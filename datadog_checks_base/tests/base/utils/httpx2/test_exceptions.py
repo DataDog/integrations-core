@@ -10,7 +10,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPRequestError,
     HTTPTimeoutError,
 )
-from datadog_checks.base.utils.httpx2 import HTTPXWrapper, _map_httpx_exception
+from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper, _map_httpx2_exception
 
 
 @pytest.mark.parametrize(
@@ -27,18 +27,18 @@ from datadog_checks.base.utils.httpx2 import HTTPXWrapper, _map_httpx_exception
 )
 def test_request_exception_mapping(raising_transport_factory, raised, expected):
     transport = raising_transport_factory(raised)
-    http = HTTPXWrapper({}, {}, transport=transport)
+    http = HTTPX2Wrapper({}, {}, transport=transport)
     with pytest.raises(expected):
         http.get('http://example.test/')
 
 
-def test_map_httpx_exception_routes_invalid_url():
-    mapped = _map_httpx_exception(httpx2.InvalidURL('bad url'))
+def test_map_httpx2_exception_routes_invalid_url():
+    mapped = _map_httpx2_exception(httpx2.InvalidURL('bad url'))
     assert isinstance(mapped, HTTPInvalidURLError)
 
 
 def test_request_raises_invalid_url_error(raising_transport_factory):
     transport = raising_transport_factory(httpx2.InvalidURL('bad url'))
-    http = HTTPXWrapper({}, {}, transport=transport)
+    http = HTTPX2Wrapper({}, {}, transport=transport)
     with pytest.raises(HTTPInvalidURLError):
         http.get('http://example.test/')

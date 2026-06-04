@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.base.utils.httpx2 import HTTPXWrapper
+from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
 from .common import parse_basic_auth
 
 
 def test_basic_auth_sent_on_request(capturing_transport, captured_requests):
-    http = HTTPXWrapper(
+    http = HTTPX2Wrapper(
         {'username': 'alice', 'password': 'secret'},
         {},
         transport=capturing_transport,
@@ -29,6 +29,6 @@ def test_basic_auth_sent_on_request(capturing_transport, captured_requests):
     ],
 )
 def test_no_authorization_header_set(instance, capturing_transport, captured_requests):
-    http = HTTPXWrapper(instance, {}, transport=capturing_transport)
+    http = HTTPX2Wrapper(instance, {}, transport=capturing_transport)
     http.get('http://example.test/')
     assert 'authorization' not in captured_requests[0].headers

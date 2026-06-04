@@ -1,1 +1,1 @@
-Add library-agnostic HTTP mocks/proto/exceptions and migrate intg tests. Add ``HTTPXWrapper``, an httpx2-backed HTTP client opt-in via the ``use_httpx2`` instance config flag. The default remains the existing requests-based client.
+Add library-agnostic HTTP mocks/proto/exceptions and migrate intg tests. Add ``HTTPX2Wrapper``, an httpx2-backed HTTP client opt-in via the ``use_httpx2`` instance config flag. The default remains the existing requests-based client.

@@ -99,7 +99,7 @@ def _build_timeout(config: dict[str, Any]) -> tuple[float, float]:
     return connect, read
 
 
-def _map_httpx_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPError:
+def _map_httpx2_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPError:
     """Translate an httpx2 exception into the library-agnostic equivalent."""
     if isinstance(exc, httpx2.InvalidURL):
         return HTTPInvalidURLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
@@ -118,7 +118,7 @@ def _map_httpx_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPError
     return HTTPError(str(exc) or exc.__class__.__name__)
 
 
-class HTTPXResponseAdapter:
+class HTTPX2ResponseAdapter:
     """Wraps an httpx2.Response to satisfy HTTPResponseProtocol."""
 
     __slots__ = ('_response',)
@@ -190,7 +190,7 @@ class HTTPXResponseAdapter:
         try:
             self._response.raise_for_status()
         except httpx2.HTTPStatusError as exc:
-            raise _map_httpx_exception(exc) from exc
+            raise _map_httpx2_exception(exc) from exc
 
     def close(self) -> None:
         self._response.close()
@@ -211,7 +211,7 @@ class HTTPXResponseAdapter:
         delimiter: bytes | str | None = None,
     ) -> Iterator[bytes | str]:
         if delimiter is not None:
-            raise NotImplementedError("HTTPXResponseAdapter.iter_lines does not support custom delimiters")
+            raise NotImplementedError("HTTPX2ResponseAdapter.iter_lines does not support custom delimiters")
         encoding = self._response.encoding or 'utf-8'
         for line in self._response.iter_lines():
             # errors='replace' tolerates bytes that don't round-trip under the declared charset.
@@ -225,7 +225,7 @@ class HTTPXResponseAdapter:
         return None
 
 
-class HTTPXWrapper:
+class HTTPX2Wrapper:
     """Implements HTTPClientProtocol using a single shared httpx2.Client per wrapper."""
 
     __slots__ = (
@@ -340,28 +340,28 @@ class HTTPXWrapper:
         self.options['headers'][name] = value
         self._client.headers[name] = value
 
-    def get(self, url: str, **options: Any) -> HTTPXResponseAdapter:
+    def get(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('GET', url, options)
 
-    def post(self, url: str, **options: Any) -> HTTPXResponseAdapter:
+    def post(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('POST', url, options)
 
-    def put(self, url: str, **options: Any) -> HTTPXResponseAdapter:
+    def put(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('PUT', url, options)
 
-    def delete(self, url: str, **options: Any) -> HTTPXResponseAdapter:
+    def delete(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('DELETE', url, options)
 
-    def head(self, url: str, **options: Any) -> HTTPXResponseAdapter:
+    def head(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('HEAD', url, options)
 
-    def patch(self, url: str, **options: Any) -> HTTPXResponseAdapter:
+    def patch(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('PATCH', url, options)
 
-    def options_method(self, url: str, **options: Any) -> HTTPXResponseAdapter:
+    def options_method(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('OPTIONS', url, options)
 
-    def _request(self, method: str, url: str, options: dict[str, Any]) -> HTTPXResponseAdapter:
+    def _request(self, method: str, url: str, options: dict[str, Any]) -> HTTPX2ResponseAdapter:
         # stream=True keeps the connection open until the body is consumed (.content/.text/.iter_*)
         # or close() is called. Callers should use it as a context manager when not reading the body.
         if self._log_requests:
@@ -373,21 +373,21 @@ class HTTPXWrapper:
             request = self._client.build_request(method, url, **request_kwargs)
             response = self._client.send(request, stream=True, follow_redirects=follow_redirects)
         except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
-            raise _map_httpx_exception(exc) from exc
-        return HTTPXResponseAdapter(response)
+            raise _map_httpx2_exception(exc) from exc
+        return HTTPX2ResponseAdapter(response)
 
     def _build_request_kwargs(self, options: dict[str, Any], *, method: str = '', url: str = '') -> dict[str, Any]:
         """Translate call-site options to httpx2.Client.request kwargs."""
         # Drop stream silently because OM v2 scraper passes it unconditionally (base_scraper.py:459).
         # The wrapper streams internally, so the kwarg is meaningless.
         if 'stream' in options:
-            self.logger.debug('HTTPXWrapper dropping unsupported per-request kwarg: stream')
+            self.logger.debug('HTTPX2Wrapper dropping unsupported per-request kwarg: stream')
         options = {k: v for k, v in options.items() if k != 'stream'}
 
         unknown = set(options) - REQUEST_KWARGS
         if unknown:
             context = f' for {method} {url}' if method or url else ''
-            raise TypeError(f"HTTPXWrapper does not support per-request kwargs{context}: {sorted(unknown)}")
+            raise TypeError(f"HTTPX2Wrapper does not support per-request kwargs{context}: {sorted(unknown)}")
         kwargs: dict[str, Any] = {}
         passthrough = ('params', 'json', 'data', 'content', 'files', 'cookies')
         for key in passthrough:
@@ -431,4 +431,4 @@ class HTTPXWrapper:
             pass
         except Exception as exc:
             # Don't propagate from __del__ (interpreter handles it). Log at debug so the swallow is observable.
-            self.logger.debug('HTTPXWrapper.close raised during __del__: %r', exc)
+            self.logger.debug('HTTPX2Wrapper.close raised during __del__: %r', exc)

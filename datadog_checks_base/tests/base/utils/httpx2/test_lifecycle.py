@@ -5,17 +5,17 @@ import sys
 
 import pytest
 
-from datadog_checks.base.utils.httpx2 import HTTPXWrapper
+from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
 
 def test_close_is_idempotent(capturing_transport):
-    http = HTTPXWrapper({}, {}, transport=capturing_transport)
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     http.close()
     http.close()
 
 
 def test_context_manager(capturing_transport):
-    with HTTPXWrapper({}, {}, transport=capturing_transport) as http:
+    with HTTPX2Wrapper({}, {}, transport=capturing_transport) as http:
         response = http.get('http://example.test/')
     assert response.status_code == 200
 
@@ -30,13 +30,13 @@ def test_module_import_fails_without_httpx2(monkeypatch):
     monkeypatch.undo()
     import datadog_checks.base.utils.httpx2 as restored
 
-    assert hasattr(restored, 'HTTPXWrapper')
+    assert hasattr(restored, 'HTTPX2Wrapper')
 
 
 @pytest.mark.parametrize(
     'instance,expected_cls_name',
     [
-        pytest.param({'use_httpx2': True}, 'HTTPXWrapper', id='opt-in'),
+        pytest.param({'use_httpx2': True}, 'HTTPX2Wrapper', id='opt-in'),
         pytest.param({'use_httpx2': False}, 'RequestsWrapper', id='explicit-default'),
         pytest.param({}, 'RequestsWrapper', id='unset-default'),
     ],

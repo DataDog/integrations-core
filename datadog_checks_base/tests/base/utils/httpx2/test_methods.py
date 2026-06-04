@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from datadog_checks.base.utils.httpx2 import HTTPXWrapper
+from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
 HTTP_VERBS = {
     'get': 'GET',
@@ -20,7 +20,7 @@ HTTP_VERBS = {
 
 @pytest.mark.parametrize('method,verb', HTTP_VERBS.items())
 def test_method_dispatches_with_correct_verb(method, verb, captured_requests, capturing_transport):
-    http = HTTPXWrapper({}, {}, transport=capturing_transport)
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     fn = getattr(http, method)
     response = fn('http://example.test/path', headers={'X-Test': '1'})
 
@@ -29,7 +29,7 @@ def test_method_dispatches_with_correct_verb(method, verb, captured_requests, ca
 
 
 def test_post_json_body_is_serialized(capturing_transport, captured_requests):
-    http = HTTPXWrapper({}, {}, transport=capturing_transport)
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     http.post('http://example.test/path', json={'a': 1, 'b': 'two'})
     req = captured_requests[0]
     assert req.headers['content-type'] == 'application/json'
@@ -37,6 +37,6 @@ def test_post_json_body_is_serialized(capturing_transport, captured_requests):
 
 
 def test_request_accepts_stream_kwarg(capturing_transport):
-    http = HTTPXWrapper({}, {}, transport=capturing_transport)
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     response = http.get('http://example.test/', stream=True)
     assert response.status_code == 200

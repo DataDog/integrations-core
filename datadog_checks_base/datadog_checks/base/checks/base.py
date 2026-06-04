@@ -414,9 +414,9 @@ class AgentCheck(object):
         if not hasattr(self, '_http'):
             instance = self.instance or {}
             if is_affirmative(instance.get('use_httpx2', False)):
-                from datadog_checks.base.utils.httpx2 import HTTPXWrapper
+                from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
-                self._http = HTTPXWrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+                self._http = HTTPX2Wrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
             else:
                 # See Performance Optimizations in this package's README.md.
                 from datadog_checks.base.utils.http import RequestsWrapper
