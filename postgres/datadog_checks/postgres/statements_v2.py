@@ -304,6 +304,30 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
     # -- Obfuscation resolution -------------------------------------------
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _fetch_query_texts(self, keys: set[PgssKey]) -> dict[PgssKey, str]:
+        if not keys:
+            return {}
+        ordered = sorted(keys)
+        qids = [k[0] for k in ordered]
+        dbids = [k[1] for k in ordered]
+        userids = [k[2] for k in ordered]
+        try:
+            rows, _ = self._execute_query(
+                QUERY_TEXT_FETCH,
+                params=(qids, dbids, userids),
+                row_factory=dict_row,
+            )
+            return {(row['queryid'], row['dbid'], row['userid']): row['query'] for row in rows}
+        except psycopg.Error as e:
+            self._log.warning("Failed to fetch query text for %d pgss keys: %s", len(keys), e)
+            return {}
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _populate_obfuscation_lookup(self, raw_texts: dict[PgssKey, str]) -> dict[PgssKey, ObfuscationResult]:
+        """FFI obfuscation + cache update for raw query texts (miss path)."""
+        return self._obfuscation_lookup.populate(raw_texts)
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _resolve_obfuscations(
         self, changed_pgss_keys: set[PgssKey], vanished_pgss_keys: set[PgssKey]
     ) -> dict[PgssKey, ObfuscationResult]:
@@ -342,28 +366,10 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 len(filtered),
                 len(misses),
             )
-            populated = self._obfuscation_lookup.populate(filtered)
+            populated = self._populate_obfuscation_lookup(filtered)
             hits.update(populated)
 
         return hits
-
-    def _fetch_query_texts(self, keys: set[PgssKey]) -> dict[PgssKey, str]:
-        if not keys:
-            return {}
-        ordered = sorted(keys)
-        qids = [k[0] for k in ordered]
-        dbids = [k[1] for k in ordered]
-        userids = [k[2] for k in ordered]
-        try:
-            rows, _ = self._execute_query(
-                QUERY_TEXT_FETCH,
-                params=(qids, dbids, userids),
-                row_factory=dict_row,
-            )
-            return {(row['queryid'], row['dbid'], row['userid']): row['query'] for row in rows}
-        except psycopg.Error as e:
-            self._log.warning("Failed to fetch query text for %d pgss keys: %s", len(keys), e)
-            return {}
 
     # -- Row assembly -----------------------------------------------------
 
