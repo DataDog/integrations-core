@@ -8,7 +8,7 @@ from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from typing import Any, Self
 
-import httpx2 as httpx
+import httpx2
 from binary import KIBIBYTE
 
 from datadog_checks.base.config import is_affirmative
@@ -63,14 +63,14 @@ REQUEST_KWARGS = frozenset(
 )
 
 
-def _make_timeout(connect: float, read: float) -> httpx.Timeout:
+def _make_timeout(connect: float, read: float) -> httpx2.Timeout:
     # Pass the read timeout to every phase so write and pool aren't left unbounded.
-    return httpx.Timeout(connect=connect, read=read, write=read, pool=read)
+    return httpx2.Timeout(connect=connect, read=read, write=read, pool=read)
 
 
-def _build_basic_auth(config: dict[str, Any]) -> httpx.BasicAuth | None:
+def _build_basic_auth(config: dict[str, Any]) -> httpx2.BasicAuth | None:
     if config['username'] is not None and config['password'] is not None:
-        return httpx.BasicAuth(config['username'], config['password'])
+        return httpx2.BasicAuth(config['username'], config['password'])
     return None
 
 
@@ -99,21 +99,21 @@ def _build_timeout(config: dict[str, Any]) -> tuple[float, float]:
     return connect, read
 
 
-def _map_httpx_exception(exc: httpx.HTTPError | httpx.InvalidURL) -> HTTPError:
+def _map_httpx_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPError:
     """Translate an httpx2 exception into the library-agnostic equivalent."""
-    if isinstance(exc, httpx.InvalidURL):
+    if isinstance(exc, httpx2.InvalidURL):
         return HTTPInvalidURLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
-    if isinstance(exc, httpx.TimeoutException):
+    if isinstance(exc, httpx2.TimeoutException):
         return HTTPTimeoutError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
-    if isinstance(exc, httpx.ConnectError):
+    if isinstance(exc, httpx2.ConnectError):
         return HTTPConnectionError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
-    if isinstance(exc, httpx.HTTPStatusError):
+    if isinstance(exc, httpx2.HTTPStatusError):
         return HTTPStatusError(
             str(exc) or exc.__class__.__name__,
             request=getattr(exc, 'request', None),
             response=getattr(exc, 'response', None),
         )
-    if isinstance(exc, httpx.RequestError):
+    if isinstance(exc, httpx2.RequestError):
         return HTTPRequestError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     return HTTPError(str(exc) or exc.__class__.__name__)
 
@@ -123,7 +123,7 @@ class HTTPXResponseAdapter:
 
     __slots__ = ('_response',)
 
-    def __init__(self, response: httpx.Response) -> None:
+    def __init__(self, response: httpx2.Response) -> None:
         self._response = response
 
     @property
@@ -168,7 +168,7 @@ class HTTPXResponseAdapter:
     @property
     def cookies(self) -> Mapping[str, str]:
         # Narrowed to Mapping to keep httpx2 out of the wrapper surface. Callers needing
-        # the richer httpx.Cookies API can reach self._response.cookies directly.
+        # the richer httpx2.Cookies API can reach self._response.cookies directly.
         return self._response.cookies
 
     @property
@@ -189,7 +189,7 @@ class HTTPXResponseAdapter:
             return
         try:
             self._response.raise_for_status()
-        except httpx.HTTPStatusError as exc:
+        except httpx2.HTTPStatusError as exc:
             raise _map_httpx_exception(exc) from exc
 
     def close(self) -> None:
@@ -241,7 +241,7 @@ class HTTPXWrapper:
         init_config: dict[str, Any] | None = None,
         remapper: dict[str, dict[str, Any]] | None = None,
         logger: logging.Logger | None = None,
-        transport: httpx.BaseTransport | None = None,
+        transport: httpx2.BaseTransport | None = None,
     ) -> None:
         self.logger = logger or LOGGER
         init_config = init_config or {}
@@ -309,7 +309,7 @@ class HTTPXWrapper:
             config[field] = value
         return config
 
-    def _build_client(self, transport: httpx.BaseTransport | None) -> httpx.Client:
+    def _build_client(self, transport: httpx2.BaseTransport | None) -> httpx2.Client:
         kwargs: dict[str, Any] = {
             'headers': self.options['headers'],
             'timeout': _make_timeout(self.options['timeout'][0], self.options['timeout'][1]),
@@ -322,7 +322,7 @@ class HTTPXWrapper:
             kwargs['auth'] = self.options['auth']
         if transport is not None:
             kwargs['transport'] = transport
-        return httpx.Client(**kwargs)
+        return httpx2.Client(**kwargs)
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         for key, value in self.options['headers'].items():
@@ -368,11 +368,11 @@ class HTTPXWrapper:
             self.logger.debug('Sending %s request to %s', method, url)
 
         request_kwargs = self._build_request_kwargs(options, method=method, url=url)
-        follow_redirects = request_kwargs.pop('follow_redirects', httpx.USE_CLIENT_DEFAULT)
+        follow_redirects = request_kwargs.pop('follow_redirects', httpx2.USE_CLIENT_DEFAULT)
         try:
             request = self._client.build_request(method, url, **request_kwargs)
             response = self._client.send(request, stream=True, follow_redirects=follow_redirects)
-        except (httpx.HTTPError, httpx.InvalidURL) as exc:
+        except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
             raise _map_httpx_exception(exc) from exc
         return HTTPXResponseAdapter(response)
 
