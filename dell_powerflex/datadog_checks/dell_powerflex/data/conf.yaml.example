@@ -72,6 +72,8 @@ instances:
     ##   sds: name, id, protectionDomainId, sdsState, faultSetId
     ##   sdc: id, sdcGuid, sdcType, sdcIp
     ##   device: name, id, storagePoolId, sdsId, deviceCurrentPathName
+    ##
+    ## Note: the system resource type is not filterable and will be ignored if specified.
     #
     # resource_filters:
     #   - resource: volume

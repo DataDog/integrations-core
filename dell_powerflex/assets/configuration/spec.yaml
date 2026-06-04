@@ -37,11 +37,13 @@ files:
       value:
         type: boolean
         example: false
+        default: false
     - name: collect_alerts
       description: Enable collection of alerts from the PowerFlex Gateway.
       value:
         type: boolean
         example: false
+        default: false
     - name: max_workers
       description: |
         Maximum number of threads used to fetch per-resource statistics in parallel.
@@ -74,6 +76,8 @@ files:
           sds: name, id, protectionDomainId, sdsState, faultSetId
           sdc: id, sdcGuid, sdcType, sdcIp
           device: name, id, storagePoolId, sdsId, deviceCurrentPathName
+
+        Note: the system resource type is not filterable and will be ignored if specified.
       value:
         type: array
         items:
