@@ -128,6 +128,10 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_parts_and_merges().model_dump(),
                 **(instance.get('parts_and_merges', {})),
             },
+            "schema_metrics": {
+                **dict_defaults.instance_schema_metrics().model_dump(),
+                **(instance.get('schema_metrics', {})),
+            },
             "collect_schemas": {
                 **dict_defaults.instance_collect_schemas().model_dump(),
                 **(instance.get('collect_schemas', {})),
@@ -313,6 +317,11 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
     validation_result.add_feature(
         FeatureKey.PARTS_AND_MERGES,
         config.parts_and_merges.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
+        FeatureKey.SCHEMA_METRICS,
+        config.schema_metrics.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
