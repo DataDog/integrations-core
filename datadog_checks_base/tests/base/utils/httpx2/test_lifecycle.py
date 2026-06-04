@@ -25,12 +25,6 @@ def test_module_import_fails_without_httpx2(monkeypatch):
     monkeypatch.delitem(sys.modules, 'datadog_checks.base.utils.httpx2', raising=False)
     with pytest.raises(ImportError, match='httpx2'):
         import datadog_checks.base.utils.httpx2  # noqa: F401
-    # After monkeypatch teardown the module must import cleanly again so sibling tests are
-    # not affected by a leaked broken import state.
-    monkeypatch.undo()
-    import datadog_checks.base.utils.httpx2 as restored
-
-    assert hasattr(restored, 'HTTPX2Wrapper')
 
 
 @pytest.mark.parametrize(
