@@ -1,14 +1,72 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+from contextlib import ExitStack
+
 import pytest
 
+from datadog_checks.dev import get_here
+from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_port_forward import port_forward
+from datadog_checks.dev.subprocess import run_command
+
 from .common import MOCKED_INSTANCE
+
+HERE = get_here()
+KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
+
+
+def setup_kueue():
+    run_command(
+        [
+            'kubectl',
+            'apply',
+            '--server-side',
+            '-f',
+            f'https://github.com/kubernetes-sigs/kueue/releases/download/{KUEUE_VERSION}/manifests.yaml',
+        ]
+    )
+    run_command(
+        [
+            'kubectl',
+            'wait',
+            'deployment/kueue-controller-manager',
+            '--for=condition=Available',
+            '-n',
+            'kueue-system',
+            '--timeout=300s',
+        ]
+    )
+    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'metrics-reader.yaml')])
+    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'queue.yaml')])
+    run_command(['kubectl', 'wait', 'clusterqueue/cluster-queue', '--for=condition=Active', '--timeout=300s'])
+    run_command(['kubectl', 'wait', 'localqueue/user-queue', '--for=condition=Active', '--timeout=300s'])
+
+
+def get_service_account_token():
+    result = run_command(
+        ['kubectl', 'create', 'token', 'kueue-metrics-reader', '-n', 'default'],
+        capture=True,
+    )
+    return result.stdout.strip()
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    yield
+    with kind_run(conditions=[setup_kueue], sleep=10) as kubeconfig, ExitStack() as stack:
+        kueue_host, kueue_port = stack.enter_context(
+            port_forward(kubeconfig, 'kueue-system', 8443, 'service', 'kueue-controller-manager-metrics-service')
+        )
+        instances = [
+            {
+                'openmetrics_endpoint': f'https://{kueue_host}:{kueue_port}/metrics',
+                'tls_verify': False,
+                'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
+            }
+        ]
+
+        yield {'instances': instances}
 
 
 @pytest.fixture

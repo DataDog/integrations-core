@@ -21,6 +21,7 @@ TEST_METRICS = [
     'kueue.go.goroutines',
     'kueue.cluster_queue.resource_usage.cpu',
     'kueue.cluster_queue.resource_usage.gpu',
+    'kueue.cluster_queue.resource_usage.memory',
     'kueue.cluster_queue.resource_usage.other',
     'kueue.cluster_queue.resource_pending.gpu',
     'kueue.cluster_queue.pending_workloads',

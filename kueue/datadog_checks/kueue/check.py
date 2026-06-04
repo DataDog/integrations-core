@@ -14,6 +14,7 @@ LOCAL_QUEUE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in LOCAL_QUEUE_M
 
 RESOURCE_NAME_MAP = {
     'cpu': 'cpu',
+    'memory': 'memory',
     'nvidia.com/gpu': 'gpu',
 }
 

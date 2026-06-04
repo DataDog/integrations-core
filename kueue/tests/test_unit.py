@@ -91,6 +91,7 @@ def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_respons
 
     aggregator.assert_metric('kueue.cluster_queue.resource_usage.cpu')
     aggregator.assert_metric('kueue.cluster_queue.resource_usage.gpu')
+    aggregator.assert_metric('kueue.cluster_queue.resource_usage.memory')
     aggregator.assert_metric('kueue.cluster_queue.resource_usage.fpga')
     aggregator.assert_metric('kueue.cluster_queue.resource_usage.custom_gpu', count=0)
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'test:tag')

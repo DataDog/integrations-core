@@ -2,3 +2,7 @@
 
 [[envs.default.matrix]]
 python = ["3.13"]
+version = ["v0.18.0"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "KUEUE_VERSION"
