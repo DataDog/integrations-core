@@ -339,31 +339,6 @@ class ArgocdResourceCollector:
             "map_paths": list(spec.include["map_paths"]),
             "annotation_keys": list(spec.include["annotation_keys"]),
         }
-        # DEBUG: dump post-allow-list payload as JSONL to /tmp/genres-debug — remove before merging
-        try:
-            import json as _json
-            import os as _os
-
-            from datadog_checks.base.utils.genresources.inclusion import apply_allow_list
-
-            _filtered = apply_allow_list(
-                item,
-                paths=include["paths"],
-                map_paths=include["map_paths"],
-                annotation_keys=include["annotation_keys"],
-            )
-            _os.makedirs("/tmp/genres-debug", exist_ok=True)
-            with open("/tmp/genres-debug/payloads.jsonl", "a", encoding="utf-8") as _fp:
-                _fp.write(
-                    _json.dumps(
-                        {"seen_at": seen_at, "type": spec.resource_type, "key": key, "payload": _filtered},
-                        sort_keys=True,
-                        separators=(",", ":"),
-                    )
-                    + "\n"
-                )
-        except Exception:
-            self.check.log.exception("GENRES_DEBUG: failed to dump filtered payload")
         cache_key = f"{spec.resource_type}|{key}"
         token = _change_token(item)
         if force_full or self._submitted.get(cache_key) != token:
