@@ -400,7 +400,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
                 mock_agent.side_effect = obfuscate_sql
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
-                check.check(dbm_instance)
+                run_one_check(check, cancel=False)
 
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
