@@ -101,6 +101,9 @@ def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mocker):
     mock_post.assert_not_called()
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', at_least=1)
+    aggregator.assert_metric('dell_powerflex.system.count', at_least=1)
+    aggregator.assert_metric('dell_powerflex.storage_pool.count', at_least=1)
+    aggregator.assert_metric('dell_powerflex.volume.count', at_least=1)
 
 
 def test_token_refresh_uses_min_collection_interval(dd_run_check, instance, mock_http_get, mocker):
@@ -598,6 +601,18 @@ def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator
 
     cached_timestamp = check.read_persistent_cache('last_event_timestamp')
     spy = mocker.spy(check._api, 'get_events')
+    dd_run_check(check)
+
+    assert spy.call_args.kwargs['since'] == cached_timestamp
+
+
+def test_collect_alerts_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
+    instance['collect_alerts'] = True
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    cached_timestamp = check.read_persistent_cache('last_alert_timestamp')
+    spy = mocker.spy(check._api, 'get_alerts')
     dd_run_check(check)
 
     assert spy.call_args.kwargs['since'] == cached_timestamp
