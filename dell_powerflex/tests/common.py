@@ -307,7 +307,7 @@ SYSTEM_STATS_BWC_METRICS = [
 
 BWC_SUFFIXES = ['num_seconds', 'total_weight_in_kb', 'num_occured']
 
-_SIMPLE_METRIC_LISTS = [
+SIMPLE_METRIC_LISTS = [
     SYSTEM_MDM_CLUSTER_METRICS,
     SYSTEM_STATS_SIMPLE_METRICS,
     VOLUME_STATS_SIMPLE_METRICS,
@@ -318,7 +318,7 @@ _SIMPLE_METRIC_LISTS = [
     DEVICE_STATS_SIMPLE_METRICS,
 ]
 
-_BWC_METRIC_LISTS = [
+BWC_METRIC_LISTS = [
     SYSTEM_STATS_BWC_METRICS,
     VOLUME_STATS_BWC_METRICS,
     STORAGE_POOL_STATS_BWC_METRICS,
@@ -339,11 +339,226 @@ ALL_METRICS_SET: set[str] = {
     'dell_powerflex.sdc.count',
     'dell_powerflex.device.count',
 }
-for _metrics in _SIMPLE_METRIC_LISTS:
+for _metrics in SIMPLE_METRIC_LISTS:
     for _m in _metrics:
         ALL_METRICS_SET.add(str(_m['name']))
-for _bwc_list in _BWC_METRIC_LISTS:
+for _bwc_list in BWC_METRIC_LISTS:
     for _prefix in _bwc_list:
         for _suffix in BWC_SUFFIXES:
             ALL_METRICS_SET.add(f'{_prefix}.{_suffix}')
 ALL_METRICS: list[str] = sorted(ALL_METRICS_SET)
+
+BASE_TAGS = ['powerflex_gateway_url:https://localhost:443']
+
+# E2E expected metric points (excludes the dynamic powerflex_gateway_url tag).
+# The test prepends that tag before asserting.
+
+SYSTEM_TAGS = ['system_id:1fcf40fc60c6520f', 'dell_type:system']
+POOL1_TAGS = [
+    'storage_pool_id:25155ba600000000',
+    'storage_pool_name:pool1',
+    'protection_domain_id:68c139ee00000000',
+    'dell_type:storage_pool',
+]
+POOL2_TAGS = [
+    'storage_pool_id:2515d0d600000001',
+    'storage_pool_name:storagepool2',
+    'protection_domain_id:68c139ee00000000',
+    'dell_type:storage_pool',
+]
+PD_TAGS = [
+    'protection_domain_id:68c139ee00000000',
+    'protection_domain_name:domain1',
+    'system_id:1fcf40fc60c6520f',
+    'dell_type:protection_domain',
+]
+SDS3_TAGS = [
+    'sds_id:d1c062b700000000',
+    'sds_name:SDS3',
+    'protection_domain_id:68c139ee00000000',
+    'fault_set_id:faultset00000001',
+    'dell_type:sds',
+]
+SDS2_TAGS = ['sds_id:d1c062b800000001', 'sds_name:SDS2', 'protection_domain_id:68c139ee00000000', 'dell_type:sds']
+SDS1_TAGS = ['sds_id:d1c062b900000002', 'sds_name:SDS1', 'protection_domain_id:68c139ee00000000', 'dell_type:sds']
+SDC1_TAGS = [
+    'sdc_id:1b8659fd00000001',
+    'sdc_guid:33FC0AF2-5180-45D8-9BDC-8E2F78CD60BF',
+    'sdc_type:AppSdc',
+    'sdc_ip:10.0.1.250',
+    'peer_mdm_id:mdm00000001',
+    'dell_type:sdc',
+]
+SDC2_TAGS = [
+    'sdc_id:1b8659fc00000000',
+    'sdc_guid:BE3BC972-269A-4931-96B8-286BFA45C004',
+    'sdc_type:AppSdc',
+    'sdc_ip:10.0.1.223',
+    'dell_type:sdc',
+]
+SDC3_TAGS = [
+    'sdc_id:1b8659fe00000002',
+    'sdc_guid:46EE0B53-B823-4E68-B0B4-41A2DEC5A425',
+    'sdc_type:AppSdc',
+    'sdc_ip:10.0.1.228',
+    'dell_type:sdc',
+]
+VOL_VOLUMEE_TAGS = [
+    'volume_id:c58b06e700000000',
+    'volume_name:volumee',
+    'volume_type:ThinProvisioned',
+    'storage_pool_id:25155ba600000000',
+    'dell_type:volume',
+]
+VOL_BIGVOLUME_TAGS = [
+    'volume_id:c58b06e800000001',
+    'volume_name:bigvolume',
+    'volume_type:ThinProvisioned',
+    'storage_pool_id:25155ba600000000',
+    'dell_type:volume',
+]
+VOL_SNAP1_TAGS = [
+    'volume_id:c58b06e900000002',
+    'volume_name:volumee-snap-01',
+    'volume_type:Snapshot',
+    'storage_pool_id:25155ba600000000',
+    'ancestor_volume_id:c58b06e700000000',
+    'dell_type:volume',
+]
+VOL_SNAP2_TAGS = [
+    'volume_id:c58b06ea00000003',
+    'volume_name:volumee-snap-02',
+    'volume_type:Snapshot',
+    'storage_pool_id:25155ba600000000',
+    'ancestor_volume_id:c58b06e900000002',
+    'dell_type:volume',
+]
+DEV1_TAGS = [
+    'device_id:f7fd7d0b00020000',
+    'device_name:sds1-dev1',
+    'current_path_name:/dev/sdb',
+    'storage_pool_id:25155ba600000000',
+    'sds_id:d1c062b900000002',
+    'dell_type:device',
+]
+DEV2_TAGS = [
+    'device_id:f7fd7d0a00010000',
+    'device_name:sds2-dev1',
+    'current_path_name:/dev/sdb',
+    'storage_pool_id:25155ba600000000',
+    'sds_id:d1c062b800000001',
+    'dell_type:device',
+]
+DEV3_TAGS = [
+    'device_id:f7f77d0900000000',
+    'device_name:sds3-dev1',
+    'current_path_name:/dev/sdb',
+    'storage_pool_id:25155ba600000000',
+    'sds_id:d1c062b700000000',
+    'dell_type:device',
+]
+
+ALL_EXPECTED_METRICS: list[dict] = [
+    # ---- system ----
+    {'name': 'dell_powerflex.system.count', 'value': 1, 'tags': SYSTEM_TAGS},
+    *[
+        {'name': m['name'], 'value': m['value'], 'tags': SYSTEM_TAGS + m.get('extra_tags', [])}
+        for m in SYSTEM_MDM_CLUSTER_METRICS + SYSTEM_STATS_SIMPLE_METRICS
+    ],
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SYSTEM_TAGS} for p in SYSTEM_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- storage_pool: pool1 ----
+    {'name': 'dell_powerflex.storage_pool.count', 'value': 1, 'tags': POOL1_TAGS},
+    *[{'name': m['name'], 'value': m['value'], 'tags': POOL1_TAGS} for m in STORAGE_POOL_STATS_SIMPLE_METRICS],
+    *[
+        {'name': f'{p}.{s}', 'value': 0, 'tags': POOL1_TAGS}
+        for p in STORAGE_POOL_STATS_BWC_METRICS
+        for s in BWC_SUFFIXES
+    ],
+    # ---- storage_pool: storagepool2 ----
+    {'name': 'dell_powerflex.storage_pool.count', 'value': 1, 'tags': POOL2_TAGS},
+    {'name': 'dell_powerflex.capacity.in_use_in_kb', 'value': 0, 'tags': POOL2_TAGS},
+    {'name': 'dell_powerflex.max_capacity.in_kb', 'value': 0, 'tags': POOL2_TAGS},
+    {'name': 'dell_powerflex.num_of_volumes', 'value': 0, 'tags': POOL2_TAGS},
+    *[
+        {'name': f'{p}.{s}', 'value': 0, 'tags': POOL2_TAGS}
+        for p in STORAGE_POOL_STATS_BWC_METRICS
+        for s in BWC_SUFFIXES
+    ],
+    # ---- protection_domain: domain1 ----
+    {'name': 'dell_powerflex.protection_domain.count', 'value': 1, 'tags': PD_TAGS},
+    *[{'name': m['name'], 'value': m['value'], 'tags': PD_TAGS} for m in PROTECTION_DOMAIN_STATS_SIMPLE_METRICS],
+    *[
+        {'name': f'{p}.{s}', 'value': 0, 'tags': PD_TAGS}
+        for p in PROTECTION_DOMAIN_STATS_BWC_METRICS
+        for s in BWC_SUFFIXES
+    ],
+    # ---- sds: SDS3 ----
+    {'name': 'dell_powerflex.sds.count', 'value': 1, 'tags': SDS3_TAGS},
+    *[{'name': m['name'], 'value': m['value'], 'tags': SDS3_TAGS} for m in SDS_STATS_SIMPLE_METRICS],
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SDS3_TAGS} for p in SDS_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- sds: SDS2 ----
+    {'name': 'dell_powerflex.sds.count', 'value': 1, 'tags': SDS2_TAGS},
+    {'name': 'dell_powerflex.capacity.in_use_in_kb', 'value': 350208, 'tags': SDS2_TAGS},
+    {'name': 'dell_powerflex.unused_capacity.in_kb', 'value': 103406592, 'tags': SDS2_TAGS},
+    {'name': 'dell_powerflex.num_of_devices', 'value': 1, 'tags': SDS2_TAGS},
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SDS2_TAGS} for p in SDS_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- sds: SDS1 ----
+    {'name': 'dell_powerflex.sds.count', 'value': 1, 'tags': SDS1_TAGS},
+    {'name': 'dell_powerflex.capacity.in_use_in_kb', 'value': 349184, 'tags': SDS1_TAGS},
+    {'name': 'dell_powerflex.unused_capacity.in_kb', 'value': 103407616, 'tags': SDS1_TAGS},
+    {'name': 'dell_powerflex.num_of_devices', 'value': 1, 'tags': SDS1_TAGS},
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SDS1_TAGS} for p in SDS_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- sdc: SDC1 ----
+    {'name': 'dell_powerflex.sdc.count', 'value': 1, 'tags': SDC1_TAGS},
+    *[{'name': m['name'], 'value': m['value'], 'tags': SDC1_TAGS} for m in SDC_STATS_SIMPLE_METRICS],
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SDC1_TAGS} for p in SDC_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- sdc: SDC2 ----
+    {'name': 'dell_powerflex.sdc.count', 'value': 1, 'tags': SDC2_TAGS},
+    {'name': 'dell_powerflex.num_of_mapped_volumes', 'value': 0, 'tags': SDC2_TAGS},
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SDC2_TAGS} for p in SDC_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- sdc: SDC3 ----
+    {'name': 'dell_powerflex.sdc.count', 'value': 1, 'tags': SDC3_TAGS},
+    {'name': 'dell_powerflex.num_of_mapped_volumes', 'value': 0, 'tags': SDC3_TAGS},
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SDC3_TAGS} for p in SDC_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- volume: volumee ----
+    {'name': 'dell_powerflex.volume.count', 'value': 1, 'tags': VOL_VOLUMEE_TAGS},
+    *[{'name': m['name'], 'value': m['value'], 'tags': VOL_VOLUMEE_TAGS} for m in VOLUME_STATS_SIMPLE_METRICS],
+    *[
+        {'name': f'{p}.{s}', 'value': 0, 'tags': VOL_VOLUMEE_TAGS}
+        for p in VOLUME_STATS_BWC_METRICS
+        for s in BWC_SUFFIXES
+    ],
+    {'name': 'dell_powerflex.volume.sdc_mapping', 'value': 1, 'tags': VOL_VOLUMEE_TAGS + ['sdc_id:1b8659fd00000001']},
+    # ---- volume: bigvolume ----
+    {'name': 'dell_powerflex.volume.count', 'value': 1, 'tags': VOL_BIGVOLUME_TAGS},
+    {'name': 'dell_powerflex.num_of_child_volumes', 'value': 0, 'tags': VOL_BIGVOLUME_TAGS},
+    {'name': 'dell_powerflex.num_of_mapped_sdcs', 'value': 1, 'tags': VOL_BIGVOLUME_TAGS},
+    *[
+        {'name': f'{p}.{s}', 'value': 0, 'tags': VOL_BIGVOLUME_TAGS}
+        for p in VOLUME_STATS_BWC_METRICS
+        for s in BWC_SUFFIXES
+    ],
+    {'name': 'dell_powerflex.volume.sdc_mapping', 'value': 1, 'tags': VOL_BIGVOLUME_TAGS + ['sdc_id:1b8659fd00000001']},
+    # ---- volume: volumee-snap-01 ----
+    {'name': 'dell_powerflex.volume.count', 'value': 1, 'tags': VOL_SNAP1_TAGS},
+    {'name': 'dell_powerflex.num_of_child_volumes', 'value': 1, 'tags': VOL_SNAP1_TAGS},
+    {'name': 'dell_powerflex.num_of_mapped_sdcs', 'value': 0, 'tags': VOL_SNAP1_TAGS},
+    # ---- volume: volumee-snap-02 ----
+    {'name': 'dell_powerflex.volume.count', 'value': 1, 'tags': VOL_SNAP2_TAGS},
+    {'name': 'dell_powerflex.num_of_child_volumes', 'value': 0, 'tags': VOL_SNAP2_TAGS},
+    {'name': 'dell_powerflex.num_of_mapped_sdcs', 'value': 0, 'tags': VOL_SNAP2_TAGS},
+    # ---- device: sds1-dev1 ----
+    {'name': 'dell_powerflex.device.count', 'value': 1, 'tags': DEV1_TAGS},
+    *[{'name': m['name'], 'value': m['value'], 'tags': DEV1_TAGS} for m in DEVICE_STATS_SIMPLE_METRICS],
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': DEV1_TAGS} for p in DEVICE_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- device: sds2-dev1 ----
+    {'name': 'dell_powerflex.device.count', 'value': 1, 'tags': DEV2_TAGS},
+    {'name': 'dell_powerflex.capacity.in_use_in_kb', 'value': 350208, 'tags': DEV2_TAGS},
+    {'name': 'dell_powerflex.avg_read_latency_in_microsec', 'value': 12793, 'tags': DEV2_TAGS},
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': DEV2_TAGS} for p in DEVICE_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    # ---- device: sds3-dev1 ----
+    {'name': 'dell_powerflex.device.count', 'value': 1, 'tags': DEV3_TAGS},
+    {'name': 'dell_powerflex.capacity.in_use_in_kb', 'value': 349184, 'tags': DEV3_TAGS},
+    {'name': 'dell_powerflex.avg_read_latency_in_microsec', 'value': 10023, 'tags': DEV3_TAGS},
+    *[{'name': f'{p}.{s}', 'value': 0, 'tags': DEV3_TAGS} for p in DEVICE_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+]

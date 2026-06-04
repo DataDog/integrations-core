@@ -5,17 +5,22 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import ALL_METRICS
+from .common import ALL_EXPECTED_METRICS, ALL_METRICS
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check):
+def test_e2e(dd_agent_check, dd_environment):
     aggregator = dd_agent_check()
 
-    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    gateway_tag = f"powerflex_gateway_url:{dd_environment['powerflex_gateway_url']}"
+
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=[gateway_tag])
 
     for metric in ALL_METRICS:
         aggregator.assert_metric(metric)
+
+    for metric in ALL_EXPECTED_METRICS:
+        aggregator.assert_metric(metric['name'], value=metric['value'], tags=[gateway_tag] + metric['tags'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
