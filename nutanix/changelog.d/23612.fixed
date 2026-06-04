@@ -1,0 +1,1 @@
+Skip hosts, VMs, and clusters missing an `extId` or name, and log a warning.
