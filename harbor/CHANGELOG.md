@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.4.1 / 2026-05-14
+
+***Fixed***:
+
+* Remove the default auto configuration that used literal placeholder credentials. ([#23595](https://github.com/DataDog/integrations-core/pull/23595))
+
 ## 6.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

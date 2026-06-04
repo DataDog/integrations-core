@@ -137,17 +137,11 @@ def run_vacuum_thread(pg_instance, vacuum_query, application_name='test'):
 def run_one_check(check: AgentCheck, cancel=True):
     """
     Run check and immediately cancel.
-    Waits for all threads to close before continuing.
+    cancel() joins all threads and nulls futures, so no extra .result() calls needed.
     """
     check.run()
     if cancel:
         check.cancel()
-    if check.statement_samples._job_loop_future is not None:
-        check.statement_samples._job_loop_future.result()
-    if check.statement_metrics._job_loop_future is not None:
-        check.statement_metrics._job_loop_future.result()
-    if check.metadata_samples._job_loop_future is not None:
-        check.metadata_samples._job_loop_future.result()
 
 
 def normalize_object(obj):

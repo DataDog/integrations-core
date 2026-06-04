@@ -332,6 +332,9 @@ class SQLServer(DatabaseCheck):
         return self.host_and_port[1]
 
     def resolve_db_host(self):
+        if "\\" in self.host:
+            # SQL Server instance names are not resolvable, this preserves original fallback behavior prior to v7.79.0
+            return datadog_agent.get_hostname()
         return agent_host_resolver(self.host)
 
     @property

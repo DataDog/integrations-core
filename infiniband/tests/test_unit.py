@@ -36,14 +36,36 @@ def _assert_metrics(aggregator, metrics, metric_prefix, tags, count=1, m_type='g
             )
 
 
+def _base_tags():
+    return [
+        'device:' + MOCK_DEVICE,
+        'port:' + MOCK_PORT,
+        'link_layer:infiniband',
+        'netdev:ens5f0',
+        'gid_type:roce_v2',
+        'firmware_version:16.35.4030',
+        'hca_type:mt4129',
+        'board_id:mt_0000000438',
+        'node_type:ca',
+        'custom:tag',
+    ]
+
+
 def test_check(aggregator, instance, mock_fs):
     check = InfinibandCheck('infiniband', {}, [instance])
     check.check({})
 
-    tags = ['device:' + MOCK_DEVICE, 'port:' + MOCK_PORT, 'custom:tag']
+    tags = _base_tags()
 
     _assert_metrics(aggregator, MOCK_IB_COUNTER_DATA, 'infiniband', tags)
     _assert_metrics(aggregator, MOCK_RDMA_COUNTER_DATA, 'infiniband.rdma', tags)
+    aggregator.assert_metric(
+        'infiniband.port.rate',
+        metric_type=aggregator.GAUGE,
+        value=100_000_000_000,
+        tags=tags,
+        count=1,
+    )
 
     for status_name, status_value in MOCK_STATUS_DATA.items():
         value, state_name = status_value.split(':', 1)
@@ -80,10 +102,17 @@ def test_collection_types(aggregator, mock_fs, collection_type, m_type, count):
     check = InfinibandCheck('infiniband', {}, [instance])
     check.check({})
 
-    tags = ['device:' + MOCK_DEVICE, 'port:' + MOCK_PORT, 'custom:tag']
+    tags = _base_tags()
 
     _assert_metrics(aggregator, MOCK_IB_COUNTER_DATA, 'infiniband', tags, count=count, m_type=m_type)
     _assert_metrics(aggregator, MOCK_RDMA_COUNTER_DATA, 'infiniband.rdma', tags, count=count, m_type=m_type)
+    aggregator.assert_metric(
+        'infiniband.port.rate',
+        metric_type=aggregator.GAUGE,
+        value=100_000_000_000,
+        tags=tags,
+        count=1,
+    )
 
 
 def test_exclude_devices(aggregator, mock_fs):

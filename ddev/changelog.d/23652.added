@@ -1,0 +1,1 @@
+Legacy migration: `validate jmx-metrics` is now implemented natively in ddev (was previously delegated to datadog_checks_dev).

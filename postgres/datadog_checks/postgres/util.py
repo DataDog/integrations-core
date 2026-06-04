@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import math
 import re
 import string
 from enum import Enum
@@ -49,6 +50,8 @@ class DatabaseConfigurationError(Enum):
     pg_stat_statements_not_readable = 'pg-stat-statements-not-readable'
     pg_stat_database_not_readable = 'pg-stat-database-not-readable'
     config_validation = 'config-validation'
+    column_statistics_function_undefined = 'column-statistics-function-undefined'
+    column_statistics_function_insufficient_privilege = 'column-statistics-function-insufficient-privilege'
 
 
 # Docs anchor is appended to the troubleshooting URL to land the user on the right section.
@@ -196,6 +199,22 @@ DIAGNOSTIC_METADATA = {
         ),
         "docs_anchor": DatabaseConfigurationError.config_validation.value,
     },
+    DatabaseConfigurationError.column_statistics_function_undefined: {
+        "description": "The `datadog.column_statistics` function is required to collect column statistics.",
+        "remediation": (
+            "Create the `datadog.column_statistics` function in every monitored database as documented in the "
+            "Postgres DBM setup guide."
+        ),
+        "docs_anchor": DatabaseConfigurationError.column_statistics_function_undefined.value,
+    },
+    DatabaseConfigurationError.column_statistics_function_insufficient_privilege: {
+        "description": "The datadog user lacks EXECUTE on `datadog.column_statistics`.",
+        "remediation": (
+            "Run `GRANT EXECUTE ON FUNCTION datadog.column_statistics() TO <datadog_user>;` in every monitored "
+            "database."
+        ),
+        "docs_anchor": DatabaseConfigurationError.column_statistics_function_insufficient_privilege.value,
+    },
 }
 
 
@@ -342,6 +361,11 @@ def get_list_chunks(lst, n):
     """Yield successive n-sized chunks from lst."""
     for i in range(0, len(lst), n):
         yield lst[i : i + n]
+
+
+def collection_interval_gcd(*intervals: float | int) -> int:
+    """GCD of collection intervals (seconds); outer-loop tick for jobs with multiple sub-schedules."""
+    return math.gcd(*(int(i) for i in intervals))
 
 
 SET_TRIM_PATTERN = re.compile(

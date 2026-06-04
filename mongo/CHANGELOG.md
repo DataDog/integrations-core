@@ -2,7 +2,14 @@
 
 <!-- towncrier release notes start -->
 
-## 10.10.0 / 2026-04-15
+## 10.10.1 / 2026-05-14
+
+***Fixed***:
+
+* Fixed a datetime overflow when collecting slow operations from MongoDB 8.0 replica set logs containing out-of-range `$date` sentinel values in RSM topology change entries. ([#23472](https://github.com/DataDog/integrations-core/pull/23472))
+* Include `database_instance` tag in `mongodb.can_connect` service check. ([#23476](https://github.com/DataDog/integrations-core/pull/23476))
+
+## 10.10.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 

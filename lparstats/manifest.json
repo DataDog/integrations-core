@@ -14,6 +14,7 @@
     "media": [],
     "classifier_tags": [
       "Category::OS & System",
+      "Supported OS::AIX",
       "Offering::Integration"
     ]
   },
