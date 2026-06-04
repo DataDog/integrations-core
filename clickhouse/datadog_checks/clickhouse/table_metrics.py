@@ -59,8 +59,6 @@ def agent_check_getter(self):
 class ClickhouseTableMetrics(DBMAsyncJob):
     """Per-table size and per-view refresh gauges from system.tables and system.view_refreshes."""
 
-    SERVICE_CHECK_VIEW_REFRESH = 'view.refresh'
-
     def __init__(self, check: ClickhouseCheck, config: SchemaMetrics):
         collection_interval = config.collection_interval
         if collection_interval is None or collection_interval <= 0:
@@ -141,12 +139,10 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         # Drop the instance-level `db:` base tag (the connection database) so each
         # per-view series carries exactly one `db:` tag — the view's own database.
         base_tags = [t for t in self._check.tags if not t.startswith('db:')]
-        for database, view_name, host, status, exception, last_time, next_time, written_rows, written_bytes in rows:
+        for database, view_name, host, status, _exception, last_time, next_time, written_rows, written_bytes in rows:
             view_tags = base_tags + [f'db:{database}', f'view:{view_name}', f'host:{host}']
-            sc_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
-            sc_msg = '' if sc_status == AgentCheck.OK else ((exception or '').split('\n')[0] or status)
-            self._check.service_check(self.SERVICE_CHECK_VIEW_REFRESH, sc_status, tags=view_tags, message=sc_msg)
-            self._check.gauge('view.refresh.status', sc_status, tags=view_tags)
+            refresh_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
+            self._check.gauge('view.refresh.status', refresh_status, tags=view_tags)
             self._check.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)
             self._check.gauge('view.refresh.next_time', int(next_time or 0), tags=view_tags)
             self._check.gauge('view.refresh.rows', int(written_rows or 0), tags=view_tags)

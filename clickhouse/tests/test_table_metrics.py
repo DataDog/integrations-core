@@ -169,7 +169,6 @@ def test_routes_through_cluster_all_replicas_in_single_endpoint_mode(schema_metr
     raw_queries = []
 
     check.gauge = lambda *a, **kw: None
-    check.service_check = lambda *a, **kw: None
     with (
         mock.patch.object(check.table_metrics, '_execute_query', side_effect=lambda q: dbm_queries.append(q) or []),
         mock.patch.object(check, 'execute_query_raw', side_effect=lambda q: raw_queries.append(q) or []),
@@ -187,65 +186,53 @@ def _patch_view_refresh_query(check, rows):
     return mock.patch.object(check, 'execute_query_raw', return_value=rows)
 
 
-def test_collect_view_refresh_emits_gauges_and_service_check(check):
+def test_collect_view_refresh_emits_gauges(check):
     job = check.table_metrics
     gauges = []
-    service_checks = []
     check.gauge = lambda name, value, tags=None: gauges.append((name, value, tags))
-    check.service_check = lambda name, status, tags=None, message=None: service_checks.append(
-        (name, status, tags, message)
-    )
 
     row = _view_refresh_row(status='Scheduled', written_rows=500, written_bytes=4096)
     with _patch_view_refresh_query(check, [row]):
         job._collect_view_refresh_metrics()
 
-    sc = service_checks[0]
-    assert sc[0] == 'view.refresh'
-    assert sc[1] == AgentCheck.OK
-    assert 'db:mydb' in sc[2]
-    assert 'view:mv_orders' in sc[2]
-    assert 'host:replica-1' in sc[2]
-    assert sc[3] == ''
-
-    by_name = {n: v for n, v, _ in gauges}
-    assert by_name['view.refresh.status'] == AgentCheck.OK
-    assert by_name['view.refresh.rows'] == 500
-    assert by_name['view.refresh.bytes'] == 4096
+    by_name = {n: (v, t) for n, v, t in gauges}
+    assert by_name['view.refresh.status'][0] == AgentCheck.OK
+    assert 'db:mydb' in by_name['view.refresh.status'][1]
+    assert 'view:mv_orders' in by_name['view.refresh.status'][1]
+    assert 'host:replica-1' in by_name['view.refresh.status'][1]
+    assert by_name['view.refresh.rows'][0] == 500
+    assert by_name['view.refresh.bytes'][0] == 4096
 
 
-def test_collect_view_refresh_error_status_sets_critical_with_message(check):
+def test_collect_view_refresh_error_status_emits_critical_gauge(check):
     job = check.table_metrics
-    service_checks = []
-    check.gauge = lambda *a, **kw: None
-    check.service_check = lambda name, status, tags=None, message=None: service_checks.append((status, message))
+    gauges = []
+    check.gauge = lambda name, value, tags=None: gauges.append((name, value, tags))
 
     row = _view_refresh_row(status='Error', exception='Timeout exceeded\nmore detail')
     with _patch_view_refresh_query(check, [row]):
         job._collect_view_refresh_metrics()
 
-    status, msg = service_checks[0]
-    assert status == AgentCheck.CRITICAL
-    assert msg == 'Timeout exceeded'
+    status_gauge = next(v for n, v, _ in gauges if n == 'view.refresh.status')
+    assert status_gauge == AgentCheck.CRITICAL
 
 
-def test_collect_view_refresh_unknown_status_maps_to_unknown(check):
+def test_collect_view_refresh_unknown_status_emits_unknown_gauge(check):
     job = check.table_metrics
-    service_checks = []
-    check.gauge = lambda *a, **kw: None
-    check.service_check = lambda name, status, tags=None, message=None: service_checks.append(status)
+    gauges = []
+    check.gauge = lambda name, value, tags=None: gauges.append((name, value, tags))
 
     with _patch_view_refresh_query(check, [_view_refresh_row(status='SomeFutureStatus')]):
         job._collect_view_refresh_metrics()
 
-    assert service_checks[0] == AgentCheck.UNKNOWN
+    status_gauge = next(v for n, v, _ in gauges if n == 'view.refresh.status')
+    assert status_gauge == AgentCheck.UNKNOWN
 
 
 def test_collect_view_refresh_drops_instance_db_tag(check):
     job = check.table_metrics
     emitted_tags = []
     check.gauge = lambda name, value, tags=None: emitted_tags.append(tags)
-    check.service_check = lambda *a, **kw: None
 
     with _patch_view_refresh_query(check, [_view_refresh_row(database='analytics')]):
         job._collect_view_refresh_metrics()
