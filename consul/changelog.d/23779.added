@@ -1,0 +1,1 @@
+Add new config `health_check_warning_events` to emit an event when a Consul health check transitions to `warning`.

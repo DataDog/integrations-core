@@ -55,6 +55,7 @@ files:
         display_default: null
         example: http://argocd-commit-server:8087/metrics
         type: string
+      fleet_configurable: false
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

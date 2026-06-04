@@ -146,6 +146,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
 
     # Set kafka_client as an attribute (not a property mock)
     client.kafka_client = mock_admin_client
+    client._cluster_metadata = metadata
     client.get_topic_partitions.return_value = {'test-topic': [0, 1]}
 
     def mock_offsets_for_times(partitions, offset=-1):
@@ -1419,3 +1420,41 @@ def test_partition_out_of_sync_broker_id_tag(
         'kafka.partition.offline',
     ):
         aggregator.assert_metric(metric, tags=expected_tags)
+
+
+def test_heartbeat_brokers_populated(check):
+    """Heartbeat payload includes the broker list when metadata is available."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=5, cluster_id='test-cluster-id')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert hb_events[0]['brokers'] == [
+        {'id': '1', 'host': 'broker1', 'port': 9092},
+        {'id': '2', 'host': 'broker2', 'port': 9092},
+    ]
+
+
+def test_heartbeat_brokers_empty_when_no_metadata(check):
+    """Heartbeat payload has an empty broker list when _cluster_metadata is None."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    mock_kafka_client._cluster_metadata = None
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=0, cluster_id='test-cluster-id')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert hb_events[0]['brokers'] == []
