@@ -167,7 +167,8 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        self.statement_metrics = None
+        # Initialize statement metrics collector before server version is known.
+        self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
         self.data_observability = PostgresDataObservability(self, self._config)
