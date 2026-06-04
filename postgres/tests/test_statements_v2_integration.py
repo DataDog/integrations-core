@@ -48,7 +48,7 @@ def dbm_instance_v2(pg_instance):
         'enabled': True,
         'run_sync': True,
         'collection_interval': CLOSE_TO_ZERO_INTERVAL,
-        'use_v2': True,
+        'incremental_query_metrics': True,
     }
     return pg_instance
 
@@ -344,7 +344,7 @@ def test_pg_stat_statements_dealloc_v2(aggregator, integration_check, pg_instanc
     pg_instance['pg_stat_activity_view'] = "datadog.pg_stat_activity()"
     pg_instance['query_samples'] = {'enabled': False}
     pg_instance['query_activity'] = {'enabled': False}
-    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2, 'use_v2': True}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2, 'incremental_query_metrics': True}
 
     with _get_superconn(pg_instance) as superconn:
         with superconn.cursor() as cur:

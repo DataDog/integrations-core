@@ -167,11 +167,11 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
-        if self._config.query_metrics.use_v2:
-            self.log.info("Using v2 statement metrics")
+        if self._config.query_metrics.incremental_query_metrics:
+            self.log.info("Using incremental query metrics collector")
             self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
         else:
-            self.log.info("Using v1 statement metrics")
+            self.log.info("Using legacy query metrics collector (full pg_stat_statements load)")
             self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)

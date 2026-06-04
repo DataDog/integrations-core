@@ -752,20 +752,9 @@ files:
         - name: incremental_query_metrics
           hidden: true
           description: |
-            Enable an experimental performance optimization that reduces the amount of data queried from `pg_stat_statements`
-            when calculating query metrics. This option is only available for PostgreSQL 10.0 and above.
-          value:
-            type: boolean
-            display_default: false
-            example: false
-        - name: use_v2
-          hidden: true
-          description: |
-            Use the V2 statement metrics collection pipeline with layered caching.
-            V2 uses a lightweight integer-only pgss scan for change detection and a
-            two-tier obfuscation lookup (queryid -> query_signature ->
-            ObfuscationResult) that skips both the PG text fetch and the FFI
-            obfuscation call on cache hit. Raw query text is never cached.
+            When enabled query metrics collection uses a lightweight multi-pass pipeline.
+            The check determines which statements had a change in call counts since the last collection, then fetches
+            query text from `pg_stat_statements` and runs obfuscation for those statements.
           value:
             type: boolean
             display_default: true
