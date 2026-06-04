@@ -205,6 +205,15 @@ files:
         value:
           example: false
           type: boolean
+      - name: filter_queue_statistics_metrics
+        description: |
+          When enabled, queue statistics metrics (`ibm_mq.stats.queue.*`) are only emitted for queues that the check
+          monitors via `queue_patterns` or `queue_regex`.
+        fleet_configurable: true
+        value:
+          example: true
+          default: false
+          type: boolean
       - name: collect_reset_queue_metrics
         description: |
           Collect metrics from Reset Queue Statistics. Statistics collected are:
