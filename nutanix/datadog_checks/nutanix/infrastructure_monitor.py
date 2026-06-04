@@ -458,7 +458,7 @@ class InfrastructureMonitor:
                     )
             except Exception:
                 self.check.log.exception(
-                    "[%s][%s] Failed to fetch stats for host %s", self._pc_label, cluster_name, host_name
+                    "[%s][%s] Failed to fetch stats for host %s", self._pc_label, cluster_name, display_hostname
                 )
 
         host_label = host_name or host_id
