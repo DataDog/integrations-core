@@ -72,7 +72,7 @@ The `policy_validation_flags` [suppress specific validation errors][12] that may
 
 The integration automatically tags all metrics and service checks with the name of the store in the `certificate_store:<STORE>` tag. Certificate metrics and service checks are tagged with the certificate's subjects, thumbprints and serial numbers. CRL metrics and service checks are tagged with the CRL's issuer and thumbprint.
 
-Beginning with Agent v7.80, six opt-in flags expose additional certificate metadata as tags on per-certificate metrics and service checks. Each flag defaults to `false`; set it to `true` in your instance configuration to emit the corresponding tags.
+Beginning with Agent v7.80, six opt-in flags expose additional certificate metadata as tags on per-certificate metrics and service checks. Each flag defaults to `false`. Set the value to `true` in your instance configuration to emit the corresponding tags.
 
 | Flag | Tags emitted |
 | --- | --- |
