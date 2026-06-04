@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import time
 from contextlib import ExitStack
 
 import pytest
@@ -39,11 +40,39 @@ def setup_kueue():
         ]
     )
     run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'metrics-reader.yaml')])
-    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'queue.yaml')])
+    # The deployment can be `Available` before the webhook server is actually serving, so wait until the
+    # webhook service has ready endpoints before applying resources that go through the mutating webhooks.
+    run_command(
+        [
+            'kubectl',
+            'wait',
+            '--for=jsonpath={.subsets[*].addresses[*].ip}',
+            'endpoints/kueue-webhook-service',
+            '-n',
+            'kueue-system',
+            '--timeout=300s',
+        ]
+    )
+    apply_queue_manifests()
     run_command(['kubectl', 'wait', 'clusterqueue/cluster-queue', '--for=condition=Active', '--timeout=300s'])
     run_command(
         ['kubectl', 'wait', 'localqueue/user-queue', '-n', 'default', '--for=condition=Active', '--timeout=300s']
     )
+
+
+def apply_queue_manifests():
+    # The webhook can still reject calls for a short window after its endpoints become ready (cert
+    # propagation), so retry the apply a few times before giving up.
+    queue_manifest = os.path.join(HERE, 'kind', 'queue.yaml')
+    last_error = None
+    for _ in range(10):
+        try:
+            run_command(['kubectl', 'apply', '-f', queue_manifest], check=True)
+            return
+        except Exception as e:
+            last_error = e
+            time.sleep(5)
+    raise RuntimeError(f'Failed to apply queue manifests after retries: {last_error}')
 
 
 def get_service_account_token():
