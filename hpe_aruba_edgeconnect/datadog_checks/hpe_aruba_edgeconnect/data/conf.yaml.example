@@ -386,10 +386,10 @@ instances:
     #
     # log_requests: false
 
-    ## @param persist_connections - boolean - optional - default: false
-    ## Whether or not to persist cookies and use connection pooling for improved performance.
+    ## @param persist_connections - boolean - optional - default: true
+    ## Connections are always persisted to use cookies and connection pooling for improved performance.
     #
-    # persist_connections: false
+    # persist_connections: true
 
     ## @param allow_redirects - boolean - optional - default: true
     ## Whether or not to allow URL redirection.

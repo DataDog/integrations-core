@@ -65,7 +65,7 @@ def instance_namespace():
 
 
 def instance_persist_connections():
-    return False
+    return True
 
 
 def instance_request_size():

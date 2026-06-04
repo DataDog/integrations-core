@@ -118,6 +118,11 @@ files:
             username: admin
             password: secret
     - template: instances/http
+      overrides:
+        persist_connections.value.default: true
+        persist_connections.value.example: true
+        persist_connections.description: |
+          Connections are always persisted to use cookies and connection pooling for improved performance.
     - template: instances/default
       overrides:
         min_collection_interval.value.example: 60
