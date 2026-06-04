@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from datadog_checks.base.utils.http_httpx import HTTPXWrapper
+from datadog_checks.base.utils.httpx2 import HTTPXWrapper
 
 HTTP_VERBS = {
     'get': 'GET',

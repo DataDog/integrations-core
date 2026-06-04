@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from datadog_checks.base.utils.http_httpx import HTTPXWrapper
+from datadog_checks.base.utils.httpx2 import HTTPXWrapper
 
 
 def test_close_is_idempotent(capturing_transport):
@@ -22,13 +22,13 @@ def test_context_manager(capturing_transport):
 
 def test_module_import_fails_without_httpx2(monkeypatch):
     monkeypatch.setitem(sys.modules, 'httpx2', None)
-    monkeypatch.delitem(sys.modules, 'datadog_checks.base.utils.http_httpx', raising=False)
+    monkeypatch.delitem(sys.modules, 'datadog_checks.base.utils.httpx2', raising=False)
     with pytest.raises(ImportError, match='httpx2'):
-        import datadog_checks.base.utils.http_httpx  # noqa: F401
+        import datadog_checks.base.utils.httpx2  # noqa: F401
     # After monkeypatch teardown the module must import cleanly again so sibling tests are
     # not affected by a leaked broken import state.
     monkeypatch.undo()
-    import datadog_checks.base.utils.http_httpx as restored
+    import datadog_checks.base.utils.httpx2 as restored
 
     assert hasattr(restored, 'HTTPXWrapper')
 
@@ -36,8 +36,8 @@ def test_module_import_fails_without_httpx2(monkeypatch):
 @pytest.mark.parametrize(
     'instance,expected_cls_name',
     [
-        pytest.param({'use_httpx': True}, 'HTTPXWrapper', id='opt-in'),
-        pytest.param({'use_httpx': False}, 'RequestsWrapper', id='explicit-default'),
+        pytest.param({'use_httpx2': True}, 'HTTPXWrapper', id='opt-in'),
+        pytest.param({'use_httpx2': False}, 'RequestsWrapper', id='explicit-default'),
         pytest.param({}, 'RequestsWrapper', id='unset-default'),
     ],
 )

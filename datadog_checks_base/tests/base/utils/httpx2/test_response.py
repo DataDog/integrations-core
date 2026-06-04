@@ -4,11 +4,11 @@
 import logging
 from datetime import timedelta
 
-import httpx2 as httpx
+import httpx2
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_httpx import DEFAULT_CHUNK_SIZE, HTTPXResponseAdapter, HTTPXWrapper
+from datadog_checks.base.utils.httpx2 import DEFAULT_CHUNK_SIZE, HTTPXResponseAdapter, HTTPXWrapper
 
 
 @pytest.mark.parametrize('status_code', [404, 500])
@@ -76,10 +76,10 @@ def test_response_iter_content_default_chunk_size_uses_default(status_transport_
     ],
 )
 def test_response_iter_content_decode_uses_response_encoding(charset, raw, expected):
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=raw, headers={'Content-Type': f'text/plain; charset={charset}'})
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, content=raw, headers={'Content-Type': f'text/plain; charset={charset}'})
 
-    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    http = HTTPXWrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     chunks = list(response.iter_content(chunk_size=64, decode_unicode=True))
     assert ''.join(chunks) == expected
@@ -95,10 +95,10 @@ def test_response_iter_content_decode_uses_response_encoding(charset, raw, expec
 def test_response_iter_lines_decode_uses_response_encoding(charset, line):
     raw = (line + '\n' + line).encode(charset)
 
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=raw, headers={'Content-Type': f'text/plain; charset={charset}'})
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, content=raw, headers={'Content-Type': f'text/plain; charset={charset}'})
 
-    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    http = HTTPXWrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     encoded_lines = list(response.iter_lines(decode_unicode=False))
     assert encoded_lines == [line.encode(charset), line.encode(charset)]
@@ -113,12 +113,12 @@ def test_response_iter_lines_rejects_delimiter(status_transport_factory):
 
 
 def test_response_elapsed_returns_zero_on_runtime_error(caplog):
-    # httpx2's .elapsed raises RuntimeError for in-memory responses. The real httpx.Request is
+    # httpx2's .elapsed raises RuntimeError for in-memory responses. The real httpx2.Request is
     # attached so the adapter's debug log can format request info without a secondary error.
-    request = httpx.Request('GET', 'http://example.test/')
-    response = httpx.Response(200, content=b'x', request=request)
+    request = httpx2.Request('GET', 'http://example.test/')
+    response = httpx2.Response(200, content=b'x', request=request)
     adapter = HTTPXResponseAdapter(response)
-    with caplog.at_level(logging.DEBUG, logger='datadog_checks.base.utils.http_httpx'):
+    with caplog.at_level(logging.DEBUG, logger='datadog_checks.base.utils.httpx2'):
         assert adapter.elapsed == timedelta(0)
     assert any('elapsed unavailable' in record.message for record in caplog.records)
 
@@ -146,10 +146,10 @@ def test_response_text_decodes_body(status_transport_factory):
 
 
 def test_response_json_returns_decoded_object():
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, json={'a': 1})
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, json={'a': 1})
 
-    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    http = HTTPXWrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     assert response.json() == {'a': 1}
 
@@ -162,10 +162,10 @@ def test_response_content_returns_raw_bytes(status_transport_factory):
 
 
 def test_response_headers_exposed():
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, headers={'X-Custom': 'value'}, content=b'')
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, headers={'X-Custom': 'value'}, content=b'')
 
-    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    http = HTTPXWrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     assert response.headers['X-Custom'] == 'value'
 
@@ -178,28 +178,28 @@ def test_response_url_reflects_request_url(status_transport_factory):
 
 
 def test_response_encoding_property_reflects_declared_charset():
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=b'data', headers={'Content-Type': 'text/plain; charset=iso-8859-1'})
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, content=b'data', headers={'Content-Type': 'text/plain; charset=iso-8859-1'})
 
-    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    http = HTTPXWrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     assert response.encoding == 'iso-8859-1'
 
 
 def test_response_encoding_property_settable_through_adapter():
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=b'data', headers={'Content-Type': 'text/plain; charset=utf-8'})
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, content=b'data', headers={'Content-Type': 'text/plain; charset=utf-8'})
 
-    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    http = HTTPXWrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     response.encoding = 'iso-8859-1'
     assert response.encoding == 'iso-8859-1'
 
 
 def test_response_cookies_exposed():
-    def handler(_request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, headers={'Set-Cookie': 'session=abc123'}, content=b'')
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, headers={'Set-Cookie': 'session=abc123'}, content=b'')
 
-    http = HTTPXWrapper({}, {}, transport=httpx.MockTransport(handler))
+    http = HTTPXWrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     assert response.cookies['session'] == 'abc123'

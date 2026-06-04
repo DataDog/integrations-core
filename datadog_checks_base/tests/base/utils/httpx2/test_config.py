@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.base.utils.http_httpx import HTTPXWrapper
+from datadog_checks.base.utils.httpx2 import HTTPXWrapper
 
 
 def test_default_headers_include_user_agent(capturing_transport):
