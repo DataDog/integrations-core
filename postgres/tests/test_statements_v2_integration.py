@@ -438,3 +438,76 @@ def test_internal_telemetry_gauges_v2(aggregator, integration_check, dbm_instanc
     )
 
     conn.close()
+
+
+# ---------------------------------------------------------------------------
+# pgss not loaded (ObjectNotInPrerequisiteState) — error path
+# ---------------------------------------------------------------------------
+
+
+def test_statement_metrics_pgss_not_loaded_v2(aggregator, integration_check, dbm_instance_v2):
+    check = integration_check(dbm_instance_v2)
+
+    with mock.patch(
+        'datadog_checks.postgres.statements_v2.PostgresStatementMetricsV2._get_pg_stat_statements_columns',
+        side_effect=psycopg.errors.ObjectNotInPrerequisiteState('pg_stat_statements must be loaded'),
+    ):
+        run_one_check(check)
+
+    expected_tags = _get_expected_tags(
+        check, dbm_instance_v2, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + ['error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded']
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )
+    assert len(check.warnings) == 1
+    assert check.warnings == [
+        "Unable to collect statement metrics because pg_stat_statements extension is not loaded "
+        "in database 'datadog_test'. "
+        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#"
+        "pg-stat-statements-not-loaded"
+        " for more details\ncode=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname",
+    ]
+
+
+# ---------------------------------------------------------------------------
+# FQT TTL cache deduplication
+# ---------------------------------------------------------------------------
+
+
+@requires_over_10
+def test_fqt_cache_deduplication_v2(aggregator, integration_check, dbm_instance_v2):
+    """FQT events for a given query are emitted exactly once within the TTL window."""
+    conn = psycopg.connect(
+        host=HOST, dbname=DB_NAME, user="bob", password="bob", autocommit=True, cursor_factory=ClientCursor
+    )
+
+    check = integration_check(dbm_instance_v2)
+    check._connect()
+
+    # Cycle 1: seeds DeltaDetector snapshot (no derivatives yet)
+    conn.cursor().execute("SELECT city FROM persons WHERE city = %s", ("hello",))
+    run_one_check(check, cancel=False)
+
+    # Cycle 2: derivatives produced → FQT event emitted and cached
+    conn.cursor().execute("SELECT city FROM persons WHERE city = %s", ("hello",))
+    run_one_check(check, cancel=False)
+
+    # Cycle 3: same query → FQT cache hit, event must NOT be re-emitted
+    conn.cursor().execute("SELECT city FROM persons WHERE city = %s", ("hello",))
+    run_one_check(check, cancel=False)
+
+    conn.close()
+
+    expected_query = "SELECT city FROM persons WHERE city = $1"
+    query_signature = compute_sql_signature(expected_query)
+
+    dbm_samples = aggregator.get_event_platform_events("dbm-samples")
+    fqt_events = [e for e in dbm_samples if e.get('dbm_type') == 'fqt']
+    matching = [e for e in fqt_events if e['db']['query_signature'] == query_signature]
+
+    assert len(matching) == 1, (
+        f"Expected exactly 1 FQT event across 3 cycles but got {len(matching)}; "
+        "TTL cache deduplication may be broken"
+    )
