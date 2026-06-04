@@ -427,7 +427,9 @@ def test_obfuscate_sql_options(aggregator, integration_check, dbm_instance, data
     for name, obj in [('statement_metrics', check.statement_metrics), ('statement_samples', check.statement_samples)]:
         opts = json.loads(obj._obfuscate_options)
         assert opts.get('dbms') == 'postgresql', f"{name}: missing dbms=postgresql in obfuscation options"
-        assert opts.get('return_json_metadata') is True, f"{name}: missing return_json_metadata=True in obfuscation options"
+        assert opts.get('return_json_metadata') is True, (
+            f"{name}: missing return_json_metadata=True in obfuscation options"
+        )
 
     captured_options = []
 
