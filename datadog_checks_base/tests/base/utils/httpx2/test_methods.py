@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import logging
 
 import pytest
 
@@ -36,7 +37,9 @@ def test_post_json_body_is_serialized(capturing_transport, captured_requests):
     assert json.loads(req.content) == {'a': 1, 'b': 'two'}
 
 
-def test_request_accepts_stream_kwarg(capturing_transport):
+def test_stream_kwarg_logged_and_dropped(capturing_transport, caplog):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
-    response = http.get('http://example.test/', stream=True)
+    with caplog.at_level(logging.DEBUG, logger='datadog_checks.base.utils.httpx2'):
+        response = http.get('http://example.test/', stream=True)
     assert response.status_code == 200
+    assert any('dropping unsupported per-request kwarg: stream' in r.message for r in caplog.records)
