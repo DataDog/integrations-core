@@ -254,7 +254,6 @@ def test_collect_view_refresh_drops_instance_db_tag(check):
     assert all(t == 'db:analytics' for t in db_tags), db_tags
 
 
-
 def test_collect_view_refresh_skips_when_flag_set(check):
     job = check.table_metrics
     job._view_refreshes_skip = True
