@@ -326,7 +326,7 @@ tests:
         local_user_id: 4532000
         local_user_name: admin
         ocsf:
-          severity: High
+          severity: Medium
           activity_name: Response
           metadata:
             uid: '2100'
@@ -365,7 +365,7 @@ tests:
             direction: Outbound
           class_uid: 4003
           activity_id: 2
-          severity_id: 4
+          severity_id: 3
           time: 1745311133161
           class_name: DNS Activity
           status: Failure
@@ -760,7 +760,7 @@ tests:
         local_user_id: 4682000
         local_user_name: John
         ocsf:
-          severity: Low
+          severity: Informational
           activity_name: Query
           metadata:
             uid: '2600'
@@ -799,7 +799,7 @@ tests:
             direction: Outbound
           class_uid: 4003
           activity_id: 1
-          severity_id: 2
+          severity_id: 1
           time: 1747655677118
           class_name: DNS Activity
           status: Failure

@@ -386,17 +386,9 @@ pipeline:
             - name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@threat:true @result:blocked"
-                  name: High
-                  id: 4
-                - filter:
-                    query: "@threat:true @result:allowed"
+                    query: "@threat:true"
                   name: Medium
                   id: 3
-                - filter:
-                    query: "@threat:false @result:blocked"
-                  name: Low
-                  id: 2
                 - filter:
                     query: "*"
                   name: Informational
