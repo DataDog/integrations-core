@@ -426,9 +426,6 @@ class HTTPX2Wrapper:
     def __del__(self) -> None:  # no cov
         try:
             self.close()
-        except AttributeError:
-            # __del__ runs even if __init__ failed before self._client was set.
-            pass
         except Exception as exc:
             # Don't propagate from __del__ (interpreter handles it). Log at debug so the swallow is observable.
             self.logger.debug('HTTPX2Wrapper.close raised during __del__: %r', exc)
