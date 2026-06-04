@@ -45,8 +45,6 @@ STANDARD_FIELDS = {
     'username': None,
 }
 
-DEFAULT_REMAPPED_FIELDS: dict[str, dict[str, Any]] = {}
-
 REQUEST_KWARGS = frozenset(
     {
         'params',
@@ -289,7 +287,6 @@ class HTTPX2Wrapper:
         config = {field: instance.get(field, value) for field, value in default_fields.items()}
 
         remapper = dict(remapper) if remapper else {}
-        remapper.update(DEFAULT_REMAPPED_FIELDS)
 
         for remapped_field, data in remapper.items():
             field = data.get('name')
