@@ -465,7 +465,15 @@ ALL_EXPECTED_METRICS: list[dict] = [
         {'name': m['name'], 'value': m['value'], 'tags': SYSTEM_TAGS + m.get('extra_tags', [])}
         for m in SYSTEM_MDM_CLUSTER_METRICS + SYSTEM_STATS_SIMPLE_METRICS
     ],
-    *[{'name': f'{p}.{s}', 'value': 0, 'tags': SYSTEM_TAGS} for p in SYSTEM_STATS_BWC_METRICS for s in BWC_SUFFIXES],
+    *[
+        {
+            'name': f'{p}.{s}',
+            'value': 42 if p == 'dell_powerflex.user_data_read_bwc' and s == 'num_occured' else 0,
+            'tags': SYSTEM_TAGS,
+        }
+        for p in SYSTEM_STATS_BWC_METRICS
+        for s in BWC_SUFFIXES
+    ],
     # ---- storage_pool: pool1 ----
     {'name': 'dell_powerflex.storage_pool.count', 'value': 1, 'tags': POOL1_TAGS},
     *[{'name': m['name'], 'value': m['value'], 'tags': POOL1_TAGS} for m in STORAGE_POOL_STATS_SIMPLE_METRICS],

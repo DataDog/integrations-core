@@ -361,7 +361,7 @@
   "userDataReadBwc": {
     "numSeconds": 0,
     "totalWeightInKb": 0,
-    "numOccured": 0
+    "numOccured": 42
   },
   "pendingBckRebuildCapacityInKb": 0,
   "rmcacheCurrNumOf4kbEntries": 0,

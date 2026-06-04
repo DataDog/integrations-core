@@ -141,7 +141,13 @@ def test_collect_system(dd_run_check, aggregator, instance, mock_http_get):
     for metric in SYSTEM_STATS_SIMPLE_METRICS:
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=system_tags)
 
-    assert_bwc_metrics(aggregator, SYSTEM_STATS_BWC_METRICS, system_tags)
+    assert_bwc_metrics(
+        aggregator, [m for m in SYSTEM_STATS_BWC_METRICS if m != 'dell_powerflex.user_data_read_bwc'], system_tags
+    )
+    # userDataReadBwc fixture has numOccured=42
+    aggregator.assert_metric('dell_powerflex.user_data_read_bwc.num_seconds', value=0, tags=system_tags)
+    aggregator.assert_metric('dell_powerflex.user_data_read_bwc.total_weight_in_kb', value=0, tags=system_tags)
+    aggregator.assert_metric('dell_powerflex.user_data_read_bwc.num_occured', value=42, tags=system_tags)
 
 
 def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
