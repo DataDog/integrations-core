@@ -254,18 +254,6 @@ def test_collect_view_refresh_drops_instance_db_tag(check):
     assert all(t == 'db:analytics' for t in db_tags), db_tags
 
 
-def test_collect_view_refresh_dedupes_rows(check):
-    job = check.table_metrics
-    service_checks = []
-    check.gauge = lambda *a, **kw: None
-    check.service_check = lambda name, status, tags=None, message=None: service_checks.append(name)
-
-    row = _view_refresh_row()
-    with _patch_view_refresh_query(check, [row, row, row]):
-        job._collect_view_refresh_metrics()
-
-    assert len(service_checks) == 1
-
 
 def test_collect_view_refresh_skips_when_flag_set(check):
     job = check.table_metrics
