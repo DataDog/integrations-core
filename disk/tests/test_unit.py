@@ -13,7 +13,7 @@ from datadog_checks.base.utils.timeout import TimeoutException
 from datadog_checks.dev.testing import requires_linux, requires_windows
 from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics, mock_context_manager
 from datadog_checks.disk import Disk
-from datadog_checks.disk.disk import IGNORE_CASE
+from datadog_checks.disk.disk import IGNORE_CASE, _base_device_name
 
 if ON_WINDOWS:
     DEFAULT_DEVICE_NAME = 'c:'
@@ -685,8 +685,16 @@ def test_latency_metrics_respect_device_include(aggregator, dd_run_check):
         'system.disk.write_time_pct',
     ]
     for metric in latency_metrics:
-        aggregator.assert_metric(metric, tags=['device:{}'.format(included_device), 'device_name:sda1'], count=1)
-        aggregator.assert_metric(metric, tags=['device:{}'.format(excluded_device), 'device_name:sdb1'], count=0)
+        aggregator.assert_metric(
+            metric,
+            tags=['device:{}'.format(included_device), 'device_name:{}'.format(_base_device_name(included_device))],
+            count=1,
+        )
+        aggregator.assert_metric(
+            metric,
+            tags=['device:{}'.format(excluded_device), 'device_name:{}'.format(_base_device_name(excluded_device))],
+            count=0,
+        )
 
 
 def test_mount_point_include():
