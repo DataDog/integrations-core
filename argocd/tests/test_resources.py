@@ -100,6 +100,30 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
         aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=1, tags=[f"resource_type:{spec_type}"])
 
 
+def test_application_include_contains_prd_fields_required_for_idp_catalog():
+    assert {
+        "spec.sources[*].chart",
+        "status.conditions[*].lastTransitionTime",
+        "status.history[*].id",
+        "status.history[*].revision",
+        "status.history[*].deployedAt",
+        "status.history[*].deployStartedAt",
+        "status.history[*].initiatedBy.username",
+        "status.history[*].initiatedBy.automated",
+        "status.operationState.startedAt",
+        "status.operationState.finishedAt",
+        "status.summary.images[*]",
+    } <= set(APPLICATION_INCLUDE["paths"])
+
+
+def test_application_include_contains_kubernetes_resource_identity_for_automatic_mapping():
+    assert {
+        "status.resources[*].group",
+        "status.resources[*].version",
+        "status.resources[*].requiresPruning",
+    } <= set(APPLICATION_INCLUDE["paths"])
+
+
 def test_application_key_uses_app_identity_not_destination(mock_http_response_per_endpoint):
     apps = [
         _application("web", namespace="team-a", cluster="https://remote", dest_namespace="prod"),
@@ -233,3 +257,127 @@ def test_collect_strips_credentials_from_repo_urls(mock_http_response_per_endpoi
     assert by_type["argocd_application"]["fields"]["spec"]["source"]["repoURL"] == "https://github.com/org/repo"
     assert by_type["argocd_repository"]["fields"]["repo"] == "https://github.com/org/repo"
     assert by_type["argocd_repository"]["key"] == "argocd.example.com:https://github.com/org/repo"
+
+
+def test_collect_scrubs_credentials_from_condition_messages(mock_http_response_per_endpoint):
+    app = _application("broken")
+    app["status"]["conditions"] = [
+        {
+            "type": "ComparisonError",
+            "message": "failed to fetch https://oauth2:t0ken@github.com/org/repo: auth required",
+        }
+    ]
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])
+
+    with patch.object(check, "submit_generic_resource", create=True) as submit:
+        check._resource_collector.collect()
+
+    app_call = next(c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application")
+    conditions = app_call.kwargs["fields"]["status"]["conditions"]
+    assert conditions[0]["type"] == "ComparisonError"
+    assert "t0ken" not in conditions[0]["message"]
+    assert "https://github.com/org/repo" in conditions[0]["message"]
+
+
+def test_collect_skips_unchanged_resources_on_second_cycle(mock_http_response_per_endpoint):
+    app = _application("checkout")
+    app["metadata"]["resourceVersion"] = "100"
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])
+
+    with patch.object(check, "submit_generic_resource", create=True) as submit:
+        check._resource_collector.collect()
+        after_first = submit.call_count
+        check._resource_collector._last_collect = 0.0  # simulate the collection interval elapsing
+        check._resource_collector.collect()
+        after_second = submit.call_count
+
+    assert after_first == 1
+    assert after_second == 1  # unchanged app is not re-submitted on the next cycle
+
+
+def test_collect_resubmits_application_when_resource_version_changes(mock_http_response_per_endpoint):
+    app_v1 = _application("checkout")
+    app_v1["metadata"]["resourceVersion"] = "100"
+    app_v2 = _application("checkout")
+    app_v2["metadata"]["resourceVersion"] = "200"
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app_v1]), _items_response([app_v2])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])
+
+    with patch.object(check, "submit_generic_resource", create=True) as submit:
+        check._resource_collector.collect()
+        after_first = submit.call_count
+        check._resource_collector._last_collect = 0.0  # simulate the collection interval elapsing
+        check._resource_collector.collect()
+        after_second = submit.call_count
+
+    assert after_first == 1
+    assert after_second == 2  # resourceVersion changed, so the app is re-submitted
+
+
+def test_collect_resubmits_unchanged_resources_on_ttl_sweep(mock_http_response_per_endpoint):
+    app = _application("checkout")
+    app["metadata"]["resourceVersion"] = "100"
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])
+    collector = check._resource_collector
+
+    with patch.object(check, "submit_generic_resource", create=True) as submit:
+        collector.collect()
+        after_first = submit.call_count
+        collector._last_full_submit = 0.0  # force the next cycle to be a full TTL-refresh sweep
+        collector._last_collect = 0.0
+        collector.collect()
+        after_second = submit.call_count
+
+    assert after_first == 1
+    assert after_second == 2  # the sweep re-submits even unchanged resources to refresh their TTL
+
+
+def test_collect_respects_collection_interval(mock_http_response_per_endpoint):
+    app_v1 = _application("checkout")
+    app_v1["metadata"]["resourceVersion"] = "100"
+    app_v2 = _application("checkout")
+    app_v2["metadata"]["resourceVersion"] = "200"
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app_v1]), _items_response([app_v2])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance()])  # default 120s collection interval
+
+    with patch.object(check, "submit_generic_resource", create=True) as submit:
+        check._resource_collector.collect()
+        after_first = submit.call_count
+        check._resource_collector.collect()
+        after_second = submit.call_count
+
+    assert after_first == 1
+    assert after_second == 1  # second call is within the interval -> skipped, the changed v2 is never fetched

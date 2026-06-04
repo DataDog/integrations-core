@@ -60,6 +60,10 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
+def instance_genresources_collection_interval_seconds():
+    return 120
+
+
 def instance_genresources_ttl_seconds():
     return 21600
 

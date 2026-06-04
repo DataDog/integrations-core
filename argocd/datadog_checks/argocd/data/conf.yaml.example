@@ -105,6 +105,14 @@ instances:
     #
     # genresources_ttl_seconds: 21600
 
+    ## @param genresources_collection_interval_seconds - integer - optional - default: 120
+    ## Minimum number of seconds between generic resources collection cycles.
+    ## The collector polls the Argo CD API at most once per interval,
+    ## independent of the check's metrics scrape frequency, to limit load on
+    ## the Argo CD API server in large deployments. Minimum of 1.
+    #
+    # genresources_collection_interval_seconds: 120
+
     ## @param max_resources_per_cycle - integer - optional - default: 10000
     ## Maximum number of items emitted per resource type per check cycle.
     ## When an ArgoCD API endpoint returns more than this, the excess is

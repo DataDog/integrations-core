@@ -117,6 +117,7 @@ class InstanceConfig(BaseModel):
     extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
     generic_resources_auth_token: Optional[str] = None
     generic_resources_endpoint: Optional[str] = None
+    genresources_collection_interval_seconds: Optional[int] = Field(None, ge=1)
     genresources_ttl_seconds: Optional[int] = Field(None, ge=1)
     headers: Optional[MappingProxyType[str, Any]] = None
     histogram_buckets_as_distributions: Optional[bool] = None

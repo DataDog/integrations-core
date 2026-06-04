@@ -6,7 +6,10 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
+import re
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable
@@ -79,6 +82,7 @@ APPLICATION_INCLUDE: dict[str, tuple[str, ...]] = {
         "spec.sources[*].repoURL",
         "spec.sources[*].path",
         "spec.sources[*].targetRevision",
+        "spec.sources[*].chart",
         "spec.destination.server",
         "spec.destination.namespace",
         "spec.destination.name",
@@ -88,15 +92,31 @@ APPLICATION_INCLUDE: dict[str, tuple[str, ...]] = {
         "status.sync.revision",
         "status.health.status",
         "status.health.message",
+        "status.conditions[*].type",
+        "status.conditions[*].message",
+        "status.conditions[*].lastTransitionTime",
         "status.operationState.phase",
+        "status.operationState.startedAt",
+        "status.operationState.finishedAt",
         "status.operationState.operation.initiatedBy.username",
+        "status.operationState.operation.initiatedBy.automated",
         "status.sourceType",
         "status.reconciledAt",
+        "status.summary.images[*]",
+        "status.history[*].id",
+        "status.history[*].revision",
+        "status.history[*].deployedAt",
+        "status.history[*].deployStartedAt",
+        "status.history[*].initiatedBy.username",
+        "status.history[*].initiatedBy.automated",
         "status.resources[*].kind",
         "status.resources[*].name",
         "status.resources[*].namespace",
+        "status.resources[*].group",
+        "status.resources[*].version",
         "status.resources[*].status",
         "status.resources[*].health.status",
+        "status.resources[*].requiresPruning",
     ),
     "map_paths": ("metadata.labels",),
     "annotation_keys": (),
@@ -132,6 +152,9 @@ REPOSITORY_INCLUDE: dict[str, tuple[str, ...]] = {
 }
 
 
+URL_CREDENTIALS_PATTERN = re.compile(r"([a-zA-Z][a-zA-Z0-9+.\-]*://)[^/\s@]+@")
+
+
 def _strip_url_userinfo(url: str) -> str:
     """Drop any embedded ``user:token@`` credentials from a URL."""
     parsed = urlparse(url)
@@ -143,8 +166,13 @@ def _strip_url_userinfo(url: str) -> str:
     return urlunparse(parsed._replace(netloc=netloc))
 
 
-def _sanitize_repo_urls(item: dict, resource_type: str) -> None:
-    """Strip embedded credentials from repo URLs in place before they ship or become keys."""
+def _scrub_url_credentials(text: str) -> str:
+    """Strip ``user:token@`` userinfo from any URL embedded in free text (e.g. error messages)."""
+    return URL_CREDENTIALS_PATTERN.sub(r"\1", text)
+
+
+def _sanitize_item(item: dict, resource_type: str) -> None:
+    """Strip embedded credentials from repo URLs and free-text messages in place before they ship."""
     if resource_type == "argocd_application":
         spec = item.get("spec") or {}
         source = spec.get("source")
@@ -153,9 +181,23 @@ def _sanitize_repo_urls(item: dict, resource_type: str) -> None:
         for src in spec.get("sources") or []:
             if isinstance(src, dict) and isinstance(src.get("repoURL"), str):
                 src["repoURL"] = _strip_url_userinfo(src["repoURL"])
+        for condition in (item.get("status") or {}).get("conditions") or []:
+            if isinstance(condition, dict) and isinstance(condition.get("message"), str):
+                condition["message"] = _scrub_url_credentials(condition["message"])
     elif resource_type == "argocd_repository":
         if isinstance(item.get("repo"), str):
             item["repo"] = _strip_url_userinfo(item["repo"])
+    connection = item.get("connectionState")
+    if isinstance(connection, dict) and isinstance(connection.get("message"), str):
+        connection["message"] = _scrub_url_credentials(connection["message"])
+
+
+def _change_token(item: dict) -> str:
+    """A value that changes whenever the resource changes: k8s resourceVersion if present, else a content hash."""
+    version = (item.get("metadata") or {}).get("resourceVersion")
+    if isinstance(version, str) and version:
+        return version
+    return hashlib.sha1(json.dumps(item, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
 def _application_key(item: dict) -> str:
@@ -215,6 +257,11 @@ class ArgocdResourceCollector:
         self._extra_paths: list[str] = list(instance.get("extra_include_paths") or [])
         self._auth_token: str | None = instance.get("generic_resources_auth_token")
         self._instance_prefix: str = _instance_prefix(self._endpoint)
+        self._submitted: dict[str, str] = {}
+        self._last_full_submit: float = 0.0
+        self._resubmit_interval: int = max(1, self._ttl_seconds // 2)
+        self._collection_interval: int = instance.get("genresources_collection_interval_seconds", 120)
+        self._last_collect: float = 0.0
 
     def collect(self) -> None:
         if not self._endpoint:
@@ -226,12 +273,19 @@ class ArgocdResourceCollector:
             return
 
         seen_at = int(time.time())
+        if seen_at - self._last_collect < self._collection_interval:
+            return
+        self._last_collect = seen_at
+
         expire_at = seen_at + self._ttl_seconds
+        force_full = (seen_at - self._last_full_submit) >= self._resubmit_interval
+        if force_full:
+            self._last_full_submit = seen_at
 
         for spec in RESOURCE_TYPE_SPECS:
-            self._collect_type(spec, seen_at=seen_at, expire_at=expire_at)
+            self._collect_type(spec, seen_at=seen_at, expire_at=expire_at, force_full=force_full)
 
-    def _collect_type(self, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int) -> None:
+    def _collect_type(self, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int, force_full: bool) -> None:
         tags = [f"resource_type:{spec.resource_type}"]
         try:
             items = self._fetch(spec.api_path)
@@ -251,8 +305,13 @@ class ArgocdResourceCollector:
             )
             items = items[: self._max_resources]
 
+        seen = set()
         for item in items:
-            self._emit_item(item, spec, seen_at=seen_at, expire_at=expire_at)
+            cache_key = self._emit_item(item, spec, seen_at=seen_at, expire_at=expire_at, force_full=force_full)
+            if cache_key is not None:
+                seen.add(cache_key)
+        namespace = f"{spec.resource_type}|"
+        self._submitted = {k: v for k, v in self._submitted.items() if not k.startswith(namespace) or k in seen}
 
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
@@ -264,27 +323,60 @@ class ArgocdResourceCollector:
         payload = response.json()
         return list(payload.get("items") or [])
 
-    def _emit_item(self, item: dict, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int) -> None:
+    def _emit_item(
+        self, item: dict, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int, force_full: bool
+    ) -> str | None:
         try:
-            _sanitize_repo_urls(item, spec.resource_type)
+            _sanitize_item(item, spec.resource_type)
             key = spec.key_builder(item)
         except Exception:
             self.check.log.warning("genresources: skipping malformed %s", spec.resource_type, exc_info=True)
-            return
+            return None
         if self._instance_prefix:
             key = f"{self._instance_prefix}:{key}"
+        include = {
+            "paths": list(spec.include["paths"]) + self._extra_paths,
+            "map_paths": list(spec.include["map_paths"]),
+            "annotation_keys": list(spec.include["annotation_keys"]),
+        }
+        # DEBUG: dump post-allow-list payload as JSONL to /tmp/genres-debug — remove before merging
         try:
-            self.check.submit_generic_resource(
-                type=spec.resource_type,
-                key=key,
-                fields=item,
-                include={
-                    "paths": list(spec.include["paths"]) + self._extra_paths,
-                    "map_paths": list(spec.include["map_paths"]),
-                    "annotation_keys": list(spec.include["annotation_keys"]),
-                },
-                seen_at=seen_at,
-                expire_at=expire_at,
+            import json as _json
+            import os as _os
+
+            from datadog_checks.base.utils.genresources.inclusion import apply_allow_list
+
+            _filtered = apply_allow_list(
+                item,
+                paths=include["paths"],
+                map_paths=include["map_paths"],
+                annotation_keys=include["annotation_keys"],
             )
+            _os.makedirs("/tmp/genres-debug", exist_ok=True)
+            with open("/tmp/genres-debug/payloads.jsonl", "a", encoding="utf-8") as _fp:
+                _fp.write(
+                    _json.dumps(
+                        {"seen_at": seen_at, "type": spec.resource_type, "key": key, "payload": _filtered},
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    )
+                    + "\n"
+                )
         except Exception:
-            self.check.log.exception("genresources: failed to submit %s (key=%s)", spec.resource_type, key)
+            self.check.log.exception("GENRES_DEBUG: failed to dump filtered payload")
+        cache_key = f"{spec.resource_type}|{key}"
+        token = _change_token(item)
+        if force_full or self._submitted.get(cache_key) != token:
+            try:
+                self.check.submit_generic_resource(
+                    type=spec.resource_type,
+                    key=key,
+                    fields=item,
+                    include=include,
+                    seen_at=seen_at,
+                    expire_at=expire_at,
+                )
+                self._submitted[cache_key] = token
+            except Exception:
+                self.check.log.exception("genresources: failed to submit %s (key=%s)", spec.resource_type, key)
+        return cache_key
