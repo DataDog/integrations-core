@@ -5,6 +5,7 @@ import sys
 
 import pytest
 
+from datadog_checks.base.utils import httpx2 as httpx2_module
 from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
 
@@ -18,6 +19,26 @@ def test_context_manager(capturing_transport):
     with HTTPX2Wrapper({}, {}, transport=capturing_transport) as http:
         response = http.get('http://example.test/')
     assert response.status_code == 200
+
+
+def test_request_closes_response_when_adapter_wrap_fails(capturing_transport, monkeypatch):
+    closed = []
+
+    def failing_init(self, response):
+        # Install the spy at adapter-init time so the close() calls that httpx2 makes
+        # while eagerly reading the in-memory MockTransport body during Response.__init__
+        # are not counted; only the production guard's close() is observed.
+        original_close = response.close
+        response.close = lambda: (closed.append(True), original_close())[-1]
+        raise RuntimeError('boom')
+
+    monkeypatch.setattr(httpx2_module.HTTPX2ResponseAdapter, '__init__', failing_init)
+
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    with pytest.raises(RuntimeError, match='boom'):
+        http.get('http://example.test/')
+
+    assert closed == [True]
 
 
 def test_module_import_fails_without_httpx2(monkeypatch):

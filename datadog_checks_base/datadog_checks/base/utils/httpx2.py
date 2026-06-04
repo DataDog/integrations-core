@@ -371,7 +371,12 @@ class HTTPX2Wrapper:
             response = self._client.send(request, stream=True, follow_redirects=follow_redirects)
         except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
             raise _map_httpx2_exception(exc) from exc
-        return HTTPX2ResponseAdapter(response)
+        try:
+            return HTTPX2ResponseAdapter(response)
+        except BaseException:
+            # Close the open stream if anything between send(stream=True) and the wrap raises.
+            response.close()
+            raise
 
     def _build_request_kwargs(self, options: dict[str, Any], *, method: str = '', url: str = '') -> dict[str, Any]:
         """Translate call-site options to httpx2.Client.request kwargs."""
