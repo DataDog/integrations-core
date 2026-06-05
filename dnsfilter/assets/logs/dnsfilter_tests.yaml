@@ -521,6 +521,7 @@ tests:
       - 83
       categories_names:
       - Suspicious & Deceptive
+      code: NOERROR
       collection_id: 12500
       collection_name: testing collection
       collections:
@@ -535,13 +536,16 @@ tests:
         question:
           name: byethost6.com
           type: HTTPS
+      domain: byethost6.com
       evt:
         outcome: allowed
       fqdn: www.chalmerset.byethost6.com
       id: 8200
       local_ipv4_address: 10.50.8.1
       local_ipv6_address: fdfe:9042:c53d:0:84bd:853e:965f:babc
+      local_user_id: 4532000
       local_user_login: WIN11-50-8-1\admin
+      local_user_name: admin
       mac_address: 00505692e123
       method: 22
       method_name: Security Category
@@ -551,11 +555,69 @@ tests:
           ip: 10.0.0.1
       network_name: Your First Network
       networkid: 8305000
+      ocsf:
+        action: Allowed
+        action_id: 1
+        activity_id: 1
+        activity_name: Query
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Outbound
+          direction_id: 2
+          protocol_name: udp
+        disposition: Allowed
+        disposition_id: 1
+        dst_endpoint:
+          ip: 10.0.0.2
+          uid: '212800'
+        duration: 451
+        firewall_rule:
+          name: Suspicious & Deceptive
+          uid: '83'
+        is_alert: true
+        metadata:
+          event_code: Security Category
+          original_time: '2025-04-22 08:39:23.988'
+          product:
+            name: DNSFilter
+            vendor_name: DNSFilter
+          profiles:
+          - security_control
+          uid: '8200'
+          version: 1.5.0
+        query:
+          hostname: www.chalmerset.byethost6.com
+          type: HTTPS
+        rcode: NoError
+        rcode_id: 0
+        severity: Medium
+        severity_id: 3
+        src_endpoint:
+          hostname: WIN11-50-8-1
+          intermediate_ips:
+          - 10.0.0.1
+          ip: 10.50.8.1
+          mac: 00505692e123
+          name: WIN11-50-8-1
+          owner:
+            name: admin
+            uid: '4532000'
+          uid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
+        status: Success
+        status_code: NOERROR
+        status_id: 1
+        time: 1745311163988
       policy_id: 1249100
       policy_name: Your First Policy
       protocol: udp
+      question_type: HTTPS
       region: BOM
+      request_address: 10.0.0.1
       responsetime: 451
+      result: allowed
       scheduled_policy_id: 56600
       scheduled_policy_name: test-DD
       server_address: 10.0.0.2
@@ -567,68 +629,6 @@ tests:
       usr:
         id: 4532000
         name: admin
-      local_user_id: 4532000
-      local_user_name: admin
-      ocsf:
-        severity: Medium
-        activity_name: Query
-        metadata:
-          uid: '8200'
-          product:
-            name: DNSFilter
-            vendor_name: DNSFilter
-          event_code: Security Category
-          original_time: '2025-04-22 08:39:23.988'
-          version: 1.5.0
-          profiles:
-          - security_control
-        category_uid: 4
-        category_name: Network Activity
-        status_code: NOERROR
-        src_endpoint:
-          uid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
-          hostname: WIN11-50-8-1
-          intermediate_ips:
-          - 10.0.0.1
-          ip: 10.50.8.1
-          name: WIN11-50-8-1
-          mac: 00505692e123
-          owner:
-            uid: '4532000'
-            name: admin
-        query:
-          hostname: www.chalmerset.byethost6.com
-          type: HTTPS
-        rcode: NoError
-        duration: 451
-        rcode_id: 0
-        status_id: 1
-        connection_info:
-          protocol_name: udp
-          direction_id: 2
-          direction: Outbound
-        class_uid: 4003
-        activity_id: 1
-        severity_id: 3
-        time: 1745311163988
-        class_name: DNS Activity
-        status: Success
-        dst_endpoint:
-          uid: '212800'
-          ip: 10.0.0.2
-        disposition: Allowed
-        action_id: 1
-        action: Allowed
-        disposition_id: 1
-        is_alert: true
-        firewall_rule:
-          uid: '83'
-          name: Suspicious & Deceptive
-      domain: byethost6.com
-      code: NOERROR
-      result: allowed
-      request_address: 10.0.0.1
-      question_type: HTTPS
     message: |-
       {
         "local_user_id" : 4532000,
