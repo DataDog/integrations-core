@@ -273,126 +273,126 @@ tests:
     }
   result:
     custom:
-      agent_type_raw: windows
-      agentid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
-      agentname: WIN11-50-8-1
-      agenttype: agent
+      agent_type_raw: "windows"
+      agentid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+      agentname: "WIN11-50-8-1"
+      agenttype: "agent"
       application_category_id: 8
-      application_category_name: Portal
+      application_category_name: "Portal"
       application_id: 570
-      application_name: Hao123
+      application_name: "Hao123"
       categories:
-      - 52
+       - 52
       categories_names:
-      - Phishing
-      code: NOERROR
+       - "Phishing"
+      code: "NOERROR"
       collection_id: 12500
-      collection_name: testing collection
+      collection_name: "testing collection"
       collections:
-      - 12500
-      - 12580
+       - 12500
+       - 12580
       collections_names:
-      - testing collection
-      - Blocked Requests
+       - "testing collection"
+       - "Blocked Requests"
       dns:
         flags:
-          rcode: NOERROR
+          rcode: "NOERROR"
         question:
-          name: cricketbettingpro.com
-          type: A
-      domain: cricketbettingpro.com
+          name: "cricketbettingpro.com"
+          type: "A"
+      domain: "cricketbettingpro.com"
       evt:
-        outcome: blocked
-      fqdn: www.cricketbettingpro.com
+        outcome: "blocked"
+      fqdn: "www.cricketbettingpro.com"
       id: 2100
-      local_ipv4_address: 10.50.8.1
-      local_ipv6_address: fdfe:9042:c53d:0:84bd:853e:965f:babc
+      local_ipv4_address: "10.50.8.1"
+      local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
       local_user_id: 4532000
-      local_user_login: WIN11-50-8-1\admin
-      local_user_name: admin
-      mac_address: 00505692e336
+      local_user_login: "WIN11-50-8-1\\admin"
+      local_user_name: "admin"
+      mac_address: "00505692e336"
       method: 36
-      method_name: Security
+      method_name: "Security"
       network:
         client:
           geoip: {}
-          ip: 10.0.0.1
-      network_name: Your First Network
+          ip: "10.0.0.1"
+      network_name: "Your First Network"
       networkid: 8305000
       ocsf:
-        action: Denied
+        action: "Denied"
         action_id: 2
         activity_id: 1
-        activity_name: Query
-        category_name: Network Activity
+        activity_name: "Query"
+        category_name: "Network Activity"
         category_uid: 4
-        class_name: DNS Activity
+        class_name: "DNS Activity"
         class_uid: 4003
         connection_info:
-          direction: Outbound
+          direction: "Outbound"
           direction_id: 2
-          protocol_name: udp
-        disposition: Blocked
+          protocol_name: "udp"
+        disposition: "Blocked"
         disposition_id: 2
         dst_endpoint:
-          ip: 10.0.0.2
-          uid: '212800'
+          ip: "10.0.0.2"
+          uid: "212800"
         duration: 0
         firewall_rule:
-          name: Phishing
-          uid: '52'
+          name: "Phishing"
+          uid: "52"
         is_alert: true
         metadata:
-          event_code: Security
-          original_time: '2025-04-22 08:38:53.161'
+          event_code: "Security"
+          original_time: "2025-04-22 08:38:53.161"
           product:
-            name: DNSFilter
-            vendor_name: DNSFilter
+            name: "DNSFilter"
+            vendor_name: "DNSFilter"
           profiles:
-          - security_control
-          uid: '2100'
-          version: 1.5.0
+           - "security_control"
+          uid: "2100"
+          version: "1.5.0"
         query:
-          hostname: www.cricketbettingpro.com
-          type: A
-        rcode: NoError
+          hostname: "www.cricketbettingpro.com"
+          type: "A"
+        rcode: "NoError"
         rcode_id: 0
-        severity: Medium
+        severity: "Medium"
         severity_id: 3
         src_endpoint:
-          hostname: WIN11-50-8-1
+          hostname: "WIN11-50-8-1"
           intermediate_ips:
-          - 10.0.0.1
-          ip: 10.50.8.1
-          mac: 00505692e336
-          name: WIN11-50-8-1
+           - "10.0.0.1"
+          ip: "10.50.8.1"
+          mac: "00505692e336"
+          name: "WIN11-50-8-1"
           owner:
-            name: admin
-            uid: '4532000'
-          uid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
-        status: Failure
-        status_code: NOERROR
+            name: "admin"
+            uid: "4532000"
+          uid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+        status: "Failure"
+        status_code: "NOERROR"
         status_id: 2
         time: 1745311133161
       policy_id: 1249100
-      policy_name: Your First Policy
-      protocol: udp
-      question_type: A
-      region: BOM
-      request_address: 10.0.0.1
+      policy_name: "Your First Policy"
+      protocol: "udp"
+      question_type: "A"
+      region: "BOM"
+      request_address: "10.0.0.1"
       responsetime: 0
-      result: blocked
+      result: "blocked"
       scheduled_policy_id: 56600
-      scheduled_policy_name: test-DD
-      server_address: 10.0.0.2
+      scheduled_policy_name: "test-DD"
+      server_address: "10.0.0.2"
       server_id: 212800
-      status: info
+      status: "info"
       threat: true
-      time: '2025-04-22 08:38:53.161'
+      time: "2025-04-22 08:38:53.161"
       timestamp: 1745311133161
       usr:
         id: 4532000
-        name: admin
+        name: "admin"
     message: |-
       {
         "local_user_id" : 4532000,
@@ -438,9 +438,9 @@ tests:
         "region" : "BOM",
         "collection_name" : "testing collection"
       }
-    status: info
+    status: "info"
     tags:
-    - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1745311133161
 - sample: |-
     {
@@ -489,126 +489,126 @@ tests:
     }
   result:
     custom:
-      agent_type_raw: windows
-      agentid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
-      agentname: WIN11-50-8-1
-      agenttype: agent
+      agent_type_raw: "windows"
+      agentid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+      agentname: "WIN11-50-8-1"
+      agenttype: "agent"
       application_category_id: 8
-      application_category_name: Portal
+      application_category_name: "Portal"
       application_id: 570
-      application_name: Hao123
+      application_name: "Hao123"
       categories:
-      - 83
+       - 83
       categories_names:
-      - Suspicious & Deceptive
-      code: NOERROR
+       - "Suspicious & Deceptive"
+      code: "NOERROR"
       collection_id: 12500
-      collection_name: testing collection
+      collection_name: "testing collection"
       collections:
-      - 12500
-      - 12580
+       - 12500
+       - 12580
       collections_names:
-      - testing collection
-      - Blocked Requests
+       - "testing collection"
+       - "Blocked Requests"
       dns:
         flags:
-          rcode: NOERROR
+          rcode: "NOERROR"
         question:
-          name: byethost6.com
-          type: HTTPS
-      domain: byethost6.com
+          name: "byethost6.com"
+          type: "HTTPS"
+      domain: "byethost6.com"
       evt:
-        outcome: allowed
-      fqdn: www.chalmerset.byethost6.com
+        outcome: "allowed"
+      fqdn: "www.chalmerset.byethost6.com"
       id: 8200
-      local_ipv4_address: 10.50.8.1
-      local_ipv6_address: fdfe:9042:c53d:0:84bd:853e:965f:babc
+      local_ipv4_address: "10.50.8.1"
+      local_ipv6_address: "fdfe:9042:c53d:0:84bd:853e:965f:babc"
       local_user_id: 4532000
-      local_user_login: WIN11-50-8-1\admin
-      local_user_name: admin
-      mac_address: 00505692e123
+      local_user_login: "WIN11-50-8-1\\admin"
+      local_user_name: "admin"
+      mac_address: "00505692e123"
       method: 22
-      method_name: Security Category
+      method_name: "Security Category"
       network:
         client:
           geoip: {}
-          ip: 10.0.0.1
-      network_name: Your First Network
+          ip: "10.0.0.1"
+      network_name: "Your First Network"
       networkid: 8305000
       ocsf:
-        action: Allowed
+        action: "Allowed"
         action_id: 1
         activity_id: 1
-        activity_name: Query
-        category_name: Network Activity
+        activity_name: "Query"
+        category_name: "Network Activity"
         category_uid: 4
-        class_name: DNS Activity
+        class_name: "DNS Activity"
         class_uid: 4003
         connection_info:
-          direction: Outbound
+          direction: "Outbound"
           direction_id: 2
-          protocol_name: udp
-        disposition: Allowed
+          protocol_name: "udp"
+        disposition: "Allowed"
         disposition_id: 1
         dst_endpoint:
-          ip: 10.0.0.2
-          uid: '212800'
+          ip: "10.0.0.2"
+          uid: "212800"
         duration: 451
         firewall_rule:
-          name: Suspicious & Deceptive
-          uid: '83'
+          name: "Suspicious & Deceptive"
+          uid: "83"
         is_alert: true
         metadata:
-          event_code: Security Category
-          original_time: '2025-04-22 08:39:23.988'
+          event_code: "Security Category"
+          original_time: "2025-04-22 08:39:23.988"
           product:
-            name: DNSFilter
-            vendor_name: DNSFilter
+            name: "DNSFilter"
+            vendor_name: "DNSFilter"
           profiles:
-          - security_control
-          uid: '8200'
-          version: 1.5.0
+           - "security_control"
+          uid: "8200"
+          version: "1.5.0"
         query:
-          hostname: www.chalmerset.byethost6.com
-          type: HTTPS
-        rcode: NoError
+          hostname: "www.chalmerset.byethost6.com"
+          type: "HTTPS"
+        rcode: "NoError"
         rcode_id: 0
-        severity: Medium
+        severity: "Medium"
         severity_id: 3
         src_endpoint:
-          hostname: WIN11-50-8-1
+          hostname: "WIN11-50-8-1"
           intermediate_ips:
-          - 10.0.0.1
-          ip: 10.50.8.1
-          mac: 00505692e123
-          name: WIN11-50-8-1
+           - "10.0.0.1"
+          ip: "10.50.8.1"
+          mac: "00505692e123"
+          name: "WIN11-50-8-1"
           owner:
-            name: admin
-            uid: '4532000'
-          uid: 2b63f879-3439-43e5-86b6-d46f0f12cabc
-        status: Success
-        status_code: NOERROR
+            name: "admin"
+            uid: "4532000"
+          uid: "2b63f879-3439-43e5-86b6-d46f0f12cabc"
+        status: "Success"
+        status_code: "NOERROR"
         status_id: 1
         time: 1745311163988
       policy_id: 1249100
-      policy_name: Your First Policy
-      protocol: udp
-      question_type: HTTPS
-      region: BOM
-      request_address: 10.0.0.1
+      policy_name: "Your First Policy"
+      protocol: "udp"
+      question_type: "HTTPS"
+      region: "BOM"
+      request_address: "10.0.0.1"
       responsetime: 451
-      result: allowed
+      result: "allowed"
       scheduled_policy_id: 56600
-      scheduled_policy_name: test-DD
-      server_address: 10.0.0.2
+      scheduled_policy_name: "test-DD"
+      server_address: "10.0.0.2"
       server_id: 212800
-      status: warning
+      status: "warning"
       threat: true
-      time: '2025-04-22 08:39:23.988'
+      time: "2025-04-22 08:39:23.988"
       timestamp: 1745311163988
       usr:
         id: 4532000
-        name: admin
+        name: "admin"
     message: |-
       {
         "local_user_id" : 4532000,
@@ -654,9 +654,9 @@ tests:
         "region" : "BOM",
         "collection_name" : "testing collection"
       }
-    status: warn
+    status: "warn"
     tags:
-    - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1745311163988
 - sample: |-
     {
