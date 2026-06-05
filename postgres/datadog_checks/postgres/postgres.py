@@ -209,7 +209,7 @@ class PostgreSql(DatabaseCheck):
         except Exception as e:
             self.log.exception("Error during check initialization: %s", e)
             self._run_automatic_diagnostics()
-            raise e
+            raise
 
     def database_monitoring_column_statistics(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-column-statistics")
@@ -1217,7 +1217,6 @@ class PostgreSql(DatabaseCheck):
         # Resend the initialization event. The submitter will debounce it
         self._submit_initialization_health_event()
 
-        self.log.info("Running check sanity check")
         should_run_diagnostics = False
 
         tags = copy.copy(self.tags)

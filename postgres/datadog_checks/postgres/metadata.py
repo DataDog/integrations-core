@@ -172,7 +172,7 @@ class PostgresMetadata(DBMAsyncJob):
             self._log.warning("metadata did error")
             self._last_run_did_error = True
             # Reraise the error to be caught by the job error handling
-            raise e
+            raise
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
