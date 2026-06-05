@@ -85,10 +85,6 @@ class ClickhouseSchemaCollectorConfig(SchemaCollectorConfig):
 class ClickhouseSchemaCollector(SchemaCollector):
     """Collects ClickHouse schema metadata via a single CTE query per cycle."""
 
-    # Uses a single cluster-wide query with a stub database entry; the stub name
-    # is not a real database identifier and must not be sent as a sentinel.
-    _emit_empty_db_sentinel = False
-
     _check: ClickhouseCheck
     _config: ClickhouseSchemaCollectorConfig
 

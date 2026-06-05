@@ -44,11 +44,6 @@ class SchemaCollector(ABC):
     Abstract base class for DBM schema collectors.
     """
 
-    # Set to False in subclasses that use a stub database entry (e.g. a single
-    # cluster-wide query) where the stub name is not a real database identifier
-    # and should not be forwarded to the backend as a sentinel.
-    _emit_empty_db_sentinel: bool = True
-
     def __init__(self, check: DatabaseCheck, config: SchemaCollectorConfig):
         self._check = check
         self._log = check.log
@@ -94,12 +89,6 @@ class SchemaCollector(ABC):
                             # the next row to see if we've reached the last row
                             next_row = self._get_next(cursor)
                             self.maybe_flush(is_last_payload=False)
-                    if db_rows_count == 0 and self._emit_empty_db_sentinel:
-                        # Empty database: the terminal payload would otherwise have metadata=[]
-                        # with no DatabaseName, so the backend cannot attribute snapshot
-                        # completion/deletion to this DB. Include a sentinel entry carrying
-                        # the DB identity so the backend can clean up stale schemas.
-                        self._queued_rows.append({**database})
                     self.maybe_flush(is_last_payload=True)
                     self._total_rows_count += db_rows_count
                     total_payloads_count += self._collection_payloads_count
