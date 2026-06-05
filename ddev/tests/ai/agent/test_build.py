@@ -37,8 +37,11 @@ def make_factory(
     return DefaultAgentRuntimeFactory(
         agent_clients=clients,
         file_registry=file_registry,
-        artifact_root=file_registry.policy.write_root / "artifacts",
     )
+
+
+# Opaque stand-in: build_runtime forwards it untouched and only the spawn tool stores it.
+_PROCESS_FACTORY = object()
 
 
 def build_runtime(
@@ -47,8 +50,14 @@ def build_runtime(
     *,
     system_prompt: str = "system",
     owner_id: str = "p1",
+    process_factory: object = _PROCESS_FACTORY,
 ) -> AgentRuntime:
-    return factory.build_runtime(agent_config=config, system_prompt=system_prompt, owner_id=owner_id)
+    return factory.build_runtime(
+        agent_config=config,
+        system_prompt=system_prompt,
+        owner_id=owner_id,
+        process_factory=process_factory,
+    )
 
 
 def test_unknown_provider_raises(file_registry, clients):
@@ -108,13 +117,13 @@ def test_build_runtime_uses_config_tools(file_registry, clients):
 def test_build_runtime_wires_spawn_subagent_tool(file_registry, clients):
     config = AgentConfig(provider="anthropic", tools=["spawn_subagent"])
     factory = make_factory(clients, file_registry)
-    runtime = build_runtime(factory, config)
+    sentinel_process_factory = object()
+    runtime = build_runtime(factory, config, process_factory=sentinel_process_factory)
 
     tool = runtime.tool_registry._tools["spawn_subagent"]
     assert isinstance(tool, SpawnSubagentTool)
     assert tool._agent_config is config
-    assert tool._runtime_builder.__self__ is factory
-    assert tool._log_dir == file_registry.policy.write_root / "artifacts" / "subagents" / "p1"
+    assert tool._process_factory is sentinel_process_factory
 
 
 def test_build_runtime_reuses_shared_file_registry(file_registry, clients):

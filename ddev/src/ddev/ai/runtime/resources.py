@@ -2,12 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pathlib import Path
 from typing import Any
 
 from ddev.ai.agent.build import AgentRuntimeFactory, DefaultAgentRuntimeFactory
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.config import AgentConfig
 from ddev.ai.phases.resources import ResourceUnavailableError
+from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 
@@ -20,14 +21,15 @@ class RunResources:
         agent_clients: dict[str, Any],
         file_access_policy: FileAccessPolicy,
         agents: dict[str, AgentConfig],
-        artifact_root: Path,
+        callbacks: Callbacks,
     ) -> None:
         self._agent_clients = agent_clients
         self._file_access_policy = file_access_policy
         self._agents = agents
-        self._artifact_root = artifact_root
+        self._callbacks = callbacks
         self._file_registry: FileRegistry | None = None
         self._agent_runtime_factory: AgentRuntimeFactory | None = None
+        self._process_factory: ReActProcessFactory | None = None
 
     def agent_clients(self) -> dict[str, Any]:
         """Raw provider-name -> SDK client map."""
@@ -52,6 +54,14 @@ class RunResources:
             self._agent_runtime_factory = DefaultAgentRuntimeFactory(
                 agent_clients=self._agent_clients,
                 file_registry=self.file_registry(),
-                artifact_root=self._artifact_root,
             )
         return self._agent_runtime_factory
+
+    def process_factory(self) -> ReActProcessFactory:
+        """Return the run-wide factory that creates scoped ReActProcesses."""
+        if self._process_factory is None:
+            self._process_factory = ReActProcessFactory(
+                self.agent_runtime_factory().build_runtime,
+                self._callbacks,
+            )
+        return self._process_factory

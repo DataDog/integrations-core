@@ -4,7 +4,6 @@
 
 import pytest
 
-from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.phases.config import AgentConfig
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
@@ -158,9 +157,7 @@ def test_available_tool_names_returns_fresh_copy():
 OWNER_ID = "test-agent"
 TOOLS_WITHOUT_EXTRA_DEPS = [n for n in ToolRegistry.available_tool_names() if n != "spawn_subagent"]
 
-
-def runtime_builder(*, agent_config: AgentConfig, system_prompt: str, owner_id: str) -> AgentRuntime:
-    raise AssertionError("runtime builder should not be called during registry construction")
+PROCESS_FACTORY = object()  # opaque sentinel — from_names only stores it on the spawn tool
 
 
 def from_names(tool_names: list[str], tmp_path, *, owner_id: str = OWNER_ID) -> ToolRegistry:
@@ -169,8 +166,7 @@ def from_names(tool_names: list[str], tmp_path, *, owner_id: str = OWNER_ID) -> 
         owner_id=owner_id,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
         agent_config=AgentConfig.model_construct(provider="anthropic", tools=tool_names),
-        runtime_builder=runtime_builder,
-        artifact_root=tmp_path / "artifacts",
+        process_factory=PROCESS_FACTORY,
     )
 
 
@@ -204,9 +200,8 @@ def test_from_names_spawn_subagent_gets_runtime_context(tmp_path):
     tool = registry._tools["spawn_subagent"]
     assert isinstance(tool, SpawnSubagentTool)
     assert tool._agent_config == AgentConfig(tools=["read_file", "spawn_subagent"])
-    assert tool._runtime_builder is runtime_builder
+    assert tool._process_factory is PROCESS_FACTORY
     assert tool._allowed_tools == {"read_file"}
-    assert tool._log_dir == tmp_path / "artifacts" / "subagents" / OWNER_ID
 
 
 def test_from_names_fs_tools_share_file_registry(tmp_path):
@@ -252,16 +247,14 @@ def test_from_names_reuses_supplied_file_registry(tmp_path):
         owner_id="a",
         file_registry=shared,
         agent_config=AgentConfig(tools=["read_file", "create_file"]),
-        runtime_builder=runtime_builder,
-        artifact_root=tmp_path / "artifacts",
+        process_factory=PROCESS_FACTORY,
     )
     reg_b = ToolRegistry.from_names(
         ["read_file", "create_file"],
         owner_id="b",
         file_registry=shared,
         agent_config=AgentConfig(tools=["read_file", "create_file"]),
-        runtime_builder=runtime_builder,
-        artifact_root=tmp_path / "artifacts",
+        process_factory=PROCESS_FACTORY,
     )
 
     for tool in reg_a._tools.values():

@@ -4,6 +4,7 @@
 
 import pytest
 
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.types import ReActResult
@@ -12,6 +13,11 @@ from ddev.ai.tools.core.types import ToolResult
 # ---------------------------------------------------------------------------
 # Minimal fixtures
 # ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def scope() -> AgentScope:
+    return AgentScope(owner_id="p1", role=AgentRole.PHASE)
 
 
 @pytest.fixture
@@ -48,7 +54,7 @@ def react_result(response: AgentResponse) -> ReActResult:
 async def test_decorator_returns_original_function() -> None:
     cb = CallbackSet()
 
-    async def handler(response: AgentResponse, iteration: int) -> None:
+    async def handler(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         pass
 
     assert cb.on_agent_response(handler) is handler
@@ -58,10 +64,10 @@ async def test_decorator_registers_handler_in_internal_list() -> None:
     cb = CallbackSet()
 
     @cb.on_agent_response
-    async def h1(response: AgentResponse, iteration: int) -> None: ...
+    async def h1(scope: AgentScope, response: AgentResponse, iteration: int) -> None: ...
 
     @cb.on_agent_response
-    async def h2(response: AgentResponse, iteration: int) -> None: ...
+    async def h2(scope: AgentScope, response: AgentResponse, iteration: int) -> None: ...
 
     assert cb._on_agent_response == [h1, h2]
 
@@ -72,47 +78,48 @@ async def test_decorator_registers_handler_in_internal_list() -> None:
 
 
 async def test_empty_callback_set_is_noop(
-    response: AgentResponse, tool_call: ToolCall, react_result: ReActResult
+    scope: AgentScope, response: AgentResponse, tool_call: ToolCall, react_result: ReActResult
 ) -> None:
     cb = CallbackSet()
-    await cb.fire_agent_response(response, 1)
-    await cb.fire_tool_call(tool_call, ToolResult(success=True, data="ok"), 1)
-    await cb.fire_complete(react_result)
-    await cb.fire_error(RuntimeError("boom"))
+    await cb.fire_agent_start(scope, "sys", [])
+    await cb.fire_agent_response(scope, response, 1)
+    await cb.fire_tool_call(scope, tool_call, ToolResult(success=True, data="ok"), 1)
+    await cb.fire_agent_finish(scope, react_result)
+    await cb.fire_agent_error(scope, RuntimeError("boom"))
 
 
-async def test_multiple_handlers_same_event_all_fire(response: AgentResponse) -> None:
+async def test_multiple_handlers_same_event_all_fire(scope: AgentScope, response: AgentResponse) -> None:
     cb = CallbackSet()
     fired: list[int] = []
 
     @cb.on_agent_response
-    async def first(response: AgentResponse, iteration: int) -> None:
+    async def first(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         fired.append(1)
 
     @cb.on_agent_response
-    async def second(response: AgentResponse, iteration: int) -> None:
+    async def second(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         fired.append(2)
 
     @cb.on_agent_response
-    async def third(response: AgentResponse, iteration: int) -> None:
+    async def third(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         fired.append(3)
 
-    await cb.fire_agent_response(response, 5)
+    await cb.fire_agent_response(scope, response, 5)
 
     assert fired == [1, 2, 3]
 
 
-async def test_handlers_receive_correct_arguments(response: AgentResponse) -> None:
+async def test_handlers_receive_correct_arguments(scope: AgentScope, response: AgentResponse) -> None:
     cb = CallbackSet()
     received: list[tuple] = []
 
     @cb.on_agent_response
-    async def h(response: AgentResponse, iteration: int) -> None:
-        received.append((response, iteration))
+    async def h(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
+        received.append((scope, response, iteration))
 
-    await cb.fire_agent_response(response, 7)
+    await cb.fire_agent_response(scope, response, 7)
 
-    assert received == [(response, 7)]
+    assert received == [(scope, response, 7)]
 
 
 # ---------------------------------------------------------------------------
@@ -120,68 +127,85 @@ async def test_handlers_receive_correct_arguments(response: AgentResponse) -> No
 # ---------------------------------------------------------------------------
 
 
-async def test_fire_swallows_handler_exception(response: AgentResponse) -> None:
+async def test_fire_swallows_handler_exception(scope: AgentScope, response: AgentResponse) -> None:
     cb = CallbackSet()
     fired: list[int] = []
 
     @cb.on_agent_response
-    async def bad(response: AgentResponse, iteration: int) -> None:
+    async def bad(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         raise RuntimeError("boom")
 
     @cb.on_agent_response
-    async def good(response: AgentResponse, iteration: int) -> None:
+    async def good(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         fired.append(iteration)
 
-    await cb.fire_agent_response(response, 1)
+    await cb.fire_agent_response(scope, response, 1)
     assert fired == [1]
 
 
-async def test_fire_tool_call_swallows_handler_exception(tool_call: ToolCall) -> None:
+async def test_fire_tool_call_swallows_handler_exception(scope: AgentScope, tool_call: ToolCall) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
 
     @cb.on_tool_call
-    async def bad(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
+    async def bad(scope: AgentScope, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
         raise RuntimeError("boom")
 
     @cb.on_tool_call
-    async def good(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
+    async def good(scope: AgentScope, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
         fired.append(True)
 
-    await cb.fire_tool_call(tool_call, ToolResult(success=True, data="ok"), 1)
+    await cb.fire_tool_call(scope, tool_call, ToolResult(success=True, data="ok"), 1)
     assert fired == [True]
 
 
-async def test_fire_complete_swallows_handler_exception(react_result: ReActResult) -> None:
+async def test_fire_agent_finish_swallows_handler_exception(scope: AgentScope, react_result: ReActResult) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
 
-    @cb.on_complete
-    async def bad(result: ReActResult) -> None:
+    @cb.on_agent_finish
+    async def bad(scope: AgentScope, result: ReActResult) -> None:
         raise RuntimeError("boom")
 
-    @cb.on_complete
-    async def good(result: ReActResult) -> None:
+    @cb.on_agent_finish
+    async def good(scope: AgentScope, result: ReActResult) -> None:
         fired.append(True)
 
-    await cb.fire_complete(react_result)
+    await cb.fire_agent_finish(scope, react_result)
     assert fired == [True]
 
 
-async def test_fire_error_swallows_handler_exception() -> None:
+async def test_fire_agent_error_swallows_handler_exception(scope: AgentScope) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
 
-    @cb.on_error
-    async def bad(error: BaseException) -> None:
+    @cb.on_agent_error
+    async def bad(scope: AgentScope, error: BaseException) -> None:
         raise RuntimeError("boom")
 
-    @cb.on_error
-    async def good(error: BaseException) -> None:
+    @cb.on_agent_error
+    async def good(scope: AgentScope, error: BaseException) -> None:
         fired.append(True)
 
-    await cb.fire_error(ValueError("original error"))
+    await cb.fire_agent_error(scope, ValueError("original error"))
     assert fired == [True]
+
+
+# ---------------------------------------------------------------------------
+# on_agent_start
+# ---------------------------------------------------------------------------
+
+
+async def test_agent_start_registered_and_fired(scope: AgentScope) -> None:
+    cb = CallbackSet()
+    received: list[tuple] = []
+
+    @cb.on_agent_start
+    async def h(scope: AgentScope, system_prompt: str, tools: list[str]) -> None:
+        received.append((scope, system_prompt, tools))
+
+    await cb.fire_agent_start(scope, "sys", ["read_file"])
+    assert received == [(scope, "sys", ["read_file"])]
 
 
 # ---------------------------------------------------------------------------
@@ -189,68 +213,68 @@ async def test_fire_error_swallows_handler_exception() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_before_compact_registered_and_fired() -> None:
+async def test_before_compact_registered_and_fired(scope: AgentScope) -> None:
     cb = CallbackSet()
-    fired: list[bool] = []
+    fired: list[AgentScope] = []
 
     @cb.on_before_compact
-    async def h() -> None:
-        fired.append(True)
+    async def h(scope: AgentScope) -> None:
+        fired.append(scope)
 
-    await cb.fire_before_compact()
-    assert fired == [True]
+    await cb.fire_before_compact(scope)
+    assert fired == [scope]
 
 
-async def test_after_compact_registered_and_fired() -> None:
+async def test_after_compact_registered_and_fired(scope: AgentScope) -> None:
     cb = CallbackSet()
-    fired: list[bool] = []
+    fired: list[AgentScope] = []
 
     @cb.on_after_compact
-    async def h() -> None:
-        fired.append(True)
+    async def h(scope: AgentScope) -> None:
+        fired.append(scope)
 
-    await cb.fire_after_compact()
-    assert fired == [True]
+    await cb.fire_after_compact(scope)
+    assert fired == [scope]
 
 
-async def test_compact_callback_exception_is_swallowed() -> None:
+async def test_compact_callback_exception_is_swallowed(scope: AgentScope) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
 
     @cb.on_before_compact
-    async def bad() -> None:
+    async def bad(scope: AgentScope) -> None:
         raise RuntimeError("boom")
 
     @cb.on_before_compact
-    async def good() -> None:
+    async def good(scope: AgentScope) -> None:
         fired.append(True)
 
-    await cb.fire_before_compact()
+    await cb.fire_before_compact(scope)
     assert fired == [True]
 
 
-async def test_multiple_compact_handlers_all_fired() -> None:
+async def test_multiple_compact_handlers_all_fired(scope: AgentScope) -> None:
     cb = CallbackSet()
     fired: list[str] = []
 
     @cb.on_before_compact
-    async def b1() -> None:
+    async def b1(scope: AgentScope) -> None:
         fired.append("before-1")
 
     @cb.on_before_compact
-    async def b2() -> None:
+    async def b2(scope: AgentScope) -> None:
         fired.append("before-2")
 
     @cb.on_after_compact
-    async def a1() -> None:
+    async def a1(scope: AgentScope) -> None:
         fired.append("after-1")
 
     @cb.on_after_compact
-    async def a2() -> None:
+    async def a2(scope: AgentScope) -> None:
         fired.append("after-2")
 
-    await cb.fire_before_compact()
-    await cb.fire_after_compact()
+    await cb.fire_before_compact(scope)
+    await cb.fire_after_compact(scope)
     assert fired == ["before-1", "before-2", "after-1", "after-2"]
 
 
@@ -389,63 +413,63 @@ async def test_phase_finish_exception_is_swallowed() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_before_agent_send_registered_and_fired() -> None:
+async def test_before_agent_send_registered_and_fired(scope: AgentScope) -> None:
     cb = CallbackSet()
     fired: list[int] = []
 
     @cb.on_before_agent_send
-    async def h(iteration: int) -> None:
+    async def h(scope: AgentScope, prompt: str, iteration: int) -> None:
         fired.append(iteration)
 
-    await cb.fire_before_agent_send(3)
+    await cb.fire_before_agent_send(scope, "do it", 3)
     assert fired == [3]
 
 
-async def test_before_agent_send_receives_correct_iteration() -> None:
+async def test_before_agent_send_receives_correct_prompt_and_iteration(scope: AgentScope) -> None:
     cb = CallbackSet()
-    received: list[int] = []
+    received: list[tuple[str, int]] = []
 
     @cb.on_before_agent_send
-    async def h(iteration: int) -> None:
-        received.append(iteration)
+    async def h(scope: AgentScope, prompt: str, iteration: int) -> None:
+        received.append((prompt, iteration))
 
-    await cb.fire_before_agent_send(7)
-    assert received == [7]
+    await cb.fire_before_agent_send(scope, "summarize", 7)
+    assert received == [("summarize", 7)]
 
 
-async def test_before_agent_send_multiple_handlers_all_fire_in_order() -> None:
+async def test_before_agent_send_multiple_handlers_all_fire_in_order(scope: AgentScope) -> None:
     cb = CallbackSet()
     fired: list[int] = []
 
     @cb.on_before_agent_send
-    async def first(iteration: int) -> None:
+    async def first(scope: AgentScope, prompt: str, iteration: int) -> None:
         fired.append(1)
 
     @cb.on_before_agent_send
-    async def second(iteration: int) -> None:
+    async def second(scope: AgentScope, prompt: str, iteration: int) -> None:
         fired.append(2)
 
     @cb.on_before_agent_send
-    async def third(iteration: int) -> None:
+    async def third(scope: AgentScope, prompt: str, iteration: int) -> None:
         fired.append(3)
 
-    await cb.fire_before_agent_send(1)
+    await cb.fire_before_agent_send(scope, "p", 1)
     assert fired == [1, 2, 3]
 
 
-async def test_before_agent_send_exception_is_swallowed() -> None:
+async def test_before_agent_send_exception_is_swallowed(scope: AgentScope) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
 
     @cb.on_before_agent_send
-    async def bad(iteration: int) -> None:
+    async def bad(scope: AgentScope, prompt: str, iteration: int) -> None:
         raise RuntimeError("boom")
 
     @cb.on_before_agent_send
-    async def good(iteration: int) -> None:
+    async def good(scope: AgentScope, prompt: str, iteration: int) -> None:
         fired.append(True)
 
-    await cb.fire_before_agent_send(1)
+    await cb.fire_before_agent_send(scope, "p", 1)
     assert fired == [True]
 
 
@@ -500,20 +524,23 @@ async def test_callbacks_dispatches_goal_check_to_all_sets():
 # ---------------------------------------------------------------------------
 
 
-async def test_callbacks_empty_is_noop(response: AgentResponse, tool_call: ToolCall, react_result: ReActResult) -> None:
+async def test_callbacks_empty_is_noop(
+    scope: AgentScope, response: AgentResponse, tool_call: ToolCall, react_result: ReActResult
+) -> None:
     callbacks = Callbacks()
-    await callbacks.fire_agent_response(response, 1)
-    await callbacks.fire_tool_call(tool_call, ToolResult(success=True, data="ok"), 1)
-    await callbacks.fire_complete(react_result)
-    await callbacks.fire_error(RuntimeError("boom"))
-    await callbacks.fire_before_compact()
-    await callbacks.fire_after_compact()
-    await callbacks.fire_before_agent_send(1)
+    await callbacks.fire_agent_start(scope, "sys", [])
+    await callbacks.fire_agent_response(scope, response, 1)
+    await callbacks.fire_tool_call(scope, tool_call, ToolResult(success=True, data="ok"), 1)
+    await callbacks.fire_agent_finish(scope, react_result)
+    await callbacks.fire_agent_error(scope, RuntimeError("boom"))
+    await callbacks.fire_before_compact(scope)
+    await callbacks.fire_after_compact(scope)
+    await callbacks.fire_before_agent_send(scope, "p", 1)
     await callbacks.fire_phase_start("p")
     await callbacks.fire_phase_finish("p")
 
 
-async def test_callbacks_dispatches_to_all_sets(response: AgentResponse) -> None:
+async def test_callbacks_dispatches_to_all_sets(scope: AgentScope, response: AgentResponse) -> None:
     fired_a: list[int] = []
     fired_b: list[int] = []
 
@@ -521,20 +548,39 @@ async def test_callbacks_dispatches_to_all_sets(response: AgentResponse) -> None
     set_b = CallbackSet()
 
     @set_a.on_agent_response
-    async def a(response: AgentResponse, iteration: int) -> None:
+    async def a(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         fired_a.append(iteration)
 
     @set_b.on_agent_response
-    async def b(response: AgentResponse, iteration: int) -> None:
+    async def b(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
         fired_b.append(iteration)
 
     callbacks = Callbacks([set_a, set_b])
-    await callbacks.fire_agent_response(response, 3)
+    await callbacks.fire_agent_response(scope, response, 3)
 
     assert fired_a == [3]
     assert fired_b == [3]
 
 
-async def test_callbacks_set_with_no_registered_handlers_is_noop(response: AgentResponse) -> None:
+async def test_callbacks_set_with_no_registered_handlers_is_noop(scope: AgentScope, response: AgentResponse) -> None:
     callbacks = Callbacks([CallbackSet()])
-    await callbacks.fire_agent_response(response, 1)
+    await callbacks.fire_agent_response(scope, response, 1)
+
+
+async def test_with_set_appends_without_mutating_original(scope: AgentScope, response: AgentResponse) -> None:
+    fired: list[int] = []
+    extra = CallbackSet()
+
+    @extra.on_agent_response
+    async def h(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
+        fired.append(iteration)
+
+    base = Callbacks()
+    combined = base.with_set(extra)
+
+    # Original is untouched (no handlers), combined dispatches to the new set.
+    await base.fire_agent_response(scope, response, 1)
+    assert fired == []
+    await combined.fire_agent_response(scope, response, 2)
+    assert fired == [2]
+    assert base._sets == []
