@@ -39,6 +39,12 @@ def test_per_request_headers_merge_into_request(capturing_transport, captured_re
     assert captured_requests[0].headers['x-per-request'] == 'yes'
 
 
+def test_per_request_empty_headers_dict_preserves_client_defaults(capturing_transport, captured_requests):
+    http = HTTPX2Wrapper({'extra_headers': {'X-Default': 'kept'}}, {}, transport=capturing_transport)
+    http.get('http://example.test/', headers={})
+    assert captured_requests[0].headers['x-default'] == 'kept'
+
+
 @pytest.mark.parametrize(
     'headers,extra_headers,canonical_key,expected_value',
     [

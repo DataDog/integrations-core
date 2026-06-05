@@ -416,6 +416,7 @@ class HTTPX2Wrapper:
         headers = options.get('headers')
         extra_headers = options.get('extra_headers')
         if headers is not None or extra_headers is not None:
+            # Empty headers/extra_headers fall through as a benign no-op: client-level defaults survive build_request.
             # httpx2.Headers folds keys case-insensitively so overlapping headers/extra_headers collapse
             # to a single entry, matching RequestsWrapper's CaseInsensitiveDict behavior.
             merged = httpx2.Headers(headers or {})
