@@ -1,0 +1,1 @@
+Fix schema collection to correctly emit an empty terminal payload when the cluster has no tables, restoring compatibility with the base SchemaCollector sentinel change.
