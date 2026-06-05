@@ -308,46 +308,6 @@ SYSTEM_STATS_BWC_METRICS = [
 
 BWC_SUFFIXES = ['num_seconds', 'total_weight_in_kb', 'num_occured']
 
-SIMPLE_METRIC_LISTS = [
-    SYSTEM_MDM_CLUSTER_METRICS,
-    SYSTEM_STATS_SIMPLE_METRICS,
-    VOLUME_STATS_SIMPLE_METRICS,
-    STORAGE_POOL_STATS_SIMPLE_METRICS,
-    PROTECTION_DOMAIN_STATS_SIMPLE_METRICS,
-    SDS_STATS_SIMPLE_METRICS,
-    SDC_STATS_SIMPLE_METRICS,
-    DEVICE_STATS_SIMPLE_METRICS,
-]
-
-BWC_METRIC_LISTS = [
-    SYSTEM_STATS_BWC_METRICS,
-    VOLUME_STATS_BWC_METRICS,
-    STORAGE_POOL_STATS_BWC_METRICS,
-    PROTECTION_DOMAIN_STATS_BWC_METRICS,
-    SDS_STATS_BWC_METRICS,
-    SDC_STATS_BWC_METRICS,
-    DEVICE_STATS_BWC_METRICS,
-]
-
-ALL_METRICS_SET: set[str] = {
-    'dell_powerflex.api.can_connect',
-    'dell_powerflex.volume.sdc_mapping',
-    'dell_powerflex.system.count',
-    'dell_powerflex.volume.count',
-    'dell_powerflex.storage_pool.count',
-    'dell_powerflex.protection_domain.count',
-    'dell_powerflex.sds.count',
-    'dell_powerflex.sdc.count',
-    'dell_powerflex.device.count',
-}
-for _metrics in SIMPLE_METRIC_LISTS:
-    for _m in _metrics:
-        ALL_METRICS_SET.add(str(_m['name']))
-for _bwc_list in BWC_METRIC_LISTS:
-    for _prefix in _bwc_list:
-        for _suffix in BWC_SUFFIXES:
-            ALL_METRICS_SET.add(f'{_prefix}.{_suffix}')
-ALL_METRICS: list[str] = sorted(ALL_METRICS_SET)
 
 BASE_TAGS = ['powerflex_gateway_url:https://localhost:443']
 
