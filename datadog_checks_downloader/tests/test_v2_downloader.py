@@ -12,6 +12,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from tuf.api.exceptions import DownloadError
+
 from datadog_checks.downloader import cli
 from datadog_checks.downloader.download_v2 import TUFPointerDownloader
 from datadog_checks.downloader.exceptions import (
@@ -23,7 +25,6 @@ from datadog_checks.downloader.exceptions import (
     NonDatadogPackage,
     TargetNotFoundError,
 )
-from tuf.api.exceptions import DownloadError
 
 from ._v2_synth_repo import build_delegated_repo, serve_directory
 
