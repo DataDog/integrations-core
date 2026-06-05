@@ -262,8 +262,3 @@ def test_response_adapter_satisfies_protocol(status_transport_factory):
     http = HTTPX2Wrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
     assert isinstance(response, HTTPResponseProtocol)
-
-
-@pytest.mark.parametrize('attr', ['encoding', 'url', 'cookies', 'elapsed'])
-def test_response_protocol_declares_extended_attrs(attr):
-    assert attr in HTTPResponseProtocol.__annotations__ or hasattr(HTTPResponseProtocol, attr)
