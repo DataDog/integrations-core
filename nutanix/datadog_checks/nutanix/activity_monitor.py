@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from datadog_checks.nutanix.check import NutanixCheck
 
 
-_SEVERITY_TO_ALERT_TYPE = {"CRITICAL": "error", "WARNING": "warning", "INFO": "info"}
+SEVERITY_TO_ALERT_TYPE = {"CRITICAL": "error", "WARNING": "warning", "INFO": "info"}
 
 
 class _SafeDict(dict):
@@ -202,7 +202,11 @@ class ActivityMonitor:
         self.check.gauge(f"alert.{state}", value, tags=self._build_alert_tags(alert))
 
     def _reconcile_alerts(self) -> int:
-        """Reconcile open alerts against the unresolved-alerts API and emit per-state metrics."""
+        """Reconcile open alerts against the unresolved-alerts API and emit per-state metrics.
+
+        Returns the number of alerts currently tracked as open, so the check summary reflects
+        active tracking rather than just this cycle's state changes (which are 0 on quiet cycles).
+        """
         try:
             alerts = self._list_alerts_unresolved()
         except Exception:
@@ -228,13 +232,12 @@ class ActivityMonitor:
         filter_excluded_ids = frozenset(self._open_alerts.keys() - api_alerts.keys() - gone_ids)
         still_tracked = api_alerts.keys() & self._open_alerts.keys()
 
-        count = self._track_new_alerts(new_ids, api_alerts)
-        count += self._emit_resolved_alerts(gone_ids)
+        self._track_new_alerts(new_ids, api_alerts)
+        self._emit_resolved_alerts(gone_ids)
         self._drop_filter_excluded(filter_excluded_ids)
         transitioned = self._emit_alert_transitions(still_tracked, api_alerts)
-        count += len(transitioned)
         self._emit_heartbeats_and_gauges(transitioned)
-        return count
+        return len(self._open_alerts)
 
     def _drop_filter_excluded(self, filter_excluded_ids: frozenset[str]) -> None:
         """Stop tracking alerts that are still open in Prism Central but no longer match
@@ -535,7 +538,7 @@ class ActivityMonitor:
             message = self._render_message(message, parameters)
 
         # Acknowledged alerts soften to "warning" regardless of severity (operator already triaging).
-        event_alert_type = "warning" if is_acknowledged else _SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+        event_alert_type = "warning" if is_acknowledged else SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
         alert_tags = self._build_alert_tags(alert, "acknowledged" if is_acknowledged else "open")
 
         self.check.event(
@@ -611,7 +614,7 @@ class ActivityMonitor:
         else:  # acknowledged -> open
             prefix = "Alert reopened"
             msg_text = "Alert is no longer acknowledged"
-            event_alert_type = _SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
+            event_alert_type = SEVERITY_TO_ALERT_TYPE.get(alert.get("severity"), "info")
             # Nutanix has no dedicated "reopenedTime" field; lastUpdatedTime is the closest signal.
             timestamp_field = alert.get("lastUpdatedTime")
 
@@ -665,9 +668,14 @@ class ActivityMonitor:
             if entity_name := entity.get("name"):
                 task_tags.append(f"ntnx_entity_name:{entity_name}")
 
-            # Enrich with rendered alert title when the entity is an alert
+            # Enrich with rendered alert title when the entity is an alert. Best-effort:
+            # a transient failure here must not abort the whole task collection cycle.
             if entity_type == "monitoring:serviceability:alert":
-                if alert := self._get_alert(entity.get("extId", "")):
+                try:
+                    alert = self._get_alert(entity.get("extId", ""))
+                except HTTPError:
+                    alert = None
+                if alert:
                     title = alert.get("title", "")
                     if parameters := alert.get("parameters"):
                         title = self._render_message(title, parameters)

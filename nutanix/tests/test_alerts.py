@@ -11,22 +11,13 @@ from requests.exceptions import HTTPError
 
 from datadog_checks.nutanix import NutanixCheck
 
-from .conftest import load_fixture
+from .conftest import fixture_alert
 
 pytestmark = [pytest.mark.unit]
 
 
 MOCK_ALERT_DATETIME = datetime.fromisoformat("2026-01-04T21:09:00.000000Z")
 MOCK_ALERT_DATETIME_AFTER_ALL = datetime.fromisoformat("2026-05-01T00:00:00.000000Z")
-
-
-def _fixture_alert(alert_type, **overrides):
-    """Load the first fixture alert with the given alertType and apply overrides."""
-    for page in load_fixture('alerts.json'):
-        for alert in page.get('data', []):
-            if alert.get('alertType') == alert_type:
-                return {**alert, **overrides}
-    raise ValueError(f"No alert with alertType={alert_type} in fixture")
 
 
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
@@ -139,7 +130,7 @@ def test_alerts_filtered_by_activity_filter_alertType(
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
-    synthetic = _fixture_alert("A200335", isResolved=False, isAcknowledged=False)
+    synthetic = fixture_alert("A200335", isResolved=False, isAcknowledged=False)
     mocker.patch(
         'datadog_checks.nutanix.activity_monitor.ActivityMonitor._list_alerts_unresolved',
         return_value=[synthetic],
@@ -170,7 +161,7 @@ def test_alert_message_template_rendering(
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
-    synthetic = _fixture_alert("A6227", isResolved=False, isAcknowledged=False)
+    synthetic = fixture_alert("A6227", isResolved=False, isAcknowledged=False)
     mocker.patch(
         'datadog_checks.nutanix.activity_monitor.ActivityMonitor._list_alerts_unresolved',
         return_value=[synthetic],
@@ -192,66 +183,66 @@ def test_alert_message_template_rendering(
     assert "Admin user password has expired." in msg_text, "Rendered message should contain actual value"
 
 
-_COMPLETE_OUTPUT_CASES = [
-    pytest.param(
-        {
-            # A1031 (ca546858) is unresolved+acknowledged in the fixture, no injection needed.
-            "alert_type": "A1031",
-            "inject_synthetic": False,
-            "msg_text_contains": [
-                "Disk space usage for /var/log on Controller VM 10.0.0.108 has exceeded 75%",
-            ],
-            "msg_text_excludes": ["{mount_path}", "{entity}", "{ip_address}", "{threshold}"],
-            "msg_title_contains": ["Disk space usage high for /var/log on Controller VM 10.0.0.108"],
-            "expected_tags": [
-                "ntnx_alert_type:A1031",
-                "ntnx_alert_severity:WARNING",
-                "ntnx_alert_classification:Storage",
-                "ntnx_alert_impact:SYSTEM_INDICATOR",
-            ],
-            "expected_tag_prefixes": ["ntnx_cluster_name:", "ntnx_node_name:"],
-        },
-        id="a1031_disk_space",
-    ),
-    pytest.param(
-        {
-            "alert_type": "A111050",
-            "inject_synthetic": True,
-            "msg_text_contains": ["nutanix"],
-            "msg_text_excludes": ["{users}"],
-            "msg_title_contains": ["10.0.0.165"],
-            "msg_title_excludes": ["{pcvm_ip}"],
-            "expected_tags": [
-                "ntnx_alert_type:A111050",
-                "ntnx_alert_severity:CRITICAL",
-                "ntnx_alert_classification:Cluster",
-                "ntnx_alert_impact:CONFIGURATION",
-                "ntnx_cluster_name:prism-central-deployment",
-            ],
-        },
-        id="a111050_default_password",
-    ),
-    pytest.param(
-        {
-            "alert_type": "A6227",
-            "inject_synthetic": True,
-            "msg_text_equals": "Admin user password has expired. Please change the admin password.",
-            "msg_text_excludes": ["{alert_msg}"],
-            "msg_title_equals": "Alert: The PC admin user password is going to expire soon or has already expired.",
-            "expected_tags": [
-                "ntnx_alert_type:A6227",
-                "ntnx_alert_severity:CRITICAL",
-                "ntnx_alert_classification:Cluster",
-                "ntnx_alert_impact:CONFIGURATION",
-                "ntnx_cluster_name:prism-central-deployment",
-            ],
-        },
-        id="a6227_password_expiry",
-    ),
-]
-
-
-@pytest.mark.parametrize("case", _COMPLETE_OUTPUT_CASES)
+@pytest.mark.parametrize(
+    "case",
+    [
+        pytest.param(
+            {
+                # A1031 (ca546858) is unresolved+acknowledged in the fixture, no injection needed.
+                "alert_type": "A1031",
+                "inject_synthetic": False,
+                "msg_text_contains": [
+                    "Disk space usage for /var/log on Controller VM 10.0.0.108 has exceeded 75%",
+                ],
+                "msg_text_excludes": ["{mount_path}", "{entity}", "{ip_address}", "{threshold}"],
+                "msg_title_contains": ["Disk space usage high for /var/log on Controller VM 10.0.0.108"],
+                "expected_tags": [
+                    "ntnx_alert_type:A1031",
+                    "ntnx_alert_severity:WARNING",
+                    "ntnx_alert_classification:Storage",
+                    "ntnx_alert_impact:SYSTEM_INDICATOR",
+                ],
+                "expected_tag_prefixes": ["ntnx_cluster_name:", "ntnx_node_name:"],
+            },
+            id="a1031_disk_space",
+        ),
+        pytest.param(
+            {
+                "alert_type": "A111050",
+                "inject_synthetic": True,
+                "msg_text_contains": ["nutanix"],
+                "msg_text_excludes": ["{users}"],
+                "msg_title_contains": ["10.0.0.165"],
+                "msg_title_excludes": ["{pcvm_ip}"],
+                "expected_tags": [
+                    "ntnx_alert_type:A111050",
+                    "ntnx_alert_severity:CRITICAL",
+                    "ntnx_alert_classification:Cluster",
+                    "ntnx_alert_impact:CONFIGURATION",
+                    "ntnx_cluster_name:prism-central-deployment",
+                ],
+            },
+            id="a111050_default_password",
+        ),
+        pytest.param(
+            {
+                "alert_type": "A6227",
+                "inject_synthetic": True,
+                "msg_text_equals": "Admin user password has expired. Please change the admin password.",
+                "msg_text_excludes": ["{alert_msg}"],
+                "msg_title_equals": "Alert: The PC admin user password is going to expire soon or has already expired.",
+                "expected_tags": [
+                    "ntnx_alert_type:A6227",
+                    "ntnx_alert_severity:CRITICAL",
+                    "ntnx_alert_classification:Cluster",
+                    "ntnx_alert_impact:CONFIGURATION",
+                    "ntnx_cluster_name:prism-central-deployment",
+                ],
+            },
+            id="a6227_password_expiry",
+        ),
+    ],
+)
 @mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
 def test_alert_complete_output(
     get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker, case
@@ -271,7 +262,7 @@ def test_alert_complete_output(
 
     check = NutanixCheck('nutanix', {}, [instance])
     if case.get("inject_synthetic"):
-        synthetic = _fixture_alert(case["alert_type"], isResolved=False, isAcknowledged=True)
+        synthetic = fixture_alert(case["alert_type"], isResolved=False, isAcknowledged=True)
         mocker.patch(
             'datadog_checks.nutanix.activity_monitor.ActivityMonitor._list_alerts_unresolved',
             return_value=[synthetic],
@@ -738,7 +729,7 @@ def test_alert_event_carries_service_tag_when_available(
     get_current_datetime.return_value = MOCK_ALERT_DATETIME
 
     check = NutanixCheck('nutanix', {}, [instance])
-    synthetic = _fixture_alert(
+    synthetic = fixture_alert(
         "NTNX_IAMv2_Authn_Database_Connectivity_Error_Warning",
         isResolved=False,
         isAcknowledged=False,

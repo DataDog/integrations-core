@@ -55,6 +55,15 @@ def load_fixture_page(filename, page):
     return {"data": [], "metadata": {"totalAvailableResults": 0}}
 
 
+def fixture_alert(alert_type, **overrides):
+    """Load the first fixture alert with the given alertType and apply overrides."""
+    for page in load_fixture('alerts.json'):
+        for alert in page.get('data', []):
+            if alert.get('alertType') == alert_type:
+                return {**alert, **overrides}
+    raise ValueError(f"No alert with alertType={alert_type} in fixture")
+
+
 # Test instance configurations
 INSTANCE = {
     "pc_ip": "10.0.0.197",
