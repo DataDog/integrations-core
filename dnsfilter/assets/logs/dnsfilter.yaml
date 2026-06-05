@@ -357,6 +357,9 @@ pipeline:
                     query: "*"
                   name: Query
                   id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
               type: schema-category-mapper
             - name: ocsf.status_id
               categories:
