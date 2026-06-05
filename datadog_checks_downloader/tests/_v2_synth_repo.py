@@ -2,13 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""Synthetic TUF repository builder for v2 downloader integration tests.
-
-Builds a tiny, fully signed v2-style repository on disk with a single delegated
-``Targets`` role. The delegated role can be configured with either ``paths`` or
-``path_hash_prefixes`` rules so tests can exercise both delegation styles without
-hardcoding the role name in the downloader.
-"""
+"""Synthetic TUF repository builder for v2 downloader tests."""
 
 from __future__ import annotations
 
@@ -64,10 +58,7 @@ def build_delegated_repo(
     paths: list[str] | None = None,
     path_hash_prefixes: list[str] | None = None,
 ) -> None:
-    """Materialize a signed v2-style TUF repo with one delegated targets role.
-
-    Exactly one of ``paths`` or ``path_hash_prefixes`` must be provided.
-    """
+    """Materialize a signed v2-style TUF repo with one delegated targets role."""
     if (paths is None) == (path_hash_prefixes is None):
         raise ValueError('exactly one of paths or path_hash_prefixes must be set')
 

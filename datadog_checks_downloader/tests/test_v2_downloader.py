@@ -291,13 +291,7 @@ class TestDisableVerification:
 
 
 class TestUpdaterContract:
-    """Lock in the v2 target-path storage contract.
-
-    The downloader must address TUF targets by the stable storage path only and
-    rely on python-tuf to walk delegations. The first path segment is the agreed
-    namespace required by the publisher pipeline, not a role kwarg passed to the
-    TUF client.
-    """
+    """Lock in the v2 target-path storage contract."""
 
     def test_get_targetinfo_called_with_prefixed_path_only(self, mock_urlopen, mock_updater_cls):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
@@ -334,12 +328,7 @@ def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) ->
 
 
 class TestDelegationTraversal:
-    """End-to-end: build a signed TUF repo using the v2 target-path contract.
-
-    The stable target path starts with ``integrations/v1/``. The TUF repository can
-    map that namespace to any compatible delegation topology while the downloader
-    keeps asking for the same target path.
-    """
+    """Test v2 target resolution through delegated TUF metadata."""
 
     @staticmethod
     def _make_pointer_target(project: str, version: str) -> tuple[str, bytes, dict]:
