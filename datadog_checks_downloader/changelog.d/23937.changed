@@ -1,0 +1,1 @@
+Tighten v2 downloader pointer validation and document its delegation-agnostic contract.
