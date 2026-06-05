@@ -59,6 +59,8 @@ REQUEST_KWARGS = frozenset(
         'follow_redirects',
     }
 )
+REQUEST_KWARGS_SPECIAL = frozenset({'headers', 'extra_headers', 'timeout', 'follow_redirects'})
+REQUEST_KWARGS_PASSTHROUGH = REQUEST_KWARGS - REQUEST_KWARGS_SPECIAL
 
 
 def _make_timeout(connect: float, read: float) -> httpx2.Timeout:
@@ -404,8 +406,7 @@ class HTTPX2Wrapper:
             context = f' for {method} {url}' if method or url else ''
             raise TypeError(f"HTTPX2Wrapper does not support per-request kwargs{context}: {sorted(unknown)}")
         kwargs: dict[str, Any] = {}
-        passthrough = ('params', 'json', 'data', 'content', 'files', 'cookies')
-        for key in passthrough:
+        for key in REQUEST_KWARGS_PASSTHROUGH:
             if key in options:
                 kwargs[key] = options[key]
 
