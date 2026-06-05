@@ -124,6 +124,13 @@ def test_response_iter_lines_bytes_through_crlf(status_transport_factory):
     assert list(response.iter_lines(decode_unicode=False)) == [b'a', b'b', b'c']
 
 
+def test_response_iter_lines_decoded_through_crlf(status_transport_factory):
+    transport = status_transport_factory(200, b'a\r\nb\r\nc')
+    http = HTTPX2Wrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert list(response.iter_lines(decode_unicode=True)) == ['a', 'b', 'c']
+
+
 def test_response_iter_lines_rejects_delimiter(status_transport_factory):
     transport = status_transport_factory(200, b'a\nb\n')
     http = HTTPX2Wrapper({}, {}, transport=transport)
