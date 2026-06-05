@@ -213,11 +213,18 @@ class HTTPX2ResponseAdapter:
     ) -> Iterator[bytes | str]:
         if delimiter is not None:
             raise NotImplementedError("HTTPX2ResponseAdapter.iter_lines does not support custom delimiters")
-        encoding = self._response.encoding or 'utf-8'
         try:
-            for line in self._response.iter_lines():
-                # errors='replace' tolerates bytes that don't round-trip under the declared charset.
-                yield line if decode_unicode else line.encode(encoding, errors='replace')
+            if decode_unicode:
+                yield from self._response.iter_lines()
+                return
+            buffer = b''
+            for chunk in self._response.iter_bytes():
+                buffer += chunk
+                while b'\n' in buffer:
+                    line, _, buffer = buffer.partition(b'\n')
+                    yield line.rstrip(b'\r')
+            if buffer:
+                yield buffer.rstrip(b'\r')
         except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
             raise _map_httpx2_exception(exc) from exc
 

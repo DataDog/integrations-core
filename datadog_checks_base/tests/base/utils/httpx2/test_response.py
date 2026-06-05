@@ -104,6 +104,24 @@ def test_response_iter_lines_decode_uses_response_encoding(charset, line):
     assert encoded_lines == [line.encode(charset), line.encode(charset)]
 
 
+def test_response_iter_lines_bytes_through_invalid_sequences():
+    raw = b'invalid\xff\xfe\nsecond\n'
+
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, content=raw, headers={'Content-Type': 'text/plain; charset=utf-8'})
+
+    http = HTTPX2Wrapper({}, {}, transport=httpx2.MockTransport(handler))
+    response = http.get('http://example.test/')
+    assert list(response.iter_lines(decode_unicode=False)) == [b'invalid\xff\xfe', b'second']
+
+
+def test_response_iter_lines_bytes_through_crlf(status_transport_factory):
+    transport = status_transport_factory(200, b'a\r\nb\r\nc')
+    http = HTTPX2Wrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert list(response.iter_lines(decode_unicode=False)) == [b'a', b'b', b'c']
+
+
 def test_response_iter_lines_rejects_delimiter(status_transport_factory):
     transport = status_transport_factory(200, b'a\nb\n')
     http = HTTPX2Wrapper({}, {}, transport=transport)
