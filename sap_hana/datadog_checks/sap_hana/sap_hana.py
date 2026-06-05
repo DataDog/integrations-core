@@ -185,7 +185,7 @@ class SapHanaCheck(AgentCheck):
 
     @property
     def dbms(self):
-        return 'hana'
+        return 'saphana'
 
     @property
     def dbms_version(self):

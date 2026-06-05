@@ -63,7 +63,7 @@ class HanaSchemaCollector(SchemaCollector):
 
     @property
     def kind(self) -> str:
-        return "hana_databases"
+        return "saphana_databases"
 
     def _get_databases(self) -> list[DatabaseInfo]:
         try:
