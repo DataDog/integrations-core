@@ -1154,7 +1154,6 @@ def replay_reproduce_command(row: dict[str, Any]) -> str:
             f"--target-ref {target_ref}",
             "--replay-cache latest",
             f"--readings {readings}",
-            "--adapters requests,subprocess,process,psycopg,clickhouse-connect",
             "--artifacts /tmp/replay-pbt-repro",
             "--overwrite",
         ]

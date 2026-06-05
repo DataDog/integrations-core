@@ -398,7 +398,7 @@ jobs:
       REPLAY_PBT_BATCH_COUNT: ${{ inputs.batch_count }}
       REPLAY_PBT_RESULT_DIR: /tmp/replay-pbt-result
       REPLAY_PBT_ARTIFACTS: /tmp/replay-pbt-artifacts
-      REPLAY_PBT_ADAPTERS: requests,subprocess,process,psycopg,clickhouse-connect
+      REPLAY_PBT_ADAPTERS: ${{ matrix.adapters }}
       REPLAY_PBT_RUNNER: ${{ matrix.runner }}
       REPLAY_PBT_RECORD_IMAGE: ${{ matrix.record_image }}
       REPLAY_PBT_REPLAY_IMAGE: ${{ matrix.replay_image }}
@@ -586,6 +586,7 @@ jobs:
             'record_image': os.environ['REPLAY_PBT_RECORD_IMAGE'],
             'replay_image': os.environ['REPLAY_PBT_REPLAY_IMAGE'],
             'readings': os.environ['REPLAY_PBT_READINGS'],
+            'adapters': os.environ['REPLAY_PBT_ADAPTERS'],
             'target_ref': os.environ['REPLAY_PBT_TARGET_REF'],
             'batch_index': os.environ['REPLAY_PBT_BATCH_INDEX'],
             'batch_count': os.environ['REPLAY_PBT_BATCH_COUNT'],
@@ -656,6 +657,7 @@ jobs:
             "cache_key": os.environ["REPLAY_PBT_CACHE_KEY"],
             "mode": os.environ["REPLAY_PBT_MODE"],
             "readings": os.environ["REPLAY_PBT_READINGS"],
+            "adapters": os.environ["REPLAY_PBT_ADAPTERS"],
             "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
             "batch_index": os.environ["REPLAY_PBT_BATCH_INDEX"],
             "batch_count": os.environ["REPLAY_PBT_BATCH_COUNT"],
@@ -724,6 +726,7 @@ jobs:
             "cache_key": os.environ["REPLAY_PBT_CACHE_KEY"],
             "mode": os.environ["REPLAY_PBT_MODE"],
             "readings": os.environ["REPLAY_PBT_READINGS"],
+            "adapters": os.environ["REPLAY_PBT_ADAPTERS"],
             "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
             "batch_index": os.environ["REPLAY_PBT_BATCH_INDEX"],
             "batch_count": os.environ["REPLAY_PBT_BATCH_COUNT"],
@@ -789,6 +792,7 @@ jobs:
             "cache_key": os.environ["REPLAY_PBT_CACHE_KEY"],
             "mode": os.environ["REPLAY_PBT_MODE"],
             "readings": os.environ["REPLAY_PBT_READINGS"],
+            "adapters": os.environ["REPLAY_PBT_ADAPTERS"],
             "target_ref": os.environ["REPLAY_PBT_TARGET_REF"],
             "batch_index": os.environ["REPLAY_PBT_BATCH_INDEX"],
             "batch_count": os.environ["REPLAY_PBT_BATCH_COUNT"],
@@ -814,6 +818,7 @@ jobs:
             'cache_key': os.environ['REPLAY_PBT_CACHE_KEY'],
             'mode': os.environ['REPLAY_PBT_MODE'],
             'readings': os.environ['REPLAY_PBT_READINGS'],
+            'adapters': os.environ['REPLAY_PBT_ADAPTERS'],
             'target_ref': os.environ['REPLAY_PBT_TARGET_REF'],
             'batch_index': os.environ['REPLAY_PBT_BATCH_INDEX'],
             'batch_count': os.environ['REPLAY_PBT_BATCH_COUNT'],

@@ -38,5 +38,8 @@ include = ["/datadog_checks", "/tests", "/manifest.json"]
 include = ["/datadog_checks/krakend"]
 dev-mode-dirs = ["."]
 
+[tool.datadog.replay]
+adapters = ["requests"]
+
 [tool.ruff]
 extend = "../pyproject.toml"

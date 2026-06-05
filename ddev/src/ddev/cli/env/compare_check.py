@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path as StdPath
@@ -26,8 +27,7 @@ if TYPE_CHECKING:
 # Manual cache invalidation knob for compare-check artifacts. Bump this whenever
 # replay fixture semantics or suitability criteria change in a way that should
 # make existing .ddev/replay caches ineligible for --replay-cache auto/latest.
-REPLAY_CACHE_VERSION = 5
-REPLAY_ADAPTER = 'all'
+REPLAY_CACHE_VERSION = 6
 OUTPUT_COLLECTIONS = (
     'metrics',
     'service_checks',
@@ -122,9 +122,12 @@ OUTPUT_COLLECTIONS = (
 )
 @click.option(
     '--adapters',
-    default=REPLAY_ADAPTER,
-    show_default=True,
-    help='Comma-separated replay adapters to record/replay, or "all".',
+    default=None,
+    help=(
+        'Comma-separated replay adapters to record/replay. Defaults to '
+        '[tool.datadog.replay].adapters in the integration pyproject.toml; '
+        'if that array is missing or empty, replay is unsupported.'
+    ),
 )
 @click.pass_context
 def compare_check(
@@ -146,7 +149,7 @@ def compare_check(
     readings: int,
     replay_time: float,
     reading_interval: float,
-    adapters: str,
+    adapters: str | None,
 ):
     """
     Compare no-Agent check output across two integrations-core refs.
@@ -158,7 +161,7 @@ def compare_check(
 
     app: Application = ctx.obj
     integration = app.repo.integrations.get(intg_name)
-    adapter = adapters
+    adapter = _resolve_replay_adapters(app.repo.path, integration.name, adapters)
     storage = EnvDataStorage(app.data_dir)
     if comparison_mode == 'record-each-side':
         if environment is not None:
@@ -240,6 +243,33 @@ def compare_check(
     changed_envs = [env_name for env_name, _, diff in batch_results if diff.get('changed')]
     if changed_envs:
         raise click.ClickException(f'compare-check detected differences or incomplete runs: {", ".join(changed_envs)}')
+
+
+def _configured_replay_adapters(repo_path: StdPath | str, integration_name: str) -> tuple[str, ...]:
+    pyproject = StdPath(str(repo_path)) / integration_name / 'pyproject.toml'
+    if not pyproject.is_file():
+        return ()
+
+    data = tomllib.loads(pyproject.read_text())
+    replay = data.get('tool', {}).get('datadog', {}).get('replay', {})
+    adapters = replay.get('adapters')
+    if not isinstance(adapters, list):
+        return ()
+
+    return tuple(adapter for adapter in adapters if isinstance(adapter, str) and adapter.strip())
+
+
+def _resolve_replay_adapters(repo_path: StdPath | str, integration_name: str, adapters: str | None) -> str:
+    if adapters:
+        return adapters
+
+    configured = _configured_replay_adapters(repo_path, integration_name)
+    if not configured:
+        raise click.ClickException(
+            f'Replay is not supported for {integration_name!r}: add a non-empty '
+            '[tool.datadog.replay].adapters array to its pyproject.toml.'
+        )
+    return ','.join(configured)
 
 
 def _select_env_names(ctx: click.Context, integration, storage, environment: str | None) -> list[str]:

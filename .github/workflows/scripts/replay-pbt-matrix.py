@@ -17,6 +17,7 @@ import math
 import re
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -71,6 +72,20 @@ def has_python_check(integration: str) -> bool:
         if re.search(r'^class\s+\w*Check\b', text, flags=re.MULTILINE):
             return True
     return False
+
+
+def configured_replay_adapters(integration: str) -> tuple[str, ...]:
+    pyproject = REPO_ROOT / integration / 'pyproject.toml'
+    if not pyproject.is_file():
+        return ()
+
+    data = tomllib.loads(pyproject.read_text())
+    replay = data.get('tool', {}).get('datadog', {}).get('replay', {})
+    adapters = replay.get('adapters')
+    if not isinstance(adapters, list):
+        return ()
+
+    return tuple(adapter for adapter in adapters if isinstance(adapter, str) and adapter.strip())
 
 
 def is_jmx_check(integration: str) -> bool:
@@ -182,6 +197,10 @@ def main() -> None:
             continue
         if cached_targets is not None and (integration, environment) not in cached_targets:
             continue
+        configured_adapters = configured_replay_adapters(integration)
+        if not configured_adapters:
+            continue
+        adapters = ','.join(configured_adapters)
 
         fixture_ref = latest_integration_tag(integration) or args.target_ref
         # JMX checks go through agent jmx list, not embedded Python.
@@ -197,6 +216,7 @@ def main() -> None:
             'target_ref': args.target_ref,
             'target_head': target_head,
             'readings': args.readings,
+            'adapters': adapters,
             'runner': args.runner,
             # Artifact slug is runner-prefixed so per-job artifacts stay
             # distinct across runners; the underlying replay-cache key is
@@ -205,7 +225,7 @@ def main() -> None:
             'artifact_slug': slug(f'{args.runner}-{integration}-{environment}'),
             'cache_key': f'replay-pbt-v{cache_version}-'
             f'{slug(integration)}-{slug(environment)}-readings{slug(args.readings)}-fixture-{slug(fixture_ref)}'
-            '-adapters-notcp',
+            f'-adapters-{slug(adapters)}',
         }
         if args.runner == 'agent':
             row['record_image'] = args.record_image

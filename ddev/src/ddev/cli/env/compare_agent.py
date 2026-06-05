@@ -45,9 +45,12 @@ if TYPE_CHECKING:
 )
 @click.option(
     '--adapters',
-    default='requests,subprocess,tcp,process,psycopg,clickhouse-connect',
-    show_default=True,
-    help='Comma-separated replay adapters to install inside the Agent shim.',
+    default=None,
+    help=(
+        'Comma-separated replay adapters to install inside the Agent shim. Defaults to '
+        '[tool.datadog.replay].adapters in the integration pyproject.toml; '
+        'if that array is missing or empty, replay is unsupported.'
+    ),
 )
 @click.option('--artifacts', default=None, help='Artifacts root or exact run directory.')
 @click.option('--exact-artifacts-dir', is_flag=True, help='Treat --artifacts as the exact run directory.')
@@ -76,7 +79,7 @@ def compare_agent(
     reading_interval: float,
     replay_time: float,
     probes: str,
-    adapters: str,
+    adapters: str | None,
     artifacts: str | None,
     exact_artifacts_dir: bool,
     overwrite: bool,
@@ -92,7 +95,13 @@ def compare_agent(
     from datadog_checks.dev.replay.agent.runner import run_compare_agent
     from datadog_checks.dev.replay.agent.diff import write_diffs
     from ddev.e2e.config import EnvDataStorage
-    from ddev.cli.env.compare_check import _slug, _update_latest, _ensure_environment, _stop_environment
+    from ddev.cli.env.compare_check import (
+        _ensure_environment,
+        _resolve_replay_adapters,
+        _slug,
+        _stop_environment,
+        _update_latest,
+    )
 
     integration = app.repo.integrations.get(intg_name)
     storage = EnvDataStorage(app.repo.path / '.ddev' / 'env' if False else app.data_dir)  # data_dir is the right root
@@ -108,7 +117,8 @@ def compare_agent(
     replay_image = replay_image or record_image
 
     probe_tuple = tuple(p.strip() for p in probes.split(',') if p.strip())
-    adapter_tuple = tuple(a.strip() for a in adapters.split(',') if a.strip())
+    resolved_adapters = _resolve_replay_adapters(repo_path, integration.name, adapters)
+    adapter_tuple = tuple(a.strip() for a in resolved_adapters.split(',') if a.strip())
 
     cached_fixture_dir = _resolve_replay_cache_for_agent(
         repo_path, integration.name, environment, replay_cache

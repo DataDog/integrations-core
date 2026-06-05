@@ -86,7 +86,14 @@ if TYPE_CHECKING:
 @click.option(
     '--check-cache-only', is_flag=True, help='Validate replay-cache suitability and exit without running tests.'
 )
-@click.option('--adapters', default='all', show_default=True, help='Comma-separated replay adapters, or "all".')
+@click.option(
+    '--adapters',
+    default=None,
+    help=(
+        'Comma-separated replay adapters. Defaults to [tool.datadog.replay].adapters in the '
+        'integration pyproject.toml; if that array is missing or empty, replay is unsupported.'
+    ),
+)
 @click.option(
     '--warnings-as-errors', is_flag=True, help='Promote replay validation advisory warnings to test failures.'
 )
@@ -107,11 +114,14 @@ def replay_pbt(
     artifacts: StdPath | None,
     overwrite: bool,
     check_cache_only: bool,
-    adapters: str,
+    adapters: str | None,
     warnings_as_errors: bool,
 ) -> None:
     """Run cached replay validation and metamorphic checks for one integration environment."""
     app: Application = ctx.obj
+    from ddev.cli.env.compare_check import _resolve_replay_adapters
+
+    adapters = _resolve_replay_adapters(app.repo.path, intg_name, adapters)
     selected_properties = properties or PROPERTIES
     effective_fixture_ref = fixture_ref or _latest_integration_release_tag(app.repo.path, intg_name) or target_ref
     if fixture_ref is None:
