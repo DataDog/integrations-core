@@ -6,7 +6,6 @@
 
 import hashlib
 import json
-import socket
 import urllib.error
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -18,7 +17,6 @@ from datadog_checks.downloader import cli
 from datadog_checks.downloader.download_v2 import (
     V2_POINTER_TARGET_DELEGATION,
     V2_POINTER_TARGET_PREFIX,
-    V2_POINTER_TARGET_SCHEMA_VERSION,
     TUFPointerDownloader,
 )
 from datadog_checks.downloader.exceptions import (
@@ -37,9 +35,6 @@ pytestmark = pytest.mark.offline
 
 PROJECT = 'datadog-postgres'
 VERSION = '14.0.0'
-EXPECTED_POINTER_TARGET_DELEGATION = 'wheelsmith'
-EXPECTED_POINTER_TARGET_SCHEMA_VERSION = 'v1'
-EXPECTED_POINTER_TARGET_PREFIX = 'wheelsmith/v1'
 WHEEL_NAME = f'datadog_postgres-{VERSION}-py3-none-any.whl'
 WHEEL_CONTENT = b'fake wheel bytes for testing'
 WHEEL_DIGEST = hashlib.sha256(WHEEL_CONTENT).hexdigest()
@@ -95,8 +90,8 @@ class TestTargetResolution:
     @pytest.mark.parametrize(
         'version,expected_target',
         [
-            pytest.param(VERSION, f'{EXPECTED_POINTER_TARGET_PREFIX}/{PROJECT}/{VERSION}.json', id='explicit-version'),
-            pytest.param(None, f'{EXPECTED_POINTER_TARGET_PREFIX}/{PROJECT}/latest.json', id='missing-version'),
+            pytest.param(VERSION, f'wheelsmith/v1/{PROJECT}/{VERSION}.json', id='explicit-version'),
+            pytest.param(None, f'wheelsmith/v1/{PROJECT}/latest.json', id='missing-version'),
         ],
     )
     def test_get_pointer_requests_expected_target(self, mock_urlopen, mock_updater_cls, version, expected_target):
@@ -308,9 +303,7 @@ class TestUpdaterContract:
 
         mock_updater = mock_updater_cls.return_value
         call = mock_updater.get_targetinfo.call_args
-        assert V2_POINTER_TARGET_DELEGATION == EXPECTED_POINTER_TARGET_DELEGATION
-        assert V2_POINTER_TARGET_SCHEMA_VERSION == EXPECTED_POINTER_TARGET_SCHEMA_VERSION
-        assert call.args == (f'{EXPECTED_POINTER_TARGET_PREFIX}/{PROJECT}/{VERSION}.json',)
+        assert call.args == (f'wheelsmith/v1/{PROJECT}/{VERSION}.json',)
         assert call.kwargs == {}
 
     def test_target_path_uses_stable_wheelsmith_namespace(self, mock_urlopen, mock_updater_cls):
@@ -318,15 +311,9 @@ class TestUpdaterContract:
         downloader.get_pointer(PROJECT, version=VERSION)
 
         target_path = mock_updater_cls.return_value.get_targetinfo.call_args.args[0]
-        assert target_path.startswith(f'{EXPECTED_POINTER_TARGET_PREFIX}/')
+        assert target_path.startswith('wheelsmith/v1/')
         assert not target_path.startswith('targets/')
         assert not target_path.startswith('wheels-signer-')
-
-
-def _free_port() -> int:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(('127.0.0.1', 0))
-        return s.getsockname()[1]
 
 
 def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -367,8 +354,7 @@ class TestDelegationTraversal:
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
-        port = _free_port()
-        with serve_directory(repo, port) as url:
+        with serve_directory(repo) as url:
             downloader = TUFPointerDownloader(repository_url=url)
             assert downloader.get_pointer(project, version=version) == pointer
 
@@ -388,8 +374,7 @@ class TestDelegationTraversal:
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
-        port = _free_port()
-        with serve_directory(repo, port) as url:
+        with serve_directory(repo) as url:
             downloader = TUFPointerDownloader(repository_url=url)
             assert downloader.get_pointer(project, version=version) == pointer
 
@@ -406,8 +391,7 @@ class TestDelegationTraversal:
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
-        port = _free_port()
-        with serve_directory(repo, port) as url:
+        with serve_directory(repo) as url:
             downloader = TUFPointerDownloader(repository_url=url)
             with pytest.raises(TargetNotFoundError, match='datadog-redis'):
                 downloader.get_pointer('datadog-redis', version=version)

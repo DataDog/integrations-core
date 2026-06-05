@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import threading
+from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from functools import partial
@@ -34,8 +35,9 @@ EXPIRY = datetime(2099, 1, 1, tzinfo=timezone.utc)
 TOP_LEVEL_ROLES = ('root', 'targets', 'snapshot', 'timestamp')
 
 
-def _make_signers(role_names):
-    signers, public_keys = {}, {}
+def _make_signers(role_names: tuple[str, ...]) -> tuple[dict[str, SSlibSigner], dict[str, SSlibKey]]:
+    signers: dict[str, SSlibSigner] = {}
+    public_keys: dict[str, SSlibKey] = {}
     for role in role_names:
         priv = generate_ed25519_key()
         signers[role] = SSlibSigner(priv)
@@ -142,15 +144,15 @@ class _ReuseTCPServer(TCPServer):
 
 
 @contextmanager
-def serve_directory(directory: Path, port: int):
-    """Serve ``directory`` over HTTP on ``port`` for the duration of the context."""
+def serve_directory(directory: Path) -> Iterator[str]:
+    """Serve ``directory`` over HTTP for the duration of the context."""
     handler = partial(SimpleHTTPRequestHandler, directory=str(directory))
-    httpd = _ReuseTCPServer(('127.0.0.1', port), handler)
-    thread = threading.Thread(target=httpd.serve_forever, daemon=True)
-    thread.start()
-    try:
-        yield f'http://127.0.0.1:{port}'
-    finally:
-        httpd.shutdown()
-        httpd.server_close()
-        thread.join(timeout=2)
+    with _ReuseTCPServer(('127.0.0.1', 0), handler) as httpd:
+        port = httpd.server_address[1]
+        thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        thread.start()
+        try:
+            yield f'http://127.0.0.1:{port}'
+        finally:
+            httpd.shutdown()
+            thread.join(timeout=2)

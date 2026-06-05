@@ -96,7 +96,7 @@ class TUFPointerDownloader:
         if not isinstance(wheel_path, str) or not wheel_path.startswith('/') or wheel_path.startswith('//'):
             raise MalformedPointerError(project, 'wheel_path')
         normalized = posixpath.normpath(wheel_path)
-        if normalized != wheel_path or '..' in wheel_path.split('/'):
+        if normalized != wheel_path:
             raise MalformedPointerError(project, 'wheel_path')
 
     @staticmethod
