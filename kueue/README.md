@@ -4,16 +4,16 @@
 
 This check monitors Kueue through the Datadog Agent.
 
-Kueue is a Kubernetes workload queueing system that allows you to manage and schedule workloads on your Kubernetes cluster. It provides a way to prioritize and manage workloads, and to ensure that workloads are scheduled in a fair and efficient manner. This integration collects metrics from the Kueue controller manager and the Kueue API server and enables you to monitor the health and performance of your Kueue cluster.
+Kueue is a Kubernetes workload queueing system that allows you to manage and schedule workloads on your Kubernetes cluster. It provides a way to prioritize and manage workloads, and to ensure that workloads are scheduled in a fair and efficient manner. This integration collects metrics from the Kueue controller manager and Kueue API server to help you monitor the health and performance of your Kueue cluster.
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
+Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3].
 
 ### Installation
 
 The Kueue check is included in the [Datadog Agent][2] package.
-No additional installation is needed on your server.
+No additional installation is required on your server.
 
 ### Configuration
 

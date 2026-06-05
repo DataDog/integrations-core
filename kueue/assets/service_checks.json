@@ -12,6 +12,6 @@
             "endpoint"
         ],
         "name": "Kueue OpenMetrics endpoint health",
-        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Kueue OpenMetrics endpoint, otherwise returns `OK`."
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to the Kueue OpenMetrics endpoint. Returns `OK` when the endpoint is reachable."
     }
 ]
