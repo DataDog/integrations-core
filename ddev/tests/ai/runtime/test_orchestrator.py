@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import Phase
 from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -233,7 +234,7 @@ def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
         agent_clients={},
         file_access_policy=file_access_policy,
         agents={"a": MagicMock(), "b": MagicMock()},
-        artifact_root=file_access_policy.write_root,
+        callbacks=Callbacks(),
     )
     with pytest.raises(ResourceUnavailableError, match="No agent definition named 'missing'"):
         provider.agent_config("missing")

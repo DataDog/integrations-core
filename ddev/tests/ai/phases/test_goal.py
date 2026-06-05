@@ -7,6 +7,7 @@ import json
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.phases.config import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
@@ -20,6 +21,7 @@ from ddev.ai.phases.goal import (
 )
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
+from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry
 
 from .conftest import MockAgent, make_response, resolve_key
@@ -118,24 +120,32 @@ def test_build_reviewer_user_message_sections():
 def _make_worker_process(responses):
     """ReActProcess wired to a MockAgent — used as the worker."""
     agent = MockAgent(list(responses))
-    return ReActProcess(AgentRuntime(agent=agent, tool_registry=ToolRegistry([]))), agent
+    scope = AgentScope(owner_id="worker", role=AgentRole.PHASE)
+    return ReActProcess(AgentRuntime(agent=agent, tool_registry=ToolRegistry([])), scope=scope), agent
 
 
-class ReviewerRuntimeFactory:
-    """Runtime factory returning a fixed reviewer agent for run_goal_loop tests."""
+class ReviewerProcessFactory:
+    """Process factory returning a fixed reviewer agent wrapped in a ReActProcess."""
 
-    def __init__(self, responses) -> None:
+    def __init__(self, responses, callbacks: Callbacks | None = None) -> None:
         self.agent = MockAgent(list(responses))
         self.calls: list[dict[str, object]] = []
+        self._callbacks = callbacks or Callbacks()
 
-    def build_runtime(self, *, agent_config: AgentConfig, system_prompt: str, owner_id: str) -> AgentRuntime:
-        self.calls.append({"agent_config": agent_config, "system_prompt": system_prompt, "owner_id": owner_id})
-        return AgentRuntime(agent=self.agent, tool_registry=ToolRegistry([]))
+    def create(self, *, scope, agent_config: AgentConfig, system_prompt: str) -> ReActProcess:
+        self.calls.append({"agent_config": agent_config, "system_prompt": system_prompt, "owner_id": scope.owner_id})
+        return ReActProcess(
+            AgentRuntime(agent=self.agent, tool_registry=ToolRegistry([])),
+            callbacks=self._callbacks,
+            scope=scope,
+        )
 
 
-def _reviewer_factory(responses) -> tuple[ReviewerRuntimeFactory, list[dict[str, object]], MockAgent]:
-    """Return a reviewer runtime factory plus its captured calls and agent."""
-    factory = ReviewerRuntimeFactory(responses)
+def _reviewer_factory(
+    responses, callbacks: Callbacks | None = None
+) -> tuple[ReviewerProcessFactory, list[dict[str, object]], MockAgent]:
+    """Return a reviewer process factory plus its captured calls and agent."""
+    factory = ReviewerProcessFactory(responses, callbacks)
     return factory, factory.calls, factory.agent
 
 
@@ -157,7 +167,11 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         total_output_tokens=50,
         context_usage=None,
     )
-    factory, builder_calls, _ = _reviewer_factory([make_response('{"valid": true, "reason": ""}', 20, 10)])
+    run_logger = AgentLogger(tmp_path)
+    factory, builder_calls, _ = _reviewer_factory(
+        [make_response('{"valid": true, "reason": ""}', 20, 10)],
+        callbacks=Callbacks([run_logger.as_callback_set()]),
+    )
 
     outcome = await run_goal_loop(
         task=TaskConfig(name="t1", prompt="x", goal="verify"),
@@ -166,10 +180,9 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         worker_process=worker_process,
         initial_result=initial_result,
         parent_agent_config=AgentConfig(tools=[]),
-        runtime_factory=factory,
+        process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
-        log_root=tmp_path,
         compact_if_needed=_noop_compact,
     )
 
@@ -181,7 +194,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     assert builder_calls[0]["owner_id"] == "p1.goal.t1"
     assert builder_calls[0]["system_prompt"] == GOAL_REVIEWER_SYSTEM_PROMPT
 
-    log_path = tmp_path / "goal_agent" / "p1" / "t1.jsonl"
+    log_path = tmp_path / "goal_reviewer" / "p1.goal.t1.jsonl"
     assert log_path.exists()
     events = {json.loads(line)["event"] for line in log_path.read_text().splitlines() if line.strip()}
     assert {"start", "finish"} <= events
@@ -211,10 +224,9 @@ async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
         worker_process=worker_process,
         initial_result=initial_result,
         parent_agent_config=parent_config,
-        runtime_factory=factory,
+        process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
-        log_root=tmp_path,
         compact_if_needed=_noop_compact,
     )
 
@@ -250,10 +262,9 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
         worker_process=worker_process,
         initial_result=initial_result,
         parent_agent_config=AgentConfig(tools=[]),
-        runtime_factory=factory,
+        process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
-        log_root=tmp_path,
         compact_if_needed=_noop_compact,
     )
 
@@ -291,24 +302,15 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
             worker_process=worker_process,
             initial_result=initial_result,
             parent_agent_config=AgentConfig(tools=[]),
-            runtime_factory=factory,
+            process_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
-            log_root=tmp_path,
             compact_if_needed=_noop_compact,
         )
 
     err = exc_info.value
     assert err.input_tokens == 5 + 10 + 7
     assert err.output_tokens == 3 + 5 + 4
-
-    log_path = tmp_path / "goal_agent" / "p1" / "t1.jsonl"
-    finish = next(
-        json.loads(line) for line in log_path.read_text().splitlines() if json.loads(line)["event"] == "finish"
-    )
-    assert finish["total_input_tokens"] == 5 + 10 + 7
-    assert finish["total_output_tokens"] == 3 + 5 + 4
-    assert finish["success"] is False
 
 
 async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
@@ -334,10 +336,9 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
         worker_process=worker_process,
         initial_result=initial_result,
         parent_agent_config=AgentConfig(tools=[]),
-        runtime_factory=factory,
+        process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
-        log_root=tmp_path,
         compact_if_needed=_noop_compact,
     )
     assert outcome.attempts == 1
@@ -370,24 +371,15 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
             worker_process=worker_process,
             initial_result=initial_result,
             parent_agent_config=AgentConfig(tools=[]),
-            runtime_factory=factory,
+            process_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
-            log_root=tmp_path,
             compact_if_needed=_noop_compact,
         )
 
     err = exc_info.value
     assert err.input_tokens == 5 + 7
     assert err.output_tokens == 3 + 4
-
-    log_path = tmp_path / "goal_agent" / "p1" / "t1.jsonl"
-    finish = next(
-        json.loads(line) for line in log_path.read_text().splitlines() if json.loads(line)["event"] == "finish"
-    )
-    assert finish["total_input_tokens"] == 5 + 7
-    assert finish["total_output_tokens"] == 3 + 4
-    assert finish["success"] is False
 
 
 async def test_run_goal_loop_fires_callbacks(tmp_path):
@@ -424,10 +416,9 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         worker_process=worker_process,
         initial_result=initial_result,
         parent_agent_config=AgentConfig(tools=[]),
-        runtime_factory=factory,
+        process_factory=factory,
         callbacks=Callbacks([cb_set]),
         phase_id="p1",
-        log_root=tmp_path,
         compact_if_needed=_noop_compact,
     )
     assert events == [

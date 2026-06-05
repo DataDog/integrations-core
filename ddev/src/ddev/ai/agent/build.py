@@ -5,14 +5,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.phases.config import AgentConfig
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
+
+if TYPE_CHECKING:
+    from ddev.ai.react.factory import ReActProcessFactory
 
 
 @dataclass(frozen=True)
@@ -30,6 +32,7 @@ class AgentRuntimeFactory(Protocol):
         agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
+        process_factory: ReActProcessFactory,
     ) -> AgentRuntime: ...
 
 
@@ -42,6 +45,7 @@ class AgentRuntimeBuilder(Protocol):
         agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
+        process_factory: ReActProcessFactory,
     ) -> AgentRuntime: ...
 
 
@@ -53,11 +57,9 @@ class DefaultAgentRuntimeFactory:
         *,
         agent_clients: dict[str, Any],
         file_registry: FileRegistry,
-        artifact_root: Path,
     ) -> None:
         self._agent_clients = agent_clients
         self._file_registry = file_registry
-        self._artifact_root = artifact_root
 
     def _resolve_client(self, provider: str) -> Any:
         client = self._agent_clients.get(provider)
@@ -94,15 +96,16 @@ class DefaultAgentRuntimeFactory:
         agent_config: AgentConfig,
         system_prompt: str,
         owner_id: str,
+        process_factory: ReActProcessFactory,
     ) -> AgentRuntime:
-        """Build an agent and its tools from the given configuration."""
+        """Build an AgentRuntime from the given configuration."""
         tool_registry = ToolRegistry.from_names(
             agent_config.tools,
             owner_id=owner_id,
             file_registry=self._file_registry,
             agent_config=agent_config,
-            runtime_builder=self.build_runtime,
-            artifact_root=self._artifact_root,
+            # forwarded untouched to tools that spawn child agents
+            process_factory=process_factory,
         )
         agent = self._build_provider_agent(
             agent_config=agent_config,

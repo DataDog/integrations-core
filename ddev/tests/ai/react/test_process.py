@@ -10,6 +10,7 @@ import pytest
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentConnectionError
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.process import ReActProcess
@@ -65,6 +66,10 @@ class MockToolRegistry:
         self._result = result or ToolResult(success=True, data=_TOOL_RESULT_DATA)
         self.run_calls: list[tuple[str, dict]] = []
 
+    @property
+    def definitions(self) -> list[dict]:
+        return []
+
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         self.run_calls.append((name, raw))
         return self._result
@@ -76,6 +81,10 @@ class RaisingToolRegistry:
     def __init__(self, exc: BaseException) -> None:
         self._exc = exc
         self.run_calls: list[tuple[str, dict]] = []
+
+    @property
+    def definitions(self) -> list[dict]:
+        return []
 
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         self.run_calls.append((name, raw))
@@ -89,6 +98,10 @@ class PerToolRegistry:
         self._behaviors = behaviors
         self.run_calls: list[tuple[str, dict]] = []
 
+    @property
+    def definitions(self) -> list[dict]:
+        return []
+
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         self.run_calls.append((name, raw))
         behavior = self._behaviors[name]
@@ -101,8 +114,10 @@ class CallbackRecorder:
     """Test helper that wires a CallbackSet to record all lifecycle events."""
 
     def __init__(self) -> None:
+        self.agent_starts: list[tuple[AgentScope, str, list[str]]] = []
+        self.before_sends: list[tuple[str, int]] = []
         self.agent_responses: list[tuple[AgentResponse, int]] = []
-        self.tool_calls_seen: list[tuple[ToolCall, ToolResult, int]] = []
+        self.tool_calls_seen: list[tuple[AgentScope, ToolCall, ToolResult, int]] = []
         self.complete_results: list[ReActResult] = []
         self.errors: list[BaseException] = []
         self.before_compacts: int = 0
@@ -110,28 +125,36 @@ class CallbackRecorder:
 
         self.callback_set = CallbackSet()
 
+        @self.callback_set.on_agent_start
+        async def _record_start(scope: AgentScope, system_prompt: str, tools: list[str]) -> None:
+            self.agent_starts.append((scope, system_prompt, tools))
+
+        @self.callback_set.on_before_agent_send
+        async def _record_before_send(scope: AgentScope, prompt: str, iteration: int) -> None:
+            self.before_sends.append((prompt, iteration))
+
         @self.callback_set.on_agent_response
-        async def _record_response(response: AgentResponse, iteration: int) -> None:
+        async def _record_response(scope: AgentScope, response: AgentResponse, iteration: int) -> None:
             self.agent_responses.append((response, iteration))
 
         @self.callback_set.on_tool_call
-        async def _record_tool_call(tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
-            self.tool_calls_seen.append((tool_call, result, iteration))
+        async def _record_tool_call(scope: AgentScope, tool_call: ToolCall, result: ToolResult, iteration: int) -> None:
+            self.tool_calls_seen.append((scope, tool_call, result, iteration))
 
-        @self.callback_set.on_complete
-        async def _record_complete(result: ReActResult) -> None:
+        @self.callback_set.on_agent_finish
+        async def _record_complete(scope: AgentScope, result: ReActResult) -> None:
             self.complete_results.append(result)
 
-        @self.callback_set.on_error
-        async def _record_error(error: BaseException) -> None:
+        @self.callback_set.on_agent_error
+        async def _record_error(scope: AgentScope, error: BaseException) -> None:
             self.errors.append(error)
 
         @self.callback_set.on_before_compact
-        async def _record_before_compact() -> None:
+        async def _record_before_compact(scope: AgentScope) -> None:
             self.before_compacts += 1
 
         @self.callback_set.on_after_compact
-        async def _record_after_compact() -> None:
+        async def _record_after_compact(scope: AgentScope) -> None:
             self.after_compacts += 1
 
 
@@ -167,10 +190,12 @@ def make_process(
     registry: MockToolRegistry | None = None,
     callbacks: Callbacks | None = None,
     compact_threshold_pct: float | None = None,
+    scope: AgentScope | None = None,
 ) -> ReActProcess:
     return ReActProcess(
         AgentRuntime(agent=agent, tool_registry=registry or MockToolRegistry()),
         callbacks=callbacks,
+        scope=scope or AgentScope(owner_id="test", role=AgentRole.PHASE),
         compact_threshold_pct=compact_threshold_pct,
     )
 
@@ -259,9 +284,7 @@ async def test_tool_exception_loop_continues_with_failure_result() -> None:
         ]
     )
 
-    result = await ReActProcess(
-        AgentRuntime(agent=agent, tool_registry=RaisingToolRegistry(RuntimeError("disk error"))),
-    ).start("Do something")
+    result = await make_process(agent, registry=RaisingToolRegistry(RuntimeError("disk error"))).start("Do something")
 
     assert result.iterations == 2
     assert result.final_response.stop_reason == StopReason.END_TURN
@@ -281,13 +304,14 @@ async def test_tool_exception_on_tool_call_callback_fires_with_error_result() ->
     )
     recorder = CallbackRecorder()
 
-    await ReActProcess(
-        AgentRuntime(agent=agent, tool_registry=RaisingToolRegistry(ValueError("oops"))),
+    await make_process(
+        agent,
+        registry=RaisingToolRegistry(ValueError("oops")),
         callbacks=Callbacks([recorder.callback_set]),
     ).start("x")
 
     assert len(recorder.tool_calls_seen) == 1
-    _, error_result, _ = recorder.tool_calls_seen[0]
+    _, _, error_result, _ = recorder.tool_calls_seen[0]
     assert error_result.success is False
 
 
@@ -309,9 +333,7 @@ async def test_tool_exception_error_message_format(exc: BaseException, expected_
         ]
     )
 
-    await ReActProcess(
-        AgentRuntime(agent=agent, tool_registry=RaisingToolRegistry(exc)),
-    ).start("x")
+    await make_process(agent, registry=RaisingToolRegistry(exc)).start("x")
 
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
     assert sent_back[0].result.error == expected_error
@@ -334,7 +356,7 @@ async def test_partial_batch_failure_only_affects_raising_tool() -> None:
         }
     )
 
-    result = await ReActProcess(AgentRuntime(agent=agent, tool_registry=registry)).start("Do both")
+    result = await make_process(agent, registry=registry).start("Do both")
 
     assert result.iterations == 2
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
@@ -361,20 +383,23 @@ async def test_callbacks_invoked_correct_counts() -> None:
     registry = MockToolRegistry(result=expected_result)
     recorder = CallbackRecorder()
     agent = MockAgent(responses)
+    scope = AgentScope(owner_id="owner-loop", role=AgentRole.SUBAGENT)
 
-    result = await make_process(agent, registry=registry, callbacks=Callbacks([recorder.callback_set])).start(
-        "Run tools"
-    )
+    result = await make_process(
+        agent, registry=registry, callbacks=Callbacks([recorder.callback_set]), scope=scope
+    ).start("Run tools")
 
     assert len(recorder.agent_responses) == 2
     assert recorder.agent_responses[0][1] == 1
     assert recorder.agent_responses[1][1] == 2
     assert len(recorder.tool_calls_seen) == 2
-    assert all(iteration == 1 for _, _, iteration in recorder.tool_calls_seen)
-    assert recorder.tool_calls_seen[0][0] is tool_calls[0]
-    assert recorder.tool_calls_seen[1][0] is tool_calls[1]
-    assert recorder.tool_calls_seen[0][1] is expected_result
-    assert recorder.tool_calls_seen[1][1] is expected_result
+    assert all(iteration == 1 for *_, iteration in recorder.tool_calls_seen)
+    # In-loop callbacks must carry the process's scope, not a default or stale one.
+    assert all(seen_scope is scope for seen_scope, *_ in recorder.tool_calls_seen)
+    assert recorder.tool_calls_seen[0][1] is tool_calls[0]
+    assert recorder.tool_calls_seen[1][1] is tool_calls[1]
+    assert recorder.tool_calls_seen[0][2] is expected_result
+    assert recorder.tool_calls_seen[1][2] is expected_result
     assert len(recorder.complete_results) == 1
     assert recorder.complete_results[0] is result
     assert len(recorder.errors) == 0
@@ -386,6 +411,45 @@ async def test_two_callback_sets_both_notified() -> None:
     await make_process(agent, callbacks=Callbacks([rec_a.callback_set, rec_b.callback_set])).start("x")
     assert len(rec_a.complete_results) == 1
     assert len(rec_b.complete_results) == 1
+
+
+async def test_agent_start_fires_first_with_scope_and_metadata() -> None:
+    agent = MockAgent([make_response(StopReason.END_TURN)])
+    agent._system_prompt = "you are a tester"
+    recorder = CallbackRecorder()
+    scope = AgentScope(owner_id="owner-1", role=AgentRole.SUBAGENT)
+
+    await make_process(agent, callbacks=Callbacks([recorder.callback_set]), scope=scope).start("do it")
+
+    assert len(recorder.agent_starts) == 1
+    fired_scope, system_prompt, tools = recorder.agent_starts[0]
+    assert fired_scope is scope
+    assert system_prompt == "you are a tester"
+    assert tools == []
+    assert recorder.before_sends[0] == ("do it", 1)
+
+
+# ---------------------------------------------------------------------------
+# run_once — single no-tools turn
+# ---------------------------------------------------------------------------
+
+
+async def test_run_once_sends_with_no_tools_and_fires_scoped_callbacks() -> None:
+    agent = MockAgent([make_response(StopReason.END_TURN, input_tokens=7, output_tokens=3)])
+    recorder = CallbackRecorder()
+    scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE)
+
+    process = make_process(agent, callbacks=Callbacks([recorder.callback_set]), scope=scope)
+    response = await process.run_once("summarize")
+
+    assert response.usage.input_tokens == 7
+    assert agent.send_calls == ["summarize"]
+    # run_once is a single turn: one before_send, one response, no agent_start/finish.
+    assert len(recorder.agent_responses) == 1
+    assert recorder.agent_responses[0][1] == 1
+    assert recorder.before_sends == [("summarize", 1)]
+    assert recorder.agent_starts == []
+    assert recorder.complete_results == []
 
 
 # ---------------------------------------------------------------------------
@@ -407,6 +471,7 @@ async def test_agent_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
         AgentRuntime(agent=ErrorAgent(), tool_registry=MockToolRegistry()),
+        scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
         callbacks=Callbacks([recorder.callback_set]),
     )
 
@@ -433,6 +498,7 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
         AgentRuntime(agent=InterruptAgent(), tool_registry=MockToolRegistry()),
+        scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
         callbacks=Callbacks([recorder.callback_set]),
     )
 
@@ -458,6 +524,7 @@ async def test_cancelled_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
         AgentRuntime(agent=CancelledAgent(), tool_registry=MockToolRegistry()),
+        scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
         callbacks=Callbacks([recorder.callback_set]),
     )
 
