@@ -37,9 +37,9 @@ pytestmark = pytest.mark.offline
 
 PROJECT = 'datadog-postgres'
 VERSION = '14.0.0'
-EXPECTED_POINTER_TARGET_DELEGATION = 'integrations'
+EXPECTED_POINTER_TARGET_DELEGATION = 'wheelsmith'
 EXPECTED_POINTER_TARGET_SCHEMA_VERSION = 'v1'
-EXPECTED_POINTER_TARGET_PREFIX = 'integrations/v1'
+EXPECTED_POINTER_TARGET_PREFIX = 'wheelsmith/v1'
 WHEEL_NAME = f'datadog_postgres-{VERSION}-py3-none-any.whl'
 WHEEL_CONTENT = b'fake wheel bytes for testing'
 WHEEL_DIGEST = hashlib.sha256(WHEEL_CONTENT).hexdigest()
@@ -313,7 +313,7 @@ class TestUpdaterContract:
         assert call.args == (f'{EXPECTED_POINTER_TARGET_PREFIX}/{PROJECT}/{VERSION}.json',)
         assert call.kwargs == {}
 
-    def test_target_path_uses_stable_integrations_namespace(self, mock_urlopen, mock_updater_cls):
+    def test_target_path_uses_stable_wheelsmith_namespace(self, mock_urlopen, mock_updater_cls):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         downloader.get_pointer(PROJECT, version=VERSION)
 

@@ -1,1 +1,1 @@
-Use the versioned ``integrations/v1`` v2 target namespace and tighten pointer validation.
+Use the versioned ``wheelsmith/v1`` v2 target namespace and tighten pointer validation.
