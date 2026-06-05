@@ -94,7 +94,7 @@ def test_response_iter_content_decode_uses_response_encoding(charset, raw, expec
         pytest.param('iso-8859-1', 'café', id='iso-8859-1'),
     ],
 )
-def test_response_iter_lines_decode_uses_response_encoding(charset, line):
+def test_response_iter_lines_bytes_path_is_encoding_agnostic(charset, line):
     raw = (line + '\n' + line).encode(charset)
 
     def handler(_request: httpx2.Request) -> httpx2.Response:
