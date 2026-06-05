@@ -3,10 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Literal
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Literal
 
 from ddev.event_bus.orchestrator import BaseMessage
+
+if TYPE_CHECKING:
+    from ddev.utils.github_async.models import WorkflowJob
 
 
 @dataclass
@@ -42,6 +45,18 @@ class WorkflowStatus:
 
 
 @dataclass
+class WorkflowResult:
+    """In-memory result for a single test job within a finished batch."""
+
+    integration: str
+    environment: str
+    platform: Literal["linux", "windows", "macos"]
+    status: Literal["success", "failure", "skipped"]
+    failed_step: str | None = None
+    failed_tests: list[str] = field(default_factory=list)
+
+
+@dataclass
 class TestBatch(BaseMessage):
     """Dispatched to trigger a matrix of test jobs."""
 
@@ -59,6 +74,8 @@ class BatchFinished(BaseMessage):
     workflow_url: str
     artifacts_path: str
     timed_out: bool = False
+    job_list: list[BatchJob] = field(default_factory=list)
+    jobs: list[WorkflowJob] | None = None
 
 
 @dataclass
