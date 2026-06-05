@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from collections.abc import Mapping
 from datetime import timedelta
 
 import httpx2
@@ -240,6 +241,13 @@ def test_response_cookies_exposed():
     http = HTTPX2Wrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     assert response.cookies['session'] == 'abc123'
+
+
+def test_response_cookies_is_mapping(status_transport_factory):
+    transport = status_transport_factory(200, b'')
+    http = HTTPX2Wrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert isinstance(response.cookies, Mapping)
 
 
 def test_response_adapter_satisfies_protocol(status_transport_factory):
