@@ -1,0 +1,1 @@
+Send each logical database as its own independent schema snapshot, so an error or partial collection for one database does not affect others.

@@ -23,6 +23,7 @@ from .query_completions import ClickhouseQueryCompletions
 from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
+from .table_metrics import ClickhouseTableMetrics
 from .utils import ErrorSanitizer
 
 try:
@@ -122,6 +123,12 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_errors = ClickhouseQueryErrors(self, self._config.query_errors)
         else:
             self.query_errors = None
+
+        # Initialize schema metrics (per-table size and per-view refresh gauges)
+        if self._config.dbm and self._config.schema_metrics.enabled:
+            self.table_metrics = ClickhouseTableMetrics(self, self._config.schema_metrics)
+        else:
+            self.table_metrics = None
 
         # Initialize schema collection (catalog metadata for Schema Explorer)
         if self._config.dbm and self._config.collect_schemas.enabled:
@@ -266,6 +273,10 @@ class ClickhouseCheck(DatabaseCheck):
         # Run query errors if DBM is enabled (from system.query_log - failed queries)
         if self.query_errors:
             self.query_errors.run_job_loop(self.tags)
+
+        # Run schema metrics (per-table size and per-view refresh gauges) if enabled
+        if self.table_metrics:
+            self.table_metrics.run_job_loop(self.tags)
 
         # Run schema collection if enabled
         if self.metadata:
@@ -540,6 +551,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions.cancel()
         if self.query_errors:
             self.query_errors.cancel()
+        if self.table_metrics:
+            self.table_metrics.cancel()
         if self.metadata:
             self.metadata.cancel()
         if self.parts_and_merges:
@@ -554,6 +567,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions._job_loop_future.result()
         if self.query_errors and self.query_errors._job_loop_future:
             self.query_errors._job_loop_future.result()
+        if self.table_metrics and self.table_metrics._job_loop_future:
+            self.table_metrics._job_loop_future.result()
         if self.metadata and self.metadata._job_loop_future:
             self.metadata._job_loop_future.result()
         if self.parts_and_merges and self.parts_and_merges._job_loop_future:
