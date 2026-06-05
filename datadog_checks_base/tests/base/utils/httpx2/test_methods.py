@@ -4,6 +4,7 @@
 import json
 import logging
 
+import httpx2
 import pytest
 
 from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
@@ -43,3 +44,29 @@ def test_stream_kwarg_logged_and_dropped(capturing_transport, caplog):
         response = http.get('http://example.test/', stream=True)
     assert response.status_code == 200
     assert any('dropping unsupported per-request kwarg: stream' in r.message for r in caplog.records)
+
+
+def _spy_on_send(http):
+    captured = {}
+    original_send = http._client.send
+
+    def spy(request, **kwargs):
+        captured.update(kwargs)
+        return original_send(request, **kwargs)
+
+    http._client.send = spy
+    return captured
+
+
+def test_request_passes_follow_redirects_per_request(capturing_transport):
+    http = HTTPX2Wrapper({'allow_redirects': False}, {}, transport=capturing_transport)
+    captured = _spy_on_send(http)
+    http.get('http://example.test/', follow_redirects=True)
+    assert captured['follow_redirects'] is True
+
+
+def test_request_uses_client_default_follow_redirects_when_omitted(capturing_transport):
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    captured = _spy_on_send(http)
+    http.get('http://example.test/')
+    assert captured['follow_redirects'] is httpx2.USE_CLIENT_DEFAULT
