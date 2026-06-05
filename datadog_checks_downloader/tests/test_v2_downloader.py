@@ -15,7 +15,12 @@ import pytest
 from tuf.api.exceptions import DownloadError
 
 from datadog_checks.downloader import cli
-from datadog_checks.downloader.download_v2 import TUFPointerDownloader
+from datadog_checks.downloader.download_v2 import (
+    V2_POINTER_TARGET_DELEGATION,
+    V2_POINTER_TARGET_PREFIX,
+    V2_POINTER_TARGET_SCHEMA_VERSION,
+    TUFPointerDownloader,
+)
 from datadog_checks.downloader.exceptions import (
     DigestMismatch,
     LengthMismatch,
@@ -32,6 +37,9 @@ pytestmark = pytest.mark.offline
 
 PROJECT = 'datadog-postgres'
 VERSION = '14.0.0'
+EXPECTED_POINTER_TARGET_DELEGATION = 'integrations'
+EXPECTED_POINTER_TARGET_SCHEMA_VERSION = 'v1'
+EXPECTED_POINTER_TARGET_PREFIX = 'integrations/v1'
 WHEEL_NAME = f'datadog_postgres-{VERSION}-py3-none-any.whl'
 WHEEL_CONTENT = b'fake wheel bytes for testing'
 WHEEL_DIGEST = hashlib.sha256(WHEEL_CONTENT).hexdigest()
@@ -87,8 +95,8 @@ class TestTargetResolution:
     @pytest.mark.parametrize(
         'version,expected_target',
         [
-            pytest.param(VERSION, f'integrations/v1/{PROJECT}/{VERSION}.json', id='explicit-version'),
-            pytest.param(None, f'integrations/v1/{PROJECT}/latest.json', id='missing-version'),
+            pytest.param(VERSION, f'{EXPECTED_POINTER_TARGET_PREFIX}/{PROJECT}/{VERSION}.json', id='explicit-version'),
+            pytest.param(None, f'{EXPECTED_POINTER_TARGET_PREFIX}/{PROJECT}/latest.json', id='missing-version'),
         ],
     )
     def test_get_pointer_requests_expected_target(self, mock_urlopen, mock_updater_cls, version, expected_target):
@@ -300,7 +308,9 @@ class TestUpdaterContract:
 
         mock_updater = mock_updater_cls.return_value
         call = mock_updater.get_targetinfo.call_args
-        assert call.args == (f'integrations/v1/{PROJECT}/{VERSION}.json',)
+        assert V2_POINTER_TARGET_DELEGATION == EXPECTED_POINTER_TARGET_DELEGATION
+        assert V2_POINTER_TARGET_SCHEMA_VERSION == EXPECTED_POINTER_TARGET_SCHEMA_VERSION
+        assert call.args == (f'{EXPECTED_POINTER_TARGET_PREFIX}/{PROJECT}/{VERSION}.json',)
         assert call.kwargs == {}
 
     def test_target_path_uses_stable_integrations_namespace(self, mock_urlopen, mock_updater_cls):
@@ -308,7 +318,7 @@ class TestUpdaterContract:
         downloader.get_pointer(PROJECT, version=VERSION)
 
         target_path = mock_updater_cls.return_value.get_targetinfo.call_args.args[0]
-        assert target_path.startswith('integrations/v1/')
+        assert target_path.startswith(f'{EXPECTED_POINTER_TARGET_PREFIX}/')
         assert not target_path.startswith('targets/')
         assert not target_path.startswith('wheels-signer-')
 
@@ -351,9 +361,9 @@ class TestDelegationTraversal:
         repo = tmp_path / 'repo'
         build_delegated_repo(
             repo,
-            delegated_targets={f'integrations/v1/{project}/{version}.json': json.dumps(pointer).encode()},
-            delegated_role_name='integrations',
-            paths=[f'integrations/v1/{project}/*'],
+            delegated_targets={f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            paths=[f'{V2_POINTER_TARGET_PREFIX}/{project}/*'],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
@@ -364,7 +374,7 @@ class TestDelegationTraversal:
 
     def test_resolves_through_hash_prefix_delegation(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
-        target_path = f'integrations/v1/{project}/{version}.json'
+        target_path = f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json'
         _, _, pointer = self._make_pointer_target(project, version)
 
         prefix = hashlib.sha256(target_path.encode()).hexdigest()[:2]
@@ -373,7 +383,7 @@ class TestDelegationTraversal:
         build_delegated_repo(
             repo,
             delegated_targets={target_path: json.dumps(pointer).encode()},
-            delegated_role_name='integrations',
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
             path_hash_prefixes=[prefix],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
@@ -390,9 +400,9 @@ class TestDelegationTraversal:
         repo = tmp_path / 'repo'
         build_delegated_repo(
             repo,
-            delegated_targets={f'integrations/v1/{project}/{version}.json': json.dumps(pointer).encode()},
-            delegated_role_name='integrations',
-            paths=['integrations/v1/datadog-postgres/*'],
+            delegated_targets={f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            paths=[f'{V2_POINTER_TARGET_PREFIX}/datadog-postgres/*'],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
