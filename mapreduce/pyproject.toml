@@ -60,3 +60,6 @@ dev-mode-dirs = [
 
 [tool.pytest.ini_options]
 addopts = "--capture=no"
+
+[tool.datadog.replay]
+adapters = ["requests"]

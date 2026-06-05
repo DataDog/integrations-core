@@ -60,3 +60,6 @@ include = [
 dev-mode-dirs = [
     ".",
 ]
+
+[tool.datadog.replay]
+adapters = ["requests"]
