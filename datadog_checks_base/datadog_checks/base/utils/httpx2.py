@@ -105,9 +105,7 @@ def _map_httpx2_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPErro
         return HTTPInvalidURLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx2.TimeoutException):
         return HTTPTimeoutError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
-    if isinstance(exc, httpx2.ConnectError):
-        return HTTPConnectionError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
-    if isinstance(exc, (httpx2.ReadError, httpx2.WriteError, httpx2.CloseError)):
+    if isinstance(exc, httpx2.NetworkError):
         return HTTPConnectionError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx2.HTTPStatusError):
         return HTTPStatusError(
