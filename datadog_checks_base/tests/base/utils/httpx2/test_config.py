@@ -84,6 +84,32 @@ def test_connect_and_read_timeout_split(capturing_transport):
     assert read == 30.0
 
 
+@pytest.mark.parametrize(
+    'timeout_value,expected',
+    [
+        pytest.param(
+            None,
+            {'connect': None, 'read': None, 'write': None, 'pool': None},
+            id='none-means-no-timeout',
+        ),
+        pytest.param(
+            7,
+            {'connect': 7.0, 'read': 7.0, 'write': 7.0, 'pool': 7.0},
+            id='scalar-pins-all-phases',
+        ),
+        pytest.param(
+            (3, 5),
+            {'connect': 3.0, 'read': 5.0, 'write': 5.0, 'pool': 5.0},
+            id='tuple-connect-read-pins-write-pool',
+        ),
+    ],
+)
+def test_per_request_timeout_value_construction(capturing_transport, captured_requests, timeout_value, expected):
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    http.get('http://example.test/', timeout=timeout_value)
+    assert captured_requests[0].extensions['timeout'] == expected
+
+
 def test_verify_defaults_to_true(capturing_transport):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     assert http.options['verify'] is True

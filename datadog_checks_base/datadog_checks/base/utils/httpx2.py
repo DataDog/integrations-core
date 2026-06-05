@@ -422,10 +422,13 @@ class HTTPX2Wrapper:
 
         if 'timeout' in options:
             timeout_value = options['timeout']
-            if isinstance(timeout_value, (tuple, list)) and len(timeout_value) == 2:
+            if timeout_value is None:
+                kwargs['timeout'] = None
+            elif isinstance(timeout_value, (tuple, list)) and len(timeout_value) == 2:
                 kwargs['timeout'] = _make_timeout(float(timeout_value[0]), float(timeout_value[1]))
             else:
-                kwargs['timeout'] = float(timeout_value)  # type: ignore[arg-type]
+                value = float(timeout_value)
+                kwargs['timeout'] = _make_timeout(value, value)
 
         if 'follow_redirects' in options:
             kwargs['follow_redirects'] = bool(options['follow_redirects'])
