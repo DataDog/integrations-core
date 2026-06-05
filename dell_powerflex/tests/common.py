@@ -309,7 +309,8 @@ SYSTEM_STATS_BWC_METRICS = [
 BWC_SUFFIXES = ['num_seconds', 'total_weight_in_kb', 'num_occured']
 
 
-BASE_TAGS = ['powerflex_gateway_url:https://localhost:443']
+DEFAULT_GATEWAY_URL = 'https://localhost:443'
+BASE_TAGS = [f'powerflex_gateway_url:{DEFAULT_GATEWAY_URL}']
 
 # E2E expected metric points (excludes the dynamic powerflex_gateway_url tag).
 # The test prepends that tag before asserting.

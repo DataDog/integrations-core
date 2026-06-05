@@ -16,6 +16,8 @@ from datadog_checks.dev.docker import get_docker_hostname
 from datadog_checks.dev.fs import get_here
 from datadog_checks.dev.utils import find_free_port
 
+from .common import DEFAULT_GATEWAY_URL
+
 USE_POWERFLEX_LAB = os.environ.get('USE_POWERFLEX_LAB')
 POWERFLEX_GATEWAY_URL = os.environ.get('POWERFLEX_GATEWAY_URL')
 POWERFLEX_USERNAME = os.environ.get('POWERFLEX_USERNAME')
@@ -62,10 +64,11 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return {
-        'powerflex_gateway_url': 'https://localhost:443',
+        'powerflex_gateway_url': DEFAULT_GATEWAY_URL,
         'powerflex_username': 'admin',
         'powerflex_password': 'password',
     }
+
 
 
 def _get_url_path(url):

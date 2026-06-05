@@ -14,6 +14,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from .common import (
     ALL_EXPECTED_METRICS,
     BASE_TAGS,
+    DEFAULT_GATEWAY_URL,
     DEV1_TAGS,
     DEV2_TAGS,
     DEV3_TAGS,
@@ -104,7 +105,7 @@ def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mocker):
 
 
 def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mocker):
-    instance = {'powerflex_gateway_url': 'https://localhost:443'}
+    instance = {'powerflex_gateway_url': DEFAULT_GATEWAY_URL}
     mocker.patch(
         'requests.Session.get',
         side_effect=lambda url, *args, **kwargs: MagicMock(
@@ -354,7 +355,7 @@ def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
 
 
 def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_http_get, mock_responses):
-    mock_responses('https://localhost:443/api/types/System/instances')[0]['name'] = 'my-powerflex'
+    mock_responses(f'{DEFAULT_GATEWAY_URL}/api/types/System/instances')[0]['name'] = 'my-powerflex'
 
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -604,7 +605,7 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
         assert event['alert_type'] == 'error'
         assert event['event_type'] == 'dell_powerflex.event'
         assert event['source_type_name'] == 'dell-powerflex'
-        assert 'powerflex_gateway_url:https://localhost:443' in event['tags']
+        assert f'powerflex_gateway_url:{DEFAULT_GATEWAY_URL}' in event['tags']
 
     severities = {tag for e in events for tag in e['tags'] if tag.startswith('severity:')}
     assert severities == {'severity:CRITICAL', 'severity:MAJOR'}
@@ -690,7 +691,7 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     for alert in alerts:
         assert alert['event_type'] == 'dell_powerflex.alert'
         assert alert['source_type_name'] == 'dell-powerflex'
-        assert 'powerflex_gateway_url:https://localhost:443' in alert['tags']
+        assert f'powerflex_gateway_url:{DEFAULT_GATEWAY_URL}' in alert['tags']
 
     mdm_alert = next(a for a in alerts if a['msg_title'] == 'Unable To Receive Mdm Events')
     assert mdm_alert['alert_type'] == 'error'
