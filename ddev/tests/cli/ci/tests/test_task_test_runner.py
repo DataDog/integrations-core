@@ -14,8 +14,8 @@ from typing import Any
 import httpx
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests._status import conclusion_to_status
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async import GitHubResponse
