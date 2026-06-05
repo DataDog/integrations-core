@@ -3231,7 +3231,7 @@
               ],
               "yaxis": {
                 "include_zero": true,
-                "label": "Latency (μs)"
+                "label": "Latency (\u03bcs)"
               }
             },
             "layout": {
@@ -3264,7 +3264,7 @@
             "id": 9000000000000002,
             "definition": {
               "type": "note",
-              "content": "## Resource Capacity & Allocation\n\nThis section provides visibility into physical capacity (from hosts) vs allocated resources (to VMs) to help with capacity planning and detect overcommitment.\n\n**Note:** Cluster-level capacity and allocation totals (including overcommit ratios) reflect all VMs in the cluster, regardless of the VM name filter. Only the per-VM allocation table below is filtered by VM name.",
+              "content": "**Capacity planning inputs for the Nutanix fleet**: physical capacity per host (CPU, memory, storage), cluster-level totals (nodes, VMs, allocations), and per-VM allocations. Filter any widget by state tags (`ntnx_maintenance_state`, `ntnx_connection_state`, `ntnx_power_state`, `ntnx_disk_status`, `ntnx_operation_mode`) to compute *available* capacity \u2014 excluding hosts in maintenance, disconnected nodes, powered-off VMs, or degraded disks.",
               "background_color": "blue",
               "font_size": "14",
               "text_align": "left",
@@ -3629,292 +3629,6 @@
             }
           },
           {
-            "id": 9000000000000014,
-            "definition": {
-              "title": "Cluster Resource Capacity by Cluster",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "cores",
-                      "query": "sum:nutanix.cluster.cpu.total_cores{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "threads",
-                      "query": "sum:nutanix.cluster.cpu.total_threads{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "memory",
-                      "query": "sum:nutanix.cluster.memory.total_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "vcpus",
-                      "query": "sum:nutanix.cluster.cpu.vcpus_allocated{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "mem_alloc",
-                      "query": "sum:nutanix.cluster.memory.allocated_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "alias": "Cores",
-                      "cell_display_mode": "number",
-                      "formula": "cores"
-                    },
-                    {
-                      "alias": "Threads",
-                      "cell_display_mode": "number",
-                      "formula": "threads"
-                    },
-                    {
-                      "alias": "Memory",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      },
-                      "cell_display_mode": "number",
-                      "formula": "memory"
-                    },
-                    {
-                      "alias": "vCPUs Allocated",
-                      "cell_display_mode": "number",
-                      "formula": "vcpus"
-                    },
-                    {
-                      "alias": "Memory Allocated",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      },
-                      "cell_display_mode": "number",
-                      "formula": "mem_alloc"
-                    },
-                    {
-                      "alias": "CPU Overcommit",
-                      "cell_display_mode": "number",
-                      "formula": "vcpus / cores",
-                      "conditional_formats": [
-                        {
-                          "comparator": ">=",
-                          "value": 4,
-                          "palette": "white_on_red"
-                        },
-                        {
-                          "comparator": ">=",
-                          "value": 2,
-                          "palette": "white_on_yellow"
-                        },
-                        {
-                          "comparator": "<",
-                          "value": 2,
-                          "palette": "white_on_green"
-                        }
-                      ]
-                    },
-                    {
-                      "alias": "Mem Overcommit",
-                      "cell_display_mode": "number",
-                      "formula": "mem_alloc / memory",
-                      "conditional_formats": [
-                        {
-                          "comparator": ">=",
-                          "value": 1,
-                          "palette": "white_on_red"
-                        },
-                        {
-                          "comparator": ">=",
-                          "value": 0.8,
-                          "palette": "white_on_yellow"
-                        },
-                        {
-                          "comparator": "<",
-                          "value": 0.8,
-                          "palette": "white_on_green"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": {
-              "x": 0,
-              "y": 3,
-              "width": 12,
-              "height": 3
-            }
-          },
-          {
-            "id": 9000000000000010,
-            "definition": {
-              "title": "Host Resource Allocation by Host",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "sockets",
-                      "query": "sum:nutanix.host.cpu.sockets{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "cores",
-                      "query": "sum:nutanix.host.cpu.cores{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "threads",
-                      "query": "sum:nutanix.host.cpu.threads{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "memory",
-                      "query": "sum:nutanix.host.memory.bytes{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "alias": "Sockets",
-                      "cell_display_mode": "number",
-                      "formula": "sockets"
-                    },
-                    {
-                      "alias": "Cores",
-                      "cell_display_mode": "number",
-                      "formula": "cores"
-                    },
-                    {
-                      "alias": "Threads",
-                      "cell_display_mode": "number",
-                      "formula": "threads"
-                    },
-                    {
-                      "alias": "Memory",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      },
-                      "cell_display_mode": "number",
-                      "formula": "memory"
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": {
-              "x": 0,
-              "y": 6,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
-            "id": 9000000000000011,
-            "definition": {
-              "title": "VM Resource Allocation",
-              "title_size": "16",
-              "title_align": "left",
-              "type": "query_table",
-              "requests": [
-                {
-                  "response_format": "scalar",
-                  "queries": [
-                    {
-                      "data_source": "metrics",
-                      "name": "vcpus",
-                      "query": "sum:nutanix.vm.cpu.vcpus_allocated{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "sockets",
-                      "query": "sum:nutanix.vm.cpu.sockets{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "cores",
-                      "query": "sum:nutanix.vm.cpu.cores_per_socket{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
-                      "aggregator": "last"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "memory",
-                      "query": "sum:nutanix.vm.memory.allocated_bytes{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name}",
-                      "aggregator": "last"
-                    }
-                  ],
-                  "formulas": [
-                    {
-                      "alias": "vCPUs",
-                      "cell_display_mode": "number",
-                      "formula": "vcpus"
-                    },
-                    {
-                      "alias": "Sockets",
-                      "cell_display_mode": "number",
-                      "formula": "sockets"
-                    },
-                    {
-                      "alias": "Cores/Socket",
-                      "cell_display_mode": "number",
-                      "formula": "cores"
-                    },
-                    {
-                      "alias": "Memory",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "byte"
-                        }
-                      },
-                      "cell_display_mode": "number",
-                      "formula": "memory"
-                    }
-                  ]
-                }
-              ],
-              "has_search_bar": "auto"
-            },
-            "layout": {
-              "x": 6,
-              "y": 6,
-              "width": 6,
-              "height": 3
-            }
-          },
-          {
             "id": 9000000000000012,
             "definition": {
               "title": "vCPUs Allocated Over Time",
@@ -3967,7 +3681,7 @@
             },
             "layout": {
               "x": 0,
-              "y": 9,
+              "y": 19,
               "width": 6,
               "height": 3
             }
@@ -4032,9 +3746,395 @@
             },
             "layout": {
               "x": 6,
-              "y": 9,
+              "y": 19,
               "width": 6,
               "height": 3
+            }
+          },
+          {
+            "id": 9000000000000030,
+            "definition": {
+              "title": "Clusters",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "nodes",
+                      "query": "max:nutanix.cluster.nbr_nodes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name,ntnx_operation_mode}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "healthy_hosts",
+                      "query": "sum:nutanix.host.count{$ntnx_cluster_name,$prism_central,ntnx_maintenance_state:normal,ntnx_connection_state:connected} by {ntnx_cluster_name,ntnx_operation_mode}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "vms",
+                      "query": "max:nutanix.cluster.vm.count{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name,ntnx_operation_mode}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "cores",
+                      "query": "sum:nutanix.cluster.cpu.total_cores{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name,ntnx_operation_mode}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "memory",
+                      "query": "sum:nutanix.cluster.memory.total_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name,ntnx_operation_mode}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "vcpus",
+                      "query": "sum:nutanix.cluster.cpu.vcpus_allocated{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name,ntnx_operation_mode}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "mem_alloc",
+                      "query": "sum:nutanix.cluster.memory.allocated_bytes{$ntnx_cluster_name,$prism_central} by {ntnx_cluster_name,ntnx_operation_mode}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Nodes",
+                      "cell_display_mode": "number",
+                      "formula": "nodes"
+                    },
+                    {
+                      "alias": "Healthy Nodes",
+                      "cell_display_mode": "number",
+                      "formula": "healthy_hosts",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<",
+                          "value": 1,
+                          "palette": "white_on_red"
+                        }
+                      ]
+                    },
+                    {
+                      "alias": "VMs",
+                      "cell_display_mode": "number",
+                      "formula": "vms"
+                    },
+                    {
+                      "alias": "Cores",
+                      "cell_display_mode": "number",
+                      "formula": "cores"
+                    },
+                    {
+                      "alias": "Memory",
+                      "cell_display_mode": "number",
+                      "formula": "memory",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "vCPUs Allocated",
+                      "cell_display_mode": "number",
+                      "formula": "vcpus"
+                    },
+                    {
+                      "alias": "Memory Allocated",
+                      "cell_display_mode": "number",
+                      "formula": "mem_alloc",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "CPU Overcommit",
+                      "cell_display_mode": "number",
+                      "formula": "vcpus / cores",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 4,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 2,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 2,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    },
+                    {
+                      "alias": "Mem Overcommit",
+                      "cell_display_mode": "number",
+                      "formula": "mem_alloc / memory",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 1,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 0.8,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 0.8,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 9000000000000031,
+            "definition": {
+              "title": "Hosts",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "cores",
+                      "query": "sum:nutanix.host.cpu.cores{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name,ntnx_cluster_name,ntnx_host_type,ntnx_hypervisor_name,ntnx_maintenance_state,ntnx_connection_state}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "threads",
+                      "query": "sum:nutanix.host.cpu.threads{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name,ntnx_cluster_name,ntnx_host_type,ntnx_hypervisor_name,ntnx_maintenance_state,ntnx_connection_state}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "memory",
+                      "query": "sum:nutanix.host.memory.bytes{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name,ntnx_cluster_name,ntnx_host_type,ntnx_hypervisor_name,ntnx_maintenance_state,ntnx_connection_state}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Cores",
+                      "cell_display_mode": "number",
+                      "formula": "cores"
+                    },
+                    {
+                      "alias": "Threads",
+                      "cell_display_mode": "number",
+                      "formula": "threads"
+                    },
+                    {
+                      "alias": "Memory",
+                      "cell_display_mode": "number",
+                      "formula": "memory",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 9000000000000032,
+            "definition": {
+              "title": "VMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "vcpus",
+                      "query": "sum:nutanix.vm.cpu.vcpus_allocated{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name,ntnx_cluster_name,ntnx_host_name,ntnx_power_state,ntnx_is_agent_vm}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "memory",
+                      "query": "sum:nutanix.vm.memory.allocated_bytes{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name,ntnx_cluster_name,ntnx_host_name,ntnx_power_state,ntnx_is_agent_vm}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "disk",
+                      "query": "sum:nutanix.vm.disk_capacity_bytes{$ntnx_cluster_name,$ntnx_vm_name,$prism_central} by {ntnx_vm_name,ntnx_cluster_name,ntnx_host_name,ntnx_power_state,ntnx_is_agent_vm}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "vCPUs",
+                      "cell_display_mode": "number",
+                      "formula": "vcpus"
+                    },
+                    {
+                      "alias": "Memory",
+                      "cell_display_mode": "number",
+                      "formula": "memory",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Disk Allocated",
+                      "cell_display_mode": "number",
+                      "formula": "disk",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 12,
+              "height": 4
+            }
+          },
+          {
+            "id": 9000000000000033,
+            "definition": {
+              "title": "Storage Capacity by Host (with disk status)",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "storage",
+                      "query": "sum:nutanix.host.storage_capacity{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name,ntnx_cluster_name,ntnx_disk_status}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "free",
+                      "query": "sum:nutanix.host.free_physical_storage{$ntnx_cluster_name,$ntnx_host_name,$prism_central} by {ntnx_host_name,ntnx_cluster_name,ntnx_disk_status}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Total Storage",
+                      "cell_display_mode": "number",
+                      "formula": "storage",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Free Storage",
+                      "cell_display_mode": "number",
+                      "formula": "free",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Used %",
+                      "cell_display_mode": "number",
+                      "formula": "(storage - free) / storage * 100",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 90,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 75,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 75,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 12,
+              "height": 4
             }
           }
         ]
@@ -4043,7 +4143,7 @@
         "x": 0,
         "y": 53,
         "width": 12,
-        "height": 13
+        "height": 22
       }
     }
   ],

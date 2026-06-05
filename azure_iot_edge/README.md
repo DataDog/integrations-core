@@ -43,7 +43,7 @@ Follow the steps below to configure the IoT Edge device, runtime modules, and th
 
 3. Install and configure the Datadog Agent as a **custom module**:
     - Set the module name. For example: `datadog-agent`.
-    - Set the Agent image URI. For example: `datadog/agent:7`.
+    - Set the Agent image URI. For example: `registry.datadoghq.com/agent:7`.
     - Under "Environment Variables", configure your `DD_API_KEY`. You may also set extra Agent configuration here (see [Agent Environment Variables][6]).
     - Under "Container Create Options", enter the following configuration based on your device OS. **Note**: `NetworkId` must correspond to the network name set in the device `config.yaml` file.
 

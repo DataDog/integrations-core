@@ -11,6 +11,7 @@ from collections import namedtuple
 import mock
 import pytest
 
+from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -27,7 +28,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.metrics import SqlFractionMetric
-from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
+from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -219,16 +220,165 @@ def test_schema_collector_uses_database_compatibility_level_for_schema_query(
         }
     )
     collector._database_compatibility_levels = {"datadog_test": compatibility_level}
-    cursor = mock.Mock()
-    collector._check.connection.open_managed_default_connection.return_value = contextlib.nullcontext()
-    collector._check.connection.get_managed_cursor.return_value = contextlib.nullcontext(cursor)
+    main_cursor = mock.Mock()
+    detail_cursor = mock.Mock()
+    collector._check.connection.open_managed_default_connection.side_effect = [
+        contextlib.nullcontext(),
+        contextlib.nullcontext(),
+    ]
+    collector._check.connection.get_managed_cursor.side_effect = [
+        contextlib.nullcontext(main_cursor),
+        contextlib.nullcontext(detail_cursor),
+    ]
 
     with collector._get_cursor("datadog_test"):
         pass
 
-    tables_query = cursor.execute.call_args_list[1][0][0]
+    tables_query = main_cursor.execute.call_args_list[1][0][0]
     assert collector._is_2016_or_earlier is expected_legacy
     assert ("STRING_AGG" in tables_query) is not expected_legacy
+    assert (detail_cursor.execute.call_count == 1) is expected_legacy
+
+
+def test_schema_collector_reuses_pre_2017_connection_for_table_detail_queries() -> None:
+    collector = create_schema_collector(
+        {
+            STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD,
+            STATIC_INFO_MAJOR_VERSION: 13,
+        }
+    )
+    main_cursor = mock.Mock()
+    detail_cursor = mock.Mock()
+    detail_cursor.fetchall_dict.side_effect = [
+        [{"name": "id"}],
+        [{"name": "pk_table_1"}],
+        [{"foreign_key_name": "fk_table_1"}],
+        [{"name": "id"}],
+        [{"name": "pk_table_2"}],
+        [{"foreign_key_name": "fk_table_2"}],
+    ]
+    detail_cursor.fetchone_dict.side_effect = [{"partition_count": 1}, {"partition_count": 2}]
+    collector._check.connection.open_managed_default_connection.side_effect = [
+        contextlib.nullcontext(),
+        contextlib.nullcontext(),
+    ]
+    collector._check.connection.get_managed_cursor.side_effect = [
+        contextlib.nullcontext(main_cursor),
+        contextlib.nullcontext(detail_cursor),
+    ]
+    database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+    rows = [
+        {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table_1", "table_id": 101},
+        {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table_2", "table_id": 102},
+    ]
+
+    with collector._get_cursor("datadog_test"):
+        mapped_rows = [collector._map_row(database, row) for row in rows]
+
+    assert collector._check.connection.open_managed_default_connection.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+    ]
+    assert collector._check.connection.get_managed_cursor.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+    ]
+    assert detail_cursor.execute.call_args_list[0] == mock.call("USE [datadog_test];")
+    assert detail_cursor.execute.call_args_list.count(mock.call("USE [datadog_test];")) == 1
+    assert detail_cursor.execute.call_count == 9
+    assert collector._pre_2017_cursor is None
+    assert [row["schemas"][0]["tables"][0]["partitions"]["partition_count"] for row in mapped_rows] == [1, 2]
+
+
+def configure_pre_2017_detail_cursor(cursor: mock.Mock, partition_count: int = 1) -> None:
+    cursor.fetchall_dict.side_effect = [
+        [{"name": "id"}],
+        [{"name": "pk_table"}],
+        [{"foreign_key_name": "fk_table"}],
+    ]
+    cursor.fetchone_dict.return_value = {"partition_count": partition_count}
+
+
+def test_schema_collector_uses_new_pre_2017_connection_for_each_database() -> None:
+    collector = create_schema_collector(
+        {
+            STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD,
+            STATIC_INFO_MAJOR_VERSION: 13,
+        }
+    )
+    main_cursor_1 = mock.Mock()
+    detail_cursor_1 = mock.Mock()
+    configure_pre_2017_detail_cursor(detail_cursor_1, partition_count=1)
+    main_cursor_2 = mock.Mock()
+    detail_cursor_2 = mock.Mock()
+    configure_pre_2017_detail_cursor(detail_cursor_2, partition_count=2)
+    collector._check.connection.open_managed_default_connection.side_effect = [
+        contextlib.nullcontext(),
+        contextlib.nullcontext(),
+        contextlib.nullcontext(),
+        contextlib.nullcontext(),
+    ]
+    collector._check.connection.get_managed_cursor.side_effect = [
+        contextlib.nullcontext(main_cursor_1),
+        contextlib.nullcontext(detail_cursor_1),
+        contextlib.nullcontext(main_cursor_2),
+        contextlib.nullcontext(detail_cursor_2),
+    ]
+    row = {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table", "table_id": 101}
+
+    with collector._get_cursor("datadog_test_1"):
+        collector._map_row(
+            {"name": "datadog_test_1", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"},
+            row,
+        )
+    with collector._get_cursor("datadog_test_2"):
+        collector._map_row(
+            {"name": "datadog_test_2", "id": "2", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"},
+            row,
+        )
+
+    assert collector._check.connection.get_managed_cursor.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+    ]
+    assert detail_cursor_1.execute.call_args_list[0] == mock.call("USE [datadog_test_1];")
+    assert detail_cursor_2.execute.call_args_list[0] == mock.call("USE [datadog_test_2];")
+    assert collector._pre_2017_cursor is None
+
+
+def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -> None:
+    collector = create_schema_collector(
+        {
+            STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD,
+            STATIC_INFO_MAJOR_VERSION: 14,
+        }
+    )
+    collector._database_compatibility_levels = {"datadog_test": 130}
+    cursor = mock.Mock()
+    collector._check.connection.open_managed_default_connection.return_value = contextlib.nullcontext()
+    collector._check.connection.get_managed_cursor.return_value = contextlib.nullcontext(cursor)
+    database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+    row = {
+        "schema_name": "test_schema",
+        "schema_id": 1,
+        "owner_name": "dbo",
+        "table_name": "table",
+        "table_id": 101,
+        "columns": '[{"name": "id"}]',
+        "indexes": '[{"name": "pk_table"}]',
+        "foreign_keys": '[{"foreign_key_name": "fk_table"}]',
+        "partition_count": 1,
+    }
+
+    with collector._get_cursor("datadog_test"):
+        mapped_row = collector._map_row(database, row)
+
+    assert collector._check.connection.open_managed_default_connection.call_args_list == [mock.call(KEY_PREFIX)]
+    assert collector._check.connection.get_managed_cursor.call_args_list == [mock.call(KEY_PREFIX)]
+    assert collector._pre_2017_cursor is None
+    assert mapped_row["schemas"][0]["tables"][0]["columns"] == [{"name": "id"}]
 
 
 def test_get_cursor(instance_docker):
@@ -757,6 +907,71 @@ def test_parse_sqlserver_major_version(version, expected_major_version):
 def test_split_sqlserver_host(instance_host, split_host, split_port):
     s_host, s_port = split_sqlserver_host_port(instance_host)
     assert (s_host, s_port) == (split_host, split_port)
+
+
+AGENT_HOSTNAME = 'sql-agent-host.example.com'
+
+
+@pytest.fixture
+def agent_hostname_for_resolve_db_host():
+    datadog_agent.set_hostname(AGENT_HOSTNAME)
+    yield
+    datadog_agent.reset_hostname()
+
+
+@pytest.mark.parametrize(
+    'instance_host,host_part',
+    [
+        (r'SQL-HOST01\INSTANCE01,1601', r'SQL-HOST01\INSTANCE01'),
+        (r'MY-SERVER\SQLEXPRESS,1433', r'MY-SERVER\SQLEXPRESS'),
+        (r'MY-SERVER\SQLEXPRESS', r'MY-SERVER\SQLEXPRESS'),
+    ],
+)
+def test_resolve_db_host_named_instance_returns_agent_hostname(
+    agent_hostname_for_resolve_db_host, instance_host, host_part
+):
+    instance = {
+        'host': instance_host,
+        'username': 'datadog',
+        'password': 'secret',
+    }
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    assert check.host == host_part
+
+    # Agent 7.79+ base resolver returns the literal host string for unresolvable names.
+    with mock.patch(
+        'datadog_checks.sqlserver.sqlserver.agent_host_resolver',
+        return_value=host_part,
+    ):
+        assert check.resolve_db_host() == AGENT_HOSTNAME
+    assert check.resolved_hostname == AGENT_HOSTNAME
+    assert check.database_hostname == AGENT_HOSTNAME
+
+
+@pytest.mark.parametrize(
+    'instance_host,host_part,base_resolver_return',
+    [
+        ('db.example.com,1433', 'db.example.com', 'resolved-db.example.com'),
+        ('192.0.2.10,1433', '192.0.2.10', '192.0.2.10'),
+    ],
+)
+def test_resolve_db_host_plain_host_delegates_to_base_resolver(
+    agent_hostname_for_resolve_db_host, instance_host, host_part, base_resolver_return
+):
+    instance = {
+        'host': instance_host,
+        'username': 'datadog',
+        'password': 'secret',
+    }
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    assert check.host == host_part
+
+    with mock.patch(
+        'datadog_checks.sqlserver.sqlserver.agent_host_resolver',
+        return_value=base_resolver_return,
+    ) as mock_resolver:
+        assert check.resolve_db_host() == base_resolver_return
+        mock_resolver.assert_called_once_with(host_part)
 
 
 @pytest.mark.parametrize(
