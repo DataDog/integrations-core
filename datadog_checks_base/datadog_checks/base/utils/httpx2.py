@@ -221,14 +221,14 @@ class HTTPX2ResponseAdapter:
             if decode_unicode:
                 yield from self._response.iter_lines()
                 return
-            buffer = b''
+            buf = bytearray()
             for chunk in self._response.iter_bytes():
-                buffer += chunk
-                while b'\n' in buffer:
-                    line, _, buffer = buffer.partition(b'\n')
-                    yield line.rstrip(b'\r')
-            if buffer:
-                yield buffer.rstrip(b'\r')
+                buf.extend(chunk)
+                while (idx := buf.find(b'\n')) != -1:
+                    yield bytes(buf[:idx]).rstrip(b'\r')
+                    del buf[: idx + 1]
+            if buf:
+                yield bytes(buf).rstrip(b'\r')
         except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
             raise _map_httpx2_exception(exc) from exc
 

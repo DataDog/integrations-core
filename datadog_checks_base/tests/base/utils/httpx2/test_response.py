@@ -131,6 +131,24 @@ def test_response_iter_lines_rejects_delimiter(status_transport_factory):
         list(response.iter_lines(delimiter=b'|'))
 
 
+def test_response_iter_lines_bytes_across_many_chunks():
+    chunk_size = 1024
+    num_chunks = 6
+    body = b''.join((b'X' * (chunk_size - 1) + b'\n') for _ in range(num_chunks)) + b'tail'
+
+    def streamed():
+        for i in range(0, len(body), chunk_size):
+            yield body[i : i + chunk_size]
+
+    def handler(_request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200, content=streamed())
+
+    http = HTTPX2Wrapper({}, {}, transport=httpx2.MockTransport(handler))
+    response = http.get('http://example.test/')
+    lines = list(response.iter_lines(decode_unicode=False))
+    assert lines == [b'X' * (chunk_size - 1)] * num_chunks + [b'tail']
+
+
 def test_response_elapsed_returns_zero_on_runtime_error(caplog):
     # httpx2's .elapsed raises RuntimeError for in-memory responses. The real httpx2.Request is
     # attached so the adapter's debug log can format request info without a secondary error.
