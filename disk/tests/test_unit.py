@@ -662,14 +662,20 @@ def test_latency_metrics_respect_device_include(aggregator, dd_run_check):
     """
     Latency metrics must honour device_include/device_exclude.
 
-    disk_partitions() returns full paths (e.g. /dev/sda1) while disk_io_counters()
-    returns bare names on Linux (e.g. sda1). The filter must normalise both sides
-    via _base_device_name so that including /dev/sda1 correctly allows sda1's latency
-    metrics and excludes sdb1's.
+    On Linux, disk_partitions() returns full paths (e.g. /dev/sda1) while
+    disk_io_counters() returns bare names (e.g. sda1). The filter normalises both
+    sides via _base_device_name so that including /dev/sda1 correctly allows sda1's
+    latency metrics and excludes sdb1's. On Windows both sources use drive-letter
+    format (e.g. C:), so no normalisation is needed.
     """
-    partition_device = '/dev/sda1'
-    included_io_key = 'sda1'  # bare name as returned by disk_io_counters on Linux
-    excluded_io_key = 'sdb1'
+    if ON_WINDOWS:
+        partition_device = 'C:\\'
+        included_io_key = 'C:'
+        excluded_io_key = 'D:'
+    else:
+        partition_device = '/dev/sda1'
+        included_io_key = 'sda1'  # bare name as returned by disk_io_counters on Linux
+        excluded_io_key = 'sdb1'
 
     io_counters = {included_io_key: MockDiskMetrics(), excluded_io_key: MockDiskMetrics()}
 
