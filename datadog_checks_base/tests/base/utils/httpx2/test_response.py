@@ -8,6 +8,7 @@ import httpx2
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_protocol import HTTPResponseProtocol
 from datadog_checks.base.utils.httpx2 import DEFAULT_CHUNK_SIZE, HTTPX2ResponseAdapter, HTTPX2Wrapper
 
 
@@ -221,3 +222,15 @@ def test_response_cookies_exposed():
     http = HTTPX2Wrapper({}, {}, transport=httpx2.MockTransport(handler))
     response = http.get('http://example.test/')
     assert response.cookies['session'] == 'abc123'
+
+
+def test_response_adapter_satisfies_protocol(status_transport_factory):
+    transport = status_transport_factory(200, b'')
+    http = HTTPX2Wrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    assert isinstance(response, HTTPResponseProtocol)
+
+
+@pytest.mark.parametrize('attr', ['encoding', 'url', 'cookies', 'elapsed'])
+def test_response_protocol_declares_extended_attrs(attr):
+    assert attr in HTTPResponseProtocol.__annotations__ or hasattr(HTTPResponseProtocol, attr)
