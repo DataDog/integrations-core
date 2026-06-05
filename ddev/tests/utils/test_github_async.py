@@ -27,6 +27,7 @@ from ddev.utils.github_async.models import (
     PullRequestRef,
     PullRequestReviewComment,
     WorkflowDispatchResult,
+    WorkflowJobsList,
     WorkflowRun,
 )
 
@@ -333,6 +334,79 @@ async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
 
     client = _make_client(httpx.MockTransport(handler))
     async for _ in client.list_workflow_run_artifacts("owner", "repo", 1, per_page=100):
+        pass
+
+
+# ---------------------------------------------------------------------------
+# list_workflow_jobs (pagination)
+# ---------------------------------------------------------------------------
+
+
+def _workflow_job(idx: int, conclusion: str = "success") -> dict[str, Any]:
+    return {
+        "id": idx,
+        "run_id": 1,
+        "name": f"job-{idx}",
+        "status": "completed",
+        "conclusion": conclusion,
+        "html_url": f"https://github.com/o/r/runs/{idx}",
+        "steps": [{"name": "Run tests", "status": "completed", "conclusion": conclusion, "number": 1}],
+    }
+
+
+async def test_list_workflow_jobs_single_page() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.path == "/repos/owner/repo/actions/runs/1/jobs"
+        return _json_response({"total_count": 2, "jobs": [_workflow_job(1), _workflow_job(2, "failure")]})
+
+    client = _make_client(httpx.MockTransport(handler))
+    pages = []
+    async for page in client.list_workflow_jobs("owner", "repo", 1):
+        pages.append(page)
+
+    assert len(pages) == 1
+    assert isinstance(pages[0].data, WorkflowJobsList)
+    assert pages[0].data.total_count == 2
+    assert pages[0].data.jobs[1].conclusion == "failure"
+    assert pages[0].data.jobs[0].steps[0].name == "Run tests"
+
+
+async def test_list_workflow_jobs_two_pages() -> None:
+    call_count = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            link = f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'
+            return _json_response({"total_count": 2, "jobs": [_workflow_job(1)]}, headers={"link": link})
+        return _json_response({"total_count": 2, "jobs": [_workflow_job(2)]})
+
+    client = _make_client(httpx.MockTransport(handler))
+    pages = []
+    async for page in client.list_workflow_jobs("owner", "repo", 1):
+        pages.append(page)
+
+    assert len(pages) == 2
+    assert pages[0].data.jobs[0].id == 1
+    assert pages[1].data.jobs[0].id == 2
+
+
+async def test_list_workflow_jobs_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        async for _ in client.list_workflow_jobs("o", "r", 1):
+            pass
+    assert exc_info.value.response.status_code == 404
+
+
+async def test_list_workflow_jobs_per_page_forwarded() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params["per_page"] == "100"
+        return _json_response({"total_count": 0, "jobs": []})
+
+    client = _make_client(httpx.MockTransport(handler))
+    async for _ in client.list_workflow_jobs("owner", "repo", 1, per_page=100):
         pass
 
 

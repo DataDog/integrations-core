@@ -15,7 +15,8 @@ import httpx
 import pytest
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
-from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, _conclusion_to_status
+from ddev.cli.ci.tests._status import conclusion_to_status
+from ddev.cli.ci.tests.task_test_runner import TaskTestRunner
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
@@ -223,7 +224,7 @@ def _drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
 
 
 # ---------------------------------------------------------------------------
-# _conclusion_to_status
+# conclusion_to_status
 # ---------------------------------------------------------------------------
 
 
@@ -241,7 +242,7 @@ def _drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
     ],
 )
 def test_conclusion_to_status(conclusion: str | None, expected: str) -> None:
-    assert _conclusion_to_status(conclusion) == expected
+    assert conclusion_to_status(conclusion) == expected
 
 
 # ---------------------------------------------------------------------------

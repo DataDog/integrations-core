@@ -7,42 +7,14 @@ import asyncio
 import dataclasses
 import json
 import logging
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
+from ddev.cli.ci.tests._status import conclusion_to_status
 from ddev.cli.ci.tests.messages import BatchFinished, TestBatch
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import WorkflowRun
-
-
-def _conclusion_to_status(conclusion: str | None) -> Literal["success", "failure", "skipped"]:
-    """Map a GitHub Actions conclusion string to a BatchFinished status.
-
-    Note: ``None`` maps to ``"failure"`` here while the check run reports ``"neutral"``
-    for the same input. The asymmetry is intentional — BatchFinished consumers want a
-    binary outcome, the check UI prefers an explicit ``"neutral"`` badge.
-    """
-    if conclusion == "success":
-        return "success"
-    if conclusion == "skipped":
-        return "skipped"
-    return "failure"
-
-
-@dataclass(frozen=True)
-class TestRunnerOptions:
-    """Configuration for a ``TaskTestRunner``."""
-
-    owner: str
-    repo: str
-    workflow_id: str | int
-    ref: str
-    base_sha: str
-    checkout_sha: str
-    artifacts_base_path: Path
-    poll_interval_seconds: float = 30.0
 
 
 class TaskTestRunner(AsyncProcessor[TestBatch]):
@@ -52,10 +24,29 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     and emits a ``BatchFinished``.
     """
 
-    def __init__(self, name: str, client: AsyncGitHubClient, options: TestRunnerOptions) -> None:
+    def __init__(
+        self,
+        name: str,
+        client: AsyncGitHubClient,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        base_sha: str,
+        checkout_sha: str,
+        artifacts_base_path: Path,
+        poll_interval_seconds: float = 30.0,
+    ) -> None:
         super().__init__(name)
         self._client = client
-        self._options = options
+        self._owner = owner
+        self._repo = repo
+        self._workflow_id = workflow_id
+        self._ref = ref
+        self._base_sha = base_sha
+        self._checkout_sha = checkout_sha
+        self._artifacts_base_path = artifacts_base_path
+        self._poll_interval_seconds = poll_interval_seconds
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
     async def process_message(self, message: TestBatch) -> None:
@@ -63,23 +54,23 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         log_extra: dict[str, Any] = {"batch_id": message.id}
 
         dispatch = await self._client.create_workflow_dispatch(
-            self._options.owner, self._options.repo, self._options.workflow_id, ref=self._options.ref, inputs=inputs
+            self._owner, self._repo, self._workflow_id, ref=self._ref, inputs=inputs
         )
         run_id = dispatch.data.workflow_run_id
         log_extra["run_id"] = run_id
         self._logger.info("Dispatched batch", extra=log_extra)
 
-        run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
-        workflow_url = run.data.html_url
+        run = await self._client.get_workflow_run(self._owner, self._repo, run_id)
+        workflow_url = run.data.html_url or ""
         log_extra["workflow_url"] = workflow_url
 
         check = await self._client.create_check_run(
-            self._options.owner,
-            self._options.repo,
+            self._owner,
+            self._repo,
             name=f"test-batch/{message.id}",
-            head_sha=self._options.base_sha,
+            head_sha=self._base_sha,
             status="in_progress",
-            details_url=workflow_url,
+            details_url=workflow_url or None,
         )
         check_run_id = check.data.id
         log_extra["check_run_id"] = check_run_id
@@ -88,52 +79,36 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         final_conclusion: str = "cancelled"
         finished: BatchFinished | None = None
         try:
-            timed_out = False
             if run.data.status != "completed":
-                completed = await self._poll_until_complete(run_id, log_extra)
-                if completed is None:
-                    final_conclusion = "timed_out"
-                    timed_out = True
-                    self._logger.warning("Workflow polling timed out", extra=log_extra)
-                else:
-                    run = completed
+                run = await self._poll_until_complete(run_id, log_extra)
             else:
                 self._logger.info("Workflow completed", extra=log_extra)
 
-            if timed_out:
-                finished = BatchFinished(
-                    id=message.id,
-                    status="failure",
-                    run_id=run_id,
-                    workflow_url=workflow_url,
-                    artifacts_path="",
-                    timed_out=True,
-                )
-            else:
-                raw = run.data.conclusion
-                if raw is None:
-                    self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
-                final_conclusion = raw or "neutral"
+            raw = run.data.conclusion
+            if raw is None:
+                self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
+            final_conclusion = raw or "neutral"
 
-                artifacts_path = await self._download_artifacts(run_id, log_extra)
-                self._logger.info("Artifacts downloaded", extra=log_extra)
+            artifacts_path = await self._download_artifacts(run_id, log_extra)
+            self._logger.info("Artifacts downloaded", extra=log_extra)
 
-                finished = BatchFinished(
-                    id=message.id,
-                    status=_conclusion_to_status(raw),
-                    run_id=run_id,
-                    workflow_url=workflow_url,
-                    artifacts_path=str(artifacts_path),
-                )
+            finished = BatchFinished(
+                id=message.id,
+                status=conclusion_to_status(raw),
+                run_id=run_id,
+                workflow_url=workflow_url,
+                artifacts_path=str(artifacts_path),
+                job_list=message.job_list,
+            )
         finally:
             try:
                 await self._client.update_check_run(
-                    self._options.owner,
-                    self._options.repo,
+                    self._owner,
+                    self._repo,
                     check_run_id,
                     status="completed",
                     conclusion=final_conclusion,
-                    details_url=workflow_url,
+                    details_url=workflow_url or None,
                 )
                 self._logger.info("Check run closed", extra={**log_extra, "conclusion": final_conclusion})
             except Exception:
@@ -145,8 +120,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
 
     async def _poll_until_complete(self, run_id: int, log_extra: dict[str, Any]) -> GitHubResponse[WorkflowRun]:
         while True:
-            await asyncio.sleep(self._options.poll_interval_seconds)
-            run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
+            await asyncio.sleep(self._poll_interval_seconds)
+            run = await self._client.get_workflow_run(self._owner, self._repo, run_id)
             if run.data.status == "completed":
                 self._logger.info("Workflow completed", extra=log_extra)
                 return run
@@ -154,16 +129,16 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
         return {
             "batch_id": message.id,
-            "checkout_sha": self._options.checkout_sha,
+            "checkout_sha": self._checkout_sha,
             "integrations": json.dumps(message.integrations),
             "job_list": json.dumps([dataclasses.asdict(job) for job in message.job_list]),
         }
 
     async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> Path:
-        run_path = self._options.artifacts_base_path / str(run_id)
+        run_path = self._artifacts_base_path / str(run_id)
         failures: list[tuple[int, str]] = []
         try:
-            async for page in self._client.list_workflow_run_artifacts(self._options.owner, self._options.repo, run_id):
+            async for page in self._client.list_workflow_run_artifacts(self._owner, self._repo, run_id):
                 for artifact in page.data.artifacts:
                     if artifact.expired:
                         self._logger.info(
