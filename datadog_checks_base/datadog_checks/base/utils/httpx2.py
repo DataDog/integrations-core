@@ -279,6 +279,9 @@ class HTTPX2Wrapper:
 
         # proxies=None mirrors RequestsWrapper.options for consumers (e.g. http_check).
         # TODO: wire proxies through to httpx2 as part of the ongoing httpx migration.
+        # Note: options['headers'] is a mirror of _client.headers maintained by set_header.
+        # Direct mutation (e.g. self.options['headers']['X-Foo'] = 'bar') will NOT reach the wire.
+        # Use set_header/get_header for header mutations.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,

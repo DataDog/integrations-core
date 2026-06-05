@@ -202,6 +202,15 @@ def test_set_header_adds_new_header(capturing_transport, captured_requests):
     assert captured_requests[0].headers['x-new'] == 'value'
 
 
+def test_direct_options_headers_mutation_does_not_propagate(capturing_transport, captured_requests):
+    # Characterization test for the documented constraint: options['headers'] is a mirror,
+    # not the source of truth. Direct mutation does NOT reach the wire. Use set_header instead.
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    http.options['headers']['X-Direct'] = 'leaked'
+    http.get('http://example.test/')
+    assert 'x-direct' not in captured_requests[0].headers
+
+
 def test_remapper_renames_field(capturing_transport):
     remapper = {'ssl_validation': {'name': 'tls_verify'}}
     http = HTTPX2Wrapper({'ssl_validation': False}, {}, remapper=remapper, transport=capturing_transport)
