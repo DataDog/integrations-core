@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 _SYSTEM_SCHEMAS = frozenset(['SYS', 'SYSTEM', 'PUBLIC'])
 _SYSTEM_SCHEMA_PREFIX = '_SYS_'
 
-CURRENT_DATABASE_QUERY = "SELECT DATABASE_NAME, DESCRIPTION FROM SYS.M_DATABASE"
+CURRENT_DATABASE_QUERY = "SELECT DATABASE_NAME FROM SYS.M_DATABASE"
+CURRENT_DATABASE_DESCRIPTION_QUERY = "SELECT DESCRIPTION FROM SYS.M_DATABASE"
 
 SCHEMAS_QUERY = """
 SELECT SCHEMA_NAME, SCHEMA_OWNER
@@ -70,7 +71,16 @@ class HanaSchemaCollector(SchemaCollector):
                 cursor.execute(CURRENT_DATABASE_QUERY)
                 row = cursor.fetchone()
                 if row:
-                    return [{'name': row[0], 'description': row[1] or ''}]
+                    db_name = row[0]
+                    description = ''
+                    try:
+                        cursor.execute(CURRENT_DATABASE_DESCRIPTION_QUERY)
+                        desc_row = cursor.fetchone()
+                        if desc_row:
+                            description = desc_row[0] or ''
+                    except Exception:
+                        pass
+                    return [{'name': db_name, 'description': description}]
         except Exception as e:
             self._log.warning("Could not fetch current HANA database info: %s", e)
         return [{'name': self._check._server, 'description': ''}]
