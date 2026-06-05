@@ -385,8 +385,10 @@ class HTTPX2Wrapper:
         if self._log_requests:
             self.logger.debug('Sending %s request to %s', method, url)
 
+        follow_redirects = (
+            bool(options['follow_redirects']) if 'follow_redirects' in options else httpx2.USE_CLIENT_DEFAULT
+        )
         request_kwargs = self._build_request_kwargs(options, method=method, url=url)
-        follow_redirects = request_kwargs.pop('follow_redirects', httpx2.USE_CLIENT_DEFAULT)
         try:
             request = self._client.build_request(method, url, **request_kwargs)
             response = self._client.send(request, stream=True, follow_redirects=follow_redirects)
@@ -436,9 +438,6 @@ class HTTPX2Wrapper:
             else:
                 value = float(timeout_value)
                 kwargs['timeout'] = _make_timeout(value, value)
-
-        if 'follow_redirects' in options:
-            kwargs['follow_redirects'] = bool(options['follow_redirects'])
 
         return kwargs
 
