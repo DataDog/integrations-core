@@ -2,7 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""TUF pointer-file downloader for the v2 repository format."""
+"""TUF pointer-file downloader for the v2 repository format.
+
+Delegation routing is intentionally left to ``tuf.ngclient.Updater``. The downloader
+only knows the *target path* (``{project}/{version}.json``) and never references a
+delegated-role name. Whichever delegated role claims the path — via ``paths`` or
+``path_hash_prefixes`` in its parent ``Targets`` metadata — is discovered by the TUF
+client as it walks the delegation tree. New delegation layouts can therefore roll
+out in the repository without any change to this module.
+"""
 
 from __future__ import annotations
 
@@ -10,6 +18,8 @@ import hashlib
 import importlib.resources
 import json
 import logging
+import posixpath
+import re
 import tempfile
 import urllib.request
 from pathlib import Path
@@ -33,6 +43,7 @@ V2_REPOSITORY_URL = "https://agent-integration-wheels-prod.s3.amazonaws.com"
 WHEEL_FETCH_TIMEOUT_SECONDS = 60
 
 REQUIRED_POINTER_KEYS = ('digest', 'length', 'wheel_path')
+SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
 
 
 class TUFPointerDownloader:
@@ -77,7 +88,20 @@ class TUFPointerDownloader:
         for key in REQUIRED_POINTER_KEYS:
             if key not in pointer:
                 raise MalformedPointerError(project, key)
-        if not pointer['wheel_path'].startswith('/'):
+
+        digest = pointer['digest']
+        if not isinstance(digest, str) or not SHA256_HEX_RE.match(digest):
+            raise MalformedPointerError(project, 'digest')
+
+        length = pointer['length']
+        if not isinstance(length, int) or isinstance(length, bool) or length < 0:
+            raise MalformedPointerError(project, 'length')
+
+        wheel_path = pointer['wheel_path']
+        if not isinstance(wheel_path, str) or not wheel_path.startswith('/') or wheel_path.startswith('//'):
+            raise MalformedPointerError(project, 'wheel_path')
+        normalized = posixpath.normpath(wheel_path)
+        if normalized != wheel_path or '..' in wheel_path.split('/'):
             raise MalformedPointerError(project, 'wheel_path')
 
     @staticmethod
