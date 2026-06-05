@@ -70,7 +70,6 @@ def instance():
     }
 
 
-
 def _get_url_path(url):
     parsed = urlparse(url)
     return parsed.path.replace('::', '__')
