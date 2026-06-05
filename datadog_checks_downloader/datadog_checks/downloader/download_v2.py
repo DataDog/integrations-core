@@ -5,11 +5,11 @@
 """TUF pointer-file downloader for the v2 repository format.
 
 The downloader and publisher pipeline share a stable TUF target-path contract:
-``integrations/{project}/{version}.json``. The first path segment is a storage
-namespace required by TUF-on-CI's delegated target layout. TUF delegation routing
-itself is still left to ``tuf.ngclient.Updater``: as long as the target path remains
-stable, the repository can change which delegated role signs that path without any
-client-side change.
+``integrations/v1/{project}/{version}.json``. The first path segment is a storage
+namespace required by TUF-on-CI's delegated target layout, and the second segment
+versions the pointer-file contract. TUF delegation routing itself is still left to
+``tuf.ngclient.Updater``: as long as the target path remains stable, the repository
+can change which delegated role signs that path without any client-side change.
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ V2_REPOSITORY_URL = "https://agent-integration-wheels-prod.s3.amazonaws.com"
 WHEEL_FETCH_TIMEOUT_SECONDS = 60
 
 REQUIRED_POINTER_KEYS = ('digest', 'length', 'wheel_path')
-V2_POINTER_TARGET_PREFIX = 'integrations'
+V2_POINTER_TARGET_PREFIX = 'integrations/v1'
 SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
 
 

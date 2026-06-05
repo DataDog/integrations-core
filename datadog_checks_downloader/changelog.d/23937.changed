@@ -1,1 +1,1 @@
-Tighten v2 downloader pointer validation and document its delegation-agnostic contract.
+Use the versioned ``integrations/v1`` v2 target namespace and tighten pointer validation.

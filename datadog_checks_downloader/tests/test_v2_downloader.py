@@ -86,8 +86,8 @@ class TestTargetResolution:
     @pytest.mark.parametrize(
         'version,expected_target',
         [
-            pytest.param(VERSION, f'integrations/{PROJECT}/{VERSION}.json', id='explicit-version'),
-            pytest.param(None, f'integrations/{PROJECT}/latest.json', id='missing-version'),
+            pytest.param(VERSION, f'integrations/v1/{PROJECT}/{VERSION}.json', id='explicit-version'),
+            pytest.param(None, f'integrations/v1/{PROJECT}/latest.json', id='missing-version'),
         ],
     )
     def test_get_pointer_requests_expected_target(self, mock_urlopen, mock_updater_cls, version, expected_target):
@@ -305,7 +305,7 @@ class TestUpdaterContract:
 
         mock_updater = mock_updater_cls.return_value
         call = mock_updater.get_targetinfo.call_args
-        assert call.args == (f'integrations/{PROJECT}/{VERSION}.json',)
+        assert call.args == (f'integrations/v1/{PROJECT}/{VERSION}.json',)
         assert call.kwargs == {}
 
     def test_target_path_uses_stable_integrations_namespace(self, mock_urlopen, mock_updater_cls):
@@ -313,7 +313,7 @@ class TestUpdaterContract:
         downloader.get_pointer(PROJECT, version=VERSION)
 
         target_path = mock_updater_cls.return_value.get_targetinfo.call_args.args[0]
-        assert target_path.startswith('integrations/')
+        assert target_path.startswith('integrations/v1/')
         assert not target_path.startswith('targets/')
         assert not target_path.startswith('wheels-signer-')
 
@@ -336,7 +336,7 @@ def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) ->
 class TestDelegationTraversal:
     """End-to-end: build a signed TUF repo using the v2 target-path contract.
 
-    The stable target path starts with ``integrations/``. The TUF repository can
+    The stable target path starts with ``integrations/v1/``. The TUF repository can
     map that namespace to any compatible delegation topology while the downloader
     keeps asking for the same target path.
     """
@@ -361,9 +361,9 @@ class TestDelegationTraversal:
         repo = tmp_path / 'repo'
         build_delegated_repo(
             repo,
-            delegated_targets={f'integrations/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_targets={f'integrations/v1/{project}/{version}.json': json.dumps(pointer).encode()},
             delegated_role_name='integrations',
-            paths=[f'integrations/{project}/*'],
+            paths=[f'integrations/v1/{project}/*'],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
@@ -374,7 +374,7 @@ class TestDelegationTraversal:
 
     def test_resolves_through_hash_prefix_delegation(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
-        target_path = f'integrations/{project}/{version}.json'
+        target_path = f'integrations/v1/{project}/{version}.json'
         _, _, pointer = self._make_pointer_target(project, version)
 
         prefix = hashlib.sha256(target_path.encode()).hexdigest()[:2]
@@ -400,9 +400,9 @@ class TestDelegationTraversal:
         repo = tmp_path / 'repo'
         build_delegated_repo(
             repo,
-            delegated_targets={f'integrations/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_targets={f'integrations/v1/{project}/{version}.json': json.dumps(pointer).encode()},
             delegated_role_name='integrations',
-            paths=['integrations/datadog-postgres/*'],
+            paths=['integrations/v1/datadog-postgres/*'],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
