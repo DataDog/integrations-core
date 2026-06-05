@@ -65,8 +65,27 @@ def test_agentcheck_http_dispatch(instance, expected_cls_name):
         assert type(check.http).__name__ == expected_cls_name
     finally:
         # Read the cached attribute directly (AgentCheck.http is a property that may rebuild).
-        http = check._http
+        http = getattr(check, '_http', None)
         if http is not None:
             close = getattr(http, 'close', None)
             if close is not None:
                 close()
+
+
+def test_teardown_guard_preserves_build_error():
+    from datadog_checks.base import AgentCheck
+
+    class BoomCheck(AgentCheck):
+        def _build_http_client(self, instance):
+            raise RuntimeError('build failed')
+
+    check = BoomCheck('test', {}, [{}])
+    with pytest.raises(RuntimeError, match='build failed'):
+        try:
+            _ = check.http
+        finally:
+            http = getattr(check, '_http', None)
+            if http is not None:
+                close = getattr(http, 'close', None)
+                if close is not None:
+                    close()
