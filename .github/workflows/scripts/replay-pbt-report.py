@@ -811,6 +811,7 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                         continue
                     path = sanitize_text(finding.get("path", ""), max_len=220)
                     asset_type = sanitize_text(finding.get("asset_type") or infer_asset_type(path), max_len=80)
+                    tags = finding.get("tags") if isinstance(finding.get("tags"), list) else []
                     finding_row = {
                         "level": sanitize_text(finding.get("level", ""), max_len=50),
                         "property": sanitize_text(property_name, max_len=100),
@@ -823,8 +824,18 @@ def load_findings_and_coverages(root: Path) -> tuple[list[dict[str, Any]], list[
                         "tag_key": sanitize_text(finding.get("tag_key", ""), max_len=120),
                         "path": path,
                         "asset_type": asset_type,
+                        "collection": sanitize_text(finding.get("collection", ""), max_len=80),
                         "message": sanitize_text(finding.get("message", ""), max_len=400),
                         "query": sanitize_text(finding.get("query", ""), max_len=300),
+                        "reading": sanitize_text(finding.get("reading", ""), max_len=40),
+                        "index": sanitize_text(finding.get("index", ""), max_len=40),
+                        "value": sanitize_text(finding.get("value", ""), max_len=120),
+                        "submission_type": sanitize_text(finding.get("submission_type", ""), max_len=80),
+                        "mapped_type": sanitize_text(finding.get("mapped_type", ""), max_len=80),
+                        "metadata_type": sanitize_text(finding.get("metadata_type", ""), max_len=80),
+                        "hostname": sanitize_text(finding.get("hostname", ""), max_len=160),
+                        "device": sanitize_text(finding.get("device", ""), max_len=160),
+                        "tags": sanitize_text(",".join(str(tag) for tag in tags), max_len=500),
                     }
                     finding_row["display_message"] = sanitize_text(asset_finding_message(finding_row), max_len=400)
                     findings.append(finding_row)
@@ -971,6 +982,20 @@ def asset_finding_message(finding: dict[str, Any]) -> str:
         return f"{source} query metric was not emitted by this replay fixture."
     if message == "Integration asset query references a metric missing from metadata.csv.":
         return f"{source} query references a metric missing from metadata.csv."
+
+    details = []
+    if finding.get("value") not in (None, ""):
+        details.append(f"value={finding.get('value')}")
+    if finding.get("submission_type"):
+        details.append(f"type={finding.get('submission_type')}")
+    if finding.get("metadata_type"):
+        details.append(f"metadata_type={finding.get('metadata_type')}")
+    if finding.get("reading") not in (None, ""):
+        details.append(f"reading={finding.get('reading')}")
+    if finding.get("index") not in (None, ""):
+        details.append(f"index={finding.get('index')}")
+    if details:
+        return f"{message} ({', '.join(details)})"
     return message
 
 
@@ -2470,7 +2495,7 @@ def main() -> None:
     write_tsv(args.out_dir / "targets.tsv", rows, ["status", "category", "category_label", "validation_family", "integration", "environment", "target", "fixture_ref", "target_ref", "failing_property_count", "summary"])
     write_tsv(args.out_dir / "failure-categories.tsv", categories, ["category", "label", "count", "description"])
     write_tsv(args.out_dir / "property-results.tsv", property_results, ["status", "property", "validation_family", "requires_replay_cache", "integration", "environment", "target"])
-    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "validation_family", "check", "integration", "environment", "target", "asset_type", "collection", "metric", "tag_key", "path", "message", "display_message", "query"])
+    write_tsv(args.out_dir / "findings.tsv", findings, ["level", "property", "validation_family", "check", "integration", "environment", "target", "asset_type", "collection", "metric", "value", "submission_type", "mapped_type", "metadata_type", "reading", "index", "tags", "hostname", "device", "tag_key", "path", "message", "display_message", "query"])
     write_tsv(
         args.out_dir / "coverage-summary.tsv",
         coverages,

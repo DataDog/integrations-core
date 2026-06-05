@@ -314,9 +314,19 @@ def _assert_same_context_coverage(original: dict[str, Any], mutated: dict[str, A
 
 
 def _normalized_reading_outputs(output: dict[str, Any]) -> list[dict[str, Any]]:
+    return [reading_output for _, reading_output in _iter_normalized_reading_outputs(output)]
+
+
+def _iter_normalized_reading_outputs(output: dict[str, Any]) -> Iterator[tuple[int, dict[str, Any]]]:
     if output.get('version') == 2 and isinstance(output.get('readings'), list):
-        return [reading.get('output', {}) for reading in output['readings']]
-    return [output]
+        for fallback_index, reading in enumerate(output['readings']):
+            if isinstance(reading, dict):
+                raw_index = reading.get('index', fallback_index)
+                reading_index = raw_index if isinstance(raw_index, int) else fallback_index
+                reading_output = reading.get('output', {})
+                yield reading_index, reading_output if isinstance(reading_output, dict) else {}
+        return
+    yield 0, output
 
 
 def _order_insensitive(value: Any) -> Any:
@@ -398,8 +408,17 @@ class ReplayPBTFinding:
     tag_key: str | None = None
     asset_type: str | None = None
     collection: str | None = None
+    reading: int | None = None
+    index: int | None = None
+    value: int | float | str | None = None
+    submission_type: str | None = None
+    mapped_type: str | None = None
+    metadata_type: str | None = None
+    hostname: str | None = None
+    device: str | None = None
+    tags: tuple[str, ...] = ()
 
-    def as_dict(self) -> dict[str, str | None]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             'level': self.level,
             'check': self.check,
@@ -410,6 +429,15 @@ class ReplayPBTFinding:
             'tag_key': self.tag_key,
             'asset_type': self.asset_type,
             'collection': self.collection,
+            'reading': self.reading,
+            'index': self.index,
+            'value': self.value,
+            'submission_type': self.submission_type,
+            'mapped_type': self.mapped_type,
+            'metadata_type': self.metadata_type,
+            'hostname': self.hostname,
+            'device': self.device,
+            'tags': list(self.tags),
         }
 
 
@@ -976,6 +1004,13 @@ def _write_findings(property_dir: Path, findings: list[ReplayPBTFinding]) -> Non
             [
                 f'- **{finding.level.upper()}** `{finding.check}`: {finding.message}',
                 f'  - metric: `{finding.metric}`' if finding.metric else '',
+                f'  - value: `{finding.value}`' if finding.value is not None else '',
+                f'  - submission type: `{finding.submission_type}`' if finding.submission_type else '',
+                f'  - mapped metadata type: `{finding.mapped_type}`' if finding.mapped_type else '',
+                f'  - metadata type: `{finding.metadata_type}`' if finding.metadata_type else '',
+                f'  - reading: `{finding.reading}`' if finding.reading is not None else '',
+                f'  - index: `{finding.index}`' if finding.index is not None else '',
+                f'  - tags: `{list(finding.tags)}`' if finding.tags else '',
                 f'  - tag key: `{finding.tag_key}`' if finding.tag_key else '',
                 f'  - path: `{finding.path}`' if finding.path else '',
                 f'  - query: `{finding.query}`' if finding.query else '',
@@ -1014,18 +1049,80 @@ def _handle_findings(context: ReplayPBTContext, property_name: str, findings: li
     assert not failures, f'{property_name} findings: {[finding.as_dict() for finding in failures[:20]]!r}'
 
 
-def _assert_rate_values_finite(output: dict[str, Any]) -> None:
+def _metric_finding(
+    *,
+    level: str,
+    check: str,
+    message: str,
+    reading: int,
+    index: int,
+    metric: dict[str, Any],
+) -> ReplayPBTFinding:
+    submission_type = AGGREGATOR_TYPE_NAMES.get(metric.get('type'))
+    value = metric.get('value')
+    return ReplayPBTFinding(
+        level=level,
+        check=check,
+        message=message,
+        collection='metrics',
+        metric=metric.get('name') if isinstance(metric.get('name'), str) else None,
+        reading=reading,
+        index=index,
+        value=value if isinstance(value, int | float | str) else repr(value),
+        submission_type=submission_type,
+        hostname=metric.get('hostname') if isinstance(metric.get('hostname'), str) else None,
+        device=metric.get('device') if isinstance(metric.get('device'), str) else None,
+        tags=tuple(tag for tag in metric.get('tags') or [] if isinstance(tag, str)),
+    )
+
+
+def _non_finite_metric_findings(output: dict[str, Any], *, check: str) -> list[ReplayPBTFinding]:
+    findings = []
+    for reading, reading_output in _iter_normalized_reading_outputs(output):
+        for index, metric in enumerate(reading_output.get('metrics', [])):
+            value = metric.get('value')
+            if not isinstance(value, int | float) or not math.isfinite(value):
+                findings.append(
+                    _metric_finding(
+                        level='error',
+                        check=check,
+                        message='Metric value is not finite.',
+                        reading=reading,
+                        index=index,
+                        metric=metric,
+                    )
+                )
+    return findings
+
+
+def _rate_value_findings(output: dict[str, Any]) -> tuple[int, list[ReplayPBTFinding]]:
     seen = 0
-    for reading_output in _normalized_reading_outputs(output):
-        _assert_normalized_output_contract(reading_output)
+    findings = []
+    for reading, reading_output in _iter_normalized_reading_outputs(output):
         for index, metric in enumerate(reading_output.get('metrics', [])):
             if metric.get('type') != RATE:
                 continue
             seen += 1
             value = metric.get('value')
-            assert isinstance(value, int | float) and math.isfinite(value), f'rate metric[{index}] is not finite'
+            if not isinstance(value, int | float) or not math.isfinite(value):
+                findings.append(
+                    _metric_finding(
+                        level='error',
+                        check='rate-finite-values',
+                        message='Rate metric value is not finite.',
+                        reading=reading,
+                        index=index,
+                        metric=metric,
+                    )
+                )
+    return seen, findings
+
+
+def _assert_rate_values_finite(output: dict[str, Any]) -> None:
+    seen, findings = _rate_value_findings(output)
     if seen == 0:
         pytest.skip('No rate metrics emitted by this replay cache.')
+    assert not findings, f'rate metric[{findings[0].index}] is not finite'
 
 
 UPPER_BOUND_TAG_PREFIX = 'upper_bound:'
@@ -1154,9 +1251,10 @@ def _assert_histogram_inf_equals_count(output: dict[str, Any]) -> None:
     assert not mismatches, f'Histogram +Inf bucket does not equal .count: {mismatches[:10]!r}'
 
 
-def _assert_monotonic_count_values_nonnegative(output: dict[str, Any]) -> None:
+def _monotonic_count_value_findings(output: dict[str, Any]) -> tuple[int, list[ReplayPBTFinding]]:
     seen = 0
-    for reading_output in _normalized_reading_outputs(output):
+    findings = []
+    for reading, reading_output in _iter_normalized_reading_outputs(output):
         _assert_normalized_output_contract(reading_output)
         for index, metric in enumerate(reading_output.get('metrics', [])):
             if metric.get('type') != MONOTONIC_COUNT:
@@ -1165,9 +1263,91 @@ def _assert_monotonic_count_values_nonnegative(output: dict[str, Any]) -> None:
                 continue
             seen += 1
             value = metric.get('value')
-            assert isinstance(value, int | float) and value >= 0, f'monotonic_count metric[{index}] is negative'
+            if not isinstance(value, int | float) or value < 0:
+                findings.append(
+                    _metric_finding(
+                        level='error',
+                        check='monotonic-count-nonnegative',
+                        message='Monotonic count metric value is negative.',
+                        reading=reading,
+                        index=index,
+                        metric=metric,
+                    )
+                )
+    return seen, findings
+
+
+def _assert_monotonic_count_values_nonnegative(output: dict[str, Any]) -> None:
+    seen, findings = _monotonic_count_value_findings(output)
     if seen == 0:
         pytest.skip('No non-sum monotonic_count metrics emitted by this replay cache.')
+    assert not findings, f'monotonic_count metric[{findings[0].index}] is negative'
+
+
+def _emitted_metric_metadata_findings(
+    output: dict[str, Any],
+    metadata_rows: dict[str, dict[str, str]],
+    *,
+    configured_custom_metrics: set[str] | None = None,
+) -> tuple[int, int, list[ReplayPBTFinding]]:
+    configured_custom_metrics = configured_custom_metrics or set()
+    findings = []
+    emitted_count = 0
+    validated_count = 0
+    for reading, reading_output in _iter_normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
+        emitted_count += len(reading_output.get('metrics', []))
+        for index, metric in enumerate(reading_output.get('metrics', [])):
+            name = metric.get('name')
+            if name in configured_custom_metrics:
+                continue
+
+            validated_count += 1
+            submission_type = AGGREGATOR_TYPE_NAMES.get(metric.get('type'))
+            mapped_type = SUBMISSION_TO_METADATA_TYPE.get(submission_type or '')
+            row = metadata_rows.get(name)
+            if row is None:
+                findings.append(
+                    ReplayPBTFinding(
+                        level='error',
+                        check='metadata-emitted-metrics',
+                        message='Emitted metric is missing from metadata.csv.',
+                        collection='metrics',
+                        metric=name if isinstance(name, str) else None,
+                        reading=reading,
+                        index=index,
+                        value=metric.get('value') if isinstance(metric.get('value'), int | float | str) else None,
+                        submission_type=submission_type,
+                        mapped_type=mapped_type,
+                        hostname=metric.get('hostname') if isinstance(metric.get('hostname'), str) else None,
+                        device=metric.get('device') if isinstance(metric.get('device'), str) else None,
+                        tags=tuple(tag for tag in metric.get('tags') or [] if isinstance(tag, str)),
+                    )
+                )
+                continue
+
+            expected_type = row.get('metric_type')
+            if mapped_type != expected_type:
+                findings.append(
+                    ReplayPBTFinding(
+                        level='error',
+                        check='metadata-emitted-metrics',
+                        message='Emitted metric type does not match metadata.csv.',
+                        collection='metrics',
+                        metric=name if isinstance(name, str) else None,
+                        reading=reading,
+                        index=index,
+                        value=metric.get('value') if isinstance(metric.get('value'), int | float | str) else None,
+                        submission_type=submission_type,
+                        mapped_type=mapped_type,
+                        metadata_type=expected_type,
+                        hostname=metric.get('hostname') if isinstance(metric.get('hostname'), str) else None,
+                        device=metric.get('device') if isinstance(metric.get('device'), str) else None,
+                        tags=tuple(tag for tag in metric.get('tags') or [] if isinstance(tag, str)),
+                    )
+                )
+
+    return emitted_count, validated_count, findings
 
 
 def _assert_emitted_metrics_match_metadata(
@@ -1176,43 +1356,25 @@ def _assert_emitted_metrics_match_metadata(
     *,
     configured_custom_metrics: set[str] | None = None,
 ) -> None:
-    configured_custom_metrics = configured_custom_metrics or set()
-    missing = []
-    mismatched = []
-    emitted_count = 0
-    validated_count = 0
-    for reading_output in _normalized_reading_outputs(output):
-        _assert_normalized_output_contract(reading_output)
-        emitted_count += len(reading_output.get('metrics', []))
-        for metric in reading_output.get('metrics', []):
-            name = metric.get('name')
-            if name in configured_custom_metrics:
-                continue
-
-            validated_count += 1
-            row = metadata_rows.get(name)
-            if row is None:
-                missing.append(name)
-                continue
-
-            submission_type = AGGREGATOR_TYPE_NAMES.get(metric.get('type'))
-            mapped_type = SUBMISSION_TO_METADATA_TYPE.get(submission_type or '')
-            expected_type = row.get('metric_type')
-            if mapped_type != expected_type:
-                mismatched.append(
-                    {
-                        'metric': name,
-                        'submission_type': submission_type,
-                        'mapped_type': mapped_type,
-                        'metadata_type': expected_type,
-                    }
-                )
-
+    emitted_count, validated_count, findings = _emitted_metric_metadata_findings(
+        output, metadata_rows, configured_custom_metrics=configured_custom_metrics
+    )
     if emitted_count == 0:
         pytest.skip('No metrics emitted by this replay cache.')
     if validated_count == 0:
         pytest.skip('Only configured custom metrics were emitted by this replay cache.')
-    assert not missing, f'emitted metrics missing from metadata.csv: {sorted(set(missing))[:20]!r}'
+    missing = sorted({finding.metric for finding in findings if 'missing' in finding.message and finding.metric})
+    mismatched = [
+        {
+            'metric': finding.metric,
+            'submission_type': finding.submission_type,
+            'mapped_type': finding.mapped_type,
+            'metadata_type': finding.metadata_type,
+        }
+        for finding in findings
+        if 'type' in finding.message
+    ]
+    assert not missing, f'emitted metrics missing from metadata.csv: {missing[:20]!r}'
     assert not mismatched, f'emitted metric type mismatches against metadata.csv: {mismatched[:20]!r}'
 
 
@@ -1680,6 +1842,54 @@ def test_monotonic_count_values_nonnegative_rejects_negative_count():
         _assert_monotonic_count_values_nonnegative(output)
 
 
+def test_monotonic_count_findings_include_replay_metric_context():
+    output = {
+        'version': 2,
+        'readings': [
+            {
+                'index': 7,
+                'output': {
+                    'metrics': [
+                        {
+                            'name': 'example.counter',
+                            'type': MONOTONIC_COUNT,
+                            'value': -1.0,
+                            'tags': ['endpoint:http://example.test', 'shard:0'],
+                        }
+                    ],
+                    'service_checks': [],
+                },
+            }
+        ],
+    }
+
+    seen, findings = _monotonic_count_value_findings(output)
+
+    assert seen == 1
+    assert [finding.as_dict() for finding in findings] == [
+        {
+            'level': 'error',
+            'check': 'monotonic-count-nonnegative',
+            'message': 'Monotonic count metric value is negative.',
+            'path': None,
+            'query': None,
+            'metric': 'example.counter',
+            'tag_key': None,
+            'asset_type': None,
+            'collection': 'metrics',
+            'reading': 7,
+            'index': 0,
+            'value': -1.0,
+            'submission_type': 'monotonic_count',
+            'mapped_type': None,
+            'metadata_type': None,
+            'hostname': None,
+            'device': None,
+            'tags': ['endpoint:http://example.test', 'shard:0'],
+        }
+    ]
+
+
 def _histogram_bucket_metric(
     name: str, upper_bound: str, value: float, tags: list[str] | None = None
 ) -> dict[str, Any]:
@@ -2004,9 +2214,15 @@ def test_emitted_metrics_match_metadata(replay_pbt_context: ReplayPBTContext, va
         property_dir,
         _load_manifest_metric_prefix(replay_pbt_context.repo, replay_pbt_context.integration),
     )
-    _assert_emitted_metrics_match_metadata(
-        _read_normalized(property_dir), metadata_rows, configured_custom_metrics=configured_custom_metrics
+    output = _read_normalized(property_dir)
+    emitted_count, validated_count, findings = _emitted_metric_metadata_findings(
+        output, metadata_rows, configured_custom_metrics=configured_custom_metrics
     )
+    if emitted_count == 0:
+        pytest.skip('No metrics emitted by this replay cache.')
+    if validated_count == 0:
+        pytest.skip('Only configured custom metrics were emitted by this replay cache.')
+    _handle_findings(replay_pbt_context, property_name, findings)
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
@@ -2095,8 +2311,11 @@ def test_output_values_are_finite(replay_pbt_context: ReplayPBTContext, validati
     property_dir = replay_pbt_context.artifacts / property_name
     diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
     assert diff['changed'] is False
-    for output in _normalized_reading_outputs(_read_normalized(property_dir)):
-        _assert_normalized_output_contract(output)
+    output = _read_normalized(property_dir)
+    findings = _non_finite_metric_findings(output, check=property_name)
+    _handle_findings(replay_pbt_context, property_name, findings)
+    for reading_output in _normalized_reading_outputs(output):
+        _assert_normalized_output_contract(reading_output)
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
@@ -2109,7 +2328,11 @@ def test_rate_values_are_finite(replay_pbt_context: ReplayPBTContext, validation
     property_dir = replay_pbt_context.artifacts / property_name
     diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
     assert diff['changed'] is False
-    _assert_rate_values_finite(_read_normalized(property_dir))
+    output = _read_normalized(property_dir)
+    seen, findings = _rate_value_findings(output)
+    if seen == 0:
+        pytest.skip('No rate metrics emitted by this replay cache.')
+    _handle_findings(replay_pbt_context, property_name, findings)
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
@@ -2122,7 +2345,11 @@ def test_monotonic_count_values_are_nonnegative(replay_pbt_context: ReplayPBTCon
     property_dir = replay_pbt_context.artifacts / property_name
     diff = _run_compare_check_cache(context=replay_pbt_context, cache=replay_pbt_context.cache, artifacts=property_dir)
     assert diff['changed'] is False
-    _assert_monotonic_count_values_nonnegative(_read_normalized(property_dir))
+    output = _read_normalized(property_dir)
+    seen, findings = _monotonic_count_value_findings(output)
+    if seen == 0:
+        pytest.skip('No non-sum monotonic_count metrics emitted by this replay cache.')
+    _handle_findings(replay_pbt_context, property_name, findings)
 
 
 @settings(max_examples=1, deadline=None, suppress_health_check=[HealthCheck.function_scoped_fixture])
