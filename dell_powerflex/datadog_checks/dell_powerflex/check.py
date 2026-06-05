@@ -86,6 +86,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
                 collector()
             except Exception as e:
                 self.log.warning('Failed during %s collection: %s', collector.__name__, e)
+                self.log.debug('Failed during %s collection', collector.__name__, exc_info=True)
 
     def _collect_statistics(
         self,
@@ -104,6 +105,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
                     stats = future.result()
                 except Exception as e:
                     self.log.warning('Failed to collect statistics for %s: %s', resource_id, e)
+                    self.log.debug('Failed to collect statistics for %s', resource_id, exc_info=True)
                     continue
                 for api_field, metric_suffix in simple_metrics:
                     self.gauge(metric_suffix, stats.get(api_field), tags=tags)
