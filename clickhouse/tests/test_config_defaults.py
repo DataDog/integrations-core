@@ -70,6 +70,12 @@ EXPECTED_DEFAULTS = {
         'max_samples_per_collection': 1000,
         'run_sync': False,
     },
+    # === DBM: Schema metrics ===
+    'schema_metrics': {
+        'enabled': False,
+        'collection_interval': 60,
+        'run_sync': False,
+    },
     # === DBM: Schema collector ===
     'collect_schemas': {
         'enabled': False,

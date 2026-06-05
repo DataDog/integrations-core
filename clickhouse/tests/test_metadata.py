@@ -571,13 +571,14 @@ def test_max_execution_time_set_on_client(collector):
 
 
 def test_main_query_failure_closes_client(collector):
+    # The base class catches per-DB errors and continues; the caller (run_job) catches
+    # any remaining exception. What matters is that the client is properly closed.
     mock_client = mock.MagicMock()
     mock_client.query_rows_stream.return_value.__enter__.side_effect = Exception("main query failed")
 
     _capture_payloads(collector._check)
     with mock.patch.object(collector._check, 'create_dbm_client', return_value=mock_client):
-        with pytest.raises(Exception, match="main query failed"):
-            collector.collect_schemas()
+        collector.collect_schemas()
 
     mock_client.close.assert_called_once()
     assert collector._db_client is None
