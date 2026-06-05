@@ -1454,7 +1454,6 @@ def test_heartbeat_brokers_empty_when_no_metadata(check):
     assert hb_events[0]['brokers'] == []
 
 
-
 def test_schema_registry_subject_compat_failure_on_version_bump_preserves_cached_compat(
     check, dd_run_check, aggregator
 ):
