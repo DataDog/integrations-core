@@ -70,6 +70,18 @@ def test_per_request_headers_extra_headers_case_fold(
     assert sent.get_list(canonical_key) == [expected_value]
 
 
+def test_init_header_get_set_are_case_insensitive_with_case_different_overlap(capturing_transport):
+    http = HTTPX2Wrapper(
+        {'headers': {'X-Foo': 'a'}, 'extra_headers': {'x-foo': 'b'}},
+        {},
+        transport=capturing_transport,
+    )
+    assert http.get_header('X-FOO') == http.get_header('x-foo')
+    http.set_header('X-Foo', 'c')
+    assert http.get_header('X-Foo') == 'c'
+    assert http.get_header('x-foo') == 'c'
+
+
 def test_timeout_from_instance(capturing_transport):
     http = HTTPX2Wrapper({'timeout': 25}, {}, transport=capturing_transport)
     connect, read = http.options['timeout']

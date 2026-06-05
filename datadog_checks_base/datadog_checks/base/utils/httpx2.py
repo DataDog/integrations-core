@@ -263,6 +263,9 @@ class HTTPX2Wrapper:
 
         config = self._resolve_config(instance, init_config, remapper)
 
+        # options['headers'] is a plain dict for parity with RequestsWrapper (http.py:319).
+        # Case-folding is applied at request time via httpx2.Headers in _build_request_kwargs;
+        # get_header/set_header below do case-insensitive iteration over this dict.
         headers = get_default_headers()
         if config['headers']:
             headers.clear()
