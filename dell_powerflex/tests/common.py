@@ -1,8 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from typing import Any
 
-SYSTEM_MDM_CLUSTER_METRICS = [
+SYSTEM_MDM_CLUSTER_METRICS: list[dict[str, Any]] = [
     {'name': 'dell_powerflex.mdm_cluster.good_nodes', 'value': 3},
     {'name': 'dell_powerflex.mdm_cluster.good_replicas', 'value': 2},
     {
