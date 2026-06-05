@@ -60,3 +60,6 @@ dev-mode-dirs = [
 
 [tool.pytest.ini_options]
 addopts = "--ignore=tests/docker"
+
+[tool.datadog.replay]
+adapters = ["requests"]
