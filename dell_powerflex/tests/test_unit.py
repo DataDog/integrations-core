@@ -67,6 +67,23 @@ def test_can_connect_down(dd_run_check, aggregator, instance, mocker):
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=0, tags=BASE_TAGS)
 
 
+def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, mocker, caplog):
+    mocker.patch(
+        'requests.Session.post',
+        return_value=MagicMock(
+            raise_for_status=MagicMock(),
+            json=MagicMock(return_value={'error': 'unauthorized_client'}),
+            status_code=200,
+        ),
+    )
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('dell_powerflex.api.can_connect', value=0, tags=BASE_TAGS)
+    assert 'Auth response missing access_token' in caplog.text
+
+
 def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mocker, caplog):
     mocker.patch('requests.Session.get', side_effect=HTTPError(response=MagicMock(status_code=500)))
 
