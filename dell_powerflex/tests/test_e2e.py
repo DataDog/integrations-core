@@ -9,10 +9,10 @@ from .common import ALL_EXPECTED_METRICS, ALL_METRICS
 
 
 @pytest.mark.e2e
-def test_e2e(dd_agent_check, dd_environment):
+def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check()
 
-    gateway_tag = f"powerflex_gateway_url:{dd_environment['powerflex_gateway_url']}"
+    gateway_tag = f"powerflex_gateway_url:{instance['powerflex_gateway_url']}"
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=[gateway_tag])
 
