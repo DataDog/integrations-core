@@ -4,12 +4,12 @@
 
 """TUF pointer-file downloader for the v2 repository format.
 
-Delegation routing is intentionally left to ``tuf.ngclient.Updater``. The downloader
-only knows the *target path* (``{project}/{version}.json``) and never references a
-delegated-role name. Whichever delegated role claims the path — via ``paths`` or
-``path_hash_prefixes`` in its parent ``Targets`` metadata — is discovered by the TUF
-client as it walks the delegation tree. New delegation layouts can therefore roll
-out in the repository without any change to this module.
+The downloader and publisher pipeline share a stable TUF target-path contract:
+``integrations/{project}/{version}.json``. The first path segment is a storage
+namespace required by TUF-on-CI's delegated target layout. TUF delegation routing
+itself is still left to ``tuf.ngclient.Updater``: as long as the target path remains
+stable, the repository can change which delegated role signs that path without any
+client-side change.
 """
 
 from __future__ import annotations
@@ -43,6 +43,7 @@ V2_REPOSITORY_URL = "https://agent-integration-wheels-prod.s3.amazonaws.com"
 WHEEL_FETCH_TIMEOUT_SECONDS = 60
 
 REQUIRED_POINTER_KEYS = ('digest', 'length', 'wheel_path')
+V2_POINTER_TARGET_PREFIX = 'integrations'
 SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
 
 
@@ -73,7 +74,7 @@ class TUFPointerDownloader:
     @staticmethod
     def _target_path(project: str, version: str | None) -> str:
         name = version if version is not None else 'latest'
-        return f'{project}/{name}.json'
+        return f'{V2_POINTER_TARGET_PREFIX}/{project}/{name}.json'
 
     @staticmethod
     def _wheel_filename(project: str, version: str) -> str:

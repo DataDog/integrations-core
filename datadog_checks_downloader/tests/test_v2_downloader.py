@@ -86,8 +86,8 @@ class TestTargetResolution:
     @pytest.mark.parametrize(
         'version,expected_target',
         [
-            pytest.param(VERSION, f'{PROJECT}/{VERSION}.json', id='explicit-version'),
-            pytest.param(None, f'{PROJECT}/latest.json', id='missing-version'),
+            pytest.param(VERSION, f'integrations/{PROJECT}/{VERSION}.json', id='explicit-version'),
+            pytest.param(None, f'integrations/{PROJECT}/latest.json', id='missing-version'),
         ],
     )
     def test_get_pointer_requests_expected_target(self, mock_urlopen, mock_updater_cls, version, expected_target):
@@ -291,31 +291,31 @@ class TestDisableVerification:
 
 
 class TestUpdaterContract:
-    """Lock in the contract that target resolution is delegation-agnostic.
+    """Lock in the v2 target-path storage contract.
 
-    The downloader must address TUF targets by path only and rely on python-tuf to
-    walk delegations. Any future change that hardcodes a delegated-role name (e.g.
-    by passing a ``role`` kwarg or a role-prefixed target path) will trip these
-    assertions.
+    The downloader must address TUF targets by the stable storage path only and
+    rely on python-tuf to walk delegations. The first path segment is the agreed
+    namespace required by the publisher pipeline, not a role kwarg passed to the
+    TUF client.
     """
 
-    def test_get_targetinfo_called_with_path_only(self, mock_urlopen, mock_updater_cls):
+    def test_get_targetinfo_called_with_prefixed_path_only(self, mock_urlopen, mock_updater_cls):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         downloader.get_pointer(PROJECT, version=VERSION)
 
         mock_updater = mock_updater_cls.return_value
         call = mock_updater.get_targetinfo.call_args
-        assert call.args == (f'{PROJECT}/{VERSION}.json',)
+        assert call.args == (f'integrations/{PROJECT}/{VERSION}.json',)
         assert call.kwargs == {}
 
-    def test_target_path_carries_no_role_prefix(self, mock_urlopen, mock_updater_cls):
+    def test_target_path_uses_stable_integrations_namespace(self, mock_urlopen, mock_updater_cls):
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         downloader.get_pointer(PROJECT, version=VERSION)
 
         target_path = mock_updater_cls.return_value.get_targetinfo.call_args.args[0]
+        assert target_path.startswith('integrations/')
         assert not target_path.startswith('targets/')
         assert not target_path.startswith('wheels-signer-')
-        assert not target_path.startswith('pointers/')
 
 
 def _free_port() -> int:
@@ -334,10 +334,11 @@ def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) ->
 
 
 class TestDelegationTraversal:
-    """End-to-end: build a real signed TUF repo with a delegated role; downloader resolves it.
+    """End-to-end: build a signed TUF repo using the v2 target-path contract.
 
-    The downloader never names the delegated role — python-tuf discovers it from the
-    paths or path_hash_prefixes declared in the parent Targets metadata.
+    The stable target path starts with ``integrations/``. The TUF repository can
+    map that namespace to any compatible delegation topology while the downloader
+    keeps asking for the same target path.
     """
 
     @staticmethod
@@ -360,9 +361,9 @@ class TestDelegationTraversal:
         repo = tmp_path / 'repo'
         build_delegated_repo(
             repo,
-            delegated_targets={f'{project}/{version}.json': json.dumps(pointer).encode()},
-            delegated_role_name='wheel-pointers',
-            paths=[f'{project}/*'],
+            delegated_targets={f'integrations/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_role_name='integrations',
+            paths=[f'integrations/{project}/*'],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
@@ -373,7 +374,7 @@ class TestDelegationTraversal:
 
     def test_resolves_through_hash_prefix_delegation(self, monkeypatch, tmp_path):
         project, version = 'datadog-postgres', '14.0.0'
-        target_path = f'{project}/{version}.json'
+        target_path = f'integrations/{project}/{version}.json'
         _, _, pointer = self._make_pointer_target(project, version)
 
         prefix = hashlib.sha256(target_path.encode()).hexdigest()[:2]
@@ -382,7 +383,7 @@ class TestDelegationTraversal:
         build_delegated_repo(
             repo,
             delegated_targets={target_path: json.dumps(pointer).encode()},
-            delegated_role_name='by-hash',
+            delegated_role_name='integrations',
             path_hash_prefixes=[prefix],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
@@ -399,9 +400,9 @@ class TestDelegationTraversal:
         repo = tmp_path / 'repo'
         build_delegated_repo(
             repo,
-            delegated_targets={f'{project}/{version}.json': json.dumps(pointer).encode()},
-            delegated_role_name='wheel-pointers',
-            paths=['datadog-postgres/*'],
+            delegated_targets={f'integrations/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_role_name='integrations',
+            paths=['integrations/datadog-postgres/*'],
         )
         _patch_bootstrap_to_use(repo, monkeypatch)
 
