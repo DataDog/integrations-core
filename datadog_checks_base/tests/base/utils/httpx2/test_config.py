@@ -3,17 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.base.utils.httpx2 import (
-    REQUEST_KWARGS,
-    REQUEST_KWARGS_PASSTHROUGH,
-    REQUEST_KWARGS_SPECIAL,
-    HTTPX2Wrapper,
-)
-
-
-def test_request_kwargs_invariant():
-    assert REQUEST_KWARGS_PASSTHROUGH | REQUEST_KWARGS_SPECIAL == REQUEST_KWARGS
-    assert REQUEST_KWARGS_PASSTHROUGH & REQUEST_KWARGS_SPECIAL == frozenset()
+from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
 
 def test_default_headers_include_user_agent(capturing_transport):

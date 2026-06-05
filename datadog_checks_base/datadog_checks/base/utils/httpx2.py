@@ -61,6 +61,8 @@ REQUEST_KWARGS = frozenset(
 )
 REQUEST_KWARGS_SPECIAL = frozenset({'headers', 'extra_headers', 'timeout', 'follow_redirects'})
 REQUEST_KWARGS_PASSTHROUGH = REQUEST_KWARGS - REQUEST_KWARGS_SPECIAL
+assert REQUEST_KWARGS_PASSTHROUGH | REQUEST_KWARGS_SPECIAL == REQUEST_KWARGS
+assert REQUEST_KWARGS_PASSTHROUGH & REQUEST_KWARGS_SPECIAL == frozenset()
 
 
 def _make_timeout(connect: float, read: float) -> httpx2.Timeout:
