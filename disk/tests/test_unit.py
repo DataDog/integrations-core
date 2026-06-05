@@ -660,19 +660,24 @@ def test_device_include_exclude():
 
 def test_latency_metrics_respect_device_include(aggregator, dd_run_check):
     """
-    Latency metrics (read_time, write_time) must honour device_include/device_exclude,
-    not emit metrics for every disk regardless of configuration.
+    Latency metrics must honour device_include/device_exclude.
+
+    disk_partitions() returns full paths (e.g. /dev/sda1) while disk_io_counters()
+    returns bare names on Linux (e.g. sda1). The filter must normalise both sides
+    via _base_device_name so that including /dev/sda1 correctly allows sda1's latency
+    metrics and excludes sdb1's.
     """
-    included_device = '/dev/sda1'
-    excluded_device = '/dev/sdb1'
+    partition_device = '/dev/sda1'
+    included_io_key = 'sda1'  # bare name as returned by disk_io_counters on Linux
+    excluded_io_key = 'sdb1'
 
-    io_counters = {included_device: MockDiskMetrics(), excluded_device: MockDiskMetrics()}
+    io_counters = {included_io_key: MockDiskMetrics(), excluded_io_key: MockDiskMetrics()}
 
-    instance = {'device_include': [included_device], 'tag_by_label': False}
+    instance = {'device_include': [partition_device], 'tag_by_label': False}
     c = Disk('disk', {}, [instance])
 
     with (
-        mock.patch('psutil.disk_partitions', return_value=[MockPart(device=included_device)]),
+        mock.patch('psutil.disk_partitions', return_value=[MockPart(device=partition_device)]),
         mock.patch('psutil.disk_usage', return_value=MockDiskMetrics()),
         mock.patch('psutil.disk_io_counters', return_value=io_counters),
     ):
@@ -687,12 +692,12 @@ def test_latency_metrics_respect_device_include(aggregator, dd_run_check):
     for metric in latency_metrics:
         aggregator.assert_metric(
             metric,
-            tags=['device:{}'.format(included_device), 'device_name:{}'.format(_base_device_name(included_device))],
+            tags=['device:{}'.format(included_io_key), 'device_name:{}'.format(_base_device_name(included_io_key))],
             count=1,
         )
         aggregator.assert_metric(
             metric,
-            tags=['device:{}'.format(excluded_device), 'device_name:{}'.format(_base_device_name(excluded_device))],
+            tags=['device:{}'.format(excluded_io_key), 'device_name:{}'.format(_base_device_name(excluded_io_key))],
             count=0,
         )
 
