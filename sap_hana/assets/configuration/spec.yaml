@@ -58,6 +58,7 @@ files:
             sslUseDefaultTrustStore: false
           type: object
           additionalProperties: true
+        fleet_configurable: false
       - name: use_hana_hostnames
         description: |
           Whether or not to use the hostnames contained in HANA's monitoring
@@ -77,12 +78,14 @@ files:
         value:
           type: number
           example: 10
+        fleet_configurable: false
       - template: instances/db
       - name: persist_db_connections
         description: Whether or not to persist database connections.
         value:
           type: boolean
           example: true
+        fleet_configurable: false
       - name: use_tls
         description: |
           Instructs the SAP HANA integration to connect using TLS.

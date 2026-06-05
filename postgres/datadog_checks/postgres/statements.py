@@ -195,6 +195,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         obfuscate_options['table_names'] = self._config.obfuscator_options.collect_tables
         obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
         obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
+        obfuscate_options['dbms'] = 'postgresql'
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(

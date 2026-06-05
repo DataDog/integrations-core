@@ -2,6 +2,12 @@ name: Test results for the master branch
 
 on:
   workflow_call:
+    inputs:
+      dry_run:
+        description: "Run the badge step but skip committing to the badges branch."
+        required: false
+        default: false
+        type: boolean
 
 defaults:
   run:
@@ -66,6 +72,7 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Commit if stats have changed
+      if: ${{ !inputs.dry_run }}
       run: |-
         git add "${{ env.BADGE_PATH }}"
         if git commit -m "Update test results from ${{ github.sha }}"; then
