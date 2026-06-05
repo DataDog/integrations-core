@@ -101,51 +101,86 @@ def test_submit_generic_resource_given_include_all_ships_constructed_fields(aggr
 
 
 @pytest.mark.parametrize(
-    "kwargs",
+    "kwargs, expected_log",
     [
-        {"type": "t", "key": "", "fields": {"metadata": {"name": "x"}}, "include": VALUE_INCLUDE},
-        {"type": "t", "key": "k", "fields": ["not", "a", "dict"], "include": VALUE_INCLUDE},
-        {"type": "t", "key": "k", "fields": {"metadata": {"name": "x"}}, "include": None},
-        {
-            "type": "t",
-            "key": "k",
-            "fields": {"metadata": {"name": "x"}},
-            "include": {"paths": "metadata.name", "map_paths": [], "annotation_keys": []},
-        },
-        {
-            "type": "t",
-            "key": "k",
-            "fields": {"metadata": {"name": "x"}},
-            "include": {"paths": [], "map_paths": [], "annotation_keys": ["*"]},
-        },
-        {
-            "type": "t",
-            "key": "k",
-            "fields": {"spec": {"project": "p"}},
-            "include": {"paths": ["spec"], "map_paths": [], "annotation_keys": []},
-        },
-        {
-            "type": "t",
-            "key": "k",
-            "fields": {"spec": {"source": {"repoURL": "r", "helm": {"x": 1}}}},
-            "include": {"paths": [], "map_paths": ["spec.source"], "annotation_keys": []},
-        },
-        {
-            "type": "t",
-            "key": "k",
-            "fields": {"metadata": {"name": "x"}},
-            "include": {"paths": ["does.not.exist"], "map_paths": [], "annotation_keys": []},
-        },
-        {
-            "type": "t",
-            "key": "k",
-            "fields": {"spec": {"ratio": float("nan")}},
-            "include": {"paths": ["spec.ratio"], "map_paths": [], "annotation_keys": []},
-        },
-        {"type": "t", "key": "k", "fields": {"metadata": {"name": "x" * 2_000_000}}, "include": VALUE_INCLUDE},
+        (
+            {"type": "t", "key": "", "fields": {"metadata": {"name": "x"}}, "include": VALUE_INCLUDE},
+            "empty key",
+        ),
+        (
+            {"type": "", "key": "k", "fields": {"metadata": {"name": "x"}}, "include": VALUE_INCLUDE},
+            "empty type",
+        ),
+        (
+            {"type": "t", "key": "k", "fields": ["not", "a", "dict"], "include": VALUE_INCLUDE},
+            "non-dict fields",
+        ),
+        (
+            {"type": "t", "key": "k", "fields": {"metadata": {"name": "x"}}, "include": None},
+            "non-dict include",
+        ),
+        (
+            {
+                "type": "t",
+                "key": "k",
+                "fields": {"metadata": {"name": "x"}},
+                "include": {"paths": "metadata.name", "map_paths": [], "annotation_keys": []},
+            },
+            "malformed include",
+        ),
+        (
+            {
+                "type": "t",
+                "key": "k",
+                "fields": {"metadata": {"name": "x"}},
+                "include": {"paths": [], "map_paths": [], "annotation_keys": ["*"]},
+            },
+            "catch-all annotation pattern",
+        ),
+        (
+            {
+                "type": "t",
+                "key": "k",
+                "fields": {"spec": {"project": "p"}},
+                "include": {"paths": ["spec"], "map_paths": [], "annotation_keys": []},
+            },
+            "nested include value",
+        ),
+        (
+            {
+                "type": "t",
+                "key": "k",
+                "fields": {"spec": {"source": {"repoURL": "r", "helm": {"x": 1}}}},
+                "include": {"paths": [], "map_paths": ["spec.source"], "annotation_keys": []},
+            },
+            "non-flat map_path",
+        ),
+        (
+            {
+                "type": "t",
+                "key": "k",
+                "fields": {"metadata": {"name": "x"}},
+                "include": {"paths": ["does.not.exist"], "map_paths": [], "annotation_keys": []},
+            },
+            "empty inclusion",
+        ),
+        (
+            {
+                "type": "t",
+                "key": "k",
+                "fields": {"spec": {"ratio": float("nan")}},
+                "include": {"paths": ["spec.ratio"], "map_paths": [], "annotation_keys": []},
+            },
+            "failed to encode fields",
+        ),
+        (
+            {"type": "t", "key": "k", "fields": {"metadata": {"name": "x" * 2_000_000}}, "include": VALUE_INCLUDE},
+            "oversize resource",
+        ),
     ],
     ids=[
         "empty_key",
+        "empty_type",
         "non_dict_fields",
         "non_dict_include",
         "malformed_include",
@@ -157,10 +192,11 @@ def test_submit_generic_resource_given_include_all_ships_constructed_fields(aggr
         "oversize_payload",
     ],
 )
-def test_submit_generic_resource_drops_and_counts_invalid_input(aggregator, check, kwargs):
+def test_submit_generic_resource_drops_and_counts_invalid_input(aggregator, check, caplog, kwargs, expected_log):
     check.submit_generic_resource(**kwargs)
     assert aggregator.get_event_platform_events("genresources", parse_json=False) == []
     datadog_agent.assert_telemetry("argocd", "datadog.agent.check.genresources.dropped", "count", 1)
+    assert any(expected_log in record.getMessage() for record in caplog.records)
 
 
 def test_submit_generic_resource_ignores_non_int_timestamps(aggregator, check):

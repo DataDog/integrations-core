@@ -820,12 +820,13 @@ class AgentCheck(object):
         # type: (str, str, dict | None, dict, int | None, int | None) -> None
         """Ship a resource on the ``genresources`` event-platform track.
 
-        ``include`` is required: ``{"paths": [...], "map_paths": [...], "annotation_keys": [...]}``.
-        ``paths`` select values; ``map_paths`` select whole flat maps (e.g. ``metadata.labels``);
-        ``annotation_keys`` glob ``metadata.annotations`` keys. A path that resolves to a structured
-        object is dropped. Pass ``include=INCLUDE_ALL`` to ship a dict you built in code as-is — only
-        safe when your code constructed every value, never for a raw upstream object. ``seen_at`` /
-        ``expire_at`` are optional ``int`` unix-seconds.
+        ``fields`` is the resource body. ``include`` chooses what to keep from it:
+        ``{"paths": [...], "map_paths": [...], "annotation_keys": [...]}``. Evaluated against ``fields``,
+        ``paths`` select individual values, ``map_paths`` select whole flat maps (e.g.
+        ``metadata.labels``), and ``annotation_keys`` glob ``metadata.annotations`` keys. A path that
+        resolves to a structured object is dropped. Pass ``include=INCLUDE_ALL`` to ship ``fields``
+        as-is — only safe when your code constructed every value, never for a raw upstream object.
+        ``seen_at`` / ``expire_at`` are optional ``int`` unix-seconds.
         """
         if fields is None:
             return
@@ -852,6 +853,11 @@ class AgentCheck(object):
 
         if not key:
             self.log.warning("genresources: dropping resource with empty key for type=%s", type)
+            _emit_dropped()
+            return
+
+        if not type:
+            self.log.warning("genresources: dropping resource with empty type for key=%s", key)
             _emit_dropped()
             return
 
