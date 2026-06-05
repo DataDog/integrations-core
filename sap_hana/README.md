@@ -81,6 +81,14 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
    GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR;
    ```
 
+   To collect schema metadata for Database Monitoring (see [Schema collection](#schema-collection)), also grant select on the catalog views that store schema, table, and column definitions. These are already covered by the `GRANT CATALOG READ` in step 2, so this is only needed if you skipped that grant:
+
+   ```shell
+   GRANT SELECT ON SYS.SCHEMAS TO DD_MONITOR;
+   GRANT SELECT ON SYS.TABLES TO DD_MONITOR;
+   GRANT SELECT ON SYS.TABLE_COLUMNS TO DD_MONITOR;
+   ```
+
 4. Finally, run the following command to assign the monitoring role to the desired user:
 
    ```shell
@@ -120,6 +128,20 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
     See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
+
+#### Schema collection
+
+The Agent can collect SAP HANA catalog metadata (schemas, tables, and columns) for Database Monitoring's Schema Explorer. Collection is disabled by default. To enable it, make sure the monitoring user can read the catalog views (see [Granting privileges](#granting-privileges)) and add the following block to your `sap_hana.d/conf.yaml` file:
+
+```yaml
+   collect_schemas:
+     enabled: true
+     collection_interval: 600
+     max_tables: 300
+     max_columns: 50
+```
+
+See the [sample sap_hana.d/conf.yaml][4] for all available schema collection options, including `include_schemas` and `exclude_schemas`.
 
 ### Validation
 

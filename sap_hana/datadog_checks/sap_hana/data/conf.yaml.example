@@ -220,6 +220,50 @@ instances:
     #   - TLS_CHACHA20_POLY1305_SHA256
     #   - TLS_AES_128_GCM_SHA256
 
+    ## Configure collection of SAP HANA catalog metadata (schemas, tables,
+    ## columns) for Database Monitoring's Schema Explorer.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of catalog metadata. When enabled, the Agent
+        ## queries `SYS.SCHEMAS`, `SYS.TABLES`, and `SYS.TABLE_COLUMNS` and
+        ## emits schema metadata payloads.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the schema collection interval (in seconds). Catalog data
+        ## changes slowly; 600s (10 min) is a reasonable default.
+        #
+        # collection_interval: 600
+
+        ## @param max_tables - integer - optional - default: 300
+        ## Maximum number of tables to collect per cycle across all schemas.
+        #
+        # max_tables: 300
+
+        ## @param max_columns - integer - optional - default: 50
+        ## Maximum number of columns to collect per table.
+        #
+        # max_columns: 50
+
+        ## @param include_schemas - list of strings - optional
+        ## A list of schema names to include. Any schema whose name is in
+        ## this list will be included. If empty, all schemas (other than
+        ## those excluded) are included.
+        #
+        # include_schemas:
+        #   - MY_SCHEMA
+
+        ## @param exclude_schemas - list of strings - optional
+        ## A list of schema names to exclude. Any schema whose name is in
+        ## this list will be excluded. SAP HANA system schemas are always
+        ## excluded regardless of this setting.
+        #
+        # exclude_schemas:
+        #   - TMP_SCHEMA
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
