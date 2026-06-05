@@ -50,7 +50,8 @@
                         ],
                         "foreign_keys": [],
                         "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "relkind": "p"
                     }
                 ]
             }
@@ -89,7 +90,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "f"
                     }
                 ]
             }
@@ -150,7 +152,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16730"
+                        "toast_table": "pg_toast_16730",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -211,7 +214,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16748"
+                        "toast_table": "pg_toast_16748",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -272,7 +276,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16725"
+                        "toast_table": "pg_toast_16725",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -333,7 +338,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16680"
+                        "toast_table": "pg_toast_16680",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -394,7 +400,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16705"
+                        "toast_table": "pg_toast_16705",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -455,7 +462,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16685"
+                        "toast_table": "pg_toast_16685",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -527,7 +535,8 @@
                         ],
                         "foreign_keys": [],
                         "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "relkind": "p"
                     }
                 ]
             }
@@ -604,7 +613,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16740"
+                        "toast_table": "pg_toast_16740",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -680,7 +690,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16715"
+                        "toast_table": "pg_toast_16715",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -751,7 +762,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16655"
+                        "toast_table": "pg_toast_16655",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -812,7 +824,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16700"
+                        "toast_table": "pg_toast_16700",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -873,7 +886,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16690"
+                        "toast_table": "pg_toast_16690",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -929,7 +943,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "relkind": "p"
                     }
                 ]
             }
@@ -990,7 +1005,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16675"
+                        "toast_table": "pg_toast_16675",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1051,7 +1067,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16755"
+                        "toast_table": "pg_toast_16755",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1112,7 +1129,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16720"
+                        "toast_table": "pg_toast_16720",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1179,7 +1197,8 @@
                                 "table_id": "16663"
                             }
                         ],
-                        "toast_table": "pg_toast_16663"
+                        "toast_table": "pg_toast_16663",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1240,7 +1259,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16735"
+                        "toast_table": "pg_toast_16735",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1301,7 +1321,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16695"
+                        "toast_table": "pg_toast_16695",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1362,7 +1383,8 @@
                         ],
                         "indexes": [],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16710"
+                        "toast_table": "pg_toast_16710",
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1418,7 +1440,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "toast_table": "pg_toast_16762"
+                        "toast_table": "pg_toast_16762",
+                        "relkind": "r"
                     }
                 ]
             }
