@@ -272,7 +272,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     self._track_node_checkpoint(str(server_node), event_time_int)
 
                 mean_time = float(total_duration_ms) / execution_count if execution_count > 0 else 0.0
-                mean_cpu_us = float(total_cpu_us) / execution_count if execution_count > 0 else 0.0
 
                 result_row = {
                     'normalized_query_hash': str(normalized_query_hash),
@@ -285,7 +284,6 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     'count': int(execution_count) if execution_count else 0,
                     'total_time': float(total_duration_ms) if total_duration_ms else 0.0,
                     'mean_time': mean_time,
-                    'mean_cpu_us': mean_cpu_us,
                     'result_rows': int(total_result_rows) if total_result_rows else 0,
                     'read_rows': int(total_read_rows) if total_read_rows else 0,
                     'read_bytes': int(total_read_bytes) if total_read_bytes else 0,
@@ -362,10 +360,8 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             total_count = merged['count']
             if total_count > 0:
                 merged['mean_time'] = merged['total_time'] / total_count
-                merged['mean_cpu_us'] = merged['cpu_us'] / total_count
             else:
                 merged['mean_time'] = 0.0
-                merged['mean_cpu_us'] = 0.0
 
             result.append(merged)
 

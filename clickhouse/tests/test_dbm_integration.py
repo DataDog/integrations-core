@@ -32,7 +32,6 @@ METRICS_COLUMNS = {
     'count',
     'total_time',
     'mean_time',
-    'mean_cpu_us',
     'read_rows',
     'read_bytes',
     'written_rows',

@@ -126,7 +126,6 @@ def test_normalize_queries(check_with_dbm):
             'peak_memory_usage': 1500000,
             'cpu_us': 80000,
             'cpu_wait_us': 8000,
-            'mean_cpu_us': 8000.0,
         }
     ]
 
@@ -194,7 +193,6 @@ def test_query_signature_matches_samples_pipeline(check_with_dbm):
                 'peak_memory_usage': 0,
                 'cpu_us': 1000,
                 'cpu_wait_us': 100,
-                'mean_cpu_us': 1000.0,
             }
         ]
         normalized = metrics._normalize_queries(rows)
@@ -460,7 +458,6 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
             'peak_memory_usage': 0,
             'cpu_us': 1000,
             'cpu_wait_us': 100,
-            'mean_cpu_us': 1000.0,
         },
         {
             'normalized_query_hash': '67890',
@@ -483,7 +480,6 @@ def test_normalize_queries_handles_obfuscation_failure(check_with_dbm):
             'peak_memory_usage': 0,
             'cpu_us': 500,
             'cpu_wait_us': 50,
-            'mean_cpu_us': 500.0,
         },
     ]
 
@@ -537,7 +533,6 @@ def test_merge_rows_across_nodes_single_node():
             'peak_memory_usage': 8000,
             'cpu_us': 80000,
             'cpu_wait_us': 8000,
-            'mean_cpu_us': 8000.0,
         }
     ]
 
@@ -547,7 +542,6 @@ def test_merge_rows_across_nodes_single_node():
     assert result[0]['total_time'] == 100.0
     assert result[0]['cpu_us'] == 80000
     assert result[0]['cpu_wait_us'] == 8000
-    assert result[0]['mean_cpu_us'] == 8000.0
 
 
 def test_merge_rows_across_nodes_sums_counts():
@@ -571,7 +565,6 @@ def test_merge_rows_across_nodes_sums_counts():
             'peak_memory_usage': 80000,
             'cpu_us': 500000,
             'cpu_wait_us': 50000,
-            'mean_cpu_us': 5000.0,
         },
         {
             'normalized_query_hash': 'hash1',
@@ -589,7 +582,6 @@ def test_merge_rows_across_nodes_sums_counts():
             'peak_memory_usage': 90000,
             'cpu_us': 300000,
             'cpu_wait_us': 30000,
-            'mean_cpu_us': 6000.0,
         },
     ]
 
@@ -610,7 +602,6 @@ def test_merge_rows_across_nodes_sums_counts():
     assert merged['cpu_us'] == 800000
     assert merged['cpu_wait_us'] == 80000
     assert merged['mean_time'] == 800.0 / 150
-    assert merged['mean_cpu_us'] == 800000.0 / 150
 
 
 def test_merge_rows_across_nodes_different_queries():
@@ -632,7 +623,6 @@ def test_merge_rows_across_nodes_different_queries():
         'peak_memory_usage': 0,
         'cpu_us': 80000,
         'cpu_wait_us': 8000,
-        'mean_cpu_us': 8000.0,
     }
 
     rows = [
@@ -671,7 +661,6 @@ def test_metrics_row_with_empty_values(check_with_dbm):
             'peak_memory_usage': 0,
             'cpu_us': 0,  # Zero CPU
             'cpu_wait_us': 0,
-            'mean_cpu_us': 0.0,
         }
     ]
 
