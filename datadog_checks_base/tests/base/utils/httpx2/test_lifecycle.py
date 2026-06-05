@@ -44,8 +44,9 @@ def test_request_closes_response_when_adapter_wrap_fails(capturing_transport, mo
 def test_module_import_fails_without_httpx2(monkeypatch):
     monkeypatch.setitem(sys.modules, 'httpx2', None)
     monkeypatch.delitem(sys.modules, 'datadog_checks.base.utils.httpx2', raising=False)
-    with pytest.raises(ImportError, match='httpx2'):
+    with pytest.raises(ImportError) as exc_info:
         import datadog_checks.base.utils.httpx2  # noqa: F401
+    assert exc_info.value.name == 'httpx2'
 
 
 @pytest.mark.parametrize(
