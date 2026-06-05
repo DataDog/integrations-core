@@ -20,7 +20,9 @@ from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper, _map_httpx2_exceptio
         pytest.param(httpx2.ReadTimeout('slow'), HTTPTimeoutError, id='read-timeout'),
         pytest.param(httpx2.PoolTimeout('pool'), HTTPTimeoutError, id='pool-timeout'),
         pytest.param(httpx2.ConnectError('refused'), HTTPConnectionError, id='connect-error'),
-        pytest.param(httpx2.ReadError('mid-stream'), HTTPRequestError, id='read-error'),
+        pytest.param(httpx2.ReadError('mid-stream'), HTTPConnectionError, id='read-error'),
+        pytest.param(httpx2.WriteError('broken-pipe'), HTTPConnectionError, id='write-error'),
+        pytest.param(httpx2.CloseError('half-closed'), HTTPConnectionError, id='close-error'),
         pytest.param(httpx2.LocalProtocolError('bad'), HTTPRequestError, id='local-protocol-error'),
         pytest.param(httpx2.RequestError('generic'), HTTPRequestError, id='request-error'),
     ],
@@ -47,7 +49,7 @@ def test_request_raises_invalid_url_error(raising_transport_factory):
 @pytest.mark.parametrize(
     'raised,expected',
     [
-        pytest.param(httpx2.ReadError('mid-stream'), HTTPRequestError, id='read-error'),
+        pytest.param(httpx2.ReadError('mid-stream'), HTTPConnectionError, id='read-error'),
         pytest.param(httpx2.ReadTimeout('slow'), HTTPTimeoutError, id='read-timeout'),
     ],
 )
