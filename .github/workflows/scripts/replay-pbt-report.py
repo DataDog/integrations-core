@@ -724,6 +724,8 @@ def compact_row(row: dict[str, Any]) -> dict[str, Any]:
         "target_ref": row.get("target_ref", ""),
         "mode": row.get("mode", ""),
         "readings": row.get("readings", ""),
+        "adapters": row.get("adapters", ""),
+        "cache_key": row.get("cache_key", ""),
         "batch_index": row.get("batch_index", ""),
         "batch_count": row.get("batch_count", ""),
         "failing_property_count": len(failed_tests),
