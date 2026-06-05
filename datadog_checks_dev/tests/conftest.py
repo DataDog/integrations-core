@@ -1,7 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import pytest
+from hypothesis import settings
+
+if os.environ.get('REPLAY_PBT_HYPOTHESIS_DEBUG') == 'true':
+    settings.register_profile('replay-pbt-ci', print_blob=True)
+    settings.load_profile('replay-pbt-ci')
 
 
 @pytest.fixture(scope='session')

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import os
 import random
 from collections.abc import AsyncIterator
 from contextlib import ExitStack, asynccontextmanager
@@ -11,6 +12,7 @@ from typing import Any, Generator
 import pytest
 import vcr
 from datadog_checks.dev.tooling.utils import set_root
+from hypothesis import settings
 from pytest_mock import MockerFixture
 
 from ddev.cli.application import Application
@@ -31,6 +33,10 @@ from .helpers.runner import CliRunner
 
 # Rewrite assertions on the assertions helper module
 pytest.register_assert_rewrite('tests.helpers.assertions')
+
+if os.environ.get('REPLAY_PBT_HYPOTHESIS_DEBUG') == 'true':
+    settings.register_profile('replay-pbt-ci', print_blob=True)
+    settings.load_profile('replay-pbt-ci')
 
 
 @pytest.fixture(scope='session')

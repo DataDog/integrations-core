@@ -402,6 +402,7 @@ jobs:
       REPLAY_PBT_RUNNER: ${{ matrix.runner }}
       REPLAY_PBT_RECORD_IMAGE: ${{ matrix.record_image }}
       REPLAY_PBT_REPLAY_IMAGE: ${{ matrix.replay_image }}
+      REPLAY_PBT_HYPOTHESIS_DEBUG: "true"
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
@@ -853,6 +854,42 @@ jobs:
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source, destination)
         PY
+
+    - name: Collect Hypothesis replay database on failure
+      if: failure()
+      run: |
+        python - <<'PY'
+        import json
+        import shutil
+        from pathlib import Path
+
+        output_root = Path('/tmp/replay-pbt-hypothesis')
+        output_root.mkdir(parents=True, exist_ok=True)
+        copied = []
+        for source in sorted(Path('.').rglob('.hypothesis')):
+            if not source.is_dir() or '.git' in source.parts:
+                continue
+            rel_parent = source.parent.relative_to(Path('.'))
+            destination = output_root / rel_parent / '.hypothesis'
+            if destination.exists():
+                shutil.rmtree(destination)
+            shutil.copytree(source, destination)
+            copied.append(str(rel_parent / '.hypothesis'))
+        (output_root / 'manifest.json').write_text(json.dumps({'copied': copied}, indent=2, sort_keys=True) + '\n')
+        PY
+
+    - name: Scan Hypothesis replay database artifact
+      if: failure()
+      run: python .github/workflows/scripts/replay-pbt-secret-scan.py /tmp/replay-pbt-hypothesis
+
+    - name: Upload Hypothesis replay database
+      if: failure()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: replay-pbt-hypothesis-${{ matrix.artifact_slug }}
+        path: /tmp/replay-pbt-hypothesis
+        if-no-files-found: ignore
+        retention-days: 1
 
     - name: Stage compare-agent diff bundle (agent runner only)
       if: env.REPLAY_PBT_RUNNER == 'agent' && always()
