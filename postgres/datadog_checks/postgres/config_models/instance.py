@@ -190,6 +190,19 @@ class DataObservability(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class DataSecurity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    forward_data: Optional[bool] = None
+    interval: Optional[int] = None
+    query: Optional[str] = None
+    send_event: Optional[bool] = None
+    send_sds_results: Optional[bool] = None
+
+
 class DatabaseAutodiscovery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -344,6 +357,7 @@ class InstanceConfig(BaseModel):
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_directory: Optional[str] = None
     data_observability: Optional[DataObservability] = None
+    data_security: Optional[DataSecurity] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None
     database_identifier: Optional[DatabaseIdentifier] = None
     database_instance_collection_interval: Optional[float] = None

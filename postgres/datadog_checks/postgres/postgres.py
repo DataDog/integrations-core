@@ -4,6 +4,7 @@
 import contextlib
 import copy
 import functools
+import json as _stdlib_json
 import os
 import threading
 from string import Template
@@ -43,6 +44,7 @@ from datadog_checks.postgres.relationsmanager import (
     TABLE_BLOAT,
     RelationsManager,
 )
+from datadog_checks.postgres.sds.sds_emitter import build_payload, emit_sds_results
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
 
@@ -103,6 +105,13 @@ MAX_CUSTOM_RESULTS = 100
 
 PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
+# --- Data security analysis (DEMO ONLY) ---------------------------------------
+# The scan query (and the scanning rules, applied Agent-side) are pushed via
+# Remote Configuration. The integration only runs the query the Agent forwarded
+# into `data_security.query` and scans the resulting rows through the Agent's
+# Sensitive Data Scanner.
+DATA_SECURITY_DEFAULT_INTERVAL = 15  # seconds between scan passes
+
 
 class PostgreSql(DatabaseCheck):
     """Collects per-database, and optionally per-relation metrics, custom metrics"""
@@ -131,6 +140,7 @@ class PostgreSql(DatabaseCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
+        self._last_data_security_run = 0.0
 
         config, validation_result = build_config(self)
         self._config = config
@@ -201,17 +211,239 @@ class PostgreSql(DatabaseCheck):
     def database_monitoring_column_statistics(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-column-statistics")
 
+    def scan_with_sds(self, rows):
+        """
+        Scan each row (a dict) through the Agent's Sensitive Data Scanner using
+        the structured map scanner (the ``datadog_agent.scan`` binding, backed by
+        the Agent's ``sds.ScanMap``). The scanner is configured Agent-side
+        (reconfigured via Remote Configuration), so no scanning rules are
+        configured in the integration.
+
+        Returns a ``(rows_affected, columns_affected, matched_kinds)`` tuple:
+        a row is "affected" when the scanner reported at least one match, a
+        column is "affected" when it matched at least once across the sample,
+        and ``matched_kinds`` is the set of rule ids that fired.
+        """
+        rows_affected = 0
+        columns_affected = set()
+        matched_kinds = set()
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            try:
+                matches_json = datadog_agent.scan(_stdlib_json.dumps(row, default=str))
+            except Exception as e:
+                self.log.debug("data_security: sds scan failed for row: %s", e)
+                continue
+            try:
+                matches = _stdlib_json.loads(matches_json) if matches_json else []
+            except (TypeError, ValueError):
+                matches = []
+            if not matches:
+                continue
+            rows_affected += 1
+            for match in matches:
+                column = match.get("column")
+                if column:
+                    columns_affected.add(column)
+                rule_id = match.get("rule_id")
+                if rule_id:
+                    matched_kinds.add(rule_id)
+        return rows_affected, columns_affected, matched_kinds
+
+    def _run_data_security_query(self, query):
+        # Run the RC-forwarded data_security query and return the parsed rows. The query is
+        # expected to aggregate rows as a JSON array text in its first column (e.g.
+        # `SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json)::text AS rows_json FROM ...`).
+        try:
+            with self.db() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(query)
+                    row = cursor.fetchone()
+        except psycopg.Error as e:
+            self.log.warning("data_security: failed to run query: %s", e)
+            return None
+
+        rows_json = row[0] if row else None
+        try:
+            parsed_rows = json.loads(rows_json) if rows_json else []
+        except (TypeError, ValueError):
+            parsed_rows = []
+        return parsed_rows if isinstance(parsed_rows, list) else []
+
+    def _rds_instance_metadata(self):
+        # Derive the RDS DB instance identifier and region from the configured AWS endpoint
+        # (e.g. "customers-04.cfxdfe8cpixl.us-west-2.rds.amazonaws.com" -> "customers-04",
+        # "us-west-2"). Falls back to the resolved hostname / configured host when the endpoint
+        # is not an RDS endpoint, so resource_name is always populated (required by the intake).
+        aws = getattr(self._config, "aws", None)
+        endpoint = (
+            (getattr(aws, "instance_endpoint", None) if aws else None) or self.resolved_hostname or self._config.host
+        )
+        region = getattr(aws, "region", None) if aws else None
+        instance_identifier = endpoint
+        if endpoint and AWS_RDS_HOSTNAME_SUFFIX in endpoint:
+            parts = endpoint.split(".", 3)
+            if len(parts) == 4:
+                instance_identifier = parts[0]
+                if not region:
+                    region = parts[2]
+        return instance_identifier, region
+
+    def _emit_sds_results(self, *, sample_size, rows_affected, columns_affected, matched_kinds):
+        # Map the local scan output onto the shared SdsResultPayload schema and forward it to the
+        # sds-intake. This must never break the data_security scan, so all failures are swallowed.
+        try:
+            rule_id = ",".join(sorted(matched_kinds)) if matched_kinds else "unknown"
+            db_matches = [
+                {
+                    "rule_id": rule_id,
+                    "column_name": column,
+                    "count_matched_rows": rows_affected,
+                    "count_total_rows": sample_size,
+                }
+                for column in sorted(columns_affected)
+            ]
+            # Nothing sensitive found: skip emitting an empty result.
+            if not db_matches:
+                return
+
+            # Mimic an agentless RDS-instance scan so the backend routes this through the
+            # RdsExtractor: the resource type must be "aws_rds_instance" and the location must
+            # be carried in the `rds_table` oneof. The scan source defaults to AGENTLESS.
+            instance_identifier, region = self._rds_instance_metadata()
+            # instance_arn is intentionally left unset: the backend identifies the resource via
+            # resource.name (RedAPL lookup), not the ARN. database_name carries the location.
+            rds_table = {"database_name": self._config.dbname}
+            scan_result = {
+                "duration": 0,
+                "db_matches": db_matches,
+                "location": {"rds_table": rds_table},
+            }
+            payload = build_payload(
+                resource_type="aws_rds_instance",
+                resource_name=instance_identifier,
+                scan_results=[scan_result],
+                scanner_version=__version__,
+                region=region,
+                stats={"files_scanned": 1},
+            )
+            emit_sds_results(self, payload)
+            self.log.info("data_security: emitted sds-result with %d matched column(s)", len(db_matches))
+        except Exception:
+            self.log.exception("data_security: failed to emit sds-result")
+
+    def _forward_data_to_agent(self, rows):
+        # Forward the raw extracted rows to the Agent, which scans them with the Sensitive Data
+        # Scanner and forwards the processed result to the event platform intake. No analysis is
+        # done in the integration.
+        event = {
+            "host": self.reported_hostname,
+            "database_instance": self.database_identifier,
+            "sample_size": len(rows),
+            "rows": rows,
+            "timestamp": int(time() * 1000),
+        }
+        try:
+            payload = _stdlib_json.dumps(event, default=str)
+        except (TypeError, ValueError):
+            self.log.warning("data_security: failed to serialize rows for agent forwarding")
+            return
+        # The Agent scans `payload` with the Sensitive Data Scanner and forwards the result.
+        self.scan_and_event_platform_event(payload, "sds-result")
+        self.log.info("data_security: forwarded %d row(s) to the agent for sds scan + forward", len(rows))
+
+    def _emit_data_security_event(self, rows, rows_affected, columns_affected, matched_kinds):
+        # Emit a single Datadog event carrying the local scan summary (row/column-level hit counts).
+        sample_size = len(rows)
+        sensitive_data = {
+            "sample_size": sample_size,
+            "rows_affected": rows_affected,
+            "rows_affected_ratio": (rows_affected / sample_size) if sample_size else 0.0,
+            "columns_affected": sorted(columns_affected),
+            "columns_affected_count": len(columns_affected),
+            "matched_rules": sorted(matched_kinds),
+        }
+        try:
+            pretty_json = _stdlib_json.dumps({"sensitive_data": sensitive_data}, indent=2, default=str)
+        except (TypeError, ValueError):
+            return
+
+        event_tags = [t for t in self._non_internal_tags if not t.startswith("db:")] + [
+            "kind:data_security_analysis",
+            "database_instance:{}".format(self.database_identifier),
+        ]
+        self.event(
+            {
+                "timestamp": int(time()),
+                "event_type": "postgres.data_security_analysis",
+                "source_type_name": self.SOURCE_TYPE_NAME,
+                "msg_title": "Data security analysis | db={}".format(self.database_identifier),
+                "msg_text": "%%%\n```json\n{}\n```\n%%%".format(pretty_json),
+                "aggregation_key": "postgres-data-security:{}".format(self.database_identifier),
+                "alert_type": "info",
+                "priority": "low",
+                "host": self.reported_hostname,
+                "tags": event_tags,
+            }
+        )
+
+    def _data_security_scan(self):
+        # DEMO ONLY. Runs the RC-forwarded `data_security.query`, parses the returned rows and,
+        # depending on the configured flags:
+        #   - forward_data:     forwards the raw rows to the Agent (which scans + forwards them),
+        #   - otherwise scans the rows locally through the Agent's scanner and, per flag:
+        #       - send_sds_results: forwards the findings to the sds-intake (protobuf), and/or
+        #       - send_event:       emits a Datadog event with the scan summary.
+        cfg = self.instance.get("data_security") or {}
+        if not cfg.get("enabled"):
+            return
+        query = cfg.get("query")
+        if not query:
+            self.log.debug("data_security: enabled but no query configured yet (waiting for RC), skipping")
+            return
+        interval = cfg.get("interval", DATA_SECURITY_DEFAULT_INTERVAL)
+        now = time()
+        if now - self._last_data_security_run < interval:
+            return
+        self._last_data_security_run = now
+
+        forward_data = bool(cfg.get("forward_data"))
+        send_event = bool(cfg.get("send_event"))
+        send_sds_results = bool(cfg.get("send_sds_results"))
+
+        rows = self._run_data_security_query(query)
+        if rows is None:
+            return
+
+        if forward_data:
+            self._forward_data_to_agent(rows)
+            return
+
+        rows_affected, columns_affected, matched_kinds = self.scan_with_sds(rows)
+
+        if send_sds_results:
+            self._emit_sds_results(
+                sample_size=len(rows),
+                rows_affected=rows_affected,
+                columns_affected=columns_affected,
+                matched_kinds=matched_kinds,
+            )
+
+        if send_event:
+            self._emit_data_security_event(rows, rows_affected, columns_affected, matched_kinds)
+
     def _submit_initialization_health_event(self):
         try:
             # Handle the config validation result after we've set tags so those tags are included in the health event
             # TODO: Use the submission debouncer to only send this every 6 hours
             self.health.submit_health_event(
                 name=HealthEvent.INITIALIZATION,
-                status=HealthStatus.ERROR
-                if not self._validation_result.valid
-                else HealthStatus.WARNING
-                if self._validation_result.warnings
-                else HealthStatus.OK,
+                status=(
+                    HealthStatus.ERROR
+                    if not self._validation_result.valid
+                    else HealthStatus.WARNING if self._validation_result.warnings else HealthStatus.OK
+                ),
                 cooldown_time=60 * 60 * 6,  # 6 hours
                 data={
                     "errors": [str(error) for error in self._validation_result.errors],
@@ -1261,6 +1493,10 @@ class PostgreSql(DatabaseCheck):
             if self._query_manager.queries:
                 self._query_manager.executor = functools.partial(self.execute_query_raw, db=self.db)
                 self._query_manager.execute(extra_tags=tags)
+
+            # Runs the RC-forwarded data_security query and scans the rows through the Agent's
+            # Sensitive Data Scanner (no-op unless data_security.enabled and a query is configured).
+            self._data_security_scan()
 
         except Exception as e:
             self.log.exception("Unable to collect postgres metrics.")

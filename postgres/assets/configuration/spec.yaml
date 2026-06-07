@@ -683,6 +683,65 @@ files:
                 - name: entity_id
                   type: string
           fleet_configurable: false
+    - name: data_security
+      display_priority: 0
+      hidden: true
+      description: |
+        DEMO ONLY. Runs the data security `query` (forwarded via Remote
+        Configuration) and scans the resulting rows through the Agent's
+        Sensitive Data Scanner. The scanning rules are configured Agent-side
+        (also via Remote Configuration), not here. Do not enable in production.
+      options:
+        - name: enabled
+          description: |
+            Enable the data security analysis scan. The scan is a no-op until a
+            `query` is configured (normally forwarded via Remote Configuration).
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: interval
+          description: How often (in seconds) the scan pass runs.
+          value:
+            type: integer
+            example: 15
+            display_default: 15
+        - name: query
+          description: |
+            The SQL query to run on every scan pass. It is expected to aggregate
+            the rows to scan as a JSON array text in its first column (e.g.
+            `SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json)::text AS rows_json FROM public.users AS t;`).
+            This is normally forwarded by the Agent from Remote Configuration.
+          value:
+            type: string
+            example: ""
+            display_default: ""
+        - name: send_event
+          description: |
+            When true, a Datadog event titled "Data security analysis" carrying
+            the scan summary (row/column-level hit counts) is emitted.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: send_sds_results
+          description: |
+            When true, the findings are forwarded to the Sensitive Data Scanner
+            (DSPM) intake as a protobuf `SdsResultPayload`.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+        - name: forward_data
+          description: |
+            When true, the raw extracted rows are forwarded to the Agent, which
+            scans them with the Sensitive Data Scanner and forwards the processed
+            result to the intake. The integration performs no local scan in this
+            mode (the `send_event` / `send_sds_results` flags are ignored).
+          value:
+            type: boolean
+            example: false
+            display_default: false
     - name: pg_stat_statements_view
       display_priority: 0
       description: |

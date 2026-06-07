@@ -200,6 +200,10 @@ EXPECTED_DEFAULTS = {
         'config_id': None,
         'queries': (),
     },
+    # === Data Security (DEMO ONLY) ===
+    # Read directly from `self.instance` in postgres.py rather than wired
+    # through `build_config`, so the parsed default stays `None`.
+    'data_security': None,
     # === Relations configuration ===
     'relations': [],
     # === Query encodings ===

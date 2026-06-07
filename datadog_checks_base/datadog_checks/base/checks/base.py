@@ -444,9 +444,9 @@ class AgentCheck(object):
                 provider=self.provider,
                 ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
                 file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
-                trusted_providers=trusted_providers
-                if trusted_providers is not None
-                else list(DEFAULT_TRUSTED_PROVIDERS),
+                trusted_providers=(
+                    trusted_providers if trusted_providers is not None else list(DEFAULT_TRUSTED_PROVIDERS)
+                ),
                 excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
             )
 
@@ -810,6 +810,44 @@ class AgentCheck(object):
         if raw_event is None:
             return
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+
+    def event_platform_event_raw(self, raw_event, event_track_type):
+        # type: (bytes, str) -> None
+        """Send a raw (binary) event platform event.
+
+        Unlike `event_platform_event`, the payload is forwarded to the intake as-is, without any
+        string coercion. This is required for binary payloads (e.g. protobuf) that are not valid
+        UTF-8 and would otherwise be corrupted by `to_native_string`.
+
+        Parameters:
+            raw_event (bytes):
+                binary payload (e.g. a serialized protobuf message) to send
+            event_track_type (str):
+                type of event ingested and processed by the event platform
+        """
+        if raw_event is None:
+            return
+        aggregator.submit_event_platform_event(self, self.check_id, raw_event, event_track_type)
+
+    def scan_and_event_platform_event(self, raw_event, event_track_type):
+        # type: (str, str) -> None
+        """Send an event platform event after the Agent scans it with the Sensitive Data Scanner.
+
+        Unlike `event_platform_event`, the raw event is sent to the Agent which performs the
+        sensitive-data analysis (e.g. redaction) itself before forwarding the processed event to
+        the event platform intake.
+
+        Parameters:
+            raw_event (str):
+                JSON formatted string representing the event to send
+            event_track_type (str):
+                type of event ingested and processed by the event platform
+        """
+        if raw_event is None:
+            return
+        aggregator.scan_and_submit_event_platform_event(
+            self, self.check_id, to_native_string(raw_event), event_track_type
+        )
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)

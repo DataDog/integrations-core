@@ -465,6 +465,52 @@ instances:
         #
         # collection_interval: 10
 
+    ## DEMO ONLY. Periodically scans the configured tables (either a full
+    ## SELECT or a TABLESAMPLE-based sampling) and submits the resulting rows
+    ## as a Datadog event titled "Data security analysis". Do not enable in
+    ## production.
+    #
+    # data_security:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable the data security analysis scan. The scan is a no-op until a
+        ## `query` is configured (normally forwarded via Remote Configuration).
+        #
+        # enabled: false
+
+        ## @param interval - integer - optional - default: 15
+        ## How often (in seconds) the scan pass runs.
+        #
+        # interval: 15
+
+        ## @param query - string - optional - default: ''
+        ## The SQL query to run on every scan pass. It is expected to aggregate
+        ## the rows to scan as a JSON array text in its first column (e.g.
+        ## `SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json)::text AS rows_json FROM public.users AS t;`).
+        ## This is normally forwarded by the Agent from Remote Configuration.
+        #
+        # query: ''
+
+        ## @param send_event - boolean - optional - default: false
+        ## When true, a Datadog event titled "Data security analysis" carrying
+        ## the scan summary (row/column-level hit counts) is emitted.
+        #
+        # send_event: false
+
+        ## @param send_sds_results - boolean - optional - default: false
+        ## When true, the findings are forwarded to the Sensitive Data Scanner
+        ## (DSPM) intake as a protobuf `SdsResultPayload`.
+        #
+        # send_sds_results: false
+
+        ## @param forward_data - boolean - optional - default: false
+        ## When true, the raw extracted rows are forwarded to the Agent, which
+        ## scans them with the Sensitive Data Scanner and forwards the processed
+        ## result to the intake. The integration performs no local scan in this
+        ## mode (the `send_event` / `send_sds_results` flags are ignored).
+        #
+        # forward_data: false
+
     ## @param pg_stat_statements_view - string - optional - default: pg_stat_statements
     ## Set this value if you want to define a custom view or function to allow the datadog user to query the
     ## `pg_stat_statements` table, which is useful for restricting the permissions given to the datadog agent.
