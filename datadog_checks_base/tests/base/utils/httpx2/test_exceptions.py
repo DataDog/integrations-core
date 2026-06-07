@@ -70,3 +70,26 @@ def test_iter_methods_map_mid_stream_exceptions(
     response = http.get('http://example.test/')
     with pytest.raises(expected):
         list(getattr(response, iter_method)(**iter_kwargs))
+
+
+@pytest.mark.parametrize(
+    'raised,expected',
+    [
+        pytest.param(httpx2.ReadError('mid-stream'), HTTPConnectionError, id='read-error'),
+        pytest.param(httpx2.ReadTimeout('slow'), HTTPTimeoutError, id='read-timeout'),
+    ],
+)
+@pytest.mark.parametrize(
+    'reader',
+    [
+        pytest.param(lambda r: r.content, id='content'),
+        pytest.param(lambda r: r.text, id='text'),
+        pytest.param(lambda r: r.json(), id='json'),
+    ],
+)
+def test_buffered_reads_map_exceptions(mid_stream_raising_transport_factory, raised, expected, reader):
+    transport = mid_stream_raising_transport_factory(raised)
+    http = HTTPX2Wrapper({}, {}, transport=transport)
+    response = http.get('http://example.test/')
+    with pytest.raises(expected):
+        reader(response)

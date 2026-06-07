@@ -134,12 +134,18 @@ class HTTPX2ResponseAdapter:
 
     @property
     def content(self) -> bytes:
-        return self._response.read()
+        try:
+            return self._response.read()
+        except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
+            raise _map_httpx2_exception(exc) from exc
 
     @property
     def text(self) -> str:
-        self._response.read()
-        return self._response.text
+        try:
+            self._response.read()
+            return self._response.text
+        except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
+            raise _map_httpx2_exception(exc) from exc
 
     @property
     def headers(self) -> Mapping[str, str]:
@@ -182,8 +188,11 @@ class HTTPX2ResponseAdapter:
             return timedelta(0)
 
     def json(self, **kwargs: Any) -> Any:
-        self._response.read()
-        return self._response.json(**kwargs)
+        try:
+            self._response.read()
+            return self._response.json(**kwargs)
+        except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
+            raise _map_httpx2_exception(exc) from exc
 
     def raise_for_status(self) -> None:
         # Mirror requests semantics (4xx/5xx only); httpx2 also raises on 3xx.
