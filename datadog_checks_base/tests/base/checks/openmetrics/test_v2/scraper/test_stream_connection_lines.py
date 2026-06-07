@@ -20,9 +20,16 @@ def _scraper_with_connection_error(exception, *, ignore_connection_errors):
     return scraper
 
 
-def test_connection_error_warning_path(caplog):
+@pytest.mark.parametrize(
+    'exception',
+    [
+        pytest.param(HTTPConnectionError('refused'), id='http-connection-error'),
+        pytest.param(RequestsConnectionError('boom'), id='requests-connection-error-backcompat'),
+    ],
+)
+def test_connection_error_warning_path(caplog, exception):
     scraper = _scraper_with_connection_error(
-        HTTPConnectionError('refused'),
+        exception,
         ignore_connection_errors=True,
     )
     with caplog.at_level(logging.WARNING, logger='test_stream_connection_lines'):
@@ -31,7 +38,7 @@ def test_connection_error_warning_path(caplog):
         'OpenMetrics endpoint http://example.test/metrics is not accessible' in record.message
         for record in caplog.records
     )
-    assert any('refused' in record.message for record in caplog.records)
+    assert any(str(exception) in record.message for record in caplog.records)
 
 
 def test_connection_error_reraises_when_not_ignored():
@@ -41,13 +48,3 @@ def test_connection_error_reraises_when_not_ignored():
     )
     with pytest.raises(HTTPConnectionError):
         list(scraper.stream_connection_lines())
-
-
-def test_requests_connection_error_still_handled(caplog):
-    scraper = _scraper_with_connection_error(
-        RequestsConnectionError('boom'),
-        ignore_connection_errors=True,
-    )
-    with caplog.at_level(logging.WARNING, logger='test_stream_connection_lines'):
-        assert list(scraper.stream_connection_lines()) == []
-    assert any('boom' in record.message for record in caplog.records)
