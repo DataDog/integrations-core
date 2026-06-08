@@ -243,11 +243,17 @@ class MessageDeserializer:
     ) -> tuple[str | None, int | None]:
         """Deserialize message, handling Schema Registry format if present."""
         if uses_schema_registry:
-            if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
-                msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
+            if message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
+                self.log.warning(
+                    "Schema registry expected but message does not start with magic byte 0x00 "
+                    "(got: %s), falling back to string",
+                    hex(message[0]),
+                )
+                return self._deserialize_bytes(message, 'string', None, uses_schema_registry=False), None
+            if len(message) < 5:
                 raise ValueError(
                     f"Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
-                    f"but message is too short or has wrong magic byte: {msg_hex}"
+                    f"but message is too short: {message.hex()}"
                 )
             schema_id = int.from_bytes(message[1:5], 'big')
             message = message[5:]  # Skip the magic byte and schema ID bytes
