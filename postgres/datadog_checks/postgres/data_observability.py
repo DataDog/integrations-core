@@ -40,12 +40,12 @@ class DueQuery:
     scheduled_time: float
     mode: Mode
 
+
 class PostgresDataObservability(DBMAsyncJob):
     def __init__(self, check: PostgreSql, config: InstanceConfig):
         self._check = check
         self._config = config
         self._last_execution: dict[int, float] = {}
-        self._loaded_config_id: str | None = None
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
