@@ -432,13 +432,21 @@ pipeline:
               name: ocsf.disposition_id
               categories:
                 - filter:
-                    query: "@query_log.actionTaken:allow"
+                    query: '@query_log.actionTaken:(allow OR "query-response")'
                   name: Allowed
                   id: 1
                 - filter:
                     query: "@query_log.actionTaken:block"
                   name: Blocked
                   id: 2
+                - filter:
+                    query: "@query_log.actionTaken:monitor"
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: "@query_log.actionTaken:redirect"
+                  name: Modified
+                  id: 4
                 - filter:
                     query: "@query_log.actionTaken:*"
                   name: Other
@@ -457,25 +465,13 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@query_log.actionTaken:allow"
-                  name: Informational
-                  id: 1
-                - filter:
-                    query: "@query_log.actionTaken:monitor"
-                  name: Low
-                  id: 2
-                - filter:
-                    query: "@query_log.actionTaken:redirect"
+                    query: "@query_log.actionTaken:(block OR redirect)"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@query_log.actionTaken:block"
-                  name: High
-                  id: 4
-                - filter:
                     query: "@query_log.actionTaken:*"
-                  name: Other
-                  id: 99
+                  name: Informational
+                  id: 1
               targets:
                 name: ocsf.severity
                 id: ocsf.severity_id

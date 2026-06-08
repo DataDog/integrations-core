@@ -95,7 +95,7 @@ tests:
       vendor:
         endpoint: "dns-query-logs"
       ocsf:
-        severity: High
+        severity: Medium
         activity_name: Query
         metadata:
           uid: 1768799730903712CBD65A6B0963C276D07800E643DBG
@@ -130,7 +130,7 @@ tests:
         class_uid: 4003
         activity_id: 1
         time: 1770186142000
-        severity_id: 4
+        severity_id: 3
         class_name: DNS Activity
         query_time: 1770186142000
         disposition_id: 2
