@@ -253,11 +253,9 @@ class MessageDeserializer:
 
                 return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
             else:
-                msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
                 self.log.debug(
                     "Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
-                    "but message is too short or has wrong magic byte: %s, falling back to string",
-                    msg_hex,
+                    "but message is too short or has wrong magic byte, falling back to string",
                 )
                 return self._deserialize_bytes(message, 'string', None, uses_schema_registry=False), None
         else:

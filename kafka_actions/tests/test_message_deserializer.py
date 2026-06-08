@@ -669,7 +669,6 @@ class TestMessageDeserializer:
         assert result == json.dumps('hello-world')
         assert schema_id is None
         log.debug.assert_called()
-        assert '68' in log.debug.call_args[0][1]  # hex('h') == 0x68
 
     def test_schema_registry_wrong_magic_byte_non_utf8_returns_error(self):
         """When fallback-to-string is triggered but bytes are not valid UTF-8, return error string."""
