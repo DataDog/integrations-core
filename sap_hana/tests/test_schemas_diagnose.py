@@ -74,8 +74,8 @@ class TestHanaSchemaCollector:
 
         assert len(payloads) == 1
         payload = payloads[0]
-        assert payload['kind'] == 'hana_databases'
-        assert payload['dbms'] == 'hana'
+        assert payload['kind'] == 'saphana_databases'
+        assert payload['dbms'] == 'saphana'
         assert payload['host'] == 'hana-host'
         assert payload['database_instance'] == 'hana-host:39015'
 
@@ -274,6 +274,6 @@ class TestHanaDiagnose:
         check = _make_check()
         assert check.reported_hostname == 'hana-host'
         assert check.database_identifier == 'hana-host:39015'
-        assert check.dbms == 'hana'
+        assert check.dbms == 'saphana'
         assert check.cloud_metadata == {}
         assert 'server:hana-host' in check.tags
