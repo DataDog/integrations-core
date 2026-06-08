@@ -1955,6 +1955,7 @@ def test_pg_stat_statements_max_warning(
 def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_replica2):
     dbm_instance_replica2['query_samples'] = {'enabled': False}
     dbm_instance_replica2['query_activity'] = {'enabled': False}
+    dbm_instance_replica2['collect_schemas'] = {'enabled': False}
     with _get_superconn(dbm_instance_replica2) as superconn:
         with superconn.cursor() as cur:
             cur.execute("select pg_stat_statements_reset();")
