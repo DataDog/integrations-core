@@ -488,7 +488,14 @@ async def test_process_message_times_out_when_run_never_completes(tmp_path: Path
 
     assert len(client.update_check_run_calls) == 1
     assert client.update_check_run_calls[0]["conclusion"] == "timed_out"
-    assert _drain_queue(runner.queue) == []
+
+    submitted = _drain_queue(runner.queue)
+    assert len(submitted) == 1
+    finished = submitted[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.timed_out is True
+    assert finished.status == "failure"
+    assert finished.artifacts_path == ""
 
 
 @pytest.mark.asyncio
