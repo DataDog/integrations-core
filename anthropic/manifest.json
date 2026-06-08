@@ -23,6 +23,14 @@
     ],
     "resources": [
       {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/cloud-siem-claude-compliance-api-integration/"
+      },
+      {
+        "resource_type": "blog",
+        "url": "https://claude.com/blog/compliance-api-security-partners"
+      },
+      {
         "url": "https://docs.datadoghq.com/integrations/anthropic/",
         "resource_type": "documentation"
       }
