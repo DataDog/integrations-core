@@ -572,6 +572,19 @@ def test_schedule_query_fires_at_cron_tick(pg_instance, aggregator, monkeypatch)
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
 
 
+def test_schedule_query_fires_when_first_poll_exactly_at_tick(pg_instance, aggregator, monkeypatch):
+    """First poll landing exactly on the cron tick must fire, not skip the cycle."""
+    tick_time = float(_BASE_EPOCH + 60)  # 00:50:00 — exactly on the :50 tick
+    monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: tick_time)
+
+    mock_conn, _ = _make_mock_conn()
+    check = _make_cron_check(pg_instance)
+    check.db_pool = _mock_db_pool(mock_conn)
+
+    check.data_observability.run_job()
+    assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
+
+
 def test_schedule_advances_after_run(pg_instance, monkeypatch):
     """After a cron fire, the scheduler advances to the NEXT future tick (not the same tick)."""
     current_time = [float(_BASE_EPOCH + 65)]  # 00:50:05 — already past the tick

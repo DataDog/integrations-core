@@ -95,7 +95,9 @@ class PostgresDataObservability(DBMAsyncJob):
         due: list[DueQuery] = []
         for q in self._queries:
             if q.schedule:
-                ticks = self._schedulers[q.monitor_id].due_ticks(now)
+                # +0.001 so a poll landing exactly on a tick boundary is treated
+                # as due (CronScheduler.previous_tick uses strict less-than).
+                ticks = self._schedulers[q.monitor_id].due_ticks(now + 0.001)
                 if ticks:
                     # Take the latest elapsed tick; earlier ones are already in the past
                     # and do not need separate execution.
