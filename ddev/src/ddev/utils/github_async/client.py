@@ -372,9 +372,7 @@ class AsyncGitHubClient:
             params={"per_page": per_page},
         )
         comments = [IssueComment.model_validate(item) for item in response.json()]
-        return GitHubResponse[list[IssueComment]].model_validate(
-            {"data": comments, "headers": dict(response.headers)}
-        )
+        return GitHubResponse[list[IssueComment]].model_validate({"data": comments, "headers": dict(response.headers)})
 
     async def get_pull_request(
         self,
