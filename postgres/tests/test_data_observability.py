@@ -27,7 +27,7 @@ BASE_QUERY = {
     'dbname': 'test_db',
     'query': 'SELECT count(*) FROM orders',
     'interval_seconds': 60,
-    'timeout_seconds': 30,
+    'query_timeout': 30,
     'type': 'freshness',
     'entity': {
         'platform': 'aws',
@@ -45,7 +45,7 @@ MULTI_QUERIES = [
         'dbname': 'test_db',
         'query': 'SELECT count(*) FROM users',
         'interval_seconds': 120,
-        'timeout_seconds': 30,
+        'query_timeout': 30,
         'type': 'freshness',
         'entity': {
             'platform': 'aws',
@@ -282,34 +282,34 @@ def test_query_failure_does_not_block_subsequent(aggregator, pg_instance):
     assert len(status_metrics) == 2
 
 
-def _set_local_timeout_ms(mock_cursor):
-    """Return the statement_timeout (ms) passed to the SET LOCAL execute, or None."""
+def _get_local_timeout_ms(mock_cursor):
+    """Return the statement_timeout (ms) passed to the set_config execute, or None."""
     for call in mock_cursor.execute.call_args_list:
         sql = call.args[0]
-        if sql.strip().upper().startswith('SET LOCAL STATEMENT_TIMEOUT'):
-            return call.args[1][0]
+        if "set_config('statement_timeout'" in sql.lower():
+            return int(call.args[1][0])
     return None
 
 
-def test_timeout_seconds_applied_in_transaction(pg_instance):
-    """The query's timeout_seconds is applied as SET LOCAL statement_timeout inside a transaction."""
+def test_query_timeout_applied_in_transaction(pg_instance):
+    """The query's query_timeout is applied via set_config inside a transaction."""
     mock_conn, mock_cursor = _make_mock_conn()
 
     _setup_and_run(pg_instance, mock_conn=mock_conn, mock_cursor=mock_cursor)
 
     mock_conn.transaction.assert_called_once()
-    assert _set_local_timeout_ms(mock_cursor) == 30_000
+    assert _get_local_timeout_ms(mock_cursor) == 30_000
 
 
-def test_timeout_seconds_converted_to_milliseconds(pg_instance):
-    """timeout_seconds from the query payload is converted to milliseconds."""
+def test_query_timeout_converted_to_milliseconds(pg_instance):
+    """query_timeout from the query payload is converted to milliseconds for set_config."""
     query = deepcopy(BASE_QUERY)
-    query['timeout_seconds'] = 180
+    query['query_timeout'] = 180
     mock_conn, mock_cursor = _make_mock_conn()
 
     _setup_and_run(pg_instance, queries=[query], mock_conn=mock_conn, mock_cursor=mock_cursor)
 
-    assert _set_local_timeout_ms(mock_cursor) == 180_000
+    assert _get_local_timeout_ms(mock_cursor) == 180_000
 
 
 def test_no_description_does_not_block_subsequent(aggregator, pg_instance):
@@ -1129,7 +1129,7 @@ BROKEN_AGENT_YAML = (
     "                ON c.user_id = pv.user_id AND c.page_url = pv.url\n"
     "              WHERE pv.id IS NULL\n"
     '            -- Datadog {"monitor_ids":[26724188]}\n'
-    "          timeout_seconds: 300\n"
+    "          query_timeout: 300\n"
     "          type: run_query\n"
 )
 

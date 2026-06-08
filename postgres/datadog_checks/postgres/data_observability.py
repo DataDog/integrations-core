@@ -131,13 +131,22 @@ class PostgresDataObservability(DBMAsyncJob):
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
-            timeout_ms = query_spec.timeout_seconds * 1000
-            # Pool connections run with autocommit=True, so SET LOCAL only takes
-            # effect inside an explicit transaction; it also reverts on commit,
+            timeout_ms = query_spec.query_timeout * 1000
+            # Pool connections run with autocommit=True, so the timeout must be
+            # applied inside an explicit transaction and reverts on commit,
             # avoiding timeout leakage onto the shared connection.
+            # set_config() is used instead of "SET LOCAL statement_timeout = %s"
+            # because psycopg3 uses server-side binding (extended query protocol)
+            # for parameterized execute() calls, and PostgreSQL rejects bound
+            # parameters in SET statements under the extended protocol. set_config()
+            # is a regular function that accepts parameters normally; is_local=true
+            # gives the same scope as SET LOCAL (current transaction only).
             with conn.transaction():
                 with conn.cursor() as cursor:
-                    cursor.execute("SET LOCAL statement_timeout = %s", (timeout_ms,))
+                    cursor.execute(
+                        "SELECT set_config('statement_timeout', %s, true)",
+                        (str(int(timeout_ms)),),
+                    )
                     cursor.execute(query_spec.query)
                     # cursor.description is None when the query produced no result set
                     # (e.g. INSERT, UPDATE, DELETE, or a syntax error that executed without
