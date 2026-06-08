@@ -27,10 +27,13 @@ class BatchJob:
 
 @dataclass
 class FailedCheck:
-    """A single failed test check within a workflow."""
+    """A single failed (or timed-out) test job within a workflow."""
 
     name: str
     url: str
+    environment: str = ""
+    error: str | None = None
+    failed_tests: list[str] = field(default_factory=list)
 
 
 @dataclass

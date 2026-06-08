@@ -146,6 +146,34 @@ async def test_failure_path_records_failed_step_and_tests(tmp_path: Path) -> Non
 
 
 @pytest.mark.asyncio
+async def test_failed_check_carries_environment_error_and_tests(tmp_path: Path) -> None:
+    artifacts = tmp_path / "artifacts" / "100"
+    _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING)
+    _write_metadata(artifacts, [{"name": "j1", "conclusion": "failure", "failed_step": "Run unit tests"}])
+
+    gatherer = _make_gatherer(tmp_path)
+    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=[_batch_job("j1")]))
+
+    check = _drain_queue(gatherer.queue)[0].workflows[0].failed_checks[0]
+    assert check.environment == "py3.13"
+    assert check.error == "Run unit tests"
+    assert check.failed_tests == ["tests.test_a::test_fail"]
+
+
+@pytest.mark.asyncio
+async def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
+    gatherer = _make_gatherer(tmp_path)
+    job_list = [_batch_job("j1", environment="py3.12"), _batch_job("j2", target="kafka", environment="py3.13")]
+    await gatherer.process_message(
+        _batch_finished("", status="failure", run_id=300, job_list=job_list, timed_out=True)
+    )
+
+    status = _drain_queue(gatherer.queue)[0].workflows[0]
+    assert status.failed_count == 2
+    assert {check.error for check in status.failed_checks} == {"timed out"}
+
+
+@pytest.mark.asyncio
 async def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts, "j1", environment="py3.12", junit=JUNIT_PASSING)

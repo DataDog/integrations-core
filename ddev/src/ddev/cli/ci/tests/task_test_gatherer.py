@@ -57,9 +57,10 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         jobs_by_name = {job.name: job for job in message.job_list}
         job_statuses = self._read_job_statuses(message)
 
+        default_status = (message.status, "timed out" if message.timed_out else None)
         results: list[WorkflowResult] = []
         for job_name, batch_job in jobs_by_name.items():
-            conclusion, failed_step = job_statuses.get(job_name, (message.status, None))
+            conclusion, failed_step = job_statuses.get(job_name, default_status)
             job_dir = self._locate_job_dir(artifacts_path, job_name)
             failed_tests: list[str] = []
             if job_dir is not None:
@@ -155,7 +156,13 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         success_count = sum(1 for result in results if result.status == "success")
         failed_count = sum(1 for result in results if result.status == "failure")
         failed_checks = [
-            FailedCheck(name=result.integration, url=message.workflow_url)
+            FailedCheck(
+                name=result.integration,
+                url=message.workflow_url,
+                environment=result.environment,
+                error=result.failed_step,
+                failed_tests=result.failed_tests,
+            )
             for result in results
             if result.status == "failure"
         ]
