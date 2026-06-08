@@ -128,8 +128,8 @@ files:
         min_collection_interval.value.example: 60
         min_collection_interval.value.display_default: 60
         min_collection_interval.description: |
-          This changes the collection interval of the check. For more information, see:
-          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+          Changes the collection interval of the check. For more information, see
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
           The default is 60 seconds. Statistics are only available at one-minute intervals, 
           so more frequent runs do not collect additional data.
 
