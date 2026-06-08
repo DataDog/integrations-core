@@ -290,9 +290,9 @@ class HTTPX2Wrapper:
 
         # proxies=None mirrors RequestsWrapper.options for consumers (e.g. http_check).
         # TODO: wire proxies through to httpx2 as part of the ongoing httpx migration.
-        # Note: options['headers'] is a mirror of _client.headers maintained by set_header.
-        # Direct mutation (e.g. self.options['headers']['X-Foo'] = 'bar') will NOT reach the wire.
-        # Use set_header/get_header for header mutations.
+        # options['headers'] is the per-request source of truth and is re-read in _build_request_kwargs,
+        # so direct mutation (__setitem__, update(), whole-dict replacement) reaches the wire.
+        # set_header keeps options['headers'] and _client.headers in sync for callers that prefer it.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,
@@ -429,16 +429,18 @@ class HTTPX2Wrapper:
             if key in options:
                 kwargs[key] = options[key]
 
+        # Re-read self.options['headers'] per request so post-init mutations (__setitem__, update(),
+        # whole-dict replacement) reach the wire, mirroring RequestsWrapper's ChainMap pattern at http.py:497.
+        # Layered order: self.options['headers'] < per-call headers < per-call extra_headers.
+        # httpx2.Headers folds keys case-insensitively, matching RequestsWrapper's CaseInsensitiveDict.
+        merged = httpx2.Headers(self.options.get('headers') or {})
         headers = options.get('headers')
+        if headers:
+            merged.update(headers)
         extra_headers = options.get('extra_headers')
-        if headers is not None or extra_headers is not None:
-            # Empty headers/extra_headers fall through as a benign no-op: client-level defaults survive build_request.
-            # httpx2.Headers folds keys case-insensitively so overlapping headers/extra_headers collapse
-            # to a single entry, matching RequestsWrapper's CaseInsensitiveDict behavior.
-            merged = httpx2.Headers(headers or {})
-            if extra_headers:
-                merged.update(extra_headers)
-            kwargs['headers'] = merged
+        if extra_headers:
+            merged.update(extra_headers)
+        kwargs['headers'] = merged
 
         if 'timeout' in options:
             timeout_value = options['timeout']
