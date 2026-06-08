@@ -95,9 +95,17 @@ class PostgresDataObservability(DBMAsyncJob):
         due: list[DueQuery] = []
         for q in self._queries:
             if q.schedule:
-                # +0.001 so a poll landing exactly on a tick boundary is treated
-                # as due (CronScheduler.previous_tick uses strict less-than).
-                ticks = self._schedulers[q.monitor_id].due_ticks(now + 0.001)
+                scheduler = self._schedulers[q.monitor_id]
+                first_poll = scheduler.next_tick is None
+                ticks = scheduler.due_ticks(now)
+                if not ticks and first_poll:
+                    # previous_tick is strict (< now), so a first poll that lands
+                    # exactly on a tick returns [] instead of [tick]. Probe with
+                    # +0.001 to detect that narrow case without inflating the
+                    # startup-lookback window comparison.
+                    prev = scheduler.expression.previous_tick(before=now + 0.001)
+                    if now - prev < 0.001:
+                        ticks = [prev]
                 if ticks:
                     # Take the latest elapsed tick; earlier ones are already in the past
                     # and do not need separate execution.
