@@ -33,7 +33,7 @@ No additional installation is needed on your server.
 
 1. Edit the `hpe_aruba_edgeconnect.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your HPE Aruba EdgeConnect performance data. See the [sample hpe_aruba_edgeconnect.d/conf.yaml][4] for all available configuration options.
 
-   **Note**: Monitor permissions are enough to collect most metrics. Admin permissions are required to collect the `hpe_aruba_edgeconnect.device.cpu.usage` metric on the appliances. If the configured credentials do not have admin access, this metric will be skipped, but the rest of the metrics will still be collected.
+   **Note**: Monitor permissions are enough to collect most metrics. Admin permissions are required to collect the `hpe_aruba_edgeconnect.device.cpu.usage` metric on the appliances. If the configured credentials do not have admin access, the Agent skips this metric, but collects the rest of the metrics.
 
 2. [Restart the Agent][5].
 
