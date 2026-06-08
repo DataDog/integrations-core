@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from functools import cached_property
 from typing import Any
 
 from ddev.ai.agent.build import AgentRuntimeFactory, DefaultAgentRuntimeFactory
@@ -27,19 +28,15 @@ class RunResources:
         self._file_access_policy = file_access_policy
         self._agents = agents
         self._callbacks = callbacks
-        self._file_registry: FileRegistry | None = None
-        self._agent_runtime_factory: AgentRuntimeFactory | None = None
-        self._process_factory: ReActProcessFactory | None = None
 
     def agent_clients(self) -> dict[str, Any]:
         """Raw provider-name -> SDK client map."""
         return dict(self._agent_clients)
 
+    @cached_property
     def file_registry(self) -> FileRegistry:
         """Lazily-built, run-wide singleton FileRegistry."""
-        if self._file_registry is None:
-            self._file_registry = FileRegistry(policy=self._file_access_policy)
-        return self._file_registry
+        return FileRegistry(policy=self._file_access_policy)
 
     def agent_config(self, name: str) -> AgentConfig:
         """Resolve a flow agent definition by name; typed error if absent."""
@@ -48,20 +45,18 @@ class RunResources:
         except KeyError as e:
             raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
 
+    @cached_property
     def agent_runtime_factory(self) -> AgentRuntimeFactory:
-        """Return a ready-to-use generic runtime factory."""
-        if self._agent_runtime_factory is None:
-            self._agent_runtime_factory = DefaultAgentRuntimeFactory(
-                agent_clients=self._agent_clients,
-                file_registry=self.file_registry(),
-            )
-        return self._agent_runtime_factory
+        """Ready-to-use generic runtime factory."""
+        return DefaultAgentRuntimeFactory(
+            agent_clients=self._agent_clients,
+            file_registry=self.file_registry,
+        )
 
+    @cached_property
     def process_factory(self) -> ReActProcessFactory:
-        """Return the run-wide factory that creates scoped ReActProcesses."""
-        if self._process_factory is None:
-            self._process_factory = ReActProcessFactory(
-                self.agent_runtime_factory().build_runtime,
-                self._callbacks,
-            )
-        return self._process_factory
+        """Run-wide factory that creates scoped ReActProcesses."""
+        return ReActProcessFactory(
+            self.agent_runtime_factory.build_runtime,
+            self._callbacks,
+        )
