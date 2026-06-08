@@ -319,7 +319,7 @@ def test_no_description_does_not_block_subsequent(aggregator, pg_instance):
 
     def execute_side_effect(sql, *args, **kwargs):
         nonlocal query_count
-        if sql.strip().upper().startswith('SET LOCAL'):
+        if "set_config('statement_timeout'" in sql.lower():
             return
         query_count += 1
         mock_cursor.description = None if query_count == 1 else [('count',)]
@@ -1104,7 +1104,7 @@ def test_agent_yaml_delivery_round_trips_query(pg_instance, query):
     check.db_pool = _mock_db_pool(mock_conn)
     check.data_observability.run_job()
 
-    # The exact SQL string (not the SET LOCAL statement_timeout call) must reach the driver.
+    # The exact SQL string (not the set_config timeout call) must reach the driver.
     executed = [call.args[0] for call in mock_cursor.execute.call_args_list]
     assert query in executed, f"original query string must be executed verbatim; got {executed!r}"
 
