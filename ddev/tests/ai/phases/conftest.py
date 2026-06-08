@@ -174,6 +174,15 @@ def flow_dir(tmp_path):
 
 
 @pytest.fixture
+def flow_context(flow_dir):
+    return FlowContext(
+        runtime_variables={},
+        flow_variables={},
+        config_dir=flow_dir,
+    )
+
+
+@pytest.fixture
 def message_queue():
     """An asyncio.Queue that can be attached to a Phase for submit_message."""
     return asyncio.Queue()

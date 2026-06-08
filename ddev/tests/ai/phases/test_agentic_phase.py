@@ -370,35 +370,35 @@ async def test_run_memory_step_returns_response_data_and_fires_callbacks(flow_di
     ids=["spawn", "regular_tool", "no_tools"],
 )
 def test_build_creates_subagent_builder_from_tool_metadata(
-    flow_dir: Path,
+    flow_context,
     tools: list[str],
     expected: bool,
 ) -> None:
-    from ddev.ai.phases.base import FlowContext
     from ddev.ai.phases.checkpoint import CheckpointManager
     from ddev.ai.phases.orchestrator import ResourceProvider
 
+    flow_dir = flow_context.config_dir
     provider = ResourceProvider(
         agent_clients={},
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
         agents={"writer": AgentConfig(tools=tools)},
     )
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    context = FlowContext(runtime_variables={}, flow_variables={}, config_dir=flow_dir)
     phase = AgenticPhase.build(
         phase_id="p1",
         config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
         deps=[],
         resources=provider,
         checkpoint_manager=checkpoint_manager,
-        context=context,
+        context=flow_context,
     )
 
     assert (phase._subagent_builder is not None) is expected
 
 
-async def test_spawn_subagent_wiring(flow_dir, message_queue):
+async def test_spawn_subagent_wiring(flow_context, message_queue):
     """Phase correctly passes subagent_builder + log_dir to the agent builder at execute time."""
+    flow_dir = flow_context.config_dir
 
     def make_usage() -> TokenUsage:
         return TokenUsage(input_tokens=100, output_tokens=50, cache_read_input_tokens=0, cache_creation_input_tokens=0)
@@ -449,20 +449,13 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
             ]
         )
 
-    from ddev.ai.phases.base import FlowContext
-
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    context = FlowContext(
-        runtime_variables={},
-        flow_variables={},
-        config_dir=flow_dir,
-    )
     phase = AgenticPhase(
         phase_id="p1",
         dependencies=[],
         config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
         checkpoint_manager=checkpoint_manager,
-        context=context,
+        context=flow_context,
         agent_builder=agent_builder_fn,
         subagent_builder=mock_subagent_builder,
     )
@@ -496,28 +489,27 @@ async def test_spawn_subagent_wiring(flow_dir, message_queue):
     ids=["no_goal", "single_goal", "mixed"],
 )
 def test_build_creates_goal_agent_builder_when_any_task_has_goal(
-    flow_dir,
+    flow_context,
     tasks,
     expect_builder,
 ):
-    from ddev.ai.phases.base import FlowContext
     from ddev.ai.phases.checkpoint import CheckpointManager
     from ddev.ai.phases.orchestrator import ResourceProvider
 
+    flow_dir = flow_context.config_dir
     provider = ResourceProvider(
         agent_clients={},
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
         agents={"writer": AgentConfig()},
     )
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    context = FlowContext(runtime_variables={}, flow_variables={}, config_dir=flow_dir)
     phase = AgenticPhase.build(
         phase_id="p1",
         config=PhaseConfig(agent="writer", tasks=tasks),
         deps=[],
         resources=provider,
         checkpoint_manager=checkpoint_manager,
-        context=context,
+        context=flow_context,
     )
     assert (phase._goal_agent_builder is not None) is expect_builder
 
