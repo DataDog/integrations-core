@@ -67,7 +67,7 @@ instances:
     ## @param appliance_credentials_overrides - list of mappings - optional
     ## Per-appliance credential overrides matched by CIDR. When an appliance IP falls within a listed
     ## CIDR block, the associated username and password are used instead of the main credentials.
-    ## If multiple CIDR blocks match, the first match is used. Each entry must specify all three
+    ## If multiple CIDR blocks match, the Agent uses the first match. Each entry must specify all three
     ## fields: `cidr`, `username`, and `password`.
     #
     # appliance_credentials_overrides:
@@ -413,8 +413,8 @@ instances:
     # service: <SERVICE>
 
     ## @param min_collection_interval - number - optional - default: 60
-    ## This changes the collection interval of the check. For more information, see:
-    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    ## Changes the collection interval of the check. For more information, see
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
     ## The default is 60 seconds. Statistics are only available at one-minute intervals, 
     ## so more frequent runs do not collect additional data.
     #
