@@ -361,8 +361,10 @@ class CronScheduler:
 
         if self._next_tick_cached is None:
             if self._startup_lookback > 0:
-                prev = self._expression.previous_tick(before=now)
-                if now - prev <= self._startup_lookback:
+                # +1 captures a tick at exactly now (previous_tick is strict).
+                # prev<=now guards against now+1 crossing a minute boundary.
+                prev = self._expression.previous_tick(before=now + 1)
+                if prev <= now and now - prev <= self._startup_lookback:
                     elapsed.append(prev)
             self._next_tick_cached = self._expression.next_tick(after=now)
             return elapsed

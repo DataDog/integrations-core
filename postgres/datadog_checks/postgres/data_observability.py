@@ -71,11 +71,14 @@ class PostgresDataObservability(DBMAsyncJob):
             if q.schedule:
                 try:
                     schedulers[q.monitor_id] = CronScheduler(q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
-                except (ValueError, TypeError):
+                except (ValueError, TypeError) as e:
                     self._log.warning(
-                        "Skipping DO query monitor_id=%d: invalid cron schedule %r",
+                        "Skipping DO query monitor_id=%d: invalid cron schedule %r (%s). "
+                        "Check the schedule of Data Observability monitor %d.",
                         q.monitor_id,
                         q.schedule,
+                        e,
+                        q.monitor_id,
                     )
                     continue
             elif not (q.interval_seconds and q.interval_seconds > 0):

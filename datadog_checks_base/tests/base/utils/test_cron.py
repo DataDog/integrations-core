@@ -498,6 +498,15 @@ def test_scheduler_startup_lookback(expression: str, lookback: float, now: float
     assert s.due_ticks(now=now) == expected
 
 
+def test_scheduler_first_poll_exactly_on_tick_boundary_fires() -> None:
+    """A first poll whose timestamp equals the cron tick exactly must fire once."""
+    tick = utc_timestamp(2026, 6, 8, 9, 0)
+    s = CronScheduler("0 9 * * *", startup_lookback=300)
+    assert s.due_ticks(now=tick) == [tick]
+    # Second poll a few seconds later must not re-fire the same tick.
+    assert s.due_ticks(now=tick + 30) == []
+
+
 def test_scheduler_default_now_uses_wall_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     fixed = utc_timestamp(2026, 1, 1, 8, 30)
     monkeypatch.setattr(time, "time", lambda: fixed)
