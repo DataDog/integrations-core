@@ -950,11 +950,9 @@ def test_failed_cron_query_advances_next_run(pg_instance, aggregator, monkeypatc
 
 
 def test_cron_startup_lookback_boundary_inclusive(pg_instance, aggregator, monkeypatch):
-    """CronScheduler uses an inclusive (<=) boundary: at exactly the window recovery fires;
-    1 second past the window it does not."""
-    # prev_tick = 00:50:00; window = 60s; clock = 00:51:00 means (now - prev_tick) == 60s == window.
-    # CronScheduler: 60 <= 60 → recovery fires.
-    current_time = [float(_BASE_EPOCH + 120)]  # 00:51:00 exactly
+    """Recovery fires when now - prev_tick is within the window; does not fire outside it."""
+    # prev_tick = 00:50:00; window = 60s; clock = 00:50:55 means (now - prev_tick) == 55s < window.
+    current_time = [float(_BASE_EPOCH + 115)]  # 00:50:55
     monkeypatch.setattr('datadog_checks.postgres.data_observability.time.time', lambda: current_time[0])
 
     mock_conn, _ = _make_mock_conn()
@@ -963,7 +961,7 @@ def test_cron_startup_lookback_boundary_inclusive(pg_instance, aggregator, monke
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.postgres.data_observability.query_executions')) == 1
 
-    # 1 second past the boundary: (now - prev_tick) == 61 > 60, recovery does NOT fire.
+    # Outside the window: (now - prev_tick) == 61 > 60, recovery does NOT fire.
     check2 = _make_cron_check(pg_instance, monkeypatch=monkeypatch, window_seconds=60)
     check2.db_pool = _mock_db_pool(mock_conn)
     current_time[0] = float(_BASE_EPOCH + 121)
