@@ -1,2 +1,1 @@
-Bump `datadog-checks-base` to `>=37.39.1`. Notable changes:
-  - Send each logical database as its own independent schema snapshot, so an error or partial collection for one database does not affect others. ([#23913](https://github.com/DataDog/integrations-core/pull/23913))
+Bump `datadog-checks-base` to `>=37.39.1`.
