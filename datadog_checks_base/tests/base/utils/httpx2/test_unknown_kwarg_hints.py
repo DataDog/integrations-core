@@ -70,7 +70,7 @@ def test_unknown_kwarg_multi_lists_each_hint(capturing_transport):
     assert 'pools connections' in message
 
 
-def test_stream_kwarg_still_silently_dropped(capturing_transport, captured_requests):
+def test_stream_kwarg_still_silently_dropped(capturing_transport):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
-    http.get('http://example.test/', stream=True)
-    assert len(captured_requests) == 1
+    response = http.get('http://example.test/', stream=True)
+    assert response.status_code == 200
