@@ -159,7 +159,11 @@ class ReActProcess:
     async def run_once(self, prompt: str) -> AgentResponse:
         """Run a single agent turn with no tools available, firing scoped callbacks.
         The caller is responsible for token accounting."""
-        await self._callbacks.fire_before_agent_send(self._scope, prompt, 1)
-        response = await self._agent.send(prompt, allowed_tools=[])
-        await self._callbacks.fire_agent_response(self._scope, response, 1)
-        return response
+        try:
+            await self._callbacks.fire_before_agent_send(self._scope, prompt, 1)
+            response = await self._agent.send(prompt, allowed_tools=[])
+            await self._callbacks.fire_agent_response(self._scope, response, 1)
+            return response
+        except BaseException as e:
+            await self._callbacks.fire_agent_error(self._scope, e)
+            raise
