@@ -65,6 +65,7 @@ assert REQUEST_KWARGS_PASSTHROUGH | REQUEST_KWARGS_SPECIAL == REQUEST_KWARGS
 assert REQUEST_KWARGS_PASSTHROUGH & REQUEST_KWARGS_SPECIAL == frozenset()
 
 UNKNOWN_KWARG_HINTS: dict[str, str] = {
+    'allow_redirects': "use 'follow_redirects' instead (httpx2 name for this kwarg)",
     'verify': "configure 'tls_verify' in instance config, or drop the per-call kwarg",
     'persist': 'drop the kwarg, httpx2 pools connections by default',
     'cert': "configure 'tls_cert' and 'tls_private_key' in instance config",
