@@ -651,8 +651,8 @@ class PostgreSql(DatabaseCheck):
             )
         elif self._config.query_metrics.incremental_query_metrics and custom_pgss_view:
             self.log.warning(
-                "incremental_query_metrics is not compatible with a custom pg_stat_statements_view (%s) "
-                "because it requires the pg_stat_statements(false) function form. "
+                "incremental_query_metrics requires calling the pg_stat_statements extension function directly "
+                "and cannot be used with a custom configured pg_stat_statements_view (%s). "
                 "Falling back to the legacy query metrics collector.",
                 self._config.pg_stat_statements_view,
             )
