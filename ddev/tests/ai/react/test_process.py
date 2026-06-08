@@ -452,6 +452,25 @@ async def test_run_once_sends_with_no_tools_and_fires_scoped_callbacks() -> None
     assert recorder.complete_results == []
 
 
+async def test_run_once_error_notifies_and_reraises() -> None:
+    recorder = CallbackRecorder()
+    scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE)
+    process = ReActProcess(
+        AgentRuntime(agent=ErrorAgent(), tool_registry=MockToolRegistry()),
+        scope=scope,
+        callbacks=Callbacks([recorder.callback_set]),
+    )
+
+    with pytest.raises(AgentConnectionError):
+        await process.run_once("summarize")
+
+    assert len(recorder.errors) == 1
+    assert isinstance(recorder.errors[0], AgentConnectionError)
+    assert recorder.before_sends == [("summarize", 1)]
+    assert len(recorder.agent_responses) == 0
+    assert len(recorder.complete_results) == 0
+
+
 # ---------------------------------------------------------------------------
 # Error path
 # ---------------------------------------------------------------------------
