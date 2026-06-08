@@ -8,7 +8,6 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-
 from datadog_checks.kafka_actions.message_deserializer import DeserializedMessage, MessageDeserializer
 
 pytestmark = [pytest.mark.unit]
@@ -272,7 +271,9 @@ class TestMessageDeserializer:
 
         # Test 2: uses_schema_registry=True with plain Avro message - falls back to string (non-UTF-8 bytes → error)
         result = deserializer.deserialize_message(avro_message_no_sr, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Non-UTF-8 avro bytes produce error after string fallback"
+        assert result[0].startswith("<deserialization error:"), (
+            "Non-UTF-8 avro bytes produce error after string fallback"
+        )
         assert result[1] is None
 
         # Test 3: uses_schema_registry=True with Schema Registry format - should succeed
