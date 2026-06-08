@@ -94,6 +94,34 @@ def test_discover_config_accepts_successful_candidate_only():
     submit_metric.assert_not_called()
 
 
+def test_discover_config_rejects_candidate_with_no_metrics():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{}]}
+
+        def check(self, instance):
+            pass  # successful run, but submits no metric
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
+def test_discover_config_rejects_candidate_with_only_service_check():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{}]}
+
+        def check(self, instance):
+            self.service_check('health', AgentCheck.OK)  # service check, no metric
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
 def test_discover_config_returns_empty_for_base_check():
     payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
 

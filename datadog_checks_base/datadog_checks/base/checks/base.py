@@ -240,10 +240,12 @@ class AgentCheck(object):
                         raise ConfigurationError('config-discovery: generated candidate has no instances')
 
                     check = cls(check_name, copy.deepcopy(init_config), copy.deepcopy(instances))
-                    with _suppress_discovery_side_effects(check):
+                    with _suppress_discovery_side_effects(check) as stats:
                         error_report = check.run()
-                    if not error_report:
+                    if not error_report and stats['metrics'] > 0:
                         return json.encode([config])
+                    if not error_report and stats['metrics'] == 0:
+                        logging.getLogger(__name__).debug('config-discovery: candidate rejected (no metrics collected)')
                 except Exception:
                     logging.getLogger(__name__).debug('config-discovery: candidate rejected', exc_info=True)
         except Exception:
@@ -1887,8 +1889,7 @@ def _discovery_noop(*args, **kwargs):
 
 @contextmanager
 def _suppress_discovery_side_effects(check):
-    suppressed_methods = (
-        '_submit_metric',
+    noop_methods = (
         'event',
         'event_platform_event',
         'send_log',
@@ -1899,8 +1900,16 @@ def _suppress_discovery_side_effects(check):
         'write_persistent_cache',
     )
     originals = {}
+    stats = {'metrics': 0}
 
-    for method in suppressed_methods:
+    def _count_metric(*args, **kwargs):
+        stats['metrics'] += 1
+
+    if hasattr(check, '_submit_metric'):
+        originals['_submit_metric'] = check._submit_metric
+        check._submit_metric = _count_metric
+
+    for method in noop_methods:
         if hasattr(check, method):
             originals[method] = getattr(check, method)
             setattr(check, method, _discovery_noop)
@@ -1911,7 +1920,7 @@ def _suppress_discovery_side_effects(check):
         logger.addFilter(log_filter)
 
     try:
-        yield
+        yield stats
     finally:
         if logger is not None:
             logger.removeFilter(log_filter)

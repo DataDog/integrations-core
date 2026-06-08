@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.discovery import Port, Service
@@ -47,6 +49,28 @@ def test_generate_configs():
         {'init_config': {}, 'instances': [{'openmetrics_endpoint': 'http://10.0.0.1:9090/custom'}]},
         {'init_config': {}, 'instances': [{'openmetrics_endpoint': 'http://10.0.0.1:8080/custom'}]},
     ]
+
+
+def test_discover_config_rejects_openmetrics_endpoint_with_no_matching_metrics(mock_http_response):
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+        DISCOVERY_PORT_HINTS = [9090]
+
+        def get_default_config(self):
+            return {'metrics': [{'krakend_specific_counter': 'krakend.requests'}]}
+
+    mock_http_response(
+        """
+        # HELP python_gc_duration_seconds A summary of the GC invocation durations.
+        # TYPE python_gc_duration_seconds summary
+        python_gc_duration_seconds{generation="0",quantile="0"} 0.0
+        python_gc_duration_seconds_count 1
+        """
+    )
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': [{'number': 9090, 'name': 'metrics'}]})
+
+    assert json.loads(Check.discover_config(payload)) == []
 
 
 def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):
