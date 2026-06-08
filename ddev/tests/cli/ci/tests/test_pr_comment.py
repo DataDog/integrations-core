@@ -30,6 +30,30 @@ def test_running_header_when_not_done() -> None:
     assert "still running" in body
 
 
+def test_running_count_shown_when_not_done() -> None:
+    body = format_pr_comment(UpdatePRComment(id="x", done=False, workflows=[_status(1, 2, [])], running_count=4))
+    assert "**4** running" in body
+
+
+def test_summary_link_in_final_comment() -> None:
+    body = format_pr_comment(
+        UpdatePRComment(id="x", done=True, workflows=[_status(1, 3, [])], summary_url="https://app.datadoghq.com/s/1")
+    )
+    assert "[View full summary](https://app.datadoghq.com/s/1)" in body
+
+
+def test_summary_link_absent_when_running() -> None:
+    body = format_pr_comment(
+        UpdatePRComment(id="x", done=False, workflows=[_status(1, 3, [])], summary_url="https://app.datadoghq.com/s/1")
+    )
+    assert "View full summary" not in body
+
+
+def test_summary_link_absent_when_no_url() -> None:
+    body = format_pr_comment(UpdatePRComment(id="x", done=True, workflows=[_status(1, 3, [])]))
+    assert "View full summary" not in body
+
+
 def test_complete_header_success_when_no_failures() -> None:
     body = format_pr_comment(UpdatePRComment(id="x", done=True, workflows=[_status(1, 3, [])]))
     assert "✅ Test Dispatcher — _complete_" in body
