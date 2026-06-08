@@ -164,9 +164,7 @@ async def test_failed_check_carries_environment_error_and_tests(tmp_path: Path) 
 async def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
     gatherer = _make_gatherer(tmp_path)
     job_list = [_batch_job("j1", environment="py3.12"), _batch_job("j2", target="kafka", environment="py3.13")]
-    await gatherer.process_message(
-        _batch_finished("", status="failure", run_id=300, job_list=job_list, timed_out=True)
-    )
+    await gatherer.process_message(_batch_finished("", status="failure", run_id=300, job_list=job_list, timed_out=True))
 
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.failed_count == 2
