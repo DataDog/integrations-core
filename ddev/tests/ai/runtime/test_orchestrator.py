@@ -226,7 +226,7 @@ async def test_file_registry_getter_is_idempotent(minimal_flow, make_orchestrato
     orchestrator = make_orchestrator(minimal_flow)
     await orchestrator.on_initialize()
     assert orchestrator._resources is not None
-    assert orchestrator._resources.file_registry() is orchestrator._resources.file_registry()
+    assert orchestrator._resources.file_registry is orchestrator._resources.file_registry
 
 
 def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):

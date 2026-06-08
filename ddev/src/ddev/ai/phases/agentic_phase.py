@@ -108,7 +108,7 @@ class AgenticPhase(Phase):
         # config.agent is guaranteed set & known by validate_config.
         agent_name = cast(str, config.agent)
         agent_config = resources.agent_config(agent_name)
-        process_factory = resources.process_factory()
+        process_factory = resources.process_factory
 
         return cls(
             phase_id=phase_id,
