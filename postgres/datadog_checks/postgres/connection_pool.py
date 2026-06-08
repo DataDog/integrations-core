@@ -263,7 +263,7 @@ class LRUConnectionPoolManager:
             **self.pool_config,
         )
 
-    def get_connection(self, dbname: str, persistent: bool = False):
+    def get_connection(self, dbname: str, persistent: bool = False, autocommit: bool = True):
         """
         Context-managed access to a single connection from the pool associated with the given dbname.
 
@@ -314,7 +314,7 @@ class LRUConnectionPoolManager:
                 self.pools[dbname] = (pool, now, persistent)
 
             # Return the pool's context manager directly
-            return pool.connection()
+            return pool.connection(autocommit=autocommit)
 
     def get_pool_stats(self, dbname: str) -> Optional[Dict[str, Any]]:
         """
