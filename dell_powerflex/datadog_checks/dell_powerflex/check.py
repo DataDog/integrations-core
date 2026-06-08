@@ -336,7 +336,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         return tags
 
     def _collect_events_and_alerts(self) -> None:
-        now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+        now = datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         if self.config.collect_events:
             last_event_ts = self.read_persistent_cache('last_event_timestamp') or now
             if self._collect_events(last_event_ts):
@@ -353,7 +353,10 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.log.warning('Failed to collect events: %s', e)
             return False
         for event in events:
-            self.event(self._build_dd_event(event, 'powerflex_event_name', 'service_name', 'dell_powerflex.event'))
+            try:
+                self.event(self._build_dd_event(event, 'powerflex_event_name', 'service_name', 'dell_powerflex.event'))
+            except Exception as e:
+                self.log.warning('Skipping malformed event %s: %s', event.get('name'), e)
         return True
 
     def _collect_alerts(self, since: str) -> bool:
@@ -363,7 +366,10 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
             self.log.warning('Failed to collect alerts: %s', e)
             return False
         for alert in alerts:
-            self.event(self._build_dd_event(alert, 'powerflex_alert_name', 'service', 'dell_powerflex.alert'))
+            try:
+                self.event(self._build_dd_event(alert, 'powerflex_alert_name', 'service', 'dell_powerflex.alert'))
+            except Exception as e:
+                self.log.warning('Skipping malformed alert %s: %s', alert.get('name'), e)
         return True
 
     def _build_dd_event(self, raw: dict, name_tag_key: str, service_key: str, event_type: str) -> dict[str, Any]:
@@ -371,7 +377,7 @@ class DellPowerflexCheck(AgentCheck, ConfigMixin):
         timestamp = datetime.fromisoformat(raw_ts).timestamp() if raw_ts else datetime.now(tz=timezone.utc).timestamp()
 
         severity = raw.get('severity', '')
-        alert_type = SEVERITY_TO_ALERT_TYPE.get(severity.upper(), 'info') if severity else 'info'
+        alert_type = SEVERITY_TO_ALERT_TYPE.get(str(severity).upper(), 'info') if severity else 'info'
 
         tags = list(self._base_tags)
         tags.append(f"{name_tag_key}:{raw.get('name', '')}")

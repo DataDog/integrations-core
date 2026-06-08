@@ -626,6 +626,7 @@ def test_collect_events(dd_run_check, aggregator, instance, mock_http_get):
 
     major_event = next(e for e in events if 'severity:MAJOR' in e['tags'])
     assert major_event['msg_title'] == 'Postgres Instance Different Timeline'
+    assert check.read_persistent_cache('last_event_timestamp') is not None
 
 
 def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator, instance, mock_http_get, mocker):
@@ -675,10 +676,44 @@ def test_collect_failure(
     mocker.patch(mock_target, side_effect=Exception(f'{config_key} API failed'))
     caplog.set_level(logging.WARNING)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    cache_key = 'last_event_timestamp' if config_key == 'collect_events' else 'last_alert_timestamp'
+    dd_run_check(check)  # initialize persistent cache prefix
+    previous_timestamp = '2020-01-01T00:00:00.000000Z'
+    check.write_persistent_cache(cache_key, previous_timestamp)
     dd_run_check(check)
     assert log_message in caplog.text
     assert len(aggregator.events) == 0
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
+    assert check.read_persistent_cache(cache_key) == previous_timestamp
+
+
+@pytest.mark.parametrize(
+    'config_key, mock_target, log_message',
+    [
+        (
+            'collect_events',
+            'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_events',
+            'Skipping malformed event',
+        ),
+        (
+            'collect_alerts',
+            'datadog_checks.dell_powerflex.api.PowerFlexAPI.get_alerts',
+            'Skipping malformed alert',
+        ),
+    ],
+)
+def test_malformed_record_is_skipped(
+    dd_run_check, aggregator, instance, mock_http_get, mocker, caplog, config_key, mock_target, log_message
+):
+    instance[config_key] = True
+    valid_record = {'name': 'VALID_EVENT', 'timestamp': '2026-03-18T03:40:16.253Z', 'severity': 'CRITICAL'}
+    malformed_record = {'name': 'BAD_EVENT', 'timestamp': 'not-a-timestamp', 'severity': 'CRITICAL'}
+    mocker.patch(mock_target, return_value=[valid_record, malformed_record])
+    caplog.set_level(logging.WARNING)
+    check = DellPowerflexCheck('dell_powerflex', {}, [instance])
+    dd_run_check(check)
+    assert log_message in caplog.text
+    assert len(aggregator.events) == 1
 
 
 def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
@@ -707,6 +742,7 @@ def test_collect_alerts(dd_run_check, aggregator, instance, mock_http_get):
     assert license_alert['alert_type'] == 'warning'
     assert 'PowerFlex is using a trial license' in license_alert['msg_text']
     assert 'severity:MINOR' in license_alert['tags']
+    assert check.read_persistent_cache('last_alert_timestamp') is not None
 
 
 def test_statistics_failure_does_not_block_other_resources(
