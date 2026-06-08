@@ -23,7 +23,6 @@ CURRENT_DATABASE_DESCRIPTION_QUERY = "SELECT DESCRIPTION FROM SYS.M_DATABASE"
 SCHEMAS_QUERY = """
 SELECT SCHEMA_NAME, SCHEMA_OWNER
 FROM SYS.SCHEMAS
-WHERE HAS_PRIVILEGES = 'TRUE'
 """
 
 TABLES_QUERY = """
@@ -116,6 +115,19 @@ class HanaSchemaCollector(SchemaCollector):
                         'columns': [],
                     }
 
+            # Trim to max_tables before fetching columns so the column query only
+            # loads data for tables that will actually be emitted.
+            total = 0
+            for schema_name in list(schemas.keys()):
+                tables = schemas[schema_name]['tables']
+                for table_name in list(tables.keys()):
+                    if total >= self._config.max_tables:
+                        del tables[table_name]
+                    else:
+                        total += 1
+                if not tables:
+                    del schemas[schema_name]
+
             with closing(conn.cursor()) as cursor:
                 cursor.execute(COLUMNS_QUERY)
                 for row in cursor.fetchall():
@@ -138,13 +150,8 @@ class HanaSchemaCollector(SchemaCollector):
                         }
                     )
 
-            total = 0
             for schema_name, schema_data in schemas.items():
-                if total >= self._config.max_tables:
-                    break
                 for table_name, table_data in schema_data['tables'].items():
-                    if total >= self._config.max_tables:
-                        break
                     table_rows.append(
                         {
                             'schema_name': schema_name,
@@ -155,7 +162,6 @@ class HanaSchemaCollector(SchemaCollector):
                             'columns': table_data['columns'],
                         }
                     )
-                    total += 1
         except Exception as e:
             self._log.error("Error fetching HANA schema data: %s", e)
 
