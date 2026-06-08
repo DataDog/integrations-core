@@ -61,7 +61,7 @@ class ResourceProvider:
 
     def agent_clients(self) -> dict[str, Any]:
         """Raw provider-name -> SDK client map."""
-        return self._agent_clients
+        return dict(self._agent_clients)
 
     def file_registry(self) -> FileRegistry:
         """Lazily-built, run-wide singleton FileRegistry."""
