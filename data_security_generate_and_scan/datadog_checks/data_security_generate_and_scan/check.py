@@ -22,23 +22,31 @@ class DataSecurityGenerateAndScanCheck(AgentCheck):
     def check(self, _):
         # type: (Any) -> None
         matches = []
-        if self.data is not None:
-            value = self.data if isinstance(self.data, str) else json.dumps(self.data)
+        items = self.data if isinstance(self.data, list) else [self.data]
+        for item in items:
+            if item is None:
+                continue
+            value = item if isinstance(item, str) else json.dumps(item)
             result = datadog_agent.scan(value)
-            if result:
-                try:
-                    parsed = json.loads(result)
-                except (TypeError, ValueError):
-                    self.log.debug("Could not parse scan result for %r: %r", value, result)
-                    parsed = None
-                if parsed:
-                    matches.extend(parsed)
+            if not result:
+                continue
+            try:
+                parsed = json.loads(result)
+            except (TypeError, ValueError):
+                self.log.debug("Could not parse scan result for %r: %r", value, result)
+                continue
+            if parsed:
+                matches.extend(parsed)
+
+        # Wrap the JSON in %%% ... %%% so the Datadog event explorer renders it as
+        # a Markdown ```json code block (https://app.datadoghq.com/event).
+        msg_text = "%%%\n```json\n{}\n```\n%%%".format(json.dumps(matches, indent=2, sort_keys=True))
 
         self.event(
             {
                 'source_type_name': self.__NAMESPACE__,
                 'msg_title': 'Sensitive data scan matches',
-                'msg_text': json.dumps(matches),
+                'msg_text': msg_text,
                 'tags': (self.instance or {}).get('tags', []),
             }
         )
