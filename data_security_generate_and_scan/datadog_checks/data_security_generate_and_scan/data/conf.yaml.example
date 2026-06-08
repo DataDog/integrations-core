@@ -14,6 +14,15 @@ init_config:
 instances:
 
   -
+    ## @param data - object - optional
+    ## Arbitrary JSON-serializable data to run through the Sensitive Data
+    ## Scanner on every check run. The value is JSON-encoded before scanning,
+    ## and any matches found are emitted as a single event whose text is the
+    ## JSON-encoded array of matches.
+    #
+    # data:
+    #   - {"id": 12, "name": "127.0.0.1", "box_office": 836800000}
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##

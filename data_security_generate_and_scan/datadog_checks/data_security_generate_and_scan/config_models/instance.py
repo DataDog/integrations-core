@@ -29,6 +29,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     min_collection_interval: Optional[float] = None
     service: Optional[str] = None
+    strings: Optional[tuple[str, ...]] = None
     tags: Optional[tuple[str, ...]] = None
 
     @model_validator(mode='before')
