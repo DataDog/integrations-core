@@ -230,16 +230,17 @@ def test_remapper_ignores_unknown_target_field(capturing_transport):
 
 
 @pytest.mark.parametrize(
-    'kwarg,value',
+    'kwarg,value,hint_substring',
     [
-        pytest.param('proxies', {'http': 'http://proxy:8080'}, id='proxies'),
-        pytest.param('allow_redirects', False, id='allow-redirects-uses-httpx-name'),
+        pytest.param('proxies', {'http': 'http://proxy:8080'}, 'proxy support', id='proxies'),
+        pytest.param('allow_redirects', False, 'follow_redirects', id='allow-redirects-uses-httpx-name'),
     ],
 )
-def test_request_rejects_unknown_kwarg(capturing_transport, kwarg, value):
+def test_request_rejects_unknown_kwarg(capturing_transport, kwarg, value, hint_substring):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
-    with pytest.raises(TypeError, match=kwarg):
+    with pytest.raises(TypeError, match=kwarg) as excinfo:
         http.get('http://example.test/', **{kwarg: value})
+    assert hint_substring in str(excinfo.value)
 
 
 def test_init_config_timeout_used_when_instance_has_none(capturing_transport):

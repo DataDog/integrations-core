@@ -49,6 +49,15 @@ def test_unknown_kwarg_typeerror_includes_remediation_for_proxies(capturing_tran
     assert 'proxy support' in message
 
 
+def test_unknown_kwarg_typeerror_includes_remediation_for_allow_redirects(capturing_transport):
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    with pytest.raises(TypeError) as excinfo:
+        http.get('http://example.test/', allow_redirects=False)
+    message = str(excinfo.value)
+    assert 'allow_redirects' in message
+    assert 'follow_redirects' in message
+
+
 def test_unknown_kwarg_without_hint_falls_back_gracefully(capturing_transport):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     with pytest.raises(TypeError) as excinfo:
