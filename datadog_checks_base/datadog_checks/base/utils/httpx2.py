@@ -64,6 +64,13 @@ REQUEST_KWARGS_PASSTHROUGH = REQUEST_KWARGS - REQUEST_KWARGS_SPECIAL
 assert REQUEST_KWARGS_PASSTHROUGH | REQUEST_KWARGS_SPECIAL == REQUEST_KWARGS
 assert REQUEST_KWARGS_PASSTHROUGH & REQUEST_KWARGS_SPECIAL == frozenset()
 
+UNKNOWN_KWARG_HINTS: dict[str, str] = {
+    'verify': "configure 'tls_verify' in instance config, or drop the per-call kwarg",
+    'persist': 'drop the kwarg, httpx2 pools connections by default',
+    'cert': "configure 'tls_cert' and 'tls_private_key' in instance config",
+    'proxies': 'proxy support is not yet wired through to httpx2, see TODO in httpx2.py',
+}
+
 
 def _make_timeout(connect: float, read: float) -> httpx2.Timeout:
     # Pass the read timeout to every phase so write and pool aren't left unbounded.
@@ -423,7 +430,10 @@ class HTTPX2Wrapper:
         unknown = set(options) - REQUEST_KWARGS
         if unknown:
             context = f' for {method} {url}' if method or url else ''
-            raise TypeError(f"HTTPX2Wrapper does not support per-request kwargs{context}: {sorted(unknown)}")
+            sorted_unknown = sorted(unknown)
+            hints = [f'  {k}: {UNKNOWN_KWARG_HINTS[k]}' for k in sorted_unknown if k in UNKNOWN_KWARG_HINTS]
+            hint_block = ('\n' + '\n'.join(hints)) if hints else ''
+            raise TypeError(f"HTTPX2Wrapper does not support per-request kwargs{context}: {sorted_unknown}{hint_block}")
         kwargs: dict[str, Any] = {}
         for key in REQUEST_KWARGS_PASSTHROUGH:
             if key in options:
