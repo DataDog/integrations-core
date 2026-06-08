@@ -7,6 +7,7 @@ import json
 from unittest.mock import patch
 
 import pytest
+
 from datadog_checks.kafka_actions import KafkaActionsCheck
 
 pytestmark = [pytest.mark.unit]

@@ -5,6 +5,7 @@
 import base64
 
 import pytest
+
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_actions.config import KafkaActionsConfig
 
