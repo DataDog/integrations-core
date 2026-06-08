@@ -288,10 +288,11 @@ class TestMessageDeserializer:
         result = deserializer.deserialize_message(wrong_magic_byte, 'avro', avro_schema, True)
         assert result[0].startswith("<deserialization error:"), "Non-UTF-8 bytes produce error after string fallback"
 
-        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - should fail
+        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - falls back to string
         too_short = b'\x00\x00\x01'
         result = deserializer.deserialize_message(too_short, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        assert result[0] is not None, "Too-short message falls back to string, not an error"
+        assert result[1] is None
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=avro_message_no_sr)
@@ -424,10 +425,11 @@ class TestMessageDeserializer:
         result = deserializer.deserialize_message(wrong_magic_byte, 'protobuf', protobuf_schema, True)
         assert result[0].startswith("<deserialization error:"), "Non-UTF-8 bytes produce error after string fallback"
 
-        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - should fail
+        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - falls back to string
         too_short = b'\x00\x00\x01'
         result = deserializer.deserialize_message(too_short, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        assert result[0] is not None, "Too-short message falls back to string, not an error"
+        assert result[1] is None
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=protobuf_message_no_sr)
@@ -666,8 +668,8 @@ class TestMessageDeserializer:
 
         assert result == json.dumps('hello-world')
         assert schema_id is None
-        log.warning.assert_called_once()
-        assert '0x68' in log.warning.call_args[0][1]  # hex('h') == 0x68
+        log.debug.assert_called()
+        assert '68' in log.debug.call_args[0][1]  # hex('h') == 0x68
 
     def test_schema_registry_wrong_magic_byte_non_utf8_returns_error(self):
         """When fallback-to-string is triggered but bytes are not valid UTF-8, return error string."""

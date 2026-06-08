@@ -243,26 +243,23 @@ class MessageDeserializer:
     ) -> tuple[str | None, int | None]:
         """Deserialize message, handling Schema Registry format if present."""
         if uses_schema_registry:
-            if message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
-                self.log.warning(
-                    "Schema registry expected but message does not start with magic byte 0x00 "
-                    "(got: %s), falling back to string",
-                    hex(message[0]),
+            if len(message) >= 5 and message[0] == SCHEMA_REGISTRY_MAGIC_BYTE:
+                schema_id = int.from_bytes(message[1:5], 'big')
+                message = message[5:]  # Skip the magic byte and schema ID bytes
+
+                actual_format = message_format
+                if self.schema_registry is not None:
+                    schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
+
+                return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
+            else:
+                msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
+                self.log.debug(
+                    "Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
+                    "but message is too short or has wrong magic byte: %s, falling back to string",
+                    msg_hex,
                 )
                 return self._deserialize_bytes(message, 'string', None, uses_schema_registry=False), None
-            if len(message) < 5:
-                raise ValueError(
-                    f"Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
-                    f"but message is too short: {message.hex()}"
-                )
-            schema_id = int.from_bytes(message[1:5], 'big')
-            message = message[5:]  # Skip the magic byte and schema ID bytes
-
-            actual_format = message_format
-            if self.schema_registry is not None:
-                schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
-
-            return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
         else:
             # Fallback behavior: try without schema registry format first, then with it
             try:
