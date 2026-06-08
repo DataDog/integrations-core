@@ -73,10 +73,8 @@ class ResourceProvider:
         """Resolve a flow agent definition by name; typed error if absent."""
         try:
             return self._agents[name]
-        except KeyError:
-            raise ResourceUnavailableError(
-                f"No agent definition named {name!r}. Known: {sorted(self._agents)}"
-            ) from None
+        except KeyError as e:
+            raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
 
 
 def _discover_and_register_phases(
@@ -150,10 +148,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
             ai_root = Path(__file__).parent.parent
             try:
                 rel = flow_phases_dir.relative_to(ai_root)
-            except ValueError:
+            except ValueError as e:
                 raise FlowConfigError(
                     f"Flow phases directory {flow_phases_dir} must be inside the ddev.ai package tree ({ai_root})"
-                ) from None
+                ) from e
             flow_import_prefix = "ddev.ai." + ".".join(rel.parts)
             _discover_and_register_phases(
                 self._phase_registry,

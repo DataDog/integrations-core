@@ -51,6 +51,42 @@ def _make_stub_phase(
 
 
 # ---------------------------------------------------------------------------
+# Phase.build
+# ---------------------------------------------------------------------------
+
+
+def test_build_creates_properly_initialized_instance(flow_dir):
+    checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
+    context = FlowContext(
+        runtime_variables={"var1": "val1"},
+        flow_variables={"var2": "val2"},
+        config_dir=flow_dir,
+    )
+    config = PhaseConfig()
+
+    phase = _StubPhase.build(
+        phase_id="p1",
+        config=config,
+        deps=["dep1", "dep2"],
+        resources=object(),
+        checkpoint_manager=checkpoint_manager,
+        context=context,
+    )
+
+    assert isinstance(phase, _StubPhase)
+    assert phase._phase_id == "p1"
+    assert phase._remaining_dependencies == {"dep1", "dep2"}
+    assert phase._config is config
+    assert phase._checkpoint_manager is checkpoint_manager
+    assert phase._runtime_variables == {"var1": "val1"}
+    assert phase._flow_variables == {"var2": "val2"}
+    assert phase._config_dir == flow_dir
+    assert phase._callbacks is context.callbacks
+    assert phase._logger is context.logger
+    assert phase._executed is False
+
+
+# ---------------------------------------------------------------------------
 # Phase.on_success
 # ---------------------------------------------------------------------------
 
