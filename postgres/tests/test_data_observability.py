@@ -831,13 +831,11 @@ def test_starved_query_eventually_fires(pg_instance, aggregator, monkeypatch):
 # ---------------------------------------------------------------------------
 
 
-
-
 @pytest.mark.parametrize(
     "window_seconds,time_offset,expected_fires",
     [
-        (300, 70, 1),   # inside window (10s after tick): fires
-        (0, 70, 0),     # disabled: skips
+        (300, 70, 1),  # inside window (10s after tick): fires
+        (0, 70, 0),  # disabled: skips
         (300, 400, 0),  # outside window (340s after tick): skips
     ],
     ids=["inside-window", "disabled", "outside-window"],

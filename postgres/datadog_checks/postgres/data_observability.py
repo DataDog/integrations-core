@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass
 from collections.abc import Iterable
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
 import psycopg
@@ -64,17 +64,13 @@ class PostgresDataObservability(DBMAsyncJob):
     def _do_config(self):
         return self._config.data_observability
 
-    def _filter_valid_queries(
-        self, queries: Iterable[Query]
-    ) -> tuple[tuple[Query, ...], dict[int, CronScheduler]]:
+    def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[tuple[Query, ...], dict[int, CronScheduler]]:
         valid: list[Query] = []
         schedulers: dict[int, CronScheduler] = {}
         for q in queries:
             if q.schedule:
                 try:
-                    schedulers[q.monitor_id] = CronScheduler(
-                        q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS
-                    )
+                    schedulers[q.monitor_id] = CronScheduler(q.schedule, startup_lookback=CRON_STARTUP_LOOKBACK_SECONDS)
                 except (ValueError, TypeError):
                     self._log.warning(
                         "Skipping DO query monitor_id=%d: invalid cron schedule %r",
