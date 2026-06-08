@@ -62,27 +62,31 @@ tests:
         actionTaken: "block"
         appliedPolicyId: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
         authority:
-         -
-          recordType: "SOA"
-          domainName: "."
-          parsed: true
-          rData: "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
+          - recordType: "SOA"
+            domainName: "."
+            parsed: true
+            rData: "a.root-servers.net a.root-servers.net 2026011601 3600 1800 7200 300"
         drsId: "87a16e58-11d3-4d45-a574-af92520d3b99"
         id: "1768799730903712CBD65A6B0963C276D07800E643DBG"
         identity:
           identityId: "identity_id_example"
+          userId: example@test.bluecat.com
         latency: 0
         matchedPolicies:
-         -
-          criteria:
-            queryDomain: "amazon.in"
-          name: "Local Policy"
-          id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
-          eventType: "block"
+          - criteria:
+              queryDomain: "amazon.in"
+            name: "Local Policy"
+            id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+            eventType: "block"
         queryClassId: 1
         queryProtocol: "UDP"
         siteId: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
         time: 1770186142000
+        query: amazon.in.
+        source: 10.41.13.131
+        queryType: A
+        queryId: 8121
+        response: NXDOMAIN
       site_details:
         id: "955ff30b-93a9-4f13-9de1-aeaa25190f48"
         name: "House India"
@@ -90,6 +94,49 @@ tests:
         id: "example@test.bluecat.com"
       vendor:
         endpoint: "dns-query-logs"
+      ocsf:
+        severity: High
+        activity_name: Query
+        metadata:
+          uid: 1768799730903712CBD65A6B0963C276D07800E643DBG
+          product:
+            name: Edge
+            vendor_name: BlueCat
+          log_name: dns-query-logs
+          version: 1.5.0
+          profiles:
+            - security_control
+        category_uid: 4
+        category_name: Network Activity
+        status_code: NXDOMAIN
+        query:
+          hostname: amazon.in.
+          type: A
+          class: IN
+          packet_uid: 8121
+        src_endpoint:
+          ip: 10.41.13.131
+          owner:
+            uid: example@test.bluecat.com
+        rcode: NXDomain
+        duration: 0
+        disposition: Blocked
+        rcode_id: 3
+        status_id: 2
+        connection_info:
+          protocol_name: UDP
+          direction_id: 2
+          direction: Outbound
+        class_uid: 4003
+        activity_id: 1
+        time: 1770186142000
+        severity_id: 4
+        class_name: DNS Activity
+        query_time: 1770186142000
+        disposition_id: 2
+        status: Failure
+        policy:
+          uid: 1768562642346-70ad5103-90f2-40ea-a98d-48926b823575
     message: |-
       {
         "site_details" : {
@@ -135,5 +182,5 @@ tests:
         }
       }
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1770186142000
