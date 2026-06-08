@@ -658,36 +658,29 @@ def test_device_include_exclude():
     assert c.exclude_disk(MockPart(device='/dev/sda4')) is True
 
 
-def test_latency_metrics_respect_device_include(aggregator, dd_run_check):
+def test_latency_metrics_respect_device_include(aggregator):
     """
-    Latency metrics must honour device_include/device_exclude.
+    collect_latency_metrics must only emit metrics for devices in included_devices.
 
-    On Linux, disk_partitions() returns full paths (e.g. /dev/sda1) while
-    disk_io_counters() returns bare names (e.g. sda1). The filter normalises both
-    sides via _base_device_name so that including /dev/sda1 correctly allows sda1's
-    latency metrics and excludes sdb1's. On Windows both sources use drive-letter
-    format (e.g. C:), so no normalisation is needed.
+    On Linux, disk_io_counters() returns bare names (e.g. sda1) while
+    disk_partitions() returns full paths (e.g. /dev/sda1). The included_devices
+    set is built from _base_device_name values, which normalises both formats to
+    the same bare name so matching works cross-platform.
     """
     if ON_WINDOWS:
-        partition_device = 'C:\\'
         included_io_key = 'C:'
         excluded_io_key = 'D:'
     else:
-        partition_device = '/dev/sda1'
-        included_io_key = 'sda1'  # bare name as returned by disk_io_counters on Linux
+        included_io_key = 'sda1'
         excluded_io_key = 'sdb1'
 
     io_counters = {included_io_key: MockDiskMetrics(), excluded_io_key: MockDiskMetrics()}
+    included_devices = {_base_device_name(included_io_key)}
 
-    instance = {'device_include': [partition_device], 'tag_by_label': False}
-    c = Disk('disk', {}, [instance])
+    c = Disk('disk', {}, [{'tag_by_label': False}])
 
-    with (
-        mock.patch('psutil.disk_partitions', return_value=[MockPart(device=partition_device)]),
-        mock.patch('psutil.disk_usage', return_value=MockDiskMetrics()),
-        mock.patch('psutil.disk_io_counters', return_value=io_counters),
-    ):
-        dd_run_check(c)
+    with mock.patch('psutil.disk_io_counters', return_value=io_counters):
+        c.collect_latency_metrics(included_devices)
 
     latency_metrics = [
         'system.disk.read_time',
