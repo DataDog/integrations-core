@@ -35,6 +35,7 @@ WHERE IS_TEMPORARY = 'FALSE'
 COLUMNS_QUERY = """
 SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, DATA_TYPE_NAME, IS_NULLABLE, DEFAULT_VALUE, POSITION
 FROM SYS.TABLE_COLUMNS
+WHERE (SCHEMA_NAME, TABLE_NAME) IN ({placeholders})
 ORDER BY SCHEMA_NAME, TABLE_NAME, POSITION
 """
 
@@ -115,8 +116,6 @@ class HanaSchemaCollector(SchemaCollector):
                         'columns': [],
                     }
 
-            # Trim to max_tables before fetching columns so the column query only
-            # loads data for tables that will actually be emitted.
             total = 0
             for schema_name in list(schemas.keys()):
                 tables = schemas[schema_name]['tables']
@@ -128,27 +127,30 @@ class HanaSchemaCollector(SchemaCollector):
                 if not tables:
                     del schemas[schema_name]
 
-            with closing(conn.cursor()) as cursor:
-                cursor.execute(COLUMNS_QUERY)
-                for row in cursor.fetchall():
-                    schema_name, table_name = row[0], row[1]
-                    if schema_name not in schemas:
-                        continue
-                    tables = schemas[schema_name]['tables']
-                    if table_name not in tables:
-                        continue
-                    columns = tables[table_name]['columns']
-                    if len(columns) >= self._config.max_columns:
-                        continue
-                    columns.append(
-                        {
-                            'name': row[2],
-                            'data_type': row[3] or '',
-                            'nullable': row[4] == 'TRUE',
-                            'default': row[5],
-                            'position': row[6],
-                        }
-                    )
+            surviving_tables = [
+                (schema_name, table_name)
+                for schema_name, schema_data in schemas.items()
+                for table_name in schema_data['tables']
+            ]
+            if surviving_tables:
+                placeholders = ', '.join('(?, ?)' for _ in surviving_tables)
+                params = tuple(v for pair in surviving_tables for v in pair)
+                with closing(conn.cursor()) as cursor:
+                    cursor.execute(COLUMNS_QUERY.format(placeholders=placeholders), params)
+                    for row in cursor.fetchall():
+                        schema_name, table_name = row[0], row[1]
+                        columns = schemas[schema_name]['tables'][table_name]['columns']
+                        if len(columns) >= self._config.max_columns:
+                            continue
+                        columns.append(
+                            {
+                                'name': row[2],
+                                'data_type': row[3] or '',
+                                'nullable': row[4] == 'TRUE',
+                                'default': row[5],
+                                'position': row[6],
+                            }
+                        )
 
             for schema_name, schema_data in schemas.items():
                 for table_name, table_data in schema_data['tables'].items():
