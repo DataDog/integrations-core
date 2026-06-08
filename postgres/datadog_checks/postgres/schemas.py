@@ -228,17 +228,19 @@ class PostgresSchemaCollector(SchemaCollector):
 
     @contextlib.contextmanager
     def _get_cursor(self, database_name):
-        conn = self._check.db_pool.get_connection(database_name)
-        # Disable statement level autocommit so we can set the statement timeout locally
-        conn.autocommit = False
-        with conn.cursor(row_factory=dict_row) as cursor:
-            query, params = self.get_rows_query()
-            cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
-            cursor.execute(query, params)
-            yield cursor
-        conn.commit()
-        # Restore the autocommit behavior for the next connection
-        conn.autocommit = True
+        with self._check.db_pool.get_connection(database_name) as conn:
+            # Disable statement level autocommit so we can set the statement timeout locally
+            conn.autocommit = False
+            try:
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    query, params = self.get_rows_query()
+                    cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
+                    cursor.execute(query, params)
+                    yield cursor
+                conn.commit()
+            finally:
+                # Restore the autocommit behavior for the next connection
+                conn.autocommit = True
 
     def _get_schemas_query(self):
         query = SCHEMA_QUERY
