@@ -300,7 +300,7 @@ class HTTPX2Wrapper:
         # TODO: wire proxies through to httpx2 as part of the ongoing httpx migration.
         # options['headers'] is the per-request source of truth and is re-read in _build_request_kwargs,
         # so direct mutation (__setitem__, update(), whole-dict replacement) reaches the wire.
-        # set_header keeps options['headers'] and _client.headers in sync for callers that prefer it.
+        # set_header mutates options['headers'] in place; the per-request merge above re-reads it.
         self.options: dict[str, Any] = {
             'auth': auth,
             'cert': cert,
@@ -368,14 +368,11 @@ class HTTPX2Wrapper:
         return default
 
     def set_header(self, name: str, value: str) -> None:
-        # Mirror into both stores: options['headers'] is the public shape, _client.headers is what httpx2 sends.
         for key in list(self.options['headers']):
             if key.lower() == name.lower():
                 self.options['headers'][key] = value
-                self._client.headers[key] = value
                 return
         self.options['headers'][name] = value
-        self._client.headers[name] = value
 
     def get(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('GET', url, options)
