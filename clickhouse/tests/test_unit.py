@@ -329,6 +329,21 @@ def test_query_completions_zero_samples_per_hour_defaults(bad_value):
     assert any('query_completions.samples_per_hour_per_query' in w for w in check._validation_result.warnings)
 
 
+@pytest.mark.parametrize("bad_value", [0, -1, -100])
+def test_collect_schemas_zero_collection_interval_defaults(bad_value):
+    """Zero or negative collection_interval must not crash the constructor via ZeroDivisionError."""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'dbm': True,
+        'collect_schemas': {'enabled': True, 'collection_interval': bad_value},
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check._config.collect_schemas.collection_interval > 0
+    assert any('collect_schemas.collection_interval' in w for w in check._validation_result.warnings)
+
+
 BASE_INSTANCE = {'server': 'myhost.example.com', 'port': 8123, 'username': 'default'}
 
 

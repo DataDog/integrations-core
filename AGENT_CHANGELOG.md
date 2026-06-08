@@ -1,3 +1,8 @@
+## Datadog Agent version [7.79.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7792)
+
+### Integration Updates
+* SQL Server [23.0.2](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
 ## Datadog Agent version [7.79.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7791)
 
 ### Integration Updates

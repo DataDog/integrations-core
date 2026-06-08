@@ -229,6 +229,20 @@ files:
               type: boolean
               example: true
             fleet_configurable: false
+          - name: hostname_transform
+            description: |
+              Should be either 'upper' or 'lower' or 'default'.
+              If 'upper', the check will convert the Nutanix hostname to uppercase.
+              If 'lower', the check will convert the Nutanix hostname to lowercase.
+              If 'default', the check will not transform the Nutanix hostname (the default option).
+              Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
+            fleet_configurable: false
+            value:
+              type: string
+              enum:
+              - upper
+              - lower
+              - default
           - template: instances/http
           - template: instances/default
             overrides:
