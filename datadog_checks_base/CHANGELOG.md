@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.33.4 / 2026-06-08
+
+***Fixed***:
+
+* Send each logical database as its own independent schema snapshot, so an error or partial collection for one database does not affect others. ([#23913](https://github.com/DataDog/integrations-core/pull/23913))
+
 ## 37.33.3 / 2026-04-09
 
 ***Fixed***:
