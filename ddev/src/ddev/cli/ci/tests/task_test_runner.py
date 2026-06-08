@@ -109,31 +109,43 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         final_conclusion: str = "cancelled"
         finished: BatchFinished | None = None
         try:
+            timed_out = False
             if run.data.status != "completed":
                 completed = await self._poll_until_complete(run_id, log_extra)
                 if completed is None:
                     final_conclusion = "timed_out"
+                    timed_out = True
                     self._logger.warning("Workflow polling timed out", extra=log_extra)
-                    return
-                run = completed
+                else:
+                    run = completed
             else:
                 self._logger.info("Workflow completed", extra=log_extra)
 
-            raw = run.data.conclusion
-            if raw is None:
-                self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
-            final_conclusion = raw or "neutral"
+            if timed_out:
+                finished = BatchFinished(
+                    id=message.id,
+                    status="failure",
+                    run_id=run_id,
+                    workflow_url=workflow_url,
+                    artifacts_path="",
+                    timed_out=True,
+                )
+            else:
+                raw = run.data.conclusion
+                if raw is None:
+                    self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
+                final_conclusion = raw or "neutral"
 
-            artifacts_path = await self._download_artifacts(run_id, log_extra)
-            self._logger.info("Artifacts downloaded", extra=log_extra)
+                artifacts_path = await self._download_artifacts(run_id, log_extra)
+                self._logger.info("Artifacts downloaded", extra=log_extra)
 
-            finished = BatchFinished(
-                id=message.id,
-                status=_conclusion_to_status(raw),
-                run_id=run_id,
-                workflow_url=workflow_url,
-                artifacts_path=str(artifacts_path),
-            )
+                finished = BatchFinished(
+                    id=message.id,
+                    status=_conclusion_to_status(raw),
+                    run_id=run_id,
+                    workflow_url=workflow_url,
+                    artifacts_path=str(artifacts_path),
+                )
         finally:
             await self._client.update_check_run(
                 self._owner,
