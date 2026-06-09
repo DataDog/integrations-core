@@ -23,6 +23,7 @@ EXPECTED_DEFAULTS = {
     'password': '',
     'connect_timeout': 10,
     'read_timeout': 10,
+    'reported_hostname': None,
     'compression': None,
     'tls_verify': False,
     'tls_ca_cert': None,
@@ -67,6 +68,25 @@ EXPECTED_DEFAULTS = {
         'samples_per_hour_per_query': 60,
         'seen_samples_cache_maxsize': 10000,
         'max_samples_per_collection': 1000,
+        'run_sync': False,
+    },
+    # === DBM: Schema metrics ===
+    'schema_metrics': {
+        'enabled': False,
+        'collection_interval': 60,
+        'run_sync': False,
+    },
+    # === DBM: Schema collector ===
+    'collect_schemas': {
+        'enabled': False,
+        'collection_interval': 600,
+        'max_tables': 300,
+        'max_columns': 1000,
+        'max_query_duration': 60,
+        'include_databases': (),
+        'exclude_databases': (),
+        'include_tables': (),
+        'exclude_tables': (),
         'run_sync': False,
     },
     # === DBM: Parts and merges ===

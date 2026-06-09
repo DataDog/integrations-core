@@ -50,7 +50,7 @@ def test_passes_with_exactly_one_qa_label(ddev, pr_context, mocker, label):
     result = ddev('validate', 'qa-label')
 
     assert result.exit_code == 0, result.output
-    assert 'QA label set' in result.output
+    assert 'Agent-release QA label set' in result.output
 
 
 def test_fails_when_no_qa_label(ddev, pr_context, mocker):
@@ -59,7 +59,7 @@ def test_fails_when_no_qa_label(ddev, pr_context, mocker):
     result = ddev('validate', 'qa-label')
 
     assert result.exit_code == 1, result.output
-    assert 'No QA decision label set' in result.output
+    assert 'missing an Agent-release QA decision label' in result.output
     assert 'qa/required' in result.output
     assert 'qa/skip-qa' in result.output
 
@@ -70,7 +70,7 @@ def test_fails_when_both_qa_labels(ddev, pr_context, mocker):
     result = ddev('validate', 'qa-label')
 
     assert result.exit_code == 1, result.output
-    assert 'more than one QA decision label' in result.output
+    assert 'more than one Agent-release QA decision label' in result.output
 
 
 def test_skips_outside_pull_request_context(ddev, monkeypatch, mocker):

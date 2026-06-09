@@ -39,6 +39,8 @@ METRICS_COLUMNS = {
     'result_rows',
     'result_bytes',
     'memory_usage',
+    'cpu_us',
+    'cpu_wait_us',
     'peak_memory_usage',
 }
 
@@ -264,8 +266,8 @@ def test_dbm_properties(instance):
 
     check = ClickhouseCheck('clickhouse', {}, [instance_config])
     assert check.reported_hostname is not None
+    assert check.reported_hostname != ''
     assert check.database_identifier is not None
-    assert check._config.server in check.reported_hostname
     assert str(check._config.port) in check.database_identifier
 
 
@@ -359,6 +361,8 @@ def test_query_completions_data(aggregator, instance, dd_run_check, datadog_agen
     assert details['username'] is not None
     assert details['read_rows'] >= 0
     assert details['event_time_microseconds'] > 0
+    assert details['cpu_us'] >= 0
+    assert details['cpu_wait_us'] >= 0
 
 
 def test_explain_plan_collected(aggregator, instance, dd_run_check, datadog_agent):
@@ -621,3 +625,5 @@ def test_query_errors_data(aggregator, instance, dd_run_check):
     assert 'UNKNOWN_TABLE' in details['exception']
     assert details['exception_code'] == 60
     assert 'stack_trace' in details
+    assert details['cpu_us'] >= 0
+    assert details['cpu_wait_us'] >= 0
