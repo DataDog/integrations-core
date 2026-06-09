@@ -170,7 +170,7 @@ echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics
 - Open PRs in draft mode unless explicitly asked otherwise; mark them ready for review once the work is complete and CI passes.
 - Always populate the PR body using the repository's template at `.github/PULL_REQUEST_TEMPLATE.md`. Read the template first and fill in every section (`What does this PR do?`, `Motivation`, `Review checklist`). Do not omit, rename, or reorder the template sections, and do not add unrelated sections on top.
 - Keep PR titles short and descriptive in plain words. Do not use conventional-commit prefixes (`feat:`, `fix:`, `chore:`).
-- Add the `qa/skip-qa` label when the PR doesn't need to be tested during QA, and check the corresponding checkbox in the template.
+- Every PR must declare a QA decision via a label. Add `qa/required` if the PR ships changes that need QA validation, or `qa/skip-qa` if it does not (e.g., docs, tests, developer tooling, or no agent-impacting changes). The `validate-all` CI check fails until exactly one of those labels is set. Tick the matching checkbox in the PR template.
 - Push the branch and open the PR before adding the changelog entry so the entry filename can reference the real PR number.
 
 ## Documentation

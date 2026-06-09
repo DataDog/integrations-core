@@ -42,7 +42,7 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Verify check versions match the Agent requirements file",
     ),
     "ci": ValidationConfig(
-        description="Validate CI configuration and Codecov settings",
+        description="Validate CI configuration and code coverage settings",
         repo_wide=True,
         fix_flag="--sync",
     ),
@@ -103,6 +103,10 @@ VALIDATIONS: dict[str, ValidationConfig] = {
     ),
     "package": ValidationConfig(
         description="Validate Python package metadata and naming",
+    ),
+    "qa-label": ValidationConfig(
+        description="Validate the pull request declares whether it needs QA for the next Agent release",
+        repo_wide=True,
     ),
     "readmes": ValidationConfig(
         description="Validate README files have required sections",

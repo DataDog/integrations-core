@@ -1,0 +1,1 @@
+Emit connection_error DSM event when the integration cannot connect to Kafka.

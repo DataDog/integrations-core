@@ -73,7 +73,7 @@ RUN Get-RemoteFile `
     git config --global user.email 'agent-integrations-builder@datadoghq.com'
 
 # Install Rust
-ENV RUST_VERSION="1.74.1" `
+ENV RUST_VERSION="1.91.0" `
     RUSTUP_VERSION="1.26.0" `
     RUSTC_HASH="365d072ac4ef47f8774f4d2094108035e2291a0073702db25fa7797a30861fc9"
 RUN Get-RemoteFile `
@@ -166,7 +166,7 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.19.0"
+ENV CURL_VERSION="8.20.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

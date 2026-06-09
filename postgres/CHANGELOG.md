@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.8.1 / 2026-05-20
+
+***Fixed***:
+
+* Fix a crash caused by cancel closing database connections while the check is still running. ([#23728](https://github.com/DataDog/integrations-core/pull/23728))
+
 ## 23.8.0 / 2026-05-14
 
 ***Added***:
@@ -23,7 +29,7 @@
 * Close dangling connections and break reference cycles on check cancel to reduce memory retention when checks are restarted or rescheduled. ([#23640](https://github.com/DataDog/integrations-core/pull/23640))
 * Eliminate reference cycle in diagnostic instrumentation. ([#23647](https://github.com/DataDog/integrations-core/pull/23647))
 
-## 23.7.0 / 2026-04-15
+## 23.7.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 
