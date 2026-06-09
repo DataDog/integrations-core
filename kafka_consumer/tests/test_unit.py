@@ -756,3 +756,14 @@ def test_connection_error_not_emitted_without_cluster_monitoring(check, kafka_in
     """No connection_error event is emitted when cluster monitoring is disabled."""
     kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
     assert not _connection_error_events(kafka_consumer_check)
+
+
+def test_connection_error_sink_failure_does_not_mask_broker_error(check, kafka_instance, dd_run_check):
+    """Sink failure during connection_error emission does not mask the original AdminClient error."""
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = seed_mock_client()
+    kafka_consumer_check.client.request_metadata_update.side_effect = Exception('broker down')
+    kafka_consumer_check.event_platform_event = mock.Mock(side_effect=Exception('intake unavailable'))
+    with pytest.raises(Exception, match="Unable to connect to the AdminClient"):
+        dd_run_check(kafka_consumer_check)
