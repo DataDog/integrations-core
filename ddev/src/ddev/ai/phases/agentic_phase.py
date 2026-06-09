@@ -278,11 +278,15 @@ class AgenticPhase(Phase):
             context,
             self._resolver,
         )
-        process = self._process_factory.create(
-            scope=self._scope,
-            agent_config=self._agent_config,
-            system_prompt=system_prompt,
-        )
+        try:
+            process = self._process_factory.create(
+                scope=self._scope,
+                agent_config=self._agent_config,
+                system_prompt=system_prompt,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to create process for phase {self._phase_id}: {e}") from e
+
         await self.run_tasks(process, context)
 
         self.after_react()
