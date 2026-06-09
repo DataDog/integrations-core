@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic import Field
+from pydantic import Field, ValidationError
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason
@@ -98,13 +98,17 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
         self._counter += 1
         subagent_id = f"{self._owner_id}.sub.{self._counter:03d}-{label}"
         child_scope = AgentScope(owner_id=subagent_id, role=AgentRole.SUBAGENT)
-        child_config = self._agent_config.model_copy(update={"tools": tool_input.tools})
 
         try:
+            child_config = self._agent_config.model_copy(update={"tools": tool_input.tools})
             process = self._process_factory.create(
                 scope=child_scope,
                 agent_config=child_config,
                 system_prompt=tool_input.system_prompt,
+            )
+        except ValidationError as e:
+            return ToolResult(
+                success=False, error=f"Invalid child config for {label!r}: {e.error_count()} validation error(s)"
             )
         except Exception as e:
             return ToolResult(success=False, error=f"Subagent {label!r} failed to build: {type(e).__name__}: {e}")
