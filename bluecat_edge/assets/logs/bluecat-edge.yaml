@@ -284,23 +284,25 @@ pipeline:
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
         - type: attribute-remapper
-          name: Map `answers.0.rdata` to `ocsf.answer.rdata`
+          name: Map `query_log.answers.0.rdata` to `ocsf.answer.rdata`
           enabled: true
           sources:
-            - answers.0.rdata
+            - query_log.answers.0.rdata
           sourceType: attribute
           target: ocsf.answer.rdata
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: true
         - type: attribute-remapper
-          name: Map `answers.0.recordType` to `ocsf.answer.type`
+          name: Map `query_log.answers.0.recordType` to `ocsf.answer.type`
           enabled: true
           sources:
-            - answers.0.recordType
+            - query_log.answers.0.recordType
           sourceType: attribute
           target: ocsf.answer.type
           targetType: attribute
           preserveSource: true
+          overrideOnConflict: true
         - type: array-processor
           name: Append ocsf.answer into ocsf.answers array
           enabled: true
