@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 2.0.0 / 2026-05-20
+## 2.0.0 / 2026-05-20 / Agent 7.79.1
 
 ***Changed***:
 
@@ -19,7 +19,7 @@
 
 * Fix default raw metric prefix. ([#23598](https://github.com/DataDog/integrations-core/pull/23598))
 
-## 1.1.1 / 2026-04-15
+## 1.1.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

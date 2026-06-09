@@ -195,6 +195,18 @@ RESOLVED_TABULAR_OBJECTS = [
 ]
 
 EXCLUDED_E2E_TAG_KEYS = ['agent_version']
+SNMP_E2E_BACKEND_ENRICHED_METRIC_PREFIXES = ('snmp.', 'datadog.snmp.')
+SNMP_E2E_BACKEND_ENRICHED_TAG_KEYS = {
+    'agent_host',
+    'device_hostname',
+    'device_id',
+    'device_ip',
+    'device_namespace',
+    'snmp_device',
+    'snmp_host',
+    'snmp_profile',
+}
+SNMP_E2E_ENRICHMENT_MATCH_TAG_KEYS = {'autodiscovery_subnet'}
 
 snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
 snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
@@ -333,19 +345,147 @@ def remove_tags(tags, tag_keys_to_remove):
     return new_tags
 
 
+def _collect_device_metadata_enabled(config):
+    init_config = config.get('init_config', {})
+    instances = config.get('instances', [])
+
+    value = init_config.get('collect_device_metadata', True)
+    for instance in instances:
+        if 'collect_device_metadata' in instance:
+            value = instance['collect_device_metadata']
+            break
+
+    return str(value).lower() not in ('false', '0', 'no')
+
+
+def _should_enrich_snmp_e2e_metrics(args):
+    if not args:
+        return False
+
+    config = args[0]
+    if not isinstance(config, dict):
+        return False
+
+    if not _collect_device_metadata_enabled(config):
+        return False
+
+    init_config = config.get('init_config', {})
+    instances = config.get('instances', [])
+    return (
+        init_config.get('loader') == 'core'
+        or any(instance.get('loader') == 'core' for instance in instances)
+        or not instances
+    )
+
+
+def _get_snmp_e2e_metric_enrichment_tag_sets(aggregator):
+    enrichment_tag_sets = []
+    seen_tag_sets = set()
+    service_checks = aggregator._service_checks.get('snmp.can_check', [])
+    for service_check in service_checks:
+        if service_check.status == SnmpCheck.OK and service_check.tags:
+            tags = remove_tags(service_check.tags, EXCLUDED_E2E_TAG_KEYS)
+            tag_set = tuple(sorted(tags))
+            if tag_set not in seen_tag_sets:
+                enrichment_tag_sets.append(tags)
+                seen_tag_sets.add(tag_set)
+
+    return enrichment_tag_sets
+
+
+def _has_backend_enriched_tag(tags):
+    for tag in tags:
+        tag_key = tag.split(':', 1)[0]
+        if tag_key in SNMP_E2E_BACKEND_ENRICHED_TAG_KEYS:
+            return True
+
+    return False
+
+
+def _get_matching_snmp_e2e_metric_enrichment_tag_sets(metric_tags, enrichment_tag_sets):
+    match_tags = []
+    for tag in metric_tags:
+        tag_key = tag.split(':', 1)[0]
+        if tag_key in SNMP_E2E_ENRICHMENT_MATCH_TAG_KEYS:
+            match_tags.append(tag)
+
+    if not match_tags:
+        return enrichment_tag_sets
+
+    matching_tag_sets = []
+    for enrichment_tags in enrichment_tag_sets:
+        if all(tag in enrichment_tags for tag in match_tags):
+            matching_tag_sets.append(enrichment_tags)
+
+    return matching_tag_sets
+
+
+def _get_enriched_snmp_e2e_metric_tags(metric_name, metric_tags, enrichment_tag_sets, enrichment_counters):
+    if (
+        not enrichment_tag_sets
+        or not _is_snmp_backend_enriched_metric(metric_name)
+        or _has_backend_enriched_tag(metric_tags)
+    ):
+        return [metric_tags]
+
+    matching_tag_sets = _get_matching_snmp_e2e_metric_enrichment_tag_sets(metric_tags, enrichment_tag_sets)
+    if not matching_tag_sets:
+        return [metric_tags]
+
+    if len(matching_tag_sets) == 1:
+        return [_add_missing_tags(metric_tags, matching_tag_sets[0])]
+
+    counter_key = (
+        metric_name,
+        tuple(sorted(metric_tags)),
+        tuple(tuple(sorted(tags)) for tags in matching_tag_sets),
+    )
+    enrichment_tags = matching_tag_sets[enrichment_counters[counter_key] % len(matching_tag_sets)]
+    enrichment_counters[counter_key] += 1
+    return [_add_missing_tags(metric_tags, enrichment_tags)]
+
+
+def _add_missing_tags(tags, tags_to_add):
+    new_tags = list(tags)
+    seen_tags = set(new_tags)
+    for tag in tags_to_add:
+        if tag not in seen_tags:
+            new_tags.append(tag)
+            seen_tags.add(tag)
+
+    return new_tags
+
+
+def _is_snmp_backend_enriched_metric(metric_name):
+    return metric_name.startswith(SNMP_E2E_BACKEND_ENRICHED_METRIC_PREFIXES)
+
+
 def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
     """
     dd_agent_check_wrapper is a wrapper around dd_agent_check that will return an aggregator.
-    The wrapper will modify tags by excluding EXCLUDED_E2E_TAG_KEYS.
+    The wrapper modifies e2e metric tags by excluding EXCLUDED_E2E_TAG_KEYS and,
+    for core SNMP checks, mirroring backend device/profile tag enrichment.
     """
     aggregator = dd_agent_check(*args, **kwargs)
+    metric_enrichment_tag_sets = []
+    if _should_enrich_snmp_e2e_metrics(args):
+        # The core Agent submits SNMP metrics with an NDM resource and relies on
+        # backend enrichment for device/profile tags. The e2e replay does not
+        # expose resources, so mirror that enrichment locally from the service
+        # check tags that still carry the full device context.
+        metric_enrichment_tag_sets = _get_snmp_e2e_metric_enrichment_tag_sets(aggregator)
+
     new_agg_metrics = defaultdict(list)
+    enrichment_counters = defaultdict(int)
     for metric_name, metric_list in aggregator._metrics.items():
         new_metrics = []
         for metric in metric_list:
             # metric is a Namedtuple, to modify namedtuple fields we need to use `._replace()`
-            new_metric = metric._replace(tags=remove_tags(metric.tags, EXCLUDED_E2E_TAG_KEYS))
-            new_metrics.append(new_metric)
+            metric_tags = remove_tags(metric.tags, EXCLUDED_E2E_TAG_KEYS)
+            for enriched_metric_tags in _get_enriched_snmp_e2e_metric_tags(
+                metric_name, metric_tags, metric_enrichment_tag_sets, enrichment_counters
+            ):
+                new_metrics.append(metric._replace(tags=enriched_metric_tags))
         new_agg_metrics[metric_name] = new_metrics
 
     aggregator._metrics = new_agg_metrics

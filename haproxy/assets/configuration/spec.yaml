@@ -153,6 +153,7 @@ files:
         unless it also matches an include rule.
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
     - name: services_exclude
       fleet_configurable: true
       legacy: true
@@ -188,6 +189,7 @@ files:
         "active" pool of connections normally used for servicing requests.
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
     - name: enable_service_check
       fleet_configurable: true
       legacy: true
@@ -210,6 +212,7 @@ files:
         tags: ['team:sre','env:prod','app:elk']
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
     - name: startup_grace_seconds
       legacy: true
       value:
@@ -227,6 +230,7 @@ files:
         haproxy reaches this many seconds.
 
         NOTE: This only takes effect when `use_openmetrics` is set to `false`.
+      fleet_configurable: false
   - template: logs
     example:
     - type: udp
