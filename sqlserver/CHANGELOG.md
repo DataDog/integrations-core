@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* Restore agent hostname instrumentation for SQL Server named instance host configurations. ([#23862](https://github.com/DataDog/integrations-core/pull/23862))
+* Restore Agent hostname instrumentation for SQL Server named instance host configurations. ([#23862](https://github.com/DataDog/integrations-core/pull/23862))
 
 ## 23.1.0 / 2026-05-14
 
