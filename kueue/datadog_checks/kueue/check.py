@@ -40,7 +40,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def configure_scrapers(self):
         super().configure_scrapers()
 
-        metric_transformer = self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer
+        metric_transformer = self.scrapers[self.config.openmetrics_endpoint].metric_transformer
         metric_transformer.add_custom_transformer(
             RESOURCE_METRIC_PATTERN,
             self.configure_resource_transformer(),
@@ -53,9 +53,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         )
 
     def configure_resource_transformer(self):
-        metric_transformer = self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer
+        metric_transformer = self.scrapers[self.config.openmetrics_endpoint].metric_transformer
         # Built-in names are applied last so they cannot be overridden by user config.
-        resource_name_map = {**self.instance.get('resource_name_map', {}), **RESOURCE_NAME_MAP}
+        resource_name_map = {**(self.config.resource_name_map or {}), **RESOURCE_NAME_MAP}
         cached_transformers = {}
 
         def resource_transformer(metric, sample_data, runtime_data):
@@ -81,7 +81,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return resource_transformer
 
     def configure_local_queue_transformer(self):
-        metric_transformer = self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer
+        metric_transformer = self.scrapers[self.config.openmetrics_endpoint].metric_transformer
         cached_transformers = {}
 
         def local_queue_transformer(metric, sample_data, runtime_data):
