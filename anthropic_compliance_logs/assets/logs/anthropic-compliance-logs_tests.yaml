@@ -29,6 +29,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_artifact_id: "claude_artifact_01EXAMPLEARTIFACT0"
       created_at: "2026-05-22T15:25:13.701734Z"
+      created_at_timestamp: 1779463513701
       evt:
         name: "claude_artifact_viewed"
       http:
@@ -143,6 +144,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
       created_at: "2026-05-22T15:21:54.358426Z"
+      created_at_timestamp: 1779463314358
       evt:
         name: "claude_chat_created"
       http:
@@ -248,6 +250,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
       created_at: "2026-05-22T15:21:03.415347Z"
+      created_at_timestamp: 1779463263415
       evt:
         name: "claude_chat_deleted"
       http:
@@ -355,6 +358,7 @@ tests:
       claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
       claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
       created_at: "2026-05-22T15:21:44.621308Z"
+      created_at_timestamp: 1779463304621
       evt:
         name: "claude_chat_updated"
       http:
@@ -461,6 +465,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
       created_at: "2026-05-22T15:21:53.556370Z"
+      created_at_timestamp: 1779463313556
       evt:
         name: "claude_chat_viewed"
       http:
@@ -567,6 +572,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_file_id: "claude_file_01EXAMPLEFILEID000000"
       created_at: "2026-05-22T15:21:32.702968Z"
+      created_at_timestamp: 1779463292702
       evt:
         name: "claude_file_uploaded"
       filename: "example-image.png"
@@ -676,6 +682,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_file_id: "claude_file_01EXAMPLEFILEID000000"
       created_at: "2026-05-22T15:21:50.616332Z"
+      created_at_timestamp: 1779463310616
       evt:
         name: "claude_file_viewed"
       filename: "example-screenshot.png"
@@ -784,6 +791,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
       created_at: "2026-05-22T15:21:10.594873Z"
+      created_at_timestamp: 1779463270594
       evt:
         name: "claude_project_created"
       http:
@@ -892,6 +900,7 @@ tests:
       claude_project_document_id: "claude_proj_doc_01EXAMPLEDOC0000000000"
       claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
       created_at: "2026-05-22T15:23:05.845058Z"
+      created_at_timestamp: 1779463385845
       evt:
         name: "claude_project_document_uploaded"
       filename: "example-document.pdf"
@@ -1004,6 +1013,7 @@ tests:
       claude_file_id: "claude_file_01EXAMPLEFILEID000000"
       claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
       created_at: "2026-05-22T15:20:23.462825Z"
+      created_at_timestamp: 1779463223462
       evt:
         name: "claude_project_file_uploaded"
       filename: "example-file.txt"
@@ -1114,6 +1124,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
       created_at: "2026-05-22T15:21:48.506301Z"
+      created_at_timestamp: 1779463308506
       evt:
         name: "claude_project_viewed"
       http:
@@ -1221,6 +1232,7 @@ tests:
         user_agent: "Mozilla/5.0 Claude/1.3883.0"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-05-22T15:21:44.267747Z"
+      created_at_timestamp: 1779463304267
       evt:
         name: "claude_skill_created"
       http:
@@ -1330,6 +1342,7 @@ tests:
         user_agent: "Mozilla/5.0 Claude/1.7196.1"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-05-22T15:21:17.287525Z"
+      created_at_timestamp: 1779463277287
       evt:
         name: "claude_skill_replaced"
       http:
@@ -1444,6 +1457,7 @@ tests:
         user_agent: "Mozilla/5.0"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-05-22T15:21:50.371418Z"
+      created_at_timestamp: 1779463310371
       evt:
         name: "claude_user_settings_updated"
       http:
@@ -1557,6 +1571,7 @@ tests:
         type: "api_actor"
         user_agent: "example-client/1.0"
       created_at: "2026-05-22T15:21:38.920308Z"
+      created_at_timestamp: 1779463298920
       evt:
         name: "compliance_api_accessed"
       http:
@@ -1667,6 +1682,7 @@ tests:
         type: "admin_api_key_actor"
         user_agent: "python-requests/2.32.5"
       created_at: "2026-05-22T15:07:03.419782Z"
+      created_at_timestamp: 1779462423419
       deleted_user_id: "user_01EXAMPLEUSERID0000000000"
       evt:
         name: "org_user_deleted"
@@ -1771,6 +1787,7 @@ tests:
         user_agent: "Mozilla/5.0"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-04-22T12:38:58.658822Z"
+      created_at_timestamp: 1776861538658
       deleted_user_email: "user@example.com"
       deleted_user_id: "user_01EXAMPLEUSERID0000000000"
       evt:
@@ -1881,6 +1898,7 @@ tests:
         user_agent: "Mozilla/5.0"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-05-15T15:22:37.490878Z"
+      created_at_timestamp: 1778858557490
       evt:
         name: "org_user_invite_accepted"
       http:
@@ -1989,6 +2007,7 @@ tests:
         user_agent: "Mozilla/5.0"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-05-15T15:22:11.738584Z"
+      created_at_timestamp: 1778858531738
       evt:
         name: "org_user_invite_sent"
       http:
@@ -2099,6 +2118,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       api_key_id: "apikey_01EXAMPLEAPIKEY000000000"
       created_at: "2026-05-22T15:21:23.115384Z"
+      created_at_timestamp: 1779463283115
       evt:
         name: "platform_api_key_created"
       http:
@@ -2211,6 +2231,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       api_key_id: "apikey_01EXAMPLEAPIKEY000000000"
       created_at: "2026-05-22T15:23:11.707169Z"
+      created_at_timestamp: 1779463391707
       evt:
         name: "platform_api_key_updated"
       http:
@@ -2330,6 +2351,7 @@ tests:
         user_agent: "Mozilla/5.0"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-05-22T15:21:10.596119Z"
+      created_at_timestamp: 1779463270596
       evt:
         name: "role_assignment_granted"
       http:
@@ -2453,6 +2475,7 @@ tests:
         user_agent: "Mozilla/5.0 Claude/1.6259.0"
         user_id: "user_01EXAMPLEUSERID0000000000"
       created_at: "2026-05-21T20:47:11.194821Z"
+      created_at_timestamp: 1779396431194
       evt:
         name: "role_assignment_revoked"
       http:
@@ -2567,6 +2590,7 @@ tests:
         unauthenticated_email_address: "user@example.com"
         user_agent: "Mozilla/5.0"
       created_at: "2026-05-22T15:19:09.946100Z"
+      created_at_timestamp: 1779463149946
       evt:
         name: "sso_login_initiated"
       http:
@@ -2665,6 +2689,7 @@ tests:
         user_id: "user_01EXAMPLEUSERID0000000000"
       auth_method: "sso"
       created_at: "2026-05-22T15:19:14.445010Z"
+      created_at_timestamp: 1779463154445
       evt:
         name: "sso_login_succeeded"
       http:
