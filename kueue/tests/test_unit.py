@@ -44,11 +44,6 @@ def _base_metric_name(metric_name):
     return metric_name
 
 
-def _assert_metadata_metrics(aggregator):
-    for metric in get_metadata_metrics():
-        aggregator.assert_metric(metric)
-
-
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
 
@@ -73,8 +68,6 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
         check_submission_type=True,
         check_symmetric_inclusion=True,
     )
-    _assert_metadata_metrics(aggregator)
-    aggregator.assert_all_metrics_covered()
 
 
 def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_response):
