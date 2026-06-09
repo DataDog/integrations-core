@@ -60,6 +60,7 @@ datadog-datadog-cluster-agent==6.5.0
 datadog-dcgm==4.4.1
 datadog-delinea-privilege-manager==1.2.0
 datadog-delinea-secret-server==1.3.0
+datadog-dell-powerflex==1.0.0
 datadog-directory==4.4.0
 datadog-disk==7.5.1
 datadog-dns-check==5.5.0
