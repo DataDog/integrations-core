@@ -25,6 +25,40 @@ The report separates checks into four families so reviewers can understand what 
 
 Replay-backed checks need a suitable replay cache. If no cache is restored and `seed_missing_caches=true`, the workflow starts the E2E environment and runs `compare-check` once to seed a cache. If no cache is restored and seeding is disabled, replay-backed checks are skipped, but static asset checks still run.
 
+## Cross-run flake detection
+
+To detect nondeterminism that survives cached replay, run the same replay-only sweep multiple times against the same branch/SHA and compare the sanitized reports. Prefer `mode=all-cached` with `seed_missing_caches=false` so live fixture seeding cannot introduce drift.
+
+Example:
+
+```bash
+# Run this 3-5 times with the same ref after caches have been seeded.
+gh workflow run zz-test-worker-poc.yaml \
+  --ref nubtron/metadata-e2e-monkeypatch-replay \
+  -f mode=all-cached \
+  -f runner=no-agent \
+  -f seed_missing_caches=false \
+  -f readings=2 \
+  -f max_targets=1000 \
+  -f allow_truncation=false
+```
+
+Then compare the completed run reports:
+
+```bash
+python .github/workflows/scripts/replay-pbt-flake-report.py \
+  --run-ids 27000000001,27000000002,27000000003 \
+  --out-dir /tmp/replay-pbt-flakes \
+  --zip /tmp/replay-pbt-flakes.zip
+```
+
+The flake report flags:
+
+- target status/category changes across runs,
+- property pass/fail changes across runs,
+- finding fingerprint changes across runs,
+- targets or properties missing from some runs.
+
 The replay cache stays in GitHub Actions cache. The report uploads only allowlisted files such as summaries, property manifests, findings, coverage summaries, and TSV/JSON report views.
 
 ## Check inventory
