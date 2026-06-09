@@ -29,6 +29,13 @@ instances:
     #
   - server: <SERVER>
 
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. Overrides the default hostname resolution,
+    ## which uses the `server` value. Useful when the agent connects via localhost or 127.0.0.1
+    ## (e.g., co-located with ClickHouse in the same pod) to avoid reporting a non-unique hostname.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
     ## @param port - integer - optional - default: 8123
     ## The port used to connect to the system.
     ## This integration uses the HTTP interface, so the default is 8123 (HTTP port).
@@ -117,6 +124,16 @@ instances:
     #
     # single_endpoint_mode: false
 
+    ## @param use_legacy_queries - boolean - optional - default: true
+    ## Enable the legacy query set for collecting metrics. Set to `false` to disable.
+    #
+    # use_legacy_queries: true
+
+    ## @param use_advanced_queries - boolean - optional - default: true
+    ## Enable the advanced query set for collecting metrics. Set to `false` to disable.
+    #
+    # use_advanced_queries: true
+
     ## Configure collection of database samples snapshots from system.processes
     #
     # query_samples:
@@ -196,6 +213,94 @@ instances:
         ## Set the maximum number of error samples to collect per hour per unique query signature.
         #
         # samples_per_hour_per_query: 60
+
+    ## Configure per-table size and per-view refresh gauges derived from
+    ## `system.tables` and `system.view_refreshes`. Independent of
+    ## `collect_schemas` (which controls catalog structure collection)
+    ## so users can dashboard table sizes without enabling Schema Explorer.
+    ## Requires `dbm: true`.
+    #
+    # schema_metrics:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of per-table size and per-view refresh gauges.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 60
+        ## Set the schema metrics collection interval (in seconds). These
+        ## gauges change continuously, so 60s is a reasonable default.
+        #
+        # collection_interval: 60
+
+    ## Configure collection of ClickHouse catalog metadata (databases,
+    ## tables, views, columns) for Database Monitoring's Schema Explorer.
+    ## Requires `dbm: true`.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of catalog metadata. When enabled, the agent
+        ## polls `system.tables`, `system.columns`, and
+        ## `system.view_refreshes` (ClickHouse 24.3+) and emits one
+        ## `kind=clickhouse_databases` payload per cycle.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the schema collection interval (in seconds). Catalog data
+        ## changes slowly; 600s (10 min) is a reasonable default.
+        #
+        # collection_interval: 600
+
+        ## @param max_tables - integer - optional - default: 300
+        ## Maximum number of tables plus views to collect per cycle
+        ## across all databases.
+        #
+        # max_tables: 300
+
+        ## @param max_columns - integer - optional - default: 1000
+        ## Maximum number of columns to collect per table/view.
+        #
+        # max_columns: 1000
+
+        ## @param max_query_duration - integer - optional - default: 60
+        ## Maximum duration of the schema collection queries in seconds.
+        ## Applied to each query via the `max_execution_time` ClickHouse setting.
+        #
+        # max_query_duration: 60
+
+        ## @param include_databases - list of strings - optional
+        ## A list of regex patterns to include databases. Any database whose
+        ## name matches any one of these patterns will be included. If empty,
+        ## all databases (other than those excluded) are included.
+        #
+        # include_databases:
+        #   - mydb
+
+        ## @param exclude_databases - list of strings - optional
+        ## A list of regex patterns to exclude databases. Any database whose
+        ## name matches any one of these patterns will be excluded. The
+        ## ClickHouse system databases (`system`, `INFORMATION_SCHEMA`,
+        ## `information_schema`) are always excluded regardless of this setting.
+        #
+        # exclude_databases:
+        #   - tmp_.*
+
+        ## @param include_tables - list of strings - optional
+        ## A list of regex patterns to include tables. Any table whose name
+        ## matches any one of these patterns will be included. If empty, all
+        ## tables (other than those excluded) are included.
+        #
+        # include_tables:
+        #   - events.*
+
+        ## @param exclude_tables - list of strings - optional
+        ## A list of regex patterns to exclude tables. Any table whose name
+        ## matches any one of these patterns will be excluded.
+        #
+        # exclude_tables:
+        #   - .*_tmp
 
     ## Configure parts and merges monitoring
     #
@@ -406,16 +511,42 @@ instances:
 #
 # logs:
 #   - source: clickhouse
+#     service: clickhouse
 #     type: file
 #     path: /var/log/clickhouse-server/clickhouse-server.log
+#     tags:
+#     - format:plain
 #     log_processing_rules:
 #     - type: multi_line
-#       name: log_start_with_date
+#       name: new_log_start_with_date
 #       pattern: \d{4}\.\d{2}\.\d{2}
 #   - source: clickhouse
+#     service: clickhouse
 #     type: file
 #     path: /var/log/clickhouse-server/clickhouse-server.err.log
+#     tags:
+#     - format:plain
 #     log_processing_rules:
 #     - type: multi_line
-#       name: log_start_with_date
+#       name: new_log_start_with_date
 #       pattern: \d{4}\.\d{2}\.\d{2}
+#   - source: clickhouse
+#     service: clickhouse
+#     type: file
+#     path: /var/log/clickhouse-server/clickhouse-server.log
+#     tags:
+#     - format:json
+#     log_processing_rules:
+#     - type: multi_line
+#       name: new_log_start_with_json
+#       pattern: \{
+#   - source: clickhouse
+#     service: clickhouse
+#     type: file
+#     path: /var/log/clickhouse-server/clickhouse-server.err.log
+#     tags:
+#     - format:json
+#     log_processing_rules:
+#     - type: multi_line
+#       name: new_log_start_with_json
+#       pattern: \{

@@ -107,7 +107,7 @@ def shared_logs(example_log_configs, mount_whitelist=None):
 @contextmanager
 def docker_run(
     compose_file=None,
-    waith_for_health=False,
+    wait_for_health=True,
     build=False,
     service_name=None,
     up=None,
@@ -132,7 +132,7 @@ def docker_run(
         compose_file (str):
             A path to a Docker compose file. A custom tear
             down is not required when using this.
-        waith_for_health (bool):
+        wait_for_health (bool):
             Whether or not to wait for the health of the service to be healthy before yielding.
         build (bool):
             Whether or not to build images for when `compose_file` is provided
@@ -176,8 +176,7 @@ def docker_run(
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
             composeFileArgs['capture'] = capture
-        if waith_for_health:
-            composeFileArgs['waith_for_health'] = waith_for_health
+        composeFileArgs['wait_for_health'] = wait_for_health
         set_up = ComposeFileUp(**composeFileArgs)
         if down is not None:
             tear_down = down
@@ -244,16 +243,16 @@ class ComposeFileUp(LazyFunction):
         build: bool = False,
         service_name: str | None = None,
         capture: str | None = None,
-        waith_for_health: bool = False,
+        wait_for_health: bool = True,
     ):
         self.compose_file = compose_file
         self.build = build
         self.service_name = service_name
         self.capture = capture
-        self.waith_for_health = waith_for_health
+        self.wait_for_health = wait_for_health
         self.command = ['docker', 'compose', '-f', self.compose_file, 'up', '-d', '--force-recreate']
 
-        if waith_for_health:
+        if wait_for_health:
             self.command.append('--wait')
 
         if self.build:

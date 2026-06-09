@@ -409,18 +409,25 @@ MOCK_TEST_METRICS = [
     'istio.galley.istio.authentication.meshpolicies',
 ]
 
-# Ambient mode (ztunnel) - default namespace istio.ztunnel (OpenMetrics submits counters as .count)
-V2_ZTUNNEL_METRICS = [
+# Ambient mode (ztunnel) - default namespace istio.ztunnel.
+# Ztunnel counters use `# TYPE foo counter` + `foo_total{} N`, which the legacy parser drops; require the v2 parser.
+V2_ZTUNNEL_COUNTER_METRICS = [
     'istio.ztunnel.tcp.connections_opened.count',
     'istio.ztunnel.tcp.connections_closed.count',
     'istio.ztunnel.tcp.send_bytes.count',
     'istio.ztunnel.tcp.received_bytes.count',
-    'istio.ztunnel.dns.requests.count',
-    'istio.ztunnel.dns.upstream_requests.count',
-    'istio.ztunnel.dns.upstream_failures.count',
-    'istio.ztunnel.connection.opens.count',
-    'istio.ztunnel.connection.closes.count',
+    'istio.ztunnel.xds.message.count',
+    'istio.ztunnel.xds.message_bytes.count',
+    'istio.ztunnel.proxies_started.count',
 ]
+
+# Gauges, unaffected by the legacy-parser counter bug; split out so the regression test pins only counters.
+V2_ZTUNNEL_GAUGE_METRICS = [
+    'istio.ztunnel.active_proxy_count',
+    'istio.ztunnel.pending_proxy_count',
+]
+
+V2_ZTUNNEL_METRICS = V2_ZTUNNEL_COUNTER_METRICS + V2_ZTUNNEL_GAUGE_METRICS
 
 # Ambient mode (waypoint) - default namespace istio.waypoint
 V2_WAYPOINT_METRICS = [

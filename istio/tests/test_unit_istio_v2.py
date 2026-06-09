@@ -241,14 +241,50 @@ def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
 # --- Ambient mode (istio_mode: ambient) tests ---
 
 
-def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response):
-    """Test ztunnel metrics collection in ambient mode with default namespace."""
-    mock_http_response(file_path=get_fixture_path('1.5', 'ztunnel.txt'))
+def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response, caplog):
+    """Ztunnel metrics collection in ambient mode against a real ztunnel exposition."""
+    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE])
-    dd_run_check(check)
+    with caplog.at_level('WARNING'):
+        dd_run_check(check)
+
+    # The ztunnel sub-scraper must default to use_latest_spec=True so the OpenMetrics parser
+    # is used; without this default the parser reverts to legacy and counters silently drop.
+    assert check.scraper_configs[0]['use_latest_spec'] is True
+    # The opt-out warning must stay silent on the default path.
+    assert "use_latest_spec: false" not in caplog.text
 
     for metric in common.V2_ZTUNNEL_METRICS:
         aggregator.assert_metric(metric)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, mock_http_response):
+    """Pin the broken behavior: with the legacy Prometheus parser (use_latest_spec=False),
+    ztunnel counter metrics are silently dropped because the parser does not add `_total`
+    to a counter's allowed sample names when TYPE is declared with the base name. Gauges
+    are unaffected by the same bug and still collected."""
+    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    instance = dict(common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE, use_latest_spec=False)
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    dd_run_check(check)
+
+    for metric in common.V2_ZTUNNEL_COUNTER_METRICS:
+        aggregator.assert_metric(metric, count=0)
+    for metric in common.V2_ZTUNNEL_GAUGE_METRICS:
+        aggregator.assert_metric(metric)
+
+
+def test_ambient_warns_when_user_opts_out_of_openmetrics_parser(caplog, dd_run_check, mock_http_response):
+    """Setting `use_latest_spec: false` with ambient + ztunnel reintroduces the silent-drop bug;
+    the integration must log a warning so the regression is not silent."""
+    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    instance = dict(common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE, use_latest_spec=False)
+    check = Istio(common.CHECK_NAME, {}, [instance])
+    with caplog.at_level('WARNING'):
+        dd_run_check(check)
+    assert "use_latest_spec: false" in caplog.text
+    assert "ztunnel" in caplog.text
 
 
 def test_ambient_waypoint_metrics(aggregator, dd_run_check, mock_http_response):
@@ -289,7 +325,7 @@ def test_ambient_requires_at_least_one_endpoint():
 
 def test_ambient_auto_detect_with_ztunnel_endpoint(aggregator, dd_run_check, mock_http_response):
     """Test that ambient mode is auto-detected when ztunnel_endpoint is configured without explicit istio_mode."""
-    mock_http_response(file_path=get_fixture_path('1.5', 'ztunnel.txt'))
+    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
     instance = {
         'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
         'use_openmetrics': True,
@@ -319,7 +355,7 @@ def test_ambient_auto_detect_with_waypoint_endpoint(aggregator, dd_run_check, mo
 
 def test_ambient_auto_detect_with_both_endpoints(aggregator, dd_run_check, mock_http_response):
     """Test that ambient mode is auto-detected when both ztunnel and waypoint endpoints are configured."""
-    mock_http_response(file_path=get_fixture_path('1.5', 'ztunnel.txt'))
+    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
     instance = {
         'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
         'waypoint_endpoint': 'http://localhost:15021/stats/prometheus',

@@ -24,7 +24,7 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
-$desired_commit = "36118ef68885436fd2a999188216337365856ad4"
+$desired_commit = "3e797c57a635d3ce8f3473ef344ea44c09c246c8"
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {

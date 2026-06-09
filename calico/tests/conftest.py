@@ -5,7 +5,7 @@ from os import path
 
 import pytest
 
-from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
@@ -14,6 +14,11 @@ from .common import EXTRA_METRICS
 
 NAMESPACE = "calico"
 HERE = path.dirname(path.abspath(__file__))
+
+
+def _felix_config_default_exists():
+    result = run_command(["kubectl", "get", "felixconfiguration", "default"], capture='both')
+    return result.code == 0
 
 
 def setup_calico():
@@ -32,10 +37,27 @@ def setup_calico():
     # Wait for pods
     run_command(["kubectl", "wait", "--for=condition=Ready", "pods", "--all", "--all-namespaces", "--timeout=300s"])
 
-    # Activate Felix
+    # calico-node creates the default FelixConfiguration asynchronously after pods report Ready.
+    WaitFor(_felix_config_default_exists, attempts=60, wait=2)()
+
+    # check=True so a missed patch fails loudly here instead of as a connection-refused timeout later.
     run_command(
-        """kubectl exec -i -n kube-system calicoctl -- /calicoctl patch felixConfiguration
-        default --patch '{"spec":{"prometheusMetricsEnabled": true}}'"""
+        [
+            "kubectl",
+            "exec",
+            "-i",
+            "-n",
+            "kube-system",
+            "calicoctl",
+            "--",
+            "/calicoctl",
+            "patch",
+            "felixConfiguration",
+            "default",
+            "--patch",
+            '{"spec":{"prometheusMetricsEnabled": true}}',
+        ],
+        check=True,
     )
 
 

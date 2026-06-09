@@ -32,8 +32,8 @@ def test_create_invalid_branch_name(ddev, name, mocker):
 @pytest.mark.parametrize(
     'yaml_updated',
     [
-        pytest.param(True, id='agent_branch_exists'),
-        pytest.param(False, id='agent_branch_not_exists'),
+        pytest.param(True, id='build_agent_yaml_updated'),
+        pytest.param(False, id='build_agent_yaml_unchanged'),
     ],
 )
 def test_create_branch(ddev, mocker, yaml_updated):
@@ -58,7 +58,7 @@ def test_create_branch(ddev, mocker, yaml_updated):
     run_mock.assert_any_call('checkout', '-B', '5.5.x')
     run_mock.assert_any_call('push', 'origin', '5.5.x')
 
-    # yaml commit only happens when agent branch exists
+    # yaml commit only happens when build_agent.yaml was updated
     yaml_commit = call('add', '.gitlab/build_agent.yaml')
     assert (yaml_commit in run_mock.call_args_list) is yaml_updated
 
@@ -78,38 +78,64 @@ def test_create_branch(ddev, mocker, yaml_updated):
     assert run_mock.call_args_list[-1] == call('checkout', 'master')
 
 
-@pytest.mark.parametrize(
-    'ls_remote_output,expected_result,file_should_change',
-    [
-        pytest.param('abc123\trefs/heads/7.99.x\n', True, True, id='branch_exists'),
-        pytest.param('', False, False, id='branch_not_exists'),
-    ],
-)
-def test_ensure_build_agent_yaml_updated(mocker, tmp_path, ls_remote_output, expected_result, file_should_change):
-    """Test ensure_build_agent_yaml_updated with different branch existence scenarios."""
+def test_ensure_build_agent_yaml_updated(mocker, tmp_path):
     build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
     build_agent_path.parent.ensure_dir_exists()
     build_agent_path.write_text('.build-agent-tpl:\n  trigger:\n    branch: main\n')
 
     app_mock = mocker.MagicMock()
-    app_mock.repo.git.capture.return_value = ls_remote_output
 
     with Path(tmp_path).as_cwd():
         result = ensure_build_agent_yaml_updated(app_mock, '7.99.x')
 
-    assert result is expected_result
-    content = build_agent_path.read_text()
-    if file_should_change:
-        assert 'branch: 7.99.x' in content
-    else:
-        assert 'branch: main' in content
+    assert result is True
+    assert 'branch: 7.99.x' in build_agent_path.read_text()
+    app_mock.repo.git.capture.assert_not_called()
+
+
+def test_ensure_build_agent_yaml_updated_ignores_unrelated_main_branch(mocker, tmp_path):
+    build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
+    build_agent_path.parent.ensure_dir_exists()
+    content = '.build-agent-tpl:\n  trigger:\n    branch: main\nunrelated-job:\n  trigger:\n    branch: main\n'
+    build_agent_path.write_text(content)
+
+    app_mock = mocker.MagicMock()
+
+    with Path(tmp_path).as_cwd():
+        result = ensure_build_agent_yaml_updated(app_mock, '7.99.x')
+
+    assert result is True
+    assert build_agent_path.read_text() == (
+        '.build-agent-tpl:\n  trigger:\n    branch: 7.99.x\nunrelated-job:\n  trigger:\n    branch: main\n'
+    )
+    app_mock.abort.assert_not_called()
+
+
+def test_ensure_build_agent_yaml_updated_aborts_on_multiple_template_main_branches(mocker, tmp_path):
+    build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
+    build_agent_path.parent.ensure_dir_exists()
+    content = '.build-agent-tpl:\n  trigger:\n    branch: main\n    branch: main\n'
+    build_agent_path.write_text(content)
+
+    app_mock = mocker.MagicMock()
+    app_mock.abort.side_effect = RuntimeError('abort')
+
+    with Path(tmp_path).as_cwd(), pytest.raises(RuntimeError, match='abort'):
+        ensure_build_agent_yaml_updated(app_mock, '7.99.x')
+
+    assert build_agent_path.read_text() == content
+    app_mock.abort.assert_called_once_with(
+        'Expected exactly one `.build-agent-tpl` branch pointing to `main` in `.gitlab/build_agent.yaml`; found 2.'
+    )
 
 
 def test_ensure_build_agent_yaml_updated_already_on_release_branch(mocker, tmp_path):
     """Test early return when file already points to a release branch."""
     build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
     build_agent_path.parent.ensure_dir_exists()
-    build_agent_path.write_text('.build-agent-tpl:\n  trigger:\n    branch: 7.98.x\n')
+    build_agent_path.write_text(
+        '.build-agent-tpl:\n  trigger:\n    branch: 7.98.x\nunrelated-job:\n  trigger:\n    branch: main\n'
+    )
 
     app_mock = mocker.MagicMock()
 
@@ -117,6 +143,8 @@ def test_ensure_build_agent_yaml_updated_already_on_release_branch(mocker, tmp_p
         result = ensure_build_agent_yaml_updated(app_mock, '7.99.x')
 
     assert result is False
+    assert 'branch: 7.98.x' in build_agent_path.read_text()
+    assert 'branch: main' in build_agent_path.read_text()
     app_mock.repo.git.capture.assert_not_called()
 
 

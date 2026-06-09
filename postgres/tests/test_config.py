@@ -87,6 +87,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
             'query_samples': {'enabled': True},
             'collect_settings': {'enabled': True},
             'collect_schemas': {'enabled': True},
+            'collect_column_statistics': {'enabled': True},
             'query_activity': {'enabled': True},
             'query_metrics': {'enabled': True},
             'data_observability': {'enabled': True},
@@ -101,6 +102,7 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.QUERY_SAMPLES,
         FeatureKey.COLLECT_SETTINGS,
         FeatureKey.COLLECT_SCHEMAS,
+        FeatureKey.COLLECT_COLUMN_STATISTICS,
         FeatureKey.QUERY_ACTIVITY,
         FeatureKey.QUERY_METRICS,
         FeatureKey.DATA_OBSERVABILITY,
@@ -118,6 +120,7 @@ def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
     assert features[FeatureKey.QUERY_SAMPLES]['enabled'] is False
     assert features[FeatureKey.COLLECT_SETTINGS]['enabled'] is False
     assert features[FeatureKey.COLLECT_SCHEMAS]['enabled'] is False
+    assert features[FeatureKey.COLLECT_COLUMN_STATISTICS]['enabled'] is False
     assert features[FeatureKey.QUERY_ACTIVITY]['enabled'] is False
     assert features[FeatureKey.QUERY_METRICS]['enabled'] is False
 
@@ -607,3 +610,102 @@ def test_autodiscovery_exclude_none_does_not_error(mock_check):
     config, result = build_config(check=mock_check)
     assert result.valid
     assert config.dbname == 'main'
+
+
+# ---------------------------------------------------------------------------
+# Data Observability — schedule field config tests
+# ---------------------------------------------------------------------------
+
+
+def test_do_query_schedule_field_defaults_to_none(mock_check, minimal_instance):
+    """A DO query without schedule field has schedule=None by default."""
+    minimal_instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'queries': [
+            {
+                'monitor_id': 1,
+                'dbname': 'mydb',
+                'query': 'SELECT 1',
+                'interval_seconds': 60,
+                'query_timeout': 30_000,
+                'entity': {
+                    'platform': 'aws',
+                    'account': '123',
+                    'database': 'mydb',
+                    'schema': 'public',
+                    'table': 'foo',
+                },
+            }
+        ],
+    }
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    query = config.data_observability.queries[0]
+    assert query.schedule is None
+    assert query.interval_seconds == 60
+
+
+def test_do_query_schedule_field_parsed(mock_check, minimal_instance):
+    """A DO query with schedule field is parsed correctly; interval_seconds may be absent."""
+    minimal_instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'queries': [
+            {
+                'monitor_id': 2,
+                'dbname': 'mydb',
+                'query': 'SELECT 1',
+                'schedule': '20 * * * *',
+                'query_timeout': 30_000,
+                'entity': {
+                    'platform': 'aws',
+                    'account': '123',
+                    'database': 'mydb',
+                    'schema': 'public',
+                    'table': 'bar',
+                },
+            }
+        ],
+    }
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    query = config.data_observability.queries[0]
+    assert query.schedule == '20 * * * *'
+    assert query.interval_seconds is None
+
+
+def test_do_query_both_schedule_and_interval_parsed(mock_check, minimal_instance):
+    """A DO query with both schedule and interval_seconds is accepted; both fields present."""
+    minimal_instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'queries': [
+            {
+                'monitor_id': 3,
+                'dbname': 'mydb',
+                'query': 'SELECT 1',
+                'schedule': '0 * * * *',
+                'interval_seconds': 3600,
+                'query_timeout': 30_000,
+                'entity': {
+                    'platform': 'aws',
+                    'account': '123',
+                    'database': 'mydb',
+                    'schema': 'public',
+                    'table': 'baz',
+                },
+            }
+        ],
+    }
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    query = config.data_observability.queries[0]
+    assert query.schedule == '0 * * * *'
+    assert query.interval_seconds == 3600
