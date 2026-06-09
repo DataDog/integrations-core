@@ -331,3 +331,18 @@ def test_connection_failure(aggregator, instance):
         assert check._query_manager is None
     aggregator.assert_service_check("ibm_i.can_connect", count=1, status=AgentCheck.CRITICAL)
     aggregator.assert_all_metrics_covered()
+
+
+def test_check_query_manager_execute_error(aggregator, instance):
+    check = IbmICheck('ibm_i', {}, [instance])
+    check.log = mock.MagicMock()
+    check.load_configuration_models()
+    check._query_manager = mock.MagicMock(hostname="host")
+    check._query_manager.execute.side_effect = Exception("boom")
+
+    with mock.patch('datadog_checks.ibm_i.IbmICheck._delete_connection_subprocess') as delete_conn:
+        check.check(instance)
+
+    delete_conn.assert_called_once()
+    aggregator.assert_service_check("ibm_i.can_connect", count=1, status=AgentCheck.CRITICAL)
+    aggregator.assert_all_metrics_covered()
