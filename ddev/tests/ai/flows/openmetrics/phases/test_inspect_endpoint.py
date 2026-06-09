@@ -19,11 +19,10 @@ from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     _build_memory_text,
     _parse_exposition,
 )
+from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
-from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.event_bus.exceptions import MessageProcessingError
 
 ENDPOINT_URL = "http://example.test:9100/metrics"
@@ -105,15 +104,17 @@ def _make_phase(
     runtime_variables: dict[str, str] | None = None,
 ) -> tuple[InspectEndpointPhase, CheckpointManager]:
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
+    context = FlowContext(
+        runtime_variables=runtime_variables if runtime_variables is not None else {"endpoint_url": ENDPOINT_URL},
+        flow_variables={},
+        config_dir=flow_dir,
+    )
     phase = InspectEndpointPhase(
         phase_id=phase_id,
         dependencies=[],
         config=PhaseConfig(),
         checkpoint_manager=checkpoint_manager,
-        runtime_variables=runtime_variables if runtime_variables is not None else {"endpoint_url": ENDPOINT_URL},
-        flow_variables={},
-        config_dir=flow_dir,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
+        context=context,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager

@@ -7,14 +7,15 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.build import (
     make_agent_builder,
     make_goal_agent_builder,
     make_subagent_builder,
 )
-from ddev.ai.phases.base import FlowServices, Phase, PhaseOutcome
+from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
+from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
@@ -27,6 +28,7 @@ if TYPE_CHECKING:
     from ddev.ai.agent.base import BaseAgent
     from ddev.ai.agent.build import AgentBuilder, GoalAgentBuilder, SubagentBuilder
     from ddev.ai.phases.goal import GoalLoopOutcome
+    from ddev.ai.phases.orchestrator import ResourceProvider
     from ddev.ai.react.types import ReActResult
 
 
@@ -65,7 +67,8 @@ class AgenticPhase(Phase):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        services: FlowServices,
+        checkpoint_manager: CheckpointManager,
+        context: FlowContext,
         agent_builder: AgentBuilder,
         subagent_builder: SubagentBuilder | None = None,
         goal_agent_builder: GoalAgentBuilder | None = None,
@@ -74,7 +77,8 @@ class AgenticPhase(Phase):
             phase_id=phase_id,
             dependencies=dependencies,
             config=config,
-            services=services,
+            checkpoint_manager=checkpoint_manager,
+            context=context,
         )
         self._agent_builder = agent_builder
         self._subagent_builder = subagent_builder
@@ -83,7 +87,7 @@ class AgenticPhase(Phase):
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0
         self._subagent_log_dir = (
-            services.checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
+            checkpoint_manager.root / "subagents" / phase_id if subagent_builder is not None else None
         )
 
     @classmethod
@@ -101,52 +105,55 @@ class AgenticPhase(Phase):
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
 
     @classmethod
-    def extra_init_kwargs(  # type: ignore[override]
+    def build(
         cls,
-        *,
         phase_id: str,
-        phase_config: PhaseConfig,
-        agents: dict[str, AgentConfig],
-        agent_clients: dict[str, Any],
-        services: FlowServices,
-        **_: Any,
-    ) -> dict[str, Any]:
-        if phase_config.agent is None:
-            raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
-        agent_config = agents[phase_config.agent]
-        file_registry = services.file_registry
+        config: PhaseConfig,
+        deps: list[str],
+        resources: ResourceProvider,
+        checkpoint_manager: CheckpointManager,
+        context: FlowContext,
+    ) -> AgenticPhase:
+        # config.agent is guaranteed set & known by validate_config.
+        agent_name = cast(str, config.agent)
+        agent_config = resources.agent_config(agent_name)
+        agent_clients = resources.agent_clients()
+        file_registry = resources.file_registry()
 
         subagent_builder = None
-        requires_subagent_builder = any(
+        if any(
             spec.requires_subagent_builder
             for name in agent_config.tools
             if (spec := TOOL_MANIFEST.get(name)) is not None
-        )
-        if requires_subagent_builder:
+        ):
             subagent_builder = make_subagent_builder(
                 parent_agent_config=agent_config,
                 agent_clients=agent_clients,
                 file_registry=file_registry,
             )
 
-        any_goal = any((t.goal is not None or t.goal_path is not None) for t in phase_config.tasks)
         goal_agent_builder = None
-        if any_goal:
+        if any((t.goal is not None or t.goal_path is not None) for t in config.tasks):
             goal_agent_builder = make_goal_agent_builder(
                 parent_agent_config=agent_config,
                 agent_clients=agent_clients,
                 file_registry=file_registry,
             )
 
-        return {
-            "agent_builder": make_agent_builder(
+        return cls(
+            phase_id=phase_id,
+            dependencies=deps,
+            config=config,
+            checkpoint_manager=checkpoint_manager,
+            context=context,
+            agent_builder=make_agent_builder(
                 agent_config=agent_config,
                 agent_clients=agent_clients,
                 file_registry=file_registry,
             ),
-            "subagent_builder": subagent_builder,
-            "goal_agent_builder": goal_agent_builder,
-        }
+            subagent_builder=subagent_builder,
+            goal_agent_builder=goal_agent_builder,
+        )
 
     def before_react(self) -> None:
         """Called once before agent/tools are created. Override for phase-specific setup."""
