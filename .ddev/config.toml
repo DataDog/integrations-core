@@ -43,6 +43,7 @@ krakend = "KrakenD"
 lustre = "Lustre"
 prefect = "Prefect"
 n8n = "n8n"
+hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 
@@ -53,6 +54,7 @@ prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
 nifi = "nifi."
+hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -271,3 +273,5 @@ prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
 nifi = ["linux", "windows", "mac_os"]
+hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
+
