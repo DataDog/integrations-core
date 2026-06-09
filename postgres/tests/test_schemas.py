@@ -173,6 +173,8 @@ def test_tables(dbm_instance, integration_check):
         'pgtable',
         'pg_newtable',
         'cities',
+        'fk_table_1',
+        'fk_table_2',
         'sample_foreign_d73a8c',
     }
     if float(POSTGRES_VERSION) >= 11:
