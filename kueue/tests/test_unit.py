@@ -54,15 +54,19 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
-    aggregator.assert_metric_has_tag('kueue.go.info', 'go_version:go1.24.4')
-    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.gpu', 'kueue_cluster_queue:default')
-    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_pending.gpu', 'kueue_cluster_queue:default')
-    aggregator.assert_metric_has_tag('kueue.pending_workloads', 'kueue_cluster_queue:default')
-    aggregator.assert_metric_has_tag('kueue.pending_workloads', 'status:inadmissible')
-    aggregator.assert_metric_has_tag('kueue.resource_flavor.quota_reserved_workloads', 'kueue_cluster_queue:default')
-    aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'kueue_local_queue:gpu')
-    aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'namespace:team-a')
-    aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'status:active')
+    expected_metric_tags = (
+        ('kueue.go.info', 'go_version:go1.24.4'),
+        ('kueue.cluster_queue.resource_usage.gpu', 'kueue_cluster_queue:default'),
+        ('kueue.cluster_queue.resource_pending.gpu', 'kueue_cluster_queue:default'),
+        ('kueue.pending_workloads', 'kueue_cluster_queue:default'),
+        ('kueue.pending_workloads', 'status:inadmissible'),
+        ('kueue.resource_flavor.quota_reserved_workloads', 'kueue_cluster_queue:default'),
+        ('kueue.local_queue.pending_workloads', 'kueue_local_queue:gpu'),
+        ('kueue.local_queue.pending_workloads', 'namespace:team-a'),
+        ('kueue.local_queue.pending_workloads', 'status:active'),
+    )
+    for metric, tag in expected_metric_tags:
+        aggregator.assert_metric_has_tag(metric, tag)
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
