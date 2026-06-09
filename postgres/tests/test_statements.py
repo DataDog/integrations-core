@@ -233,6 +233,7 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     dbm_instance['collect_schemas'] = {'enabled': False}
     connections = {}
 
@@ -399,7 +400,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
                 mock_agent.side_effect = obfuscate_sql
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
-                check.check(dbm_instance)
+                run_one_check(check, cancel=False)
 
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
@@ -871,6 +872,7 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     dbm_instance['collect_schemas'] = {'enabled': False}
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
@@ -1069,6 +1071,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1807,6 +1810,7 @@ def test_statement_metrics_database_errors(
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     check = integration_check(dbm_instance)
 
     with mock.patch(
@@ -1882,6 +1886,7 @@ def test_statement_metrics_attributes_undefined_table_to_not_loaded_when_spl_mis
     that fails until SPL is fixed and the server restarted)."""
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
+    dbm_instance.setdefault('query_metrics', {})['incremental_query_metrics'] = False
     check = integration_check(dbm_instance)
 
     # Override _load_pg_settings so the test-postgres (which has pg_stat_statements in SPL) doesn't
