@@ -58,7 +58,6 @@ class BatchFinished(BaseMessage):
     run_id: int
     workflow_url: str
     artifacts_path: str
-    timed_out: bool = False
 
 
 @dataclass
