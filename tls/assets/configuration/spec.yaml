@@ -110,6 +110,7 @@ files:
       value:
         example: 60
         type: number
+      fleet_configurable: false
     - name: days_warning
       fleet_configurable: true
       description: |
@@ -164,5 +165,6 @@ files:
         enum:
         - postgres
         - mysql
+      fleet_configurable: false
     - template: instances/default
     - template: instances/tls

@@ -610,96 +610,100 @@ tests:
       - "source:LOGS_SOURCE"
     timestamp: 1711584052656
  -
-  sample: "<134>May 11 18:47:07 test-system {\"_path\":\"conn\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T18:47:07.850764Z\",\"ts\":\"2026-05-11T18:47:02.848960Z\",\"uid\":\"12345678901234567890\",\"id.orig_h\":\"10.10.50.1\",\"id.orig_p\":60704,\"id.resp_h\":\"10.10.60.6\",\"id.resp_p\":88,\"proto\":\"tcp\",\"service\":\"krb_tcp\",\"orig_bytes\":227,\"resp_bytes\":195,\"conn_state\":\"RSTR\",\"local_orig\":true,\"local_resp\":true,\"missed_bytes\":0,\"history\":\"ShADTdFar\",\"orig_pkts\":5,\"resp_pkts\":7,\"orig_ip_bytes\":666,\"resp_ip_bytes\":499,\"community_id\":\"1:abc123\",\"tunnel_parents\":[\"test\",\"test2\"]}"
+  sample: "<134>May 11 18:47:07 test-system {\"_path\":\"conn\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T18:47:07.850764Z\",\"ts\":\"2026-05-11T18:47:02.848960Z\",\"uid\":\"12345678901234567890\",\"id.orig_h\":\"10.10.50.1\",\"id.orig_p\":60704,\"id.resp_h\":\"10.10.60.6\",\"id.resp_p\":88,\"proto\":\"tcp\",\"service\":\"krb_tcp\",\"orig_bytes\":227,\"resp_bytes\":195,\"conn_state\":\"RSTR\",\"local_orig\":true,\"local_resp\":true,\"missed_bytes\":0,\"history\":\"ShADTdFar\",\"orig_pkts\":5,\"resp_pkts\":7,\"orig_ip_bytes\":666,\"resp_ip_bytes\":499,\"community_id\":\"1:abc123\",\"tunnel_parents\":[\"test\",\"test2\"],\"orig_l2_addr\":\"00:50:56:a1:b2:c3\",\"resp_l2_addr\":\"00:50:56:d4:e5:f6\"}"
   service: "corelight"
   result:
     custom:
-      resp_pkts: 7
-      resp_ip_bytes: 499
-      local_orig: true
-      _write_ts: '2026-05-11T18:47:07.850764Z'
-      orig_ip_bytes: 666
-      zeek:
-        proto: tcp
-        missed_bytes: 0
-      orig_pkts: 5
-      _path: conn
-      history: ShADTdFar
-      tunnel_parents:
-        - test
-        - test2
-      connection_state: Responder sent a RST
-      network:
-        bytes_written: 195
-        destination:
-          port: 88
-          ip: 10.10.60.6
-        client:
-          port: 60704
-          ip: 10.10.50.1
-        bytes_read: 227
-      local_resp: true
-      uid: '12345678901234567890'
-      community_id: 1:abc123
-      ocsf:
-        severity: Informational
-        activity_name: Close
-        metadata:
-          uid: '12345678901234567890'
-          product:
-            name: Zeek
-            vendor_name: Corelight
-          version: 1.5.0
-        category_uid: 4
-        category_name: Network Activity
-        src_endpoint:
-          port: 60704
-          ip: 10.10.50.1
-        status_detail: RSTR
-        status_id: 2
-        connection_info:
-          boundary: Localhost
-          boundary_id: 1
-          uid: '12345678901234567890'
-          direction_id: 3
-          community_uid: 1:abc123
-          flag_history: ShADTdFar
-          protocol_name: tcp
-          direction: Lateral
-        class_uid: 4001
-        activity_id: 2
-        time: 1778525222848
-        dst_endpoint:
-          port: 88
-          ip: 10.10.60.6
-        severity_id: 1
-        class_name: Network Activity
-        traffic:
-          bytes_out: 227
-          bytes_in: 195
-          packets_out: 5
-          bytes: 422
-          packets_in: 7
-          packets: 12
-          bytes_missed: 0
-        status: Failure
-      _system_name: test-system
-      service: krb_tcp
-      conn_state: RSTR
-      ts: '2026-05-11T18:47:02.848960Z'
+      _path: "conn"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T18:47:07.850764Z"
+      community_id: "1:abc123"
+      conn_state: "RSTR"
+      connection_state: "Responder sent a RST"
+      history: "ShADTdFar"
       id:
+        orig_h: "10.10.50.1"
         orig_p: 60704
-        resp_h: 10.10.60.6
-        orig_h: 10.10.50.1
+        resp_h: "10.10.60.6"
         resp_p: 88
-      orig_bytes: 227
+      local_orig: true
+      local_resp: true
       missed_bytes: 0
+      network:
+        bytes_read: 227
+        bytes_written: 195
+        client:
+          ip: "10.10.50.1"
+          port: 60704
+        destination:
+          ip: "10.10.60.6"
+          port: 88
+      ocsf:
+        activity_id: 2
+        activity_name: "Close"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          boundary: "Localhost"
+          boundary_id: 1
+          community_uid: "1:abc123"
+          direction: "Lateral"
+          direction_id: 3
+          flag_history: "ShADTdFar"
+          protocol_name: "tcp"
+          uid: "12345678901234567890"
+        dst_endpoint:
+          ip: "10.10.60.6"
+          mac: "00:50:56:d4:e5:f6"
+          port: 88
+        metadata:
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "12345678901234567890"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.50.1"
+          mac: "00:50:56:a1:b2:c3"
+          port: 60704
+        status: "Failure"
+        status_detail: "RSTR"
+        status_id: 2
+        time: 1778525222848
+        traffic:
+          bytes: 422
+          bytes_in: 195
+          bytes_missed: 0
+          bytes_out: 227
+          packets: 12
+          packets_in: 7
+          packets_out: 5
+      orig_bytes: 227
+      orig_ip_bytes: 666
+      orig_l2_addr: "00:50:56:a1:b2:c3"
+      orig_pkts: 5
+      proto: "tcp"
       resp_bytes: 195
-      proto: tcp
-    service: conn
-    message: <134>May 11 18:47:07 test-system {"_path":"conn","_system_name":"test-system","_write_ts":"2026-05-11T18:47:07.850764Z","ts":"2026-05-11T18:47:02.848960Z","uid":"12345678901234567890","id.orig_h":"10.10.50.1","id.orig_p":60704,"id.resp_h":"10.10.60.6","id.resp_p":88,"proto":"tcp","service":"krb_tcp","orig_bytes":227,"resp_bytes":195,"conn_state":"RSTR","local_orig":true,"local_resp":true,"missed_bytes":0,"history":"ShADTdFar","orig_pkts":5,"resp_pkts":7,"orig_ip_bytes":666,"resp_ip_bytes":499,"community_id":"1:abc123","tunnel_parents":["test","test2"]}
+      resp_ip_bytes: 499
+      resp_l2_addr: "00:50:56:d4:e5:f6"
+      resp_pkts: 7
+      service: "krb_tcp"
+      ts: "2026-05-11T18:47:02.848960Z"
+      tunnel_parents:
+       - "test"
+       - "test2"
+      uid: "12345678901234567890"
+      zeek:
+        missed_bytes: 0
+        proto: "tcp"
+    message: '<134>May 11 18:47:07 test-system {"_path":"conn","_system_name":"test-system","_write_ts":"2026-05-11T18:47:07.850764Z","ts":"2026-05-11T18:47:02.848960Z","uid":"12345678901234567890","id.orig_h":"10.10.50.1","id.orig_p":60704,"id.resp_h":"10.10.60.6","id.resp_p":88,"proto":"tcp","service":"krb_tcp","orig_bytes":227,"resp_bytes":195,"conn_state":"RSTR","local_orig":true,"local_resp":true,"missed_bytes":0,"history":"ShADTdFar","orig_pkts":5,"resp_pkts":7,"orig_ip_bytes":666,"resp_ip_bytes":499,"community_id":"1:abc123","tunnel_parents":["test","test2"],"orig_l2_addr":"00:50:56:a1:b2:c3","resp_l2_addr":"00:50:56:d4:e5:f6"}'
+    service: "conn"
     tags:
-      - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1778525222848
  -
   sample: "<134>May 11 18:46:03 ndr-pvg3-1 {\"_path\":\"conn_long\",\"_system_name\":\"ndr-pvg3-1\",\"_write_ts\":\"2026-05-11T18:46:03.887017Z\",\"ts\":\"2026-05-11T18:36:03.886935Z\",\"uid\":\"12345678901234568\",\"id.orig_h\":\"10.250.5.75\",\"id.orig_p\":63231,\"id.resp_h\":\"172.64.5.1\",\"id.resp_p\":443,\"id.vlan\":1000,\"proto\":\"tcp\",\"service\":\"ssl\",\"duration\":600.0000820159912,\"orig_bytes\":7071,\"resp_bytes\":18980,\"conn_state\":\"S1\",\"local_orig\":true,\"local_resp\":false,\"missed_bytes\":0,\"history\":\"ShADadtT\",\"orig_pkts\":32,\"resp_pkts\":37,\"orig_ip_bytes\":8380,\"resp_ip_bytes\":20532,\"community_id\":\"1:def456\",\"corelight_shunted\":false}"
@@ -1217,252 +1221,278 @@ tests:
       - source:LOGS_SOURCE
     timestamp: 1778515913944
  -
-  sample: "<134>May 11 19:11:03 test-system {\"_path\":\"notice\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T19:11:03.521194Z\",\"ts\":\"2026-05-11T19:11:03.521194Z\",\"note\":\"ATTACK::Discovery\",\"msg\":\"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins\",\"id.orig_h\":\"10.10.10.15\",\"id.orig_p\":54321,\"id.resp_h\":\"192.168.1.1\",\"id.resp_p\":80,\"peer_descr\":\"manager\",\"actions\":[\"Notice::ACTION_LOG\"],\"suppress_for\":3600, \"uid\":\"12345678901234567890\", \"severity\":{\"name\":\"High\",\"id\":4}}"
+  sample: "<134>May 11 19:11:03 test-system {\"_path\":\"notice\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T19:11:03.521194Z\",\"ts\":\"2026-05-11T19:11:03.521194Z\",\"note\":\"ATTACK::Discovery\",\"msg\":\"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins\",\"id.orig_h\":\"10.10.10.15\",\"id.orig_p\":54321,\"id.resp_h\":\"192.168.1.1\",\"id.resp_p\":80,\"proto\":\"tcp\",\"peer_descr\":\"manager\",\"actions\":[\"Notice::ACTION_LOG\"],\"suppress_for\":3600, \"uid\":\"12345678901234567890\", \"severity\":{\"name\":\"error\",\"level\":3}}"
   service: "corelight"
   result:
     custom:
-      msg: Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins
-      suppress_for: 3600
-      _write_ts: '2026-05-11T19:11:03.521194Z'
+      _path: "notice"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T19:11:03.521194Z"
+      actions:
+        - "Notice::ACTION_LOG"
+      id:
+        orig_h: "10.10.10.15"
+        orig_p: 54321
+        resp_h: "192.168.1.1"
+        resp_p: 80
+      msg: "Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins"
       network:
         client:
-          ip: 10.10.10.15
+          ip: "10.10.10.15"
           port: 54321
         destination:
-          ip: 192.168.1.1
+          ip: "192.168.1.1"
           port: 80
-      zeek:
-        note: ATTACK::Discovery
-      _path: notice
-      peer_descr: manager
+      note: "ATTACK::Discovery"
       ocsf:
-        activity_name: Create
-        metadata:
-          product:
-            name: Zeek
-            vendor_name: Corelight
-          version: 1.5.0
-          uid: '12345678901234567890'
-          event_code: ATTACK::Discovery
-        is_alert: true
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        evidences:
+          - connection_info:
+              direction_id: 0
+              protocol_name: "tcp"
+            dst_endpoint:
+              ip: "192.168.1.1"
+              port: 80
+            src_endpoint:
+              ip: "10.10.10.15"
+              port: 54321
         finding_info:
-          uid: '12345678901234567890'
-          title: ATTACK::Discovery
+          title: "ATTACK::Discovery"
+          uid: "12345678901234567890"
+        is_alert: true
+        metadata:
+          event_code: "ATTACK::Discovery"
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "12345678901234567890"
+          version: "1.5.0"
+        severity: "Medium"
+        severity_id: 3
+        status: "New"
         status_id: 1
         time: 1778526663521
-        status: New
-        severity: High
-        severity_id: 4
-        evidences:
-          - src_endpoint:
-              ip: 10.10.10.15
-              port: 54321
-            dst_endpoint:
-              ip: 192.168.1.1
-              port: 80
-        category_uid: 2
-        category_name: Findings
-        class_uid: 2004
-        activity_id: 1
-        class_name: Detection Finding
-      _system_name: test-system
-      actions:
-        - Notice::ACTION_LOG
-      ts: '2026-05-11T19:11:03.521194Z'
-      note: ATTACK::Discovery
-      uid: '12345678901234567890'
+      peer_descr: "manager"
+      proto: "tcp"
       severity:
-        name: High
-        id: 4
-      id:
-        orig_p: 54321
-        resp_h: 192.168.1.1
-        orig_h: 10.10.10.15
-        resp_p: 80
-    service: notice
-    message: <134>May 11 19:11:03 test-system {"_path":"notice","_system_name":"test-system","_write_ts":"2026-05-11T19:11:03.521194Z","ts":"2026-05-11T19:11:03.521194Z","note":"ATTACK::Discovery","msg":"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins","id.orig_h":"10.10.10.15","id.orig_p":54321,"id.resp_h":"192.168.1.1","id.resp_p":80,"peer_descr":"manager","actions":["Notice::ACTION_LOG"],"suppress_for":3600, "uid":"12345678901234567890", "severity":{"name":"High","id":4}}
+        level: 3
+        name: "error"
+      suppress_for: 3600
+      ts: "2026-05-11T19:11:03.521194Z"
+      uid: "12345678901234567890"
+      zeek:
+        note: "ATTACK::Discovery"
+        proto: "tcp"
+    message: '<134>May 11 19:11:03 test-system {"_path":"notice","_system_name":"test-system","_write_ts":"2026-05-11T19:11:03.521194Z","ts":"2026-05-11T19:11:03.521194Z","note":"ATTACK::Discovery","msg":"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins","id.orig_h":"10.10.10.15","id.orig_p":54321,"id.resp_h":"192.168.1.1","id.resp_p":80,"proto":"tcp","peer_descr":"manager","actions":["Notice::ACTION_LOG"],"suppress_for":3600, "uid":"12345678901234567890", "severity":{"name":"error","level":3}}'
+    service: "notice"
+    status: "info"
     tags:
-      - source:LOGS_SOURCE
+      - "source:LOGS_SOURCE"
     timestamp: 1778526663521
-    status: info
  -
-  sample: "<134>May 11 17:59:59 test-system {\"_path\":\"suricata_corelight\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T17:59:59.359532Z\",\"ts\":\"2026-05-11T17:59:59.358114Z\",\"uid\":\"CN4bklsrGiWMsQhg3\",\"id.orig_h\":\"10.215.3.8\",\"id.orig_p\":65196,\"id.resp_h\":\"10.69.5.8\",\"id.resp_p\":80,\"id.vlan\":1123,\"proto\":\"tcp\",\"service\":\"http\",\"suri_id\":\"SOHaIDWJ5dBe\",\"flow_id\":2093130069465879,\"tx_id\":0,\"community_id\":\"1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=\",\"severity\":1,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2006380,\"rev\":17,\"signature\":\"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":1,\"metadata\":[\"confidence:Medium\",\"created_at:2010_07_30\",\"performance_impact:Significant\",\"signature_severity:Informational\",\"updated_at:2024_08_07\"]}}"
+  sample: "<134>May 11 17:59:59 test-system {\"_path\":\"suricata_corelight\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T17:59:59.359532Z\",\"ts\":\"2026-05-11T17:59:59.358114Z\",\"uid\":\"CN4bklsrGiWMsQhg3\",\"id.orig_h\":\"10.215.3.8\",\"id.orig_p\":65196,\"id.resp_h\":\"10.69.5.8\",\"id.resp_p\":80,\"id.vlan\":1123,\"proto\":\"tcp\",\"service\":\"http\",\"suri_id\":\"SOHaIDWJ5dBe\",\"flow_id\":2093130069465879,\"tx_id\":0,\"community_id\":\"1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=\",\"severity\":1,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2006380,\"rev\":17,\"signature\":\"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":1,\"metadata\":[\"attack_target:Client_Endpoint\",\"confidence:High\",\"created_at:2026_04_01\",\"deployment:Internal\",\"deployment:Perimeter\",\"mitre_tactic_id:TA0011\",\"mitre_tactic_name:Command_And_Control\",\"mitre_technique_id:T1071\",\"mitre_technique_name:Application_Layer_Protocol\",\"performance_impact:Low\",\"signature_severity:Major\",\"updated_at:2026_04_09\"]}}"
   service: "corelight"
   result:
     custom:
-      alert_severity: High
-      _write_ts: '2026-05-11T17:59:59.359532Z'
-      suri_id: SOHaIDWJ5dBe
-      _path: suricata_corelight
-      tx_id: 0
-      network:
-        destination:
-          port: 80
-          ip: 10.69.5.8
-        client:
-          port: 65196
-          ip: 10.215.3.8
-      uid: CN4bklsrGiWMsQhg3
-      community_id: 1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=
-      ocsf:
-        severity: High
-        activity_name: Create
-        metadata:
-          uid: CN4bklsrGiWMsQhg3
-          product:
-            name: Suricata
-            vendor_name: Corelight
-          event_code: '2006380'
-          log_provider: Corelight
-          version: 1.5.0
-        category_uid: 2
-        category_name: Findings
-        confidence: Medium
-        is_alert: true
-        status_detail: allowed
-        finding_info:
-          uid_alt: SOHaIDWJ5dBe
-          title: ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted
-          analytic:
-            uid: '2006380'
-            type_id: 1
-            name: ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted
-            type: Rule
-          uid: CN4bklsrGiWMsQhg3
-        class_uid: 2004
-        activity_id: 1
-        time: 1778522399358
-        severity_id: 4
-        evidences:
-          - src_endpoint:
-              port: 65196
-              ip: 10.215.3.8
-            dst_endpoint:
-              port: 80
-              ip: 10.69.5.8
-        class_name: Detection Finding
-        confidence_id: 2
-      _system_name: test-system
+      _path: "suricata_corelight"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T17:59:59.359532Z"
       alert:
-        severity: 1
-        signature_id: 2006380
-        rev: 17
-        metadata:
-          - confidence:Medium
-          - created_at:2010_07_30
-          - performance_impact:Significant
-          - signature_severity:Informational
-          - updated_at:2024_08_07
+        action: "allowed"
+        category: "Potential Corporate Privacy Violation"
         gid: 1
-        signature: ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted
-        action: allowed
-        category: Potential Corporate Privacy Violation
-      service: http
+        metadata:
+         - "attack_target:Client_Endpoint"
+         - "confidence:High"
+         - "created_at:2026_04_01"
+         - "deployment:Internal"
+         - "deployment:Perimeter"
+         - "mitre_tactic_id:TA0011"
+         - "mitre_tactic_name:Command_And_Control"
+         - "mitre_technique_id:T1071"
+         - "mitre_technique_name:Application_Layer_Protocol"
+         - "performance_impact:Low"
+         - "signature_severity:Major"
+         - "updated_at:2026_04_09"
+        rev: 17
+        severity: 1
+        signature: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
+        signature_id: 2006380
+      alert_severity: "High"
+      community_id: "1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY="
       flow_id: 2093130069465879
-      proto: tcp
       id:
-        vlan: 1123
+        orig_h: "10.215.3.8"
         orig_p: 65196
-        resp_h: 10.69.5.8
-        orig_h: 10.215.3.8
+        resp_h: "10.69.5.8"
         resp_p: 80
-      ts: '2026-05-11T17:59:59.358114Z'
+        vlan: 1123
+      network:
+        client:
+          ip: "10.215.3.8"
+          port: 65196
+        destination:
+          ip: "10.69.5.8"
+          port: 80
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "High"
+        confidence_id: 3
+        evidences:
+          - connection_info:
+              direction_id: 0
+              protocol_name: "http"
+            dst_endpoint:
+              ip: "10.69.5.8"
+              port: 80
+            src_endpoint:
+              ip: "10.215.3.8"
+              port: 65196
+        finding_info:
+          analytic:
+            name: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
+            type: "Rule"
+            type_id: 1
+            uid: "2006380"
+          attacks:
+            - tactic:
+                name: "Command_And_Control"
+                uid: "TA0011"
+              technique:
+                name: "Application_Layer_Protocol"
+                uid: "T1071"
+          title: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
+          types:
+           - "Potential Corporate Privacy Violation"
+          uid: "CN4bklsrGiWMsQhg3"
+          uid_alt: "SOHaIDWJ5dBe"
+        is_alert: true
+        metadata:
+          event_code: "2006380"
+          log_provider: "Corelight"
+          product:
+            name: "Suricata"
+            vendor_name: "Corelight"
+          uid: "CN4bklsrGiWMsQhg3"
+          version: "1.5.0"
+        risk_level: "High"
+        risk_level_id: 3
+        severity: "High"
+        severity_id: 4
+        status_detail: "allowed"
+        time: 1778522399358
+      proto: "tcp"
+      service: "http"
       severity: 1
-    service: suricata_corelight
-    message: <134>May 11 17:59:59 test-system {"_path":"suricata_corelight","_system_name":"test-system","_write_ts":"2026-05-11T17:59:59.359532Z","ts":"2026-05-11T17:59:59.358114Z","uid":"CN4bklsrGiWMsQhg3","id.orig_h":"10.215.3.8","id.orig_p":65196,"id.resp_h":"10.69.5.8","id.resp_p":80,"id.vlan":1123,"proto":"tcp","service":"http","suri_id":"SOHaIDWJ5dBe","flow_id":2093130069465879,"tx_id":0,"community_id":"1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=","severity":1,"alert":{"action":"allowed","gid":1,"signature_id":2006380,"rev":17,"signature":"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted","category":"Potential Corporate Privacy Violation","severity":1,"metadata":["confidence:Medium","created_at:2010_07_30","performance_impact:Significant","signature_severity:Informational","updated_at:2024_08_07"]}}
+      suri_id: "SOHaIDWJ5dBe"
+      ts: "2026-05-11T17:59:59.358114Z"
+      tx_id: 0
+      uid: "CN4bklsrGiWMsQhg3"
+    message: '<134>May 11 17:59:59 test-system {"_path":"suricata_corelight","_system_name":"test-system","_write_ts":"2026-05-11T17:59:59.359532Z","ts":"2026-05-11T17:59:59.358114Z","uid":"CN4bklsrGiWMsQhg3","id.orig_h":"10.215.3.8","id.orig_p":65196,"id.resp_h":"10.69.5.8","id.resp_p":80,"id.vlan":1123,"proto":"tcp","service":"http","suri_id":"SOHaIDWJ5dBe","flow_id":2093130069465879,"tx_id":0,"community_id":"1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=","severity":1,"alert":{"action":"allowed","gid":1,"signature_id":2006380,"rev":17,"signature":"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted","category":"Potential Corporate Privacy Violation","severity":1,"metadata":["attack_target:Client_Endpoint","confidence:High","created_at:2026_04_01","deployment:Internal","deployment:Perimeter","mitre_tactic_id:TA0011","mitre_tactic_name:Command_And_Control","mitre_technique_id:T1071","mitre_technique_name:Application_Layer_Protocol","performance_impact:Low","signature_severity:Major","updated_at:2026_04_09"]}}'
+    service: "suricata_corelight"
+    status: "alert"
     tags:
-      - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1778522399358
-    status: alert
  -
   sample: "<134>May 11 19:26:26 ndr-dub-stryker-DC-1 {\"_path\":\"files\",\"_system_name\":\"ndr-dub-stryker-DC-1\",\"_write_ts\":\"2026-05-11T19:26:26.082433Z\",\"ts\":\"2026-05-11T19:26:25.875206Z\",\"uid\":\"CjTuQU17IDvaVa8Nq2\",\"fuid\":\"FOPDsn3PdkiZsljcj2\",\"tx_hosts\":[\"10.104.10.60\"],\"rx_hosts\":[\"10.104.10.65\"],\"conn_uids\":[\"CjTuQU17IDvaGb8Nq2\"],\"source\":\"HTTP\",\"depth\":0,\"analyzers\":[\"SHA1\",\"MD5\",\"SHA256\",\"DATA_EVENT\"],\"local_orig\":true,\"is_orig\":false,\"seen_bytes\":253109,\"total_bytes\":253109,\"missing_bytes\":0,\"overflow_bytes\":0,\"timedout\":false,\"duration\":0.2072269916534424,\"mime_type\":\"text/json\",\"md5\":\"6e6ae0ed19f595687684faafae5499e13\",\"sha1\":\"f6578daa6d398c91398888b91a96d4c0e099c79c\",\"sha256\":\"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f\",\"id.vlan\":1010}"
   service: "corelight"
   result:
     custom:
-      timedout: false
-      sha256: a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f
-      source: HTTP
-      duration: 0.2072269916534424
-      uid: CjTuQU17IDvaVa8Nq2
+      _path: "files"
+      _system_name: "ndr-dub-stryker-DC-1"
+      _write_ts: "2026-05-11T19:26:26.082433Z"
       analyzers:
-        - SHA1
-        - MD5
-        - SHA256
-        - DATA_EVENT
-      ocsf:
-        severity: Informational
-        activity_name: Download
-        metadata:
-          uid: CjTuQU17IDvaVa8Nq2
-          product:
-            name: Zeek
-            vendor_name: Corelight
-          version: 1.5.0
-        category_uid: 6
-        category_name: Application Activity
-        actor:
-          session:
-            uid: CjTuQU17IDvaVa8Nq2
-        file:
-          uid: FOPDsn3PdkiZsljcj2
-          size: 253109
-          mime_type: text/json
-          type_id: 1
-          name: FOPDsn3PdkiZsljcj2
-          hashes:
-            - algorithm_id: 1
-              value: 6e6ae0ed19f595687684faafae5499e13
-              algorithm: MD5
-            - algorithm_id: 2
-              value: f6578daa6d398c91398888b91a96d4c0e099c79c
-              algorithm: SHA-1
-            - algorithm_id: 3
-              value: a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f
-              algorithm: SHA-256
-        status_id: 1
-        class_uid: 6006
-        activity_id: 2
-        time: 1778527585875
-        severity_id: 1
-        class_name: File Hosting Activity
-        status: Success
-        src_endpoint:
-          ip: 10.104.10.60
-        dst_endpoint:
-          ip: 10.104.10.65
-      fuid: FOPDsn3PdkiZsljcj2
+       - "SHA1"
+       - "MD5"
+       - "SHA256"
+       - "DATA_EVENT"
+      conn_uids:
+       - "CjTuQU17IDvaGb8Nq2"
+      depth: 0
+      dest_host:
+       - "10.104.10.60"
+      duration: 0.2072269916534424
+      fuid: "FOPDsn3PdkiZsljcj2"
       id:
         vlan: 1010
+      is_orig: false
       local_orig: true
-      _write_ts: '2026-05-11T19:26:26.082433Z'
+      md5: "6e6ae0ed19f595687684faafae5499e13"
+      mime_type: "text/json"
+      missing_bytes: 0
+      ocsf:
+        activity_id: 2
+        activity_name: "Download"
+        actor:
+          session:
+            uid: "CjTuQU17IDvaVa8Nq2"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "File Hosting Activity"
+        class_uid: 6006
+        dst_endpoint:
+          ip: "10.104.10.65"
+        file:
+          hashes:
+            - algorithm: "MD5"
+              algorithm_id: 1
+              value: "6e6ae0ed19f595687684faafae5499e13"
+            - algorithm: "SHA-1"
+              algorithm_id: 2
+              value: "f6578daa6d398c91398888b91a96d4c0e099c79c"
+            - algorithm: "SHA-256"
+              algorithm_id: 3
+              value: "a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f"
+          mime_type: "text/json"
+          name: "FOPDsn3PdkiZsljcj2"
+          size: 253109
+          type_id: 1
+          uid: "FOPDsn3PdkiZsljcj2"
+        metadata:
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "CjTuQU17IDvaVa8Nq2"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.104.10.60"
+        status: "Success"
+        status_id: 1
+        time: 1778527585875
+      orig_host:
+       - "10.104.10.65"
       rx_hosts:
-        - 10.104.10.65
+       - "10.104.10.65"
+      seen_bytes: 253109
+      sha1: "f6578daa6d398c91398888b91a96d4c0e099c79c"
+      sha256: "a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f"
+      source: "HTTP"
+      timedout: false
+      total_bytes: 253109
+      ts: "2026-05-11T19:26:25.875206Z"
+      tx_hosts:
+       - "10.104.10.60"
+      uid: "CjTuQU17IDvaVa8Nq2"
       zeek:
-        total_bytes: 253109
-        seen_bytes: 253109
         missing_bytes: 0
         overflow_bytes: 0
-      orig_host:
-        - 10.104.10.65
-      _path: files
-      is_orig: false
-      tx_hosts:
-        - 10.104.10.60
-      sha1: f6578daa6d398c91398888b91a96d4c0e099c79c
-      depth: 0
-      _system_name: ndr-dub-stryker-DC-1
-      mime_type: text/json
-      dest_host:
-        - 10.104.10.60
-      conn_uids:
-        - CjTuQU17IDvaGb8Nq2
-      ts: '2026-05-11T19:26:25.875206Z'
-      md5: 6e6ae0ed19f595687684faafae5499e13
-      total_bytes: 253109
-      seen_bytes: 253109
-      missing_bytes: 0
-    service: files
-    message: <134>May 11 19:26:26 ndr-dub-stryker-DC-1 {"_path":"files","_system_name":"ndr-dub-stryker-DC-1","_write_ts":"2026-05-11T19:26:26.082433Z","ts":"2026-05-11T19:26:25.875206Z","uid":"CjTuQU17IDvaVa8Nq2","fuid":"FOPDsn3PdkiZsljcj2","tx_hosts":["10.104.10.60"],"rx_hosts":["10.104.10.65"],"conn_uids":["CjTuQU17IDvaGb8Nq2"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","SHA256","DATA_EVENT"],"local_orig":true,"is_orig":false,"seen_bytes":253109,"total_bytes":253109,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"duration":0.2072269916534424,"mime_type":"text/json","md5":"6e6ae0ed19f595687684faafae5499e13","sha1":"f6578daa6d398c91398888b91a96d4c0e099c79c","sha256":"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f","id.vlan":1010}
+        seen_bytes: 253109
+        total_bytes: 253109
+    message: '<134>May 11 19:26:26 ndr-dub-stryker-DC-1 {"_path":"files","_system_name":"ndr-dub-stryker-DC-1","_write_ts":"2026-05-11T19:26:26.082433Z","ts":"2026-05-11T19:26:25.875206Z","uid":"CjTuQU17IDvaVa8Nq2","fuid":"FOPDsn3PdkiZsljcj2","tx_hosts":["10.104.10.60"],"rx_hosts":["10.104.10.65"],"conn_uids":["CjTuQU17IDvaGb8Nq2"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","SHA256","DATA_EVENT"],"local_orig":true,"is_orig":false,"seen_bytes":253109,"total_bytes":253109,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"duration":0.2072269916534424,"mime_type":"text/json","md5":"6e6ae0ed19f595687684faafae5499e13","sha1":"f6578daa6d398c91398888b91a96d4c0e099c79c","sha256":"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f","id.vlan":1010}'
+    service: "files"
     tags:
-      - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1778527585875
