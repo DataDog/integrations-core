@@ -59,11 +59,19 @@ class TaskConfig(BaseModel):
     goal: str | None = None
     goal_path: Path | None = None
     max_goal_attempts: int = 5
+    clear_context_before: bool = False
+    compact_context_before: bool = False
 
     @model_validator(mode="after")
     def exactly_one_prompt_source(self) -> TaskConfig:
         if (self.prompt_path is None) == (self.prompt is None):
             raise ValueError("Exactly one of 'prompt_path' or 'prompt' must be set")
+        return self
+
+    @model_validator(mode="after")
+    def context_flags_mutually_exclusive(self) -> TaskConfig:
+        if self.clear_context_before and self.compact_context_before:
+            raise ValueError("'clear_context_before' and 'compact_context_before' are mutually exclusive")
         return self
 
     @model_validator(mode="after")
