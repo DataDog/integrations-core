@@ -40,10 +40,13 @@ def test():
     assert not discovery_errors
     assert discovery_contents == normalize_yaml(
         """
-        from datadog_checks.base.utils.discovery import from_ports
+        from collections.abc import Iterator
+        from typing import Any
+
+        from datadog_checks.base.utils.discovery import Service, from_ports
 
 
-        def candidates(service):
+        def candidates(service: Service) -> Iterator[dict[str, Any]]:
             # discovery[0]: from_ports
             for ctx in from_ports(service, port_hints=[9090]):
                 yield {

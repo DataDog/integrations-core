@@ -10,6 +10,7 @@ import logging
 import os
 import re
 from collections import deque
+from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from os.path import basename
 from pathlib import Path
@@ -70,6 +71,7 @@ if TYPE_CHECKING:
     import unicodedata as _module_unicodedata
 
     from datadog_checks.base.utils.diagnose import Diagnosis
+    from datadog_checks.base.utils.discovery import Service
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
 
@@ -185,7 +187,7 @@ class AgentCheck(object):
             return cls
 
     @classmethod
-    def generate_configs(cls, service):
+    def generate_configs(cls, service: Service) -> Iterable[dict[str, Any]]:
         """
         Yield candidate full configurations for service discovery.
 
@@ -198,7 +200,7 @@ class AgentCheck(object):
         return candidates
 
     @classmethod
-    def discover_config(cls, service_json):
+    def discover_config(cls, service_json: str) -> str:
         """
         Return discovered configurations for an AD service payload.
 
@@ -1835,14 +1837,14 @@ class AgentCheck(object):
         return _parse_ast_config(stdout.strip().decode('utf-8'))
 
 
-def _discovery_check_name(cls):
+def _discovery_check_name(cls: type[AgentCheck]) -> str:
     module_parts = cls.__module__.split('.')
     if len(module_parts) >= 2 and module_parts[0] == 'datadog_checks':
         return module_parts[1]
     return cls.__name__
 
 
-def _generated_discovery_candidates(cls, service):
+def _generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> Iterable[dict[str, Any]] | None:
     module_parts = cls.__module__.split('.')
     if len(module_parts) < 2 or module_parts[0] != 'datadog_checks':
         return None
@@ -1861,7 +1863,7 @@ def _generated_discovery_candidates(cls, service):
     return discovery.candidates(service)
 
 
-def _discovery_service_from_json(service_json):
+def _discovery_service_from_json(service_json: str) -> Service:
     from datadog_checks.base.utils.discovery import Port, Service
 
     raw_service = json.decode(service_json)
@@ -1876,19 +1878,19 @@ def _discovery_service_from_json(service_json):
 
 
 class _DiscoveryErrorDowngrade(logging.Filter):
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         if record.levelno >= logging.ERROR:
             record.levelno = logging.DEBUG
             record.levelname = 'DEBUG'
         return True
 
 
-def _discovery_noop(*args, **kwargs):
+def _discovery_noop(*args: Any, **kwargs: Any) -> None:
     pass
 
 
 @contextmanager
-def _suppress_discovery_side_effects(check):
+def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[dict[str, int]]:
     noop_methods = (
         'event',
         'event_platform_event',
@@ -1899,10 +1901,10 @@ def _suppress_discovery_side_effects(check):
         'set_metadata',
         'write_persistent_cache',
     )
-    originals = {}
+    originals: dict[str, Any] = {}
     stats = {'metrics': 0}
 
-    def _count_metric(*args, **kwargs):
+    def _count_metric(*args: Any, **kwargs: Any) -> None:
         stats['metrics'] += 1
 
     if hasattr(check, '_submit_metric'):

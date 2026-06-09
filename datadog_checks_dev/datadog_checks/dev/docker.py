@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import os
 from contextlib import contextmanager
-from typing import Iterator  # noqa: F401
+from typing import Any, Iterator  # noqa: F401
 from urllib.parse import urlparse
 
 import yaml
@@ -63,8 +65,10 @@ def using_windows_containers():
 
 
 def get_e2e_discovery_config(
-    check_root=None, *, site_packages='/opt/datadog-agent/embedded/lib/python3.13/site-packages'
-):
+    check_root: str | os.PathLike[str] | None = None,
+    *,
+    site_packages: str = '/opt/datadog-agent/embedded/lib/python3.13/site-packages',
+) -> tuple[dict[str, Any], dict[str, list[str]]]:
     check_root = os.fspath(check_root or find_check_root(depth=1))
     check_name = os.path.basename(check_root)
     repo_root = os.path.dirname(check_root)

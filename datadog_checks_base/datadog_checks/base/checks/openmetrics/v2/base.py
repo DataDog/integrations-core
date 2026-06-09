@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections import ChainMap
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import yaml
 from requests.exceptions import RequestException
@@ -18,7 +18,9 @@ from datadog_checks.base.utils.tracing import traced_class
 from .scraper import OpenMetricsScraper
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Iterator, Mapping
+
+    from datadog_checks.base.utils.discovery import Service
 
     from .metrics_mapping import MetricsMapping, _RawMetricsConfig
 
@@ -119,7 +121,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         self.scrapers.update(scrapers)
 
     @classmethod
-    def generate_configs(cls, service):
+    def generate_configs(cls, service: Service) -> Iterator[dict[str, Any]]:
         from datadog_checks.base.utils.discovery import candidate_ports
 
         generated = super().generate_configs(service)

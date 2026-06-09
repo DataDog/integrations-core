@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 from io import StringIO
+from typing import Any
 
 import yaml
 
@@ -65,7 +68,7 @@ def construct_yaml(obj, **kwargs):
     return yaml.safe_dump(obj, sort_keys=False, **kwargs)
 
 
-def construct_discovery_auto_conf(discovery):
+def construct_discovery_auto_conf(discovery: dict[str, Any]) -> str:
     lines = ['ad_identifiers:']
     lines.extend(f'  - {identifier}' for identifier in discovery['ad_identifiers'])
     lines.extend(['discovery: {}', 'init_config:', 'instances: []'])

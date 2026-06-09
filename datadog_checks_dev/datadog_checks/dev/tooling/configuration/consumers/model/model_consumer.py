@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
 import warnings
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import yaml
 from datamodel_code_generator import DataModelType
@@ -260,12 +262,15 @@ class ModelConsumer:
             defaults_file_contents = self.code_formatter.apply_black(defaults_file_contents)
         return defaults_file_contents
 
-    def _build_discovery_file(self, discovery):
+    def _build_discovery_file(self, discovery: dict[str, Any]) -> str:
         lines = [
-            'from datadog_checks.base.utils.discovery import from_ports',
+            'from collections.abc import Iterator',
+            'from typing import Any',
+            '',
+            'from datadog_checks.base.utils.discovery import Service, from_ports',
             '',
             '',
-            'def candidates(service):',
+            'def candidates(service: Service) -> Iterator[dict[str, Any]]:',
         ]
 
         for strategy_index, strategy in enumerate(discovery['strategies']):

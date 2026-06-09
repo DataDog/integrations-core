@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 from string import Formatter
+from typing import Any
 
 from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
 
@@ -130,7 +132,7 @@ def files_validator(files, loader) -> None:
         options_validator(options, loader, file_name)
 
 
-def discovery_validator(discovery, loader, file_name):
+def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
     location = f'{loader.source}, {file_name}, discovery'
     if not isinstance(discovery, dict):
         loader.errors.append(f'{location}: Attribute `discovery` must be a mapping object')
@@ -195,7 +197,7 @@ def discovery_validator(discovery, loader, file_name):
                 _validate_discovery_template(template, loader, candidate_location, field_name)
 
 
-def _validate_discovery_template(template, loader, location, field_name):
+def _validate_discovery_template(template: str, loader: Any, location: str, field_name: str) -> None:
     try:
         parsed_template = Formatter().parse(template)
     except ValueError as e:
