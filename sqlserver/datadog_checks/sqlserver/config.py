@@ -120,8 +120,6 @@ class SQLServerConfig:
                 }
             )
         )
-        collect_execution_plans_config: dict = instance.get('collect_execution_plans', {}) or {}
-        self.collect_execution_plans: bool = is_affirmative(collect_execution_plans_config.get('enabled', True))
         collect_raw_query_statement_config: dict = instance.get('collect_raw_query_statement', {}) or {}
         self.collect_raw_query_statement = {
             "enabled": is_affirmative(collect_raw_query_statement_config.get('enabled', False)),

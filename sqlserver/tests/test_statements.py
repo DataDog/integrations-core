@@ -1300,23 +1300,25 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "collect_execution_plans_config,expect_plans",
+    "collect_plans_value,expect_plans",
     [
-        pytest.param({}, True, id="default_collects_plans"),
-        pytest.param({'collect_execution_plans': {'enabled': True}}, True, id="explicitly_enabled"),
-        pytest.param({'collect_execution_plans': {'enabled': False}}, False, id="disabled_skips_plans"),
+        pytest.param(None, True, id="default_collects_plans"),
+        pytest.param(True, True, id="explicitly_enabled"),
+        pytest.param(False, False, id="disabled_skips_plans"),
     ],
 )
-def test_collect_execution_plans_toggle(instance_docker, collect_execution_plans_config, expect_plans):
-    """collect_execution_plans.enabled=false skips plan loop while keeping metrics."""
+def test_collect_execution_plans_toggle(instance_docker, collect_plans_value, expect_plans):
+    """query_metrics.collect_plans=false skips plan loop while keeping metrics."""
     instance_docker['dbm'] = True
-    instance_docker['query_metrics'] = {
+    query_metrics = {
         'enabled': True,
         'run_sync': True,
         'collection_interval': 0.1,
         'enforce_collection_interval_deadline': False,
     }
-    instance_docker.update(collect_execution_plans_config)
+    if collect_plans_value is not None:
+        query_metrics['collect_plans'] = collect_plans_value
+    instance_docker['query_metrics'] = query_metrics
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
 

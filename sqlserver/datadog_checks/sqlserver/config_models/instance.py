@@ -58,14 +58,6 @@ class CollectDeadlocks(BaseModel):
     max_deadlocks: Optional[float] = None
 
 
-class CollectExecutionPlans(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        frozen=True,
-    )
-    enabled: Optional[bool] = None
-
-
 class CollectRawQueryStatement(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -397,6 +389,7 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_plans: Optional[bool] = None
     collection_interval: Optional[float] = None
     disable_secondary_tags: Optional[bool] = None
     dm_exec_query_stats_row_limit: Optional[int] = None
@@ -441,7 +434,6 @@ class InstanceConfig(BaseModel):
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     collect_deadlocks: Optional[CollectDeadlocks] = None
-    collect_execution_plans: Optional[CollectExecutionPlans] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None

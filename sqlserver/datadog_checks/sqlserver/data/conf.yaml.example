@@ -420,6 +420,13 @@ instances:
         #
         # lookback_window: 600
 
+        ## @param collect_plans - boolean - optional - default: true
+        ## Set to `false` to disable collection of query execution plans while keeping query
+        ## metrics collection running. Note that when `enabled` is set to `false`, plan
+        ## collection is also disabled regardless of this setting.
+        #
+        # collect_plans: true
+
     ## Configure collection of procedure metrics
     #
     # procedure_metrics:
@@ -661,18 +668,6 @@ instances:
         ## Set to `true` to keep identifier quotations (e.g. `"my_table"`) in your normalized SQL statements.
         #
         # keep_identifier_quotation: false
-
-    ## Configure the collection of query execution plans. Execution plans are collected as part of
-    ## the query metrics job and emitted as query samples. Disabling this keeps query metrics
-    ## collection running while skipping plan collection.
-    ## This option only applies when `dbm` is enabled.
-    #
-    # collect_execution_plans:
-
-        ## @param enabled - boolean - optional - default: true
-        ## Set to `false` to disable collection of query execution plans.
-        #
-        # enabled: true
 
     ## Configure the collection of raw query statements in query activity, and XE events.
     ## To collect raw query statements from XE events, set `collect_xe.query_completions.enabled` and
