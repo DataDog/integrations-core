@@ -425,13 +425,6 @@ pipeline:
               target: ocsf.metadata.product.vendor_name
               preserveSource: true
               overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.query.class` to `ocsf.query.class`
-              sources:
-                - ocsf.query.class
-              target: ocsf.query.class
-              preserveSource: true
-              overrideOnConflict: true
             - type: schema-category-mapper
               name: ocsf.activity_id
               categories:
