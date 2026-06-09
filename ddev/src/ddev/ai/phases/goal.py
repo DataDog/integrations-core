@@ -274,11 +274,14 @@ async def run_goal_loop(
         provider=parent_agent_config.provider,
         tools=filter_read_only(parent_agent_config.tools),
     )
-    reviewer_process = process_factory.create(
-        scope=reviewer_scope,
-        agent_config=reviewer_config,
-        system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
-    )
+    try:
+        reviewer_process = process_factory.create(
+            scope=reviewer_scope,
+            agent_config=reviewer_config,
+            system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
+        )
+    except Exception as e:
+        raise RuntimeError(f"Failed to create reviewer process for task {task.name}: {e}") from e
 
     return await _drive_goal_loop(
         task=task,
