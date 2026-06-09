@@ -35,6 +35,8 @@ SOURCE_ERRORS_COUNT = 7
 LEGACY_GAUGE_METRICS = [
     NAMESPACE + '.registry.endpoints.total',
     NAMESPACE + '.source.endpoints.total',
+    NAMESPACE + '.controller.consecutive.soft.errors',
+    NAMESPACE + '.controller.last_reconcile',
     NAMESPACE + '.controller.last_sync',
     NAMESPACE + '.controller.verified_a_records',
     NAMESPACE + '.controller.verified_aaaa_records',
@@ -70,6 +72,8 @@ LEGACY_METRICS_OMV2 = LEGACY_GAUGE_METRICS + COUNTER_METRICS_OMV2
 V120_GAUGE_METRICS = [
     NAMESPACE + '.registry.endpoints.total',
     NAMESPACE + '.source.endpoints.total',
+    NAMESPACE + '.controller.consecutive.soft.errors',
+    NAMESPACE + '.controller.last_reconcile',
     NAMESPACE + '.controller.last_sync',
     NAMESPACE + '.source.records',
     NAMESPACE + '.registry.records',
