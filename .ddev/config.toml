@@ -43,6 +43,7 @@ krakend = "KrakenD"
 lustre = "Lustre"
 prefect = "Prefect"
 n8n = "n8n"
+hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
@@ -55,6 +56,7 @@ n8n = "n8n."
 control_m = "control_m."
 nifi = "nifi."
 dell_powerflex = "dell_powerflex."
+hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -273,3 +275,5 @@ n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
 nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
+hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
+
