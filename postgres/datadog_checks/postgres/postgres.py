@@ -18,6 +18,7 @@ from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
+    TagManager,
     default_json_event_encoding,
     tracked_query,
 )
@@ -142,7 +143,8 @@ class PostgreSql(DatabaseCheck):
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self._tags = list(self._config.tags)
+        self.tag_manager = TagManager()
+        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self.add_core_tags()
 
         # Submit the initialization health event in case the `check` method is never called
@@ -153,9 +155,6 @@ class PostgreSql(DatabaseCheck):
             self.log.error("Configuration validation failed: %s", validation_result.errors)
             raise validation_result.errors[0]
 
-        # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
-        # go through the agent internal metrics submission processing those tags
-        self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
@@ -186,7 +185,6 @@ class PostgreSql(DatabaseCheck):
         self.check_initializations.append(self.load_system_identifier)
         self.check_initializations.append(self.initialize_is_aurora)
         self.check_initializations.append(self._query_manager.compile_queries)
-        self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
         self._dynamic_queries = []
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -248,7 +246,11 @@ class PostgreSql(DatabaseCheck):
 
     @property
     def tags(self):
-        return self._tags
+        return self.tag_manager.get_tags()
+
+    @property
+    def tags_without_db(self):
+        return self.tag_manager.get_tags(include_db=False)
 
     @property
     def dbms(self):
@@ -259,40 +261,41 @@ class PostgreSql(DatabaseCheck):
         """
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
         """
-        self.tags.append("database_hostname:{}".format(self.database_hostname))
-        self.tags.append("database_instance:{}".format(self.database_identifier))
+        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
+        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def set_resource_tags(self):
         if self._config.gcp.project_id and self._config.gcp.instance_id:
-            self.tags.append(
-                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self._config.gcp.project_id, self._config.gcp.instance_id
-                )
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "gcp_sql_database_instance:{}:{}".format(self._config.gcp.project_id, self._config.gcp.instance_id),
             )
         if self._config.aws.instance_endpoint:
-            self.tags.append(
-                "dd.internal.resource:aws_rds_instance:{}".format(
-                    self._config.aws.instance_endpoint,
-                )
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "aws_rds_instance:{}".format(self._config.aws.instance_endpoint),
             )
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "aws_rds_instance:{}".format(self.resolved_hostname),
+            )
         if self._config.azure.deployment_type and self._config.azure.fully_qualified_domain_name:
             deployment_type = self._config.azure.deployment_type
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
-                self.tags.append(
-                    "dd.internal.resource:{}:{}".format(resource_type, self._config.azure.fully_qualified_domain_name)
+                self.tag_manager.set_tag(
+                    "dd.internal.resource",
+                    "{}:{}".format(resource_type, self._config.azure.fully_qualified_domain_name),
                 )
         # finally, tag the `database_instance` resource for this instance
         # metrics intake will use this tag to add all the tags for the instance
-        self.tags.append(
-            "dd.internal.resource:database_instance:{}".format(
-                self.database_identifier,
-            )
+        self.tag_manager.set_tag(
+            "dd.internal.resource",
+            "database_instance:{}".format(self.database_identifier),
         )
 
     def _new_query_executor(self, queries, db):
@@ -1209,7 +1212,7 @@ class PostgreSql(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.dbms_version,
                 'integration_version': __version__,
-                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
+                "tags": self.tag_manager.get_tags(include_internal=False, include_db=False),
                 "timestamp": time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {
@@ -1231,11 +1234,9 @@ class PostgreSql(DatabaseCheck):
         # Resend the initialization event. The submitter will debounce it
         self._submit_initialization_health_event()
 
-        tags = copy.copy(self.tags)
-        self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
-        # Reset _non_internal_tags to prevent stale dynamic tags (e.g., replication_role) from accumulating
-        self._non_internal_tags = [t for t in copy.copy(self.tags) if not t.startswith("dd.internal")]
-        tags_to_add = []
+        # Tags computed before connecting, used for the service check if an early failure occurs.
+        # Recomputed below once the dynamic tags (version, cluster name, etc.) have been set.
+        tags = self.tag_manager.get_tags()
         try:
             # Check version
             self._connect()
@@ -1246,24 +1247,20 @@ class PostgreSql(DatabaseCheck):
             self.wal_level = self._get_wal_level()
 
             # Add raw version as a tag
-            tags.append(f'postgresql_version:{self.raw_version}')
-            tags_to_add.append(f'postgresql_version:{self.raw_version}')
+            self.tag_manager.set_tag('postgresql_version', self.raw_version, replace=True)
 
             # Add system identifier as a tag
             if self.system_identifier:
-                tags.append(f'system_identifier:{self.system_identifier}')
-                tags_to_add.append(f'system_identifier:{self.system_identifier}')
+                self.tag_manager.set_tag('system_identifier', str(self.system_identifier), replace=True)
 
             # Add cluster name if it was set
             if self.cluster_name:
-                tags.append(f'postgresql_cluster_name:{self.cluster_name}')
-                tags_to_add.append(f'postgresql_cluster_name:{self.cluster_name}')
+                self.tag_manager.set_tag('postgresql_cluster_name', self.cluster_name, replace=True)
 
             if self._config.tag_replication_role:
-                replication_role_tag = "replication_role:{}".format(self._get_replication_role())
-                tags.append(replication_role_tag)
-                tags_to_add.append(replication_role_tag)
-            self._update_tag_sets(tags_to_add)
+                self.tag_manager.set_tag('replication_role', self._get_replication_role(), replace=True)
+
+            tags = self.tag_manager.get_tags()
             self._send_database_instance_metadata()
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
@@ -1315,7 +1312,3 @@ class PostgreSql(DatabaseCheck):
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
-
-    def _update_tag_sets(self, tags):
-        self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
-        self.tags_without_db = list(set(self.tags_without_db) | set(tags))

@@ -1120,12 +1120,13 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     check.run()
 
     # Verify the role tag reflects master
-    replication_tags = [t for t in check._non_internal_tags if t.startswith('replication_role:')]
+    non_internal_tags = check.tag_manager.get_tags(include_internal=False)
+    replication_tags = [t for t in non_internal_tags if t.startswith('replication_role:')]
     assert replication_tags == ['replication_role:master'], f"Expected master role tag, got: {replication_tags}"
 
-    # Verify dd.internal tags are not in _non_internal_tags
-    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
-    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
+    # Verify dd.internal tags are not in the non-internal tags
+    internal_tags = [t for t in non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in non-internal tags: {internal_tags}"
 
     # Verify the metadata event has the correct role
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
@@ -1146,7 +1147,8 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     check.run()
 
     # After role change, only the current role should be present
-    replication_tags = [t for t in check._non_internal_tags if t.startswith('replication_role:')]
+    non_internal_tags = check.tag_manager.get_tags(include_internal=False)
+    replication_tags = [t for t in non_internal_tags if t.startswith('replication_role:')]
     assert len(replication_tags) == 1, (
         f"Expected exactly 1 replication_role tag, got {len(replication_tags)}: {replication_tags}"
     )
@@ -1155,8 +1157,8 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     )
 
     # Verify dd.internal tags are still excluded after role change
-    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
-    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
+    internal_tags = [t for t in non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in non-internal tags: {internal_tags}"
 
     # Verify the metadata event reflects the new role only
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
