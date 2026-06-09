@@ -121,6 +121,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: blacklist_conntrack_metrics
             description: |
               Linux only.
@@ -137,6 +138,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: collect_aws_ena_metrics
             description: |
               Turn on collection of the AWS Elastic Network Adapter (ENA) statistics for network interfaces.

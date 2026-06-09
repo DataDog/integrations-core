@@ -63,6 +63,7 @@ files:
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - name: use_ssl
       description: |
         Set to `true` to connect to the Tibco EMS server using SSL (`ssl://host:port`).
@@ -71,4 +72,5 @@ files:
         type: boolean
         default: false
         example: true
+      fleet_configurable: false
     - template: instances/default
