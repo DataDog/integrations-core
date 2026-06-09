@@ -29,10 +29,6 @@ class RunResources:
         self._agents = agents
         self._callbacks = callbacks
 
-    def agent_clients(self) -> dict[str, Any]:
-        """Raw provider-name -> SDK client map."""
-        return dict(self._agent_clients)
-
     @cached_property
     def file_registry(self) -> FileRegistry:
         """Lazily-built, run-wide singleton FileRegistry."""
