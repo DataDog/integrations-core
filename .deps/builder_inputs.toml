@@ -1,16 +1,21 @@
-# Content hashes of the inputs that determine each builder image.
+# Content hashes of the inputs that determine the resolution pipeline and each
+# builder image.
 #
-# The `Resolve Dependencies and Build Wheels` workflow compares these
-# hashes against hashes computed from the working tree (via
-# .builders/inputs_hash.py) to decide whether to rebuild a builder image
-# from scratch or pull the existing one by digest from image_digests.json.
+# The `Resolve Dependencies and Build Wheels` workflow uses these hashes to
+# gate the full pipeline (resolution.hash) and to decide whether to rebuild a
+# builder image from scratch or pull the existing one by digest (images.*).
+# The `verify-deps-pin` workflow checks resolution.hash on merge-queue refs.
 #
-# This file is rewritten by .builders/upload.py whenever dependency
-# resolution publishes new artifacts and should not be edited by hand.
-# The set of files covered by each hash is defined by COMMON_INPUTS in
-# .builders/inputs_hash.py plus everything under .builders/images/<target>/.
+# This file is rewritten by .builders/upload.py whenever dependency resolution
+# publishes new artifacts and should not be edited by hand.
+# Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
+# RESOLUTION_INPUTS).
+[resolution]
+hash = "8c7602cb4a1ade5ad9eefb7f68259196cb602e88e38261963e834a8349582a7e"
 
-[inputs]
-linux-aarch64 = "e48bf769667a4f30addf317d2b889aea045e025b981276a5cbfdf5b53ae86ca8"
-linux-x86_64 = "5e769b5c5678a0c578bbaf2289a8359ade8f3420de2a7f7ed3c09217866014c7"
-windows-x86_64 = "beba3774e0929bc4f9377cabcde2f797a83309d88be329154b3e099961c95884"
+[images]
+linux-aarch64 = "9a455bfa1c898dae1a1aa826dbed31b20da25e226a7d66e18782cb5b4bfc6e43"
+linux-x86_64 = "0aad766c48c9fbc4efa30fbfe9c7791e41f5477f0fd9f236e4edb79e3bf74868"
+macos-aarch64 = "bd20131cfae81eed46998431117e50a724744679c959a6d9648ca63dd4d3bfdc"
+macos-x86_64 = "37e8f1ef74292fb9f2df305603aa991121d35162d47eba98fcbd46e458f7dc54"
+windows-x86_64 = "41c9c460a4c72a0e48d825f00cfd27f2d1e54598400eb5aa0918e7e8cf646a9c"

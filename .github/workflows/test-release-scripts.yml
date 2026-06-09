@@ -8,11 +8,13 @@ on:
       - ".github/workflows/scripts/**"
       - ".github/workflows/release-dispatch.yml"
       - ".github/workflows/release-trigger.yml"
+      - ".github/workflows/test-release-scripts.yml"
   pull_request:
     paths:
       - ".github/workflows/scripts/**"
       - ".github/workflows/release-dispatch.yml"
       - ".github/workflows/release-trigger.yml"
+      - ".github/workflows/test-release-scripts.yml"
 
 jobs:
   test:
@@ -27,7 +29,7 @@ jobs:
           python-version: "3.13"
 
       - name: Install pytest
-        run: pip install pytest==8.3.5
+        run: pip install pytest==9.0.3
 
       - name: Run tests
         working-directory: .github/workflows/scripts

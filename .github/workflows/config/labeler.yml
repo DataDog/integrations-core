@@ -3,9 +3,12 @@ base_package:
   - any-glob-to-any-file: datadog_checks_base/**/*
 changelog/no-changelog:
 - changed-files:
-  - any-glob-to-any-file:
+  - any-glob-to-all-files:
     - requirements-agent-release.txt
     - '**/__about__.py'
+    - '**/CHANGELOG.md'
+    - '**/changelog.d/*'
+    - .in-toto/**
 ddev:
 - changed-files:
   - any-glob-to-any-file: ddev/**/*
@@ -19,7 +22,7 @@ dev/testing:
 - changed-files:
   - any-glob-to-any-file:
     - .github/workflows/**
-    - .codecov.yml
+    - code-coverage.datadog.yml
 dev/tooling:
 - changed-files:
   - any-glob-to-any-file:
@@ -98,6 +101,10 @@ integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
     - anthropic/**/*
+integration/anthropic_compliance_logs:
+- changed-files:
+  - any-glob-to-any-file:
+    - anthropic_compliance_logs/**/*
 integration/anthropic_usage_and_costs:
 - changed-files:
   - any-glob-to-any-file:
@@ -438,6 +445,10 @@ integration/delinea_secret_server:
 - changed-files:
   - any-glob-to-any-file:
     - delinea_secret_server/**/*
+integration/dell_powerflex:
+- changed-files:
+  - any-glob-to-any-file:
+    - dell_powerflex/**/*
 integration/directory:
 - changed-files:
   - any-glob-to-any-file:
@@ -650,6 +661,10 @@ integration/hivemq:
 - changed-files:
   - any-glob-to-any-file:
     - hivemq/**/*
+integration/hpe_aruba_edgeconnect:
+- changed-files:
+  - any-glob-to-any-file:
+    - hpe_aruba_edgeconnect/**/*
 integration/http_check:
 - changed-files:
   - any-glob-to-any-file:
@@ -914,6 +929,10 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
+integration/lparstats:
+- changed-files:
+  - any-glob-to-any-file:
+    - lparstats/**/*
 integration/lustre:
 - changed-files:
   - any-glob-to-any-file:
@@ -998,10 +1017,6 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
-integration/nifi:
-- changed-files:
-  - any-glob-to-any-file:
-    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:
@@ -1022,6 +1037,10 @@ integration/nginx_ingress_controller:
 - changed-files:
   - any-glob-to-any-file:
     - nginx_ingress_controller/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
@@ -1138,6 +1157,10 @@ integration/ping_one:
 - changed-files:
   - any-glob-to-any-file:
     - ping_one/**/*
+integration/ping_one_aic:
+- changed-files:
+  - any-glob-to-any-file:
+    - ping_one_aic/**/*
 integration/pivotal_pks:
 - changed-files:
   - any-glob-to-any-file:

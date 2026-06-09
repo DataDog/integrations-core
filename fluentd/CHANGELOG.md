@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.5.1 / 2026-04-15
+## 5.6.0 / 2026-05-14
+
+***Added***:
+
+* Add support for security validation in models for the `fluentd` configuration option. ([#23629](https://github.com/DataDog/integrations-core/pull/23629))
+
+## 5.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

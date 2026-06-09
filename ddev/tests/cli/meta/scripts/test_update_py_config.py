@@ -14,7 +14,7 @@ def test_update_py_config(fake_repo, ddev):
     result = ddev('meta', 'scripts', 'update-python-config', NEW_PYTHON_VERSION)
 
     assert result.exit_code == 0, result.output
-    assert result.output.endswith('Python upgrades\n\nPassed: 9\n')
+    assert result.output.endswith('Python upgrades\n\nPassed: 10\n')
 
     contents = constant_file.read_text()
     assert f'PYTHON_VERSION = {OLD_PYTHON_VERSION!r}' not in contents
@@ -24,6 +24,11 @@ def test_update_py_config(fake_repo, ddev):
     contents = ci_file.read_text()
     assert f'PYTHON_VERSION: "{OLD_PYTHON_VERSION}"' not in contents
     assert f'PYTHON_VERSION: "{NEW_PYTHON_VERSION}"' in contents
+
+    yaml_workflow = fake_repo.path / '.github' / 'workflows' / 'claim-pypi-name.yaml'
+    contents = yaml_workflow.read_text()
+    assert f'python-version: "{OLD_PYTHON_VERSION}"' not in contents
+    assert f'python-version: "{NEW_PYTHON_VERSION}"' in contents
 
     hatch_file = fake_repo.path / 'dummy' / 'hatch.toml'
     contents = hatch_file.read_text()

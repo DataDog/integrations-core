@@ -124,6 +124,18 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_query_errors().model_dump(),
                 **(instance.get('query_errors', {})),
             },
+            "parts_and_merges": {
+                **dict_defaults.instance_parts_and_merges().model_dump(),
+                **(instance.get('parts_and_merges', {})),
+            },
+            "schema_metrics": {
+                **dict_defaults.instance_schema_metrics().model_dump(),
+                **(instance.get('schema_metrics', {})),
+            },
+            "collect_schemas": {
+                **dict_defaults.instance_collect_schemas().model_dump(),
+                **(instance.get('collect_schemas', {})),
+            },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
             # Other settings
@@ -213,6 +225,37 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"query_errors.samples_per_hour_per_query must be greater than 0, defaulting to {default_value}."
         )
 
+    if _safefloat(args.get('parts_and_merges', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_parts_and_merges().collection_interval
+        args['parts_and_merges']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"parts_and_merges.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if _safefloat(args.get('collect_schemas', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_collect_schemas().collection_interval
+        args['collect_schemas']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"collect_schemas.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    _pm_defaults = dict_defaults.instance_parts_and_merges()
+    for _field in (
+        'max_parts_rows',
+        'max_mutations_rows',
+        'max_detached_parts_rows',
+        'max_replication_queue_rows',
+        'table_metrics_max_tables',
+        'stalled_merge_elapsed_threshold_seconds',
+        'stuck_replication_num_tries',
+    ):
+        if _safefloat(args.get('parts_and_merges', {}).get(_field)) <= 0:
+            default_value = getattr(_pm_defaults, _field)
+            args['parts_and_merges'][_field] = default_value
+            validation_result.add_warning(
+                f"parts_and_merges.{_field} must be greater than 0, defaulting to {default_value}."
+            )
+
 
 def _validate_config(config: InstanceConfig, instance: dict, validation_result: ValidationResult):
     """Validate the configuration and add warnings/errors."""
@@ -229,6 +272,7 @@ def _validate_config(config: InstanceConfig, instance: dict, validation_result: 
             config.query_completions.enabled if config.query_completions else False,
         ),
         ('query_errors', config.query_errors.enabled if config.query_errors else False),
+        ('parts_and_merges', config.parts_and_merges.enabled if config.parts_and_merges else False),
     ]
     for feature_name, _is_enabled in dbm_features:
         if instance.get(feature_name, {}).get('enabled') and not config.dbm:
@@ -268,6 +312,16 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
     validation_result.add_feature(
         FeatureKey.QUERY_ERRORS,
         config.query_errors.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
+        FeatureKey.PARTS_AND_MERGES,
+        config.parts_and_merges.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
+        FeatureKey.SCHEMA_METRICS,
+        config.schema_metrics.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)

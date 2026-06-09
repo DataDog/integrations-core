@@ -67,6 +67,7 @@ from .queries import (
     QUERY_DEADLOCKS,
     QUERY_ERRORS_RAISED,
     QUERY_USER_CONNECTIONS,
+    QUERY_WAIT_EVENT_SUMMARY,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
@@ -468,8 +469,10 @@ class MySql(DatabaseCheck):
 
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-            if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
-                queries.extend([QUERY_ERRORS_RAISED])
+            if self._config.dbm_enabled:
+                queries.extend([QUERY_WAIT_EVENT_SUMMARY])
+                if not self.is_mariadb and self.version.version_compatible((8, 0, 0)):
+                    queries.extend([QUERY_ERRORS_RAISED])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
@@ -563,6 +566,18 @@ class MySql(DatabaseCheck):
                 self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.reported_hostname
             )
             yield db
+        except pymysql.err.OperationalError as e:
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
+            )
+            if e.args[0] == 1045 and not self._config.ssl:
+                self.log.warning(
+                    "Access denied error (1045) with no SSL configuration. If your MySQL instance requires SSL "
+                    "connections, configure the 'ssl' option in the check configuration "
+                    "(e.g. 'ssl.check_hostname: false' for connections without certificate verification). "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_mysql/ for more details."
+                )
+            raise
         except Exception:
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
@@ -1169,10 +1184,11 @@ class MySql(DatabaseCheck):
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
                 if self.is_mariadb and self._config.replication_channel:
-                    cursor.execute("SET @@default_master_connection = '{0}';".format(self._config.replication_channel))
-                cursor.execute(
-                    show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
+                    cursor.execute("SET @@default_master_connection = %s", (self._config.replication_channel,))
+                query, params = show_replica_status_query(
+                    self.version, self.is_mariadb, self._config.replication_channel
                 )
+                cursor.execute(query, params)
 
                 results = cursor.fetchall()
                 self.log.debug("Getting replication status: %s", results)
