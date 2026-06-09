@@ -226,6 +226,9 @@ services:
 - id: ddev
   paths:
   - ddev/src/ddev/
+- id: dell_powerflex
+  paths:
+  - dell_powerflex/datadog_checks/dell_powerflex/
 - id: directory
   paths:
   - directory/datadog_checks/directory/

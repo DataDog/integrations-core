@@ -1,0 +1,134 @@
+name: Dell PowerFlex
+files:
+- name: dell_powerflex.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: powerflex_gateway_url
+      required: true
+      display_priority: 3
+      description: URL of the PowerFlex Gateway REST API.
+      value:
+        example: https://localhost:443
+        type: string
+    - name: powerflex_username
+      display_priority: 2
+      description: Username for PowerFlex Gateway authentication via Keycloak.
+      value:
+        type: string
+    - name: powerflex_password
+      secret: true
+      display_priority: 1
+      description: Password for PowerFlex Gateway authentication via Keycloak.
+      value:
+        type: string
+        example: <PASSWORD>
+    - name: powerflex_client_id
+      description: OAuth2 client ID for Keycloak authentication.
+      value:
+        type: string
+        example: powerflexUI
+        default: powerflexUI
+    - name: collect_events
+      description: Enable collection of CRITICAL and MAJOR severity events from the PowerFlex Gateway.
+      value:
+        type: boolean
+        example: false
+        default: false
+    - name: collect_alerts
+      description: Enable collection of alerts from the PowerFlex Gateway.
+      value:
+        type: boolean
+        example: false
+        default: false
+    - name: max_workers
+      description: |
+        Maximum number of threads used to fetch per-resource statistics in parallel.
+        Increase this value for large environments with many resources.
+      value:
+        type: integer
+        example: 4
+        default: 4
+    - name: resource_filters
+      description: |
+        Filter resources by property regex patterns and control statistics
+        collection per resource type. Exclude takes precedence over include.
+        If no filter is configured for a resource type, all resources of
+        that type are collected with statistics enabled, except for devices
+        which have statistics disabled by default.
+
+        Each filter entry has the following fields:
+          resource: The resource type to filter.
+          property: The API property name to match against.
+          patterns: List of regex patterns to match against the property value.
+          type: Either 'include' (default) or 'exclude'. If a resource matches
+            both an include and exclude filter, it is excluded.
+          collect_statistics: When false, skip per-resource statistics API
+            calls to reduce load. Defaults to true.
+
+        Supported resource types and common filterable properties:
+          volume: name, id, volumeType, storagePoolId, ancestorVolumeId
+          storage_pool: name, id, mediaType, protectionDomainId
+          protection_domain: name, id, protectionDomainState
+          sds: name, id, protectionDomainId, sdsState, faultSetId
+          sdc: id, sdcGuid, sdcType, sdcIp
+          device: name, id, storagePoolId, sdsId, deviceCurrentPathName
+
+        Note: the system resource type is not filterable and will be ignored if specified.
+      value:
+        type: array
+        items:
+          type: object
+        example:
+          - resource: volume
+            property: name
+            patterns:
+              - ".*"
+          - resource: storage_pool
+            property: name
+            collect_statistics: true
+            patterns:
+              - "^prod-"
+          - resource: protection_domain
+            property: name
+            patterns:
+              - ".*"
+          - resource: sds
+            property: name
+            type: exclude
+            patterns:
+              - "^standby-"
+          - resource: sdc
+            property: sdcType
+            patterns:
+              - "^AppSdc$"
+          - resource: device
+            property: name
+            collect_statistics: false
+    - template: instances/http
+    - template: instances/default
+  - template: logs
+    example:
+      - type: file
+        path: /opt/emc/scaleio/mdm/logs/eventLogger.log
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/mdm/logs/trc.0
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/sds/logs/trc.0
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/lia/logs/trc.0
+        source: dell_powerflex
+        service: <SERVICE>
+      - type: file
+        path: /opt/emc/scaleio/activemq/data/activemq.log
+        source: dell_powerflex
+        service: <SERVICE>
