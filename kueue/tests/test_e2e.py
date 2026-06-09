@@ -5,17 +5,18 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.utils import assert_service_checks
+from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
 
 @pytest.mark.e2e
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check()
 
-    aggregator.assert_metric('kueue.build_info', at_least=1)
-    aggregator.assert_metric('kueue.go.goroutines', at_least=1)
-    aggregator.assert_metric('kueue.cluster_queue.info', at_least=1)
-    aggregator.assert_metric('kueue.cluster_queue.status', at_least=1)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        check_symmetric_inclusion=True,
+    )
 
     for metric in ('kueue.cluster_queue.info', 'kueue.cluster_queue.status'):
         aggregator.assert_metric_has_tag(metric, 'kueue_cluster_queue:cluster-queue')
