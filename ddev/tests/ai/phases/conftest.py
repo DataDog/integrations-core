@@ -10,11 +10,10 @@ import pytest
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
-from ddev.ai.phases.base import FlowServices
+from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import PhaseConfig, TaskConfig
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
-from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
 # ---------------------------------------------------------------------------
@@ -135,12 +134,10 @@ def make_agent_phase(
         context_compact_threshold_pct=context_compact_threshold_pct,
     )
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
-    services = FlowServices(
-        checkpoint_manager=checkpoint_manager,
+    context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
-        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=flow_dir)),
         callbacks=callbacks or Callbacks(),
     )
 
@@ -148,7 +145,8 @@ def make_agent_phase(
         phase_id=phase_id,
         dependencies=dependencies or [],
         config=config,
-        services=services,
+        checkpoint_manager=checkpoint_manager,
+        context=context,
         agent_builder=make_agent_builder(mock_agent, captured_agent_kwargs),
         goal_agent_builder=goal_agent_builder,
     )
@@ -173,6 +171,15 @@ def flow_dir(tmp_path):
     prompts_dir.mkdir()
     (prompts_dir / "writer.md").write_text("You are a writer for ${phase_name}.")
     return tmp_path
+
+
+@pytest.fixture
+def flow_context(flow_dir):
+    return FlowContext(
+        runtime_variables={},
+        flow_variables={},
+        config_dir=flow_dir,
+    )
 
 
 @pytest.fixture

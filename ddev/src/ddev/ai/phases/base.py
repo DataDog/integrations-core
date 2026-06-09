@@ -2,32 +2,34 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 import logging
 from abc import abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
+if TYPE_CHECKING:
+    from ddev.ai.phases.orchestrator import ResourceProvider
+
 
 @dataclass(frozen=True)
-class FlowServices:
-    """Shared pipeline-level infrastructure passed to every phase."""
+class FlowContext:
+    """Ambient, flow-scoped execution context shared by every phase."""
 
-    checkpoint_manager: CheckpointManager
     runtime_variables: dict[str, str]
     flow_variables: dict[str, str]
     config_dir: Path
-    file_registry: FileRegistry
     callbacks: Callbacks = field(default_factory=Callbacks)
     logger: logging.Logger = field(default_factory=lambda: logging.getLogger(__name__))
 
@@ -40,28 +42,11 @@ class PhaseOutcome:
     extra_checkpoint: dict[str, Any] = field(default_factory=dict)
 
 
-class PhaseRegistry:
-    def __init__(self) -> None:
-        self._registry: dict[str, type["Phase"]] = {}
-
-    def register(self, name: str, phase_cls: type["Phase"]) -> None:
-        self._registry[name] = phase_cls
-
-    def known_names(self) -> list[str]:
-        return sorted(self._registry)
-
-    def get(self, name: str) -> type["Phase"]:
-        if name not in self._registry:
-            raise ValueError(f"Unknown phase type: {name!r}. Known: {self.known_names()}")
-        return self._registry[name]
-
-
 class Phase(AsyncProcessor[PhaseTrigger]):
     """Lifecycle base for all phases.
 
     process_message() implements the immutable pipeline skeleton.
     Subclasses implement execute() to provide phase-specific logic.
-    Registered in PhaseRegistry by _discover_and_register_phases() at startup.
     """
 
     def __init__(
@@ -69,20 +54,19 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         phase_id: str,
         dependencies: list[str],
         config: PhaseConfig,
-        services: FlowServices,
+        checkpoint_manager: CheckpointManager,
+        context: FlowContext,
     ) -> None:
         super().__init__(name=phase_id)
         self._phase_id = phase_id
-        self._dependencies = set(dependencies)
         self._remaining_dependencies = set(dependencies)
         self._config = config
-        self._checkpoint_manager = services.checkpoint_manager
-        self._runtime_variables = services.runtime_variables
-        self._flow_variables = services.flow_variables
-        self._config_dir = services.config_dir
-        self._file_registry = services.file_registry
-        self._callbacks = services.callbacks
-        self._logger = services.logger
+        self._checkpoint_manager = checkpoint_manager
+        self._runtime_variables = context.runtime_variables
+        self._flow_variables = context.flow_variables
+        self._config_dir = context.config_dir
+        self._callbacks = context.callbacks
+        self._logger = context.logger
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
         self._executed = False
@@ -91,11 +75,11 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         if isinstance(message, PhaseTrigger):
             if message.phase_id is None:
                 # Initial trigger — only root phases (no declared dependencies) respond
-                if self._dependencies:
+                if self._remaining_dependencies:
                     return False
             else:
                 # Phase-completion trigger — check dependency tracking
-                if message.phase_id not in self._dependencies:
+                if message.phase_id not in self._remaining_dependencies:
                     return False
                 self._remaining_dependencies.discard(message.phase_id)
                 if self._remaining_dependencies:
@@ -116,14 +100,27 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         return None
 
     @classmethod
-    def extra_init_kwargs(cls, **kwargs: Any) -> dict[str, Any]:
-        """Override to inject subclass-specific kwargs into __init__ at construction time.
+    def build(
+        cls,
+        phase_id: str,
+        config: PhaseConfig,
+        deps: list[str],
+        resources: ResourceProvider,
+        checkpoint_manager: CheckpointManager,
+        context: FlowContext,
+    ) -> Phase:
+        """Uniform polymorphic factory called by the orchestrator for every phase.
 
-        The orchestrator passes phase_id, phase_config, agents, agent_clients, and services
-        (FlowServices) as keyword arguments. Subclasses declare the ones they need
-        explicitly and accept the rest via **kwargs.
+        Subclasses that need infrastructure (agent builders, file registry)
+        pull it from ``resources`` inside their own ``build()`` override.
         """
-        return {}
+        return cls(
+            phase_id=phase_id,
+            dependencies=deps,
+            config=config,
+            checkpoint_manager=checkpoint_manager,
+            context=context,
+        )
 
     @abstractmethod
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome: ...
