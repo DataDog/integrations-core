@@ -193,11 +193,23 @@ pipeline:
   filter:
     query: source:claude-compliance-logs
   processors:
+    - type: grok-parser
+      name: Normalize `created_at` to millisecond precision for date remapping
+      enabled: true
+      source: created_at
+      samples:
+        - "2026-06-03T14:36:36.312153Z"
+      grok:
+        supportRules: ""
+        matchRules: |
+          extract_date_us %{date("yyyy-MM-dd'T'HH:mm:ss.SSS","UTC"):created_at_ms}[0-9]+Z
+          extract_date_ms %{date("yyyy-MM-dd'T'HH:mm:ss.SSS","UTC"):created_at_ms}Z
+          extract_date_s %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):created_at_ms}Z
     - type: date-remapper
       name: Define `created_at` as the official date of the log
       enabled: true
       sources:
-        - created_at
+        - created_at_ms
     - type: attribute-remapper
       name: Map `type` to `evt.name`
       enabled: true
