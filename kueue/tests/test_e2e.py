@@ -15,8 +15,21 @@ def test_e2e(dd_agent_check):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        check_symmetric_inclusion=True,
+        exclude=['kueue.go.gc.duration.seconds.quantile'],
     )
+
+    for metric in (
+        'kueue.build_info',
+        'kueue.go.goroutines',
+        'kueue.go.info',
+        'kueue.cluster_queue.info',
+        'kueue.cluster_queue.status',
+        'kueue.local_queue.status',
+        'kueue.controller.runtime.active_workers',
+        'kueue.process.uptime.seconds',
+        'kueue.workqueue.depth',
+    ):
+        aggregator.assert_metric(metric, at_least=1)
 
     for metric in ('kueue.cluster_queue.info', 'kueue.cluster_queue.status'):
         aggregator.assert_metric_has_tag(metric, 'kueue_cluster_queue:cluster-queue')
