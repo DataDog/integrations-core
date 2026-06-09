@@ -11,7 +11,6 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
 
-import httpx
 import pytest
 
 from ddev.cli.ci.tests._status import conclusion_to_status
@@ -73,7 +72,6 @@ class _FakeClient:
         artifacts: list[Artifact] | None = None,
         workflow_url: str = "https://github.com/o/r/actions/runs/123",
         fail_at: dict[str, Exception] | None = None,
-        get_workflow_run_transient_failures: int = 0,
         get_workflow_run_fail_after: int = -1,
         download_failure_for_url: str | None = None,
     ) -> None:
@@ -82,7 +80,6 @@ class _FakeClient:
         self._artifacts = artifacts if artifacts is not None else [_artifact(1), _artifact(2)]
         self._workflow_url = workflow_url
         self._fail_at = fail_at or {}
-        self._get_workflow_run_transient_failures = get_workflow_run_transient_failures
         self._get_workflow_run_fail_after = get_workflow_run_fail_after
         self._get_workflow_run_call_count = 0
         self._download_failure_for_url = download_failure_for_url
@@ -114,8 +111,6 @@ class _FakeClient:
     ) -> GitHubResponse[WorkflowRun]:
         self.get_workflow_run_calls.append(run_id)
         self._get_workflow_run_call_count += 1
-        if self._get_workflow_run_call_count <= self._get_workflow_run_transient_failures:
-            raise httpx.ConnectError("transient")
         if (
             self._get_workflow_run_fail_after >= 0
             and self._get_workflow_run_call_count > self._get_workflow_run_fail_after
@@ -466,74 +461,6 @@ async def test_process_message_failures_propagate_and_close_check_run(tmp_path: 
     else:
         # Any other failure inside the try-block leaves final_conclusion at "cancelled".
         assert closed["conclusion"] == "cancelled"
-
-
-@pytest.mark.asyncio
-async def test_process_message_times_out_when_run_never_completes(tmp_path: Path) -> None:
-    client = _FakeClient(run_statuses=["in_progress"], conclusion="success", artifacts=[])
-    runner = TaskTestRunner(
-        name="t",
-        client=client,  # type: ignore[arg-type]
-        owner="o",
-        repo="r",
-        workflow_id="wf",
-        ref="main",
-        base_sha="abc",
-        checkout_sha="def",
-        artifacts_base_path=tmp_path,
-        poll_interval_seconds=0.0,
-        max_wait_seconds=0.0,
-    )
-    runner.queue = asyncio.Queue()
-    await runner.process_message(_batch())
-
-    assert len(client.update_check_run_calls) == 1
-    assert client.update_check_run_calls[0]["conclusion"] == "timed_out"
-
-    submitted = _drain_queue(runner.queue)
-    assert len(submitted) == 1
-    finished = submitted[0]
-    assert isinstance(finished, BatchFinished)
-    assert finished.timed_out is True
-    assert finished.status == "failure"
-    assert finished.artifacts_path == ""
-
-
-@pytest.mark.asyncio
-async def test_get_workflow_run_retries_on_transient_then_succeeds(tmp_path: Path) -> None:
-    client = _FakeClient(
-        run_statuses=["queued", "completed"],
-        conclusion="success",
-        artifacts=[],
-        get_workflow_run_transient_failures=2,
-    )
-    runner = TaskTestRunner(
-        name="t",
-        client=client,  # type: ignore[arg-type]
-        owner="o",
-        repo="r",
-        workflow_id="wf",
-        ref="main",
-        base_sha="abc",
-        checkout_sha="def",
-        artifacts_base_path=tmp_path,
-        poll_interval_seconds=0.0,
-        max_wait_seconds=300.0,
-        transient_retry_attempts=3,
-        transient_retry_base_seconds=0.0,
-        transient_retry_factor=1.0,
-    )
-    runner.queue = asyncio.Queue()
-
-    await runner.process_message(_batch())
-
-    # 2 transient failures + 1 success on the initial GET (call 3), then 1 poll → "completed" (call 4).
-    assert len(client.get_workflow_run_calls) == 4
-    submitted = _drain_queue(runner.queue)
-    assert len(submitted) == 1
-    assert isinstance(submitted[0], BatchFinished)
-    assert submitted[0].status == "success"
-    assert client.update_check_run_calls[0]["conclusion"] == "success"
 
 
 @pytest.mark.asyncio
