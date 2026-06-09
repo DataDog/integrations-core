@@ -70,7 +70,7 @@ def construct_yaml(obj, **kwargs):
 
 def construct_discovery_auto_conf(discovery: dict[str, Any]) -> str:
     lines = ['ad_identifiers:']
-    lines.extend(f'  - {identifier}' for identifier in discovery['ad_identifiers'])
+    lines.extend(f'  {line}' for line in construct_yaml(discovery['ad_identifiers']).splitlines())
     lines.extend(['discovery: {}', 'init_config:', 'instances: []'])
     return '\n'.join(lines) + '\n'
 

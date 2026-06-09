@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import yaml
+
 from datadog_checks.dev.tooling.configuration.consumers.example import DESCRIPTION_LINE_LENGTH_LIMIT
 
 from ..utils import get_example_consumer, normalize_yaml
@@ -74,6 +76,39 @@ def test_discovery_generates_auto_conf():
         instances: []
         """
     )
+
+
+def test_discovery_auto_conf_preserves_string_identifiers():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - "true"
+            - "null"
+            - "123"
+            - "foo # bar"
+            - "*alias"
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+
+    files = consumer.render()
+    contents, errors = files['auto_conf.yaml']
+    assert not errors
+    assert yaml.safe_load(contents)['ad_identifiers'] == ['true', 'null', '123', 'foo # bar', '*alias']
 
 
 def test_section_with_option():
