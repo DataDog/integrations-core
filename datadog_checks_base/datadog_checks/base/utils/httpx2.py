@@ -57,9 +57,10 @@ REQUEST_KWARGS = frozenset(
         'extra_headers',
         'timeout',
         'follow_redirects',
+        'auth',
     }
 )
-REQUEST_KWARGS_SPECIAL = frozenset({'headers', 'extra_headers', 'timeout', 'follow_redirects'})
+REQUEST_KWARGS_SPECIAL = frozenset({'headers', 'extra_headers', 'timeout', 'follow_redirects', 'auth'})
 REQUEST_KWARGS_PASSTHROUGH = REQUEST_KWARGS - REQUEST_KWARGS_SPECIAL
 assert REQUEST_KWARGS_PASSTHROUGH | REQUEST_KWARGS_SPECIAL == REQUEST_KWARGS
 assert REQUEST_KWARGS_PASSTHROUGH & REQUEST_KWARGS_SPECIAL == frozenset()
@@ -404,10 +405,11 @@ class HTTPX2Wrapper:
         follow_redirects = (
             bool(options['follow_redirects']) if 'follow_redirects' in options else httpx2.USE_CLIENT_DEFAULT
         )
+        auth = options['auth'] if 'auth' in options else httpx2.USE_CLIENT_DEFAULT
         request_kwargs = self._build_request_kwargs(options, method=method, url=url)
         try:
             request = self._client.build_request(method, url, **request_kwargs)
-            response = self._client.send(request, stream=True, follow_redirects=follow_redirects)
+            response = self._client.send(request, stream=True, follow_redirects=follow_redirects, auth=auth)
         except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
             raise _map_httpx2_exception(exc) from exc
         try:
