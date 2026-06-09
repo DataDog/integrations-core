@@ -999,6 +999,20 @@ files:
             example: false
             display_default: false
           fleet_configurable: false
+    - name: collect_execution_plans
+      description: |
+        Configure the collection of query execution plans. Execution plans are collected as part of
+        the query metrics job and emitted as query samples. Disabling this keeps query metrics
+        collection running while skipping plan collection.
+        This option only applies when `dbm` is enabled.
+      options:
+        - name: enabled
+          description: |
+            Set to `false` to disable collection of query execution plans.
+          value:
+            type: boolean
+            example: true
+          fleet_configurable: false
     - name: collect_raw_query_statement
       description: |
         Configure the collection of raw query statements in query activity, and XE events.
