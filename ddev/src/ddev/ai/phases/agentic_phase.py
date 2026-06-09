@@ -149,7 +149,7 @@ class AgenticPhase(Phase):
         last_result: ReActResult | None,
     ) -> ReActResult:
         """Run one task and return the result to use for the next task."""
-        await self._compact_context(process, last_result)
+        await self._manage_context(process, task, last_result)
 
         has_goal = self._task_has_goal(task)
         prompt = self._render_task_prompt(task, context, has_goal)
@@ -160,11 +160,21 @@ class AgenticPhase(Phase):
 
         return await self._run_goal_validation(process, task, context, prompt, result)
 
-    async def _compact_context(
+    async def _manage_context(
         self,
         process: ReActProcess,
+        task: TaskConfig,
         last_result: ReActResult | None,
     ) -> None:
+        if task.clear_context_before:
+            process.reset()
+            return
+
+        if task.compact_context_before:
+            input_tokens, output_tokens = await process.compact()
+            self._add_tokens(input_tokens, output_tokens)
+            return
+
         input_tokens, output_tokens = await self._compact_if_needed(process, last_result)
         self._add_tokens(input_tokens, output_tokens)
 

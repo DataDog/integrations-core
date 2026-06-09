@@ -649,6 +649,177 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     assert cp["error"] == "something went wrong"
 
 
+# ---------------------------------------------------------------------------
+# process_message — per-task context management flags
+# ---------------------------------------------------------------------------
+
+
+async def test_clear_context_before_resets_history(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50),
+            make_response("t2 done", 200, 80),
+            make_response("summary", 10, 5),
+        ]
+    )
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        tasks=[
+            TaskConfig(name="t1", prompt="First."),
+            TaskConfig(name="t2", prompt="Second.", clear_context_before=True),
+        ],
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mock_agent.reset_call_count == 1
+    assert mock_agent.compact_call_count == 0
+
+
+async def test_clear_context_before_skips_auto_compact(flow_dir, monkeypatch, message_queue):
+    """clear_context_before takes priority — no auto-compact even when context is full."""
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50, context_pct=95),
+            make_response("t2 done", 200, 80),
+            make_response("summary", 10, 5),
+        ]
+    )
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        tasks=[
+            TaskConfig(name="t1", prompt="First."),
+            TaskConfig(name="t2", prompt="Second.", clear_context_before=True),
+        ],
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mock_agent.reset_call_count == 1
+    assert mock_agent.compact_call_count == 0
+
+
+async def test_compact_context_before_compacts_unconditionally(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50, context_pct=10),
+            make_response("t2 done", 200, 80),
+            make_response("summary", 10, 5),
+        ]
+    )
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        tasks=[
+            TaskConfig(name="t1", prompt="First."),
+            TaskConfig(name="t2", prompt="Second.", compact_context_before=True),
+        ],
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mock_agent.compact_call_count == 1
+    assert mock_agent.reset_call_count == 0
+
+
+async def test_compact_context_before_skips_auto_compact(flow_dir, monkeypatch, message_queue):
+    """compact_context_before takes priority — auto-compact does not fire a second time."""
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50, context_pct=95),
+            make_response("t2 done", 200, 80),
+            make_response("summary", 10, 5),
+        ]
+    )
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        tasks=[
+            TaskConfig(name="t1", prompt="First."),
+            TaskConfig(name="t2", prompt="Second.", compact_context_before=True),
+        ],
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mock_agent.compact_call_count == 1
+
+
+async def test_clear_context_before_on_first_task_is_harmless(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50),
+            make_response("summary", 10, 5),
+        ]
+    )
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        tasks=[TaskConfig(name="t1", prompt="First.", clear_context_before=True)],
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read()["p1"]["status"] == "success"
+    assert mock_agent.reset_call_count == 1
+
+
+async def test_compact_context_before_on_first_task_is_noop(flow_dir, monkeypatch, message_queue):
+    mock_agent = MockAgent(
+        [
+            make_response("t1 done", 100, 50),
+            make_response("summary", 10, 5),
+        ]
+    )
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        tasks=[TaskConfig(name="t1", prompt="First.", compact_context_before=True)],
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read()["p1"]["status"] == "success"
+    assert mgr.read()["p1"]["tokens"] == {"total_input": 110, "total_output": 55}
+    assert mock_agent.compact_call_count == 1
+
+
+# ---------------------------------------------------------------------------
+# TaskConfig — context flag validation
+# ---------------------------------------------------------------------------
+
+
+def test_task_config_rejects_both_context_flags():
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        TaskConfig(name="t1", prompt="x", clear_context_before=True, compact_context_before=True)
+
+
+def test_task_config_accepts_clear_context_alone():
+    t = TaskConfig(name="t1", prompt="x", clear_context_before=True)
+    assert t.clear_context_before is True
+    assert t.compact_context_before is False
+
+
+def test_task_config_accepts_compact_context_alone():
+    t = TaskConfig(name="t1", prompt="x", compact_context_before=True)
+    assert t.compact_context_before is True
+    assert t.clear_context_before is False
+
+
 async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch, message_queue):
     """GoalParseError is treated the same as GoalAttemptsExhausted: logged with final_valid=False."""
     from ddev.ai.phases.goal import GoalParseError
