@@ -221,7 +221,7 @@ instances:
     #   - TLS_AES_128_GCM_SHA256
 
     ## Configure collection of SAP HANA catalog metadata (schemas, tables,
-    ## columns) for Database Monitoring's Schema Explorer.
+    ## columns) for Data Quality features in Data Observability.
     #
     # collect_schemas:
 

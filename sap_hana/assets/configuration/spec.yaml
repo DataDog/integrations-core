@@ -97,7 +97,7 @@ files:
       - name: collect_schemas
         description: |
           Configure collection of SAP HANA catalog metadata (schemas, tables,
-          columns) for Database Monitoring's Schema Explorer.
+          columns) for Data Quality features in Data Observability.
         options:
           - name: enabled
             description: |
