@@ -15,7 +15,7 @@
 * Add file-based YAML metrics loading for OpenMetrics V2 checks with composable predicates ([#22750](https://github.com/DataDog/integrations-core/pull/22750))
 * Add ``CronExpression`` and ``CronScheduler`` utilities for cron-style scheduling inside check methods. ([#23741](https://github.com/DataDog/integrations-core/pull/23741))
 
-## 37.38.0 / 2026-05-22
+## 37.38.0 / 2026-05-22 / Agent 7.80.0
 
 ***Security***:
 
