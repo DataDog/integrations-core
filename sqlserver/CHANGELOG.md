@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.1.1 / 2026-06-09
+
+***Fixed***:
+
+* Restore Agent hostname instrumentation for SQL Server named instance host configurations. ([#23862](https://github.com/DataDog/integrations-core/pull/23862))
+
 ## 23.1.0 / 2026-05-14
 
 ***Added***:
