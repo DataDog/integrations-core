@@ -1,4 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+external_dns.controller.consecutive.soft.errors,gauge,,error,,Number of consecutive soft errors in reconciliation loop,-1,external_dns,controller consecutive soft errors,,
+external_dns.controller.last_reconcile,gauge,,second,,Timestamp of last reconcile attempt,0,external_dns,controller last reconcile timestamp,,
 external_dns.controller.last_sync,gauge,,second,,Timestamp of last successful sync with the DNS provider,0,external_dns,controller last sync timestamp,,
 external_dns.controller.verified_a_records,gauge,,record,,Number of DNS A records that exist both in source and registry (before v1.18),0,external_dns,verified a records,,
 external_dns.controller.verified_aaaa_records,gauge,,record,,Number of DNS AAAA records that exist both in source and registry (before v1.18),0,external_dns,verified aaaa records,,

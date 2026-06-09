@@ -46,6 +46,7 @@ files:
             value:
               type: string
               example: "http://%%host%%:7979/metrics"
+            fleet_configurable: false
           - name: tags
             description: |
               List of tags to attach to every metric and service check emitted by this integration.
