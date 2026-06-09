@@ -530,7 +530,6 @@ class ActivityMonitor:
         ext_id = alert.get("extId", "")
         title = alert.get("title", "Nutanix Alert")
         message = alert.get("message", "")
-        created_time = alert.get("creationTime")
         is_acknowledged = alert.get("isAcknowledged", False)
 
         if parameters := alert.get("parameters"):
@@ -543,9 +542,9 @@ class ActivityMonitor:
 
         self.check.event(
             {
-                "timestamp": self._parse_timestamp(created_time)
-                if created_time
-                else get_timestamp(get_current_datetime()),
+                # Stamp at observation time, not creationTime: this event feeds the monitor's
+                # trailing rollup window, so back-dating would auto-recover it while still open.
+                "timestamp": get_timestamp(get_current_datetime()),
                 "event_type": self.check.__NAMESPACE__,
                 "msg_title": f"Alert: {title}",
                 "msg_text": message,

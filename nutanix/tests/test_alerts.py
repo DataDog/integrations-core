@@ -9,6 +9,7 @@ from unittest import mock
 import pytest
 from requests.exceptions import HTTPError
 
+from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.nutanix import NutanixCheck
 
 from .conftest import fixture_alert
@@ -484,6 +485,43 @@ def test_alerts_still_open_emits_heartbeat_each_cycle(
     for event in heartbeat_events:
         assert event["aggregation_key"].startswith("nutanix-alert-")
         assert any(t in event["tags"] for t in ("ntnx_alert_status:open", "ntnx_alert_status:acknowledged"))
+
+
+@mock.patch("datadog_checks.nutanix.activity_monitor.get_current_datetime")
+def test_open_event_stamped_at_observation_time_not_creation_time(
+    get_current_datetime, dd_run_check, aggregator, mock_instance, mock_http_get, mocker
+):
+    """Regression: open/heartbeat events are stamped at observation time, not creationTime.
+
+    Event monitors window on occurrence time, so back-dating the heartbeat to creationTime
+    pushes every emission outside the monitor's trailing rollup window, making the monitor
+    auto-recover while the alert is still open in Prism Central.
+    """
+    instance = mock_instance.copy()
+    instance["collect_alerts"] = True
+    get_current_datetime.return_value = MOCK_ALERT_DATETIME
+
+    creation_time = "2020-01-01T00:00:00.000000Z"
+    synthetic = fixture_alert("A1031", isResolved=False, isAcknowledged=False, creationTime=creation_time)
+    mocker.patch(
+        'datadog_checks.nutanix.activity_monitor.ActivityMonitor._list_alerts_unresolved',
+        return_value=[synthetic],
+    )
+
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    open_events = [
+        e for e in aggregator.events if "ntnx_type:alert" in e.get("tags", []) and e["msg_title"].startswith("Alert:")
+    ]
+    assert len(open_events) == 1
+
+    assert open_events[0]["timestamp"] == get_timestamp(MOCK_ALERT_DATETIME), (
+        "Open event must be stamped at observation time so it lands in the monitor's trailing window"
+    )
+    assert open_events[0]["timestamp"] != check.activity_monitor._parse_timestamp(creation_time), (
+        "Open event must not be back-dated to creationTime"
+    )
 
 
 # --- nutanix.alert.open metric emission ---
