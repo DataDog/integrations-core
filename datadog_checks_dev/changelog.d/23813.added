@@ -1,0 +1,1 @@
+Fail `ddev validate agent-reqs` when `requirements-agent-release.txt` pins a `datadog-*` package whose integration folder is no longer present in the repo.

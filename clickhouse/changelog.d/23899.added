@@ -1,0 +1,1 @@
+Add ClickHouse schema collection: catalog payload (databases, tables, views, columns) under collect_schemas with include/exclude regex filters for databases and tables.

@@ -49,7 +49,7 @@ RUN /opt/python/${PYTHON3_VERSION}/bin/python3 -m pip install --no-warn-script-l
  && /opt/python/${PYTHON3_VERSION}/bin/python3 -m virtualenv /py3
 
 # Rust toolchain (needed for cryptography)
-ENV RUST_VERSION="1.76"
+ENV RUST_VERSION="1.91.0"
 ENV RUSTC_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
 ARG RUSTUP_VERSION="1.26.0"
 ARG RUSTUP_SHA256="0b2f6c8f85a3d02fde2efc0ced4657869d73fccfce59defb4e8d29233116e6db"
@@ -161,8 +161,8 @@ RUN \
 # curl
 RUN \
  DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
- VERSION="8.19.0" \
- SHA256="2a2c11db4c122691aa23b4363befda1bfd801770bfebf41e1d21cee4f2ab0f71" \
+ VERSION="8.20.0" \
+ SHA256="fc5819cad3f9f5482669adcdc49a782c15f36d2a0715b395b06d9173593d2dc0" \
  RELATIVE_PATH="curl-{{version}}" \
   bash install-from-source.sh \
     --disable-manual \

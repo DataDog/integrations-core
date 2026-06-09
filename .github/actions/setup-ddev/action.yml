@@ -29,6 +29,7 @@ runs:
       env:
         CACHE_PROFILE: ${{ inputs.cache-profile }}
         INSTALL_MODE: ${{ inputs.install-mode }}
+        DDEV_VERSION: ${{ inputs.ddev-version }}
       run: |-
         case "$INSTALL_MODE" in
           local|pypi) ;;
@@ -45,6 +46,11 @@ runs:
             exit 1
             ;;
         esac
+
+        if [[ -n "$DDEV_VERSION" && ! "$DDEV_VERSION" =~ ^(===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9._*+!-]+(,(===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9._*+!-]+)*$ ]]; then
+          echo "::error::Invalid ddev-version '$DDEV_VERSION'. Use a PEP 440-style version specifier such as ==16.0.0 or >=16,<17."
+          exit 1
+        fi
 
     - name: Compute cache date
       id: cache-date
@@ -157,7 +163,9 @@ runs:
     - name: Install ddev from PyPI
       if: ${{ inputs.install-mode == 'pypi' }}
       shell: bash
-      run: uv pip install --system "ddev${{ inputs.ddev-version }}"
+      env:
+        DDEV_VERSION: ${{ inputs.ddev-version }}
+      run: uv pip install --system "ddev${DDEV_VERSION}"
 
     - name: Save local ddev cache
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' && steps.restore-local-ddev-base-cache.outputs.cache-hit != 'true' }}

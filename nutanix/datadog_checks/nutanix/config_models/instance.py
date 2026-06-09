@@ -90,6 +90,7 @@ class InstanceConfig(BaseModel):
     exclude_filtered_resources_from_cluster_capacity: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
+    hostname_transform: Optional[Literal['upper', 'lower', 'default']] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None

@@ -265,6 +265,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: database_identifier
       display_priority: 0
       description: |
@@ -289,6 +290,7 @@ files:
             - host: The provided host of the instance.
             - port: The port number of the instance.
             In addition, you can use any key from the `tags` section of the configuration.
+          fleet_configurable: false
     - name: dbstrict
       display_priority: 0
       fleet_configurable: true
@@ -350,6 +352,7 @@ files:
         type: string
         require_trusted_provider: true
         default: null
+      fleet_configurable: false
     - name: ssl_password
       display_priority: 0
       description: |
@@ -361,6 +364,7 @@ files:
       value:
         type: string
         default: null
+      fleet_configurable: false
     - name: idle_connection_timeout
       display_priority: 0
       fleet_configurable: true
@@ -385,6 +389,7 @@ files:
         type: integer
         example: 30
         display_default: 30
+      fleet_configurable: false
     - name: locks_idle_in_transaction
       display_priority: 0
       description: Configure collection of idle in transaction lock age metrics
@@ -397,6 +402,7 @@ files:
             example: true
             display_default: true
           hidden: true
+          fleet_configurable: false
         - name: collection_interval
           description: Set the collection interval (in seconds) for idle in transaction lock age metrics.
           value:
@@ -404,6 +410,7 @@ files:
             example: 300
             display_default: 300
           hidden: true
+          fleet_configurable: false
         - name: max_rows
           description: Set the maximum number of rows to collect per check run.
           value:
@@ -411,6 +418,7 @@ files:
             example: 100
             display_default: 100
           hidden: true
+          fleet_configurable: false
     - name: collect_checksum_metrics
       display_priority: 0
       fleet_configurable: true
@@ -433,6 +441,7 @@ files:
         example:
           - application_name
         default: []
+      fleet_configurable: false
     - name: collect_buffercache_metrics
       display_priority: 0
       fleet_configurable: true
@@ -466,6 +475,7 @@ files:
         type: string
         example: /usr/local/pgsql/data
         display_default: /usr/local/pgsql/data
+      fleet_configurable: false
     - name: table_count_limit
       display_priority: 0
       fleet_configurable: true
@@ -481,6 +491,7 @@ files:
         type: array
         items:
           type: object
+      fleet_configurable: false
     - name: database_autodiscovery
       display_priority: 0
       fleet_configurable: true
@@ -560,6 +571,7 @@ files:
             type: integer
             example: 600
             display_default: 600
+          fleet_configurable: false
     - name: application_name
       display_priority: 0
       fleet_configurable: true
@@ -603,6 +615,7 @@ files:
             type: boolean
             example: false
             display_default: false
+          fleet_configurable: false
         - name: config_id
           hidden: true
           description: |
@@ -613,6 +626,7 @@ files:
             the intake can correlate results back to the originating RC config.
           value:
             type: string
+          fleet_configurable: false
         - name: queries
           hidden: true
           description: |
@@ -668,6 +682,7 @@ files:
                   type: integer
                 - name: entity_id
                   type: string
+          fleet_configurable: false
     - name: pg_stat_statements_view
       display_priority: 0
       description: |
@@ -678,6 +693,7 @@ files:
         type: string
         example: show_pg_stat_statements()
         display_default: pg_stat_statements
+      fleet_configurable: false
     - name: pg_stat_activity_view
       display_priority: 0
       hidden: true
@@ -688,6 +704,7 @@ files:
       value:
         type: string
         display_default: pg_stat_activity
+      fleet_configurable: false
     - name: query_encodings
       display_priority: 0
       description: |
@@ -706,6 +723,7 @@ files:
           - latin1
         display_default:
           - utf8
+      fleet_configurable: false
     - name: query_metrics
       display_priority: 0
       fleet_configurable: true
@@ -735,6 +753,7 @@ files:
           value:
             type: number
             default: 10000
+          fleet_configurable: false
         - name: full_statement_text_cache_max_size
           hidden: true
           description: |
@@ -742,6 +761,7 @@ files:
           value:
             type: number
             default: 10000
+          fleet_configurable: false
         - name: full_statement_text_samples_per_hour_per_query
           hidden: true
           description: |
@@ -749,24 +769,18 @@ files:
           value:
             type: number
             default: 1
+          fleet_configurable: false
         - name: incremental_query_metrics
           hidden: true
           description: |
-            Enable an experimental performance optimization that reduces the amount of data queried from `pg_stat_statements`
-            when calculating query metrics. This option is only available for PostgreSQL 10.0 and above.
+            When enabled query metrics collection uses a lightweight multi-pass pipeline.
+            The check determines which statements had a change in call counts since the last collection, then fetches
+            query text from `pg_stat_statements` and runs obfuscation for those statements.
           value:
             type: boolean
-            display_default: false
-            example: false
-        - name: baseline_metrics_expiry
-          hidden: true
-          description: |
-            Set the cache expiry time (in seconds) for the baseline for query metrics. This option is only available when
-            `incremental_query_metrics` is enabled.
-          value:
-            type: number
-            display_default: 300
-            example: 300
+            display_default: true
+            example: true
+          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -775,6 +789,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
         - name: batch_max_content_size
           hidden: true
           description: |
@@ -783,6 +798,7 @@ files:
           value:
             type: integer
             example: 20_000_000
+          fleet_configurable: false
     - name: query_samples
       display_priority: 0
       fleet_configurable: true
@@ -816,6 +832,7 @@ files:
           value:
             type: integer
             example: 60
+          fleet_configurable: false
         - name: samples_per_hour_per_query
           description: |
             Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
@@ -823,6 +840,7 @@ files:
           value:
             type: integer
             example: 15
+          fleet_configurable: false
         - name: explained_queries_cache_maxsize
           description: |
             Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should
@@ -831,6 +849,7 @@ files:
           value:
             type: integer
             example: 5000
+          fleet_configurable: false
         - name: seen_samples_cache_maxsize
           description: |
             Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
@@ -838,6 +857,7 @@ files:
           value:
             type: integer
             example: 10000
+          fleet_configurable: false
         - name: explain_parameterized_queries
           fleet_configurable: true
           description: |
@@ -853,6 +873,7 @@ files:
           value:
             type: integer
             default: 5000
+          fleet_configurable: false
         - name: explain_errors_cache_ttl
           hidden: true
           description: |
@@ -860,6 +881,7 @@ files:
           value:
             type: integer
             default: 86400
+          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -868,6 +890,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
     - name: query_activity
       display_priority: 0
       fleet_configurable: true
@@ -1076,6 +1099,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the column statistics collection interval (in seconds).
@@ -1083,6 +1107,7 @@ files:
             type: number
             example: 3600
             display_default: 3600
+          fleet_configurable: false
         - name: max_tables
           description: |
             Maximum number of tables to collect column statistics for.
@@ -1090,6 +1115,7 @@ files:
             type: number
             example: 500
             display_default: 500
+          fleet_configurable: false
         - name: include_databases
           description: |
             A list of regex patterns to include databases.
@@ -1101,6 +1127,7 @@ files:
               type: string
             example:
               - "mydb"
+          fleet_configurable: false
         - name: exclude_databases
           description: |
             A list of regex patterns to exclude databases.
@@ -1112,6 +1139,7 @@ files:
               type: string
             example:
               - "privatedb.*"
+          fleet_configurable: false
         - name: include_schemas
           description: |
             A list of regex patterns to include schemas.
@@ -1123,6 +1151,7 @@ files:
               type: string
             example:
               - "myschema"
+          fleet_configurable: false
         - name: exclude_schemas
           description: |
             A list of regex patterns to exclude schemas.
@@ -1134,6 +1163,7 @@ files:
               type: string
             example:
               - "privateschema.*"
+          fleet_configurable: false
         - name: include_tables
           description: |
             A list of regex patterns to include tables.
@@ -1145,6 +1175,7 @@ files:
               type: string
             example:
               - "users.*"
+          fleet_configurable: false
         - name: exclude_tables
           description: |
             A list of regex patterns to exclude tables.
@@ -1156,6 +1187,7 @@ files:
               type: string
             example:
               - "temp_.*"
+          fleet_configurable: false
     - name: aws
       display_priority: 0
       description: |
@@ -1179,6 +1211,7 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+          fleet_configurable: false
         - name: region
           description: |
             Equal to the region of the instance the agent is connecting to.
@@ -1186,6 +1219,7 @@ files:
           value:
             type: string
             example: us-east-1
+          fleet_configurable: false
         - name: managed_authentication
           description: |
             Configure section used for AWS IAM Authentication with RDS.
@@ -1213,6 +1247,7 @@ files:
             - name: role_arn
               type: string
               example: arn:aws:iam::123456789012:role/MyRole
+          fleet_configurable: false
 
     - name: gcp
       display_priority: 0
@@ -1234,6 +1269,7 @@ files:
           value:
             type: string
             example: foo-project
+          fleet_configurable: false
         - name: instance_id
           description: |
             Equal to the GCP resource's instance ID.
@@ -1243,6 +1279,7 @@ files:
           value:
             type: string
             example: foo-database
+          fleet_configurable: false
 
     - name: azure
       display_priority: 0
@@ -1268,6 +1305,7 @@ files:
           value:
             type: string
             example: flexible_server
+          fleet_configurable: false
         - name: fully_qualified_domain_name
           description: |
             Equal to the full qualified domain name of the Azure PostgreSQL database.
@@ -1276,6 +1314,7 @@ files:
           value:
             type: string
             example: my-postgres-database.database.windows.net
+          fleet_configurable: false
         - name: managed_authentication
           description: |
             Configuration section used for Azure AD Authentication.
@@ -1330,6 +1369,7 @@ files:
                 The permission scope from where to access the identity token.
               type: string
               example: https://ossrdbms-aad.database.windows.net/.default
+          fleet_configurable: false
     - name: obfuscator_options
       display_priority: 0
       description: |
@@ -1346,6 +1386,7 @@ files:
             type: string
             example: obfuscate_and_normalize
             display_default: obfuscate_and_normalize
+          fleet_configurable: false
         - name: replace_digits
           description: |
             Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -1353,6 +1394,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
         - name: collect_metadata
           description: |
             Set to `false` to disable the collection of metadata in your SQL statements.
@@ -1360,6 +1402,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collect_tables
           fleet_configurable: true
           description: |
@@ -1508,6 +1551,7 @@ files:
         type: boolean
         example: false
         display_default: false
+      fleet_configurable: false
     - name: database_instance_collection_interval
       display_priority: 0
       hidden: true

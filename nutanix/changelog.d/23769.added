@@ -1,0 +1,1 @@
+Add `hostname_transform` config option to transform all Nutanix hostnames (hosts and VMs) to uppercase, lowercase, or leave them unchanged.
