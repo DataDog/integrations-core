@@ -628,6 +628,7 @@ def test_do_query_schedule_field_defaults_to_none(mock_check, minimal_instance):
                 'dbname': 'mydb',
                 'query': 'SELECT 1',
                 'interval_seconds': 60,
+                'query_timeout': 30_000,
                 'entity': {
                     'platform': 'aws',
                     'account': '123',
@@ -658,6 +659,7 @@ def test_do_query_schedule_field_parsed(mock_check, minimal_instance):
                 'dbname': 'mydb',
                 'query': 'SELECT 1',
                 'schedule': '20 * * * *',
+                'query_timeout': 30_000,
                 'entity': {
                     'platform': 'aws',
                     'account': '123',
@@ -689,6 +691,7 @@ def test_do_query_both_schedule_and_interval_parsed(mock_check, minimal_instance
                 'query': 'SELECT 1',
                 'schedule': '0 * * * *',
                 'interval_seconds': 3600,
+                'query_timeout': 30_000,
                 'entity': {
                     'platform': 'aws',
                     'account': '123',

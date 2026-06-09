@@ -131,7 +131,8 @@ class PostgresDataObservability(DBMAsyncJob):
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
-            timeout_ms = query_spec.query_timeout * 1000
+            # query_timeout is in milliseconds, matching the instance-level query_timeout unit.
+            timeout_ms = query_spec.query_timeout
             # Pool connections run with autocommit=True, so the timeout must be
             # applied inside an explicit transaction and reverts on commit,
             # avoiding timeout leakage onto the shared connection.

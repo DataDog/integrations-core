@@ -27,7 +27,7 @@ BASE_QUERY = {
     'dbname': 'test_db',
     'query': 'SELECT count(*) FROM orders',
     'interval_seconds': 60,
-    'query_timeout': 30,
+    'query_timeout': 30_000,
     'type': 'freshness',
     'entity': {
         'platform': 'aws',
@@ -45,7 +45,7 @@ MULTI_QUERIES = [
         'dbname': 'test_db',
         'query': 'SELECT count(*) FROM users',
         'interval_seconds': 120,
-        'query_timeout': 30,
+        'query_timeout': 30_000,
         'type': 'freshness',
         'entity': {
             'platform': 'aws',
@@ -301,10 +301,10 @@ def test_query_timeout_applied_in_transaction(pg_instance):
     assert _get_local_timeout_ms(mock_cursor) == 30_000
 
 
-def test_query_timeout_converted_to_milliseconds(pg_instance):
-    """query_timeout from the query payload is converted to milliseconds for set_config."""
+def test_query_timeout_passed_directly_to_set_config(pg_instance):
+    """query_timeout (milliseconds) is forwarded as-is to SET LOCAL statement_timeout."""
     query = deepcopy(BASE_QUERY)
-    query['query_timeout'] = 180
+    query['query_timeout'] = 180_000
     mock_conn, mock_cursor = _make_mock_conn()
 
     _setup_and_run(pg_instance, queries=[query], mock_conn=mock_conn, mock_cursor=mock_cursor)
@@ -548,6 +548,8 @@ CRON_QUERY = {
     'dbname': 'test_db',
     'query': 'SELECT 1',
     'schedule': '50 * * * *',  # every hour at :50
+    'interval_seconds': 3600,
+    'query_timeout': 30_000,
     'type': 'freshness',
     'entity': {
         'platform': 'aws',
@@ -705,6 +707,7 @@ def test_query_without_schedule_or_positive_interval_filtered_at_init(pg_instanc
         'monitor_id': 30,
         'dbname': 'test_db',
         'query': 'SELECT 1',
+        'query_timeout': 30_000,
         'type': 'freshness',
         'entity': {
             'platform': 'aws',
