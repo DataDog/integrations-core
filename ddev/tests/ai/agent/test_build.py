@@ -124,3 +124,20 @@ def test_build_runtime_reuses_shared_file_registry(file_registry, clients):
     for tool in runtime.tool_registry._tools.values():
         assert tool._registry is file_registry
         assert tool._owner_id == "owner"
+
+
+async def test_shared_registry_does_not_share_parent_read_authorization(file_registry, clients, tmp_path):
+    config = AgentConfig(provider="anthropic", tools=[])
+    path = tmp_path / "file.txt"
+    path.write_text("before", encoding="utf-8")
+    file_registry.record("parent", str(path), "before")
+
+    factory = make_factory(clients, file_registry)
+    child_config = config.model_copy(update={"tools": ["edit_file"]})
+    runtime = build_runtime(factory, child_config, system_prompt="sys", owner_id="parent.sub.001-child")
+    registry = runtime.tool_registry
+    result = await registry.run("edit_file", {"path": str(path), "old_string": "before", "new_string": "after"})
+
+    assert result.success is False
+    assert "Not authorized" in result.error
+    assert path.read_text(encoding="utf-8") == "before"
