@@ -1,0 +1,1 @@
+Gate `ddev release branch create` and `update-build-agent-yaml.yml` on the matching `DataDog/datadog-agent` branch existing so neither writer can produce a release-branch pointer to a missing upstream branch.
