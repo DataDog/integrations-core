@@ -643,6 +643,7 @@ files:
                 - monitor_id
                 - dbname
                 - query
+                - query_timeout
                 - entity
               properties:
               - name: monitor_id
@@ -665,6 +666,11 @@ files:
                   schedule wins and interval_seconds is ignored. If neither is set, the
                   query is skipped at runtime with a warning.
                 type: string
+              - name: query_timeout
+                description: |
+                  Statement timeout for this query in milliseconds. Overrides the instance-level
+                  query_timeout for this query only.
+                type: integer
               - name: entity
                 type: object
                 required:
