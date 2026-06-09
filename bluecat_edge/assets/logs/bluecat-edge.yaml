@@ -281,12 +281,32 @@ pipeline:
           template: "BlueCat"
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
-        - type: string-builder-processor
-          name: Add ocsf.query.class
+        - type: attribute-remapper
+          name: Map `answers.0.rdata` to `ocsf.answer.rdata`
           enabled: true
-          template: "IN"
-          target: ocsf.query.class
-          replaceMissing: false
+          sources:
+            - answers.0.rdata
+          sourceType: attribute
+          target: ocsf.answer.rdata
+          targetType: attribute
+          preserveSource: true
+        - type: attribute-remapper
+          name: Map `answers.0.recordType` to `ocsf.answer.type`
+          enabled: true
+          sources:
+            - answers.0.recordType
+          sourceType: attribute
+          target: ocsf.answer.type
+          targetType: attribute
+          preserveSource: true
+        - type: array-processor
+          name: Append ocsf.answer into ocsf.answers array
+          enabled: true
+          operation:
+            source: ocsf.answer
+            target: ocsf.answers
+            preserveSource: false
+            type: append
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
