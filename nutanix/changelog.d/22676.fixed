@@ -1,0 +1,1 @@
+Catch both ``requests.HTTPError`` and ``HTTPStatusError`` in nutanix activity and health collectors so the v4.2 to v4.0 alerts fallback continues to fire through the in-flight HTTP-client migration.

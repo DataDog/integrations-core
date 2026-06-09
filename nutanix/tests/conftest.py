@@ -162,9 +162,7 @@ def mock_http_get(mock_http):
             return MockHTTPResponse(json_data=load_fixture("cluster_stats_aabbccdd.json"))
 
         if '/api/clustermgmt/v4.0/config/disks' in url:
-            response_data = load_fixture_page("disks.json", page)
-            mock_resp.json = mocker.Mock(return_value=response_data)
-            return mock_resp
+            return MockHTTPResponse(json_data=load_fixture_page("disks.json", page))
 
         if '/api/clustermgmt/v4.0/config/clusters/d07db284-6df6-4ca2-88cd-9dd5ed71ac08/hosts' in url:
             return MockHTTPResponse(status_code=400)

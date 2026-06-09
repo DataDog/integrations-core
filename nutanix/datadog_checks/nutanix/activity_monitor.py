@@ -8,8 +8,9 @@ from collections.abc import Callable
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
-from requests.exceptions import HTTPError
+import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.nutanix.resource_filters import should_collect_activity, should_collect_resource
 
@@ -134,7 +135,7 @@ class ActivityMonitor:
         """Run a collection function with standard error handling."""
         try:
             return collect_fn()
-        except HTTPError as e:
+        except (requests.HTTPError, HTTPStatusError) as e:
             self.check.log.error(
                 "[%s] Failed to collect %ss: HTTP %s",
                 self._pc_label,
@@ -235,7 +236,7 @@ class ActivityMonitor:
                 self.alerts_v42_supported = True
                 self.check.write_persistent_cache("alerts_v42_supported", "True")
             return result
-        except HTTPError as e:
+        except (requests.HTTPError, HTTPStatusError) as e:
             if e.response is not None and e.response.status_code == 404:
                 self.check.log.debug(
                     "[%s] Alerts API v4.2 not supported, falling back to v4.0 permanently",
