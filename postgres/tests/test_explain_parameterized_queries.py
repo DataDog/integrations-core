@@ -287,7 +287,6 @@ def test_explain_prepared_statement_type_mismatch_no_error_log(integration_check
 
 
 @pytest.mark.unit
-@requires_over_12
 @pytest.mark.parametrize(
     "exception_class",
     [
@@ -299,20 +298,22 @@ def test_explain_statement_type_mismatch_maps_to_undefined_function(integration_
     check = integration_check(dbm_instance)
     epq = check.statement_samples._explain_parameterized_queries
 
-    with mock.patch.object(epq, '_set_plan_cache_mode'):
-        with mock.patch.object(epq, '_create_prepared_statement'):
-            with mock.patch.object(epq, '_deallocate_prepared_statement'):
-                with mock.patch.object(
-                    epq,
-                    '_explain_prepared_statement',
-                    return_value=None,
-                ):
-                    plan, err_code, err_msg = epq.explain_statement(
-                        'datadog_test',
-                        "SELECT id FROM t WHERE id = $1",
-                        "SELECT id FROM t WHERE id = $1",
-                        "test_sig",
-                    )
+    with mock.patch.object(check, 'version', V12):
+        with mock.patch.object(check, 'db_pool'):
+            with mock.patch.object(epq, '_set_plan_cache_mode'):
+                with mock.patch.object(epq, '_create_prepared_statement'):
+                    with mock.patch.object(epq, '_deallocate_prepared_statement'):
+                        with mock.patch.object(
+                            epq,
+                            '_explain_prepared_statement',
+                            return_value=None,
+                        ):
+                            plan, err_code, err_msg = epq.explain_statement(
+                                'datadog_test',
+                                "SELECT id FROM t WHERE id = $1",
+                                "SELECT id FROM t WHERE id = $1",
+                                "test_sig",
+                            )
 
     assert plan is None
     assert err_code == DBExplainError.undefined_function
