@@ -194,10 +194,7 @@ class AgentCheck(object):
         Integrations can opt into config discovery by declaring a discovery
         stanza in their spec and generating config_models.discovery.
         """
-        candidates = _generated_discovery_candidates(cls, service)
-        if candidates is None:
-            return ()
-        return candidates
+        return _generated_discovery_candidates(cls, service)
 
     @classmethod
     def discover_config(cls, service_json: str) -> str:
@@ -1844,10 +1841,10 @@ def _discovery_check_name(cls: type[AgentCheck]) -> str:
     return cls.__name__
 
 
-def _generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> Iterable[dict[str, Any]] | None:
+def _generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> Iterable[dict[str, Any]]:
     module_parts = cls.__module__.split('.')
     if len(module_parts) < 2 or module_parts[0] != 'datadog_checks':
-        return None
+        return ()
 
     module_name = f'{module_parts[0]}.{module_parts[1]}.config_models.discovery'
     try:
@@ -1857,7 +1854,7 @@ def _generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> 
         # discovery.py exists and fails to import one of its own dependencies,
         # let that error surface to the caller.
         if e.name and module_name.startswith(e.name):
-            return None
+            return ()
         raise
 
     return discovery.candidates(service)
