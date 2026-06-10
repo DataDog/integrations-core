@@ -529,7 +529,7 @@
         {
             "id": 3478691643697987,
             "definition": {
-                "title": "Kuberbetes API server",
+                "title": "Kubernetes API server",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1213,7 +1213,7 @@
                     {
                         "id": 1639655680757989,
                         "definition": {
-                            "title": "Agent check success ration",
+                            "title": "Agent check success ratio",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1482,7 +1482,7 @@
                     {
                         "id": 7769591245715321,
                         "definition": {
-                            "title": "Etcd total number of keys.",
+                            "title": "Etcd total number of keys",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2655,7 +2655,7 @@
                     {
                         "id": 7350980922272526,
                         "definition": {
-                            "title": "Nodes unealthy",
+                            "title": "Nodes unhealthy",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
