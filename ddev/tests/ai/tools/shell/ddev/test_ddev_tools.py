@@ -132,15 +132,28 @@ def test_env_start_cmd(dev, expected):
 # --- ddev env test ---
 
 
-@pytest.mark.parametrize(
-    "dev,expected",
-    [
-        (False, ["ddev", "--no-interactive", "env", "test", "mycheck", "py3.11-1.23"]),
-        (True, ["ddev", "--no-interactive", "env", "test", "--dev", "mycheck", "py3.11-1.23"]),
-    ],
-)
-def test_env_test_cmd(dev, expected):
-    assert DdevEnvTestTool().cmd(EnvTestInput(integration="mycheck", environment="py3.11-1.23", dev=dev)) == expected
+def test_env_test_cmd_default_env():
+    assert DdevEnvTestTool().cmd(EnvTestInput(integration="mycheck")) == [
+        "ddev",
+        "--no-interactive",
+        "env",
+        "test",
+        "--dev",
+        "mycheck",
+        "all",
+    ]
+
+
+def test_env_test_cmd_specific_env():
+    assert DdevEnvTestTool().cmd(EnvTestInput(integration="mycheck", environment="py3.11-1.23")) == [
+        "ddev",
+        "--no-interactive",
+        "env",
+        "test",
+        "--dev",
+        "mycheck",
+        "py3.11-1.23",
+    ]
 
 
 # --- ddev env stop ---
