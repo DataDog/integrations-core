@@ -92,10 +92,10 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "http_get": ToolSpec("http.http_get", "HttpGetTool", read_only=True),
     "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool", read_only=False),
     "ddev_test": ToolSpec("shell.ddev.ddev_test", "DdevTestTool", read_only=False),
-    "ddev_env_show": ToolSpec("shell.ddev.env_show", "DdevEnvShowTool", read_only=False),
+    "ddev_env_show": ToolSpec("shell.ddev.env_show", "DdevEnvShowTool", read_only=True),
     "ddev_env_start": ToolSpec("shell.ddev.env_start", "DdevEnvStartTool", read_only=False),
     "ddev_env_stop": ToolSpec("shell.ddev.env_stop", "DdevEnvStopTool", read_only=False),
-    "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool", read_only=False),
+    "ddev_env_test": ToolSpec("shell.ddev.env_test", "DdevEnvTestTool", read_only=True),
     "ddev_release_changelog": ToolSpec("shell.ddev.release_changelog", "DdevReleaseChangelogTool", read_only=False),
     "ddev_validate": ToolSpec("shell.ddev.validate", "DdevValidateTool", read_only=False),
     "spawn_subagent": ToolSpec(
