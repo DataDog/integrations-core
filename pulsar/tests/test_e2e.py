@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import EXPECTED_METRICS, METRICS_URL, OPTIONAL_METRICS
 
@@ -23,3 +24,18 @@ def test_check(dd_agent_check, instance):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_e2e_discovery(dd_agent_check, discovery_config):
+    aggregator = dd_agent_check(
+        discovery_config,
+        check_rate=True,
+        discovery_min_instances=1,
+        discovery_timeout=30,
+    )
+
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        check_symmetric_inclusion=True,
+    )
