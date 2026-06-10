@@ -1662,6 +1662,22 @@ def _collect_groups(check, describe_result, group_id='test-group'):
     return kafka_consumer_check
 
 
+def _collect_groups_with_cache(check, describe_result, seed=None, group_id='test-group'):
+    """Like _collect_groups but wires the persistent cache so membership-change logic is exercised."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+
+    mock_client = seed_mock_kafka_client()
+    _stub_consumer_groups(mock_client.kafka_client, {group_id: describe_result})
+    kafka_consumer_check.metadata_collector.client = mock_client
+    _wire_cache(kafka_consumer_check, seed)
+
+    metadata = mock.MagicMock()
+    metadata.cluster_id = 'test-cluster-id'
+    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    return kafka_consumer_check
+
+
 def test_consumer_group_rebalancing_state_based(check, aggregator):
     """A group in a rebalancing state reports rebalancing=1 (classic protocol)."""
     describe_result = _make_group_describe(state_name='PREPARING_REBALANCING', members=[_make_member()])
@@ -1765,5 +1781,52 @@ def test_consumer_group_member_static_membership_tag(check, aggregator):
             'client_id:c1',
             'member_host:h1',
             'group_instance_id:static-1',
+        ],
+    )
+
+
+def test_membership_changes_not_emitted_on_first_run(check, aggregator):
+    """No membership_changes on first run — no prior cache to compare against."""
+    describe_result = _make_group_describe(members=[_make_member()])
+    _collect_groups_with_cache(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def test_membership_changes_not_emitted_when_members_unchanged(check, aggregator):
+    """No membership_changes when the member set is identical to the previous run."""
+    member = _make_member(client_id='c1')
+    prev_hash = hashlib.sha256(b'm-c1').hexdigest()
+    cache_key = 'kafka_consumer_group_members_cache'
+    describe_result = _make_group_describe(members=[member])
+    _collect_groups_with_cache(
+        check,
+        describe_result,
+        seed={cache_key: json.dumps({'test-group': prev_hash})},
+    )
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def test_membership_changes_emitted_when_members_differ(check, aggregator):
+    """membership_changes fires exactly once when the member set differs from the prior run."""
+    cache_key = 'kafka_consumer_group_members_cache'
+    old_hash = hashlib.sha256(b'm-old').hexdigest()
+    describe_result = _make_group_describe(members=[_make_member(client_id='new')])
+    _collect_groups_with_cache(
+        check,
+        describe_result,
+        seed={cache_key: json.dumps({'test-group': old_hash})},
+    )
+    aggregator.assert_metric(
+        'kafka.consumer_group.membership_changes',
+        value=1,
+        count=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'partition_assignor:range',
+            'consumer_group_type:CONSUMER',
+            'is_simple_consumer_group:false',
         ],
     )

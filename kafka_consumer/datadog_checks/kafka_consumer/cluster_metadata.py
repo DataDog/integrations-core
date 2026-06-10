@@ -851,13 +851,7 @@ class ClusterMetadataCollector:
             except Exception as e:
                 self.log.warning("Error getting consumer group details for %s: %s", group_id, e)
 
-        try:
-            prev_members_cache_str = self.check.read_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY)
-            prev_member_hashes = json.loads(prev_members_cache_str) if prev_members_cache_str else None
-        except Exception as e:
-            self.log.debug("Could not read consumer group members cache: %s", e)
-            prev_member_hashes = None
-
+        prev_member_hashes = self._load_member_hashes_cache()
         current_member_hashes = {}
 
         for group_id, group_info in group_id_to_info.items():
@@ -880,7 +874,9 @@ class ClusterMetadataCollector:
                 tags=group_meta_tags,
             )
 
-            member_hash = hashlib.sha256(','.join(sorted(m.member_id for m in members)).encode()).hexdigest()
+            member_hash = hashlib.sha256(
+                ','.join(sorted(getattr(m, 'member_id', '') or '' for m in members)).encode()
+            ).hexdigest()
             current_member_hashes[group_id] = member_hash
 
             if prev_member_hashes is not None:
@@ -906,8 +902,21 @@ class ClusterMetadataCollector:
                         member_tags.append(f'group_instance_id:{group_instance_id}')
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
+        self._save_member_hashes_cache(current_member_hashes)
+
+    def _load_member_hashes_cache(self) -> dict[str, str] | None:
+        """Return the previous member-hash map, or None if unreadable."""
         try:
-            self.check.write_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY, json.dumps(current_member_hashes))
+            cached = self.check.read_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY)
+            return json.loads(cached) if cached else None
+        except Exception as e:
+            self.log.debug("Could not read consumer group members cache: %s", e)
+            return None
+
+    def _save_member_hashes_cache(self, hashes: dict[str, str]) -> None:
+        """Persist the current member-hash map."""
+        try:
+            self.check.write_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY, json.dumps(hashes))
         except Exception as e:
             self.log.debug("Could not write consumer group members cache: %s", e)
 
