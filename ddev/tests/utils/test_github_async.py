@@ -773,7 +773,29 @@ async def test_download_artifact_non_302_raises(tmp_path) -> None:
         return httpx.Response(200, content=b"not a redirect")
 
     client = _make_client(httpx.MockTransport(handler))
-    with pytest.raises(httpx.HTTPError):
+    with pytest.raises(httpx.HTTPError, match="Expected 302"):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+@pytest.mark.asyncio
+async def test_download_artifact_signed_url_error_raises(monkeypatch, tmp_path) -> None:
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(403, content=b"expired")
+
+    real_async_client = httpx.AsyncClient
+
+    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
+        if kwargs.get("transport") is None:
+            kwargs["transport"] = httpx.MockTransport(signed_handler)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+    with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
@@ -787,13 +809,20 @@ async def test_download_artifact_missing_location_header_raises(tmp_path) -> Non
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
+@pytest.mark.parametrize(
+    "malicious_member",
+    [
+        pytest.param("../escape.txt", id="parent-traversal"),
+        pytest.param("/etc/passwd", id="absolute-path"),
+    ],
+)
 @pytest.mark.asyncio
-async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path) -> None:
+async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malicious_member: str) -> None:
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
 
     def signed_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=_make_zip({"../escape.txt": b"pwn"}))
+        return httpx.Response(200, content=_make_zip({malicious_member: b"pwn"}))
 
     real_async_client = httpx.AsyncClient
 
@@ -806,7 +835,8 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path) -> Non
 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     dest = tmp_path / "out"
-    with pytest.raises(httpx.HTTPError, match="(?i)zip-slip"):
+    with pytest.raises(ValueError, match="(?i)zip-slip"):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", dest)
 
-    assert not (tmp_path / "escape.txt").exists()
+    # Nothing was extracted before the guard fired.
+    assert list(dest.rglob("*")) == []

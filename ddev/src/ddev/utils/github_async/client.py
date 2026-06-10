@@ -111,6 +111,9 @@ class AsyncGitHubClient:
     # Internal helpers
     # ------------------------------------------------------------------
 
+    def _effective_timeout(self, timeout: float | None) -> float:
+        return timeout if timeout is not None else self._default_timeout
+
     async def _request(
         self,
         method: str,
@@ -118,7 +121,7 @@ class AsyncGitHubClient:
         timeout: float | None = None,
         **kwargs: Any,
     ) -> httpx.Response:
-        effective_timeout = timeout if timeout is not None else self._default_timeout
+        effective_timeout = self._effective_timeout(timeout)
         try:
             response = await self._client.request(method, endpoint, timeout=effective_timeout, **kwargs)
         except httpx.TransportError as exc:
@@ -526,7 +529,7 @@ class AsyncGitHubClient:
         timeout: float | None = None,
     ) -> str:
         """Authenticated GET; return the unauthenticated signed URL from the 302 Location header."""
-        effective_timeout = timeout if timeout is not None else self._default_timeout
+        effective_timeout = self._effective_timeout(timeout)
         redirect_response = await self._client.request(
             "GET",
             archive_download_url,
@@ -550,7 +553,7 @@ class AsyncGitHubClient:
         timeout: float | None = None,
     ) -> None:
         """Anonymous fetch (no bearer token to S3) + zip-slip-validated extractall."""
-        effective_timeout = timeout if timeout is not None else self._default_timeout
+        effective_timeout = self._effective_timeout(timeout)
         async with httpx.AsyncClient(timeout=effective_timeout) as anonymous_client:
             download_response = await anonymous_client.get(signed_url)
             download_response.raise_for_status()
@@ -561,10 +564,10 @@ class AsyncGitHubClient:
             for info in zf.infolist():
                 name = info.filename
                 if name.startswith("/") or ".." in Path(name).parts:
-                    raise httpx.HTTPError(f"Zip-slip detected: {name}")
+                    raise ValueError(f"Zip-slip detected: {name}")
                 target = (dest_path / name).resolve()
                 if target != dest_root and dest_root not in target.parents:
-                    raise httpx.HTTPError(f"Zip-slip detected: {name}")
+                    raise ValueError(f"Zip-slip detected: {name}")
             zf.extractall(dest_path)
 
     async def download_artifact(

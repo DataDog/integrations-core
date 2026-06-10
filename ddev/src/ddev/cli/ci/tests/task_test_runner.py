@@ -40,8 +40,14 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     Note: ``base_sha`` is currently used as the check run's ``head_sha`` while the
     workflow input receives ``checkout_sha`` (the merge commit). The asymmetry —
     check on PR head, workflow on merge commit — is intentional for now, but the
-    semantics will be revisited once ``BatchFinished`` consumers are settled. See
-    PR #23518 review thread.
+    semantics will be revisited once ``BatchFinished`` consumers are settled.
+
+    Known limitations (accepted for now):
+    - A failure before the check run is created (dispatch, initial run fetch, or
+      check creation) leaves the dispatched workflow untracked with no ``BatchFinished``.
+    - ``_poll_until_complete`` is unbounded; a run that never reaches ``"completed"``
+      relies on the orchestrator's ``max_timeout`` to cancel it. Retry/timeout handling
+      is deferred to the async client.
     """
 
     def __init__(
@@ -120,15 +126,20 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 artifacts_path=str(artifacts_path),
             )
         finally:
-            await self._client.update_check_run(
-                self._owner,
-                self._repo,
-                check_run_id,
-                status="completed",
-                conclusion=final_conclusion,
-                details_url=workflow_url or None,
-            )
-            self._logger.info("Check run closed", extra={**log_extra, "conclusion": final_conclusion})
+            try:
+                await self._client.update_check_run(
+                    self._owner,
+                    self._repo,
+                    check_run_id,
+                    status="completed",
+                    conclusion=final_conclusion,
+                    details_url=workflow_url or None,
+                )
+                self._logger.info("Check run closed", extra={**log_extra, "conclusion": final_conclusion})
+            except Exception:
+                self._logger.exception(
+                    "Failed to close check run", extra={**log_extra, "conclusion": final_conclusion}
+                )
 
         if finished is not None:
             self.submit_message(finished)
@@ -153,37 +164,40 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> Path:
         run_path = self._artifacts_base_path / str(run_id)
         failures: list[tuple[int, str]] = []
-        async for page in self._client.list_workflow_run_artifacts(self._owner, self._repo, run_id):
-            for artifact in page.data.artifacts:
-                if artifact.expired:
-                    self._logger.info(
-                        "Skipping expired artifact %s (%s)",
-                        artifact.id,
-                        artifact.name,
-                        extra=log_extra,
-                    )
-                    continue
-                if not artifact.archive_download_url:
-                    self._logger.info(
-                        "Skipping artifact %s (%s) without download URL",
-                        artifact.id,
-                        artifact.name,
-                        extra=log_extra,
-                    )
-                    continue
-                target = run_path / f"{artifact.id}-{artifact.name}"
-                try:
-                    await self._client.download_artifact(artifact.archive_download_url, target)
-                    self._logger.info("Downloaded artifact %s -> %s", artifact.id, target, extra=log_extra)
-                except Exception as exc:
-                    self._logger.warning(
-                        "Failed to download artifact %s (%s): %s",
-                        artifact.id,
-                        artifact.name,
-                        exc,
-                        extra=log_extra,
-                    )
-                    failures.append((artifact.id, artifact.name))
+        try:
+            async for page in self._client.list_workflow_run_artifacts(self._owner, self._repo, run_id):
+                for artifact in page.data.artifacts:
+                    if artifact.expired:
+                        self._logger.info(
+                            "Skipping expired artifact %s (%s)",
+                            artifact.id,
+                            artifact.name,
+                            extra=log_extra,
+                        )
+                        continue
+                    if not artifact.archive_download_url:
+                        self._logger.info(
+                            "Skipping artifact %s (%s) without download URL",
+                            artifact.id,
+                            artifact.name,
+                            extra=log_extra,
+                        )
+                        continue
+                    target = run_path / f"{artifact.id}-{artifact.name}"
+                    try:
+                        await self._client.download_artifact(artifact.archive_download_url, target)
+                        self._logger.info("Downloaded artifact %s -> %s", artifact.id, target, extra=log_extra)
+                    except Exception as exc:
+                        self._logger.warning(
+                            "Failed to download artifact %s (%s): %s",
+                            artifact.id,
+                            artifact.name,
+                            exc,
+                            extra=log_extra,
+                        )
+                        failures.append((artifact.id, artifact.name))
+        except Exception:
+            self._logger.warning("Failed to list workflow run artifacts", extra=log_extra, exc_info=True)
         if failures:
             self._logger.warning(
                 "Artifact download had %s failures: %s",
