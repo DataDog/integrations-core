@@ -533,6 +533,9 @@ jobs:
         --version ${{ env.VERSION }}
         staged
 
+    - name: Verify PKG was produced
+      run: ls staged/*.pkg
+
   macos-packaging:
     name: Build macOS installer and sign/notarize artifacts
     if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || github.event_name == 'schedule'
