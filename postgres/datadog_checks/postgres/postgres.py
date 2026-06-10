@@ -1323,6 +1323,7 @@ class PostgreSql(DatabaseCheck):
         if not self._config.enable_automatic_diagnostics:
             return
         try:
+            self.diagnosis.clear()
             run_diagnostics(self)
             self.health.submit_diagnoses()
         except Exception as e:
