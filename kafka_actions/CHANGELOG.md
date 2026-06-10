@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.7.1 / 2026-06-09
+
+***Fixed***:
+
+* Fall back to string deserialization when schema registry magic byte is absent. ([#23951](https://github.com/DataDog/integrations-core/pull/23951))
+
 ## 2.7.0 / 2026-05-14
 
 ***Added***:
