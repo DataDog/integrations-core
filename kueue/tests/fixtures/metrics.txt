@@ -59,8 +59,14 @@ controller_runtime_webhook_requests{replica_role="leader"} 1
 controller_runtime_webhook_requests_in_flight{replica_role="leader"} 1
 
 # HELP go_gc_duration_seconds Kueue go gc duration seconds metric.
-# TYPE go_gc_duration_seconds gauge
-go_gc_duration_seconds{replica_role="leader"} 1
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{replica_role="leader",quantile="0"} 1
+go_gc_duration_seconds{replica_role="leader",quantile="0.25"} 1
+go_gc_duration_seconds{replica_role="leader",quantile="0.5"} 1
+go_gc_duration_seconds{replica_role="leader",quantile="0.75"} 1
+go_gc_duration_seconds{replica_role="leader",quantile="1"} 1
+go_gc_duration_seconds_sum{replica_role="leader"} 1
+go_gc_duration_seconds_count{replica_role="leader"} 1
 
 # HELP go_gc_gogc_percent Kueue go gc gogc percent metric.
 # TYPE go_gc_gogc_percent gauge
