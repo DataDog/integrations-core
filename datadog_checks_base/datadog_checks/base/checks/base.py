@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import functools
 import importlib
 import logging
@@ -241,9 +242,9 @@ class AgentCheck(object):
                     check = cls(check_name, copy.deepcopy(init_config), copy.deepcopy(instances))
                     with _suppress_discovery_side_effects(check) as stats:
                         error_report = check.run()
-                    if not error_report and stats['metrics'] > 0:
+                    if not error_report and stats.metric_count > 0:
                         return json.encode([config])
-                    if not error_report and stats['metrics'] == 0:
+                    if not error_report and stats.metric_count == 0:
                         logging.getLogger(__name__).debug('config-discovery: candidate rejected (no metrics collected)')
                 except Exception:
                     logging.getLogger(__name__).debug('config-discovery: candidate rejected', exc_info=True)
@@ -1874,6 +1875,11 @@ def _discovery_service_from_json(service_json: str) -> Service:
     )
 
 
+@dataclasses.dataclass
+class _DiscoveryRunStats:
+    metric_count: int = 0
+
+
 class _DiscoveryErrorDowngrade(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         if record.levelno >= logging.ERROR:
@@ -1887,7 +1893,7 @@ def _discovery_noop(*args: Any, **kwargs: Any) -> None:
 
 
 @contextmanager
-def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[dict[str, int]]:
+def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRunStats]:
     noop_methods = (
         'event',
         'event_platform_event',
@@ -1899,10 +1905,10 @@ def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[dict[str, in
         'write_persistent_cache',
     )
     originals: dict[str, Any] = {}
-    stats = {'metrics': 0}
+    stats = _DiscoveryRunStats()
 
     def _count_metric(*args: Any, **kwargs: Any) -> None:
-        stats['metrics'] += 1
+        stats.metric_count += 1
 
     if hasattr(check, '_submit_metric'):
         originals['_submit_metric'] = check._submit_metric
