@@ -12,12 +12,7 @@ import click
 from httpx import HTTPError, HTTPStatusError
 from packaging.version import Version
 
-from .build_agent import (
-    BUILD_AGENT_YAML_PATH,
-    ensure_build_agent_yaml_updated,
-    find_build_agent_template_main_branch_matches,
-    replace_build_agent_template_main_branch,
-)
+from .build_agent import BUILD_AGENT_YAML_PATH, ensure_build_agent_yaml_updated
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -25,21 +20,6 @@ if TYPE_CHECKING:
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
-
-__all__ = [
-    'BRANCH_NAME_PATTERN',
-    'BRANCH_NAME_REGEX',
-    'BUILD_AGENT_YAML_PATH',
-    'GITHUB_LABEL_COLOR',
-    'bump_milestone',
-    'compute_next_milestone',
-    'create',
-    'ensure_build_agent_yaml_updated',
-    'find_build_agent_template_main_branch_matches',
-    'replace_build_agent_template_main_branch',
-    'suggest_next_branch',
-    'update_release_json',
-]
 
 
 @click.command
