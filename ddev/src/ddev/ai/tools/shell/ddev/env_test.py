@@ -11,14 +11,14 @@ from ddev.ai.tools.shell.base import CmdTool
 
 class EnvTestInput(BaseToolInput):
     integration: Annotated[str, Field(description="Integration name")]
-    environment: Annotated[str, Field(description="Environment name (e.g. py3.11-1.23)")]
-    dev: Annotated[bool, Field(description="Pass --dev flag (use if env was started with --dev)")] = False
+    environment: Annotated[
+        str, Field(description="Environment name (e.g. py3.11-1.23). Defaults to 'all' to test every environment.")
+    ] = "all"
 
 
 class DdevEnvTestTool(CmdTool[EnvTestInput]):
-    """Runs E2E tests for the given integration in the specified environment.
-    `ddev env test` starts the environment, runs the tests, and stops it automatically —
-    no prior `ddev_env_start` is needed. Use `dev=true` to pass the `--dev` flag."""
+    """Runs E2E tests for an integration. Always passes --dev and tests all environments by default.
+    Pass a specific environment name to target a single environment."""
 
     timeout = 600
 
@@ -27,8 +27,4 @@ class DdevEnvTestTool(CmdTool[EnvTestInput]):
         return "ddev_env_test"
 
     def cmd(self, tool_input: EnvTestInput) -> list[str]:
-        cmd = ["ddev", "--no-interactive", "env", "test"]
-        if tool_input.dev:
-            cmd.append("--dev")
-        cmd += [tool_input.integration, tool_input.environment]
-        return cmd
+        return ["ddev", "--no-interactive", "env", "test", "--dev", tool_input.integration, tool_input.environment]
