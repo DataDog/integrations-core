@@ -594,15 +594,14 @@ def test_infra_mode_tag(dd_run_check, aggregator, instance, infrastructure_mode,
 
     aggregator.assert_metric_has_tag('proxmox.cpu', expected_tag, count=expected_count)
 
-    if expected_count > 0:
-        # assert that no container metrics have the infra_mode tag
-        for metric in aggregator.metrics('proxmox.cpu'):
-            if 'proxmox_type:container' in metric.tags:
-                assert expected_tag not in metric.tags
-        # assert only the cpu metric has the infra_mode tag
-        for metric_name in ALL_METRICS:
-            if metric_name != 'proxmox.cpu':
-                aggregator.assert_metric_has_tag(metric_name, expected_tag, count=0)
+    # assert that no container metrics have the infra_mode tag
+    for metric in aggregator.metrics('proxmox.cpu'):
+        if 'proxmox_type:container' in metric.tags:
+            assert expected_tag not in metric.tags
+    # assert only the cpu metric has the infra_mode tag
+    for metric_name in ALL_METRICS:
+        if metric_name != 'proxmox.cpu':
+            aggregator.assert_metric_has_tag(metric_name, expected_tag, count=0)
 
 
 @pytest.mark.parametrize(
