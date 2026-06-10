@@ -137,9 +137,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 )
                 self._logger.info("Check run closed", extra={**log_extra, "conclusion": final_conclusion})
             except Exception:
-                self._logger.exception(
-                    "Failed to close check run", extra={**log_extra, "conclusion": final_conclusion}
-                )
+                self._logger.exception("Failed to close check run", extra={**log_extra, "conclusion": final_conclusion})
 
         if finished is not None:
             self.submit_message(finished)
