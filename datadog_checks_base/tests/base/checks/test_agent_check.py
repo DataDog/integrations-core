@@ -153,6 +153,51 @@ def test_generate_configs_loads_generated_discovery_module():
     import_module.assert_called_once_with('datadog_checks.generated.config_models.discovery')
 
 
+def test_suppress_discovery_side_effects_restores_methods_after_exit():
+    from datadog_checks.base.checks.base import _discovery_noop, _suppress_discovery_side_effects
+
+    check = AgentCheck()
+
+    with _suppress_discovery_side_effects(check):
+        assert check.service_check is _discovery_noop
+
+    assert check.service_check is not _discovery_noop
+
+
+def test_suppress_discovery_side_effects_downgrades_error_logs():
+    from datadog_checks.base.checks.base import _DiscoveryErrorDowngrade, _suppress_discovery_side_effects
+
+    check = AgentCheck()
+
+    with _suppress_discovery_side_effects(check):
+        filters = check.log.logger.filters
+        assert any(isinstance(f, _DiscoveryErrorDowngrade) for f in filters)
+
+        record = logging.LogRecord(
+            name='test', level=logging.ERROR, pathname='', lineno=0, msg='boom', args=(), exc_info=None
+        )
+        for f in filters:
+            f.filter(record)
+
+        assert record.levelno == logging.DEBUG
+        assert record.levelname == 'DEBUG'
+
+    assert not any(isinstance(f, _DiscoveryErrorDowngrade) for f in check.log.logger.filters)
+
+
+def test_suppress_discovery_side_effects_restores_methods_on_exception():
+    from datadog_checks.base.checks.base import _discovery_noop, _suppress_discovery_side_effects
+
+    check = AgentCheck()
+
+    with pytest.raises(RuntimeError):
+        with _suppress_discovery_side_effects(check):
+            assert check.service_check is _discovery_noop
+            raise RuntimeError('body failed')
+
+    assert check.service_check is not _discovery_noop
+
+
 @pytest.fixture
 def fresh_check():
     """Return an AgentCheck with no cached _package_dir."""
