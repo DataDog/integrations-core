@@ -1,1 +1,0 @@
-Track each Nutanix alert through its lifecycle (open, acknowledged, resolved) with dedicated metrics, transition events, and a default monitor template.
