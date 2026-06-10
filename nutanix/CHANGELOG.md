@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.5.0 / 2026-06-10
+
+***Added***:
+
+* Track each Nutanix alert through its lifecycle (open, acknowledged, resolved) with dedicated metrics, transition events, and a default monitor template. ([#23538](https://github.com/DataDog/integrations-core/pull/23538))
+
 ## 1.4.0 / 2026-06-09
 
 ***Added***:
