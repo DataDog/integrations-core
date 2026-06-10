@@ -69,6 +69,12 @@ def get_e2e_discovery_config(
     *,
     site_packages: str = '/opt/datadog-agent/embedded/lib/python3.13/site-packages',
 ) -> tuple[dict[str, Any], dict[str, list[str]]]:
+    """Return ``(auto_conf config, metadata)`` for an e2e discovery run.
+
+    Reads the integration's ``auto_conf.yaml`` and returns the parsed config together
+    with Docker volume metadata that mounts the repo's discovery utilities and the
+    integration's generated ``config_models/discovery.py`` into the agent container.
+    """
     check_root = os.fspath(check_root or find_check_root(depth=1))
     check_name = os.path.basename(check_root)
     repo_root = os.path.dirname(check_root)
@@ -84,19 +90,6 @@ def get_e2e_discovery_config(
                 '{}:{}'.format(
                     os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base', 'utils', 'discovery'),
                     f'{site_packages}/datadog_checks/base/utils/discovery:ro',
-                ),
-                '{}:{}'.format(
-                    os.path.join(
-                        repo_root,
-                        'datadog_checks_base',
-                        'datadog_checks',
-                        'base',
-                        'checks',
-                        'openmetrics',
-                        'v2',
-                        'base.py',
-                    ),
-                    f'{site_packages}/datadog_checks/base/checks/openmetrics/v2/base.py:ro',
                 ),
                 '{}:{}'.format(
                     os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base', 'checks', 'base.py'),

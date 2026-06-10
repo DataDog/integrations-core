@@ -6,12 +6,16 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class Port:
+    """An Autodiscovery-exposed port on a service."""
+
     number: int
     name: str = ""
 
 
 @dataclass(frozen=True)
 class Service:
+    """An Autodiscovery-discovered service instance."""
+
     id: str
     host: str
     ports: tuple[Port, ...] = field(default_factory=tuple)
