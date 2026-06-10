@@ -184,7 +184,7 @@ def test_explain_parameterized_queries_explain_prepared_statement_no_plan_return
 
     with mock.patch(
         'datadog_checks.postgres.explain_parameterized_queries.ExplainParameterizedQueries._execute_query_and_fetch_rows',
-        return_value=None,
+        return_value=[],
     ):
         plan_dict, explain_err_code, err = check.statement_samples._run_and_track_explain(
             DB_NAME,
