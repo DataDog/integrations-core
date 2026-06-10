@@ -27,15 +27,29 @@ def _make_check(extra=None):
     return SapHanaCheck('sap_hana', {}, [instance])
 
 
-def _make_cursor_mock(schema_rows, table_rows, column_rows):
-    """Return a (conn, cursor) pair whose fetchall cycles through the three catalog result sets."""
+def _joined_row(
+    schema,
+    table,
+    table_type='TABLE',
+    is_column_table='TRUE',
+    owner='OWNER',
+    column_name=None,
+    data_type='INTEGER',
+    nullable='TRUE',
+    default=None,
+    position=1,
+):
+    """Build one row of the streamed schema/tables/columns join, in SELECT column order."""
+    return (schema, table, table_type, is_column_table, owner, column_name, data_type, nullable, default, position)
+
+
+def _make_cursor_mock(joined_rows, db_name='TEST_DB', description='Test database'):
+    """Return a (conn, cursor) pair that streams the joined result set one row at a time via fetchone."""
     conn = mock.MagicMock()
     cursor = mock.MagicMock()
     conn.cursor.return_value = cursor
-    # fetchone: first call is _get_databases (CURRENT_DATABASE_QUERY)
-    cursor.fetchone.return_value = ('TEST_DB', 'Test database')
-    # fetchall: cycles through schemas → tables → columns
-    cursor.fetchall.side_effect = [schema_rows, table_rows, column_rows]
+    # fetchone order: database name, database description, then the joined rows, then end-of-cursor.
+    cursor.fetchone.side_effect = [(db_name,), (description,)] + list(joined_rows) + [None]
     return conn, cursor
 
 
@@ -65,9 +79,7 @@ class TestHanaSchemaCollector:
     def test_payload_structure(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
         check._conn, _ = _make_cursor_mock(
-            schema_rows=[('MY_SCHEMA', 'MY_OWNER')],
-            table_rows=[('MY_TABLE', 'MY_SCHEMA', 'TABLE', 'TRUE')],
-            column_rows=[('MY_SCHEMA', 'MY_TABLE', 'COL1', 'INTEGER', 'TRUE', None, 1)],
+            [_joined_row('MY_SCHEMA', 'MY_TABLE', owner='MY_OWNER', column_name='COL1')],
         )
 
         payloads = _collect_payloads(check)
@@ -90,59 +102,56 @@ class TestHanaSchemaCollector:
         assert table['columns'][0]['data_type'] == 'INTEGER'
         assert table['columns'][0]['nullable'] is True
 
-    def test_system_schemas_excluded(self):
+    def test_zero_column_table(self):
+        # A table with no visible columns comes back as a single row with NULL column fields.
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock([_joined_row('S', 'EMPTY', column_name=None)])
+
+        payloads = _collect_payloads(check)
+        table = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]
+        assert table['name'] == 'EMPTY'
+        assert table['columns'] == []
+
+    def test_multiple_tables_streamed(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
         check._conn, _ = _make_cursor_mock(
-            schema_rows=[
-                ('SYS', 'SYSTEM'),
-                ('SYSTEM', 'SYSTEM'),
-                ('PUBLIC', 'PUBLIC'),
-                ('_SYS_REPO', 'SYSTEM'),
-                ('_SYS_BIC', 'SYSTEM'),
-                ('USER_SCHEMA', 'MY_OWNER'),
+            [
+                _joined_row('S', 'T1', column_name='C1', position=1),
+                _joined_row('S', 'T1', column_name='C2', position=2),
+                _joined_row('S', 'T2', column_name='C1', position=1),
             ],
-            table_rows=[('T', 'USER_SCHEMA', 'TABLE', 'TRUE')],
-            column_rows=[],
         )
 
         payloads = _collect_payloads(check)
-        schema_names = [s['name'] for s in payloads[0]['metadata'][0]['schemas']]
-        assert schema_names == ['USER_SCHEMA']
+        tables = [t['name'] for row in payloads[0]['metadata'] for s in row['schemas'] for t in s['tables']]
+        assert tables == ['T1', 'T2']
 
-    def test_exclude_schemas_filter(self):
+    def test_system_schemas_excluded_in_sql(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        query, params = check._schema_collector._build_query()
+        assert "NOT IN ('SYS', 'SYSTEM', 'PUBLIC')" in query
+        assert r"NOT LIKE '\_SYS\_%' ESCAPE '\'" in query
+        assert params == ()
+
+    def test_exclude_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'exclude_schemas': ['EXCL']}})
-        check._conn, _ = _make_cursor_mock(
-            schema_rows=[('EXCL', 'O'), ('KEEP', 'O')],
-            table_rows=[('T', 'KEEP', 'TABLE', 'TRUE')],
-            column_rows=[],
-        )
+        query, params = check._schema_collector._build_query()
+        assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
+        assert params == ('EXCL',)
 
-        payloads = _collect_payloads(check)
-        schema_names = [s['name'] for s in payloads[0]['metadata'][0]['schemas']]
-        assert 'EXCL' not in schema_names
-        assert 'KEEP' in schema_names
-
-    def test_include_schemas_filter(self):
+    def test_include_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'include_schemas': ['ONLY']}})
-        check._conn, _ = _make_cursor_mock(
-            schema_rows=[('ONLY', 'O'), ('OTHER', 'O')],
-            table_rows=[('T', 'ONLY', 'TABLE', 'TRUE')],
-            column_rows=[],
-        )
-
-        payloads = _collect_payloads(check)
-        schema_names = [s['name'] for s in payloads[0]['metadata'][0]['schemas']]
-        assert schema_names == ['ONLY']
+        query, params = check._schema_collector._build_query()
+        assert 'AND t.SCHEMA_NAME IN (?)' in query
+        assert params == ('ONLY',)
 
     def test_max_columns_respected(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'max_columns': 2}})
         check._conn, _ = _make_cursor_mock(
-            schema_rows=[('S', 'O')],
-            table_rows=[('T', 'S', 'TABLE', 'TRUE')],
-            column_rows=[
-                ('S', 'T', 'C1', 'INT', 'TRUE', None, 1),
-                ('S', 'T', 'C2', 'INT', 'TRUE', None, 2),
-                ('S', 'T', 'C3', 'INT', 'TRUE', None, 3),
+            [
+                _joined_row('S', 'T', column_name='C1', position=1),
+                _joined_row('S', 'T', column_name='C2', position=2),
+                _joined_row('S', 'T', column_name='C3', position=3),
             ],
         )
 
@@ -150,25 +159,14 @@ class TestHanaSchemaCollector:
         cols = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]['columns']
         assert len(cols) == 2
 
-    def test_max_tables_respected(self):
+    def test_max_tables_limit_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'max_tables': 3}})
-        check._conn, _ = _make_cursor_mock(
-            schema_rows=[('S', 'O')],
-            table_rows=[('T{}'.format(i), 'S', 'TABLE', 'TRUE') for i in range(10)],
-            column_rows=[],
-        )
-
-        payloads = _collect_payloads(check)
-        # each metadata row is one table
-        assert len(payloads[0]['metadata']) == 3
+        query, _ = check._schema_collector._build_query()
+        assert 'LIMIT 3' in query
 
     def test_maybe_collect_schemas_time_gated(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 600}})
-        check._conn, _ = _make_cursor_mock(
-            schema_rows=[('S', 'O')],
-            table_rows=[('T', 'S', 'TABLE', 'TRUE')],
-            column_rows=[],
-        )
+        check._conn, _ = _make_cursor_mock([_joined_row('S', 'T', column_name='C1')])
         check.database_monitoring_metadata = mock.MagicMock()
         check.histogram = mock.MagicMock()
         check.gauge = mock.MagicMock()

@@ -14,34 +14,35 @@ if TYPE_CHECKING:
     from .config_models.instance import CollectSchemas
     from .sap_hana import SapHanaCheck
 
-_SYSTEM_SCHEMAS = frozenset(['SYS', 'SYSTEM', 'PUBLIC'])
-_SYSTEM_SCHEMA_PREFIX = '_SYS_'
-
 CURRENT_DATABASE_QUERY = "SELECT DATABASE_NAME FROM SYS.M_DATABASE"
 CURRENT_DATABASE_DESCRIPTION_QUERY = "SELECT DESCRIPTION FROM SYS.M_DATABASE"
 
-SCHEMAS_QUERY = """
-SELECT SCHEMA_NAME, SCHEMA_OWNER
-FROM SYS.SCHEMAS
+# Single query that filters and caps tables in the database (not in Python) and joins their columns.
+# The limited_tables CTE applies the schema filters and max_tables LIMIT before the column join, so
+# the server never returns more than max_tables tables' worth of rows. Results are ordered so each
+# table's columns arrive contiguously and can be assembled one table at a time while streaming the
+# cursor. System schemas are excluded here; '_' is a LIKE wildcard, so '_SYS_' is escaped.
+SCHEMA_TABLES_QUERY = r"""
+WITH limited_tables AS (
+    SELECT t.SCHEMA_NAME, t.TABLE_NAME, t.TABLE_TYPE, t.IS_COLUMN_TABLE, s.SCHEMA_OWNER
+    FROM SYS.TABLES t
+    LEFT JOIN SYS.SCHEMAS s ON s.SCHEMA_NAME = t.SCHEMA_NAME
+    WHERE t.IS_TEMPORARY = 'FALSE'
+      AND t.IS_SYSTEM_TABLE = 'FALSE'
+      AND t.SCHEMA_NAME NOT IN ('SYS', 'SYSTEM', 'PUBLIC')
+      AND t.SCHEMA_NAME NOT LIKE '\_SYS\_%' ESCAPE '\'
+      {include_clause}
+      {exclude_clause}
+    ORDER BY t.SCHEMA_NAME, t.TABLE_NAME
+    LIMIT {max_tables}
+)
+SELECT lt.SCHEMA_NAME, lt.TABLE_NAME, lt.TABLE_TYPE, lt.IS_COLUMN_TABLE, lt.SCHEMA_OWNER,
+       c.COLUMN_NAME, c.DATA_TYPE_NAME, c.IS_NULLABLE, c.DEFAULT_VALUE, c.POSITION
+FROM limited_tables lt
+LEFT JOIN SYS.TABLE_COLUMNS c
+  ON c.SCHEMA_NAME = lt.SCHEMA_NAME AND c.TABLE_NAME = lt.TABLE_NAME
+ORDER BY lt.SCHEMA_NAME, lt.TABLE_NAME, c.POSITION
 """
-
-TABLES_QUERY = """
-SELECT TABLE_NAME, SCHEMA_NAME, TABLE_TYPE, IS_COLUMN_TABLE
-FROM SYS.TABLES
-WHERE IS_TEMPORARY = 'FALSE'
-  AND IS_SYSTEM_TABLE = 'FALSE'
-"""
-
-COLUMNS_QUERY = """
-SELECT SCHEMA_NAME, TABLE_NAME, COLUMN_NAME, DATA_TYPE_NAME, IS_NULLABLE, DEFAULT_VALUE, POSITION
-FROM SYS.TABLE_COLUMNS
-WHERE (SCHEMA_NAME, TABLE_NAME) IN ({placeholders})
-ORDER BY SCHEMA_NAME, TABLE_NAME, POSITION
-"""
-
-
-def _is_system_schema(name):
-    return name in _SYSTEM_SCHEMAS or name.startswith(_SYSTEM_SCHEMA_PREFIX)
 
 
 class HanaSchemaCollectorConfig(SchemaCollectorConfig):
@@ -60,6 +61,7 @@ class HanaSchemaCollector(SchemaCollector):
 
     def __init__(self, check: SapHanaCheck, config: CollectSchemas):
         super().__init__(check, HanaSchemaCollectorConfig(config))
+        self._pending_row = None
 
     @property
     def kind(self) -> str:
@@ -85,92 +87,70 @@ class HanaSchemaCollector(SchemaCollector):
             self._log.warning("Could not fetch current HANA database info: %s", e)
         return [{'name': self._check._server, 'description': ''}]
 
+    def _build_query(self):
+        """Build the schema/tables/columns query with schema filters and the table cap pushed into SQL."""
+        include_clause = ''
+        exclude_clause = ''
+        params = []
+        if self._config.include_schemas:
+            include = sorted(self._config.include_schemas)
+            placeholders = ', '.join('?' for _ in include)
+            include_clause = 'AND t.SCHEMA_NAME IN ({})'.format(placeholders)
+            params.extend(include)
+        if self._config.exclude_schemas:
+            exclude = sorted(self._config.exclude_schemas)
+            placeholders = ', '.join('?' for _ in exclude)
+            exclude_clause = 'AND t.SCHEMA_NAME NOT IN ({})'.format(placeholders)
+            params.extend(exclude)
+        query = SCHEMA_TABLES_QUERY.format(
+            include_clause=include_clause,
+            exclude_clause=exclude_clause,
+            max_tables=int(self._config.max_tables),
+        )
+        return query, tuple(params)
+
     @contextlib.contextmanager
     def _get_cursor(self, _database_name):
         conn = self._check._conn
-        table_rows = []
-        try:
-            schemas = {}
-            with closing(conn.cursor()) as cursor:
-                cursor.execute(SCHEMAS_QUERY)
-                for row in cursor.fetchall():
-                    schema_name = row[0]
-                    schema_owner = row[1] or ''
-                    if _is_system_schema(schema_name):
-                        continue
-                    if self._config.include_schemas and schema_name not in self._config.include_schemas:
-                        continue
-                    if schema_name in self._config.exclude_schemas:
-                        continue
-                    schemas[schema_name] = {'owner': schema_owner, 'tables': {}}
-
-            with closing(conn.cursor()) as cursor:
-                cursor.execute(TABLES_QUERY)
-                for row in cursor.fetchall():
-                    table_name, schema_name, table_type, is_column_table = row[0], row[1], row[2], row[3]
-                    if schema_name not in schemas:
-                        continue
-                    schemas[schema_name]['tables'][table_name] = {
-                        'type': table_type or '',
-                        'is_column_table': is_column_table == 'TRUE',
-                        'columns': [],
-                    }
-
-            total = 0
-            for schema_name in list(schemas.keys()):
-                tables = schemas[schema_name]['tables']
-                for table_name in list(tables.keys()):
-                    if total >= self._config.max_tables:
-                        del tables[table_name]
-                    else:
-                        total += 1
-                if not tables:
-                    del schemas[schema_name]
-
-            surviving_tables = [
-                (schema_name, table_name)
-                for schema_name, schema_data in schemas.items()
-                for table_name in schema_data['tables']
-            ]
-            if surviving_tables:
-                placeholders = ', '.join('(?, ?)' for _ in surviving_tables)
-                params = tuple(v for pair in surviving_tables for v in pair)
-                with closing(conn.cursor()) as cursor:
-                    cursor.execute(COLUMNS_QUERY.format(placeholders=placeholders), params)
-                    for row in cursor.fetchall():
-                        schema_name, table_name = row[0], row[1]
-                        columns = schemas[schema_name]['tables'][table_name]['columns']
-                        if len(columns) >= self._config.max_columns:
-                            continue
-                        columns.append(
-                            {
-                                'name': row[2],
-                                'data_type': row[3] or '',
-                                'nullable': row[4] == 'TRUE',
-                                'default': row[5],
-                                'position': row[6],
-                            }
-                        )
-
-            for schema_name, schema_data in schemas.items():
-                for table_name, table_data in schema_data['tables'].items():
-                    table_rows.append(
-                        {
-                            'schema_name': schema_name,
-                            'schema_owner': schema_data['owner'],
-                            'table_name': table_name,
-                            'table_type': table_data['type'],
-                            'is_column_table': table_data['is_column_table'],
-                            'columns': table_data['columns'],
-                        }
-                    )
-        except Exception as e:
-            self._log.error("Error fetching HANA schema data: %s", e)
-
-        yield iter(table_rows)
+        query, params = self._build_query()
+        with closing(conn.cursor()) as cursor:
+            cursor.execute(query, params)
+            self._pending_row = cursor.fetchone()
+            try:
+                yield cursor
+            finally:
+                self._pending_row = None
 
     def _get_next(self, cursor):
-        return next(cursor, None)
+        """Assemble one table from consecutive cursor rows sharing the same (schema, table) key."""
+        row = self._pending_row
+        if row is None:
+            return None
+        schema_name, table_name = row[0], row[1]
+        table_type, is_column_table, schema_owner = row[2], row[3], row[4]
+        columns = []
+        while row is not None and row[0] == schema_name and row[1] == table_name:
+            column_name = row[5]
+            if column_name is not None and len(columns) < self._config.max_columns:
+                columns.append(
+                    {
+                        'name': column_name,
+                        'data_type': row[6] or '',
+                        'nullable': row[7] == 'TRUE',
+                        'default': row[8],
+                        'position': row[9],
+                    }
+                )
+            row = cursor.fetchone()
+        self._pending_row = row
+        return {
+            'schema_name': schema_name,
+            'schema_owner': schema_owner or '',
+            'table_name': table_name,
+            'table_type': table_type or '',
+            'is_column_table': is_column_table == 'TRUE',
+            'columns': columns,
+        }
 
     def _map_row(self, database: DatabaseInfo, table_row) -> dict:
         return {
