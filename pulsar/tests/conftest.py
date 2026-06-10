@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_config
 from datadog_checks.pulsar import PulsarCheck
 
 from . import common
@@ -21,7 +21,8 @@ def dd_environment(instance):
         mount_logs=True,
         sleep=10,
     ):
-        yield instance
+        _, discovery_metadata = get_e2e_discovery_config()
+        yield instance, discovery_metadata
 
 
 @pytest.fixture(scope='session')
@@ -32,3 +33,8 @@ def instance():
 @pytest.fixture(scope='session')
 def pulsar_check():
     return lambda instance: PulsarCheck('pulsar', {}, [instance])
+
+
+@pytest.fixture
+def discovery_config():
+    return get_e2e_discovery_config()[0]
