@@ -77,6 +77,7 @@ class ClusterMetadataCollector:
         self.TOPIC_CONFIG_CACHE_KEY = 'kafka_topic_config_cache'
         self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
+        self.CONSUMER_GROUP_MEMBERS_CACHE_KEY = 'kafka_consumer_group_members_cache'
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
         self.SCHEMA_VERSION_CHECK_CACHE_KEY = 'kafka_schema_version_check_cache'
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY = 'kafka_schema_compatibility_fetch_cache'
@@ -850,6 +851,15 @@ class ClusterMetadataCollector:
             except Exception as e:
                 self.log.warning("Error getting consumer group details for %s: %s", group_id, e)
 
+        try:
+            prev_members_cache_str = self.check.read_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY)
+            prev_member_hashes = json.loads(prev_members_cache_str) if prev_members_cache_str else None
+        except Exception as e:
+            self.log.debug("Could not read consumer group members cache: %s", e)
+            prev_member_hashes = None
+
+        current_member_hashes = {}
+
         for group_id, group_info in group_id_to_info.items():
             group_tags = self._get_tags(cluster_id) + [f'consumer_group:{group_id}']
             state = group_info.state
@@ -873,6 +883,16 @@ class ClusterMetadataCollector:
             # during rebalances when members can momentarily be zero.
             self.check.gauge('consumer_group.empty', 1 if state_name == 'EMPTY' else 0, tags=group_meta_tags)
 
+            member_hash = hashlib.sha256(
+                ','.join(sorted(m.member_id for m in members)).encode()
+            ).hexdigest()
+            current_member_hashes[group_id] = member_hash
+
+            if prev_member_hashes is not None:
+                prev_hash = prev_member_hashes.get(group_id)
+                if prev_hash is not None and prev_hash != member_hash:
+                    self.check.count('consumer_group.membership_changes', 1, tags=group_meta_tags)
+
             for member in members:
                 client_id = member.client_id
                 host = member.host
@@ -890,6 +910,13 @@ class ClusterMetadataCollector:
                     if group_instance_id is not None:
                         member_tags.append(f'group_instance_id:{group_instance_id}')
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
+
+        try:
+            self.check.write_persistent_cache(
+                self.CONSUMER_GROUP_MEMBERS_CACHE_KEY, json.dumps(current_member_hashes)
+            )
+        except Exception as e:
+            self.log.debug("Could not write consumer group members cache: %s", e)
 
     def _build_group_meta_tags(self, state_tags: list[str], group_info) -> list[str]:
         """Build the group-level tag list, appending dimensional metadata when the broker provides it."""
