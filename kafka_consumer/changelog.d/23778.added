@@ -1,1 +1,0 @@
-Schema Registry: emit per-subject and global compatibility on the Data Streams schema payload, and stop emitting Datadog Events for broker, topic, and schema registry configurations (those payloads continue to flow to the Data Streams intake).
