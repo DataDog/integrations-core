@@ -57,10 +57,13 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
     expected_metric_tags = (
         ('kueue.go.info', 'go_version:go1.24.4'),
         ('kueue.cluster_queue.resource_usage.gpu', 'kueue_cluster_queue:default'),
+        ('kueue.cluster_queue.resource_usage.gpu', 'kueue_resource_flavor:on-demand'),
         ('kueue.cluster_queue.resource_pending.gpu', 'kueue_cluster_queue:default'),
+        ('kueue.cluster_queue.resource_pending.gpu', 'kueue_resource_flavor:on-demand'),
         ('kueue.pending_workloads', 'kueue_cluster_queue:default'),
         ('kueue.pending_workloads', 'status:inadmissible'),
         ('kueue.resource_flavor.quota_reserved_workloads', 'kueue_cluster_queue:default'),
+        ('kueue.resource_flavor.quota_reserved_workloads', 'kueue_resource_flavor:on-demand'),
         ('kueue.local_queue.pending_workloads', 'kueue_local_queue:gpu'),
         ('kueue.local_queue.pending_workloads', 'namespace:team-a'),
         ('kueue.local_queue.pending_workloads', 'status:active'),
@@ -94,7 +97,7 @@ def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_respons
     aggregator.assert_metric('kueue.cluster_queue.resource_usage.custom_gpu', count=0)
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'test:tag')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'kueue_cluster_queue:default')
-    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'flavor:on-demand')
+    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'kueue_resource_flavor:on-demand')
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'replica_role:leader')
 
 
