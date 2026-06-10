@@ -1,0 +1,1 @@
+Fix high-volume ERROR log spam from `explain_parameterized_queries` when `EXPLAIN EXECUTE` encounters a type mismatch on ORM-generated queries with untyped NULL parameters.
