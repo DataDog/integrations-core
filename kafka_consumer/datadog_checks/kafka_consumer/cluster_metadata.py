@@ -879,9 +879,6 @@ class ClusterMetadataCollector:
                 1 if self._is_group_rebalancing(state_name, members) else 0,
                 tags=group_meta_tags,
             )
-            # Keyed off the broker-reported EMPTY state, not member count, to avoid false positives
-            # during rebalances when members can momentarily be zero.
-            self.check.gauge('consumer_group.empty', 1 if state_name == 'EMPTY' else 0, tags=group_meta_tags)
 
             member_hash = hashlib.sha256(
                 ','.join(sorted(m.member_id for m in members)).encode()

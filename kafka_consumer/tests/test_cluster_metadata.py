@@ -538,21 +538,6 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     )
 
     aggregator.assert_metric(
-        'kafka.consumer_group.empty',
-        value=0,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'consumer_group:test-group',
-            'consumer_group_state:STABLE',
-            'coordinator:1',
-            'partition_assignor:range',
-            'consumer_group_type:CLASSIC',
-            'is_simple_consumer_group:false',
-        ],
-    )
-
-    aggregator.assert_metric(
         'kafka.consumer_group.member.partitions',
         value=1,
         tags=[
@@ -1718,34 +1703,6 @@ def test_consumer_group_not_rebalancing_when_no_target_assignment(check, aggrega
     describe_result = _make_group_describe(state_name='STABLE', members=[member])
     _collect_groups(check, describe_result)
     aggregator.assert_metric('kafka.consumer_group.rebalancing', value=0)
-
-
-def test_consumer_group_empty(check, aggregator):
-    """A group in the EMPTY state (offsets but no members) reports empty=1 and members=0."""
-    describe_result = _make_group_describe(state_name='EMPTY', members=[])
-    _collect_groups(check, describe_result)
-    aggregator.assert_metric(
-        'kafka.consumer_group.empty',
-        value=1,
-        tags=[
-            'kafka_cluster_id:test-cluster-id',
-            'consumer_group:test-group',
-            'consumer_group_state:EMPTY',
-            'coordinator:1',
-            'partition_assignor:range',
-            'consumer_group_type:CONSUMER',
-            'is_simple_consumer_group:false',
-        ],
-    )
-    aggregator.assert_metric('kafka.consumer_group.empty', value=1, count=1)
-    aggregator.assert_metric('kafka.consumer_group.members', value=0)
-
-
-def test_consumer_group_not_empty_when_members_present(check, aggregator):
-    """A stable group with members reports empty=0."""
-    describe_result = _make_group_describe(state_name='STABLE', members=[_make_member()])
-    _collect_groups(check, describe_result)
-    aggregator.assert_metric('kafka.consumer_group.empty', value=0)
 
 
 def test_consumer_group_dimensional_tags(check, aggregator):

@@ -1,0 +1,415 @@
+# Consumer Group Signals Demo
+#
+# Demonstrates the kafka.consumer_group.rebalancing signal and kafka.consumer_group.membership_changes
+# counter added in PR #23915, plus dimensional metadata tags on existing gauges.
+#
+# Quick start:
+#   export DD_API_KEY=your_key_here
+#   export DD_SITE=datad0g.com     # or datadoghq.com
+#   docker compose -f docker-compose-consumer-group-signals-demo.yaml up
+#
+# Consumer groups created:
+#   group-orders-main     - 3 stable consumers on demo-orders (3 partitions) → Stable
+#   group-analytics       - 1 consumer on demo-analytics + demo-orders → Stable
+#   group-events          - 1 consumer on demo-events → Stable
+#   group-rebalancing     - crashes every 25s (no LeaveGroup) → triggers periodic rebalances
+#   group-abandoned       - stops cleanly after 90s → group enters EMPTY state
+#
+# The local kafka_consumer check code is mounted directly into the agent container.
+
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:19092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:19092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      CLUSTER_ID: 'Mka3OEVBNTcwNTJENDM2Qk'
+    command: >
+      bash -c "
+      sed -i '/KAFKA_ZOOKEEPER_CONNECT/d' /etc/confluent/docker/configure &&
+      /etc/confluent/docker/run
+      "
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command: >
+      bash -c "
+      kafka-topics --bootstrap-server kafka:19092 --create --if-not-exists --topic demo-orders    --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:19092 --create --if-not-exists --topic demo-analytics --partitions 2 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:19092 --create --if-not-exists --topic demo-events    --partitions 1 --replication-factor 1 &&
+      echo 'Topics created'
+      "
+    restart: "no"
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.5.0
+    hostname: schema-registry
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:19092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7.79.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      DD_API_KEY: ${DD_API_KEY:?DD_API_KEY is required}
+      DD_SITE: ${DD_SITE:-datadoghq.com}
+      DD_HOSTNAME: kafka-consumer-signals-demo
+      DD_TAGS: "env:demo kafka_cluster:consumer-signals-demo"
+      DD_LOG_LEVEL: "INFO"
+      DD_REMOTE_CONFIGURATION_ENABLED: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      # Mount local kafka_consumer check so changes are live without rebuilding the agent image
+      - ../../datadog_checks/kafka_consumer:/opt/datadog-agent/embedded/lib/python3.13/site-packages/datadog_checks/kafka_consumer:ro
+    configs:
+      - source: kafka_consumer_config
+        target: /etc/datadog-agent/conf.d/kafka_consumer.d/conf.yaml
+
+  producer:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    configs:
+      - source: producer_script
+        target: /app/producer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/producer.py
+      "
+    restart: unless-stopped
+
+  # --- Stable group: 3 consumers covering all 3 partitions of demo-orders ---
+
+  consumer-orders-1:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      GROUP_ID: group-orders-main
+      TOPICS: demo-orders
+      CLIENT_ID: orders-1
+    configs:
+      - source: stable_consumer_script
+        target: /app/consumer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/consumer.py
+      "
+    restart: unless-stopped
+
+  consumer-orders-2:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      GROUP_ID: group-orders-main
+      TOPICS: demo-orders
+      CLIENT_ID: orders-2
+    configs:
+      - source: stable_consumer_script
+        target: /app/consumer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/consumer.py
+      "
+    restart: unless-stopped
+
+  consumer-orders-3:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      GROUP_ID: group-orders-main
+      TOPICS: demo-orders
+      CLIENT_ID: orders-3
+    configs:
+      - source: stable_consumer_script
+        target: /app/consumer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/consumer.py
+      "
+    restart: unless-stopped
+
+  # --- Stable group: analytics consumer ---
+
+  consumer-analytics:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      GROUP_ID: group-analytics
+      TOPICS: demo-analytics,demo-orders
+      CLIENT_ID: analytics-1
+    configs:
+      - source: stable_consumer_script
+        target: /app/consumer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/consumer.py
+      "
+    restart: unless-stopped
+
+  # --- Stable group: events consumer ---
+
+  consumer-events:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      GROUP_ID: group-events
+      TOPICS: demo-events
+      CLIENT_ID: events-1
+    configs:
+      - source: stable_consumer_script
+        target: /app/consumer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/consumer.py
+      "
+    restart: unless-stopped
+
+  # --- Rebalancing group: crashes every 25s without sending LeaveGroup ---
+  # The session timeout (15s) fires after the crash, putting the group into
+  # PreparingRebalance → kafka.consumer_group.rebalancing = 1
+
+  consumer-rebalancing:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      GROUP_ID: group-rebalancing
+      TOPICS: demo-orders
+      CLIENT_ID: rebalancer
+    configs:
+      - source: flappy_consumer_script
+        target: /app/consumer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/consumer.py
+      "
+    restart: unless-stopped
+
+  # --- Abandoned group: stops cleanly after 90s → group enters EMPTY state ---
+  # Once the consumer closes (sends LeaveGroup) the broker moves the group to
+  # EMPTY (offsets retained, no members) → consumer_group_state:EMPTY tag on rebalancing metric
+
+  consumer-one-shot:
+    image: python:3.11-slim
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      GROUP_ID: group-abandoned
+      TOPICS: demo-events
+      CLIENT_ID: oneshot
+    configs:
+      - source: oneshot_consumer_script
+        target: /app/consumer.py
+    command: >
+      bash -c "
+      pip install -q 'confluent-kafka==2.3.0' &&
+      python /app/consumer.py
+      "
+    restart: "no"
+
+configs:
+  kafka_consumer_config:
+    content: |
+      init_config:
+
+      instances:
+        - kafka_connect_str: "kafka:19092"
+          monitor_unlisted_consumer_groups: true
+          enable_cluster_monitoring: true
+          schema_registry_url: http://schema-registry:8081
+          min_collection_interval: 10
+          tags:
+            - env:demo
+            - kafka_cluster:consumer-signals-demo
+
+  producer_script:
+    content: |
+      #!/usr/bin/env python3
+      import time, random
+      from confluent_kafka import Producer
+
+      producer = Producer({'bootstrap.servers': 'kafka:19092', 'client.id': 'demo-producer'})
+      TOPICS = ['demo-orders', 'demo-analytics', 'demo-events']
+      KEYS = ['alice', 'bob', 'charlie', 'diana', 'eve']
+      count = 0
+      try:
+          while True:
+              topic = random.choice(TOPICS)
+              key = random.choice(KEYS)
+              value = f"msg-{count}-{key}-{int(time.time())}"
+              producer.produce(topic, key=key.encode(), value=value.encode())
+              producer.poll(0)
+              count += 1
+              if count % 20 == 0:
+                  print(f"Produced {count} messages across {TOPICS}")
+              time.sleep(0.3)
+      except KeyboardInterrupt:
+          pass
+      finally:
+          producer.flush()
+
+  stable_consumer_script:
+    content: |
+      #!/usr/bin/env python3
+      import os, time
+      from confluent_kafka import Consumer, KafkaError
+
+      group_id = os.environ['GROUP_ID']
+      topics = os.environ['TOPICS'].split(',')
+      client_id = os.environ.get('CLIENT_ID', 'consumer')
+
+      consumer = Consumer({
+          'bootstrap.servers': 'kafka:19092',
+          'group.id': group_id,
+          'client.id': client_id,
+          'auto.offset.reset': 'earliest',
+          'enable.auto.commit': 'true',
+      })
+      consumer.subscribe(topics)
+      print(f"[{group_id}/{client_id}] Started, consuming from {topics}")
+      count = 0
+      try:
+          while True:
+              msg = consumer.poll(1.0)
+              if msg is None:
+                  continue
+              if msg.error():
+                  if msg.error().code() != KafkaError._PARTITION_EOF:
+                      print(f"[{group_id}/{client_id}] Error: {msg.error()}")
+                  continue
+              count += 1
+              if count % 50 == 0:
+                  print(f"[{group_id}/{client_id}] Consumed {count} messages (latest: {msg.topic()}[{msg.partition()}]@{msg.offset()})")
+      except KeyboardInterrupt:
+          pass
+      finally:
+          consumer.close()
+
+  flappy_consumer_script:
+    content: |
+      #!/usr/bin/env python3
+      # Simulates a misbehaving consumer that crashes without sending LeaveGroup.
+      # The broker detects the dead consumer via session timeout (15s), moves the
+      # group to PreparingRebalance, and the remaining member triggers a rebalance.
+      import os, sys, time
+      from confluent_kafka import Consumer, KafkaError
+
+      group_id = os.environ['GROUP_ID']
+      topics = os.environ['TOPICS'].split(',')
+      client_id = os.environ.get('CLIENT_ID', 'flappy')
+
+      consumer = Consumer({
+          'bootstrap.servers': 'kafka:19092',
+          'group.id': group_id,
+          'client.id': client_id,
+          'auto.offset.reset': 'earliest',
+          'session.timeout.ms': '15000',
+          'heartbeat.interval.ms': '4000',
+          'enable.auto.commit': 'true',
+      })
+      consumer.subscribe(topics)
+      print(f"[{group_id}/{client_id}] Started with 15s session timeout, will hard-crash in 25s")
+      start = time.time()
+      count = 0
+      while time.time() - start < 25:
+          msg = consumer.poll(1.0)
+          if msg and not msg.error():
+              count += 1
+      print(f"[{group_id}/{client_id}] Hard-crashing after {count} messages (no LeaveGroup sent)")
+      # Intentional hard exit — session timeout will fire on the broker side,
+      # putting the group into PreparingRebalance.
+      os._exit(1)
+
+  oneshot_consumer_script:
+    content: |
+      #!/usr/bin/env python3
+      # Runs for 90s, commits offsets, then closes cleanly.
+      # After close the group has no members but retained offsets → EMPTY state.
+      import os, time
+      from confluent_kafka import Consumer, KafkaError
+
+      group_id = os.environ['GROUP_ID']
+      topics = os.environ['TOPICS'].split(',')
+      client_id = os.environ.get('CLIENT_ID', 'oneshot')
+
+      consumer = Consumer({
+          'bootstrap.servers': 'kafka:19092',
+          'group.id': group_id,
+          'client.id': client_id,
+          'auto.offset.reset': 'earliest',
+          'enable.auto.commit': 'true',
+      })
+      consumer.subscribe(topics)
+      print(f"[{group_id}/{client_id}] Started, will stop in 90s — group '{group_id}' will become EMPTY")
+      start = time.time()
+      count = 0
+      while time.time() - start < 90:
+          msg = consumer.poll(1.0)
+          if msg and not msg.error():
+              count += 1
+      print(f"[{group_id}/{client_id}] Done after {count} messages. Closing cleanly.")
+      consumer.close()
+      print(f"[{group_id}/{client_id}] Group '{group_id}' should now be in EMPTY state.")
+
+networks:
+  default:
+    name: kafka-consumer-signals-demo
