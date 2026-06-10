@@ -1,0 +1,80 @@
+[
+  {
+    "rfcacheEnabled": true,
+    "rebuildNetworkThrottlingEnabled": false,
+    "vtreeMigrationNetworkThrottlingEnabled": false,
+    "overallIoNetworkThrottlingEnabled": false,
+    "rfcacheAccpId": null,
+    "rebalanceNetworkThrottlingEnabled": false,
+    "systemId": "1fcf40fc60c6520f",
+    "name": "domain1",
+    "sdrSdsConnectivityInfo": {
+      "clientServerConnStatus": "CLIENT_SERVER_CONN_STATUS_ALL_CONNECTED",
+      "disconnectedClientId": null,
+      "disconnectedClientName": null,
+      "disconnectedServerId": null,
+      "disconnectedServerName": null,
+      "disconnectedServerIp": null
+    },
+    "protectionDomainState": "Active",
+    "rplCapAlertLevel": "invalid",
+    "rebuildNetworkThrottlingInKbps": null,
+    "rebalanceNetworkThrottlingInKbps": null,
+    "overallIoNetworkThrottlingInKbps": null,
+    "vtreeMigrationNetworkThrottlingInKbps": null,
+    "sdsDecoupledCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 300},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 500},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 700}
+    },
+    "sdsConfigurationFailureCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 300},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 500},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 700}
+    },
+    "mdmSdsNetworkDisconnectionsCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 300},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 500},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 700}
+    },
+    "sdsSdsNetworkDisconnectionsCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 300},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 500},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 700}
+    },
+    "rfcacheOpertionalMode": "WriteMiss",
+    "rfcachePageSizeKb": 64,
+    "rfcacheMaxIoSizeKb": 128,
+    "sdsReceiveBufferAllocationFailuresCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 20000},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 200000},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 2000000}
+    },
+    "fglDefaultNumConcurrentWrites": 1000,
+    "fglMetadataCacheEnabled": false,
+    "fglDefaultMetadataCacheSize": 0,
+    "protectedMaintenanceModeNetworkThrottlingEnabled": false,
+    "protectedMaintenanceModeNetworkThrottlingInKbps": null,
+    "sdtSdsConnectivityInfo": {
+      "clientServerConnStatus": "CLIENT_SERVER_CONN_STATUS_ALL_CONNECTED",
+      "disconnectedClientId": null,
+      "disconnectedClientName": null,
+      "disconnectedServerId": null,
+      "disconnectedServerName": null,
+      "disconnectedServerIp": null
+    },
+    "id": "68c139ee00000000",
+    "links": [
+      {"rel": "self", "href": "/api/instances/ProtectionDomain::68c139ee00000000"},
+      {"rel": "/api/ProtectionDomain/relationship/Statistics", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/Statistics"},
+      {"rel": "/api/ProtectionDomain/relationship/Sdr", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/Sdr"},
+      {"rel": "/api/ProtectionDomain/relationship/AccelerationPool", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/AccelerationPool"},
+      {"rel": "/api/ProtectionDomain/relationship/Sdt", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/Sdt"},
+      {"rel": "/api/ProtectionDomain/relationship/StoragePool", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/StoragePool"},
+      {"rel": "/api/ProtectionDomain/relationship/Sds", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/Sds"},
+      {"rel": "/api/ProtectionDomain/relationship/ReplicationConsistencyGroup", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/ReplicationConsistencyGroup"},
+      {"rel": "/api/ProtectionDomain/relationship/FaultSet", "href": "/api/instances/ProtectionDomain::68c139ee00000000/relationships/FaultSet"},
+      {"rel": "/api/parent/relationship/systemId", "href": "/api/instances/System::1fcf40fc60c6520f"}
+    ]
+  }
+]

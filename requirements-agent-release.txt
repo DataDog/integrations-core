@@ -34,7 +34,7 @@ datadog-ceph==4.5.1; sys_platform != 'win32'
 datadog-cert-manager==6.4.1
 datadog-checkpoint-harmony-endpoint==1.2.0
 datadog-checkpoint-quantum-firewall==1.3.0
-datadog-checks-base==37.39.0
+datadog-checks-base==37.39.1
 datadog-checks-dependency-provider==3.2.0
 datadog-checks-downloader==9.1.0
 datadog-cilium==6.4.1
@@ -213,7 +213,7 @@ datadog-sonarqube==5.6.1
 datadog-sonatype-nexus==2.3.0; sys_platform != 'darwin'
 datadog-sonicwall-firewall==1.3.0
 datadog-spark==7.7.1
-datadog-sqlserver==23.1.0
+datadog-sqlserver==23.1.1
 datadog-squid==5.4.0
 datadog-ssh-check==4.8.0
 datadog-statsd==3.3.0
