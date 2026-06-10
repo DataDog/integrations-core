@@ -577,23 +577,32 @@ def test_events(get_current_datetime, dd_run_check, aggregator, instance, collec
 
 
 @pytest.mark.parametrize(
-    ('infrastructure_mode', 'expected_tag', 'should_have_tag'),
+    ('infrastructure_mode', 'expected_tag', 'expected_count'),
     [
-        pytest.param('basic', 'infra_mode:basic', True, id='basic mode adds infra_mode tag'),
-        pytest.param('full', 'infra_mode:full', False, id='full mode does not add infra_mode tag'),
-        pytest.param(None, 'infra_mode:full', False, id='unset mode does not add infra_mode tag'),
+        pytest.param('basic', 'infra_mode:basic', 2, id='basic mode adds infra_mode tag'),
+        pytest.param('full', 'infra_mode:full', 0, id='full mode does not add infra_mode tag'),
+        pytest.param(None, 'infra_mode:full', 0, id='unset mode does not add infra_mode tag'),
     ],
 )
 @pytest.mark.usefixtures('mock_http_get')
-def test_infra_mode_tag(dd_run_check, aggregator, instance, infrastructure_mode, expected_tag, should_have_tag):
+def test_infra_mode_tag(dd_run_check, aggregator, instance, infrastructure_mode, expected_tag, expected_count):
     instance = copy.deepcopy(instance)
     if infrastructure_mode is not None:
         instance['infrastructure_mode'] = infrastructure_mode
     check = ProxmoxCheck('proxmox', {}, [instance])
     dd_run_check(check)
 
-    count = None if should_have_tag else 0
-    aggregator.assert_metric_has_tag('proxmox.cpu', expected_tag, count=count)
+    aggregator.assert_metric_has_tag('proxmox.cpu', expected_tag, count=expected_count)
+
+    if expected_count > 0:
+        # assert that no container metrics have the infra_mode tag
+        for metric in aggregator.metrics('proxmox.cpu'):
+            if 'proxmox_type:container' in metric.tags:
+                assert expected_tag not in metric.tags
+        # assert only the cpu metric has the infra_mode tag
+        for metric_name in ALL_METRICS:
+            if metric_name != 'proxmox.cpu':
+                aggregator.assert_metric_has_tag(metric_name, expected_tag, count=0)
 
 
 @pytest.mark.parametrize(
