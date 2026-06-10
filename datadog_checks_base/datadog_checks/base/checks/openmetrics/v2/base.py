@@ -6,7 +6,7 @@ from __future__ import annotations
 from collections import ChainMap
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import yaml
 from requests.exceptions import RequestException
@@ -18,9 +18,7 @@ from datadog_checks.base.utils.tracing import traced_class
 from .scraper import OpenMetricsScraper
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping
-
-    from datadog_checks.base.utils.discovery import Service
+    from collections.abc import Mapping
 
     from .metrics_mapping import MetricsMapping, _RawMetricsConfig
 
@@ -43,9 +41,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 2000
-
-    DISCOVERY_PORT_HINTS: list[int] = []
-    DISCOVERY_METRICS_PATH: str = "/metrics"
 
     METRICS_MAP: tuple[MetricsMapping, ...] = ()
     """YAML files with metric name mappings to load automatically.
@@ -119,25 +114,6 @@ class OpenMetricsBaseCheckV2(AgentCheck):
 
         self.scrapers.clear()
         self.scrapers.update(scrapers)
-
-    @classmethod
-    def generate_configs(cls, service: Service) -> Iterator[dict[str, Any]]:
-        from datadog_checks.base.utils.discovery import candidate_ports
-
-        generated = super().generate_configs(service)
-        if generated:
-            yield from generated
-            return
-
-        for port in candidate_ports(service, cls.DISCOVERY_PORT_HINTS):
-            yield {
-                "init_config": {},
-                "instances": [
-                    {
-                        "openmetrics_endpoint": f"http://{service.host}:{port.number}{cls.DISCOVERY_METRICS_PATH}",
-                    }
-                ],
-            }
 
     def create_scraper(self, config):
         """
