@@ -1,0 +1,1 @@
+Added config `filter_queue_statistics_metrics`  so `ibm_mq.stats.queue.*` metrics can be limited to queues discovered with `queue_patterns` or `queue_regex`.
