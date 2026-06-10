@@ -68,12 +68,13 @@ class _FakeClient:
     def __init__(
         self,
         run_statuses: list[str],
-        conclusion: str = "success",
+        conclusion: str | None = "success",
         artifacts: list[Artifact] | None = None,
         workflow_url: str = "https://github.com/o/r/actions/runs/123",
         fail_at: dict[str, Exception] | None = None,
         get_workflow_run_fail_after: int = -1,
         download_failure_for_url: str | None = None,
+        list_artifacts_failure: bool = False,
     ) -> None:
         self._run_statuses = list(run_statuses)
         self._conclusion = conclusion
@@ -83,6 +84,7 @@ class _FakeClient:
         self._get_workflow_run_fail_after = get_workflow_run_fail_after
         self._get_workflow_run_call_count = 0
         self._download_failure_for_url = download_failure_for_url
+        self._list_artifacts_failure = list_artifacts_failure
         self.dispatch_calls: list[dict[str, Any]] = []
         self.get_workflow_run_calls: list[int] = []
         self.create_check_run_calls: list[dict[str, Any]] = []
@@ -184,6 +186,8 @@ class _FakeClient:
         self, owner: str, repo: str, run_id: int, per_page: int = 30, timeout: float | None = None
     ) -> AsyncIterator[GitHubResponse[ArtifactsList]]:
         self.list_artifacts_calls.append(run_id)
+        if self._list_artifacts_failure:
+            raise RuntimeError("boom-list-artifacts")
         yield _wrap(ArtifactsList(total_count=len(self._artifacts), artifacts=list(self._artifacts)))
 
     async def download_artifact(self, archive_download_url: str, dest_path: Path, timeout: float | None = None) -> None:
@@ -398,7 +402,6 @@ def _batch(batch_id: str = "batch-err") -> TestBatch:
         "create_workflow_dispatch",
         "get_workflow_run_initial",
         "get_workflow_run_mid_poll",
-        "update_check_run",
         "submit_message",
     ],
 )
@@ -417,8 +420,6 @@ async def test_process_message_failures_propagate_and_close_check_run(tmp_path: 
         fail_at = {"get_workflow_run": boom}
         get_workflow_run_fail_after = 1
         run_statuses = ["queued", "completed"]
-    elif failure_point == "update_check_run":
-        fail_at = {"update_check_run": boom}
 
     client = _FakeClient(
         run_statuses=run_statuses,
@@ -455,12 +456,66 @@ async def test_process_message_failures_propagate_and_close_check_run(tmp_path: 
     if failure_point == "submit_message":
         # Workflow completed cleanly; finally closed with success before submit raised.
         assert closed["conclusion"] == "success"
-    elif failure_point == "update_check_run":
-        # The close itself raised; the recorded call captures the attempted conclusion.
-        assert closed["conclusion"] in ("success", "cancelled")
     else:
         # Any other failure inside the try-block leaves final_conclusion at "cancelled".
         assert closed["conclusion"] == "cancelled"
+
+
+@pytest.mark.asyncio
+async def test_process_message_null_conclusion(tmp_path: Path) -> None:
+    client = _FakeClient(run_statuses=["completed"], conclusion=None, artifacts=[])
+    runner = _make_runner(client, tmp_path)
+
+    await runner.process_message(_batch())
+
+    # A null GitHub conclusion maps to a "failure" BatchFinished and a "neutral" check run.
+    submitted = _drain_queue(runner.queue)
+    assert len(submitted) == 1
+    finished = submitted[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.status == "failure"
+
+    assert len(client.update_check_run_calls) == 1
+    assert client.update_check_run_calls[0]["conclusion"] == "neutral"
+
+
+@pytest.mark.asyncio
+async def test_process_message_emits_batch_finished_when_listing_artifacts_fails(tmp_path: Path) -> None:
+    client = _FakeClient(run_statuses=["completed"], conclusion="success", list_artifacts_failure=True)
+    runner = _make_runner(client, tmp_path)
+
+    # A failure listing artifacts must not abort the batch: the check run is still closed
+    # and exactly one BatchFinished is emitted with the workflow's real conclusion.
+    await runner.process_message(_batch())
+
+    assert len(client.update_check_run_calls) == 1
+    assert client.update_check_run_calls[0]["conclusion"] == "success"
+
+    submitted = _drain_queue(runner.queue)
+    assert len(submitted) == 1
+    finished = submitted[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.status == "success"
+
+
+@pytest.mark.asyncio
+async def test_process_message_swallows_check_run_close_failure(tmp_path: Path) -> None:
+    client = _FakeClient(
+        run_statuses=["completed"],
+        conclusion="success",
+        artifacts=[_artifact(1)],
+        fail_at={"update_check_run": RuntimeError("boom-close")},
+    )
+    runner = _make_runner(client, tmp_path)
+
+    # A failure closing the check run must not propagate or suppress the BatchFinished.
+    await runner.process_message(_batch())
+
+    assert len(client.update_check_run_calls) == 1
+    submitted = _drain_queue(runner.queue)
+    assert len(submitted) == 1
+    assert isinstance(submitted[0], BatchFinished)
+    assert submitted[0].status == "success"
 
 
 @pytest.mark.asyncio

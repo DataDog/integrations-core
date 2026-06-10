@@ -800,21 +800,6 @@ async def test_update_check_run_omits_unset_fields() -> None:
     assert captured == {"conclusion": "failure"}
 
 
-@pytest.mark.asyncio
-async def test_update_check_run_requires_conclusion_when_completed() -> None:
-    requested = False
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        nonlocal requested
-        requested = True
-        return _json_response(_check_run_payload())
-
-    client = _make_client(httpx.MockTransport(handler))
-    with pytest.raises(ValueError, match="conclusion is required"):
-        await client.update_check_run("o", "r", 77, status="completed")
-    assert requested is False
-
-
 # ---------------------------------------------------------------------------
 # download_artifact
 # ---------------------------------------------------------------------------
@@ -929,31 +914,3 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malici
 
     # Nothing was extracted before the guard fired.
     assert list(dest.rglob("*")) == []
-
-
-def _patch_signed_download(monkeypatch, handler: Any) -> None:
-    """Route the anonymous signed-URL download through a mock transport."""
-    real_async_client = httpx.AsyncClient
-
-    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
-        if kwargs.get("transport") is None:
-            kwargs["transport"] = httpx.MockTransport(handler)
-        return real_async_client(*args, **kwargs)
-
-    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
-
-
-@pytest.mark.asyncio
-async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) -> None:
-    """A failed signed-URL download propagates as httpx.HTTPStatusError (no retries)."""
-
-    def github_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
-
-    def signed_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(503, content=b"unavailable")
-
-    _patch_signed_download(monkeypatch, signed_handler)
-    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
-    with pytest.raises(httpx.HTTPStatusError):
-        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")

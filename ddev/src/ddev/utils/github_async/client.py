@@ -527,7 +527,7 @@ class AsyncGitHubClient:
             repo: Repository name.
             check_run_id: Numeric ID of the check run to update.
             status: New status (``"queued"`` | ``"in_progress"`` | ``"completed"``).
-            conclusion: Final conclusion. Required when ``status="completed"``.
+            conclusion: Final conclusion (only valid when ``status="completed"``).
             details_url: Optional URL the check title links to.
             output: Optional structured output (title, summary, ...).
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
@@ -535,8 +535,6 @@ class AsyncGitHubClient:
         Returns:
             GitHubResponse[CheckRun]: The validated check run data and headers.
         """
-        if status == "completed" and conclusion is None:
-            raise ValueError("A conclusion is required when a check run status is 'completed'.")
         payload: dict[str, Any] = {}
         if status is not None:
             payload["status"] = status
@@ -619,9 +617,6 @@ class AsyncGitHubClient:
         ``Location`` header with a fresh **unauthenticated** client so the GitHub
         bearer token is not leaked to the redirect target. Each zip member is
         validated against ``dest_path`` before extraction (zip-slip protection).
-
-        This performs a single attempt with no retries; any failure propagates to the
-        caller.
 
         Args:
             archive_download_url: The artifact's ``archive_download_url`` (absolute or relative to the API base).
