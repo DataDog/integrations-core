@@ -84,9 +84,9 @@ def ensure_build_agent_yaml_updated(app: Application, branch_name: str) -> bool:
 
     if not agent_branch_exists(branch_name):
         app.display_warning(
-            f'Agent branch `{branch_name}` does not exist in `DataDog/datadog-agent` yet. '
+            f'Unable to verify that agent branch `{branch_name}` exists in `DataDog/datadog-agent`. '
             f'Leaving `{BUILD_AGENT_YAML_PATH}` pointing to `main`. '
-            f'Run `ddev release branch tag` once the upstream branch exists to trigger the update PR.'
+            f'Re-dispatch `update-build-agent-yaml.yml` (or re-run `ddev release branch tag`) once the upstream branch exists.'
         )
         return False
 
