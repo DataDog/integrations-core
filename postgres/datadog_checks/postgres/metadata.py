@@ -164,15 +164,8 @@ class PostgresMetadata(DBMAsyncJob):
         # do not emit any dd.internal metrics for DBM specific check code
         self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
         self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
-        try:
-            self.report_postgres_metadata()
-            self.report_postgres_extensions()
-            self._last_run_did_error = False
-        except Exception as e:
-            self._log.warning("metadata did error")
-            self._last_run_did_error = True
-            # Reraise the error to be caught by the job error handling
-            raise
+        self.report_postgres_metadata()
+        self.report_postgres_extensions()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_postgres_extensions(self):
