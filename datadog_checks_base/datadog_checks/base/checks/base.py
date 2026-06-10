@@ -798,18 +798,170 @@ class AgentCheck(object):
         aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
     def event_platform_event(self, raw_event, event_track_type):
-        # type: (str, str) -> None
+        # type: (str | bytes, str) -> None
         """Send an event platform event.
 
         Parameters:
-            raw_event (str):
-                JSON formatted string representing the event to send
+            raw_event (str | bytes):
+                JSON formatted string representing the event to send, or
+                pre-encoded bytes for proto tracks such as ``genresources``
             event_track_type (str):
                 type of event ingested and processed by the event platform
         """
         if raw_event is None:
             return
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), event_track_type)
+        if isinstance(raw_event, (bytearray, memoryview)):
+            raw_event = bytes(raw_event)
+        elif not isinstance(raw_event, bytes):
+            raw_event = to_native_string(raw_event)
+        aggregator.submit_event_platform_event(self, self.check_id, raw_event, event_track_type)
+
+    def submit_generic_resource(self, *, type, key, fields, include, seen_at=None, expire_at=None):
+        # type: (str, str, dict | None, dict, int | None, int | None) -> None
+        """Ship a resource on the ``genresources`` event-platform track.
+
+        ``fields`` is the resource body. ``include`` chooses what to keep from it:
+        ``{"paths": [...], "map_paths": [...], "annotation_keys": [...]}``. Evaluated against ``fields``,
+        ``paths`` select individual values, ``map_paths`` select whole flat maps (e.g.
+        ``metadata.labels``), and ``annotation_keys`` glob ``metadata.annotations`` keys. A path that
+        resolves to a structured object is dropped. Pass ``include=INCLUDE_ALL`` to ship ``fields``
+        as-is — only safe when your code constructed every value, never for a raw upstream object.
+        ``seen_at`` / ``expire_at`` are optional ``int`` unix-seconds.
+        """
+        if fields is None:
+            return
+
+        # stdlib json on purpose: module-level json is the orjson wrapper, which coerces datetime instead of failing.
+        import json as _json
+
+        # Lazy import: avoids loading the protobuf runtime for every check that imports base.py.
+        from datadog_checks.base.utils.genresources import (
+            GENRESOURCES_TRACK,
+            INCLUDE_ALL,
+            INTEGRATIONS_CORE_SOURCE,
+            MAX_FIELDS_JSON_BYTES,
+            GenericResource,
+            GenericResourceEvent,
+            apply_allow_list,
+            find_invalid_include,
+        )
+
+        integration = self.name
+
+        def _emit_dropped(count=1):
+            datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.dropped", count, "count")
+
+        if not key:
+            self.log.warning("genresources: dropping resource with empty key for type=%s", type)
+            _emit_dropped()
+            return
+
+        if not type:
+            self.log.warning("genresources: dropping resource with empty type for key=%s", key)
+            _emit_dropped()
+            return
+
+        if not isinstance(fields, dict):
+            self.log.warning(
+                "genresources: dropping resource with non-dict fields type=%s key=%s actual_type=%s",
+                type,
+                key,
+                fields.__class__.__name__,
+            )
+            _emit_dropped()
+            return
+
+        if include is INCLUDE_ALL:
+            # Caller built `fields` in code and owns its contents; ship as-is, no allow-list.
+            included = fields
+        else:
+            if not isinstance(include, dict):
+                self.log.warning(
+                    "genresources: dropping resource with non-dict include type=%s key=%s actual_type=%s",
+                    type,
+                    key,
+                    include.__class__.__name__,
+                )
+                _emit_dropped()
+                return
+
+            paths = include.get("paths", [])
+            map_paths = include.get("map_paths", [])
+            annotation_keys = include.get("annotation_keys", [])
+
+            def _is_str_list(value):
+                return isinstance(value, list) and all(isinstance(item, str) for item in value)
+
+            if not (_is_str_list(paths) and _is_str_list(map_paths) and _is_str_list(annotation_keys)):
+                self.log.warning("genresources: dropping resource with malformed include type=%s key=%s", type, key)
+                _emit_dropped()
+                return
+
+            if any(not pattern.strip("*?") for pattern in annotation_keys):
+                self.log.warning(
+                    "genresources: dropping resource with catch-all annotation pattern type=%s key=%s", type, key
+                )
+                _emit_dropped()
+                return
+
+            invalid = find_invalid_include(fields, paths, map_paths)
+            if invalid is not None:
+                offending_path, reason = invalid
+                self.log.warning(
+                    "genresources: dropping resource (%s) path=%s type=%s key=%s", reason, offending_path, type, key
+                )
+                _emit_dropped()
+                return
+
+            included = apply_allow_list(fields, paths=paths, map_paths=map_paths, annotation_keys=annotation_keys)
+
+        if not included:
+            self.log.warning("genresources: dropping resource with empty inclusion type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        try:
+            fields_json = _json.dumps(included, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+        except (TypeError, ValueError):
+            self.log.exception("genresources: failed to encode fields for type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        if len(fields_json) > MAX_FIELDS_JSON_BYTES:
+            self.log.warning(
+                "genresources: dropping oversize resource type=%s key=%s size=%d",
+                type,
+                key,
+                len(fields_json),
+            )
+            _emit_dropped()
+            return
+
+        resource = GenericResource(type=type, key=key, fields_json=fields_json)
+
+        def _set_seconds(ts, value, label):
+            if value is None:
+                return
+            if isinstance(value, int) and not isinstance(value, bool):
+                ts.seconds = value
+            else:
+                self.log.warning(
+                    "genresources: ignoring non-int %s for type=%s key=%s value=%r", label, type, key, value
+                )
+
+        _set_seconds(resource.seen_at, seen_at, "seen_at")
+        _set_seconds(resource.expire_at, expire_at, "expire_at")
+
+        event = GenericResourceEvent(source=INTEGRATIONS_CORE_SOURCE, resource=resource)
+        try:
+            payload = event.SerializeToString()
+        except Exception:
+            self.log.exception("genresources: failed to serialize type=%s key=%s", type, key)
+            _emit_dropped()
+            return
+
+        self.event_platform_event(payload, GENRESOURCES_TRACK)
+        datadog_agent.emit_agent_telemetry(integration, "datadog.agent.check.genresources.emitted", 1, "count")
 
     def should_send_metric(self, metric_name):
         return not self._metric_excluded(metric_name) and self._metric_included(metric_name)
