@@ -37,6 +37,9 @@ files:
       value:
         type: string
         example: full
+        enum:
+        - full
+        - basic
     - name: resource_filters
       display_priority: 1
       description: |

@@ -141,7 +141,7 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             if metric_value is not None:
                 metric_tags = tags
                 infra_mode = self.config.infrastructure_mode
-                if metric_name_remapped == INFRA_MODE_METRIC and hostname and infra_mode and infra_mode != 'full':
+                if metric_name_remapped == INFRA_MODE_METRIC and hostname and infra_mode != 'full':
                     metric_tags = list(tags) + [f'infra_mode:{infra_mode}']
                 metric_method(f'{metric_name_remapped}', metric_value, tags=metric_tags, hostname=hostname)
 
