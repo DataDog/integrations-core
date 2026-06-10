@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 1.4.0 / 2026-06-09
+
+***Added***:
+
+* Add `hostname_transform` config option to transform all Nutanix hostnames (hosts and VMs) to uppercase, lowercase, or leave them unchanged. ([#23769](https://github.com/DataDog/integrations-core/pull/23769))
+
+***Fixed***:
+
+* Skip hosts, VMs, and clusters missing an `extId` or name, and log a warning. ([#23612](https://github.com/DataDog/integrations-core/pull/23612))
+
 ## 1.3.0 / 2026-05-14
 
 ***Added***:
