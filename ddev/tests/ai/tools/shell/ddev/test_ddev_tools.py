@@ -4,7 +4,7 @@
 import pytest
 from pydantic import ValidationError
 
-from ddev.ai.tools.shell.ddev.create import CreateInput, DdevCreateTool
+from ddev.ai.tools.shell.ddev.create import DdevCreateInput, DdevCreateTool
 from ddev.ai.tools.shell.ddev.ddev_test import DdevTestInput, DdevTestTool
 from ddev.ai.tools.shell.ddev.env_show import DdevEnvShowTool, EnvShowInput
 from ddev.ai.tools.shell.ddev.env_start import DdevEnvStartTool, EnvStartInput
@@ -15,31 +15,46 @@ from ddev.ai.tools.shell.ddev.validate import DdevValidateInput, DdevValidateToo
 
 # --- ddev create ---
 
+VALID_CREATE_INPUT = {
+    "integration": "my_check",
+    "display_name": "My Check",
+    "metrics_prefix": "my_check.",
+    "platforms": ["linux", "windows", "mac_os"],
+}
 
-def test_create_cmd_basic():
-    tool = DdevCreateTool()
-    assert tool.cmd(CreateInput(integration="my_check", integration_type="check")) == [
+
+def test_create_cmd():
+    cmd = DdevCreateTool().cmd(DdevCreateInput(**VALID_CREATE_INPUT))
+    assert cmd == [
         "ddev",
         "--no-interactive",
         "create",
-        "--type",
         "check",
-        "--skip-manifest",
-        "My_check",
+        "--display-name",
+        "My Check",
+        "--metrics-prefix",
+        "my_check.",
+        "--platforms",
+        "linux,windows,mac_os",
+        "my_check",
     ]
 
 
+def test_create_cmd_platforms_joined():
+    cmd = DdevCreateTool().cmd(DdevCreateInput(**{**VALID_CREATE_INPUT, "platforms": ["linux", "mac_os"]}))
+    assert cmd[cmd.index("--platforms") + 1] == "linux,mac_os"
+
+
 @pytest.mark.parametrize(
-    "integration_type", ["check", "check_only", "event", "jmx", "logs", "metrics_crawler", "snmp_tile", "tile"]
+    "platforms",
+    [
+        ["linux", "bsd"],
+        [],
+    ],
 )
-def test_create_cmd_all_types(integration_type: str):
-    cmd = DdevCreateTool().cmd(CreateInput(integration="my_check", integration_type=integration_type))
-    assert cmd[cmd.index("--type") + 1] == integration_type
-
-
-def test_create_invalid_type_raises():
+def test_create_invalid_platform_raises(platforms):
     with pytest.raises(ValidationError):
-        CreateInput(integration="my_check", integration_type="custom")
+        DdevCreateInput(**{**VALID_CREATE_INPUT, "platforms": platforms})
 
 
 # --- ddev test ---

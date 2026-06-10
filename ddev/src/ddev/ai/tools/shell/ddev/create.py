@@ -8,22 +8,28 @@ from pydantic import Field
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.shell.base import CmdTool
 
-IntegrationType = Literal["check", "check_only", "event", "jmx", "logs", "metrics_crawler", "snmp_tile", "tile"]
+Platform = Literal["linux", "windows", "mac_os"]
 
 
-class CreateInput(BaseToolInput):
+class DdevCreateInput(BaseToolInput):
     integration: Annotated[str, Field(description="Name of the new integration (snake_case)")]
-    integration_type: Annotated[
-        IntegrationType,
+    display_name: Annotated[str, Field(description="Human-readable display name (e.g. 'My Integration')")]
+    metrics_prefix: Annotated[str, Field(description="Metric namespace prefix (e.g. 'my_integration.')")]
+    platforms: Annotated[
+        list[Platform],
         Field(
-            description="Template type: 'check' (standard Agent check), 'check_only' (no hatch env),"
-            " 'event', 'jmx', 'logs', 'metrics_crawler', 'snmp_tile', 'tile'"
+            description=(
+                "Target platforms for the integration. Include all three ('linux', 'windows', 'mac_os') by default;"
+                " remove a platform only if the integration explicitly cannot run on it (e.g. a Windows-only service"
+                " would omit 'linux' and 'mac_os')."
+            ),
+            min_length=1,
         ),
     ]
 
 
-class DdevCreateTool(CmdTool[CreateInput]):
-    """Scaffolds a new Datadog Agent integration with all boilerplate files and
+class DdevCreateTool(CmdTool[DdevCreateInput]):
+    """Scaffolds a new Datadog Agent check integration with all boilerplate files and
     directory structure. Creates a directory named after the integration (snake_case)
     in the current working directory. Use before writing any integration code."""
 
@@ -33,7 +39,17 @@ class DdevCreateTool(CmdTool[CreateInput]):
     def name(self) -> str:
         return "ddev_create"
 
-    def cmd(self, tool_input: CreateInput) -> list[str]:
-        # Capitalize to avoid ddev's islower() interactive prompt; normalize_package_name restores snake_case
-        name = tool_input.integration.capitalize()
-        return ["ddev", "--no-interactive", "create", "--type", tool_input.integration_type, "--skip-manifest", name]
+    def cmd(self, tool_input: DdevCreateInput) -> list[str]:
+        return [
+            "ddev",
+            "--no-interactive",
+            "create",
+            "check",
+            "--display-name",
+            tool_input.display_name,
+            "--metrics-prefix",
+            tool_input.metrics_prefix,
+            "--platforms",
+            ",".join(tool_input.platforms),
+            tool_input.integration,
+        ]
