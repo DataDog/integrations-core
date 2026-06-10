@@ -248,6 +248,45 @@ def test_create_prepared_statement_exception(integration_check, dbm_instance):
 
 
 @pytest.mark.unit
+@requires_over_12
+@pytest.mark.parametrize(
+    "exception_class",
+    [
+        psycopg.errors.UndefinedFunction,
+        psycopg.errors.DatatypeMismatch,
+    ],
+)
+def test_explain_prepared_statement_type_mismatch_no_error_log(integration_check, dbm_instance, exception_class):
+    """Type mismatch errors from EXPLAIN EXECUTE must be handled at DEBUG, not ERROR.
+
+    When _explain_prepared_statement encounters UndefinedFunction or DatatypeMismatch (caused by
+    untyped NULL parameters against non-text columns), it must return None (sentinel) rather than
+    raise. If it raises, @tracked_method logs at ERROR level for every explain attempt on every
+    affected query signature with no rate limiting. explain_statement maps None -> undefined_function
+    so the failure is still observable in collection_errors telemetry.
+    """
+    check = integration_check(dbm_instance)
+    epq = check.statement_samples._explain_parameterized_queries
+
+    with mock.patch.object(epq, '_generate_prepared_statement_query', return_value="EXECUTE dd_test(null)"):
+        with mock.patch.object(
+            epq,
+            '_execute_query_and_fetch_rows',
+            side_effect=exception_class("operator does not exist: bigint = text"),
+        ):
+            with mock.patch.object(check.log, 'exception') as mock_exception:
+                result = epq._explain_prepared_statement(
+                    None,
+                    "SELECT id FROM t WHERE id = $1",
+                    "SELECT id FROM t WHERE id = $1",
+                    "test_sig",
+                )
+
+    assert result is None
+    mock_exception.assert_not_called()
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "query,statement_is_parameterized_query",
     [

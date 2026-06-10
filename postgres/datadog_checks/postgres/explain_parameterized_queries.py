@@ -97,7 +97,9 @@ class ExplainParameterizedQueries:
 
             try:
                 result = self._explain_prepared_statement(conn, statement, obfuscated_statement, query_signature)
-                if result:
+                if result is None:
+                    return None, DBExplainError.undefined_function, None
+                elif result:
                     plan = result[0][0][0]
                     return plan, DBExplainError.explained_with_prepared_statement, None
                 else:
@@ -160,6 +162,17 @@ class ExplainParameterizedQueries:
                 EXPLAIN_QUERY.format(explain_function=self._explain_function),
                 (prepared_statement_query,),
             )
+        except (psycopg.errors.UndefinedFunction, psycopg.errors.DatatypeMismatch) as e:
+            logged_statement = obfuscated_statement
+            if self._config.log_unobfuscated_plans:
+                logged_statement = statement
+            logger.debug(
+                'Failed to explain parameterized statement(%s)=[%s] due to type mismatch | err=[%s]',
+                query_signature,
+                logged_statement,
+                e,
+            )
+            return None
         except Exception as e:
             logged_statement = obfuscated_statement
             if self._config.log_unobfuscated_plans:
