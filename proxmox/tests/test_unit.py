@@ -577,6 +577,26 @@ def test_events(get_current_datetime, dd_run_check, aggregator, instance, collec
 
 
 @pytest.mark.parametrize(
+    ('infrastructure_mode', 'expected_tag', 'should_have_tag'),
+    [
+        pytest.param('basic', 'infra_mode:basic', True, id='basic mode adds infra_mode tag'),
+        pytest.param('full', 'infra_mode:full', False, id='full mode does not add infra_mode tag'),
+        pytest.param(None, 'infra_mode:full', False, id='unset mode does not add infra_mode tag'),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_infra_mode_tag(dd_run_check, aggregator, instance, infrastructure_mode, expected_tag, should_have_tag):
+    instance = copy.deepcopy(instance)
+    if infrastructure_mode is not None:
+        instance['infrastructure_mode'] = infrastructure_mode
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    count = None if should_have_tag else 0
+    aggregator.assert_metric_has_tag('proxmox.cpu', expected_tag, count=count)
+
+
+@pytest.mark.parametrize(
     ('resource_filters, expected_vms, expected_nodes'),
     [
         pytest.param(
