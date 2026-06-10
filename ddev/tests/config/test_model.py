@@ -1547,6 +1547,12 @@ class TestAI:
         assert config.ai.anthropic_api_key == 'anth-key'
         assert config.raw_data == {'ai': {}}
 
+    def test_anthropic_api_key_config_takes_precedence_over_env(self, monkeypatch):
+        monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'ai': {'anthropic_api_key': 'config-key'}})
+
+        assert config.ai.anthropic_api_key == 'config-key'
+
     def test_anthropic_api_key_dd_takes_precedence(self, monkeypatch):
         monkeypatch.setenv('DD_ANTHROPIC_API_KEY', 'dd-key')
         monkeypatch.setenv('ANTHROPIC_API_KEY', 'anth-key')
