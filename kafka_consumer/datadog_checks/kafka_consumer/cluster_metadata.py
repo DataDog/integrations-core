@@ -880,9 +880,7 @@ class ClusterMetadataCollector:
                 tags=group_meta_tags,
             )
 
-            member_hash = hashlib.sha256(
-                ','.join(sorted(m.member_id for m in members)).encode()
-            ).hexdigest()
+            member_hash = hashlib.sha256(','.join(sorted(m.member_id for m in members)).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
 
             if prev_member_hashes is not None:
@@ -909,9 +907,7 @@ class ClusterMetadataCollector:
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
         try:
-            self.check.write_persistent_cache(
-                self.CONSUMER_GROUP_MEMBERS_CACHE_KEY, json.dumps(current_member_hashes)
-            )
+            self.check.write_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY, json.dumps(current_member_hashes))
         except Exception as e:
             self.log.debug("Could not write consumer group members cache: %s", e)
 
