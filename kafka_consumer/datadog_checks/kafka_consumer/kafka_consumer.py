@@ -121,7 +121,7 @@ class KafkaCheck(AgentCheck):
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
-            connect_status: dict[str, bool] = {}
+            connect_status: dict[str, bool] | None = None
             if self.config._kafka_connect_urls or (
                 self.config._kafka_connect_confluent_cloud_environment_id
                 and self.config._kafka_connect_confluent_cloud_cluster_id
@@ -132,6 +132,7 @@ class KafkaCheck(AgentCheck):
                     )
                 except Exception as e:
                     self.log.error("Error collecting connector metadata: %s", e)
+                    connect_status = {}
 
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id, connect_status)
 
@@ -169,7 +170,7 @@ class KafkaCheck(AgentCheck):
         }
         if self.config._kafka_cluster_id_override:
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
-        if connect_status:
+        if connect_status is not None:
             payload['connect_api_status'] = connect_status
         self.event_platform_event(json.dumps(payload), "data-streams-message")
 

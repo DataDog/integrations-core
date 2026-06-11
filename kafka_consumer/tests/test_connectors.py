@@ -472,60 +472,34 @@ def test_configure_session_sets_basic_auth():
     assert session.auth == ('user', 'pass')
 
 
-def test_configure_session_tls_verify_false():
+@pytest.mark.parametrize(
+    "config_overrides,attr,expected",
+    [
+        ({"_kafka_connect_tls_verify": False}, "verify", False),
+        ({"_kafka_connect_tls_ca_cert": "/path/to/ca.crt"}, "verify", "/path/to/ca.crt"),
+        (
+            {"_kafka_connect_tls_cert": "/path/to/cert.pem", "_kafka_connect_tls_key": "/path/to/key.pem"},
+            "cert",
+            ("/path/to/cert.pem", "/path/to/key.pem"),
+        ),
+        ({"_kafka_connect_tls_cert": "/path/to/cert.pem"}, "cert", "/path/to/cert.pem"),
+    ],
+    ids=["tls_verify_false", "tls_ca_cert", "client_cert_and_key", "cert_only"],
+)
+def test_configure_session_tls(config_overrides, attr, expected):
     collector, _, config, _ = make_collector()
     config._kafka_connect_username = None
     config._kafka_connect_password = None
-    config._kafka_connect_tls_verify = False
+    config._kafka_connect_tls_verify = True
     config._kafka_connect_tls_ca_cert = None
     config._kafka_connect_tls_cert = None
     config._kafka_connect_tls_key = None
+    for k, v in config_overrides.items():
+        setattr(config, k, v)
 
     session = mock.MagicMock()
     collector._configure_session(session)
-    assert session.verify is False
-
-
-def test_configure_session_tls_ca_cert():
-    collector, _, config, _ = make_collector()
-    config._kafka_connect_username = None
-    config._kafka_connect_password = None
-    config._kafka_connect_tls_verify = True
-    config._kafka_connect_tls_ca_cert = '/path/to/ca.crt'
-    config._kafka_connect_tls_cert = None
-    config._kafka_connect_tls_key = None
-
-    session = mock.MagicMock()
-    collector._configure_session(session)
-    assert session.verify == '/path/to/ca.crt'
-
-
-def test_configure_session_client_cert_and_key():
-    collector, _, config, _ = make_collector()
-    config._kafka_connect_username = None
-    config._kafka_connect_password = None
-    config._kafka_connect_tls_verify = True
-    config._kafka_connect_tls_ca_cert = None
-    config._kafka_connect_tls_cert = '/path/to/cert.pem'
-    config._kafka_connect_tls_key = '/path/to/key.pem'
-
-    session = mock.MagicMock()
-    collector._configure_session(session)
-    assert session.cert == ('/path/to/cert.pem', '/path/to/key.pem')
-
-
-def test_configure_session_cert_only():
-    collector, _, config, _ = make_collector()
-    config._kafka_connect_username = None
-    config._kafka_connect_password = None
-    config._kafka_connect_tls_verify = True
-    config._kafka_connect_tls_ca_cert = None
-    config._kafka_connect_tls_cert = '/path/to/cert.pem'
-    config._kafka_connect_tls_key = None
-
-    session = mock.MagicMock()
-    collector._configure_session(session)
-    assert session.cert == '/path/to/cert.pem'
+    assert getattr(session, attr) == expected
 
 
 # ---------------------------------------------------------------------------
@@ -541,6 +515,18 @@ def test_collect_oauth_failure_returns_endpoints_as_false():
         result = collector.collect('cluster-1')
 
     assert result == {'http://localhost:8083': False}
+
+
+def test_collect_oauth_failure_includes_confluent_cloud_endpoint():
+    collector, _, config, _ = make_collector()  # no connect_urls
+    config._kafka_connect_oauth_token_provider = {'url': 'http://auth', 'client_id': 'id', 'client_secret': 'sec'}
+    config._kafka_connect_confluent_cloud_environment_id = 'env-abc123'
+    config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
+
+    with mock.patch.object(collector, '_refresh_oauth_token', side_effect=Exception("auth failed")):
+        result = collector.collect('cluster-1')
+
+    assert result == {'confluent_cloud:env-abc123:lkc-xyz789': False}
 
 
 # ---------------------------------------------------------------------------
@@ -736,34 +722,30 @@ def test_get_events_to_send_handles_write_failure():
 # ---------------------------------------------------------------------------
 
 
-def test_collect_confluent_cloud_constructs_correct_url():
+@pytest.mark.parametrize(
+    "base_url,expected_url",
+    [
+        (
+            'https://api.confluent.cloud',
+            'https://api.confluent.cloud/connect/v1/environments/env-abc123/clusters/lkc-xyz789',
+        ),
+        (
+            'https://private.confluent.example.com/',
+            'https://private.confluent.example.com/connect/v1/environments/env-abc123/clusters/lkc-xyz789',
+        ),
+    ],
+    ids=["default_url", "custom_base_url"],
+)
+def test_collect_confluent_cloud_url_construction(base_url, expected_url):
     collector, _, config, _ = make_collector()
     config._kafka_connect_confluent_cloud_environment_id = 'env-abc123'
     config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
-    config._kafka_connect_confluent_cloud_url = 'https://api.confluent.cloud'
+    config._kafka_connect_confluent_cloud_url = base_url
 
     with mock.patch.object(collector, '_collect_rest') as mock_rest:
         collector._collect_confluent_cloud('cluster-1')
 
-    mock_rest.assert_called_once_with(
-        'https://api.confluent.cloud/connect/v1/environments/env-abc123/clusters/lkc-xyz789',
-        'cluster-1',
-    )
-
-
-def test_collect_confluent_cloud_custom_base_url():
-    collector, _, config, _ = make_collector()
-    config._kafka_connect_confluent_cloud_environment_id = 'env-abc123'
-    config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
-    config._kafka_connect_confluent_cloud_url = 'https://private.confluent.example.com/'
-
-    with mock.patch.object(collector, '_collect_rest') as mock_rest:
-        collector._collect_confluent_cloud('cluster-1')
-
-    mock_rest.assert_called_once_with(
-        'https://private.confluent.example.com/connect/v1/environments/env-abc123/clusters/lkc-xyz789',
-        'cluster-1',
-    )
+    mock_rest.assert_called_once_with(expected_url, 'cluster-1')
 
 
 def test_collect_confluent_cloud_success_reported_in_connectivity():

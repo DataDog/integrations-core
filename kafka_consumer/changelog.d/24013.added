@@ -1,1 +1,1 @@
-Collect Kafka Connect connector status metrics and configurations via the Kafka Connect REST API and Amazon MSK Connect.
+Add Kafka Connect connector monitoring via the Kafka Connect REST API and Confluent Cloud Connect, including connector health metrics and configuration events.
