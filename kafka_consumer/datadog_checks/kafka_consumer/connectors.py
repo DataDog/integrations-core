@@ -9,8 +9,6 @@ import time
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
-import requests
-
 from datadog_checks.kafka_consumer.event_cache_mixin import EventCacheMixin
 
 if TYPE_CHECKING:
@@ -65,33 +63,6 @@ def _short_class_name(full_class: str) -> str:
     return full_class.rsplit('.', 1)[-1] if full_class else full_class
 
 
-def _fetch_oidc_token(oauth_config: dict, session: requests.Session, timeout: float) -> tuple[str, float]:
-    """Fetch an OIDC token using client credentials grant."""
-    token_url = oauth_config['url']
-    client_id = oauth_config['client_id']
-    client_secret = oauth_config['client_secret']
-
-    data: dict = {'grant_type': 'client_credentials'}
-    scope = oauth_config.get('scope')
-    if scope:
-        data['scope'] = scope
-
-    kwargs: dict = {'auth': (client_id, client_secret), 'timeout': timeout}
-    tls_ca_cert = oauth_config.get('tls_ca_cert')
-    if tls_ca_cert:
-        kwargs['verify'] = tls_ca_cert
-
-    response = session.post(token_url, data=data, **kwargs)
-    response.raise_for_status()
-    token_data = response.json()
-
-    access_token = token_data['access_token']
-    expires_in = token_data.get('expires_in', 300)
-    expires_at = time.time() + expires_in
-
-    return access_token, expires_at
-
-
 class KafkaConnectCollector(EventCacheMixin):
     """Collects Kafka Connect connector metrics and config events."""
 
@@ -99,36 +70,74 @@ class KafkaConnectCollector(EventCacheMixin):
         self.check = check
         self.config = config
         self.log = log
+        self.http = check.http
 
         configs_refresh = self.config._kafka_configs_refresh_interval
         self._configs_refresh_interval = configs_refresh
         self._configs_refresh_jitter = max(15, configs_refresh // 10)
 
-        self._session: requests.Session | None = None
         self._oauth_token: str | None = None
-        self._oauth_token_expiry: float = 0
+        self._oauth_token_expiry: float = 0.0
+        self._http_kwargs: dict = {}
+        self._configure_http()
 
-    def _get_session(self) -> requests.Session:
-        if self._session is None:
-            self._session = requests.Session()
-            self._configure_session(self._session)
-        return self._session
+    def _configure_http(self) -> None:
+        """Build per-request HTTP kwargs for Kafka Connect auth and TLS."""
+        self._http_kwargs = {}
 
-    def _configure_session(self, session: requests.Session) -> None:
         if self.config._kafka_connect_username and self.config._kafka_connect_password:
-            session.auth = (self.config._kafka_connect_username, self.config._kafka_connect_password)
+            self._http_kwargs['auth'] = (self.config._kafka_connect_username, self.config._kafka_connect_password)
 
         if not self.config._kafka_connect_tls_verify:
-            session.verify = False
+            self._http_kwargs['verify'] = False
         elif self.config._kafka_connect_tls_ca_cert:
-            session.verify = self.config._kafka_connect_tls_ca_cert
+            self._http_kwargs['verify'] = self.config._kafka_connect_tls_ca_cert
         else:
-            session.verify = True
+            self._http_kwargs['verify'] = True
 
         if self.config._kafka_connect_tls_cert and self.config._kafka_connect_tls_key:
-            session.cert = (self.config._kafka_connect_tls_cert, self.config._kafka_connect_tls_key)
+            self._http_kwargs['cert'] = (self.config._kafka_connect_tls_cert, self.config._kafka_connect_tls_key)
         elif self.config._kafka_connect_tls_cert:
-            session.cert = self.config._kafka_connect_tls_cert
+            self._http_kwargs['cert'] = self.config._kafka_connect_tls_cert
+
+    def _get_request_kwargs(self) -> dict:
+        """Return per-request kwargs including the current OAuth bearer token if set."""
+        kwargs = dict(self._http_kwargs)
+        if self._oauth_token:
+            extra_headers = {'Authorization': f'Bearer {self._oauth_token}'}
+            oauth_config = self.config._kafka_connect_oauth_token_provider
+            if oauth_config:
+                custom_headers = oauth_config.get('custom_headers')
+                if custom_headers:
+                    extra_headers.update(custom_headers)
+            kwargs['extra_headers'] = extra_headers
+        return kwargs
+
+    def _fetch_oidc_token(self, oauth_config: dict) -> tuple[str, float]:
+        """Fetch an OIDC token using client credentials grant."""
+        token_url = oauth_config['url']
+        client_id = oauth_config['client_id']
+        client_secret = oauth_config['client_secret']
+
+        data: dict = {'grant_type': 'client_credentials'}
+        scope = oauth_config.get('scope')
+        if scope:
+            data['scope'] = scope
+
+        options: dict = {'auth': (client_id, client_secret), 'timeout': self.config._request_timeout}
+        tls_ca_cert = oauth_config.get('tls_ca_cert')
+        if tls_ca_cert:
+            options['verify'] = tls_ca_cert
+
+        response = self.http.post(token_url, data=data, **options)
+        response.raise_for_status()
+        token_data = response.json()
+
+        access_token = token_data['access_token']
+        expires_in = token_data.get('expires_in', 300)
+        expires_at = time.time() + expires_in
+
+        return access_token, expires_at
 
     def _refresh_oauth_token(self) -> None:
         oauth_config = self.config._kafka_connect_oauth_token_provider
@@ -138,18 +147,9 @@ class KafkaConnectCollector(EventCacheMixin):
         if self._oauth_token and time.time() < (self._oauth_token_expiry - 30):
             return
 
-        session = self._get_session()
-        timeout = self.config._request_timeout
-        token, expires_at = _fetch_oidc_token(oauth_config, session, timeout)
-
+        token, expires_at = self._fetch_oidc_token(oauth_config)
         self._oauth_token = token
         self._oauth_token_expiry = expires_at
-        session.headers['Authorization'] = f'Bearer {token}'
-
-        custom_headers = oauth_config.get('custom_headers')
-        if custom_headers:
-            session.headers.update(custom_headers)
-
         self.log.debug("Kafka Connect OAuth token refreshed, expires at %s", expires_at)
 
     def collect(self, cluster_id: str) -> dict[str, bool]:
@@ -206,12 +206,11 @@ class KafkaConnectCollector(EventCacheMixin):
         return connectivity
 
     def _collect_rest(self, url: str, cluster_id: str) -> None:
-        session = self._get_session()
-        timeout = self.config._request_timeout
-        response = session.get(
+        response = self.http.get(
             f'{url.rstrip("/")}/connectors',
             params={'expand': ['info', 'status']},
-            timeout=timeout,
+            timeout=self.config._request_timeout,
+            **self._get_request_kwargs(),
         )
         response.raise_for_status()
         connectors_data = response.json()
@@ -349,9 +348,11 @@ class KafkaConnectCollector(EventCacheMixin):
         if not items_to_fetch:
             return
 
-        session = self._get_session()
-        timeout = self.config._request_timeout
-        response = session.get(f'{url.rstrip("/")}/connector-plugins', timeout=timeout)
+        response = self.http.get(
+            f'{url.rstrip("/")}/connector-plugins',
+            timeout=self.config._request_timeout,
+            **self._get_request_kwargs(),
+        )
         response.raise_for_status()
         plugins = response.json()
 
@@ -385,4 +386,3 @@ class KafkaConnectCollector(EventCacheMixin):
         base = self.config._kafka_connect_confluent_cloud_url.rstrip('/')
         url = f'{base}/connect/v1/environments/{env_id}/clusters/{cc_cluster_id}'
         self._collect_rest(url, cluster_id)
-

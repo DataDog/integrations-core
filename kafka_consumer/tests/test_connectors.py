@@ -6,7 +6,6 @@ import time
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.kafka_consumer.connectors import (
     KafkaConnectCollector,
@@ -263,7 +262,7 @@ def test_collect_returns_connected_true_on_success():
 
 def test_collect_returns_connected_false_on_failure():
     collector, _, _, _ = make_collector(connect_urls=['http://localhost:8083'])
-    with mock.patch.object(collector, '_collect_rest', side_effect=requests.ConnectionError("refused")):
+    with mock.patch.object(collector, '_collect_rest', side_effect=ConnectionError("refused")):
         result = collector.collect('cluster-1')
 
     assert result == {'http://localhost:8083': False}
@@ -279,9 +278,7 @@ def test_older_worker_list_response_warns_and_returns():
     mock_resp = mock.MagicMock()
     mock_resp.json.return_value = ['connector-a', 'connector-b']  # old-style list
 
-    session_mock = mock.MagicMock()
-    session_mock.get.return_value = mock_resp
-    collector._session = session_mock
+    collector.http.get.return_value = mock_resp
 
     # Should not raise, should not emit metrics
     collector._collect_rest('http://localhost:8083', 'cluster-1')
@@ -291,7 +288,7 @@ def test_older_worker_list_response_warns_and_returns():
 
 
 # ---------------------------------------------------------------------------
-# _collect_rest — full success path with mocked HTTP session
+# _collect_rest — full success path with mocked HTTP
 # ---------------------------------------------------------------------------
 
 
@@ -300,9 +297,7 @@ def test_collect_rest_success_emits_metrics_and_events():
     mock_resp = mock.MagicMock()
     mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
 
-    session_mock = mock.MagicMock()
-    session_mock.get.return_value = mock_resp
-    collector._session = session_mock
+    collector.http.get.return_value = mock_resp
 
     with mock.patch.object(collector, '_collect_plugins'):
         collector._collect_rest('http://localhost:8083', 'cluster-1')
@@ -325,9 +320,7 @@ def test_collect_plugins_emits_event_on_first_call():
     mock_resp = mock.MagicMock()
     mock_resp.json.return_value = plugins
 
-    session_mock = mock.MagicMock()
-    session_mock.get.return_value = mock_resp
-    collector._session = session_mock
+    collector.http.get.return_value = mock_resp
 
     collector._collect_plugins('http://localhost:8083', 'cluster-1')
     assert check.event_platform_event.call_count == 1
@@ -454,11 +447,11 @@ def test_original_cluster_id_field_when_no_override():
 
 
 # ---------------------------------------------------------------------------
-# _configure_session — auth and TLS configuration paths
+# _configure_http — auth and TLS configuration paths
 # ---------------------------------------------------------------------------
 
 
-def test_configure_session_sets_basic_auth():
+def test_configure_http_sets_basic_auth():
     collector, _, config, _ = make_collector()
     config._kafka_connect_username = 'user'
     config._kafka_connect_password = 'pass'
@@ -467,9 +460,8 @@ def test_configure_session_sets_basic_auth():
     config._kafka_connect_tls_cert = None
     config._kafka_connect_tls_key = None
 
-    session = mock.MagicMock()
-    collector._configure_session(session)
-    assert session.auth == ('user', 'pass')
+    collector._configure_http()
+    assert collector._http_kwargs['auth'] == ('user', 'pass')
 
 
 @pytest.mark.parametrize(
@@ -486,7 +478,7 @@ def test_configure_session_sets_basic_auth():
     ],
     ids=["tls_verify_false", "tls_ca_cert", "client_cert_and_key", "cert_only"],
 )
-def test_configure_session_tls(config_overrides, attr, expected):
+def test_configure_http_tls(config_overrides, attr, expected):
     collector, _, config, _ = make_collector()
     config._kafka_connect_username = None
     config._kafka_connect_password = None
@@ -497,9 +489,8 @@ def test_configure_session_tls(config_overrides, attr, expected):
     for k, v in config_overrides.items():
         setattr(config, k, v)
 
-    session = mock.MagicMock()
-    collector._configure_session(session)
-    assert getattr(session, attr) == expected
+    collector._configure_http()
+    assert collector._http_kwargs[attr] == expected
 
 
 # ---------------------------------------------------------------------------
@@ -534,26 +525,19 @@ def test_collect_oauth_failure_includes_confluent_cloud_endpoint():
 # ---------------------------------------------------------------------------
 
 
-def test_refresh_oauth_token_sets_header():
+def test_refresh_oauth_token_stores_token():
     collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
     config._kafka_connect_oauth_token_provider = {
         'url': 'http://auth/token',
         'client_id': 'client',
         'client_secret': 'secret',
     }
-    config._request_timeout = 10
 
-    session_mock = mock.MagicMock()
-    session_mock.headers = {}
-    collector._session = session_mock
-
-    with mock.patch(
-        'datadog_checks.kafka_consumer.connectors._fetch_oidc_token',
-        return_value=('mytoken', time.time() + 300),
-    ):
+    with mock.patch.object(collector, '_fetch_oidc_token', return_value=('mytoken', time.time() + 300)):
         collector._refresh_oauth_token()
 
-    assert session_mock.headers['Authorization'] == 'Bearer mytoken'
+    assert collector._oauth_token == 'mytoken'
+    assert collector._get_request_kwargs()['extra_headers']['Authorization'] == 'Bearer mytoken'
 
 
 def test_refresh_oauth_token_skips_when_still_valid():
@@ -563,12 +547,11 @@ def test_refresh_oauth_token_skips_when_still_valid():
         'client_id': 'client',
         'client_secret': 'secret',
     }
-    config._request_timeout = 10
 
     collector._oauth_token = 'existing-token'
     collector._oauth_token_expiry = time.time() + 3600
 
-    with mock.patch('datadog_checks.kafka_consumer.connectors._fetch_oidc_token') as mock_fetch:
+    with mock.patch.object(collector, '_fetch_oidc_token') as mock_fetch:
         collector._refresh_oauth_token()
 
     mock_fetch.assert_not_called()
@@ -578,7 +561,7 @@ def test_refresh_oauth_token_no_op_when_no_provider():
     collector, _, config, _ = make_collector()
     config._kafka_connect_oauth_token_provider = None
 
-    with mock.patch('datadog_checks.kafka_consumer.connectors._fetch_oidc_token') as mock_fetch:
+    with mock.patch.object(collector, '_fetch_oidc_token') as mock_fetch:
         collector._refresh_oauth_token()
 
     mock_fetch.assert_not_called()
@@ -592,28 +575,21 @@ def test_refresh_oauth_token_sets_custom_headers():
         'client_secret': 'secret',
         'custom_headers': {'X-Tenant': 'tenant-1'},
     }
-    config._request_timeout = 10
 
-    session_mock = mock.MagicMock()
-    session_mock.headers = {}
-    collector._session = session_mock
-
-    with mock.patch(
-        'datadog_checks.kafka_consumer.connectors._fetch_oidc_token',
-        return_value=('mytoken', time.time() + 300),
-    ):
+    with mock.patch.object(collector, '_fetch_oidc_token', return_value=('mytoken', time.time() + 300)):
         collector._refresh_oauth_token()
 
-    assert session_mock.headers.get('X-Tenant') == 'tenant-1'
+    extra = collector._get_request_kwargs()['extra_headers']
+    assert extra.get('X-Tenant') == 'tenant-1'
 
 
 # ---------------------------------------------------------------------------
-# _fetch_oidc_token — standalone function
+# _fetch_oidc_token — instance method using self.http
 # ---------------------------------------------------------------------------
 
 
 def test_fetch_oidc_token_returns_token_and_expiry():
-    from datadog_checks.kafka_consumer.connectors import _fetch_oidc_token
+    collector, check, _, _ = make_collector()
 
     oauth_config = {
         'url': 'http://auth/token',
@@ -623,18 +599,16 @@ def test_fetch_oidc_token_returns_token_and_expiry():
 
     mock_resp = mock.MagicMock()
     mock_resp.json.return_value = {'access_token': 'tok123', 'expires_in': 600}
+    check.http.post.return_value = mock_resp
 
-    session_mock = mock.MagicMock()
-    session_mock.post.return_value = mock_resp
-
-    token, expires_at = _fetch_oidc_token(oauth_config, session_mock, timeout=10)
+    token, expires_at = collector._fetch_oidc_token(oauth_config)
     assert token == 'tok123'
     assert expires_at > time.time()
     assert expires_at < time.time() + 700
 
 
 def test_fetch_oidc_token_uses_scope_and_ca_cert():
-    from datadog_checks.kafka_consumer.connectors import _fetch_oidc_token
+    collector, check, _, _ = make_collector()
 
     oauth_config = {
         'url': 'http://auth/token',
@@ -646,30 +620,13 @@ def test_fetch_oidc_token_uses_scope_and_ca_cert():
 
     mock_resp = mock.MagicMock()
     mock_resp.json.return_value = {'access_token': 'tok456', 'expires_in': 300}
+    check.http.post.return_value = mock_resp
 
-    session_mock = mock.MagicMock()
-    session_mock.post.return_value = mock_resp
-
-    token, _ = _fetch_oidc_token(oauth_config, session_mock, timeout=5)
+    token, _ = collector._fetch_oidc_token(oauth_config)
     assert token == 'tok456'
-    call_kwargs = session_mock.post.call_args.kwargs
+    call_kwargs = check.http.post.call_args.kwargs
     assert call_kwargs['verify'] == '/path/to/ca.crt'
     assert call_kwargs['data']['scope'] == 'openid'
-
-
-# ---------------------------------------------------------------------------
-# _get_session — session creation when None
-# ---------------------------------------------------------------------------
-
-
-def test_get_session_creates_session_on_first_call():
-    collector, _, _, _ = make_collector()
-    assert collector._session is None
-    session = collector._get_session()
-    assert session is not None
-    assert collector._session is session
-    # Calling again returns the same instance
-    assert collector._get_session() is session
 
 
 # ---------------------------------------------------------------------------
@@ -679,7 +636,7 @@ def test_get_session_creates_session_on_first_call():
 
 def test_mark_items_fetched_uses_defaults_when_none():
     collector, _, _, cache_store = make_collector()
-    # Call without explicit ttl_base/ttl_jitter → should use CONFIGS_REFRESH_INTERVAL defaults
+    # Call without explicit ttl_base/ttl_jitter → should use _configs_refresh_interval defaults
     collector._mark_items_fetched('test_key', ['item-a'])
     cached = json.loads(cache_store['test_key'])
     assert 'item-a' in cached
@@ -768,11 +725,7 @@ def test_collect_confluent_cloud_failure_reported_in_connectivity():
     config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
     config._kafka_connect_confluent_cloud_url = 'https://api.confluent.cloud'
 
-    with mock.patch.object(
-        collector, '_collect_confluent_cloud', side_effect=requests.ConnectionError("refused")
-    ):
+    with mock.patch.object(collector, '_collect_confluent_cloud', side_effect=ConnectionError("refused")):
         result = collector.collect('cluster-1')
 
     assert result == {'confluent_cloud:env-abc123:lkc-xyz789': False}
-
-
