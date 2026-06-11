@@ -360,6 +360,7 @@ def test_parse_exposition_raises_on_zero_families():
 
 def test_build_memory_text_renders_all_fields(tmp_path):
     jsonl_path = tmp_path / "inspect_endpoint_metrics.jsonl"
+    exposition_path = tmp_path / "inspect_endpoint_exposition.txt"
     text = _build_memory_text(
         url="http://example.test:9100/metrics",
         status=200,
@@ -367,6 +368,7 @@ def test_build_memory_text_renders_all_fields(tmp_path):
         exposition_format="prometheus",
         metric_count=2,
         jsonl_path=jsonl_path,
+        exposition_path=exposition_path,
     )
     assert "http://example.test:9100/metrics" in text
     assert "200" in text
@@ -374,6 +376,7 @@ def test_build_memory_text_renders_all_fields(tmp_path):
     assert "prometheus" in text
     assert "2" in text
     assert str(jsonl_path) in text
+    assert str(exposition_path) in text
 
 
 # ---------------------------------------------------------------------------
@@ -589,3 +592,51 @@ async def test_jsonl_failure_propagates_as_phase_failure(flow_dir, message_queue
     blocker.mkdir()
 
     await _assert_phase_fails(phase, mgr, message_queue, error_contains="Failed to write metrics catalog")
+
+
+# ---------------------------------------------------------------------------
+# Raw exposition sidecar — new tests
+# ---------------------------------------------------------------------------
+
+
+async def test_exposition_path_in_checkpoint(flow_dir, message_queue, monkeypatch):
+    _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
+    phase, mgr = _make_phase(flow_dir, message_queue)
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    path_str = mgr.read()[PHASE_ID]["exposition_path"]
+    assert isinstance(path_str, str)
+    assert os.path.isabs(path_str)
+    assert os.path.exists(path_str)
+
+
+async def test_exposition_file_holds_verbatim_body(flow_dir, message_queue, monkeypatch):
+    _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
+    phase, _mgr = _make_phase(flow_dir, message_queue)
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    exposition = (flow_dir / f"{PHASE_ID}_exposition.txt").read_text(encoding="utf-8")
+    assert exposition == PROMETHEUS_BODY
+
+
+async def test_memory_text_includes_exposition_path(flow_dir, message_queue, monkeypatch):
+    _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
+    phase, mgr = _make_phase(flow_dir, message_queue)
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read()[PHASE_ID]["exposition_path"] in mgr.memory_content(PHASE_ID)
+
+
+async def test_exposition_failure_propagates_as_phase_failure(flow_dir, message_queue, monkeypatch):
+    _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
+    phase, mgr = _make_phase(flow_dir, message_queue)
+
+    # Block only the exposition temp path (the JSONL is written first and succeeds).
+    blocker = flow_dir / f"{PHASE_ID}_exposition.txt.tmp"
+    blocker.mkdir()
+
+    await _assert_phase_fails(phase, mgr, message_queue, error_contains="Failed to write exposition snapshot")
+    assert not (flow_dir / f"{PHASE_ID}_exposition.txt").exists()
