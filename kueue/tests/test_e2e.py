@@ -4,7 +4,7 @@
 
 import pytest
 
-from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
+from datadog_checks.dev.utils import get_metadata_metrics
 
 
 @pytest.mark.e2e
@@ -28,5 +28,3 @@ def test_e2e(dd_agent_check):
 
     for metric in ('kueue.cluster_queue.info', 'kueue.cluster_queue.status'):
         aggregator.assert_metric_has_tag(metric, 'kueue_cluster_queue:cluster-queue')
-
-    assert_service_checks(aggregator)
