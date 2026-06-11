@@ -186,6 +186,125 @@ class TestHanaSchemaCollector:
         check._maybe_collect_schemas()
         check.database_monitoring_metadata.assert_not_called()
 
+    def test_column_field_mapping(self):
+        COLUMNS = [
+            # (name ~20 chars,         data_type,    nullable,  default,                position)
+            ('EMPLOYEE_IDENTIFIER', 'INTEGER', 'FALSE', None, 1),
+            ('CUSTOMER_FIRST_NAME', 'NVARCHAR', 'TRUE', None, 2),
+            ('RECORD_CREATED_TIME', 'TIMESTAMP', 'TRUE', 'CURRENT_TIMESTAMP', 3),
+            ('ACCOUNT_BALANCE_AMT', 'DECIMAL', 'TRUE', '0', 4),
+            ('CUSTOMER_STATUS_CODE', 'VARCHAR', 'FALSE', 'ACTIVE', 5),
+            ('IS_ACTIVE_FLAG_VALUE', 'BOOLEAN', 'TRUE', 'FALSE', 6),
+            ('TOTAL_AMOUNT_NUMERIC', 'BIGINT', 'FALSE', None, 7),
+            ('PRODUCT_CODE_STRING', 'CHAR', 'TRUE', None, 8),
+            ('CONVERSION_RATIO_VAL', 'DOUBLE', 'FALSE', '1.0', 9),
+            ('LONG_TEXT_NOTES_CLOB', 'CLOB', 'TRUE', None, 10),
+            ('LAST_MODIFIED_DTTM', 'TIMESTAMP', 'TRUE', None, 11),
+            ('RECORD_TYPE_TINYINT', 'TINYINT', 'FALSE', '0', 12),
+            ('BINARY_PAYLOAD_DATA', 'BLOB', 'TRUE', None, 13),
+            ('NULL_TYPED_COLUMN_AA', None, 'TRUE', None, 14),  # None → ''
+            ('LAST_SEQUENCE_NUMBER', 'SMALLINT', 'FALSE', None, 15),
+        ]
+        rows = [
+            _joined_row('S', 'T', column_name=name, data_type=dt, nullable=nl, default=d, position=pos)
+            for name, dt, nl, d, pos in COLUMNS
+        ]
+        check = _make_check({'collect_schemas': {'enabled': True, 'max_columns': 100}})
+        check._conn, _ = _make_cursor_mock(rows)
+
+        payloads = _collect_payloads(check)
+        cols = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]['columns']
+
+        assert len(cols) == len(COLUMNS)
+        for col, (name, data_type, nullable, default, position) in zip(cols, COLUMNS):
+            assert col['name'] == name
+            assert col['data_type'] == (data_type or '')
+            assert col['nullable'] == (nullable == 'TRUE')
+            assert col['default'] == default
+            assert col['position'] == position
+
+    def test_column_multi_table_mapping(self):
+        rows = [
+            _joined_row('S', 'T1', column_name='C1', data_type='INTEGER', nullable='TRUE', position=1),
+            _joined_row('S', 'T1', column_name='C2', data_type='VARCHAR', nullable='TRUE', position=2),
+            _joined_row('S', 'T1', column_name='C3', data_type='TIMESTAMP', nullable='FALSE', position=3),
+            _joined_row('S', 'T2', column_name='X1', data_type='BIGINT', nullable='FALSE', position=1),
+            _joined_row('S', 'T2', column_name='X2', data_type='DECIMAL', nullable='TRUE', default='0', position=2),
+        ]
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock(rows)
+
+        payloads = _collect_payloads(check)
+        tables = {t['name']: t for row in payloads[0]['metadata'] for s in row['schemas'] for t in s['tables']}
+
+        assert set(tables.keys()) == {'T1', 'T2'}
+        assert [c['name'] for c in tables['T1']['columns']] == ['C1', 'C2', 'C3']
+        assert tables['T1']['columns'][2]['nullable'] is False
+        assert [c['name'] for c in tables['T2']['columns']] == ['X1', 'X2']
+        assert tables['T2']['columns'][1]['default'] == '0'
+
+    def test_get_databases_name_and_description(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        conn = mock.MagicMock()
+        cursor = mock.MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.side_effect = [('PROD_DB',), ('Production instance',)]
+        check._conn = conn
+
+        result = check._schema_collector._get_databases()
+        assert result == [{'name': 'PROD_DB', 'description': 'Production instance'}]
+
+    def test_get_databases_description_query_fails(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        conn = mock.MagicMock()
+        cursor = mock.MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.return_value = ('PROD_DB',)
+
+        def raise_on_description(query, *args, **kwargs):
+            if 'DESCRIPTION' in query:
+                raise Exception('access denied')
+
+        cursor.execute.side_effect = raise_on_description
+        check._conn = conn
+
+        result = check._schema_collector._get_databases()
+        assert result == [{'name': 'PROD_DB', 'description': ''}]
+
+    def test_get_databases_execute_exception_falls_back_to_server(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        conn = mock.MagicMock()
+        cursor = mock.MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.execute.side_effect = Exception('connection error')
+        check._conn = conn
+
+        result = check._schema_collector._get_databases()
+        assert result == [{'name': check._server, 'description': ''}]
+
+    def test_is_column_table_false(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock([_joined_row('S', 'T', is_column_table='FALSE', column_name='C1')])
+
+        payloads = _collect_payloads(check)
+        table = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]
+        assert table['is_column_table'] is False
+
+    def test_null_schema_owner(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock([_joined_row('S', 'T', owner=None, column_name='C1')])
+
+        payloads = _collect_payloads(check)
+        schema = payloads[0]['metadata'][0]['schemas'][0]
+        assert schema['owner'] == ''
+
+    def test_include_and_exclude_combined(self):
+        check = _make_check({'collect_schemas': {'enabled': True, 'include_schemas': ['A'], 'exclude_schemas': ['B']}})
+        query, params = check._schema_collector._build_query()
+        assert 'AND t.SCHEMA_NAME IN (?)' in query
+        assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
+        assert params == ('A', 'B')
+
 
 # ─── Diagnostics ─────────────────────────────────────────────────────────────
 
