@@ -96,8 +96,8 @@
                   ],
                   "queries": [
                     {"name": "running", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:running}"},
-                    {"name": "paused", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:paused}"},
-                    {"name": "failed", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:failed}"}
+                    {"name": "paused", "data_source": "metrics", "query": "count:kafka.connector.running{$cluster,$connect_url,connector_state:paused}"},
+                    {"name": "failed", "data_source": "metrics", "query": "count:kafka.connector.running{$cluster,$connect_url,connector_state:failed}"}
                   ],
                   "response_format": "timeseries",
                   "display_type": "bars"
@@ -114,7 +114,7 @@
               "requests": [
                 {
                   "formulas": [{"formula": "query1", "limit": {"count": 20, "order": "desc"}}],
-                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url} by {connector_type}", "aggregator": "last"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "count:kafka.connector.running{$cluster,$connect_url} by {connector_type}", "aggregator": "last"}],
                   "response_format": "scalar"
                 }
               ]

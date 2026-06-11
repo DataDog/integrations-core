@@ -533,14 +533,14 @@ def test_configure_session_cert_only():
 # ---------------------------------------------------------------------------
 
 
-def test_collect_oauth_failure_returns_empty():
+def test_collect_oauth_failure_returns_endpoints_as_false():
     collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
     config._kafka_connect_oauth_token_provider = {'url': 'http://auth', 'client_id': 'id', 'client_secret': 'sec'}
 
     with mock.patch.object(collector, '_refresh_oauth_token', side_effect=Exception("auth failed")):
         result = collector.collect('cluster-1')
 
-    assert result == {}
+    assert result == {'http://localhost:8083': False}
 
 
 # ---------------------------------------------------------------------------
