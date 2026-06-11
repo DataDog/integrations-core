@@ -194,6 +194,10 @@ def _resolve_proxy(
         return None, None
     proxies = proxies.copy()
     no_proxy = proxies.pop('no_proxy', None)
+    # A proxy block carrying only no_proxy is not a real proxy config. Treat it as unconfigured so
+    # trust_env stays on and HTTP_PROXY/HTTPS_PROXY keep working, rather than being silently disabled.
+    if not proxies:
+        return None, None
     if isinstance(no_proxy, str):
         no_proxy = no_proxy.replace(';', ',').split(',')
     return proxies, no_proxy
@@ -386,6 +390,7 @@ class HTTPX2Wrapper:
         '_client',
         '_log_requests',
         'logger',
+        'no_proxy_uris',
         'options',
     )
 
@@ -418,6 +423,8 @@ class HTTPX2Wrapper:
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
         proxies, no_proxy = _resolve_proxy(config, init_config)
+        # Exposed for parity with RequestsWrapper, which http_check reads as self.http.no_proxy_uris.
+        self.no_proxy_uris = no_proxy or None
 
         # options['headers'] is the per-request source of truth and is re-read in _build_request_kwargs,
         # so direct mutation (__setitem__, update(), whole-dict replacement) reaches the wire.
