@@ -276,25 +276,25 @@ jobs:
         brew remove --force --ignore-dependencies $(brew list --formula)
         brew install coreutils
 
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
     - name: Set up Python
-      # Use PBS as suggested by: https://github.com/DataDog/integrations-core/pull/21692#pullrequestreview-3358660684
-      # PBS stands for "Python Build Standalone": https://astral.sh/blog/python-build-standalone
-      env:
-        PYTHON_PATCH: 13
-        PBS_RELEASE: 20260414
-        PBS_SHA256__aarch64: 874f9931ad40dcce38caf6f408aa7e10ec3d0dfce2184ba7af62a965a66b9cd9
-        PBS_SHA256__x86_64: d34198cd856fa80ebf3aa821fe329a25fab66eeda44f72ac9576591282e31bb7
+      # PBS pins live in .builders/images/macos/pbs.env so they enter inputs_hash per-target
+      # digests (images/macos/**/*) and invalidate ~/builder_root cache on bump.
+      # https://github.com/DataDog/integrations-core/pull/21692#pullrequestreview-3358660684
       run: |
-        set -u
+        set -euo pipefail
+        set -a
+        # shellcheck disable=SC1091
+        source .builders/images/macos/pbs.env
+        set +a
         curl -fsSL -o pbs.tgz "https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-$PYTHON_VERSION.$PYTHON_PATCH+$PBS_RELEASE-${{ matrix.job.arch }}-apple-darwin-install_only_stripped.tar.gz"
         echo "$PBS_SHA256__${{ matrix.job.arch }} *pbs.tgz" | shasum -a 256 -c -
         prefix=$(dirname "$(dirname "$DD_PYTHON3")")
         sudo mkdir -p "$prefix"
         sudo tar -xzf pbs.tgz -C "$prefix" --strip-components=1
         rm pbs.tgz
-
-    - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Download dependency constraints
       uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
@@ -312,10 +312,9 @@ jobs:
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       with:
         path: ~/builder_root
-        # The gate already content-hashes every file that influences this build
-        # (per-target images, shared images, deps, build.py, the workflow file).
-        # Using its hash as the cache key removes the duplicate hashFiles list
-        # and makes drift between the gate and the cache key unrepresentable.
+        # matrix.job.hash content-hashes per-target .builders/ inputs (including
+        # images/macos/**/*, so pbs.env participates). Using it as the cache key
+        # keeps the gate and Actions cache aligned.
         key: ${{ matrix.job.image }}-deps-builder-root-cache-${{ matrix.job.hash }}
 
     - name: Run the build
