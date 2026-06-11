@@ -39,7 +39,7 @@ deps = [
     "boto3==1.43.24",
     "cachetools==7.1.4",
     "cryptography==48.0.0",
-    "pymysql==1.2.0",
+    "pymysql==1.1.2",
 ]
 
 [project.urls]
