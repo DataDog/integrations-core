@@ -14,6 +14,7 @@ import posixpath
 import re
 import tempfile
 import urllib.request
+from collections.abc import Mapping
 from pathlib import Path
 
 from tuf.ngclient import Updater
@@ -80,6 +81,9 @@ class TUFPointerDownloader:
 
     @staticmethod
     def _validate_pointer(project: str, pointer: dict) -> None:
+        if not isinstance(pointer, Mapping):
+            raise MalformedPointerError(project, 'pointer')
+
         for key in REQUIRED_POINTER_KEYS:
             if key not in pointer:
                 raise MalformedPointerError(project, key)

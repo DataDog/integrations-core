@@ -52,7 +52,10 @@ POINTER = {
 
 
 def _mock_tuf_updater(pointer: dict) -> MagicMock:
-    pointer_bytes = json.dumps(pointer).encode()
+    return _mock_tuf_updater_with_pointer_bytes(json.dumps(pointer).encode())
+
+
+def _mock_tuf_updater_with_pointer_bytes(pointer_bytes: bytes) -> MagicMock:
     mock_updater = MagicMock()
     mock_updater.get_targetinfo.return_value = MagicMock()
 
@@ -175,6 +178,21 @@ class TestMalformedPointer:
 
         downloader = TUFPointerDownloader(repository_url=REPO_URL)
         with pytest.raises(MalformedPointerError, match='wheel_path'):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        mock_urlopen.assert_not_called()
+
+    @pytest.mark.parametrize(
+        'pointer_bytes',
+        [
+            pytest.param(b'["digest", "length", "wheel_path"]', id='list'),
+            pytest.param(b'"not an object"', id='string'),
+        ],
+    )
+    def test_raises_when_pointer_payload_is_not_object(self, mock_urlopen, mock_updater_cls, tmp_path, pointer_bytes):
+        mock_updater_cls.return_value = _mock_tuf_updater_with_pointer_bytes(pointer_bytes)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(MalformedPointerError, match='pointer'):
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
         mock_urlopen.assert_not_called()
 
