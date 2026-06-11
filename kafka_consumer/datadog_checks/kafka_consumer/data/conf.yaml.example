@@ -546,17 +546,6 @@ instances:
     #
     # kafka_connect_collect_task_metrics: false
 
-    ## @param kafka_connect_aws_region - string - optional
-    ## AWS region for Amazon MSK Connect (managed service). When set, collects connector data
-    ## from the MSK Connect API via boto3 in addition to or instead of kafka_connect_url.
-    #
-    # kafka_connect_aws_region: <KAFKA_CONNECT_AWS_REGION>
-
-    ## @param kafka_connect_aws_role_arn - string - optional
-    ## ARN of an IAM role to assume for MSK Connect API calls. Used for cross-account access.
-    #
-    # kafka_connect_aws_role_arn: <KAFKA_CONNECT_AWS_ROLE_ARN>
-
     ## @param kafka_connect_confluent_cloud_environment_id - string - optional - default: env-abc123
     ## Confluent Cloud environment ID (e.g. env-abc123). When set together with
     ## kafka_connect_confluent_cloud_cluster_id, collects connector data from the

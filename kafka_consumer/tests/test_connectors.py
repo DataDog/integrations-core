@@ -23,7 +23,6 @@ pytestmark = [pytest.mark.unit]
 
 def make_collector(
     connect_urls=None,
-    aws_region=None,
     collect_task_metrics=False,
     cache_store=None,
 ):
@@ -47,8 +46,6 @@ def make_collector(
 
     config = mock.MagicMock()
     config._kafka_connect_urls = connect_urls or []
-    config._kafka_connect_aws_region = aws_region
-    config._kafka_connect_aws_role_arn = None
     config._kafka_connect_confluent_cloud_environment_id = None
     config._kafka_connect_confluent_cloud_cluster_id = None
     config._kafka_connect_confluent_cloud_url = 'https://api.confluent.cloud'
@@ -532,7 +529,7 @@ def test_configure_session_cert_only():
 
 
 # ---------------------------------------------------------------------------
-# collect() — OAuth failure and MSK paths
+# collect() — OAuth failure path
 # ---------------------------------------------------------------------------
 
 
@@ -544,26 +541,6 @@ def test_collect_oauth_failure_returns_empty():
         result = collector.collect('cluster-1')
 
     assert result == {}
-
-
-def test_collect_msk_success():
-    collector, _, config, _ = make_collector(aws_region='us-east-1')
-    config._kafka_connect_oauth_token_provider = None
-
-    with mock.patch.object(collector, '_collect_msk_managed'):
-        result = collector.collect('cluster-1')
-
-    assert result == {'msk:us-east-1': True}
-
-
-def test_collect_msk_failure():
-    collector, _, config, _ = make_collector(aws_region='us-east-1')
-    config._kafka_connect_oauth_token_provider = None
-
-    with mock.patch.object(collector, '_collect_msk_managed', side_effect=Exception("boto3 error")):
-        result = collector.collect('cluster-1')
-
-    assert result == {'msk:us-east-1': False}
 
 
 # ---------------------------------------------------------------------------
@@ -689,11 +666,9 @@ def test_fetch_oidc_token_uses_scope_and_ca_cert():
 
     token, _ = _fetch_oidc_token(oauth_config, session_mock, timeout=5)
     assert token == 'tok456'
-    call_kwargs = session_mock.post.call_args[1]
+    call_kwargs = session_mock.post.call_args.kwargs
     assert call_kwargs['verify'] == '/path/to/ca.crt'
-    post_data = session_mock.post.call_args[1].get('data') or session_mock.post.call_args[0][1]
-    assert 'scope' in session_mock.post.call_args[1].get('data', {}) or \
-           'scope' in (session_mock.post.call_args.kwargs.get('data') or {})
+    assert call_kwargs['data']['scope'] == 'openid'
 
 
 # ---------------------------------------------------------------------------
@@ -754,52 +729,6 @@ def test_get_events_to_send_handles_write_failure():
     result = collector._get_events_to_send('test_key', {'item': 'content'})
     assert result == ['item']
     collector.log.debug.assert_called()
-
-
-# ---------------------------------------------------------------------------
-# _collect_msk_managed — with mocked boto3
-# ---------------------------------------------------------------------------
-
-
-def test_collect_msk_managed_emits_metrics_and_events():
-    collector, check, config, _ = make_collector(aws_region='us-east-1')
-    config._kafka_connect_aws_role_arn = None
-
-    mock_connector = {
-        'connectorName': 'my-connector',
-        'connectorArn': 'arn:aws:kafkaconnect:us-east-1:123456789:connector/my-connector',
-        'connectorState': 'RUNNING',
-        'kafkaConnectVersion': '2.7.1',
-        'connectorConfiguration': {'connector.class': 'io.debezium.connector.mysql.MySqlConnector'},
-    }
-
-    mock_paginator = mock.MagicMock()
-    mock_paginator.paginate.return_value = [{'connectors': [mock_connector]}]
-
-    mock_client = mock.MagicMock()
-    mock_client.get_paginator.return_value = mock_paginator
-
-    mock_boto3 = mock.MagicMock()
-    mock_boto3.client.return_value = mock_client
-
-    with mock.patch.dict('sys.modules', {'boto3': mock_boto3}):
-        collector._collect_msk_managed('cluster-1')
-
-    count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.count']
-    assert count_calls[0].args[1] == 1
-    assert check.event_platform_event.call_count == 1
-
-
-def test_collect_msk_managed_missing_boto3():
-    collector, _, config, _ = make_collector(aws_region='us-east-1')
-    config._kafka_connect_aws_role_arn = None
-
-    import sys
-
-    with mock.patch.dict('sys.modules', {'boto3': None}):
-        collector._collect_msk_managed('cluster-1')
-
-    collector.log.error.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -865,34 +794,3 @@ def test_collect_confluent_cloud_failure_reported_in_connectivity():
     assert result == {'confluent_cloud:env-abc123:lkc-xyz789': False}
 
 
-def test_collect_msk_managed_with_role_arn():
-    collector, check, config, _ = make_collector(aws_region='us-east-1')
-    config._kafka_connect_aws_role_arn = 'arn:aws:iam::123:role/my-role'
-
-    mock_paginator = mock.MagicMock()
-    mock_paginator.paginate.return_value = [{'connectors': []}]
-
-    mock_kafka_client = mock.MagicMock()
-    mock_kafka_client.get_paginator.return_value = mock_paginator
-
-    mock_sts_client = mock.MagicMock()
-    mock_sts_client.assume_role.return_value = {
-        'Credentials': {
-            'AccessKeyId': 'AKI',
-            'SecretAccessKey': 'SAK',
-            'SessionToken': 'ST',
-        }
-    }
-
-    def boto3_client_factory(service_name, **kwargs):
-        if service_name == 'sts':
-            return mock_sts_client
-        return mock_kafka_client
-
-    mock_boto3 = mock.MagicMock()
-    mock_boto3.client.side_effect = boto3_client_factory
-
-    with mock.patch.dict('sys.modules', {'boto3': mock_boto3}):
-        collector._collect_msk_managed('cluster-1')
-
-    mock_sts_client.assume_role.assert_called_once()
