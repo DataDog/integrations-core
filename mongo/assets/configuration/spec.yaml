@@ -12,6 +12,7 @@ files:
       value:
         example: false
         type: boolean
+      fleet_configurable: false
     - template: init_config/default
   - template: instances
     options:
@@ -241,6 +242,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the operation samples collection interval in seconds. Each collection involves capturing
@@ -273,6 +275,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the slow operations collection interval in seconds. Each collection involves capturing
@@ -280,6 +283,7 @@ files:
           value:
             type: number
             example: 10
+          fleet_configurable: false
         - name: max_operations
           description: |
             Set the maximum number of slow operations to collect per interval.
@@ -300,6 +304,7 @@ files:
           value:
             type: string
             example: queryPlanner
+          fleet_configurable: false
     - name: collect_schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       fleet_configurable: true
@@ -310,6 +315,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the schemas collection interval in seconds. Each collection involves sampling documents
@@ -317,6 +323,7 @@ files:
           value:
             type: number
             example: 3600
+          fleet_configurable: false
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
@@ -336,6 +343,7 @@ files:
             type: number
             display_default: null
             example: 300
+          fleet_configurable: false
         - name: max_depth
           description: |
             Set the maximum depth of nested documents to sample.
@@ -366,6 +374,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the schemas collection interval in seconds. Each collection involves sampling documents
@@ -373,6 +382,7 @@ files:
           value:
             type: number
             example: 3600
+          fleet_configurable: false
         - name: sample_size
           description: |
             Set the sample size for each collection. The sample size is the number of documents to sample
@@ -381,6 +391,7 @@ files:
           value:
             type: number
             example: 10
+          fleet_configurable: false
         - name: max_collections
           description: |
             Set the maximum number of collections to collect schemas from per interval. The maxium number of collections
@@ -391,12 +402,14 @@ files:
             type: number
             display_default: null
             example: 300
+          fleet_configurable: false
         - name: max_depth
           description: |
             Set the maximum depth of nested documents to sample.
           value:
             type: number
             example: 5
+          fleet_configurable: false
         - name: collect_search_indexes
           description: |
             Set to `true` to collect search indexes for each collection.
@@ -404,6 +417,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
     - name: query_metrics
       description: |
         Query metrics provide aggregated performance statistics for normalized queries.
@@ -422,6 +436,7 @@ files:
             type: boolean
             example: false
             display_default: false
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query metrics collection interval in seconds.
@@ -429,6 +444,7 @@ files:
             type: number
             example: 10
             display_default: 10
+          fleet_configurable: false
         - name: full_statement_text_cache_max_size
           description: |
             Maximum size of the cache for full query text events.
@@ -436,6 +452,7 @@ files:
             type: number
             example: 10000
             display_default: 10000
+          fleet_configurable: false
         - name: full_statement_text_samples_per_hour_per_query
           description: |
             Maximum number of full query text events per query per hour.
@@ -443,6 +460,7 @@ files:
             type: number
             example: 1
             display_default: 1
+          fleet_configurable: false
     - name: replica_check
       description: |
         Whether or not to read from available replicas.
@@ -450,6 +468,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: timeout
       description: |
         Controls connectTimeoutMS, serverSelectionTimeoutMS, socketTimeoutMS and timeoutMS
@@ -457,16 +476,19 @@ files:
       value:
         type: integer
         example: 30
+      fleet_configurable: false
     - name: tls
       description: If `True`, create the connection to the server using transport layer security.
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: tls_certificate_key_file
       description: A file containing the client certificate and private key. Implies tls=True.
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - name: tls_ca_file
       description: |
         A file containing one or a bundle of “certification authority” certificates,
@@ -475,6 +497,7 @@ files:
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - name: tls_allow_invalid_hostnames
       description: |
         If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True.
@@ -483,6 +506,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: tls_allow_invalid_certificates
       description: |
         If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process.
@@ -491,12 +515,14 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: dbstats_tag_dbname
       description: |
         Whether or not to include the 'dbname' as a tag for dbstat metrics
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: additional_metrics
       description: |
         By default, the check collects a sample of metrics from MongoDB.
@@ -514,6 +540,7 @@ files:
           type: string
         example:
           [metrics.commands, tcmalloc, top, collection, jumbo_chunks, sharded_data_distribution]
+      fleet_configurable: false
     - name: metrics_collection_interval
       description: |
         The interval in seconds at which to collect certain types of metrics.
@@ -527,6 +554,7 @@ files:
           value:
             type: integer
             example: 300
+          fleet_configurable: false
         - name: collections_indexes_stats
           description: |
             The interval in seconds at which to collect collection indexes stats metrics.
@@ -574,6 +602,7 @@ files:
           type: string
         example:
           - <COLLECTION_NAME>
+      fleet_configurable: false
     - name: collections_indexes_stats
       description: |
         Collect indexes access metrics for every index in every collections in
@@ -581,6 +610,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: system_database_stats
       description: |
         Enable or disable the collection of database stats, collection stats, and index stats for system databases
@@ -702,6 +732,7 @@ files:
       value:
         example: false
         type: boolean
+      fleet_configurable: false
     - name: server
       fleet_configurable: true
       legacy: true
