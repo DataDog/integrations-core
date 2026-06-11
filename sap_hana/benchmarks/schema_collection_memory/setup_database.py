@@ -7,8 +7,8 @@ import argparse
 import sys
 from contextlib import closing
 
-NUM_TABLES = 50
-NUM_COLUMNS = 50
+NUM_TABLES = 1000
+NUM_COLUMNS = 1000
 
 ADMIN_USER = "system"
 ADMIN_PASSWORD = "Admin1337"
