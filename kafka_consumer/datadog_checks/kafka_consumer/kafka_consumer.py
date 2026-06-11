@@ -9,6 +9,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
+from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
 from datadog_checks.kafka_consumer.constants import (
     HIGH_WATERMARK,
     KAFKA_INTERNAL_TOPICS,
@@ -33,6 +34,7 @@ class KafkaCheck(AgentCheck):
 
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
+        self._connector_collector = KafkaConnectCollector(self, self.config, self.log)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -134,6 +136,12 @@ class KafkaCheck(AgentCheck):
                 self.metadata_collector.collect_all_metadata(highwater_offsets)
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
+
+        if self.config._kafka_connect_urls or self.config._kafka_connect_aws_region:
+            try:
+                self._connector_collector.collect(self.config._kafka_cluster_id_override or cluster_id)
+            except Exception as e:
+                self.log.error("Error collecting connector metadata: %s", e)
 
         if self.config._close_admin_client:
             self.client.close_admin_client()
