@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from .config_models.instance import CollectSchemas
     from .sap_hana import SapHanaCheck
 
+CURSOR_FETCH_SIZE = 10_000
+
 CURRENT_DATABASE_QUERY = "SELECT DATABASE_NAME FROM SYS.M_DATABASE"
 CURRENT_DATABASE_DESCRIPTION_QUERY = "SELECT DESCRIPTION FROM SYS.M_DATABASE"
 
@@ -114,6 +116,7 @@ class HanaSchemaCollector(SchemaCollector):
         conn = self._check._conn
         query, params = self._build_query()
         with closing(conn.cursor()) as cursor:
+            cursor.setfetchsize(CURSOR_FETCH_SIZE)
             cursor.execute(query, params)
             self._pending_row = cursor.fetchone()
             try:
