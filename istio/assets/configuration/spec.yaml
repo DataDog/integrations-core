@@ -136,6 +136,7 @@ files:
           example: sidecar
           display_default: sidecar
           type: string
+        fleet_configurable: false
       - name: send_histograms_buckets
         description: Set send_histograms_buckets to true to send the histograms bucket from Istio.
         fleet_configurable: true

@@ -26,6 +26,7 @@ files:
             value:
               type: number
               example: 10
+            fleet_configurable: false
           - template: instances/default
       - template: logs
         example:
