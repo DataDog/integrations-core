@@ -3,14 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import contextmanager
-from typing import Any, Iterator  # noqa: F401
+from typing import Iterator  # noqa: F401
 from urllib.parse import urlparse
-
-import yaml
 
 from .conditions import CheckDockerLogs
 from .env import environment_run, get_state, save_state
-from .fs import create_file, file_exists, read_file
+from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
@@ -44,6 +42,43 @@ def get_container_ip(container_id_or_name):
     return run_command(command, capture='out', check=True).stdout.strip()
 
 
+def get_e2e_discovery_metadata(
+    check_root: str | os.PathLike[str] | None = None,
+    *,
+    site_packages: str = '/opt/datadog-agent/embedded/lib/python3.13/site-packages',
+) -> dict[str, list[str]]:
+    """Return Docker volume metadata for an e2e discovery run.
+
+    Mounts the integration's ``auto_conf.yaml`` and ``config_models/discovery.py`` into the
+    agent container, alongside the repo's discovery utilities from ``datadog_checks_base``.
+
+    Pass ``{"init_config": {}, "instances": []}`` to ``dd_agent_check`` alongside this
+    metadata so that the static per-env config is temporarily replaced with an empty-instances
+    file, leaving ``auto_conf.yaml`` as the sole AD template driving config-discovery.
+    """
+    check_root = os.fspath(check_root or find_check_root(depth=1))
+    check_name = os.path.basename(check_root)
+    repo_root = os.path.dirname(check_root)
+    check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
+    base_pkg = os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base')
+    auto_conf = os.path.join(check_pkg, 'data', 'auto_conf.yaml')
+    discovery_module = os.path.join(check_pkg, 'config_models', 'discovery.py')
+    base_py = os.path.join(base_pkg, 'checks', 'base.py')
+    discovery_dir = os.path.join(base_pkg, 'utils', 'discovery')
+    openmetrics_base = os.path.join(base_pkg, 'checks', 'openmetrics', 'v2', 'base.py')
+
+    return {
+        'docker_volumes': [
+            f'{auto_conf}:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro',
+            f'{discovery_module}:{site_packages}/datadog_checks/{check_name}/config_models/discovery.py:ro',
+            f'{discovery_dir}:{site_packages}/datadog_checks/base/utils/discovery:ro',
+            f'{openmetrics_base}:{site_packages}/datadog_checks/base/checks/openmetrics/v2/base.py:ro',
+            f'{base_py}:{site_packages}/datadog_checks/base/checks/base.py:ro',
+            '/var/run/docker.sock:/var/run/docker.sock:ro',
+        ],
+    }
+
+
 def compose_file_active(compose_file):
     """
     Returns a `bool` indicating whether or not a compose file has any active services.
@@ -60,44 +95,6 @@ def using_windows_containers():
     """
     os_type = run_command(['docker', 'info', '--format', '{{.OSType}}'], capture=True, check=True).stdout.strip()
     return os_type == 'windows'
-
-
-def get_e2e_discovery_config(
-    check_root: str | os.PathLike[str] | None = None,
-    *,
-    site_packages: str = '/opt/datadog-agent/embedded/lib/python3.13/site-packages',
-) -> tuple[dict[str, Any], dict[str, list[str]]]:
-    """Return ``(auto_conf config, metadata)`` for an e2e discovery run.
-
-    Reads the integration's ``auto_conf.yaml`` and returns the parsed config together
-    with Docker volume metadata that mounts the repo's discovery utilities and the
-    integration's generated ``config_models/discovery.py`` into the agent container.
-    """
-    check_root = os.fspath(check_root or find_check_root(depth=1))
-    check_name = os.path.basename(check_root)
-    repo_root = os.path.dirname(check_root)
-    check_package_root = os.path.join(check_root, 'datadog_checks', check_name)
-    discovery_model_path = os.path.join(check_package_root, 'config_models', 'discovery.py')
-
-    config = yaml.safe_load(read_file(os.path.join(check_package_root, 'data', 'auto_conf.yaml')))
-
-    return (
-        config,
-        {
-            'docker_volumes': [
-                '{}:{}'.format(
-                    os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base', 'utils', 'discovery'),
-                    f'{site_packages}/datadog_checks/base/utils/discovery:ro',
-                ),
-                '{}:{}'.format(
-                    os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base', 'checks', 'base.py'),
-                    f'{site_packages}/datadog_checks/base/checks/base.py:ro',
-                ),
-                f'{discovery_model_path}:{site_packages}/datadog_checks/{check_name}/config_models/discovery.py:ro',
-                '/var/run/docker.sock:/var/run/docker.sock:ro',
-            ],
-        },
-    )
 
 
 @contextmanager

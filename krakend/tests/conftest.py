@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_e2e_discovery_config
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.krakend import KrakendCheck
@@ -51,13 +51,12 @@ def run_docker_e2e(env_vars: dict[str, str], conditions: list[LazyFunction]):
         conditions=conditions,
     ):
         asyncio.run(generate_sample_traffic())
-        _, discovery_metadata = get_e2e_discovery_config()
 
         yield (
             {
                 "instances": [{"openmetrics_endpoint": OPEN_METRICS_ENDPOINT}],
             },
-            discovery_metadata,
+            get_e2e_discovery_metadata(),
         )
 
 
@@ -95,11 +94,6 @@ def check(instance: InstanceBuilder, request: pytest.FixtureRequest):
         return KrakendCheck("krakend", {}, [instance(go_metrics=go_metrics, process_metrics=process_metrics)])
 
     return KrakendCheck("krakend", {}, [instance()])
-
-
-@pytest.fixture
-def discovery_config():
-    return get_e2e_discovery_config()[0]
 
 
 @pytest.fixture

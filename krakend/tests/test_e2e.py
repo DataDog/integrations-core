@@ -24,9 +24,9 @@ def test_e2e(dd_agent_check, instance: InstanceBuilder):
 
 
 @pytest.mark.e2e
-def test_e2e_discovery(dd_agent_check, discovery_config):
+def test_e2e_discovery(dd_agent_check):
     aggregator = dd_agent_check(
-        discovery_config,
+        {'init_config': {}, 'instances': []},
         check_rate=True,
         discovery_min_instances=1,
         discovery_timeout=30,

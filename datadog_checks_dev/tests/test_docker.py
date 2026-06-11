@@ -8,7 +8,7 @@ import pytest
 import tenacity
 
 from datadog_checks.dev.ci import running_on_ci
-from datadog_checks.dev.docker import ComposeFileUp, compose_file_active, docker_run, get_e2e_discovery_config
+from datadog_checks.dev.docker import ComposeFileUp, compose_file_active, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.subprocess import run_command
 
 from .common import not_windows_ci
@@ -18,33 +18,26 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
 
 
-def test_get_e2e_discovery_config(tmp_path):
+def test_get_e2e_discovery_metadata(tmp_path):
     check_root = tmp_path / 'test_check'
     check_package_root = check_root / 'datadog_checks' / 'test_check'
     data_dir = check_package_root / 'data'
-    config_models_dir = check_package_root / 'config_models'
     data_dir.mkdir(parents=True)
-    config_models_dir.mkdir()
     (data_dir / 'auto_conf.yaml').write_text(
         'ad_identifiers:\n  - test\ndiscovery: {}\ninit_config:\ninstances: []\n',
         encoding='utf-8',
     )
-    (config_models_dir / 'discovery.py').write_text('', encoding='utf-8')
 
-    config, metadata = get_e2e_discovery_config(check_root, site_packages='/site-packages')
+    metadata = get_e2e_discovery_metadata(check_root, site_packages='/site-packages')
 
-    assert config == {
-        'ad_identifiers': ['test'],
-        'discovery': {},
-        'init_config': None,
-        'instances': [],
-    }
+    base_pkg = tmp_path / 'datadog_checks_base' / 'datadog_checks' / 'base'
     assert metadata == {
         'docker_volumes': [
-            f'{tmp_path}/datadog_checks_base/datadog_checks/base/utils/discovery:/site-packages/datadog_checks/base/utils/discovery:ro',
-            f'{tmp_path}/datadog_checks_base/datadog_checks/base/checks/openmetrics/v2/base.py:/site-packages/datadog_checks/base/checks/openmetrics/v2/base.py:ro',
-            f'{tmp_path}/datadog_checks_base/datadog_checks/base/checks/base.py:/site-packages/datadog_checks/base/checks/base.py:ro',
+            f'{check_package_root}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/test_check.d/auto_conf.yaml:ro',
             f'{check_package_root}/config_models/discovery.py:/site-packages/datadog_checks/test_check/config_models/discovery.py:ro',
+            f'{base_pkg}/utils/discovery:/site-packages/datadog_checks/base/utils/discovery:ro',
+            f'{base_pkg}/checks/openmetrics/v2/base.py:/site-packages/datadog_checks/base/checks/openmetrics/v2/base.py:ro',
+            f'{base_pkg}/checks/base.py:/site-packages/datadog_checks/base/checks/base.py:ro',
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
     }
