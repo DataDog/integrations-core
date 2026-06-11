@@ -314,12 +314,6 @@ files:
           Override the auto-detected kafka_cluster_id. When set, this value is used as
           the kafka_cluster_id tag on all metrics and events. The original auto-detected
           cluster ID is preserved as an original_kafka_cluster_id tag.
-
-          Use this option when multiple clusters report the same cluster ID and therefore
-          appear as a single entity in Datadog. This affects Amazon MSK KRaft clusters
-          (versions 3.7.x.kraft and later) due to an AWS provisioning bug where every
-          cluster is assigned the same hardcoded cluster ID. Set a unique value per
-          check instance to disambiguate clusters until AWS resolves the issue.
         value:
           type: string
         fleet_configurable: false
