@@ -597,19 +597,6 @@ files:
           type: boolean
           example: false
           display_default: false
-      - name: kafka_connect_aws_region
-        description: |
-          AWS region for Amazon MSK Connect (managed service). When set, collects connector data
-          from the MSK Connect API via boto3 in addition to or instead of kafka_connect_url.
-        fleet_configurable: true
-        value:
-          type: string
-      - name: kafka_connect_aws_role_arn
-        description: |
-          ARN of an IAM role to assume for MSK Connect API calls. Used for cross-account access.
-        fleet_configurable: true
-        value:
-          type: string
       - name: kafka_connect_confluent_cloud_environment_id
         description: |
           Confluent Cloud environment ID (e.g. env-abc123). When set together with

@@ -150,7 +150,7 @@ class KafkaConnectCollector:
         """Collect connector data and return connectivity status per endpoint.
 
         Returns a mapping of endpoint identifier to connection success (True/False).
-        REST URL endpoints use the URL as key; MSK uses 'msk:<region>'.
+        REST URL endpoints use the URL as key; Confluent Cloud uses 'confluent_cloud:<env>:<cluster>'.
         """
         if self.config._kafka_connect_oauth_token_provider:
             try:
@@ -168,16 +168,6 @@ class KafkaConnectCollector:
             except Exception as e:
                 self.log.error("Error collecting Kafka Connect data from %s: %s (%s)", url, e, type(e).__name__)
                 connectivity[url] = False
-
-        if self.config._kafka_connect_aws_region:
-            region = self.config._kafka_connect_aws_region
-            msk_key = f'msk:{region}'
-            try:
-                self._collect_msk_managed(cluster_id)
-                connectivity[msk_key] = True
-            except Exception as e:
-                self.log.error("Error collecting MSK Connect data: %s (%s)", e, type(e).__name__)
-                connectivity[msk_key] = False
 
         if (
             self.config._kafka_connect_confluent_cloud_environment_id
@@ -371,75 +361,6 @@ class KafkaConnectCollector:
         if self._get_events_to_send(event_cache_key, {'plugins': content}):
             event = json.loads(content)
             event['collection_timestamp'] = int(time.time() * 1000)
-            self.check.event_platform_event(json.dumps(event), 'data-streams-message')
-
-    def _collect_msk_managed(self, cluster_id: str) -> None:
-        try:
-            import boto3
-        except ImportError:
-            self.log.error("boto3 is required for MSK Connect collection. Install it with: pip install boto3")
-            return
-
-        region = self.config._kafka_connect_aws_region
-        role_arn = self.config._kafka_connect_aws_role_arn
-
-        if role_arn:
-            sts = boto3.client('sts')
-            assumed = sts.assume_role(RoleArn=role_arn, RoleSessionName='datadog-kafka-connect')
-            creds = assumed['Credentials']
-            client = boto3.client(
-                'kafkaconnect',
-                region_name=region,
-                aws_access_key_id=creds['AccessKeyId'],
-                aws_secret_access_key=creds['SecretAccessKey'],
-                aws_session_token=creds['SessionToken'],
-            )
-        else:
-            client = boto3.client('kafkaconnect', region_name=region)
-
-        connectors = []
-        paginator = client.get_paginator('list_connectors')
-        for page in paginator.paginate():
-            connectors.extend(page.get('connectors', []))
-
-        tags_base = self._get_tags(cluster_id) + [f'aws_region:{region}']
-        self.check.gauge('connector.count', len(connectors), tags=tags_base)
-
-        connector_contents: dict[str, str] = {}
-
-        for connector in connectors:
-            name = connector.get('connectorName', '')
-            connector_arn = connector.get('connectorArn', '')
-            connector_state = connector.get('connectorState', 'UNKNOWN')
-            connector_tags = tags_base + [
-                f'connector:{name}',
-                f'connector_state:{connector_state}',
-            ]
-            self.check.gauge(
-                'connector.running',
-                1 if connector_state == 'RUNNING' else 0,
-                tags=connector_tags,
-            )
-
-            # Exclude collection_timestamp from hashed content so dedup fires on unchanged configs.
-            content = {
-                'kafka_cluster_id': cluster_id,
-                **self._original_cluster_id_field(),
-                'connector': name,
-                'connectorArn': connector_arn,
-                'kafkaConnectVersion': connector.get('kafkaConnectVersion', ''),
-                'connector_state': connector_state,
-                'aws_region': region,
-                'config_type': 'connector',
-                'config': connector.get('connectorConfiguration') or {},
-            }
-            connector_contents[name] = json.dumps(content, sort_keys=True)
-
-        connectors_to_emit = self._get_events_to_send(f'{CONNECTOR_CONFIG_CACHE_KEY}:msk:{region}', connector_contents)
-        collection_timestamp = int(time.time() * 1000)
-        for name in connectors_to_emit:
-            event = json.loads(connector_contents[name])
-            event['collection_timestamp'] = collection_timestamp
             self.check.event_platform_event(json.dumps(event), 'data-streams-message')
 
     def _collect_confluent_cloud(self, cluster_id: str) -> None:

@@ -122,7 +122,10 @@ class KafkaCheck(AgentCheck):
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
             connect_status: dict[str, bool] = {}
-            if self.config._kafka_connect_urls or self.config._kafka_connect_aws_region:
+            if self.config._kafka_connect_urls or (
+                self.config._kafka_connect_confluent_cloud_environment_id
+                and self.config._kafka_connect_confluent_cloud_cluster_id
+            ):
                 try:
                     connect_status = self._connector_collector.collect(
                         self.config._kafka_cluster_id_override or cluster_id
