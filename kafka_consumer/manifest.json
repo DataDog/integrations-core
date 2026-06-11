@@ -60,6 +60,9 @@
       },
       "source_type_id": 10239,
       "auto_install": true
+    },
+    "dashboards": {
+      "Kafka Connect - Connector Monitoring": "assets/dashboards/kafka_connect_connector_monitoring.json"
     }
   }
 }
