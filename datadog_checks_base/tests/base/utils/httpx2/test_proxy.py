@@ -185,3 +185,36 @@ def test_build_proxy_transport_builds_router_when_proxy_set():
     transport = _build_proxy_transport({'http': 'http://1.2.3.4:3128'}, None, True, None)
     assert isinstance(transport, _ProxyRoutingTransport)
     transport.close()
+
+
+def test_build_proxy_transport_threads_verify_and_cert_into_inners():
+    with mock.patch('datadog_checks.base.utils.httpx2.httpx2.HTTPTransport') as transport_cls:
+        _build_proxy_transport({'https': 'http://1.2.3.4:3128'}, None, '/etc/ssl/ca.pem', '/etc/ssl/c.pem')
+    calls = transport_cls.call_args_list
+    assert calls, 'expected the direct and proxied inner transports to be built'
+    assert all(call.kwargs['verify'] == '/etc/ssl/ca.pem' for call in calls)
+    assert all(call.kwargs['cert'] == '/etc/ssl/c.pem' for call in calls)
+
+
+def test_same_proxy_url_for_both_schemes_shares_one_transport():
+    transport = _build_proxy_transport({'http': 'http://p:3128', 'https': 'http://p:3128'}, None, True, None)
+    assert transport._scheme_transports['http'] is transport._scheme_transports['https']
+    transport.close()  # would double-close the shared inner without the id() dedup
+
+
+def test_proxy_with_only_no_proxy_and_no_scheme_url_is_treated_as_unconfigured():
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        http = HTTPX2Wrapper({'proxy': {'no_proxy': 'internal.corp'}}, {})
+    assert http.options['proxies'] is None
+    assert http._client.trust_env is True
+
+
+def test_no_proxy_uris_stored_on_wrapper():
+    http = HTTPX2Wrapper({'proxy': {'http': 'http://p:1', 'no_proxy': 'a.com,b.com'}}, {})
+    assert http.no_proxy_uris == ['a.com', 'b.com']
+
+
+def test_no_proxy_uris_none_when_no_proxy_configured():
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        http = HTTPX2Wrapper({}, {})
+    assert http.no_proxy_uris is None
