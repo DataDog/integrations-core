@@ -1,0 +1,302 @@
+[
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-cloud-security-rules",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-docs",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-rev-eng-config",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-eula",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-changelogs",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-apps",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-images",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-readmes",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-monitors",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-integrations",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-dashboards",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-logs",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-owner-validator",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-service_checks",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-metrics_metadata",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-saved_views",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-oauth_clients",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-app-builder-blueprint",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-webhook_config",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-account-config-schema",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-account-config-runtime",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-dataflows",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "validate-manifests",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://app.datadoghq.com/ci/code-coverage/github.com%2Fdatadog%2Fintegrations-core/pull-requests/23917",
+    "name": "Datadog PR Gates / Total coverage percentage",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715691/job/79751772699",
+    "name": "test / check",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715691/job/79751772774",
+    "name": "test / save-event / Save event",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715691/job/79751772927",
+    "name": "test / upload-coverage",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/runs/79751378549",
+    "name": "CodeQL",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715691/job/79751172770",
+    "name": "test / test-minimum-base-package (linux, ubuntu-22.04, argocd, ArgoCD (py3.13-2.4.7), py3.13-2.4.7) / minimum-base-package-ArgoCD (py3.13-2.4.7)-py3.13-2.4.7",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715691/job/79751172773",
+    "name": "test / test (linux, ubuntu-22.04, argocd, ArgoCD (py3.13-2.4.7), py3.13-2.4.7) / ArgoCD (py3.13-2.4.7)-py3.13-2.4.7",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021713767/job/79751165759",
+    "name": "Pre-resolve dependency versions",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021713767/job/79751166649",
+    "name": "Publish artifacts and commit lockfiles to branch",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021713767/job/79751165863",
+    "name": "Run tests",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021713767/job/79751166646",
+    "name": "Target ${{ matrix.job.image }} on ${{ matrix.job.runner_os }}",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021714474/job/79751123966",
+    "name": "run / Comment for PR changelog",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021714595/job/79751114027",
+    "name": "labeler",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715564/job/79751098117",
+    "name": "labeler / apply",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715403/job/79751097632",
+    "name": "pinact",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715691/job/79751098894",
+    "name": "test / compute-matrix / Compute matrix",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715363/job/79751097583",
+    "name": "Analyze (python)",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715580/job/79751098417",
+    "name": "Run Validations / Validate",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021714474/job/79751095789",
+    "name": "run / Check PR changelog",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021715390/job/79751097374",
+    "name": "Check do-not-merge labels",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021713822/job/79751092706",
+    "name": "Set dependency-wheel-promotion status",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021713767/job/79751093182",
+    "name": "Check content hashes",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "skipping",
+    "link": "https://github.com/DataDog/integrations-core/actions/runs/27021713822/job/79751093808",
+    "name": "Set dependency-wheel-promotion status for merge queue",
+    "state": "SKIPPED"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://github.com/apps/datadog-assets",
+    "name": "review-check",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://app.mergefreeze.com/installations/3516/branches/6406",
+    "name": "mergefreeze",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://gitlab.ddbuild.io/datadog/integrations-core/-/pipelines/117360426",
+    "name": "dd-gitlab/default-pipeline",
+    "state": "SUCCESS"
+  },
+  {
+    "bucket": "pass",
+    "link": "https://mosaic.us1.ddbuild.io/change-request/4351187008552157420",
+    "name": "DDCI Task Sourcing",
+    "state": "SUCCESS"
+  }
+]

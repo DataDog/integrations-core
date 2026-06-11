@@ -24,6 +24,12 @@ if TYPE_CHECKING:
     from .check import ArgocdCheck
 
 
+# Resource-key delimiter. "|" rather than ":" because ":" appears inside cluster/repo server URLs
+# (https://host:port). "|" can't occur in a k8s name/namespace, hostname, URL, or DD tag value, so keys
+# stay unambiguously splittable.
+KEY_SEPARATOR = "|"
+
+
 def _instance_prefix(endpoint: str | None) -> str:
     """Build a multi-part prefix that disambiguates resources across clusters and envs.
 
@@ -56,7 +62,7 @@ def _instance_prefix(endpoint: str | None) -> str:
         host = urlparse(endpoint).hostname or ""
         if host:
             parts.append(host)
-    return ":".join(parts)
+    return KEY_SEPARATOR.join(parts)
 
 
 GENRESOURCES_API_UP_METRIC = "argocd.genresources.api.up"
@@ -206,7 +212,7 @@ def _application_key(item: dict) -> str:
     name = metadata.get("name")
     if not name:
         raise ValueError("argocd_application is missing metadata.name")
-    return f"{namespace}:{name}"
+    return f"{namespace}{KEY_SEPARATOR}{name}"
 
 
 def _cluster_key(item: dict) -> str:
@@ -333,7 +339,7 @@ class ArgocdResourceCollector:
             self.check.log.warning("genresources: skipping malformed %s", spec.resource_type, exc_info=True)
             return None
         if self._instance_prefix:
-            key = f"{self._instance_prefix}:{key}"
+            key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
         include = {
             "paths": list(spec.include["paths"]) + self._extra_paths,
             "map_paths": list(spec.include["map_paths"]),

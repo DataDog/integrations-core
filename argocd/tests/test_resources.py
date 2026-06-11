@@ -85,9 +85,9 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
         check._resource_collector.collect()
 
     by_type = {call.kwargs["type"]: call.kwargs for call in submit.call_args_list}
-    assert by_type["argocd_application"]["key"] == "argocd.example.com:argocd:checkout"
-    assert by_type["argocd_cluster"]["key"] == "argocd.example.com:https://cluster-a.example"
-    assert by_type["argocd_repository"]["key"] == "argocd.example.com:https://github.com/team/repo"
+    assert by_type["argocd_application"]["key"] == "argocd.example.com|argocd|checkout"
+    assert by_type["argocd_cluster"]["key"] == "argocd.example.com|https://cluster-a.example"
+    assert by_type["argocd_repository"]["key"] == "argocd.example.com|https://github.com/team/repo"
     for spec_type, include in (
         ("argocd_application", APPLICATION_INCLUDE),
         ("argocd_cluster", CLUSTER_INCLUDE),
@@ -142,7 +142,7 @@ def test_application_key_uses_app_identity_not_destination(mock_http_response_pe
         check._resource_collector.collect()
 
     keys = {c.kwargs["key"] for c in submit.call_args_list if c.kwargs["type"] == "argocd_application"}
-    assert keys == {"argocd.example.com:team-a:web", "argocd.example.com:team-b:web"}
+    assert keys == {"argocd.example.com|team-a|web", "argocd.example.com|team-b|web"}
 
 
 def test_collect_appends_extra_include_paths_to_every_type(mock_http_response_per_endpoint):
@@ -256,7 +256,7 @@ def test_collect_strips_credentials_from_repo_urls(mock_http_response_per_endpoi
     by_type = {c.kwargs["type"]: c.kwargs for c in submit.call_args_list}
     assert by_type["argocd_application"]["fields"]["spec"]["source"]["repoURL"] == "https://github.com/org/repo"
     assert by_type["argocd_repository"]["fields"]["repo"] == "https://github.com/org/repo"
-    assert by_type["argocd_repository"]["key"] == "argocd.example.com:https://github.com/org/repo"
+    assert by_type["argocd_repository"]["key"] == "argocd.example.com|https://github.com/org/repo"
 
 
 def test_collect_scrubs_credentials_from_condition_messages(mock_http_response_per_endpoint):
