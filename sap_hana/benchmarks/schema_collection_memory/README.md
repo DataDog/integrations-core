@@ -49,6 +49,17 @@ Results are written to `results/benchmark_results.txt`.
 HANA Express has resource constraints. If `CREATE TABLE` fails with a column-count or
 memory error, set `NUM_COLUMNS` to 500 or lower.
 
+## Notes on memory investigation
+
+During development, `cursor.setfetchsize(10_000)` was tried on the hdbcli cursor before
+`execute()` to reduce the C-layer result buffer. It had no measurable effect on peak RSS
+(1042 MiB → 1043 MiB). The reason: the dominant memory consumer is the Python-side
+`_queued_rows` list accumulating all table dicts before the single `json.dumps` flush —
+not the hdbcli C layer. The base `SchemaCollector` flushes when `len(_queued_rows) >=
+payload_chunk_size` (default 10,000) or on the last database. Since HANA always reports
+one database and a 1000-table schema is below the 10,000 threshold, everything flushes
+at once. The `max_tables` / `max_columns` limits are the effective control.
+
 ## Expected outcome
 
 The limited run (max\_tables=300, max\_columns=50) processes 300 tables × 50 columns =
