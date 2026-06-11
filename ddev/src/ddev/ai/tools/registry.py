@@ -86,6 +86,7 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "create_file": ToolSpec("fs.create_file", "CreateFileTool", factory=_file_registry_factory, read_only=False),
     "edit_file": ToolSpec("fs.edit_file", "EditFileTool", factory=_file_registry_factory, read_only=False),
     "append_file": ToolSpec("fs.append_file", "AppendFileTool", factory=_file_registry_factory, read_only=False),
+    "copy_path": ToolSpec("fs.copy_path", "CopyPathTool", factory=_file_policy_factory, read_only=False),
     "grep": ToolSpec("shell.grep", "GrepTool", factory=_file_policy_factory, read_only=True),
     "list_files": ToolSpec("shell.list_files", "ListFilesTool", read_only=True),
     "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory, read_only=False),
