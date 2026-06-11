@@ -1,7 +1,7 @@
 services:
   saphanabenchmark:
     container_name: saphanabenchmark
-    image: saplabs/hanaexpress:${SAP_HANA_VERSION:-2.00.076.00.20231004.2}
+    image: saplabs/hanaexpress:${SAP_HANA_VERSION:-latest}
     ulimits:
       nofile:
         soft: 1048576
@@ -10,7 +10,7 @@ services:
       kernel.shmmax: 1073741824
       net.ipv4.ip_local_port_range: "40000 60999"
     ports:
-      - "39017:39017"
+      - "39019:39017"
     environment:
       - PASSWORD=${PASSWORD}
     entrypoint:

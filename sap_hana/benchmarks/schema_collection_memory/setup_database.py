@@ -7,8 +7,8 @@ import argparse
 import sys
 from contextlib import closing
 
-NUM_TABLES = 1000
-NUM_COLUMNS = 1000
+NUM_TABLES = 50
+NUM_COLUMNS = 50
 
 ADMIN_USER = "system"
 ADMIN_PASSWORD = "Admin1337"
@@ -16,13 +16,13 @@ DATADOG_USER = "datadog"
 DATADOG_PASSWORD = "Datadog9000"
 SCHEMA = "BENCH"
 HOST = "localhost"
-PORT = 39017
+PORT = 39019
 
 
-def connect(user: str, password: str):
+def connect(user: str, password: str, host: str = HOST, port: int = PORT):
     from hdbcli.dbapi import Connection as HanaConnection
 
-    return HanaConnection(address=HOST, port=PORT, user=user, password=password)
+    return HanaConnection(address=host, port=port, user=user, password=password)
 
 
 def setup_user(cursor) -> None:
@@ -34,6 +34,8 @@ def setup_user(cursor) -> None:
     cursor.execute(f'ALTER USER {DATADOG_USER} ENABLE CLIENT CONNECT')
     cursor.execute(f'ALTER USER {DATADOG_USER} DISABLE PASSWORD LIFETIME')
     cursor.execute(f'GRANT CATALOG READ TO {DATADOG_USER}')
+    for view in ('SYS.M_DATABASE', 'SYS.TABLES', 'SYS.SCHEMAS', 'SYS.TABLE_COLUMNS'):
+        cursor.execute(f'GRANT SELECT ON {view} TO {DATADOG_USER}')
 
 
 def setup_schema(cursor) -> None:
@@ -69,12 +71,8 @@ def main() -> None:
     parser.add_argument('--port', type=int, default=PORT)
     args = parser.parse_args()
 
-    global HOST, PORT
-    HOST = args.host
-    PORT = args.port
-
-    print(f'Connecting to {HOST}:{PORT} as {ADMIN_USER}...', flush=True)
-    with closing(connect(ADMIN_USER, ADMIN_PASSWORD)) as conn:
+    print(f'Connecting to {args.host}:{args.port} as {ADMIN_USER}...', flush=True)
+    with closing(connect(ADMIN_USER, ADMIN_PASSWORD, host=args.host, port=args.port)) as conn:
         with closing(conn.cursor()) as cursor:
             print('Setting up monitoring user...', flush=True)
             setup_user(cursor)

@@ -16,7 +16,7 @@ RUN_COLLECTOR = os.path.join(os.path.dirname(__file__), 'run_collector.py')
 SETUP_DATABASE = os.path.join(os.path.dirname(__file__), 'setup_database.py')
 
 HOST = 'localhost'
-PORT = 39017
+PORT = 39019
 
 
 def wait_for_hana(host: str, port: int, timeout: int = 600) -> None:

@@ -17,7 +17,7 @@ from resource import RUSAGE_SELF, getrusage
 DATADOG_USER = "datadog"
 DATADOG_PASSWORD = "Datadog9000"
 HOST = "localhost"
-PORT = 39017
+PORT = 39019
 
 MODES = {
     "limited": {"enabled": True, "max_tables": 300, "max_columns": 50},
