@@ -119,6 +119,30 @@ class KafkaConfig:
         self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
         self._schema_registry_oauth_token_provider = instance.get('schema_registry_oauth_token_provider')
 
+        # Kafka Connect
+        self._kafka_connect_urls = self._parse_connect_urls(instance.get('kafka_connect_url'))
+        self._kafka_connect_username = instance.get('kafka_connect_username')
+        self._kafka_connect_password = instance.get('kafka_connect_password')
+        self._kafka_connect_tls_verify = is_affirmative(instance.get('kafka_connect_tls_verify', True))
+        self._kafka_connect_tls_cert = instance.get('kafka_connect_tls_cert')
+        self._kafka_connect_tls_key = instance.get('kafka_connect_tls_key')
+        self._kafka_connect_tls_ca_cert = instance.get('kafka_connect_tls_ca_cert')
+        self._kafka_connect_oauth_token_provider = instance.get('kafka_connect_oauth_token_provider')
+        self._kafka_connect_collect_task_metrics = is_affirmative(
+            instance.get('kafka_connect_collect_task_metrics', False)
+        )
+        self._kafka_connect_aws_region = instance.get('kafka_connect_aws_region')
+        self._kafka_connect_aws_role_arn = instance.get('kafka_connect_aws_role_arn')
+        self._kafka_connect_aws_msk_cluster_arn = instance.get('kafka_connect_aws_msk_cluster_arn')
+
+    @staticmethod
+    def _parse_connect_urls(value) -> list[str]:
+        if not value:
+            return []
+        if isinstance(value, str):
+            return [value]
+        return list(value)
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')
