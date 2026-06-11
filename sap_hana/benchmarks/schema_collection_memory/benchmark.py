@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 #!/usr/bin/env python3
 """Orchestrate limited vs unlimited schema collection runs and compare peak memory."""
 
