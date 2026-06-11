@@ -1,0 +1,1 @@
+Collect Kafka Connect connector status metrics and configurations via the Kafka Connect REST API and Amazon MSK Connect.
