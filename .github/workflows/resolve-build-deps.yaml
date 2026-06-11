@@ -280,10 +280,10 @@ jobs:
       # Use PBS as suggested by: https://github.com/DataDog/integrations-core/pull/21692#pullrequestreview-3358660684
       # PBS stands for "Python Build Standalone": https://astral.sh/blog/python-build-standalone
       env:
-        PYTHON_PATCH: 13
-        PBS_RELEASE: 20260414
-        PBS_SHA256__aarch64: 874f9931ad40dcce38caf6f408aa7e10ec3d0dfce2184ba7af62a965a66b9cd9
-        PBS_SHA256__x86_64: d34198cd856fa80ebf3aa821fe329a25fab66eeda44f72ac9576591282e31bb7
+        PYTHON_PATCH: 14
+        PBS_RELEASE: 20260610
+        PBS_SHA256__aarch64: 79daa8e9dea1e64ad50aebb05a807289023a474c2020b72361eb44d67fa2401e
+        PBS_SHA256__x86_64: 064731aded38b1a12909088d40d9e0e385dc989e38a1e1de9917610254194962
       run: |
         set -u
         curl -fsSL -o pbs.tgz "https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-$PYTHON_VERSION.$PYTHON_PATCH+$PBS_RELEASE-${{ matrix.job.arch }}-apple-darwin-install_only_stripped.tar.gz"
