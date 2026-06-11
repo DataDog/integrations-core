@@ -519,7 +519,7 @@ class MySql(DatabaseCheck):
             connection_args['read_default_file'] = self._config.defaults_file
             return connection_args
 
-        connection_args.update({'user': self._config.user, 'passwd': self._config.password})
+        connection_args.update({'user': self._config.user, 'password': self._config.password})
         if self._uses_aws_managed_auth:
             # Generate AWS IAM auth token
             aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
@@ -531,7 +531,7 @@ class MySql(DatabaseCheck):
                 region=region,
                 role_arn=aws_managed_authentication.get('role_arn'),
             )
-            connection_args.update({'user': self._config.user, 'passwd': password})
+            connection_args.update({'user': self._config.user, 'password': password})
         if self._config.mysql_sock != '':
             self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
             connection_args.update({'unix_socket': self._config.mysql_sock})

@@ -35,7 +35,7 @@ class MockAsyncJob(ManagedAuthConnectionMixin):
 def test_mixin_no_managed_auth(mock_connect):
     """Test that mixin does not reconnect when managed auth is disabled."""
     mock_connect.return_value = Mock()
-    provider = Mock(return_value={'user': 'test', 'passwd': 'pass'})
+    provider = Mock(return_value={'user': 'test', 'password': 'pass'})
     job = MockAsyncJob(provider, uses_managed_auth=False)
 
     # Get connection
@@ -54,7 +54,7 @@ def test_mixin_no_managed_auth(mock_connect):
 def test_mixin_managed_auth_initial_connection(mock_connect):
     """Test that mixin creates connection on first call with managed auth."""
     mock_connect.return_value = Mock()
-    provider = Mock(return_value={'user': 'test', 'passwd': 'token123'})
+    provider = Mock(return_value={'user': 'test', 'password': 'token123'})
     job = MockAsyncJob(provider, uses_managed_auth=True)
 
     conn = job._get_db_connection()
@@ -68,7 +68,7 @@ def test_mixin_managed_auth_initial_connection(mock_connect):
 def test_mixin_managed_auth_cached_connection(mock_connect):
     """Test that mixin returns cached connection when TTL not expired."""
     mock_connect.return_value = Mock()
-    provider = Mock(return_value={'user': 'test', 'passwd': 'token123'})
+    provider = Mock(return_value={'user': 'test', 'password': 'token123'})
     job = MockAsyncJob(provider, uses_managed_auth=True)
 
     # Get connection
@@ -89,7 +89,7 @@ def test_mixin_managed_auth_cached_connection(mock_connect):
 def test_mixin_managed_auth_reconnect_after_ttl(mock_connect):
     """Test that mixin reconnects after TTL expires."""
     mock_connect.side_effect = [Mock(), Mock()]  # Two different connections
-    provider = Mock(return_value={'user': 'test', 'passwd': 'new_token'})
+    provider = Mock(return_value={'user': 'test', 'password': 'new_token'})
     job = MockAsyncJob(provider, uses_managed_auth=True)
 
     # Get initial connection
@@ -120,7 +120,7 @@ def test_mixin_should_reconnect_no_connection():
 def test_mixin_should_reconnect_ttl_not_expired(mock_connect):
     """Test that _should_reconnect_for_managed_auth returns False when TTL not expired."""
     mock_connect.return_value = Mock()
-    provider = Mock(return_value={'user': 'test', 'passwd': 'token'})
+    provider = Mock(return_value={'user': 'test', 'password': 'token'})
     job = MockAsyncJob(provider, uses_managed_auth=True)
 
     job._get_db_connection()
@@ -133,7 +133,7 @@ def test_mixin_should_reconnect_ttl_not_expired(mock_connect):
 def test_mixin_should_reconnect_ttl_expired(mock_connect):
     """Test that _should_reconnect_for_managed_auth returns True when TTL expired."""
     mock_connect.return_value = Mock()
-    provider = Mock(return_value={'user': 'test', 'passwd': 'token'})
+    provider = Mock(return_value={'user': 'test', 'password': 'token'})
     job = MockAsyncJob(provider, uses_managed_auth=True)
 
     job._get_db_connection()
@@ -162,7 +162,7 @@ def test_get_connection_args_with_aws_managed_auth(mock_generate_token):
     connection_args = check._get_connection_args()
 
     assert connection_args['user'] == 'datadog'
-    assert connection_args['passwd'] == 'iam_token_123'
+    assert connection_args['password'] == 'iam_token_123'
     mock_generate_token.assert_called_once_with(
         host='mydb.us-east-1.rds.amazonaws.com',
         port=3306,
@@ -194,7 +194,7 @@ def test_get_connection_args_with_aws_managed_auth_and_role_arn(mock_generate_to
     check = MySql(common.CHECK_NAME, {}, [instance])
     connection_args = check._get_connection_args()
 
-    assert connection_args['passwd'] == 'iam_token_456'
+    assert connection_args['password'] == 'iam_token_456'
     mock_generate_token.assert_called_once_with(
         host='mydb.us-east-1.rds.amazonaws.com',
         port=3306,
@@ -217,7 +217,7 @@ def test_get_connection_args_without_managed_auth():
     connection_args = check._get_connection_args()
 
     assert connection_args['user'] == 'datadog'
-    assert connection_args['passwd'] == 'my_password'
+    assert connection_args['password'] == 'my_password'
 
 
 def test_uses_aws_managed_auth_flag_true():

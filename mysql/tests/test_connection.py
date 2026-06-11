@@ -48,7 +48,7 @@ def test_connection_with_sock():
         'read_timeout': None,
         'unix_socket': '/foo/bar',
         'user': 'ddog',
-        'passwd': 'pwd',
+        'password': 'pwd',
         'port': 123,
     }
 
@@ -67,7 +67,7 @@ def test_connection_with_host():
         'connect_timeout': 10,
         'read_timeout': None,
         'user': 'ddog',
-        'passwd': 'pwd',
+        'password': 'pwd',
         'host': 'localhost',
     }
 
@@ -82,7 +82,7 @@ def test_connection_with_host_and_port():
         'connect_timeout': 10,
         'read_timeout': None,
         'user': 'ddog',
-        'passwd': 'pwd',
+        'password': 'pwd',
         'host': 'localhost',
         'port': 123,
     }
@@ -98,7 +98,7 @@ def test_connection_with_charset(instance_basic):
         'autocommit': True,
         'host': common.HOST,
         'user': common.USER,
-        'passwd': common.PASS,
+        'password': common.PASS,
         'port': common.PORT,
         'ssl': None,
         'connect_timeout': 10,
