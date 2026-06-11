@@ -3,16 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import ipaddress
 import logging
 from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from typing import Any, Self
+from urllib.parse import urlparse
 
 import httpx2
 from binary import KIBIBYTE
 
+from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
 
+from .common import ensure_unicode
 from .headers import get_default_headers, update_headers
 from .http_exceptions import (
     HTTPConnectionError,
@@ -29,6 +33,10 @@ DEFAULT_TIMEOUT = 10
 # Matches the effective chunk size used by RequestsWrapper.iter_content (http.py:415 multiplies by KIBIBYTE).
 DEFAULT_CHUNK_SIZE = 16 * KIBIBYTE
 
+# options['proxies'] sentinel stored when skip_proxy is set, for parity with RequestsWrapper.
+# trust_env=False is what actually keeps httpx2 from reading HTTP_PROXY/HTTPS_PROXY.
+PROXY_SETTINGS_DISABLED = {'http': '', 'https': ''}
+
 STANDARD_FIELDS = {
     'allow_redirects': True,
     'connect_timeout': None,
@@ -36,7 +44,9 @@ STANDARD_FIELDS = {
     'headers': None,
     'log_requests': False,
     'password': None,
+    'proxy': None,
     'read_timeout': None,
+    'skip_proxy': False,
     'timeout': DEFAULT_TIMEOUT,
     'tls_ca_cert': None,
     'tls_cert': None,
@@ -70,7 +80,7 @@ UNKNOWN_KWARG_HINTS: dict[str, str] = {
     'verify': "configure 'tls_verify' in instance config, or drop the per-call kwarg",
     'persist': 'drop the kwarg, httpx2 pools connections by default',
     'cert': "configure 'tls_cert' and 'tls_private_key' in instance config",
-    'proxies': 'proxy support is not yet wired through to httpx2, see TODO in httpx2.py',
+    'proxies': "configure 'proxy' in instance config; per-request proxy support is unavailable",
 }
 
 
@@ -127,6 +137,117 @@ def _map_httpx2_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPErro
     if isinstance(exc, httpx2.RequestError):
         return HTTPRequestError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     return HTTPError(str(exc) or exc.__class__.__name__)
+
+
+def should_bypass_proxy(url: str, no_proxy_uris: list[str]) -> bool:
+    # Copied from RequestsWrapper (http.py) so no_proxy matching stays identical after the httpx migration.
+    # Accepts a URL and a list of no_proxy URIs
+    # Returns True if URL should bypass the proxy.
+    parsed_uri_parts = urlparse(url)
+    parsed_uri = parsed_uri_parts.hostname
+
+    if '*' in no_proxy_uris:
+        # A single * character is supported, which matches all hosts, and effectively disables the proxy.
+        # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
+        return True
+
+    if parsed_uri_parts.scheme == "unix":
+        # Unix domain sockets semantically do not make sense to proxy
+        return True
+
+    for no_proxy_uri in no_proxy_uris:
+        try:
+            # If no_proxy_uri is an IP or IP CIDR.
+            # A ValueError is raised if address does not represent a valid IPv4 or IPv6 address.
+            ip_network = ipaddress.ip_network(ensure_unicode(no_proxy_uri))
+            ip_address = ipaddress.ip_address(ensure_unicode(parsed_uri))
+            if ip_address in ip_network:
+                return True
+        except ValueError:
+            # Treat no_proxy_uri as a domain name
+            # A domain name matches that name and all subdomains.
+            #   e.g. "foo.com" matches "foo.com" and "bar.foo.com"
+            # A domain name with a leading "." matches subdomains only.
+            #   e.g. ".y.com" matches "x.y.com" but not "y.com".
+            if no_proxy_uri.startswith((".", "*.")):
+                # Support wildcard subdomain; treat as leading dot "."
+                # e.g. "*.example.domain" as ".example.domain"
+                dot_no_proxy_uri = no_proxy_uri.lstrip("*")
+            else:
+                # Used for matching subdomains.
+                dot_no_proxy_uri = ".{}".format(no_proxy_uri)
+            if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
+                return True
+    return False
+
+
+def _resolve_proxy(
+    config: dict[str, Any], init_config: dict[str, Any]
+) -> tuple[dict[str, str] | None, list[str] | None]:
+    """Resolve proxy settings with the RequestsWrapper precedence: instance, then init_config, then Agent config."""
+    if is_affirmative(config['skip_proxy']):
+        return PROXY_SETTINGS_DISABLED.copy(), None
+    proxies = config['proxy'] or init_config.get('proxy')
+    if not proxies and is_affirmative(init_config.get('use_agent_proxy', True)):
+        proxies = datadog_agent.get_config('proxy')
+    if not proxies:
+        return None, None
+    proxies = proxies.copy()
+    no_proxy = proxies.pop('no_proxy', None)
+    if isinstance(no_proxy, str):
+        no_proxy = no_proxy.replace(';', ',').split(',')
+    return proxies, no_proxy
+
+
+class _ProxyRoutingTransport(httpx2.BaseTransport):
+    """Pick a proxied or direct transport per request, mirroring RequestsWrapper's per-request no_proxy check."""
+
+    def __init__(
+        self,
+        scheme_transports: dict[str, httpx2.BaseTransport],
+        direct: httpx2.BaseTransport,
+        no_proxy_uris: list[str] | None,
+    ) -> None:
+        self._scheme_transports = scheme_transports
+        self._direct = direct
+        self._no_proxy_uris = no_proxy_uris
+
+    def handle_request(self, request: httpx2.Request) -> httpx2.Response:
+        if self._no_proxy_uris and should_bypass_proxy(str(request.url), self._no_proxy_uris):
+            return self._direct.handle_request(request)
+        transport = self._scheme_transports.get(request.url.scheme, self._direct)
+        return transport.handle_request(request)
+
+    def close(self) -> None:
+        seen = {id(self._direct): self._direct}
+        seen.update({id(t): t for t in self._scheme_transports.values()})
+        for transport in seen.values():
+            transport.close()
+
+
+def _build_proxy_transport(
+    proxies: dict[str, str] | None,
+    no_proxy: list[str] | None,
+    verify: bool | str,
+    cert: str | tuple[str, str] | None,
+) -> _ProxyRoutingTransport | None:
+    """Build the per-request routing transport, or None when no real proxy is configured."""
+    # None => no custom transport; the client builds its default and trust_env decides env proxies.
+    if not proxies or proxies == PROXY_SETTINGS_DISABLED:
+        return None
+    direct = httpx2.HTTPTransport(verify=verify, cert=cert)
+    cache: dict[str, httpx2.BaseTransport] = {}
+    scheme_transports: dict[str, httpx2.BaseTransport] = {}
+    for scheme in ('http', 'https'):
+        url = proxies.get(scheme)
+        if not url:
+            continue
+        if url not in cache:
+            cache[url] = httpx2.HTTPTransport(proxy=httpx2.Proxy(url), verify=verify, cert=cert)
+        scheme_transports[scheme] = cache[url]
+    if not scheme_transports:
+        return None
+    return _ProxyRoutingTransport(scheme_transports, direct, no_proxy)
 
 
 class HTTPX2ResponseAdapter:
@@ -296,9 +417,8 @@ class HTTPX2Wrapper:
         cert = _build_cert(config)
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
+        proxies, no_proxy = _resolve_proxy(config, init_config)
 
-        # proxies=None mirrors RequestsWrapper.options for consumers (e.g. http_check).
-        # TODO: wire proxies through to httpx2 as part of the ongoing httpx migration.
         # options['headers'] is the per-request source of truth and is re-read in _build_request_kwargs,
         # so direct mutation (__setitem__, update(), whole-dict replacement) reaches the wire.
         # set_header mutates options['headers'] in place; the per-request merge above re-reads it.
@@ -306,14 +426,14 @@ class HTTPX2Wrapper:
             'auth': auth,
             'cert': cert,
             'headers': headers,
-            'proxies': None,
+            'proxies': proxies,
             'timeout': timeout,
             'verify': verify,
             'allow_redirects': allow_redirects,
         }
 
         self._log_requests = is_affirmative(config['log_requests'])
-        self._client = self._build_client(transport)
+        self._client = self._build_client(transport, no_proxy)
 
     @staticmethod
     def _resolve_config(
@@ -323,6 +443,7 @@ class HTTPX2Wrapper:
     ) -> dict[str, Any]:
         default_fields = dict(STANDARD_FIELDS)
         default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
+        default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
         default_fields['timeout'] = init_config.get('timeout', default_fields['timeout'])
 
         config = {field: instance.get(field, value) for field, value in default_fields.items()}
@@ -347,17 +468,23 @@ class HTTPX2Wrapper:
             config[field] = value
         return config
 
-    def _build_client(self, transport: httpx2.BaseTransport | None) -> httpx2.Client:
+    def _build_client(self, transport: httpx2.BaseTransport | None, no_proxy: list[str] | None) -> httpx2.Client:
+        proxies = self.options['proxies']
         kwargs: dict[str, Any] = {
             'headers': self.options['headers'],
             'timeout': _make_timeout(self.options['timeout'][0], self.options['timeout'][1]),
             'follow_redirects': self.options['allow_redirects'],
             'verify': self.options['verify'],
+            # trust_env reads HTTP_PROXY/HTTPS_PROXY only when no proxy is configured.
+            'trust_env': proxies is None,
         }
         if self.options['cert'] is not None:
             kwargs['cert'] = self.options['cert']
         if self.options['auth'] is not None:
             kwargs['auth'] = self.options['auth']
+        # An injected transport (e.g. tests) wins; otherwise route through a proxy transport when one is configured.
+        if transport is None:
+            transport = _build_proxy_transport(proxies, no_proxy, self.options['verify'], self.options['cert'])
         if transport is not None:
             kwargs['transport'] = transport
         return httpx2.Client(**kwargs)
