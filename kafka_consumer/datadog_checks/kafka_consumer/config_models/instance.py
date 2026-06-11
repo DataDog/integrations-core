@@ -95,6 +95,9 @@ class InstanceConfig(BaseModel):
     kafka_connect_aws_region: Optional[str] = None
     kafka_connect_aws_role_arn: Optional[str] = None
     kafka_connect_collect_task_metrics: Optional[bool] = None
+    kafka_connect_confluent_cloud_cluster_id: Optional[str] = None
+    kafka_connect_confluent_cloud_environment_id: Optional[str] = None
+    kafka_connect_confluent_cloud_url: Optional[str] = None
     kafka_connect_oauth_token_provider: Optional[KafkaConnectOauthTokenProvider] = None
     kafka_connect_password: Optional[str] = None
     kafka_connect_str: Union[str, tuple[str, ...]]

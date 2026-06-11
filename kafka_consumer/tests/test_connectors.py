@@ -49,6 +49,9 @@ def make_collector(
     config._kafka_connect_urls = connect_urls or []
     config._kafka_connect_aws_region = aws_region
     config._kafka_connect_aws_role_arn = None
+    config._kafka_connect_confluent_cloud_environment_id = None
+    config._kafka_connect_confluent_cloud_cluster_id = None
+    config._kafka_connect_confluent_cloud_url = 'https://api.confluent.cloud'
     config._kafka_connect_username = None
     config._kafka_connect_password = None
     config._kafka_connect_tls_verify = True
@@ -797,6 +800,69 @@ def test_collect_msk_managed_missing_boto3():
         collector._collect_msk_managed('cluster-1')
 
     collector.log.error.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# _collect_confluent_cloud — URL construction and delegation
+# ---------------------------------------------------------------------------
+
+
+def test_collect_confluent_cloud_constructs_correct_url():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_confluent_cloud_environment_id = 'env-abc123'
+    config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
+    config._kafka_connect_confluent_cloud_url = 'https://api.confluent.cloud'
+
+    with mock.patch.object(collector, '_collect_rest') as mock_rest:
+        collector._collect_confluent_cloud('cluster-1')
+
+    mock_rest.assert_called_once_with(
+        'https://api.confluent.cloud/connect/v1/environments/env-abc123/clusters/lkc-xyz789',
+        'cluster-1',
+    )
+
+
+def test_collect_confluent_cloud_custom_base_url():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_confluent_cloud_environment_id = 'env-abc123'
+    config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
+    config._kafka_connect_confluent_cloud_url = 'https://private.confluent.example.com/'
+
+    with mock.patch.object(collector, '_collect_rest') as mock_rest:
+        collector._collect_confluent_cloud('cluster-1')
+
+    mock_rest.assert_called_once_with(
+        'https://private.confluent.example.com/connect/v1/environments/env-abc123/clusters/lkc-xyz789',
+        'cluster-1',
+    )
+
+
+def test_collect_confluent_cloud_success_reported_in_connectivity():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_oauth_token_provider = None
+    config._kafka_connect_confluent_cloud_environment_id = 'env-abc123'
+    config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
+    config._kafka_connect_confluent_cloud_url = 'https://api.confluent.cloud'
+
+    with mock.patch.object(collector, '_collect_confluent_cloud'):
+        result = collector.collect('cluster-1')
+
+    assert result == {'confluent_cloud:env-abc123:lkc-xyz789': True}
+
+
+def test_collect_confluent_cloud_failure_reported_in_connectivity():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_oauth_token_provider = None
+    config._kafka_connect_confluent_cloud_environment_id = 'env-abc123'
+    config._kafka_connect_confluent_cloud_cluster_id = 'lkc-xyz789'
+    config._kafka_connect_confluent_cloud_url = 'https://api.confluent.cloud'
+
+    with mock.patch.object(
+        collector, '_collect_confluent_cloud', side_effect=requests.ConnectionError("refused")
+    ):
+        result = collector.collect('cluster-1')
+
+    assert result == {'confluent_cloud:env-abc123:lkc-xyz789': False}
 
 
 def test_collect_msk_managed_with_role_arn():
