@@ -288,3 +288,545 @@ def test_older_worker_list_response_warns_and_returns():
 
     assert check.gauge.call_count == 0
     collector.log.warning.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# _collect_rest — full success path with mocked HTTP session
+# ---------------------------------------------------------------------------
+
+
+def test_collect_rest_success_emits_metrics_and_events():
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
+
+    session_mock = mock.MagicMock()
+    session_mock.get.return_value = mock_resp
+    collector._session = session_mock
+
+    with mock.patch.object(collector, '_collect_plugins'):
+        collector._collect_rest('http://localhost:8083', 'cluster-1')
+
+    count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.count']
+    assert count_calls, "expected connector.count gauge"
+    assert count_calls[0].args[1] == 2
+    assert check.event_platform_event.call_count > 0
+
+
+# ---------------------------------------------------------------------------
+# _collect_plugins — success and skip-when-cached paths
+# ---------------------------------------------------------------------------
+
+
+def test_collect_plugins_emits_event_on_first_call():
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    plugins = [{'class': 'org.apache.kafka.connect.file.FileStreamSinkConnector', 'type': 'sink', 'version': '3.3.0'}]
+
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = plugins
+
+    session_mock = mock.MagicMock()
+    session_mock.get.return_value = mock_resp
+    collector._session = session_mock
+
+    collector._collect_plugins('http://localhost:8083', 'cluster-1')
+    assert check.event_platform_event.call_count == 1
+    payload = json.loads(check.event_platform_event.call_args[0][0])
+    assert payload['config_type'] == 'connector_plugins'
+
+
+def test_collect_plugins_skips_when_ttl_not_expired(monkeypatch):
+    collector, check, _, cache_store = make_collector(connect_urls=['http://localhost:8083'])
+
+    from urllib.parse import quote
+
+    from datadog_checks.kafka_consumer.connectors import CONNECTOR_PLUGINS_CACHE_KEY
+
+    safe_url = quote('http://localhost:8083', safe='')
+    fetch_cache_key = f'{CONNECTOR_PLUGINS_CACHE_KEY}:{safe_url}'
+    cache_store[fetch_cache_key] = json.dumps({'plugins': time.time() + 9999})
+
+    collector._collect_plugins('http://localhost:8083', 'cluster-1')
+    assert check.event_platform_event.call_count == 0
+
+
+# ---------------------------------------------------------------------------
+# _get_items_to_fetch and _mark_items_fetched
+# ---------------------------------------------------------------------------
+
+
+def test_get_items_to_fetch_returns_all_on_empty_cache():
+    collector, _, _, _ = make_collector()
+    result = collector._get_items_to_fetch('nonexistent_key', ['a', 'b'])
+    assert result == ['a', 'b']
+
+
+def test_get_items_to_fetch_skips_unexpired_items():
+    collector, _, _, cache_store = make_collector()
+    future = time.time() + 9999
+    cache_store['test_key'] = json.dumps({'item-a': future, 'item-b': 0})
+    result = collector._get_items_to_fetch('test_key', ['item-a', 'item-b'])
+    assert result == ['item-b']
+    assert 'item-a' not in result
+
+
+def test_mark_items_fetched_writes_expiry():
+    collector, _, _, cache_store = make_collector()
+    collector._mark_items_fetched('test_key', ['item-a'], ttl_base=100, ttl_jitter=0)
+    cached = json.loads(cache_store['test_key'])
+    assert 'item-a' in cached
+    assert cached['item-a'] > time.time()
+
+
+def test_mark_items_fetched_evicts_oldest_when_over_max():
+    collector, _, _, cache_store = make_collector()
+    existing = {f'key-{i}': time.time() + i for i in range(10)}
+    cache_store['test_key'] = json.dumps(existing)
+    collector._mark_items_fetched('test_key', ['new-key'], ttl_base=100, ttl_jitter=0, max_cache_size=5)
+    cached = json.loads(cache_store['test_key'])
+    assert len(cached) <= 5
+    assert 'new-key' in cached
+
+
+def test_get_items_to_fetch_handles_corrupt_cache():
+    collector, _, _, cache_store = make_collector()
+    cache_store['bad_key'] = 'not-valid-json'
+    result = collector._get_items_to_fetch('bad_key', ['item'])
+    assert result == ['item']
+
+
+def test_get_events_to_send_handles_corrupt_cache():
+    collector, _, _, cache_store = make_collector()
+    cache_store['bad_key'] = 'not-valid-json'
+    result = collector._get_events_to_send('bad_key', {'item': 'content'})
+    assert result == ['item']
+
+
+def test_get_events_to_send_empty_items():
+    collector, _, _, _ = make_collector()
+    result = collector._get_events_to_send('some_key', {})
+    assert result == []
+
+
+# ---------------------------------------------------------------------------
+# _get_tags and _original_cluster_id_field
+# ---------------------------------------------------------------------------
+
+
+def test_get_tags_without_cluster_id():
+    collector, _, config, _ = make_collector()
+    config._custom_tags = ['env:prod']
+    config._kafka_cluster_id_override = None
+    tags = collector._get_tags()
+    assert tags == ['env:prod']
+
+
+def test_get_tags_with_cluster_id():
+    collector, _, config, _ = make_collector()
+    config._custom_tags = []
+    config._kafka_cluster_id_override = None
+    tags = collector._get_tags('cluster-abc')
+    assert 'kafka_cluster_id:cluster-abc' in tags
+
+
+def test_get_tags_with_cluster_id_override():
+    collector, _, config, _ = make_collector()
+    config._custom_tags = []
+    config._kafka_cluster_id_override = 'override-id'
+    config._auto_detected_cluster_id = 'real-id'
+    tags = collector._get_tags('override-id')
+    assert 'original_kafka_cluster_id:real-id' in tags
+
+
+def test_original_cluster_id_field_when_override_set():
+    collector, _, config, _ = make_collector()
+    config._kafka_cluster_id_override = 'override-id'
+    config._auto_detected_cluster_id = 'real-id'
+    result = collector._original_cluster_id_field()
+    assert result == {'original_kafka_cluster_id': 'real-id'}
+
+
+def test_original_cluster_id_field_when_no_override():
+    collector, _, config, _ = make_collector()
+    config._kafka_cluster_id_override = None
+    result = collector._original_cluster_id_field()
+    assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# _configure_session — auth and TLS configuration paths
+# ---------------------------------------------------------------------------
+
+
+def test_configure_session_sets_basic_auth():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_username = 'user'
+    config._kafka_connect_password = 'pass'
+    config._kafka_connect_tls_verify = True
+    config._kafka_connect_tls_ca_cert = None
+    config._kafka_connect_tls_cert = None
+    config._kafka_connect_tls_key = None
+
+    session = mock.MagicMock()
+    collector._configure_session(session)
+    assert session.auth == ('user', 'pass')
+
+
+def test_configure_session_tls_verify_false():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_username = None
+    config._kafka_connect_password = None
+    config._kafka_connect_tls_verify = False
+    config._kafka_connect_tls_ca_cert = None
+    config._kafka_connect_tls_cert = None
+    config._kafka_connect_tls_key = None
+
+    session = mock.MagicMock()
+    collector._configure_session(session)
+    assert session.verify is False
+
+
+def test_configure_session_tls_ca_cert():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_username = None
+    config._kafka_connect_password = None
+    config._kafka_connect_tls_verify = True
+    config._kafka_connect_tls_ca_cert = '/path/to/ca.crt'
+    config._kafka_connect_tls_cert = None
+    config._kafka_connect_tls_key = None
+
+    session = mock.MagicMock()
+    collector._configure_session(session)
+    assert session.verify == '/path/to/ca.crt'
+
+
+def test_configure_session_client_cert_and_key():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_username = None
+    config._kafka_connect_password = None
+    config._kafka_connect_tls_verify = True
+    config._kafka_connect_tls_ca_cert = None
+    config._kafka_connect_tls_cert = '/path/to/cert.pem'
+    config._kafka_connect_tls_key = '/path/to/key.pem'
+
+    session = mock.MagicMock()
+    collector._configure_session(session)
+    assert session.cert == ('/path/to/cert.pem', '/path/to/key.pem')
+
+
+def test_configure_session_cert_only():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_username = None
+    config._kafka_connect_password = None
+    config._kafka_connect_tls_verify = True
+    config._kafka_connect_tls_ca_cert = None
+    config._kafka_connect_tls_cert = '/path/to/cert.pem'
+    config._kafka_connect_tls_key = None
+
+    session = mock.MagicMock()
+    collector._configure_session(session)
+    assert session.cert == '/path/to/cert.pem'
+
+
+# ---------------------------------------------------------------------------
+# collect() — OAuth failure and MSK paths
+# ---------------------------------------------------------------------------
+
+
+def test_collect_oauth_failure_returns_empty():
+    collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
+    config._kafka_connect_oauth_token_provider = {'url': 'http://auth', 'client_id': 'id', 'client_secret': 'sec'}
+
+    with mock.patch.object(collector, '_refresh_oauth_token', side_effect=Exception("auth failed")):
+        result = collector.collect('cluster-1')
+
+    assert result == {}
+
+
+def test_collect_msk_success():
+    collector, _, config, _ = make_collector(aws_region='us-east-1')
+    config._kafka_connect_oauth_token_provider = None
+
+    with mock.patch.object(collector, '_collect_msk_managed'):
+        result = collector.collect('cluster-1')
+
+    assert result == {'msk:us-east-1': True}
+
+
+def test_collect_msk_failure():
+    collector, _, config, _ = make_collector(aws_region='us-east-1')
+    config._kafka_connect_oauth_token_provider = None
+
+    with mock.patch.object(collector, '_collect_msk_managed', side_effect=Exception("boto3 error")):
+        result = collector.collect('cluster-1')
+
+    assert result == {'msk:us-east-1': False}
+
+
+# ---------------------------------------------------------------------------
+# _refresh_oauth_token
+# ---------------------------------------------------------------------------
+
+
+def test_refresh_oauth_token_sets_header():
+    collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
+    config._kafka_connect_oauth_token_provider = {
+        'url': 'http://auth/token',
+        'client_id': 'client',
+        'client_secret': 'secret',
+    }
+    config._request_timeout = 10
+
+    session_mock = mock.MagicMock()
+    session_mock.headers = {}
+    collector._session = session_mock
+
+    with mock.patch(
+        'datadog_checks.kafka_consumer.connectors._fetch_oidc_token',
+        return_value=('mytoken', time.time() + 300),
+    ):
+        collector._refresh_oauth_token()
+
+    assert session_mock.headers['Authorization'] == 'Bearer mytoken'
+
+
+def test_refresh_oauth_token_skips_when_still_valid():
+    collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
+    config._kafka_connect_oauth_token_provider = {
+        'url': 'http://auth/token',
+        'client_id': 'client',
+        'client_secret': 'secret',
+    }
+    config._request_timeout = 10
+
+    collector._oauth_token = 'existing-token'
+    collector._oauth_token_expiry = time.time() + 3600
+
+    with mock.patch('datadog_checks.kafka_consumer.connectors._fetch_oidc_token') as mock_fetch:
+        collector._refresh_oauth_token()
+
+    mock_fetch.assert_not_called()
+
+
+def test_refresh_oauth_token_no_op_when_no_provider():
+    collector, _, config, _ = make_collector()
+    config._kafka_connect_oauth_token_provider = None
+
+    with mock.patch('datadog_checks.kafka_consumer.connectors._fetch_oidc_token') as mock_fetch:
+        collector._refresh_oauth_token()
+
+    mock_fetch.assert_not_called()
+
+
+def test_refresh_oauth_token_sets_custom_headers():
+    collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
+    config._kafka_connect_oauth_token_provider = {
+        'url': 'http://auth/token',
+        'client_id': 'client',
+        'client_secret': 'secret',
+        'custom_headers': {'X-Tenant': 'tenant-1'},
+    }
+    config._request_timeout = 10
+
+    session_mock = mock.MagicMock()
+    session_mock.headers = {}
+    collector._session = session_mock
+
+    with mock.patch(
+        'datadog_checks.kafka_consumer.connectors._fetch_oidc_token',
+        return_value=('mytoken', time.time() + 300),
+    ):
+        collector._refresh_oauth_token()
+
+    assert session_mock.headers.get('X-Tenant') == 'tenant-1'
+
+
+# ---------------------------------------------------------------------------
+# _fetch_oidc_token — standalone function
+# ---------------------------------------------------------------------------
+
+
+def test_fetch_oidc_token_returns_token_and_expiry():
+    from datadog_checks.kafka_consumer.connectors import _fetch_oidc_token
+
+    oauth_config = {
+        'url': 'http://auth/token',
+        'client_id': 'cid',
+        'client_secret': 'csec',
+    }
+
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = {'access_token': 'tok123', 'expires_in': 600}
+
+    session_mock = mock.MagicMock()
+    session_mock.post.return_value = mock_resp
+
+    token, expires_at = _fetch_oidc_token(oauth_config, session_mock, timeout=10)
+    assert token == 'tok123'
+    assert expires_at > time.time()
+    assert expires_at < time.time() + 700
+
+
+def test_fetch_oidc_token_uses_scope_and_ca_cert():
+    from datadog_checks.kafka_consumer.connectors import _fetch_oidc_token
+
+    oauth_config = {
+        'url': 'http://auth/token',
+        'client_id': 'cid',
+        'client_secret': 'csec',
+        'scope': 'openid',
+        'tls_ca_cert': '/path/to/ca.crt',
+    }
+
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = {'access_token': 'tok456', 'expires_in': 300}
+
+    session_mock = mock.MagicMock()
+    session_mock.post.return_value = mock_resp
+
+    token, _ = _fetch_oidc_token(oauth_config, session_mock, timeout=5)
+    assert token == 'tok456'
+    call_kwargs = session_mock.post.call_args[1]
+    assert call_kwargs['verify'] == '/path/to/ca.crt'
+    post_data = session_mock.post.call_args[1].get('data') or session_mock.post.call_args[0][1]
+    assert 'scope' in session_mock.post.call_args[1].get('data', {}) or \
+           'scope' in (session_mock.post.call_args.kwargs.get('data') or {})
+
+
+# ---------------------------------------------------------------------------
+# _get_session — session creation when None
+# ---------------------------------------------------------------------------
+
+
+def test_get_session_creates_session_on_first_call():
+    collector, _, _, _ = make_collector()
+    assert collector._session is None
+    session = collector._get_session()
+    assert session is not None
+    assert collector._session is session
+    # Calling again returns the same instance
+    assert collector._get_session() is session
+
+
+# ---------------------------------------------------------------------------
+# _mark_items_fetched — defaults and exception paths
+# ---------------------------------------------------------------------------
+
+
+def test_mark_items_fetched_uses_defaults_when_none():
+    collector, _, _, cache_store = make_collector()
+    # Call without explicit ttl_base/ttl_jitter → should use CONFIGS_REFRESH_INTERVAL defaults
+    collector._mark_items_fetched('test_key', ['item-a'])
+    cached = json.loads(cache_store['test_key'])
+    assert 'item-a' in cached
+    assert cached['item-a'] > time.time()
+
+
+def test_mark_items_fetched_handles_corrupt_cache():
+    collector, _, _, cache_store = make_collector()
+    cache_store['bad_key'] = 'not-valid-json'
+    # Should not raise
+    collector._mark_items_fetched('bad_key', ['item'], ttl_base=100, ttl_jitter=0)
+    cached = json.loads(cache_store['bad_key'])
+    assert 'item' in cached
+
+
+def test_mark_items_fetched_handles_write_failure():
+    collector, check, _, _ = make_collector()
+    check.write_persistent_cache.side_effect = Exception("disk full")
+    # Should not raise
+    collector._mark_items_fetched('test_key', ['item'], ttl_base=100, ttl_jitter=0)
+    collector.log.debug.assert_called()
+
+
+# ---------------------------------------------------------------------------
+# _get_events_to_send — write failure path
+# ---------------------------------------------------------------------------
+
+
+def test_get_events_to_send_handles_write_failure():
+    collector, check, _, _ = make_collector()
+    check.write_persistent_cache.side_effect = Exception("disk full")
+    # Should not raise, should return the items to send
+    result = collector._get_events_to_send('test_key', {'item': 'content'})
+    assert result == ['item']
+    collector.log.debug.assert_called()
+
+
+# ---------------------------------------------------------------------------
+# _collect_msk_managed — with mocked boto3
+# ---------------------------------------------------------------------------
+
+
+def test_collect_msk_managed_emits_metrics_and_events():
+    collector, check, config, _ = make_collector(aws_region='us-east-1')
+    config._kafka_connect_aws_role_arn = None
+
+    mock_connector = {
+        'connectorName': 'my-connector',
+        'connectorArn': 'arn:aws:kafkaconnect:us-east-1:123456789:connector/my-connector',
+        'connectorState': 'RUNNING',
+        'kafkaConnectVersion': '2.7.1',
+        'connectorConfiguration': {'connector.class': 'io.debezium.connector.mysql.MySqlConnector'},
+    }
+
+    mock_paginator = mock.MagicMock()
+    mock_paginator.paginate.return_value = [{'connectors': [mock_connector]}]
+
+    mock_client = mock.MagicMock()
+    mock_client.get_paginator.return_value = mock_paginator
+
+    mock_boto3 = mock.MagicMock()
+    mock_boto3.client.return_value = mock_client
+
+    with mock.patch.dict('sys.modules', {'boto3': mock_boto3}):
+        collector._collect_msk_managed('cluster-1')
+
+    count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.count']
+    assert count_calls[0].args[1] == 1
+    assert check.event_platform_event.call_count == 1
+
+
+def test_collect_msk_managed_missing_boto3():
+    collector, _, config, _ = make_collector(aws_region='us-east-1')
+    config._kafka_connect_aws_role_arn = None
+
+    import sys
+
+    with mock.patch.dict('sys.modules', {'boto3': None}):
+        collector._collect_msk_managed('cluster-1')
+
+    collector.log.error.assert_called_once()
+
+
+def test_collect_msk_managed_with_role_arn():
+    collector, check, config, _ = make_collector(aws_region='us-east-1')
+    config._kafka_connect_aws_role_arn = 'arn:aws:iam::123:role/my-role'
+
+    mock_paginator = mock.MagicMock()
+    mock_paginator.paginate.return_value = [{'connectors': []}]
+
+    mock_kafka_client = mock.MagicMock()
+    mock_kafka_client.get_paginator.return_value = mock_paginator
+
+    mock_sts_client = mock.MagicMock()
+    mock_sts_client.assume_role.return_value = {
+        'Credentials': {
+            'AccessKeyId': 'AKI',
+            'SecretAccessKey': 'SAK',
+            'SessionToken': 'ST',
+        }
+    }
+
+    def boto3_client_factory(service_name, **kwargs):
+        if service_name == 'sts':
+            return mock_sts_client
+        return mock_kafka_client
+
+    mock_boto3 = mock.MagicMock()
+    mock_boto3.client.side_effect = boto3_client_factory
+
+    with mock.patch.dict('sys.modules', {'boto3': mock_boto3}):
+        collector._collect_msk_managed('cluster-1')
+
+    mock_sts_client.assume_role.assert_called_once()
