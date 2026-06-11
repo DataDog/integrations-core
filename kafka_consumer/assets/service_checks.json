@@ -1,11 +1,1 @@
-[
-  {
-    "agent_version": "7.80.0",
-    "integration": "Kafka Consumer",
-    "check": "kafka.connector.can_connect",
-    "statuses": ["ok", "critical"],
-    "groups": ["connect_url", "kafka_cluster_id"],
-    "name": "Kafka Connect can connect",
-    "description": "Returns CRITICAL if the Agent cannot reach the Kafka Connect REST API."
-  }
-]
+[]
