@@ -470,13 +470,13 @@ instances:
     # kafka_connect_url: http://localhost:8083
 
     ## @param kafka_connect_username - string - optional
-    ## Username for Kafka Connect Basic Authentication.
+    ## Username for Kafka Connect basic authentication.
     ## Used in combination with kafka_connect_password.
     #
     # kafka_connect_username: <USERNAME>
 
     ## @param kafka_connect_password - string - optional
-    ## Password for Kafka Connect Basic Authentication.
+    ## Password for Kafka Connect basic authentication.
     ## Used in combination with kafka_connect_username.
     #
     # kafka_connect_password: <PASSWORD>
@@ -487,23 +487,23 @@ instances:
     #
     # kafka_connect_tls_verify: true
 
-    ## @param kafka_connect_tls_ca_cert - string - optional - default: /path/to/ca_cert.pem
+    ## @param kafka_connect_tls_ca_cert - string - optional
     ## Path to a custom CA certificate file for Kafka Connect TLS verification.
     ## If not specified, uses the system's default CA bundle.
     #
-    # kafka_connect_tls_ca_cert: /path/to/ca_cert.pem
+    # kafka_connect_tls_ca_cert: <KAFKA_CONNECT_TLS_CA_CERT>
 
-    ## @param kafka_connect_tls_cert - string - optional - default: /path/to/client_cert.pem
+    ## @param kafka_connect_tls_cert - string - optional
     ## Path to the client certificate file for Kafka Connect mutual TLS authentication.
     ## Must be used in combination with kafka_connect_tls_key.
     #
-    # kafka_connect_tls_cert: /path/to/client_cert.pem
+    # kafka_connect_tls_cert: <KAFKA_CONNECT_TLS_CERT>
 
-    ## @param kafka_connect_tls_key - string - optional - default: /path/to/client_key.pem
+    ## @param kafka_connect_tls_key - string - optional
     ## Path to the client private key file for Kafka Connect mutual TLS authentication.
     ## Must be used in combination with kafka_connect_tls_cert.
     #
-    # kafka_connect_tls_key: /path/to/client_key.pem
+    # kafka_connect_tls_key: <KAFKA_CONNECT_TLS_KEY>
 
     ## OAuth token provider settings for Kafka Connect authentication.
     ## When configured, the check will fetch an OAuth token and use it as a Bearer token
@@ -546,18 +546,13 @@ instances:
     #
     # kafka_connect_collect_task_metrics: false
 
-    ## @param kafka_connect_aws_region - string - optional - default: us-east-1
+    ## @param kafka_connect_aws_region - string - optional
     ## AWS region for Amazon MSK Connect (managed service). When set, collects connector data
     ## from the MSK Connect API via boto3 in addition to or instead of kafka_connect_url.
     #
-    # kafka_connect_aws_region: us-east-1
+    # kafka_connect_aws_region: <KAFKA_CONNECT_AWS_REGION>
 
-    ## @param kafka_connect_aws_role_arn - string - optional - default: arn:aws:iam::123456789012:role/DatadogMSKConnectRole
+    ## @param kafka_connect_aws_role_arn - string - optional
     ## ARN of an IAM role to assume for MSK Connect API calls. Used for cross-account access.
     #
-    # kafka_connect_aws_role_arn: arn:aws:iam::123456789012:role/DatadogMSKConnectRole
-
-    ## @param kafka_connect_aws_msk_cluster_arn - string - optional - default: arn:aws:kafka:us-east-1:123456789012:cluster/my-cluster/abc123
-    ## ARN of the MSK cluster to filter connectors by. When unset, all connectors in the region are collected.
-    #
-    # kafka_connect_aws_msk_cluster_arn: arn:aws:kafka:us-east-1:123456789012:cluster/my-cluster/abc123
+    # kafka_connect_aws_role_arn: <KAFKA_CONNECT_AWS_ROLE_ARN>

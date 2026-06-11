@@ -488,7 +488,7 @@ files:
           example: http://localhost:8083
       - name: kafka_connect_username
         description: |
-          Username for Kafka Connect Basic Authentication.
+          Username for Kafka Connect basic authentication.
           Used in combination with kafka_connect_password.
         fleet_configurable: true
         value:
@@ -496,7 +496,7 @@ files:
           example: <USERNAME>
       - name: kafka_connect_password
         description: |
-          Password for Kafka Connect Basic Authentication.
+          Password for Kafka Connect basic authentication.
           Used in combination with kafka_connect_username.
         fleet_configurable: true
         secret: true
@@ -519,7 +519,6 @@ files:
         fleet_configurable: true
         value:
           type: string
-          example: /path/to/ca_cert.pem
       - name: kafka_connect_tls_cert
         description: |
           Path to the client certificate file for Kafka Connect mutual TLS authentication.
@@ -527,7 +526,6 @@ files:
         fleet_configurable: true
         value:
           type: string
-          example: /path/to/client_cert.pem
       - name: kafka_connect_tls_key
         description: |
           Path to the client private key file for Kafka Connect mutual TLS authentication.
@@ -535,7 +533,6 @@ files:
         fleet_configurable: true
         value:
           type: string
-          example: /path/to/client_key.pem
       - name: kafka_connect_oauth_token_provider
         description: |
           OAuth token provider settings for Kafka Connect authentication.
@@ -607,18 +604,9 @@ files:
         fleet_configurable: true
         value:
           type: string
-          example: us-east-1
       - name: kafka_connect_aws_role_arn
         description: |
           ARN of an IAM role to assume for MSK Connect API calls. Used for cross-account access.
         fleet_configurable: true
         value:
           type: string
-          example: arn:aws:iam::123456789012:role/DatadogMSKConnectRole
-      - name: kafka_connect_aws_msk_cluster_arn
-        description: |
-          ARN of the MSK cluster to filter connectors by. When unset, all connectors in the region are collected.
-        fleet_configurable: true
-        value:
-          type: string
-          example: arn:aws:kafka:us-east-1:123456789012:cluster/my-cluster/abc123

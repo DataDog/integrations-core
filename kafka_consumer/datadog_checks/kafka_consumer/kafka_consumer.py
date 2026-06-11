@@ -137,7 +137,9 @@ class KafkaCheck(AgentCheck):
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
 
-        if self.config._kafka_connect_urls or self.config._kafka_connect_aws_region:
+        if self.config._cluster_monitoring_enabled and (
+            self.config._kafka_connect_urls or self.config._kafka_connect_aws_region
+        ):
             try:
                 self._connector_collector.collect(self.config._kafka_cluster_id_override or cluster_id)
             except Exception as e:

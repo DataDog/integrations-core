@@ -6,6 +6,6 @@
     "statuses": ["ok", "critical"],
     "groups": ["connect_url", "kafka_cluster_id"],
     "name": "Kafka Connect can connect",
-    "description": "Returns CRITICAL if the agent cannot reach the Kafka Connect REST API."
+    "description": "Returns CRITICAL if the Agent cannot reach the Kafka Connect REST API."
   }
 ]

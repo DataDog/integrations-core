@@ -92,7 +92,6 @@ class InstanceConfig(BaseModel):
     kafka_client_api_version: Optional[str] = None
     kafka_cluster_id_override: Optional[str] = None
     kafka_configs_refresh_interval: Optional[int] = None
-    kafka_connect_aws_msk_cluster_arn: Optional[str] = None
     kafka_connect_aws_region: Optional[str] = None
     kafka_connect_aws_role_arn: Optional[str] = None
     kafka_connect_collect_task_metrics: Optional[bool] = None

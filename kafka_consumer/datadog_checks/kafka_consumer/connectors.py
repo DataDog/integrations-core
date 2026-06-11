@@ -8,10 +8,10 @@ import hashlib
 import json
 import random
 import time
+from typing import Any
 from urllib.parse import quote
 
 import requests
-
 
 CONNECTOR_CONFIG_CACHE_KEY = 'kafka_connector_config_cache'
 CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
@@ -165,19 +165,31 @@ class KafkaConnectCollector:
                     tags=self._get_tags(cluster_id) + [f'connect_url:{url}'],
                 )
             except Exception as e:
-                self.log.error("Error collecting Kafka Connect data from %s: %s", url, e)
+                self.log.error("Error collecting Kafka Connect data from %s: %s (%s)", url, e, type(e).__name__)
                 self.check.service_check(
                     'connector.can_connect',
                     self.check.CRITICAL,
                     tags=self._get_tags(cluster_id) + [f'connect_url:{url}'],
-                    message=str(e),
+                    message=f'{type(e).__name__}: {e}',
                 )
 
         if self.config._kafka_connect_aws_region:
+            region = self.config._kafka_connect_aws_region
             try:
                 self._collect_msk_managed(cluster_id)
+                self.check.service_check(
+                    'connector.can_connect',
+                    self.check.OK,
+                    tags=self._get_tags(cluster_id) + [f'aws_region:{region}'],
+                )
             except Exception as e:
-                self.log.error("Error collecting MSK Connect data: %s", e)
+                self.log.error("Error collecting MSK Connect data: %s (%s)", e, type(e).__name__)
+                self.check.service_check(
+                    'connector.can_connect',
+                    self.check.CRITICAL,
+                    tags=self._get_tags(cluster_id) + [f'aws_region:{region}'],
+                    message=f'{type(e).__name__}: {e}',
+                )
 
     def _collect_rest(self, url: str, cluster_id: str) -> None:
         session = self._get_session()
@@ -190,6 +202,17 @@ class KafkaConnectCollector:
         response.raise_for_status()
         connectors_data = response.json()
 
+        if not isinstance(connectors_data, dict):
+            # Older Connect workers (pre-Kafka 2.3 / CP 5.3) ignore the expand parameter
+            # and return a plain list of connector names instead of the expanded dict.
+            self.log.warning(
+                "Unexpected response shape from %s/connectors (got %s, expected dict). "
+                "The Connect worker may not support the expand parameter — Kafka 2.3+ / CP 5.3+ is required.",
+                url,
+                type(connectors_data).__name__,
+            )
+            return
+
         tags_base = self._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
 
@@ -197,7 +220,7 @@ class KafkaConnectCollector:
         self._emit_connector_config_events(connectors_data, cluster_id, url)
         self._collect_plugins(url, cluster_id)
 
-    def _emit_connector_metrics(self, connectors_data: dict, tags_base: list[str]) -> None:
+    def _emit_connector_metrics(self, connectors_data: dict[str, Any], tags_base: list[str]) -> None:
         for name, data in connectors_data.items():
             info = data.get('info', {})
             status = data.get('status', {})
@@ -246,7 +269,7 @@ class KafkaConnectCollector:
                         tags=task_tags,
                     )
 
-    def _emit_connector_config_events(self, connectors_data: dict, cluster_id: str, url: str) -> None:
+    def _emit_connector_config_events(self, connectors_data: dict[str, Any], cluster_id: str, url: str) -> None:
         connector_contents: dict[str, str] = {}
 
         for name, data in connectors_data.items():
@@ -260,8 +283,9 @@ class KafkaConnectCollector:
 
             truncated_config = self._truncate_connector_config(raw_config)
 
-            payload = {
-                'collection_timestamp': int(time.time() * 1000),
+            # Exclude collection_timestamp from hashed content so the hash is stable
+            # across cycles and dedup actually fires on unchanged configs.
+            content = {
                 'kafka_cluster_id': cluster_id,
                 **self._original_cluster_id_field(),
                 'connector': name,
@@ -272,12 +296,17 @@ class KafkaConnectCollector:
                 'config_type': 'connector',
                 'config': truncated_config,
             }
-            connector_contents[name] = json.dumps(payload, sort_keys=True)
+            connector_contents[name] = json.dumps(content, sort_keys=True)
 
-        connectors_to_emit = self._get_events_to_send(CONNECTOR_CONFIG_CACHE_KEY, connector_contents)
+        safe_url = quote(url, safe='')
+        cache_key = f'{CONNECTOR_CONFIG_CACHE_KEY}:{safe_url}'
+        connectors_to_emit = self._get_events_to_send(cache_key, connector_contents)
 
+        collection_timestamp = int(time.time() * 1000)
         for name in connectors_to_emit:
-            self.check.event_platform_event(connector_contents[name], 'data-streams-message')
+            event = json.loads(connector_contents[name])
+            event['collection_timestamp'] = collection_timestamp
+            self.check.event_platform_event(json.dumps(event), 'data-streams-message')
 
     def _truncate_connector_config(self, config: dict) -> dict:
         important: dict[str, str] = {}
@@ -320,31 +349,29 @@ class KafkaConnectCollector:
         )
 
         event_cache_key = f'{CONNECTOR_PLUGINS_EVENT_CACHE_KEY}:{safe_url}'
-        payload = {
-            'collection_timestamp': int(time.time() * 1000),
+        # Exclude collection_timestamp from hashed content so dedup fires on unchanged plugin lists.
+        content_dict = {
             'kafka_cluster_id': cluster_id,
             **self._original_cluster_id_field(),
             'connect_url': url,
             'config_type': 'connector_plugins',
             'plugins': plugins,
         }
-        content = json.dumps(payload, sort_keys=True)
+        content = json.dumps(content_dict, sort_keys=True)
         if self._get_events_to_send(event_cache_key, {'plugins': content}):
-            self.check.event_platform_event(content, 'data-streams-message')
+            event = json.loads(content)
+            event['collection_timestamp'] = int(time.time() * 1000)
+            self.check.event_platform_event(json.dumps(event), 'data-streams-message')
 
     def _collect_msk_managed(self, cluster_id: str) -> None:
         try:
             import boto3
         except ImportError:
-            self.log.error(
-                "boto3 is required for MSK Connect collection. "
-                "Install it with: pip install boto3"
-            )
+            self.log.error("boto3 is required for MSK Connect collection. Install it with: pip install boto3")
             return
 
         region = self.config._kafka_connect_aws_region
         role_arn = self.config._kafka_connect_aws_role_arn
-        msk_cluster_arn = self.config._kafka_connect_aws_msk_cluster_arn
 
         if role_arn:
             sts = boto3.client('sts')
@@ -362,17 +389,8 @@ class KafkaConnectCollector:
 
         connectors = []
         paginator = client.get_paginator('list_connectors')
-        page_kwargs: dict = {}
-        if msk_cluster_arn:
-            page_kwargs['connectorNamePrefix'] = ''
-        for page in paginator.paginate(**page_kwargs):
-            for connector in page.get('connectors', []):
-                if msk_cluster_arn:
-                    kafka_cluster = connector.get('kafkaCluster', {}).get('apacheKafkaCluster', {})
-                    arn = kafka_cluster.get('bootstrapServers', '')
-                    if msk_cluster_arn not in arn:
-                        pass
-                connectors.append(connector)
+        for page in paginator.paginate():
+            connectors.extend(page.get('connectors', []))
 
         tags_base = self._get_tags(cluster_id) + [f'aws_region:{region}']
         self.check.gauge('connector.count', len(connectors), tags=tags_base)
@@ -393,8 +411,8 @@ class KafkaConnectCollector:
                 tags=connector_tags,
             )
 
-            payload = {
-                'collection_timestamp': int(time.time() * 1000),
+            # Exclude collection_timestamp from hashed content so dedup fires on unchanged configs.
+            content = {
                 'kafka_cluster_id': cluster_id,
                 **self._original_cluster_id_field(),
                 'connector': name,
@@ -405,13 +423,14 @@ class KafkaConnectCollector:
                 'config_type': 'connector',
                 'config': connector.get('connectorConfiguration') or {},
             }
-            connector_contents[name] = json.dumps(payload, sort_keys=True)
+            connector_contents[name] = json.dumps(content, sort_keys=True)
 
-        connectors_to_emit = self._get_events_to_send(
-            f'{CONNECTOR_CONFIG_CACHE_KEY}:msk:{region}', connector_contents
-        )
+        connectors_to_emit = self._get_events_to_send(f'{CONNECTOR_CONFIG_CACHE_KEY}:msk:{region}', connector_contents)
+        collection_timestamp = int(time.time() * 1000)
         for name in connectors_to_emit:
-            self.check.event_platform_event(connector_contents[name], 'data-streams-message')
+            event = json.loads(connector_contents[name])
+            event['collection_timestamp'] = collection_timestamp
+            self.check.event_platform_event(json.dumps(event), 'data-streams-message')
 
     def _get_items_to_fetch(self, cache_key: str, item_keys: list[str]) -> list[str]:
         current_time = time.time()
@@ -513,7 +532,7 @@ class KafkaConnectCollector:
                 tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
         return tags
 
-    def _original_cluster_id_field(self) -> dict:
+    def _original_cluster_id_field(self) -> dict[str, str]:
         if self.config._kafka_cluster_id_override:
             return {'original_kafka_cluster_id': self.config._auto_detected_cluster_id}
         return {}
