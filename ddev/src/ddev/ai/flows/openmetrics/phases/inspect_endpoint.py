@@ -18,6 +18,7 @@ from ddev.ai.phases.config import AgentConfig, FlowConfigError, PhaseConfig
 REQUEST_TIMEOUT_SECONDS = 10.0
 RESPONSE_BODY_LIMIT_BYTES = 10 * 1024 * 1024  # 10 MB
 JSONL_FILENAME_SUFFIX = "_metrics.jsonl"
+EXPOSITION_FILENAME_SUFFIX = "_exposition.txt"
 
 
 class EndpointInspectionError(Exception):
@@ -99,6 +100,17 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
         raise EndpointInspectionError(f"Failed to write metrics catalog at {path}: {e}") from e
 
 
+def _write_exposition(path: Path, body: str) -> None:
+    """Atomically write the verbatim endpoint body, for reuse as a test fixture."""
+    tmp_path = path.with_suffix(path.suffix + ".tmp")
+    try:
+        tmp_path.write_text(body, encoding="utf-8")
+        os.replace(tmp_path, path)
+    except OSError as e:
+        _remove_if_exists(tmp_path)
+        raise EndpointInspectionError(f"Failed to write exposition snapshot at {path}: {e}") from e
+
+
 def _build_memory_text(
     url: str,
     status: int,
@@ -106,6 +118,7 @@ def _build_memory_text(
     exposition_format: str,
     metric_count: int,
     jsonl_path: Path,
+    exposition_path: Path,
 ) -> str:
     """Render the markdown memory file describing the inspected endpoint."""
     lines = [
@@ -117,9 +130,11 @@ def _build_memory_text(
         f"- **Exposition format:** {exposition_format}",
         f"- **Metric families detected:** {metric_count}",
         f"- **Metrics catalog:** {jsonl_path}",
+        f"- **Raw exposition snapshot:** {exposition_path}",
         "",
         "Endpoint is reachable and serves a Prometheus/OpenMetrics-compatible body.",
-        "The full list of metrics with metadata is in the catalog file above.",
+        "The full list of metrics with metadata is in the catalog file above. The raw exposition",
+        "snapshot is the verbatim endpoint body, suitable for use as a test fixture.",
     ]
     return "\n".join(lines)
 
@@ -192,6 +207,11 @@ class InspectEndpointPhase(Phase):
         jsonl_path = (self._checkpoint_manager.memory_dir / f"{self._phase_id}{JSONL_FILENAME_SUFFIX}").resolve()
         _write_jsonl(jsonl_path, rows)
 
+        exposition_path = (
+            self._checkpoint_manager.memory_dir / f"{self._phase_id}{EXPOSITION_FILENAME_SUFFIX}"
+        ).resolve()
+        _write_exposition(exposition_path, body)
+
         metric_count = len(families)
         memory_text = _build_memory_text(
             url=endpoint_url,
@@ -200,6 +220,7 @@ class InspectEndpointPhase(Phase):
             exposition_format=exposition_format,
             metric_count=metric_count,
             jsonl_path=jsonl_path,
+            exposition_path=exposition_path,
         )
 
         return PhaseOutcome(
@@ -213,5 +234,6 @@ class InspectEndpointPhase(Phase):
                 "exposition_format": exposition_format,
                 "metric_count": metric_count,
                 "metrics_jsonl_path": str(jsonl_path),
+                "exposition_path": str(exposition_path),
             },
         )
