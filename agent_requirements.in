@@ -38,7 +38,7 @@ pydantic==2.13.4
 pyjwt==2.13.0
 pymongo[srv]==4.8.0; python_version >= '3.9'
 pymqi==1.12.13
-pymysql==1.2.0
+pymysql==1.1.2
 pyodbc==5.3.0
 pyopenssl==26.2.0
 pysnmp-mibs==0.1.6
