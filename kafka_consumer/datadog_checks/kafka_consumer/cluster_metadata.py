@@ -4,9 +4,7 @@
 
 """Kafka Cluster Metadata Collection."""
 
-import hashlib
 import json
-import random
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -17,6 +15,7 @@ from confluent_kafka import IsolationLevel, TopicPartition
 from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
+from datadog_checks.kafka_consumer.event_cache_mixin import EventCacheMixin
 
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
 
@@ -42,7 +41,7 @@ class SchemaInfo(TypedDict):
     compatibility: str | None
 
 
-class ClusterMetadataCollector:
+class ClusterMetadataCollector(EventCacheMixin):
     """Collects Kafka cluster metadata (brokers, topics, consumer groups, schemas)."""
 
     def __init__(self, check, client, config, log):
@@ -52,12 +51,10 @@ class ClusterMetadataCollector:
         self.log = log
         self.http = check.http
 
-        self.EVENT_CACHE_TTL = 3600  # 1 hour in seconds
-
         # Broker/topic config refresh interval (configurable, default 3 min)
         configs_refresh = self.config._kafka_configs_refresh_interval
-        self.CONFIGS_REFRESH_INTERVAL = configs_refresh
-        self.CONFIGS_REFRESH_JITTER = max(15, configs_refresh // 10)  # 10% jitter, min 15s
+        self._configs_refresh_interval = configs_refresh
+        self._configs_refresh_jitter = max(15, configs_refresh // 10)  # 10% jitter, min 15s
         self.BROKER_CONFIG_BATCH_SIZE = 5  # Max brokers to describe_configs per run (one per call, Kafka limitation)
         self.TOPIC_CONFIG_BATCH_SIZE = 100  # Max topics to describe_configs per check run
 
@@ -248,137 +245,6 @@ class ClusterMetadataCollector:
         except Exception as e:
             self.log.error("Error collecting schema registry info: %s", e)
 
-    def _get_items_to_fetch(self, cache_key_prefix: str, item_keys: list[str]) -> list[str]:
-        """
-        Check which items need fetching based on cache expiration.
-
-        Returns items sorted oldest-first (earliest expiry first) so that
-        when combined with batch limits, the least recently fetched items
-        are prioritized.
-
-        Args:
-            cache_key_prefix: Cache key to load
-            item_keys: List of item keys to check
-
-        Returns:
-            List of item keys that need fetching (not cached or expired),
-            sorted by expiry time ascending (oldest first)
-        """
-        current_time = time.time()
-        items_to_fetch = []
-
-        try:
-            cached_str = self.check.read_persistent_cache(cache_key_prefix)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self.log.debug("Could not read cache %s: %s", cache_key_prefix, e)
-            cache_dict = {}
-
-        for item_key in item_keys:
-            expire_at = cache_dict.get(item_key, 0)
-
-            if current_time >= expire_at:
-                items_to_fetch.append((expire_at, item_key))
-
-        # Sort by expiry time ascending — items that expired longest ago are fetched first.
-        items_to_fetch.sort()
-        return [item_key for _, item_key in items_to_fetch]
-
-    def _mark_items_fetched(
-        self,
-        cache_key_prefix: str,
-        item_keys: list[str],
-        ttl_base: float | None = None,
-        ttl_jitter: float | None = None,
-        max_cache_size: int | None = None,
-    ):
-        """
-        Mark items as fetched in cache with jittered TTL.
-
-        Args:
-            cache_key_prefix: Cache key to update
-            item_keys: List of item keys that were fetched
-            ttl_base: Base TTL in seconds (defaults to CONFIGS_REFRESH_INTERVAL)
-            ttl_jitter: Jitter range in seconds (defaults to CONFIGS_REFRESH_JITTER)
-            max_cache_size: Maximum number of entries to keep. Oldest entries are evicted first.
-        """
-        if ttl_base is None:
-            ttl_base = self.CONFIGS_REFRESH_INTERVAL
-        if ttl_jitter is None:
-            ttl_jitter = self.CONFIGS_REFRESH_JITTER
-
-        current_time = time.time()
-
-        try:
-            cached_str = self.check.read_persistent_cache(cache_key_prefix)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self.log.debug("Could not read cache %s for update: %s", cache_key_prefix, e)
-            cache_dict = {}
-
-        for item_key in item_keys:
-            ttl = ttl_base + random.uniform(0, ttl_jitter)
-            cache_dict[item_key] = current_time + ttl
-
-        if max_cache_size and len(cache_dict) > max_cache_size:
-            sorted_keys = sorted(cache_dict, key=lambda k: cache_dict[k])
-            for key in sorted_keys[: len(cache_dict) - max_cache_size]:
-                del cache_dict[key]
-
-        try:
-            self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
-        except Exception as e:
-            self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
-
-    def _get_events_to_send(self, cache_key_prefix: str, items: dict[str, str]) -> list[str]:
-        """
-        Determine which items should emit events based on content changes or expiration.
-
-        Args:
-            cache_key_prefix: Cache key to load/update
-            items: Dict mapping item_key -> event_content
-
-        Returns:
-            List of item keys that should emit events
-        """
-        if not items:
-            return []
-
-        event_cache_ttl = self.EVENT_CACHE_TTL
-        current_time = time.time()
-        events_to_send = []
-
-        try:
-            cached_str = self.check.read_persistent_cache(cache_key_prefix)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self.log.debug("Could not read cache %s: %s", cache_key_prefix, e)
-            cache_dict = {}
-
-        for item_key, event_content in items.items():
-            current_hash = hashlib.sha256(event_content.encode('utf-8')).hexdigest()
-
-            cached_entry = cache_dict.get(item_key)
-
-            if (
-                not cached_entry
-                or cached_entry.get('hash', '') != current_hash
-                or current_time >= cached_entry.get('expire_at', 0)
-            ):
-                events_to_send.append(item_key)
-                cache_dict[item_key] = {
-                    'hash': current_hash,
-                    'expire_at': current_time + event_cache_ttl,
-                }
-
-        if events_to_send:
-            try:
-                self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
-            except Exception as e:
-                self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
-
-        return events_to_send
-
     def _collect_broker_metadata(self, metadata=None):
         self.log.debug("Collecting broker metadata")
 
@@ -508,8 +374,8 @@ class ClusterMetadataCollector:
         self._mark_items_fetched(
             self.BROKER_CONFIG_FETCH_CACHE_KEY,
             broker_ids_batch,
-            ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-            ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+            ttl_base=self._configs_refresh_interval,
+            ttl_jitter=self._configs_refresh_jitter,
             max_cache_size=self.BROKER_CONFIG_CACHE_MAX_SIZE,
         )
 
@@ -793,8 +659,8 @@ class ClusterMetadataCollector:
         self._mark_items_fetched(
             self.TOPIC_CONFIG_FETCH_CACHE_KEY,
             topic_names_to_fetch,
-            ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-            ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+            ttl_base=self._configs_refresh_interval,
+            ttl_jitter=self._configs_refresh_jitter,
             max_cache_size=self.TOPIC_CONFIG_CACHE_MAX_SIZE,
         )
 
@@ -1412,15 +1278,3 @@ class ClusterMetadataCollector:
 
         return dict(selected_configs)
 
-    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
-        tags = list(self.config._custom_tags)
-        if cluster_id:
-            tags.append(f'kafka_cluster_id:{cluster_id}')
-            if self.config._kafka_cluster_id_override:
-                tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
-        return tags
-
-    def _original_cluster_id_field(self) -> dict[str, str]:
-        if self.config._kafka_cluster_id_override:
-            return {'original_kafka_cluster_id': self.config._auto_detected_cluster_id}
-        return {}
