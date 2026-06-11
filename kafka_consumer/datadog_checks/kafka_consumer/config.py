@@ -140,7 +140,7 @@ class KafkaConfig:
         )
 
     @staticmethod
-    def _parse_connect_urls(value: str | list | tuple | None) -> list[str]:
+    def _parse_connect_urls(value: str | list[str] | tuple[str, ...] | None) -> list[str]:
         if not value:
             return []
         if isinstance(value, str):

@@ -4,12 +4,19 @@
 
 import hashlib
 import json
+import logging
 import random
+import re
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
 import requests
+
+if TYPE_CHECKING:
+    from datadog_checks.kafka_consumer.config import KafkaConfig
+
+SENSITIVE_KEY_PATTERN = re.compile(r'(?i)(password|secret|\.key$|sasl\.jaas\.config|api\.key|api\.secret)')
 
 CONNECTOR_CONFIG_CACHE_KEY = 'kafka_connector_config_cache'
 CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
@@ -89,14 +96,14 @@ def _fetch_oidc_token(oauth_config: dict, session: requests.Session, timeout: fl
 class KafkaConnectCollector:
     """Collects Kafka Connect connector metrics and config events."""
 
-    def __init__(self, check, config, log):
+    def __init__(self, check, config: 'KafkaConfig', log: logging.Logger) -> None:
         self.check = check
         self.config = config
         self.log = log
 
         configs_refresh = self.config._kafka_configs_refresh_interval
-        self.CONFIGS_REFRESH_INTERVAL = configs_refresh
-        self.CONFIGS_REFRESH_JITTER = max(15, configs_refresh // 10)
+        self._configs_refresh_interval = configs_refresh
+        self._configs_refresh_jitter = max(15, configs_refresh // 10)
 
         self._session: requests.Session | None = None
         self._oauth_token: str | None = None
@@ -157,7 +164,15 @@ class KafkaConnectCollector:
                 self._refresh_oauth_token()
             except Exception as e:
                 self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
-                return dict.fromkeys(self.config._kafka_connect_urls, False)
+                failed: dict[str, bool] = dict.fromkeys(self.config._kafka_connect_urls, False)
+                if (
+                    self.config._kafka_connect_confluent_cloud_environment_id
+                    and self.config._kafka_connect_confluent_cloud_cluster_id
+                ):
+                    env_id = self.config._kafka_connect_confluent_cloud_environment_id
+                    cc_id = self.config._kafka_connect_confluent_cloud_cluster_id
+                    failed[f'confluent_cloud:{env_id}:{cc_id}'] = False
+                return failed
 
         connectivity: dict[str, bool] = {}
 
@@ -259,11 +274,11 @@ class KafkaConnectCollector:
             if self.config._kafka_connect_collect_task_metrics:
                 for task in tasks:
                     task_id = task.get('id', '')
-                    task_state = task.get('state', 'UNKNOWN')
+                    task_state = (task.get('state') or 'UNKNOWN').lower()
                     task_tags = connector_tags + [f'task_id:{task_id}', f'task_state:{task_state}']
                     self.check.gauge(
                         'connector.task.running',
-                        1 if task_state == 'RUNNING' else 0,
+                        1 if task_state == 'running' else 0,
                         tags=task_tags,
                     )
 
@@ -324,7 +339,7 @@ class KafkaConnectCollector:
             selected.append((key, rest[key]))
             remaining_slots -= 1
 
-        return dict(selected)
+        return {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in selected}
 
     def _collect_plugins(self, url: str, cluster_id: str) -> None:
         safe_url = quote(url, safe='')
@@ -342,8 +357,8 @@ class KafkaConnectCollector:
         self._mark_items_fetched(
             fetch_cache_key,
             ['plugins'],
-            ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-            ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+            ttl_base=self._configs_refresh_interval,
+            ttl_jitter=self._configs_refresh_jitter,
         )
 
         event_cache_key = f'{CONNECTOR_PLUGINS_EVENT_CACHE_KEY}:{safe_url}'
@@ -396,9 +411,9 @@ class KafkaConnectCollector:
         max_cache_size: int | None = None,
     ) -> None:
         if ttl_base is None:
-            ttl_base = self.CONFIGS_REFRESH_INTERVAL
+            ttl_base = self._configs_refresh_interval
         if ttl_jitter is None:
-            ttl_jitter = self.CONFIGS_REFRESH_JITTER
+            ttl_jitter = self._configs_refresh_jitter
 
         current_time = time.time()
 
@@ -423,7 +438,9 @@ class KafkaConnectCollector:
         except Exception as e:
             self.log.debug("Could not write cache %s: %s", cache_key, e)
 
-    def _get_events_to_send(self, cache_key: str, items: dict[str, str]) -> list[str]:
+    def _get_events_to_send(
+        self, cache_key: str, items: dict[str, str], max_cache_size: int | None = None
+    ) -> list[str]:
         if not items:
             return []
 
@@ -453,9 +470,10 @@ class KafkaConnectCollector:
                 }
 
         if events_to_send:
-            if len(cache_dict) > CONNECTOR_CONFIG_CACHE_MAX_SIZE:
+            ceiling = max_cache_size if max_cache_size is not None else CONNECTOR_CONFIG_CACHE_MAX_SIZE
+            if len(cache_dict) > ceiling:
                 sorted_keys = sorted(cache_dict, key=lambda k: cache_dict[k].get('expire_at', 0))
-                for key in sorted_keys[: len(cache_dict) - CONNECTOR_CONFIG_CACHE_MAX_SIZE]:
+                for key in sorted_keys[: len(cache_dict) - ceiling]:
                     del cache_dict[key]
             try:
                 self.check.write_persistent_cache(cache_key, json.dumps(cache_dict))

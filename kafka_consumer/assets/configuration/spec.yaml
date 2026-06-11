@@ -617,7 +617,7 @@ files:
           example: lkc-xyz789
       - name: kafka_connect_confluent_cloud_url
         description: |
-          Base URL for the Confluent Cloud REST API. Defaults to https://api.confluent.cloud.
+          Base URL for the Confluent Cloud REST API. Defaults to `https://api.confluent.cloud`.
           Override only if using a private networking endpoint.
         fleet_configurable: true
         value:
