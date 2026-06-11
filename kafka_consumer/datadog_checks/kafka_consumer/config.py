@@ -133,6 +133,13 @@ class KafkaConfig:
         )
         self._kafka_connect_aws_region = instance.get('kafka_connect_aws_region')
         self._kafka_connect_aws_role_arn = instance.get('kafka_connect_aws_role_arn')
+        self._kafka_connect_confluent_cloud_environment_id = instance.get(
+            'kafka_connect_confluent_cloud_environment_id'
+        )
+        self._kafka_connect_confluent_cloud_cluster_id = instance.get('kafka_connect_confluent_cloud_cluster_id')
+        self._kafka_connect_confluent_cloud_url = instance.get(
+            'kafka_connect_confluent_cloud_url', 'https://api.confluent.cloud'
+        )
 
     @staticmethod
     def _parse_connect_urls(value) -> list[str]:
