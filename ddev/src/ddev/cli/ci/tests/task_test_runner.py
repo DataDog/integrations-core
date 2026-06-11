@@ -32,22 +32,9 @@ def _conclusion_to_status(conclusion: str | None) -> Literal["success", "failure
 
 class TaskTestRunner(AsyncProcessor[TestBatch]):
     """
-    Launches a ``test-batch.yaml`` workflow run for a ``TestBatch``, waits for it
-    to complete, downloads its artifacts, and emits a ``BatchFinished`` message.
-
-    No throttling and no DispatcherConfig — those land in later tiers.
-
-    Note: ``base_sha`` is currently used as the check run's ``head_sha`` while the
-    workflow input receives ``checkout_sha`` (the merge commit). The asymmetry —
-    check on PR head, workflow on merge commit — is intentional for now, but the
-    semantics will be revisited once ``BatchFinished`` consumers are settled.
-
-    Known limitations (accepted for now):
-    - A failure before the check run is created (dispatch, initial run fetch, or
-      check creation) leaves the dispatched workflow untracked with no ``BatchFinished``.
-    - ``_poll_until_complete`` is unbounded; a run that never reaches ``"completed"``
-      relies on the orchestrator's ``max_timeout`` to cancel it. Retry/timeout handling
-      is deferred to the async client.
+    Runs one ``test-batch.yaml`` workflow for a ``TestBatch``: dispatches the run,
+    opens a check run, polls until the workflow completes, downloads its artifacts,
+    and emits a ``BatchFinished``.
     """
 
     def __init__(
