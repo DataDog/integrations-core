@@ -1,0 +1,278 @@
+{
+  "title": "Kafka Connect - Connector Monitoring (DSM)",
+  "description": "Monitor Kafka Connect connectors collected by the kafka_consumer integration with cluster monitoring enabled. Shows connector health, task states, and configuration events.",
+  "widgets": [
+    {
+      "id": 1,
+      "definition": {
+        "type": "group",
+        "title": "Connector Overview",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Total Connectors",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.count{$cluster,$connect_url}", "aggregator": "last"}],
+                  "response_format": "scalar"
+                }
+              ],
+              "precision": 0
+            },
+            "layout": {"width": 3, "height": 2}
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Running Connectors",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:running}", "aggregator": "last"}],
+                  "response_format": "scalar"
+                }
+              ],
+              "precision": 0
+            },
+            "layout": {"width": 3, "height": 2}
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Connectors Not Running",
+              "requests": [
+                {
+                  "formulas": [{"formula": "total - running"}],
+                  "queries": [
+                    {"name": "total", "data_source": "metrics", "query": "sum:kafka.connector.count{$cluster,$connect_url}", "aggregator": "last"},
+                    {"name": "running", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:running}", "aggregator": "last"}
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "precision": 0
+            },
+            "layout": {"width": 3, "height": 2}
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Failed Tasks",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:failed}", "aggregator": "last"}],
+                  "response_format": "scalar"
+                }
+              ],
+              "precision": 0
+            },
+            "layout": {"width": 3, "height": 2}
+          }
+        ]
+      },
+      "layout": {"width": 12, "height": 3}
+    },
+    {
+      "id": 2,
+      "definition": {
+        "type": "group",
+        "title": "Connector Health",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Connectors by State",
+              "requests": [
+                {
+                  "formulas": [
+                    {"formula": "running", "alias": "Running"},
+                    {"formula": "paused", "alias": "Paused"},
+                    {"formula": "failed", "alias": "Failed"}
+                  ],
+                  "queries": [
+                    {"name": "running", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:running}"},
+                    {"name": "paused", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:paused}"},
+                    {"name": "failed", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url,connector_state:failed}"}
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars"
+                }
+              ],
+              "show_legend": true
+            },
+            "layout": {"width": 6, "height": 3}
+          },
+          {
+            "definition": {
+              "type": "toplist",
+              "title": "Connectors by Type (Source/Sink)",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1", "limit": {"count": 20, "order": "desc"}}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.running{$cluster,$connect_url} by {connector_type}", "aggregator": "last"}],
+                  "response_format": "scalar"
+                }
+              ]
+            },
+            "layout": {"width": 3, "height": 3}
+          },
+          {
+            "definition": {
+              "type": "toplist",
+              "title": "Top Connectors by Task Count",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1", "limit": {"count": 20, "order": "desc"}}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.task.count{$cluster,$connect_url} by {connector}", "aggregator": "last"}],
+                  "response_format": "scalar"
+                }
+              ]
+            },
+            "layout": {"width": 3, "height": 3}
+          }
+        ]
+      },
+      "layout": {"width": 12, "height": 4}
+    },
+    {
+      "id": 3,
+      "definition": {
+        "type": "group",
+        "title": "Task Health",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Task States Over Time",
+              "requests": [
+                {
+                  "formulas": [
+                    {"formula": "running", "alias": "Running"},
+                    {"formula": "failed", "alias": "Failed"},
+                    {"formula": "paused", "alias": "Paused"},
+                    {"formula": "unassigned", "alias": "Unassigned"}
+                  ],
+                  "queries": [
+                    {"name": "running", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:running}"},
+                    {"name": "failed", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:failed}"},
+                    {"name": "paused", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:paused}"},
+                    {"name": "unassigned", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:unassigned}"}
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "style": {"palette": "dog_classic"}
+                }
+              ],
+              "show_legend": true
+            },
+            "layout": {"width": 8, "height": 3}
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Total Tasks",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.task.count{$cluster,$connect_url}", "aggregator": "last"}],
+                  "response_format": "scalar"
+                }
+              ],
+              "precision": 0
+            },
+            "layout": {"width": 2, "height": 2}
+          },
+          {
+            "definition": {
+              "type": "query_value",
+              "title": "Task Failure Rate",
+              "requests": [
+                {
+                  "formulas": [{"formula": "(failed / total) * 100"}],
+                  "queries": [
+                    {"name": "failed", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:failed}", "aggregator": "last"},
+                    {"name": "total", "data_source": "metrics", "query": "sum:kafka.connector.task.count{$cluster,$connect_url}", "aggregator": "last"}
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "precision": 1,
+              "custom_unit": "%"
+            },
+            "layout": {"width": 2, "height": 2}
+          },
+          {
+            "definition": {
+              "type": "toplist",
+              "title": "Connectors with Failed Tasks",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1", "limit": {"count": 20, "order": "desc"}}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:failed} by {connector}", "aggregator": "last"}],
+                  "response_format": "scalar"
+                }
+              ]
+            },
+            "layout": {"width": 12, "height": 3}
+          }
+        ]
+      },
+      "layout": {"width": 12, "height": 7}
+    },
+    {
+      "id": 4,
+      "definition": {
+        "type": "group",
+        "title": "Per-Connector Detail",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Connector Running Status (per connector)",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "avg:kafka.connector.running{$cluster,$connect_url} by {connector,connector_class}"}],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ],
+              "show_legend": true
+            },
+            "layout": {"width": 6, "height": 3}
+          },
+          {
+            "definition": {
+              "type": "timeseries",
+              "title": "Failed Tasks per Connector",
+              "requests": [
+                {
+                  "formulas": [{"formula": "query1"}],
+                  "queries": [{"name": "query1", "data_source": "metrics", "query": "sum:kafka.connector.tasks{$cluster,$connect_url,task_state:failed} by {connector}"}],
+                  "response_format": "timeseries",
+                  "display_type": "bars"
+                }
+              ],
+              "show_legend": true
+            },
+            "layout": {"width": 6, "height": 3}
+          }
+        ]
+      },
+      "layout": {"width": 12, "height": 4}
+    }
+  ],
+  "template_variables": [
+    {"name": "cluster", "prefix": "kafka_cluster_id", "defaults": ["*"]},
+    {"name": "connect_url", "prefix": "connect_url", "defaults": ["*"]}
+  ],
+  "layout_type": "ordered",
+  "reflow_type": "fixed"
+}
