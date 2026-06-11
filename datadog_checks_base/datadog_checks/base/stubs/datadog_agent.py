@@ -27,6 +27,8 @@ class DatadogAgentStub(object):
         self._external_tags = []
         self._host_tags = "{}"
         self._sent_telemetry = defaultdict(list)
+        self._sent_reported_issues = defaultdict(list)
+        self._sent_resolved_issues = []
 
     def get_default_config(self):
         return {'enable_metadata_collection': True}
@@ -39,6 +41,8 @@ class DatadogAgentStub(object):
         self._process_start_time = 0
         self._external_tags = []
         self._host_tags = "{}"
+        self._sent_reported_issues.clear()
+        self._sent_resolved_issues.clear()
 
     def assert_logs(self, check_id, logs):
         sent_logs = self._sent_logs[check_id]
@@ -159,6 +163,11 @@ class DatadogAgentStub(object):
     def emit_agent_telemetry(self, check_name, metric_name, metric_value, metric_type):
         self._sent_telemetry[(check_name, metric_name, metric_type)].append(metric_value)
 
+    def report_issue(self, check_name, report_json):
+        self._sent_reported_issues[check_name].append(json.decode(report_json))
+
+    def resolve_issue(self, issue_id):
+        self._sent_resolved_issues.append(issue_id)
 
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()
