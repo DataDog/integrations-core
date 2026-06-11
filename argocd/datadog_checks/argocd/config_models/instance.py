@@ -113,11 +113,12 @@ class InstanceConfig(BaseModel):
     exclude_metrics: Optional[tuple[str, ...]] = None
     exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
-    extra_include_paths: Optional[tuple[str, ...]] = None
     extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
-    generic_resources_auth_token: Optional[str] = None
-    generic_resources_endpoint: Optional[str] = None
+    genresources_auth_token: Optional[str] = None
     genresources_collection_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_endpoint: Optional[str] = None
+    genresources_extra_include_paths: Optional[tuple[str, ...]] = None
+    genresources_max_resources_per_cycle: Optional[int] = Field(None, ge=1)
     genresources_ttl_seconds: Optional[int] = Field(None, ge=1)
     headers: Optional[MappingProxyType[str, Any]] = None
     histogram_buckets_as_distributions: Optional[bool] = None
@@ -134,7 +135,6 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
     log_requests: Optional[bool] = None
-    max_resources_per_cycle: Optional[int] = Field(None, ge=1)
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None

@@ -64,6 +64,10 @@ def instance_genresources_collection_interval_seconds():
     return 120
 
 
+def instance_genresources_max_resources_per_cycle():
+    return 10000
+
+
 def instance_genresources_ttl_seconds():
     return 21600
 
@@ -90,10 +94,6 @@ def instance_kerberos_force_initiate():
 
 def instance_log_requests():
     return False
-
-
-def instance_max_resources_per_cycle():
-    return 10000
 
 
 def instance_min_collection_interval():

@@ -257,11 +257,11 @@ class ArgocdResourceCollector:
     def __init__(self, check: "ArgocdCheck") -> None:
         self.check = check
         instance = check.instance
-        self._endpoint: str | None = instance.get("generic_resources_endpoint")
+        self._endpoint: str | None = instance.get("genresources_endpoint")
         self._ttl_seconds: int = instance.get("genresources_ttl_seconds", 21600)
-        self._max_resources: int = instance.get("max_resources_per_cycle", 10000)
-        self._extra_paths: list[str] = list(instance.get("extra_include_paths") or [])
-        self._auth_token: str | None = instance.get("generic_resources_auth_token")
+        self._max_resources: int = instance.get("genresources_max_resources_per_cycle", 10000)
+        self._extra_paths: list[str] = list(instance.get("genresources_extra_include_paths") or [])
+        self._auth_token: str | None = instance.get("genresources_auth_token")
         self._instance_prefix: str = _instance_prefix(self._endpoint)
         self._submitted: dict[str, str] = {}
         self._last_full_submit: float = 0.0
@@ -271,9 +271,7 @@ class ArgocdResourceCollector:
 
     def collect(self) -> None:
         if not self._endpoint:
-            self.check.log.warning(
-                "collect_genresources is enabled but generic_resources_endpoint is not set; skipping"
-            )
+            self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
             for spec in RESOURCE_TYPE_SPECS:
                 self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=[f"resource_type:{spec.resource_type}"])
             return
@@ -304,7 +302,8 @@ class ArgocdResourceCollector:
 
         if len(items) > self._max_resources:
             self.check.log.warning(
-                "genresources: volume cap hit (%d / %d) for type=%s; increase max_resources_per_cycle if expected",
+                "genresources: volume cap hit (%d / %d) for type=%s; "
+                "increase genresources_max_resources_per_cycle if expected",
                 self._max_resources,
                 len(items),
                 spec.resource_type,

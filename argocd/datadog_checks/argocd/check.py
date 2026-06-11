@@ -45,7 +45,10 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def check(self, instance):
         if self.instance.get("collect_genresources"):
-            self._resource_collector.collect()
+            try:
+                self._resource_collector.collect()
+            except Exception:
+                self.log.exception("genresources: collection cycle failed")
         super().check(instance)
 
     def parse_config(self):

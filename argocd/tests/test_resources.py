@@ -60,8 +60,8 @@ def _instance(**overrides) -> dict:
     instance = {
         "app_controller_endpoint": "http://app_controller:8082",
         "collect_genresources": True,
-        "generic_resources_endpoint": ARGOCD_ENDPOINT,
-        "generic_resources_auth_token": "test-token",
+        "genresources_endpoint": ARGOCD_ENDPOINT,
+        "genresources_auth_token": "test-token",
     }
     instance.update(overrides)
     return instance
@@ -154,7 +154,7 @@ def test_collect_appends_extra_include_paths_to_every_type(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(extra_include_paths=extra)])
+    check = ArgocdCheck("argocd", {}, [_instance(genresources_extra_include_paths=extra)])
 
     with patch.object(check, "submit_generic_resource", create=True) as submit:
         check._resource_collector.collect()
@@ -210,7 +210,7 @@ def test_collect_caps_per_type_with_warning(mock_http_response_per_endpoint, cap
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(max_resources_per_cycle=3)])
+    check = ArgocdCheck("argocd", {}, [_instance(genresources_max_resources_per_cycle=3)])
 
     with patch.object(check, "submit_generic_resource", create=True) as submit:
         check._resource_collector.collect()

@@ -65,7 +65,7 @@ files:
       value:
         type: boolean
         example: false
-    - name: generic_resources_endpoint
+    - name: genresources_endpoint
       hidden: true
       description: |
         Base URL of the ArgoCD REST API (for example, ``https://argocd.example.com``).
@@ -74,7 +74,7 @@ files:
         display_default: null
         example: https://<ARGOCD_HOST>
         type: string
-    - name: generic_resources_auth_token
+    - name: genresources_auth_token
       hidden: true
       description: |
         Raw bearer token used to authenticate against the ArgoCD REST API.
@@ -108,7 +108,7 @@ files:
         type: integer
         example: 120
         minimum: 1
-    - name: max_resources_per_cycle
+    - name: genresources_max_resources_per_cycle
       hidden: true
       description: |
         Maximum number of items emitted per resource type per check cycle.
@@ -119,7 +119,7 @@ files:
         type: integer
         example: 10000
         minimum: 1
-    - name: extra_include_paths
+    - name: genresources_extra_include_paths
       hidden: true
       description: |
         Additional dotted JSON paths appended to the baseline allow-list of
