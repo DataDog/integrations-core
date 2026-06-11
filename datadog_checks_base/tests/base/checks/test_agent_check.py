@@ -153,6 +153,20 @@ def test_generate_configs_loads_generated_discovery_module():
     import_module.assert_called_once_with('datadog_checks.generated.config_models.discovery')
 
 
+def test_suppress_discovery_side_effects_counts_metrics():
+    from datadog_checks.base.checks.base import _suppress_discovery_side_effects
+
+    check = AgentCheck()
+
+    with _suppress_discovery_side_effects(check) as stats:
+        assert stats.metric_count == 0
+        check._submit_metric('gauge', 'my.metric', 1.0)
+        check._submit_metric('gauge', 'my.metric', 2.0)
+        assert stats.metric_count == 2
+
+    assert stats.metric_count == 2
+
+
 def test_suppress_discovery_side_effects_restores_methods_after_exit():
     from datadog_checks.base.checks.base import _discovery_noop, _suppress_discovery_side_effects
 
