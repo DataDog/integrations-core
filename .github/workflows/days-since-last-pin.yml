@@ -26,9 +26,15 @@ jobs:
           GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
         run: python3 .github/workflows/scripts/days_since_last_pin.py
 
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-core-api-key
+
       - name: Submit metric to Datadog
         env:
-          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
           DAYS: ${{ steps.compute.outputs.days }}
         run: |
           python3 - <<'EOF'
