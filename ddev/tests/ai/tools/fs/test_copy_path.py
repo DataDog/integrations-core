@@ -127,3 +127,23 @@ async def test_copy_read_denied(tmp_path) -> None:
 
     assert result.success is False
     assert result.error is not None
+
+
+async def test_copy_directory_denied_child_is_rejected(tmp_path) -> None:
+    # write_root is a subdirectory; src lives outside it so deny patterns apply to its contents.
+    write_root = tmp_path / "write_root"
+    write_root.mkdir()
+    policy = FileAccessPolicy(write_root=write_root, deny_patterns=(".env",))
+    tool = CopyPathTool(policy)
+
+    src = tmp_path / "src_dir"
+    src.mkdir()
+    (src / "safe.txt").write_text("ok", encoding="utf-8")
+    (src / ".env").write_text("SECRET=hunter2", encoding="utf-8")
+    dst = write_root / "dst_dir"
+
+    result = await tool.run({"source": str(src), "destination": str(dst)})
+
+    assert result.success is False
+    assert result.error is not None
+    assert not dst.exists()

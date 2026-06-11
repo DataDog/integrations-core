@@ -49,6 +49,11 @@ class CopyPathTool(BaseTool[CopyPathInput]):
 
         try:
             if source.is_dir():
+                for entry in source.rglob("*"):
+                    try:
+                        self._policy.assert_readable(entry)
+                    except FileAccessError as e:
+                        return ToolResult(success=False, error=str(e))
                 shutil.copytree(source, destination, dirs_exist_ok=True)
                 file_count = sum(1 for p in destination.rglob("*") if p.is_file())
                 return ToolResult(success=True, data=f"Copied directory tree to {destination} ({file_count} files).")
