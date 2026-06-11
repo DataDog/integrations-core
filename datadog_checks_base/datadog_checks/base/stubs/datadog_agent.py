@@ -169,5 +169,6 @@ class DatadogAgentStub(object):
     def resolve_issue(self, issue_id):
         self._sent_resolved_issues.append(issue_id)
 
+
 # Use the stub as a singleton
 datadog_agent = DatadogAgentStub()
