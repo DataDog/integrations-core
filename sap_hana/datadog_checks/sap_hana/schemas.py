@@ -35,13 +35,21 @@ WITH limited_tables AS (
       {exclude_clause}
     ORDER BY t.SCHEMA_NAME, t.TABLE_NAME
     LIMIT {max_tables}
+),
+limited_columns AS (
+    SELECT c.SCHEMA_NAME, c.TABLE_NAME, c.COLUMN_NAME, c.DATA_TYPE_NAME,
+           c.IS_NULLABLE, c.DEFAULT_VALUE, c.POSITION,
+           ROW_NUMBER() OVER (PARTITION BY c.SCHEMA_NAME, c.TABLE_NAME ORDER BY c.POSITION) AS rn
+    FROM SYS.TABLE_COLUMNS c
+    INNER JOIN limited_tables lt ON lt.SCHEMA_NAME = c.SCHEMA_NAME AND lt.TABLE_NAME = c.TABLE_NAME
 )
 SELECT lt.SCHEMA_NAME, lt.TABLE_NAME, lt.TABLE_TYPE, lt.IS_COLUMN_TABLE, lt.SCHEMA_OWNER,
-       c.COLUMN_NAME, c.DATA_TYPE_NAME, c.IS_NULLABLE, c.DEFAULT_VALUE, c.POSITION
+       lc.COLUMN_NAME, lc.DATA_TYPE_NAME, lc.IS_NULLABLE, lc.DEFAULT_VALUE, lc.POSITION
 FROM limited_tables lt
-LEFT JOIN SYS.TABLE_COLUMNS c
-  ON c.SCHEMA_NAME = lt.SCHEMA_NAME AND c.TABLE_NAME = lt.TABLE_NAME
-ORDER BY lt.SCHEMA_NAME, lt.TABLE_NAME, c.POSITION
+LEFT JOIN limited_columns lc
+  ON lc.SCHEMA_NAME = lt.SCHEMA_NAME AND lc.TABLE_NAME = lt.TABLE_NAME
+  AND lc.rn <= {max_columns}
+ORDER BY lt.SCHEMA_NAME, lt.TABLE_NAME, lc.POSITION
 """
 
 
@@ -106,6 +114,7 @@ class HanaSchemaCollector(SchemaCollector):
             include_clause=include_clause,
             exclude_clause=exclude_clause,
             max_tables=int(self._config.max_tables),
+            max_columns=int(self._config.max_columns),
         )
         return query, tuple(params)
 

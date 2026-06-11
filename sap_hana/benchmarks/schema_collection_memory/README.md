@@ -51,14 +51,32 @@ memory error, set `NUM_COLUMNS` to 500 or lower.
 
 ## Notes on memory investigation
 
-During development, `cursor.setfetchsize(10_000)` was tried on the hdbcli cursor before
-`execute()` to reduce the C-layer result buffer. It had no measurable effect on peak RSS
-(1042 MiB → 1043 MiB). The reason: the dominant memory consumer is the Python-side
-`_queued_rows` list accumulating all table dicts before the single `json.dumps` flush —
-not the hdbcli C layer. The base `SchemaCollector` flushes when `len(_queued_rows) >=
-payload_chunk_size` (default 10,000) or on the last database. Since HANA always reports
-one database and a 1000-table schema is below the 10,000 threshold, everything flushes
-at once. The `max_tables` / `max_columns` limits are the effective control.
+**`setfetchsize` (no effect on memory)**
+`cursor.setfetchsize(10_000)` was tried on the hdbcli cursor before `execute()` to reduce
+the C-layer result buffer. It had no measurable effect on peak RSS (1042 MiB → 1043 MiB).
+The reason: the dominant memory consumer is the Python-side `_queued_rows` list
+accumulating all table dicts before the single `json.dumps` flush — not the hdbcli C
+layer. The base `SchemaCollector` flushes when `len(_queued_rows) >= payload_chunk_size`
+(default 10,000) or on the last database. Since HANA always reports one database and a
+1000-table schema is below the 10,000 threshold, everything flushes at once. The
+`max_tables` / `max_columns` limits are the effective memory control.
+
+**SQL column limit via `ROW_NUMBER()` (5× faster, no memory change)**
+The original query joined `SYS.TABLE_COLUMNS` without a column count cap, so the server
+returned all 1000 columns per table regardless of `max_columns`; Python discarded the
+excess. Pushing the limit into SQL with a `limited_columns` CTE using `ROW_NUMBER() OVER
+(PARTITION BY schema, table ORDER BY position)` means the server only sends the first
+`max_columns` columns per table. Result on the 1000×1000 schema:
+
+| Mode    | Duration before | Duration after |
+|---------|-----------------|----------------|
+| limited (max_tables=300, max_columns=50)         | 8.1s | 1.6s |
+| unlimited (max_tables=10M, max_columns=10M)      | 48.8s | 50.6s |
+
+Peak RSS was unchanged in both modes — the Python-side column dicts are bounded by
+`max_columns` either way, so peak Python heap stays the same. The gain is query
+efficiency: 285,000 fewer rows sent from the server (300 tables × 950 discarded
+columns) in the limited case.
 
 ## Expected outcome
 
