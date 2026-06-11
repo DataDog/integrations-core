@@ -61,6 +61,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: false
   - template: logs
     example:
     - type: docker

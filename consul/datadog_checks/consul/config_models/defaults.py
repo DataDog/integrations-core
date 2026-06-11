@@ -48,6 +48,10 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
+def instance_health_check_warning_events():
+    return False
+
+
 def instance_health_checks_cache_size():
     return 5000
 

@@ -27,6 +27,7 @@ from ddev.cli.validate.labeler import labeler
 from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.metadata import metadata
 from ddev.cli.validate.openmetrics import openmetrics
+from ddev.cli.validate.qa_label import qa_label
 from ddev.cli.validate.version import version
 
 
@@ -57,6 +58,7 @@ validate.add_command(metadata)
 validate.add_command(models)
 validate.add_command(openmetrics)
 validate.add_command(package)
+validate.add_command(qa_label)
 validate.add_command(readmes)
 validate.add_command(saved_views)
 validate.add_command(service_checks)

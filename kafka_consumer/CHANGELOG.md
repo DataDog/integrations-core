@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2026-06-09
+
+***Removed***:
+
+* Remove the Data Streams live messages reading feature, which has moved to the kafka_actions integration. ([#23842](https://github.com/DataDog/integrations-core/pull/23842))
+
+***Added***:
+
+* Schema Registry: emit per-subject and global compatibility on the Data Streams schema payload, and stop emitting Datadog Events for broker, topic, and schema registry configurations (those payloads continue to flow to the Data Streams intake). ([#23778](https://github.com/DataDog/integrations-core/pull/23778))
+* Add broker list to the cluster monitoring heartbeat payload. ([#23898](https://github.com/DataDog/integrations-core/pull/23898))
+* Emit connection_error DSM event when the integration cannot connect to Kafka. ([#23902](https://github.com/DataDog/integrations-core/pull/23902))
+
 ## 7.3.0 / 2026-05-14
 
 ***Added***:
@@ -15,7 +27,7 @@
 * Lower log level from WARN to DEBUG for the message emitted when a consumer group has offsets for a partition but no stored highwater offset (typically during leader failover). ([#23388](https://github.com/DataDog/integrations-core/pull/23388))
 * When a topic's highwater offset decreases (retention wipe, topic recreation, or offset reset), purge cached (offset, timestamp) pairs whose offset is above the new highwater and switch eviction to oldest-timestamp instead of smallest-offset. Previously, stale pre-reset entries poisoned interpolation and pinned `kafka.estimated_consumer_lag` to a wall-clock value equal to how long ago the reset happened. ([#23409](https://github.com/DataDog/integrations-core/pull/23409))
 
-## 7.2.1 / 2026-05-12
+## 7.2.1 / 2026-05-12 / Agent 7.79.0
 
 ***Fixed***:
 

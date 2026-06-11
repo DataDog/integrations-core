@@ -6,8 +6,8 @@ import pytest
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
+from . import common
 from .common import CLICKHOUSE_VERSION
-from .metrics import OPTIONAL_METRICS, get_metrics
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -17,23 +17,16 @@ def test_check(aggregator, instance, dd_run_check):
     dd_run_check(check)
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
-    db_hostname_tag = 'database_hostname:{}'.format(instance['server'])
+    metrics = common.get_metrics(CLICKHOUSE_VERSION)
+    db_hostname_tag = 'database_hostname:{}'.format(check.reported_hostname)
     db_instance_tag = 'database_instance:{}:{}:default'.format(instance['server'], instance['port'])
-    metrics = get_metrics(CLICKHOUSE_VERSION)
 
     for metric in metrics:
-        aggregator.assert_metric_has_tag(metric, port_tag, at_least=1)
-        aggregator.assert_metric_has_tag(metric, server_tag, at_least=1)
-        aggregator.assert_metric_has_tag(metric, 'db:default', at_least=1)
-        aggregator.assert_metric_has_tag(metric, 'foo:bar', at_least=1)
+        aggregator.assert_metric_has_tags(
+            metric, [port_tag, server_tag, 'db:default', 'foo:bar', db_hostname_tag, db_instance_tag], at_least=1
+        )
 
-    aggregator.assert_metric(
-        'clickhouse.dictionary.item.current',
-        tags=[server_tag, port_tag, 'db:default', 'foo:bar', 'dictionary:test', db_hostname_tag, db_instance_tag],
-        at_least=1,
-    )
-
-    for metric in OPTIONAL_METRICS:
+    for metric in common.get_optional_metrics(CLICKHOUSE_VERSION):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_service_check("clickhouse.can_connect", count=1)
@@ -62,10 +55,37 @@ def test_custom_queries(aggregator, instance, dd_run_check):
             'db:default',
             'foo:bar',
             'test:clickhouse',
-            'database_hostname:{}'.format(instance['server']),
+            'database_hostname:{}'.format(check.reported_hostname),
             'database_instance:{}:{}:default'.format(instance['server'], instance['port']),
         ],
     )
+
+
+@pytest.mark.skipif(
+    common.is_legacy(CLICKHOUSE_VERSION),
+    reason='`system.errors` is collected only via advanced queries, which legacy ClickHouse versions do not support',
+)
+def test_errors_raised_metric(aggregator, instance, dd_run_check):
+    from .conftest import get_clickhouse_client
+
+    client = get_clickhouse_client(
+        host=instance['server'],
+        port=instance['port'],
+        username=instance['username'],
+        password=instance['password'],
+    )
+    try:
+        client.query('SELECT something FROM system.tables')
+    except Exception:
+        pass
+
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('clickhouse.errors.raised', at_least=1)
+    for sample in aggregator.metrics('clickhouse.errors.raised'):
+        tag_keys = {t.split(':', 1)[0] for t in sample.tags}
+        assert {'error_name', 'error_code', 'remote'}.issubset(tag_keys), sample.tags
 
 
 @pytest.mark.skipif(CLICKHOUSE_VERSION == 'latest', reason='Version `latest` is ever-changing, skipping')

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.6.0 / 2026-06-09
+
+***Added***:
+
+* Add new config `health_check_warning_events` to emit an event when a Consul health check transitions to `warning`. ([#23779](https://github.com/DataDog/integrations-core/pull/23779))
+
 ## 5.5.0 / 2026-05-14
 
 ***Added***:

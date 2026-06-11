@@ -23,6 +23,23 @@ from . import defaults, validators
 SECURE_FIELD_NAMES = frozenset(['tls_ca_cert'])
 
 
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
+    max_columns: Optional[int] = None
+    max_query_duration: Optional[int] = None
+    max_tables: Optional[int] = None
+    run_sync: Optional[bool] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -121,12 +138,23 @@ class QuerySamples(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class SchemaMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    run_sync: Optional[bool] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_schemas: Optional[CollectSchemas] = None
     compression: Optional[str] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
@@ -147,13 +175,17 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
+    reported_hostname: Optional[str] = None
+    schema_metrics: Optional[SchemaMetrics] = None
     server: str
     service: Optional[str] = None
     single_endpoint_mode: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_verify: Optional[bool] = None
+    use_advanced_queries: Optional[bool] = None
     use_global_custom_queries: Optional[str] = None
+    use_legacy_queries: Optional[bool] = None
     username: Optional[str] = None
     verify: Optional[bool] = None
 
