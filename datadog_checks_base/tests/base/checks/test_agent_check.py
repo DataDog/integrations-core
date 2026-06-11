@@ -160,8 +160,8 @@ def test_suppress_discovery_side_effects_counts_metrics():
 
     with _suppress_discovery_side_effects(check) as stats:
         assert stats.metric_count == 0
-        check._submit_metric('gauge', 'my.metric', 1.0)
-        check._submit_metric('gauge', 'my.metric', 2.0)
+        check.gauge('my.metric', 1.0)
+        check.count('my.metric', 2.0)
         assert stats.metric_count == 2
 
     assert stats.metric_count == 2
