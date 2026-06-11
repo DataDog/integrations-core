@@ -157,7 +157,7 @@ class KafkaConnectCollector:
                 self._refresh_oauth_token()
             except Exception as e:
                 self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
-                return {}
+                return dict.fromkeys(self.config._kafka_connect_urls, False)
 
         connectivity: dict[str, bool] = {}
 
@@ -249,12 +249,10 @@ class KafkaConnectCollector:
             ]
             self.check.gauge('connector.task.count', len(tasks), tags=count_tags)
 
-            task_state_counts = {
-                'running': sum(1 for t in tasks if t.get('state') == 'RUNNING'),
-                'failed': sum(1 for t in tasks if t.get('state') == 'FAILED'),
-                'paused': sum(1 for t in tasks if t.get('state') == 'PAUSED'),
-                'unassigned': sum(1 for t in tasks if t.get('state') == 'UNASSIGNED'),
-            }
+            task_state_counts: dict[str, int] = {}
+            for task in tasks:
+                state = (task.get('state') or 'UNKNOWN').lower()
+                task_state_counts[state] = task_state_counts.get(state, 0) + 1
             for state_name, count in task_state_counts.items():
                 self.check.gauge('connector.tasks', count, tags=count_tags + [f'task_state:{state_name}'])
 
@@ -455,6 +453,10 @@ class KafkaConnectCollector:
                 }
 
         if events_to_send:
+            if len(cache_dict) > CONNECTOR_CONFIG_CACHE_MAX_SIZE:
+                sorted_keys = sorted(cache_dict, key=lambda k: cache_dict[k].get('expire_at', 0))
+                for key in sorted_keys[: len(cache_dict) - CONNECTOR_CONFIG_CACHE_MAX_SIZE]:
+                    del cache_dict[key]
             try:
                 self.check.write_persistent_cache(cache_key, json.dumps(cache_dict))
             except Exception as e:

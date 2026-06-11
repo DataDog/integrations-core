@@ -547,7 +547,7 @@ instances:
     # kafka_connect_collect_task_metrics: false
 
     ## @param kafka_connect_confluent_cloud_environment_id - string - optional - default: env-abc123
-    ## Confluent Cloud environment ID (e.g. env-abc123). When set together with
+    ## Confluent Cloud environment ID (e.g., env-abc123). When set together with
     ## kafka_connect_confluent_cloud_cluster_id, collects connector data from the
     ## Confluent Cloud Connect REST API. Authenticate using kafka_connect_username
     ## (Cloud API key ID) and kafka_connect_password (Cloud API key secret).
@@ -555,7 +555,7 @@ instances:
     # kafka_connect_confluent_cloud_environment_id: env-abc123
 
     ## @param kafka_connect_confluent_cloud_cluster_id - string - optional - default: lkc-xyz789
-    ## Confluent Cloud Kafka cluster ID (e.g. lkc-xyz789). Required when
+    ## Confluent Cloud Kafka cluster ID (e.g., lkc-xyz789). Required when
     ## kafka_connect_confluent_cloud_environment_id is set.
     #
     # kafka_connect_confluent_cloud_cluster_id: lkc-xyz789
