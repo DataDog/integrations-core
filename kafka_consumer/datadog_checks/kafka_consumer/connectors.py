@@ -146,48 +146,40 @@ class KafkaConnectCollector:
 
         self.log.debug("Kafka Connect OAuth token refreshed, expires at %s", expires_at)
 
-    def collect(self, cluster_id: str) -> None:
+    def collect(self, cluster_id: str) -> dict[str, bool]:
+        """Collect connector data and return connectivity status per endpoint.
+
+        Returns a mapping of endpoint identifier to connection success (True/False).
+        REST URL endpoints use the URL as key; MSK uses 'msk:<region>'.
+        """
         if self.config._kafka_connect_oauth_token_provider:
             try:
                 self._refresh_oauth_token()
             except Exception as e:
                 self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
-                return
+                return {}
+
+        connectivity: dict[str, bool] = {}
 
         for url in self.config._kafka_connect_urls:
             try:
                 self._collect_rest(url, cluster_id)
-                self.check.service_check(
-                    'connector.can_connect',
-                    self.check.OK,
-                    tags=self._get_tags(cluster_id) + [f'connect_url:{url}'],
-                )
+                connectivity[url] = True
             except Exception as e:
                 self.log.error("Error collecting Kafka Connect data from %s: %s (%s)", url, e, type(e).__name__)
-                self.check.service_check(
-                    'connector.can_connect',
-                    self.check.CRITICAL,
-                    tags=self._get_tags(cluster_id) + [f'connect_url:{url}'],
-                    message=f'{type(e).__name__}: {e}',
-                )
+                connectivity[url] = False
 
         if self.config._kafka_connect_aws_region:
             region = self.config._kafka_connect_aws_region
+            msk_key = f'msk:{region}'
             try:
                 self._collect_msk_managed(cluster_id)
-                self.check.service_check(
-                    'connector.can_connect',
-                    self.check.OK,
-                    tags=self._get_tags(cluster_id) + [f'aws_region:{region}'],
-                )
+                connectivity[msk_key] = True
             except Exception as e:
                 self.log.error("Error collecting MSK Connect data: %s (%s)", e, type(e).__name__)
-                self.check.service_check(
-                    'connector.can_connect',
-                    self.check.CRITICAL,
-                    tags=self._get_tags(cluster_id) + [f'aws_region:{region}'],
-                    message=f'{type(e).__name__}: {e}',
-                )
+                connectivity[msk_key] = False
+
+        return connectivity
 
     def _collect_rest(self, url: str, cluster_id: str) -> None:
         session = self._get_session()
@@ -247,14 +239,14 @@ class KafkaConnectCollector:
             ]
             self.check.gauge('connector.task.count', len(tasks), tags=count_tags)
 
-            running = sum(1 for t in tasks if t.get('state') == 'RUNNING')
-            failed = sum(1 for t in tasks if t.get('state') == 'FAILED')
-            paused = sum(1 for t in tasks if t.get('state') == 'PAUSED')
-            unassigned = sum(1 for t in tasks if t.get('state') == 'UNASSIGNED')
-            self.check.gauge('connector.tasks_running', running, tags=count_tags)
-            self.check.gauge('connector.tasks_failed', failed, tags=count_tags)
-            self.check.gauge('connector.tasks_paused', paused, tags=count_tags)
-            self.check.gauge('connector.tasks_unassigned', unassigned, tags=count_tags)
+            task_state_counts = {
+                'running': sum(1 for t in tasks if t.get('state') == 'RUNNING'),
+                'failed': sum(1 for t in tasks if t.get('state') == 'FAILED'),
+                'paused': sum(1 for t in tasks if t.get('state') == 'PAUSED'),
+                'unassigned': sum(1 for t in tasks if t.get('state') == 'UNASSIGNED'),
+            }
+            for state_name, count in task_state_counts.items():
+                self.check.gauge('connector.tasks', count, tags=count_tags + [f'task_state:{state_name}'])
 
             if self.config._kafka_connect_collect_task_metrics:
                 for task in tasks:

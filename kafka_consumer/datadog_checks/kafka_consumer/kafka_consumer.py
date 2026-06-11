@@ -131,19 +131,21 @@ class KafkaCheck(AgentCheck):
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
-            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
+            connect_status: dict[str, bool] = {}
+            if self.config._kafka_connect_urls or self.config._kafka_connect_aws_region:
+                try:
+                    connect_status = self._connector_collector.collect(
+                        self.config._kafka_cluster_id_override or cluster_id
+                    )
+                except Exception as e:
+                    self.log.error("Error collecting connector metadata: %s", e)
+
+            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id, connect_status)
+
             try:
                 self.metadata_collector.collect_all_metadata(highwater_offsets)
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
-
-        if self.config._cluster_monitoring_enabled and (
-            self.config._kafka_connect_urls or self.config._kafka_connect_aws_region
-        ):
-            try:
-                self._connector_collector.collect(self.config._kafka_cluster_id_override or cluster_id)
-            except Exception as e:
-                self.log.error("Error collecting connector metadata: %s", e)
 
         if self.config._close_admin_client:
             self.client.close_admin_client()
@@ -174,7 +176,9 @@ class KafkaCheck(AgentCheck):
             }
         )
 
-    def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+    def _send_cluster_monitoring_heartbeat(
+        self, total_contexts: int, cluster_id: str, connect_status: dict[str, bool] | None = None
+    ) -> None:
         payload = {
             'kafka_cluster_id': cluster_id,
             'config_type': 'heartbeat',
@@ -184,6 +188,8 @@ class KafkaCheck(AgentCheck):
         }
         if self.config._kafka_cluster_id_override:
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
+        if connect_status:
+            payload['connect_api_status'] = connect_status
         self._emit_cluster_monitoring_event(payload)
 
     def get_consumer_offsets(self):

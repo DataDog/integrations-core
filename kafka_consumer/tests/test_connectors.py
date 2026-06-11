@@ -156,10 +156,7 @@ def test_emit_connector_metrics_gauges():
     emitted = {call.args[0] for call in check.gauge.call_args_list}
     assert 'connector.running' in emitted
     assert 'connector.task.count' in emitted
-    assert 'connector.tasks_running' in emitted
-    assert 'connector.tasks_failed' in emitted
-    assert 'connector.tasks_paused' in emitted
-    assert 'connector.tasks_unassigned' in emitted
+    assert 'connector.tasks' in emitted
 
 
 def test_emit_connector_metrics_running_state():
@@ -252,28 +249,24 @@ def test_collection_timestamp_excluded_from_hash():
 
 
 # ---------------------------------------------------------------------------
-# can_connect service check
+# collect() — connectivity status dict
 # ---------------------------------------------------------------------------
 
 
-def test_can_connect_ok_on_success():
-    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+def test_collect_returns_connected_true_on_success():
+    collector, _, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     with mock.patch.object(collector, '_collect_rest'):
-        collector.collect('cluster-1')
+        result = collector.collect('cluster-1')
 
-    sc_calls = [c for c in check.service_check.call_args_list if c.args[0] == 'connector.can_connect']
-    assert sc_calls, "expected a can_connect service check"
-    assert sc_calls[0].args[1] == check.OK
+    assert result == {'http://localhost:8083': True}
 
 
-def test_can_connect_critical_on_failure():
-    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+def test_collect_returns_connected_false_on_failure():
+    collector, _, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     with mock.patch.object(collector, '_collect_rest', side_effect=requests.ConnectionError("refused")):
-        collector.collect('cluster-1')
+        result = collector.collect('cluster-1')
 
-    sc_calls = [c for c in check.service_check.call_args_list if c.args[0] == 'connector.can_connect']
-    assert sc_calls[0].args[1] == check.CRITICAL
-    assert 'ConnectionError' in sc_calls[0].kwargs.get('message', '')
+    assert result == {'http://localhost:8083': False}
 
 
 # ---------------------------------------------------------------------------
