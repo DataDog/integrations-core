@@ -48,32 +48,8 @@ def instance_kafka_configs_refresh_interval():
     return 180
 
 
-def instance_kafka_connect_aws_msk_cluster_arn():
-    return 'arn:aws:kafka:us-east-1:123456789012:cluster/my-cluster/abc123'
-
-
-def instance_kafka_connect_aws_region():
-    return 'us-east-1'
-
-
-def instance_kafka_connect_aws_role_arn():
-    return 'arn:aws:iam::123456789012:role/DatadogMSKConnectRole'
-
-
 def instance_kafka_connect_collect_task_metrics():
     return False
-
-
-def instance_kafka_connect_tls_ca_cert():
-    return '/path/to/ca_cert.pem'
-
-
-def instance_kafka_connect_tls_cert():
-    return '/path/to/client_cert.pem'
-
-
-def instance_kafka_connect_tls_key():
-    return '/path/to/client_key.pem'
 
 
 def instance_kafka_connect_tls_verify():

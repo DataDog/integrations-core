@@ -133,7 +133,6 @@ class KafkaConfig:
         )
         self._kafka_connect_aws_region = instance.get('kafka_connect_aws_region')
         self._kafka_connect_aws_role_arn = instance.get('kafka_connect_aws_role_arn')
-        self._kafka_connect_aws_msk_cluster_arn = instance.get('kafka_connect_aws_msk_cluster_arn')
 
     @staticmethod
     def _parse_connect_urls(value) -> list[str]:
