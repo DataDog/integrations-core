@@ -591,29 +591,3 @@ files:
           type: boolean
           example: false
           display_default: false
-      - name: kafka_connect_confluent_cloud_environment_id
-        description: |
-          Confluent Cloud environment ID (e.g., env-abc123). When set together with
-          kafka_connect_confluent_cloud_cluster_id, collects connector data from the
-          Confluent Cloud Connect REST API. Authenticate using kafka_connect_username
-          (Cloud API key ID) and kafka_connect_password (Cloud API key secret).
-        fleet_configurable: true
-        value:
-          type: string
-          example: env-abc123
-      - name: kafka_connect_confluent_cloud_cluster_id
-        description: |
-          Confluent Cloud Kafka cluster ID (e.g., lkc-xyz789). Required when
-          kafka_connect_confluent_cloud_environment_id is set.
-        fleet_configurable: true
-        value:
-          type: string
-          example: lkc-xyz789
-      - name: kafka_connect_confluent_cloud_url
-        description: |
-          Base URL for the Confluent Cloud REST API. Defaults to `https://api.confluent.cloud`.
-          Override only if using a private networking endpoint.
-        fleet_configurable: true
-        value:
-          type: string
-          example: https://api.confluent.cloud
