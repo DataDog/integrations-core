@@ -28,6 +28,9 @@ MAX_RESULT_ROWS = 10_000
 # catch-up.
 CRON_STARTUP_LOOKBACK_SECONDS = 300
 
+# Fallback per-query statement timeout.
+DEFAULT_DO_QUERY_TIMEOUT_S = 60
+
 Mode = Literal["cron", "interval"]
 
 
@@ -42,7 +45,7 @@ class PostgresDataObservability(DBMAsyncJob):
     def __init__(self, check: PostgreSql, config: InstanceConfig):
         self._check = check
         self._config = config
-        self._last_execution: dict[int, float] = {}  # interval mode: last fire timestamp
+        self._last_execution: dict[int, float] = {}
         collection_interval = config.data_observability.collection_interval or 10
         super(PostgresDataObservability, self).__init__(
             check,
@@ -128,18 +131,34 @@ class PostgresDataObservability(DBMAsyncJob):
         try:
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
-            with conn.cursor() as cursor:
-                cursor.execute(query_spec.query)
-                # cursor.description is None when the query produced no result set
-                # (e.g. INSERT, UPDATE, DELETE, or a syntax error that executed without
-                # raising). RC-delivered queries must be SELECTs; treat this as a
-                # per-query error so subsequent queries in the list still run.
-                if cursor.description is None:
-                    raise psycopg.errors.ProgrammingError(
-                        "Query returned no result set — only SELECT statements are supported"
+            # query_timeout is in milliseconds, matching the instance-level query_timeout unit.
+            timeout_ms = query_spec.query_timeout
+            # Pool connections run with autocommit=True, so the timeout must be
+            # applied inside an explicit transaction and reverts on commit,
+            # avoiding timeout leakage onto the shared connection.
+            # set_config() is used instead of "SET LOCAL statement_timeout = %s"
+            # because psycopg3 uses server-side binding (extended query protocol)
+            # for parameterized execute() calls, and PostgreSQL rejects bound
+            # parameters in SET statements under the extended protocol. set_config()
+            # is a regular function that accepts parameters normally; is_local=true
+            # gives the same scope as SET LOCAL (current transaction only).
+            with conn.transaction():
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT set_config('statement_timeout', %s, true)",
+                        (str(int(timeout_ms)),),
                     )
-                columns = [desc[0] for desc in cursor.description]
-                rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
+                    cursor.execute(query_spec.query)
+                    # cursor.description is None when the query produced no result set
+                    # (e.g. INSERT, UPDATE, DELETE, or a syntax error that executed without
+                    # raising). RC-delivered queries must be SELECTs; treat this as a
+                    # per-query error so subsequent queries in the list still run.
+                    if cursor.description is None:
+                        raise psycopg.errors.ProgrammingError(
+                            "Query returned no result set — only SELECT statements are supported"
+                        )
+                    columns = [desc[0] for desc in cursor.description]
+                    rows = [list(row) for row in cursor.fetchmany(MAX_RESULT_ROWS)]
             duration = time.time() - start
             return {
                 'status': 'success',

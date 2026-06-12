@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 
 import psycopg
 import pytest
+import yaml
 
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.data_observability import EVENT_TRACK_TYPE
@@ -26,6 +27,7 @@ BASE_QUERY = {
     'dbname': 'test_db',
     'query': 'SELECT count(*) FROM orders',
     'interval_seconds': 60,
+    'query_timeout': 30_000,
     'type': 'freshness',
     'entity': {
         'platform': 'aws',
@@ -43,6 +45,7 @@ MULTI_QUERIES = [
         'dbname': 'test_db',
         'query': 'SELECT count(*) FROM users',
         'interval_seconds': 120,
+        'query_timeout': 30_000,
         'type': 'freshness',
         'entity': {
             'platform': 'aws',
@@ -279,15 +282,47 @@ def test_query_failure_does_not_block_subsequent(aggregator, pg_instance):
     assert len(status_metrics) == 2
 
 
+def _get_local_timeout_ms(mock_cursor):
+    """Return the statement_timeout (ms) passed to the set_config execute, or None."""
+    for call in mock_cursor.execute.call_args_list:
+        sql = call.args[0]
+        if "set_config('statement_timeout'" in sql.lower():
+            return int(call.args[1][0])
+    return None
+
+
+def test_query_timeout_applied_in_transaction(pg_instance):
+    """The query's query_timeout is applied via set_config inside a transaction."""
+    mock_conn, mock_cursor = _make_mock_conn()
+
+    _setup_and_run(pg_instance, mock_conn=mock_conn, mock_cursor=mock_cursor)
+
+    mock_conn.transaction.assert_called_once()
+    assert _get_local_timeout_ms(mock_cursor) == 30_000
+
+
+def test_query_timeout_passed_directly_to_set_config(pg_instance):
+    """query_timeout (milliseconds) is forwarded as-is to SET LOCAL statement_timeout."""
+    query = deepcopy(BASE_QUERY)
+    query['query_timeout'] = 180_000
+    mock_conn, mock_cursor = _make_mock_conn()
+
+    _setup_and_run(pg_instance, queries=[query], mock_conn=mock_conn, mock_cursor=mock_cursor)
+
+    assert _get_local_timeout_ms(mock_cursor) == 180_000
+
+
 def test_no_description_does_not_block_subsequent(aggregator, pg_instance):
     """First query returns None description (non-SELECT), second query still runs."""
     mock_conn, mock_cursor = _make_mock_conn()
-    call_count = 0
+    query_count = 0
 
     def execute_side_effect(sql, *args, **kwargs):
-        nonlocal call_count
-        call_count += 1
-        mock_cursor.description = None if call_count == 1 else [('count',)]
+        nonlocal query_count
+        if "set_config('statement_timeout'" in sql.lower():
+            return
+        query_count += 1
+        mock_cursor.description = None if query_count == 1 else [('count',)]
 
     mock_cursor.execute = MagicMock(side_effect=execute_side_effect)
 
@@ -513,6 +548,8 @@ CRON_QUERY = {
     'dbname': 'test_db',
     'query': 'SELECT 1',
     'schedule': '50 * * * *',  # every hour at :50
+    'interval_seconds': 3600,
+    'query_timeout': 30_000,
     'type': 'freshness',
     'entity': {
         'platform': 'aws',
@@ -670,6 +707,7 @@ def test_query_without_schedule_or_positive_interval_filtered_at_init(pg_instanc
         'monitor_id': 30,
         'dbname': 'test_db',
         'query': 'SELECT 1',
+        'query_timeout': 30_000,
         'type': 'freshness',
         'entity': {
             'platform': 'aws',
@@ -986,3 +1024,122 @@ def test_emit_failures_metric_on_emit_path_exception(pg_instance, aggregator, mo
     assert len(failures) == 1
     assert any(t.startswith('exc_class:JSONDecodeError') for t in failures[0].tags)
     assert 'monitor_id:1' in failures[0].tags
+
+
+# --- Agent YAML-delivery round-trip tests ---
+#
+# The DO queries originate from a Remote Configuration payload handled by the Datadog Agent's
+# Go RC handler (comp/dataobs/queryactions/impl/handler.go). The agent injects them into the
+# postgres instance config, serializes the instance to YAML, and hands that YAML *string* to
+# this check; datadog_checks.base parses it with yaml.safe_load before the dict ever reaches
+# PostgreSql.__init__.
+#
+# DO query strings are multi-line SQL that routinely mixes indented lines with a trailing
+# column-0 "-- Datadog {...}" annotation. yaml.v3 used to serialize such a string as a literal
+# block scalar ("|") whose later, less-indented line escaped the block and produced YAML that
+# neither go-yaml nor PyYAML can parse (a "did not find expected key" / ParserError). The agent
+# now forces a double-quoted scalar for the query so the round-trip is exact. The tests above
+# all inject a Python dict directly and therefore never exercise this serialize→safe_load
+# boundary; these tests close that gap from the consumer side.
+
+# Indented SELECT lines followed by a column-0 "-- Datadog" comment — the canonical failing shape.
+MULTILINE_QUERY = (
+    "  SELECT count(*) AS dd_value\n"
+    "  FROM events.clicks c\n"
+    "  LEFT JOIN events.page_views pv\n"
+    "    ON c.user_id = pv.user_id AND c.page_url = pv.url\n"
+    "  WHERE pv.id IS NULL\n"
+    '-- Datadog {"monitor_ids":[26724188]}\n'
+)
+
+
+def _instance_yaml_as_agent_delivers(pg_instance, query):
+    """Render the DO instance to a YAML string the way the agent delivers it to the check.
+
+    The query is emitted as a double-quoted scalar (matching the agent's yaml.Node fix); the
+    rest of the instance is dumped normally. Returns the YAML text, which mirrors exactly what
+    datadog_checks.base feeds to yaml.safe_load.
+    """
+    instance = _make_do_instance(pg_instance, queries=[{**deepcopy(BASE_QUERY), 'query': query}])
+    do = instance.pop('data_observability')
+    queries_block = do.pop('queries')
+    q = queries_block[0]
+    # Build the query entry by hand so the SQL is a double-quoted scalar, as the agent emits it.
+    # json.dumps produces a valid YAML double-quoted flow scalar for these characters.
+    query_entry_lines = [f"      - query: {json.dumps(query)}"]
+    for key, value in q.items():
+        if key == 'query':
+            continue
+        query_entry_lines.append(f"        {key}: {json.dumps(value)}")
+    do_yaml = ["data_observability:"]
+    for key, value in do.items():
+        do_yaml.append(f"    {key}: {json.dumps(value)}")
+    do_yaml.append("    queries:")
+    do_yaml.extend(query_entry_lines)
+    return yaml.safe_dump(instance, default_flow_style=False) + "\n".join(do_yaml) + "\n"
+
+
+@pytest.mark.parametrize(
+    'query',
+    [
+        pytest.param(MULTILINE_QUERY, id='indented_then_col0_comment'),
+        pytest.param('SELECT 23 as dd_value;\n-- Datadog {"monitor_ids":[26386160]}\n', id='trailing_comment'),
+        pytest.param(
+            'SELECT COUNT(1) AS dd_a_1, COUNT(DISTINCT "customer_id") AS dd_b_2 FROM "testdb"."shop"."orders"\n'
+            '-- Datadog {"monitor_ids":[26358412,26386112]}\n',
+            id='embedded_quotes',
+        ),
+        pytest.param('SELECT 1', id='simple_single_line'),
+    ],
+)
+def test_agent_yaml_delivery_round_trips_query(pg_instance, query):
+    """The query survives the agent's YAML serialization + safe_load round-trip byte-for-byte
+    and reaches cursor.execute unchanged. This is the consumer-side guard for the yaml.v3
+    block-scalar bug fixed in the agent (handler.go)."""
+    instance_yaml = _instance_yaml_as_agent_delivers(pg_instance, query)
+
+    # The agent → Python boundary: base.load_config feeds this YAML string to yaml.safe_load.
+    parsed = yaml.safe_load(instance_yaml)
+    assert parsed['data_observability']['queries'][0]['query'] == query, "query must survive safe_load intact"
+
+    mock_conn, mock_cursor = _make_mock_conn()
+    check = PostgreSql('postgres', {}, [parsed])
+    check.db_pool = _mock_db_pool(mock_conn)
+    check.data_observability.run_job()
+
+    # The exact SQL string (not the set_config timeout call) must reach the driver.
+    executed = [call.args[0] for call in mock_cursor.execute.call_args_list]
+    assert query in executed, f"original query string must be executed verbatim; got {executed!r}"
+
+
+# The YAML the agent emitted for MULTILINE_QUERY *before* the handler.go fix: a literal block
+# scalar ("|4") whose trailing "-- Datadog" line is indented 12 spaces while the block content
+# sits at 14. Being less-indented than the block, that line terminates the scalar and is then
+# read as a sibling node at indent 12 — deeper than the mapping keys at 10 — and the ":" inside
+# it makes the parser expect a key. yaml.v3 emitted this without error; both go-yaml and PyYAML
+# fail to parse it. In production this never reached the check: the agent's autodiscovery digest
+# re-parsed the YAML first, failed, and dropped the config before scheduling.
+BROKEN_AGENT_YAML = (
+    "data_observability:\n"
+    "    enabled: true\n"
+    "    queries:\n"
+    "        - dbname: analyticsdb\n"
+    "          interval_seconds: 3600\n"
+    "          query: |4\n"
+    "              SELECT count(*) AS dd_value\n"
+    "              FROM events.clicks c\n"
+    "              LEFT JOIN events.page_views pv\n"
+    "                ON c.user_id = pv.user_id AND c.page_url = pv.url\n"
+    "              WHERE pv.id IS NULL\n"
+    '            -- Datadog {"monitor_ids":[26724188]}\n'
+    "          query_timeout: 300\n"
+    "          type: run_query\n"
+)
+
+
+def test_pre_fix_agent_yaml_was_unparseable():
+    """Documents the cross-language bug. The agent's old literal-block output fails yaml.safe_load
+    with the same parse error go-yaml hit. The agent now emits a double-quoted scalar (handler.go),
+    so this shape is no longer produced; test_agent_yaml_delivery_round_trips_query covers the fix."""
+    with pytest.raises(yaml.YAMLError):
+        yaml.safe_load(BROKEN_AGENT_YAML)
