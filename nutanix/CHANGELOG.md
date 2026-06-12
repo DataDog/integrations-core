@@ -18,7 +18,7 @@
 
 * Skip hosts, VMs, and clusters missing an `extId` or name, and log a warning. ([#23612](https://github.com/DataDog/integrations-core/pull/23612))
 
-## 1.3.0 / 2026-05-14
+## 1.3.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
