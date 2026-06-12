@@ -1,9 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+import logging
 import os
+import re
+from collections.abc import Callable, Mapping, Sequence
 from contextlib import contextmanager
-from typing import Iterator  # noqa: F401
+from types import SimpleNamespace
+from typing import Any, Iterator  # noqa: F401
 from urllib.parse import urlparse
 
 from .conditions import CheckDockerLogs
@@ -18,6 +23,16 @@ try:
     from contextlib import ExitStack
 except ImportError:
     from contextlib2 import ExitStack
+
+
+CONTAINER_STABILITY_LOG_PATTERNS = (
+    r'error',
+    r'panic',
+    r'fatal',
+    r'segmentation fault',
+    r'core dumped',
+    r'Traceback',
+)
 
 
 def get_docker_hostname():
@@ -40,6 +55,178 @@ def get_container_ip(container_id_or_name):
     ]
 
     return run_command(command, capture='out', check=True).stdout.strip()
+
+
+def assert_all_discovery_candidates_stable(
+    dd_agent_check: Callable[..., Any],
+    check_cls: type[Any],
+    compose_file: str | os.PathLike[str] | None = None,
+    compose_service: str | None = None,
+    *,
+    project_name: str | None = None,
+    service_id: str | None = None,
+    dd_agent_check_kwargs: Mapping[str, Any] | None = None,
+    log_patterns: Sequence[str] = CONTAINER_STABILITY_LOG_PATTERNS,
+) -> None:
+    """Run generated discovery candidates directly and assert the target container stays stable."""
+    compose_service = compose_service or _get_default_compose_service()
+    container_id = _get_compose_container_id(compose_file, compose_service, project_name=project_name)
+    initial_state = _inspect_container(container_id)
+    previous_logs = _get_container_logs(container_id)
+
+    ports = tuple(SimpleNamespace(number=port, name='') for port in _get_container_ports(initial_state))
+    service = SimpleNamespace(
+        id=service_id or compose_service,
+        host=_get_container_ip_from_inspect(initial_state),
+        ports=ports,
+    )
+    candidates = tuple(check_cls.generate_configs(service))
+    if not candidates:
+        raise AssertionError(f'No discovery candidates generated for service {service.id!r}')
+
+    check_kwargs = {'check_rate': True}
+    if dd_agent_check_kwargs:
+        check_kwargs.update(dd_agent_check_kwargs)
+
+    for index, candidate in enumerate(candidates, 1):
+        logging.debug('Probing candidate #%d: %r', index, candidate)
+        try:
+            dd_agent_check(candidate, **check_kwargs)
+        except Exception:
+            logging.debug('Error probing candidate #%d: %r', index, candidate)
+            pass
+
+        current_container_id = _get_compose_container_id(compose_file, compose_service, project_name=project_name)
+        current_state = _inspect_container(current_container_id)
+        _assert_container_stable(initial_state, current_state, index)
+
+        current_logs = _get_container_logs(current_container_id)
+        new_logs = current_logs[len(previous_logs) :] if current_logs.startswith(previous_logs) else current_logs
+        for line in new_logs.splitlines():
+            logging.debug('New log line: %s', line)
+        _assert_no_log_patterns(new_logs, log_patterns, index)
+        previous_logs = current_logs
+
+
+def _get_compose_container_id(
+    compose_file: str | os.PathLike[str] | None, compose_service: str, *, project_name: str | None = None
+) -> str:
+    compose_file = compose_file or _get_default_compose_file()
+    project_name = project_name or _get_default_compose_project_name()
+
+    command = ['docker', 'compose']
+    if project_name:
+        command.extend(['-p', project_name])
+    command.extend(['-f', os.fspath(compose_file), 'ps', '-q', compose_service])
+
+    container_id = run_command(command, capture='out', check=True).stdout.strip()
+    if not container_id:
+        raise AssertionError(f'No container found for compose service {compose_service!r}')
+
+    return container_id
+
+
+def _get_default_compose_service() -> str:
+    docker_metadata = get_state('docker_compose_metadata', {})
+    if docker_metadata.get('service_name'):
+        return docker_metadata['service_name']
+
+    return os.path.basename(find_check_root(depth=2))
+
+
+def _get_default_compose_file() -> str:
+    docker_metadata = get_state('docker_compose_metadata', {})
+    if docker_metadata.get('compose_file'):
+        return docker_metadata['compose_file']
+
+    compose_file = os.path.join(find_check_root(depth=3), 'tests', 'docker', 'docker-compose.yml')
+    if os.path.exists(compose_file):
+        return compose_file
+
+    raise AssertionError(
+        'Could not determine the compose file. Pass compose_file explicitly or use docker_run with a compose file.'
+    )
+
+
+def _get_default_compose_project_name() -> str | None:
+    docker_metadata = get_state('docker_compose_metadata', {})
+    return docker_metadata.get('project_name') or os.getenv('COMPOSE_PROJECT_NAME')
+
+
+def _inspect_container(container_id: str) -> dict[str, Any]:
+    raw_inspect = run_command(['docker', 'inspect', container_id], capture='out', check=True).stdout
+    return json.loads(raw_inspect)[0]
+
+
+def _get_container_ip_from_inspect(inspect_data: Mapping[str, Any]) -> str:
+    networks = inspect_data.get('NetworkSettings', {}).get('Networks', {})
+    for network in networks.values():
+        ip_address = network.get('IPAddress')
+        if ip_address:
+            return ip_address
+
+    raise AssertionError(f"Could not determine container IP for {inspect_data.get('Name', '<unknown>')}")
+
+
+def _get_container_ports(inspect_data: Mapping[str, Any]) -> list[int]:
+    ports: set[int] = set()
+    exposed_ports = inspect_data.get('Config', {}).get('ExposedPorts') or {}
+    network_ports = inspect_data.get('NetworkSettings', {}).get('Ports') or {}
+
+    for raw_port in list(exposed_ports) + list(network_ports):
+        port, _, protocol = raw_port.partition('/')
+        if protocol and protocol != 'tcp':
+            continue
+        try:
+            ports.add(int(port))
+        except ValueError:
+            continue
+
+    if not ports:
+        raise AssertionError(f"No TCP ports found for container {inspect_data.get('Name', '<unknown>')}")
+
+    return sorted(ports)
+
+
+def _get_container_logs(container_id: str) -> str:
+    result = run_command(['docker', 'logs', container_id], capture=True)
+    return result.stdout + result.stderr
+
+
+def _assert_container_stable(
+    initial_state: Mapping[str, Any], current_state: Mapping[str, Any], candidate_index: int
+) -> None:
+    initial_id = initial_state['Id']
+    current_id = current_state['Id']
+    if current_id != initial_id:
+        raise AssertionError(
+            f'Container changed while probing candidate #{candidate_index}: {initial_id} -> {current_id}'
+        )
+
+    state = current_state.get('State', {})
+    if not state.get('Running'):
+        raise AssertionError(f'Container is not running after probing candidate #{candidate_index}')
+
+    initial_restart_count = initial_state.get('RestartCount', 0)
+    current_restart_count = current_state.get('RestartCount', 0)
+    if current_restart_count != initial_restart_count:
+        raise AssertionError(
+            f'Container restart count changed while probing candidate #{candidate_index}: '
+            f'{initial_restart_count} -> {current_restart_count}'
+        )
+
+    health = state.get('Health')
+    if health and health.get('Status') != 'healthy':
+        raise AssertionError(f"Container health is {health.get('Status')!r} after probing candidate #{candidate_index}")
+
+
+def _assert_no_log_patterns(logs: str, patterns: Sequence[str], candidate_index: int) -> None:
+    for pattern in patterns:
+        match = re.search(pattern, logs, re.IGNORECASE)
+        if match:
+            raise AssertionError(
+                f'Container logs matched {pattern!r} after probing candidate #{candidate_index}: {match.group(0)!r}'
+            )
 
 
 def get_e2e_discovery_metadata(
@@ -244,6 +431,16 @@ def docker_run(
                 raise TypeError(
                     'mount_logs: expected True, a list or a set, but got {}'.format(type(mount_logs).__name__)
                 )
+
+    if compose_file is not None:
+        save_state(
+            'docker_compose_metadata',
+            {
+                'compose_file': compose_file,
+                'project_name': (env_vars or {}).get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
+                'service_name': service_name,
+            },
+        )
 
     with environment_run(
         up=set_up,
