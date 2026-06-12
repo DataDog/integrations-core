@@ -96,9 +96,9 @@ def test_skip_proxy_init_config_yields_disabled_sentinel():
 
 
 def test_skip_proxy_disables_trust_env_and_builds_no_router():
-    http = HTTPX2Wrapper({'skip_proxy': True}, {})
-    assert http._client.trust_env is False
-    assert not isinstance(http._client._transport, _ProxyRoutingTransport)
+    with HTTPX2Wrapper({'skip_proxy': True}, {}) as http:
+        assert http._client.trust_env is False
+        assert not isinstance(http._client._transport, _ProxyRoutingTransport)
 
 
 # --- a configured proxy routes by scheme and installs the router ---
@@ -110,9 +110,9 @@ def test_request_routes_to_matching_scheme_proxy():
 
 
 def test_proxy_configured_installs_router_and_disables_trust_env():
-    http = HTTPX2Wrapper({'proxy': {'http': 'http://1.2.3.4:3128'}}, {})
-    assert http._client.trust_env is False
-    assert isinstance(http._client._transport, _ProxyRoutingTransport)
+    with HTTPX2Wrapper({'proxy': {'http': 'http://1.2.3.4:3128'}}, {}) as http:
+        assert http._client.trust_env is False
+        assert isinstance(http._client._transport, _ProxyRoutingTransport)
 
 
 # --- no_proxy host, subdomain, and leading-dot bypass ---
