@@ -1892,6 +1892,10 @@ def _discovery_noop(*args: Any, **kwargs: Any) -> None:
 
 @contextmanager
 def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRunStats]:
+    metric_methods = (
+        '_submit_metric',
+        'submit_histogram_bucket',
+    )
     noop_methods = (
         'event',
         'event_platform_event',
@@ -1908,9 +1912,10 @@ def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRu
     def _count_metric(*args: Any, **kwargs: Any) -> None:
         stats.metric_count += 1
 
-    if hasattr(check, '_submit_metric'):
-        originals['_submit_metric'] = check._submit_metric
-        check._submit_metric = _count_metric
+    for method in metric_methods:
+        if hasattr(check, method):
+            originals[method] = getattr(check, method)
+            setattr(check, method, _count_metric)
 
     for method in noop_methods:
         if hasattr(check, method):

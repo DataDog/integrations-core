@@ -92,6 +92,24 @@ def test_discover_config_accepts_successful_candidate_only():
     submit_metric.assert_not_called()
 
 
+def test_discover_config_accepts_histogram_bucket_candidate():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{'host': service.host}]}
+
+        def check(self, instance):
+            self.submit_histogram_bucket('histogram.bucket', 3, 0, 1, True, instance['host'], [])
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    with patch('datadog_checks.base.checks.base.aggregator.submit_histogram_bucket') as submit_histogram_bucket:
+        configs = json.loads(DiscoveryCheck.discover_config(payload))
+
+    assert configs == [{'init_config': {}, 'instances': [{'host': '10.0.0.1'}]}]
+    submit_histogram_bucket.assert_not_called()
+
+
 def test_discover_config_rejects_candidate_with_no_metrics():
     class DiscoveryCheck(AgentCheck):
         @classmethod
@@ -156,13 +174,36 @@ def test_suppress_discovery_side_effects_counts_metrics():
 
     check = AgentCheck()
 
+    with patch('datadog_checks.base.checks.base.aggregator.submit_histogram_bucket') as submit_histogram_bucket:
+        with _suppress_discovery_side_effects(check) as stats:
+            assert stats.metric_count == 0
+            check.gauge('my.metric', 1.0)
+            check.count('my.metric', 2.0)
+            check.submit_histogram_bucket('my.histogram', 3, 0, 1, True, '', [])
+            assert stats.metric_count == 3
+
+        submit_histogram_bucket.assert_not_called()
+
+    assert stats.metric_count == 3
+
+
+def test_suppress_discovery_side_effects_restores_metric_methods_after_exit():
+    from datadog_checks.base.checks.base import _suppress_discovery_side_effects
+
+    check = AgentCheck()
+    original_submit_metric = check._submit_metric
+    original_submit_histogram_bucket = check.submit_histogram_bucket
+
     with _suppress_discovery_side_effects(check) as stats:
         assert stats.metric_count == 0
         check.gauge('my.metric', 1.0)
-        check.count('my.metric', 2.0)
+        check.submit_histogram_bucket('my.histogram', 3, 0, 1, True, '', [])
         assert stats.metric_count == 2
+        assert check._submit_metric is not original_submit_metric
+        assert check.submit_histogram_bucket is not original_submit_histogram_bucket
 
-    assert stats.metric_count == 2
+    assert check._submit_metric is original_submit_metric
+    assert check.submit_histogram_bucket is original_submit_histogram_bucket
 
 
 def test_suppress_discovery_side_effects_restores_methods_after_exit():
