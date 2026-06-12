@@ -1,0 +1,1 @@
+Make `generate-profile-from-mibs` emit `symbol` instead of the deprecated `column` field on table metric tags, and accept `symbol` in `validate-profile`.

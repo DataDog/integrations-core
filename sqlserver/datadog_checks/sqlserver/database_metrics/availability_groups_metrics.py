@@ -52,7 +52,8 @@ class SqlserverAvailabilityGroupsMetrics(SqlserverDatabaseMetricsBase):
     def queries(self):
         query = AVAILABILITY_GROUPS_METRICS_QUERY.copy()
         if self.availability_group:
-            query['query'] += f" where resource_group_id = '{self.availability_group}'"
+            query['query'] += " where resource_group_id = ?"
+            query['params'] = (self.availability_group,)
         return [query]
 
     def __repr__(self) -> str:

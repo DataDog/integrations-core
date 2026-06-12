@@ -45,6 +45,15 @@ METRICS_COLUMNS = {
     'sum_select_full_join',
     'sum_no_index_used',
     'sum_no_good_index_used',
+    'sum_sort_rows',
+    'sum_sort_merge_passes',
+    'sum_sort_range',
+    'sum_sort_scan',
+    'sum_created_tmp_tables',
+    'sum_created_tmp_disk_tables',
+    'sum_select_full_range_join',
+    'sum_select_range',
+    'sum_select_range_check',
 }
 
 
@@ -238,6 +247,15 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                    `sum_select_full_join`,
                    `sum_no_index_used`,
                    `sum_no_good_index_used`,
+                   `sum_sort_rows`,
+                   `sum_sort_merge_passes`,
+                   `sum_sort_range`,
+                   `sum_sort_scan`,
+                   `sum_created_tmp_tables`,
+                   `sum_created_tmp_disk_tables`,
+                   `sum_select_full_range_join`,
+                   `sum_select_range`,
+                   `sum_select_range_check`,
                    `last_seen`
             FROM performance_schema.events_statements_summary_by_digest
             {}
@@ -261,6 +279,15 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                         sum(`sum_select_full_join`) AS `sum_select_full_join`,
                         sum(`sum_no_index_used`) AS `sum_no_index_used`,
                         sum(`sum_no_good_index_used`) AS `sum_no_good_index_used`,
+                        sum(`sum_sort_rows`) AS `sum_sort_rows`,
+                        sum(`sum_sort_merge_passes`) AS `sum_sort_merge_passes`,
+                        sum(`sum_sort_range`) AS `sum_sort_range`,
+                        sum(`sum_sort_scan`) AS `sum_sort_scan`,
+                        sum(`sum_created_tmp_tables`) AS `sum_created_tmp_tables`,
+                        sum(`sum_created_tmp_disk_tables`) AS `sum_created_tmp_disk_tables`,
+                        sum(`sum_select_full_range_join`) AS `sum_select_full_range_join`,
+                        sum(`sum_select_range`) AS `sum_select_range`,
+                        sum(`sum_select_range_check`) AS `sum_select_range_check`,
                         NOW() AS `last_seen`
                 FROM performance_schema.prepared_statements_instances
                 WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL

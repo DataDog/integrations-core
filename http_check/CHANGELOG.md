@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 12.7.0 / 2026-06-09
+
+***Added***:
+
+* Add http_status_code tag to http metrics. ([#23731](https://github.com/DataDog/integrations-core/pull/23731))
+
+## 12.6.2 / 2026-04-28 / Agent 7.79.0
+
+***Fixed***:
+
+* Bump cryptography from 46.0.6 to 46.0.7 to address CVE-2026-39892. ([#23403](https://github.com/DataDog/integrations-core/pull/23403))
+
 ## 12.6.1 / 2026-04-09 / Agent 7.78.0
 
 ***Fixed***:

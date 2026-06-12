@@ -60,9 +60,11 @@ def integrations(app):
 
 
 def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
+    workflows_dir = app.repo.path / ".github" / "workflows"
     files_to_update = [
-        *(app.repo.path / ".github" / "workflows").glob("*.yml"),
-        *(app.repo.path / ".github" / "workflows" / "scripts").glob("*.sh"),
+        *workflows_dir.glob("*.yml"),
+        *workflows_dir.glob("*.yaml"),
+        *(workflows_dir / "scripts").glob("*.sh"),
     ]
 
     # Patterns to match:

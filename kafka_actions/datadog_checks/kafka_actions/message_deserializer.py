@@ -183,6 +183,7 @@ class MessageDeserializer:
         format_type: str = 'json',
         schema_str: str | None = None,
         uses_schema_registry: bool = False,
+        skip_bytes: int = 0,
     ) -> tuple[str | None, int | None]:
         """Deserialize a message (key or value).
 
@@ -191,6 +192,13 @@ class MessageDeserializer:
             format_type: 'json', 'bson', 'protobuf', 'avro', or 'raw'
             schema_str: Schema definition (for protobuf/avro)
             uses_schema_registry: Whether to expect Schema Registry format
+            skip_bytes: Number of bytes to drop from the start of raw_bytes
+                before any further processing. Useful for stripping a custom
+                producer-side prefix (e.g. a 1-byte version flag, a 4-byte
+                tenant id, a non-Confluent schema registry envelope) so the
+                remaining bytes can be fed to one of the standard format
+                paths. Applied before raw/json/bson/protobuf/avro and before
+                Schema Registry magic-byte detection.
 
         Returns:
             Tuple of (deserialized_string, schema_id)
@@ -199,6 +207,20 @@ class MessageDeserializer:
         """
         if not raw_bytes:
             return None, None
+
+        if skip_bytes:
+            if skip_bytes < 0:
+                self.log.warning("skip_bytes must be non-negative, got %d", skip_bytes)
+                return f"<deserialization error: skip_bytes must be non-negative, got {skip_bytes}>", None
+            if skip_bytes > len(raw_bytes):
+                self.log.warning("skip_bytes=%d exceeds message length %d", skip_bytes, len(raw_bytes))
+                return (
+                    f"<deserialization error: skip_bytes={skip_bytes} exceeds message length {len(raw_bytes)}>",
+                    None,
+                )
+            raw_bytes = raw_bytes[skip_bytes:]
+            if not raw_bytes:
+                return None, None
 
         if format_type == 'raw':
             return json.dumps(base64.b64encode(raw_bytes).decode('ascii')), None
@@ -221,20 +243,21 @@ class MessageDeserializer:
     ) -> tuple[str | None, int | None]:
         """Deserialize message, handling Schema Registry format if present."""
         if uses_schema_registry:
-            if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
-                msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
-                raise ValueError(
-                    f"Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
-                    f"but message is too short or has wrong magic byte: {msg_hex}"
+            if len(message) >= 5 and message[0] == SCHEMA_REGISTRY_MAGIC_BYTE:
+                schema_id = int.from_bytes(message[1:5], 'big')
+                message = message[5:]  # Skip the magic byte and schema ID bytes
+
+                actual_format = message_format
+                if self.schema_registry is not None:
+                    schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
+
+                return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
+            else:
+                self.log.debug(
+                    "Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
+                    "but message is too short or has wrong magic byte, falling back to string",
                 )
-            schema_id = int.from_bytes(message[1:5], 'big')
-            message = message[5:]  # Skip the magic byte and schema ID bytes
-
-            actual_format = message_format
-            if self.schema_registry is not None:
-                schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
-
-            return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
+                return self._deserialize_bytes(message, 'string', None, uses_schema_registry=False), None
         else:
             # Fallback behavior: try without schema registry format first, then with it
             try:
@@ -614,9 +637,10 @@ class DeserializedMessage:
             key_format = self.config.get('key_format', 'json')
             key_schema = self.config.get('key_schema')
             key_uses_sr = self.config.get('key_uses_schema_registry', False)
+            key_skip_bytes = self.config.get('key_skip_bytes', 0)
 
             deserialized, schema_id = self.deserializer.deserialize_message(
-                self.kafka_msg.key(), key_format, key_schema, key_uses_sr
+                self.kafka_msg.key(), key_format, key_schema, key_uses_sr, skip_bytes=key_skip_bytes
             )
 
             self._key_deserialized = self._parse_deserialized(deserialized)
@@ -631,9 +655,10 @@ class DeserializedMessage:
             value_format = self.config.get('value_format', 'json')
             value_schema = self.config.get('value_schema')
             value_uses_sr = self.config.get('value_uses_schema_registry', False)
+            value_skip_bytes = self.config.get('value_skip_bytes', 0)
 
             deserialized, schema_id = self.deserializer.deserialize_message(
-                self.kafka_msg.value(), value_format, value_schema, value_uses_sr
+                self.kafka_msg.value(), value_format, value_schema, value_uses_sr, skip_bytes=value_skip_bytes
             )
 
             self._value_deserialized = self._parse_deserialized(deserialized)

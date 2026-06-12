@@ -59,6 +59,7 @@
       "Supported OS::macOS",
       "Category::Security",
       "Category::Network",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]

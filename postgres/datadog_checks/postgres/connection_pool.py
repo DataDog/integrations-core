@@ -75,20 +75,31 @@ class AWSTokenProvider(TokenProvider):
 
 
 class AzureTokenProvider(TokenProvider):
-    """
-    Token provider for Azure Managed Identity.
-    """
+    """Token provider for Azure managed authentication."""
 
-    def __init__(self, client_id: str, identity_scope: str = None, skew_seconds: int = 60):
+    def __init__(
+        self,
+        auth_type: str,
+        client_id: str | None = None,
+        tenant_id: str | None = None,
+        identity_scope: str | None = None,
+        skew_seconds: int = 60,
+    ):
         super().__init__(skew_seconds=skew_seconds)
+        self.auth_type = auth_type
         self.client_id = client_id
+        self.tenant_id = tenant_id
         self.identity_scope = identity_scope
 
     def _fetch_token(self) -> Tuple[str, float]:
-        # Import azure only when this method is called
-        from .azure import generate_managed_identity_token
+        from .azure import generate_azure_token
 
-        token = generate_managed_identity_token(client_id=self.client_id, identity_scope=self.identity_scope)
+        token = generate_azure_token(
+            auth_type=self.auth_type,
+            client_id=self.client_id,
+            tenant_id=self.tenant_id,
+            identity_scope=self.identity_scope,
+        )
         return token.token, float(token.expires_on)
 
 

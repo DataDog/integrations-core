@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 16.1.1 / 2026-04-29
+
+***Fixed***:
+
+* Bumped datadog_checks_dev to version 38.0.0. Fixes dependency issues with new virtualenv. ([#23516](https://github.com/DataDog/integrations-core/pull/23516))
+
+## 16.1.0 / 2026-04-29
+
+***Added***:
+
+* Check for existing open PRs before creating rc tag ([#22254](https://github.com/DataDog/integrations-core/pull/22254))
+* Add async GitHub API client with generic request method, automatic pagination, and Python 3.13 type parameter syntax ([#22734](https://github.com/DataDog/integrations-core/pull/22734))
+* Add eula validation to the validate all orchestrator ([#23346](https://github.com/DataDog/integrations-core/pull/23346))
+* Create dispatcher messages ([#23362](https://github.com/DataDog/integrations-core/pull/23362))
+* Add `release changelog draft` command to preview the changelog generated from `changelog.d/` entries without writing to `CHANGELOG.md` or removing the news fragments. ([#23493](https://github.com/DataDog/integrations-core/pull/23493))
+* Use uv as the installer for hatch test environments to speed up environment setup. ([#23497](https://github.com/DataDog/integrations-core/pull/23497))
+
 ## 16.0.0 / 2026-04-21
 
 ***Changed***:

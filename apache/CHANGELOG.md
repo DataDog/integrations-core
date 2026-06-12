@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 7.4.1 / 2026-04-15
+## 7.5.0 / 2026-05-14
+
+***Added***:
+
+* Adding troubleshooting doc link for Apache integration ([#22968](https://github.com/DataDog/integrations-core/pull/22968))
+
+***Fixed***:
+
+* Re-order configuration fields by usage frequency. ([#23277](https://github.com/DataDog/integrations-core/pull/23277))
+
+## 7.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

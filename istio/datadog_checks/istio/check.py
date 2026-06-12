@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import ChainMap
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2, is_affirmative
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 
 from .constants import ISTIOD_NAMESPACE
@@ -72,10 +72,24 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
                 "`ztunnel_endpoint`, `waypoint_endpoint`, or `istiod_endpoint`."
             )
 
-        # Ztunnel provides L4 TCP metrics for ambient mesh
+        # Ztunnel uses the modern OpenMetrics counter convention; force the v2 parser so counters are not dropped.
         ztunnel_namespace = istiod_namespace + ".ztunnel"
         if ztunnel_endpoint:
-            self.scraper_configs.append(self._generate_config(ztunnel_endpoint, ZTUNNEL_METRICS, ztunnel_namespace))
+            if not is_affirmative(self.instance.get("use_latest_spec", True)):
+                self.log.warning(
+                    "`use_latest_spec: false` is set with `ztunnel_endpoint` configured. "
+                    "ztunnel emits the modern OpenMetrics counter convention which the "
+                    "legacy parser silently drops, so every ztunnel counter metric will be "
+                    "missed. Remove `use_latest_spec: false` to restore ztunnel metrics."
+                )
+            self.scraper_configs.append(
+                self._generate_config(
+                    ztunnel_endpoint,
+                    ZTUNNEL_METRICS,
+                    ztunnel_namespace,
+                    scraper_defaults={'use_latest_spec': True},
+                )
+            )
 
         # Waypoint provides L7 HTTP/gRPC metrics (optional in ambient mode)
         waypoint_namespace = istiod_namespace + ".waypoint"
@@ -86,16 +100,12 @@ class IstioCheckV2(OpenMetricsBaseCheckV2):
         if istiod_endpoint:
             self.scraper_configs.append(self._generate_config(istiod_endpoint, ISTIOD_METRICS, istiod_namespace))
 
-    def _generate_config(self, endpoint, metrics, namespace):
+    def _generate_config(self, endpoint, metrics, namespace, *, scraper_defaults=None):
         metrics = construct_metrics_config(metrics)
         metrics.append(ISTIOD_VERSION)
-        config = {
-            'openmetrics_endpoint': endpoint,
-            'metrics': metrics,
-            'namespace': namespace,
-        }
+        config = {**(scraper_defaults or {}), 'openmetrics_endpoint': endpoint, 'metrics': metrics}
+        # Instance keys override scraper_defaults; per-scraper namespace is restored on the next line.
         config.update(self.instance)
-        # Restore per-scraper namespace so custom ztunnel/waypoint/mesh namespaces are not overwritten by instance
         config['namespace'] = namespace
         return config
 

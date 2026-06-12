@@ -10,13 +10,11 @@ The Adyen integration collects transaction, dispute, and payout data using Adyen
 
 Follow the instructions below to configure this integration for your Adyen account.
 
-### Configuration
-
-#### Webhook Configuration
+### Webhook Configuration
 
 Configure the Datadog endpoint to forward Adyen events as logs to Datadog. For more details, see [Adyen webhook overview][2].
 
-1. Copy the generated URL inside the **Configuration** tab on the Datadog [Adyen integration tile][4].
+1. {{< integration-api-key-picker >}}
 2. Sign in to your [Adyen][1] account with a user which has a **Merchant technical integrator** role along with default roles, and has access to **Company account and all associated merchant accounts**.
 3. Under the **Developers** section, click **Webhooks**.
 4. Click on **Create new webhook**.
@@ -63,11 +61,10 @@ For further assistance, contact [Datadog Support][3].
 
 Additional helpful documentation, links, and articles:
 
-- [Monitor and optimize payment processing with Datadog's Adyen integration][5]
+- [Monitor and optimize payment processing with Datadog's Adyen integration][4]
 
 
 [1]: https://www.adyen.com/
 [2]: https://docs.adyen.com/development-resources/webhooks/
 [3]: https://docs.datadoghq.com/help/
-[4]: /integrations/adyen
-[5]: https://www.datadoghq.com/blog/monitor-adyen-payments/
+[4]: https://www.datadoghq.com/blog/monitor-adyen-payments/
