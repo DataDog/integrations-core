@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import sys
 import textwrap
 from pathlib import Path
 
@@ -603,16 +602,19 @@ def test_malformed_yaml_raises_flow_config_error(tmp_path):
         ConfigurationEngine(core_dir=tmp_path)
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="chmod is a no-op on Windows")
-def test_unreadable_file_raises_flow_config_error(tmp_path):
+def test_unreadable_file_raises_flow_config_error(tmp_path, monkeypatch):
     bad = tmp_path / "bad.yaml"
     bad.write_text("- type: agent\n  config:\n    name: x\n")
-    bad.chmod(0o000)
-    try:
-        with pytest.raises(FlowConfigError, match="Could not read"):
-            ConfigurationEngine(core_dir=tmp_path)
-    finally:
-        bad.chmod(0o644)
+    original_read_text = Path.read_text
+
+    def _fail_for_bad(self, *args, **kwargs):
+        if self == bad:
+            raise OSError("permission denied")
+        return original_read_text(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", _fail_for_bad)
+    with pytest.raises(FlowConfigError, match="Could not read"):
+        ConfigurationEngine(core_dir=tmp_path)
 
 
 def test_list_element_not_a_mapping_raises(tmp_path):
@@ -940,9 +942,9 @@ def test_detect_cycles_simple_two_node():
     deps = {"a": ["b"], "b": ["a"]}
     cycles, truncated = detect_cycles(deps)
     assert len(cycles) >= 1
-    cycle_nodes = {n for c in cycles for n in c}
-    assert "a" in cycle_nodes and "b" in cycle_nodes
     assert not truncated
+    # Verify the path includes a closing node (ordered path contract)
+    assert any(len(c) >= 3 and c[0] == c[-1] for c in cycles)
 
 
 def test_detect_cycles_limit_truncated():

@@ -4,9 +4,10 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import yaml
 from pydantic import TypeAdapter, ValidationError
@@ -23,6 +24,8 @@ from ddev.ai.config.models import (
 
 ResourceKind = Literal["agent", "phase", "flow"]
 
+_log = logging.getLogger(__name__)
+
 
 @dataclass
 class ConfigConflict:
@@ -32,8 +35,8 @@ class ConfigConflict:
 
 
 @dataclass
-class _RegistryEntry:
-    config: AgentConfig | PhaseConfig | FlowConfig
+class _RegistryEntry[C]:
+    config: C
     source_file: Path
 
 
@@ -60,12 +63,14 @@ class ConfigurationEngine:
         self,
         core_dir: Path,
         user_dirs: list[str] | None = None,
+        src_root: Path | None = None,
     ) -> None:
         self._core_dir = core_dir
+        self._src_root = src_root or Path(__file__).parent.parent.parent.parent  # ddev/src/
         self._scan_dirs: list[Path] = self._deduplicate([core_dir] + self._resolve_user_dirs(user_dirs or []))
-        self._agents: dict[str, _RegistryEntry] = {}
-        self._phases: dict[str, _RegistryEntry] = {}
-        self._flows: dict[str, _RegistryEntry] = {}
+        self._agents: dict[str, _RegistryEntry[AgentConfig]] = {}
+        self._phases: dict[str, _RegistryEntry[PhaseConfig]] = {}
+        self._flows: dict[str, _RegistryEntry[FlowConfig]] = {}
         self._conflicts: list[ConfigConflict] = []
         self._build_registries()
 
@@ -94,7 +99,7 @@ class ConfigurationEngine:
         return resolved
 
     def _build_registries(self) -> None:
-        pending: dict[tuple[ResourceKind, str], list[_RegistryEntry]] = {}
+        pending: dict[tuple[ResourceKind, str], list[_RegistryEntry[Any]]] = {}
         seen_files: set[Path] = set()
 
         for scan_dir in self._scan_dirs:
@@ -121,7 +126,7 @@ class ConfigurationEngine:
     def _parse_file(
         self,
         path: Path,
-        pending: dict[tuple[ResourceKind, str], list[_RegistryEntry]],
+        pending: dict[tuple[ResourceKind, str], list[_RegistryEntry[Any]]],
     ) -> None:
         try:
             text = path.read_text()
@@ -148,7 +153,7 @@ class ConfigurationEngine:
             key = (envelope.type, envelope.config.name)
             pending.setdefault(key, []).append(entry)
 
-    def _registry_for(self, obj_type: ResourceKind) -> dict[str, _RegistryEntry]:
+    def _registry_for(self, obj_type: ResourceKind) -> dict[str, _RegistryEntry[Any]]:
         match obj_type:
             case "agent":
                 return self._agents
@@ -170,10 +175,9 @@ class ConfigurationEngine:
     def phase_discovery_targets(self) -> list[tuple[Path, str]]:
         """Return (phases_dir, import_prefix) pairs for phases/ directories under scan_dirs.
 
-        Only directories under the ddev src root can have their import prefix derived
-        automatically. User dirs outside the src tree are skipped.
+        Only directories under ``src_root`` can have their import prefix derived
+        automatically. Directories outside it emit a WARNING and are skipped.
         """
-        src_root = Path(__file__).parent.parent.parent.parent  # ddev/src/
         targets: list[tuple[Path, str]] = []
         seen: set[Path] = set()
         for scan_dir in self._scan_dirs:
@@ -185,11 +189,15 @@ class ConfigurationEngine:
                     continue
                 seen.add(resolved)
                 try:
-                    rel = phases_dir.relative_to(src_root)
+                    rel = phases_dir.relative_to(self._src_root)
                     import_prefix = ".".join(rel.parts)
                     targets.append((phases_dir, import_prefix))
                 except ValueError:
-                    pass
+                    _log.warning(
+                        "phases/ directory %s is outside the ddev src tree — "
+                        "its phase classes cannot be auto-imported and will be unavailable at runtime",
+                        phases_dir,
+                    )
         return targets
 
     def build_flow(self, name: str) -> ResolvedFlow:
@@ -219,7 +227,7 @@ class ConfigurationEngine:
     def _get_flow_config(self, name: str) -> FlowConfig:
         if name not in self._flows:
             raise FlowConfigError(f"Flow {name!r} not found. Available flows: {sorted(self._flows)}")
-        return self._flows[name].config  # type: ignore[return-value]
+        return self._flows[name].config
 
     def _collect_phases(self, flow_config: FlowConfig, flow_name: str) -> dict[str, PhaseConfig]:
         phases = {}
@@ -230,7 +238,7 @@ class ConfigurationEngine:
             seen.add(entry.phase)
             if entry.phase not in self._phases:
                 raise FlowConfigError(f"Flow {flow_name!r} references unknown phase: {entry.phase!r}")
-            phases[entry.phase] = self._phases[entry.phase].config  # type: ignore[assignment]
+            phases[entry.phase] = self._phases[entry.phase].config
         return phases
 
     def _collect_agents(self, phases: dict[str, PhaseConfig]) -> dict[str, AgentConfig]:
@@ -240,7 +248,7 @@ class ConfigurationEngine:
                 continue
             if phase_config.agent not in self._agents:
                 raise FlowConfigError(f"Phase {phase_name!r} references unknown agent: {phase_config.agent!r}")
-            agents[phase_config.agent] = self._agents[phase_config.agent].config  # type: ignore[assignment]
+            agents[phase_config.agent] = self._agents[phase_config.agent].config
         return agents
 
     def _validate_dependency_graph(self, flow_config: FlowConfig, flow_name: str) -> None:
@@ -346,7 +354,7 @@ class ConfigurationEngine:
         source_dir = source_file.parent
         resolved_tasks = []
         for task in config.tasks:
-            updates: dict = {}
+            updates: dict[str, Any] = {}
             new_prompt = self._resolve_relative(source_dir, task.prompt_path)
             if new_prompt is not task.prompt_path:
                 updates["prompt_path"] = new_prompt

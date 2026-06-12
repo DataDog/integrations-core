@@ -27,7 +27,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         engine: ConfigurationEngine,
         flow_name: str,
         checkpoint_path: Path,
-        runtime_variables: dict[str, Any],
+        runtime_variables: dict[str, str],
         agent_clients: dict[str, Any],
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
@@ -84,11 +84,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             discover_and_register_phases(self._phase_registry, phases_dir, import_prefix)
 
     def _validate_phase_classes(self, resolved: ResolvedFlow) -> None:
-        flow_phase_ids = {entry.phase for entry in resolved.flow}
         for phase_id, phase_config in resolved.phases.items():
-            if phase_id not in flow_phase_ids:
-                self._logger.warning("Phase %r is defined but not referenced in flow — it will not run", phase_id)
-                continue
             try:
                 phase_cls = self._phase_registry.get(phase_config.class_)
             except ValueError as e:
