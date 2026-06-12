@@ -106,7 +106,7 @@ def test_instance_timeout(check, instance):
         ),
         (
             'OK case with failing /state due to Exception and fallback on /state.json',
-            [Exception, MagicMock(status_code=200, content='{}')],
+            [Exception("unexpected error"), MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
