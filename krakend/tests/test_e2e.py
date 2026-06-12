@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.docker import get_docker_hostname
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable, get_docker_hostname
+from datadog_checks.krakend import KrakendCheck
 from tests.helpers import get_metrics_from_metadata
 from tests.types import InstanceBuilder
 
@@ -40,3 +41,8 @@ def test_e2e_discovery(dd_agent_check_discovery, is_lab):
         check_submission_type=True,
         check_symmetric_inclusion=True,
     )
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, KrakendCheck)
