@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 from copy import deepcopy
 
 import pytest
@@ -40,6 +41,62 @@ def test_off_vms_skipped_by_default(dd_run_check, aggregator, mock_instance, moc
     assert len(vm_metrics) == 4
     vm_names = {tag.split(":")[1] for m in vm_metrics for tag in m.tags if tag.startswith("ntnx_vm_name:")}
     assert "test-vm-that-should-remain-off" not in vm_names
+
+
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_off_vms_collected_with_wildcard_filter(
+    dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection
+):
+    """A wildcard powerState filter ('.*') overrides the ON-only default and collects OFF VMs.
+
+    Covers both OFF VMs in the fixtures: ``test-vm-that-should-remain-off`` (attached to a host)
+    and ``hostless-vm-second-cluster`` (no host, as powered-off AHV VMs report no host field).
+    All 6 VMs (4 ON + 2 OFF) are collected.
+    """
+    mock_instance["batch_vm_collection"] = batch_vm_collection
+    mock_instance["resource_filters"] = [
+        {"resource": "vm", "property": "powerState", "patterns": [".*"]},
+    ]
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    vm_metrics = aggregator.metrics("nutanix.vm.count")
+    vm_names = {tag.split(":", 1)[1] for m in vm_metrics for tag in m.tags if tag.startswith("ntnx_vm_name:")}
+    assert len(vm_metrics) == 6
+    assert "test-vm-that-should-remain-off" in vm_names
+    assert "hostless-vm-second-cluster" in vm_names
+
+
+@pytest.mark.parametrize("batch_vm_collection", [True, False])
+def test_hostless_off_vm_collected_with_filter(
+    dd_run_check, aggregator, mock_instance, mock_http_get, batch_vm_collection
+):
+    """A powered-off VM with no host assignment is collected when a powerState filter allows OFF."""
+    mock_instance["batch_vm_collection"] = batch_vm_collection
+    mock_instance["resource_filters"] = [
+        {"resource": "vm", "property": "powerState", "patterns": ["^(ON|OFF)$"]},
+    ]
+    check = NutanixCheck('nutanix', {}, [mock_instance])
+    dd_run_check(check)
+
+    hostless = next(
+        m for m in aggregator.metrics("nutanix.vm.count") if "ntnx_vm_name:hostless-vm-second-cluster" in m.tags
+    )
+    assert "ntnx_power_state:off" in hostless.tags
+    assert "ntnx_cluster_name:second-nutanix-cluster" in hostless.tags
+    assert not any(tag.startswith("ntnx_host_name:") for tag in hostless.tags)
+
+
+def test_off_vm_skip_logged_at_debug(dd_run_check, aggregator, mock_instance, mock_http_get, caplog):
+    """The default ON-only skip logs the skipped VM and the reason at debug level."""
+    with caplog.at_level(logging.DEBUG):
+        check = NutanixCheck('nutanix', {}, [mock_instance])
+        dd_run_check(check)
+
+    assert any(
+        "Skipping VM" in r.message and "powerState=OFF" in r.message and "no powerState resource filter" in r.message
+        for r in caplog.records
+    )
 
 
 def test_vm_status_off(dd_run_check, aggregator, mock_instance, mock_http_get):

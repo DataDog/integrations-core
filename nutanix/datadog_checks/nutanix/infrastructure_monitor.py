@@ -185,6 +185,7 @@ class InfrastructureMonitor:
                 vm_stats = self._get_vm_stats_by_cluster_id(cluster_id, cluster_name)
                 hosts = self._list_hosts_by_cluster(cluster_id)
                 self._process_hosts(hosts, cluster_id, cluster_tags, vm_stats, cluster_name)
+                self._process_hostless_vms(cluster_id, vm_stats, cluster_name)
                 self._report_cluster_capacity_metrics(hosts, cluster_id, cluster_tags)
 
                 self.cluster_count += 1
@@ -594,6 +595,13 @@ class InfrastructureMonitor:
             f['resource'] == 'vm' and f['property'] == 'powerState' for f in self.check.resource_filters
         )
         if not has_power_state_filter and vm.get("powerState") != "ON":
+            self.check.log.debug(
+                "[%s] Skipping VM %s: powerState=%s and no powerState resource filter set "
+                "(only ON VMs are collected by default)",
+                self._pc_label,
+                vm.get("name") or vm.get("extId"),
+                vm.get("powerState"),
+            )
             return False
         if not should_collect_resource("vm", vm, self.check.resource_filters, self.check.log):
             return False
@@ -605,8 +613,43 @@ class InfrastructureMonitor:
             self._vms_by_host[host_id] = self._list_vms(host_id)
         return self._vms_by_host[host_id]
 
+    def _get_hostless_vms(self) -> list[dict]:
+        """Return VMs with no host assignment (e.g. powered-off VMs), cached per run.
+
+        Powered-off AHV VMs report no ``host`` field, so the per-host VM queries never
+        return them. Batch mode already groups them under the "" key; non-batch mode
+        fetches them once here with a single unfiltered List VMs call.
+        """
+        if "" not in self._vms_by_host:
+            self._vms_by_host[""] = [vm for vm in self._list_vms() if not get_nested(vm, "host/extId")]
+        return self._vms_by_host[""]
+
+    def _process_hostless_vms(
+        self, cluster_id: str, cluster_vm_stats_dict: dict[str, list[dict]], cluster_name: str
+    ) -> None:
+        """Report metrics for VMs in this cluster that have no host assignment."""
+        try:
+            hostless_vms = [vm for vm in self._get_hostless_vms() if get_nested(vm, "cluster/extId") == cluster_id]
+        except Exception:
+            self.check.log.exception("[%s][%s] Failed to list hostless VMs", self._pc_label, cluster_name)
+            return
+
+        processed = 0
+        for vm in hostless_vms:
+            if self._process_vm(vm, cluster_vm_stats_dict, cluster_name):
+                self.vm_count += 1
+                processed += 1
+        if processed:
+            self.check.log.info(
+                "[%s][%s] Processed %d hostless VMs (no host assignment)",
+                self._pc_label,
+                cluster_name,
+                processed,
+            )
+
     def _build_vms_by_host_cache(self) -> None:
         """Fetch all VMs and group them by host. Hostless VMs are stored under the "" key."""
+        self._vms_by_host.setdefault("", [])
         for vm in self._list_vms():
             host_id = get_nested(vm, "host/extId") or ""
             self._vms_by_host.setdefault(host_id, []).append(vm)

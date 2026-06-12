@@ -290,5 +290,5 @@ def test_explicit_vm_power_state_filter_overrides_default(dd_run_check, aggregat
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 
-    # 5 VMs: 3 ON + 1 OFF on host 1, plus 1 ON on host 2
-    assert len(aggregator.metrics("nutanix.vm.count")) == 5
+    # 6 VMs: 3 ON + 1 OFF on host 1, 1 ON on host 2, plus 1 hostless OFF VM on cluster 2
+    assert len(aggregator.metrics("nutanix.vm.count")) == 6
