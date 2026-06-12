@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 8.0.0 / 2026-06-09
+
+***Removed***:
+
+* Remove the Data Streams live messages reading feature, which has moved to the kafka_actions integration. ([#23842](https://github.com/DataDog/integrations-core/pull/23842))
+
+***Added***:
+
+* Schema Registry: emit per-subject and global compatibility on the Data Streams schema payload, and stop emitting Datadog Events for broker, topic, and schema registry configurations (those payloads continue to flow to the Data Streams intake). ([#23778](https://github.com/DataDog/integrations-core/pull/23778))
+* Add broker list to the cluster monitoring heartbeat payload. ([#23898](https://github.com/DataDog/integrations-core/pull/23898))
+* Emit connection_error DSM event when the integration cannot connect to Kafka. ([#23902](https://github.com/DataDog/integrations-core/pull/23902))
+
 ## 7.3.0 / 2026-05-14
 
 ***Added***:
