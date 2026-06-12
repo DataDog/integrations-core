@@ -20,9 +20,9 @@ from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     _parse_exposition,
 )
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError
 
 ENDPOINT_URL = "http://example.test:9100/metrics"

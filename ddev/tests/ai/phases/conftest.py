@@ -13,8 +13,8 @@ from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUs
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.checkpoint import CheckpointManager
 from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
+from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 

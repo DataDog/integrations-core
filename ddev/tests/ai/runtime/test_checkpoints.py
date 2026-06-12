@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from ddev.ai.phases.checkpoint import CheckpointManager, CheckpointReadError
+from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointReadError
 
 
 @pytest.fixture
