@@ -125,17 +125,6 @@ class AgenticPhase(Phase):
     def after_react(self) -> None:
         """Called once after all tasks complete. Override for phase-specific teardown."""
 
-    async def _compact_if_needed(
-        self,
-        process: ReActProcess,
-        last_result: ReActResult | None,
-    ) -> tuple[int, int]:
-        if last_result is None or last_result.context_usage is None:
-            return 0, 0
-        if last_result.context_usage.context_pct < self._config.context_compact_threshold_pct:
-            return 0, 0
-        return await process.compact()
-
     async def run_tasks(
         self,
         process: ReActProcess,
@@ -149,56 +138,123 @@ class AgenticPhase(Phase):
         last_result: ReActResult | None = None
 
         for task in self._config.tasks:
-            cin, cout = await self._compact_if_needed(process, last_result)
-            self._total_input_tokens += cin
-            self._total_output_tokens += cout
+            last_result = await self.run_task(process, task, context, last_result)
 
-            has_goal = task.goal is not None or task.goal_path is not None
-            prompt = render_task_prompt(task, self._config_dir, context, self._resolver)
-            if has_goal:
-                prompt = prompt + GOAL_TASK_SUFFIX
+    async def run_task(
+        self,
+        process: ReActProcess,
+        task: TaskConfig,
+        context: dict[str, Any],
+        last_result: ReActResult | None,
+    ) -> ReActResult:
+        """Run one task and return the result to use for the next task."""
+        await self._compact_context(process, last_result)
 
-            last_result = await process.start(prompt)
-            self._total_input_tokens += last_result.total_input_tokens
-            self._total_output_tokens += last_result.total_output_tokens
+        has_goal = self._task_has_goal(task)
+        prompt = self._render_task_prompt(task, context, has_goal)
+        result = await self._start_task(process, prompt)
 
-            if has_goal:
-                goal_text = render_goal_text(task, self._config_dir, context, self._resolver)
-                try:
-                    outcome: GoalLoopOutcome = await run_goal_loop(
-                        task=task,
-                        goal_text=goal_text,
-                        rendered_task_prompt=prompt,
-                        worker_process=process,
-                        initial_result=last_result,
-                        parent_agent_config=self._agent_config,
-                        runtime_factory=self._runtime_factory,
-                        callbacks=self._callbacks,
-                        phase_id=self._phase_id,
-                        log_root=self._checkpoint_manager.root,
-                        compact_if_needed=lambda r: self._compact_if_needed(process, r),
-                    )
-                except GoalValidationError as e:
-                    self._goal_attempt_log.append(
-                        {
-                            "task": task.name,
-                            "attempts": e.attempts,
-                            "final_valid": False,
-                        }
-                    )
-                    self._total_input_tokens += e.input_tokens
-                    self._total_output_tokens += e.output_tokens
-                    raise
-                last_result = outcome.final_result
-                self._total_input_tokens += outcome.total_input_tokens
-                self._total_output_tokens += outcome.total_output_tokens
-                self._goal_attempt_log.append(
-                    {
-                        "task": task.name,
-                        "attempts": outcome.attempts,
-                        "final_valid": True,
-                    }
-                )
+        if not has_goal:
+            return result
+
+        return await self._run_goal_validation(process, task, context, prompt, result)
+
+    async def _compact_context(
+        self,
+        process: ReActProcess,
+        last_result: ReActResult | None,
+    ) -> None:
+        input_tokens, output_tokens = await self._compact_if_needed(process, last_result)
+        self._add_tokens(input_tokens, output_tokens)
+
+    async def _compact_if_needed(
+        self,
+        process: ReActProcess,
+        last_result: ReActResult | None,
+    ) -> tuple[int, int]:
+        if last_result is None or last_result.context_usage is None:
+            return 0, 0
+        if last_result.context_usage.context_pct < self._config.context_compact_threshold_pct:
+            return 0, 0
+        return await process.compact()
+
+    def _task_has_goal(self, task: TaskConfig) -> bool:
+        return task.goal is not None or task.goal_path is not None
+
+    def _render_task_prompt(
+        self,
+        task: TaskConfig,
+        context: dict[str, Any],
+        has_goal: bool,
+    ) -> str:
+        prompt = render_task_prompt(task, self._config_dir, context, self._resolver)
+        if has_goal:
+            return prompt + GOAL_TASK_SUFFIX
+        return prompt
+
+    async def _start_task(
+        self,
+        process: ReActProcess,
+        prompt: str,
+    ) -> ReActResult:
+        result = await process.start(prompt)
+        self._add_tokens(result.total_input_tokens, result.total_output_tokens)
+        return result
+
+    async def _run_goal_validation(
+        self,
+        process: ReActProcess,
+        task: TaskConfig,
+        context: dict[str, Any],
+        prompt: str,
+        result: ReActResult,
+    ) -> ReActResult:
+        goal_text = render_goal_text(task, self._config_dir, context, self._resolver)
+        try:
+            outcome: GoalLoopOutcome = await run_goal_loop(
+                task=task,
+                goal_text=goal_text,
+                rendered_task_prompt=prompt,
+                worker_process=process,
+                initial_result=result,
+                parent_agent_config=self._agent_config,
+                runtime_factory=self._runtime_factory,
+                callbacks=self._callbacks,
+                phase_id=self._phase_id,
+                log_root=self._checkpoint_manager.root,
+                compact_if_needed=lambda r: self._compact_if_needed(process, r),
+            )
+        except GoalValidationError as e:
+            self._record_goal_attempt(task, e.attempts, final_valid=False)
+            self._add_tokens(e.input_tokens, e.output_tokens)
+            raise
+
+        self._record_goal_attempt(task, outcome.attempts, final_valid=True)
+        self._add_tokens(outcome.total_input_tokens, outcome.total_output_tokens)
+        return outcome.final_result
+
+    def _record_goal_attempt(
+        self,
+        task: TaskConfig,
+        attempts: int,
+        *,
+        final_valid: bool,
+    ) -> None:
+        self._goal_attempt_log.append(
+            {
+                "task": task.name,
+                "attempts": attempts,
+                "final_valid": final_valid,
+            }
+        )
+
+    def _add_tokens(
+        self,
+        input_tokens: int,
+        output_tokens: int,
+    ) -> None:
+        self._total_input_tokens += input_tokens
+        self._total_output_tokens += output_tokens
 
     async def _run_memory_step(
         self,
