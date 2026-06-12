@@ -23,6 +23,17 @@ def wait_for_controller():
     run_command(
         [
             'kubectl',
+            'rollout',
+            'status',
+            'deployment/kueue-controller-manager',
+            '-n',
+            KUEUE_NAMESPACE,
+            '--timeout=300s',
+        ]
+    )
+    run_command(
+        [
+            'kubectl',
             'wait',
             'deployment/kueue-controller-manager',
             '--for=condition=Available',
