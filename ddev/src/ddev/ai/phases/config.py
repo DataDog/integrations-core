@@ -6,10 +6,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
-
-from ddev.ai.tools.registry import ToolRegistry
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class FlowConfigError(Exception):
@@ -21,15 +18,10 @@ def _detect_cycles(
     limit: int = 50,
 ) -> tuple[list[list[str]], bool]:
     """Return every simple cycle in the dependency graph, each as an ordered list of phase IDs."""
-    # Enumerate every simple cycle exactly once: from each node, DFS only through
-    # higher-ranked nodes, so each cycle is reported only when started from its
-    # lowest-ranked member. (Tiernan-style enumeration with rank canonicalization.)
     rank = {n: i for i, n in enumerate(dependency_map)}
     cycles: list[list[str]] = []
 
     class _LimitReached(Exception):
-        """Raised when the cycle limit is reached."""
-
         pass
 
     def dfs(start: str, current: str, path: list[str], on_path: set[str]):
@@ -100,113 +92,7 @@ class CheckpointConfig(BaseModel):
         return self
 
 
-class AgentConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    provider: str = "anthropic"
-    model: str | None = None
-    max_tokens: int | None = None
-    tools: list[str] = []
-
-    @field_validator("tools", mode="after")
-    @classmethod
-    def tools_must_be_known(cls, tools: list[str]) -> list[str]:
-        unknown = set(tools) - set(ToolRegistry.available_tool_names())
-        if unknown:
-            raise ValueError(f"Unknown tool names: {sorted(unknown)}")
-        return tools
-
-
-class PhaseConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    type: str = "AgenticPhase"
-    agent: str | None = None
-    tasks: list[TaskConfig] = []
-    context_compact_threshold_pct: int = 80
-    checkpoint: CheckpointConfig | None = None
-
-
 class FlowEntry(BaseModel):
     model_config = ConfigDict(extra="forbid")
     phase: str
     dependencies: list[str] = []
-
-
-class FlowConfig(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    variables: dict[str, str] = {}
-    agents: dict[str, AgentConfig]
-    phases: dict[str, PhaseConfig]
-    flow: list[FlowEntry]
-
-    @model_validator(mode="after")
-    def cross_references(self) -> FlowConfig:
-        """Validate all cross-references between agents, phases, and dependencies."""
-        scheduled = {entry.phase for entry in self.flow}
-        seen: set[str] = set()
-        for entry in self.flow:
-            if entry.phase in seen:
-                raise ValueError(f"Duplicate phase in flow: {entry.phase!r}")
-            seen.add(entry.phase)
-            if entry.phase not in self.phases:
-                raise ValueError(f"Flow references unknown phase: {entry.phase!r}")
-            for dep in entry.dependencies:
-                if dep not in self.phases:
-                    raise ValueError(f"Phase {entry.phase!r} depends on unknown phase: {dep!r}")
-                if dep not in scheduled:
-                    raise ValueError(f"Phase {entry.phase!r} depends on {dep!r} which is not scheduled in flow")
-
-        for phase_id, phase in self.phases.items():
-            if phase.agent is not None and phase.agent not in self.agents:
-                raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
-
-        dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
-        cycles, truncated = _detect_cycles(dependency_map)
-        if cycles:
-            formatted = "\n  ".join(" → ".join(c) for c in cycles)
-            suffix = f"\n  (showing first {len(cycles)}; more cycles exist)" if truncated else ""
-            raise ValueError(f"Cycle(s) detected in flow:\n  {formatted}{suffix}")
-
-        return self
-
-    @classmethod
-    def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
-        """Load, parse, and validate flow.yaml. Raises FlowConfigError on any problem."""
-        try:
-            raw = yaml.safe_load(path.read_text())
-        except (OSError, yaml.YAMLError) as e:
-            raise FlowConfigError(f"Failed to load {path}: {e}") from e
-
-        try:
-            config = cls.model_validate(raw)
-        except ValidationError as e:
-            raise FlowConfigError(f"Invalid flow config:\n{e}") from e
-
-        config._validate_files(config_dir)
-        return config
-
-    def _validate_files(self, config_dir: Path) -> None:
-        """Check all referenced files exist."""
-        for agent_name in self.agents:
-            system_prompt = config_dir / "prompts" / f"{agent_name}.md"
-            if not system_prompt.exists():
-                raise FlowConfigError(f"System prompt not found for agent {agent_name!r}: {system_prompt}")
-
-        for phase_id, phase in self.phases.items():
-            for i, task in enumerate(phase.tasks):
-                if task.prompt_path is not None:
-                    resolved = config_dir / task.prompt_path
-                    if not resolved.exists():
-                        raise FlowConfigError(
-                            f"Phase {phase_id!r} task {i} ({task.name!r}): prompt_path not found: {resolved}"
-                        )
-                if task.goal_path is not None:
-                    resolved = config_dir / task.goal_path
-                    if not resolved.exists():
-                        raise FlowConfigError(
-                            f"Phase {phase_id!r} task {i} ({task.name!r}): goal_path not found: {resolved}"
-                        )
-
-            if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
-                resolved = config_dir / phase.checkpoint.memory_prompt_path
-                if not resolved.exists():
-                    raise FlowConfigError(f"Phase {phase_id!r} checkpoint memory_prompt_path not found: {resolved}")

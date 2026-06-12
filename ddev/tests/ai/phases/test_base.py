@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 import pytest
 
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
-from ddev.ai.phases.config import PhaseConfig
+from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
@@ -36,7 +36,7 @@ def _make_stub_phase(
     phase = _StubPhase(
         phase_id=phase_id,
         dependencies=dependencies or [],
-        config=PhaseConfig(),
+        config=PhaseConfig(name="test_phase"),
         checkpoint_manager=checkpoint_manager,
         context=flow_context,
         outcome=outcome,
@@ -57,7 +57,7 @@ def test_build_creates_properly_initialized_instance(flow_dir):
         flow_variables={"var2": "val2"},
         config_dir=flow_dir,
     )
-    config = PhaseConfig()
+    config = PhaseConfig(name="test_phase")
 
     phase = _StubPhase.build(
         phase_id="p1",

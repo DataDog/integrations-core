@@ -12,7 +12,8 @@ from typing import Any
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig
+from ddev.ai.phases.config import TaskConfig
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
@@ -271,6 +272,7 @@ async def run_goal_loop(
     """
     reviewer_scope = AgentScope(owner_id=f"{phase_id}.goal.{task.name}", role=AgentRole.GOAL_REVIEWER)
     reviewer_config = AgentConfig(
+        name=parent_agent_config.name,
         provider=parent_agent_config.provider,
         tools=filter_read_only(parent_agent_config.tools),
     )

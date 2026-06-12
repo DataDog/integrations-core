@@ -8,7 +8,7 @@ from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import FlowConfig, FlowConfigError
+from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
 from ddev.ai.runtime.agent_log import AgentLogger

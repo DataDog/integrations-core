@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig, PhaseConfig
+from ddev.ai.config.models import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError

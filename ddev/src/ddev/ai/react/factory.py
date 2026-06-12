@@ -7,7 +7,7 @@ from __future__ import annotations
 from ddev.ai.agent.build import AgentRuntimeBuilder
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.react.process import ReActProcess
 
 

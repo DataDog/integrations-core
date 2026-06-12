@@ -12,7 +12,8 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig, PhaseConfig
+from ddev.ai.phases.config import CheckpointConfig, FlowConfigError, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
@@ -95,20 +96,22 @@ def test_render_memory_prompt_raises_when_no_source():
 @pytest.mark.parametrize(
     "config,match",
     [
-        (PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
-        (PhaseConfig(agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
-        (PhaseConfig(agent="writer"), "at least one task"),
+        (PhaseConfig(name="test_phase", tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
+        (PhaseConfig(name="test_phase", agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
+        (PhaseConfig(name="test_phase", agent="writer"), "at least one task"),
     ],
     ids=["missing_agent", "unknown_agent", "empty_tasks"],
 )
 def test_validate_config_rejects_invalid(config, match):
     with pytest.raises(FlowConfigError, match=match):
-        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
+        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig(name="writer")})
 
 
 def test_validate_config_accepts_valid():
     AgenticPhase.validate_config(
-        "p1", PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]), {"writer": AgentConfig()}
+        "p1",
+        PhaseConfig(name="test_phase", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]),
+        {"writer": AgentConfig(name="writer")},
     )
 
 
@@ -221,7 +224,7 @@ async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatc
 
     assert captured["owner_id"] == "p1"
     assert captured["system_prompt"] == "Project: myproj"
-    assert captured["agent_config"] == AgentConfig(tools=[])
+    assert captured["agent_config"] == AgentConfig(name="writer", tools=[])
 
 
 async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, message_queue):
@@ -423,12 +426,12 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
     resources = RunResources(
         agent_clients={"anthropic": object()},
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
-        agents={"writer": AgentConfig(tools=["spawn_subagent"])},
+        agents={"writer": AgentConfig(name="writer", tools=["spawn_subagent"])},
         callbacks=run_callbacks,
     )
     phase = AgenticPhase.build(
         phase_id="p1",
-        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        config=PhaseConfig(name="test_phase", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
         deps=[],
         resources=resources,
         checkpoint_manager=checkpoint_manager,

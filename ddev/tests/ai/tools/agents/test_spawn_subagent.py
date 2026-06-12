@@ -16,7 +16,7 @@ from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentInput, SpawnSubagentTool
@@ -137,7 +137,7 @@ def make_tool(
 ) -> SpawnSubagentTool:
     return SpawnSubagentTool(
         owner_id=owner_id,
-        agent_config=agent_config or AgentConfig(tools=parent_tools or ["read_file", "edit_file"]),
+        agent_config=agent_config or AgentConfig(name="writer", tools=parent_tools or ["read_file", "edit_file"]),
         process_factory=factory,
     )
 
@@ -229,6 +229,7 @@ async def test_multi_iteration_wires_callbacks(tmp_path):
 
 async def test_child_runtime_config_inherits_parent_settings_and_requested_tools(tmp_path):
     parent_config = AgentConfig(
+        name="writer",
         provider="anthropic",
         tools=["read_file", "edit_file", "spawn_subagent"],
         model="custom-model",

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 

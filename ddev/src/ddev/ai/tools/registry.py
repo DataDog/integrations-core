@@ -17,7 +17,7 @@ from .core.protocol import ToolProtocol
 from .core.types import ToolResult
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.config.models import AgentConfig
     from ddev.ai.react.factory import ReActProcessFactory
 
 

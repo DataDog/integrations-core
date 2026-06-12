@@ -14,7 +14,8 @@ from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUs
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig, PhaseConfig
+from ddev.ai.phases.config import TaskConfig
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
@@ -157,6 +158,7 @@ def make_agent_phase(
     Pass ``goal_runtime_builder`` as a callable (owner_id: str) -> AgentRuntime for goal tests.
     """
     config = PhaseConfig(
+        name="default",
         agent="writer",
         tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
         checkpoint=checkpoint,
@@ -186,7 +188,7 @@ def make_agent_phase(
         config=config,
         checkpoint_manager=checkpoint_manager,
         context=context,
-        agent_config=agent_config or AgentConfig(tools=[]),
+        agent_config=agent_config or AgentConfig(name="writer", tools=[]),
         process_factory=process_factory,
     )
     phase.queue = message_queue

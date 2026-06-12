@@ -9,7 +9,8 @@ import pytest
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-from ddev.ai.phases.config import AgentConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig
+from ddev.ai.phases.config import TaskConfig
 from ddev.ai.phases.goal import (
     GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,
@@ -179,7 +180,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(tools=[]),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
@@ -211,6 +212,7 @@ async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
     )
     factory, builder_calls, _ = _reviewer_factory([make_response('{"valid": true, "reason": ""}', 20, 10)])
     parent_config = AgentConfig(
+        name="writer",
         provider="anthropic",
         tools=["read_file", "edit_file", "grep", "create_file"],
         model="custom-model",
@@ -261,7 +263,7 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(tools=[]),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
@@ -301,7 +303,7 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
             rendered_task_prompt="TASK",
             worker_process=worker_process,
             initial_result=initial_result,
-            parent_agent_config=AgentConfig(tools=[]),
+            parent_agent_config=AgentConfig(name="writer", tools=[]),
             process_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
@@ -335,7 +337,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(tools=[]),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
@@ -370,7 +372,7 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
             rendered_task_prompt="TASK",
             worker_process=worker_process,
             initial_result=initial_result,
-            parent_agent_config=AgentConfig(tools=[]),
+            parent_agent_config=AgentConfig(name="writer", tools=[]),
             process_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
@@ -415,7 +417,7 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(tools=[]),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks([cb_set]),
         phase_id="p1",
