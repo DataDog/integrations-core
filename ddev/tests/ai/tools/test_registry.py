@@ -4,6 +4,9 @@
 
 import pytest
 
+from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.phases.config import AgentConfig
+from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
@@ -156,53 +159,60 @@ OWNER_ID = "test-agent"
 TOOLS_WITHOUT_EXTRA_DEPS = [n for n in ToolRegistry.available_tool_names() if n != "spawn_subagent"]
 
 
-def test_from_names_empty(tmp_path):
-    registry = ToolRegistry.from_names(
-        [], owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
+def runtime_builder(*, agent_config: AgentConfig, system_prompt: str, owner_id: str) -> AgentRuntime:
+    raise AssertionError("runtime builder should not be called during registry construction")
+
+
+def from_names(tool_names: list[str], tmp_path, *, owner_id: str = OWNER_ID) -> ToolRegistry:
+    return ToolRegistry.from_names(
+        tool_names,
+        owner_id=owner_id,
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
+        agent_config=AgentConfig.model_construct(provider="anthropic", tools=tool_names),
+        runtime_builder=runtime_builder,
+        artifact_root=tmp_path / "artifacts",
     )
+
+
+def test_from_names_empty(tmp_path):
+    registry = from_names([], tmp_path)
     assert registry.definitions == []
 
 
 def test_from_names_unknown_raises(tmp_path):
     with pytest.raises(ValueError, match="Unknown tool name: 'teleport'"):
-        ToolRegistry.from_names(
-            ["teleport"], owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-        )
+        from_names(["teleport"], tmp_path)
 
 
 @pytest.mark.parametrize("name", TOOLS_WITHOUT_EXTRA_DEPS)
 def test_from_names_each_known_tool(name, tmp_path):
-    registry = ToolRegistry.from_names(
-        [name], owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-    )
+    registry = from_names([name], tmp_path)
     assert len(registry.definitions) == 1
     assert registry.definitions[0]["name"] == name
 
 
 def test_from_names_all_at_once(tmp_path):
     all_names = TOOLS_WITHOUT_EXTRA_DEPS
-    registry = ToolRegistry.from_names(
-        all_names, owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-    )
+    registry = from_names(all_names, tmp_path)
     built_names = {d["name"] for d in registry.definitions}
     assert built_names == set(all_names)
 
 
-def test_from_names_spawn_subagent_without_deps_raises(tmp_path):
-    with pytest.raises(ValueError, match="requires both 'subagent_builder' and 'log_dir'"):
-        ToolRegistry.from_names(
-            ["spawn_subagent"],
-            owner_id=OWNER_ID,
-            file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
-        )
+def test_from_names_spawn_subagent_gets_runtime_context(tmp_path):
+    registry = from_names(["read_file", "spawn_subagent"], tmp_path)
+
+    tool = registry._tools["spawn_subagent"]
+    assert isinstance(tool, SpawnSubagentTool)
+    assert tool._agent_config == AgentConfig(tools=["read_file", "spawn_subagent"])
+    assert tool._runtime_builder is runtime_builder
+    assert tool._allowed_tools == {"read_file"}
+    assert tool._log_dir == tmp_path / "artifacts" / "subagents" / OWNER_ID
 
 
 def test_from_names_fs_tools_share_file_registry(tmp_path):
     """All tools that use the file registry in the same ToolRegistry share a single instance."""
     all_names = TOOLS_WITHOUT_EXTRA_DEPS
-    registry = ToolRegistry.from_names(
-        all_names, owner_id=OWNER_ID, file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-    )
+    registry = from_names(all_names, tmp_path)
     fs_tools = [t for t in registry._tools.values() if hasattr(t, "_registry")]
     if len(fs_tools) < 2:
         pytest.skip("Need at least 2 fs tools to test shared registry")
@@ -237,8 +247,22 @@ def test_filter_read_only_unknown_name_raises():
 def test_from_names_reuses_supplied_file_registry(tmp_path):
     """Multiple ToolRegistries can share one FileRegistry; tools carry their own owner_id."""
     shared = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
-    reg_a = ToolRegistry.from_names(["read_file", "create_file"], owner_id="a", file_registry=shared)
-    reg_b = ToolRegistry.from_names(["read_file", "create_file"], owner_id="b", file_registry=shared)
+    reg_a = ToolRegistry.from_names(
+        ["read_file", "create_file"],
+        owner_id="a",
+        file_registry=shared,
+        agent_config=AgentConfig(tools=["read_file", "create_file"]),
+        runtime_builder=runtime_builder,
+        artifact_root=tmp_path / "artifacts",
+    )
+    reg_b = ToolRegistry.from_names(
+        ["read_file", "create_file"],
+        owner_id="b",
+        file_registry=shared,
+        agent_config=AgentConfig(tools=["read_file", "create_file"]),
+        runtime_builder=runtime_builder,
+        artifact_root=tmp_path / "artifacts",
+    )
 
     for tool in reg_a._tools.values():
         assert tool._registry is shared

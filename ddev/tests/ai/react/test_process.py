@@ -8,6 +8,7 @@ from typing import Any
 import pytest
 
 from ddev.ai.agent.base import BaseAgent
+from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentConnectionError
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
@@ -168,8 +169,7 @@ def make_process(
     compact_threshold_pct: float | None = None,
 ) -> ReActProcess:
     return ReActProcess(
-        agent=agent,
-        tool_registry=registry or MockToolRegistry(),
+        AgentRuntime(agent=agent, tool_registry=registry or MockToolRegistry()),
         callbacks=callbacks,
         compact_threshold_pct=compact_threshold_pct,
     )
@@ -260,8 +260,7 @@ async def test_tool_exception_loop_continues_with_failure_result() -> None:
     )
 
     result = await ReActProcess(
-        agent=agent,
-        tool_registry=RaisingToolRegistry(RuntimeError("disk error")),
+        AgentRuntime(agent=agent, tool_registry=RaisingToolRegistry(RuntimeError("disk error"))),
     ).start("Do something")
 
     assert result.iterations == 2
@@ -283,8 +282,7 @@ async def test_tool_exception_on_tool_call_callback_fires_with_error_result() ->
     recorder = CallbackRecorder()
 
     await ReActProcess(
-        agent=agent,
-        tool_registry=RaisingToolRegistry(ValueError("oops")),
+        AgentRuntime(agent=agent, tool_registry=RaisingToolRegistry(ValueError("oops"))),
         callbacks=Callbacks([recorder.callback_set]),
     ).start("x")
 
@@ -312,8 +310,7 @@ async def test_tool_exception_error_message_format(exc: BaseException, expected_
     )
 
     await ReActProcess(
-        agent=agent,
-        tool_registry=RaisingToolRegistry(exc),
+        AgentRuntime(agent=agent, tool_registry=RaisingToolRegistry(exc)),
     ).start("x")
 
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
@@ -337,7 +334,7 @@ async def test_partial_batch_failure_only_affects_raising_tool() -> None:
         }
     )
 
-    result = await ReActProcess(agent=agent, tool_registry=registry).start("Do both")
+    result = await ReActProcess(AgentRuntime(agent=agent, tool_registry=registry)).start("Do both")
 
     assert result.iterations == 2
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
@@ -409,8 +406,7 @@ class ErrorAgent(BaseAgent[Any]):
 async def test_agent_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
-        agent=ErrorAgent(),
-        tool_registry=MockToolRegistry(),
+        AgentRuntime(agent=ErrorAgent(), tool_registry=MockToolRegistry()),
         callbacks=Callbacks([recorder.callback_set]),
     )
 
@@ -436,8 +432,7 @@ class InterruptAgent(BaseAgent[Any]):
 async def test_keyboard_interrupt_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
-        agent=InterruptAgent(),
-        tool_registry=MockToolRegistry(),
+        AgentRuntime(agent=InterruptAgent(), tool_registry=MockToolRegistry()),
         callbacks=Callbacks([recorder.callback_set]),
     )
 
@@ -462,8 +457,7 @@ class CancelledAgent(BaseAgent[Any]):
 async def test_cancelled_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
-        agent=CancelledAgent(),
-        tool_registry=MockToolRegistry(),
+        AgentRuntime(agent=CancelledAgent(), tool_registry=MockToolRegistry()),
         callbacks=Callbacks([recorder.callback_set]),
     )
 

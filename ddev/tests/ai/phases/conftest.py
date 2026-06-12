@@ -3,16 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import asyncio
+from collections.abc import Callable
 from typing import Any
 
 import pytest
 
+from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.checkpoint import CheckpointManager
-from ddev.ai.phases.config import PhaseConfig, TaskConfig
+from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -86,23 +88,35 @@ class MockAgent:
         return None
 
 
-def make_agent_builder(mock_agent: MockAgent, captured_kwargs: dict[str, Any] | None = None):
-    """Create an agent_builder that returns the given mock and an empty ToolRegistry.
+class MockRuntimeFactory:
+    """Minimal AgentRuntimeFactory that injects a MockAgent for testing."""
 
-    If ``captured_kwargs`` is provided, every call records the system_prompt and
-    owner_id passed in — useful for asserting on prompt rendering.
-    """
+    def __init__(
+        self,
+        mock_agent: MockAgent,
+        captured_kwargs: dict[str, Any] | None = None,
+        goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
+    ) -> None:
+        self._mock_agent = mock_agent
+        self._captured = captured_kwargs
+        self._goal_runtime_builder = goal_runtime_builder
 
-    def builder(
-        system_prompt: str, owner_id: str, subagent_builder=None, log_dir=None
-    ) -> tuple[MockAgent, ToolRegistry]:
-        if captured_kwargs is not None:
-            captured_kwargs["system_prompt"] = system_prompt
-            captured_kwargs["owner_id"] = owner_id
-        mock_agent.name = owner_id
-        return mock_agent, ToolRegistry([])
-
-    return builder
+    def build_runtime(
+        self,
+        *,
+        agent_config: AgentConfig,
+        system_prompt: str,
+        owner_id: str,
+    ) -> AgentRuntime:
+        if self._goal_runtime_builder is not None and ".goal." in owner_id:
+            return self._goal_runtime_builder(owner_id)
+        if self._captured is not None:
+            self._captured["agent_config"] = agent_config
+            self._captured["system_prompt"] = system_prompt
+            self._captured["owner_id"] = owner_id
+        self._mock_agent.name = owner_id
+        self._mock_agent._system_prompt = system_prompt
+        return AgentRuntime(agent=self._mock_agent, tool_registry=ToolRegistry([]))
 
 
 def make_agent_phase(
@@ -119,13 +133,15 @@ def make_agent_phase(
     runtime_variables: dict[str, str] | None = None,
     context_compact_threshold_pct: int = 80,
     callbacks=None,
-    captured_agent_kwargs: dict[str, Any] | None = None,
-    goal_agent_builder=None,
+    captured_worker_kwargs: dict[str, Any] | None = None,
+    goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
+    agent_config: AgentConfig | None = None,
 ) -> tuple[AgenticPhase, CheckpointManager]:
     """Build an AgenticPhase ready for process_message-driven tests.
 
-    Injects a mock agent_builder so no real LLM or tools are constructed. Pass
-    ``captured_agent_kwargs`` (a dict) to record the rendered system_prompt and owner_id.
+    Injects a MockRuntimeFactory so no real LLM or tools are constructed. Pass
+    ``captured_worker_kwargs`` (a dict) to record build_runtime inputs.
+    Pass ``goal_runtime_builder`` as a callable (owner_id: str) -> AgentRuntime for goal tests.
     """
     config = PhaseConfig(
         agent="writer",
@@ -141,14 +157,19 @@ def make_agent_phase(
         callbacks=callbacks or Callbacks(),
     )
 
+    runtime_factory = MockRuntimeFactory(
+        mock_agent=mock_agent,
+        captured_kwargs=captured_worker_kwargs,
+        goal_runtime_builder=goal_runtime_builder,
+    )
     phase = AgenticPhase(
         phase_id=phase_id,
         dependencies=dependencies or [],
         config=config,
         checkpoint_manager=checkpoint_manager,
         context=context,
-        agent_builder=make_agent_builder(mock_agent, captured_agent_kwargs),
-        goal_agent_builder=goal_agent_builder,
+        agent_config=agent_config or AgentConfig(tools=[]),
+        runtime_factory=runtime_factory,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager

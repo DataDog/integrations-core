@@ -6,16 +6,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.agent.anthropic_client import DEFAULT_MAX_TOKENS, DEFAULT_MODEL, AnthropicAgent
-from ddev.ai.agent.build import (
-    build_agent,
-    build_subagent,
-    make_agent_builder,
-    make_goal_agent_builder,
-    make_subagent_builder,
-)
+from ddev.ai.agent.anthropic_client import AnthropicAgent
+from ddev.ai.agent.build import AgentRuntime, DefaultAgentRuntimeFactory
 from ddev.ai.phases.config import AgentConfig
-from ddev.ai.phases.goal import GOAL_REVIEWER_SYSTEM_PROMPT
+from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
@@ -36,29 +30,56 @@ def clients() -> dict:
     return {"anthropic": MagicMock()}
 
 
-# ---------------------------------------------------------------------------
-# Core builder behaviour
-# ---------------------------------------------------------------------------
+def make_factory(
+    clients: dict,
+    file_registry: FileRegistry,
+) -> DefaultAgentRuntimeFactory:
+    return DefaultAgentRuntimeFactory(
+        agent_clients=clients,
+        file_registry=file_registry,
+        artifact_root=file_registry.policy.write_root / "artifacts",
+    )
+
+
+def build_runtime(
+    factory: DefaultAgentRuntimeFactory,
+    config: AgentConfig,
+    *,
+    system_prompt: str = "system",
+    owner_id: str = "p1",
+) -> AgentRuntime:
+    return factory.build_runtime(agent_config=config, system_prompt=system_prompt, owner_id=owner_id)
 
 
 def test_unknown_provider_raises(file_registry, clients):
     config = AgentConfig.model_construct(provider="bad_provider", tools=[])
+    factory = make_factory(clients, file_registry)
     with pytest.raises(ValueError, match="Unknown agent provider: 'bad_provider'"):
-        build_agent(config, clients, "sys", "p1", file_registry)
+        build_runtime(factory, config)
 
 
 def test_missing_client_raises(file_registry):
     config = AgentConfig(provider="anthropic", tools=[])
+    factory = make_factory({}, file_registry)
     with pytest.raises(ValueError, match="No client provided for agent provider 'anthropic'"):
-        build_agent(config, {}, "sys", "p1", file_registry)
+        build_runtime(factory, config)
 
 
-def test_builds_anthropic_agent_with_correct_types_and_name(file_registry, clients):
+def test_build_runtime_returns_agent_runtime(file_registry, clients):
     config = AgentConfig(provider="anthropic", tools=[])
-    agent, registry = build_agent(config, clients, "sys", "p1", file_registry)
-    assert isinstance(agent, AnthropicAgent)
-    assert isinstance(registry, ToolRegistry)
-    assert agent.name == "p1"
+    runtime = build_runtime(make_factory(clients, file_registry), config)
+
+    assert isinstance(runtime, AgentRuntime)
+    assert isinstance(runtime.agent, AnthropicAgent)
+    assert isinstance(runtime.tool_registry, ToolRegistry)
+    assert runtime.agent.name == "p1"
+
+
+def test_build_runtime_uses_explicit_system_prompt(file_registry, clients):
+    config = AgentConfig(provider="anthropic", tools=[])
+    runtime = build_runtime(make_factory(clients, file_registry), config, system_prompt="Project: integrations")
+
+    assert runtime.agent._system_prompt == "Project: integrations"
 
 
 @pytest.mark.parametrize(
@@ -68,38 +89,41 @@ def test_builds_anthropic_agent_with_correct_types_and_name(file_registry, clien
         ("claude-haiku-4-5", 512),
     ],
 )
-def test_model_and_max_tokens_forwarded(file_registry, clients, model, max_tokens):
+def test_build_runtime_forwards_model_and_max_tokens(file_registry, clients, model, max_tokens):
     config = AgentConfig(provider="anthropic", model=model, max_tokens=max_tokens, tools=[])
-    agent, _ = build_agent(config, clients, "sys", "p1", file_registry)
-    assert agent._model == model
-    assert agent._max_tokens == max_tokens
+    runtime = build_runtime(make_factory(clients, file_registry), config)
+
+    assert runtime.agent._model == model
+    assert runtime.agent._max_tokens == max_tokens
 
 
-def test_build_agent_uses_config_tools(file_registry, clients):
+def test_build_runtime_uses_config_tools(file_registry, clients):
     config = AgentConfig(provider="anthropic", tools=["read_file"])
-    _, registry = build_agent(config, clients, "sys", "p1", file_registry)
-    assert len(registry.definitions) == 1
-    assert registry.definitions[0]["name"] == "read_file"
+    runtime = build_runtime(make_factory(clients, file_registry), config)
+
+    assert len(runtime.tool_registry.definitions) == 1
+    assert runtime.tool_registry.definitions[0]["name"] == "read_file"
 
 
-# ---------------------------------------------------------------------------
-# build_subagent
-# ---------------------------------------------------------------------------
+def test_build_runtime_wires_spawn_subagent_tool(file_registry, clients):
+    config = AgentConfig(provider="anthropic", tools=["spawn_subagent"])
+    factory = make_factory(clients, file_registry)
+    runtime = build_runtime(factory, config)
+
+    tool = runtime.tool_registry._tools["spawn_subagent"]
+    assert isinstance(tool, SpawnSubagentTool)
+    assert tool._agent_config is config
+    assert tool._runtime_builder.__self__ is factory
+    assert tool._log_dir == file_registry.policy.write_root / "artifacts" / "subagents" / "p1"
 
 
-def test_build_subagent_reuses_shared_file_registry(file_registry, clients):
-    config = AgentConfig(provider="anthropic", tools=[])
-    _, registry = build_subagent(config, clients, file_registry, "sys", "child", ["read_file", "edit_file"])
+def test_build_runtime_reuses_shared_file_registry(file_registry, clients):
+    config = AgentConfig(provider="anthropic", tools=["read_file", "edit_file"])
+    runtime = build_runtime(make_factory(clients, file_registry), config, owner_id="owner")
 
-    for tool in registry._tools.values():
+    for tool in runtime.tool_registry._tools.values():
         assert tool._registry is file_registry
-        assert tool._owner_id == "child"
-
-
-def test_build_subagent_recursion_guard(file_registry, clients):
-    config = AgentConfig.model_construct(provider="anthropic", tools=[])
-    with pytest.raises(ValueError):
-        build_subagent(config, clients, file_registry, "sys", "sub", ["spawn_subagent"])
+        assert tool._owner_id == "owner"
 
 
 async def test_shared_registry_does_not_share_parent_read_authorization(file_registry, clients, tmp_path):
@@ -108,77 +132,12 @@ async def test_shared_registry_does_not_share_parent_read_authorization(file_reg
     path.write_text("before", encoding="utf-8")
     file_registry.record("parent", str(path), "before")
 
-    _, registry = build_subagent(config, clients, file_registry, "sys", "parent.sub.001-child", ["edit_file"])
+    factory = make_factory(clients, file_registry)
+    child_config = config.model_copy(update={"tools": ["edit_file"]})
+    runtime = build_runtime(factory, child_config, system_prompt="sys", owner_id="parent.sub.001-child")
+    registry = runtime.tool_registry
     result = await registry.run("edit_file", {"path": str(path), "old_string": "before", "new_string": "after"})
 
     assert result.success is False
     assert "Not authorized" in result.error
     assert path.read_text(encoding="utf-8") == "before"
-
-
-# ---------------------------------------------------------------------------
-# Closures — verify delegation works and signatures are correct
-# ---------------------------------------------------------------------------
-
-
-def test_make_agent_builder(file_registry, clients):
-    config = AgentConfig(provider="anthropic", tools=[])
-    builder = make_agent_builder(config, clients, file_registry)
-    agent, registry = builder("sys", "p1", None, None)
-    assert isinstance(agent, AnthropicAgent)
-    assert agent.name == "p1"
-
-
-def test_make_subagent_builder(file_registry, clients):
-    config = AgentConfig(provider="anthropic", tools=[])
-    builder = make_subagent_builder(config, clients, file_registry)
-    agent, registry = builder("sys", "sub-1", [])
-    assert isinstance(agent, AnthropicAgent)
-    assert agent.name == "sub-1"
-
-
-# ---------------------------------------------------------------------------
-# make_goal_agent_builder
-# ---------------------------------------------------------------------------
-
-
-def test_goal_agent_builder_unknown_provider_raises(file_registry, clients):
-    config = AgentConfig.model_construct(provider="bad_provider", tools=[])
-    builder = make_goal_agent_builder(config, clients, file_registry)
-    with pytest.raises(ValueError, match="Unknown agent provider: 'bad_provider'"):
-        builder("phase.goal.task")
-
-
-def test_make_goal_agent_builder_filters_read_only_tools(file_registry, clients):
-    config = AgentConfig(
-        provider="anthropic",
-        tools=["read_file", "edit_file", "grep", "create_file"],
-    )
-    builder = make_goal_agent_builder(config, clients, file_registry)
-    agent, registry = builder("phase.goal.task")
-
-    assert isinstance(agent, AnthropicAgent)
-    assert agent.name == "phase.goal.task"
-    tool_names = {d["name"] for d in registry.definitions}
-    assert tool_names == {"read_file", "grep"}
-
-
-def test_make_goal_agent_builder_uses_default_model(file_registry, clients):
-    config = AgentConfig(
-        provider="anthropic",
-        tools=["read_file"],
-        model="claude-opus-4-7",
-        max_tokens=999,
-    )
-    builder = make_goal_agent_builder(config, clients, file_registry)
-    agent, _ = builder("phase.goal.task")
-
-    assert agent._model == DEFAULT_MODEL
-    assert agent._max_tokens == DEFAULT_MAX_TOKENS
-
-
-def test_make_goal_agent_builder_uses_reviewer_system_prompt(file_registry, clients):
-    config = AgentConfig(provider="anthropic", tools=["read_file"])
-    builder = make_goal_agent_builder(config, clients, file_registry)
-    agent, _ = builder("phase.goal.task")
-    assert agent._system_prompt == GOAL_REVIEWER_SYSTEM_PROMPT

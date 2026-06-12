@@ -3,15 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import asyncio
-from typing import Any
 
-from ddev.ai.agent.base import BaseAgent
+from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
-from ddev.ai.tools.registry import ToolRegistry
 
 
 class ReActProcess:
@@ -24,21 +22,19 @@ class ReActProcess:
 
     def __init__(
         self,
-        agent: BaseAgent[Any],
-        tool_registry: ToolRegistry,
+        runtime: AgentRuntime,
         callbacks: Callbacks | None = None,
         compact_threshold_pct: float | None = 75.0,
     ) -> None:
         """
         Args:
-            agent: A BaseAgent subclass (e.g. AnthropicAgent).
-            tool_registry: Registry of tools available in this loop.
+            runtime: Agent runtime containing the agent and its tool registry.
             callbacks: Optional Callbacks instance to observe loop events.
             compact_threshold_pct: Context usage percentage at which the loop auto-compacts.
                 None disables auto-compaction entirely.
         """
-        self._agent = agent
-        self._tool_registry = tool_registry
+        self._agent = runtime.agent
+        self._tool_registry = runtime.tool_registry
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._compact_threshold_pct = compact_threshold_pct
 

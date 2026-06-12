@@ -8,17 +8,16 @@ import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
+from ddev.ai.agent.build import AgentRuntimeFactory
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import TaskConfig
+from ddev.ai.phases.config import AgentConfig, TaskConfig
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.agents.agent_logger import AgentLogger
-
-if TYPE_CHECKING:
-    from ddev.ai.agent.build import GoalAgentBuilder
+from ddev.ai.tools.registry import filter_read_only
 
 GOAL_REVIEWER_SYSTEM_PROMPT = """\
 You are a strict, independent reviewer. Your only job is to verify whether a
@@ -258,7 +257,8 @@ async def run_goal_loop(
     rendered_task_prompt: str,
     worker_process: ReActProcess,
     initial_result: ReActResult,
-    goal_agent_builder: GoalAgentBuilder,
+    parent_agent_config: AgentConfig,
+    runtime_factory: AgentRuntimeFactory,
     callbacks: Callbacks,
     phase_id: str,
     log_root: Path,
@@ -278,7 +278,15 @@ async def run_goal_loop(
         raise OSError(f"Goal reviewer log directory could not be created at {log_dir}: {e}") from e
 
     reviewer_owner_id = f"{phase_id}.goal.{task.name}"
-    reviewer_agent, reviewer_registry = goal_agent_builder(reviewer_owner_id)
+    reviewer_config = AgentConfig(
+        provider=parent_agent_config.provider,
+        tools=filter_read_only(parent_agent_config.tools),
+    )
+    reviewer_runtime = runtime_factory.build_runtime(
+        agent_config=reviewer_config,
+        system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
+        owner_id=reviewer_owner_id,
+    )
 
     try:
         agent_logger = AgentLogger(log_path)
@@ -289,11 +297,10 @@ async def run_goal_loop(
         agent_logger.log_start(
             system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
             prompt=f"<goal loop for task {task.name!r}>",
-            tools=[d["name"] for d in reviewer_registry.definitions],
+            tools=[d["name"] for d in reviewer_runtime.tool_registry.definitions],
         )
         reviewer_process = ReActProcess(
-            agent=reviewer_agent,
-            tool_registry=reviewer_registry,
+            reviewer_runtime,
             callbacks=agent_logger.build_callbacks(),
         )
 
