@@ -47,7 +47,13 @@ def _recording_transport(label: str, sink: list[str]) -> httpx2.MockTransport:
     return httpx2.MockTransport(handler)
 
 
-def _served_by(no_proxy_uris: list[str], url: str) -> str:
+def _served_by(
+    no_proxy_uris: list[str],
+    url: str,
+    *,
+    env_schemes: set[str] | None = None,
+    env_no_proxy: list[str] | None = None,
+) -> str:
     """Route one request through _ProxyRoutingTransport with labelled inners; return the inner that served it."""
     sink: list[str] = []
     direct = _recording_transport('direct', sink)
@@ -55,7 +61,7 @@ def _served_by(no_proxy_uris: list[str], url: str) -> str:
         'http': _recording_transport('proxy-http', sink),
         'https': _recording_transport('proxy-https', sink),
     }
-    routing = _ProxyRoutingTransport(scheme_transports, direct, no_proxy_uris)
+    routing = _ProxyRoutingTransport(scheme_transports, direct, no_proxy_uris, env_schemes, env_no_proxy)
     routing.handle_request(httpx2.Request('GET', url))
     assert len(sink) == 1
     return sink[0]
@@ -204,11 +210,11 @@ def test_no_proxy_configured_keeps_trust_env_default_and_builds_no_router():
         pytest.param({'http': ''}, id='empty-scheme-value'),
     ],
 )
-def test_proxy_with_no_usable_scheme_keeps_trust_env_and_builds_no_router(proxy):
+def test_proxy_with_no_usable_scheme_keeps_trust_env_and_builds_no_router(proxy, clean_proxy_env):
     with mock.patch(AGENT_GET_CONFIG, return_value=None):
         http = HTTPX2Wrapper({'proxy': proxy}, {})
-    # No usable proxy URL: env proxies stay honored and no router is installed, rather than
-    # silently disabling both the proxy and HTTP_PROXY/HTTPS_PROXY.
+    # No usable proxy URL and no env proxy to fill from: env proxies stay honored and no router is
+    # installed, rather than silently disabling both the proxy and HTTP_PROXY/HTTPS_PROXY.
     assert http._client.trust_env is True
     assert not isinstance(http._client._transport, _ProxyRoutingTransport)
 
@@ -304,25 +310,27 @@ def test_env_proxies_empty_without_env(clean_proxy_env):
     assert _env_proxies() == {}
 
 
-def test_build_env_proxy_transport_merges_instance_and_env_no_proxy(clean_proxy_env):
+def test_build_env_proxy_transport_separates_instance_and_env_no_proxy_tiers(clean_proxy_env):
     clean_proxy_env.setenv('HTTP_PROXY', 'http://p:1')
     clean_proxy_env.setenv('NO_PROXY', 'env.example')
-    transport = _build_env_proxy_transport(['instance.example'], True, None)
+    transport = _build_env_proxy_transport(None, ['instance.example'], True, None)
     assert isinstance(transport, _ProxyRoutingTransport)
-    assert set(transport._no_proxy_uris) == {'instance.example', 'env.example'}
+    # Two distinct tiers: instance no_proxy bypasses every proxy; env NO_PROXY only env-filled schemes.
+    assert transport._no_proxy_uris == ['instance.example']
+    assert transport._env_no_proxy == ['env.example']
     transport.close()
 
 
 def test_build_env_proxy_transport_preserves_cidr_no_proxy(clean_proxy_env):
     clean_proxy_env.setenv('HTTP_PROXY', 'http://p:1')
-    transport = _build_env_proxy_transport(['10.0.0.0/25'], True, None)
+    transport = _build_env_proxy_transport(None, ['10.0.0.0/25'], True, None)
     assert '10.0.0.0/25' in transport._no_proxy_uris
     transport.close()
 
 
 def test_build_env_proxy_transport_none_without_env_proxy(clean_proxy_env, monkeypatch):
     monkeypatch.setattr(GET_ENV_PROXIES, lambda: {})
-    assert _build_env_proxy_transport(['internal.corp'], True, None) is None
+    assert _build_env_proxy_transport(None, ['internal.corp'], True, None) is None
 
 
 def test_no_proxy_uris_stored_on_wrapper():
@@ -334,3 +342,100 @@ def test_no_proxy_uris_none_when_no_proxy_configured():
     with mock.patch(AGENT_GET_CONFIG, return_value=None):
         http = HTTPX2Wrapper({}, {})
     assert http.no_proxy_uris is None
+
+
+# --- partial proxy block: the environment fills the scheme the instance left unset (Codex follow-up #2) ---
+
+
+def test_partial_instance_proxy_fills_other_scheme_from_env(clean_proxy_env):
+    clean_proxy_env.setenv('HTTPS_PROXY', 'http://envhttps:1')
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        with HTTPX2Wrapper({'proxy': {'http': 'http://inst:2'}}, {}) as http:
+            router = http._client._transport
+            assert isinstance(router, _ProxyRoutingTransport)
+            assert http._client.trust_env is False
+            # http stays on the instance proxy; https is filled from HTTPS_PROXY instead of going direct.
+            assert set(router._scheme_transports) == {'http', 'https'}
+            assert router._env_schemes == {'https'}
+
+
+def test_partial_instance_proxy_without_env_omits_other_scheme(clean_proxy_env):
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        with HTTPX2Wrapper({'proxy': {'http': 'http://inst:2'}}, {}) as http:
+            router = http._client._transport
+            assert isinstance(router, _ProxyRoutingTransport)
+            # No HTTPS_PROXY to fill from: https has no transport, so it falls through to direct.
+            assert set(router._scheme_transports) == {'http'}
+            assert router._env_schemes == set()
+
+
+def test_full_instance_proxy_ignores_env(clean_proxy_env):
+    clean_proxy_env.setenv('HTTP_PROXY', 'http://envhttp:1')
+    clean_proxy_env.setenv('HTTPS_PROXY', 'http://envhttps:1')
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        with HTTPX2Wrapper({'proxy': {'http': 'http://inst:2', 'https': 'http://inst:3'}}, {}) as http:
+            router = http._client._transport
+            # Both schemes are instance-configured, so nothing is attributed to the environment.
+            assert router._env_schemes == set()
+
+
+def test_skip_proxy_ignores_env_proxy(clean_proxy_env):
+    clean_proxy_env.setenv('HTTP_PROXY', 'http://envhttp:1')
+    with HTTPX2Wrapper({'skip_proxy': True}, {}) as http:
+        assert http._client.trust_env is False
+        assert not isinstance(http._client._transport, _ProxyRoutingTransport)
+
+
+def test_build_env_proxy_transport_fills_missing_scheme_from_env(clean_proxy_env):
+    clean_proxy_env.setenv('HTTPS_PROXY', 'http://envhttps:1')
+    transport = _build_env_proxy_transport({'http': 'http://inst:2'}, None, True, None)
+    assert set(transport._scheme_transports) == {'http', 'https'}
+    assert transport._env_schemes == {'https'}
+    transport.close()
+
+
+def test_build_env_proxy_transport_instance_wins_over_env_per_scheme(clean_proxy_env):
+    clean_proxy_env.setenv('HTTP_PROXY', 'http://envhttp:1')
+    clean_proxy_env.setenv('HTTPS_PROXY', 'http://envhttps:1')
+    transport = _build_env_proxy_transport({'http': 'http://inst:2'}, None, True, None)
+    # The instance owns http; only the scheme it left unset is env-filled.
+    assert transport._env_schemes == {'https'}
+    transport.close()
+
+
+# --- two-tier no_proxy routing: instance no_proxy bypasses all, env NO_PROXY only env-filled schemes ---
+
+
+def test_env_no_proxy_bypasses_env_filled_scheme():
+    assert _served_by([], 'https://internal.corp/', env_schemes={'https'}, env_no_proxy=['internal.corp']) == 'direct'
+
+
+def test_env_no_proxy_routes_external_host_through_env_proxy():
+    served = _served_by([], 'https://external.com/', env_schemes={'https'}, env_no_proxy=['internal.corp'])
+    assert served == 'proxy-https'
+
+
+def test_env_no_proxy_does_not_bypass_instance_scheme():
+    # http is instance-configured (not env-filled), so env NO_PROXY must not divert it.
+    served = _served_by([], 'http://internal.corp/', env_schemes={'https'}, env_no_proxy=['internal.corp'])
+    assert served == 'proxy-http'
+
+
+def test_explicit_scheme_ignores_env_no_proxy():
+    # https here is instance-configured; env NO_PROXY governs only env-filled schemes, so the proxy serves it.
+    served = _served_by([], 'https://internal.corp/', env_schemes=set(), env_no_proxy=['internal.corp'])
+    assert served == 'proxy-https'
+
+
+def test_instance_no_proxy_bypasses_every_scheme():
+    # Tier-1 instance no_proxy bypasses all proxies regardless of scheme attribution.
+    assert _served_by(['internal.corp'], 'https://internal.corp/', env_schemes={'https'}) == 'direct'
+    assert _served_by(['internal.corp'], 'http://internal.corp/', env_schemes={'https'}) == 'direct'
+
+
+def test_unconfigured_scheme_routes_direct():
+    sink: list[str] = []
+    direct = _recording_transport('direct', sink)
+    routing = _ProxyRoutingTransport({'http': _recording_transport('proxy-http', sink)}, direct, None)
+    routing.handle_request(httpx2.Request('GET', 'https://api.example.com/'))
+    assert sink == ['direct']
