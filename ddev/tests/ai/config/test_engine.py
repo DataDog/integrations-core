@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import sys
 import textwrap
 from pathlib import Path
 
@@ -602,6 +603,7 @@ def test_malformed_yaml_raises_flow_config_error(tmp_path):
         ConfigurationEngine(core_dir=tmp_path)
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="chmod is a no-op on Windows")
 def test_unreadable_file_raises_flow_config_error(tmp_path):
     bad = tmp_path / "bad.yaml"
     bad.write_text("- type: agent\n  config:\n    name: x\n")
