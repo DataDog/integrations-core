@@ -2,9 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
-from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig, VariableDeclaration
+from ddev.ai.config.models import (
+    AgentConfig,
+    AgentEnvelope,
+    FlowConfig,
+    FlowEnvelope,
+    PhaseConfig,
+    PhaseEnvelope,
+    ResourceEnvelope,
+    VariableDeclaration,
+)
 
 
 def test_variable_declaration_with_default():
@@ -31,7 +40,6 @@ def test_agent_config_minimal():
 
 
 def test_phase_config_class_field():
-    # 'class' is the YAML key; Python attribute is 'class_'
     p = PhaseConfig.model_validate({"name": "my_phase", "class": "AgenticPhase"})
     assert p.name == "my_phase"
     assert p.class_ == "AgenticPhase"
@@ -56,3 +64,26 @@ def test_flow_config_variables_are_values():
         }
     )
     assert f.variables == {"integration_name": "my_integration"}
+
+
+def test_agent_config_unknown_tool_raises():
+    with pytest.raises(ValidationError, match="Unknown tool names"):
+        AgentConfig.model_validate({"name": "a", "tools": ["teleport"]})
+
+
+def test_resource_envelope_agent_type():
+    adapter = TypeAdapter(ResourceEnvelope)
+    result = adapter.validate_python({"type": "agent", "config": {"name": "a"}})
+    assert isinstance(result, AgentEnvelope)
+
+
+def test_resource_envelope_phase_type():
+    adapter = TypeAdapter(ResourceEnvelope)
+    result = adapter.validate_python({"type": "phase", "config": {"name": "p"}})
+    assert isinstance(result, PhaseEnvelope)
+
+
+def test_resource_envelope_flow_type():
+    adapter = TypeAdapter(ResourceEnvelope)
+    result = adapter.validate_python({"type": "flow", "config": {"name": "f", "flow": []}})
+    assert isinstance(result, FlowEnvelope)
