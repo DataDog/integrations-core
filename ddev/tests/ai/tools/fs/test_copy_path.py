@@ -127,6 +127,64 @@ async def test_copy_read_denied(tmp_path) -> None:
     assert result.error is not None
 
 
+async def test_copy_file_no_overwrite_by_default(copy_tool: CopyPathTool, tmp_path) -> None:
+    src = tmp_path / "src.txt"
+    dst = tmp_path / "dst.txt"
+    src.write_text("new content", encoding="utf-8")
+    dst.write_text("original content", encoding="utf-8")
+
+    result = await copy_tool.run({"source": str(src), "destination": str(dst)})
+
+    assert result.success is False
+    assert "overwrite=True" in result.hint
+    assert dst.read_text(encoding="utf-8") == "original content"
+
+
+async def test_copy_file_overwrite_flag_replaces_existing(copy_tool: CopyPathTool, tmp_path) -> None:
+    src = tmp_path / "src.txt"
+    dst = tmp_path / "dst.txt"
+    src.write_text("new content", encoding="utf-8")
+    dst.write_text("original content", encoding="utf-8")
+
+    result = await copy_tool.run({"source": str(src), "destination": str(dst), "overwrite": True})
+
+    assert result.success is True
+    assert dst.read_text(encoding="utf-8") == "new content"
+
+
+async def test_copy_directory_no_overwrite_reports_conflicts(copy_tool: CopyPathTool, tmp_path) -> None:
+    src = tmp_path / "src_dir"
+    src.mkdir()
+    (src / "conflict.txt").write_text("new", encoding="utf-8")
+    (src / "new.txt").write_text("also new", encoding="utf-8")
+
+    dst = tmp_path / "dst_dir"
+    dst.mkdir()
+    (dst / "conflict.txt").write_text("original", encoding="utf-8")
+
+    result = await copy_tool.run({"source": str(src), "destination": str(dst)})
+
+    assert result.success is False
+    assert "overwrite=True" in result.hint
+    assert "conflict.txt" in result.error
+    assert (dst / "conflict.txt").read_text(encoding="utf-8") == "original"
+
+
+async def test_copy_directory_overwrite_flag_replaces_conflicts(copy_tool: CopyPathTool, tmp_path) -> None:
+    src = tmp_path / "src_dir"
+    src.mkdir()
+    (src / "conflict.txt").write_text("new", encoding="utf-8")
+
+    dst = tmp_path / "dst_dir"
+    dst.mkdir()
+    (dst / "conflict.txt").write_text("original", encoding="utf-8")
+
+    result = await copy_tool.run({"source": str(src), "destination": str(dst), "overwrite": True})
+
+    assert result.success is True
+    assert (dst / "conflict.txt").read_text(encoding="utf-8") == "new"
+
+
 async def test_copy_directory_denied_child_is_rejected(tmp_path) -> None:
     # write_root is a subdirectory; src lives outside it so deny patterns apply to its contents.
     write_root = tmp_path / "write_root"

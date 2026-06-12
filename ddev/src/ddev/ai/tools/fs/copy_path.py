@@ -22,6 +22,13 @@ class CopyPathInput(BaseToolInput):
             " for a directory source it is the target directory."
         ),
     ]
+    overwrite: Annotated[
+        bool,
+        Field(
+            description="If True, overwrite existing files at the destination. "
+            "Defaults to False; set to True only when you are sure you want to replace existing files.",
+        ),
+    ] = False
 
 
 class CopyPathTool(BaseTool[CopyPathInput]):
@@ -56,10 +63,32 @@ class CopyPathTool(BaseTool[CopyPathInput]):
 
         try:
             if source.is_dir():
+                if not tool_input.overwrite:
+                    conflicts = [
+                        str(destination / p.relative_to(source))
+                        for p in source.rglob("*")
+                        if p.is_file() and (destination / p.relative_to(source)).exists()
+                    ]
+                    if conflicts:
+                        listed = "\n".join(f"  {c}" for c in conflicts)
+                        return ToolResult(
+                            success=False,
+                            error=(
+                                f"Copy aborted: {len(conflicts)} file(s) already exist at the destination "
+                                f"and would be overwritten:\n{listed}"
+                            ),
+                            hint="Set overwrite=True to replace them.",
+                        )
                 shutil.copytree(source, destination, dirs_exist_ok=True)
                 file_count = sum(1 for p in source.rglob("*") if p.is_file())
                 return ToolResult(success=True, data=f"Copied directory tree to {destination} ({file_count} files).")
             destination.parent.mkdir(parents=True, exist_ok=True)
+            if not tool_input.overwrite and destination.exists():
+                return ToolResult(
+                    success=False,
+                    error=(f"Copy aborted: destination already exists: {destination}. "),
+                    hint="Set overwrite=True to replace it.",
+                )
             shutil.copy2(source, destination)
             size = Path(destination).stat().st_size
             return ToolResult(success=True, data=f"Copied file to {destination} ({size} bytes).")
