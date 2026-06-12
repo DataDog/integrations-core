@@ -7,9 +7,14 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.engine import ConfigurationEngine
+from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.config import FlowConfigError
-from ddev.ai.phases.messages import PhaseFailedMessage
-from ddev.ai.phases.registry import PhaseRegistry
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+from ddev.ai.runtime.agent_log import AgentLogger
+from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
@@ -18,7 +23,8 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 class PhaseOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
-        flow_yaml_path: Path,
+        engine: ConfigurationEngine,
+        flow_name: str,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
         agent_clients: dict[str, Any],
@@ -45,7 +51,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
             grace_period=grace_period,
             max_timeout=max_timeout,
         )
-        self._flow_yaml_path = flow_yaml_path
+        self._engine = engine
+        self._flow_name = flow_name
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
         self._agent_clients = agent_clients
@@ -57,8 +64,60 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._failed_error: str | None = None
 
     async def on_initialize(self) -> None:
-        """Stub pending migration to ConfigurationEngine (Task 5)."""
-        raise FlowConfigError("PhaseOrchestrator.on_initialize requires migration to ConfigurationEngine (Task 5)")
+        discover_and_register_phases(
+            self._phase_registry,
+            Path(__file__).parent.parent / "phases",
+            "ddev.ai.phases",
+        )
+
+        resolved = self._engine.build_flow(self._flow_name)
+
+        flow_phase_ids = {entry.phase for entry in resolved.flow}
+        for phase_id, phase_config in resolved.phases.items():
+            if phase_id not in flow_phase_ids:
+                self._logger.warning("Phase %r is defined but not referenced in flow — it will not run", phase_id)
+                continue
+            try:
+                phase_cls = self._phase_registry.get(phase_config.class_)
+            except ValueError as e:
+                raise FlowConfigError(str(e)) from e
+            phase_cls.validate_config(phase_id, phase_config, resolved.agents)
+
+        checkpoint_manager = CheckpointManager(self._checkpoint_path)
+        dependency_map = {entry.phase: entry.dependencies for entry in resolved.flow}
+
+        self._agent_logger = AgentLogger(checkpoint_manager.root)
+        run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
+
+        self._resources = RunResources(
+            agent_clients=self._agent_clients,
+            file_access_policy=self._file_access_policy,
+            agents=resolved.agents,
+            callbacks=run_callbacks,
+        )
+        context = FlowContext(
+            runtime_variables=self._runtime_variables,
+            flow_variables=resolved.variables,
+            callbacks=run_callbacks,
+            logger=self._logger,
+        )
+
+        for entry in resolved.flow:
+            phase_id = entry.phase
+            phase_config = resolved.phases[phase_id]
+            deps = dependency_map[phase_id]
+            phase_cls = self._phase_registry.get(phase_config.class_)
+            phase = phase_cls.build(
+                phase_id=phase_id,
+                config=phase_config,
+                deps=deps,
+                resources=self._resources,
+                checkpoint_manager=checkpoint_manager,
+                context=context,
+            )
+            self.register_processor(phase, [PhaseTrigger])
+
+        self.submit_message(PhaseTrigger(id="start", phase_id=None))
 
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""
