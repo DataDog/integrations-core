@@ -184,9 +184,9 @@ class MesosMaster(AgentCheck):
             else:
                 status = AgentCheck.OK
                 msg = "Mesos master instance detected at {} ".format(url)
-        # requests.exceptions.Timeout is a transition shim for the httpx2 migration, drop once requests is gone.
         except (requests.exceptions.Timeout, HTTPTimeoutError):
-            # If there's a timeout
+            # On timeout. requests.exceptions.Timeout is a transition shim for the
+            # httpx2 migration; drop it once requests is gone.
             msg = "{} seconds timeout when hitting {}".format(self.http.options['timeout'], url)
             status = AgentCheck.CRITICAL
         except Exception as e:
