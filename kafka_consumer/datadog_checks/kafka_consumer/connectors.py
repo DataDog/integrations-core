@@ -21,42 +21,6 @@ CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
 CONNECTOR_PLUGINS_EVENT_CACHE_KEY = 'kafka_connector_plugins_event_cache'
 CONNECTOR_CONFIG_CACHE_MAX_SIZE = 5_000
 
-IMPORTANT_CONNECTOR_CONFIG_KEYS = [
-    'connector.class',
-    'tasks.max',
-    'topics',
-    'topics.regex',
-    'topic.prefix',
-    'key.converter',
-    'value.converter',
-    'key.converter.schema.registry.url',
-    'value.converter.schema.registry.url',
-    'header.converter',
-    'errors.tolerance',
-    'errors.retry.delay.max.ms',
-    'errors.retry.timeout',
-    'errors.deadletterqueue.topic.name',
-    'errors.deadletterqueue.context.headers.enable',
-    'transforms',
-    'predicates',
-    'source.cluster.alias',
-    'target.cluster.alias',
-    'source.cluster.bootstrap.servers',
-    'target.cluster.bootstrap.servers',
-    'replication.factor',
-    'connection.url',
-    'connection.host',
-    'connection.port',
-    'database.hostname',
-    'database.port',
-    'database.dbname',
-    'database.server.name',
-    'aws.region',
-    's3.bucket.name',
-    'topic.creation.default.replication.factor',
-    'topic.creation.default.partitions',
-]
-
 
 def _short_class_name(full_class: str) -> str:
     """Return the rightmost component of a fully-qualified Java class name."""
@@ -292,7 +256,7 @@ class KafkaConnectCollector(EventCacheMixin):
             tasks = status.get('tasks') or []
             raw_config = info.get('config') or {}
 
-            truncated_config = self._truncate_connector_config(raw_config)
+            redacted_config = {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in raw_config.items()}
 
             # Exclude collection_timestamp from hashed content so the hash is stable
             # across cycles and dedup actually fires on unchanged configs.
@@ -305,7 +269,7 @@ class KafkaConnectCollector(EventCacheMixin):
                 'task_count': len(tasks),
                 'connect_url': url,
                 'config_type': 'connector',
-                'config': truncated_config,
+                'config': redacted_config,
             }
             connector_contents[name] = json.dumps(content, sort_keys=True)
 
@@ -320,26 +284,6 @@ class KafkaConnectCollector(EventCacheMixin):
             event = json.loads(connector_contents[name])
             event['collection_timestamp'] = collection_timestamp
             self.check.event_platform_event(json.dumps(event), 'data-streams-message')
-
-    def _truncate_connector_config(self, config: dict) -> dict:
-        important: dict[str, str] = {}
-        rest: dict[str, str] = {}
-
-        for key, value in config.items():
-            if key in IMPORTANT_CONNECTOR_CONFIG_KEYS:
-                important[key] = value
-            else:
-                rest[key] = value
-
-        selected = [(k, important[k]) for k in IMPORTANT_CONNECTOR_CONFIG_KEYS if k in important]
-        remaining_slots = 30 - len(selected)
-        for key in sorted(rest.keys()):
-            if remaining_slots <= 0:
-                break
-            selected.append((key, rest[key]))
-            remaining_slots -= 1
-
-        return {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in selected}
 
     def _collect_plugins(self, url: str, cluster_id: str) -> None:
         safe_url = quote(url, safe='')

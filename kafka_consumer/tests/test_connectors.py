@@ -115,32 +115,39 @@ def test_short_class_name(full_class, expected):
 
 
 # ---------------------------------------------------------------------------
-# _truncate_connector_config
+# Sensitive key redaction in config events
 # ---------------------------------------------------------------------------
 
 
-def test_truncate_connector_config_important_keys_first():
-    collector, _, _, _ = make_collector()
-    cfg = {
-        'connector.class': 'io.confluent.SomeSink',
-        'tasks.max': '3',
-        'random.key.a': 'va',
-        'random.key.b': 'vb',
+def test_sensitive_keys_redacted_in_config_event():
+    """Full config is captured but sensitive keys are replaced with [hidden]."""
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    connectors_data = {
+        'my-sink': {
+            'info': {
+                'type': 'sink',
+                'config': {
+                    'connector.class': 'io.confluent.SomeSink',
+                    'connection.password': 'secret123',
+                    'sasl.jaas.config': 'org.apache.kafka.common.security.plain.PlainLoginModule ...',
+                    'tasks.max': '2',
+                    'topics': 'orders',
+                },
+            },
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        }
     }
-    result = collector._truncate_connector_config(cfg)
-    keys = list(result.keys())
-    assert keys.index('connector.class') < keys.index('random.key.a')
-    assert 'connector.class' in result
-    assert 'tasks.max' in result
 
+    collector._emit_connector_config_events(connectors_data, 'cluster-1', 'http://localhost:8083')
+    assert check.event_platform_event.call_count == 1
 
-def test_truncate_connector_config_cap_at_30():
-    collector, _, _, _ = make_collector()
-    cfg = {f'key.{i}': str(i) for i in range(50)}
-    cfg['connector.class'] = 'SomeClass'
-    result = collector._truncate_connector_config(cfg)
-    assert len(result) == 30
-    assert 'connector.class' in result
+    payload = json.loads(check.event_platform_event.call_args[0][0])
+    cfg = payload['config']
+    assert cfg['connection.password'] == '[hidden]'
+    assert cfg['sasl.jaas.config'] == '[hidden]'
+    assert cfg['connector.class'] == 'io.confluent.SomeSink'
+    assert cfg['topics'] == 'orders'
+    assert cfg['tasks.max'] == '2'
 
 
 # ---------------------------------------------------------------------------
