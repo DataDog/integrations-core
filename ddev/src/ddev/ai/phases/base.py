@@ -9,7 +9,6 @@ from abc import abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
@@ -29,7 +28,6 @@ class FlowContext:
 
     runtime_variables: dict[str, str]
     flow_variables: dict[str, str]
-    config_dir: Path
     callbacks: Callbacks = field(default_factory=Callbacks)
     logger: logging.Logger = field(default_factory=lambda: logging.getLogger(__name__))
 
@@ -64,7 +62,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._checkpoint_manager = checkpoint_manager
         self._runtime_variables = context.runtime_variables
         self._flow_variables = context.flow_variables
-        self._config_dir = context.config_dir
         self._callbacks = context.callbacks
         self._logger = context.logger
         self._started_at: datetime | None = None

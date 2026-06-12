@@ -172,7 +172,6 @@ def make_agent_phase(
     context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
-        config_dir=flow_dir,
         callbacks=effective_callbacks,
     )
 
@@ -188,7 +187,8 @@ def make_agent_phase(
         config=config,
         checkpoint_manager=checkpoint_manager,
         context=context,
-        agent_config=agent_config or AgentConfig(name="writer", tools=[]),
+        agent_config=agent_config
+        or AgentConfig(name="writer", tools=[], system_prompt_path=flow_dir / "prompts" / "writer.md"),
         process_factory=process_factory,
     )
     phase.queue = message_queue
@@ -219,7 +219,6 @@ def flow_context(flow_dir):
     return FlowContext(
         runtime_variables={},
         flow_variables={},
-        config_dir=flow_dir,
     )
 
 

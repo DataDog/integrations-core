@@ -7,7 +7,6 @@ from __future__ import annotations
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -111,13 +110,12 @@ class GoalLoopOutcome:
 
 def render_goal_text(
     task: TaskConfig,
-    config_dir: Path,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None,
 ) -> str:
     """Render the goal — from file if goal_path is set, inline otherwise."""
     if task.goal_path is not None:
-        return render_prompt(config_dir / task.goal_path, context, resolver)
+        return render_prompt(task.goal_path, context, resolver)
     assert task.goal is not None  # caller checks
     return render_inline(task.goal, context, resolver)
 

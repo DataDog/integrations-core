@@ -108,7 +108,6 @@ def _make_phase(
     context = FlowContext(
         runtime_variables=runtime_variables if runtime_variables is not None else {"endpoint_url": ENDPOINT_URL},
         flow_variables={},
-        config_dir=flow_dir,
     )
     phase = InspectEndpointPhase(
         phase_id=phase_id,

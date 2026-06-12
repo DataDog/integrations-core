@@ -71,7 +71,6 @@ def test_parse_reviewer_output_rejects(text):
 def test_render_goal_text_inline_and_path(tmp_path):
     inline = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="check ${name}"),
-        tmp_path,
         {"name": "Alice"},
         None,
     )
@@ -79,8 +78,7 @@ def test_render_goal_text_inline_and_path(tmp_path):
 
     (tmp_path / "goal.md").write_text("verify ${target}")
     from_file = render_goal_text(
-        TaskConfig(name="t", prompt="x", goal_path="goal.md"),
-        tmp_path,
+        TaskConfig(name="t", prompt="x", goal_path=tmp_path / "goal.md"),
         {"target": "endpoint"},
         None,
     )
@@ -90,7 +88,6 @@ def test_render_goal_text_inline_and_path(tmp_path):
 def test_render_goal_text_forwards_resolver(tmp_path):
     result = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="see ${draft_memory}"),
-        tmp_path,
         {},
         resolve_key,
     )
