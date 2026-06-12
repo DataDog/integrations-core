@@ -33,7 +33,6 @@ from datadog_checks.base.utils.tracking import tracked_method
 
 from .util import (
     DatabaseConfigurationError,
-    ManagedAuthConnectionMixin,
     StatementTruncationState,
     get_truncation_state,
     warning_with_tags,
@@ -203,12 +202,12 @@ ExplainState = namedtuple('ExplainState', ['strategy', 'error_code', 'error_mess
 EMPTY_EXPLAIN_STATE = ExplainState(strategy=None, error_code=None, error_message=None)
 
 
-class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
+class MySQLStatementSamples(DBMAsyncJob):
     """
     Collects statement samples and execution plans.
     """
 
-    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
+    def __init__(self, check, config):
         collection_interval = float(config.statement_metrics_config.get('collection_interval', 1))
         if collection_interval <= 0:
             collection_interval = 1
@@ -221,15 +220,11 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             job_name="statement-samples",
-            shutdown_callback=self._close_db_conn,
+            shutdown_callback=lambda: check._connection_manager.close("statement-samples"),
         )
         self._config = config
         self._version_processed = False
-        self._connection_args_provider = connection_args_provider
-        self._uses_managed_auth = uses_managed_auth
-        self._db_created_at = 0
         self._last_check_run = 0
-        self._db = None
         self._check = check
         self._configured_collection_interval = self._config.statement_samples_config.get('collection_interval', -1)
         self._events_statements_row_limit = self._config.statement_samples_config.get(
@@ -290,15 +285,6 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 self._global_status_table = "performance_schema.global_status"
             self._version_processed = True
 
-    def _close_db_conn(self):
-        if self._db:
-            try:
-                self._db.close()
-            except Exception:
-                self._log.debug("Failed to close db connection", exc_info=1)
-            finally:
-                self._db = None
-
     def _use_schema(self, cursor, schema, explain_state_cache_key):
         """
         Try to use the schema (if provided), caching errors to avoid excessive futile re-attempts
@@ -346,7 +332,10 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def _get_new_events_statements_current(self):
         start = time.time()
-        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterDictCursor)) as cursor,
+        ):
             self._cursor_run(
                 cursor,
                 "set @uptime = {}".format(UPTIME_SUBQUERY.format(global_status_table=self._global_status_table)),
@@ -414,7 +403,10 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         if not self._explained_statements_ratelimiter.acquire(query_cache_key):
             return None
 
-        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterCursor)) as cursor,
+        ):
             plan, error_states = self._explain_statement(
                 cursor, row['sql_text'], row['current_schema'], obfuscated_statement, query_signature
             )
@@ -512,7 +504,10 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         I.e. (events_statements_current, events_statements_history)
         :return:
         """
-        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterCursor)) as cursor,
+        ):
             self._cursor_run(cursor, ENABLED_STATEMENTS_CONSUMERS_QUERY)
             return {r[0] for r in cursor.fetchall()}
 
@@ -522,7 +517,10 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         Returns True if at least one statement instrument has TIMED = 'YES'
         :return: bool
         """
-        with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterCursor)) as cursor,
+        ):
             self._cursor_run(cursor, EVENTS_STATEMENTS_TIME_INSTRUMENTATION_QUERY)
             result = cursor.fetchone()
             return result[0] > 0 if result else False
@@ -533,7 +531,10 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         :return:
         """
         try:
-            with closing(self._get_db_connection().cursor(CommenterCursor)) as cursor:
+            with (
+                self._check._connection_manager.get_connection(self._job_name) as db,
+                closing(db.cursor(CommenterCursor)) as cursor,
+            ):
                 self._cursor_run(cursor, 'CALL {}()'.format(self._events_statements_enable_procedure))
         except pymysql.err.DatabaseError as e:
             self._log.debug(

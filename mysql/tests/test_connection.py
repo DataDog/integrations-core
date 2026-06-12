@@ -20,7 +20,7 @@ def test_connection_with_defaults_file():
         'defaults_file': '/foo/bar',
     }
     check = MySql(common.CHECK_NAME, {}, [file_instance])
-    connection_args = check._get_connection_args()
+    connection_args = check.build_connection_args().as_kwargs()
     assert connection_args == {
         'autocommit': True,
         'ssl': None,
@@ -40,7 +40,7 @@ def test_connection_with_sock():
         'sock': '/foo/bar',
     }
     check = MySql(common.CHECK_NAME, {}, [file_instance])
-    connection_args = check._get_connection_args()
+    connection_args = check.build_connection_args().as_kwargs()
     assert connection_args == {
         'autocommit': True,
         'ssl': None,
@@ -60,7 +60,7 @@ def test_connection_with_host():
         'pass': 'pwd',
     }
     check = MySql(common.CHECK_NAME, {}, [file_instance])
-    connection_args = check._get_connection_args()
+    connection_args = check.build_connection_args().as_kwargs()
     assert connection_args == {
         'autocommit': True,
         'ssl': None,
@@ -75,7 +75,7 @@ def test_connection_with_host():
 def test_connection_with_host_and_port():
     file_instance = {'host': 'localhost', 'user': 'ddog', 'pass': 'pwd', 'port': '123'}
     check = MySql(common.CHECK_NAME, {}, [file_instance])
-    connection_args = check._get_connection_args()
+    connection_args = check.build_connection_args().as_kwargs()
     assert connection_args == {
         'autocommit': True,
         'ssl': None,
@@ -93,7 +93,7 @@ def test_connection_with_charset(instance_basic):
     instance['charset'] = 'utf8mb4'
     check = MySql(common.CHECK_NAME, {}, [instance])
 
-    connection_args = check._get_connection_args()
+    connection_args = check.build_connection_args().as_kwargs()
     assert connection_args == {
         'autocommit': True,
         'host': common.HOST,
