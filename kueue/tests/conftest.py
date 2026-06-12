@@ -16,6 +16,21 @@ from .common import MOCKED_INSTANCE
 
 HERE = get_here()
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
+KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
+
+
+def wait_for_controller():
+    run_command(
+        [
+            'kubectl',
+            'wait',
+            'deployment/kueue-controller-manager',
+            '--for=condition=Available',
+            '-n',
+            KUEUE_NAMESPACE,
+            '--timeout=300s',
+        ]
+    )
 
 
 def setup_kueue():
@@ -28,17 +43,15 @@ def setup_kueue():
             f'https://github.com/kubernetes-sigs/kueue/releases/download/{KUEUE_VERSION}/manifests.yaml',
         ]
     )
-    run_command(
-        [
-            'kubectl',
-            'wait',
-            'deployment/kueue-controller-manager',
-            '--for=condition=Available',
-            '-n',
-            'kueue-system',
-            '--timeout=300s',
-        ]
-    )
+
+    # Ensure the controller is ready
+    wait_for_controller()
+
+    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'kueue-config.yaml')])
+    # Restart the controller to pick up the new config
+    run_command(['kubectl', 'rollout', 'restart', 'deployment/kueue-controller-manager', '-n', KUEUE_NAMESPACE])
+    wait_for_controller()
+
     run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'metrics-reader.yaml')])
     # The deployment can be `Available` before the webhook server is actually serving, so wait until the
     # webhook service has ready endpoints before applying resources that go through the mutating webhooks.
@@ -49,7 +62,7 @@ def setup_kueue():
             '--for=jsonpath={.subsets[*].addresses[*].ip}',
             'endpoints/kueue-webhook-service',
             '-n',
-            'kueue-system',
+            KUEUE_NAMESPACE,
             '--timeout=300s',
         ]
     )
@@ -58,6 +71,9 @@ def setup_kueue():
     run_command(
         ['kubectl', 'wait', 'localqueue/user-queue', '-n', 'default', '--for=condition=Active', '--timeout=300s']
     )
+    run_command(['kubectl', 'apply', '-f', os.path.join(HERE, 'kind', 'workloads.yaml')])
+    wait_for_job_workload_condition('scheduled-workload', 'Admitted=True')
+    wait_for_job_workload_condition('unschedulable-workload', 'QuotaReserved=False')
 
 
 def apply_queue_manifests():
@@ -73,6 +89,44 @@ def apply_queue_manifests():
             last_error = e
             time.sleep(5)
     raise RuntimeError(f'Failed to apply queue manifests after retries: {last_error}')
+
+
+def wait_for_job_workload_condition(job_name: str, condition: str) -> None:
+    job_uid = run_command(
+        ['kubectl', 'get', 'job', job_name, '-n', 'default', '-o', 'jsonpath={.metadata.uid}'], capture=True
+    ).stdout.strip()
+    workload_name = ''
+    for _ in range(10):
+        workload_name = run_command(
+            [
+                'kubectl',
+                'get',
+                'workloads.kueue.x-k8s.io',
+                '-n',
+                'default',
+                '-l',
+                f'kueue.x-k8s.io/job-uid={job_uid}',
+                '-o',
+                'jsonpath={.items[0].metadata.name}',
+            ],
+            capture=True,
+        ).stdout.strip()
+        if workload_name:
+            break
+        time.sleep(1)
+    if not workload_name:
+        raise RuntimeError(f'Failed to find Kueue Workload for Job {job_name}')
+    run_command(
+        [
+            'kubectl',
+            'wait',
+            f'workload/{workload_name}',
+            '-n',
+            'default',
+            f'--for=condition={condition}',
+            '--timeout=300s',
+        ]
+    )
 
 
 def get_service_account_token():

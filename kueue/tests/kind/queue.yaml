@@ -17,9 +17,9 @@ spec:
     - name: default-flavor
       resources:
       - name: cpu
-        nominalQuota: 9
+        nominalQuota: 1
       - name: memory
-        nominalQuota: 36Gi
+        nominalQuota: 1Gi
 ---
 apiVersion: kueue.x-k8s.io/v1beta2
 kind: LocalQueue
