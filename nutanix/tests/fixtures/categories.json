@@ -340,6 +340,111 @@
           "$fv": "v4.r1"
         },
         "$objectType": "prism.v4.config.Category",
+        "extId": "7bc6c5cc-17cb-30a1-a241-6ec3f6df9226",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/7bc6c5cc-17cb-30a1-a241-6ec3f6df9226",
+            "rel": "self"
+          }
+        ],
+        "key": "category_name",
+        "value": "test1",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "99746a4b-82aa-3b55-8820-82811ff13b76",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/99746a4b-82aa-3b55-8820-82811ff13b76",
+            "rel": "self"
+          }
+        ],
+        "key": "category_name",
+        "value": "test2",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "d376dd80-4959-3e3e-8dc1-ebf21488dcf4",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/d376dd80-4959-3e3e-8dc1-ebf21488dcf4",
+            "rel": "self"
+          }
+        ],
+        "key": "cluster_category",
+        "value": "cluster_value1",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "9513da33-7dc1-3a69-beb4-d10c76a5546f",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/9513da33-7dc1-3a69-beb4-d10c76a5546f",
+            "rel": "self"
+          }
+        ],
+        "key": "cluster_category",
+        "value": "cluster_value2",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "abae9b6a-e906-33e6-8236-a1620dc62658",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/abae9b6a-e906-33e6-8236-a1620dc62658",
+            "rel": "self"
+          }
+        ],
+        "key": "cluster_category",
+        "value": "cluster_value3",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
         "extId": "c1e404a3-de7d-524a-ae7a-9ede9aba3421",
         "links": [
           {
@@ -417,6 +522,69 @@
         "value": "Testing",
         "type": "SYSTEM",
         "description": "Testing Environment"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "bf39201c-1df3-3bc6-826c-1e454fe1d56a",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/bf39201c-1df3-3bc6-826c-1e454fe1d56a",
+            "rel": "self"
+          }
+        ],
+        "key": "host_category",
+        "value": "host_value1",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "644cd768-dd10-3ef1-a9d7-572e4ee34f12",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/644cd768-dd10-3ef1-a9d7-572e4ee34f12",
+            "rel": "self"
+          }
+        ],
+        "key": "host_category",
+        "value": "host_value2",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "0834f43d-1402-3dac-bd73-a5fbedc90b1a",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/0834f43d-1402-3dac-bd73-a5fbedc90b1a",
+            "rel": "self"
+          }
+        ],
+        "key": "host_category",
+        "value": "host_value3",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
       },
       {
         "$reserved": {
@@ -821,6 +989,132 @@
           "$fv": "v4.r1"
         },
         "$objectType": "prism.v4.config.Category",
+        "extId": "fd10937c-88f8-3239-bde5-3ad3d0ffd8aa",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/fd10937c-88f8-3239-bde5-3ad3d0ffd8aa",
+            "rel": "self"
+          }
+        ],
+        "key": "vm_category",
+        "value": "vm_value1",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "d2b89652-50da-3902-97ff-9b13c4d070de",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/d2b89652-50da-3902-97ff-9b13c4d070de",
+            "rel": "self"
+          }
+        ],
+        "key": "vm_category",
+        "value": "vm_value2",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      },
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
+        "extId": "dfb0ec88-9982-3611-8001-a0c6c66e4075",
+        "links": [
+          {
+            "$reserved": {
+              "$fv": "v1.r0"
+            },
+            "$objectType": "common.v1.response.ApiLink",
+            "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories/dfb0ec88-9982-3611-8001-a0c6c66e4075",
+            "rel": "self"
+          }
+        ],
+        "key": "vm_category",
+        "value": "vm_value3",
+        "type": "USER",
+        "ownerUuid": "773ffab1-a60b-52e7-bdab-a62c75151cb1"
+      }
+    ],
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "prism.v4.config.ListCategoriesApiResponse",
+    "metadata": {
+      "flags": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "hasError",
+          "value": false
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isPaginated",
+          "value": true
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isTruncated",
+          "value": false
+        }
+      ],
+      "$reserved": {
+        "$fv": "v1.r0"
+      },
+      "$objectType": "common.v1.response.ApiResponseMetadata",
+      "links": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.response.ApiLink",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=1&$limit=50",
+          "rel": "next"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=1&$limit=50",
+          "rel": "last"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "rel": "self"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "rel": "first"
+        }
+      ],
+      "totalAvailableResults": 52
+    }
+  },
+  {
+    "data": [
+      {
+        "$reserved": {
+          "$fv": "v4.r1"
+        },
+        "$objectType": "prism.v4.config.Category",
         "extId": "342d6f64-87c3-5c22-9aef-cf54b5fbdce4",
         "links": [
           {
@@ -900,19 +1194,84 @@
             "$fv": "v1.r0"
           },
           "$objectType": "common.v1.response.ApiLink",
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=1&%2524limit=50&$page=1&$limit=50",
+          "rel": "next"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=1&%2524limit=50&$page=1&$limit=50",
           "rel": "last"
         },
         {
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=1&%2524limit=50&$page=0&$limit=50",
           "rel": "self"
         },
         {
-          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=0&%2524limit=50&$page=0&$limit=50",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=1&%2524limit=50&$page=0&$limit=50",
           "rel": "first"
         }
       ],
-      "totalAvailableResults": 41
+      "totalAvailableResults": 52
+    }
+  },
+  {
+    "$reserved": {
+      "$fv": "v4.r1"
+    },
+    "$objectType": "prism.v4.config.ListCategoriesApiResponse",
+    "metadata": {
+      "flags": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "hasError",
+          "value": false
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isPaginated",
+          "value": true
+        },
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.config.Flag",
+          "name": "isTruncated",
+          "value": false
+        }
+      ],
+      "$reserved": {
+        "$fv": "v1.r0"
+      },
+      "$objectType": "common.v1.response.ApiResponseMetadata",
+      "links": [
+        {
+          "$reserved": {
+            "$fv": "v1.r0"
+          },
+          "$objectType": "common.v1.response.ApiLink",
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=2&%2524limit=50&$page=1&$limit=50",
+          "rel": "next"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=2&%2524limit=50&$page=1&$limit=50",
+          "rel": "last"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=2&%2524limit=50&$page=0&$limit=50",
+          "rel": "self"
+        },
+        {
+          "href": "https://nutanix.local:9440/api/prism/v4.0/config/categories?%2524page=2&%2524limit=50&$page=0&$limit=50",
+          "rel": "first"
+        }
+      ],
+      "totalAvailableResults": 52
     }
   }
 ]

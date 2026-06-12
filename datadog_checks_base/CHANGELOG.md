@@ -2,6 +2,66 @@
 
 <!-- towncrier release notes start -->
 
+## 37.40.0 / 2026-06-09
+
+***Added***:
+
+* Add ``AgentCheck.submit_generic_resource`` to submit resource snapshots on the ``genresources`` event-platform track with allow-list field selection. ([#23905](https://github.com/DataDog/integrations-core/pull/23905))
+
+***Fixed***:
+
+* Fix ``resolve_db_host`` treating loopback IP literals (e.g. ``::1``) as DNS resolution failures, which caused database checks to submit metrics with the wrong host tag and miss agent host tags. ([#23849](https://github.com/DataDog/integrations-core/pull/23849))
+
+## 37.39.1 / 2026-06-08
+
+***Fixed***:
+
+* Send each logical database as its own independent schema snapshot, so an error or partial collection for one database does not affect others. ([#23913](https://github.com/DataDog/integrations-core/pull/23913))
+
+## 37.39.0 / 2026-05-29
+
+***Added***:
+
+* Add file-based YAML metrics loading for OpenMetrics V2 checks with composable predicates ([#22750](https://github.com/DataDog/integrations-core/pull/22750))
+* Add ``CronExpression`` and ``CronScheduler`` utilities for cron-style scheduling inside check methods. ([#23741](https://github.com/DataDog/integrations-core/pull/23741))
+
+## 37.38.0 / 2026-05-22
+
+***Security***:
+
+* Bump urllib3 to 2.7.0 to address CVE-2026-44431 and CVE-2026-44432. ([#23767](https://github.com/DataDog/integrations-core/pull/23767))
+
+## 37.37.0 / 2026-05-14
+
+***Added***:
+
+* Add a per-performance-object `include_total` option (default `false`) to the Windows perf-counter framework. When set to `true`, the `_Total` aggregate instance is collected instead of being excluded by default. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+
+## 37.36.0 / 2026-04-24
+
+***Added***:
+
+* Add parameterized query support to QueryExecutor. ([#23469](https://github.com/DataDog/integrations-core/pull/23469))
+
+## 37.35.1 / 2026-04-28 / Agent 7.79.0
+
+***Fixed***:
+
+* Bump cryptography from 46.0.6 to 46.0.7 to address CVE-2026-39892. ([#23403](https://github.com/DataDog/integrations-core/pull/23403))
+
+## 37.35.0 / 2026-04-15
+
+***Added***:
+
+* Add _get_package_dir utility method to AgentCheck for locating package data files ([#22749](https://github.com/DataDog/integrations-core/pull/22749))
+
+***Fixed***:
+
+* Fallback to database host instead of agent host when failing to resolve a database host name ([#23181](https://github.com/DataDog/integrations-core/pull/23181))
+* Bump `requests` to `>=2.33.0` (CVE-2026-25645 / VULN-59770) and `cryptography` to `>=46.0.6` (CVE-2026-34073 / VULN-59768). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+* Bump pyOpenSSL to >=26.0.0 to address CVE-2026-27459 (VULN-59209, Critical 9.8) and CVE-2026-27448 (VULN-59208, Medium 5.3). ([#23225](https://github.com/DataDog/integrations-core/pull/23225))
+* Apply ignore_tags filtering to dynamic tags in OpenMetrics v2 scraper. ([#23328](https://github.com/DataDog/integrations-core/pull/23328))
+
 ## 37.34.1 / 2026-04-02
 
 ***Fixed***:
@@ -21,6 +81,13 @@
 * Fix schema collection silently dropping all collected metadata when the last discovered database has no tables. ([#22880](https://github.com/DataDog/integrations-core/pull/22880))
 * Fix process_isolation parameter to handle log formats and external tags. ([#22973](https://github.com/DataDog/integrations-core/pull/22973))
 * Reduce allocations in `StatementMetrics` by deferring dict construction and updating the previous-statements cache in place. ([#23075](https://github.com/DataDog/integrations-core/pull/23075))
+
+## 37.33.3 / 2026-04-09 / Agent 7.78.0
+
+***Fixed***:
+
+* Bump `requests` to `==2.33.0` (CVE-2026-25645 / VULN-59770) and `cryptography` to `==46.0.6` (CVE-2026-34073 / VULN-59768). ([#23223](https://github.com/DataDog/integrations-core/pull/23223))
+* Bump pyOpenSSL to >=26.0.0 to address CVE-2026-27459 (VULN-59209, Critical 9.8) and CVE-2026-27448 (VULN-59208, Medium 5.3). ([#23225](https://github.com/DataDog/integrations-core/pull/23225))
 
 ## 37.33.2 / 2026-04-03
 

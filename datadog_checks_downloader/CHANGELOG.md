@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 9.1.0 / 2026-03-18
+## 9.2.0 / 2026-06-09
+
+***Added***:
+
+* Add v2 TUF pointer downloader support. ([#23144](https://github.com/DataDog/integrations-core/pull/23144))
+
+## 9.1.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:
 

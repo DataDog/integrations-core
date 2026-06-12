@@ -10,6 +10,7 @@ files:
     options:
     - name: health_endpoint
       fleet_configurable: true
+      display_priority: 5
       required: true
       description: |
         The Boundary controller's health endpoint.
@@ -18,6 +19,7 @@ files:
         example: http://localhost:9203/health
     - template: instances/openmetrics
       overrides:
+        openmetrics_endpoint.display_priority: 3
         openmetrics_endpoint.value.example: http://localhost:9203/metrics
         openmetrics_endpoint.description: |
           The URL where Boundary exposes Prometheus metrics.

@@ -190,11 +190,15 @@ def make(ctx, checks, version, end, initial_release, skip_sign, sign_only, exclu
         updated_checks.append(check)
         # update the list of integrations to be shipped with the Agent
         if repo_choice == 'core' and check not in NOT_CHECKS:
-            req_file = get_agent_release_requirements()
-            commit_targets.append(os.path.basename(req_file))
-            echo_waiting('Updating the Agent requirements file... ', nl=False)
-            update_agent_requirements(req_file, check, get_agent_requirement_line(check, version, ctx.obj))
-            echo_success('success!')
+            requirement_line = get_agent_requirement_line(check, version, ctx.obj)
+            if requirement_line is not None:
+                req_file = get_agent_release_requirements()
+                commit_targets.append(os.path.basename(req_file))
+                echo_waiting('Updating the Agent requirements file... ', nl=False)
+                update_agent_requirements(req_file, check, requirement_line)
+                echo_success('success!')
+            else:
+                echo_info(f'Skipping Agent requirements update for {check}: no supported platforms to include.')
 
         echo_waiting('Committing files...')
 

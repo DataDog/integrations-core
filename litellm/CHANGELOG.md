@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 2.4.0 / 2026-04-01
+## 2.5.0 / 2026-06-09
+
+***Added***:
+
+* add support for new metric names litellm_remaining_tokens_metric and litellm_remaining_requests_metric ([#23957](https://github.com/DataDog/integrations-core/pull/23957))
+
+## 2.4.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 2.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

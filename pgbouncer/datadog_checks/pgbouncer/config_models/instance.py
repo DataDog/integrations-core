@@ -36,6 +36,7 @@ class InstanceConfig(BaseModel):
     )
     collect_per_client_metrics: Optional[bool] = None
     collect_per_server_metrics: Optional[bool] = None
+    database_filter_regex: Optional[str] = None
     database_url: Optional[str] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None

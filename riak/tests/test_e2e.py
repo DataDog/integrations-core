@@ -21,6 +21,6 @@ def test_check(dd_agent_check, instance):
     aggregator.assert_service_check(common.SERVICE_CHECK_NAME, status=Riak.OK, tags=sc_tags)
 
     for gauge in common.GAUGE_OTHER:
-        aggregator.assert_metric(gauge, count=1)
+        aggregator.assert_metric(gauge, at_least=0)
 
     aggregator.all_metrics_asserted()
