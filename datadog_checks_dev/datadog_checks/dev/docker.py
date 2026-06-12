@@ -52,9 +52,9 @@ def get_e2e_discovery_metadata(
     Mounts the integration's ``auto_conf.yaml`` and ``config_models/discovery.py`` into the
     agent container, alongside the repo's discovery utilities from ``datadog_checks_base``.
 
-    Pass ``{"init_config": {}, "instances": []}`` to ``dd_agent_check`` alongside this
-    metadata so that the static per-env config is temporarily replaced with an empty-instances
-    file, leaving ``auto_conf.yaml`` as the sole AD template driving config-discovery.
+    Use ``dd_agent_check_discovery`` alongside this metadata so that the static
+    per-env config is temporarily replaced with an empty-instances file, leaving
+    ``auto_conf.yaml`` as the sole AD template driving config-discovery.
     """
     check_root = os.fspath(check_root or find_check_root(depth=1))
     check_name = os.path.basename(check_root)
