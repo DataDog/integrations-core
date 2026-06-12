@@ -235,8 +235,6 @@ class AgentCheck(object):
                     if not isinstance(instances, list):
                         raise ConfigurationError('config-discovery: generated instances must be a list')
                     if not instances:
-                        if config.get('logs') is not None:
-                            return json.encode([config])
                         raise ConfigurationError('config-discovery: generated candidate has no instances')
 
                     check = cls(check_name, copy.deepcopy(init_config), copy.deepcopy(instances))

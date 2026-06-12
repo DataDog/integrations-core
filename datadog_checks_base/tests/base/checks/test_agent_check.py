@@ -56,7 +56,6 @@ def test_discover_config_accepts_successful_candidate_only():
                 yield {
                     'init_config': {'selected_port': port.number},
                     'instances': [{'port': port.number, 'accept': port.number == 9090}],
-                    'logs': [{'source': 'discovered'}],
                 }
 
         def check(self, instance):
@@ -87,7 +86,6 @@ def test_discover_config_accepts_successful_candidate_only():
         {
             'init_config': {'selected_port': 9090},
             'instances': [{'port': 9090, 'accept': True}],
-            'logs': [{'source': 'discovered'}],
         }
     ]
     assert DiscoveryCheck.calls == [8080, 9090]
