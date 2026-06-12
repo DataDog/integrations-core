@@ -736,3 +736,84 @@ def test_collect_confluent_cloud_failure_reported_in_connectivity():
         result = collector.collect('cluster-1')
 
     assert result == {'confluent_cloud:env-abc123:lkc-xyz789': False}
+
+
+# ---------------------------------------------------------------------------
+# MirrorMaker 2 — tag enrichment
+# ---------------------------------------------------------------------------
+
+MM2_CONNECTORS_RESPONSE = {
+    'mm2-source': {
+        'info': {
+            'type': 'source',
+            'config': {
+                'connector.class': 'org.apache.kafka.connect.mirror.MirrorSourceConnector',
+                'source.cluster.alias': 'us-east',
+                'target.cluster.alias': 'us-west',
+                'tasks.max': '1',
+            },
+        },
+        'status': {
+            'connector': {'state': 'RUNNING'},
+            'tasks': [{'id': 0, 'state': 'RUNNING', 'worker_id': 'connect:8083'}],
+        },
+    },
+    'regular-sink': {
+        'info': {
+            'type': 'sink',
+            'config': {
+                'connector.class': 'io.confluent.connect.s3.S3SinkConnector',
+                'topics': 'orders',
+            },
+        },
+        'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+    },
+}
+
+
+def test_mm2_connector_gets_mirror_maker_tag():
+    collector, check, _, _ = make_collector()
+    collector._emit_connector_metrics(MM2_CONNECTORS_RESPONSE, [])
+
+    running_calls = [
+        c for c in check.gauge.call_args_list if c.args[0] == 'connector.running' and 'connector:mm2-source' in c.kwargs.get('tags', [])
+    ]
+    assert running_calls, "no connector.running gauge for mm2-source"
+    tags = running_calls[0].kwargs['tags']
+    assert 'mirror_maker:true' in tags
+    assert 'source_cluster:us-east' in tags
+    assert 'target_cluster:us-west' in tags
+
+
+def test_non_mm2_connector_has_no_mirror_maker_tag():
+    collector, check, _, _ = make_collector()
+    collector._emit_connector_metrics(MM2_CONNECTORS_RESPONSE, [])
+
+    running_calls = [
+        c for c in check.gauge.call_args_list if c.args[0] == 'connector.running' and 'connector:regular-sink' in c.kwargs.get('tags', [])
+    ]
+    assert running_calls, "no connector.running gauge for regular-sink"
+    tags = running_calls[0].kwargs['tags']
+    assert 'mirror_maker:true' not in tags
+
+
+def test_mm2_config_event_includes_mirror_maker_fields():
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    collector._emit_connector_config_events(MM2_CONNECTORS_RESPONSE, 'cluster-1', 'http://localhost:8083')
+
+    payloads = [json.loads(c.args[0]) for c in check.event_platform_event.call_args_list]
+    mm2_payload = next((p for p in payloads if p.get('connector') == 'mm2-source'), None)
+    assert mm2_payload is not None, "no event emitted for mm2-source"
+    assert mm2_payload.get('mirror_maker') is True
+    assert mm2_payload.get('source_cluster') == 'us-east'
+    assert mm2_payload.get('target_cluster') == 'us-west'
+
+
+def test_non_mm2_config_event_has_no_mirror_maker_fields():
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    collector._emit_connector_config_events(MM2_CONNECTORS_RESPONSE, 'cluster-1', 'http://localhost:8083')
+
+    payloads = [json.loads(c.args[0]) for c in check.event_platform_event.call_args_list]
+    sink_payload = next((p for p in payloads if p.get('connector') == 'regular-sink'), None)
+    assert sink_payload is not None, "no event emitted for regular-sink"
+    assert 'mirror_maker' not in sink_payload

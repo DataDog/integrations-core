@@ -16,6 +16,15 @@ if TYPE_CHECKING:
 
 SENSITIVE_KEY_PATTERN = re.compile(r'(?i)(password|secret|\.key$|sasl\.jaas\.config|api\.key|api\.secret)')
 
+# Short class names for the three built-in MirrorMaker 2 connectors
+MM2_CONNECTOR_CLASSES = frozenset(
+    {
+        'MirrorSourceConnector',
+        'MirrorCheckpointConnector',
+        'MirrorHeartbeatConnector',
+    }
+)
+
 CONNECTOR_CONFIG_CACHE_KEY = 'kafka_connector_config_cache'
 CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
 CONNECTOR_PLUGINS_EVENT_CACHE_KEY = 'kafka_connector_plugins_event_cache'
@@ -25,6 +34,18 @@ CONNECTOR_CONFIG_CACHE_MAX_SIZE = 5_000
 def _short_class_name(full_class: str) -> str:
     """Return the rightmost component of a fully-qualified Java class name."""
     return full_class.rsplit('.', 1)[-1] if full_class else full_class
+
+
+def _mm2_tags(config: dict) -> list[str]:
+    """Return extra tags for a MirrorMaker 2 connector."""
+    tags = ['mirror_maker:true']
+    source = config.get('source.cluster.alias', '')
+    target = config.get('target.cluster.alias', '')
+    if source:
+        tags.append(f'source_cluster:{source}')
+    if target:
+        tags.append(f'target_cluster:{target}')
+    return tags
 
 
 class KafkaConnectCollector(EventCacheMixin):
@@ -201,9 +222,10 @@ class KafkaConnectCollector(EventCacheMixin):
         for name, data in connectors_data.items():
             info = data.get('info', {})
             status = data.get('status', {})
+            connector_config = info.get('config') or {}
 
             connector_type = info.get('type', 'unknown')
-            full_class = (info.get('config') or {}).get('connector.class', '')
+            full_class = connector_config.get('connector.class', '')
             connector_class = _short_class_name(full_class)
             connector_state = (status.get('connector') or {}).get('state', 'UNKNOWN')
 
@@ -213,6 +235,8 @@ class KafkaConnectCollector(EventCacheMixin):
                 f'connector_class:{connector_class}',
                 f'connector_state:{connector_state}',
             ]
+            if connector_class in MM2_CONNECTOR_CLASSES:
+                connector_tags.extend(_mm2_tags(connector_config))
             self.check.gauge(
                 'connector.running',
                 1 if connector_state == 'RUNNING' else 0,
@@ -260,7 +284,7 @@ class KafkaConnectCollector(EventCacheMixin):
 
             # Exclude collection_timestamp from hashed content so the hash is stable
             # across cycles and dedup actually fires on unchanged configs.
-            content = {
+            content: dict[str, Any] = {
                 'kafka_cluster_id': cluster_id,
                 **self._original_cluster_id_field(),
                 'connector': name,
@@ -271,6 +295,15 @@ class KafkaConnectCollector(EventCacheMixin):
                 'config_type': 'connector',
                 'config': redacted_config,
             }
+            connector_class = _short_class_name(raw_config.get('connector.class', ''))
+            if connector_class in MM2_CONNECTOR_CLASSES:
+                content['mirror_maker'] = True
+                source = raw_config.get('source.cluster.alias', '')
+                target = raw_config.get('target.cluster.alias', '')
+                if source:
+                    content['source_cluster'] = source
+                if target:
+                    content['target_cluster'] = target
             connector_contents[name] = json.dumps(content, sort_keys=True)
 
         safe_url = quote(url, safe='')

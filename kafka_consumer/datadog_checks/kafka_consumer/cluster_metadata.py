@@ -201,6 +201,11 @@ class ClusterMetadataCollector(EventCacheMixin):
         except Exception as e:
             self.log.error("Error collecting schema registry info: %s", e)
 
+        try:
+            self._collect_mirror_maker_heartbeats(highwater_offsets, shared_metadata)
+        except Exception as e:
+            self.log.error("Error collecting MirrorMaker 2 heartbeat metrics: %s", e)
+
     def _collect_broker_metadata(self, metadata=None):
         self.log.debug("Collecting broker metadata")
 
@@ -1041,6 +1046,71 @@ class ClusterMetadataCollector(EventCacheMixin):
             return subject.removesuffix('-key'), 'key'
         return subject, 'unknown'
 
+    def _collect_mirror_maker_heartbeats(self, highwater_offsets: dict, metadata) -> None:
+        """Gauge MirrorMaker 2 replication freshness from heartbeat topic timestamps.
+
+        Scans for MM2 heartbeat topics (named ``<source-alias>.heartbeats``) and reads the
+        timestamp of the latest message in each partition using the broker-side max-timestamp
+        offset lookup. Requires Kafka 2.8+ (KIP-543) on the broker.
+        """
+        topic_partitions = self.client.get_topic_partitions()
+
+        heartbeat_topics = [
+            name for name in topic_partitions if name == 'heartbeats' or (name.endswith('.heartbeats') and '.' in name)
+        ]
+
+        if not heartbeat_topics:
+            return
+
+        self.log.debug("Found %d MM2 heartbeat topic(s): %s", len(heartbeat_topics), heartbeat_topics)
+
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if metadata and hasattr(metadata, 'cluster_id') else 'unknown'
+        )
+
+        requests = {
+            TopicPartition(topic, partition): OffsetSpec.max_timestamp()
+            for topic in heartbeat_topics
+            for partition in topic_partitions.get(topic, [])
+            if highwater_offsets.get((topic, partition), 0) > 0
+        }
+
+        if not requests:
+            return
+
+        try:
+            futures = self.client.kafka_client.list_offsets(
+                requests,
+                isolation_level=IsolationLevel.READ_UNCOMMITTED,
+                request_timeout=self.config._request_timeout,
+            )
+        except Exception as e:
+            self.log.warning("Failed to query MM2 heartbeat timestamps: %s", e)
+            return
+
+        now_ms = time.time() * 1000
+
+        for tp, future in futures.items():
+            try:
+                info = future.result()
+            except Exception as e:
+                self.log.debug("Failed to get max-timestamp offset for %s:%s: %s", tp.topic, tp.partition, e)
+                continue
+
+            if info.timestamp is None or info.timestamp < 0:
+                self.log.debug("No timestamp available for %s:%s (broker may be < 2.8)", tp.topic, tp.partition)
+                continue
+
+            lag_seconds = (now_ms - info.timestamp) / 1000.0
+            source_alias = tp.topic.rsplit('.heartbeats', 1)[0] if '.' in tp.topic else 'unknown'
+
+            tags = self._get_tags(cluster_id) + [
+                f'topic:{tp.topic}',
+                f'partition:{tp.partition}',
+                f'source_cluster:{source_alias}',
+            ]
+            self.check.gauge('mirror_maker.heartbeat_lag_seconds', lag_seconds, tags=tags)
+
     def _truncate_config_for_event(self, config_data, max_configs=50):
         """
         Truncate broker/topic configs to avoid event size limits.
@@ -1116,4 +1186,3 @@ class ClusterMetadataCollector(EventCacheMixin):
             selected_configs.append((key, remaining[key]))
 
         return dict(selected_configs)
-

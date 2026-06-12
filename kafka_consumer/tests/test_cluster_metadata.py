@@ -11,6 +11,7 @@ import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
 from datadog_checks.kafka_consumer.client import KafkaClient
+from datadog_checks.kafka_consumer.event_cache_mixin import EVENT_CACHE_TTL
 
 pytestmark = [pytest.mark.unit]
 
@@ -960,10 +961,10 @@ def test_schema_registry_two_tier_ttl(check):
     collector = kafka_consumer_check.metadata_collector
 
     # Schema version checks reuse the same refresh interval as broker/topic configs
-    assert collector.CONFIGS_REFRESH_INTERVAL == 180  # default 3 min
+    assert collector._configs_refresh_interval == 180  # default 3 min
 
     # All events (broker, topic, schema) share the same re-emission TTL
-    assert collector.EVENT_CACHE_TTL == 3600  # 1 hour
+    assert EVENT_CACHE_TTL == 3600  # 1 hour
 
 
 def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, aggregator):
@@ -1117,8 +1118,8 @@ def test_kafka_configs_refresh_interval(check, interval, expected_interval, expe
     kafka_consumer_check = check(instance)
     collector = kafka_consumer_check.metadata_collector
 
-    assert collector.CONFIGS_REFRESH_INTERVAL == expected_interval
-    assert collector.CONFIGS_REFRESH_JITTER == expected_jitter
+    assert collector._configs_refresh_interval == expected_interval
+    assert collector._configs_refresh_jitter == expected_jitter
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
@@ -1458,3 +1459,136 @@ def test_heartbeat_brokers_empty_when_no_metadata(check):
     hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
     assert len(hb_events) == 1
     assert hb_events[0]['brokers'] == []
+
+
+# ---------------------------------------------------------------------------
+# MirrorMaker 2 heartbeat collection
+# ---------------------------------------------------------------------------
+
+
+def _make_mm2_collector(check_instance, heartbeat_topics, hwm_offsets, timestamp_ms):
+    """Build a ClusterMetadataCollector wired for MM2 heartbeat tests."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check_instance(instance)
+    collector = kafka_consumer_check.metadata_collector
+
+    mock_client = seed_mock_kafka_client()
+    partitions_map = {topic: [0] for topic in heartbeat_topics}
+    mock_client.get_topic_partitions.return_value = partitions_map
+
+    def mock_list_offsets(requests, **_kwargs):
+        result = {}
+        for tp in requests:
+            info = mock.MagicMock()
+            info.timestamp = timestamp_ms
+            future = mock.MagicMock()
+            future.result.return_value = info
+            result[tp] = future
+        return result
+
+    mock_client.kafka_client.list_offsets.side_effect = mock_list_offsets
+    collector.client = mock_client
+
+    kafka_consumer_check.gauge = mock.Mock()
+
+    metadata = mock.MagicMock()
+    metadata.cluster_id = 'test-cluster'
+
+    return collector, kafka_consumer_check, hwm_offsets, metadata
+
+
+def test_mm2_heartbeat_emits_gauge(check):
+    """Heartbeat lag gauge is emitted for *.heartbeats topics with data."""
+    now_ms = time.time() * 1000
+    lag_ms = 5000  # 5 seconds of lag
+    heartbeat_ts = now_ms - lag_ms
+
+    collector, kafka_consumer_check, hwm, metadata = _make_mm2_collector(
+        check,
+        heartbeat_topics=['us-east.heartbeats'],
+        hwm_offsets={('us-east.heartbeats', 0): 10},
+        timestamp_ms=heartbeat_ts,
+    )
+
+    with mock.patch.object(time, 'time', return_value=now_ms / 1000):
+        collector._collect_mirror_maker_heartbeats(hwm, metadata)
+
+    gauge_calls = [c for c in kafka_consumer_check.gauge.call_args_list if c.args[0] == 'mirror_maker.heartbeat_lag_seconds']
+    assert len(gauge_calls) == 1
+
+    lag_value = gauge_calls[0].args[1]
+    assert abs(lag_value - 5.0) < 0.1
+
+    tags = gauge_calls[0].kwargs['tags']
+    assert 'topic:us-east.heartbeats' in tags
+    assert 'partition:0' in tags
+    assert 'source_cluster:us-east' in tags
+
+
+def test_mm2_heartbeat_skips_zero_hwm(check):
+    """Partitions with hwm=0 (empty topic) are not queried."""
+    collector, kafka_consumer_check, hwm, metadata = _make_mm2_collector(
+        check,
+        heartbeat_topics=['us-east.heartbeats'],
+        hwm_offsets={('us-east.heartbeats', 0): 0},
+        timestamp_ms=time.time() * 1000,
+    )
+
+    collector._collect_mirror_maker_heartbeats(hwm, metadata)
+
+    gauge_calls = [c for c in kafka_consumer_check.gauge.call_args_list if c.args[0] == 'mirror_maker.heartbeat_lag_seconds']
+    assert gauge_calls == []
+    collector.client.kafka_client.list_offsets.assert_not_called()
+
+
+def test_mm2_heartbeat_skips_non_heartbeat_topics(check):
+    """Topics not named *.heartbeats are ignored."""
+    now_ms = time.time() * 1000
+    collector, kafka_consumer_check, hwm, metadata = _make_mm2_collector(
+        check,
+        heartbeat_topics=['orders', 'payments'],
+        hwm_offsets={('orders', 0): 100, ('payments', 0): 50},
+        timestamp_ms=now_ms - 1000,
+    )
+
+    collector._collect_mirror_maker_heartbeats(hwm, metadata)
+
+    gauge_calls = [c for c in kafka_consumer_check.gauge.call_args_list if c.args[0] == 'mirror_maker.heartbeat_lag_seconds']
+    assert gauge_calls == []
+
+
+def test_mm2_heartbeat_negative_timestamp_skipped(check):
+    """Partitions where the broker returns timestamp=-1 are silently skipped."""
+    collector, kafka_consumer_check, hwm, metadata = _make_mm2_collector(
+        check,
+        heartbeat_topics=['us-east.heartbeats'],
+        hwm_offsets={('us-east.heartbeats', 0): 5},
+        timestamp_ms=-1,
+    )
+
+    collector._collect_mirror_maker_heartbeats(hwm, metadata)
+
+    gauge_calls = [c for c in kafka_consumer_check.gauge.call_args_list if c.args[0] == 'mirror_maker.heartbeat_lag_seconds']
+    assert gauge_calls == []
+
+
+def test_mm2_heartbeat_list_offsets_exception_logged(check, caplog):
+    """list_offsets exceptions are caught and no gauge is emitted."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.gauge = mock.Mock()
+    collector = kafka_consumer_check.metadata_collector
+
+    mock_client = seed_mock_kafka_client()
+    mock_client.get_topic_partitions.return_value = {'us-east.heartbeats': [0]}
+    mock_client.kafka_client.list_offsets.side_effect = Exception("broker unavailable")
+    collector.client = mock_client
+
+    metadata = mock.MagicMock()
+    metadata.cluster_id = 'test-cluster'
+
+    collector._collect_mirror_maker_heartbeats({('us-east.heartbeats', 0): 5}, metadata)
+
+    gauge_calls = [c for c in kafka_consumer_check.gauge.call_args_list if c.args[0] == 'mirror_maker.heartbeat_lag_seconds']
+    assert gauge_calls == []
+    assert any('broker unavailable' in r.message for r in caplog.records)
