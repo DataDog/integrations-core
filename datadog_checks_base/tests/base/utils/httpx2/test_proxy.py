@@ -79,6 +79,7 @@ def test_no_proxy_string_is_split_off_proxies():
     http = HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'no_proxy': 'a.com,b.com;c.com'}}, {})
     # no_proxy never leaks into options['proxies']; it drives routing instead.
     assert http.options['proxies'] == {'http': 'http://i:1'}
+    assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']  # ';' normalized to ','
 
 
 # --- skip_proxy ---
@@ -170,6 +171,25 @@ def test_no_proxy_configured_keeps_trust_env_default_and_builds_no_router():
     assert not isinstance(http._client._transport, _ProxyRoutingTransport)
 
 
+# --- a proxy dict with no usable http/https scheme is treated as unconfigured ---
+
+
+@pytest.mark.parametrize(
+    'proxy',
+    [
+        pytest.param({'all_proxy': 'http://p:3128'}, id='unknown-scheme-key'),
+        pytest.param({'http': ''}, id='empty-scheme-value'),
+    ],
+)
+def test_proxy_with_no_usable_scheme_keeps_trust_env_and_builds_no_router(proxy):
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        http = HTTPX2Wrapper({'proxy': proxy}, {})
+    # No usable proxy URL: env proxies stay honored and no router is installed, rather than
+    # silently disabling both the proxy and HTTP_PROXY/HTTPS_PROXY.
+    assert http._client.trust_env is True
+    assert not isinstance(http._client._transport, _ProxyRoutingTransport)
+
+
 # --- _build_proxy_transport decides whether a custom transport is needed ---
 
 
@@ -185,6 +205,13 @@ def test_build_proxy_transport_builds_router_when_proxy_set():
     transport = _build_proxy_transport({'http': 'http://1.2.3.4:3128'}, None, True, None)
     assert isinstance(transport, _ProxyRoutingTransport)
     transport.close()
+
+
+def test_build_proxy_transport_skips_direct_allocation_when_no_scheme_usable():
+    with mock.patch('datadog_checks.base.utils.httpx2.httpx2.HTTPTransport') as transport_cls:
+        result = _build_proxy_transport({'all_proxy': 'http://p:3128'}, None, True, None)
+    assert result is None
+    assert transport_cls.call_count == 0  # the direct transport must not be built when nothing routes
 
 
 def test_build_proxy_transport_threads_verify_and_cert_into_inners():

@@ -229,6 +229,15 @@ class _ProxyRoutingTransport(httpx2.BaseTransport):
             transport.close()
 
 
+def _proxy_is_active(proxies: dict[str, str] | None) -> bool:
+    """True when a proxy is actively configured: the skip_proxy sentinel, or a usable http/https URL."""
+    if not proxies:
+        return False
+    if proxies == PROXY_SETTINGS_DISABLED:
+        return True
+    return bool(proxies.get('http') or proxies.get('https'))
+
+
 def _build_proxy_transport(
     proxies: dict[str, str] | None,
     no_proxy: list[str] | None,
@@ -239,7 +248,6 @@ def _build_proxy_transport(
     # None => no custom transport; the client builds its default and trust_env decides env proxies.
     if not proxies or proxies == PROXY_SETTINGS_DISABLED:
         return None
-    direct = httpx2.HTTPTransport(verify=verify, cert=cert)
     cache: dict[str, httpx2.BaseTransport] = {}
     scheme_transports: dict[str, httpx2.BaseTransport] = {}
     for scheme in ('http', 'https'):
@@ -251,6 +259,7 @@ def _build_proxy_transport(
         scheme_transports[scheme] = cache[url]
     if not scheme_transports:
         return None
+    direct = httpx2.HTTPTransport(verify=verify, cert=cert)
     return _ProxyRoutingTransport(scheme_transports, direct, no_proxy)
 
 
@@ -440,7 +449,7 @@ class HTTPX2Wrapper:
         }
 
         self._log_requests = is_affirmative(config['log_requests'])
-        self._client = self._build_client(transport, no_proxy)
+        self._client = self._build_client(transport)
 
     @staticmethod
     def _resolve_config(
@@ -475,15 +484,15 @@ class HTTPX2Wrapper:
             config[field] = value
         return config
 
-    def _build_client(self, transport: httpx2.BaseTransport | None, no_proxy: list[str] | None) -> httpx2.Client:
+    def _build_client(self, transport: httpx2.BaseTransport | None) -> httpx2.Client:
         proxies = self.options['proxies']
         kwargs: dict[str, Any] = {
             'headers': self.options['headers'],
             'timeout': _make_timeout(self.options['timeout'][0], self.options['timeout'][1]),
             'follow_redirects': self.options['allow_redirects'],
             'verify': self.options['verify'],
-            # trust_env reads HTTP_PROXY/HTTPS_PROXY only when no proxy is configured.
-            'trust_env': proxies is None,
+            # trust_env reads HTTP_PROXY/HTTPS_PROXY only when no proxy is actively configured.
+            'trust_env': not _proxy_is_active(proxies),
         }
         if self.options['cert'] is not None:
             kwargs['cert'] = self.options['cert']
@@ -491,7 +500,9 @@ class HTTPX2Wrapper:
             kwargs['auth'] = self.options['auth']
         # An injected transport (e.g. tests) wins; otherwise route through a proxy transport when one is configured.
         if transport is None:
-            transport = _build_proxy_transport(proxies, no_proxy, self.options['verify'], self.options['cert'])
+            transport = _build_proxy_transport(
+                proxies, self.no_proxy_uris, self.options['verify'], self.options['cert']
+            )
         if transport is not None:
             kwargs['transport'] = transport
         return httpx2.Client(**kwargs)
