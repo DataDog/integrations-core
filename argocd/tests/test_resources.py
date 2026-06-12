@@ -16,7 +16,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from datadog_checks.argocd import ArgocdCheck
-from datadog_checks.argocd.resources import (
+from datadog_checks.argocd.resources_constants import (
     APPLICATION_INCLUDE,
     CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
