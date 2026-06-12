@@ -730,7 +730,7 @@ facets:
     name: Event Time
     path: ocsf.time
     source: log
-    type: integer
+    type: long
   - groups:
       - OCSF
     name: TLS Cipher

@@ -59,35 +59,11 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Activity Name
+    name: Activity
     path: ocsf.activity_name
-    source: log
-  - groups:
-      - OCSF
-    name: Category ID
-    path: ocsf.category_uid
-    source: log
-  - groups:
-      - OCSF
-    name: Category
-    path: ocsf.category_name
-    source: log
-  - groups:
-      - OCSF
-    name: Class ID
-    path: ocsf.class_uid
-    source: log
-  - groups:
-      - OCSF
-    name: Class
-    path: ocsf.class_name
-    source: log
-  - groups:
-      - OCSF
-    name: Name
-    path: ocsf.actor.user.name
     source: log
   - groups:
       - OCSF
@@ -96,8 +72,45 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Source IP Address
-    path: ocsf.src_endpoint.ip
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Operation
+    path: ocsf.api.operation
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.group.name
+    source: log
+  - groups:
+      - OCSF
+    name: Message
+    path: ocsf.message
     source: log
   - groups:
       - OCSF
@@ -106,8 +119,49 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Target Name
-    path: ocsf.user.name
+    name: Name
+    path: ocsf.metadata.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Vendor Name
+    path: ocsf.metadata.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Profiles
+    path: ocsf.metadata.profiles
+    source: log
+  - groups:
+      - OCSF
+    name: Version
+    path: ocsf.metadata.version
+    source: log
+  - groups:
+      - OCSF
+    name: Privileges
+    path: ocsf.privileges
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.service.name
+    source: log
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: IP Address
+    path: ocsf.src_endpoint.ip
     source: log
   - groups:
       - OCSF
@@ -118,6 +172,45 @@ facets:
       - OCSF
     name: Status ID
     path: ocsf.status_id
+    source: log
+    type: integer
+  - facetType: range
+    groups:
+      - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+    type: long
+  - groups:
+      - OCSF
+    name: Type ID
+    path: ocsf.type_uid
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Type Uid Float
+    path: ocsf.type_uid_float
+    source: log
+  - groups:
+      - OCSF
+    name: Email Address
+    path: ocsf.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Web Resource Name
+    path: ocsf.web_resource.name
+    source: log
+  - groups:
+      - OCSF
+    name: Web Resource Type
+    path: ocsf.web_resource.type
     source: log
 pipeline:
   type: pipeline
