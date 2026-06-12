@@ -61,6 +61,21 @@ layer. The base `SchemaCollector` flushes when `len(_queued_rows) >= payload_chu
 1000-table schema is below the 10,000 threshold, everything flushes at once. The
 `max_tables` / `max_columns` limits are the effective memory control.
 
+**Column-based flush threshold (11× RSS reduction for unlimited)**
+The base class `payload_chunk_size` counts tables, which is a poor proxy for memory when
+tables are wide. `HanaSchemaCollector` overrides `maybe_flush` to flush after every
+`PAYLOAD_COLUMN_CHUNK_SIZE` (50,000) columns instead. For 1000-column tables this flushes
+every 50 tables, keeping `_queued_rows` from growing unboundedly. Result on the 1000×1000
+schema:
+
+| Mode | RSS before | RSS after | Payloads |
+|------|-----------|-----------|---------|
+| unlimited (no limits) | 1,038 MiB | 93.7 MiB | 21 |
+| limited (300 tables × 50 cols) | 56.4 MiB | 56.9 MiB | 1 |
+
+The limited case is unaffected: 300 × 50 = 15,000 columns never reaches the 50,000
+threshold so it still flushes once at the end.
+
 **SQL column limit via `ROW_NUMBER()` (5× faster, no memory change)**
 The original query joined `SYS.TABLE_COLUMNS` without a column count cap, so the server
 returned all 1000 columns per table regardless of `max_columns`; Python discarded the

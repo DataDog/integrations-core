@@ -305,6 +305,35 @@ class TestHanaSchemaCollector:
         assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
         assert params == ('A', 'B')
 
+    def test_column_chunk_flush(self):
+        # 3 tables × 3 columns each; threshold set to 5 so flush fires after T1+T2 (6 cols),
+        # then T3 lands in the final payload. Verifies intermediate flush, correct table
+        # distribution, and that collection_payloads_count only appears on the last payload.
+        rows = [
+            _joined_row('S', 'T1', column_name='C1', position=1),
+            _joined_row('S', 'T1', column_name='C2', position=2),
+            _joined_row('S', 'T1', column_name='C3', position=3),
+            _joined_row('S', 'T2', column_name='C1', position=1),
+            _joined_row('S', 'T2', column_name='C2', position=2),
+            _joined_row('S', 'T2', column_name='C3', position=3),
+            _joined_row('S', 'T3', column_name='C1', position=1),
+            _joined_row('S', 'T3', column_name='C2', position=2),
+            _joined_row('S', 'T3', column_name='C3', position=3),
+        ]
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._schema_collector._config.payload_column_chunk_size = 5
+        check._conn, _ = _make_cursor_mock(rows)
+
+        payloads = _collect_payloads(check)
+
+        assert len(payloads) == 2
+        tables_p1 = [t['name'] for row in payloads[0]['metadata'] for s in row['schemas'] for t in s['tables']]
+        tables_p2 = [t['name'] for row in payloads[1]['metadata'] for s in row['schemas'] for t in s['tables']]
+        assert tables_p1 == ['T1', 'T2']
+        assert tables_p2 == ['T3']
+        assert 'collection_payloads_count' not in payloads[0]
+        assert payloads[1]['collection_payloads_count'] == 2
+
 
 # ─── Diagnostics ─────────────────────────────────────────────────────────────
 

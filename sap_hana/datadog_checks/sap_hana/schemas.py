@@ -14,6 +14,8 @@ if TYPE_CHECKING:
     from .config_models.instance import CollectSchemas
     from .sap_hana import SapHanaCheck
 
+PAYLOAD_COLUMN_CHUNK_SIZE = 50_000
+
 CURRENT_DATABASE_QUERY = "SELECT DATABASE_NAME FROM SYS.M_DATABASE"
 CURRENT_DATABASE_DESCRIPTION_QUERY = "SELECT DESCRIPTION FROM SYS.M_DATABASE"
 
@@ -61,6 +63,7 @@ class HanaSchemaCollectorConfig(SchemaCollectorConfig):
         self.max_columns = int(config.max_columns or 50)
         self.exclude_schemas = set(config.exclude_schemas or ())
         self.include_schemas = set(config.include_schemas or ())
+        self.payload_column_chunk_size = PAYLOAD_COLUMN_CHUNK_SIZE
 
 
 class HanaSchemaCollector(SchemaCollector):
@@ -70,6 +73,20 @@ class HanaSchemaCollector(SchemaCollector):
     def __init__(self, check: SapHanaCheck, config: CollectSchemas):
         super().__init__(check, HanaSchemaCollectorConfig(config))
         self._pending_row = None
+
+    def _reset(self) -> None:
+        super()._reset()
+        self._queued_column_count = 0
+
+    def maybe_flush(self, is_last_payload: bool) -> None:
+        if self._queued_column_count >= self._config.payload_column_chunk_size:
+            saved = self._config.payload_chunk_size
+            self._config.payload_chunk_size = 0
+            super().maybe_flush(is_last_payload)
+            self._config.payload_chunk_size = saved
+            self._queued_column_count = 0
+        else:
+            super().maybe_flush(is_last_payload)
 
     @property
     def kind(self) -> str:
@@ -162,6 +179,7 @@ class HanaSchemaCollector(SchemaCollector):
         }
 
     def _map_row(self, database: DatabaseInfo, table_row) -> dict:
+        self._queued_column_count += len(table_row['columns'])
         return {
             **database,
             'schemas': [
