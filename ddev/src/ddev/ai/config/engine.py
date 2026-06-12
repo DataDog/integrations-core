@@ -18,7 +18,7 @@ from ddev.ai.config.models import (
     ResourceEnvelope,
     VariableDeclaration,
 )
-from ddev.ai.phases.config import FlowConfigError, _detect_cycles
+from ddev.ai.phases.config import FlowConfigError, detect_cycles
 
 
 @dataclass
@@ -190,7 +190,7 @@ class ConfigurationEngine:
                         f"Phase {entry.phase!r} depends on {dep!r} which is not in flow {flow_name!r}"
                     )
             dependency_map[entry.phase] = entry.dependencies
-        cycles, truncated = _detect_cycles(dependency_map)
+        cycles, truncated = detect_cycles(dependency_map)
         if cycles:
             formatted = "\n  ".join(" → ".join(c) for c in cycles)
             suffix = f"\n  (showing first {len(cycles)}; more cycles exist)" if truncated else ""

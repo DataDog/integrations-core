@@ -11,6 +11,7 @@ import pytest
 from prometheus_client import Metric
 from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
+from ddev.ai.config.models import AgentConfig, PhaseConfig
 from ddev.ai.flows.openmetrics.phases import inspect_endpoint as inspect_endpoint_module
 from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     EndpointInspectionError,
@@ -20,7 +21,6 @@ from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     _parse_exposition,
 )
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.config.models import AgentConfig, PhaseConfig
 from ddev.ai.phases.config import CheckpointConfig, FlowConfigError, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import CheckpointManager

@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.config.models import AgentConfig, PhaseConfig
+from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.config import CheckpointConfig, FlowConfigError, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage

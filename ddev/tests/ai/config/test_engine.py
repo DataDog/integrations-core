@@ -469,3 +469,66 @@ def test_build_flow_relative_paths_resolved(tmp_path):
     resolved = engine.build_flow("my_flow")
     assert resolved.agents["agent_a"].system_prompt_path == tmp_path / "prompts" / "agent_a.md"
     assert resolved.phases["phase_a"].tasks[0].prompt_path == tmp_path / "task.md"
+
+
+def test_build_flow_dependency_not_in_flow_raises(tmp_path):
+    write_yaml(
+        tmp_path,
+        "config.yaml",
+        """\
+        - type: phase
+          config:
+            name: phase_a
+        - type: phase
+          config:
+            name: phase_b
+        - type: flow
+          config:
+            name: my_flow
+            flow:
+              - phase: phase_b
+                dependencies: [phase_a]
+    """,
+    )
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    with pytest.raises(Exception, match="phase_a"):
+        engine.build_flow("my_flow")
+
+
+def test_build_flow_multi_cycle_reports_both(tmp_path):
+    write_yaml(
+        tmp_path,
+        "config.yaml",
+        """\
+        - type: phase
+          config:
+            name: p1
+        - type: phase
+          config:
+            name: p2
+        - type: phase
+          config:
+            name: p3
+        - type: phase
+          config:
+            name: p4
+        - type: flow
+          config:
+            name: my_flow
+            flow:
+              - phase: p1
+                dependencies: [p3, p4]
+              - phase: p2
+                dependencies: [p1]
+              - phase: p3
+                dependencies: [p2]
+              - phase: p4
+                dependencies: [p2]
+    """,
+    )
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    with pytest.raises(Exception) as exc_info:
+        engine.build_flow("my_flow")
+    error = str(exc_info.value)
+    assert "p1" in error
+    assert "p2" in error

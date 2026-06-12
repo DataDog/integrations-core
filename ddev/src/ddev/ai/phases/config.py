@@ -13,7 +13,7 @@ class FlowConfigError(Exception):
     """Wraps Pydantic ValidationError or YAML errors with a user-friendly message."""
 
 
-def _detect_cycles(
+def detect_cycles(
     dependency_map: dict[str, list[str]],
     limit: int = 50,
 ) -> tuple[list[list[str]], bool]:

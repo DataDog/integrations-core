@@ -6,8 +6,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.config.models import PhaseConfig
+from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError

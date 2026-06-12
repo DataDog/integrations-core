@@ -11,8 +11,8 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
 from ddev.ai.config.models import AgentConfig, PhaseConfig
+from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
 from ddev.ai.phases.config import CheckpointConfig, FlowConfigError, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.process import ReActProcess
