@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -80,7 +81,10 @@ def _build_jsonl_rows(families: list[Metric]) -> list[dict[str, Any]]:
 
 
 def _remove_if_exists(path: Path) -> None:
-    path.unlink(missing_ok=True)
+    try:
+        path.unlink(missing_ok=True)
+    except OSError:
+        pass
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -95,7 +99,7 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
                     raise EndpointInspectionError(f"Failed to serialize metric {row.get('name')!r}: {e}") from e
                 fh.write(line)
                 fh.write("\n")
-        tmp_path.replace(path)
+        os.replace(tmp_path, path)
     except EndpointInspectionError:
         _remove_if_exists(tmp_path)
         raise
@@ -109,7 +113,7 @@ def _write_exposition(path: Path, body: str) -> None:
     tmp_path = path.with_suffix(path.suffix + ".tmp")
     try:
         tmp_path.write_text(body, encoding="utf-8")
-        tmp_path.replace(path)
+        os.replace(tmp_path, path)
     except OSError as e:
         _remove_if_exists(tmp_path)
         raise EndpointInspectionError(f"Failed to write exposition snapshot at {path}: {e}") from e

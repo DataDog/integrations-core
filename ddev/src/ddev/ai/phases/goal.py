@@ -134,7 +134,7 @@ def build_reviewer_user_message(
 
 
 class _ReviewerOutput(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="ignore", strict=True)
     valid: bool
     reason: str = ""
 

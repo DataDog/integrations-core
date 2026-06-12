@@ -542,7 +542,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
 def test_build_flow_error_paths(tmp_path, yaml_content, expected_match):
     if yaml_content:
         write_yaml(tmp_path, "config.yaml", yaml_content)
-    if "conflict" in expected_match:
+    if expected_match == "conflicts":
         # Conflict test needs two files
         write_yaml(
             tmp_path,
