@@ -9,11 +9,34 @@ import pytest
 from datadog_checks.base.utils.httpx2 import (
     PROXY_SETTINGS_DISABLED,
     HTTPX2Wrapper,
+    _build_env_proxy_transport,
     _build_proxy_transport,
+    _env_proxies,
     _ProxyRoutingTransport,
 )
 
 AGENT_GET_CONFIG = 'datadog_checks.base.utils.httpx2.datadog_agent.get_config'
+GET_ENV_PROXIES = 'datadog_checks.base.utils.httpx2.get_environment_proxies'
+
+PROXY_ENV_VARS = (
+    'HTTP_PROXY',
+    'HTTPS_PROXY',
+    'ALL_PROXY',
+    'NO_PROXY',
+    'http_proxy',
+    'https_proxy',
+    'all_proxy',
+    'no_proxy',
+    'REQUEST_METHOD',
+)
+
+
+@pytest.fixture
+def clean_proxy_env(monkeypatch):
+    """Strip proxy-related env vars so each test controls the environment it reads."""
+    for name in PROXY_ENV_VARS:
+        monkeypatch.delenv(name, raising=False)
+    return monkeypatch
 
 
 def _recording_transport(label: str, sink: list[str]) -> httpx2.MockTransport:
@@ -229,11 +252,77 @@ def test_same_proxy_url_for_both_schemes_shares_one_transport():
     transport.close()  # would double-close the shared inner without the id() dedup
 
 
-def test_proxy_with_only_no_proxy_and_no_scheme_url_is_treated_as_unconfigured():
+def test_proxy_with_only_no_proxy_and_no_env_proxy_is_treated_as_unconfigured(monkeypatch):
+    monkeypatch.setattr(GET_ENV_PROXIES, lambda: {})
     with mock.patch(AGENT_GET_CONFIG, return_value=None):
-        http = HTTPX2Wrapper({'proxy': {'no_proxy': 'internal.corp'}}, {})
-    assert http.options['proxies'] is None
-    assert http._client.trust_env is True
+        with HTTPX2Wrapper({'proxy': {'no_proxy': 'internal.corp'}}, {}) as http:
+            # No proxy anywhere: stays unconfigured. The no_proxy list is retained (not discarded)
+            # so it can apply if an environment proxy is present.
+            assert http.options['proxies'] is None
+            assert http.no_proxy_uris == ['internal.corp']
+            assert http._client.trust_env is True
+            assert not isinstance(http._client._transport, _ProxyRoutingTransport)
+
+
+# --- no_proxy-only config combined with an environment proxy (Option A parity) ---
+
+
+def test_no_proxy_only_with_env_http_proxy_installs_router_and_disables_trust_env(clean_proxy_env):
+    clean_proxy_env.setenv('HTTP_PROXY', 'http://envproxy:3128')
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        with HTTPX2Wrapper({'proxy': {'no_proxy': 'internal.corp'}}, {}) as http:
+            # The wrapper takes over env-proxy resolution so its no_proxy bypass actually applies.
+            assert http._client.trust_env is False
+            assert isinstance(http._client._transport, _ProxyRoutingTransport)
+            assert http.no_proxy_uris == ['internal.corp']
+
+
+def test_env_proxies_http_only(clean_proxy_env):
+    clean_proxy_env.setenv('HTTP_PROXY', 'http://p:1')
+    assert _env_proxies() == {'http': 'http://p:1'}
+
+
+def test_env_proxies_all_proxy_covers_both_schemes(clean_proxy_env):
+    clean_proxy_env.setenv('ALL_PROXY', 'http://all:9')
+    assert _env_proxies() == {'http': 'http://all:9', 'https': 'http://all:9'}
+
+
+def test_env_proxies_scheme_specific_beats_all_proxy(clean_proxy_env):
+    clean_proxy_env.setenv('HTTPS_PROXY', 'http://https:2')
+    clean_proxy_env.setenv('ALL_PROXY', 'http://all:9')
+    proxies = _env_proxies()
+    assert proxies['https'] == 'http://https:2'
+    assert proxies['http'] == 'http://all:9'
+
+
+def test_env_proxies_lowercase_name_resolves(clean_proxy_env):
+    clean_proxy_env.setenv('http_proxy', 'http://low:3')
+    assert _env_proxies() == {'http': 'http://low:3'}
+
+
+def test_env_proxies_empty_without_env(clean_proxy_env):
+    assert _env_proxies() == {}
+
+
+def test_build_env_proxy_transport_merges_instance_and_env_no_proxy(clean_proxy_env):
+    clean_proxy_env.setenv('HTTP_PROXY', 'http://p:1')
+    clean_proxy_env.setenv('NO_PROXY', 'env.example')
+    transport = _build_env_proxy_transport(['instance.example'], True, None)
+    assert isinstance(transport, _ProxyRoutingTransport)
+    assert set(transport._no_proxy_uris) == {'instance.example', 'env.example'}
+    transport.close()
+
+
+def test_build_env_proxy_transport_preserves_cidr_no_proxy(clean_proxy_env):
+    clean_proxy_env.setenv('HTTP_PROXY', 'http://p:1')
+    transport = _build_env_proxy_transport(['10.0.0.0/25'], True, None)
+    assert '10.0.0.0/25' in transport._no_proxy_uris
+    transport.close()
+
+
+def test_build_env_proxy_transport_none_without_env_proxy(clean_proxy_env, monkeypatch):
+    monkeypatch.setattr(GET_ENV_PROXIES, lambda: {})
+    assert _build_env_proxy_transport(['internal.corp'], True, None) is None
 
 
 def test_no_proxy_uris_stored_on_wrapper():
