@@ -59,8 +59,8 @@ class HanaSchemaCollectorConfig(SchemaCollectorConfig):
     def __init__(self, config: CollectSchemas):
         super().__init__()
         self.collection_interval = int(config.collection_interval or 600)
-        self.max_tables = int(config.max_tables or 300)
-        self.max_columns = int(config.max_columns or 50)
+        self.max_tables = int(config.max_tables or 2000)
+        self.max_columns = int(config.max_columns or 500)
         self.exclude_schemas = set(config.exclude_schemas or ())
         self.include_schemas = set(config.include_schemas or ())
         self.payload_column_chunk_size = PAYLOAD_COLUMN_CHUNK_SIZE

@@ -238,15 +238,15 @@ instances:
         #
         # collection_interval: 600
 
-        ## @param max_tables - integer - optional - default: 300
+        ## @param max_tables - integer - optional - default: 2000
         ## Maximum number of tables to collect per cycle across all schemas.
         #
-        # max_tables: 300
+        # max_tables: 2000
 
-        ## @param max_columns - integer - optional - default: 50
+        ## @param max_columns - integer - optional - default: 500
         ## Maximum number of columns to collect per table.
         #
-        # max_columns: 50
+        # max_columns: 500
 
         ## @param include_schemas - list of strings - optional
         ## A list of schema names to include. Any schema whose name is in
