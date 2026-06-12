@@ -4,15 +4,15 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
+from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
+
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.models import AgentConfig
-from ddev.ai.phases.config import TaskConfig
+from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
@@ -133,8 +133,17 @@ def build_reviewer_user_message(
     )
 
 
+class _ReviewerOutput(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    valid: bool
+    reason: str = ""
+
+
+_REVIEWER_ADAPTER: TypeAdapter[_ReviewerOutput] = TypeAdapter(_ReviewerOutput)
+
+
 def parse_reviewer_output(text: str) -> tuple[bool, str] | None:
-    """Return (valid, reason) if text parses; None if it does not."""
+    """Return (valid, reason) if text parses as the reviewer JSON schema; None otherwise."""
     stripped = text.strip()
     if stripped.startswith("```"):
         stripped = stripped.strip("`")
@@ -142,16 +151,10 @@ def parse_reviewer_output(text: str) -> tuple[bool, str] | None:
             stripped = stripped[4:]
         stripped = stripped.strip()
     try:
-        obj = json.loads(stripped)
-    except (json.JSONDecodeError, ValueError):
+        parsed = _REVIEWER_ADAPTER.validate_json(stripped)
+    except ValidationError:
         return None
-    if not isinstance(obj, dict):
-        return None
-    valid = obj.get("valid")
-    reason = obj.get("reason", "")
-    if not isinstance(valid, bool) or not isinstance(reason, str):
-        return None
-    return valid, reason
+    return parsed.valid, parsed.reason
 
 
 async def _run_reviewer_once(

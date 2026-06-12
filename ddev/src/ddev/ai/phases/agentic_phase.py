@@ -6,12 +6,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.config.models import AgentConfig, PhaseConfig
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
-from ddev.ai.phases.config import CheckpointConfig, FlowConfigError, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
@@ -71,7 +71,8 @@ class AgenticPhase(Phase):
             checkpoint_manager=checkpoint_manager,
             context=context,
         )
-        self._agent_name = cast(str, config.agent)
+        assert config.agent is not None, "validated by validate_config"
+        self._agent_name = config.agent
         self._agent_config = agent_config
         self._process_factory = process_factory
         self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE)
@@ -103,8 +104,8 @@ class AgenticPhase(Phase):
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
     ) -> AgenticPhase:
-        # config.agent is guaranteed set & known by validate_config.
-        agent_name = cast(str, config.agent)
+        agent_name = config.agent
+        assert agent_name is not None, "validated by validate_config"
         agent_config = resources.agent_config(agent_name)
         process_factory = resources.process_factory
 
@@ -281,6 +282,7 @@ class AgenticPhase(Phase):
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()
 
+        assert self._agent_config.system_prompt_path is not None, "path resolved by ConfigurationEngine"
         system_prompt = render_prompt(
             self._agent_config.system_prompt_path,
             context,

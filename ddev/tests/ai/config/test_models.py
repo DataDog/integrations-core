@@ -87,3 +87,9 @@ def test_resource_envelope_flow_type():
     adapter = TypeAdapter(ResourceEnvelope)
     result = adapter.validate_python({"type": "flow", "config": {"name": "f", "flow": []}})
     assert isinstance(result, FlowEnvelope)
+
+
+def test_resource_envelope_unknown_type_raises():
+    adapter = TypeAdapter(ResourceEnvelope)
+    with pytest.raises(ValidationError):
+        adapter.validate_python({"type": "widget", "config": {"name": "x"}})

@@ -4,12 +4,14 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Literal
 
 import yaml
 from pydantic import TypeAdapter, ValidationError
 
+from ddev.ai.config.errors import FlowConfigError, detect_cycles
 from ddev.ai.config.models import (
     AgentConfig,
     FlowConfig,
@@ -18,13 +20,14 @@ from ddev.ai.config.models import (
     ResourceEnvelope,
     VariableDeclaration,
 )
-from ddev.ai.phases.config import FlowConfigError, detect_cycles
+
+ResourceKind = Literal["agent", "phase", "flow"]
 
 
 @dataclass
 class ConfigConflict:
     name: str
-    type: str  # "agent", "phase", or "flow"
+    type: ResourceKind
     sources: list[Path]
 
 
@@ -32,6 +35,16 @@ class ConfigConflict:
 class _RegistryEntry:
     config: AgentConfig | PhaseConfig | FlowConfig
     source_file: Path
+
+
+@dataclass
+class _VarState:
+    default: str | None
+    sources: list[str] = field(default_factory=list)
+
+    @property
+    def has_default(self) -> bool:
+        return self.default is not None
 
 
 _ENVELOPE_ADAPTER: TypeAdapter[ResourceEnvelope] = TypeAdapter(ResourceEnvelope)
@@ -49,7 +62,7 @@ class ConfigurationEngine:
         user_dirs: list[str] | None = None,
     ) -> None:
         self._core_dir = core_dir
-        self._scan_dirs: list[Path] = [core_dir] + self._resolve_user_dirs(user_dirs or [])
+        self._scan_dirs: list[Path] = self._deduplicate([core_dir] + self._resolve_user_dirs(user_dirs or []))
         self._agents: dict[str, _RegistryEntry] = {}
         self._phases: dict[str, _RegistryEntry] = {}
         self._flows: dict[str, _RegistryEntry] = {}
@@ -61,6 +74,16 @@ class ConfigurationEngine:
         """Create an engine scanning the core flows dir plus any user-provided dirs."""
         return cls(core_dir=CORE_FLOWS_DIR, user_dirs=user_dirs or [])
 
+    def _deduplicate(self, dirs: list[Path]) -> list[Path]:
+        seen: set[Path] = set()
+        result: list[Path] = []
+        for d in dirs:
+            resolved = d.resolve()
+            if resolved not in seen:
+                seen.add(resolved)
+                result.append(d)
+        return result
+
     def _resolve_user_dirs(self, raw_dirs: list[str]) -> list[Path]:
         resolved = []
         for raw in raw_dirs:
@@ -71,10 +94,15 @@ class ConfigurationEngine:
         return resolved
 
     def _build_registries(self) -> None:
-        pending: dict[tuple[str, str], list[_RegistryEntry]] = {}
+        pending: dict[tuple[ResourceKind, str], list[_RegistryEntry]] = {}
+        seen_files: set[Path] = set()
 
         for scan_dir in self._scan_dirs:
             for yaml_file in sorted(scan_dir.rglob("*.yaml")) + sorted(scan_dir.rglob("*.yml")):
+                resolved = yaml_file.resolve()
+                if resolved in seen_files:
+                    continue
+                seen_files.add(resolved)
                 self._parse_file(yaml_file, pending)
 
         for (obj_type, name), entries in pending.items():
@@ -86,18 +114,26 @@ class ConfigurationEngine:
                         sources=[e.source_file for e in entries],
                     )
                 )
-            registry = self._registry_for(obj_type)
-            registry[name] = entries[-1]
+            else:
+                registry = self._registry_for(obj_type)
+                registry[name] = entries[0]
 
     def _parse_file(
         self,
         path: Path,
-        pending: dict[tuple[str, str], list[_RegistryEntry]],
+        pending: dict[tuple[ResourceKind, str], list[_RegistryEntry]],
     ) -> None:
         try:
-            raw_list = yaml.safe_load(path.read_text())
-        except (OSError, yaml.YAMLError) as e:
-            raise FlowConfigError(f"Failed to load {path}: {e}") from e
+            text = path.read_text()
+        except OSError as e:
+            raise FlowConfigError(f"Could not read {path}: {e}") from e
+
+        try:
+            raw_list = yaml.safe_load(text)
+        except yaml.YAMLError as e:
+            mark = getattr(e, "problem_mark", None)
+            location = f" at line {mark.line + 1}" if mark else ""
+            raise FlowConfigError(f"Malformed YAML in {path}{location}: {e}") from e
 
         if not isinstance(raw_list, list):
             raise FlowConfigError(f"{path}: expected a YAML list of resource objects, got {type(raw_list).__name__}")
@@ -112,14 +148,16 @@ class ConfigurationEngine:
             key = (envelope.type, envelope.config.name)
             pending.setdefault(key, []).append(entry)
 
-    def _registry_for(self, obj_type: str) -> dict[str, _RegistryEntry]:
-        if obj_type == "agent":
-            return self._agents
-        if obj_type == "phase":
-            return self._phases
-        if obj_type == "flow":
-            return self._flows
-        raise AssertionError(f"Unknown resource type: {obj_type!r}")
+    def _registry_for(self, obj_type: ResourceKind) -> dict[str, _RegistryEntry]:
+        match obj_type:
+            case "agent":
+                return self._agents
+            case "phase":
+                return self._phases
+            case "flow":
+                return self._flows
+            case _:
+                raise AssertionError(f"Unknown resource type: {obj_type!r}")
 
     @property
     def has_conflicts(self) -> bool:
@@ -128,6 +166,31 @@ class ConfigurationEngine:
     @property
     def conflicts(self) -> list[ConfigConflict]:
         return list(self._conflicts)
+
+    def phase_discovery_targets(self) -> list[tuple[Path, str]]:
+        """Return (phases_dir, import_prefix) pairs for phases/ directories under scan_dirs.
+
+        Only directories under the ddev src root can have their import prefix derived
+        automatically. User dirs outside the src tree are skipped.
+        """
+        src_root = Path(__file__).parent.parent.parent.parent  # ddev/src/
+        targets: list[tuple[Path, str]] = []
+        seen: set[Path] = set()
+        for scan_dir in self._scan_dirs:
+            for phases_dir in scan_dir.rglob("phases"):
+                if not phases_dir.is_dir():
+                    continue
+                resolved = phases_dir.resolve()
+                if resolved in seen:
+                    continue
+                seen.add(resolved)
+                try:
+                    rel = phases_dir.relative_to(src_root)
+                    import_prefix = ".".join(rel.parts)
+                    targets.append((phases_dir, import_prefix))
+                except ValueError:
+                    pass
+        return targets
 
     def build_flow(self, name: str) -> ResolvedFlow:
         """Validate and return a fully resolved flow. Raises FlowConfigError on any problem."""
@@ -211,9 +274,9 @@ class ConfigurationEngine:
         phases: dict[str, PhaseConfig],
         agents: dict[str, AgentConfig],
         flow_name: str,
-    ) -> dict[str, dict]:
+    ) -> dict[str, _VarState]:
         """Collect variable declarations from all agents and phases; raise on conflicting defaults."""
-        declarations: dict[str, dict] = {}
+        declarations: dict[str, _VarState] = {}
         all_objects: list[tuple[str, AgentConfig | PhaseConfig]] = [(f"agent:{n}", c) for n, c in agents.items()] + [
             (f"phase:{n}", c) for n, c in phases.items()
         ]
@@ -224,71 +287,78 @@ class ConfigurationEngine:
 
     def _register_declaration(
         self,
-        declarations: dict[str, dict],
+        declarations: dict[str, _VarState],
         var_decl: VariableDeclaration,
         source_label: str,
         flow_name: str,
     ) -> None:
         """Add one variable declaration, raising if its default conflicts with an existing one."""
         if var_decl.name not in declarations:
-            declarations[var_decl.name] = {
-                "default": var_decl.default,
-                "has_default": var_decl.default is not None,
-                "sources": [source_label],
-            }
+            declarations[var_decl.name] = _VarState(default=var_decl.default, sources=[source_label])
             return
         existing = declarations[var_decl.name]
-        existing["sources"].append(source_label)
-        if existing["has_default"] and var_decl.default is not None and existing["default"] != var_decl.default:
-            all_sources = ", ".join(existing["sources"])
+        if existing.has_default and var_decl.default is not None and existing.default != var_decl.default:
+            existing.sources.append(source_label)
+            all_sources = ", ".join(existing.sources)
             raise FlowConfigError(
                 f"Variable {var_decl.name!r} has conflicting default values across {all_sources} in flow {flow_name!r}"
             )
-        if not existing["has_default"] and var_decl.default is not None:
-            existing["default"] = var_decl.default
-            existing["has_default"] = True
+        existing.sources.append(source_label)
+        if not existing.has_default and var_decl.default is not None:
+            existing.default = var_decl.default
 
     def _apply_variable_values(
         self,
-        declarations: dict[str, dict],
+        declarations: dict[str, _VarState],
         flow_config: FlowConfig,
         flow_name: str,
     ) -> dict[str, str]:
         """Resolve each declaration to a value; raise listing any variables with no value or default."""
         resolved: dict[str, str] = {}
         missing: list[str] = []
-        for var_name, info in declarations.items():
+        for var_name, state in declarations.items():
             if var_name in flow_config.variables:
                 resolved[var_name] = flow_config.variables[var_name]
-            elif info["has_default"]:
-                resolved[var_name] = info["default"]  # type: ignore[assignment]
+            elif state.has_default:
+                assert state.default is not None
+                resolved[var_name] = state.default
             else:
-                missing.append(f"  {var_name!r} (declared in {', '.join(info['sources'])})")
+                missing.append(f"  {var_name!r} (declared in {', '.join(state.sources)})")
         if missing:
             raise FlowConfigError(f"Flow {flow_name!r} is missing required variable values:\n" + "\n".join(missing))
         return resolved
 
+    @staticmethod
+    def _resolve_relative(base: Path, p: Path | None) -> Path | None:
+        """Resolve p relative to base if it is not already absolute."""
+        if p is not None and not p.is_absolute():
+            return base / p
+        return p
+
     def _resolve_agent_paths(self, config: AgentConfig, source_file: Path) -> AgentConfig:
         source_dir = source_file.parent
-        system_prompt = source_dir / "prompts" / f"{config.name}.md"
-        return config.model_copy(update={"system_prompt_path": system_prompt})
+        if config.system_prompt_path is None:
+            system_prompt = source_dir / "prompts" / f"{config.name}.md"
+            return config.model_copy(update={"system_prompt_path": system_prompt})
+        return config
 
     def _resolve_phase_paths(self, config: PhaseConfig, source_file: Path) -> PhaseConfig:
         source_dir = source_file.parent
         resolved_tasks = []
         for task in config.tasks:
             updates: dict = {}
-            if task.prompt_path is not None and not task.prompt_path.is_absolute():
-                updates["prompt_path"] = source_dir / task.prompt_path
-            if task.goal_path is not None and not task.goal_path.is_absolute():
-                updates["goal_path"] = source_dir / task.goal_path
+            new_prompt = self._resolve_relative(source_dir, task.prompt_path)
+            if new_prompt is not task.prompt_path:
+                updates["prompt_path"] = new_prompt
+            new_goal = self._resolve_relative(source_dir, task.goal_path)
+            if new_goal is not task.goal_path:
+                updates["goal_path"] = new_goal
             resolved_tasks.append(task.model_copy(update=updates) if updates else task)
 
         checkpoint = config.checkpoint
-        if checkpoint is not None and checkpoint.memory_prompt_path is not None:
-            if not checkpoint.memory_prompt_path.is_absolute():
-                checkpoint = checkpoint.model_copy(
-                    update={"memory_prompt_path": source_dir / checkpoint.memory_prompt_path}
-                )
+        if checkpoint is not None:
+            new_memory = self._resolve_relative(source_dir, checkpoint.memory_prompt_path)
+            if new_memory is not checkpoint.memory_prompt_path:
+                checkpoint = checkpoint.model_copy(update={"memory_prompt_path": new_memory})
 
         return config.model_copy(update={"tasks": resolved_tasks, "checkpoint": checkpoint})

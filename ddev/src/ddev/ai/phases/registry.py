@@ -6,8 +6,8 @@ import importlib
 import inspect
 from pathlib import Path
 
+from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.phases.base import Phase
-from ddev.ai.phases.config import FlowConfigError
 
 
 class PhaseRegistry:

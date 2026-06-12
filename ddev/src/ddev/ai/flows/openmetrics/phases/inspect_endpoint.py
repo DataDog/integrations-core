@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-import os
 from pathlib import Path
 from typing import Any
 
@@ -12,9 +11,9 @@ from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_string_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
+from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import AgentConfig, PhaseConfig
 from ddev.ai.phases.base import Phase, PhaseOutcome
-from ddev.ai.phases.config import FlowConfigError
 
 REQUEST_TIMEOUT_SECONDS = 10.0
 RESPONSE_BODY_LIMIT_BYTES = 10 * 1024 * 1024  # 10 MB
@@ -81,10 +80,7 @@ def _build_jsonl_rows(families: list[Metric]) -> list[dict[str, Any]]:
 
 
 def _remove_if_exists(path: Path) -> None:
-    try:
-        path.unlink(missing_ok=True)
-    except OSError:
-        pass
+    path.unlink(missing_ok=True)
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -99,7 +95,7 @@ def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
                     raise EndpointInspectionError(f"Failed to serialize metric {row.get('name')!r}: {e}") from e
                 fh.write(line)
                 fh.write("\n")
-        os.replace(tmp_path, path)
+        tmp_path.replace(path)
     except EndpointInspectionError:
         _remove_if_exists(tmp_path)
         raise
@@ -113,7 +109,7 @@ def _write_exposition(path: Path, body: str) -> None:
     tmp_path = path.with_suffix(path.suffix + ".tmp")
     try:
         tmp_path.write_text(body, encoding="utf-8")
-        os.replace(tmp_path, path)
+        tmp_path.replace(path)
     except OSError as e:
         _remove_if_exists(tmp_path)
         raise EndpointInspectionError(f"Failed to write exposition snapshot at {path}: {e}") from e

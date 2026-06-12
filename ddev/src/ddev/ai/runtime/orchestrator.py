@@ -8,8 +8,9 @@ from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.engine import ConfigurationEngine
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
 from ddev.ai.runtime.agent_log import AgentLogger
@@ -26,7 +27,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         engine: ConfigurationEngine,
         flow_name: str,
         checkpoint_path: Path,
-        runtime_variables: dict[str, str],
+        runtime_variables: dict[str, Any],
         agent_clients: dict[str, Any],
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
@@ -62,16 +63,27 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
+        self._agent_logger: AgentLogger | None = None
+        self._resources: RunResources | None = None
 
     async def on_initialize(self) -> None:
+        self._discover_phases()
+        resolved = self._engine.build_flow(self._flow_name)
+        self._validate_phase_classes(resolved)
+        self._agent_logger, self._resources, checkpoint_manager, context = self._build_runtime(resolved)
+        self._register_phases(resolved, self._resources, checkpoint_manager, context)
+        self.submit_message(PhaseTrigger(id="start", phase_id=None))
+
+    def _discover_phases(self) -> None:
         discover_and_register_phases(
             self._phase_registry,
             Path(__file__).parent.parent / "phases",
             "ddev.ai.phases",
         )
+        for phases_dir, import_prefix in self._engine.phase_discovery_targets():
+            discover_and_register_phases(self._phase_registry, phases_dir, import_prefix)
 
-        resolved = self._engine.build_flow(self._flow_name)
-
+    def _validate_phase_classes(self, resolved: ResolvedFlow) -> None:
         flow_phase_ids = {entry.phase for entry in resolved.flow}
         for phase_id, phase_config in resolved.phases.items():
             if phase_id not in flow_phase_ids:
@@ -80,16 +92,16 @@ class PhaseOrchestrator(EventBusOrchestrator):
             try:
                 phase_cls = self._phase_registry.get(phase_config.class_)
             except ValueError as e:
-                raise FlowConfigError(str(e)) from e
+                raise FlowConfigError(f"Phase {phase_id!r} declares unknown class {phase_config.class_!r}: {e}") from e
             phase_cls.validate_config(phase_id, phase_config, resolved.agents)
 
+    def _build_runtime(
+        self, resolved: ResolvedFlow
+    ) -> tuple[AgentLogger, RunResources, CheckpointManager, FlowContext]:
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
-        dependency_map = {entry.phase: entry.dependencies for entry in resolved.flow}
-
-        self._agent_logger = AgentLogger(checkpoint_manager.root)
-        run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
-
-        self._resources = RunResources(
+        agent_logger = AgentLogger(checkpoint_manager.root)
+        run_callbacks = self._callbacks.with_set(agent_logger.as_callback_set())
+        resources = RunResources(
             agent_clients=self._agent_clients,
             file_access_policy=self._file_access_policy,
             agents=resolved.agents,
@@ -101,7 +113,16 @@ class PhaseOrchestrator(EventBusOrchestrator):
             callbacks=run_callbacks,
             logger=self._logger,
         )
+        return agent_logger, resources, checkpoint_manager, context
 
+    def _register_phases(
+        self,
+        resolved: ResolvedFlow,
+        resources: RunResources,
+        checkpoint_manager: CheckpointManager,
+        context: FlowContext,
+    ) -> None:
+        dependency_map = {entry.phase: entry.dependencies for entry in resolved.flow}
         for entry in resolved.flow:
             phase_id = entry.phase
             phase_config = resolved.phases[phase_id]
@@ -111,13 +132,11 @@ class PhaseOrchestrator(EventBusOrchestrator):
                 phase_id=phase_id,
                 config=phase_config,
                 deps=deps,
-                resources=self._resources,
+                resources=resources,
                 checkpoint_manager=checkpoint_manager,
                 context=context,
             )
             self.register_processor(phase, [PhaseTrigger])
-
-        self.submit_message(PhaseTrigger(id="start", phase_id=None))
 
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""
@@ -128,7 +147,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
     async def on_finalize(self, exception: Exception | None) -> None:
         if self._agent_logger is not None:
-            self._agent_logger.close()
+            try:
+                self._agent_logger.close()
+            except Exception:
+                self._logger.exception("Error closing agent logger during finalize")
         if exception is not None and self._failed_phase is not None:
             self._logger.error(
                 "Pipeline aborted: phase '%s' failed: %s",
