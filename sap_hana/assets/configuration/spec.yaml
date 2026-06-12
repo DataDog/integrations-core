@@ -95,6 +95,7 @@ files:
           type: boolean
       - template: instances/tls
       - name: collect_schemas
+        hidden: true
         description: |
           Configure collection of SAP HANA catalog metadata (schemas, tables,
           columns) for Data Quality features in Data Observability.
