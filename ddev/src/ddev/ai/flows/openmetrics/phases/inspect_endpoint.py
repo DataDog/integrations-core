@@ -17,6 +17,13 @@ from ddev.ai.phases.config import AgentConfig, FlowConfigError, PhaseConfig
 
 REQUEST_TIMEOUT_SECONDS = 10.0
 RESPONSE_BODY_LIMIT_BYTES = 10 * 1024 * 1024  # 10 MB
+# Mirror the Accept header the OpenMetrics V2 scraper sends by default (use_latest_spec=False):
+# `text/plain`. Without an explicit Accept, a server that supports both formats may volunteer
+# `application/openmetrics-text` here while serving Prometheus `text/plain` to the generated
+# check — so the catalog we build (and metrics.yaml) could disagree with what the check actually
+# scrapes (counter `_total` naming, metric typing). Inspecting in the same format the check will
+# scrape keeps the two consistent.
+DEFAULT_ACCEPT_HEADER = "text/plain"
 JSONL_FILENAME_SUFFIX = "_metrics.jsonl"
 EXPOSITION_FILENAME_SUFFIX = "_exposition.txt"
 
@@ -175,7 +182,11 @@ class InspectEndpointPhase(Phase):
 
         limit_mb = RESPONSE_BODY_LIMIT_BYTES // (1024 * 1024)
         try:
-            async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS, follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                timeout=REQUEST_TIMEOUT_SECONDS,
+                follow_redirects=True,
+                headers={"Accept": DEFAULT_ACCEPT_HEADER},
+            ) as client:
                 async with client.stream("GET", endpoint_url) as response:
                     if response.status_code != 200:
                         raise EndpointInspectionError(
