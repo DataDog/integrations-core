@@ -6,9 +6,11 @@ import json
 
 import pytest
 
+from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-from ddev.ai.phases.config import TaskConfig
+from ddev.ai.phases.config import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
+    GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,
     GoalParseError,
     build_reviewer_user_message,
@@ -116,19 +118,25 @@ def test_build_reviewer_user_message_sections():
 def _make_worker_process(responses):
     """ReActProcess wired to a MockAgent — used as the worker."""
     agent = MockAgent(list(responses))
-    return ReActProcess(agent=agent, tool_registry=ToolRegistry([])), agent
+    return ReActProcess(AgentRuntime(agent=agent, tool_registry=ToolRegistry([]))), agent
 
 
-def _reviewer_builder(responses):
-    """A GoalAgentBuilder that returns a fresh MockAgent + empty ToolRegistry."""
-    agent = MockAgent(list(responses))
-    calls: list[str] = []
+class ReviewerRuntimeFactory:
+    """Runtime factory returning a fixed reviewer agent for run_goal_loop tests."""
 
-    def builder(owner_id):
-        calls.append(owner_id)
-        return agent, ToolRegistry([])
+    def __init__(self, responses) -> None:
+        self.agent = MockAgent(list(responses))
+        self.calls: list[dict[str, object]] = []
 
-    return builder, calls, agent
+    def build_runtime(self, *, agent_config: AgentConfig, system_prompt: str, owner_id: str) -> AgentRuntime:
+        self.calls.append({"agent_config": agent_config, "system_prompt": system_prompt, "owner_id": owner_id})
+        return AgentRuntime(agent=self.agent, tool_registry=ToolRegistry([]))
+
+
+def _reviewer_factory(responses) -> tuple[ReviewerRuntimeFactory, list[dict[str, object]], MockAgent]:
+    """Return a reviewer runtime factory plus its captured calls and agent."""
+    factory = ReviewerRuntimeFactory(responses)
+    return factory, factory.calls, factory.agent
 
 
 async def _noop_compact(_):
@@ -149,7 +157,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         total_output_tokens=50,
         context_usage=None,
     )
-    builder, builder_calls, _ = _reviewer_builder([make_response('{"valid": true, "reason": ""}', 20, 10)])
+    factory, builder_calls, _ = _reviewer_factory([make_response('{"valid": true, "reason": ""}', 20, 10)])
 
     outcome = await run_goal_loop(
         task=TaskConfig(name="t1", prompt="x", goal="verify"),
@@ -157,7 +165,8 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        goal_agent_builder=builder,
+        parent_agent_config=AgentConfig(tools=[]),
+        runtime_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
         log_root=tmp_path,
@@ -169,12 +178,53 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     assert outcome.total_output_tokens == 10
     assert outcome.final_result is initial_result
     assert worker_agent.send_calls == []
-    assert builder_calls == ["p1.goal.t1"]
+    assert builder_calls[0]["owner_id"] == "p1.goal.t1"
+    assert builder_calls[0]["system_prompt"] == GOAL_REVIEWER_SYSTEM_PROMPT
 
     log_path = tmp_path / "goal_agent" / "p1" / "t1.jsonl"
     assert log_path.exists()
     events = {json.loads(line)["event"] for line in log_path.read_text().splitlines() if line.strip()}
     assert {"start", "finish"} <= events
+
+
+async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
+    worker_process, _ = _make_worker_process([])
+    initial_result = ReActResult(
+        final_response=make_response("did things"),
+        iterations=1,
+        total_input_tokens=100,
+        total_output_tokens=50,
+        context_usage=None,
+    )
+    factory, builder_calls, _ = _reviewer_factory([make_response('{"valid": true, "reason": ""}', 20, 10)])
+    parent_config = AgentConfig(
+        provider="anthropic",
+        tools=["read_file", "edit_file", "grep", "create_file"],
+        model="custom-model",
+        max_tokens=999,
+    )
+
+    await run_goal_loop(
+        task=TaskConfig(name="t1", prompt="x", goal="verify"),
+        goal_text="verify",
+        rendered_task_prompt="TASK",
+        worker_process=worker_process,
+        initial_result=initial_result,
+        parent_agent_config=parent_config,
+        runtime_factory=factory,
+        callbacks=Callbacks(),
+        phase_id="p1",
+        log_root=tmp_path,
+        compact_if_needed=_noop_compact,
+    )
+
+    reviewer_config = builder_calls[0]["agent_config"]
+    assert reviewer_config.provider == "anthropic"
+    assert reviewer_config.tools == ["read_file", "grep"]
+    assert reviewer_config.model is None
+    assert reviewer_config.max_tokens is None
+    assert builder_calls[0]["system_prompt"] == GOAL_REVIEWER_SYSTEM_PROMPT
+    assert builder_calls[0]["owner_id"] == "p1.goal.t1"
 
 
 async def test_run_goal_loop_one_retry_then_pass(tmp_path):
@@ -186,7 +236,7 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
         total_output_tokens=50,
         context_usage=None,
     )
-    builder, _, reviewer_agent = _reviewer_builder(
+    factory, _, reviewer_agent = _reviewer_factory(
         [
             make_response('{"valid": false, "reason": "missing X"}', 20, 10),
             make_response('{"valid": true, "reason": ""}', 25, 12),
@@ -199,7 +249,8 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        goal_agent_builder=builder,
+        parent_agent_config=AgentConfig(tools=[]),
+        runtime_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
         log_root=tmp_path,
@@ -225,7 +276,7 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
         total_output_tokens=5,
         context_usage=None,
     )
-    builder, _, _ = _reviewer_builder(
+    factory, _, _ = _reviewer_factory(
         [
             make_response('{"valid": false, "reason": "first miss"}', 5, 3),
             make_response('{"valid": false, "reason": "second miss"}', 7, 4),
@@ -239,7 +290,8 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
             rendered_task_prompt="TASK",
             worker_process=worker_process,
             initial_result=initial_result,
-            goal_agent_builder=builder,
+            parent_agent_config=AgentConfig(tools=[]),
+            runtime_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
             log_root=tmp_path,
@@ -268,7 +320,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
         total_output_tokens=0,
         context_usage=None,
     )
-    builder, _, reviewer_agent = _reviewer_builder(
+    factory, _, reviewer_agent = _reviewer_factory(
         [
             make_response("not json", 5, 5),
             make_response('{"valid": true, "reason": ""}', 7, 7),
@@ -281,7 +333,8 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        goal_agent_builder=builder,
+        parent_agent_config=AgentConfig(tools=[]),
+        runtime_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
         log_root=tmp_path,
@@ -302,7 +355,7 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
         total_output_tokens=0,
         context_usage=None,
     )
-    builder, _, _ = _reviewer_builder(
+    factory, _, _ = _reviewer_factory(
         [
             make_response("not json", 5, 3),
             make_response("still not json", 7, 4),
@@ -316,7 +369,8 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
             rendered_task_prompt="TASK",
             worker_process=worker_process,
             initial_result=initial_result,
-            goal_agent_builder=builder,
+            parent_agent_config=AgentConfig(tools=[]),
+            runtime_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
             log_root=tmp_path,
@@ -356,7 +410,7 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         total_output_tokens=0,
         context_usage=None,
     )
-    builder, _, _ = _reviewer_builder(
+    factory, _, _ = _reviewer_factory(
         [
             make_response('{"valid": false, "reason": "fix X"}', 0, 0),
             make_response('{"valid": true, "reason": ""}', 0, 0),
@@ -369,7 +423,8 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        goal_agent_builder=builder,
+        parent_agent_config=AgentConfig(tools=[]),
+        runtime_factory=factory,
         callbacks=Callbacks([cb_set]),
         phase_id="p1",
         log_root=tmp_path,
