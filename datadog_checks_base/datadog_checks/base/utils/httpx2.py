@@ -9,9 +9,11 @@ from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from typing import Any, Self
 from urllib.parse import urlparse
+from urllib.request import getproxies
 
 import httpx2
 from binary import KIBIBYTE
+from httpx2._utils import get_environment_proxies
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
@@ -196,12 +198,12 @@ def _resolve_proxy(
         return None, None
     proxies = proxies.copy()
     no_proxy = proxies.pop('no_proxy', None)
-    # A proxy block carrying only no_proxy is not a real proxy config. Treat it as unconfigured so
-    # trust_env stays on and HTTP_PROXY/HTTPS_PROXY keep working, rather than being silently disabled.
-    if not proxies:
-        return None, None
     if isinstance(no_proxy, str):
         no_proxy = no_proxy.replace(';', ',').split(',')
+    # A proxy block carrying only no_proxy has no explicit proxy URL to route through, but the
+    # no_proxy list is retained so it can be applied against an environment proxy (HTTP_PROXY etc.).
+    if not proxies:
+        return None, no_proxy
     return proxies, no_proxy
 
 
@@ -263,6 +265,38 @@ def _build_proxy_transport(
         return None
     direct = httpx2.HTTPTransport(verify=verify, cert=cert)
     return _ProxyRoutingTransport(scheme_transports, direct, no_proxy)
+
+
+def _env_proxies() -> dict[str, str]:
+    """Read http/https proxy URLs from the environment, via httpx2's own resolver for name/case parity."""
+    mounts = get_environment_proxies()
+    fallback = mounts.get('all://')
+    proxies: dict[str, str] = {}
+    for scheme in ('http', 'https'):
+        url = mounts.get(f'{scheme}://') or fallback
+        if url:
+            proxies[scheme] = url
+    return proxies
+
+
+def _env_no_proxy() -> list[str]:
+    """Return the environment NO_PROXY hosts as bypass patterns for should_bypass_proxy."""
+    # Read the raw NO_PROXY string (pre-httpx2-transform) so CIDR patterns survive for should_bypass_proxy.
+    raw = getproxies().get('no', '')
+    return [host.strip() for host in raw.split(',') if host.strip()]
+
+
+def _build_env_proxy_transport(
+    no_proxy: list[str] | None,
+    verify: bool | str,
+    cert: str | tuple[str, str] | None,
+) -> _ProxyRoutingTransport | None:
+    """Route environment proxies through our own transport so the no_proxy bypass list applies."""
+    proxies = _env_proxies()
+    if not proxies:
+        return None
+    merged = list(no_proxy or []) + _env_no_proxy()
+    return _build_proxy_transport(proxies, merged, verify, cert)
 
 
 class HTTPX2ResponseAdapter:
@@ -505,6 +539,12 @@ class HTTPX2Wrapper:
             transport = _build_proxy_transport(
                 proxies, self.no_proxy_uris, self.options['verify'], self.options['cert']
             )
+            # No explicit proxy URL but a no_proxy list survives: take over env-proxy resolution so the
+            # bypass list applies, instead of letting trust_env route exempted hosts through the env proxy.
+            if transport is None and proxies is None and self.no_proxy_uris:
+                transport = _build_env_proxy_transport(self.no_proxy_uris, self.options['verify'], self.options['cert'])
+                if transport is not None:
+                    kwargs['trust_env'] = False
         if transport is not None:
             kwargs['transport'] = transport
         return httpx2.Client(**kwargs)
