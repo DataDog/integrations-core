@@ -117,7 +117,9 @@ class ConfigurationEngine:
             return self._agents
         if obj_type == "phase":
             return self._phases
-        return self._flows
+        if obj_type == "flow":
+            return self._flows
+        raise AssertionError(f"Unknown resource type: {obj_type!r}")
 
     @property
     def has_conflicts(self) -> bool:
@@ -158,7 +160,11 @@ class ConfigurationEngine:
 
     def _collect_phases(self, flow_config: FlowConfig, flow_name: str) -> dict[str, PhaseConfig]:
         phases = {}
+        seen: set[str] = set()
         for entry in flow_config.flow:
+            if entry.phase in seen:
+                raise FlowConfigError(f"Duplicate phase in flow {flow_name!r}: {entry.phase!r}")
+            seen.add(entry.phase)
             if entry.phase not in self._phases:
                 raise FlowConfigError(f"Flow {flow_name!r} references unknown phase: {entry.phase!r}")
             phases[entry.phase] = self._phases[entry.phase].config  # type: ignore[assignment]

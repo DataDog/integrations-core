@@ -411,6 +411,33 @@ def test_build_flow_same_default_no_conflict(tmp_path):
     assert resolved.variables["endpoint"] == "http://localhost:9090"
 
 
+def test_non_list_yaml_file_raises(tmp_path):
+    (tmp_path / "config.yaml").write_text("key: value\n")
+    with pytest.raises(Exception, match="expected a YAML list"):
+        ConfigurationEngine(core_dir=tmp_path)
+
+
+def test_build_flow_raises_on_duplicate_phase(tmp_path):
+    write_yaml(
+        tmp_path,
+        "config.yaml",
+        """\
+        - type: phase
+          config:
+            name: phase_a
+        - type: flow
+          config:
+            name: my_flow
+            flow:
+              - phase: phase_a
+              - phase: phase_a
+    """,
+    )
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    with pytest.raises(Exception, match="[Dd]uplicate"):
+        engine.build_flow("my_flow")
+
+
 def test_build_flow_relative_paths_resolved(tmp_path):
     prompts_dir = tmp_path / "prompts"
     prompts_dir.mkdir()
