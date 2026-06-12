@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest.mock import patch
 
-import pytest
-
 from ddev.ai.tools.fs.copy_path import CopyPathTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 
@@ -77,25 +75,25 @@ async def test_copy_source_not_found(copy_tool: CopyPathTool, tmp_path) -> None:
     assert "does not exist" in result.error
 
 
-@pytest.mark.parametrize(
-    "mock_target",
-    [
-        "shutil.copy2",
-        "shutil.copytree",
-    ],
-)
-async def test_copy_oserror(copy_tool: CopyPathTool, tmp_path, mock_target) -> None:
-    if mock_target == "shutil.copy2":
-        src = tmp_path / "src.txt"
-        src.write_text("data", encoding="utf-8")
-    else:
-        src = tmp_path / "src_dir"
-        src.mkdir()
-        (src / "f.txt").write_text("data", encoding="utf-8")
-
+async def test_copy_file_oserror(copy_tool: CopyPathTool, tmp_path) -> None:
+    src = tmp_path / "src.txt"
+    src.write_text("data", encoding="utf-8")
     dst = tmp_path / "dst"
 
-    with patch(mock_target, side_effect=OSError("permission denied")):
+    with patch("ddev.ai.tools.fs.copy_path.shutil.copy2", side_effect=OSError("permission denied")):
+        result = await copy_tool.run({"source": str(src), "destination": str(dst)})
+
+    assert result.success is False
+    assert result.error is not None
+
+
+async def test_copy_directory_oserror(copy_tool: CopyPathTool, tmp_path) -> None:
+    src = tmp_path / "src_dir"
+    src.mkdir()
+    (src / "f.txt").write_text("data", encoding="utf-8")
+    dst = tmp_path / "dst"
+
+    with patch("ddev.ai.tools.fs.copy_path.shutil.copytree", side_effect=OSError("permission denied")):
         result = await copy_tool.run({"source": str(src), "destination": str(dst)})
 
     assert result.success is False
