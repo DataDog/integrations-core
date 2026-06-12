@@ -539,3 +539,22 @@ instances:
     ## Collect per-task metrics. Can be high cardinality for connectors with many tasks.
     #
     # kafka_connect_collect_task_metrics: false
+
+    ## @param kafka_connect_confluent_cloud_environment_id - string - optional - default: env-abc123
+    ## Confluent Cloud environment ID (e.g. ``env-abc123``). When set together with
+    ## ``kafka_connect_confluent_cloud_cluster_id``, connector metrics and configuration events
+    ## are also collected from the Confluent Cloud Connect REST API.
+    #
+    # kafka_connect_confluent_cloud_environment_id: env-abc123
+
+    ## @param kafka_connect_confluent_cloud_cluster_id - string - optional - default: lkc-xyz789
+    ## Confluent Cloud Kafka cluster ID (e.g. ``lkc-xyz789``). Required together with
+    ## ``kafka_connect_confluent_cloud_environment_id`` to enable Confluent Cloud Connect collection.
+    #
+    # kafka_connect_confluent_cloud_cluster_id: lkc-xyz789
+
+    ## @param kafka_connect_confluent_cloud_url - string - optional - default: https://api.confluent.cloud
+    ## Base URL for the Confluent Cloud REST API. Override only when using private networking
+    ## or a custom domain; the default covers the standard Confluent Cloud endpoint.
+    #
+    # kafka_connect_confluent_cloud_url: https://api.confluent.cloud

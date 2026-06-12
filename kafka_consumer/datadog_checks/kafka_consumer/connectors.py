@@ -127,7 +127,15 @@ class KafkaConnectCollector(EventCacheMixin):
                 self._refresh_oauth_token()
             except Exception as e:
                 self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
-                return dict.fromkeys(self.config._kafka_connect_urls, False)
+                failed: dict[str, bool] = dict.fromkeys(self.config._kafka_connect_urls, False)
+                if (
+                    self.config._kafka_connect_confluent_cloud_environment_id
+                    and self.config._kafka_connect_confluent_cloud_cluster_id
+                ):
+                    env_id = self.config._kafka_connect_confluent_cloud_environment_id
+                    cc_id = self.config._kafka_connect_confluent_cloud_cluster_id
+                    failed[f'confluent_cloud:{env_id}:{cc_id}'] = False
+                return failed
 
         connectivity: dict[str, bool] = {}
 
@@ -138,6 +146,26 @@ class KafkaConnectCollector(EventCacheMixin):
             except Exception as e:
                 self.log.error("Error collecting Kafka Connect data from %s: %s (%s)", url, e, type(e).__name__)
                 connectivity[url] = False
+
+        if (
+            self.config._kafka_connect_confluent_cloud_environment_id
+            and self.config._kafka_connect_confluent_cloud_cluster_id
+        ):
+            env_id = self.config._kafka_connect_confluent_cloud_environment_id
+            cluster_id_cc = self.config._kafka_connect_confluent_cloud_cluster_id
+            cc_key = f'confluent_cloud:{env_id}:{cluster_id_cc}'
+            try:
+                self._collect_confluent_cloud(cluster_id)
+                connectivity[cc_key] = True
+            except Exception as e:
+                self.log.error(
+                    "Error collecting Confluent Cloud Connect data for %s/%s: %s (%s)",
+                    env_id,
+                    cluster_id_cc,
+                    e,
+                    type(e).__name__,
+                )
+                connectivity[cc_key] = False
 
         return connectivity
 
@@ -296,3 +324,9 @@ class KafkaConnectCollector(EventCacheMixin):
             event['collection_timestamp'] = int(time.time() * 1000)
             self.check.event_platform_event(json.dumps(event), 'data-streams-message')
 
+    def _collect_confluent_cloud(self, cluster_id: str) -> None:
+        env_id = self.config._kafka_connect_confluent_cloud_environment_id
+        cc_cluster_id = self.config._kafka_connect_confluent_cloud_cluster_id
+        base = self.config._kafka_connect_confluent_cloud_url.rstrip('/')
+        url = f'{base}/connect/v1/environments/{env_id}/clusters/{cc_cluster_id}'
+        self._collect_rest(url, cluster_id)

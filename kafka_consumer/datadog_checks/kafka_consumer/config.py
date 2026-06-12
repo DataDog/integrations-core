@@ -131,6 +131,13 @@ class KafkaConfig:
         self._kafka_connect_collect_task_metrics = is_affirmative(
             instance.get('kafka_connect_collect_task_metrics', False)
         )
+        self._kafka_connect_confluent_cloud_environment_id = instance.get(
+            'kafka_connect_confluent_cloud_environment_id'
+        )
+        self._kafka_connect_confluent_cloud_cluster_id = instance.get('kafka_connect_confluent_cloud_cluster_id')
+        self._kafka_connect_confluent_cloud_url = instance.get(
+            'kafka_connect_confluent_cloud_url', 'https://api.confluent.cloud'
+        )
 
     @staticmethod
     def _parse_connect_urls(value: str | list[str] | tuple[str, ...] | None) -> list[str]:
