@@ -72,7 +72,7 @@ class NutanixCheck(AgentCheck, ConfigMixin):
 
     @property
     def alerts(self):
-        return self.activity_monitor.alerts
+        return self.activity_monitor._open_alerts
 
     @property
     def tasks(self):

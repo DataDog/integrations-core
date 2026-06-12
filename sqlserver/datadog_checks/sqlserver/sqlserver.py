@@ -4,6 +4,7 @@
 
 from __future__ import division
 
+import functools
 import time
 from collections import defaultdict
 from string import Template
@@ -103,6 +104,7 @@ from datadog_checks.sqlserver.const import (
     VALID_METRIC_TYPES,
     expected_sys_databases_columns,
 )
+from datadog_checks.sqlserver.diagnose import run_diagnostics
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, VALID_TABLES
 from datadog_checks.sqlserver.utils import (
     is_azure_sql_database,
@@ -195,6 +197,8 @@ class SQLServer(DatabaseCheck):
         self._query_manager = None
         self._database_metrics = None
         self.sqlserver_incr_fraction_metric_previous_values = {}
+
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
 
         self._submit_initialization_health_event()
 

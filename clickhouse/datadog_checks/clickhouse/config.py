@@ -128,6 +128,14 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_parts_and_merges().model_dump(),
                 **(instance.get('parts_and_merges', {})),
             },
+            "schema_metrics": {
+                **dict_defaults.instance_schema_metrics().model_dump(),
+                **(instance.get('schema_metrics', {})),
+            },
+            "collect_schemas": {
+                **dict_defaults.instance_collect_schemas().model_dump(),
+                **(instance.get('collect_schemas', {})),
+            },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
             # Other settings
@@ -224,6 +232,13 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
             f"parts_and_merges.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    if _safefloat(args.get('collect_schemas', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_collect_schemas().collection_interval
+        args['collect_schemas']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"collect_schemas.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
     _pm_defaults = dict_defaults.instance_parts_and_merges()
     for _field in (
         'max_parts_rows',
@@ -302,6 +317,11 @@ def _apply_features(config: InstanceConfig, validation_result: ValidationResult)
     validation_result.add_feature(
         FeatureKey.PARTS_AND_MERGES,
         config.parts_and_merges.enabled and config.dbm,
+        None if config.dbm else "Requires `dbm: true`",
+    )
+    validation_result.add_feature(
+        FeatureKey.SCHEMA_METRICS,
+        config.schema_metrics.enabled and config.dbm,
         None if config.dbm else "Requires `dbm: true`",
     )
     validation_result.add_feature(FeatureKey.SINGLE_ENDPOINT_MODE, config.single_endpoint_mode)
