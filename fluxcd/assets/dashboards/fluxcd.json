@@ -117,7 +117,7 @@
                             "title_size": "16",
                             "title_align": "left",
                             "type": "check_status",
-                            "check": "cilium.prometheus.health",
+                            "check": "fluxcd.openmetrics.health",
                             "grouping": "cluster",
                             "group_by": [],
                             "tags": []

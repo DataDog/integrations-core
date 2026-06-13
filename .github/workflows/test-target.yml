@@ -258,37 +258,18 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
-      with:
-        enable-cache: false
-
-    - name: Restore cache
-      if: inputs.repo == 'core'
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
-      with:
-        path: |
-          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
-          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
-        key: >-
-          ${{ format(
-            'v02-uv-{0}-{1}-{2}-{3}',
-            env.pythonLocation,
-            hashFiles('datadog_checks_base/pyproject.toml'),
-            hashFiles('datadog_checks_dev/pyproject.toml'),
-            hashFiles('ddev/pyproject.toml')
-          )}}
-        restore-keys: |-
-          v02-uv-${{ env.pythonLocation }}
-
     - name: Install ddev from local folder
       if: inputs.repo == 'core'
-      run: |-
-        uv pip install --system -e ./datadog_checks_dev[cli] -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
 
     - name: Install ddev from PyPI
       if: inputs.repo != 'core'
-      run: uv pip install --system ddev
+      uses: ./core-temp/.github/actions/setup-ddev
+      with:
+        install-mode: pypi
 
     - name: Configure ddev
       run: |-

@@ -48,10 +48,10 @@ $ ddev env start postgres py3.9-14.0
  - Container compose-postgres_replica-1   Started                                            0.9s
  - Container compose-postgres-1           Started                                            0.9s
 
-master-py3: Pulling from datadog/agent-dev
+master-py3: Pulling from agent-dev
 Digest: sha256:72824c9a986b0ef017eabba4e2cc9872333c7e16eec453b02b2276a40518655c
-Status: Image is up to date for datadog/agent-dev:master-py3
-docker.io/datadog/agent-dev:master-py3
+Status: Image is up to date for registry.datadoghq.com/agent-dev:master-py3
+registry.datadoghq.com/agent-dev:master-py3
 
 Stop environment -> ddev env stop postgres py3.9-14.0
 Execute tests -> ddev env test postgres py3.9-14.0
@@ -70,16 +70,16 @@ Let's see what we have running:
 
 ```
 $ docker ps --format "table {{.Image}}\t{{.Status}}\t{{.Ports}}\t{{.Names}}"
-IMAGE                          STATUS                   PORTS                              NAMES
-datadog/agent-dev:master-py3   Up 3 minutes (healthy)                                      dd_postgres_py3.9-14.0
-postgres:14-alpine             Up 3 minutes (healthy)   5432/tcp, 0.0.0.0:5434->5434/tcp   compose-postgres_replica2-1
-postgres:14-alpine             Up 3 minutes (healthy)   0.0.0.0:5432->5432/tcp             compose-postgres-1
-postgres:14-alpine             Up 3 minutes (healthy)   5432/tcp, 0.0.0.0:5433->5433/tcp   compose-postgres_replica-1
+IMAGE                                             STATUS                   PORTS                              NAMES
+registry.datadoghq.com/agent-dev:master-py3      Up 3 minutes (healthy)                                      dd_postgres_py3.9-14.0
+postgres:14-alpine                                Up 3 minutes (healthy)   5432/tcp, 0.0.0.0:5434->5434/tcp   compose-postgres_replica2-1
+postgres:14-alpine                                Up 3 minutes (healthy)   0.0.0.0:5432->5432/tcp             compose-postgres-1
+postgres:14-alpine                                Up 3 minutes (healthy)   5432/tcp, 0.0.0.0:5433->5433/tcp   compose-postgres_replica-1
 ```
 
 ### Agent version
 
-You can select a particular build of the Agent to use with the `--agent`/`-a` option. Any Docker image is valid e.g. `datadog/agent:7.47.0`.
+You can select a particular build of the Agent to use with the `--agent`/`-a` option. Any Docker image is valid e.g. `registry.datadoghq.com/agent:7.47.0`.
 
 A custom nightly build will be used by default, which is re-built on every commit to the [Datadog Agent repository][datadog-agent].
 

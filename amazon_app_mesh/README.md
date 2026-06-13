@@ -67,7 +67,7 @@ Log collection is not supported for this site.
 partial -->
 
 <!-- partial
-{{< site-region region="us,eu,gov" >}}
+{{< site-region region="us,eu,gov,gov2" >}}
 
 To enable log collection, update the Agent's DaemonSet with the dedicated [Kubernetes log collection instructions][1].
 
@@ -127,7 +127,7 @@ Log collection is not supported for this site.
 partial -->
 
 <!-- partial
-{{< site-region region="us,eu,gov" >}}
+{{< site-region region="us,eu,gov,gov2" >}}
 
 Enable log collection with the instructions in the [ECS Fargate integration documentation][1].
 
@@ -178,7 +178,7 @@ Log collection is not supported for this site.
 partial -->
 
 <!-- partial
-{{< site-region region="us,eu,gov" >}}
+{{< site-region region="us,eu,gov,gov2" >}}
 
 Enable log collection with the instructions in the [ECS integration documentation][1].
 

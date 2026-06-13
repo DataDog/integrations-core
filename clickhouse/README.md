@@ -4,9 +4,15 @@
 
 This check monitors [ClickHouse][1] through the Datadog Agent.
 
+Enable [Database Monitoring][11] (DBM) for enhanced insights into query performance and database health. In addition to the standard integration, Datadog DBM provides query-level metrics, live and historical query snapshots, query explain plans, query errors, and parts and merges observability.
+
+**Note**: Database Monitoring for ClickHouse is in Preview.
+
 **Minimum Agent version:** 7.16.0
 
 ## Setup
+
+<div class="alert alert-info">This page describes the standard ClickHouse Agent integration. If you are looking for the Database Monitoring product for ClickHouse, see <a href="https://docs.datadoghq.com/database_monitoring/setup_clickhouse/" target="_blank">Database Monitoring for ClickHouse</a>.</div>
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][2] for guidance on applying these instructions.
 
@@ -106,7 +112,7 @@ See [service_checks.json][9] for a list of service checks provided by this integ
 Need help? Contact [Datadog support][10].
 
 
-[1]: https://clickhouse.yandex
+[1]: https://clickhouse.com/
 [2]: https://docs.datadoghq.com/agent/kubernetes/integrations/
 [3]: /account/settings/agent/latest
 [4]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/datadog_checks/clickhouse/data/conf.yaml.example
@@ -116,3 +122,4 @@ Need help? Contact [Datadog support][10].
 [8]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/metadata.csv
 [9]: https://github.com/DataDog/integrations-core/blob/master/clickhouse/assets/service_checks.json
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/database_monitoring/setup_clickhouse/
