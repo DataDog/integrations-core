@@ -2,15 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# TODO: once the helper PR is released and the ``datadog-checks-base`` pin in
-# ``pyproject.toml`` resolves to a version that ships ``submit_generic_resource``,
-# drop ``create=True`` on the ``patch.object`` calls below and add at least one
-# end-to-end test that lets the real helper run and asserts on the captured
-# event-platform payload via
-# ``aggregator.get_event_platform_events("genresources", parse_json=False)``.
-# That catches ``include=`` signature drift, allow-list projection regressions,
-# and proto serialization failures that the current mocks cannot see.
-
 from __future__ import annotations
 
 from unittest.mock import patch
@@ -81,7 +72,7 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     by_type = {call.kwargs["type"]: call.kwargs for call in submit.call_args_list}
@@ -138,7 +129,7 @@ def test_application_key_uses_app_identity_not_destination(mock_http_response_pe
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     keys = {c.kwargs["key"] for c in submit.call_args_list if c.kwargs["type"] == "argocd_application"}
@@ -156,7 +147,7 @@ def test_collect_appends_extra_include_paths_to_every_type(mock_http_response_pe
     )
     check = ArgocdCheck("argocd", {}, [_instance(genresources_extra_include_paths=extra)])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     for call in submit.call_args_list:
@@ -173,7 +164,7 @@ def test_collect_isolates_per_endpoint_failures(aggregator, mock_http_response_p
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     emitted_types = {call.kwargs["type"] for call in submit.call_args_list}
@@ -194,7 +185,7 @@ def test_collect_skips_malformed_items_without_poisoning_cycle(mock_http_respons
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     application_emits = [c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application"]
@@ -212,7 +203,7 @@ def test_collect_caps_per_type_with_warning(mock_http_response_per_endpoint, cap
     )
     check = ArgocdCheck("argocd", {}, [_instance(genresources_max_resources_per_cycle=3)])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     application_emits = [c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application"]
@@ -230,7 +221,7 @@ def test_collect_logs_submit_failures_distinctly_from_malformed(mock_http_respon
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True, side_effect=RuntimeError("helper boom")):
+    with patch.object(check, "submit_generic_resource", side_effect=RuntimeError("helper boom")):
         check._resource_collector.collect()
 
     assert any("failed to submit argocd_application" in rec.message for rec in caplog.records)
@@ -250,7 +241,7 @@ def test_collect_strips_credentials_from_repo_urls(mock_http_response_per_endpoi
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     by_type = {c.kwargs["type"]: c.kwargs for c in submit.call_args_list}
@@ -276,7 +267,7 @@ def test_collect_scrubs_credentials_from_condition_messages(mock_http_response_p
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     app_call = next(c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application")
@@ -298,7 +289,7 @@ def test_collect_skips_unchanged_resources_on_second_cycle(mock_http_response_pe
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
         after_first = submit.call_count
         check._resource_collector._last_collect = 0.0  # simulate the collection interval elapsing
@@ -323,7 +314,7 @@ def test_collect_resubmits_application_when_resource_version_changes(mock_http_r
     )
     check = ArgocdCheck("argocd", {}, [_instance()])
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
         after_first = submit.call_count
         check._resource_collector._last_collect = 0.0  # simulate the collection interval elapsing
@@ -347,7 +338,7 @@ def test_collect_resubmits_unchanged_resources_on_ttl_sweep(mock_http_response_p
     check = ArgocdCheck("argocd", {}, [_instance()])
     collector = check._resource_collector
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         collector.collect()
         after_first = submit.call_count
         collector._last_full_submit = 0.0  # force the next cycle to be a full TTL-refresh sweep
@@ -373,7 +364,7 @@ def test_collect_respects_collection_interval(mock_http_response_per_endpoint):
     )
     check = ArgocdCheck("argocd", {}, [_instance()])  # default 120s collection interval
 
-    with patch.object(check, "submit_generic_resource", create=True) as submit:
+    with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
         after_first = submit.call_count
         check._resource_collector.collect()
@@ -381,3 +372,122 @@ def test_collect_respects_collection_interval(mock_http_response_per_endpoint):
 
     assert after_first == 1
     assert after_second == 1  # second call is within the interval -> skipped, the changed v2 is never fetched
+
+
+def _application_include(submit) -> dict:
+    return next(c.kwargs["include"] for c in submit.call_args_list if c.kwargs["type"] == "argocd_application")
+
+
+def test_collect_excludes_listed_leaf_path_from_allow_list(mock_http_response_per_endpoint):
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([_application("checkout")])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["status.conditions[*].message"])])
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    paths = _application_include(submit)["paths"]
+    assert "status.conditions[*].message" not in paths
+    assert "status.conditions[*].type" in paths  # sibling leaf is untouched
+
+
+def test_collect_exclude_drops_whole_subtree_given_parent_path(mock_http_response_per_endpoint):
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([_application("checkout")])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["status.history"])])
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    paths = _application_include(submit)["paths"]
+    assert not any(p.startswith("status.history") for p in paths)
+    assert "status.sync.status" in paths  # unrelated path is retained
+
+
+def test_collect_exclude_removes_map_path(mock_http_response_per_endpoint):
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([_application("checkout")])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["metadata.labels"])])
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    assert _application_include(submit)["map_paths"] == []
+
+
+def test_collect_exclude_overrides_extra_include_path(mock_http_response_per_endpoint):
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([_application("checkout")])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck(
+        "argocd",
+        {},
+        [
+            _instance(
+                genresources_extra_include_paths=["metadata.generation"],
+                genresources_exclude_paths=["metadata.generation"],
+            )
+        ],
+    )
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    assert "metadata.generation" not in _application_include(submit)["paths"]
+
+
+def test_real_helper_strips_secrets_and_excluded_fields(aggregator, mock_http_response_per_endpoint):
+    # Exercises the real submit_generic_resource (unmocked): proves the allow-list projection strips
+    # secrets and that genresources_exclude_paths actually removes a field from the shipped payload.
+    cluster = _cluster("https://k8s.example", name="prod")
+    cluster["config"] = {"bearerToken": "SUPERSECRETTOKEN"}  # config is not in CLUSTER_INCLUDE
+    cluster["annotations"] = {  # how GitOps stores it: the whole manifest, token and all
+        "kubectl.kubernetes.io/last-applied-configuration": '{"config":{"bearerToken":"SUPERSECRETTOKEN"}}'
+    }
+    cluster["connectionState"] = {"status": "Successful", "message": ""}
+    app = _application("checkout")
+    app["status"]["conditions"] = [{"type": "ComparisonError", "message": "EXCLUDEDMARKER"}]
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([cluster])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["status.conditions"])])
+
+    check._resource_collector.collect()
+
+    blob = b"".join(
+        p if isinstance(p, bytes) else p.encode()
+        for p in aggregator.get_event_platform_events("genresources", parse_json=False)
+    )
+    assert b"checkout" in blob  # the application shipped
+    assert b"https://k8s.example" in blob  # the cluster shipped
+    assert b"SUPERSECRETTOKEN" not in blob  # allow-list dropped config + the last-applied-config annotation
+    assert b"EXCLUDEDMARKER" not in blob  # genresources_exclude_paths dropped status.conditions
+
+
+def test_collector_warns_when_exclude_empties_a_type(caplog):
+    nuke = list(CLUSTER_INCLUDE["paths"]) + list(CLUSTER_INCLUDE["map_paths"])
+    ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=nuke)])
+    assert any("emptied the allow-list for argocd_cluster" in rec.message for rec in caplog.records)

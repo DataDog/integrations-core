@@ -117,6 +117,7 @@ class InstanceConfig(BaseModel):
     genresources_auth_token: Optional[str] = None
     genresources_collection_interval_seconds: Optional[int] = Field(None, ge=1)
     genresources_endpoint: Optional[str] = None
+    genresources_exclude_paths: Optional[tuple[str, ...]] = None
     genresources_extra_include_paths: Optional[tuple[str, ...]] = None
     genresources_max_resources_per_cycle: Optional[int] = Field(None, ge=1)
     genresources_ttl_seconds: Optional[int] = Field(None, ge=1)

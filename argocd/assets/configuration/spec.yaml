@@ -136,6 +136,21 @@ files:
         items:
           type: string
         example: []
+    - name: genresources_exclude_paths
+      hidden: true
+      description: |
+        Dotted JSON paths to remove from the baseline allow-list of every
+        collected resource type, applied after ``genresources_extra_include_paths``.
+        An entry removes any allow-listed path equal to it or nested beneath it;
+        for example, ``status.history`` drops every ``status.history[*]`` field
+        while ``status.conditions[*].message`` drops only that leaf. Use this to
+        stop shipping a field without a code change. Removing fields only ever
+        ships less, never more.
+      value:
+        type: array
+        items:
+          type: string
+        example: []
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

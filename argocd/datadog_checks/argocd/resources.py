@@ -10,8 +10,9 @@ import hashlib
 import json
 import os
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse, urlunparse
 
 try:
@@ -117,7 +118,8 @@ def _change_token(item: dict) -> str:
     version = (item.get("metadata") or {}).get("resourceVersion")
     if isinstance(version, str) and version:
         return version
-    return hashlib.sha1(json.dumps(item, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+    encoded = json.dumps(item, sort_keys=True, default=str).encode("utf-8")
+    return hashlib.sha1(encoded, usedforsecurity=False).hexdigest()
 
 
 def _application_key(item: dict) -> str:
@@ -165,6 +167,23 @@ RESOURCE_TYPE_SPECS: tuple[ResourceTypeSpec, ...] = (
 )
 
 
+def _is_excluded(path: str, exclude_paths: tuple[str, ...]) -> bool:
+    """True if a path equals an exclude entry or is nested beneath one (subtree match)."""
+    return any(path == ex or path.startswith(f"{ex}.") or path.startswith(f"{ex}[") for ex in exclude_paths)
+
+
+def _build_include(
+    spec_include: dict[str, tuple[str, ...]], extra_paths: list[str], exclude_paths: tuple[str, ...]
+) -> dict[str, list[str]]:
+    """Compose a type's final allow-list: baseline paths plus extras, minus any excluded paths and maps."""
+    paths = list(spec_include["paths"]) + extra_paths
+    return {
+        "paths": [p for p in paths if not _is_excluded(p, exclude_paths)],
+        "map_paths": [p for p in spec_include["map_paths"] if not _is_excluded(p, exclude_paths)],
+        "annotation_keys": list(spec_include["annotation_keys"]),
+    }
+
+
 class ArgocdResourceCollector:
     """Fetches ArgoCD Applications, Clusters, and Repositories and ships them as generic resources."""
 
@@ -175,6 +194,7 @@ class ArgocdResourceCollector:
         self._ttl_seconds: int = instance.get("genresources_ttl_seconds", 21600)
         self._max_resources: int = instance.get("genresources_max_resources_per_cycle", 10000)
         self._extra_paths: list[str] = list(instance.get("genresources_extra_include_paths") or [])
+        self._exclude_paths: tuple[str, ...] = tuple(instance.get("genresources_exclude_paths") or [])
         self._auth_token: str | None = instance.get("genresources_auth_token")
         self._instance_prefix: str = _instance_prefix(self._endpoint)
         self._submitted: dict[str, str] = {}
@@ -182,6 +202,17 @@ class ArgocdResourceCollector:
         self._resubmit_interval: int = max(1, self._ttl_seconds // 2)
         self._collection_interval: int = instance.get("genresources_collection_interval_seconds", 120)
         self._last_collect: float = 0.0
+        self._includes: dict[str, dict[str, list[str]]] = {
+            spec.resource_type: _build_include(spec.include, self._extra_paths, self._exclude_paths)
+            for spec in RESOURCE_TYPE_SPECS
+        }
+        for resource_type, include in self._includes.items():
+            if not include["paths"] and not include["map_paths"]:
+                self.check.log.warning(
+                    "genresources: genresources_exclude_paths emptied the allow-list for %s; "
+                    "nothing will be collected for it",
+                    resource_type,
+                )
 
     def collect(self) -> None:
         if not self._endpoint:
@@ -253,11 +284,7 @@ class ArgocdResourceCollector:
             return None
         if self._instance_prefix:
             key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
-        include = {
-            "paths": list(spec.include["paths"]) + self._extra_paths,
-            "map_paths": list(spec.include["map_paths"]),
-            "annotation_keys": list(spec.include["annotation_keys"]),
-        }
+        include = self._includes[spec.resource_type]
         cache_key = f"{spec.resource_type}|{key}"
         token = _change_token(item)
         if force_full or self._submitted.get(cache_key) != token:
