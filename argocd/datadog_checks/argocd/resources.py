@@ -284,6 +284,7 @@ class ArgocdResourceCollector:
     def _emit_item(
         self, item: dict, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int, force_full: bool
     ) -> str | None:
+        token = _change_token(item)
         try:
             _sanitize_item(item, spec.resource_type)
             key = spec.key_builder(item)
@@ -294,7 +295,6 @@ class ArgocdResourceCollector:
             key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
         include = self._includes[spec.resource_type]
         cache_key = f"{spec.resource_type}{KEY_SEPARATOR}{key}"
-        token = _change_token(item)
         if force_full or self._submitted.get(cache_key) != token:
             try:
                 self.check.submit_generic_resource(
