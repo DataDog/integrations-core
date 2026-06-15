@@ -213,6 +213,14 @@ class ArgocdResourceCollector:
                     "nothing will be collected for it",
                     resource_type,
                 )
+        if self._ttl_seconds < self._collection_interval:
+            self.check.log.warning(
+                "genresources: genresources_ttl_seconds (%d) is shorter than "
+                "genresources_collection_interval_seconds (%d); resources will expire "
+                "before the next refresh and cause entity churn",
+                self._ttl_seconds,
+                self._collection_interval,
+            )
 
     def collect(self) -> None:
         if not self._endpoint:
