@@ -547,7 +547,7 @@
                     {
                         "id": 3600789162924586,
                         "definition": {
-                            "title": "Cluster reconciliation (kube-state-metrics)",
+                            "title": "Cluster Reconciliation",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -634,7 +634,7 @@
                     {
                         "id": 343510221773686,
                         "definition": {
-                            "title": "Source acquisition (kube-state-metrics)",
+                            "title": "Source Acquisition",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
