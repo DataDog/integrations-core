@@ -86,8 +86,8 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
    ```shell
    GRANT SELECT ON SYS.SCHEMAS TO DD_MONITOR;
    GRANT SELECT ON SYS.M_TABLES TO DD_MONITOR;
-   GRANT SELECT ON SYS.VIEWS TO DD_MONITOR;
    GRANT SELECT ON SYS.TABLE_COLUMNS TO DD_MONITOR;
+   GRANT SELECT ON SYS.VIEWS TO DD_MONITOR;
    GRANT SELECT ON SYS.VIEW_COLUMNS TO DD_MONITOR;
    GRANT SELECT ON SYS.M_TABLE_STATISTICS TO DD_MONITOR;
    ```
@@ -140,8 +140,8 @@ The Agent can collect SAP HANA catalog metadata (schemas, tables, views, and col
    collect_schemas:
      enabled: true
      collection_interval: 600
-     max_tables: 300
-     max_columns: 50
+     max_tables: 2000
+     max_columns: 500
 ```
 
 See the [sample sap_hana.d/conf.yaml][4] for all available schema collection options, including `include_schemas` and `exclude_schemas`.
