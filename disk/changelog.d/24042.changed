@@ -1,0 +1,1 @@
+Simplify inode metric collection with an early-return guard.
