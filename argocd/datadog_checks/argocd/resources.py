@@ -260,7 +260,7 @@ class ArgocdResourceCollector:
             cache_key = self._emit_item(item, spec, seen_at=seen_at, expire_at=expire_at, force_full=force_full)
             if cache_key is not None:
                 seen.add(cache_key)
-        namespace = f"{spec.resource_type}|"
+        namespace = f"{spec.resource_type}{KEY_SEPARATOR}"
         self._submitted = {k: v for k, v in self._submitted.items() if not k.startswith(namespace) or k in seen}
 
     def _fetch(self, api_path: str) -> list[dict]:
@@ -285,7 +285,7 @@ class ArgocdResourceCollector:
         if self._instance_prefix:
             key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
         include = self._includes[spec.resource_type]
-        cache_key = f"{spec.resource_type}|{key}"
+        cache_key = f"{spec.resource_type}{KEY_SEPARATOR}{key}"
         token = _change_token(item)
         if force_full or self._submitted.get(cache_key) != token:
             try:

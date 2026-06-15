@@ -58,6 +58,7 @@ files:
         type: string
     - name: collect_genresources
       hidden: true
+      fleet_configurable: false
       description: |
         Enable the generic resources pilot collector that ships ArgoCD
         Applications, Clusters, and Repositories to Datadog as generic
@@ -67,6 +68,7 @@ files:
         example: false
     - name: genresources_endpoint
       hidden: true
+      fleet_configurable: false
       description: |
         Base URL of the ArgoCD REST API (for example, ``https://argocd.example.com``).
         Required when ``collect_genresources`` is set to ``true``.
@@ -76,6 +78,7 @@ files:
         type: string
     - name: genresources_auth_token
       hidden: true
+      fleet_configurable: false
       description: |
         Raw bearer token used to authenticate against the ArgoCD REST API.
         When set, the collector adds ``Authorization: Bearer <token>`` to
@@ -89,6 +92,7 @@ files:
         type: string
     - name: genresources_ttl_seconds
       hidden: true
+      fleet_configurable: false
       description: |
         Time-to-live in seconds applied to every emitted resource.
         Resources expire ``ttl_seconds`` after the last observation.
@@ -99,6 +103,7 @@ files:
         minimum: 1
     - name: genresources_collection_interval_seconds
       hidden: true
+      fleet_configurable: false
       description: |
         Minimum number of seconds between generic resources collection cycles.
         The collector polls the Argo CD API at most once per interval,
@@ -110,6 +115,7 @@ files:
         minimum: 1
     - name: genresources_max_resources_per_cycle
       hidden: true
+      fleet_configurable: false
       description: |
         Maximum number of items emitted per resource type per check cycle.
         When an ArgoCD API endpoint returns more than this, the excess is
@@ -121,6 +127,7 @@ files:
         minimum: 1
     - name: genresources_extra_include_paths
       hidden: true
+      fleet_configurable: false
       description: |
         Additional dotted JSON paths appended to the baseline allow-list of
         every collected resource type. Only enumerated paths are shipped;
@@ -138,6 +145,7 @@ files:
         example: []
     - name: genresources_exclude_paths
       hidden: true
+      fleet_configurable: false
       description: |
         Dotted JSON paths to remove from the baseline allow-list of every
         collected resource type, applied after ``genresources_extra_include_paths``.
