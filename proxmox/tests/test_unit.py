@@ -577,6 +577,34 @@ def test_events(get_current_datetime, dd_run_check, aggregator, instance, collec
 
 
 @pytest.mark.parametrize(
+    ('infrastructure_mode', 'expected_count'),
+    [
+        pytest.param('basic', 2, id='basic mode adds infra_mode tag'),
+        pytest.param('full', 0, id='full mode does not add infra_mode tag'),
+        pytest.param(None, 0, id='unset mode does not add infra_mode tag'),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_infra_mode_tag(dd_run_check, aggregator, instance, infrastructure_mode, expected_count):
+    instance = copy.deepcopy(instance)
+    if infrastructure_mode is not None:
+        instance['infrastructure_mode'] = infrastructure_mode
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag_prefix('proxmox.cpu', 'infra_mode:', count=expected_count)
+
+    # assert that no container metrics have an infra_mode tag
+    for metric in aggregator.metrics('proxmox.cpu'):
+        if 'proxmox_type:container' in metric.tags:
+            assert not any(t.startswith('infra_mode:') for t in metric.tags)
+    # assert only the cpu metric has an infra_mode tag
+    for metric_name in ALL_METRICS:
+        if metric_name != 'proxmox.cpu':
+            aggregator.assert_metric_has_tag_prefix(metric_name, 'infra_mode:', count=0)
+
+
+@pytest.mark.parametrize(
     ('resource_filters, expected_vms, expected_nodes'),
     [
         pytest.param(

@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 10.10.2 / 2026-06-09
+
+***Fixed***:
+
+* Raise exceptions from the hostname property, so permission and connectivity errors surface as check failures. ([#23661](https://github.com/DataDog/integrations-core/pull/23661))
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
 ## 10.10.1 / 2026-05-14
 
 ***Fixed***:

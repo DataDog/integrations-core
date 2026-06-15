@@ -535,19 +535,41 @@ class TagType(Enum):
     KEYLESS = auto()
 
 
+# Tags under keys with this prefix are internal resource tags (e.g. "dd.internal.resource") that are
+# consumed by the agent's metric submission pipeline. They should be excluded from payloads that don't
+# go through that pipeline, such as DBM metadata events.
+INTERNAL_TAG_PREFIX = "dd.internal"
+
+# Key used for the per-database tag. DBM checks exclude this from instance-level views because
+# the data is collected across all databases and the `db` tag is re-applied during ingestion.
+DB_TAG_KEY = "db"
+
+
 class TagManager:
     """
     Manages tags for a check. Tags are stored as a dictionary of key-value pairs
     for key-value tags and as a list of values for keyless tags useful for easy update and deletion.
-    There's an internal cache of the tag list to avoid generating the list of tag strings
+    There's an internal cache of the rendered tag lists to avoid generating the tag strings
     multiple times.
     """
 
     def __init__(self, normalizer: Optional[Callable[[Union[str, bytes]], str]] = None) -> None:
         self._tags: Dict[Union[str, TagType], List[str]] = {}
-        self._cached_tag_list: Optional[tuple[str, ...]] = None
+        # Rendered tag strings split into three disjoint buckets. Each tag string is stored exactly
+        # once, and a single render pass populates all three:
+        #   - _internal_tags: keys prefixed with "dd.internal"
+        #   - _db_tags: the per-database "db" key
+        #   - _base_tags: everything else (including keyless tags)
+        # get_tags() returns _base_tags merged with the requested optional buckets.
+        self._base_tags: tuple[str, ...] = ()
+        self._internal_tags: tuple[str, ...] = ()
+        self._db_tags: tuple[str, ...] = ()
+        self._cache_valid: bool = False
         self._keyless: TagType = TagType.KEYLESS
         self._normalizer = normalizer
+
+    def _invalidate_cache(self) -> None:
+        self._cache_valid = False
 
     def set_tag(self, key: Optional[str], value: str, replace: bool = False, normalize: bool = False) -> None:
         """
@@ -567,13 +589,18 @@ class TagManager:
             key = self._keyless
 
         if replace or key not in self._tags:
+            # Skip the cache invalidation if the value is unchanged. Dynamic tags (e.g. version,
+            # replication_role) are re-set with replace=True every check run but rarely change, so
+            # this lets the cached tag lists survive across runs.
+            if self._tags.get(key) == [value]:
+                return
             self._tags[key] = [value]
-            # Invalidate the cache since tags have changed
-            self._cached_tag_list = None
+            # Invalidate the caches since tags have changed
+            self._invalidate_cache()
         elif value not in self._tags[key]:
             self._tags[key].append(value)
-            # Invalidate the cache since tags have changed
-            self._cached_tag_list = None
+            # Invalidate the caches since tags have changed
+            self._invalidate_cache()
 
     def set_tags_from_list(self, tag_list: List[str], replace: bool = False, normalize: bool = False) -> None:
         """
@@ -586,7 +613,7 @@ class TagManager:
         """
         if replace:
             self._tags.clear()
-            self._cached_tag_list = None
+            self._invalidate_cache()
 
         for tag in tag_list:
             if ':' in tag:
@@ -619,8 +646,8 @@ class TagManager:
         if value is None:
             # Delete the entire key
             del self._tags[key]
-            # Invalidate the cache
-            self._cached_tag_list = None
+            # Invalidate the caches
+            self._invalidate_cache()
             return True
         else:
             # Delete specific value if it exists
@@ -629,39 +656,58 @@ class TagManager:
                 # Clean up empty lists
                 if not self._tags[key]:
                     del self._tags[key]
-                # Invalidate the cache
-                self._cached_tag_list = None
+                # Invalidate the caches
+                self._invalidate_cache()
                 return True
         return False
 
-    def _generate_tag_strings(self, tags_dict: Dict[Union[str, TagType], List[str]]) -> tuple[str, ...]:
+    def _rebuild_cache(self) -> None:
         """
-        Generate a tuple of tag strings from a tags dictionary.
-        Args:
-            tags_dict (Dict[Union[str, TagType], List[str]]): Dictionary of tags to convert to strings
-        Returns:
-            tuple[str, ...]: Tuple of tag strings
+        Render the tags dict into the three disjoint buckets (base, internal, db) in a single pass.
+        For key-value tags the rendered form is "key:value"; for keyless tags it's just the value.
         """
-        return tuple(
-            value if key == self._keyless else f"{key}:{value}" for key, values in tags_dict.items() for value in values
-        )
+        base: List[str] = []
+        internal: List[str] = []
+        db: List[str] = []
+        for key, values in self._tags.items():
+            if key == self._keyless:
+                base.extend(values)
+                continue
+            if isinstance(key, str) and key.startswith(INTERNAL_TAG_PREFIX):
+                bucket = internal
+            elif key == DB_TAG_KEY:
+                bucket = db
+            else:
+                bucket = base
+            bucket.extend("{}:{}".format(key, value) for value in values)
+        self._base_tags = tuple(base)
+        self._internal_tags = tuple(internal)
+        self._db_tags = tuple(db)
+        self._cache_valid = True
 
-    def get_tags(self) -> List[str]:
+    def get_tags(self, include_internal: bool = True, include_db: bool = True) -> List[str]:
         """
         Get a list of tag strings.
         For key-value tags, returns "key:value" format.
         For keyless tags, returns just the value.
-        The returned list is always sorted alphabetically.
+        Args:
+            include_internal (bool): If False, excludes internal resource tags (keys prefixed with
+                "dd.internal"). Useful for payloads that don't go through the agent's metric
+                submission pipeline, such as DBM metadata events.
+            include_db (bool): If False, excludes the per-database tag (the "db" key). Useful for
+                instance-level metrics and DBM events where the database is determined per-row or
+                during ingestion.
         Returns:
-            list: Sorted list of tag strings
+            list: List of tag strings
         """
-        # Return cached list if available
-        if self._cached_tag_list is not None:
-            return list(self._cached_tag_list)
-
-        # Generate and cache regular tags
-        self._cached_tag_list = self._generate_tag_strings(self._tags)
-        return list(self._cached_tag_list)
+        if not self._cache_valid:
+            self._rebuild_cache()
+        tags = list(self._base_tags)
+        if include_internal:
+            tags.extend(self._internal_tags)
+        if include_db:
+            tags.extend(self._db_tags)
+        return tags
 
 
 def now_ms() -> int:
