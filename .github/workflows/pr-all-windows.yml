@@ -61,6 +61,8 @@ jobs:
 
       - name: Get Datadog credentials
         id: dd-sts
+        # Coverage upload is optional; keep non-blocking so fork PRs and OIDC outages don't fail the job
+        continue-on-error: true
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
           policy: integrations-coverage-api-key
