@@ -35,7 +35,7 @@ def agent_check_getter(self):
 
 COLUMN_STATISTICS_QUERY = """\
 WITH tables AS (
-    SELECT n.nspname AS schemaname, c.relname AS tablename
+    SELECT c.oid AS relid, n.nspname AS schemaname, c.relname AS tablename
     FROM pg_class c
     JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
@@ -46,38 +46,36 @@ WITH tables AS (
 ),
 column_data AS (
     SELECT
+        t.relid,
         t.schemaname,
         t.tablename,
-        json_build_object(
-            'name', s.attname,
-            'avg_width', s.avg_width,
-            'n_distinct', s.n_distinct,
-            'null_frac', s.null_frac,
-            'inherited', s.inherited,
-            'correlation', s.correlation,
-            'most_common_freqs', s.most_common_freqs
-        ) AS col,
-        EXTRACT(EPOCH FROM (NOW() - st.last_analyze))::bigint AS last_analyze_age,
-        EXTRACT(EPOCH FROM (NOW() - st.last_autoanalyze))::bigint AS last_autoanalyze_age,
-        EXTRACT(EPOCH FROM (NOW() - st.last_vacuum))::bigint AS last_vacuum_age,
-        EXTRACT(EPOCH FROM (NOW() - st.last_autovacuum))::bigint AS last_autovacuum_age,
-        EXTRACT(EPOCH FROM (NOW() - GREATEST(st.last_analyze, st.last_autoanalyze)))::bigint AS stats_age
+        json_agg(
+            json_build_object(
+                'name', s.attname,
+                'avg_width', s.avg_width,
+                'n_distinct', s.n_distinct,
+                'null_frac', s.null_frac,
+                'inherited', s.inherited,
+                'correlation', s.correlation,
+                'most_common_freqs', s.most_common_freqs
+            ) ORDER BY s.attname
+        ) AS columns
     FROM datadog.column_statistics() s
     JOIN tables t ON t.schemaname = s.schemaname AND t.tablename = s.tablename
-    JOIN pg_stat_all_tables st ON st.schemaname = t.schemaname AND st.relname = t.tablename
+    GROUP BY t.relid, t.schemaname, t.tablename
 )
 SELECT
-    schemaname,
-    tablename,
-    json_agg(col ORDER BY col->>'name') AS columns,
-    (array_agg(last_analyze_age))[1] AS last_analyze_age,
-    (array_agg(last_autoanalyze_age))[1] AS last_autoanalyze_age,
-    (array_agg(last_vacuum_age))[1] AS last_vacuum_age,
-    (array_agg(last_autovacuum_age))[1] AS last_autovacuum_age,
-    (array_agg(stats_age))[1] AS stats_age
+    column_data.schemaname,
+    column_data.tablename,
+    column_data.columns,
+    EXTRACT(EPOCH FROM (NOW() - st.last_analyze))::bigint AS last_analyze_age,
+    EXTRACT(EPOCH FROM (NOW() - st.last_autoanalyze))::bigint AS last_autoanalyze_age,
+    EXTRACT(EPOCH FROM (NOW() - st.last_vacuum))::bigint AS last_vacuum_age,
+    EXTRACT(EPOCH FROM (NOW() - st.last_autovacuum))::bigint AS last_autovacuum_age,
+    EXTRACT(EPOCH FROM (NOW() - GREATEST(st.last_analyze, st.last_autoanalyze)))::bigint AS stats_age
 FROM column_data
-GROUP BY schemaname, tablename
-ORDER BY schemaname, tablename
+JOIN pg_stat_all_tables st ON st.relid = column_data.relid
+ORDER BY column_data.schemaname, column_data.tablename
 """
 
 
