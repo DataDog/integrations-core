@@ -28,3 +28,11 @@ def test_e2e_service_checks(dd_agent_check, instance):
         status=TemporalCheck.OK,
         tags=TAGS,
     )
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(rate=True)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check("temporal.server.openmetrics.health", status=TemporalCheck.OK)
