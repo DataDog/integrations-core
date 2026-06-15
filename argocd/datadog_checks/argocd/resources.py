@@ -223,16 +223,16 @@ class ArgocdResourceCollector:
             )
 
     def collect(self) -> None:
+        seen_at = int(time.time())
+        if seen_at - self._last_collect < self._collection_interval:
+            return
+        self._last_collect = seen_at
+
         if not self._endpoint:
             self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
             for spec in RESOURCE_TYPE_SPECS:
                 self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=[f"resource_type:{spec.resource_type}"])
             return
-
-        seen_at = int(time.time())
-        if seen_at - self._last_collect < self._collection_interval:
-            return
-        self._last_collect = seen_at
 
         expire_at = seen_at + self._ttl_seconds
         force_full = (seen_at - self._last_full_submit) >= self._resubmit_interval
