@@ -189,18 +189,18 @@ class ArgocdResourceCollector:
 
     def __init__(self, check: "ArgocdCheck") -> None:
         self.check = check
-        instance = check.instance
-        self._endpoint: str | None = instance.get("genresources_endpoint")
-        self._ttl_seconds: int = instance.get("genresources_ttl_seconds", 21600)
-        self._max_resources: int = instance.get("genresources_max_resources_per_cycle", 10000)
-        self._extra_paths: list[str] = list(instance.get("genresources_extra_include_paths") or [])
-        self._exclude_paths: tuple[str, ...] = tuple(instance.get("genresources_exclude_paths") or [])
-        self._auth_token: str | None = instance.get("genresources_auth_token")
+        config = check.config
+        self._endpoint: str | None = config.genresources_endpoint
+        self._ttl_seconds: int = config.genresources_ttl_seconds
+        self._max_resources: int = config.genresources_max_resources_per_cycle
+        self._extra_paths: list[str] = list(config.genresources_extra_include_paths or [])
+        self._exclude_paths: tuple[str, ...] = tuple(config.genresources_exclude_paths or [])
+        self._auth_token: str | None = config.genresources_auth_token
         self._instance_prefix: str = _instance_prefix(self._endpoint)
         self._submitted: dict[str, str] = {}
         self._last_full_submit: float = 0.0
         self._resubmit_interval: int = max(1, self._ttl_seconds // 2)
-        self._collection_interval: int = instance.get("genresources_collection_interval_seconds", 120)
+        self._collection_interval: int = config.genresources_collection_interval_seconds
         self._last_collect: float = 0.0
         self._includes: dict[str, dict[str, list[str]]] = {
             spec.resource_type: _build_include(spec.include, self._extra_paths, self._exclude_paths)
@@ -238,8 +238,8 @@ class ArgocdResourceCollector:
         tags = [f"resource_type:{spec.resource_type}"]
         try:
             items = self._fetch(spec.api_path)
-        except Exception as exc:
-            self.check.log.error("genresources: failed to fetch %s: %s", spec.resource_type, exc)
+        except Exception:
+            self.check.log.exception("genresources: failed to fetch %s", spec.resource_type)
             self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=tags)
             return
 
@@ -247,11 +247,11 @@ class ArgocdResourceCollector:
 
         if len(items) > self._max_resources:
             self.check.log.warning(
-                "genresources: volume cap hit (%d / %d) for type=%s; "
+                "genresources: volume cap hit for type=%s: fetched %d, capped at %d; "
                 "increase genresources_max_resources_per_cycle if expected",
-                self._max_resources,
-                len(items),
                 spec.resource_type,
+                len(items),
+                self._max_resources,
             )
             items = items[: self._max_resources]
 

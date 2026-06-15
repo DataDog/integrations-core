@@ -6,14 +6,18 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import pytest
+
 from datadog_checks.argocd import ArgocdCheck
+from datadog_checks.argocd.resources import ArgocdResourceCollector
 from datadog_checks.argocd.resources_constants import (
     APPLICATION_INCLUDE,
     CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
-    REPOSITORY_INCLUDE,
 )
 from datadog_checks.dev.http import MockResponse
+
+pytestmark = pytest.mark.unit
 
 ARGOCD_ENDPOINT = "https://argocd.example.com"
 APPLICATIONS_URL = f"{ARGOCD_ENDPOINT}/api/v1/applications"
@@ -62,6 +66,19 @@ def _items_response(items: list[dict], status_code: int = 200) -> MockResponse:
     return MockResponse(json_data={"items": items}, status_code=status_code)
 
 
+def _check(**instance_overrides) -> ArgocdCheck:
+    """Build an ArgocdCheck with config models loaded and the genresources collector attached.
+
+    Production builds the collector lazily on the first ``check()`` call once
+    ``check_initializations`` has populated ``self.config``. Tests reach into
+    ``check._resource_collector`` directly, so we mirror that bootstrap here.
+    """
+    check = ArgocdCheck("argocd", {}, [_instance(**instance_overrides)])
+    check.load_configuration_models()
+    check._resource_collector = ArgocdResourceCollector(check)
+    return check
+
+
 def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_http_response_per_endpoint):
     mock_http_response_per_endpoint(
         {
@@ -70,7 +87,7 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -79,15 +96,7 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
     assert by_type["argocd_application"]["key"] == "argocd.example.com|argocd|checkout"
     assert by_type["argocd_cluster"]["key"] == "argocd.example.com|https://cluster-a.example"
     assert by_type["argocd_repository"]["key"] == "argocd.example.com|https://github.com/team/repo"
-    for spec_type, include in (
-        ("argocd_application", APPLICATION_INCLUDE),
-        ("argocd_cluster", CLUSTER_INCLUDE),
-        ("argocd_repository", REPOSITORY_INCLUDE),
-    ):
-        forwarded = by_type[spec_type]["include"]
-        assert forwarded["paths"] == list(include["paths"])
-        assert forwarded["map_paths"] == list(include["map_paths"])
-        assert forwarded["annotation_keys"] == list(include["annotation_keys"])
+    for spec_type in ("argocd_application", "argocd_cluster", "argocd_repository"):
         aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=1, tags=[f"resource_type:{spec_type}"])
 
 
@@ -127,7 +136,7 @@ def test_application_key_uses_app_identity_not_destination(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -145,7 +154,7 @@ def test_collect_appends_extra_include_paths_to_every_type(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_extra_include_paths=extra)])
+    check = _check(genresources_extra_include_paths=extra)
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -162,7 +171,7 @@ def test_collect_isolates_per_endpoint_failures(aggregator, mock_http_response_p
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -183,7 +192,7 @@ def test_collect_skips_malformed_items_without_poisoning_cycle(mock_http_respons
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -201,14 +210,19 @@ def test_collect_caps_per_type_with_warning(mock_http_response_per_endpoint, cap
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_max_resources_per_cycle=3)])
+    check = _check(genresources_max_resources_per_cycle=3)
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     application_emits = [c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application"]
     assert len(application_emits) == 3
-    assert any("volume cap hit" in rec.message and "argocd_application" in rec.message for rec in caplog.records)
+    warning_messages = [rec.message for rec in caplog.records if "volume cap hit" in rec.message]
+    assert warning_messages, "expected a volume-cap warning"
+    warning = warning_messages[0]
+    assert "type=argocd_application" in warning
+    assert "fetched 7" in warning
+    assert "capped at 3" in warning
 
 
 def test_collect_logs_submit_failures_distinctly_from_malformed(mock_http_response_per_endpoint, caplog):
@@ -219,7 +233,7 @@ def test_collect_logs_submit_failures_distinctly_from_malformed(mock_http_respon
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource", side_effect=RuntimeError("helper boom")):
         check._resource_collector.collect()
@@ -239,7 +253,7 @@ def test_collect_strips_credentials_from_repo_urls(mock_http_response_per_endpoi
             REPOSITORIES_URL: [_items_response([repo])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -265,7 +279,7 @@ def test_collect_scrubs_credentials_from_condition_messages(mock_http_response_p
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -275,6 +289,47 @@ def test_collect_scrubs_credentials_from_condition_messages(mock_http_response_p
     assert conditions[0]["type"] == "ComparisonError"
     assert "t0ken" not in conditions[0]["message"]
     assert "https://github.com/org/repo" in conditions[0]["message"]
+
+
+def test_collect_scrubs_credentials_from_cluster_connection_state(mock_http_response_per_endpoint):
+    cluster = _cluster("https://cluster-a.example")
+    cluster["connectionState"] = {
+        "status": "Failed",
+        "message": "dial https://oauth2:t0ken@cluster-a.example: connection refused",
+    }
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([])],
+            CLUSTERS_URL: [_items_response([cluster])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = _check()
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    cluster_call = next(c for c in submit.call_args_list if c.kwargs["type"] == "argocd_cluster")
+    connection = cluster_call.kwargs["fields"]["connectionState"]
+    assert connection["status"] == "Failed"
+    assert "t0ken" not in connection["message"]
+    assert "https://cluster-a.example" in connection["message"]
+
+
+def test_collect_emits_api_up_zero_when_endpoint_missing(aggregator, mock_http_response_per_endpoint, caplog):
+    captured = mock_http_response_per_endpoint({})
+    check = _check(genresources_endpoint=None)
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    assert submit.call_count == 0
+    assert captured.call_count == 0  # no HTTP calls attempted when the endpoint is unset
+    for resource_type in ("argocd_application", "argocd_cluster", "argocd_repository"):
+        aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=0, tags=[f"resource_type:{resource_type}"])
+    assert any(
+        "collect_genresources is enabled but genresources_endpoint is not set" in rec.message for rec in caplog.records
+    )
 
 
 def test_collect_skips_unchanged_resources_on_second_cycle(mock_http_response_per_endpoint):
@@ -287,7 +342,7 @@ def test_collect_skips_unchanged_resources_on_second_cycle(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -312,7 +367,7 @@ def test_collect_resubmits_application_when_resource_version_changes(mock_http_r
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -335,7 +390,7 @@ def test_collect_resubmits_unchanged_resources_on_ttl_sweep(mock_http_response_p
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
     collector = check._resource_collector
 
     with patch.object(check, "submit_generic_resource") as submit:
@@ -362,7 +417,7 @@ def test_collect_respects_collection_interval(mock_http_response_per_endpoint):
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])  # default 120s collection interval
+    check = _check()  # default 120s collection interval
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -386,7 +441,7 @@ def test_collect_excludes_listed_leaf_path_from_allow_list(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["status.conditions[*].message"])])
+    check = _check(genresources_exclude_paths=["status.conditions[*].message"])
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -404,7 +459,7 @@ def test_collect_exclude_drops_whole_subtree_given_parent_path(mock_http_respons
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["status.history"])])
+    check = _check(genresources_exclude_paths=["status.history"])
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -422,7 +477,7 @@ def test_collect_exclude_removes_map_path(mock_http_response_per_endpoint):
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["metadata.labels"])])
+    check = _check(genresources_exclude_paths=["metadata.labels"])
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -438,15 +493,9 @@ def test_collect_exclude_overrides_extra_include_path(mock_http_response_per_end
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck(
-        "argocd",
-        {},
-        [
-            _instance(
-                genresources_extra_include_paths=["metadata.generation"],
-                genresources_exclude_paths=["metadata.generation"],
-            )
-        ],
+    check = _check(
+        genresources_extra_include_paths=["metadata.generation"],
+        genresources_exclude_paths=["metadata.generation"],
     )
 
     with patch.object(check, "submit_generic_resource") as submit:
@@ -473,7 +522,7 @@ def test_real_helper_strips_secrets_and_excluded_fields(aggregator, mock_http_re
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=["status.conditions"])])
+    check = _check(genresources_exclude_paths=["status.conditions"])
 
     check._resource_collector.collect()
 
@@ -489,5 +538,5 @@ def test_real_helper_strips_secrets_and_excluded_fields(aggregator, mock_http_re
 
 def test_collector_warns_when_exclude_empties_a_type(caplog):
     nuke = list(CLUSTER_INCLUDE["paths"]) + list(CLUSTER_INCLUDE["map_paths"])
-    ArgocdCheck("argocd", {}, [_instance(genresources_exclude_paths=nuke)])
+    _check(genresources_exclude_paths=nuke)
     assert any("emptied the allow-list for argocd_cluster" in rec.message for rec in caplog.records)

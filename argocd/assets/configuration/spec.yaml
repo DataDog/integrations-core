@@ -106,9 +106,9 @@ files:
       fleet_configurable: false
       description: |
         Minimum number of seconds between generic resources collection cycles.
-        The collector polls the Argo CD API at most once per interval,
+        The collector polls the ArgoCD API at most once per interval,
         independent of the check's metrics scrape frequency, to limit load on
-        the Argo CD API server in large deployments. Minimum of 1.
+        the ArgoCD API server in large deployments. Minimum of 1.
       value:
         type: integer
         example: 120
@@ -129,7 +129,7 @@ files:
       hidden: true
       fleet_configurable: false
       description: |
-        Additional dotted JSON paths appended to the baseline allow-list of
+        Additional dotted JSON paths appended to the baseline allowlist of
         every collected resource type. Only enumerated paths are shipped;
         anything not listed never leaves the Agent. ``[*]`` denotes array
         iteration. A path that does not match any field for a given type is
@@ -147,9 +147,9 @@ files:
       hidden: true
       fleet_configurable: false
       description: |
-        Dotted JSON paths to remove from the baseline allow-list of every
+        Dotted JSON paths to remove from the baseline allowlist of every
         collected resource type, applied after ``genresources_extra_include_paths``.
-        An entry removes any allow-listed path equal to it or nested beneath it;
+        An entry removes any allowlisted path equal to it or nested beneath it;
         for example, ``status.history`` drops every ``status.history[*]`` field
         while ``status.conditions[*].message`` drops only that leaf. Use this to
         stop shipping a field without a code change. Removing fields only ever

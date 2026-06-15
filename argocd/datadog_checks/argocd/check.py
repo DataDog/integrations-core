@@ -41,10 +41,12 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super(ArgocdCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_additional_transformers)
-        self._resource_collector = ArgocdResourceCollector(self)
+        self._resource_collector: ArgocdResourceCollector | None = None
 
     def check(self, instance):
-        if self.instance.get("collect_genresources"):
+        if self.config.collect_genresources:
+            if self._resource_collector is None:
+                self._resource_collector = ArgocdResourceCollector(self)
             try:
                 self._resource_collector.collect()
             except Exception:
