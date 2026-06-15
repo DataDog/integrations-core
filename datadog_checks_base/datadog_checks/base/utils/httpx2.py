@@ -296,7 +296,7 @@ def _env_no_proxy() -> list[str]:
     """Return the environment NO_PROXY hosts as bypass patterns for should_bypass_proxy."""
     # Read the raw NO_PROXY string (pre-httpx2-transform) so CIDR patterns survive for should_bypass_proxy.
     raw = getproxies().get('no', '')
-    return [host.strip() for host in raw.split(',') if host.strip()]
+    return [host.strip() for host in raw.replace(';', ',').split(',') if host.strip()]
 
 
 def _build_env_proxy_transport(
@@ -538,26 +538,27 @@ class HTTPX2Wrapper:
 
     def _build_client(self, transport: httpx2.BaseTransport | None) -> httpx2.Client:
         proxies = self.options['proxies']
+        # An injected transport (e.g. tests) wins; otherwise build one router that owns all proxy resolution:
+        # instance schemes, env-filled schemes, and the no_proxy bypass. skip_proxy installs no router.
+        has_routing_work = bool(proxies or self.no_proxy_uris)
+        router = None
+        if transport is None and proxies != PROXY_SETTINGS_DISABLED and has_routing_work:
+            router = _build_env_proxy_transport(
+                proxies, self.no_proxy_uris, self.options['verify'], self.options['cert']
+            )
+            transport = router
         kwargs: dict[str, Any] = {
             'headers': self.options['headers'],
             'timeout': _make_timeout(self.options['timeout'][0], self.options['timeout'][1]),
             'follow_redirects': self.options['allow_redirects'],
             'verify': self.options['verify'],
-            # trust_env reads HTTP_PROXY/HTTPS_PROXY only when no proxy is actively configured.
-            'trust_env': not _proxy_is_active(proxies),
+            # trust_env is off only when a router owns proxy resolution or skip_proxy is set.
+            'trust_env': router is None and not _proxy_is_active(proxies),
         }
         if self.options['cert'] is not None:
             kwargs['cert'] = self.options['cert']
         if self.options['auth'] is not None:
             kwargs['auth'] = self.options['auth']
-        # An injected transport (e.g. tests) wins; otherwise build one router that owns all proxy resolution:
-        # instance schemes, env-filled schemes, and the no_proxy bypass. skip_proxy installs no router.
-        if transport is None and proxies != PROXY_SETTINGS_DISABLED and (proxies or self.no_proxy_uris):
-            transport = _build_env_proxy_transport(
-                proxies, self.no_proxy_uris, self.options['verify'], self.options['cert']
-            )
-            if transport is not None:
-                kwargs['trust_env'] = False
         if transport is not None:
             kwargs['transport'] = transport
         return httpx2.Client(**kwargs)
