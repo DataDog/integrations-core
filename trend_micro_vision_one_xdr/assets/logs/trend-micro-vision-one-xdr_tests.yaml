@@ -120,16 +120,16 @@ tests:
         emailAddressCount: 0
         entities:
          -
+          entityId: "B159820E-5BB3-49F2-AD98-75A4F2046547"
+          entityType: "host"
           entityValue:
-            name: "assettag-eid"
             guid: "B159820E-5BB3-49F2-AD98-75A4F2046547"
             ips:
              - "10.10.10.10"
+            name: "assettag-eid"
+          managementScopeGroupId: "de4f892d-d1ed-450f-a8c1-4d838768f054"
           provenance:
            - "Alert"
-          managementScopeGroupId: "de4f892d-d1ed-450f-a8c1-4d838768f054"
-          entityType: "host"
-          entityId: "B159820E-5BB3-49F2-AD98-75A4F2046547"
           relatedIndicatorIds:
            - 1
            - 2

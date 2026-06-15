@@ -14,25 +14,25 @@ tests:
          -
           type: "GenerateParameters"
          -
-          watermark: false
-          seed: "None"
+          adapter_id: "None"
+          best_of: "None"
+          decoder_input_details: false
+          details: false
           do_sample: false
-          top_p: "None"
           frequency_penalty: "None"
           grammar: "None"
-          best_of: "None"
-          stop: "[]"
-          truncate: "None"
-          top_n_tokens: "None"
           max_new_tokens: "Some(20)"
-          top_k: "None"
-          decoder_input_details: false
-          temperature: "None"
-          typical_p: "None"
-          details: false
-          adapter_id: "None"
-          return_full_text: "None"
           repetition_penalty: "None"
+          return_full_text: "None"
+          seed: "None"
+          stop: "[]"
+          temperature: "None"
+          top_k: "None"
+          top_n_tokens: "None"
+          top_p: "None"
+          truncate: "None"
+          typical_p: "None"
+          watermark: false
         queue_time: "53.525µs"
         seed: "None"
         sub_component: "server"
@@ -59,25 +59,25 @@ tests:
          -
           type: "GenerateParameters"
          -
-          watermark: false
-          seed: "None"
+          adapter_id: "None"
+          best_of: "None"
+          decoder_input_details: false
+          details: true
           do_sample: true
-          top_p: "None"
           frequency_penalty: "None"
           grammar: "None"
-          best_of: "None"
-          stop: "[]"
-          truncate: "None"
-          top_n_tokens: "None"
           max_new_tokens: "Some(20)"
-          top_k: "None"
-          decoder_input_details: false
-          temperature: "None"
-          typical_p: "None"
-          details: true
-          adapter_id: "None"
-          return_full_text: "None"
           repetition_penalty: "None"
+          return_full_text: "None"
+          seed: "None"
+          stop: "[]"
+          temperature: "None"
+          top_k: "None"
+          top_n_tokens: "None"
+          top_p: "None"
+          truncate: "None"
+          typical_p: "None"
+          watermark: false
         sub_component: "infer"
       status: "ERROR"
     message: "`inputs` tokens + `max_new_tokens` must be <= 512. Given: 1864 `inputs` tokens and 20 `max_new_tokens`"
