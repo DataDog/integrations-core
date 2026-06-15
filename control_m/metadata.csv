@@ -12,4 +12,4 @@ control_m.jobs.total,gauge,0,job,,Total number of jobs reported by the Control-M
 control_m.jobs.waiting.by_server,gauge,0,job,,Number of waiting jobs per Control-M server.,0,control-m,jobs waiting by server,,
 control_m.jobs.waiting.total,gauge,0,job,,Total number of waiting jobs across all servers.,0,control-m,jobs waiting total,,
 control_m.server.up,gauge,0,,,Whether the Control-M server is up (1) or down (0).,0,control-m,server up,,
-control_m.server.test,gauge,0,,,Whether the Control-M server is up (1) or down (0).,0,control-m,server up,,
+control_m.server.z_test,gauge,0,,,Whether the Control-M server is up (1) or down (0).,0,control-m,server up,,
