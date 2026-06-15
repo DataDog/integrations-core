@@ -287,6 +287,10 @@ class ArgocdResourceCollector:
         token = _change_token(item)
         try:
             _sanitize_item(item, spec.resource_type)
+        except Exception:
+            self.check.log.exception("genresources: sanitize failed for %s", spec.resource_type)
+            return None
+        try:
             key = spec.key_builder(item)
         except Exception:
             self.check.log.warning("genresources: skipping malformed %s", spec.resource_type, exc_info=True)
