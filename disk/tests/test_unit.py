@@ -85,6 +85,11 @@ class MockInodesMetrics:
     f_ffree = 9
 
 
+class MockInodesMetricsNoInodes:
+    f_files = 0
+    f_ffree = 0
+
+
 class MockIoCountersMetrics:
     read_time = 15
     write_time = 25
@@ -186,6 +191,28 @@ def test_default(aggregator, gauge_metrics, rate_metrics, count_metrics, dd_run_
 
         aggregator.assert_all_metrics_covered()
         aggregator.reset()
+
+
+@pytest.mark.skipif(ON_WINDOWS, reason='inode metrics are collected via os.statvfs, which is not available on Windows')
+def test_no_inode_metrics_when_total_is_zero(aggregator, dd_run_check):
+    """Filesystems reporting zero total inodes (f_files == 0) emit no inode metrics and do not raise."""
+    with (
+        mock.patch('psutil.disk_partitions', return_value=[MockPart()], __name__='disk_partitions'),
+        mock.patch('psutil.disk_usage', return_value=MockDiskMetrics(), __name__='disk_usage'),
+        mock.patch('psutil.disk_io_counters', return_value=MockDiskIOMetrics()),
+        mock.patch('os.statvfs', return_value=MockInodesMetricsNoInodes(), __name__='statvfs'),
+    ):
+        c = Disk('disk', {}, [{'tag_by_label': False}])
+        dd_run_check(c)
+
+    for name in (
+        'system.fs.inodes.total',
+        'system.fs.inodes.free',
+        'system.fs.inodes.used',
+        'system.fs.inodes.in_use',
+        'system.fs.inodes.utilized',
+    ):
+        aggregator.assert_metric(name, count=0)
 
 
 @pytest.mark.usefixtures('psutil_mocks')

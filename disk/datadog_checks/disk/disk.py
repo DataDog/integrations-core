@@ -307,21 +307,19 @@ class Disk(AgentCheck):
             )
             return metrics
 
-        if inodes.f_files == 0:
-            return metrics
+        if inodes.f_files != 0:
+            total = inodes.f_files
+            free = inodes.f_ffree
 
-        total = inodes.f_files
-        free = inodes.f_ffree
+            metrics[self.METRIC_INODE.format('total')] = total
+            metrics[self.METRIC_INODE.format('free')] = free
 
-        metrics[self.METRIC_INODE.format('total')] = total
-        metrics[self.METRIC_INODE.format('free')] = free
+            used = total - free
+            metrics[self.METRIC_INODE.format('used')] = used
+            metrics[self.METRIC_INODE.format('utilized')] = (used / total) * 100
 
-        used = total - free
-        metrics[self.METRIC_INODE.format('used')] = used
-        metrics[self.METRIC_INODE.format('utilized')] = (used / total) * 100
-
-        # TODO: deprecate in favor of `utilized` metric
-        metrics[self.METRIC_INODE.format('in_use')] = used / total
+            # TODO: deprecate in favor of `utilized` metric
+            metrics[self.METRIC_INODE.format('in_use')] = used / total
 
         return metrics
 
