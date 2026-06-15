@@ -23,6 +23,7 @@ Follow the instructions below to install and configure this check for an Agent r
 The Control-M check is included in the [Datadog Agent][2] package.
 No additional installation is needed on your server.
 
+
 ### Configuration
 
 Edit the `control_m.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory.
