@@ -61,32 +61,33 @@ layer. The base `SchemaCollector` flushes when `len(_queued_rows) >= payload_chu
 1000-table schema is below the 10,000 threshold, everything flushes at once. The
 `max_tables` / `max_columns` limits are the effective memory control.
 
-**Column-based flush threshold (11× RSS reduction for unlimited)**
+**Column-based flush threshold (1.5x RSS reduction with limits)**
 The base class `payload_chunk_size` counts tables, which is a poor proxy for memory when
 tables are wide. `HanaSchemaCollector` overrides `maybe_flush` to flush after every
 `PAYLOAD_COLUMN_CHUNK_SIZE` (50,000) columns instead. For 1000-column tables this flushes
 every 50 tables, keeping `_queued_rows` from growing unboundedly. Result on the 1000×1000
-schema:
+schema (RSS before = without column-flush override; RSS after = with override):
 
 | Mode | RSS before | RSS after | Payloads |
 |------|-----------|-----------|---------|
 | unlimited (no limits) | 1,038 MiB | 93.7 MiB | 21 |
-| limited (300 tables × 50 cols) | 56.4 MiB | 56.9 MiB | 1 |
+| limited (300 tables × 50 cols) | 56.4 MiB | 61.5 MiB | 1 |
 
 The limited case is unaffected: 300 × 50 = 15,000 columns never reaches the 50,000
 threshold so it still flushes once at the end.
 
-**SQL column limit via `ROW_NUMBER()` (5× faster, no memory change)**
+**SQL column limit via `ROW_NUMBER()`**
 The original query joined `SYS.TABLE_COLUMNS` without a column count cap, so the server
 returned all 1000 columns per table regardless of `max_columns`; Python discarded the
 excess. Pushing the limit into SQL with a `limited_columns` CTE using `ROW_NUMBER() OVER
 (PARTITION BY schema, table ORDER BY position)` means the server only sends the first
-`max_columns` columns per table. Result on the 1000×1000 schema:
+`max_columns` columns per table. Result on the 1000×1000 schema (duration before = without
+ROW_NUMBER cap; duration after = with cap):
 
 | Mode    | Duration before | Duration after |
 |---------|-----------------|----------------|
-| limited (max_tables=300, max_columns=50)         | 8.1s | 1.6s |
-| unlimited (max_tables=10M, max_columns=10M)      | 48.8s | 50.6s |
+| limited (max_tables=300, max_columns=50)         | 8.1s | 2.2s |
+| unlimited (max_tables=10M, max_columns=10M)      | 48.8s | 50.7s |
 
 Peak RSS was unchanged in both modes — the Python-side column dicts are bounded by
 `max_columns` either way, so peak Python heap stays the same. The gain is query
@@ -98,4 +99,4 @@ columns) in the limited case.
 The limited run (max\_tables=300, max\_columns=50) processes 300 tables × 50 columns =
 15 000 column dicts. The unlimited run processes 1000 tables × 1000 columns = 1 000 000
 column dicts, all held in memory at once before the single `json.dumps` flush. The
-unlimited peak RSS is expected to be several times to an order of magnitude larger.
+unlimited peak RSS is expected to be ~1.5x larger than the limited run.
