@@ -346,11 +346,11 @@ class AsyncGitHubClient:
         owner: str,
         repo: str,
         issue_number: int,
-        per_page: int = 30,
+        per_page: int = 100,
         timeout: float | None = None,
-    ) -> GitHubResponse[list[IssueComment]]:
+    ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
         """
-        Calls the GitHub API to list comments on an issue or pull request.
+        Calls the GitHub API to list comments on an issue or pull request (paginated).
 
         GitHub API Documentation:
         https://docs.github.com/en/rest/issues/comments#list-issue-comments
@@ -359,20 +359,19 @@ class AsyncGitHubClient:
             owner: Repository owner (user or organisation).
             repo: Repository name.
             issue_number: Issue or pull request number.
-            per_page: Number of comments to fetch per page.
+            per_page: Number of comments per page (default 100, GitHub's maximum).
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
 
         Returns:
-            GitHubResponse[list[IssueComment]]: The validated comments and headers.
+            AsyncIterator[GitHubResponse[list[IssueComment]]]: One page of comments per iteration,
+            following Link headers until exhausted.
         """
-        response = await self._request(
-            "GET",
-            f"/repos/{owner}/{repo}/issues/{issue_number}/comments",
-            timeout=timeout,
-            params={"per_page": per_page},
-        )
-        comments = [IssueComment.model_validate(item) for item in response.json()]
-        return GitHubResponse[list[IssueComment]].model_validate({"data": comments, "headers": dict(response.headers)})
+        endpoint = f"/repos/{owner}/{repo}/issues/{issue_number}/comments"
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
+            comments = [IssueComment.model_validate(item) for item in response.json()]
+            yield GitHubResponse[list[IssueComment]].model_validate(
+                {"data": comments, "headers": dict(response.headers)}
+            )
 
     async def get_pull_request(
         self,

@@ -49,9 +49,9 @@ class TaskPullRequestUpdater(AsyncProcessor[UpdatePRComment]):
         """Return the comment id to edit: the tracked one, else an existing marked comment."""
         if self._comment_id is not None:
             return self._comment_id
-        comments = await self._client.list_issue_comments(self._owner, self._repo, self._pr_number)
-        for comment in comments.data:
-            if comment.body.startswith(COMMENT_MARKER):
-                self._comment_id = comment.id
-                return comment.id
+        async for page in self._client.list_issue_comments(self._owner, self._repo, self._pr_number):
+            for comment in page.data:
+                if comment.body.startswith(COMMENT_MARKER):
+                    self._comment_id = comment.id
+                    return comment.id
         return None

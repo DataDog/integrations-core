@@ -19,16 +19,23 @@ from ddev.utils.github_async.models import IssueComment
 class _FakeGitHubClient:
     """Records comment calls and returns canned IssueComment responses."""
 
-    def __init__(self, existing: list[IssueComment] | None = None) -> None:
-        self.existing = existing or []
+    def __init__(
+        self,
+        existing: list[IssueComment] | None = None,
+        pages: list[list[IssueComment]] | None = None,
+    ) -> None:
+        self.pages = pages if pages is not None else [existing or []]
         self.created: list[dict] = []
         self.updated: list[dict] = []
         self.list_calls = 0
+        self.pages_fetched = 0
         self._next_id = 1000
 
-    async def list_issue_comments(self, owner, repo, issue_number, per_page=30, timeout=None):
+    async def list_issue_comments(self, owner, repo, issue_number, per_page=100, timeout=None):
         self.list_calls += 1
-        return GitHubResponse[list[IssueComment]].model_validate({"data": self.existing, "headers": {}})
+        for page in self.pages:
+            self.pages_fetched += 1
+            yield GitHubResponse[list[IssueComment]].model_validate({"data": page, "headers": {}})
 
     async def create_issue_comment(self, owner, repo, issue_number, body, timeout=None):
         self._next_id += 1
@@ -99,6 +106,42 @@ async def test_marker_fallback_adopts_existing_comment() -> None:
     assert not client.created
     assert len(client.updated) == 1
     assert client.updated[0]["comment_id"] == 42
+
+
+@pytest.mark.asyncio
+async def test_marker_found_on_later_page() -> None:
+    client = _FakeGitHubClient(
+        pages=[
+            [_comment(idx, "unrelated") for idx in range(1, 4)],
+            [_comment(7, "noise"), _comment(42, f"{COMMENT_MARKER}\nold")],
+        ]
+    )
+    updater = _make_updater(client)
+
+    await updater.process_message(_message())
+
+    # The marker lives on the second page; it must still be found instead of posting a duplicate.
+    assert not client.created
+    assert len(client.updated) == 1
+    assert client.updated[0]["comment_id"] == 42
+    assert client.pages_fetched == 2
+
+
+@pytest.mark.asyncio
+async def test_marker_search_stops_at_first_match() -> None:
+    client = _FakeGitHubClient(
+        pages=[
+            [_comment(42, f"{COMMENT_MARKER}\nold")],
+            [_comment(99, f"{COMMENT_MARKER}\nstale")],
+        ]
+    )
+    updater = _make_updater(client)
+
+    await updater.process_message(_message())
+
+    # Found on page one — the second page is never fetched.
+    assert client.updated[0]["comment_id"] == 42
+    assert client.pages_fetched == 1
 
 
 @pytest.mark.asyncio
