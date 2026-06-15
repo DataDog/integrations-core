@@ -176,7 +176,7 @@
                         "id": 7877152359004176,
                         "definition": {
                             "type": "note",
-                            "content": "This section provides an overview of how many fluxcd objects are present and how many of them are failing. It also shows a high-level view of how long reconciliation takes. Objects are divided into two groups: source manifests (for example a git repository) and cluster reconcilers (for instance a Helm chart).\n\nCounts use the **maximum** of legacy controller totals (`fluxcd.gotk.reconcile.condition`, still emitted on older Flux) and kube-state-metrics (`fluxcd.gotk.resource.info`, Flux 2.1+) so either path populates the widget without adding both together. Readiness tables below pair **kube-state-metrics** with **legacy** `reconcile.condition` / `suspend.status`. See the integration README.",
+                            "content": "This section provides an overview of how many fluxcd objects are present and how many of them are failing. It also shows a high-level view of how long reconciliation takes. Objects are divided into two groups: source manifests (for example a git repository) and cluster reconcilers (for instance a Helm chart).\n\nCounts use the **maximum** of legacy controller totals (`fluxcd.gotk.reconcile.condition`, still emitted on older Flux) and kube-state-metrics (`fluxcd.gotk.resource.info`, Flux 2.1+) so either path populates the widget without adding both together. Readiness tables below pair **kube-state-metrics** with **legacy** `reconcile.condition` / `suspend.status`.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",

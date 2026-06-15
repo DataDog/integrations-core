@@ -32,8 +32,6 @@ You can pick and choose which services you monitor depending on your needs.
 
 This is an example configuration with Kubernetes annotations on your Flux pods. See the [sample configuration file][4] for all available configuration options.
 
-Dashboards that use `fluxcd.gotk.resource.info` expect that metric from **kube-state-metrics** (Flux 2.1+); the bundled overview dashboard also keeps **legacy controller** panels (`reconcile.condition` / `suspend.status`) for older Flux. See [Flux monitoring metrics][14].
-
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -112,4 +110,3 @@ Additional helpful documentation, links, and articles:
 [11]: https://www.datadoghq.com/blog/container-native-integrations/#cicd-with-flux
 [12]: https://docs.datadoghq.com/agent/kubernetes/log/
 [13]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
-[14]: https://fluxcd.io/flux/monitoring/metrics/
