@@ -312,6 +312,70 @@ class AsyncGitHubClient:
         )
         return self._parse_response(response, IssueComment)
 
+    async def update_issue_comment(
+        self,
+        owner: str,
+        repo: str,
+        comment_id: int,
+        body: str,
+        timeout: float | None = None,
+    ) -> GitHubResponse[IssueComment]:
+        """
+        Calls the GitHub API to update an existing comment on an issue or pull request.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/issues/comments#update-an-issue-comment
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            comment_id: Numeric ID of the comment to update.
+            body: New markdown body text of the comment.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[IssueComment]: The validated comment data and headers.
+        """
+        response = await self._request(
+            "PATCH",
+            f"/repos/{owner}/{repo}/issues/comments/{comment_id}",
+            timeout=timeout,
+            json={"body": body},
+        )
+        return self._parse_response(response, IssueComment)
+
+    async def list_issue_comments(
+        self,
+        owner: str,
+        repo: str,
+        issue_number: int,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[list[IssueComment]]]:
+        """
+        Calls the GitHub API to list comments on an issue or pull request (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/issues/comments#list-issue-comments
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            issue_number: Issue or pull request number.
+            per_page: Number of comments per page (default 100, GitHub's maximum).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            AsyncIterator[GitHubResponse[list[IssueComment]]]: One page of comments per iteration,
+            following Link headers until exhausted.
+        """
+        endpoint = f"/repos/{owner}/{repo}/issues/{issue_number}/comments"
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
+            comments = [IssueComment.model_validate(item) for item in response.json()]
+            yield GitHubResponse[list[IssueComment]].model_validate(
+                {"data": comments, "headers": dict(response.headers)}
+            )
+
     async def get_pull_request(
         self,
         owner: str,

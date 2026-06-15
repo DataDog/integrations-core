@@ -439,6 +439,79 @@ async def test_create_issue_comment_http_error_raises() -> None:
 
 
 # ---------------------------------------------------------------------------
+# update_issue_comment
+# ---------------------------------------------------------------------------
+
+
+async def test_update_issue_comment_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "PATCH"
+        assert "/issues/comments/55" in request.url.path
+        body = json.loads(request.content)
+        assert body["body"] == "updated"
+        return _json_response({**_issue_comment_payload(), "id": 55, "body": "updated"})
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.update_issue_comment("owner", "repo", 55, "updated")
+    assert isinstance(result.data, IssueComment)
+    assert result.data.id == 55
+    assert result.data.body == "updated"
+
+
+async def test_update_issue_comment_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.update_issue_comment("o", "r", 1, "hi")
+    assert exc_info.value.response.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# list_issue_comments
+# ---------------------------------------------------------------------------
+
+
+async def test_list_issue_comments_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert "/issues/7/comments" in request.url.path
+        assert request.url.params["per_page"] == "50"
+        return _json_response(
+            [{**_issue_comment_payload(), "id": 1}, {**_issue_comment_payload(), "id": 2, "body": "second"}]
+        )
+
+    client = _make_client(httpx.MockTransport(handler))
+    comments = [
+        comment async for page in client.list_issue_comments("owner", "repo", 7, per_page=50) for comment in page.data
+    ]
+    assert [comment.id for comment in comments] == [1, 2]
+    assert all(isinstance(comment, IssueComment) for comment in comments)
+
+
+async def test_list_issue_comments_paginates_two_pages() -> None:
+    call_count = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            link = f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'
+            return _json_response([{**_issue_comment_payload(), "id": 1}], headers={"link": link})
+        return _json_response([{**_issue_comment_payload(), "id": 2, "body": "second"}])
+
+    client = _make_client(httpx.MockTransport(handler))
+    comments = [comment async for page in client.list_issue_comments("owner", "repo", 7) for comment in page.data]
+    assert [comment.id for comment in comments] == [1, 2]
+
+
+async def test_list_issue_comments_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(403)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        async for _ in client.list_issue_comments("o", "r", 1):
+            pass
+    assert exc_info.value.response.status_code == 403
+
+
+# ---------------------------------------------------------------------------
 # create_pr_review_comment
 # ---------------------------------------------------------------------------
 

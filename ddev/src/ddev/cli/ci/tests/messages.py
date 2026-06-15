@@ -87,3 +87,5 @@ class UpdatePRComment(BaseMessage):
 
     done: bool
     workflows: list[WorkflowStatus]
+    running_count: int = 0
+    summary_url: str | None = None
