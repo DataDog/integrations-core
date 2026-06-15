@@ -1,0 +1,1 @@
+Update the Flux CD overview dashboard for Flux 2.1+ kube-state-metrics (`fluxcd.gotk.resource.info`) while keeping legacy reconcile.condition and suspend.status panels.
