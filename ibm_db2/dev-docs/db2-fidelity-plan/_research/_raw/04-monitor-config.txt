@@ -1,0 +1,25 @@
+
+   Database Connection Information
+
+ Database server        = DB2/LINUXX8664 12.1.4.0
+ SQL authorization ID   = DB2INST1
+ Local database alias   = TESTDB
+
+
+mon_act_metrics                  BASE
+mon_deadlock                     WITHOUT_HIST
+mon_lck_msg_lvl                  1
+mon_locktimeout                  NONE
+mon_lockwait                     NONE
+mon_lw_thresh                    5000000
+mon_obj_metrics                  EXTENDED
+mon_pkglist_sz                   32
+mon_req_metrics                  BASE
+mon_rtn_data                     NONE
+mon_rtn_execlist                 OFF
+mon_uow_data                     NONE
+mon_uow_execlist                 OFF
+mon_uow_pkglist                  OFF
+
+DB20000I  The TERMINATE command completed successfully.
+

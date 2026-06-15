@@ -1,0 +1,16 @@
+
+   Database Connection Information
+
+ Database server        = DB2/LINUXX8664 12.1.4.0
+ SQL authorization ID   = DB2INST1
+ Local database alias   = TESTDB
+
+
+SQL0138N  The statement was not executed because a numeric argument of a
+scalar function is out of range.  SQLSTATE=22011
+
+SQL0138N  The statement was not executed because a numeric argument of a
+scalar function is out of range.  SQLSTATE=22011
+
+DB20000I  The TERMINATE command completed successfully.
+

@@ -1,0 +1,38 @@
+
+   Database Connection Information
+
+ Database server        = DB2/LINUXX8664 12.1.4.0
+ SQL authorization ID   = DB2INST1
+ Local database alias   = TESTDB
+
+
+DB20000I  The SQL command completed successfully.
+
+          1 RETURN       +1.21895591735840E+002   +1.36000000000000E+002
+          2 TBSCAN       +1.21895591735840E+002   +1.36000000000000E+002
+
+EXPLAIN_REQUESTER                                                                                                               
+EXPLAIN_TIME                                                                                                                    
+SOURCE_NAME                                                                                                                     
+SOURCE_SCHEMA                                                                                                                   
+SOURCE_VERSION                                                                                                                  
+EXPLAIN_LEVEL                                                                                                                   
+STMTNO                                                                                                                          
+SECTNO                                                                                                                          
+OPERATOR_ID                                                                                                                     
+OPERATOR_TYPE                                                                                                                   
+TOTAL_COST                                                                                                                      
+IO_COST                                                                                                                         
+CPU_COST                                                                                                                        
+FIRST_ROW_COST                                                                                                                  
+RE_TOTAL_COST                                                                                                                   
+RE_IO_COST                                                                                                                      
+RE_CPU_COST                                                                                                                     
+COMM_COST                                                                                                                       
+FIRST_COMM_COST                                                                                                                 
+BUFFERS                                                                                                                         
+REMOTE_TOTAL_COST                                                                                                               
+REMOTE_COMM_COST                                                                                                                
+
+DB20000I  The TERMINATE command completed successfully.
+
