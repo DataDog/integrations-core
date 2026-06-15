@@ -1,0 +1,13 @@
+
+   Database Connection Information
+
+ Database server        = DB2/LINUXX8664 12.1.4.0
+ SQL authorization ID   = DB2INST1
+ Local database alias   = TESTDB
+
+
+MON_GET_APPLICATION_HANDLE               0 -                                              BIGINT
+MON_GET_APPLICATION_ID                   0 -                                              VARCHAR
+
+DB20000I  The TERMINATE command completed successfully.
+

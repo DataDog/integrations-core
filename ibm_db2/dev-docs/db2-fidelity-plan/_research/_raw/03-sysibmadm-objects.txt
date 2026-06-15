@@ -1,0 +1,89 @@
+
+   Database Connection Information
+
+ Database server        = DB2/LINUXX8664 12.1.4.0
+ SQL authorization ID   = DB2INST1
+ Local database alias   = TESTDB
+
+
+ADMINTABCOMPRESSINFO                           V
+ADMINTABINFO                                   V
+ADMINTEMPCOLUMNS                               V
+ADMINTEMPTABLES                                V
+APPLICATIONS                                   V
+APPL_PERFORMANCE                               V
+AUTHORIZATIONIDS                               V
+BP_HITRATIO                                    V
+BP_READ_IO                                     V
+BP_WRITE_IO                                    V
+CONTAINER_UTILIZATION                          V
+DB2_CF                                         V
+DB2_CLUSTER_HOST_STATE                         V
+DB2_INSTANCE_ALERTS                            V
+DB2_MEMBER                                     V
+DBCFG                                          V
+DBMCFG                                         V
+DBPATHS                                        V
+DB_HISTORY                                     V
+ENV_CF_SYS_RESOURCES                           V
+ENV_FEATURE_INFO                               V
+ENV_INST_INFO                                  V
+ENV_PROD_INFO                                  V
+ENV_SYS_INFO                                   V
+ENV_SYS_RESOURCES                              V
+INGEST_USER_CONNECTIONS                        V
+LOCKS_HELD                                     V
+LOCKWAITS                                      V
+LOG_UTILIZATION                                V
+LONG_RUNNING_SQL                               V
+MON_BP_UTILIZATION                             V
+MON_CONNECTION_SUMMARY                         V
+MON_CURRENT_SQL                                V
+MON_CURRENT_UOW                                V
+MON_DB_SUMMARY                                 V
+MON_LOCKWAITS                                  V
+MON_PKG_CACHE_SUMMARY                          V
+MON_SERVICE_SUBCLASS_SUMMARY                   V
+MON_TBSP_UTILIZATION                           V
+MON_TRANSACTION_LOG_UTILIZATION                V
+MON_WORKLOAD_SUMMARY                           V
+OBJECTOWNERS                                   V
+PDLOGMSGS_LAST24HOURS                          V
+PRIVILEGES                                     V
+QUERY_PREP_COST                                V
+REG_VARIABLES                                  V
+SNAPAGENT                                      V
+SNAPAGENT_MEMORY_POOL                          V
+SNAPAPPL                                       V
+SNAPAPPL_INFO                                  V
+SNAPBP                                         V
+SNAPBP_PART                                    V
+SNAPCONTAINER                                  V
+SNAPDB                                         V
+SNAPDBM                                        V
+SNAPDBM_MEMORY_POOL                            V
+SNAPDB_MEMORY_POOL                             V
+SNAPDETAILLOG                                  V
+SNAPDYN_SQL                                    V
+SNAPFCM                                        V
+SNAPFCM_PART                                   V
+SNAPHADR                                       V
+SNAPLOCK                                       V
+SNAPLOCKWAIT                                   V
+SNAPSTMT                                       V
+SNAPSTORAGE_PATHS                              V
+SNAPSUBSECTION                                 V
+SNAPSWITCHES                                   V
+SNAPTAB                                        V
+SNAPTAB_REORG                                  V
+SNAPTBSP                                       V
+SNAPTBSP_PART                                  V
+SNAPTBSP_QUIESCER                              V
+SNAPTBSP_RANGE                                 V
+SNAPUTIL                                       V
+SNAPUTIL_PROGRESS                              V
+TBSP_UTILIZATION                               V
+TOP_DYNAMIC_SQL                                V
+
+DB20000I  The TERMINATE command completed successfully.
+
