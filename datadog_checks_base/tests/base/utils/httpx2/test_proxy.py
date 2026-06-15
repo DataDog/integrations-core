@@ -11,6 +11,7 @@ from datadog_checks.base.utils.httpx2 import (
     HTTPX2Wrapper,
     _build_env_proxy_transport,
     _build_proxy_transport,
+    _env_no_proxy,
     _env_proxies,
     _ProxyRoutingTransport,
 )
@@ -71,31 +72,31 @@ def _served_by(
 
 
 def test_options_proxies_from_instance():
-    http = HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'https': 'https://i:1'}}, {})
-    assert http.options['proxies'] == {'http': 'http://i:1', 'https': 'https://i:1'}
+    with HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'https': 'https://i:1'}}, {}) as http:
+        assert http.options['proxies'] == {'http': 'http://i:1', 'https': 'https://i:1'}
 
 
 def test_options_proxies_from_init_config():
-    http = HTTPX2Wrapper({}, {'proxy': {'http': 'http://ic:2'}})
-    assert http.options['proxies'] == {'http': 'http://ic:2'}
+    with HTTPX2Wrapper({}, {'proxy': {'http': 'http://ic:2'}}) as http:
+        assert http.options['proxies'] == {'http': 'http://ic:2'}
 
 
 def test_options_proxies_from_agent_config():
     with mock.patch(AGENT_GET_CONFIG, return_value={'http': 'http://a:3', 'no_proxy': 'x,y'}):
-        http = HTTPX2Wrapper({}, {})
-    assert http.options['proxies'] == {'http': 'http://a:3'}
+        with HTTPX2Wrapper({}, {}) as http:
+            assert http.options['proxies'] == {'http': 'http://a:3'}
 
 
 def test_instance_proxy_overrides_init_and_agent():
     with mock.patch(AGENT_GET_CONFIG, return_value={'http': 'http://a:3'}):
-        http = HTTPX2Wrapper({'proxy': {'http': 'http://i:1'}}, {'proxy': {'http': 'http://ic:2'}})
-    assert http.options['proxies'] == {'http': 'http://i:1'}
+        with HTTPX2Wrapper({'proxy': {'http': 'http://i:1'}}, {'proxy': {'http': 'http://ic:2'}}) as http:
+            assert http.options['proxies'] == {'http': 'http://i:1'}
 
 
 def test_init_config_proxy_overrides_agent():
     with mock.patch(AGENT_GET_CONFIG, return_value={'http': 'http://a:3'}):
-        http = HTTPX2Wrapper({}, {'proxy': {'http': 'http://ic:2'}})
-    assert http.options['proxies'] == {'http': 'http://ic:2'}
+        with HTTPX2Wrapper({}, {'proxy': {'http': 'http://ic:2'}}) as http:
+            assert http.options['proxies'] == {'http': 'http://ic:2'}
 
 
 def test_use_agent_proxy_false_skips_agent_config():
@@ -105,10 +106,10 @@ def test_use_agent_proxy_false_skips_agent_config():
 
 
 def test_no_proxy_string_is_split_off_proxies():
-    http = HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'no_proxy': 'a.com,b.com;c.com'}}, {})
-    # no_proxy never leaks into options['proxies']; it drives routing instead.
-    assert http.options['proxies'] == {'http': 'http://i:1'}
-    assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']  # ';' normalized to ','
+    with HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'no_proxy': 'a.com,b.com;c.com'}}, {}) as http:
+        # no_proxy never leaks into options['proxies']; it drives routing instead.
+        assert http.options['proxies'] == {'http': 'http://i:1'}
+        assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']  # ';' normalized to ','
 
 
 # --- skip_proxy ---
@@ -128,6 +129,13 @@ def test_skip_proxy_disables_trust_env_and_builds_no_router():
     with HTTPX2Wrapper({'skip_proxy': True}, {}) as http:
         assert http._client.trust_env is False
         assert not isinstance(http._client._transport, _ProxyRoutingTransport)
+
+
+def test_injected_transport_keeps_trust_env(clean_proxy_env):
+    # No proxy and an injected transport: no router is built, so trust_env stays on for .netrc/SSL_CERT_FILE.
+    sink: list[str] = []
+    with HTTPX2Wrapper({}, {}, transport=_recording_transport('inj', sink)) as http:
+        assert http._client.trust_env is True
 
 
 # --- a configured proxy routes by scheme and installs the router ---
@@ -334,8 +342,8 @@ def test_build_env_proxy_transport_none_without_env_proxy(clean_proxy_env, monke
 
 
 def test_no_proxy_uris_stored_on_wrapper():
-    http = HTTPX2Wrapper({'proxy': {'http': 'http://p:1', 'no_proxy': 'a.com,b.com'}}, {})
-    assert http.no_proxy_uris == ['a.com', 'b.com']
+    with HTTPX2Wrapper({'proxy': {'http': 'http://p:1', 'no_proxy': 'a.com,b.com'}}, {}) as http:
+        assert http.no_proxy_uris == ['a.com', 'b.com']
 
 
 def test_no_proxy_uris_none_when_no_proxy_configured():
@@ -401,6 +409,11 @@ def test_build_env_proxy_transport_instance_wins_over_env_per_scheme(clean_proxy
     # The instance owns http; only the scheme it left unset is env-filled.
     assert transport._env_schemes == {'https'}
     transport.close()
+
+
+def test_env_no_proxy_normalizes_semicolons(clean_proxy_env):
+    clean_proxy_env.setenv('NO_PROXY', 'a.com;b.com')
+    assert _env_no_proxy() == ['a.com', 'b.com']  # ';' normalized to ',', mirroring instance no_proxy
 
 
 # --- two-tier no_proxy routing: instance no_proxy bypasses all, env NO_PROXY only env-filled schemes ---
