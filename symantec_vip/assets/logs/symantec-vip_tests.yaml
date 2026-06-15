@@ -46,22 +46,22 @@ tests:
       _id: "coloss4be-d2-tc.149132321663.2235348"
       _nestedCalls:
        -
+        credId: "VSME16734672"
+        extUserId: "7cc34F6DC"
+        jurHash: "1459689"
+        newBindStatus: "ENABLED"
+        operation: "addCredential"
         result:
           credType: "STANDARD_OTP"
-          statusMessage: "Success"
           status: "0000"
-        jurHash: "1459689"
-        extUserId: "7cc34F6DC"
-        newBindStatus: "ENABLED"
-        credId: "VSME16734672"
-        operation: "addCredential"
+          statusMessage: "Success"
        -
+        operation: "activateToken"
         result:
           detail: "0000"
           detailMessage: "Success"
-          statusMessage: "Success"
           status: "0000"
-        operation: "activateToken"
+          statusMessage: "Success"
       credId: "VSME1673472"
       durationMillis: "60"
       jurHash: "1459689"
