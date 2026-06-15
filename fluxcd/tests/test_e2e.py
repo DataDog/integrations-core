@@ -24,6 +24,7 @@ def test_source_controller_metrics(dd_agent_check):
         'fluxcd.gotk.reconcile.duration.seconds.bucket',
         'fluxcd.gotk.reconcile.duration.seconds.count',
         'fluxcd.gotk.reconcile.duration.seconds.sum',
+        'fluxcd.gotk.resource.info',
         'fluxcd.gotk.suspend.status',
         'fluxcd.process.cpu_seconds.count',
         'fluxcd.workqueue.adds.count',

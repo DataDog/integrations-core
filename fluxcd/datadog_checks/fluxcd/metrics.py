@@ -11,6 +11,7 @@ FLUX_V1_METRICS = {
     "controller_runtime_reconcile_time_seconds": "controller.runtime.reconcile.time.seconds",
     "gotk_reconcile_condition": "gotk.reconcile.condition",
     "gotk_reconcile_duration_seconds": "gotk.reconcile.duration.seconds",
+    "gotk_resource_info": "gotk.resource.info",
     "gotk_suspend_status": "gotk.suspend.status",
 }
 assert sorted(FLUX_V1_METRICS) == list(FLUX_V1_METRICS)

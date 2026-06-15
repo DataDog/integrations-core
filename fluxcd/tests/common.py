@@ -29,6 +29,7 @@ EXPECTED_METRICS = {
         "fluxcd.gotk.reconcile.duration.seconds.bucket",
         "fluxcd.gotk.reconcile.duration.seconds.count",
         "fluxcd.gotk.reconcile.duration.seconds.sum",
+        "fluxcd.gotk.resource.info",
         "fluxcd.gotk.suspend.status",
         "fluxcd.leader_election_master_status",
         "fluxcd.process.cpu_seconds.count",
