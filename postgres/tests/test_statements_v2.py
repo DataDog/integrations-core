@@ -242,6 +242,29 @@ class TestObfuscationLookup:
         lk.mark_ignored({(1, 1, 1), (2, 2, 2), (3, 3, 3)})
         assert lk.ignored_map_size == 2
 
+    def test_mark_ignored_drops_stale_positive_mapping(self):
+        """An ignored key must not resurface as a hit via a stale tier-1 mapping.
+
+        Reproduces the case where a key keeps its tier-1 mapping after its tier-2
+        signature was evicted: marking it ignored must drop the tier-1 entry so that,
+        even after the negative entry is trimmed and the signature is repopulated by
+        another key, the ignored key never produces a positive hit.
+        """
+        lk = self._make_lookup()
+        # Two keys share the same normalized SQL (one signature).
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
+        assert lk.queryid_map_size == 2
+
+        # Key (1, 1, 1) turns out to be ignorable; its tier-1 mapping must be dropped.
+        lk.mark_ignored({(1, 1, 1)})
+        assert (1, 1, 1) not in lk._key_to_sig
+
+        # The shared signature is still cached (via the other key), but the ignored key
+        # must not hit it.
+        hits, misses = lk.lookup({(1, 1, 1)})
+        assert (1, 1, 1) not in hits
+        assert (1, 1, 1) not in misses
+
 
 # ---------------------------------------------------------------------------
 # PostgresStatementMetricsV2 — unit tests (no live database)

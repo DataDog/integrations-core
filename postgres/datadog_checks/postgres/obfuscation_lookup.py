@@ -127,6 +127,10 @@ class ObfuscationLookup:
         :meth:`evict` when their key disappears from pg_stat_statements.
         """
         for pgss_key in keys:
+            # Drop any stale positive mapping so an ignored key can never resurface as a
+            # hit (e.g. if its signature is later repopulated by another key after this
+            # negative entry is LRU-trimmed).
+            self._key_to_sig.pop(pgss_key, None)
             self._ignored_keys[pgss_key] = None
             self._ignored_keys.move_to_end(pgss_key)
         if keys:
