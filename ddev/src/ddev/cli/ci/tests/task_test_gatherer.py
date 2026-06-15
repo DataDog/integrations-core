@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 import shutil
 from pathlib import Path
 
@@ -122,14 +123,16 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
 
     @staticmethod
     def _locate_job_dir(artifacts_path: Path, job_name: str) -> Path | None:
-        """Find the artifact directory for a job: an exact name match, else one containing it."""
+        """Find the artifact directory for a job: an exact name match, else one whose name
+        contains the job name as a whole, delimiter-bounded token (so ``j1`` never matches ``j12``)."""
         if not artifacts_path.exists():
             return None
         exact = artifacts_path / job_name
         if exact.is_dir():
             return exact
+        token = re.compile(rf"(?<![A-Za-z0-9]){re.escape(job_name)}(?![A-Za-z0-9])")
         for child in sorted(artifacts_path.iterdir()):
-            if child.is_dir() and job_name in child.name:
+            if child.is_dir() and token.search(child.name):
                 return child
         return None
 

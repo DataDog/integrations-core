@@ -265,6 +265,18 @@ async def test_malformed_junit_is_swallowed(tmp_path: Path) -> None:
     assert gatherer._results_by_run[100][0].failed_tests == []
 
 
+def test_locate_job_dir_anchors_token(tmp_path: Path) -> None:
+    (tmp_path / "j12").mkdir()
+    # "j12" must NOT satisfy a lookup for "j1".
+    assert TaskTestGatherer._locate_job_dir(tmp_path, "j1") is None
+    # A decorated directory containing "j1" as a bounded token matches.
+    (tmp_path / "coverage-j1").mkdir()
+    assert TaskTestGatherer._locate_job_dir(tmp_path, "j1") == tmp_path / "coverage-j1"
+    # An exact directory name always wins.
+    (tmp_path / "j1").mkdir()
+    assert TaskTestGatherer._locate_job_dir(tmp_path, "j1") == tmp_path / "j1"
+
+
 def test_build_done_message(tmp_path: Path) -> None:
     gatherer = _make_gatherer(tmp_path)
     message = gatherer.build_done_message("final")
