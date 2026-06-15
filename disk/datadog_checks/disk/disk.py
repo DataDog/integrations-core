@@ -307,6 +307,9 @@ class Disk(AgentCheck):
             )
             return metrics
 
+        if inodes.f_files == 0:
+            return metrics
+
         total = inodes.f_files
         free = inodes.f_ffree
 
