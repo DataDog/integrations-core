@@ -334,6 +334,9 @@ class TestPostgresStatementMetricsV2:
         assert bad_key not in result
         assert good_key in result
 
+    def test_resolve_obfuscations_skips_known_ddignore_keys_on_later_cycles(self):
+        """A DDIGNORE key is fetched once, negative-cached, then skipped (no fetch) on later cycles."""
+        v2 = self._make()
         ddignore_key = (1, 1, 1)
 
         with mock.patch.object(

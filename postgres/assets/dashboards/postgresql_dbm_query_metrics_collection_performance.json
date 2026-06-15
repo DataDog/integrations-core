@@ -1,0 +1,744 @@
+{
+    "title": "Postgres DBM - Query metrics collection (legacy vs optimized)",
+    "description": "Tells the end-to-end story of the **statement metrics** collection algorithm, stage by stage, so you can see where time and work go each cycle and compare `query_metrics.incremental_query_metrics: false` (legacy full `pg_stat_statements` load) vs `true` (optimized collector).\n\n### How to read this dashboard\nGroups are ordered to match the actual pipeline in `statements_v2.py._collect_metrics_rows`:\n\n1. **pgss capacity / usage / eviction** — the source table's health (`max`, `count`, `dealloc`). Drives everything downstream.\n2. **Per-cycle latency overview** — headline timings to compare v1 vs v2.\n3. **Stage 1 · Snapshot load** — column probe + the main pgss read.\n4. **Stage 2 · Change detection (delta)** — how many rows/queryids actually changed.\n5. **Stage 3 · Obfuscation resolve** — cache hit/miss and the miss-path cost (text fetch + FFI obfuscation).\n6. **Stage 4 · Assembly & output** — merged output rows + full job time.\n7. **Health & errors** — per-operation and pgss-config errors.\n\n### Template variables\n- **database_instance** — filters by the `database_instance` tag (DBM instance identifier).\n- **cluster_name** — filters by the `cluster_name` tag (Agent/host orchestrator context, **not** PostgreSQL's `cluster_name` setting). Use `*` for all.\n\n### Metric namespaces\n- `@tracked_method` timings: histogram **`postgresql.dd.postgres.operation.time.avg`** (ms) tagged **`operation:<method>`**; result sizes via **`postgresql.dd.postgres.operation.result.length`**; errors via **`postgresql.dd.postgres.operation.error`**.\n- v2 throughput gauges are emitted raw (no `postgresql.` prefix): **`dd.postgres.statement_metrics.lookup.*`**, **`dd.postgres.statement_metrics.delta.*`**, **`dd.postgres.queries.query_rows_raw`**, **`dd.postgres.statement_metrics.error`**.\n- pgss housekeeping (prefixed): **`postgresql.pg_stat_statements.max`** (gauge), **`postgresql.pg_stat_statements.count`** (count), **`postgresql.pg_stat_statements.dealloc`** (count, PG14+).\n\n---\n*Generated for integrations-core Postgres DBM development.*",
+    "layout_type": "ordered",
+    "template_variables": [
+        {
+            "name": "database_instance",
+            "prefix": "database_instance",
+            "default": "*"
+        },
+        {
+            "name": "cluster_name",
+            "prefix": "cluster_name",
+            "default": "*"
+        }
+    ],
+    "widgets": [
+        {
+            "definition": {
+                "title": "Stage 0 · pgss capacity, usage & eviction",
+                "type": "group",
+                "layout_type": "ordered",
+                "background_color": "vivid_blue",
+                "widgets": [
+                    {
+                        "definition": {
+                            "type": "note",
+                            "content": "The source `pg_stat_statements` table is fixed-size (`pg_stat_statements.max`). When full, Postgres **deallocates** least-used entries (`dealloc`). High fill % + rising dealloc means query-text churn, which drives obfuscation cache misses downstream (Stage 3).",
+                            "background_color": "blue",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "pgss fill — entries (count) vs capacity (max)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "cnt",
+                                            "query": "avg:postgresql.pg_stat_statements.count{$database_instance,$cluster_name} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "cnt",
+                                            "alias": "Entries (count)"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "mx",
+                                            "query": "avg:postgresql.pg_stat_statements.max{$database_instance,$cluster_name} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "mx",
+                                            "alias": "Capacity (max)"
+                                        }
+                                    ],
+                                    "style": {
+                                        "line_type": "dashed"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "pgss fill ratio (%) — count / max",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "cnt",
+                                            "query": "avg:postgresql.pg_stat_statements.count{$database_instance,$cluster_name} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "mx",
+                                            "query": "avg:postgresql.pg_stat_statements.max{$database_instance,$cluster_name} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * cnt / mx",
+                                            "alias": "Fill %"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "markers": [
+                                {
+                                    "value": "y = 100",
+                                    "display_type": "error dashed",
+                                    "label": "Full"
+                                },
+                                {
+                                    "value": "y = 90",
+                                    "display_type": "warning dashed",
+                                    "label": "90%"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "pgss eviction rate — dealloc (PG14+)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "sum:postgresql.pg_stat_statements.dealloc{$database_instance,$cluster_name} by {database_instance}.as_count()",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1",
+                                            "alias": "Evictions"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "definition": {
+                "title": "Per-cycle latency overview (v1 vs v2)",
+                "type": "group",
+                "layout_type": "ordered",
+                "background_color": "vivid_purple",
+                "widgets": [
+                    {
+                        "definition": {
+                            "title": "Operation time (ms) — avg by operation",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name} by {operation}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "_collect_metrics_rows (ms) — core per-cycle work by database_instance",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:_collect_metrics_rows} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "collect_per_statement_metrics (ms) — full job (incl. FQT + payload send)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:collect_per_statement_metrics} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "definition": {
+                "title": "Stage 1 · Snapshot load (column probe + main pgss read)",
+                "type": "group",
+                "layout_type": "ordered",
+                "background_color": "vivid_green",
+                "widgets": [
+                    {
+                        "definition": {
+                            "title": "v1 vs v2 main pgss read — operation time (ms)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "v1_load",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:_load_pg_stat_statements}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "v1_load",
+                                            "alias": "v1 _load_pg_stat_statements"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "v2_snap",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:_load_lightweight_snapshot}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "v2_snap",
+                                            "alias": "v2 _load_lightweight_snapshot"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Snapshot size — rows returned by _load_lightweight_snapshot",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:postgresql.dd.postgres.operation.result.length{$database_instance,$cluster_name,operation:_load_lightweight_snapshot} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Column probe — _get_pg_stat_statements_columns (ms)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:_get_pg_stat_statements_columns}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "definition": {
+                "title": "Stage 2 · Change detection (delta)",
+                "type": "group",
+                "layout_type": "ordered",
+                "background_color": "vivid_yellow",
+                "widgets": [
+                    {
+                        "definition": {
+                            "type": "note",
+                            "content": "Each cycle diffs the new snapshot against the previous one. Only **changed** rows flow downstream. `derivative_rows` = per (queryid, dbid, userid) rows whose counters advanced; `changed_queryids` = distinct query shapes needing text/obfuscation.",
+                            "background_color": "yellow",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Delta output — derivative rows & changed queryids",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "deriv",
+                                            "query": "avg:dd.postgres.statement_metrics.delta.derivative_rows{$database_instance,$cluster_name}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "deriv",
+                                            "alias": "Derivative rows"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "changed",
+                                            "query": "avg:dd.postgres.statement_metrics.delta.changed_queryids{$database_instance,$cluster_name}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "changed",
+                                            "alias": "Changed queryids"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "definition": {
+                "title": "Stage 3 · Obfuscation resolve (cache + miss path)",
+                "type": "group",
+                "layout_type": "ordered",
+                "background_color": "vivid_orange",
+                "widgets": [
+                    {
+                        "definition": {
+                            "type": "note",
+                            "content": "Changed queryids are resolved against the obfuscation cache. **Hits** are free; **misses** trigger a Postgres query-text fetch (`_fetch_query_texts`) + FFI obfuscation (`_populate_obfuscation_lookup`). This is the dominant cost driver in v2 and tracks pgss churn from Stage 0.",
+                            "background_color": "orange",
+                            "font_size": "14",
+                            "text_align": "left",
+                            "vertical_align": "top",
+                            "show_tick": false,
+                            "tick_pos": "50%",
+                            "tick_edge": "left",
+                            "has_padding": true
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "_resolve_obfuscations (ms) — full resolve pass",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:_resolve_obfuscations}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Obfuscation cache — hit / miss ratio (%)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "hits",
+                                            "query": "avg:dd.postgres.statement_metrics.lookup.hits{$database_instance,$cluster_name}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "misses",
+                                            "query": "avg:dd.postgres.statement_metrics.lookup.misses{$database_instance,$cluster_name}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "100 * hits / (hits + misses)",
+                                            "alias": "Hits %"
+                                        },
+                                        {
+                                            "formula": "100 * misses / (hits + misses)",
+                                            "alias": "Misses %"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Resolution volume — changed keys vs hits vs misses",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "changed",
+                                            "query": "avg:dd.postgres.statement_metrics.delta.changed_queryids{$database_instance,$cluster_name}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "hits",
+                                            "query": "avg:dd.postgres.statement_metrics.lookup.hits{$database_instance,$cluster_name}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "misses",
+                                            "query": "avg:dd.postgres.statement_metrics.lookup.misses{$database_instance,$cluster_name}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "changed",
+                                            "alias": "Changed queryids"
+                                        },
+                                        {
+                                            "formula": "hits",
+                                            "alias": "Lookup hits"
+                                        },
+                                        {
+                                            "formula": "misses",
+                                            "alias": "Lookup misses"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Miss path cost — text fetch vs FFI obfuscation (ms)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "fetch",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:_fetch_query_texts}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "fetch",
+                                            "alias": "_fetch_query_texts"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "obf",
+                                            "query": "avg:postgresql.dd.postgres.operation.time.avg{$database_instance,$cluster_name,operation:_populate_obfuscation_lookup}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "obf",
+                                            "alias": "_populate_obfuscation_lookup"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Miss path volume — texts fetched & obfuscated",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "fetched",
+                                            "query": "avg:postgresql.dd.postgres.operation.result.length{$database_instance,$cluster_name,operation:_fetch_query_texts}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "fetched",
+                                            "alias": "Texts fetched"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "populated",
+                                            "query": "avg:postgresql.dd.postgres.operation.result.length{$database_instance,$cluster_name,operation:_populate_obfuscation_lookup}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "populated",
+                                            "alias": "Texts obfuscated"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "definition": {
+                "title": "Stage 4 · Assembly & output",
+                "type": "group",
+                "layout_type": "ordered",
+                "background_color": "vivid_pink",
+                "widgets": [
+                    {
+                        "definition": {
+                            "title": "query_rows_raw — merged output rows before payload batching",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:dd.postgres.queries.query_rows_raw{$database_instance,$cluster_name} by {database_instance}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Result row count — operation.result.length by operation",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "avg:postgresql.dd.postgres.operation.result.length{$database_instance,$cluster_name} by {operation}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "definition": {
+                "title": "Health & errors",
+                "type": "group",
+                "layout_type": "ordered",
+                "background_color": "vivid_blue",
+                "widgets": [
+                    {
+                        "definition": {
+                            "title": "Tracked operation errors — count by operation",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "sum:postgresql.dd.postgres.operation.error{$database_instance,$cluster_name} by {operation}.as_count()",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "definition": {
+                            "title": "Statement metrics errors — count by error (pgss config / collection)",
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "display_type": "bars",
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "q1",
+                                            "query": "sum:dd.postgres.statement_metrics.error{$database_instance,$cluster_name} by {error}.as_count()",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "q1"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "warm"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
