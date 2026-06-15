@@ -98,13 +98,13 @@ files:
         hidden: true
         description: |
           Configure collection of SAP HANA catalog metadata (schemas, tables,
-          columns) for Data Quality features in Data Observability.
+          views, and columns) for Data Quality features in Data Observability.
         options:
           - name: enabled
             description: |
               Enable collection of catalog metadata. When enabled, the Agent
-              queries `SYS.SCHEMAS`, `SYS.TABLES`, and `SYS.TABLE_COLUMNS` and
-              emits schema metadata payloads.
+              queries `SYS.M_TABLES`, `SYS.VIEWS`, `SYS.TABLE_COLUMNS`, and
+              `SYS.VIEW_COLUMNS` and emits schema metadata payloads.
             value:
               type: boolean
               example: false
