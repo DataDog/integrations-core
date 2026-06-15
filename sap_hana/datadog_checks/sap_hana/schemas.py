@@ -19,18 +19,37 @@ PAYLOAD_COLUMN_CHUNK_SIZE = 50_000
 CURRENT_DATABASE_QUERY = "SELECT DATABASE_NAME FROM SYS.M_DATABASE"
 CURRENT_DATABASE_DESCRIPTION_QUERY = "SELECT DESCRIPTION FROM SYS.M_DATABASE"
 
-# Single query that filters and caps tables in the database (not in Python) and joins their columns.
-# The limited_tables CTE applies the schema filters and max_tables LIMIT before the column join, so
-# the server never returns more than max_tables tables' worth of rows. Results are ordered so each
-# table's columns arrive contiguously and can be assembled one table at a time while streaming the
-# cursor. System schemas are excluded here; '_' is a LIKE wildcard, so '_SYS_' is escaped.
-SCHEMA_TABLES_QUERY = r"""
+STATS_PERMISSION_PROBE = "SELECT COUNT(*) FROM SYS.M_TABLE_STATISTICS"
+
+# Fragment conditionally inserted when the monitoring user has SELECT on SYS.M_TABLE_STATISTICS.
+STATS_JOIN_FRAGMENT = """\
+    LEFT JOIN SYS.M_TABLE_STATISTICS ts
+      ON ts.SCHEMA_NAME = t.SCHEMA_NAME AND ts.TABLE_NAME = t.TABLE_NAME"""
+
+# Queries SYS.M_TABLES (tables with live row counts) and SYS.VIEWS separately, then unions them.
+# Table columns come from SYS.TABLE_COLUMNS; view columns from SYS.VIEW_COLUMNS (TABLE_COLUMNS
+# does not cover views in HANA). System schemas are excluded; '_SYS_' uses ESCAPE because '_' is
+# a LIKE wildcard. Placeholders:
+#   {stats_join}      STATS_JOIN_FRAGMENT or empty string
+#   {stats_column}    ts.LAST_MODIFY_TIME AS LAST_UPDATED_ON  or  NULL AS LAST_UPDATED_ON
+#   {include_clause}  AND t.SCHEMA_NAME IN (...)  or empty
+#   {exclude_clause}  AND t.SCHEMA_NAME NOT IN (...)  or empty
+#   {include_clause_v} / {exclude_clause_v}  same filters for v.SCHEMA_NAME
+# SELECT column order: SCHEMA_NAME[0] TABLE_NAME[1] OBJECT_TYPE[2] IS_COLUMN_TABLE[3]
+#   SCHEMA_OWNER[4] ROW_COUNT[5] LAST_UPDATED_ON[6]
+#   COLUMN_NAME[7] DATA_TYPE_NAME[8] IS_NULLABLE[9] DEFAULT_VALUE[10] POSITION[11]
+SCHEMA_OBJECTS_QUERY = r"""
 WITH limited_tables AS (
-    SELECT t.SCHEMA_NAME, t.TABLE_NAME, t.TABLE_TYPE, t.IS_COLUMN_TABLE, s.SCHEMA_OWNER
-    FROM SYS.TABLES t
+    SELECT t.SCHEMA_NAME, t.TABLE_NAME,
+           'TABLE' AS OBJECT_TYPE,
+           CASE WHEN t.TABLE_TYPE = 'COLUMN' THEN 'TRUE' ELSE 'FALSE' END AS IS_COLUMN_TABLE,
+           s.SCHEMA_OWNER,
+           CAST(t.RECORD_COUNT AS BIGINT) AS ROW_COUNT,
+           {stats_column}
+    FROM SYS.M_TABLES t
     LEFT JOIN SYS.SCHEMAS s ON s.SCHEMA_NAME = t.SCHEMA_NAME
-    WHERE t.IS_TEMPORARY = 'FALSE'
-      AND t.IS_SYSTEM_TABLE = 'FALSE'
+    {stats_join}
+    WHERE t.TABLE_TYPE NOT LIKE '%TEMPORARY%'
       AND t.SCHEMA_NAME NOT IN ('SYS', 'SYSTEM', 'PUBLIC')
       AND t.SCHEMA_NAME NOT LIKE '\_SYS\_%' ESCAPE '\'
       {include_clause}
@@ -38,20 +57,52 @@ WITH limited_tables AS (
     ORDER BY t.SCHEMA_NAME, t.TABLE_NAME
     LIMIT {max_tables}
 ),
+limited_views AS (
+    SELECT v.SCHEMA_NAME, v.VIEW_NAME AS TABLE_NAME,
+           'VIEW' AS OBJECT_TYPE,
+           NULL AS IS_COLUMN_TABLE,
+           s.SCHEMA_OWNER,
+           NULL AS ROW_COUNT,
+           NULL AS LAST_UPDATED_ON
+    FROM SYS.VIEWS v
+    LEFT JOIN SYS.SCHEMAS s ON s.SCHEMA_NAME = v.SCHEMA_NAME
+    WHERE v.SCHEMA_NAME NOT IN ('SYS', 'SYSTEM', 'PUBLIC')
+      AND v.SCHEMA_NAME NOT LIKE '\_SYS\_%' ESCAPE '\'
+      {include_clause_v}
+      {exclude_clause_v}
+),
+all_objects AS (
+    SELECT * FROM limited_tables
+    UNION ALL
+    SELECT * FROM limited_views
+),
 limited_columns AS (
     SELECT c.SCHEMA_NAME, c.TABLE_NAME, c.COLUMN_NAME, c.DATA_TYPE_NAME,
            c.IS_NULLABLE, c.DEFAULT_VALUE, c.POSITION,
            ROW_NUMBER() OVER (PARTITION BY c.SCHEMA_NAME, c.TABLE_NAME ORDER BY c.POSITION) AS rn
     FROM SYS.TABLE_COLUMNS c
     INNER JOIN limited_tables lt ON lt.SCHEMA_NAME = c.SCHEMA_NAME AND lt.TABLE_NAME = c.TABLE_NAME
+),
+limited_view_columns AS (
+    SELECT c.SCHEMA_NAME, c.VIEW_NAME AS TABLE_NAME, c.COLUMN_NAME, c.DATA_TYPE_NAME,
+           c.IS_NULLABLE, c.DEFAULT_VALUE, c.POSITION,
+           ROW_NUMBER() OVER (PARTITION BY c.SCHEMA_NAME, c.VIEW_NAME ORDER BY c.POSITION) AS rn
+    FROM SYS.VIEW_COLUMNS c
+    INNER JOIN limited_views lv ON lv.SCHEMA_NAME = c.SCHEMA_NAME AND lv.TABLE_NAME = c.VIEW_NAME
+),
+all_columns AS (
+    SELECT * FROM limited_columns
+    UNION ALL
+    SELECT * FROM limited_view_columns
 )
-SELECT lt.SCHEMA_NAME, lt.TABLE_NAME, lt.TABLE_TYPE, lt.IS_COLUMN_TABLE, lt.SCHEMA_OWNER,
-       lc.COLUMN_NAME, lc.DATA_TYPE_NAME, lc.IS_NULLABLE, lc.DEFAULT_VALUE, lc.POSITION
-FROM limited_tables lt
-LEFT JOIN limited_columns lc
-  ON lc.SCHEMA_NAME = lt.SCHEMA_NAME AND lc.TABLE_NAME = lt.TABLE_NAME
-  AND lc.rn <= {max_columns}
-ORDER BY lt.SCHEMA_NAME, lt.TABLE_NAME, lc.POSITION
+SELECT ao.SCHEMA_NAME, ao.TABLE_NAME, ao.OBJECT_TYPE, ao.IS_COLUMN_TABLE, ao.SCHEMA_OWNER,
+       ao.ROW_COUNT, ao.LAST_UPDATED_ON,
+       ac.COLUMN_NAME, ac.DATA_TYPE_NAME, ac.IS_NULLABLE, ac.DEFAULT_VALUE, ac.POSITION
+FROM all_objects ao
+LEFT JOIN all_columns ac
+  ON ac.SCHEMA_NAME = ao.SCHEMA_NAME AND ac.TABLE_NAME = ao.TABLE_NAME
+  AND ac.rn <= {max_columns}
+ORDER BY ao.SCHEMA_NAME, ao.TABLE_NAME, ac.POSITION
 """
 
 
@@ -73,6 +124,7 @@ class HanaSchemaCollector(SchemaCollector):
     def __init__(self, check: SapHanaCheck, config: CollectSchemas):
         super().__init__(check, HanaSchemaCollectorConfig(config))
         self._pending_row = None
+        self._has_table_statistics: bool | None = None
 
     def _reset(self) -> None:
         super()._reset()
@@ -112,24 +164,51 @@ class HanaSchemaCollector(SchemaCollector):
             self._log.warning("Could not fetch current HANA database info: %s", e)
         return [{'name': self._check._server, 'description': ''}]
 
+    def _probe_stats_permission(self, conn) -> bool:
+        try:
+            with closing(conn.cursor()) as cur:
+                cur.execute(STATS_PERMISSION_PROBE)
+                cur.fetchone()
+            return True
+        except Exception as e:
+            self._log.debug("SYS.M_TABLE_STATISTICS not accessible, skipping stats join: %s", e)
+            return False
+
     def _build_query(self):
-        """Build the schema/tables/columns query with schema filters and the table cap pushed into SQL."""
+        """Build the objects query with schema filters, optional stats join, and table cap in SQL."""
+        include_params: list = []
+        exclude_params: list = []
         include_clause = ''
         exclude_clause = ''
-        params = []
+        include_clause_v = ''
+        exclude_clause_v = ''
         if self._config.include_schemas:
             include = sorted(self._config.include_schemas)
             placeholders = ', '.join('?' for _ in include)
             include_clause = 'AND t.SCHEMA_NAME IN ({})'.format(placeholders)
-            params.extend(include)
+            include_clause_v = 'AND v.SCHEMA_NAME IN ({})'.format(placeholders)
+            include_params.extend(include)
         if self._config.exclude_schemas:
             exclude = sorted(self._config.exclude_schemas)
             placeholders = ', '.join('?' for _ in exclude)
             exclude_clause = 'AND t.SCHEMA_NAME NOT IN ({})'.format(placeholders)
-            params.extend(exclude)
-        query = SCHEMA_TABLES_QUERY.format(
+            exclude_clause_v = 'AND v.SCHEMA_NAME NOT IN ({})'.format(placeholders)
+            exclude_params.extend(exclude)
+        # Both limited_tables and limited_views CTEs have their own ?-placeholders, so params repeat.
+        params = include_params + exclude_params + include_params + exclude_params
+        if self._has_table_statistics:
+            stats_join = STATS_JOIN_FRAGMENT
+            stats_column = 'ts.LAST_MODIFY_TIME AS LAST_UPDATED_ON'
+        else:
+            stats_join = ''
+            stats_column = 'NULL AS LAST_UPDATED_ON'
+        query = SCHEMA_OBJECTS_QUERY.format(
             include_clause=include_clause,
             exclude_clause=exclude_clause,
+            include_clause_v=include_clause_v,
+            exclude_clause_v=exclude_clause_v,
+            stats_join=stats_join,
+            stats_column=stats_column,
             max_tables=int(self._config.max_tables),
             max_columns=int(self._config.max_columns),
         )
@@ -138,6 +217,8 @@ class HanaSchemaCollector(SchemaCollector):
     @contextlib.contextmanager
     def _get_cursor(self, _database_name):
         conn = self._check._conn
+        if self._has_table_statistics is None:
+            self._has_table_statistics = self._probe_stats_permission(conn)
         query, params = self._build_query()
         with closing(conn.cursor()) as cursor:
             cursor.execute(query, params)
@@ -148,23 +229,24 @@ class HanaSchemaCollector(SchemaCollector):
                 self._pending_row = None
 
     def _get_next(self, cursor):
-        """Assemble one table from consecutive cursor rows sharing the same (schema, table) key."""
+        """Assemble one table/view from consecutive cursor rows sharing the same (schema, table) key."""
         row = self._pending_row
         if row is None:
             return None
         schema_name, table_name = row[0], row[1]
         table_type, is_column_table, schema_owner = row[2], row[3], row[4]
+        row_count, last_updated_on = row[5], row[6]
         columns = []
         while row is not None and row[0] == schema_name and row[1] == table_name:
-            column_name = row[5]
+            column_name = row[7]
             if column_name is not None and len(columns) < self._config.max_columns:
                 columns.append(
                     {
                         'name': column_name,
-                        'data_type': row[6] or '',
-                        'nullable': row[7] == 'TRUE',
-                        'default': row[8],
-                        'position': row[9],
+                        'data_type': row[8] or '',
+                        'nullable': row[9] == 'TRUE',
+                        'default': row[10],
+                        'position': row[11],
                     }
                 )
             row = cursor.fetchone()
@@ -175,11 +257,14 @@ class HanaSchemaCollector(SchemaCollector):
             'table_name': table_name,
             'table_type': table_type or '',
             'is_column_table': is_column_table == 'TRUE',
+            'row_count': row_count,
+            'last_updated_on': last_updated_on,
             'columns': columns,
         }
 
     def _map_row(self, database: DatabaseInfo, table_row) -> dict:
         self._queued_column_count += len(table_row['columns'])
+        last_updated_on = table_row['last_updated_on']
         return {
             **database,
             'schemas': [
@@ -191,6 +276,8 @@ class HanaSchemaCollector(SchemaCollector):
                             'name': table_row['table_name'],
                             'type': table_row['table_type'],
                             'is_column_table': table_row['is_column_table'],
+                            'row_count': table_row['row_count'],
+                            'last_updated_on': str(last_updated_on) if last_updated_on is not None else None,
                             'columns': table_row['columns'],
                         }
                     ],

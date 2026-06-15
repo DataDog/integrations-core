@@ -37,7 +37,15 @@ def setup_user(cursor) -> None:
     cursor.execute(f'ALTER USER {DATADOG_USER} ENABLE CLIENT CONNECT')
     cursor.execute(f'ALTER USER {DATADOG_USER} DISABLE PASSWORD LIFETIME')
     cursor.execute(f'GRANT CATALOG READ TO {DATADOG_USER}')
-    for view in ('SYS.M_DATABASE', 'SYS.TABLES', 'SYS.SCHEMAS', 'SYS.TABLE_COLUMNS'):
+    for view in (
+        'SYS.M_DATABASE',
+        'SYS.M_TABLES',
+        'SYS.SCHEMAS',
+        'SYS.TABLE_COLUMNS',
+        'SYS.VIEWS',
+        'SYS.VIEW_COLUMNS',
+        'SYS.M_TABLE_STATISTICS',
+    ):
         cursor.execute(f'GRANT SELECT ON {view} TO {DATADOG_USER}')
 
 

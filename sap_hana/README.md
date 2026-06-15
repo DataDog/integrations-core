@@ -81,12 +81,15 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
    GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR;
    ```
 
-   To collect schema metadata for Data Quality features in Data Observability, grant select on the catalog views that store schema, table, and column definitions. These are already covered by the `GRANT CATALOG READ` in step 2, so this is only needed if you skipped that grant:
+   To collect schema metadata for Data Quality features in Data Observability, grant select on the catalog and monitoring views that store schema, table, and column definitions. These are already covered by the `GRANT CATALOG READ` in step 2, so this is only needed if you skipped that grant:
 
    ```shell
    GRANT SELECT ON SYS.SCHEMAS TO DD_MONITOR;
-   GRANT SELECT ON SYS.TABLES TO DD_MONITOR;
+   GRANT SELECT ON SYS.M_TABLES TO DD_MONITOR;
+   GRANT SELECT ON SYS.VIEWS TO DD_MONITOR;
    GRANT SELECT ON SYS.TABLE_COLUMNS TO DD_MONITOR;
+   GRANT SELECT ON SYS.VIEW_COLUMNS TO DD_MONITOR;
+   GRANT SELECT ON SYS.M_TABLE_STATISTICS TO DD_MONITOR;
    ```
 
 4. Finally, run the following command to assign the monitoring role to the desired user:
@@ -131,7 +134,7 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 #### Schema collection
 
-The Agent can collect SAP HANA catalog metadata (schemas, tables, and columns) for Data Quality features in Data Observability. Collection is disabled by default. To enable it, ensure that the monitoring user can read the catalog views (see [Granting privileges](#granting-privileges)) and add the following block to your `sap_hana.d/conf.yaml` file:
+The Agent can collect SAP HANA catalog metadata (schemas, tables, views, and columns) for Data Quality features in Data Observability. When the monitoring user has access to `SYS.M_TABLE_STATISTICS`, the Agent also collects row counts and last modification times for tables. Collection is disabled by default. To enable it, ensure that the monitoring user can read the required views (see [Granting privileges](#granting-privileges)) and add the following block to your `sap_hana.d/conf.yaml` file:
 
 ```yaml
    collect_schemas:

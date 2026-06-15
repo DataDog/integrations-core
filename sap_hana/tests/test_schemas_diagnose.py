@@ -33,23 +33,47 @@ def _joined_row(
     table_type='TABLE',
     is_column_table='TRUE',
     owner='OWNER',
+    row_count=None,
+    last_updated_on=None,
     column_name=None,
     data_type='INTEGER',
     nullable='TRUE',
     default=None,
     position=1,
 ):
-    """Build one row of the streamed schema/tables/columns join, in SELECT column order."""
-    return (schema, table, table_type, is_column_table, owner, column_name, data_type, nullable, default, position)
+    """Build one row of the streamed schema/tables/columns/stats join, in SELECT column order."""
+    return (
+        schema,
+        table,
+        table_type,
+        is_column_table,
+        owner,
+        row_count,
+        last_updated_on,
+        column_name,
+        data_type,
+        nullable,
+        default,
+        position,
+    )
 
 
 def _make_cursor_mock(joined_rows, db_name='TEST_DB', description='Test database'):
-    """Return a (conn, cursor) pair that streams the joined result set one row at a time via fetchone."""
+    """Return a (conn, cursor) pair that streams the joined result set one row at a time via fetchone.
+
+    The first fetchone call is consumed by the stats permission probe (returns a count row),
+    followed by the database name, database description, joined rows, and end-of-cursor sentinel.
+    """
     conn = mock.MagicMock()
     cursor = mock.MagicMock()
     conn.cursor.return_value = cursor
-    # fetchone order: database name, database description, then the joined rows, then end-of-cursor.
-    cursor.fetchone.side_effect = [(db_name,), (description,)] + list(joined_rows) + [None]
+    # fetchone call order (all cursors share this queue since conn.cursor always returns the same mock):
+    #   1. db_name       — _get_databases() CURRENT_DATABASE_QUERY
+    #   2. description   — _get_databases() CURRENT_DATABASE_DESCRIPTION_QUERY
+    #   3. (1,)          — _probe_stats_permission() COUNT probe
+    #   4+. joined rows  — _get_cursor() pending_row + _get_next() iterations
+    #   last. None       — end-of-cursor sentinel
+    cursor.fetchone.side_effect = [(db_name,), (description,), (1,)] + list(joined_rows) + [None]
     return conn, cursor
 
 
@@ -98,6 +122,8 @@ class TestHanaSchemaCollector:
         assert schema['owner'] == 'MY_OWNER'
         table = schema['tables'][0]
         assert table['name'] == 'MY_TABLE'
+        assert table['row_count'] is None
+        assert table['last_updated_on'] is None
         assert table['columns'][0]['name'] == 'COL1'
         assert table['columns'][0]['data_type'] == 'INTEGER'
         assert table['columns'][0]['nullable'] is True
@@ -131,19 +157,26 @@ class TestHanaSchemaCollector:
         query, params = check._schema_collector._build_query()
         assert "NOT IN ('SYS', 'SYSTEM', 'PUBLIC')" in query
         assert r"NOT LIKE '\_SYS\_%' ESCAPE '\'" in query
+        assert 'SYS.M_TABLES' in query
+        assert 'SYS.VIEWS' in query
+        assert 'SYS.VIEW_COLUMNS' in query
+        # SYS.TABLES (without the M_) must not appear
+        assert 'SYS.TABLES' not in query.replace('SYS.M_TABLES', '').replace('SYS.M_TABLE_STATISTICS', '')
         assert params == ()
 
     def test_exclude_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'exclude_schemas': ['EXCL']}})
         query, params = check._schema_collector._build_query()
         assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
-        assert params == ('EXCL',)
+        assert 'AND v.SCHEMA_NAME NOT IN (?)' in query
+        assert params == ('EXCL', 'EXCL')
 
     def test_include_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'include_schemas': ['ONLY']}})
         query, params = check._schema_collector._build_query()
         assert 'AND t.SCHEMA_NAME IN (?)' in query
-        assert params == ('ONLY',)
+        assert 'AND v.SCHEMA_NAME IN (?)' in query
+        assert params == ('ONLY', 'ONLY')
 
     def test_max_columns_respected(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'max_columns': 2}})
@@ -303,7 +336,70 @@ class TestHanaSchemaCollector:
         query, params = check._schema_collector._build_query()
         assert 'AND t.SCHEMA_NAME IN (?)' in query
         assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
-        assert params == ('A', 'B')
+        assert 'AND v.SCHEMA_NAME IN (?)' in query
+        assert 'AND v.SCHEMA_NAME NOT IN (?)' in query
+        assert params == ('A', 'B', 'A', 'B')
+
+    def test_row_count_in_payload(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock([_joined_row('S', 'T', row_count=42, column_name='C1')])
+
+        payloads = _collect_payloads(check)
+        table = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]
+        assert table['row_count'] == 42
+
+    def test_last_updated_on_in_payload(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock(
+            [_joined_row('S', 'T', last_updated_on='2024-01-15 12:00:00', column_name='C1')]
+        )
+
+        payloads = _collect_payloads(check)
+        table = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]
+        assert table['last_updated_on'] == '2024-01-15 12:00:00'
+
+    def test_view_in_payload(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock(
+            [
+                _joined_row(
+                    'S', 'MY_VIEW', table_type='VIEW', is_column_table=None, column_name='V_COL', data_type='NVARCHAR'
+                ),
+            ]
+        )
+
+        payloads = _collect_payloads(check)
+        table = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]
+        assert table['name'] == 'MY_VIEW'
+        assert table['type'] == 'VIEW'
+        assert table['is_column_table'] is False
+        assert table['row_count'] is None
+        assert table['last_updated_on'] is None
+        assert table['columns'][0]['name'] == 'V_COL'
+        assert table['columns'][0]['data_type'] == 'NVARCHAR'
+
+    def test_view_no_columns(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._conn, _ = _make_cursor_mock([_joined_row('S', 'MY_VIEW', table_type='VIEW', is_column_table=None)])
+
+        payloads = _collect_payloads(check)
+        table = payloads[0]['metadata'][0]['schemas'][0]['tables'][0]
+        assert table['name'] == 'MY_VIEW'
+        assert table['columns'] == []
+
+    def test_stats_join_when_available(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._schema_collector._has_table_statistics = True
+        query, _ = check._schema_collector._build_query()
+        assert 'SYS.M_TABLE_STATISTICS' in query
+        assert 'ts.LAST_MODIFY_TIME' in query
+
+    def test_stats_join_omitted_when_unavailable(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        check._schema_collector._has_table_statistics = False
+        query, _ = check._schema_collector._build_query()
+        assert 'SYS.M_TABLE_STATISTICS' not in query
+        assert 'NULL AS LAST_UPDATED_ON' in query
 
     def test_column_chunk_flush(self):
         # 3 tables × 3 columns each; threshold set to 5 so flush fires after T1+T2 (6 cols),
@@ -366,7 +462,13 @@ class TestHanaDiagnose:
         results = self._run(check)
         assert results[HanaConfigurationError.connection_failure.value].result == 0
         assert results[HanaConfigurationError.version_unsupported.value].result == 0
-        for view in ('sys_schemas_accessible', 'sys_tables_accessible', 'sys_table_columns_accessible'):
+        for view in (
+            'sys_schemas_accessible',
+            'sys_m_tables_accessible',
+            'sys_views_accessible',
+            'sys_table_columns_accessible',
+            'sys_view_columns_accessible',
+        ):
             assert results[view].result == 0
 
     def test_unsupported_hana_version(self):
@@ -388,16 +490,16 @@ class TestHanaDiagnose:
         cursor.fetchone.return_value = ('2.00.076.00',)
 
         def execute_side_effect(query, *args, **kwargs):
-            if 'COUNT' in query and 'SCHEMAS' in query:
+            if 'COUNT' in query and 'M_TABLES' in query:
                 raise Exception('insufficient privilege: Not authorized')
 
         cursor.execute.side_effect = execute_side_effect
         check.get_connection = mock.MagicMock(return_value=conn)
 
         results = self._run(check)
-        assert results['sys_schemas_accessible'].result == 1
+        assert results['sys_m_tables_accessible'].result == 1
         # remediation should mention privilege
-        assert results['sys_schemas_accessible'].remediation
+        assert results['sys_m_tables_accessible'].remediation
 
     def test_catalog_inaccessible_generic_error(self):
         check = _make_check()
@@ -407,14 +509,14 @@ class TestHanaDiagnose:
         cursor.fetchone.return_value = ('2.00.076.00',)
 
         def execute_side_effect(query, *args, **kwargs):
-            if 'COUNT' in query and 'TABLES' in query:
+            if 'COUNT' in query and 'M_TABLES' in query:
                 raise Exception('connection timeout')
 
         cursor.execute.side_effect = execute_side_effect
         check.get_connection = mock.MagicMock(return_value=conn)
 
         results = self._run(check)
-        assert results['sys_tables_accessible'].result == 1
+        assert results['sys_m_tables_accessible'].result == 1
 
     def test_properties(self):
         check = _make_check()

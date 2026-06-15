@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 _MINIMUM_MAJOR_VERSION = 2
 _CATEGORY = "SAP HANA"
 
-_CATALOG_VIEWS = ['SYS.SCHEMAS', 'SYS.TABLES', 'SYS.TABLE_COLUMNS']
+_CATALOG_VIEWS = ['SYS.SCHEMAS', 'SYS.M_TABLES', 'SYS.VIEWS', 'SYS.TABLE_COLUMNS', 'SYS.VIEW_COLUMNS']
 
 DIAGNOSTIC_METADATA = {
     'connection_failure': {
@@ -35,8 +35,8 @@ DIAGNOSTIC_METADATA = {
             "required for schema collection: {}.".format(', '.join(_CATALOG_VIEWS))
         ),
         'remediation': (
-            "Grant SELECT on SYS.SCHEMAS, SYS.TABLES, and SYS.TABLE_COLUMNS to the monitoring user, "
-            "or grant the CATALOG READ system privilege."
+            "Grant SELECT on SYS.SCHEMAS, SYS.M_TABLES, SYS.VIEWS, SYS.TABLE_COLUMNS, and SYS.VIEW_COLUMNS "
+            "to the monitoring user, or grant the CATALOG READ system privilege."
         ),
     },
     'catalog_view_inaccessible': {
