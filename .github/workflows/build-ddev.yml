@@ -165,7 +165,12 @@ jobs:
         mkdir "$PYAPP_REPO"
         curl -fsSL -o pyapp.tar.gz \
           "https://github.com/ofek/pyapp/releases/download/v$PYAPP_VERSION/source.tar.gz"
-        echo "$PYAPP_SHA256 *pyapp.tar.gz" | shasum -a 256 -c -
+        # sha256sum on Linux/Windows-bash; shasum on macOS (Git-for-Windows bash lacks shasum)
+        if command -v sha256sum >/dev/null 2>&1; then
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | sha256sum -c -
+        else
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | shasum -a 256 -c -
+        fi
         tar --strip-components=1 -xzf pyapp.tar.gz -C "$PYAPP_REPO"
         rm pyapp.tar.gz
 
