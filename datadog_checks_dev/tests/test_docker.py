@@ -28,16 +28,11 @@ def test_get_e2e_discovery_metadata(tmp_path):
         encoding='utf-8',
     )
 
-    metadata = get_e2e_discovery_metadata(check_root, site_packages='/site-packages')
+    metadata = get_e2e_discovery_metadata(check_root)
 
-    base_pkg = tmp_path / 'datadog_checks_base' / 'datadog_checks' / 'base'
     assert metadata == {
         'docker_volumes': [
             f'{check_package_root}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/test_check.d/auto_conf.yaml:ro',
-            f'{check_package_root}/config_models/discovery.py:/site-packages/datadog_checks/test_check/config_models/discovery.py:ro',
-            f'{base_pkg}/utils/discovery:/site-packages/datadog_checks/base/utils/discovery:ro',
-            f'{base_pkg}/checks/openmetrics/v2/base.py:/site-packages/datadog_checks/base/checks/openmetrics/v2/base.py:ro',
-            f'{base_pkg}/checks/base.py:/site-packages/datadog_checks/base/checks/base.py:ro',
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
     }

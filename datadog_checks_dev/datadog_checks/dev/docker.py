@@ -44,13 +44,10 @@ def get_container_ip(container_id_or_name):
 
 def get_e2e_discovery_metadata(
     check_root: str | os.PathLike[str] | None = None,
-    *,
-    site_packages: str = '/opt/datadog-agent/embedded/lib/python3.13/site-packages',
 ) -> dict[str, list[str]]:
     """Return Docker volume metadata for an e2e discovery run.
 
-    Mounts the integration's ``auto_conf.yaml`` and ``config_models/discovery.py`` into the
-    agent container, alongside the repo's discovery utilities from ``datadog_checks_base``.
+    Mounts the integration's ``auto_conf.yaml`` into the agent container.
 
     Use ``dd_agent_check_discovery`` alongside this metadata so that the static
     per-env config is temporarily replaced with an empty-instances file, leaving
@@ -58,22 +55,12 @@ def get_e2e_discovery_metadata(
     """
     check_root = os.fspath(check_root or find_check_root(depth=1))
     check_name = os.path.basename(check_root)
-    repo_root = os.path.dirname(check_root)
     check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
-    base_pkg = os.path.join(repo_root, 'datadog_checks_base', 'datadog_checks', 'base')
     auto_conf = os.path.join(check_pkg, 'data', 'auto_conf.yaml')
-    discovery_module = os.path.join(check_pkg, 'config_models', 'discovery.py')
-    base_py = os.path.join(base_pkg, 'checks', 'base.py')
-    discovery_dir = os.path.join(base_pkg, 'utils', 'discovery')
-    openmetrics_base = os.path.join(base_pkg, 'checks', 'openmetrics', 'v2', 'base.py')
 
     return {
         'docker_volumes': [
             f'{auto_conf}:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro',
-            f'{discovery_module}:{site_packages}/datadog_checks/{check_name}/config_models/discovery.py:ro',
-            f'{discovery_dir}:{site_packages}/datadog_checks/base/utils/discovery:ro',
-            f'{openmetrics_base}:{site_packages}/datadog_checks/base/checks/openmetrics/v2/base.py:ro',
-            f'{base_py}:{site_packages}/datadog_checks/base/checks/base.py:ro',
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
     }
