@@ -13,6 +13,9 @@ PORT = '50000'
 DB = 'datadog'
 USERNAME = 'db2inst1'
 PASSWORD = 'db2inst1-pwd'
+DBM_USERNAME = 'datadog'
+DBM_PASSWORD = 'datadog-pwd'
+DB2_IMAGE = os.getenv('DB2_IMAGE', 'taskana/db2')
 DB2_VERSION = os.getenv('DB2_VERSION')
 
 CONFIG = {

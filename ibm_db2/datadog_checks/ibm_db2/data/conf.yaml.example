@@ -25,10 +25,16 @@ init_config:
 #
 instances:
 
+  -
+    ## @param dbm - boolean - optional - default: false
+    ## Set to `true` to enable Database Monitoring.
+    #
+    # dbm: false
+
     ## @param db - string - required
     ## The name of the database to establish a connection with.
     #
-  - db: <DATABASE_NAME>
+    db: <DATABASE_NAME>
 
     ## @param username - string - required
     ## The database user to authenticate as.
@@ -66,6 +72,307 @@ instances:
     ## Connection timeout in seconds
     #
     # connection_timeout: 10
+
+    ## @param reported_hostname - string - optional
+    ## Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+    ## and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+    #
+    # reported_hostname: <REPORTED_HOSTNAME>
+
+    ## @param exclude_hostname - boolean - optional - default: false
+    ## Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+    #
+    # exclude_hostname: false
+
+    ## Controls how the database is identified. Each unique value of this identifier appears in DBM as a separate
+    ## billable instance.
+    ##
+    ## The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+    ##
+    ## This value is used as-is for the display name of the instance but is normalized when applied as the
+    ## `database_instance` tag. See https://docs.datadoghq.com/getting_started/tagging/ for more details on
+    ## Datadog tag normalization.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template to use for the database identifier. The default value is `$resolved_hostname`.
+        ## You can use the following variables, prefixed by `$` in the template:
+        ## - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+        ## - host: The provided host of the instance.
+        ## - port: The port number of the instance.
+        ## - db: The configured Db2 database name.
+        #
+        # template: $resolved_hostname:$db
+
+    ## Configure collection of DBM query metrics.
+    #
+    # query_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of query metrics. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query metric collection interval (in seconds). Each collection reads
+        ## `MON_GET_PKG_CACHE_STMT` and computes interval deltas client-side.
+        #
+        # collection_interval: 10
+
+    ## Configure DBM query sample execution plan collection.
+    #
+    # query_samples:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of execution plans from Db2 EXPLAIN tables. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query sample collection interval (in seconds). This interval is used when query metrics are
+        ## disabled and query samples are enabled.
+        #
+        # collection_interval: 10
+
+        ## @param explain_schema - string - optional - default: <MONITORING_USER>
+        ## Set the schema where the integration creates and reads Db2 EXPLAIN tables. The default is the
+        ## configured monitoring user's schema.
+        #
+        # explain_schema: DATADOG
+
+    ## Configure DBM query activity collection.
+    #
+    # query_activity:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of in-flight query activity from `MON_GET_ACTIVITY`. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the query activity collection interval (in seconds). This is an ASH-style snapshot of currently
+        ## running statements, not a complete query log.
+        #
+        # collection_interval: 10
+
+    ## Configure collection of database manager and database settings.
+    #
+    # collect_settings:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable collection of database manager and database settings. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the settings collection interval (in seconds). Each collection queries `SYSIBMADM.DBMCFG` and
+        ## `SYSIBMADM.DBCFG`.
+        #
+        # collection_interval: 600
+
+        ## @param ignored_settings_patterns - list of strings - optional
+        ## A list of setting patterns to ignore. Any setting key matching one of the values in this list will not
+        ## be collected. This uses the Db2 `LIKE` pattern-matching approach.
+        #
+        # ignored_settings_patterns:
+        #   - diag%
+
+    ## Configure collection of database schema metadata.
+    #
+    # collect_schemas:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of database schema metadata from `SYSCAT` catalog views. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## Set the database schema collection interval (in seconds).
+        #
+        # collection_interval: 600
+
+        ## @param max_tables - integer - optional - default: 300
+        ## Set the maximum number of tables to collect.
+        #
+        # max_tables: 300
+
+        ## @param max_columns - integer - optional - default: 50
+        ## Set the maximum number of columns to collect per table.
+        #
+        # max_columns: 50
+
+        ## @param max_query_duration - number - optional - default: 60
+        ## Set the maximum time for schema collection queries (in seconds).
+        #
+        # max_query_duration: 60
+
+        ## @param include_schemas - list of strings - optional
+        ## Include only schemas matching one of these Db2 `LIKE` patterns.
+        #
+        # include_schemas:
+        #   - APP%
+
+        ## @param exclude_schemas - list of strings - optional
+        ## Exclude schemas matching one of these Db2 `LIKE` patterns.
+        #
+        # exclude_schemas:
+        #   - TEST%
+
+        ## @param include_tables - list of strings - optional
+        ## Include only tables matching one of these Db2 `LIKE` patterns.
+        #
+        # include_tables:
+        #   - ORDERS%
+
+        ## @param exclude_tables - list of strings - optional
+        ## Exclude tables matching one of these Db2 `LIKE` patterns.
+        #
+        # exclude_tables:
+        #   - TMP%
+
+    ## This block defines the configuration for AWS RDS Db2 instances.
+    ##
+    ## Complete this section if you have installed the Datadog AWS Integration
+    ## (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
+    ## with Db2 integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # aws:
+
+        ## @param instance_endpoint - string - optional
+        ## Set to the Endpoint.Address of the instance the agent is connecting to.
+        #
+        # instance_endpoint: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+
+        ## @param region - string - optional
+        ## Equal to the region of the instance the agent is connecting to.
+        #
+        # region: us-east-1
+
+    ## This block defines the configuration for Google Cloud SQL instances.
+    ##
+    ## Complete this section if you have installed the Datadog GCP Integration
+    ## (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances
+    ## with Db2 integration telemetry.
+    ##
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # gcp:
+
+        ## @param project_id - string - optional
+        ## Equal to the GCP resource's project ID.
+        #
+        # project_id: foo-project
+
+        ## @param instance_id - string - optional
+        ## Equal to the GCP resource's instance ID.
+        #
+        # instance_id: foo-database
+
+    ## This block defines the configuration for Azure Db2 instances.
+    ##
+    ## Complete this section if you have installed the Datadog Azure Integration
+    ## (https://docs.datadoghq.com/integrations/azure) to enrich instances with Db2 integration telemetry.
+    ## These values are only applied when `dbm: true` option is set.
+    #
+    # azure:
+
+        ## @param deployment_type - string - optional
+        ## Equal to the deployment type for the managed database.
+        #
+        # deployment_type: virtual_machine
+
+        ## @param fully_qualified_domain_name - string - optional
+        ## Equal to the fully qualified domain name of the Azure Db2 database.
+        #
+        # fully_qualified_domain_name: db2-database.database.windows.net
+
+    ## Configure how the SQL obfuscator behaves.
+    ## Note: This option only applies when `dbm` is enabled.
+    #
+    # obfuscator_options:
+
+        ## @param obfuscation_mode - string - optional - default: obfuscate_and_normalize
+        ## Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator obfuscates SQL
+        ## statements.
+        #
+        # obfuscation_mode: obfuscate_and_normalize
+
+        ## @param replace_digits - boolean - optional - default: false
+        ## Set to `true` to replace digits in identifiers and table names with question marks in SQL statements.
+        #
+        # replace_digits: false
+
+        ## @param collect_metadata - boolean - optional - default: true
+        ## Set to `false` to disable collection of metadata in SQL statements.
+        #
+        # collect_metadata: true
+
+        ## @param collect_tables - boolean - optional - default: true
+        ## Set to `false` to disable collection of tables in SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_tables: true
+
+        ## @param collect_commands - boolean - optional - default: true
+        ## Set to `false` to disable collection of commands in SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_commands: true
+
+        ## @param collect_comments - boolean - optional - default: true
+        ## Set to `false` to disable collection of comments in SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_comments: true
+
+        ## @param collect_procedures - boolean - optional - default: true
+        ## Set to `false` to disable collection of procedures in SQL statements.
+        ## Requires `collect_metadata: true`.
+        #
+        # collect_procedures: true
+
+        ## @param keep_sql_alias - boolean - optional - default: true
+        ## Set to `true` to keep SQL aliases in obfuscated SQL statements.
+        #
+        # keep_sql_alias: true
+
+        ## @param remove_space_between_parentheses - boolean - optional - default: false
+        ## Set to `true` to remove spaces between parentheses in normalized SQL statements.
+        #
+        # remove_space_between_parentheses: false
+
+        ## @param keep_null - boolean - optional - default: false
+        ## Set to `true` to keep the keyword `NULL` in obfuscated SQL statements.
+        #
+        # keep_null: false
+
+        ## @param keep_boolean - boolean - optional - default: false
+        ## Set to `true` to keep the keywords `TRUE` and `FALSE` in obfuscated SQL statements.
+        #
+        # keep_boolean: false
+
+        ## @param keep_positional_parameter - boolean - optional - default: false
+        ## Set to `true` to keep positional parameters in obfuscated SQL statements.
+        #
+        # keep_positional_parameter: false
+
+        ## @param replace_bind_parameter - boolean - optional - default: false
+        ## Set to `true` to replace bind parameters in obfuscated SQL statements.
+        #
+        # replace_bind_parameter: false
+
+        ## @param keep_trailing_semicolon - boolean - optional - default: false
+        ## Set to `true` to keep trailing semicolons in normalized SQL statements.
+        #
+        # keep_trailing_semicolon: false
+
+        ## @param keep_identifier_quotation - boolean - optional - default: false
+        ## Set to `true` to keep identifier quotations in normalized SQL statements.
+        #
+        # keep_identifier_quotation: false
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

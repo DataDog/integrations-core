@@ -28,14 +28,16 @@ classifiers = [
     "Private :: Do Not Upload",
 ]
 dependencies = [
-    "datadog-checks-base>=37.33.0",
+    "datadog-checks-base>=37.39.1",
 ]
 dynamic = [
     "version",
 ]
 
 [project.optional-dependencies]
-deps = []
+deps = [
+    "cachetools==7.0.5",
+]
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

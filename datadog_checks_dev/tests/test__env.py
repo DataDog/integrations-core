@@ -6,7 +6,7 @@ import tenacity
 from mock import mock
 
 from datadog_checks.dev import EnvVars, environment_run
-from datadog_checks.dev._env import E2E_SET_UP, E2E_TEAR_DOWN, set_up_env, tear_down_env
+from datadog_checks.dev._env import E2E_SET_UP, E2E_TEAR_DOWN, replay_check_run, set_up_env, tear_down_env
 from datadog_checks.dev.ci import running_on_ci
 
 
@@ -28,6 +28,30 @@ def test_tear_down_env_default_true():
 def test_tear_down_env_false():
     with EnvVars({E2E_TEAR_DOWN: 'false'}):
         assert tear_down_env() is False
+
+
+def test_replay_check_run_replays_dbm_metadata_events() -> None:
+    stub_aggregator = mock.MagicMock()
+    stub_agent = mock.MagicMock()
+    agent_collector = [
+        {
+            'aggregator': {
+                'dbm-metadata': [
+                    {
+                        'EventType': 'dbm-metadata',
+                        'UnmarshalledEvent': {'kind': 'database_instance'},
+                    }
+                ]
+            },
+            'runner': {'CheckID': 'test:123', 'CheckName': 'ibm_db2'},
+        }
+    ]
+
+    replay_check_run(agent_collector, stub_aggregator, stub_agent)
+
+    stub_aggregator.submit_event_platform_event.assert_called_once_with(
+        'ibm_db2', 'test:123', '{"kind": "database_instance"}', 'dbm-metadata'
+    )
 
 
 @pytest.mark.parametrize(

@@ -21,6 +21,60 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
+class Aws(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_endpoint: Optional[str] = None
+    region: Optional[str] = None
+
+
+class Azure(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    deployment_type: Optional[str] = None
+    fully_qualified_domain_name: Optional[str] = None
+
+
+class CollectRawQueryStatement(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
+    max_columns: Optional[int] = None
+    max_query_duration: Optional[float] = None
+    max_tables: Optional[int] = None
+    run_sync: Optional[bool] = None
+
+
+class CollectSettings(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    ignored_settings_patterns: Optional[tuple[str, ...]] = None
+    run_sync: Optional[bool] = None
+
+
 class CustomQuery(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -32,6 +86,23 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
+class Gcp(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    instance_id: Optional[str] = None
+    project_id: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -41,24 +112,104 @@ class MetricPatterns(BaseModel):
     include: Optional[tuple[str, ...]] = None
 
 
+class ObfuscatorOptions(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collect_commands: Optional[bool] = None
+    collect_comments: Optional[bool] = None
+    collect_metadata: Optional[bool] = None
+    collect_procedures: Optional[bool] = None
+    collect_tables: Optional[bool] = None
+    keep_boolean: Optional[bool] = None
+    keep_identifier_quotation: Optional[bool] = None
+    keep_null: Optional[bool] = None
+    keep_positional_parameter: Optional[bool] = None
+    keep_sql_alias: Optional[bool] = None
+    keep_trailing_semicolon: Optional[bool] = None
+    obfuscation_mode: Optional[str] = None
+    remove_space_between_parentheses: Optional[bool] = None
+    replace_bind_parameter: Optional[bool] = None
+    replace_digits: Optional[bool] = None
+
+
+class QueryActivity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    payload_row_limit: Optional[int] = None
+    run_sync: Optional[bool] = None
+
+
+class QueryMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    batch_max_content_size: Optional[int] = None
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    full_statement_text_cache_max_size: Optional[int] = None
+    full_statement_text_samples_per_hour_per_query: Optional[float] = None
+    max_statements: Optional[int] = None
+    run_sync: Optional[bool] = None
+
+
+class QuerySamples(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    explain_errors_cache_maxsize: Optional[int] = None
+    explain_errors_cache_ttl: Optional[float] = None
+    explain_schema: Optional[str] = None
+    explained_queries_cache_maxsize: Optional[int] = None
+    explained_queries_per_hour_per_query: Optional[float] = None
+    run_sync: Optional[bool] = None
+    samples_per_hour_per_query: Optional[float] = None
+    seen_samples_cache_maxsize: Optional[int] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    aws: Optional[Aws] = None
+    azure: Optional[Azure] = None
+    collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
+    collect_schemas: Optional[CollectSchemas] = None
+    collect_settings: Optional[CollectSettings] = None
     connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
+    database_instance_collection_interval: Optional[float] = None
     db: str
+    dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
+    exclude_hostname: Optional[bool] = None
+    gcp: Optional[Gcp] = None
     host: Optional[str] = None
+    log_unobfuscated_queries: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
+    obfuscator_options: Optional[ObfuscatorOptions] = None
     only_custom_queries: Optional[bool] = None
     password: str
     port: Optional[int] = None
+    query_activity: Optional[QueryActivity] = None
+    query_metrics: Optional[QueryMetrics] = None
+    query_samples: Optional[QuerySamples] = None
+    reported_hostname: Optional[str] = None
     security: Optional[Literal['none', 'ssl']] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None

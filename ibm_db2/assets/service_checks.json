@@ -30,5 +30,22 @@
         ],
         "name": "Database status",
         "description": "Returns `CRITICAL` if the monitored IBM Db2 database is quiesced, `WARNING` for quiesce-pending or rollforwards, or `OK` otherwise."
+    },
+    {
+        "agent_version": "6.11.0",
+        "integration": "IBM Db2",
+        "groups": [
+            "host",
+            "db"
+        ],
+        "check": "ibm_db2.hadr.status",
+        "statuses": [
+            "ok",
+            "warning",
+            "critical",
+            "unknown"
+        ],
+        "name": "HADR status",
+        "description": "Returns `CRITICAL` for disconnected HADR state, `WARNING` for catchup or congested state, `OK` for peer and connected state, or `UNKNOWN` otherwise."
     }
 ]

@@ -4,13 +4,22 @@
 from __future__ import division
 
 from itertools import chain
+from string import Template
 from time import time as timestamp
 
 from requests import ConnectionError
 
 from datadog_checks.base import AgentCheck, is_affirmative
+from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.containers import iter_unique
+from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.platform import Platform
+from datadog_checks.base.utils.serialization import json
+
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
 
 if Platform.is_windows():
     # After installing ibm_db, dll path of dependent library of clidriver must be set before importing the module
@@ -23,29 +32,181 @@ if Platform.is_windows():
 import ibm_db
 
 from . import queries
-from .utils import get_version, scrub_connection_string, status_to_service_check
+from .__about__ import __version__
+from .config import IbmDb2Config
+from .connection import Db2Connection
+from .metadata import Db2Metadata
+from .statement_samples import Db2StatementSamples
+from .statements import Db2StatementMetrics
+from .utils import get_version, hadr_status_to_service_check, scrub_connection_string, status_to_service_check
+
+DATABASE_MONOTONIC_METRICS = (
+    ('transaction.commits', 'total_app_commits'),
+    ('transaction.commits.internal', 'int_commits'),
+    ('transaction.rollbacks', 'total_app_rollbacks'),
+    ('transaction.rollbacks.internal', 'int_rollbacks'),
+    ('row.inserted.total', 'rows_inserted'),
+    ('row.updated.total', 'rows_updated'),
+    ('row.deleted.total', 'rows_deleted'),
+    ('activity.completed', 'act_completed_total'),
+    ('activity.aborted', 'act_aborted_total'),
+    ('activity.rejected', 'act_rejected_total'),
+    ('request.completed', 'rqsts_completed_total'),
+    ('section.executions', 'total_app_section_executions'),
+    ('lock.waits', 'lock_waits'),
+    ('lock.wait_time', 'lock_wait_time'),
+    ('lock.escalations', 'lock_escals'),
+    ('lock.escalations.locklist', 'lock_escals_locklist'),
+    ('lock.escalations.maxlocks', 'lock_escals_maxlocks'),
+    ('direct.reads', 'direct_reads'),
+    ('direct.read_reqs', 'direct_read_reqs'),
+    ('direct.read_time', 'direct_read_time'),
+    ('direct.writes', 'direct_writes'),
+    ('direct.write_reqs', 'direct_write_reqs'),
+    ('direct.write_time', 'direct_write_time'),
+    ('sort.total', 'total_sorts'),
+    ('sort.overflows', 'sort_overflows'),
+    ('sort.post_threshold', 'post_threshold_sorts'),
+    ('sort.post_shrthreshold', 'post_shrthreshold_sorts'),
+    ('sort.section.total', 'total_section_sorts'),
+    ('sort.section.time', 'total_section_sort_time'),
+    ('sort.section.proc_time', 'total_section_sort_proc_time'),
+    ('hash.joins.total', 'total_hash_joins'),
+    ('hash.joins.loops', 'total_hash_loops'),
+    ('hash.joins.overflows', 'hash_join_overflows'),
+    ('hash.joins.small_overflows', 'hash_join_small_overflows'),
+    ('hash.joins.post_threshold', 'post_threshold_hash_joins'),
+    ('hash.joins.post_shrthreshold', 'post_shrthreshold_hash_joins'),
+    ('hash.grpbys.total', 'total_hash_grpbys'),
+    ('hash.grpbys.overflows', 'hash_grpby_overflows'),
+)
+
+INSTANCE_GAUGE_METRICS = (
+    ('databases.active', 'con_local_dbases'),
+    ('agent.registered', 'agents_registered'),
+    ('agent.registered.max', 'agents_registered_top'),
+    ('agent.idle', 'idle_agents'),
+    ('agent.coord', 'num_coord_agents'),
+    ('agent.coord.max', 'coord_agents_top'),
+)
+
+INSTANCE_MONOTONIC_METRICS = (
+    ('agent.from_pool', 'agents_from_pool'),
+    ('agent.created_empty_pool', 'agents_created_empty_pool'),
+)
+
+BUFFER_POOL_PAGE_CLASSES = (
+    ('column', 'col'),
+    ('data', 'data'),
+    ('index', 'index'),
+    ('xda', 'xda'),
+)
+
+BUFFER_POOL_MONOTONIC_METRICS = (
+    ('bufferpool.read_time', 'pool_read_time'),
+    ('bufferpool.write_time', 'pool_write_time'),
+    ('bufferpool.unread_prefetch_pages', 'unread_prefetch_pages'),
+    ('bufferpool.prefetch_wait_time', 'prefetch_wait_time'),
+    ('bufferpool.prefetch_waits', 'prefetch_waits'),
+    ('bufferpool.no_victim_buffer', 'pool_no_victim_buffer'),
+    ('bufferpool.vectored_ios', 'vectored_ios'),
+    ('bufferpool.pages_from_vectored_ios', 'pages_from_vectored_ios'),
+    ('bufferpool.block_ios', 'block_ios'),
+    ('bufferpool.pages_from_block_ios', 'pages_from_block_ios'),
+    ('bufferpool.files_closed', 'files_closed'),
+)
+
+BUFFER_POOL_GAUGE_METRICS = (
+    ('bufferpool.pages.configured', 'bp_cur_buffsz'),
+    ('bufferpool.pages.left_to_remove', 'bp_pages_left_to_remove'),
+    ('bufferpool.tablespaces', 'bp_tbsp_use_count'),
+)
+
+TRANSACTION_LOG_MONOTONIC_METRICS = (
+    ('log.read_time', 'log_read_time'),
+    ('log.write_time', 'log_write_time'),
+    ('log.read_io', 'num_log_read_io'),
+    ('log.write_io', 'num_log_write_io'),
+    ('log.partial_page_io', 'num_log_part_page_io'),
+    ('log.buffer_full', 'num_log_buffer_full'),
+    ('log.data_found_in_buffer', 'num_log_data_found_in_buffer'),
+    ('log.cur_commit.reads.total', 'cur_commit_total_log_reads'),
+    ('log.cur_commit.reads.disk', 'cur_commit_disk_log_reads'),
+    ('log.cur_commit.reads.buffer', 'cur_commit_log_buff_log_reads'),
+    ('hadr.log_wait.time', 'log_hadr_wait_time'),
+    ('hadr.log_wait.count', 'log_hadr_waits_total'),
+)
+
+TRANSACTION_LOG_GAUGE_METRICS = (
+    ('log.space.used.max', 'tot_log_used_top'),
+    ('log.secondary.used.max', 'sec_log_used_top'),
+    ('log.secondary.allocated', 'sec_logs_allocated'),
+    ('log.files.reusable', 'num_logs_avail_for_rename'),
+    ('log.to_redo_for_recovery', 'log_to_redo_for_recovery'),
+    ('log.held_by_dirty_pages', 'log_held_by_dirty_pages'),
+    ('log.indoubt_transactions', 'num_indoubt_trans'),
+)
+
+HADR_GAUGE_METRICS = (
+    ('hadr.log_gap', 'hadr_log_gap'),
+    ('hadr.log_wait.current', 'log_hadr_wait_cur'),
+    ('hadr.time_since_last_recv', 'time_since_last_recv'),
+    ('hadr.primary_log_pos', 'primary_log_pos'),
+    ('hadr.standby_log_pos', 'standby_log_pos'),
+    ('hadr.standby_replay_log_pos', 'standby_replay_log_pos'),
+    ('hadr.recv_replay_gap', 'standby_recv_replay_gap'),
+    ('hadr.standby_recv_buf_size', 'standby_recv_buf_size'),
+    ('hadr.standby_recv_buf_percent', 'standby_recv_buf_percent'),
+    ('hadr.standby_spool_limit', 'standby_spool_limit'),
+    ('hadr.standby_spool_percent', 'standby_spool_percent'),
+    ('hadr.sock_send_buf', 'sock_send_buf_actual'),
+    ('hadr.sock_recv_buf', 'sock_recv_buf_actual'),
+    ('hadr.heartbeat.interval', 'heartbeat_interval'),
+    ('hadr.timeout', 'hadr_timeout'),
+    ('hadr.heartbeat.missed', 'heartbeat_missed'),
+    ('hadr.heartbeat.expected', 'heartbeat_expected'),
+    ('hadr.peer_window', 'peer_window'),
+    ('hadr.takeover_app_remaining.primary', 'takeover_app_remaining_primary'),
+    ('hadr.takeover_app_remaining.standby', 'takeover_app_remaining_standby'),
+    ('hadr.replay_only_window.tran_count', 'standby_replay_only_window_tran_count'),
+)
 
 
-class IbmDb2Check(AgentCheck):
+class IbmDb2Check(DatabaseCheck):
     METRIC_PREFIX = 'ibm_db2'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)
+    SERVICE_CHECK_HADR_STATUS = '{}.hadr.status'.format(METRIC_PREFIX)
     EVENT_TABLE_SPACE_STATE = '{}.tablespace_state_change'.format(METRIC_PREFIX)
 
     def __init__(self, name, init_config, instances):
         super(IbmDb2Check, self).__init__(name, init_config, instances)
-        self._db = self.instance.get('db', '')
-        self._username = self.instance.get('username', '')
-        self._password = self.instance.get('password', '')
-        self._host = self.instance.get('host', '')
-        self._port = self.instance.get('port', 50000)
-        self._tags = self.instance.get('tags', [])
-        self._security = self.instance.get('security', 'none')
-        self._tls_cert = self.instance.get('tls_cert')
-        self._connection_timeout = self.instance.get('connection_timeout')
+        self._config = IbmDb2Config(self.init_config, self.instance, self.log)
+        self._db = self._config.db
+        self._username = self._config.username
+        self._password = self._config.password
+        self._host = self._config.host
+        self._port = self._config.port
+        self._tags = list(self._config.tags)
+        self._security = self._config.security
+        self._tls_cert = self._config.tls_cert
+        self._connection_timeout = self._config.connection_timeout
+        self._dbms_version = None
+        self._resolved_hostname = None
+        self._agent_hostname = None
+        self._database_identifier = None
+        self._database_instance_emitted = {}
 
         # Add global database tag
         self._tags.append('db:{}'.format(self._db))
+        self.tag_manager = TagManager(normalizer=lambda tag: self.normalize_tag(tag).lower())
+        self.tag_manager.set_tags_from_list(self._tags, replace=True)
+        self.add_core_tags()
+        self.set_resource_tags()
+        self.connection = Db2Connection(self, self._config)
+        self.statement_metrics = Db2StatementMetrics(self, self._config)
+        self.statement_samples = Db2StatementSamples(self, self._config)
+        self.dbm_metadata = Db2Metadata(self, self._config)
 
         # Track table space state changes
         self._table_space_states = {}
@@ -69,7 +230,9 @@ class IbmDb2Check(AgentCheck):
             self.query_database,
             self.query_buffer_pool,
             self.query_table_space,
+            self.query_container,
             self.query_transaction_log,
+            self.query_hadr,
             self.query_custom,
         )
 
@@ -81,6 +244,7 @@ class IbmDb2Check(AgentCheck):
             return
 
         self.collect_metadata()
+        self._send_database_instance_metadata()
         for query_method in self._query_methods:
             try:
                 query_method()
@@ -89,6 +253,17 @@ class IbmDb2Check(AgentCheck):
             except Exception as e:
                 self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))
                 continue
+
+        if self._config.dbm_enabled:
+            self.statement_metrics.run_job_loop(self.tag_manager.get_tags())
+            self.statement_samples.run_job_loop(self.tag_manager.get_tags())
+            self.dbm_metadata.run_job_loop(self.tag_manager.get_tags())
+
+    def cancel(self):
+        self.statement_metrics.cancel()
+        self.statement_samples.cancel()
+        self.dbm_metadata.cancel()
+        self.connection.close()
 
     @AgentCheck.metadata_entrypoint
     def collect_metadata(self):
@@ -99,12 +274,102 @@ class IbmDb2Check(AgentCheck):
             return
 
         if raw_version:
+            self._dbms_version = raw_version
             version_parts = self.parse_version(raw_version)
             self.set_metadata('version', raw_version, scheme='parts', part_map=version_parts)
 
             self.log.debug('Found ibm_db2 version: %s', raw_version)
         else:
             self.log.warning('Could not retrieve ibm_db2 version info: %s', raw_version)
+
+    @property
+    def agent_hostname(self):
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
+
+    @property
+    def dbms(self):
+        return 'db2'
+
+    @property
+    def dbms_version(self):
+        return self._dbms_version or ''
+
+    @property
+    def reported_hostname(self):
+        if self._config.exclude_hostname:
+            return None
+        return self.resolved_hostname
+
+    @property
+    def resolved_hostname(self):
+        if self._resolved_hostname is None:
+            if self._config.reported_hostname:
+                self._resolved_hostname = self._config.reported_hostname
+            else:
+                self._resolved_hostname = resolve_db_host(self._host)
+        return self._resolved_hostname
+
+    @property
+    def database_hostname(self):
+        return self.resolved_hostname
+
+    @property
+    def database_identifier(self):
+        if self._database_identifier is None:
+            template = self._config.database_identifier.get('template') or '$resolved_hostname'
+            self._database_identifier = Template(template).safe_substitute(
+                {
+                    'resolved_hostname': self.resolved_hostname,
+                    'host': self._host,
+                    'port': self._port,
+                    'db': self._db,
+                }
+            )
+        return self._database_identifier
+
+    @property
+    def tags(self):
+        return self.tag_manager.get_tags()
+
+    @property
+    def cloud_metadata(self):
+        return self._config.cloud_metadata
+
+    def add_core_tags(self):
+        self.tag_manager.set_tag('database_hostname', self.database_hostname, replace=True)
+        self.tag_manager.set_tag('database_instance', self.database_identifier, replace=True)
+
+    def set_resource_tags(self):
+        self.tag_manager.set_tag('dd.internal.resource:database_instance', self.database_identifier, replace=True)
+
+    def _send_database_instance_metadata(self):
+        now = timestamp()
+        last_emit_time = self._database_instance_emitted.get(self.database_identifier)
+        if last_emit_time is None or now - last_emit_time >= self._config.database_instance_collection_interval:
+            event = {
+                'host': self.reported_hostname,
+                'port': self._port,
+                'database_instance': self.database_identifier,
+                'database_hostname': self.database_hostname,
+                'agent_version': datadog_agent.get_version(),
+                'ddagenthostname': self.agent_hostname,
+                'dbms': self.dbms,
+                'kind': 'database_instance',
+                'collection_interval': self._config.database_instance_collection_interval,
+                'dbms_version': self.dbms_version,
+                'integration_version': __version__,
+                'tags': self.tag_manager.get_tags(),
+                'timestamp': now * 1000,
+                'cloud_metadata': self.cloud_metadata,
+                'metadata': {
+                    'dbm': self._config.dbm_enabled,
+                    'connection_host': self._host,
+                },
+            }
+            self._database_instance_emitted[self.database_identifier] = now
+            self.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def parse_version(self, version):
         """
@@ -129,6 +394,17 @@ class IbmDb2Check(AgentCheck):
         for inst in self.iter_rows(queries.INSTANCE_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0060773.html
             self.gauge(self.m('connection.active'), inst['total_connections'], tags=self._tags)
+            self.gauge(self.m('running'), 1, tags=self._tags)
+
+            db2_start_time = inst['db2start_time']
+            if db2_start_time:
+                self.gauge(self.m('uptime'), (inst['current_time'] - db2_start_time).total_seconds(), tags=self._tags)
+
+            for metric, column in INSTANCE_GAUGE_METRICS:
+                self._gauge(metric, inst[column], tags=self._tags)
+
+            for metric, column in INSTANCE_MONOTONIC_METRICS:
+                self._monotonic_count(metric, inst[column], tags=self._tags)
 
     def query_database(self):
         # Only 1 database
@@ -171,6 +447,9 @@ class IbmDb2Check(AgentCheck):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001282.html
             # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0/com.ibm.db2.luw.admin.config.doc/doc/r0000267.html
             self.gauge(self.m('lock.pages'), db['lock_list_in_use'] / 4096, tags=self._tags)
+
+            for metric, column in DATABASE_MONOTONIC_METRICS:
+                self._monotonic_count(metric, db[column], tags=self._tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001160.html
             last_backup = db['last_backup']
@@ -376,6 +655,30 @@ class IbmDb2Check(AgentCheck):
                 group_hit_percent = group_pages_found / group_reads_logical * 100
                 self.gauge(self.m('bufferpool.group.hit_percent'), group_hit_percent, tags=bp_tags)
 
+            writes_total = 0
+            for metric_page_class, column_page_class in BUFFER_POOL_PAGE_CLASSES:
+                writes = bp['pool_{}_writes'.format(column_page_class)]
+                writes_total += writes
+                self._monotonic_count('bufferpool.{}.writes'.format(metric_page_class), writes, tags=bp_tags)
+                self._monotonic_count(
+                    'bufferpool.{}.reads.async'.format(metric_page_class),
+                    bp['pool_async_{}_reads'.format(column_page_class)],
+                    tags=bp_tags,
+                )
+                self._monotonic_count(
+                    'bufferpool.{}.writes.async'.format(metric_page_class),
+                    bp['pool_async_{}_writes'.format(column_page_class)],
+                    tags=bp_tags,
+                )
+
+            self._monotonic_count('bufferpool.writes.total', writes_total, tags=bp_tags)
+
+            for metric, column in BUFFER_POOL_MONOTONIC_METRICS:
+                self._monotonic_count(metric, bp[column], tags=bp_tags)
+
+            for metric, column in BUFFER_POOL_GAUGE_METRICS:
+                self._gauge(metric, bp[column], tags=bp_tags)
+
     def query_table_space(self):
         # Utilization formulas:
         # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0056516.html
@@ -383,6 +686,12 @@ class IbmDb2Check(AgentCheck):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001295.html
             table_space_name = ts['tbsp_name']
             ts_tags = ['tablespace:{}'.format(table_space_name)]
+            if ts.get('tbsp_type'):
+                ts_tags.append('tablespace_type:{}'.format(ts['tbsp_type'].lower()))
+            if ts.get('tbsp_content_type'):
+                ts_tags.append('tablespace_content_type:{}'.format(ts['tbsp_content_type'].lower()))
+            if ts.get('storage_group_name'):
+                ts_tags.append('storage_group:{}'.format(ts['storage_group_name']))
             ts_tags.extend(self._tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0007534.html
@@ -398,7 +707,8 @@ class IbmDb2Check(AgentCheck):
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0007541.html
             used_pages = ts['tbsp_used_pages']
-            self.gauge(self.m('tablespace.used'), used_pages * page_size, tags=ts_tags)
+            used_bytes = used_pages * page_size
+            self.gauge(self.m('tablespace.used'), used_bytes, tags=ts_tags)
 
             # Percent utilized
             if usable_pages:
@@ -407,9 +717,54 @@ class IbmDb2Check(AgentCheck):
                 utilized = 0
             self.gauge(self.m('tablespace.utilized'), utilized, tags=ts_tags)
 
+            free_pages = ts['tbsp_free_pages']
+            if free_pages is not None and free_pages >= 0:
+                self.gauge(self.m('tablespace.free'), free_pages * page_size, tags=ts_tags)
+
+            self.gauge(self.m('tablespace.high_water_mark'), ts['tbsp_page_top'] * page_size, tags=ts_tags)
+
+            pending_free_pages = ts['tbsp_pending_free_pages']
+            if pending_free_pages is not None and pending_free_pages >= 0:
+                self.gauge(self.m('tablespace.pending_free'), pending_free_pages * page_size, tags=ts_tags)
+
+            max_size = ts['tbsp_max_size']
+            if max_size is not None and max_size > 0:
+                self.gauge(self.m('tablespace.max_size'), max_size, tags=ts_tags)
+                self.gauge(self.m('tablespace.max_utilized'), used_bytes / max_size * 100, tags=ts_tags)
+
+            initial_size = ts['tbsp_initial_size']
+            if initial_size is not None and initial_size > 0:
+                self.gauge(self.m('tablespace.initial_size'), initial_size, tags=ts_tags)
+
+            increase_size = ts['tbsp_increase_size']
+            if increase_size is not None and increase_size > 0:
+                self.gauge(self.m('tablespace.increase_size'), increase_size, tags=ts_tags)
+
+            self.gauge(self.m('tablespace.containers'), ts['tbsp_num_containers'], tags=ts_tags)
+            self.gauge(self.m('tablespace.last_resize_failed'), ts['tbsp_last_resize_failed'], tags=ts_tags)
+            self.gauge(self.m('tablespace.online'), 1 if ts['tbsp_state'] == 'NORMAL' else 0, tags=ts_tags)
+
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0007533.html
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.dbobj.doc/doc/c0060111.html
             self.track_table_space_state_changes(table_space_name, ts['tbsp_state'], ts_tags)
+
+    def query_container(self) -> None:
+        for container in self.iter_rows(queries.CONTAINER_TABLE, ibm_db.fetch_assoc):
+            container_tags = self._container_tags(container)
+            page_size = container.get('tbsp_page_size')
+
+            self._gauge_nonnegative('container.fs_total', container.get('fs_total_size'), tags=container_tags)
+            self._gauge_nonnegative('container.fs_used', container.get('fs_used_size'), tags=container_tags)
+            self._gauge_nonnegative('container.accessible', container.get('accessible'), tags=container_tags)
+
+            if page_size is not None:
+                total_pages = container.get('total_pages')
+                if total_pages is not None and total_pages >= 0:
+                    self.gauge(self.m('container.total'), total_pages * page_size, tags=container_tags)
+
+                usable_pages = container.get('usable_pages')
+                if usable_pages is not None and usable_pages >= 0:
+                    self.gauge(self.m('container.usable'), usable_pages * page_size, tags=container_tags)
 
     def query_transaction_log(self):
         # Only 1 transaction log
@@ -433,12 +788,58 @@ class IbmDb2Check(AgentCheck):
 
             self.gauge(self.m('log.available'), available, tags=self._tags)
             self.gauge(self.m('log.utilized'), utilized, tags=self._tags)
+            self.gauge(self.m('log.space.used'), used, tags=self._tags)
+            if tlog['total_log_available'] != -1:
+                self.gauge(self.m('log.space.available'), tlog['total_log_available'], tags=self._tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001278.html
             self.monotonic_count(self.m('log.reads'), tlog['log_reads'], tags=self._tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001279.html
             self.monotonic_count(self.m('log.writes'), tlog['log_writes'], tags=self._tags)
+
+            for metric, column in TRANSACTION_LOG_MONOTONIC_METRICS:
+                self._monotonic_count(metric, tlog[column], tags=self._tags)
+
+            for metric, column in TRANSACTION_LOG_GAUGE_METRICS:
+                self._gauge(metric, tlog[column], tags=self._tags)
+
+    def query_hadr(self) -> None:
+        hadr_rows = 0
+        primary_standby_count = 0
+        for hadr in self.iter_rows(queries.HADR_TABLE, ibm_db.fetch_assoc):
+            hadr_rows += 1
+            hadr_tags = self._hadr_tags(hadr)
+            hadr_role = hadr.get('hadr_role')
+            if hadr_role == 'PRIMARY':
+                primary_standby_count += 1
+
+            self.gauge(self.m('hadr.role'), 1, tags=hadr_tags)
+            self._hadr_state_metric('hadr.state', 'hadr_state', hadr.get('hadr_state'), hadr_tags)
+            self._hadr_state_metric('hadr.connected', 'connect_status', hadr.get('hadr_connect_status'), hadr_tags)
+            self._hadr_state_metric('hadr.syncmode', 'syncmode', hadr.get('hadr_syncmode'), hadr_tags)
+
+            for metric, column in HADR_GAUGE_METRICS:
+                self._gauge(metric, hadr[column], tags=hadr_tags)
+
+            self._emit_hadr_derived_metrics(hadr, hadr_tags)
+            hadr_status = hadr_status_to_service_check(hadr.get('hadr_state'), hadr.get('hadr_connect_status'))
+            hadr_status_message = None
+            if hadr_status != self.OK:
+                hadr_status_message = 'HADR state: {}, connect status: {}'.format(
+                    hadr.get('hadr_state'), hadr.get('hadr_connect_status')
+                )
+            self.service_check(
+                self.SERVICE_CHECK_HADR_STATUS,
+                hadr_status,
+                tags=hadr_tags,
+                message=hadr_status_message,
+            )
+
+        if hadr_rows == 0:
+            self.gauge(self.m('hadr.role'), 1, tags=['hadr_role:standard'] + self._tags)
+
+        self.gauge(self.m('hadr.standby.count'), primary_standby_count, tags=self._tags)
 
     def query_custom(self):
         for custom_query in self._custom_queries:
@@ -633,3 +1034,63 @@ class IbmDb2Check(AgentCheck):
     @classmethod
     def m(cls, metric):
         return '{}.{}'.format(cls.METRIC_PREFIX, metric)
+
+    def _hadr_tags(self, hadr: dict) -> list[str]:
+        hadr_tags = []
+        self._add_tag(hadr_tags, 'hadr_role', hadr.get('hadr_role'))
+        self._add_tag(hadr_tags, 'standby_id', hadr.get('standby_id'))
+        self._add_tag(hadr_tags, 'log_stream', hadr.get('log_stream_id'))
+        self._add_tag(hadr_tags, 'standby_host', hadr.get('standby_member_host'))
+        hadr_tags.extend(self._tags)
+        return hadr_tags
+
+    def _container_tags(self, container: dict[str, object]) -> list[str]:
+        container_tags = []
+        self._add_tag(container_tags, 'tablespace', container.get('tbsp_name'))
+        self._add_tag(container_tags, 'container', container.get('container_name'))
+        self._add_tag(container_tags, 'container_id', container.get('container_id'))
+        self._add_tag(container_tags, 'container_type', container.get('container_type'))
+        self._add_tag(container_tags, 'member', container.get('member'))
+        container_tags.extend(self._tags)
+        return container_tags
+
+    def _hadr_state_metric(self, metric: str, tag_name: str, value: object | None, tags: list[str]) -> None:
+        if value:
+            self.gauge(self.m(metric), 1, tags=tags + ['{}:{}'.format(tag_name, str(value).strip().lower())])
+
+    def _emit_hadr_derived_metrics(self, hadr: dict, tags: list[str]) -> None:
+        primary_log_pos = hadr.get('primary_log_pos')
+        standby_log_pos = hadr.get('standby_log_pos')
+        if primary_log_pos is not None and standby_log_pos is not None:
+            self.gauge(self.m('hadr.send_recv_gap'), max(primary_log_pos - standby_log_pos, 0), tags=tags)
+
+        primary_log_time = hadr.get('primary_log_time')
+        standby_replay_log_time = hadr.get('standby_replay_log_time')
+        if primary_log_time and standby_replay_log_time:
+            replay_lag = (primary_log_time - standby_replay_log_time).total_seconds()
+            self.gauge(self.m('hadr.replay_lag'), max(replay_lag, 0), tags=tags)
+
+        current_time = hadr.get('current_time')
+        peer_window_end = hadr.get('peer_window_end')
+        if current_time and peer_window_end:
+            peer_window_remaining = (peer_window_end - current_time).total_seconds()
+            self.gauge(self.m('hadr.peer_window_remaining'), max(peer_window_remaining, 0), tags=tags)
+
+        hadr_flags = hadr.get('hadr_flags') or ''
+        self.gauge(self.m('hadr.recv_blocked'), 1 if 'STANDBY_RECV_BLOCKED' in hadr_flags else 0, tags=tags)
+
+    def _add_tag(self, tags: list[str], tag_name: str, value: object | None) -> None:
+        if value is not None and value != '':
+            tags.append('{}:{}'.format(tag_name, str(value).strip().lower()))
+
+    def _gauge(self, metric, value, tags):
+        if value is not None:
+            self.gauge(self.m(metric), value, tags=tags)
+
+    def _gauge_nonnegative(self, metric: str, value: int | float | None, tags: list[str]) -> None:
+        if value is not None and value >= 0:
+            self.gauge(self.m(metric), value, tags=tags)
+
+    def _monotonic_count(self, metric, value, tags):
+        if value is not None:
+            self.monotonic_count(self.m(metric), value, tags=tags)
