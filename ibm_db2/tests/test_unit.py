@@ -378,6 +378,7 @@ def test_query_instance_expanded_metrics(instance: dict[str, Any], aggregator: A
             'agents_from_pool': 8,
             'agents_created_empty_pool': 9,
             'con_local_dbases': 10,
+            'member': 0,
         }
     )
     check.iter_rows = mock.Mock(return_value=iter([row]))
@@ -410,6 +411,7 @@ def test_query_database_expanded_metrics(instance: dict[str, Any], aggregator: A
             'direct_reads': 16,
             'sort_overflows': 17,
             'total_hash_joins': 18,
+            'member': 0,
         }
     )
     check.iter_rows = mock.Mock(return_value=iter([row]))
@@ -422,6 +424,145 @@ def test_query_database_expanded_metrics(instance: dict[str, Any], aggregator: A
     aggregator.assert_metric('ibm_db2.direct.reads', value=16, metric_type=aggregator.MONOTONIC_COUNT)
     aggregator.assert_metric('ibm_db2.sort.overflows', value=17, metric_type=aggregator.MONOTONIC_COUNT)
     aggregator.assert_metric('ibm_db2.hash.joins.total', value=18, metric_type=aggregator.MONOTONIC_COUNT)
+
+
+def test_query_memory_pool_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = {
+        'member': 0,
+        'db_name': 'DATADOG',
+        'memory_set_type': 'DATABASE',
+        'memory_pool_type': 'LOCKMGR',
+        'application_handle': None,
+        'edu_id': None,
+        'memory_pool_used': 4096,
+        'memory_pool_used_hwm': 8192,
+    }
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_memory_pool()
+
+    tags = ['memory_set:database', 'member:0', 'db:datadog', 'foo:bar', 'memory_pool:lockmgr']
+    aggregator.assert_metric('ibm_db2.memory.pool.used', value=4096, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.memory.pool.used_hwm', value=8192, tags=tags, metric_type=aggregator.GAUGE)
+
+
+def test_query_memory_pool_skips_per_application_pools(instance: dict[str, Any], aggregator: Any) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = {
+        'member': 0,
+        'memory_set_type': 'APPLICATION',
+        'memory_pool_type': 'APP_GROUP',
+        'application_handle': 123,
+        'edu_id': None,
+        'memory_pool_used': 4096,
+        'memory_pool_used_hwm': 8192,
+    }
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_memory_pool()
+
+    aggregator.assert_metric('ibm_db2.memory.pool.used', count=0)
+
+
+def test_query_memory_set_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = {
+        'member': 0,
+        'db_name': 'DATADOG',
+        'memory_set_type': 'DATABASE',
+        'memory_set_committed': 16384,
+        'memory_set_used': 8192,
+        'memory_set_used_hwm': 12288,
+        'additional_committed': 2048,
+        'memory_set_size': 32768,
+    }
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_memory_set()
+
+    tags = ['memory_set:database', 'member:0', 'db:datadog', 'foo:bar']
+    aggregator.assert_metric('ibm_db2.memory.set.committed', value=16384, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.memory.set.used', value=8192, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.memory.set.used_hwm', value=12288, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric(
+        'ibm_db2.memory.set.additional_committed', value=2048, tags=tags, metric_type=aggregator.GAUGE
+    )
+    aggregator.assert_metric('ibm_db2.memory.set.size', value=32768, tags=tags, metric_type=aggregator.GAUGE)
+
+
+def test_query_wlm_workload_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.WLM_WORKLOAD_TABLE_COLUMNS)
+    row.update(
+        {
+            'workload_name': 'SYSDEFAULTUSERWORKLOAD',
+            'workload_id': 1,
+            'member': 0,
+            'total_cpu_time': 1000,
+            'act_completed_total': 2,
+            'total_wait_time': 3,
+            'lock_waits': 4,
+        }
+    )
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_wlm_workload()
+
+    tags = ['workload_name:sysdefaultuserworkload', 'workload_id:1', 'member:0', 'db:datadog', 'foo:bar']
+    aggregator.assert_metric(
+        'ibm_db2.wlm.total_cpu_time', value=1000, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric(
+        'ibm_db2.wlm.activities.completed', value=2, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric('ibm_db2.wlm.total_wait_time', value=3, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.wlm.lock_waits', value=4, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+
+
+def test_query_wlm_service_class_metrics_disabled(instance: dict[str, Any]) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.iter_rows = mock.Mock()
+
+    check.query_wlm_service_class()
+
+    check.iter_rows.assert_not_called()
+
+
+def test_query_wlm_service_class_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_wlm_service_class_metrics'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.WLM_SERVICE_SUBCLASS_TABLE_COLUMNS)
+    row.update(
+        {
+            'service_superclass_name': 'SYSDEFAULTUSERCLASS',
+            'service_subclass_name': 'SYSDEFAULTSUBCLASS',
+            'service_class_id': 12,
+            'member': 0,
+            'total_cpu_time': 1000,
+            'act_completed_total': 2,
+            'total_wait_time': 3,
+        }
+    )
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_wlm_service_class()
+
+    tags = [
+        'service_superclass:sysdefaultuserclass',
+        'service_subclass:sysdefaultsubclass',
+        'service_class_id:12',
+        'member:0',
+        'db:datadog',
+        'foo:bar',
+    ]
+    aggregator.assert_metric(
+        'ibm_db2.wlm.total_cpu_time', value=1000, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric(
+        'ibm_db2.wlm.activities.completed', value=2, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric('ibm_db2.wlm.total_wait_time', value=3, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
 
 
 def test_query_buffer_pool_expanded_metrics(instance: dict[str, Any], aggregator: Any) -> None:
@@ -440,13 +581,14 @@ def test_query_buffer_pool_expanded_metrics(instance: dict[str, Any], aggregator
             'pool_col_writes': 5,
             'pool_read_time': 6,
             'bp_cur_buffsz': 7,
+            'member': 0,
         }
     )
     check.iter_rows = mock.Mock(return_value=iter([row]))
 
     check.query_buffer_pool()
 
-    tags = ['bufferpool:IBMDEFAULTBP', 'db:datadog', 'foo:bar']
+    tags = ['bufferpool:IBMDEFAULTBP', 'member:0', 'db:datadog', 'foo:bar']
     aggregator.assert_metric('ibm_db2.bufferpool.data.writes', value=2, tags=tags)
     aggregator.assert_metric('ibm_db2.bufferpool.writes.total', value=14, tags=tags)
     aggregator.assert_metric('ibm_db2.bufferpool.read_time', value=6, tags=tags)
@@ -475,6 +617,7 @@ def test_query_table_space_expanded_metrics(instance: dict[str, Any], aggregator
             'tbsp_type': 'DMS',
             'tbsp_content_type': 'ANY',
             'storage_group_name': 'IBMSTOGROUP',
+            'member': 0,
         }
     )
     check.iter_rows = mock.Mock(return_value=iter([row]))
@@ -486,6 +629,7 @@ def test_query_table_space_expanded_metrics(instance: dict[str, Any], aggregator
         'tablespace_type:dms',
         'tablespace_content_type:any',
         'storage_group:IBMSTOGROUP',
+        'member:0',
         'db:datadog',
         'foo:bar',
     ]
@@ -496,6 +640,7 @@ def test_query_table_space_expanded_metrics(instance: dict[str, Any], aggregator
 
 
 def test_query_container_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_container_metrics'] = True
     check = IbmDb2Check('ibm_db2', {}, [instance])
     row = row_from_columns(queries.CONTAINER_TABLE_COLUMNS)
     row.update(
@@ -533,6 +678,15 @@ def test_query_container_metrics(instance: dict[str, Any], aggregator: Any) -> N
     aggregator.assert_metric('ibm_db2.container.accessible', value=1, tags=tags)
 
 
+def test_query_container_metrics_disabled(instance: dict[str, Any]) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.iter_rows = mock.Mock()
+
+    check.query_container()
+
+    check.iter_rows.assert_not_called()
+
+
 def test_query_transaction_log_expanded_metrics(instance: dict[str, Any], aggregator: Any) -> None:
     check = IbmDb2Check('ibm_db2', {}, [instance])
     row = row_from_columns(queries.TRANSACTION_LOG_TABLE_COLUMNS)
@@ -544,6 +698,7 @@ def test_query_transaction_log_expanded_metrics(instance: dict[str, Any], aggreg
             'log_hadr_waits_total': 3,
             'log_hadr_wait_time': 4,
             'tot_log_used_top': 8192,
+            'member': 0,
         }
     )
     check.iter_rows = mock.Mock(return_value=iter([row]))

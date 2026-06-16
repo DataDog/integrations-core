@@ -13,7 +13,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
-from .common import CONFIG, DB2_VERSION, DBM_USERNAME
+from .common import CONFIG, DB2_VERSION, DBM_USERNAME, requires_db2_12_1
 
 CHECK_ID = 'test:123'
 
@@ -53,7 +53,7 @@ def test_table_space_tags(aggregator, instance, dd_run_check):
 @pytest.mark.usefixtures('dd_environment')
 def test_table_space_state_change(aggregator, instance, dd_run_check):
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check._table_space_states['USERSPACE1'] = 'test'
+    check._table_space_states['USERSPACE1:0'] = 'test'
     dd_run_check(check)
 
     aggregator.assert_event('State of `USERSPACE1` changed from `test` to `NORMAL`.')
@@ -140,6 +140,28 @@ def test_metadata(instance, datadog_agent, dd_run_check):
 
 
 @pytest.mark.usefixtures('dd_environment')
+@requires_db2_12_1
+def test_memory_and_wlm_metrics(aggregator, instance: dict, dd_run_check) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    dd_run_check(check)
+
+    for metric in (
+        'ibm_db2.memory.pool.used',
+        'ibm_db2.memory.pool.used_hwm',
+        'ibm_db2.memory.set.used',
+        'ibm_db2.memory.set.committed',
+    ):
+        aggregator.assert_metric_has_tag_prefix(metric, 'memory_set:')
+        aggregator.assert_metric_has_tag_prefix(metric, 'member:')
+
+    aggregator.assert_metric_has_tag_prefix('ibm_db2.memory.pool.used', 'memory_pool:')
+    aggregator.assert_metric_has_tag_prefix('ibm_db2.wlm.total_cpu_time', 'workload_name:')
+    aggregator.assert_metric_has_tag_prefix('ibm_db2.wlm.total_cpu_time', 'workload_id:')
+    aggregator.assert_metric_has_tag_prefix('ibm_db2.wlm.total_cpu_time', 'member:')
+
+
+@pytest.mark.usefixtures('dd_environment')
+@requires_db2_12_1
 def test_dbm_query_metrics(aggregator, dbm_instance: dict) -> None:
     check = IbmDb2Check('ibm_db2', {}, [dbm_instance])
     check._dbms_version = DB2_VERSION
@@ -176,6 +198,7 @@ def test_dbm_query_metrics(aggregator, dbm_instance: dict) -> None:
 
 
 @pytest.mark.usefixtures('dd_environment')
+@requires_db2_12_1
 def test_dbm_execution_plans(aggregator, dbm_instance: dict) -> None:
     dbm_instance['query_metrics'] = {'enabled': False, 'run_sync': True, 'collection_interval': 0.1}
     dbm_instance['query_activity'] = {'enabled': False}
@@ -228,6 +251,7 @@ def test_dbm_execution_plans(aggregator, dbm_instance: dict) -> None:
 
 
 @pytest.mark.usefixtures('dd_environment')
+@requires_db2_12_1
 def test_dbm_settings_metadata(aggregator, dbm_instance: dict) -> None:
     dbm_instance['query_metrics'] = {'enabled': False}
     dbm_instance['collect_settings'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
@@ -248,6 +272,7 @@ def test_dbm_settings_metadata(aggregator, dbm_instance: dict) -> None:
 
 
 @pytest.mark.usefixtures('dd_environment')
+@requires_db2_12_1
 def test_dbm_query_activity(aggregator, dbm_instance: dict) -> None:
     dbm_instance['query_metrics'] = {'enabled': False}
     dbm_instance['collect_settings'] = {'enabled': False}
@@ -310,6 +335,7 @@ def test_dbm_query_activity(aggregator, dbm_instance: dict) -> None:
 
 
 @pytest.mark.usefixtures('dd_environment')
+@requires_db2_12_1
 def test_dbm_schema_metadata(aggregator, dbm_instance: dict) -> None:
     schema_name = 'DBM_SCHEMA'
     instance = deepcopy(CONFIG)

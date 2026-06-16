@@ -147,6 +147,68 @@ TRANSACTION_LOG_GAUGE_METRICS = (
     ('log.indoubt_transactions', 'num_indoubt_trans'),
 )
 
+MEMORY_POOL_GAUGE_METRICS = (
+    ('memory.pool.used', 'memory_pool_used'),
+    ('memory.pool.used_hwm', 'memory_pool_used_hwm'),
+)
+
+MEMORY_SET_GAUGE_METRICS = (
+    ('memory.set.committed', 'memory_set_committed'),
+    ('memory.set.used', 'memory_set_used'),
+    ('memory.set.used_hwm', 'memory_set_used_hwm'),
+    ('memory.set.additional_committed', 'additional_committed'),
+    ('memory.set.size', 'memory_set_size'),
+)
+
+WLM_MONOTONIC_METRICS = (
+    ('wlm.total_cpu_time', 'total_cpu_time'),
+    ('wlm.activities.completed', 'act_completed_total'),
+    ('wlm.activities.aborted', 'act_aborted_total'),
+    ('wlm.activities.rejected', 'act_rejected_total'),
+    ('wlm.app_activities.completed', 'app_act_completed_total'),
+    ('wlm.app_activities.aborted', 'app_act_aborted_total'),
+    ('wlm.app_activities.rejected', 'app_act_rejected_total'),
+    ('wlm.activity_requests', 'act_rqsts_total'),
+    ('wlm.requests.completed', 'rqsts_completed_total'),
+    ('wlm.app_requests.completed', 'app_rqsts_completed_total'),
+    ('wlm.total_wait_time', 'total_wait_time'),
+    ('wlm.total_request_time', 'total_rqst_time'),
+    ('wlm.total_app_request_time', 'total_app_rqst_time'),
+    ('wlm.queue_time', 'wlm_queue_time_total'),
+    ('wlm.queue_assignments', 'wlm_queue_assignments_total'),
+    ('wlm.total_activity_time', 'total_act_time'),
+    ('wlm.total_activity_wait_time', 'total_act_wait_time'),
+    ('wlm.total_section_time', 'total_section_time'),
+    ('wlm.total_section_proc_time', 'total_section_proc_time'),
+    ('wlm.commits', 'total_app_commits'),
+    ('wlm.rollbacks', 'total_app_rollbacks'),
+    ('wlm.internal_commits', 'int_commits'),
+    ('wlm.internal_rollbacks', 'int_rollbacks'),
+    ('wlm.lock_wait_time', 'lock_wait_time'),
+    ('wlm.lock_waits', 'lock_waits'),
+    ('wlm.pool_read_time', 'pool_read_time'),
+    ('wlm.pool_write_time', 'pool_write_time'),
+    ('wlm.direct_read_time', 'direct_read_time'),
+    ('wlm.direct_write_time', 'direct_write_time'),
+    ('wlm.log_disk_wait_time', 'log_disk_wait_time'),
+    ('wlm.log_buffer_wait_time', 'log_buffer_wait_time'),
+    ('wlm.agent_wait_time', 'agent_wait_time'),
+    ('wlm.agent_waits', 'agent_waits_total'),
+    ('wlm.client_idle_wait_time', 'client_idle_wait_time'),
+    ('wlm.prefetch_wait_time', 'prefetch_wait_time'),
+    ('wlm.extended_latch_wait_time', 'total_extended_latch_wait_time'),
+    ('wlm.extended_latch_waits', 'total_extended_latch_waits'),
+    ('wlm.fcm_recv_wait_time', 'fcm_recv_wait_time'),
+    ('wlm.fcm_send_wait_time', 'fcm_send_wait_time'),
+    ('wlm.tcpip_recv_wait_time', 'tcpip_recv_wait_time'),
+    ('wlm.tcpip_send_wait_time', 'tcpip_send_wait_time'),
+    ('wlm.ipc_recv_wait_time', 'ipc_recv_wait_time'),
+    ('wlm.ipc_send_wait_time', 'ipc_send_wait_time'),
+    ('wlm.cf_wait_time', 'cf_wait_time'),
+    ('wlm.cf_waits', 'cf_waits'),
+    ('wlm.reclaim_wait_time', 'reclaim_wait_time'),
+)
+
 HADR_GAUGE_METRICS = (
     ('hadr.log_gap', 'hadr_log_gap'),
     ('hadr.log_wait.current', 'log_hadr_wait_cur'),
@@ -228,6 +290,10 @@ class IbmDb2Check(DatabaseCheck):
         self._query_methods = (
             self.query_instance,
             self.query_database,
+            self.query_memory_pool,
+            self.query_memory_set,
+            self.query_wlm_workload,
+            self.query_wlm_service_class,
             self.query_buffer_pool,
             self.query_table_space,
             self.query_container,
@@ -392,49 +458,53 @@ class IbmDb2Check(DatabaseCheck):
     def query_instance(self):
         # Only 1 instance
         for inst in self.iter_rows(queries.INSTANCE_TABLE, ibm_db.fetch_assoc):
+            instance_tags = self._member_tags(inst)
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0060773.html
-            self.gauge(self.m('connection.active'), inst['total_connections'], tags=self._tags)
-            self.gauge(self.m('running'), 1, tags=self._tags)
+            self.gauge(self.m('connection.active'), inst['total_connections'], tags=instance_tags)
+            self.gauge(self.m('running'), 1, tags=instance_tags)
 
             db2_start_time = inst['db2start_time']
             if db2_start_time:
-                self.gauge(self.m('uptime'), (inst['current_time'] - db2_start_time).total_seconds(), tags=self._tags)
+                self.gauge(
+                    self.m('uptime'), (inst['current_time'] - db2_start_time).total_seconds(), tags=instance_tags
+                )
 
             for metric, column in INSTANCE_GAUGE_METRICS:
-                self._gauge(metric, inst[column], tags=self._tags)
+                self._gauge(metric, inst[column], tags=instance_tags)
 
             for metric, column in INSTANCE_MONOTONIC_METRICS:
-                self._monotonic_count(metric, inst[column], tags=self._tags)
+                self._monotonic_count(metric, inst[column], tags=instance_tags)
 
     def query_database(self):
         # Only 1 database
         for db in self.iter_rows(queries.DATABASE_TABLE, ibm_db.fetch_assoc):
+            database_tags = self._member_tags(db)
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001156.html
-            self.service_check(self.SERVICE_CHECK_STATUS, status_to_service_check(db['db_status']), tags=self._tags)
+            self.service_check(self.SERVICE_CHECK_STATUS, status_to_service_check(db['db_status']), tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001201.html
-            self.gauge(self.m('application.active'), db['appls_cur_cons'], tags=self._tags)
+            self.gauge(self.m('application.active'), db['appls_cur_cons'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001202.html
-            self.gauge(self.m('application.executing'), db['appls_in_db2'], tags=self._tags)
+            self.gauge(self.m('application.executing'), db['appls_in_db2'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002225.html
-            self.gauge(self.m('connection.max'), db['connections_top'], tags=self._tags)
+            self.gauge(self.m('connection.max'), db['connections_top'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001200.html
-            self.monotonic_count(self.m('connection.total'), db['total_cons'], tags=self._tags)
+            self.monotonic_count(self.m('connection.total'), db['total_cons'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001283.html
-            self.monotonic_count(self.m('lock.dead'), db['deadlocks'], tags=self._tags)
+            self.monotonic_count(self.m('lock.dead'), db['deadlocks'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001290.html
-            self.monotonic_count(self.m('lock.timeouts'), db['lock_timeouts'], tags=self._tags)
+            self.monotonic_count(self.m('lock.timeouts'), db['lock_timeouts'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001281.html
-            self.gauge(self.m('lock.active'), db['num_locks_held'], tags=self._tags)
+            self.gauge(self.m('lock.active'), db['num_locks_held'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001296.html
-            self.gauge(self.m('lock.waiting'), db['num_locks_waiting'], tags=self._tags)
+            self.gauge(self.m('lock.waiting'), db['num_locks_waiting'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001294.html
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001293.html
@@ -442,14 +512,14 @@ class IbmDb2Check(DatabaseCheck):
                 average_lock_wait = db['lock_wait_time'] / db['lock_waits']
             else:
                 average_lock_wait = 0
-            self.gauge(self.m('lock.wait'), average_lock_wait, tags=self._tags)
+            self.gauge(self.m('lock.wait'), average_lock_wait, tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001282.html
             # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0/com.ibm.db2.luw.admin.config.doc/doc/r0000267.html
-            self.gauge(self.m('lock.pages'), db['lock_list_in_use'] / 4096, tags=self._tags)
+            self.gauge(self.m('lock.pages'), db['lock_list_in_use'] / 4096, tags=database_tags)
 
             for metric, column in DATABASE_MONOTONIC_METRICS:
-                self._monotonic_count(metric, db[column], tags=self._tags)
+                self._monotonic_count(metric, db[column], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001160.html
             last_backup = db['last_backup']
@@ -457,16 +527,43 @@ class IbmDb2Check(DatabaseCheck):
                 seconds_since_last_backup = (db['current_time'] - last_backup).total_seconds()
             else:
                 seconds_since_last_backup = -1
-            self.gauge(self.m('backup.latest'), seconds_since_last_backup, tags=self._tags)
+            self.gauge(self.m('backup.latest'), seconds_since_last_backup, tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0051568.html
-            self.monotonic_count(self.m('row.modified.total'), db['rows_modified'], tags=self._tags)
+            self.monotonic_count(self.m('row.modified.total'), db['rows_modified'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001317.html
-            self.monotonic_count(self.m('row.reads.total'), db['rows_read'], tags=self._tags)
+            self.monotonic_count(self.m('row.reads.total'), db['rows_read'], tags=database_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0051569.html
-            self.monotonic_count(self.m('row.returned.total'), db['rows_returned'], tags=self._tags)
+            self.monotonic_count(self.m('row.returned.total'), db['rows_returned'], tags=database_tags)
+
+    def query_memory_pool(self) -> None:
+        for memory_pool in self.iter_rows(queries.MEMORY_POOL_TABLE, ibm_db.fetch_assoc):
+            if memory_pool.get('application_handle') is not None or memory_pool.get('edu_id') is not None:
+                continue
+
+            tags = self._memory_tags(memory_pool)
+            self._add_tag(tags, 'memory_pool', memory_pool.get('memory_pool_type'))
+            for metric, column in MEMORY_POOL_GAUGE_METRICS:
+                self._gauge(metric, memory_pool.get(column), tags=tags)
+
+    def query_memory_set(self) -> None:
+        for memory_set in self.iter_rows(queries.MEMORY_SET_TABLE, ibm_db.fetch_assoc):
+            tags = self._memory_tags(memory_set)
+            for metric, column in MEMORY_SET_GAUGE_METRICS:
+                self._gauge(metric, memory_set.get(column), tags=tags)
+
+    def query_wlm_workload(self) -> None:
+        for workload in self.iter_rows(queries.WLM_WORKLOAD_TABLE, ibm_db.fetch_assoc):
+            self._submit_wlm_metrics(workload, self._wlm_workload_tags(workload))
+
+    def query_wlm_service_class(self) -> None:
+        if not self._config.collect_wlm_service_class_metrics:
+            return
+
+        for service_class in self.iter_rows(queries.WLM_SERVICE_SUBCLASS_TABLE, ibm_db.fetch_assoc):
+            self._submit_wlm_metrics(service_class, self._wlm_service_class_tags(service_class))
 
     def query_buffer_pool(self):
         # Hit ratio formulas:
@@ -474,6 +571,7 @@ class IbmDb2Check(DatabaseCheck):
         for bp in self.iter_rows(queries.BUFFER_POOL_TABLE, ibm_db.fetch_assoc):
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002256.html
             bp_tags = ['bufferpool:{}'.format(bp['bp_name'])]
+            self._add_tag(bp_tags, 'member', bp.get('member'))
             bp_tags.extend(self._tags)
 
             # Column-organized pages
@@ -692,6 +790,7 @@ class IbmDb2Check(DatabaseCheck):
                 ts_tags.append('tablespace_content_type:{}'.format(ts['tbsp_content_type'].lower()))
             if ts.get('storage_group_name'):
                 ts_tags.append('storage_group:{}'.format(ts['storage_group_name']))
+            self._add_tag(ts_tags, 'member', ts.get('member'))
             ts_tags.extend(self._tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0007534.html
@@ -746,9 +845,17 @@ class IbmDb2Check(DatabaseCheck):
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0007533.html
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.dbobj.doc/doc/c0060111.html
-            self.track_table_space_state_changes(table_space_name, ts['tbsp_state'], ts_tags)
+            self.track_table_space_state_changes(
+                table_space_name,
+                ts['tbsp_state'],
+                ts_tags,
+                state_key='{}:{}'.format(table_space_name, ts.get('member')),
+            )
 
     def query_container(self) -> None:
+        if not self._config.collect_container_metrics:
+            return
+
         for container in self.iter_rows(queries.CONTAINER_TABLE, ibm_db.fetch_assoc):
             container_tags = self._container_tags(container)
             page_size = container.get('tbsp_page_size')
@@ -769,12 +876,13 @@ class IbmDb2Check(DatabaseCheck):
     def query_transaction_log(self):
         # Only 1 transaction log
         for tlog in self.iter_rows(queries.TRANSACTION_LOG_TABLE, ibm_db.fetch_assoc):
+            transaction_log_tags = self._member_tags(tlog)
             # https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0/com.ibm.db2.luw.admin.config.doc/doc/r0000239.html
             block_size = 4096
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002530.html
             used = tlog['total_log_used']
-            self.gauge(self.m('log.used'), used / block_size, tags=self._tags)
+            self.gauge(self.m('log.used'), used / block_size, tags=transaction_log_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0002531.html
             available = tlog['total_log_available']
@@ -786,23 +894,23 @@ class IbmDb2Check(DatabaseCheck):
                 utilized = used / available * 100
                 available /= block_size
 
-            self.gauge(self.m('log.available'), available, tags=self._tags)
-            self.gauge(self.m('log.utilized'), utilized, tags=self._tags)
-            self.gauge(self.m('log.space.used'), used, tags=self._tags)
+            self.gauge(self.m('log.available'), available, tags=transaction_log_tags)
+            self.gauge(self.m('log.utilized'), utilized, tags=transaction_log_tags)
+            self.gauge(self.m('log.space.used'), used, tags=transaction_log_tags)
             if tlog['total_log_available'] != -1:
-                self.gauge(self.m('log.space.available'), tlog['total_log_available'], tags=self._tags)
+                self.gauge(self.m('log.space.available'), tlog['total_log_available'], tags=transaction_log_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001278.html
-            self.monotonic_count(self.m('log.reads'), tlog['log_reads'], tags=self._tags)
+            self.monotonic_count(self.m('log.reads'), tlog['log_reads'], tags=transaction_log_tags)
 
             # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001279.html
-            self.monotonic_count(self.m('log.writes'), tlog['log_writes'], tags=self._tags)
+            self.monotonic_count(self.m('log.writes'), tlog['log_writes'], tags=transaction_log_tags)
 
             for metric, column in TRANSACTION_LOG_MONOTONIC_METRICS:
-                self._monotonic_count(metric, tlog[column], tags=self._tags)
+                self._monotonic_count(metric, tlog[column], tags=transaction_log_tags)
 
             for metric, column in TRANSACTION_LOG_GAUGE_METRICS:
-                self._gauge(metric, tlog[column], tags=self._tags)
+                self._gauge(metric, tlog[column], tags=transaction_log_tags)
 
     def query_hadr(self) -> None:
         hadr_rows = 0
@@ -934,8 +1042,9 @@ class IbmDb2Check(DatabaseCheck):
                         metric, value, method = info
                         getattr(self, method)(metric, value, tags=query_tags)
 
-    def track_table_space_state_changes(self, name, state, tags):
-        previous_state = self._table_space_states.get(name)
+    def track_table_space_state_changes(self, name, state, tags, state_key=None):
+        state_key = state_key or name
+        previous_state = self._table_space_states.get(state_key)
         if state:
             if previous_state is not None and state != previous_state:
                 self.event(
@@ -950,7 +1059,7 @@ class IbmDb2Check(DatabaseCheck):
                         'tags': tags,
                     }
                 )
-            self._table_space_states[name] = state
+            self._table_space_states[state_key] = state
 
     def get_connection(self):
         target, username, password = self.get_connection_data(
@@ -1053,6 +1162,40 @@ class IbmDb2Check(DatabaseCheck):
         self._add_tag(container_tags, 'member', container.get('member'))
         container_tags.extend(self._tags)
         return container_tags
+
+    def _memory_tags(self, memory: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'memory_set', memory.get('memory_set_type'))
+        self._add_tag(tags, 'member', memory.get('member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _member_tags(self, row: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'member', row.get('member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _wlm_workload_tags(self, workload: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'workload_name', workload.get('workload_name'))
+        self._add_tag(tags, 'workload_id', workload.get('workload_id'))
+        self._add_tag(tags, 'member', workload.get('member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _wlm_service_class_tags(self, service_class: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'service_superclass', service_class.get('service_superclass_name'))
+        self._add_tag(tags, 'service_subclass', service_class.get('service_subclass_name'))
+        self._add_tag(tags, 'service_class_id', service_class.get('service_class_id'))
+        self._add_tag(tags, 'member', service_class.get('member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _submit_wlm_metrics(self, row: dict[str, object], tags: list[str]) -> None:
+        for metric, column in WLM_MONOTONIC_METRICS:
+            self._monotonic_count(metric, row.get(column), tags=tags)
 
     def _hadr_state_metric(self, metric: str, tag_name: str, value: object | None, tags: list[str]) -> None:
         if value:

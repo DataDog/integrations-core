@@ -72,6 +72,22 @@ files:
         value:
           type: integer
           example: 10
+      - name: collect_container_metrics
+        description: |
+          Collect per-container table space metrics from `MON_GET_CONTAINER`. These metrics can create one series per
+          table space container and member.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: collect_wlm_service_class_metrics
+        description: |
+          Collect Workload Manager metrics by service superclass and subclass. Workload-level WLM metrics are always
+          collected; enable this option only when service-class attribution is needed.
+        value:
+          type: boolean
+          example: false
+          display_default: false
       - name: dbm
         display_priority: 2
         fleet_configurable: true

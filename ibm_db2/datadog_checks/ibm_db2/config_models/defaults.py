@@ -8,6 +8,14 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_collect_container_metrics():
+    return False
+
+
+def instance_collect_wlm_service_class_metrics():
+    return False
+
+
 def instance_connection_timeout():
     return 10
 

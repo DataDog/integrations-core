@@ -23,10 +23,11 @@ INSTANCE_TABLE_COLUMNS = (
     'current timestamp AS current_time',
     'db2start_time',
     'idle_agents',
+    'member',
     'num_coord_agents',
     'total_connections',
 )
-INSTANCE_TABLE = 'SELECT {} FROM TABLE(MON_GET_INSTANCE(-1))'.format(', '.join(INSTANCE_TABLE_COLUMNS))
+INSTANCE_TABLE = 'SELECT {} FROM TABLE(MON_GET_INSTANCE(-2))'.format(', '.join(INSTANCE_TABLE_COLUMNS))
 
 
 # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0060769.html
@@ -59,6 +60,7 @@ DATABASE_TABLE_COLUMNS = (
     'lock_timeouts',
     'lock_wait_time',
     'lock_waits',
+    'member',
     'num_locks_held',
     'num_locks_waiting',
     'post_shrthreshold_hash_joins',
@@ -85,7 +87,87 @@ DATABASE_TABLE_COLUMNS = (
     'total_cons',
     'total_sorts',
 )
-DATABASE_TABLE = 'SELECT {} FROM TABLE(MON_GET_DATABASE(-1))'.format(', '.join(DATABASE_TABLE_COLUMNS))
+DATABASE_TABLE = 'SELECT {} FROM TABLE(MON_GET_DATABASE(-2))'.format(', '.join(DATABASE_TABLE_COLUMNS))
+
+
+MEMORY_POOL_TABLE_COLUMNS = (
+    'member',
+    'db_name',
+    'memory_set_type',
+    'memory_pool_type',
+    'application_handle',
+    'edu_id',
+    'memory_pool_used',
+    'memory_pool_used_hwm',
+)
+MEMORY_POOL_TABLE = 'SELECT {} FROM TABLE(MON_GET_MEMORY_POOL(NULL, NULL, -2))'.format(
+    ', '.join(MEMORY_POOL_TABLE_COLUMNS)
+)
+
+
+# The set-level function has changed more across Db2 releases than MON_GET_MEMORY_POOL.
+MEMORY_SET_TABLE = 'SELECT * FROM TABLE(MON_GET_MEMORY_SET(NULL, NULL, -2))'
+
+
+WLM_METRIC_COLUMNS = (
+    'total_cpu_time',
+    'act_completed_total',
+    'act_aborted_total',
+    'act_rejected_total',
+    'app_act_completed_total',
+    'app_act_aborted_total',
+    'app_act_rejected_total',
+    'act_rqsts_total',
+    'rqsts_completed_total',
+    'app_rqsts_completed_total',
+    'total_wait_time',
+    'total_rqst_time',
+    'total_app_rqst_time',
+    'wlm_queue_time_total',
+    'wlm_queue_assignments_total',
+    'total_act_time',
+    'total_act_wait_time',
+    'total_section_time',
+    'total_section_proc_time',
+    'total_app_commits',
+    'total_app_rollbacks',
+    'int_commits',
+    'int_rollbacks',
+    'lock_wait_time',
+    'lock_waits',
+    'pool_read_time',
+    'pool_write_time',
+    'direct_read_time',
+    'direct_write_time',
+    'log_disk_wait_time',
+    'log_buffer_wait_time',
+    'agent_wait_time',
+    'agent_waits_total',
+    'client_idle_wait_time',
+    'prefetch_wait_time',
+    'total_extended_latch_wait_time',
+    'total_extended_latch_waits',
+    'fcm_recv_wait_time',
+    'fcm_send_wait_time',
+    'tcpip_recv_wait_time',
+    'tcpip_send_wait_time',
+    'ipc_recv_wait_time',
+    'ipc_send_wait_time',
+    'cf_wait_time',
+    'cf_waits',
+    'reclaim_wait_time',
+)
+WLM_WORKLOAD_TABLE_COLUMNS = ('workload_name', 'workload_id', 'member') + WLM_METRIC_COLUMNS
+WLM_WORKLOAD_TABLE = 'SELECT {} FROM TABLE(MON_GET_WORKLOAD(NULL, -2))'.format(', '.join(WLM_WORKLOAD_TABLE_COLUMNS))
+WLM_SERVICE_SUBCLASS_TABLE_COLUMNS = (
+    'service_superclass_name',
+    'service_subclass_name',
+    'service_class_id',
+    'member',
+) + WLM_METRIC_COLUMNS
+WLM_SERVICE_SUBCLASS_TABLE = 'SELECT {} FROM TABLE(MON_GET_SERVICE_SUBCLASS(NULL, NULL, -2))'.format(
+    ', '.join(WLM_SERVICE_SUBCLASS_TABLE_COLUMNS)
+)
 
 
 # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0053942.html
@@ -96,6 +178,7 @@ BUFFER_POOL_TABLE_COLUMNS = (
     'bp_tbsp_use_count',
     'bp_name',
     'files_closed',
+    'member',
     'pages_from_block_ios',
     'pages_from_vectored_ios',
     'pool_async_col_reads',
@@ -150,7 +233,7 @@ BUFFER_POOL_TABLE_COLUMNS = (
     'unread_prefetch_pages',
     'vectored_ios',
 )
-BUFFER_POOL_TABLE = 'SELECT {} FROM TABLE(MON_GET_BUFFERPOOL(NULL, -1))'.format(', '.join(BUFFER_POOL_TABLE_COLUMNS))
+BUFFER_POOL_TABLE = 'SELECT {} FROM TABLE(MON_GET_BUFFERPOOL(NULL, -2))'.format(', '.join(BUFFER_POOL_TABLE_COLUMNS))
 
 
 # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0053943.html
@@ -163,6 +246,7 @@ TABLE_SPACE_TABLE_COLUMNS = (
     'tbsp_initial_size',
     'tbsp_last_resize_failed',
     'tbsp_max_size',
+    'member',
     'tbsp_name',
     'tbsp_num_containers',
     'tbsp_page_size',
@@ -175,7 +259,7 @@ TABLE_SPACE_TABLE_COLUMNS = (
     'tbsp_using_auto_storage',
     'tbsp_used_pages',
 )
-TABLE_SPACE_TABLE = 'SELECT {} FROM TABLE(MON_GET_TABLESPACE(NULL, -1))'.format(', '.join(TABLE_SPACE_TABLE_COLUMNS))
+TABLE_SPACE_TABLE = 'SELECT {} FROM TABLE(MON_GET_TABLESPACE(NULL, -2))'.format(', '.join(TABLE_SPACE_TABLE_COLUMNS))
 
 
 # https://www.ibm.com/docs/en/db2/12.1?topic=functions-mon-get-container-table-function
@@ -194,8 +278,8 @@ CONTAINER_TABLE_COLUMNS = (
 )
 CONTAINER_TABLE = """\
 SELECT {}
-FROM TABLE(MON_GET_CONTAINER(NULL, -1)) C
-LEFT JOIN TABLE(MON_GET_TABLESPACE(NULL, -1)) T
+FROM TABLE(MON_GET_CONTAINER(NULL, -2)) C
+LEFT JOIN TABLE(MON_GET_TABLESPACE(NULL, -2)) T
   ON C.TBSP_ID = T.TBSP_ID
  AND C.MEMBER = T.MEMBER
 """.format(', '.join(CONTAINER_TABLE_COLUMNS))
@@ -214,6 +298,7 @@ TRANSACTION_LOG_TABLE_COLUMNS = (
     'log_to_redo_for_recovery',
     'log_write_time',
     'log_writes',
+    'member',
     'num_indoubt_trans',
     'num_log_buffer_full',
     'num_log_data_found_in_buffer',
@@ -227,7 +312,7 @@ TRANSACTION_LOG_TABLE_COLUMNS = (
     'total_log_used',
     'tot_log_used_top',
 )
-TRANSACTION_LOG_TABLE = 'SELECT {} FROM TABLE(MON_GET_TRANSACTION_LOG(-1))'.format(
+TRANSACTION_LOG_TABLE = 'SELECT {} FROM TABLE(MON_GET_TRANSACTION_LOG(-2))'.format(
     ', '.join(TRANSACTION_LOG_TABLE_COLUMNS)
 )
 
@@ -268,4 +353,4 @@ HADR_TABLE_COLUMNS = (
     'takeover_app_remaining_standby',
     'time_since_last_recv',
 )
-HADR_TABLE = 'SELECT {} FROM TABLE(MON_GET_HADR(-1))'.format(', '.join(HADR_TABLE_COLUMNS))
+HADR_TABLE = 'SELECT {} FROM TABLE(MON_GET_HADR(-2))'.format(', '.join(HADR_TABLE_COLUMNS))

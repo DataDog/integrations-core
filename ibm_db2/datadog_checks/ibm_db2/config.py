@@ -24,10 +24,14 @@ class IbmDb2Config:
         self.connection_timeout: int | None = instance.get('connection_timeout')
         self.service: str = instance.get('service') or init_config.get('service') or ''
         self.min_collection_interval: float = instance.get('min_collection_interval', 15)
+        self.collect_container_metrics: bool = is_affirmative(instance.get('collect_container_metrics', False))
 
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
         self.database_identifier: dict = instance.get('database_identifier', {}) or {}
         self.database_instance_collection_interval: float = instance.get('database_instance_collection_interval', 300)
+        self.collect_wlm_service_class_metrics: bool = is_affirmative(
+            instance.get('collect_wlm_service_class_metrics', False)
+        )
         self.reported_hostname: str | None = instance.get('reported_hostname')
         self.exclude_hostname: bool = is_affirmative(instance.get('exclude_hostname', False))
         self.query_metrics_config: dict = instance.get('query_metrics', {}) or {}
