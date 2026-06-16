@@ -17,7 +17,7 @@ To check if your kernel has BTF built in, run:
 ls /sys/kernel/btf/vmlinux
 ```
 
-If that file exists, no further action is required. If it does not exist, install the kernel headers for your distribution using the command in the table below.
+If that file exists, no further action is required. If it does not exist, install the kernel headers using the command for your distribution:
 
 | Distribution | BTF built in | Kernel headers install command |
 |---|---|---|
