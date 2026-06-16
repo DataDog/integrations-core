@@ -1401,3 +1401,34 @@ def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected
     with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
         check = SQLServer(CHECK_NAME, {}, [instance])
     assert check.debug_stats_kwargs()['hostname'] == expected_hostname
+
+
+@pytest.mark.parametrize(
+    'reported_hostname, expected_hostname',
+    [
+        # Not configured: None is passed, Agent falls back to its own hostname attribution.
+        # This is intentional — we don't change service-check host for existing deployments.
+        (None, None),
+        # Explicitly configured: the custom hostname is propagated to the service check.
+        ('custom-host', 'custom-host'),
+    ],
+)
+def test_handle_service_check_propagates_reported_hostname(aggregator, reported_hostname, expected_hostname):
+    instance = {
+        'host': DOCKER_SERVER,
+        'username': 'sa',
+        'password': 'Password12!',
+    }
+    if reported_hostname is not None:
+        instance['reported_hostname'] = reported_hostname
+
+    with mock.patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='db.host'):
+        check = SQLServer(CHECK_NAME, {}, [instance])
+
+    check.handle_service_check(check.OK, DOCKER_SERVER, 'master')
+
+    aggregator.assert_service_check(
+        'sqlserver.can_connect',
+        status=check.OK,
+        hostname=expected_hostname,
+    )

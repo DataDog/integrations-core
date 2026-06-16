@@ -568,6 +568,10 @@ class SQLServer(DatabaseCheck):
         if status is AgentCheck.OK:
             message = None
 
+        # Use the raw config attribute rather than self.reported_hostname (the property) so that
+        # the override only fires when reported_hostname is explicitly configured. Passing None
+        # lets the Agent fall back to its default host attribution, keeping service-check host
+        # attribution unchanged for existing deployments that don't set reported_hostname.
         if is_default:
             self.service_check(
                 SERVICE_CHECK_NAME,
