@@ -574,7 +574,7 @@ class SQLServer(DatabaseCheck):
                 status,
                 tags=service_check_tags,
                 message=message,
-                hostname=self.reported_hostname,
+                hostname=self._config.reported_hostname,
                 raw=True,
             )
         if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
@@ -583,7 +583,7 @@ class SQLServer(DatabaseCheck):
                 status,
                 tags=service_check_tags,
                 message=message,
-                hostname=self.reported_hostname,
+                hostname=self._config.reported_hostname,
                 raw=True,
             )
 
