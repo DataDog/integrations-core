@@ -22,6 +22,36 @@ def row_from_columns(columns: tuple[str, ...], default: Any = 1) -> dict[str, An
     return row
 
 
+def test_metric_family_config_gates(instance: dict[str, Any]) -> None:
+    instance.update(
+        {
+            'collect_table_metrics': True,
+            'table_metrics_limit': 12,
+            'collect_index_metrics': True,
+            'index_metrics_limit': 34,
+            'collect_connection_metrics': True,
+            'connection_metrics_limit': 56,
+            'collect_fcm_metrics': True,
+            'collect_fcm_connection_metrics': True,
+            'collect_cf_metrics': True,
+            'collect_group_bufferpool_metrics': True,
+        }
+    )
+
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+
+    assert check._config.collect_table_metrics is True
+    assert check._config.table_metrics_limit == 12
+    assert check._config.collect_index_metrics is True
+    assert check._config.index_metrics_limit == 34
+    assert check._config.collect_connection_metrics is True
+    assert check._config.connection_metrics_limit == 56
+    assert check._config.collect_fcm_metrics is True
+    assert check._config.collect_fcm_connection_metrics is True
+    assert check._config.collect_cf_metrics is True
+    assert check._config.collect_group_bufferpool_metrics is True
+
+
 class TestPasswordScrubber:
     def test_start(self):
         s = 'pwd=password;...'

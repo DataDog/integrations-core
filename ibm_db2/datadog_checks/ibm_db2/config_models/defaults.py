@@ -8,12 +8,44 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
+def instance_collect_cf_metrics():
+    return False
+
+
+def instance_collect_connection_metrics():
+    return False
+
+
 def instance_collect_container_metrics():
+    return False
+
+
+def instance_collect_fcm_connection_metrics():
+    return False
+
+
+def instance_collect_fcm_metrics():
+    return False
+
+
+def instance_collect_group_bufferpool_metrics():
+    return False
+
+
+def instance_collect_index_metrics():
+    return False
+
+
+def instance_collect_table_metrics():
     return False
 
 
 def instance_collect_wlm_service_class_metrics():
     return False
+
+
+def instance_connection_metrics_limit():
+    return 300
 
 
 def instance_connection_timeout():
@@ -44,6 +76,10 @@ def instance_exclude_hostname():
     return False
 
 
+def instance_index_metrics_limit():
+    return 1000
+
+
 def instance_log_unobfuscated_queries():
     return False
 
@@ -62,6 +98,10 @@ def instance_port():
 
 def instance_security():
     return 'none'
+
+
+def instance_table_metrics_limit():
+    return 300
 
 
 def instance_use_global_custom_queries():

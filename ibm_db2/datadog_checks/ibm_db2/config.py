@@ -25,6 +25,20 @@ class IbmDb2Config:
         self.service: str = instance.get('service') or init_config.get('service') or ''
         self.min_collection_interval: float = instance.get('min_collection_interval', 15)
         self.collect_container_metrics: bool = is_affirmative(instance.get('collect_container_metrics', False))
+        self.collect_table_metrics: bool = is_affirmative(instance.get('collect_table_metrics', False))
+        self.table_metrics_limit: int = instance.get('table_metrics_limit', 300)
+        self.collect_index_metrics: bool = is_affirmative(instance.get('collect_index_metrics', False))
+        self.index_metrics_limit: int = instance.get('index_metrics_limit', 1000)
+        self.collect_connection_metrics: bool = is_affirmative(instance.get('collect_connection_metrics', False))
+        self.connection_metrics_limit: int = instance.get('connection_metrics_limit', 300)
+        self.collect_fcm_metrics: bool = is_affirmative(instance.get('collect_fcm_metrics', False))
+        self.collect_fcm_connection_metrics: bool = is_affirmative(
+            instance.get('collect_fcm_connection_metrics', False)
+        )
+        self.collect_cf_metrics: bool = is_affirmative(instance.get('collect_cf_metrics', False))
+        self.collect_group_bufferpool_metrics: bool = is_affirmative(
+            instance.get('collect_group_bufferpool_metrics', False)
+        )
 
         self.dbm_enabled: bool = is_affirmative(instance.get('dbm', False))
         self.database_identifier: dict = instance.get('database_identifier', {}) or {}

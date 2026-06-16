@@ -79,6 +79,63 @@ instances:
     #
     # collect_container_metrics: false
 
+    ## @param collect_table_metrics - boolean - optional - default: false
+    ## Collect per-table metrics from `MON_GET_TABLE`. These metrics can create one series per table, partition,
+    ## and member, so collection is disabled by default.
+    #
+    # collect_table_metrics: false
+
+    ## @param table_metrics_limit - integer - optional - default: 300
+    ## Maximum number of tables to collect metrics for when `collect_table_metrics` is enabled.
+    #
+    # table_metrics_limit: 300
+
+    ## @param collect_index_metrics - boolean - optional - default: false
+    ## Collect per-index metrics from `MON_GET_INDEX`. These metrics can create one series per index, partition,
+    ## and member, so collection is disabled by default.
+    #
+    # collect_index_metrics: false
+
+    ## @param index_metrics_limit - integer - optional - default: 1000
+    ## Maximum number of indexes to collect metrics for when `collect_index_metrics` is enabled.
+    #
+    # index_metrics_limit: 1000
+
+    ## @param collect_connection_metrics - boolean - optional - default: false
+    ## Collect per-connection metrics from `MON_GET_CONNECTION`. These metrics can create one series per active
+    ## connection, so collection is disabled by default.
+    #
+    # collect_connection_metrics: false
+
+    ## @param connection_metrics_limit - integer - optional - default: 300
+    ## Maximum number of connections to collect metrics for when `collect_connection_metrics` is enabled.
+    #
+    # connection_metrics_limit: 300
+
+    ## @param collect_fcm_metrics - boolean - optional - default: false
+    ## Collect pureScale Fast Communication Manager metrics. These metrics are only emitted on clustered Db2
+    ## instances and are disabled by default.
+    #
+    # collect_fcm_metrics: false
+
+    ## @param collect_fcm_connection_metrics - boolean - optional - default: false
+    ## Collect per-connection pureScale Fast Communication Manager metrics. These metrics can create one series per
+    ## FCM connection and member, so collection is disabled by default.
+    #
+    # collect_fcm_connection_metrics: false
+
+    ## @param collect_cf_metrics - boolean - optional - default: false
+    ## Collect pureScale cluster caching facility metrics. These metrics are only emitted on clustered Db2 instances
+    ## and are disabled by default.
+    #
+    # collect_cf_metrics: false
+
+    ## @param collect_group_bufferpool_metrics - boolean - optional - default: false
+    ## Collect pureScale group buffer pool metrics. These metrics are only emitted on clustered Db2 instances and
+    ## are disabled by default.
+    #
+    # collect_group_bufferpool_metrics: false
+
     ## @param collect_wlm_service_class_metrics - boolean - optional - default: false
     ## Collect Workload Manager metrics by service superclass and subclass. Workload-level WLM metrics are always
     ## collected; enable this option only when service-class attribution is needed.

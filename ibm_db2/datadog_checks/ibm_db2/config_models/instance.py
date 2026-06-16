@@ -184,11 +184,19 @@ class InstanceConfig(BaseModel):
     )
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
+    collect_cf_metrics: Optional[bool] = None
+    collect_connection_metrics: Optional[bool] = None
     collect_container_metrics: Optional[bool] = None
+    collect_fcm_connection_metrics: Optional[bool] = None
+    collect_fcm_metrics: Optional[bool] = None
+    collect_group_bufferpool_metrics: Optional[bool] = None
+    collect_index_metrics: Optional[bool] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
+    collect_table_metrics: Optional[bool] = None
     collect_wlm_service_class_metrics: Optional[bool] = None
+    connection_metrics_limit: Optional[int] = None
     connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database_identifier: Optional[DatabaseIdentifier] = None
@@ -201,6 +209,7 @@ class InstanceConfig(BaseModel):
     exclude_hostname: Optional[bool] = None
     gcp: Optional[Gcp] = None
     host: Optional[str] = None
+    index_metrics_limit: Optional[int] = None
     log_unobfuscated_queries: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
@@ -214,6 +223,7 @@ class InstanceConfig(BaseModel):
     reported_hostname: Optional[str] = None
     security: Optional[Literal['none', 'ssl']] = None
     service: Optional[str] = None
+    table_metrics_limit: Optional[int] = None
     tags: Optional[tuple[str, ...]] = None
     tls_cert: Optional[str] = None
     use_global_custom_queries: Optional[str] = None
