@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor table space, buffer pool, and other metrics from your IBM Db2 database.",
+    "description": "Monitor IBM Db2 metrics and Database Monitoring telemetry.",
     "title": "IBM Db2",
     "media": [],
     "classifier_tags": [
