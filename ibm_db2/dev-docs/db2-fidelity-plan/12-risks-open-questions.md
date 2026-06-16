@@ -276,8 +276,7 @@ Most relevant: [`07-dbm-execution-plans.md`](07-dbm-execution-plans.md),
 
 Most relevant: [`_research/code-ibm_db2-current.md`](_research/code-ibm_db2-current.md) §2,
 [`_research/code-integration-scaffolding.md`](_research/code-integration-scaffolding.md),
-[`09-implementation-architecture.md`](09-implementation-architecture.md) (the wiring doc, referenced
-throughout but **not yet present** in the plan dir — its absence is itself OQ-9).
+[`09-implementation-architecture.md`](09-implementation-architecture.md) (the wiring doc).
 
 1. **DBM collectors run as `DBMAsyncJob` threads — each needs its OWN `ibm_db` connection.** The
    current check holds a **single persistent `self._conn`** (one handle per check instance, no pooling,
@@ -351,6 +350,15 @@ Most relevant: [`00-README.md`](00-README.md) "Key risks", `99-review-and-gaps.m
    failure mode where an unknown DBMS string drops all DBM query rows.
 3. **`ddtags` shape differs by track:** comma-joined **string** on the samples/plan track; a **list**
    on the activity track. Match per payload type exactly (payload-contract §4.1/§5).
+4. **Backend/UI materialization remains external to the integration repo.** Local MITM validation on
+   2026-06-16 proves the Agent emitted all planned DBM tracks for the `database_instance` value
+   `dbm-local-db2-primary-bits:testdb`: `dbm-metrics` had 16 `query_metrics` payloads / 416
+   `db2_rows`; `databasequery` had 41 FQT events and 415 plan events (413 with a non-null plan
+   definition); `dbm-activity` had 26 events; and `dbm-metadata` had `database_instance`,
+   `db2_settings`, and `db2_databases` events. However, Datadog DBM searches in the connected org on
+   2026-06-16 returned zero samples/plans for `dbms:db2`, `source:db2`, the local-dev host, and the
+   local-dev `database_instance`. That proves only local emission, not backend indexing, facet
+   materialization, or UI rendering. See OQ-13.
 
 ---
 
@@ -387,20 +395,24 @@ they block.
    connections.** The DBM connection layer uses `exec_immediate`/`fetch_assoc`, `prepare`/`execute`
    for bound parameters, and `callproc` for `EXPLAIN_FROM_SECTION`. Each job uses a dedicated
    connection key prefix, guarded by a cache lock, and closes its connections on shutdown. (§6.1, §6.3)
-9. **OQ-9 — The missing architecture doc (`09-implementation-architecture.md`).** It is referenced by
-   05/06/07 for `DBMAsyncJob` wiring, per-job `ibm_db` connection isolation, `run_job_loop`/`cancel`,
-   module layout, and config-model surface — but **does not exist in the plan directory yet**. It must
-   be written (or its content folded elsewhere) before implementation, since the threading/connection
-   contract (§6) lives there.
+9. **OQ-9 — RESOLVED: architecture doc exists.** `09-implementation-architecture.md` now carries the
+   `DBMAsyncJob` wiring, per-job `ibm_db` connection isolation, `run_job_loop`/`cancel`, module layout,
+   and config-model surface.
 10. **OQ-10 — Plan-JSON shape acceptance.** Round-trip the synthesized Db2 plan document through a real
     agent's `obfuscate_sql_exec_plan` + the DBM UI renderer to confirm the synthesized key names render
-    correctly for a non-Postgres source. (§5.5)
+    correctly for a non-Postgres source. Local payload emission has been proven, including non-null
+    synthesized plan definitions, but backend/UI rendering is still unproven. (§5.5, §8.4)
 11. **OQ-11 — Statement-text truncation policy.** Pin the `STMT_TEXT` fetch cap (e.g. 4–16 KB) and the
     truncation-flag semantics (`LENGTH(STMT_TEXT)` vs cap), shared by metrics (§3.5) and samples (§4.5).
 12. **OQ-12 — Settings security posture.** Decide the default `ignored_settings_patterns` for the
     `db2_settings` payload — `sysadm_group`/`sysmon_group`/`keystore_*`/`ssl_*` etc. leak topology
     (not secrets; Db2 cfg stores no plaintext passwords), so pattern-based exclusion is a conservative
     default to agree on. ([`_research/db2-config-settings.md`](_research/db2-config-settings.md) §9)
+13. **OQ-13 — Backend materialization and DBM facets for Db2.** Confirm with DBM backend/product
+    owners that `dbm-metrics` payloads with `kind:"query_metrics"`, `db2_rows`,
+    `dbms/ddsource/source:"db2"`, and Db2-specific fields become the expected query-metrics explorer
+    rows, facets, metric names, and plan rows. Current evidence proves Agent emission but not
+    Datadog-side materialization.
 
 ---
 
@@ -413,7 +425,7 @@ they block.
 | Query metrics (§3) | [`05-dbm-query-metrics.md`](05-dbm-query-metrics.md) | [`_research/db2-live-pkgcache.md`](_research/db2-live-pkgcache.md) |
 | Samples/activity (§4) | [`06-dbm-query-samples-activity.md`](06-dbm-query-samples-activity.md) | [`_research/db2-live-activity.md`](_research/db2-live-activity.md) |
 | Execution plans (§5) | [`07-dbm-execution-plans.md`](07-dbm-execution-plans.md) | `_raw/05-explain-test.txt`, [`_research/db2-live-pkgcache.md`](_research/db2-live-pkgcache.md) §3-5 |
-| Driver/threading (§6) | `09-implementation-architecture.md` (**TBD, OQ-9**) | [`_research/code-ibm_db2-current.md`](_research/code-ibm_db2-current.md) §2 |
+| Driver/threading (§6) | [`09-implementation-architecture.md`](09-implementation-architecture.md) | [`_research/code-ibm_db2-current.md`](_research/code-ibm_db2-current.md) §2 |
 | Cardinality (§7) | [`04-metrics-fidelity-plan.md`](04-metrics-fidelity-plan.md) | [`_research/map-tables-indexes.md`](_research/map-tables-indexes.md), [`_research/db2-monget-catalog-2.md`](_research/db2-monget-catalog-2.md) |
 | Packaging / strings / obfuscator (§8) | [`00-README.md`](00-README.md), `99-review-and-gaps.md` | [`_research/code-dbm-payload-contract.md`](_research/code-dbm-payload-contract.md), [`_research/code-base-framework.md`](_research/code-base-framework.md) |
 | Testing of all the above | [`11-testing-and-validation.md`](11-testing-and-validation.md) | [`_research/code-testing-harness.md`](_research/code-testing-harness.md) |
