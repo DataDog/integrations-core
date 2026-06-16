@@ -13,6 +13,8 @@ from urllib.request import getproxies
 
 import httpx2
 from binary import KIBIBYTE
+
+# Private httpx2 API (pinned httpx2==2.2.0). _env_proxies hard-codes its return shape, so re-verify on any bump.
 from httpx2._utils import get_environment_proxies
 
 from datadog_checks.base.agent import datadog_agent
@@ -302,7 +304,7 @@ def _env_proxies() -> dict[str, str]:
 
 def _env_no_proxy() -> list[str]:
     """Return the environment NO_PROXY hosts as bypass patterns for should_bypass_proxy."""
-    # Read the raw NO_PROXY string (pre-httpx2-transform) so CIDR patterns survive for should_bypass_proxy.
+    # Raw NO_PROXY from stdlib getproxies(), not get_environment_proxies, so CIDR survives for should_bypass_proxy.
     raw = getproxies().get('no', '')
     return [host.strip() for host in raw.replace(';', ',').split(',') if host.strip()]
 
