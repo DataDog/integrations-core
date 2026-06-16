@@ -12,7 +12,7 @@ import ibm_db
 
 from datadog_checks.base.utils.common import to_native_string
 
-from .utils import scrub_connection_string
+from .utils import is_connection_error, scrub_connection_string
 
 
 class Db2Connection:
@@ -68,9 +68,12 @@ class Db2Connection:
         return self._execute(key_prefix, query, params)
 
     def callproc(self, key_prefix: str, procedure: str, params: Sequence[Any]) -> tuple:
+        connection = self.get_connection(key_prefix)
         try:
-            return ibm_db.callproc(self.get_connection(key_prefix), procedure, tuple(params))
-        except Exception:
+            return ibm_db.callproc(connection, procedure, tuple(params))
+        except Exception as e:
+            if not is_connection_error(e):
+                raise
             self.close(key_prefix)
             return ibm_db.callproc(self.get_connection(key_prefix), procedure, tuple(params))
 
@@ -93,9 +96,12 @@ class Db2Connection:
         return connection
 
     def _execute(self, key_prefix: str, query: str, params: Sequence[Any] | None = None) -> object:
+        connection = self.get_connection(key_prefix)
         try:
-            return self._execute_query(self.get_connection(key_prefix), query, params)
-        except Exception:
+            return self._execute_query(connection, query, params)
+        except Exception as e:
+            if not is_connection_error(e):
+                raise
             self.close(key_prefix)
             return self._execute_query(self.get_connection(key_prefix), query, params)
 

@@ -171,6 +171,23 @@ def test_non_connection_errors_are_ignored(aggregator, instance):
         query_method.assert_called()
 
 
+def test_iter_rows_does_not_reconnect_for_sql_errors(instance: dict[str, Any]) -> None:
+    sql_error = Exception(
+        '[IBM][CLI Driver][DB2/LINUXX8664] SQL0440N No authorized routine named "MON_GET_INSTANCE" '
+        'of type "FUNCTION" having compatible arguments was found. SQLSTATE=42884'
+    )
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check._conn = mock.MagicMock()
+    check.get_connection = mock.Mock()
+
+    with mock.patch('ibm_db.exec_immediate', side_effect=sql_error) as exec_immediate:
+        with pytest.raises(Exception, match='SQLSTATE=42884'):
+            list(check.iter_rows('SELECT 1', mock.Mock()))
+
+    exec_immediate.assert_called_once_with(check._conn, 'SELECT 1')
+    check.get_connection.assert_not_called()
+
+
 def test_connection_errors_stops_execution(aggregator, instance):
     erroring_query = mock.Mock(side_effect=ConnectionError("I'm broken"))
     erroring_query.__name__ = 'Erroring query'
@@ -257,6 +274,48 @@ def test_dbm_connection_query_supports_bound_parameters(instance: dict[str, Any]
     assert rows == [{'name': 'mon_act_metrics', 'value': 'BASE'}]
     assert columns == ['name', 'value']
     free_result.assert_called_once_with(cursor)
+
+
+def test_dbm_connection_execute_retries_connection_errors(instance: dict[str, Any]) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    first_connection = mock.MagicMock()
+    second_connection = mock.MagicMock()
+    cursor = mock.MagicMock()
+    check.connection._connections['dbm-test-'] = first_connection
+    check.connection._connect = mock.Mock(return_value=second_connection)
+
+    with (
+        mock.patch(
+            'ibm_db.exec_immediate',
+            side_effect=[Exception('[IBM][CLI Driver] CLI0106E Connection is closed. SQLSTATE=08003'), cursor],
+        ) as exec_immediate,
+        mock.patch('ibm_db.close') as close,
+    ):
+        assert check.connection.execute('dbm-test-', 'SELECT 1') is cursor
+
+    assert exec_immediate.call_args_list == [
+        mock.call(first_connection, 'SELECT 1'),
+        mock.call(second_connection, 'SELECT 1'),
+    ]
+    close.assert_called_once_with(first_connection)
+
+
+def test_dbm_connection_execute_does_not_retry_sql_errors(instance: dict[str, Any]) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    connection = mock.MagicMock()
+    sql_error = Exception(
+        '[IBM][CLI Driver][DB2/LINUXX8664] SQL0440N No authorized routine named "MON_GET_INSTANCE" '
+        'of type "FUNCTION" having compatible arguments was found. SQLSTATE=42884'
+    )
+    check.connection._connections['dbm-test-'] = connection
+    check.connection._connect = mock.Mock()
+
+    with mock.patch('ibm_db.exec_immediate', side_effect=sql_error) as exec_immediate:
+        with pytest.raises(Exception, match='SQLSTATE=42884'):
+            check.connection.execute('dbm-test-', 'SELECT 1')
+
+    exec_immediate.assert_called_once_with(connection, 'SELECT 1')
+    check.connection._connect.assert_not_called()
 
 
 def test_database_instance_metadata(instance: dict[str, Any], aggregator: Any) -> None:
