@@ -5,7 +5,7 @@
 
 def is_affirmative(value):
     """
-    Attempt to convert different type of values to a meaningful boolean
+    Attempt to convert different type of values to a meaningful  boolean
     """
     # try string cast
     if isinstance(value, str):
