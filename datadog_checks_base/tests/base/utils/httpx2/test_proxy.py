@@ -125,6 +125,12 @@ def test_skip_proxy_init_config_yields_disabled_sentinel():
     assert http.options['proxies'] == PROXY_SETTINGS_DISABLED
 
 
+def test_legacy_no_proxy_true_maps_to_skip_proxy():
+    # no_proxy: true is a legacy alias for skip_proxy in RequestsWrapper (http.py:106).
+    with HTTPX2Wrapper({'no_proxy': True}, {}) as http:
+        assert http.options['proxies'] == PROXY_SETTINGS_DISABLED
+
+
 def test_skip_proxy_disables_trust_env_and_builds_no_router():
     with HTTPX2Wrapper({'skip_proxy': True}, {}) as http:
         assert http._client.trust_env is False
