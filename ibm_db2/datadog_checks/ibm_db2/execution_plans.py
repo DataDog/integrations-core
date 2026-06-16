@@ -185,8 +185,8 @@ class Db2ExecutionPlans:
 
         try:
             self._ensure_explain_tables()
-            run_key = self._explain_from_section(str(executable_id), row.get('member'))
-            plan_key = self._read_plan_key(run_key)
+            run_key, explain_started_at = self._explain_from_section(str(executable_id), row.get('member'))
+            plan_key = self._read_plan_key(run_key, explain_started_at, row)
             if not plan_key:
                 return self._error_result(row, 'empty_plan', 'EXPLAIN_FROM_SECTION produced no operator rows')
 
@@ -250,7 +250,8 @@ class Db2ExecutionPlans:
         )
         self._explain_tables_ready = True
 
-    def _explain_from_section(self, executable_id: str, member: Any) -> dict[str, Any] | None:
+    def _explain_from_section(self, executable_id: str, member: Any) -> tuple[dict[str, Any] | None, Any]:
+        explain_started_at = self._read_current_timestamp()
         result = self._check.connection.callproc(
             self._conn_key_prefix,
             'SYSPROC.EXPLAIN_FROM_SECTION',
@@ -267,12 +268,24 @@ class Db2ExecutionPlans:
                 None,
             ),
         )
-        return _extract_explain_run_key(result)
+        return _extract_explain_run_key(result), explain_started_at
 
-    def _read_plan_key(self, run_key: dict[str, Any] | None) -> dict[str, Any] | None:
+    def _read_current_timestamp(self) -> Any:
+        rows, _ = self._check.connection.query(
+            self._conn_key_prefix, 'SELECT CURRENT TIMESTAMP AS explain_started_at FROM SYSIBM.SYSDUMMY1'
+        )
+        if not rows:
+            return None
+        return _lowercase_row(rows[0]).get('explain_started_at')
+
+    def _read_plan_key(
+        self, run_key: dict[str, Any] | None, explain_started_at: Any, row: dict[str, Any]
+    ) -> dict[str, Any] | None:
         if run_key:
             return self._read_plan_key_for_run(run_key)
-        return self._read_latest_plan_key()
+        if explain_started_at is None:
+            return None
+        return self._read_recent_plan_key(explain_started_at, _exact_statement_text(row))
 
     def _read_plan_key_for_run(self, run_key: dict[str, Any]) -> dict[str, Any] | None:
         query = """\
@@ -310,7 +323,24 @@ FETCH FIRST 1 ROW ONLY
             return None
         return _lowercase_row(rows[0])
 
-    def _read_latest_plan_key(self) -> dict[str, Any] | None:
+    def _read_recent_plan_key(self, explain_started_at: Any, statement_text: str | None) -> dict[str, Any] | None:
+        statement_text_filter = ''
+        params = [explain_started_at]
+        if statement_text:
+            statement_text_filter = """\
+  AND EXISTS (
+        SELECT 1
+        FROM {schema}.EXPLAIN_STATEMENT T
+        WHERE T.EXPLAIN_REQUESTER = I.EXPLAIN_REQUESTER
+          AND T.EXPLAIN_TIME = I.EXPLAIN_TIME
+          AND T.SOURCE_NAME = I.SOURCE_NAME
+          AND T.SOURCE_SCHEMA = I.SOURCE_SCHEMA
+          AND T.SOURCE_VERSION = I.SOURCE_VERSION
+          AND T.STATEMENT_TEXT = ?
+  )
+""".format(schema=self._explain_schema)
+            params.append(statement_text)
+
         query = """\
 SELECT
     S.EXPLAIN_REQUESTER,
@@ -324,8 +354,16 @@ SELECT
     S.STATEMENT_TEXT,
     S.TOTAL_COST,
     S.QUERY_DEGREE
-FROM {schema}.EXPLAIN_STATEMENT S
-WHERE RTRIM(S.EXPLAIN_REQUESTER) = CURRENT USER
+FROM {schema}.EXPLAIN_INSTANCE I
+JOIN {schema}.EXPLAIN_STATEMENT S
+  ON S.EXPLAIN_REQUESTER = I.EXPLAIN_REQUESTER
+ AND S.EXPLAIN_TIME = I.EXPLAIN_TIME
+ AND S.SOURCE_NAME = I.SOURCE_NAME
+ AND S.SOURCE_SCHEMA = I.SOURCE_SCHEMA
+ AND S.SOURCE_VERSION = I.SOURCE_VERSION
+WHERE RTRIM(I.EXPLAIN_REQUESTER) = CURRENT USER
+  AND I.EXPLAIN_TIME >= ?
+{statement_text_filter}
   AND EXISTS (
         SELECT 1
         FROM {schema}.EXPLAIN_OPERATOR O
@@ -338,10 +376,10 @@ WHERE RTRIM(S.EXPLAIN_REQUESTER) = CURRENT USER
           AND O.STMTNO = S.STMTNO
           AND O.SECTNO = S.SECTNO
   )
-ORDER BY S.EXPLAIN_TIME DESC
+ORDER BY I.EXPLAIN_TIME DESC, S.EXPLAIN_LEVEL DESC, S.STMTNO DESC, S.SECTNO DESC
 FETCH FIRST 1 ROW ONLY
-""".format(schema=self._explain_schema)
-        rows, _ = self._check.connection.query(self._conn_key_prefix, query)
+""".format(schema=self._explain_schema, statement_text_filter=statement_text_filter)
+        rows, _ = self._check.connection.query(self._conn_key_prefix, query, params=params)
         if not rows:
             return None
         return _lowercase_row(rows[0])
@@ -622,6 +660,13 @@ def _int_or_default(value: Any, default: int) -> int:
 
 def _lowercase_row(row: dict[str, Any]) -> dict[str, Any]:
     return {str(key).lower(): value for key, value in row.items()}
+
+
+def _exact_statement_text(row: dict[str, Any]) -> str | None:
+    statement_text = row.get('stmt_text')
+    if not statement_text or row.get('query_truncated') == 'truncated':
+        return None
+    return str(statement_text)
 
 
 def _plan_key_params(plan_key: dict[str, Any]) -> list[Any]:
