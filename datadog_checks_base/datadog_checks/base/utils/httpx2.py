@@ -59,6 +59,7 @@ STANDARD_FIELDS = {
 
 # Known legacy field aliases, mirrored from RequestsWrapper (http.py:103-107) for parity.
 DEFAULT_REMAPPED_FIELDS = {
+    # Forward-parity placeholder: inert until kerberos_auth is added to STANDARD_FIELDS.
     'kerberos': {'name': 'kerberos_auth'},
     # TODO: Remove in 6.13
     'no_proxy': {'name': 'skip_proxy'},

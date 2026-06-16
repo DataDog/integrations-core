@@ -71,29 +71,29 @@ def _served_by(
 # --- options['proxies'] precedence: instance > init_config > agent ---
 
 
-def test_options_proxies_from_instance():
+def test_options_proxies_from_instance(clean_proxy_env):
     with HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'https': 'https://i:1'}}, {}) as http:
         assert http.options['proxies'] == {'http': 'http://i:1', 'https': 'https://i:1'}
 
 
-def test_options_proxies_from_init_config():
+def test_options_proxies_from_init_config(clean_proxy_env):
     with HTTPX2Wrapper({}, {'proxy': {'http': 'http://ic:2'}}) as http:
         assert http.options['proxies'] == {'http': 'http://ic:2'}
 
 
-def test_options_proxies_from_agent_config():
+def test_options_proxies_from_agent_config(clean_proxy_env):
     with mock.patch(AGENT_GET_CONFIG, return_value={'http': 'http://a:3', 'no_proxy': 'x,y'}):
         with HTTPX2Wrapper({}, {}) as http:
             assert http.options['proxies'] == {'http': 'http://a:3'}
 
 
-def test_instance_proxy_overrides_init_and_agent():
+def test_instance_proxy_overrides_init_and_agent(clean_proxy_env):
     with mock.patch(AGENT_GET_CONFIG, return_value={'http': 'http://a:3'}):
         with HTTPX2Wrapper({'proxy': {'http': 'http://i:1'}}, {'proxy': {'http': 'http://ic:2'}}) as http:
             assert http.options['proxies'] == {'http': 'http://i:1'}
 
 
-def test_init_config_proxy_overrides_agent():
+def test_init_config_proxy_overrides_agent(clean_proxy_env):
     with mock.patch(AGENT_GET_CONFIG, return_value={'http': 'http://a:3'}):
         with HTTPX2Wrapper({}, {'proxy': {'http': 'http://ic:2'}}) as http:
             assert http.options['proxies'] == {'http': 'http://ic:2'}
@@ -105,11 +105,18 @@ def test_use_agent_proxy_false_skips_agent_config():
     assert http.options['proxies'] is None
 
 
-def test_no_proxy_string_is_split_off_proxies():
+def test_no_proxy_string_is_split_off_proxies(clean_proxy_env):
     with HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'no_proxy': 'a.com,b.com;c.com'}}, {}) as http:
         # no_proxy never leaks into options['proxies']; it drives routing instead.
         assert http.options['proxies'] == {'http': 'http://i:1'}
         assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']  # ';' normalized to ','
+
+
+def test_no_proxy_list_is_passed_through_unchanged(clean_proxy_env):
+    proxy = {'http': 'http://i:1', 'no_proxy': ['a.com', 'b.com']}
+    with HTTPX2Wrapper({'proxy': proxy}, {}) as http:
+        assert http.no_proxy_uris == ['a.com', 'b.com']
+        assert http.options['proxies'] == {'http': 'http://i:1'}
 
 
 # --- skip_proxy ---
@@ -347,7 +354,7 @@ def test_build_env_proxy_transport_none_without_env_proxy(clean_proxy_env, monke
     assert _build_env_proxy_transport(None, ['internal.corp'], True, None) is None
 
 
-def test_no_proxy_uris_stored_on_wrapper():
+def test_no_proxy_uris_stored_on_wrapper(clean_proxy_env):
     with HTTPX2Wrapper({'proxy': {'http': 'http://p:1', 'no_proxy': 'a.com,b.com'}}, {}) as http:
         assert http.no_proxy_uris == ['a.com', 'b.com']
 
