@@ -1,10 +1,19 @@
 services:
 
   ibm_db2:
-    # Official image does not yet support 11.1
-    image: taskana/db2:${DB2_VERSION}
+    image: ${DB2_IMAGE:-taskana/db2}:${DB2_VERSION}
     container_name: ibm_db2
+    privileged: true
     ports:
       - "50000:50000"
     environment:
       - LICENSE=accept
+      - DB2INSTANCE=db2inst1
+      - DB2INST1_PASSWORD=db2inst1-pwd
+      - DBNAME=datadog
+    healthcheck:
+      test: ["CMD-SHELL", "su - db2inst1 -c 'db2start >/tmp/db2start.health 2>&1 || grep -q SQL1026N /tmp/db2start.health'"]
+      interval: 30s
+      timeout: 10s
+      retries: 20
+      start_period: 480s

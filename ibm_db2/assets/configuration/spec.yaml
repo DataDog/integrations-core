@@ -72,6 +72,612 @@ files:
         value:
           type: integer
           example: 10
+      - name: dbm
+        display_priority: 2
+        fleet_configurable: true
+        description: |
+          Set to `true` to enable Database Monitoring.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: reported_hostname
+        display_priority: 0
+        description: |
+          Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
+          and can be useful to set a custom hostname when connecting to a remote database through a proxy.
+        fleet_configurable: true
+        value:
+          type: string
+      - name: exclude_hostname
+        display_priority: 0
+        description: |
+          Omit the hostname from tags and events. This is useful when the database host is not monitored by an agent.
+        value:
+          type: boolean
+          example: false
+          default: false
+        fleet_configurable: false
+      - name: database_identifier
+        display_priority: 0
+        description: |
+          Controls how the database is identified. Each unique value of this identifier appears in DBM as a separate
+          billable instance.
+
+          The default value is the resolved hostname for the instance, which respects the `reported_hostname` option.
+
+          This value is used as-is for the display name of the instance but is normalized when applied as the
+          `database_instance` tag. See https://docs.datadoghq.com/getting_started/tagging/ for more details on
+          Datadog tag normalization.
+        options:
+          - name: template
+            value:
+              type: string
+              display_default: "$resolved_hostname"
+              example: "$resolved_hostname:$db"
+            description: |
+              The template to use for the database identifier. The default value is `$resolved_hostname`.
+              You can use the following variables, prefixed by `$` in the template:
+              - resolved_hostname: The resolved hostname of the instance, which respects the `reported_hostname` option.
+              - host: The provided host of the instance.
+              - port: The port number of the instance.
+              - db: The configured Db2 database name.
+            fleet_configurable: false
+      - name: query_metrics
+        display_priority: 0
+        fleet_configurable: true
+        description: Configure collection of DBM query metrics.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: |
+              Enable collection of query metrics. Requires `dbm: true`.
+            value:
+              type: boolean
+              example: true
+          - name: collection_interval
+            fleet_configurable: true
+            description: |
+              Set the query metric collection interval (in seconds). Each collection reads
+              `MON_GET_PKG_CACHE_STMT` and computes interval deltas client-side.
+            value:
+              type: number
+              example: 10
+          - name: full_statement_text_cache_max_size
+            hidden: true
+            description: |
+              Set the max size of the cache used for full statement text events.
+            value:
+              type: integer
+              default: 10000
+            fleet_configurable: false
+          - name: full_statement_text_samples_per_hour_per_query
+            hidden: true
+            description: |
+              Set the max number of full statement text samples to collect per hour per query.
+            value:
+              type: number
+              default: 1
+            fleet_configurable: false
+          - name: max_statements
+            hidden: true
+            description: |
+              Set the maximum number of package cache rows to read during a single query metrics collection.
+            value:
+              type: integer
+              default: 10000
+            fleet_configurable: false
+          - name: run_sync
+            hidden: true
+            description: |
+              Run query metrics collection synchronously. This is useful for testing purposes, but should not be used
+              in production because it can block the main check thread.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
+          - name: batch_max_content_size
+            hidden: true
+            description: |
+              Set the maximum serialized DBM query metrics payload size. The default matches the Agent forwarder's
+              `database_monitoring.metrics.batch_max_content_size` default.
+            value:
+              type: integer
+              example: 20_000_000
+            fleet_configurable: false
+      - name: query_samples
+        display_priority: 0
+        fleet_configurable: true
+        description: Configure DBM query sample execution plan collection.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: |
+              Enable collection of execution plans from Db2 EXPLAIN tables. Requires `dbm: true`.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+          - name: collection_interval
+            fleet_configurable: true
+            description: |
+              Set the query sample collection interval (in seconds). This interval is used when query metrics are
+              disabled and query samples are enabled.
+            value:
+              type: number
+              example: 10
+          - name: explain_schema
+            description: |
+              Set the schema where the integration creates and reads Db2 EXPLAIN tables. The default is the
+              configured monitoring user's schema.
+            value:
+              type: string
+              example: DATADOG
+              display_default: "<MONITORING_USER>"
+            fleet_configurable: false
+          - name: explained_queries_per_hour_per_query
+            hidden: true
+            description: |
+              Set the maximum number of EXPLAIN attempts per hour for each query signature.
+            value:
+              type: number
+              default: 60
+            fleet_configurable: false
+          - name: explained_queries_cache_maxsize
+            hidden: true
+            description: |
+              Set the maximum number of query signatures tracked by the EXPLAIN rate limiter.
+            value:
+              type: integer
+              default: 5000
+            fleet_configurable: false
+          - name: samples_per_hour_per_query
+            hidden: true
+            description: |
+              Set the maximum number of plan samples emitted per hour for each query and plan signature.
+            value:
+              type: number
+              default: 15
+            fleet_configurable: false
+          - name: seen_samples_cache_maxsize
+            hidden: true
+            description: |
+              Set the maximum number of query and plan signatures tracked by the plan sample rate limiter.
+            value:
+              type: integer
+              default: 10000
+            fleet_configurable: false
+          - name: explain_errors_cache_maxsize
+            hidden: true
+            description: |
+              Set the maximum number of query signatures tracked by the EXPLAIN error cache.
+            value:
+              type: integer
+              default: 5000
+            fleet_configurable: false
+          - name: explain_errors_cache_ttl
+            hidden: true
+            description: |
+              Set how long EXPLAIN errors are cached before retrying the same query signature, in seconds.
+            value:
+              type: number
+              default: 7200
+            fleet_configurable: false
+          - name: run_sync
+            hidden: true
+            description: |
+              Run query sample collection synchronously.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
+      - name: query_activity
+        display_priority: 0
+        fleet_configurable: true
+        description: Configure DBM query activity collection.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: |
+              Enable collection of in-flight query activity from `MON_GET_ACTIVITY`. Requires `dbm: true`.
+            value:
+              type: boolean
+              example: true
+          - name: collection_interval
+            fleet_configurable: true
+            description: |
+              Set the query activity collection interval (in seconds). This is an ASH-style snapshot of currently
+              running statements, not a complete query log.
+            value:
+              type: number
+              example: 10
+          - name: payload_row_limit
+            hidden: true
+            description: |
+              Set the maximum number of activity rows in a single payload.
+            value:
+              type: integer
+              default: 3500
+            fleet_configurable: false
+          - name: run_sync
+            hidden: true
+            description: |
+              Run query activity collection synchronously.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
+      - name: collect_settings
+        display_priority: 0
+        fleet_configurable: true
+        description: Configure collection of database manager and database settings.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: |
+              Enable collection of database manager and database settings. Requires `dbm: true`.
+            value:
+              type: boolean
+              example: true
+          - name: collection_interval
+            fleet_configurable: true
+            description: |
+              Set the settings collection interval (in seconds). Each collection queries `SYSIBMADM.DBMCFG` and
+              `SYSIBMADM.DBCFG`.
+            value:
+              type: number
+              example: 600
+          - name: ignored_settings_patterns
+            fleet_configurable: true
+            description: |
+              A list of setting patterns to ignore. Any setting key matching one of the values in this list will not
+              be collected. This uses the Db2 `LIKE` pattern-matching approach.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - diag%
+          - name: run_sync
+            hidden: true
+            description: |
+              Run settings collection synchronously.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
+      - name: collect_schemas
+        display_priority: 0
+        fleet_configurable: true
+        description: Configure collection of database schema metadata.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: |
+              Enable collection of database schema metadata from `SYSCAT` catalog views. Requires `dbm: true`.
+            value:
+              type: boolean
+              example: false
+          - name: collection_interval
+            fleet_configurable: true
+            description: |
+              Set the database schema collection interval (in seconds).
+            value:
+              type: number
+              example: 600
+          - name: max_tables
+            description: |
+              Set the maximum number of tables to collect.
+            value:
+              type: integer
+              example: 300
+            fleet_configurable: false
+          - name: max_columns
+            description: |
+              Set the maximum number of columns to collect per table.
+            value:
+              type: integer
+              example: 50
+            fleet_configurable: false
+          - name: max_query_duration
+            description: |
+              Set the maximum time for schema collection queries (in seconds).
+            value:
+              type: number
+              example: 60
+            fleet_configurable: false
+          - name: include_schemas
+            description: |
+              Include only schemas matching one of these Db2 `LIKE` patterns.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - APP%
+            fleet_configurable: false
+          - name: exclude_schemas
+            description: |
+              Exclude schemas matching one of these Db2 `LIKE` patterns.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - TEST%
+            fleet_configurable: false
+          - name: include_tables
+            description: |
+              Include only tables matching one of these Db2 `LIKE` patterns.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - ORDERS%
+            fleet_configurable: false
+          - name: exclude_tables
+            description: |
+              Exclude tables matching one of these Db2 `LIKE` patterns.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - TMP%
+            fleet_configurable: false
+          - name: run_sync
+            hidden: true
+            description: |
+              Run schema collection synchronously.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
+      - name: aws
+        display_priority: 0
+        description: |
+          This block defines the configuration for AWS RDS Db2 instances.
+
+          Complete this section if you have installed the Datadog AWS Integration
+          (https://docs.datadoghq.com/integrations/amazon_web_services) to enrich instances
+          with Db2 integration telemetry.
+
+          These values are only applied when `dbm: true` option is set.
+        options:
+          - name: instance_endpoint
+            description: |
+              Set to the Endpoint.Address of the instance the agent is connecting to.
+            value:
+              type: string
+              example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
+              display_default: null
+            fleet_configurable: false
+          - name: region
+            description: |
+              Equal to the region of the instance the agent is connecting to.
+            value:
+              type: string
+              example: us-east-1
+              display_default: null
+            fleet_configurable: false
+      - name: gcp
+        display_priority: 0
+        description: |
+          This block defines the configuration for Google Cloud SQL instances.
+
+          Complete this section if you have installed the Datadog GCP Integration
+          (https://docs.datadoghq.com/integrations/google_cloud_platform) to enrich instances
+          with Db2 integration telemetry.
+
+          These values are only applied when `dbm: true` option is set.
+        options:
+          - name: project_id
+            description: |
+              Equal to the GCP resource's project ID.
+            value:
+              type: string
+              example: foo-project
+              display_default: null
+            fleet_configurable: false
+          - name: instance_id
+            description: |
+              Equal to the GCP resource's instance ID.
+            value:
+              type: string
+              example: foo-database
+              display_default: null
+            fleet_configurable: false
+      - name: azure
+        display_priority: 0
+        description: |
+          This block defines the configuration for Azure Db2 instances.
+
+          Complete this section if you have installed the Datadog Azure Integration
+          (https://docs.datadoghq.com/integrations/azure) to enrich instances with Db2 integration telemetry.
+          These values are only applied when `dbm: true` option is set.
+        options:
+          - name: deployment_type
+            description: |
+              Equal to the deployment type for the managed database.
+            value:
+              type: string
+              example: virtual_machine
+              display_default: null
+            fleet_configurable: false
+          - name: fully_qualified_domain_name
+            description: |
+              Equal to the fully qualified domain name of the Azure Db2 database.
+            value:
+              type: string
+              example: db2-database.database.windows.net
+              display_default: null
+            fleet_configurable: false
+      - name: obfuscator_options
+        display_priority: 0
+        description: |
+          Configure how the SQL obfuscator behaves.
+          Note: This option only applies when `dbm` is enabled.
+        options:
+          - name: obfuscation_mode
+            description: |
+              Set the obfuscation mode. The obfuscation mode determines how the SQL obfuscator obfuscates SQL
+              statements.
+            value:
+              type: string
+              example: obfuscate_and_normalize
+              display_default: obfuscate_and_normalize
+            fleet_configurable: false
+          - name: replace_digits
+            description: |
+              Set to `true` to replace digits in identifiers and table names with question marks in SQL statements.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
+          - name: collect_metadata
+            description: |
+              Set to `false` to disable collection of metadata in SQL statements.
+            value:
+              type: boolean
+              example: true
+            fleet_configurable: false
+          - name: collect_tables
+            description: |
+              Set to `false` to disable collection of tables in SQL statements.
+              Requires `collect_metadata: true`.
+            value:
+              type: boolean
+              example: true
+            fleet_configurable: false
+          - name: collect_commands
+            description: |
+              Set to `false` to disable collection of commands in SQL statements.
+              Requires `collect_metadata: true`.
+            value:
+              type: boolean
+              example: true
+            fleet_configurable: false
+          - name: collect_comments
+            description: |
+              Set to `false` to disable collection of comments in SQL statements.
+              Requires `collect_metadata: true`.
+            value:
+              type: boolean
+              example: true
+            fleet_configurable: false
+          - name: collect_procedures
+            description: |
+              Set to `false` to disable collection of procedures in SQL statements.
+              Requires `collect_metadata: true`.
+            value:
+              type: boolean
+              example: true
+            fleet_configurable: false
+          - name: keep_sql_alias
+            description: |
+              Set to `true` to keep SQL aliases in obfuscated SQL statements.
+            value:
+              type: boolean
+              example: true
+              display_default: true
+            fleet_configurable: false
+          - name: remove_space_between_parentheses
+            description: |
+              Set to `true` to remove spaces between parentheses in normalized SQL statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+          - name: keep_null
+            description: |
+              Set to `true` to keep the keyword `NULL` in obfuscated SQL statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+          - name: keep_boolean
+            description: |
+              Set to `true` to keep the keywords `TRUE` and `FALSE` in obfuscated SQL statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+          - name: keep_positional_parameter
+            description: |
+              Set to `true` to keep positional parameters in obfuscated SQL statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+          - name: replace_bind_parameter
+            description: |
+              Set to `true` to replace bind parameters in obfuscated SQL statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+          - name: keep_trailing_semicolon
+            description: |
+              Set to `true` to keep trailing semicolons in normalized SQL statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+          - name: keep_identifier_quotation
+            description: |
+              Set to `true` to keep identifier quotations in normalized SQL statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+            fleet_configurable: false
+      - name: collect_raw_query_statement
+        display_priority: 0
+        hidden: true
+        fleet_configurable: true
+        description: |
+          Reserved for collection of raw query statements in query samples and explain plans.
+          Raw query statements and explain plans may contain sensitive information.
+          This option only applies when `dbm` is enabled and the corresponding collectors are wired.
+        options:
+          - name: enabled
+            fleet_configurable: true
+            description: |
+              Set to `true` to collect raw query statements.
+            value:
+              type: boolean
+              example: false
+              display_default: false
+      - name: log_unobfuscated_queries
+        display_priority: 0
+        hidden: true
+        description: |
+          Set to `true` to enable logging of original unobfuscated SQL queries when obfuscation errors occur.
+          For security purposes, use this option for debugging only when requested by Datadog Support.
+          Note: This option only applies when `dbm` is enabled.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+        fleet_configurable: false
+      - name: database_instance_collection_interval
+        display_priority: 0
+        hidden: true
+        description: |
+          Set the database instance collection interval (in seconds). The database instance collection sends
+          basic information about the database instance along with a signal that it still exists.
+          This collection does not involve any additional queries to the database.
+        value:
+          type: number
+          default: 300
+        fleet_configurable: false
 
       - template: instances/db
         overrides:

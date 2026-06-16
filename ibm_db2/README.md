@@ -63,17 +63,46 @@ As a best practice, Datadog recommends creating the machine user with read-only 
 
 The IBM Db2 integration pulls data using the following table functions:
 * `MON_GET_TABLESPACE`
+* `MON_GET_CONTAINER`
 * `MON_GET_TRANSACTION_LOG`
 * `MON_GET_BUFFERPOOL`
 * `MON_GET_DATABASE`
+* `MON_GET_HADR`
 * `MON_GET_INSTANCE`
+* `MON_GET_PKG_CACHE_STMT` (when Database Monitoring query metrics are enabled)
+* `EXPLAIN_FROM_SECTION` (when Database Monitoring query execution plans are enabled)
+* `SYSINSTALLOBJECTS` (when the integration creates Db2 EXPLAIN tables for query execution plans)
+* `MON_GET_ACTIVITY` (when Database Monitoring query activity is enabled)
+* `MON_GET_CONNECTION` (when Database Monitoring query activity is enabled)
+* `MON_GET_UNIT_OF_WORK` (when Database Monitoring query activity is enabled)
+* `MON_GET_APPLICATION_HANDLE` (when Database Monitoring query activity is enabled)
+
+When Database Monitoring settings collection is enabled, the integration also reads:
+* `SYSIBMADM.DBMCFG`
+* `SYSIBMADM.DBCFG`
+
+When Database Monitoring schema collection is enabled, the integration also reads `SYSCAT` catalog views
+for schemas, tables, columns, indexes, and foreign keys.
+
+When Database Monitoring query execution plan collection is enabled, the integration uses
+`SYSPROC.EXPLAIN_FROM_SECTION` with package-cache executable IDs and reads Db2 EXPLAIN tables in the configured
+`query_samples.explain_schema`. By default this is the monitoring user's schema. The monitoring user must be able to
+create the EXPLAIN tables with `SYSPROC.SYSINSTALLOBJECTS`, or the tables must be created in advance with `SELECT`,
+`INSERT`, and `DELETE` privileges granted to the monitoring user. Pre-creating the EXPLAIN tables is recommended for
+least-privilege users because `SYSINSTALLOBJECTS` may require additional DDL privileges.
 
 For more information about these table functions, see the [official IBM documentation][17].
 
-To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permission on the above five table functions, or grant the Db2 user one of the following roles:
+To monitor a Db2 instance without execution plan collection, create a Db2 user with the `EXECUTE` permission on the
+above table functions and `SELECT` permission on the settings and catalog views, or grant the Db2 user one of the
+following roles:
 * `DATAACCESS` authority
 * `DBADM` authority
 * `SQLADM` authority
+* `SYSMON` authority
+
+Execution plan collection requires explicit `EXECUTE` permission on `SYSPROC.EXPLAIN_FROM_SECTION` and write access
+to the configured EXPLAIN tables in addition to the monitoring privileges above.
 
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor:
 * Statement

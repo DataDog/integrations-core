@@ -24,6 +24,20 @@ def status_to_service_check(db_status):
     return DB_STATUS_MAP.get(db_status, ServiceCheck.UNKNOWN)
 
 
+def hadr_status_to_service_check(hadr_state: str | None, connect_status: str | None) -> int:
+    hadr_state = (hadr_state or '').upper()
+    connect_status = (connect_status or '').upper()
+
+    if hadr_state.startswith('DISCONNECTED') or connect_status == 'DISCONNECTED':
+        return ServiceCheck.CRITICAL
+    if hadr_state.startswith('REMOTE_CATCHUP') or hadr_state == 'LOCAL_CATCHUP' or connect_status == 'CONGESTED':
+        return ServiceCheck.WARNING
+    if hadr_state == 'PEER' and (not connect_status or connect_status == 'CONNECTED'):
+        return ServiceCheck.OK
+
+    return ServiceCheck.UNKNOWN
+
+
 def get_version(connection):
     return ibm_db.get_db_info(connection, ibm_db.SQL_DBMS_VER)
 

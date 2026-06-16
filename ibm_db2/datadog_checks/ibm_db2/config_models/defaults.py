@@ -12,6 +12,14 @@ def instance_connection_timeout():
     return 10
 
 
+def instance_database_instance_collection_interval():
+    return 300
+
+
+def instance_dbm():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 
@@ -22,6 +30,14 @@ def instance_empty_default_hostname():
 
 def instance_enable_legacy_tags_normalization():
     return True
+
+
+def instance_exclude_hostname():
+    return False
+
+
+def instance_log_unobfuscated_queries():
+    return False
 
 
 def instance_min_collection_interval():

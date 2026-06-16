@@ -36,6 +36,7 @@ EVENT_PLATFORM_EVENT_TYPES = [
     'dbm-samples',
     'dbm-metrics',
     'dbm-activity',
+    'dbm-metadata',
     'network-devices-metadata',
 ]
 

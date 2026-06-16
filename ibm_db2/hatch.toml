@@ -1,12 +1,20 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["11.1"]
+version = ["11.1", "12.1"]
 
 [envs.default.env-vars]
+DB2_IMAGE = "taskana/db2"
 DB2_VERSION = "{matrix:version:11.1}"
 IBM_DB_INSTALLER_URL = "https://ddintegrations.blob.core.windows.net/ibm-db2/"
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "DB2_IMAGE", value = "icr.io/db2_community/db2", if = ["12.1"] },
+  { key = "DB2_VERSION", value = "12.1.4.0", if = ["12.1"] },
+]
 
 [envs.default]
 dependencies = [
