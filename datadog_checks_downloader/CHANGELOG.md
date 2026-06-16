@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.1 / 2026-06-15
+
+***Fixed***:
+
+* Use the versioned ``wheelsmith/v1`` v2 target namespace and tighten pointer validation. ([#23937](https://github.com/DataDog/integrations-core/pull/23937))
+
+## 9.2.0 / 2026-06-09
+
+***Added***:
+
+* Add v2 TUF pointer downloader support. ([#23144](https://github.com/DataDog/integrations-core/pull/23144))
+
 ## 9.1.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:

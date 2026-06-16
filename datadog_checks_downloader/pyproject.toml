@@ -55,6 +55,9 @@ include = [
 include = [
     "/datadog_checks/downloader",
 ]
+artifacts = [
+    "/datadog_checks/downloader/data/v2/metadata/root.json",
+]
 dev-mode-dirs = [
     ".",
 ]

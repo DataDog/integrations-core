@@ -268,29 +268,29 @@ tests:
                         - "A Tale of Two Cities"
                     Items:
                         - Brand: "Kids Books"
-                          RowTotal: 9.99
-                          ProductName: "Winnie the Pooh"
                           Categories:
                               - "Fiction"
                               - "Children"
-                          ItemPrice: 9.99
-                          Quantity: 1
                           ImageURL: "http://www.example.com/path/to/product/image.png"
+                          ItemPrice: 9.99
                           ProductID: "1111"
-                          SKU: "WINNIEPOOH"
+                          ProductName: "Winnie the Pooh"
                           ProductURL: "http://www.example.com/path/to/product"
+                          Quantity: 1
+                          RowTotal: 9.99
+                          SKU: "WINNIEPOOH"
                         - Brand: "Harcourt Classics"
-                          RowTotal: 19.99
-                          ProductName: "A Tale of Two Cities"
                           Categories:
                               - "Fiction"
                               - "Classics"
-                          ItemPrice: 19.99
-                          Quantity: 1
                           ImageURL: "http://www.example.com/path/to/product/image2.png"
+                          ItemPrice: 19.99
                           ProductID: "1112"
-                          SKU: "TALEOFTWO"
+                          ProductName: "A Tale of Two Cities"
                           ProductURL: "http://www.example.com/path/to/product2"
+                          Quantity: 1
+                          RowTotal: 19.99
+                          SKU: "TALEOFTWO"
                     OrderId: "1234"
                     ShippingAddress:
                         Address1: "125 Summer St"
@@ -1198,75 +1198,75 @@ tests:
                 landing_site: "/"
                 line_items:
                  -
-                  total_discount: "0.00"
+                  admin_graphql_api_id: "gid://shopify/LineItem/13904611934308"
+                  current_quantity: 3
+                  fulfillable_quantity: 3
+                  fulfillment_service: "manual"
                   gift_card: false
-                  requires_shipping: true
-                  total_discount_set:
-                    shop_money:
-                      amount: "0.00"
-                      currency_code: "USD"
-                    presentment_money:
-                      amount: "0.00"
-                      currency_code: "USD"
-                  title: "Magic Carpet"
-                  product_exists: true
-                  line_price_set:
-                    shop_money:
-                      amount: 6300
-                      currency_code: "USD"
-                    presentment_money:
-                      amount: 6300
-                      currency_code: "USD"
-                  variant_id: 46305476280420
-                  vendor: "My Store"
-                  translations:
-                    presentment_title: ""
-                    presentment_variant_title: ""
-                  price: 2100
-                  product_id: 8128980484196
-                  id: 13904611934308
                   grams: 0
-                  sku: "123SKU"
+                  id: 13904611934308
                   line_price: 6300
+                  line_price_set:
+                    presentment_money:
+                      amount: 6300
+                      currency_code: "USD"
+                    shop_money:
+                      amount: 6300
+                      currency_code: "USD"
+                  name: "Magic Carpet"
+                  price: 2100
+                  price_set:
+                    presentment_money:
+                      amount: "2100.00"
+                      currency_code: "USD"
+                    shop_money:
+                      amount: "2100.00"
+                      currency_code: "USD"
                   product:
                     body_html: "<p>3 x 4</p>"
+                    handle: "magic-carpet"
+                    id: 8128980484196
                     images:
                      -
-                      src: "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025.png?v=1754047681"
-                      width: 1954
-                      thumb_src: "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025_x240.png?v=1754047681"
                       height: 2649
+                      src: "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025.png?v=1754047681"
+                      thumb_src: "https://cdn.shopify.com/s/files/1/0726/5288/2020/files/magiccarpet2025_x240.png?v=1754047681"
+                      width: 1954
                     product_type: "Painting"
+                    tags: "shopify-tagged"
+                    title: "Magic Carpet"
+                    variant:
+                      id: 46305476280420
+                      options:
+                        Title: "Default Title"
+                      sku: "123SKU"
+                      title: "Default Title"
+                      translations:
+                        presentment_variant_title: ""
                     variant_options:
                       Title: "Default Title"
                     vendor: "My Store"
-                    variant:
-                      translations:
-                        presentment_variant_title: ""
-                      options:
-                        Title: "Default Title"
-                      id: 46305476280420
-                      sku: "123SKU"
-                      title: "Default Title"
-                    handle: "magic-carpet"
-                    id: 8128980484196
-                    title: "Magic Carpet"
-                    tags: "shopify-tagged"
-                  fulfillable_quantity: 3
+                  product_exists: true
+                  product_id: 8128980484196
                   quantity: 3
+                  requires_shipping: true
+                  sku: "123SKU"
                   taxable: true
-                  fulfillment_service: "manual"
-                  variant_inventory_management: "shopify"
-                  current_quantity: 3
-                  admin_graphql_api_id: "gid://shopify/LineItem/13904611934308"
-                  name: "Magic Carpet"
-                  price_set:
-                    shop_money:
-                      amount: "2100.00"
-                      currency_code: "USD"
+                  title: "Magic Carpet"
+                  total_discount: "0.00"
+                  total_discount_set:
                     presentment_money:
-                      amount: "2100.00"
+                      amount: "0.00"
                       currency_code: "USD"
+                    shop_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                  translations:
+                    presentment_title: ""
+                    presentment_variant_title: ""
+                  variant_id: 46305476280420
+                  variant_inventory_management: "shopify"
+                  vendor: "My Store"
                 merchant_business_entity_id: "37712494692"
                 name: "#1011"
                 number: 11
@@ -1293,33 +1293,33 @@ tests:
                 shipping_lines:
                  -
                   code: "Economy"
-                  price: "0.00"
-                  is_removed: false
-                  id: 4901692112996
-                  source: "shopify"
                   current_discounted_price_set:
-                    shop_money:
-                      amount: "0.00"
-                      currency_code: "USD"
                     presentment_money:
                       amount: "0.00"
                       currency_code: "USD"
-                  price_set:
                     shop_money:
-                      amount: "0.00"
-                      currency_code: "USD"
-                    presentment_money:
-                      amount: "0.00"
-                      currency_code: "USD"
-                  title: "Economy"
-                  discounted_price_set:
-                    shop_money:
-                      amount: "0.00"
-                      currency_code: "USD"
-                    presentment_money:
                       amount: "0.00"
                       currency_code: "USD"
                   discounted_price: "0.00"
+                  discounted_price_set:
+                    presentment_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                    shop_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                  id: 4901692112996
+                  is_removed: false
+                  price: "0.00"
+                  price_set:
+                    presentment_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                    shop_money:
+                      amount: "0.00"
+                      currency_code: "USD"
+                  source: "shopify"
+                  title: "Economy"
                 sms_order_updates_details:
                   created_at: "2025-08-05T14:19:52-04:00"
                   email: "brian+shop12@mayalane.com"

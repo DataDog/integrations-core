@@ -22,7 +22,7 @@ dev/testing:
 - changed-files:
   - any-glob-to-any-file:
     - .github/workflows/**
-    - .codecov.yml
+    - code-coverage.datadog.yml
 dev/tooling:
 - changed-files:
   - any-glob-to-any-file:
@@ -445,6 +445,10 @@ integration/delinea_secret_server:
 - changed-files:
   - any-glob-to-any-file:
     - delinea_secret_server/**/*
+integration/dell_powerflex:
+- changed-files:
+  - any-glob-to-any-file:
+    - dell_powerflex/**/*
 integration/directory:
 - changed-files:
   - any-glob-to-any-file:
@@ -657,6 +661,10 @@ integration/hivemq:
 - changed-files:
   - any-glob-to-any-file:
     - hivemq/**/*
+integration/hpe_aruba_edgeconnect:
+- changed-files:
+  - any-glob-to-any-file:
+    - hpe_aruba_edgeconnect/**/*
 integration/http_check:
 - changed-files:
   - any-glob-to-any-file:
@@ -897,10 +905,6 @@ integration/langchain:
 - changed-files:
   - any-glob-to-any-file:
     - langchain/**/*
-integration/lparstats:
-- changed-files:
-  - any-glob-to-any-file:
-    - lparstats/**/*
 integration/lastpass:
 - changed-files:
   - any-glob-to-any-file:
@@ -925,6 +929,10 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
+integration/lparstats:
+- changed-files:
+  - any-glob-to-any-file:
+    - lparstats/**/*
 integration/lustre:
 - changed-files:
   - any-glob-to-any-file:
@@ -1009,10 +1017,6 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
-integration/nifi:
-- changed-files:
-  - any-glob-to-any-file:
-    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:
@@ -1033,6 +1037,10 @@ integration/nginx_ingress_controller:
 - changed-files:
   - any-glob-to-any-file:
     - nginx_ingress_controller/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
@@ -1121,6 +1129,10 @@ integration/palo_alto_cortex_xdr:
 - changed-files:
   - any-glob-to-any-file:
     - palo_alto_cortex_xdr/**/*
+integration/palo_alto_networks_cortex_xsoar:
+- changed-files:
+  - any-glob-to-any-file:
+    - palo_alto_networks_cortex_xsoar/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:

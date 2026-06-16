@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.5.0 / 2026-04-15
+## 4.6.0 / 2026-06-15
+
+***Added***:
+
+* Add a collector that submits ArgoCD applications, clusters, and repositories to Datadog as generic resources. ([#23917](https://github.com/DataDog/integrations-core/pull/23917))
+
+## 4.5.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 
