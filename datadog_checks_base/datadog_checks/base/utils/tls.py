@@ -7,7 +7,7 @@ import ssl
 from copy import deepcopy
 from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
 
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 from datadog_checks.base.config import is_affirmative
 
@@ -38,7 +38,8 @@ STANDARD_FIELDS = {
 }
 
 
-class TlsConfig(BaseModel, frozen=True):
+@dataclass(frozen=True)
+class TlsConfig:
     """
     Class used internally to cache HTTPS adapters with specific TLS configurations.
     """
@@ -54,6 +55,14 @@ class TlsConfig(BaseModel, frozen=True):
     tls_protocols_allowed: tuple[str, ...] = DEFAULT_PROTOCOL_VERSIONS
     tls_validate_hostname: bool = True
     tls_verify: bool = True
+
+    def __post_init__(self):
+        # pydantic used to coerce sequences to the declared tuple type; preserve that
+        # so the frozen instance stays hashable for use as an HTTPS-adapter cache key.
+        for _f in ('tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_ciphers'):
+            _v = getattr(self, _f)
+            if isinstance(_v, list):
+                object.__setattr__(self, _f, tuple(_v))
 
 
 def _load_certifi_fallback(context):
