@@ -215,6 +215,112 @@ WLM_MONOTONIC_METRICS = (
     ('wlm.reclaim_wait_time', 'reclaim_wait_time'),
 )
 
+TABLE_MONOTONIC_METRICS = (
+    ('table.scans', 'table_scans'),
+    ('table.rows_read', 'rows_read'),
+    ('table.rows_inserted', 'rows_inserted'),
+    ('table.rows_updated', 'rows_updated'),
+    ('table.rows_deleted', 'rows_deleted'),
+    ('table.data.reads.logical', 'object_data_l_reads'),
+    ('table.data.reads.physical', 'object_data_p_reads'),
+    ('table.direct_reads', 'direct_reads'),
+    ('table.direct_writes', 'direct_writes'),
+    ('table.lock_wait_time', 'lock_wait_time'),
+    ('table.lock_waits', 'lock_waits'),
+    ('table.lock_escalations', 'lock_escals'),
+)
+
+INDEX_MONOTONIC_METRICS = (
+    ('index.scans', 'index_scans'),
+    ('index.only_scans', 'index_only_scans'),
+    ('index.jump_scans', 'index_jump_scans'),
+    ('index.key_updates', 'key_updates'),
+    ('index.pseudo_deletes', 'pseudo_deletes'),
+    ('index.del_keys_cleaned', 'del_keys_cleaned'),
+    ('index.reads.logical', 'object_index_l_reads'),
+    ('index.reads.physical', 'object_index_p_reads'),
+)
+
+INDEX_GAUGE_METRICS = (
+    ('index.leaf_pages', 'nleaf'),
+    ('index.levels', 'nlevels'),
+)
+
+CONNECTION_MONOTONIC_METRICS = (
+    ('connection.commits', 'total_app_commits'),
+    ('connection.rollbacks', 'total_app_rollbacks'),
+    ('connection.deadlocks', 'deadlocks'),
+    ('connection.lock_escalations', 'lock_escals'),
+    ('connection.lock_timeouts', 'lock_timeouts'),
+    ('connection.lock_wait_time', 'lock_wait_time'),
+    ('connection.lock_waits', 'lock_waits'),
+    ('connection.rows_deleted', 'rows_deleted'),
+    ('connection.rows_inserted', 'rows_inserted'),
+    ('connection.rows_modified', 'rows_modified'),
+    ('connection.rows_read', 'rows_read'),
+    ('connection.rows_returned', 'rows_returned'),
+    ('connection.rows_updated', 'rows_updated'),
+)
+
+CONNECTION_GAUGE_METRICS = (
+    ('connection.locks_held', 'num_locks_held'),
+    ('connection.locks_waiting', 'num_locks_waiting'),
+)
+
+FCM_MONOTONIC_METRICS = (
+    ('fcm.recv_volume', 'fcm_recv_volume'),
+    ('fcm.recv_wait_time', 'fcm_recv_wait_time'),
+    ('fcm.recv_waits', 'fcm_recv_waits_total'),
+    ('fcm.recvs', 'fcm_recvs_total'),
+    ('fcm.send_volume', 'fcm_send_volume'),
+    ('fcm.send_wait_time', 'fcm_send_wait_time'),
+    ('fcm.send_waits', 'fcm_send_waits_total'),
+    ('fcm.sends', 'fcm_sends_total'),
+    ('fcm.tq.recv_volume', 'fcm_tq_recv_volume'),
+    ('fcm.tq.recv_wait_time', 'fcm_tq_recv_wait_time'),
+    ('fcm.tq.send_volume', 'fcm_tq_send_volume'),
+    ('fcm.tq.send_wait_time', 'fcm_tq_send_wait_time'),
+)
+
+FCM_GAUGE_METRICS = (
+    ('fcm.buffers.free', 'buff_free'),
+    ('fcm.buffers.free_low_water', 'buff_free_bottom'),
+    ('fcm.channels.free', 'ch_free'),
+    ('fcm.channels.free_low_water', 'ch_free_bottom'),
+)
+
+FCM_CONNECTION_MONOTONIC_METRICS = (
+    ('fcm.connection.bytes_sent', 'total_bytes_sent'),
+    ('fcm.connection.bytes_received', 'total_bytes_received'),
+)
+
+CF_DATABASE_MONOTONIC_METRICS = (
+    ('cf.wait_time', 'cf_wait_time'),
+    ('cf.waits', 'cf_waits'),
+)
+
+CF_GAUGE_METRICS = (
+    ('cf.gbp.size', 'current_cf_gbp_size'),
+    ('cf.lock.size', 'current_cf_lock_size'),
+    ('cf.memory.current', 'current_cf_mem_size'),
+    ('cf.memory.target', 'target_cf_mem_size'),
+)
+
+CF_CMD_MONOTONIC_METRICS = (
+    ('cf.cmd.requests', 'total_cf_requests'),
+    ('cf.cmd.time', 'total_cf_cmd_time_micro'),
+)
+
+CF_WAIT_MONOTONIC_METRICS = (('cf.cmd.wait_time', 'total_cf_wait_time_micro'),)
+
+GROUP_BUFFERPOOL_MONOTONIC_METRICS = (
+    ('gbp.full', 'num_gbp_full'),
+    ('gbp.castouts', 'castout_pages'),
+    ('gbp.cross_invalidations', 'cross_invalidations'),
+    ('gbp.reads.logical', 'gbp_l_reads'),
+    ('gbp.reads.physical', 'gbp_p_reads'),
+)
+
 HADR_GAUGE_METRICS = (
     ('hadr.log_gap', 'hadr_log_gap'),
     ('hadr.log_wait.current', 'log_hadr_wait_cur'),
@@ -305,6 +411,13 @@ class IbmDb2Check(DatabaseCheck):
             self.query_container,
             self.query_transaction_log,
             self.query_hadr,
+            self.query_table_metrics,
+            self.query_index_metrics,
+            self.query_connection_metrics,
+            self.query_fcm_metrics,
+            self.query_fcm_connection_metrics,
+            self.query_cf_metrics,
+            self.query_group_bufferpool_metrics,
             self.query_custom,
         )
 
@@ -955,6 +1068,110 @@ class IbmDb2Check(DatabaseCheck):
 
         self.gauge(self.m('hadr.standby.count'), primary_standby_count, tags=self._tags)
 
+    def query_table_metrics(self) -> None:
+        if not self._config.collect_table_metrics:
+            return
+
+        count = 0
+        query = queries.TABLE_METRICS_TABLE.format(limit=_positive_limit(self._config.table_metrics_limit, 300))
+        for table in self.iter_rows(query, ibm_db.fetch_assoc):
+            count += 1
+            tags = self._table_metric_tags(table)
+            for metric, column in TABLE_MONOTONIC_METRICS:
+                self._monotonic_count(metric, table.get(column), tags=tags)
+
+        self.gauge(self.m('table.count'), count, tags=self._tags)
+
+    def query_index_metrics(self) -> None:
+        if not self._config.collect_index_metrics:
+            return
+
+        query = queries.INDEX_METRICS_TABLE.format(limit=_positive_limit(self._config.index_metrics_limit, 1000))
+        for index in self.iter_rows(query, ibm_db.fetch_assoc):
+            tags = self._index_metric_tags(index)
+            for metric, column in INDEX_MONOTONIC_METRICS:
+                self._monotonic_count(metric, index.get(column), tags=tags)
+            for metric, column in INDEX_GAUGE_METRICS:
+                self._gauge(metric, index.get(column), tags=tags)
+
+    def query_connection_metrics(self) -> None:
+        if not self._config.collect_connection_metrics:
+            return
+
+        count = 0
+        query = queries.CONNECTION_METRICS_TABLE.format(
+            limit=_positive_limit(self._config.connection_metrics_limit, 300)
+        )
+        for connection in self.iter_rows(query, ibm_db.fetch_assoc):
+            count += 1
+            tags = self._connection_metric_tags(connection)
+            for metric, column in CONNECTION_MONOTONIC_METRICS:
+                self._monotonic_count(metric, connection.get(column), tags=tags)
+            for metric, column in CONNECTION_GAUGE_METRICS:
+                self._gauge(metric, connection.get(column), tags=tags)
+
+        self.gauge(self.m('connection.count'), count, tags=self._tags)
+
+    def query_fcm_metrics(self) -> None:
+        if not self._config.collect_fcm_metrics:
+            return
+
+        for fcm in self.iter_rows(queries.FCM_TABLE, ibm_db.fetch_assoc):
+            tags = self._member_tags(fcm)
+            for metric, column in FCM_MONOTONIC_METRICS:
+                self._monotonic_count(metric, fcm.get(column), tags=tags)
+            for metric, column in FCM_GAUGE_METRICS:
+                self._gauge(metric, fcm.get(column), tags=tags)
+
+    def query_fcm_connection_metrics(self) -> None:
+        if not self._config.collect_fcm_connection_metrics:
+            return
+
+        for connection in self.iter_rows(queries.FCM_CONNECTION_TABLE, ibm_db.fetch_assoc):
+            tags = self._fcm_connection_tags(connection)
+            for metric, column in FCM_CONNECTION_MONOTONIC_METRICS:
+                self._monotonic_count(metric, connection.get(column), tags=tags)
+
+    def query_cf_metrics(self) -> None:
+        if not self._config.collect_cf_metrics:
+            return
+
+        for database in self.iter_rows(queries.CF_DATABASE_TABLE, ibm_db.fetch_assoc):
+            tags = self._member_tags(database)
+            for metric, column in CF_DATABASE_MONOTONIC_METRICS:
+                self._monotonic_count(metric, database.get(column), tags=tags)
+
+        count = 0
+        for cf in self.iter_rows(queries.CF_TABLE, ibm_db.fetch_assoc):
+            count += 1
+            tags = self._cf_tags(cf)
+            for metric, column in CF_GAUGE_METRICS:
+                self._gauge(metric, cf.get(column), tags=tags)
+            state_tags = list(tags)
+            self._add_tag(state_tags, 'state', cf.get('state'))
+            self.gauge(self.m('cf.state'), 1, tags=state_tags)
+
+        self.gauge(self.m('cf.count'), count, tags=self._tags)
+
+        for command in self.iter_rows(queries.CF_CMD_TABLE, ibm_db.fetch_assoc):
+            tags = self._cf_cmd_tags(command)
+            for metric, column in CF_CMD_MONOTONIC_METRICS:
+                self._monotonic_count(metric, command.get(column), tags=tags)
+
+        for wait in self.iter_rows(queries.CF_WAIT_TABLE, ibm_db.fetch_assoc):
+            tags = self._cf_cmd_tags(wait)
+            for metric, column in CF_WAIT_MONOTONIC_METRICS:
+                self._monotonic_count(metric, wait.get(column), tags=tags)
+
+    def query_group_bufferpool_metrics(self) -> None:
+        if not self._config.collect_group_bufferpool_metrics:
+            return
+
+        for group_bufferpool in self.iter_rows(queries.GROUP_BUFFERPOOL_TABLE, ibm_db.fetch_assoc):
+            tags = self._member_tags(group_bufferpool)
+            for metric, column in GROUP_BUFFERPOOL_MONOTONIC_METRICS:
+                self._monotonic_count(metric, group_bufferpool.get(column), tags=tags)
+
     def query_custom(self):
         for custom_query in self._custom_queries:
             metric_prefix = custom_query.get('metric_prefix')
@@ -1199,6 +1416,58 @@ class IbmDb2Check(DatabaseCheck):
         tags.extend(self._tags)
         return tags
 
+    def _table_metric_tags(self, table: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'schema', table.get('tabschema'))
+        self._add_tag(tags, 'table', table.get('tabname'))
+        self._add_tag(tags, 'member', table.get('member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _index_metric_tags(self, index: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'schema', index.get('tabschema'))
+        self._add_tag(tags, 'table', index.get('tabname'))
+        self._add_tag(tags, 'index_schema', index.get('indschema'))
+        self._add_tag(tags, 'index', index.get('indname') or index.get('iid'))
+        self._add_tag(tags, 'member', index.get('member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _connection_metric_tags(self, connection: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'application_handle', connection.get('application_handle'))
+        self._add_tag(tags, 'application_name', connection.get('application_name'))
+        self._add_tag(tags, 'user', connection.get('session_auth_id'))
+        self._add_tag(tags, 'client_hostname', connection.get('client_hostname'))
+        self._add_tag(tags, 'client_applname', connection.get('client_applname'))
+        self._add_tag(tags, 'workload_state', connection.get('workload_occurrence_state'))
+        self._add_tag(tags, 'member', connection.get('member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _fcm_connection_tags(self, connection: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'member', connection.get('member'))
+        self._add_tag(tags, 'remote_member', connection.get('remote_member'))
+        tags.extend(self._tags)
+        return tags
+
+    def _cf_tags(self, cf: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'cf_id', cf.get('cf_id'))
+        self._add_tag(tags, 'cf_hostname', cf.get('host_name'))
+        tags.extend(self._tags)
+        return tags
+
+    def _cf_cmd_tags(self, command: dict[str, object]) -> list[str]:
+        tags = []
+        self._add_tag(tags, 'cf_id', command.get('cf_id'))
+        self._add_tag(tags, 'cf_cmd_name', command.get('cf_cmd_name'))
+        self._add_tag(tags, 'member', command.get('member'))
+        tags.extend(self._tags)
+        return tags
+
     def _submit_wlm_metrics(self, row: dict[str, object], tags: list[str]) -> None:
         for metric, column in WLM_MONOTONIC_METRICS:
             self._monotonic_count(metric, row.get(column), tags=tags)
@@ -1243,3 +1512,14 @@ class IbmDb2Check(DatabaseCheck):
     def _monotonic_count(self, metric, value, tags):
         if value is not None:
             self.monotonic_count(self.m(metric), value, tags=tags)
+
+
+def _positive_limit(value: object, default: int) -> int:
+    try:
+        limit = int(value)
+    except (TypeError, ValueError):
+        return default
+
+    if limit <= 0:
+        return default
+    return limit

@@ -802,6 +802,252 @@ def test_query_container_metrics_disabled(instance: dict[str, Any]) -> None:
     check.iter_rows.assert_not_called()
 
 
+def test_query_table_metrics_disabled(instance: dict[str, Any]) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.iter_rows = mock.Mock()
+
+    check.query_table_metrics()
+
+    check.iter_rows.assert_not_called()
+
+
+def test_query_table_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_table_metrics'] = True
+    instance['table_metrics_limit'] = 12
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.TABLE_METRICS_TABLE_COLUMNS)
+    row.update(
+        {
+            'tabschema': 'DB2INST1',
+            'tabname': 'ORDERS',
+            'member': 0,
+            'table_scans': 2,
+            'rows_read': 3,
+            'object_data_l_reads': 4,
+            'object_data_p_reads': 5,
+            'lock_escals': 6,
+        }
+    )
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_table_metrics()
+
+    tags = ['schema:db2inst1', 'table:orders', 'member:0', 'db:datadog', 'foo:bar']
+    assert 'FETCH FIRST 12 ROWS ONLY' in check.iter_rows.call_args[0][0]
+    aggregator.assert_metric('ibm_db2.table.scans', value=2, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.table.rows_read', value=3, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        'ibm_db2.table.data.reads.logical', value=4, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric(
+        'ibm_db2.table.data.reads.physical', value=5, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric(
+        'ibm_db2.table.lock_escalations', value=6, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric('ibm_db2.table.count', value=1, tags=['db:datadog', 'foo:bar'])
+
+
+def test_query_index_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_index_metrics'] = True
+    instance['index_metrics_limit'] = 34
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.INDEX_METRICS_TABLE_COLUMNS)
+    row.update(
+        {
+            'tabschema': 'DB2INST1',
+            'tabname': 'ORDERS',
+            'indschema': 'DB2INST1',
+            'indname': 'ORDERS_IDX',
+            'member': 0,
+            'index_scans': 2,
+            'index_only_scans': 3,
+            'object_index_l_reads': 4,
+            'object_index_p_reads': 5,
+            'nleaf': 6,
+            'nlevels': 7,
+        }
+    )
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_index_metrics()
+
+    tags = [
+        'schema:db2inst1',
+        'table:orders',
+        'index_schema:db2inst1',
+        'index:orders_idx',
+        'member:0',
+        'db:datadog',
+        'foo:bar',
+    ]
+    assert 'FETCH FIRST 34 ROWS ONLY' in check.iter_rows.call_args[0][0]
+    aggregator.assert_metric('ibm_db2.index.scans', value=2, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.index.only_scans', value=3, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.index.reads.logical', value=4, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.index.reads.physical', value=5, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.index.leaf_pages', value=6, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.index.levels', value=7, tags=tags, metric_type=aggregator.GAUGE)
+
+
+def test_query_connection_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_connection_metrics'] = True
+    instance['connection_metrics_limit'] = 56
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.CONNECTION_METRICS_TABLE_COLUMNS)
+    row.update(
+        {
+            'application_handle': 123,
+            'application_name': 'db2bp',
+            'session_auth_id': 'DB2INST1',
+            'client_hostname': 'app.example.com',
+            'client_applname': 'orders-api',
+            'workload_occurrence_state': 'UOWEXEC',
+            'member': 0,
+            'total_app_commits': 2,
+            'total_app_rollbacks': 3,
+            'rows_read': 4,
+            'rows_returned': 5,
+            'num_locks_held': 6,
+            'num_locks_waiting': 7,
+        }
+    )
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_connection_metrics()
+
+    tags = [
+        'application_handle:123',
+        'application_name:db2bp',
+        'user:db2inst1',
+        'client_hostname:app.example.com',
+        'client_applname:orders-api',
+        'workload_state:uowexec',
+        'member:0',
+        'db:datadog',
+        'foo:bar',
+    ]
+    assert 'FETCH FIRST 56 ROWS ONLY' in check.iter_rows.call_args[0][0]
+    aggregator.assert_metric('ibm_db2.connection.commits', value=2, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.connection.rollbacks', value=3, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.connection.rows_read', value=4, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        'ibm_db2.connection.rows_returned', value=5, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric('ibm_db2.connection.locks_held', value=6, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.connection.locks_waiting', value=7, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.connection.count', value=1, tags=['db:datadog', 'foo:bar'])
+
+
+def test_query_fcm_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_fcm_metrics'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.FCM_TABLE_COLUMNS)
+    row.update(
+        {
+            'member': 0,
+            'buff_free': 2,
+            'ch_free': 3,
+            'fcm_send_volume': 4,
+            'fcm_recv_volume': 5,
+            'fcm_tq_recv_wait_time': 6,
+        }
+    )
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_fcm_metrics()
+
+    tags = ['member:0', 'db:datadog', 'foo:bar']
+    aggregator.assert_metric('ibm_db2.fcm.buffers.free', value=2, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.fcm.channels.free', value=3, tags=tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.fcm.send_volume', value=4, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.fcm.recv_volume', value=5, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        'ibm_db2.fcm.tq.recv_wait_time', value=6, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+
+
+def test_query_fcm_connection_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_fcm_connection_metrics'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.FCM_CONNECTION_TABLE_COLUMNS)
+    row.update({'member': 0, 'remote_member': 1, 'total_bytes_sent': 2, 'total_bytes_received': 3})
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_fcm_connection_metrics()
+
+    tags = ['member:0', 'remote_member:1', 'db:datadog', 'foo:bar']
+    aggregator.assert_metric(
+        'ibm_db2.fcm.connection.bytes_sent', value=2, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric(
+        'ibm_db2.fcm.connection.bytes_received', value=3, tags=tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+
+
+def test_query_cf_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_cf_metrics'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    database_row = row_from_columns(queries.CF_DATABASE_TABLE_COLUMNS)
+    database_row.update({'member': 0, 'cf_wait_time': 2, 'cf_waits': 3})
+    cf_row = row_from_columns(queries.CF_TABLE_COLUMNS)
+    cf_row.update(
+        {
+            'cf_id': 128,
+            'host_name': 'cf.example.com',
+            'state': 'PRIMARY',
+            'current_cf_gbp_size': 4,
+            'current_cf_lock_size': 5,
+            'current_cf_mem_size': 6,
+            'target_cf_mem_size': 7,
+        }
+    )
+    command_row = row_from_columns(queries.CF_CMD_TABLE_COLUMNS)
+    command_row.update({'cf_id': 128, 'cf_cmd_name': 'READ', 'total_cf_requests': 8, 'total_cf_cmd_time_micro': 9})
+    wait_row = row_from_columns(queries.CF_WAIT_TABLE_COLUMNS)
+    wait_row.update({'member': 0, 'cf_id': 128, 'cf_cmd_name': 'READ', 'total_cf_wait_time_micro': 10})
+    check.iter_rows = mock.Mock(
+        side_effect=[iter([database_row]), iter([cf_row]), iter([command_row]), iter([wait_row])]
+    )
+
+    check.query_cf_metrics()
+
+    member_tags = ['member:0', 'db:datadog', 'foo:bar']
+    cf_tags = ['cf_id:128', 'cf_hostname:cf.example.com', 'db:datadog', 'foo:bar']
+    command_tags = ['cf_id:128', 'cf_cmd_name:read', 'db:datadog', 'foo:bar']
+    wait_tags = ['cf_id:128', 'cf_cmd_name:read', 'member:0', 'db:datadog', 'foo:bar']
+    aggregator.assert_metric('ibm_db2.cf.wait_time', value=2, tags=member_tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.cf.waits', value=3, tags=member_tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.cf.gbp.size', value=4, tags=cf_tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.cf.lock.size', value=5, tags=cf_tags, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric('ibm_db2.cf.count', value=1, tags=['db:datadog', 'foo:bar'])
+    aggregator.assert_metric('ibm_db2.cf.state', value=1, metric_type=aggregator.GAUGE)
+    aggregator.assert_metric_has_tag('ibm_db2.cf.state', 'state:primary')
+    aggregator.assert_metric(
+        'ibm_db2.cf.cmd.requests', value=8, tags=command_tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+    aggregator.assert_metric('ibm_db2.cf.cmd.time', value=9, tags=command_tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric(
+        'ibm_db2.cf.cmd.wait_time', value=10, tags=wait_tags, metric_type=aggregator.MONOTONIC_COUNT
+    )
+
+
+def test_query_group_bufferpool_metrics(instance: dict[str, Any], aggregator: Any) -> None:
+    instance['collect_group_bufferpool_metrics'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    row = row_from_columns(queries.GROUP_BUFFERPOOL_TABLE_COLUMNS)
+    row.update({'member': 0, 'num_gbp_full': 2, 'castout_pages': 3, 'gbp_l_reads': 4, 'gbp_p_reads': 5})
+    check.iter_rows = mock.Mock(return_value=iter([row]))
+
+    check.query_group_bufferpool_metrics()
+
+    tags = ['member:0', 'db:datadog', 'foo:bar']
+    aggregator.assert_metric('ibm_db2.gbp.full', value=2, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.gbp.castouts', value=3, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.gbp.reads.logical', value=4, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+    aggregator.assert_metric('ibm_db2.gbp.reads.physical', value=5, tags=tags, metric_type=aggregator.MONOTONIC_COUNT)
+
+
 def test_query_transaction_log_expanded_metrics(instance: dict[str, Any], aggregator: Any) -> None:
     check = IbmDb2Check('ibm_db2', {}, [instance])
     row = row_from_columns(queries.TRANSACTION_LOG_TABLE_COLUMNS)
