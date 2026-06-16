@@ -16,9 +16,9 @@ def mount_dir(tmp_path, monkeypatch):
 
 @pytest.fixture
 def write_requirements(mount_dir):
-    """Write a single requirements.in line into the mounted dir."""
-    def _write(pin_line: str) -> None:
-        (mount_dir / 'requirements.in').write_text(f'{pin_line}\n', encoding='utf-8')
+    """Write requirements.in lines into the mounted dir."""
+    def _write(*pin_lines: str) -> None:
+        (mount_dir / 'requirements.in').write_text('\n'.join(pin_lines) + '\n', encoding='utf-8')
 
     return _write
 
@@ -59,6 +59,40 @@ def test_noop_when_env_unset(mount_dir, monkeypatch):
     # MOUNT_DIR points at an empty dir — no requirements.in present
     monkeypatch.delenv('CONFLUENT_KAFKA_VERSION', raising=False)
     build_wheels.assert_kafka_version_matches()
+
+
+def test_marker_aware_pin_selection_uses_windows_pin(write_requirements, monkeypatch):
+    write_requirements(
+        'confluent-kafka==2.13.1; sys_platform == "darwin"',
+        'confluent-kafka==2.13.2; sys_platform == "win32"',
+    )
+    monkeypatch.setenv('CONFLUENT_KAFKA_VERSION', '2.13.2')
+
+    build_wheels.assert_kafka_version_matches()
+
+
+def test_marker_aware_pin_selection_aborts_on_windows_pin_drift(write_requirements, monkeypatch, capsys):
+    write_requirements(
+        'confluent-kafka==2.13.1; sys_platform == "darwin"',
+        'confluent-kafka==2.13.2; sys_platform == "win32"',
+    )
+    monkeypatch.setenv('CONFLUENT_KAFKA_VERSION', '2.13.3')
+
+    with pytest.raises(SystemExit):
+        build_wheels.assert_kafka_version_matches()
+    _assert_aborts_with(capsys, 'disagrees.*2\\.13\\.2')
+
+
+def test_aborts_on_multiple_applicable_windows_pins(write_requirements, monkeypatch, capsys):
+    write_requirements(
+        'confluent-kafka==2.13.1',
+        'confluent-kafka==2.13.2; sys_platform == "win32"',
+    )
+    monkeypatch.setenv('CONFLUENT_KAFKA_VERSION', '2.13.2')
+
+    with pytest.raises(SystemExit):
+        build_wheels.assert_kafka_version_matches()
+    _assert_aborts_with(capsys, 'multiple Windows confluent-kafka pins')
 
 
 def test_aborts_when_requirements_file_missing(mount_dir, monkeypatch, capsys):
