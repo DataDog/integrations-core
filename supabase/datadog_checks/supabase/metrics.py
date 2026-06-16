@@ -220,6 +220,32 @@ PRIVELEGED_METRICS = {
     'runtime_uptime_milliseconds': {'name': 'runtime.uptime_milliseconds', 'type': 'time_elapsed'},
     'storage_storage_size_mb': 'storage.storage_size',
     'supabase_usage_metrics_user_queries': 'usage_metrics.user_queries',
+    'supavisor_client_connection_duration': 'supavisor.client.connection.duration',
+    'supavisor_client_connection_lifetime_ms': 'supavisor.client.connection.lifetime_ms',
+    'supavisor_client_handler_started_count': 'supavisor.client_handler.started_count',
+    'supavisor_client_handler_state_duration': 'supavisor.client_handler.state.duration',
+    'supavisor_client_handler_stopped_count': 'supavisor.client_handler.stopped_count',
+    'supavisor_client_joins_fail': 'supavisor.client.joins.fail',
+    'supavisor_client_joins_ok': 'supavisor.client.joins.ok',
+    'supavisor_client_network_recv': 'supavisor.client.network.recv',
+    'supavisor_client_network_send': 'supavisor.client.network.send',
+    'supavisor_client_queries_count': 'supavisor.client.queries_count',
+    'supavisor_client_query_duration': 'supavisor.client.query.duration',
+    'supavisor_connections_active': 'supavisor.connections.active',
+    'supavisor_db_handler_db_connection_count': 'supavisor.db_handler.db_connection_count',
+    'supavisor_db_handler_prepared_statements_evicted_count': (
+        'supavisor.db_handler.prepared_statements_evicted_count'
+    ),
+    'supavisor_db_handler_started_count': 'supavisor.db_handler.started_count',
+    'supavisor_db_handler_stopped_count': 'supavisor.db_handler.stopped_count',
+    'supavisor_db_network_recv': 'supavisor.db.network.recv',
+    'supavisor_db_network_send': 'supavisor.db.network.send',
+    'supavisor_pool_checkout_duration_local': 'supavisor.pool.checkout.duration.local',
+    'supavisor_pool_checkout_duration_remote': 'supavisor.pool.checkout.duration.remote',
+    'supavisor_pool_connections_checked_out': 'supavisor.pool.connections.checked_out',
+    'supavisor_pool_connections_idle': 'supavisor.pool.connections.idle',
+    'supavisor_proxy_connections_active': 'supavisor.proxy.connections.active',
+    'supavisor_tenants_active': 'supavisor.tenants.active',
 }
 
 STORAGE_API_METRICS = [

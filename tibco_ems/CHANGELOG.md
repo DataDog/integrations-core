@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 2.6.0 / 2026-06-09
+
+***Added***:
+
+* Add new config ``use_ssl`` to connect via SSL instead of TCP. ([#23732](https://github.com/DataDog/integrations-core/pull/23732))
+
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 2.4.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

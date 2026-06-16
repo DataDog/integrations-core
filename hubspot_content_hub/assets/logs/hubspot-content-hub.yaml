@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: hubspot-content-hub
 metric_id: hubspot-content-hub
 backend_only: false

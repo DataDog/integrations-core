@@ -1,0 +1,42 @@
+{
+  "id": "labFastSuccess",
+  "versionId": "10000000-0000-0000-0000-000000000001",
+  "name": "Lab Fast Success",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "lab/fast",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "11111111-0000-0000-0000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "lab-fast-aaaa-bbbb-cccc-000000000001"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "1", "name": "scenario", "value": "fast", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "22222222-0000-0000-0000-000000000001",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Set", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

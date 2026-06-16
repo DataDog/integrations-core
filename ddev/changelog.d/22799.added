@@ -1,1 +1,0 @@
-Add GitHub Actions workflow to automatically create a PR updating `.gitlab/build_agent.yaml` to point to the release branch once it exists in datadog-agent.

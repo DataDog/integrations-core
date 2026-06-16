@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.ibm_mq import metrics
 from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
-from datadog_checks.ibm_mq.utils import normalize_desc_tag
+from datadog_checks.ibm_mq.utils import decode_mq_description, normalize_desc_tag
 
 try:
     import pymqi
@@ -53,7 +53,7 @@ class ChannelMetricCollector(object):
 
     def _add_channel_description_tag(self, channel_info, channel_tags):
         # Add channel description as a tag, normalizing if configured.
-        channel_desc = to_string(channel_info[pymqi.CMQCFC.MQCACH_DESC]).strip()
+        channel_desc = decode_mq_description(channel_info[pymqi.CMQCFC.MQCACH_DESC], self.log).strip()
         if channel_desc:
             if self.config.normalize_description_tags:
                 channel_desc = normalize_desc_tag(channel_desc)

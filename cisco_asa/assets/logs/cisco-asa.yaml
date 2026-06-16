@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: cisco-asa
 metric_id: cisco-asa
 backend_only: false

@@ -18,6 +18,7 @@
       "Category::Log Collection",
       "Category::Network",
       "Category::Orchestration",
+      "Category::SIEM",
       "Supported OS::Linux",
       "Supported OS::macOS",
       "Offering::Integration"

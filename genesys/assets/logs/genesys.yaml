@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: genesys
 metric_id: genesys
 backend_only: false

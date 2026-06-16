@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: "zero-networks"
 metric_id: "zero-networks"
 backend_only: false

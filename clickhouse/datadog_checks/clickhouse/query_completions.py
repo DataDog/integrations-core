@@ -17,6 +17,7 @@ except ImportError:
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.clickhouse.explain_plans import ClickhouseExplainPlans
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
 
 # Query to fetch individual completed queries from system.query_log.
@@ -42,6 +43,8 @@ SELECT
     result_rows,
     result_bytes,
     memory_usage,
+    ProfileEvents['OSCPUVirtualTimeMicroseconds'] as cpu_us,
+    ProfileEvents['OSCPUWaitMicroseconds'] as cpu_wait_us,
     query_start_time_microseconds,
     event_time_microseconds,
     query_id,
@@ -85,6 +88,8 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         # Maximum number of samples to collect per run
         self._max_samples_per_collection = int(config.max_samples_per_collection)
 
+        self._explain_plans = ClickhouseExplainPlans(check, config, self._execute_query)
+
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_and_submit(self):
         """
@@ -105,17 +110,25 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 self._log.debug("No new completed queries")
                 return
 
-            # Step 2: Apply rate limiting and create payload
+            # Step 2: Collect and submit explain plans (independent of completion rate limiting)
+            try:
+                for plan_event in self._explain_plans._collect_plans(rows, self._tags_no_db or []):
+                    plan_data = json.dumps(plan_event, default=default_json_event_encoding)
+                    self._check.database_monitoring_query_sample(plan_data)
+            except Exception:
+                self._log.exception("Failed to collect explain plans")
+
+            # Step 3: Apply rate limiting and create payload
             payload = self._create_batched_payload(rows)
 
             if not payload or not payload.get('clickhouse_query_completions'):
                 self._log.debug("No query completions after rate limiting")
                 return
 
-            # Step 3: Submit payload
+            # Step 4: Submit payload
             payload_data = json.dumps(payload, default=default_json_event_encoding)
             num_completions = len(payload.get('clickhouse_query_completions', []))
-            self._log.info(
+            self._log.debug(
                 "Submitting query completions payload: %d bytes, %d completions",
                 len(payload_data),
                 num_completions,
@@ -123,7 +136,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             self._check.database_monitoring_query_activity(payload_data)
 
             if self._current_checkpoint_microseconds is not None:
-                self._log.info(
+                self._log.debug(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
 
@@ -162,7 +175,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
             rows = self._execute_query(query, parameters=params)
 
-            self._log.info(
+            self._log.debug(
                 "Loaded %d completed queries from %s [%s]",
                 len(rows),
                 query_log_table,
@@ -189,6 +202,8 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     result_rows_count,
                     result_bytes,
                     memory_usage,
+                    cpu_us,
+                    cpu_wait_us,
                     query_start_time_microseconds,
                     event_time_microseconds,
                     query_id,
@@ -206,6 +221,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
                 row_dict = {
                     'normalized_query_hash': str(normalized_query_hash),
+                    'hostname': str(server_node) if server_node else '',
                     'query': str(query_text) if query_text else '',
                     'user': str(user) if user else '',
                     'query_type': str(query_type) if query_type else '',
@@ -219,6 +235,8 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     'result_rows': int(result_rows_count) if result_rows_count else 0,
                     'result_bytes': int(result_bytes) if result_bytes else 0,
                     'memory_usage': int(memory_usage) if memory_usage else 0,
+                    'cpu_us': int(cpu_us) if cpu_us else 0,
+                    'cpu_wait_us': int(cpu_wait_us) if cpu_wait_us else 0,
                     'query_start_time_microseconds': self.to_microseconds(query_start_time_microseconds),
                     'event_time_microseconds': event_time_int,
                     'query_id': str(query_id) if query_id else '',
@@ -238,7 +256,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             return result_rows
 
         except Exception as e:
-            self._log.exception("Failed to load completed queries from system.query_log: %s", e)
+            self._log.warning("Failed to load completed queries from system.query_log: %s", e)
 
             self._check.count(
                 "dd.clickhouse.query_completions.error",
@@ -250,22 +268,6 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Re-raise to let outer handler log the error.
             # Checkpoint will still advance to avoid duplicates on retry.
             raise
-
-    def _normalize_query(self, row):
-        """
-        Normalize and obfuscate a single query row
-        """
-        obfuscation_result = self._obfuscate_query(row['query'])
-        if obfuscation_result is None:
-            return None
-
-        row['statement'] = obfuscation_result['query']
-        row['query_signature'] = obfuscation_result['query_signature']
-        row['dd_tables'] = obfuscation_result['dd_tables']
-        row['dd_commands'] = obfuscation_result['dd_commands']
-        row['dd_comments'] = obfuscation_result['dd_comments']
-
-        return row
 
     def _create_batched_payload(self, rows):
         """
@@ -304,10 +306,13 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 'result_rows': row.get('result_rows', 0),
                 'result_bytes': row.get('result_bytes', 0),
                 'memory_usage': row.get('memory_usage', 0),
+                'cpu_us': row.get('cpu_us', 0),
+                'cpu_wait_us': row.get('cpu_wait_us', 0),
                 'query_start_time_microseconds': row.get('query_start_time_microseconds', 0),
                 'event_time_microseconds': row.get('event_time_microseconds', 0),
                 'initial_query_id': row.get('initial_query_id', ''),
                 'is_initial_query': row.get('is_initial_query', True),
+                'hostname': row.get('hostname', ''),
                 'metadata': {
                     'tables': row.get('dd_tables'),
                     'commands': row.get('dd_commands'),

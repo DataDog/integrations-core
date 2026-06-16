@@ -19,8 +19,15 @@ E2E_METADATA = {
     'start_commands': [
         'apt-get update',
         'apt-get install -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -y docker.io',
+        # Remove default binary to ensure the check uses the embedded one
+        'rm -f /usr/local/sbin/nfsiostat',
     ],
     'docker_volumes': ['/var/run/docker.sock:/var/run/docker.sock'],
+}
+
+CONFIG_BUNDLED_BINARY = {
+    "init_config": {},
+    "instances": [{}],
 }
 
 METRICS = [

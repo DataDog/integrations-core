@@ -14,7 +14,10 @@ class KafkaActionsConfig:
         self.log = log
 
         self.remote_config_id = instance.get('remote_config_id')
-        self.kafka_connect_str = instance.get('kafka_connect_str')
+        kafka_connect_str = instance.get('kafka_connect_str')
+        if isinstance(kafka_connect_str, list):
+            kafka_connect_str = ','.join(str(s) for s in kafka_connect_str)
+        self.kafka_connect_str = kafka_connect_str
         self.tags = instance.get('tags', [])
 
         # Authentication fields (same pattern as kafka_consumer)
@@ -178,15 +181,15 @@ class KafkaActionsConfig:
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
         value_format = config.get('value_format', 'json')
-        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro']:
+        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
             raise ConfigurationError(
-                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro"
+                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro, raw"
             )
 
         key_format = config.get('key_format', 'json')
-        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro']:
+        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
             raise ConfigurationError(
-                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro"
+                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro, raw"
             )
 
         start_timestamp = config.get('start_timestamp')

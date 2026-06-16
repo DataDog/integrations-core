@@ -89,6 +89,7 @@ def test_statement_metrics_multiple_pgss_rows_single_query_signature(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['query_metrics']['incremental_query_metrics'] = True
     connections = {}
 
@@ -232,6 +233,8 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     connections = {}
 
     def _run_queries():
@@ -339,6 +342,7 @@ def test_wal_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -372,6 +376,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # The query signature matches the normalized query returned by the mock agent and would need to be
     # updated if the normalized query is updated
@@ -395,7 +400,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
                 mock_agent.side_effect = obfuscate_sql
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
-                check.check(dbm_instance)
+                run_one_check(check, cancel=False)
 
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
@@ -409,6 +414,38 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     assert len(matching) == 1
     row = matching[0]
     assert row['calls'] == 2
+
+
+def test_obfuscate_sql_options(aggregator, integration_check, dbm_instance, datadog_agent):
+    """Verify obfuscate_sql is called with dbms=postgresql for both metrics and samples."""
+    dbm_instance['collect_schemas'] = {'enabled': False}
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # Unconditionally verify both classes have the correct options set at init time,
+    # independent of whether the DB produces any queries to obfuscate.
+    for name, obj in [('statement_metrics', check.statement_metrics), ('statement_samples', check.statement_samples)]:
+        opts = json.loads(obj._obfuscate_options)
+        assert opts.get('dbms') == 'postgresql', f"{name}: missing dbms=postgresql in obfuscation options"
+        assert opts.get('return_json_metadata') is True, (
+            f"{name}: missing return_json_metadata=True in obfuscation options"
+        )
+
+    captured_options = []
+
+    def obfuscate_sql(query, options=None):
+        if options is not None:
+            captured_options.append(json.loads(options))
+        return json.dumps({'query': query, 'metadata': {}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_one_check(check, cancel=False)
+
+    assert captured_options, "obfuscate_sql was never called with options"
+    for opts in captured_options:
+        assert opts.get('dbms') == 'postgresql', f"missing dbms=postgresql in obfuscation options: {opts}"
 
 
 @pytest.fixture
@@ -426,6 +463,7 @@ def dbm_instance(pg_instance):
     pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.2}
     pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 0.2}
     pg_instance['collect_settings'] = {'enabled': False}
+    pg_instance['collect_column_statistics'] = {'enabled': False}
     # Set collection_interval close to 0. This is needed if the test runs the check multiple times.
     # This prevents DBMAsync from skipping job executions, as it is designed
     # to not execute jobs more frequently than their collection period.
@@ -481,6 +519,8 @@ def test_successful_explain(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
+
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -563,6 +603,7 @@ def test_failed_explain_handling(
     # Don't need metrics for this one
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if explain_function_override:
         dbm_instance['query_samples']['explain_function'] = explain_function_override
     check = integration_check(dbm_instance)
@@ -715,6 +756,7 @@ def test_statement_samples_collect(
 ):
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     dbm_instance['dbstrict'] = dbstrict
     dbm_instance['dbname'] = dbname
     dbm_instance['ignore_databases'] = ignore_databases
@@ -830,6 +872,8 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
     query = '''
@@ -911,6 +955,7 @@ def test_statement_reported_hostname(
     expected_hostname,
 ):
     dbm_instance['reported_hostname'] = reported_hostname
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     check = integration_check(dbm_instance)
 
@@ -1026,6 +1071,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1205,7 +1251,7 @@ def test_activity_reported_hostname(
     check = integration_check(dbm_instance)
     check._connect()
 
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     run_one_check(check)
 
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -1353,6 +1399,7 @@ def test_statement_run_explain_errors(
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1405,6 +1452,7 @@ def test_statement_run_explain_parameterized_queries(
     dbm_instance['query_activity']['enabled'] = False
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['query_samples']['explain_parameterized_queries'] = True
+    dbm_instance['collect_schemas'] = {'enabled': False}
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1468,7 +1516,7 @@ def test_async_job_enabled(
     dbm_instance['query_metrics'] = {'enabled': statement_metrics_enabled, 'run_sync': False}
     check = integration_check(dbm_instance)
     check._connect()
-    run_one_check(check)
+    run_one_check(check, cancel=False)
     if statement_samples_enabled or statement_activity_enabled:
         assert check.statement_samples._job_loop_future is not None
     else:
@@ -1701,8 +1749,8 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     check = integration_check(dbm_instance)
     check._connect()
     run_one_check(check)
-    assert not check.statement_samples._job_loop_future.running(), "samples thread should be stopped"
-    assert not check.statement_metrics._job_loop_future.running(), "metrics thread should be stopped"
+    assert check.statement_samples._job_loop_future is None, "samples future should be cleaned up after cancel"
+    assert check.statement_metrics._job_loop_future is None, "metrics future should be cleaned up after cancel"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
     assert check.db_pool.pools.get(dbm_instance['dbname']) is None, "db connection should be gone"
@@ -1762,6 +1810,7 @@ def test_statement_metrics_database_errors(
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     check = integration_check(dbm_instance)
 
     with mock.patch(
@@ -1828,6 +1877,50 @@ def test_statement_metrics_database_extension_errors(
     assert check.warnings == expected_warnings
 
 
+def test_statement_metrics_attributes_undefined_table_to_not_loaded_when_spl_missing(
+    aggregator, integration_check, dbm_instance
+):
+    """When pg_stat_statements is not in shared_preload_libraries, an `UndefinedTable` error on
+    the view should be attributed to `pg_stat_statements_not_loaded` (SPL fix), not
+    `pg_stat_statements_not_created` (which would tell the user to `CREATE EXTENSION`, a command
+    that fails until SPL is fixed and the server restarted)."""
+    dbm_instance['query_samples']['enabled'] = False
+    dbm_instance['query_activity']['enabled'] = False
+    dbm_instance.setdefault('query_metrics', {})['incremental_query_metrics'] = False
+    check = integration_check(dbm_instance)
+
+    # Override _load_pg_settings so the test-postgres (which has pg_stat_statements in SPL) doesn't
+    # overwrite our fake settings on connect.
+    def fake_load(self, db):
+        self.pg_settings.clear()
+        self.pg_settings['shared_preload_libraries'] = 'pgaudit'
+
+    err = psycopg.errors.UndefinedTable('relation "pg_stat_statements" does not exist')
+    with (
+        mock.patch(
+            'datadog_checks.postgres.statements.PostgresStatementMetrics._get_pg_stat_statements_columns',
+            return_value=[],
+            side_effect=err,
+        ),
+        mock.patch('datadog_checks.postgres.postgres.PostgreSql._load_pg_settings', fake_load),
+    ):
+        run_one_check(check)
+
+    expected_tags = _get_expected_tags(
+        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+    ) + ['error:database-UndefinedTable-pg_stat_statements_not_loaded']
+
+    aggregator.assert_metric(
+        'dd.postgres.statement_metrics.error', value=1.0, count=1, tags=expected_tags, hostname='stubbed.hostname'
+    )
+    assert check.warnings == [
+        'Unable to collect statement metrics because pg_stat_statements extension is not loaded in '
+        "database 'datadog_test'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+        'troubleshooting#pg-stat-statements-not-loaded for more details\n'
+        'code=pg-stat-statements-not-loaded dbname=datadog_test host=stubbed.hostname',
+    ]
+
+
 @pytest.mark.parametrize(
     "pg_stat_statements_max_threshold,expected_warnings",
     [
@@ -1867,6 +1960,7 @@ def test_pg_stat_statements_max_warning(
 def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_replica2):
     dbm_instance_replica2['query_samples'] = {'enabled': False}
     dbm_instance_replica2['query_activity'] = {'enabled': False}
+    dbm_instance_replica2['collect_schemas'] = {'enabled': False}
     with _get_superconn(dbm_instance_replica2) as superconn:
         with superconn.cursor() as cur:
             cur.execute("select pg_stat_statements_reset();")
@@ -1945,6 +2039,7 @@ def test_plan_time_metrics(aggregator, integration_check, dbm_instance):
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
 
     connections = {}
 
@@ -2036,6 +2131,7 @@ def test_metrics_encoding(
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['collect_schemas'] = {'enabled': False}
     # dbm_instance['query_activity']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -2071,6 +2167,7 @@ def test_samples_encoding(
     dbm_instance,
 ):
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['collect_schemas'] = {'enabled': False}
     if POSTGRES_LOCALE == 'C':
         dbm_instance['query_encodings'] = ['latin1', 'utf-8']
     check = integration_check(dbm_instance)

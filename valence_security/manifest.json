@@ -3,7 +3,7 @@
   "app_uuid": "a9265d8a-1531-4f1a-9719-54b03a1f0634",
   "app_id": "valence-security",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -56,6 +56,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
+      "Category::SIEM",
       "Category::Cloud",
       "Offering::Integration",
       "Submitted Data Type::Logs"

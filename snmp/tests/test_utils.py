@@ -57,7 +57,7 @@ def test_oid():
 )
 def test_oid_parse_valid(value, expected_tuple):
     # type: (Any, Tuple[int, ...]) -> None
-    mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
+    mib_view_controller = MibViewController(SnmpEngine().get_mib_builder())
     if callable(value):
         value = value(mib_view_controller)
     assert OID(value).as_tuple() == expected_tuple
@@ -98,7 +98,7 @@ def test_oid_from_unresolved_instance(value, expected_tuple):
     object_type = oid.as_object_type()
 
     # Verify returned ObjectType instance is valid by decoding it.
-    mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
+    mib_view_controller = MibViewController(SnmpEngine().get_mib_builder())
     resolved = object_type.resolveWithMib(mib_view_controller)
     assert OID(resolved).as_tuple() == expected_tuple
 
@@ -118,7 +118,7 @@ def test_oid_mib_symbol(identity, mib, symbol, prefix):
 
     oid = OID(identity)
 
-    mib_view_controller = MibViewController(SnmpEngine().getMibBuilder())
+    mib_view_controller = MibViewController(SnmpEngine().get_mib_builder())
     oid.resolve(mib_view_controller)
 
     mib_symbol = oid.get_mib_symbol()

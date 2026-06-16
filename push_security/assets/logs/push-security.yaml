@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: push-security
 metric_id: push-security
 backend_only: false

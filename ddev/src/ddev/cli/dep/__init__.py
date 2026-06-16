@@ -5,6 +5,7 @@ import click
 
 from ddev.cli.dep.freeze import freeze
 from ddev.cli.dep.pin import pin
+from ddev.cli.dep.promote import promote
 from ddev.cli.dep.sync import sync
 from ddev.cli.dep.updates import updates
 
@@ -16,5 +17,6 @@ def dep():
 
 dep.add_command(freeze)
 dep.add_command(pin)
+dep.add_command(promote)
 dep.add_command(sync)
 dep.add_command(updates)

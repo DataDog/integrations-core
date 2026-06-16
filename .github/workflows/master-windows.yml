@@ -78,8 +78,6 @@ jobs:
       (success() || failure())
     runs-on: ubuntu-latest
     permissions:
-      # needed for codecov, allows the action to get a JWT signed by Github
-      id-token: write
       contents: read
 
     steps:
@@ -92,9 +90,11 @@ jobs:
         path: coverage-reports
         merge-multiple: false
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+    - name: Upload coverage to Datadog
+      if: always()
+      continue-on-error: true
+      uses: DataDog/coverage-upload-github-action@6c4bd935248daa6f0ef94e3e6ba71ad5ad079998 # v1.0.3
       with:
-        use_oidc: true
-        directory: coverage-reports
-        fail_ci_if_error: false
+        api_key: ${{ secrets.DD_API_KEY }}
+        files: coverage-reports
+        format: cobertura

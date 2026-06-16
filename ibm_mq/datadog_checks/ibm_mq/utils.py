@@ -22,6 +22,23 @@ def sanitize_strings(s):
     return s.strip()
 
 
+def decode_mq_description(s: bytes | str, log=None) -> str:
+    """Decode an IBM MQ description field.
+
+    IBM MQ queue managers may return description fields (e.g. MQCACH_DESC, MQCA_Q_DESC)
+    in non-UTF-8 encodings because they are free-form text entered by administrators.
+    Falls back to UTF-8 with replacement characters on decode failure to avoid crashing.
+    """
+    if isinstance(s, bytes):
+        try:
+            return s.decode('utf-8')
+        except UnicodeDecodeError:
+            if log is not None:
+                log.debug("Failed to decode IBM MQ description as UTF-8, falling back to replacement: %r", s)
+            return s.decode('utf-8', errors='replace')
+    return s
+
+
 def normalize_desc_tag(desc):
     """
     Normalize description strings for use as tag values.

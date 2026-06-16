@@ -1839,7 +1839,7 @@
                             "requests": [
                                 {
                                     "aggregator": "last",
-                                    "q": "sum:snmp.ltmNodeAddrNumber{*}"
+                                    "q": "sum:snmp.ltmNodeAddrNumber{$snmp_device,$snmp_host}"
                                 }
                             ],
                             "title": "# Nodes ",

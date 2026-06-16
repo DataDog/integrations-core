@@ -9,7 +9,7 @@ from datadog_checks.base.types import ServiceCheck  # noqa: F401
 from datadog_checks.ibm_mq import metrics
 from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
 from datadog_checks.ibm_mq.metrics import GAUGE
-from datadog_checks.ibm_mq.utils import normalize_desc_tag
+from datadog_checks.ibm_mq.utils import decode_mq_description, normalize_desc_tag
 
 try:
     import pymqi
@@ -41,6 +41,7 @@ class QueueMetricCollector(object):
         self.send_metrics_from_properties = send_metrics_from_properties  # type: Callable[[Dict, Dict, str, List[str]], None]
         self.log = log  # type: logging.LoggerAdapter
         self.user_provided_queues = set(self.config.queues)  # type: Set[str]
+        self.filtered_queues = None
 
     def collect_queue_metrics(self, queue_manager):
         queues = self.discover_queues(queue_manager)
@@ -76,6 +77,8 @@ class QueueMetricCollector(object):
 
     def discover_queues(self, queue_manager):
         # type: (pymqi.QueueManager) -> Set[str]
+        # Clear each run so a config without queue_patterns/queue_regex does not reuse a prior run's set.
+        self.filtered_queues = None
 
         _discover = (
             self._discover_queues_via_names if self.config.auto_discover_queues_via_names else self._discover_queues
@@ -88,6 +91,7 @@ class QueueMetricCollector(object):
         if self.config.queue_patterns:
             for pattern in self.config.queue_patterns:
                 discovered_queues.update(_discover(queue_manager, pattern))
+            self.filtered_queues = discovered_queues
 
         if self.config.queue_regex:
             keep_queues = set()
@@ -99,6 +103,7 @@ class QueueMetricCollector(object):
                 "%s of the %s discovered queues match the queue_regex", len(keep_queues), len(discovered_queues)
             )
             discovered_queues = keep_queues
+            self.filtered_queues = discovered_queues
 
         discovered_queues.update(self.user_provided_queues)
         return discovered_queues
@@ -269,7 +274,7 @@ class QueueMetricCollector(object):
 
                 # Add queue description as tag if enabled
                 if self.config.add_description_tags and pymqi.CMQC.MQCA_Q_DESC in queue_info:
-                    queue_desc = to_string(queue_info[pymqi.CMQC.MQCA_Q_DESC]).strip()
+                    queue_desc = decode_mq_description(queue_info[pymqi.CMQC.MQCA_Q_DESC], self.log).strip()
                     if queue_desc:
                         if self.config.normalize_description_tags:
                             queue_desc = normalize_desc_tag(queue_desc)

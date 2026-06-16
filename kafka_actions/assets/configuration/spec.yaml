@@ -122,6 +122,7 @@ files:
           type: string
           example: aws_msk_iam
           display_default: oidc
+        fleet_configurable: false
       - name: aws_region
         description: |
           AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
@@ -131,6 +132,7 @@ files:
         value:
           type: string
           example: us-west-2
+        fleet_configurable: false
       - name: url
         fleet_configurable: true
         description: |
@@ -157,6 +159,7 @@ files:
           For example, a custom scope like 'kafka' or 'api://default'.
         value:
           type: string
+        fleet_configurable: false
       - name: extensions
         enabled: false
         description: |
@@ -166,6 +169,7 @@ files:
           Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
         value:
           type: string
+        fleet_configurable: false
       - name: tls_ca_cert
         enabled: false
         description: |
@@ -175,6 +179,7 @@ files:
         value:
           type: string
           example: /path/to/oauth_ca_cert.pem
+        fleet_configurable: false
 
     - template: instances/tls
 
@@ -273,7 +278,9 @@ files:
         - name: value_format
           type: string
           description: |
-            Message value format:
+            Message value format.
+
+            Supported formats:
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
             - string: Plain UTF-8 text (use for non-JSON text messages)
@@ -290,10 +297,24 @@ files:
           type: boolean
           description: Whether value uses Schema Registry format
           default: false
+        - name: value_skip_bytes
+          type: integer
+          description: |
+            Number of bytes to drop from the start of the message value before
+            deserialization. Use this to strip a producer-side prefix that
+            kafka_actions doesn't recognize natively — for example a 1-byte
+            version flag, a non-Confluent schema-registry envelope, or a
+            tenant id prepended to every record. Applied before raw / json /
+            bson / protobuf / avro decoding, and before Schema Registry
+            magic-byte detection. Default 0 (no bytes skipped).
+          default: 0
+          example: 1
         - name: key_format
           type: string
           description: |
-            Message key format:
+            Message key format.
+
+            Supported formats:
             - string: Plain UTF-8 text (most common for keys)
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
@@ -308,6 +329,13 @@ files:
           type: boolean
           description: Whether key uses Schema Registry format
           default: false
+        - name: key_skip_bytes
+          type: integer
+          description: |
+            Number of bytes to drop from the start of the message key before
+            deserialization. See value_skip_bytes for details. Default 0.
+          default: 0
+          example: 1
         - name: consumer_group_id
           type: string
           description: |
@@ -411,6 +439,7 @@ files:
           example:
             - retention.bytes
             - compression.type
+      fleet_configurable: false
     
     # ========================================================================
     # Action #4: delete_topic
@@ -436,6 +465,7 @@ files:
           type: string
           description: Topic name to delete
           example: old-orders
+      fleet_configurable: false
     
     # ========================================================================
     # Action #5: delete_consumer_group
@@ -461,6 +491,7 @@ files:
           type: string
           description: Consumer group ID to delete
           example: old-service-v1
+      fleet_configurable: false
     
     # ========================================================================
     # Action #6: update_consumer_group_offsets
@@ -521,6 +552,7 @@ files:
             - topic: orders
               partition: 1
               offset: 1500
+      fleet_configurable: false
     
     # ========================================================================
     # Action #7: produce_message
@@ -578,6 +610,7 @@ files:
             Example: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="
           example:
             source: "ZGF0YWRvZy1hZ2VudA=="
+      fleet_configurable: false
     
     # ========================================================================
     # Schema Registry Configuration
@@ -624,6 +657,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/ca_cert.pem
     - name: schema_registry_tls_cert
       description: |
@@ -632,6 +666,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/client_cert.pem
     - name: schema_registry_tls_key
       description: |
@@ -640,6 +675,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: /path/to/client_key.pem
     - name: schema_registry_oauth_token_provider
       description: |
@@ -679,6 +715,7 @@ files:
           The OAuth scope to request.
         value:
           type: string
+        fleet_configurable: false
       - name: custom_headers
         enabled: false
         description: |
@@ -692,6 +729,7 @@ files:
           type: object
           additionalProperties:
             type: string
+        fleet_configurable: false
       - name: tls_ca_cert
         enabled: false
         description: |
@@ -699,5 +737,6 @@ files:
         value:
           type: string
           example: /path/to/oauth_ca_cert.pem
+        fleet_configurable: false
 
     - template: instances/default

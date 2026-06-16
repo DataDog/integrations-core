@@ -1,0 +1,36 @@
+# Trust policy for the add-milestone workflow in DataDog/integrations-core
+#
+# This policy grants the workflow permission to set a milestone on merged pull
+# requests targeting master or release branches.
+#
+# Naming convention:
+#   self:          Only this repository (DataDog/integrations-core) can use this policy
+#   add-milestone: Grants permissions to update pull request milestones
+#   pull-request:  Intended for workflows triggered by pull_request events
+#
+# Security model:
+#   - Workflow runs on pull_request (closed) events targeting protected branches
+#   - ref restricts to master and protected X.Y.x release branches (protected by org rulesets)
+#   - job_workflow_ref is matched by pattern since PR events reference refs/pull/N/merge
+#
+# Permissions granted:
+#   - pull_requests: write  - Set the milestone on the merged pull request
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.add-milestone.pull-request
+
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:pull_request
+
+claim_pattern:
+  event_name: pull_request
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/add-milestone\.yml@.*
+  ref: refs/heads/(master|\d+\.\d+\.x)
+  repository: DataDog/integrations-core
+
+permissions:
+  pull_requests: write

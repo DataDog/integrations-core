@@ -9,7 +9,8 @@ init_config:
     #
     # service: <SERVICE>
 
-    ## REST API options
+    ## REST API options.
+    ##
     ## Those options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #
@@ -57,7 +58,7 @@ instances:
   - host: <HOSTNAME>
 
     ## @param username - string - required
-    ## The username of the read-only credentials to connect to vCenter
+    ## The username of the read-only credentials to connect to vCenter.
     ## see https://app.datadoghq.com/account/settings#integrations/vsphere
     #
     username: <USERNAME>
@@ -88,9 +89,11 @@ instances:
     # infrastructure_mode: full
 
     ## @param collection_level - integer - optional - default: 1
-    ## A number between 1 and 4 to specify how many metrics will be sent
+    ## A number between 1 and 4 to specify how many metrics will be sent.
+    ##
     ## 1: Only basic metrics - 4: every metric available.
-    ## See https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.html for more details
+    ## See https://code.vmware.com/apis/704/vsphere/vim.PerformanceManager.html for more details.
+    ##
     ## Warning: Depending on the size of the vSphere environment, metric collection can be slow,
     ## very CPU intensive and put pressure on the vCenter Server
     ## If you want more control on the metrics to collect, see `metric_filters`
@@ -98,9 +101,10 @@ instances:
     # collection_level: 1
 
     ## @param collection_type - string - optional - default: realtime
-    ## Should be either 'realtime' or 'historical'
+    ## Should be either 'realtime' or 'historical'.
     ## Use 'realtime' to collect metrics that are about the past hour. Realtime metrics are about Hosts and VMs.
     ## Use 'historical' to collect metrics that are about longer time frames such as a day, week, or month.
+    ##
     ## Historical metrics are about VMs, Datastores, Datacenters and Clusters.
     ## If you want both, we suggest creating an additional instance connecting to the same vCenter
     ## in this configuration file, but you can also set this field to 'both'. This is not recommended
@@ -112,8 +116,9 @@ instances:
     ## Whether or not to pull events data from vCenter.
     ## If you have multiple configuration instances collecting data from the same vCenter server (i.e if you collect
     ## realtime and historical metrics), you usually want to collect events only once.
+    ##
     ## By default this parameter will be 'true' if `collection_type: realtime` and 'false' if
-    ## `collection_type: historical`
+    ## `collection_type: historical`.
     ## If `collect_events_only: true`, this option has no effect and events will be collected.
     #
     # collect_events: true
@@ -169,11 +174,12 @@ instances:
 
     ## @param resource_filters - list of mappings - optional
     ## Each filter in the list is composed of three parameters.
-    ## 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter
-    ## 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
-    ## 'type' is either whitelist (default) or blacklist. If a resource is both whitelisted and blacklisted it will be
+    ##
+    ## - 'resource' is one of vm/host/datastore/datacenter/cluster on which to apply the filter.
+    ## - 'patterns' is a list of matching regex, if any of those matches, the resource will be monitored.
+    ## - 'type' is either whitelist (default) or blacklist. If a resource is both whitelisted and blacklisted it will be
     ##        considered blacklisted.
-    ## 'property' is the kind of property on which to apply the filter and must be one of those values:
+    ## - 'property' is the kind of property on which to apply the filter and must be one of those values:
     ##    - name (default) to filter on the resource name (defined by vCenter)
     ##    - inventory_path to filter on the full inventory path
     ##      (ex: \/<Datacenter_name>\/vm\/<FOLDER_NAME>\/.* for all vms in the folder <FOLDER_NAME>)
@@ -189,10 +195,13 @@ instances:
     ##    - hostname to filter on the ESXi Host name (only valid for if 'resource' equals 'vm')
     ##    - guest_hostname to filter on the VM hostname (only valid for if 'resource' equals 'vm' and
     ##      if VMware tools are installed)
+    ##
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
-    ##         resources do not have realtime metrics
+    ##         resources do not have realtime metrics.
+    ##
     ## Note2: 'host' filters are ignored when collecting historical metrics as this resource does not have
-    ##         historical metrics
+    ##         historical metrics.
+    ##
     ## Note3: If no filters are set for a resource type, all resources of that resource type are collected.
     #
     # resource_filters:
@@ -227,11 +236,14 @@ instances:
     ## @param metric_filters - mapping - optional
     ## For each resource type (vm, host, datastore, datacenter, cluster) collected,
     ## you can choose which metric you want to collect using a list of regex.
+    ##
     ## If you do not specify a regex for the resource, all metrics will be collected.
     ## See https://github.com/DataDog/integrations-core/blob/master/vsphere/datadog_checks/vsphere/metrics.py
     ## for the list of collected metrics (do not prefix them with `vsphere`)
+    ##
     ## Note1: 'datastore', 'datacenter' and 'cluster' filters are ignored when collecting realtime metrics as those
     ##         resources do not have realtime metrics. They will work only with "collection_type: historical".
+    ##
     ## Note2: 'host' filters are ignored when collecting historical metrics as this resource does not
     ##         have historical metrics. They will work only with "collection_type: realtime".
     #
@@ -313,12 +325,15 @@ instances:
 
     ## @param collect_tags - boolean - optional - default: false
     ## If true, the vSphere Tags will be collected.
+    ##
     ## The final tag sent to Datadog is composed of the vSphere tags prefix + vSphere tag category as key and
     ## vSphere tag name as value:
     ##   <TAG_PREFIX><TAG_CATEGORY>:<TAG_NAME>
+    ##
     ## Examples:
     ## - os_type:windows
     ## - application_name:my_app
+    ##
     ## Note: Tag collection works only for vSphere 6.5 and above.
     ##       Tag collection needs vSphere REST API Tagging and an endpoint (tagging.tag_association.object_to_tags)
     ##       only available from vSphere 6.5.
@@ -327,13 +342,18 @@ instances:
 
     ## @param tags_prefix - string - optional
     ## Custom tags attached to vSphere resources will be prefixed with this prefix when collected.
+    ##
     ## Example use cases:
     ##   - You have vSphere tags that might conflict with vSphere attributes or tags added by this integration or the
     ##     Datadog Agent
     ##   - You want a prefix to better recognise tags coming from vSphere
+    ##
     ## Examples with using `vtag_` prefix:
+    ## ```
     ## - vtag_os_type:windows            # where `os_type` is the category name and `windows` the tag name
     ## - vtag_application_name:my_app    # where `application_name` is the category name and `my_app` the tag name
+    ## ```
+    ##
     ## It's not recommend to use `vsphere_` as prefix, since it's already used by this integration
     ## e.g. vsphere_host, vsphere_type, etc.
     #
@@ -341,9 +361,11 @@ instances:
 
     ## @param collect_attributes - boolean - optional - default: false
     ## If true, the vSphere attributes will be collected and submitted as Datadog tags.
+    ##
     ## The final tag sent to Datadog is composed of 'attribute_prefix' + vSphere attribute category as key and
     ## the vSphere attribute value as value:
     ##   <ATTR_PREFIX><ATTR_CATEGORY>:<ATTR_VAL>
+    ##
     ## Examples:
     ## - os_type:windows
     ## - application_name:my_app
@@ -363,6 +385,7 @@ instances:
 
     ## @param collect_vsan_data - boolean - optional - default: false
     ## If true, the integration will collect additional metrics and events about vSAN clusters, and hosts.
+    ##
     ## Ensure that you have the vSAN Performance Service enabled:
     ## https://docs.vmware.com/en/VMware-vSphere/7.0/com.vmware.vsphere.vsan-monitoring.doc/
     ## GUID-02F67DC3-3D5A-48A4-A445-D2BD6AF2862C.html
@@ -371,21 +394,27 @@ instances:
 
     ## @param attributes_prefix - string - optional
     ## Custom attributes attached to vSphere resources will be prefixed with this prefix when collected.
+    ##
     ## Example use cases:
     ##   - You have vSphere attributes that might conflict with vSphere tags or tags added by this integration or the
     ##     Datadog Agent
     ##   - You want a prefix to better recognise attributes coming from vSphere
+    ##
     ## Examples with using `vattr_` prefix:
+    ## ```
     ## - vattr_os_type:windows            # where `os_type` is the attribute key and `windows` the attribute value
     ## - vattr_application_name:my_app    # where `application_name` is the attribute key and `my_app` the attribute
     ##                                    # value
+    ## ```
+    ##
     ## It's not recommend to use `vsphere_` as prefix, since it's already used by this integration
     ## e.g. vsphere_host, vsphere_type, etc.
     #
     # attributes_prefix: ''
 
     ## @param use_guest_hostname - boolean - optional - default: false
-    ## If true, the check will use the guest hostname for VMs instead of the VM name
+    ## If true, the check will use the guest hostname for VMs instead of the VM name.
+    ##
     ## This requires the VM to have VMware tools installed in it. If the guest hostname is
     ## not available, it will fallback to the VM name.
     ## Use this if you install the agent in VMs so that the hosts are not duplicated
@@ -411,7 +440,8 @@ instances:
 
     ## @param excluded_host_tags - list of strings - optional - default: []
     ## The vSphere integration collects tags for every ESXi host or VM in your environment.
-    ## Those tags can be `vcenter_server`, vsphere_type`, `vsphere_host`, `vsphere_folder`, `vsphere_cluster`
+    ##
+    ## Those tags can be `vcenter_server`, `vsphere_type`, `vsphere_host`, `vsphere_folder`, `vsphere_cluster`
     ## `vsphere_compute`, `vsphere_datacenter`, `vsphere_datastore` and are attached to the vSphere metrics by default.
     ## By default those tags are submitted as host tags but you can submit them as metric tags if you need, see:
     ## https://docs.datadoghq.com/tagging/using_tags/
@@ -425,9 +455,9 @@ instances:
 
     ## @param metrics_per_query - integer - optional - default: 500
     ## This value is used to determine the number of metrics the check will retrieve in the same API call.
-    ## If too many API calls are made by the check, consider increasing this value
-    ## If payloads are too large, consider decreasing this value
-    ## A value <= 0 means unlimited: it makes one query for all the monitored objects
+    ## If too many API calls are made by the check, consider increasing this value.
+    ## If payloads are too large, consider decreasing this value.
+    ## A value <= 0 means unlimited: it makes one query for all the monitored objects.
     #
     # metrics_per_query: 50
 
@@ -449,14 +479,14 @@ instances:
     ## @param batch_property_collector_size - integer - optional - default: 500
     ## This value is used to determine the maximum number of MORs returned by vCenter in the same API call,
     ## when exploring the infrastructure.
-    ## If too many API calls are made by the check, consider increasing this value
-    ## If payloads are too large, consider decreasing this value
-    ## A value <= 0 means unlimited: it will query for the maximum number of objects at once
+    ## If too many API calls are made by the check, consider increasing this value.
+    ## If payloads are too large, consider decreasing this value.
+    ## A value <= 0 means unlimited: it will query for the maximum number of objects at once.
     #
     # batch_property_collector_size: 500
 
     ## @param refresh_infrastructure_cache_interval - integer - optional - default: 300
-    ## Number of seconds between each discovering and caching of your vSphere environment
+    ## Number of seconds between each discovering and caching of your vSphere environment.
     ## Consider increasing this value if your environment is large, as caching can take some time to complete.
     #
     # refresh_infrastructure_cache_interval: 300
@@ -476,7 +506,7 @@ instances:
     # include_datastore_cluster_folder_tag: true
 
     ## @param hostname_transform - string - optional - default: default
-    ## Should be either 'upper' or 'lower' or 'default'
+    ## Should be either 'upper' or 'lower' or 'default'.
     ## If 'upper', the check will convert the vSphere hostname to uppercase.
     ## If 'lower', the check will convert the vSphere hostname to lowercase.
     ## If 'default', the check will not transform the vSphere hostname (the default option).
@@ -484,7 +514,7 @@ instances:
     #
     # hostname_transform: default
 
-    ## REST API options
+    ## REST API options.
     ## The options are used when making vSphere REST API calls to retrieve vSphere tags
     ## when `collect_tags` instance config is enabled.
     #

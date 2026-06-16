@@ -211,9 +211,9 @@ def is_azure_sql_database(engine_edition):
     return engine_edition == ENGINE_EDITION_SQL_DATABASE
 
 
-def execute_query(query, cursor, convert_results_to_str=False, parameter=None) -> Dict[str, str]:
-    if parameter is not None:
-        cursor.execute(query, (parameter,))
+def execute_query(query, cursor, convert_results_to_str=False, parameters=None) -> Dict[str, str]:
+    if parameters is not None:
+        cursor.execute(query, parameters)
     else:
         cursor.execute(query)
     columns = [str(column[0]).lower() for column in cursor.description]

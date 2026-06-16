@@ -9,7 +9,7 @@ def initialize_instance(values, **kwargs):
         validate_url(
             values['openmetrics_endpoint'],
             required_path='/metrics',
-            example='http://localhost:8000/metrics',
+            example='http://localhost:8080/metrics',
             config='openmetrics_endpoint',
         )
 

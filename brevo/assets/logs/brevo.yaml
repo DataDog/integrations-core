@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: brevo
 metric_id: brevo
 backend_only: false

@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: klaviyo
 metric_id: klaviyo
 backend_only: false

@@ -19,6 +19,7 @@ files:
               configuration file.
             value:
               type: string
+              require_trusted_provider: true
               example: /etc/nagios3/nagios.cfg
           - name: collect_events
             description: Set collect_events to false to disable Nagios Event collection.

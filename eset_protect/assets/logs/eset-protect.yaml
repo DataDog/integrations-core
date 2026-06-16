@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: eset-protect
 metric_id: eset-protect
 backend_only: false

@@ -22,10 +22,10 @@ from _release.summary import build_summary
 from _release.validation import HAS_FRAGMENTS, NO_VERSION, PRE_RELEASE, STABLE, UNRELEASED, validate_packages
 
 
-def _package_args(selected: str) -> list[str]:
+def _tag_package_args(selected: str) -> list[str]:
     """Return the package arguments for ``ddev release tag``."""
     selected = selected.strip()
-    if not selected or selected.lower() == "all":
+    if not selected:
         return ["all"]
     try:
         packages = json.loads(selected)
@@ -40,12 +40,10 @@ def _parse_is_stable_release() -> bool:
     return os.environ.get("IS_STABLE_RELEASE", "true").strip().lower() != "false"
 
 
-def _tag(target: str, dry_run: bool, selected: str) -> None:
+def _tag(dry_run: bool, selected: str) -> None:
     """Tag packages via ddev and optionally push to origin."""
     if dry_run:
         print("DRY RUN: tags will be created locally but not pushed to origin")
-    elif target != "prod":
-        print(f"Target '{target}': tags will be created locally but not pushed to origin")
 
     subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
     subprocess.run(
@@ -53,8 +51,8 @@ def _tag(target: str, dry_run: bool, selected: str) -> None:
         check=True,
     )
 
-    push_flag = "--push" if (target == "prod" and not dry_run) else "--no-push"
-    base_cmd = ["ddev", "release", "tag"] + _package_args(selected) + ["--skip-prerelease", push_flag]
+    push_flag = "--push" if not dry_run else "--no-push"
+    base_cmd = ["ddev", "release", "tag"] + _tag_package_args(selected) + ["--skip-prerelease", push_flag]
 
     result = subprocess.run(base_cmd)
     if result.returncode == 3:
@@ -94,7 +92,6 @@ def _validate(
     mode: str,
     source_repo: str,
     ref: str,
-    target: str,
     dry_run: bool,
     is_stable_release: bool,
 ) -> None:
@@ -109,7 +106,7 @@ def _validate(
     # Persist results for the dispatch step.
     runner_temp = os.environ.get("RUNNER_TEMP", "/tmp")
     Path(runner_temp, "release_validation.json").write_text(
-        json.dumps({"results": results, "mode": mode, "ref": ref, "target": target})
+        json.dumps({"results": results, "mode": mode, "ref": ref})
     )
 
     by_type: dict[str, list] = {}
@@ -151,7 +148,6 @@ def _validate(
                     mode,
                     source_repo,
                     ref,
-                    target,
                     dry_run,
                     was_dispatched=False,
                     footer="> ⚠️ Validation failed — stable versions cannot be released from an alpha/beta/rc branch.",
@@ -177,7 +173,6 @@ def _validate(
                 mode,
                 source_repo,
                 ref,
-                target,
                 dry_run,
                 was_dispatched=False,
                 footer="> ⚠️ Validation failed — run `ddev release make` to consolidate changelog fragments before releasing.",
@@ -192,18 +187,13 @@ def _validate(
 
 
 def main() -> None:
-    target = os.environ.get("TARGET", "dev")
     dry_run = parse_bool_env("DRY_RUN", default=False)
     selected = os.environ.get("SELECTED_PACKAGES", "")
     source_repo = os.environ.get("SOURCE_REPO", "integrations-core")
     ref = os.environ.get("REF", "")
     is_stable_release = _parse_is_stable_release()
 
-    # Normalise "[]" to empty string so both _tag and _detect treat it as auto-detect.
-    if selected.strip() == "[]":
-        selected = ""
-
-    _tag(target, dry_run, selected)
+    _tag(dry_run, selected)
 
     packages, mode = _detect(selected)
 
@@ -217,7 +207,7 @@ def main() -> None:
         write_summary("## Wheel Release\n\nNo packages detected — nothing to release.\n")
         return
 
-    _validate(packages, mode, source_repo, ref, target, dry_run, is_stable_release)
+    _validate(packages, mode, source_repo, ref, dry_run, is_stable_release)
 
 
 if __name__ == "__main__":

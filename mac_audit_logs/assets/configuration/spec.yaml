@@ -21,6 +21,7 @@ files:
       description: "Path to the directory containing the BSM audit logs."
       value:
         type: string
+        require_trusted_provider: true
         example: /var/audit
     - template: instances/default
       overrides:

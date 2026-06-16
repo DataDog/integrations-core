@@ -363,8 +363,9 @@ tests:
             is_wd_rescan: false
             matched_workflows:
              -
-              update_time: "2025-03-31T05:28:24.908880"
               av:
+                action_id: "admin"
+                action_label: "Can request a restore (admin needs to approve)"
                 alerts:
                  -
                   id: "send_email_to_recipient"
@@ -372,14 +373,13 @@ tests:
                   id: "alert_admin_on_blacklisted_item"
                  -
                   id: "alert_user_on_blacklisted_item"
+                engine: "emails-5478961-14"
+                policy_id: 34
                 policy_mode: "alert"
+                policy_update_time: "2025-03-24T10:44:20.216607"
                 workflow_id: "ms_restore_policy"
                 workflow_label: "Microsoft Restore Policy"
-                policy_id: 34
-                engine: "emails-5478961-14"
-                policy_update_time: "2025-03-24T10:44:20.216607"
-                action_id: "admin"
-                action_label: "Can request a restore (admin needs to approve)"
+              update_time: "2025-03-31T05:28:24.908880"
             mode: "monitor"
             ms_quarantine_status: "quarantined"
             ms_quarantine_verdict_type: "high_conf_phish"
@@ -393,13 +393,13 @@ tests:
             recipients_hash: "dummy_d8a9f6e3c7b2a4d5e1f0"
             recipients_user:
              -
-              is_deleted: false
-              full_name: "Test User"
-              entity_type: "office365_emails_user"
-              is_external: false
-              entity_id: "dummy_4d6a7f5e8c3b2a9d1e0f"
-              key: "Test User"
               email: "test.user@example-one.com"
+              entity_id: "dummy_4d6a7f5e8c3b2a9d1e0f"
+              entity_type: "office365_emails_user"
+              full_name: "Test User"
+              is_deleted: false
+              is_external: false
+              key: "Test User"
             saas_spam_verdict: "9"
             sender_server_ip: "10.10.10.10"
             sent_datetime: "2025-03-31T05:13:14Z"
@@ -411,63 +411,63 @@ tests:
              - "test.user@example-one.com"
             to_user:
              -
-              is_deleted: false
-              full_name: "Test User"
-              entity_type: "office365_emails_user"
-              is_external: false
-              entity_id: "dummy_4d6a7f5e8c3b2a9d1e0f"
-              key: "Test User"
               email: "test.user@example-one.com"
+              entity_id: "dummy_4d6a7f5e8c3b2a9d1e0f"
+              entity_type: "office365_emails_user"
+              full_name: "Test User"
+              is_deleted: false
+              is_external: false
+              key: "Test User"
             workflow: "av,admin"
           entity_security_result:
             ap:
              -
-              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
-              score: 7786.434293
+              entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
               entity_type: "office365_emails_email"
-              status_code: "0"
-              sec_type: "ap"
               payload:
-                reasons_by_category:
-                  Machine Learning summary:
-                   -
-                    short_text: "Phishing confidence level - Highest"
-                    full_text: "Phishing confidence level - Highest"
-                  Links:
-                   -
-                    short_text: "Suspicious-looking link"
-                    full_text: "Some of the links in the email has suspicious format - often used by Phishing emails"
-                  Sender Reputation:
-                   -
-                    short_text: "Your users didn't communicate with the sender"
-                    full_text: "The people in your org didn't communicate with the sender"
-                  Attack Analysis:
-                   -
-                    short_text: "Email analysis indicates a possible Credentials Harvesting attack"
-                    full_text: "Email analysis indicates a possible Credentials Harvesting attack"
-                    name_text: "Credentials Harvesting"
-                  Email Headers:
-                   -
-                    short_text: "DMARC check fails"
-                    full_text: "The email's header suggest that DMARC signature is missing/invalid"
+                probability_level: "5"
                 reasons:
                  - "Phishing confidence level - Highest"
-                probability_level: "5"
+                reasons_by_category:
+                  Attack Analysis:
+                   -
+                    full_text: "Email analysis indicates a possible Credentials Harvesting attack"
+                    name_text: "Credentials Harvesting"
+                    short_text: "Email analysis indicates a possible Credentials Harvesting attack"
+                  Email Headers:
+                   -
+                    full_text: "The email's header suggest that DMARC signature is missing/invalid"
+                    short_text: "DMARC check fails"
+                  Links:
+                   -
+                    full_text: "Some of the links in the email has suspicious format - often used by Phishing emails"
+                    short_text: "Suspicious-looking link"
+                  Machine Learning summary:
+                   -
+                    full_text: "Phishing confidence level - Highest"
+                    short_text: "Phishing confidence level - Highest"
+                  Sender Reputation:
+                   -
+                    full_text: "The people in your org didn't communicate with the sender"
+                    short_text: "Your users didn't communicate with the sender"
                 reasons_by_category_list:
                  - "Sender Reputation"
-              verdict: "phishing"
+              score: 7786.434293
+              sec_type: "ap"
+              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
               security_result_entity_type: "avanan_ap_scan"
-              entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
+              status_code: "0"
+              verdict: "phishing"
             clicktime_protection:
              -
-              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
-              score: 0
-              entity_type: "office365_emails_email"
-              status_code: "0"
-              sec_type: "clicktime_protection"
-              verdict: "links_replaced"
-              security_result_entity_type: "clicktime_protection_scan"
               entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
+              entity_type: "office365_emails_email"
+              score: 0
+              sec_type: "clicktime_protection"
+              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
+              security_result_entity_type: "clicktime_protection_scan"
+              status_code: "0"
+              verdict: "links_replaced"
             combined_verdict:
               ap: "phishing"
               clicktime_protection: "links_replaced"
@@ -485,36 +485,36 @@ tests:
             is_clean: false
             ms_defender:
              -
-              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
-              score: 0
-              status_description: ""
+              entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
               entity_type: "office365_emails_email"
-              status_code: "0"
-              sec_type: "ms_defender"
               payload:
                 bcl: "0"
-                policy_action: "quarantine"
                 detection_reason: "HostedContentFilterPolicy"
-                scl: "9"
+                policy_action: "quarantine"
                 policy_applied: "hphish"
-              verdict: "hphsh"
+                scl: "9"
+              score: 0
+              sec_type: "ms_defender"
+              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
               security_result_entity_type: "ms_defender_scan"
-              entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
+              status_code: "0"
+              status_description: ""
+              verdict: "hphsh"
             shadow_it:
              -
-              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
-              score: 0
-              status_description: "Clean"
+              entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
               entity_type: "office365_emails_email"
-              status_code: "clean"
-              sec_type: "shadow_it"
               payload:
-                subject: "Verify your recent Dummy Login."
                 domain: ""
                 from: "dummy@alerting-services.com"
-              verdict: "clean"
+                subject: "Verify your recent Dummy Login."
+              score: 0
+              sec_type: "shadow_it"
+              security_result_entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
               security_result_entity_type: "shadow_it_emails_scan"
-              entity_id: "dummy_9b72d5e431fa86c2e5b04719ac38f0d7"
+              status_code: "clean"
+              status_description: "Clean"
+              verdict: "clean"
           saas_info:
             saas_actor_id: "test.user@example-one.com"
             saas_actor_payload:
@@ -598,9 +598,9 @@ tests:
               key: "Test User"
           security_event_action:
            -
+            action_type: "quarantine_email"
             actor: "microsoft"
             create_time: "2025-03-31T05:28:25.673591Z"
-            action_type: "quarantine_email"
             sec_event_id: "dummy_f1e2d3c4b5a69788a0b9"
           time: "2025-03-31T05:28:26.530183Z"
       matched_security_tool_name: "Microsoft 365 Defender"
@@ -971,23 +971,23 @@ tests:
             chat_id: "19:dummy_8f1e3a7c9b5d2a4e6f0d_dummy_4d6a7f5e8c3b2a9d1e0f@unq.gbl.spaces"
             chat_members:
              -
-              farm_customer: "mt-prod-cp-us-2:datadog"
-              is_internal: true
-              is_deleted: false
               create_time: "2025-03-25 10:45:36"
-              is_external: false
-              entity_id: "dummy_4d6a7f5e8c3b2a9d1e0f"
               display_name: "Test User"
               email: "test.user@example-one.com"
-             -
+              entity_id: "dummy_4d6a7f5e8c3b2a9d1e0f"
               farm_customer: "mt-prod-cp-us-2:datadog"
-              is_internal: false
               is_deleted: false
-              create_time: "2025-03-25 10:45:36"
               is_external: false
-              entity_id: "dummy_8f1e3a7c9b5d2a4e6f0d"
+              is_internal: true
+             -
+              create_time: "2025-03-25 10:45:36"
               display_name: "Test user 2"
               email: "test.user-2@example-two.com"
+              entity_id: "dummy_8f1e3a7c9b5d2a4e6f0d"
+              farm_customer: "mt-prod-cp-us-2:datadog"
+              is_deleted: false
+              is_external: false
+              is_internal: false
             conversation_id: "19:dummy_8f1e3a7c9b5d2a4e6f0d_dummy_4d6a7f5e8c3b2a9d1e0f@unq.gbl.spaces"
             conversation_name: "Chat (Test User, Test user 2)"
             conversation_type: "chat"
@@ -1010,39 +1010,39 @@ tests:
           entity_security_result:
             av:
              -
-              security_result_entity_id: "dummy_7f3e2a9b5d4c6a1e8f0d"
-              score: 0
-              status_description: "The request has been fully answered"
-              entity_type: "ms_teams_file"
-              status_code: "1001"
-              sec_type: "av"
-              verdict: "clean"
-              security_result_entity_type: "checkpoint2"
               entity_id: "dummy_7f3e2a9b5d4c6a1e8f0d"
+              entity_type: "ms_teams_file"
+              score: 0
+              sec_type: "av"
+              security_result_entity_id: "dummy_7f3e2a9b5d4c6a1e8f0d"
+              security_result_entity_type: "checkpoint2"
+              status_code: "1001"
+              status_description: "The request has been fully answered"
+              verdict: "clean"
             combined_dlp_hit_count: 58
             combined_verdict:
               av: "clean"
               dlp: "leak"
             dlp:
              -
-              security_result_entity_id: "dummy_7f3e2a9b5d4c6a1e8f0d"
-              score: 0
-              status_description: "DLP rule match: PII, PCI"
+              entity_id: "dummy_7f3e2a9b5d4c6a1e8f0d"
               entity_type: "ms_teams_file"
-              status_code: "0"
-              sec_type: "dlp"
               payload:
+                found_text:
+                 - "****************116"
+                hit_count: 58
                 matches_dlp_rules:
                  - "PII"
                  - "PCI"
-                found_text:
-                 - "****************116"
                 scan_details:
                  - "Credit card number (very_likely): ****************116"
-                hit_count: 58
-              verdict: "leak"
+              score: 0
+              sec_type: "dlp"
+              security_result_entity_id: "dummy_7f3e2a9b5d4c6a1e8f0d"
               security_result_entity_type: "avanan_dlp"
-              entity_id: "dummy_7f3e2a9b5d4c6a1e8f0d"
+              status_code: "0"
+              status_description: "DLP rule match: PII, PCI"
+              verdict: "leak"
             findings_summary:
              -
               sectool_name: "avanan_dlp"
@@ -1118,17 +1118,17 @@ tests:
               key: "Test User"
           security_event_action:
            -
+            action_type: "send_email_to_owner_im_files_dlp"
             actor: "checkpoint"
             create_time: "2025-03-25T10:57:44.042198Z"
-            action_type: "send_email_to_owner_im_files_dlp"
-            sec_event_id: "dummy_4d9a2c7b5e3f6a1e8f0d"
             error: ""
+            sec_event_id: "dummy_4d9a2c7b5e3f6a1e8f0d"
            -
+            action_type: "send_email_to_admin_im_files_dlp"
             actor: "checkpoint"
             create_time: "2025-03-25T10:57:45.697666Z"
-            action_type: "send_email_to_admin_im_files_dlp"
-            sec_event_id: "dummy_4d9a2c7b5e3f6a1e8f0d"
             error: ""
+            sec_event_id: "dummy_4d9a2c7b5e3f6a1e8f0d"
           time: "2025-03-25T10:57:45.782800Z"
       matched_security_tool_name: "SmartDLP"
       saas_name: "Microsoft Teams"

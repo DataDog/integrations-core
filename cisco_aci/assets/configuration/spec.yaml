@@ -87,6 +87,7 @@ files:
           -----END PRIVATE KEY-----
       value:
         type: string
+      fleet_configurable: false
     - name: cert_key_path
       description: |
         Certificate Authentication:
@@ -94,6 +95,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
     - name: appcenter
       description: |
         Whether appcenter user certificates are being used.

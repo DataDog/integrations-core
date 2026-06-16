@@ -34,7 +34,6 @@ def make_query():
 
 
 @pytest.fixture(scope='session', autouse=True)
-@pytest.mark.usefixtures('dd_environment')
 def instance():
     inst = load_jmx_config()
     # Add presto coordinator to the configuration

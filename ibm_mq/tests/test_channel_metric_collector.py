@@ -224,6 +224,7 @@ def test_collect_connection_metrics_config_option(instance, collect_connection_m
         (True, True, b'Test Description', 'channel_desc:test_description'),  # Enabled + normalized
         (True, False, b'Test Description', 'channel_desc:Test Description'),  # Enabled + raw
         (True, True, b'', None),  # Empty description
+        (True, False, b'Caf\xc6', 'channel_desc:Caf\ufffd'),  # Non-UTF-8 bytes — must not crash
     ],
 )
 def test_channel_description_tags(

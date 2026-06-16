@@ -16,7 +16,9 @@ files:
           You should set those environment variables as system-wide variables.
         value:
           type: string
+          require_trusted_provider: true
           example: /usr/bin/nodetool
+        fleet_configurable: false
       - template: init_config/default
   - template: instances
     options:
@@ -35,11 +37,13 @@ files:
       value:
         type: string
         example: localhost
+      fleet_configurable: false
     - name: port
       description: The port JMX listens to for connections.
       value:
         type: integer
         example: 7199
+      fleet_configurable: false
     - name: username
       description: |
         Username from the credentials needed to connect to the host. These are the credentials for the JMX server.
@@ -47,6 +51,7 @@ files:
         check can execute the `status` command
       value:
         type: string
+      fleet_configurable: false
     - name: password
       description: |
         Password from the credentials needed to connect to the host. These are the credentials for the JMX server.
@@ -55,11 +60,13 @@ files:
       secret: true
       value:
         type: string
+      fleet_configurable: false
     - name: ssl
       description: Whether to use the --ssl parameter with nodetool to initiate a connection over SSL to the JMX server.
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: nodetool
       description: |
         The command or path to nodetool (for example, /usr/bin/nodetool or docker exec container nodetool)
@@ -73,4 +80,6 @@ files:
         This overrides `nodetool` defined in `init_config`.
       value:
         type: string
+        require_trusted_provider: true
+      fleet_configurable: false
     - template: instances/default

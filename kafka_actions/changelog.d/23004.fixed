@@ -1,1 +1,0 @@
-Return early from consume_messages when end of partition is reached instead of waiting for timeout

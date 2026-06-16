@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: mac-audit-logs
 metric_id: mac-audit-logs
 backend_only: false

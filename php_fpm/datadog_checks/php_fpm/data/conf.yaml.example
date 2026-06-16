@@ -47,7 +47,8 @@ instances:
 
   -
     ## @param status_url - string - optional - default: http://localhost/status
-    ## Get metrics from your FPM pool with this URL
+    ## Get metrics from your FPM pool with this URL.
+    ##
     ## The status URLs should follow the options from your FPM pool
     ## See http://php.net/manual/en/install.fpm.configuration.php
     ##   * pm.status_path
@@ -59,7 +60,8 @@ instances:
     # status_url: http://localhost/status
 
     ## @param ping_url - string - optional - default: http://localhost/ping
-    ## Get a reliable service check of your FPM pool with `ping_url` parameter
+    ## Get a reliable service check of your FPM pool with `ping_url` parameter.
+    ##
     ## The ping URLs should follow the options from your FPM pool
     ## See http://php.net/manual/en/install.fpm.configuration.php
     ##   * ping.path

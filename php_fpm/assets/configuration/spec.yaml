@@ -11,7 +11,8 @@ files:
     options:
     - name: status_url
       description: |
-        Get metrics from your FPM pool with this URL
+        Get metrics from your FPM pool with this URL.
+
         The status URLs should follow the options from your FPM pool
         See http://php.net/manual/en/install.fpm.configuration.php
           * pm.status_path
@@ -25,7 +26,8 @@ files:
         example: http://localhost/status
     - name: ping_url
       description: |
-        Get a reliable service check of your FPM pool with `ping_url` parameter
+        Get a reliable service check of your FPM pool with `ping_url` parameter.
+
         The ping URLs should follow the options from your FPM pool
         See http://php.net/manual/en/install.fpm.configuration.php
           * ping.path

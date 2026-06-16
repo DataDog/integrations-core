@@ -1,3 +1,4 @@
+# bypass-global-no-service-config-checks
 id: cofense-triage
 metric_id: cofense-triage
 backend_only: false
