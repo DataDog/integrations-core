@@ -117,11 +117,11 @@ Most relevant: [`_research/db2-config-settings.md`](_research/db2-config-setting
   `MON_GET_MEMORY_POOL/SET`, the config/env routines (`DBM_GET_CFG`, `DB_GET_CFG`,
   `REG_LIST_VARIABLES`, `ENV_GET_*`), and (for plans) `EXPLAIN_FROM_SECTION` + `SYSINSTALLOBJECTS`.
   `SYSMON` is simpler than enumerating these.
-- **Big caveat — everything was tested as `DB2INST1` (the instance owner).** No grant claim is
-  verified for a least-privilege `datadog` user. In particular `EXPLAIN_FROM_SECTION` and
-  `SYSINSTALLOBJECTS` for a non-owner are **(verify)** (§5, OQ-7). The package cache itself shows a
-  `grant execute on function sysproc.MON_GET_PKG_CACHE_STMT to user datadog` — evidence the intended
-  user is `datadog`, but its full grant set is unconfirmed. **Open question OQ-4.**
+- **Big caveat — the full optional-metric grant matrix is not proven for every deployment shape.** The
+  DBM 12.1 integration tests verify the `datadog` non-owner path for package-cache metrics, activity,
+  settings/schema reads, `EXPLAIN_FROM_SECTION`, `SYSINSTALLOBJECTS`, and EXPLAIN-table access. The
+  wider per-object and clustered metric families still need a full least-privilege pass across
+  standalone, DPF, pureScale, and managed environments. **Open question OQ-4.**
 
 ### 2.2 `MON_GET_PKG_CACHE_STMT_DETAILS` not callable
 
@@ -235,11 +235,13 @@ Most relevant: [`06-dbm-query-samples-activity.md`](06-dbm-query-samples-activit
 Most relevant: [`07-dbm-execution-plans.md`](07-dbm-execution-plans.md),
 [`_research/_raw/05-explain-test.txt`](_research/_raw/05-explain-test.txt).
 
-1. **`EXPLAIN_FROM_SECTION` (Path B, the *recommended* path) is UNPROVEN.** Only `EXPLAIN PLAN FOR`
-   (Path A) was actually run live. The exact procedure signature, its source-type arg (`'M'`), its OUT
-   params, and **whether a non-owner `datadog` user can call it** are all **(verify)**. **If Path B is
-   unavailable/unprivileged, the design falls back to Path A and inherits the full parameter-marker
-   problem** — the single biggest fidelity risk. This is a **gating spike** before plans commit.
+1. **`EXPLAIN_FROM_SECTION` (Path B, the *recommended* path) is implemented and live-tested for the
+   supported 12.1 path.** The collector calls `SYSPROC.EXPLAIN_FROM_SECTION` with source-type arg
+   `'M'` against package-cache `EXECUTABLE_ID`s, reads the generated EXPLAIN table rows, and deletes
+   them after plan assembly. The 12.1 integration test runs as the non-owner `datadog` user with the
+   explicit grant set and asserts a non-null JSON plan definition, plan signature, and no collection
+   errors. Residual risk: managed or hardened customer environments may still have tighter privileges
+   than the CI grant set, and write contention under a busy agent loop was not load-tested.
 2. **Explain tables are WRITTEN to on every explain** (unlike read-only Postgres `EXPLAIN`). Each
    explain inserts an `EXPLAIN_STATEMENT` + N `EXPLAIN_OPERATOR` + M `EXPLAIN_STREAM` … row-set.
    Mitigations: a **dedicated agent explain schema** (never write to `SYSTOOLS`), **delete-after-read**
@@ -287,14 +289,10 @@ throughout but **not yet present** in the plan dir — its absence is itself OQ-
 2. **CLOB handling (`STMT_TEXT`).** `ibm_db` may return a LOB locator rather than the materialized
    string; the agent must read the full CLOB and bound it (§3.5, §4.5). Confirm `fetch_assoc`/
    `fetch_tuple` materialize the CLOB for `MON_GET_PKG_CACHE_STMT.STMT_TEXT` / `MON_GET_ACTIVITY.STMT_TEXT`.
-3. **Statement-handle / "no cursor" model.** The existing code uses `ibm_db.exec_immediate(conn, sql)`
-   returning a statement handle, then iterates with `ibm_db.fetch_assoc` (dict, lowercase keys via
-   `ibm_db.ATTR_CASE = ibm_db.CASE_LOWER`) or `ibm_db.fetch_tuple`. There is **no DB-API cursor object**
-   in the current pattern (it is the `ibm_db` low-level API, not `ibm_db_dbi`). New collectors must
-   decide: reuse `exec_immediate`/`fetch_assoc`, or adopt `ibm_db_dbi` (DB-API 2.0 cursor) for
-   `callproc` (needed for `EXPLAIN_FROM_SECTION` OUT params) and parameter binding. **This API choice
-   is unsettled. Open question OQ-8.** Note `callproc` with OUT params (Path B) is awkward in the raw
-   `ibm_db` API and may force `ibm_db_dbi`.
+3. **Statement-handle / "no cursor" model.** The implementation keeps the low-level `ibm_db` API:
+   `exec_immediate`/`fetch_assoc` for reads, `prepare`/`execute` for bound parameters, and `callproc`
+   for `EXPLAIN_FROM_SECTION`. Each DBM job owns a dedicated connection key prefix. This avoids
+   introducing `ibm_db_dbi` and keeps the existing result-shape behavior (`ATTR_CASE = CASE_LOWER`).
 4. **Driver not bundled.** `ibm_db` is a C-extension (`ibm-db==3.2.6`), **not shipped with the Agent**
    — the operator must `pip install` it into the embedded env (Windows additionally needs
    `os.add_dll_directory` for `clidriver/bin`). DBM features inherit this install/packaging burden.
@@ -345,12 +343,12 @@ Most relevant: [`00-README.md`](00-README.md) "Key risks", `99-review-and-gaps.m
      string. **`code-testing-harness.md` still says `"ibm_db2"` — a direct contradiction.**
      **Resolution: `"db2"`** for all DBM payloads (purge `ibm_db2` from the testing doc). Crucially,
      `DatabaseCheck.dbms` defaults to the lowercased class name (`"ibmdb2check"`), so it **must be
-     explicitly set to `"db2"`** in code regardless. Pin this in one place. **Open question OQ-5.**
-2. **Obfuscator dialect support for Db2 (P1 blocker, not answerable from this repo).** Does the Agent
-   Go obfuscator (`pkg/obfuscate`) accept `obfuscate_options['dbms']='db2'`, or must Db2 fall back to
-   the generic SQL dialect? The dialect drives `query_signature` quality. **Must be verified against
-   the Agent source/binary, not this repo.** If `'db2'` is unsupported, generic SQL is the fallback
-   (acceptable but lower fidelity). **Open question OQ-5 (same spike).**
+     explicitly set to `"db2"`** in code regardless. This is pinned by `IbmDb2Check.dbms`.
+2. **Obfuscator dialect support for Db2 is resolved for this implementation.** The Agent obfuscator
+   passes `dbms` through to `go-sqllexer` as a string; `go-sqllexer` only aliases known DBMS names and
+   does not reject unknown values. With `dbms: "db2"`, Db2 uses the generic SQL behavior rather than a
+   Db2-specific dialect. This is acceptable for the current query-signature path and avoids the
+   failure mode where an unknown DBMS string drops all DBM query rows.
 3. **`ddtags` shape differs by track:** comma-joined **string** on the samples/plan track; a **list**
    on the activity track. Match per payload type exactly (payload-contract §4.1/§5).
 
@@ -374,20 +372,21 @@ they block.
 4. **OQ-4 — Least-privilege monitoring user.** Confirm the full grant set for a non-owner `datadog`
    user (vs the `DB2INST1` instance owner used in all research). Recommend `SYSMON` vs an explicit
    `EXECUTE` list, and verify each `MON_GET_*`/config/env routine is callable under it. (§2.1)
-5. **OQ-5 — Pin `ddsource`/`dbms`=`"db2"` AND verify obfuscator dialect.** One-place pin of the DBM
-   string to `"db2"` (set `DatabaseCheck.dbms` explicitly; purge `ibm_db2` from the testing doc), and a
-   spike against the Agent `pkg/obfuscate` to confirm a `'db2'` dialect exists (else generic). (§8.1, §8.2)
+5. **OQ-5 — RESOLVED: pin `ddsource`/`dbms`=`"db2"` and use generic obfuscator behavior.** The check
+   explicitly returns `dbms == "db2"` and emits `ddsource:"db2"` on DBM sample/activity/plan payloads.
+   Agent source inspection confirms `dbms:"db2"` is accepted by `go-sqllexer` as a generic DBMS value,
+   so no fallback string is needed. (§8.1, §8.2)
 6. **OQ-6 — Default-ON vs default-OFF posture for per-object metrics**, and the limit/filter defaults
    (`table_metrics_limit`, `index_metrics_limit`, schema include/exclude). Drives cardinality cost.
    (§7)
-7. **OQ-7 — `EXPLAIN_FROM_SECTION` (Path B) spike (gates the whole plan feature).** Run it as a
-   non-owner against a live `EXECUTABLE_ID`; confirm procedure signature, source arg (`'M'`), OUT
-   params, and grants. If Path B fails/unprivileged, accept Path A + the parameter-marker problem, or
-   defer plans. (§5.1)
-8. **OQ-8 — `ibm_db` low-level API vs `ibm_db_dbi` (DB-API 2.0).** Decide whether new collectors reuse
-   `exec_immediate`/`fetch_assoc` or adopt `ibm_db_dbi` cursors — likely forced by `callproc` with OUT
-   params for `EXPLAIN_FROM_SECTION` and by clean parameter binding. Establish/confirm per-job
-   connection isolation (assume the handle is not thread-safe). (§6.1, §6.3)
+7. **OQ-7 — RESOLVED for 12.1 CI: `EXPLAIN_FROM_SECTION` (Path B) works as a non-owner.** The 12.1
+   integration test grants `EXECUTE` on `SYSPROC.EXPLAIN_FROM_SECTION`, runs the plan path as the
+   `datadog` monitoring user, and verifies a valid plan event. Customer privilege variance remains a
+   deployment risk, not an implementation blocker. (§5.1)
+8. **OQ-8 — RESOLVED for this implementation: use the low-level `ibm_db` API with per-job
+   connections.** The DBM connection layer uses `exec_immediate`/`fetch_assoc`, `prepare`/`execute`
+   for bound parameters, and `callproc` for `EXPLAIN_FROM_SECTION`. Each job uses a dedicated
+   connection key prefix, guarded by a cache lock, and closes its connections on shutdown. (§6.1, §6.3)
 9. **OQ-9 — The missing architecture doc (`09-implementation-architecture.md`).** It is referenced by
    05/06/07 for `DBMAsyncJob` wiring, per-job `ibm_db` connection isolation, `run_job_loop`/`cancel`,
    module layout, and config-model surface — but **does not exist in the plan directory yet**. It must
