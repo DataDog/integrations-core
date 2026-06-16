@@ -202,8 +202,8 @@ def test_suppress_discovery_side_effects_restores_metric_methods_after_exit():
         assert check._submit_metric is not original_submit_metric
         assert check.submit_histogram_bucket is not original_submit_histogram_bucket
 
-    assert check._submit_metric is original_submit_metric
-    assert check.submit_histogram_bucket is original_submit_histogram_bucket
+    assert check._submit_metric == original_submit_metric
+    assert check.submit_histogram_bucket == original_submit_histogram_bucket
 
 
 def test_suppress_discovery_side_effects_restores_methods_after_exit():
