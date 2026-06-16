@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from contextlib import contextmanager
+from threading import RLock
 from typing import Any, Iterator
 
 import ibm_db
@@ -21,11 +22,14 @@ class Db2Connection:
         self._check = check
         self._config = config
         self._connections: dict[str, object] = {}
+        self._connections_lock = RLock()
 
     def close(self, key_prefix: str | None = None) -> None:
-        keys = [key_prefix] if key_prefix is not None else list(self._connections)
-        for key in keys:
-            connection = self._connections.pop(key, None)
+        with self._connections_lock:
+            keys = [key_prefix] if key_prefix is not None else list(self._connections)
+            connections = [(key, self._connections.pop(key, None)) for key in keys]
+
+        for key, connection in connections:
             if connection is not None:
                 try:
                     ibm_db.close(connection)
@@ -33,11 +37,12 @@ class Db2Connection:
                     self._check.log.debug("Failed to close Db2 connection for key_prefix=%s", key, exc_info=True)
 
     def get_connection(self, key_prefix: str) -> object:
-        connection = self._connections.get(key_prefix)
-        if connection is None:
-            connection = self._connect()
-            self._connections[key_prefix] = connection
-        return connection
+        with self._connections_lock:
+            connection = self._connections.get(key_prefix)
+            if connection is None:
+                connection = self._connect()
+                self._connections[key_prefix] = connection
+            return connection
 
     @contextmanager
     def open_managed_default_connection(self, key_prefix: str) -> Iterator[object]:
