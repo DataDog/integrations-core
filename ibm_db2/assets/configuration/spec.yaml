@@ -235,7 +235,7 @@ files:
               `MON_GET_PKG_CACHE_STMT` and computes interval deltas client-side.
             value:
               type: number
-              example: 10
+              example: 60
           - name: full_statement_text_cache_max_size
             hidden: true
             description: |
@@ -457,7 +457,7 @@ files:
               Set the database schema collection interval (in seconds).
             value:
               type: number
-              example: 600
+              example: 3600
           - name: max_tables
             description: |
               Set the maximum number of tables to collect.

@@ -7,7 +7,7 @@ from typing import Any
 
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
 
-DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 600
+DEFAULT_SCHEMAS_COLLECTION_INTERVAL = 3600
 DEFAULT_MAX_TABLES = 300
 DEFAULT_MAX_COLUMNS = 50
 KEY_PREFIX = 'dbm-schemas-'
