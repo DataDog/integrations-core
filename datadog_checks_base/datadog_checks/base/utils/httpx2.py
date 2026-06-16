@@ -57,6 +57,13 @@ STANDARD_FIELDS = {
     'username': None,
 }
 
+# Known legacy field aliases, mirrored from RequestsWrapper (http.py:103-107) for parity.
+DEFAULT_REMAPPED_FIELDS = {
+    'kerberos': {'name': 'kerberos_auth'},
+    # TODO: Remove in 6.13
+    'no_proxy': {'name': 'skip_proxy'},
+}
+
 REQUEST_KWARGS = frozenset(
     {
         'params',
@@ -519,6 +526,7 @@ class HTTPX2Wrapper:
         config = {field: instance.get(field, value) for field, value in default_fields.items()}
 
         remapper = dict(remapper) if remapper else {}
+        remapper.update(DEFAULT_REMAPPED_FIELDS)
 
         for remapped_field, data in remapper.items():
             field = data.get('name')
