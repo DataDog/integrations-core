@@ -4,17 +4,29 @@ datadog-sca-ci:
   tags: ["arch:amd64"]
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/datadog-static-analyzer:2024031801
   when: always
-  # We don't want to disrupt the pipeline so let's fail silently.
+  # We don’t want to disrupt the pipeline so let’s fail silently.
   allow_failure: true
   # This specifies the job does not have any dependency, meaning it can start as soon as it can.
   needs: []
+  id_tokens:
+    DD_STS_OIDC_TOKEN:
+      aud: rapid-seceng-sit
   script:
-    # Disabling tracing to avoid leaking secrets.
-    # See https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin:
-    # "Using ‘+’ rather than ‘-’ causes these options to be turned off"
-    - set +o xtrace
-    - export DD_API_KEY=$(aws ssm get-parameter --region us-east-1 --name "ci.integrations-core.datadog_api_key_org2" --with-decryption --query "Parameter.Value" --out text)
-    - export DD_APP_KEY=$(aws ssm get-parameter --region us-east-1 --name "ci.integrations-core.datadog_app_key_org2" --with-decryption --query "Parameter.Value" --out text)
-    - set -o xtrace
+    - |
+      set +o xtrace
+      DD_STS_RESPONSE=$(curl -sS -w "\n%{http_code}" \
+        -H "Authorization: Bearer ${DD_STS_OIDC_TOKEN}" \
+        "https://dd-sts.us1.ddbuild.io/sts/datadog/exchange?policy=integrations-core-gitlab")
+      HTTP_CODE=$(echo "$DD_STS_RESPONSE" | tail -n1)
+      RESPONSE_BODY=$(echo "$DD_STS_RESPONSE" | head -n -1)
+      if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+        echo "STS token exchange successful"
+      else
+        echo "ERROR: STS token exchange failed (HTTP ${HTTP_CODE}): $RESPONSE_BODY"
+        exit 1
+      fi
+      export DD_API_KEY=$(echo "$RESPONSE_BODY" | jq -re ".api_key")
+      export DD_APP_KEY=$(echo "$RESPONSE_BODY" | jq -re ".application_key")
+      set -o xtrace
     - osv-scanner --skip-git --recursive --experimental-only-packages --format=cyclonedx-1-4 --output=/tmp/sbom.json .
     - datadog-ci sbom upload --service integrations-core --env ci /tmp/sbom.json

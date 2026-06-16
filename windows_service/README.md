@@ -75,8 +75,6 @@ services:
     trigger_start: true
 ```
 
-Beginning with Agent version 7.74, the check automatically collects metrics for Windows services.
-
 #### Tags
 
 The check automatically tags the Windows service name to each service check in the `windows_service:<SERVICE>` tag. The `<SERVICE>` name in the tag uses lowercase and special characters are replaced with underscores. See [Getting Started with Tags][12] for more information.
@@ -96,6 +94,8 @@ Beginning with Agent version 7.73, the check automatically adds a `windows_servi
 ## Data Collected
 
 ### Metrics
+
+Beginning with Agent version 7.74, the check automatically collects metrics for Windows services.
 
 See [metadata.csv][19] for a list of metrics provided by this integration.
 
@@ -121,7 +121,7 @@ If a service is present and matches the configuration, but the Datadog Agent doe
 ```
 If the service is present in the output, permissions are the issue. To give the Datadog Agent permission [grant `Read` access on the service][14] to the [Datadog Agent User][15]. We recommend [granting `Read` access with Group Policy][16] to ensure the permissions persist through Windows Updates.
 
-## Further Reading
+## Further reading
 
 - [Monitoring Windows Server 2012][8]
 - [How to collect Windows Server 2012 metrics][9]

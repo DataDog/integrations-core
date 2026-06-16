@@ -3,7 +3,7 @@
   "app_uuid": "1cef2070-562b-4d59-b035-ea26d6a2cd75",
   "app_id": "proofpoint-on-demand",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
@@ -21,6 +21,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]

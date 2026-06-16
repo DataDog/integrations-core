@@ -7,7 +7,10 @@ import json
 import logging
 import os
 import re
+import types
+from pathlib import Path
 from typing import Any  # noqa: F401
+from unittest.mock import patch
 
 import mock
 import pytest
@@ -39,6 +42,47 @@ def test_check_version():
     check = AgentCheck()
 
     assert check.check_version == base_package_version
+
+
+@pytest.fixture
+def fresh_check():
+    """Return an AgentCheck with no cached _package_dir."""
+    check = AgentCheck()
+    if hasattr(check, '_package_dir'):
+        del check._package_dir
+    return check
+
+
+def test_get_package_dir_returns_existing_directory(fresh_check):
+    result = fresh_check._get_package_dir()
+    assert isinstance(result, Path)
+    assert result.is_dir()
+
+
+def test_get_package_dir_is_cached(fresh_check):
+    first = fresh_check._get_package_dir()
+    second = fresh_check._get_package_dir()
+    assert first is second
+
+
+def test_get_package_dir_namespace_package_fallback(fresh_check, tmp_path):
+    namespace_pkg = types.ModuleType('datadog_checks.fake_ns')
+    namespace_pkg.__file__ = None
+    namespace_pkg.__path__ = [str(tmp_path)]
+
+    with patch('importlib.import_module', return_value=namespace_pkg):
+        result = fresh_check._get_package_dir()
+
+    assert result == tmp_path
+
+
+def test_get_package_dir_raises_when_no_file_or_path(fresh_check):
+    broken_pkg = types.ModuleType('datadog_checks.broken')
+    broken_pkg.__file__ = None
+
+    with patch('importlib.import_module', return_value=broken_pkg):
+        with pytest.raises(RuntimeError, match="Cannot determine package directory"):
+            fresh_check._get_package_dir()
 
 
 def test_persistent_cache(datadog_agent):
@@ -1381,3 +1425,19 @@ def test_profile_memory_when_enabled(should_profile_value, expected_calls):
 
     assert check.should_profile_memory.call_count == 1
     assert check.profile_memory.call_count == expected_calls
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [b"\x08\x96\x01", bytearray(b"\x08\x96\x01"), memoryview(b"\x08\x96\x01")],
+    ids=["bytes", "bytearray", "memoryview"],
+)
+def test_event_platform_event_delivers_byte_like_payloads_as_bytes(aggregator, payload):
+    from datadog_checks.base import AgentCheck
+
+    check = AgentCheck("test", {}, [{}])
+    check.event_platform_event(payload, "genresources")
+
+    [received] = aggregator.get_event_platform_events("genresources", parse_json=False)
+    assert received == b"\x08\x96\x01"
+    assert isinstance(received, bytes)

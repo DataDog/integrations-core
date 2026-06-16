@@ -53,7 +53,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -113,7 +114,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -173,7 +175,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -239,7 +242,8 @@
                                 "definition": "FOREIGN KEY (city) REFERENCES cities(city)",
                                 "table_id": "16663"
                             }
-                        ]
+                        ],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -299,7 +303,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -359,7 +364,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -431,7 +437,8 @@
                         ],
                         "foreign_keys": [],
                         "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "relkind": "p"
                     }
                 ]
             }
@@ -491,7 +498,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -546,7 +554,8 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -621,7 +630,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -681,7 +691,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -753,7 +764,8 @@
                         ],
                         "foreign_keys": [],
                         "num_partitions": 2,
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "relkind": "p"
                     }
                 ]
             }
@@ -813,7 +825,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -873,7 +886,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -929,7 +943,8 @@
                             }
                         ],
                         "foreign_keys": [],
-                        "partition_key": "RANGE (id)"
+                        "partition_key": "RANGE (id)",
+                        "relkind": "p"
                     }
                 ]
             }
@@ -968,7 +983,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "f"
                     }
                 ]
             }
@@ -1028,7 +1044,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1088,7 +1105,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1164,7 +1182,8 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1224,7 +1243,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1279,7 +1299,8 @@
                                 "is_partial": false
                             }
                         ],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1339,7 +1360,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }
@@ -1399,7 +1421,8 @@
                             }
                         ],
                         "indexes": [],
-                        "foreign_keys": []
+                        "foreign_keys": [],
+                        "relkind": "r"
                     }
                 ]
             }

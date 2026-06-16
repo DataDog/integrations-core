@@ -15,8 +15,8 @@
             "id": 6361563733700849,
             "definition": {
               "type": "image",
-              "url": "/api/v2/images/3a67543d-8301-4dae-bcd8-0ccf5e041b45",
-              "url_dark_theme": "/api/v2/images/216ba6ac-706b-4420-8ff9-58a33a9d7124",
+              "url": "https://static.datadoghq.com/static/images/logos/microsoft-copilot_small.svg",
+              "url_dark_theme": "",
               "sizing": "contain",
               "margin": "md",
               "has_background": false,

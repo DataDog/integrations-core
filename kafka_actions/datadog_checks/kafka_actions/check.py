@@ -275,9 +275,11 @@ class KafkaActionsCheck(AgentCheck):
             'value_format': config.get('value_format', 'json'),
             'value_schema': config.get('value_schema'),
             'value_uses_schema_registry': config.get('value_uses_schema_registry', False),
+            'value_skip_bytes': config.get('value_skip_bytes', 0),
             'key_format': config.get('key_format', 'string'),
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
+            'key_skip_bytes': config.get('key_skip_bytes', 0),
         }
 
         self.log.debug(
@@ -453,6 +455,8 @@ class KafkaActionsCheck(AgentCheck):
                 left_value = self._get_field_from_path(left, context)
                 right_value = self._parse_literal(right)
 
+                left_value, right_value = self._coerce_types(left_value, right_value)
+
                 if op == '==':
                     return left_value == right_value
                 elif op == '!=':
@@ -497,6 +501,27 @@ class KafkaActionsCheck(AgentCheck):
                 return None
 
         return current
+
+    @staticmethod
+    def _coerce_types(left, right):
+        """Coerce mismatched types for comparison (e.g., str vs int from protobuf int64)."""
+        if type(left) is type(right):
+            return left, right
+
+        # If one side is a numeric string and the other is a number, convert the string.
+        # Exclude bools since bool is a subclass of int in Python.
+        if isinstance(left, str) and isinstance(right, (int, float)) and not isinstance(right, bool):
+            try:
+                return (float(left) if '.' in left else int(left)), right
+            except ValueError:
+                pass
+        elif isinstance(right, str) and isinstance(left, (int, float)) and not isinstance(left, bool):
+            try:
+                return left, (float(right) if '.' in right else int(right))
+            except ValueError:
+                pass
+
+        return left, right
 
     def _parse_literal(self, value_str: str):
         """Parse a literal value from string.

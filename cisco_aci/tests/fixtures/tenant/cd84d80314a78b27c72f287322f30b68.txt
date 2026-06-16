@@ -1,0 +1,31 @@
+{
+  "totalCount": "1686",
+  "imdata": [
+    {
+      "healthInst": {
+        "attributes": {
+          "childAction": "",
+          "childClassName1": "",
+          "childClassName2": "",
+          "childClassName3": "",
+          "childDn1": "",
+          "childDn2": "",
+          "childDn3": "",
+          "chng": "-1",
+          "criticalImpact": "0",
+          "cur": "94",
+          "dn": "uni/tn-DataDog/health",
+          "majorImpact": "0",
+          "maxSev": "warning",
+          "minorImpact": "0",
+          "modTs": "never",
+          "prev": "95",
+          "status": "",
+          "twScore": "94",
+          "updTs": "2025-11-25T14:00:28.439+00:00",
+          "warnImpact": "0"
+        }
+      }
+    }
+  ]
+}

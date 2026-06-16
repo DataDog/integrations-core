@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 1.7.0 / 2026-06-09
+
+***Added***:
+
+* Add port rate, link layer, network device, and device identity metadata to InfiniBand metrics. ([#23901](https://github.com/DataDog/integrations-core/pull/23901))
+
+## 1.6.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 1.5.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:
