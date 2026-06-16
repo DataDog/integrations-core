@@ -22,7 +22,7 @@
   "dataflow_config": [
     {
       "dataflow_id": "zerofox-cloud-platform-logs",
-      additional_config_fields": []
+      "additional_config_fields": []
     }
   ]
 }
