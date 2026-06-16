@@ -1,1 +1,0 @@
-Fix Docker documentation to include `CAP_PERFMON` alongside `CAP_BPF` for kernel >= 5.8.
