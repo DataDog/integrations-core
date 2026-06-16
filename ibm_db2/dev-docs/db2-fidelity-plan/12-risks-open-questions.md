@@ -350,15 +350,20 @@ Most relevant: [`00-README.md`](00-README.md) "Key risks", `99-review-and-gaps.m
    failure mode where an unknown DBMS string drops all DBM query rows.
 3. **`ddtags` shape differs by track:** comma-joined **string** on the samples/plan track; a **list**
    on the activity track. Match per payload type exactly (payload-contract §4.1/§5).
-4. **Backend/UI materialization remains external to the integration repo.** Local MITM validation on
-   2026-06-16 proves the Agent emitted all planned DBM tracks for the `database_instance` value
-   `dbm-local-db2-primary-bits:testdb`: `dbm-metrics` had 16 `query_metrics` payloads / 416
-   `db2_rows`; `databasequery` had 41 FQT events and 415 plan events (413 with a non-null plan
-   definition); `dbm-activity` had 26 events; and `dbm-metadata` had `database_instance`,
-   `db2_settings`, and `db2_databases` events. However, Datadog DBM searches in the connected org on
-   2026-06-16 returned zero samples/plans for `dbms:db2`, `source:db2`, the local-dev host, and the
-   local-dev `database_instance`. That proves only local emission, not backend indexing, facet
-   materialization, or UI rendering. See OQ-13.
+4. **Backend/UI materialization remains external to the integration repo and currently needs backend
+   support.** Local MITM validation on 2026-06-16 proves the Agent emitted all planned DBM tracks for
+   the `database_instance` value `dbm-local-db2-primary-bits:testdb`: `dbm-metrics` had 16
+   `query_metrics` payloads / 416 `db2_rows`; `databasequery` had 41 FQT events and 415 plan events
+   (413 with a non-null plan definition); `dbm-activity` had 26 events; and `dbm-metadata` had
+   `database_instance`, `db2_settings`, and `db2_databases` events. However, Datadog DBM searches in
+   the connected org on 2026-06-16 returned zero samples/plans for `dbms:db2`, `source:db2`, the
+   local-dev host, and the local-dev `database_instance`. A local `dd-go/database-monitoring`
+   inspection on 2026-06-16 also shows Db2 is not in the shared supported-DBMS registry, the query
+   metrics payload decoder has no `db2_version` or `db2_rows` fields, the metrics conversion switch
+   has no Db2 case, the events/activity decoders skip unsupported DBMS values, and the metadata
+   decoder does not recognize `db2_databases` or `db2_settings`. That proves Agent emission, but the
+   current backend checkout does not yet prove or implement Datadog-side materialization, facets, or
+   UI rendering. See OQ-13.
 
 ---
 
@@ -408,11 +413,12 @@ they block.
     `db2_settings` payload — `sysadm_group`/`sysmon_group`/`keystore_*`/`ssl_*` etc. leak topology
     (not secrets; Db2 cfg stores no plaintext passwords), so pattern-based exclusion is a conservative
     default to agree on. ([`_research/db2-config-settings.md`](_research/db2-config-settings.md) §9)
-13. **OQ-13 — Backend materialization and DBM facets for Db2.** Confirm with DBM backend/product
-    owners that `dbm-metrics` payloads with `kind:"query_metrics"`, `db2_rows`,
-    `dbms/ddsource/source:"db2"`, and Db2-specific fields become the expected query-metrics explorer
-    rows, facets, metric names, and plan rows. Current evidence proves Agent emission but not
-    Datadog-side materialization.
+13. **OQ-13 — Backend materialization and DBM facets for Db2.** Add or confirm DBM backend support
+    for `dbm-metrics` payloads with `kind:"query_metrics"`, `db2_rows`, `db2_version`,
+    `dbms/ddsource/source:"db2"`, and Db2-specific fields so they become the expected query-metrics
+    explorer rows, facets, metric names, and plan rows. Current evidence proves Agent emission, while
+    the inspected backend checkout lacks the Db2 DBMS registration, query-row decoder, metrics
+    conversion, event support gate, and typed metadata kinds needed for Datadog-side materialization.
 
 ---
 
