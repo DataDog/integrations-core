@@ -184,9 +184,11 @@ class InstanceConfig(BaseModel):
     )
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
+    collect_container_metrics: Optional[bool] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None
     collect_settings: Optional[CollectSettings] = None
+    collect_wlm_service_class_metrics: Optional[bool] = None
     connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database_identifier: Optional[DatabaseIdentifier] = None

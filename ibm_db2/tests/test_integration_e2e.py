@@ -14,6 +14,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.ibm_db2 import IbmDb2Check
 
 from . import metrics
+from .common import requires_db2_12_1
 
 
 @pytest.mark.integration
@@ -33,6 +34,7 @@ def test_e2e(dd_agent_check, instance):
 
 
 @pytest.mark.e2e
+@requires_db2_12_1
 def test_dbm_e2e(dd_agent_check: Any, instance: dict[str, Any]) -> None:
     dbm_instance = deepcopy(instance)
     dbm_instance.update(
