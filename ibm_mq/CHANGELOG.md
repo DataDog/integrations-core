@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 8.9.0 / 2026-03-18
+## 8.10.0 / 2026-06-10
+
+***Added***:
+
+* Added config `filter_queue_statistics_metrics`  so `ibm_mq.stats.queue.*` metrics can be limited to queues discovered with `queue_patterns` or `queue_regex`. ([#23933](https://github.com/DataDog/integrations-core/pull/23933))
+
+## 8.9.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+* Fix UnicodeDecodeError when IBM MQ queue manager returns channel or queue description fields in non-UTF-8 encoding. ([#23130](https://github.com/DataDog/integrations-core/pull/23130))
+
+## 8.9.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:
 

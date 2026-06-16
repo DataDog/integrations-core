@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.5.0 / 2026-06-09
+
+***Added***:
+
+* Added metrics external_dns.controller.last_reconcile & external_dns.controller.consecutive.soft.errors ([#23671](https://github.com/DataDog/integrations-core/pull/23671))
+
+## 6.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 6.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

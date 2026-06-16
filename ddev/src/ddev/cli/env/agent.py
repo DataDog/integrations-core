@@ -9,6 +9,26 @@ import click
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.e2e.agent.interface import AgentInterface
+
+
+def _invoke_check_with_retry(agent: AgentInterface, args: list[str], *, retries: int = 3, backoff: float = 0.5) -> None:
+    """Invoke ``agent check`` with bounded retry to absorb transient autodiscovery-reload races."""
+    import subprocess
+    import time
+
+    for attempt in range(retries + 1):
+        try:
+            agent.invoke(args)
+            return
+        except subprocess.CalledProcessError:
+            if attempt >= retries:
+                raise
+            click.echo(
+                f'agent check failed (attempt {attempt + 1}/{retries + 1}), retrying in {backoff:.1f}s...',
+                err=True,
+            )
+            time.sleep(backoff)
 
 
 @click.command(
@@ -54,7 +74,10 @@ def agent(app: Application, *, intg_name: str, environment: str, args: tuple[str
 
     if config_file is None or not trigger_run:
         try:
-            agent.invoke(full_args)
+            if trigger_run:
+                _invoke_check_with_retry(agent, full_args)
+            else:
+                agent.invoke(full_args)
         except subprocess.CalledProcessError as e:
             app.abort(code=e.returncode)
 
@@ -67,7 +90,7 @@ def agent(app: Application, *, intg_name: str, environment: str, args: tuple[str
     if not env_data.config_file.is_file():
         try:
             env_data.write_config(config)
-            agent.invoke(full_args)
+            _invoke_check_with_retry(agent, full_args)
         finally:
             env_data.config_file.unlink()
     else:
@@ -75,6 +98,6 @@ def agent(app: Application, *, intg_name: str, environment: str, args: tuple[str
         env_data.config_file.replace(temp_config_file)
         try:
             env_data.write_config(config)
-            agent.invoke(full_args)
+            _invoke_check_with_retry(agent, full_args)
         finally:
             temp_config_file.replace(env_data.config_file)

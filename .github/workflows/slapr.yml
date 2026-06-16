@@ -15,7 +15,6 @@ jobs:
         slack_channel_variable:
           - SLACK_CHANNEL_ID
           - SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS
-          - SLACK_CHANNEL_ID_INFRA_INTEGRATIONS
     steps:
     - uses: DataDog/slapr@4b5efe2ce585e45898bb88c4fa303e226e8199e4 # Not versioned, latest commit in master as of 2025-05-08
       env:

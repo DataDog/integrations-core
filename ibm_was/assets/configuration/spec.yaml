@@ -12,6 +12,8 @@ files:
           - name: servlet_url
             fleet_configurable: true
             required: true
+            formats:
+              - url
             description: |
               The URL of the PerfServlet configured to report metrics.
               Note: The default port is usually 9080.
@@ -80,6 +82,7 @@ files:
                 - unit.kbyte
                 - kilobyte
                 - second
+            fleet_configurable: false
           - template: instances/default
       - template: logs
         example:

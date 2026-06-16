@@ -36,6 +36,10 @@ def instance_collect_counters_with_distributions():
     return False
 
 
+def instance_collect_genresources():
+    return False
+
+
 def instance_collect_histogram_buckets():
     return True
 
@@ -54,6 +58,18 @@ def instance_enable_health_service_check():
 
 def instance_enable_legacy_tags_normalization():
     return True
+
+
+def instance_genresources_collection_interval_seconds():
+    return 120
+
+
+def instance_genresources_max_resources_per_cycle():
+    return 10000
+
+
+def instance_genresources_ttl_seconds():
+    return 21600
 
 
 def instance_histogram_buckets_as_distributions():

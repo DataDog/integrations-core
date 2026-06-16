@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 2.5.0 / 2026-06-09
+
+***Added***:
+
+* Add support for Supavisor pooler metrics exposed by the Supabase customer metrics endpoint. Covers pool client/server connection counts, pool checkout durations, query/connection latency histograms, and network throughput counters. Enables alerting on pooler client-connection saturation, which previously had no Datadog coverage despite being a common failure mode in serverless / Fluid Compute setups. ([#23749](https://github.com/DataDog/integrations-core/pull/23749))
+
+## 2.4.1 / 2026-04-15 / Agent 7.79.0
+
+***Fixed***:
+
+* Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
+
+## 2.4.0 / 2026-04-01 / Agent 7.78.0
+
+***Added***:
+
+* Add support for security validation in models ([#23109](https://github.com/DataDog/integrations-core/pull/23109))
+
 ## 2.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

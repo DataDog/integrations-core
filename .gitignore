@@ -145,6 +145,12 @@ treemap*.png
 # Claude Code customizations
 .claude
 
+# Claude Code PR review artifacts
+.agint-review/
+
+# `ddev release port-commit` worktrees
+.worktrees/
+
 # Ignore any metadata file except root json in the downloader
 datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/*
 !datadog_checks_downloader/datadog_checks/downloader/data/repo/targets/.gitignore

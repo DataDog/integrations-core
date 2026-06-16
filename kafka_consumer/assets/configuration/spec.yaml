@@ -228,6 +228,7 @@ files:
             type: string
             example: aws_msk_iam
             display_default: oidc
+          fleet_configurable: false
         - name: aws_region
           description: |
             AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
@@ -237,8 +238,11 @@ files:
           value:
             type: string
             example: us-west-2
+          fleet_configurable: false
         - name: url
           fleet_configurable: true
+          formats:
+            - url
           description: |
             The token endpoint. Required when method is `oidc`.
           value:
@@ -263,6 +267,7 @@ files:
             For example, a custom scope like 'kafka' or 'api://default'.
           value:
             type: string
+          fleet_configurable: false
         - name: extensions
           enabled: false
           description: |
@@ -272,6 +277,7 @@ files:
             Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
           value:
             type: string
+          fleet_configurable: false
         - name: tls_ca_cert
           enabled: false
           description: |
@@ -281,6 +287,7 @@ files:
           value:
             type: string
             example: /path/to/oauth_ca_cert.pem
+          fleet_configurable: false
       - template: instances/tls
       - name: tls_crlfile
         description: |
@@ -309,6 +316,7 @@ files:
           cluster ID is preserved as an original_kafka_cluster_id tag.
         value:
           type: string
+        fleet_configurable: false
       - name: enable_cluster_monitoring
         description: |
           (PREVIEW) Enable cluster monitoring to collect cluster-wide metrics for Data Streams
@@ -341,6 +349,8 @@ files:
         description: |
           Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
         fleet_configurable: true
+        formats:
+          - url
         value:
           type: string
           example: http://localhost:8081
@@ -432,6 +442,7 @@ files:
             The OAuth scope to request.
           value:
             type: string
+          fleet_configurable: false
         - name: custom_headers
           enabled: false
           description: |
@@ -445,6 +456,7 @@ files:
             type: object
             additionalProperties:
               type: string
+          fleet_configurable: false
         - name: tls_ca_cert
           enabled: false
           description: |
@@ -452,3 +464,4 @@ files:
           value:
             type: string
             example: /path/to/oauth_ca_cert.pem
+          fleet_configurable: false

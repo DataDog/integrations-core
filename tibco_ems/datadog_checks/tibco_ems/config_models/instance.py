@@ -49,6 +49,7 @@ class InstanceConfig(BaseModel):
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
     tibemsadmin: Optional[str] = None
+    use_ssl: Optional[bool] = None
     username: Optional[str] = None
 
     @model_validator(mode='before')

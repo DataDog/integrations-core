@@ -14,20 +14,26 @@ Integrate CyberArk Endpoint Privilege Manager with Datadog to gain insights into
 
 ## Setup
 
-### Create a User in CyberArk Endpoint Privilege Manager
-1. Log in to the CyberArk Endpoint Privilege Manager portal.
-2. Navigate to **Administration**.
-3. Open the **Account Management** section.
-4. Click **Create** and then click on **Create User** from the dropdown.
-5. Enter the following details:
-   - Email
-   - Password
-   - Confirm Password
-6. Select the **Account Administrator** checkbox and choose the **View Only** option.
-7. Select the **Allow to Manage Sets** checkbox.
-8. Click **Next**.
-9. Assign the **View Only Set Admin** role for all listed sets.
-10. Click **Finish**.
+### Create a Role and Assign a User in CyberArk Endpoint Privilege Manager
+
+1. Log in to the CyberArk Endpoint Privilege Manager portal and navigate to **Administration**.
+2. Open the **Roles** section and click **Create role**.
+3. Enter the role details:
+   - **Name**: Name of the role (e.g., *View Only Set Admin Role*)
+   - **Permission groups**: Select `View Only Set Admin`
+   - **Sets**: Select the required sets to collect data
+4. Click **Create**.
+5. Open the **Users** section and click **Add user**.
+6. Enter the user details:
+   - **User email**, **Password**, and **Confirm password**
+7. Click **Add**.
+   > A verification email is sent to the provided address. The user must open the email and click the verification link to activate the account before proceeding.
+8. Open the **Role assignment** section, locate the newly created role, and click **Assign or unassign users** from its options menu.
+9. Click **Assign users**, select the newly created user's email, click **Assign**.
+10. Click **Save**.
+11. Locate the **Account Admin ViewOnly Role**, and click **Assign or unassign users** from its options menu.
+12. Click **Assign users**, select the newly created user's email, click **Assign**.
+13. Click **Save**.
 
 
 ### Connect your CyberArk Endpoint Privilege Manager Account to Datadog

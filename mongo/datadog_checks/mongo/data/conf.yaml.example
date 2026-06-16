@@ -2,6 +2,12 @@
 #
 init_config:
 
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+    #
+    # propagate_agent_tags: false
+
     ## @param service - string - optional
     ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
     ##
@@ -499,6 +505,13 @@ instances:
         ## see the AWS docs https://docs.aws.amazon.com/documentdb/latest/developerguide/API_DBCluster.html
         #
         # cluster_identifier: mydocdb
+
+    ## @param propagate_agent_tags - boolean - optional - default: false
+    ## Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
+    ## When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+    ## This option takes precedence over the `propagate_agent_tags` option in `init_config`.
+    #
+    # propagate_agent_tags: false
 
     ## @param server - string - optional
     ## Specify the MongoDB URI, with database to use for reporting (defaults to "admin")
