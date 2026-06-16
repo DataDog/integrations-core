@@ -183,11 +183,11 @@ instances:
         #
         # enabled: true
 
-        ## @param collection_interval - number - optional - default: 10
+        ## @param collection_interval - number - optional - default: 60
         ## Set the query metric collection interval (in seconds). Each collection reads
         ## `MON_GET_PKG_CACHE_STMT` and computes interval deltas client-side.
         #
-        # collection_interval: 10
+        # collection_interval: 60
 
     ## Configure DBM query sample execution plan collection.
     #
@@ -256,10 +256,10 @@ instances:
         #
         # enabled: false
 
-        ## @param collection_interval - number - optional - default: 600
+        ## @param collection_interval - number - optional - default: 3600
         ## Set the database schema collection interval (in seconds).
         #
-        # collection_interval: 600
+        # collection_interval: 3600
 
         ## @param max_tables - integer - optional - default: 300
         ## Set the maximum number of tables to collect.
