@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from threading import Barrier
+from time import sleep
 from typing import Any
 
 import mock
@@ -50,6 +53,29 @@ def test_metric_family_config_gates(instance: dict[str, Any]) -> None:
     assert check._config.collect_fcm_connection_metrics is True
     assert check._config.collect_cf_metrics is True
     assert check._config.collect_group_bufferpool_metrics is True
+
+
+def test_dbm_connection_cache_is_locked(instance: dict[str, Any]) -> None:
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    barrier = Barrier(3)
+    connection = object()
+
+    def connect() -> object:
+        sleep(0.05)
+        return connection
+
+    def get_connection() -> object:
+        barrier.wait()
+        return check.connection.get_connection('dbm-test-')
+
+    check.connection._connect = mock.Mock(side_effect=connect)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = [executor.submit(get_connection), executor.submit(get_connection)]
+        barrier.wait()
+
+    assert [result.result() for result in results] == [connection, connection]
+    check.connection._connect.assert_called_once_with()
 
 
 class TestPasswordScrubber:
