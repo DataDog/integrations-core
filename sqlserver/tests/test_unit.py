@@ -1406,9 +1406,8 @@ def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected
 @pytest.mark.parametrize(
     'reported_hostname, expected_hostname',
     [
-        # Not configured: None is passed, Agent falls back to its own hostname attribution.
-        # This is intentional — we don't change service-check host for existing deployments.
-        (None, None),
+        # Not configured: falls back to resolve_db_host(), consistent with mysql/postgres.
+        (None, 'db.host'),
         # Explicitly configured: the custom hostname is propagated to the service check.
         ('custom-host', 'custom-host'),
     ],
