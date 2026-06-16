@@ -80,6 +80,83 @@ files:
           type: boolean
           example: false
           display_default: false
+      - name: collect_table_metrics
+        description: |
+          Collect per-table metrics from `MON_GET_TABLE`. These metrics can create one series per table, partition,
+          and member, so collection is disabled by default.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: table_metrics_limit
+        description: |
+          Maximum number of tables to collect metrics for when `collect_table_metrics` is enabled.
+        value:
+          type: integer
+          example: 300
+          display_default: 300
+      - name: collect_index_metrics
+        description: |
+          Collect per-index metrics from `MON_GET_INDEX`. These metrics can create one series per index, partition,
+          and member, so collection is disabled by default.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: index_metrics_limit
+        description: |
+          Maximum number of indexes to collect metrics for when `collect_index_metrics` is enabled.
+        value:
+          type: integer
+          example: 1000
+          display_default: 1000
+      - name: collect_connection_metrics
+        description: |
+          Collect per-connection metrics from `MON_GET_CONNECTION`. These metrics can create one series per active
+          connection, so collection is disabled by default.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: connection_metrics_limit
+        description: |
+          Maximum number of connections to collect metrics for when `collect_connection_metrics` is enabled.
+        value:
+          type: integer
+          example: 300
+          display_default: 300
+      - name: collect_fcm_metrics
+        description: |
+          Collect pureScale Fast Communication Manager metrics. These metrics are only emitted on clustered Db2
+          instances and are disabled by default.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: collect_fcm_connection_metrics
+        description: |
+          Collect per-connection pureScale Fast Communication Manager metrics. These metrics can create one series per
+          FCM connection and member, so collection is disabled by default.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: collect_cf_metrics
+        description: |
+          Collect pureScale cluster caching facility metrics. These metrics are only emitted on clustered Db2 instances
+          and are disabled by default.
+        value:
+          type: boolean
+          example: false
+          display_default: false
+      - name: collect_group_bufferpool_metrics
+        description: |
+          Collect pureScale group buffer pool metrics. These metrics are only emitted on clustered Db2 instances and
+          are disabled by default.
+        value:
+          type: boolean
+          example: false
+          display_default: false
       - name: collect_wlm_service_class_metrics
         description: |
           Collect Workload Manager metrics by service superclass and subclass. Workload-level WLM metrics are always
