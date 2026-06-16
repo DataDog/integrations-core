@@ -75,6 +75,7 @@ def test_plan_event_payload(instance: dict[str, Any], aggregator: Any) -> None:
     check.connection.query = mock.Mock(
         side_effect=[
             ([], []),
+            ([{'explain_started_at': explain_time}], []),
             (
                 [
                     {
@@ -163,7 +164,7 @@ def test_plan_event_payload(instance: dict[str, Any], aggregator: Any) -> None:
         'SYSPROC.EXPLAIN_FROM_SECTION',
         (bytes.fromhex('A' * 64), 'M', None, 0, 'DATADOG', None, None, None, None, None),
     )
-    assert check.connection.query.call_args_list[1].kwargs['params'] == [
+    assert check.connection.query.call_args_list[2].kwargs['params'] == [
         'DATADOG',
         explain_time,
         'SYSSH200',
@@ -237,3 +238,72 @@ def test_plan_event_for_invalid_executable_id(instance: dict[str, Any], aggregat
     assert events[0]['db']['plan']['collection_errors'] == [
         {'code': 'invalid_executable_id', 'message': 'executable_id is missing or invalid'}
     ]
+
+
+def test_plan_event_uses_recent_statement_fallback_when_run_key_is_missing(
+    instance: dict[str, Any], aggregator: Any
+) -> None:
+    check = _dbm_check(instance)
+    check.statement_metrics.tags = ['foo:bar']
+    check.statement_metrics._tags_no_db = ['foo:bar']
+    explain_time = datetime(2026, 6, 15, 12, 0, 0)
+    check.connection.query = mock.Mock(
+        side_effect=[
+            ([], []),
+            ([{'explain_started_at': explain_time}], []),
+            (
+                [
+                    {
+                        'explain_requester': 'DATADOG',
+                        'explain_time': explain_time,
+                        'source_name': 'SYSSH200',
+                        'source_schema': 'NULLID',
+                        'source_version': '',
+                        'explain_level': 'S',
+                        'stmtno': 1,
+                        'sectno': 1,
+                        'statement_text': 'VALUES 1',
+                        'total_cost': 1.2,
+                        'query_degree': 1,
+                    }
+                ],
+                [],
+            ),
+            (
+                [
+                    {'operator_id': 1, 'operator_type': 'RETURN', 'total_cost': 1.2, 'buffers': 0},
+                ],
+                [],
+            ),
+            ([], []),
+            ([], []),
+        ]
+    )
+    check.connection.callproc = mock.Mock(return_value=())
+    check.connection.execute = mock.Mock()
+
+    check.statement_metrics._submit_query_plan_events(
+        [
+            {
+                'db': 'datadog',
+                'stmt_text': 'VALUES 1',
+                'query': 'VALUES ?',
+                'query_truncated': 'not_truncated',
+                'query_signature': 'query-signature',
+                'executable_id': 'A' * 64,
+            }
+        ]
+    )
+
+    events = aggregator.get_event_platform_events('dbm-samples')
+    assert len(events) == 1
+    assert events[0]['db']['plan']['definition']
+    assert events[0]['db']['plan']['signature']
+    assert events[0]['db']['plan']['collection_errors'] is None
+    fallback_call = check.connection.query.call_args_list[2]
+    fallback_query = fallback_call.args[1]
+    assert 'FROM DATADOG.EXPLAIN_INSTANCE I' in fallback_query
+    assert 'RTRIM(I.EXPLAIN_REQUESTER) = CURRENT USER' in fallback_query
+    assert 'I.EXPLAIN_TIME >= ?' in fallback_query
+    assert 'T.STATEMENT_TEXT = ?' in fallback_query
+    assert fallback_call.kwargs['params'] == [explain_time, 'VALUES 1']
