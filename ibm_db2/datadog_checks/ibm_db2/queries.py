@@ -354,3 +354,179 @@ HADR_TABLE_COLUMNS = (
     'time_since_last_recv',
 )
 HADR_TABLE = 'SELECT {} FROM TABLE(MON_GET_HADR(-2))'.format(', '.join(HADR_TABLE_COLUMNS))
+
+
+TABLE_METRICS_TABLE_COLUMNS = (
+    'tabschema',
+    'tabname',
+    'member',
+    'table_scans',
+    'rows_read',
+    'rows_inserted',
+    'rows_updated',
+    'rows_deleted',
+    'object_data_l_reads',
+    'object_data_p_reads',
+    'direct_reads',
+    'direct_writes',
+    'lock_wait_time',
+    'lock_waits',
+    'lock_escals',
+)
+TABLE_METRICS_TABLE = """\
+SELECT {}
+FROM TABLE(MON_GET_TABLE(NULL, NULL, -2))
+WHERE TABSCHEMA NOT LIKE 'SYS%'
+  AND TABSCHEMA NOT IN ('NULLID', 'SQLJ')
+ORDER BY ROWS_READ DESC
+FETCH FIRST {{limit}} ROWS ONLY
+""".format(', '.join(TABLE_METRICS_TABLE_COLUMNS))
+
+
+INDEX_METRICS_TABLE_COLUMNS = (
+    'M.tabschema AS tabschema',
+    'M.tabname AS tabname',
+    'M.iid AS iid',
+    'M.member AS member',
+    'C.indschema AS indschema',
+    'C.indname AS indname',
+    'M.index_scans AS index_scans',
+    'M.index_only_scans AS index_only_scans',
+    'M.index_jump_scans AS index_jump_scans',
+    'M.key_updates AS key_updates',
+    'M.pseudo_deletes AS pseudo_deletes',
+    'M.del_keys_cleaned AS del_keys_cleaned',
+    'M.nleaf AS nleaf',
+    'M.nlevels AS nlevels',
+    'M.object_index_l_reads AS object_index_l_reads',
+    'M.object_index_p_reads AS object_index_p_reads',
+)
+INDEX_METRICS_TABLE = """\
+SELECT {}
+FROM TABLE(MON_GET_INDEX(NULL, NULL, -2)) M
+LEFT JOIN SYSCAT.INDEXES C
+  ON C.TABSCHEMA = M.TABSCHEMA
+ AND C.TABNAME = M.TABNAME
+ AND C.IID = M.IID
+WHERE M.TABSCHEMA NOT LIKE 'SYS%'
+  AND M.TABSCHEMA NOT IN ('NULLID', 'SQLJ')
+ORDER BY M.INDEX_SCANS DESC
+FETCH FIRST {{limit}} ROWS ONLY
+""".format(', '.join(INDEX_METRICS_TABLE_COLUMNS))
+
+
+CONNECTION_METRICS_TABLE_COLUMNS = (
+    'application_handle',
+    'application_name',
+    'session_auth_id',
+    'client_hostname',
+    'client_applname',
+    'workload_occurrence_state',
+    'member',
+    'total_app_commits',
+    'total_app_rollbacks',
+    'deadlocks',
+    'lock_escals',
+    'lock_timeouts',
+    'lock_wait_time',
+    'lock_waits',
+    'num_locks_held',
+    'num_locks_waiting',
+    'rows_deleted',
+    'rows_inserted',
+    'rows_modified',
+    'rows_read',
+    'rows_returned',
+    'rows_updated',
+)
+CONNECTION_METRICS_TABLE = """\
+SELECT {}
+FROM TABLE(MON_GET_CONNECTION(NULL, -2))
+WHERE IS_SYSTEM_APPL = 0
+ORDER BY ROWS_READ DESC
+FETCH FIRST {{limit}} ROWS ONLY
+""".format(', '.join(CONNECTION_METRICS_TABLE_COLUMNS))
+
+
+FCM_TABLE_COLUMNS = (
+    'member',
+    'buff_free',
+    'buff_free_bottom',
+    'ch_free',
+    'ch_free_bottom',
+    'fcm_recv_volume',
+    'fcm_recv_wait_time',
+    'fcm_recv_waits_total',
+    'fcm_recvs_total',
+    'fcm_send_volume',
+    'fcm_send_wait_time',
+    'fcm_send_waits_total',
+    'fcm_sends_total',
+    'fcm_tq_recv_volume',
+    'fcm_tq_recv_wait_time',
+    'fcm_tq_send_volume',
+    'fcm_tq_send_wait_time',
+)
+FCM_TABLE = 'SELECT {} FROM TABLE(MON_GET_FCM(-2))'.format(', '.join(FCM_TABLE_COLUMNS))
+
+
+FCM_CONNECTION_TABLE_COLUMNS = (
+    'member',
+    'remote_member',
+    'total_bytes_sent',
+    'total_bytes_received',
+)
+FCM_CONNECTION_TABLE = 'SELECT {} FROM TABLE(MON_GET_FCM_CONNECTION_LIST(-2))'.format(
+    ', '.join(FCM_CONNECTION_TABLE_COLUMNS)
+)
+
+
+CF_DATABASE_TABLE_COLUMNS = (
+    'member',
+    'cf_wait_time',
+    'cf_waits',
+)
+CF_DATABASE_TABLE = 'SELECT {} FROM TABLE(MON_GET_DATABASE(-2))'.format(', '.join(CF_DATABASE_TABLE_COLUMNS))
+
+
+CF_TABLE_COLUMNS = (
+    'cf_id',
+    'host_name',
+    'state',
+    'current_cf_gbp_size',
+    'current_cf_lock_size',
+    'current_cf_mem_size',
+    'target_cf_mem_size',
+)
+CF_TABLE = 'SELECT {} FROM TABLE(MON_GET_CF(-2))'.format(', '.join(CF_TABLE_COLUMNS))
+
+
+CF_CMD_TABLE_COLUMNS = (
+    'cf_id',
+    'cf_cmd_name',
+    'total_cf_requests',
+    'total_cf_cmd_time_micro',
+)
+CF_CMD_TABLE = 'SELECT {} FROM TABLE(MON_GET_CF_CMD(-2))'.format(', '.join(CF_CMD_TABLE_COLUMNS))
+
+
+CF_WAIT_TABLE_COLUMNS = (
+    'member',
+    'cf_id',
+    'cf_cmd_name',
+    'total_cf_wait_time_micro',
+)
+CF_WAIT_TABLE = 'SELECT {} FROM TABLE(MON_GET_CF_WAIT_TIME(-2))'.format(', '.join(CF_WAIT_TABLE_COLUMNS))
+
+
+GROUP_BUFFERPOOL_TABLE_COLUMNS = (
+    'member',
+    'num_gbp_full',
+    'castout_pages',
+    'cross_invalidations',
+    'gbp_l_reads',
+    'gbp_p_reads',
+)
+GROUP_BUFFERPOOL_TABLE = 'SELECT {} FROM TABLE(MON_GET_GROUP_BUFFERPOOL(-2))'.format(
+    ', '.join(GROUP_BUFFERPOOL_TABLE_COLUMNS)
+)
