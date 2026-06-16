@@ -272,9 +272,18 @@ jobs:
     - name: Set up environment
       run: |
         # We remove everything that comes pre-installed via Homebrew to avoid depending on or shipping stuff that
-        # comes in the runner through Homebrew to better control what might get shipped in the wheels via `delocate`
+        # comes in the runner through Homebrew to better control what might get shipped in the wheels via `delocate`.
+        # pkg-config and openssl@3 are needed by the management-deps install step: pip resolves cryptography via
+        # transitive deps of google-cloud-storage and falls back to building from source when no wheel matches the
+        # PBS Python's tags. These are host-side build tools — they're not bundled by `delocate` into the output
+        # wheels, which are produced by the later "Run the build" step and processed in isolation.
         brew remove --force --ignore-dependencies $(brew list --formula)
-        brew install coreutils
+        brew install coreutils pkg-config openssl@3
+        OPENSSL_PREFIX="$(brew --prefix openssl@3)"
+        {
+          echo "OPENSSL_DIR=${OPENSSL_PREFIX}"
+          echo "PKG_CONFIG_PATH=${OPENSSL_PREFIX}/lib/pkgconfig"
+        } >> "$GITHUB_ENV"
 
     - name: Checkout code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
