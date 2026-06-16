@@ -1,0 +1,1 @@
+Move cursor yield for Postgres schemas outside transaction. This should avoid creating a broken pool connection on timeout

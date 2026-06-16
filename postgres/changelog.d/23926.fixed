@@ -1,1 +1,0 @@
-Set dbms=postgresql in obfuscation options to align query_signature with dbm-logs-processor.
