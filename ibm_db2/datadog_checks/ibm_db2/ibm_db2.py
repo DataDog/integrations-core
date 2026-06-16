@@ -38,7 +38,13 @@ from .connection import Db2Connection
 from .metadata import Db2Metadata
 from .statement_samples import Db2StatementSamples
 from .statements import Db2StatementMetrics
-from .utils import get_version, hadr_status_to_service_check, scrub_connection_string, status_to_service_check
+from .utils import (
+    get_version,
+    hadr_status_to_service_check,
+    is_connection_error,
+    scrub_connection_string,
+    status_to_service_check,
+)
 
 DATABASE_MONOTONIC_METRICS = (
     ('transaction.commits', 'total_app_commits'),
@@ -1122,10 +1128,10 @@ class IbmDb2Check(DatabaseCheck):
         try:
             cursor = ibm_db.exec_immediate(self._conn, query)
         except Exception as e:
+            if not is_connection_error(e):
+                raise
             error = str(e)
             self.log.error("Error executing query: %s.\nAttempting to reconnect", error)
-            # ToDo: Probably the best strategy here would be to just set self._conn = None, abort the current check run
-            # and retry on the next check run.
             self._conn = self.get_connection()
             self.emit_connection_service_checks()
             if self._conn is None:

@@ -4,10 +4,12 @@
 import re
 
 import ibm_db
+from requests import ConnectionError
 
 from datadog_checks.base.constants import ServiceCheck
 
 CONN_STRING_PASSWORD = re.compile('(?:^|;)pwd=([^;]+)')
+CONNECTION_SQLSTATE_PATTERN = re.compile(r'SQLSTATE=08\w{3}', re.IGNORECASE)
 
 # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001156.html
 DB_STATUS_MAP = {
@@ -44,6 +46,12 @@ def get_version(connection):
 
 def scrub_connection_string(conn_str):
     return CONN_STRING_PASSWORD.sub(_scrub_password, conn_str)
+
+
+def is_connection_error(error: BaseException) -> bool:
+    if isinstance(error, ConnectionError):
+        return True
+    return CONNECTION_SQLSTATE_PATTERN.search(str(error)) is not None
 
 
 def _scrub_password(match):
