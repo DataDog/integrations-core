@@ -569,9 +569,23 @@ class SQLServer(DatabaseCheck):
             message = None
 
         if is_default:
-            self.service_check(SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+            self.service_check(
+                SERVICE_CHECK_NAME,
+                status,
+                tags=service_check_tags,
+                message=message,
+                hostname=self.reported_hostname,
+                raw=True,
+            )
         if self._config.autodiscovery and self._config.autodiscovery_db_service_check:
-            self.service_check(DATABASE_SERVICE_CHECK_NAME, status, tags=service_check_tags, message=message, raw=True)
+            self.service_check(
+                DATABASE_SERVICE_CHECK_NAME,
+                status,
+                tags=service_check_tags,
+                message=message,
+                hostname=self.reported_hostname,
+                raw=True,
+            )
 
     def autodiscover_databases(self, cursor):
         if not self._config.autodiscovery:
