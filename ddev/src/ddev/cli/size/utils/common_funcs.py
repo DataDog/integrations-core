@@ -49,16 +49,16 @@ class FileDataEntryPlatformVersion(FileDataEntry):
 
 
 class CommitEntry(TypedDict):
-    Size_Bytes: int  # Total size in bytes at commit
-    Version: str  # Version of the Integration/Dependency at commit
+    Size_Bytes: int  # Total size in bytes at commit (uncompressed)
+    Version: str  # Version of the Integration/Dependency at commit (uncompressed)
     Date: date  # Commit date
-    Author: str  # Commit author
+    Author: str  # Commit author (uncompressed)
     Commit_Message: str  # Commit message
     Commit_SHA: str  # Commit SHA hash
 
 
 class CommitEntryWithDelta(CommitEntry):
-    Delta_Bytes: int  # Size change in bytes compared to previous commit
+    Delta_Bytes: int  # Size change in bytes compared to previous commit (uncompressed)
     Delta: str  # Human-readable size change
 
 
@@ -405,7 +405,7 @@ def get_dependencies_sizes(
 
         file_data.append(
             {
-                "Names": str(dep),
+                "Name": str(dep),
                 "Version": version,
                 "Size_Bytes": int(size),
                 "Size": convert_to_human_readable_size(size),
