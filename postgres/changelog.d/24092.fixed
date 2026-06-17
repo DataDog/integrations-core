@@ -1,0 +1,1 @@
+Refactor the ``pg_class`` relation-metrics query into a version-aware builder. No metric is added or changed.
