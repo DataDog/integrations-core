@@ -13,7 +13,7 @@
             "accounts:read",
             "metrics:read",
             "events:read",
-            "flows:read"
+            "flows:read",
           ],
           "pkce": "required"
         }
