@@ -34,13 +34,8 @@ def test_check(dd_agent_check, instance, metrics):
 
 
 @pytest.mark.e2e
-def test_e2e_discovery(dd_agent_check, discovery_config):
-    aggregator = dd_agent_check(
-        discovery_config,
-        rate=True,
-        discovery_min_instances=1,
-        discovery_timeout=30,
-    )
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check("ray.openmetrics.health", status=AgentCheck.OK)

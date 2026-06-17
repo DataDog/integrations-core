@@ -10,7 +10,7 @@ from urllib.parse import urljoin
 import pytest
 import requests
 
-from datadog_checks.dev import EnvVars, TempDir, docker_run, get_e2e_discovery_config
+from datadog_checks.dev import EnvVars, TempDir, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.ray import RayCheck
@@ -67,7 +67,6 @@ def dd_environment():
         ],
         wrappers=[create_log_volumes()],
     ):
-        _, discovery_metadata = get_e2e_discovery_config()
         yield (
             {
                 "init_config": {},
@@ -80,7 +79,7 @@ def dd_environment():
             },
             {
                 **E2E_METADATA,
-                'docker_volumes': discovery_metadata['docker_volumes'],
+                **get_e2e_discovery_metadata(),
             },
         )
 
@@ -108,11 +107,6 @@ def mocked_head_instance():
 @pytest.fixture
 def mocked_worker_instance():
     return copy.deepcopy(MOCKED_WORKER_INSTANCE)
-
-
-@pytest.fixture
-def discovery_config():
-    return get_e2e_discovery_config()[0]
 
 
 def run_add():
