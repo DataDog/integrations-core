@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 23.9.1 / 2026-06-16
+
+***Fixed***:
+
+* Move cursor yield for Postgres schemas outside transaction. This should avoid creating a broken pool connection on timeout ([#24051](https://github.com/DataDog/integrations-core/pull/24051))
+* Cache ignored ``/* DDIGNORE */`` queries in incremental query metrics collector to avoid repeated lookups. ([#24056](https://github.com/DataDog/integrations-core/pull/24056))
+
 ## 23.9.0 / 2026-06-09
 
 ***Added***:

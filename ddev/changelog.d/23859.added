@@ -1,1 +1,0 @@
-Add subcommand-based `ddev create` interface (`check`, `check-only`, `jmx`, `logs`, `event`, `metrics-crawler`) with `--display-name`, `--metrics-prefix`, `--platforms`, and `--include-manifest` options for manifest-less integrations.
