@@ -116,6 +116,8 @@ def _map_httpx2_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPErro
         return HTTPInvalidURLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx2.TimeoutException):
         return HTTPTimeoutError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
+    # httpx2 has no dedicated SSL/cert exception: TLS failures surface as ConnectError (a NetworkError),
+    # so they fold into the generic HTTPConnectionError. The HTTPSSLError subtype is intentionally unproduced here.
     if isinstance(exc, httpx2.NetworkError):
         return HTTPConnectionError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx2.HTTPStatusError):
