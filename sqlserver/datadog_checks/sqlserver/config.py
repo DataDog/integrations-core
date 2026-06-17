@@ -9,6 +9,7 @@ import re
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
+from datadog_checks.sqlserver.config_models.instance import DataObservability
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     DEFAULT_LONG_METRICS_COLLECTION_INTERVAL,
@@ -132,6 +133,9 @@ class SQLServerConfig:
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
+        self.data_observability: DataObservability = DataObservability.model_validate(
+            instance.get('data_observability') or {}
+        )
 
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
