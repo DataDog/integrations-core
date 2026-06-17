@@ -82,7 +82,7 @@ go_goroutines{replica_role="leader"} 1
 
 # HELP go_info Kueue go info metric.
 # TYPE go_info gauge
-go_info{replica_role="leader",version="go1.24.4"} 1
+go_info{replica_role="leader",version="go1.26.3"} 1
 
 # HELP go_memstats_alloc_bytes Kueue go memstats alloc bytes metric.
 # TYPE go_memstats_alloc_bytes gauge
@@ -185,10 +185,10 @@ kueue_admission_attempts_total{replica_role="leader",priority_class="default-pri
 
 # HELP kueue_admission_checks_wait_time_seconds The time from when a workload got the quota reservation until admission, per 'cluster_queue'
 # TYPE kueue_admission_checks_wait_time_seconds histogram
-kueue_admission_checks_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_admission_checks_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_admission_checks_wait_time_seconds_sum{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_admission_checks_wait_time_seconds_count{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_admission_checks_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_admission_checks_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_admission_checks_wait_time_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_admission_checks_wait_time_seconds_count{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_admission_cycle_preemption_skips The number of Workloads in the ClusterQueue that got preemption candidates but had to be skipped because other ClusterQueues needed the same resources in the same cycle
 # TYPE kueue_admission_cycle_preemption_skips gauge
@@ -196,25 +196,25 @@ kueue_admission_cycle_preemption_skips{replica_role="leader"} 1
 
 # HELP kueue_admission_wait_time_seconds The time between a workload was created or requeued until admission, per 'cluster_queue'
 # TYPE kueue_admission_wait_time_seconds histogram
-kueue_admission_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_admission_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_admission_wait_time_seconds_sum{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_admission_wait_time_seconds_count{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_admission_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_admission_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_admission_wait_time_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_admission_wait_time_seconds_count{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_admitted_until_ready_wait_time_seconds The time between a workload was admitted until ready, per 'cluster_queue'
 # TYPE kueue_admitted_until_ready_wait_time_seconds histogram
-kueue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_admitted_until_ready_wait_time_seconds_sum{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_admitted_until_ready_wait_time_seconds_count{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_admitted_until_ready_wait_time_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_admitted_until_ready_wait_time_seconds_count{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_admitted_active_workloads The number of admitted Workloads that are active, per 'cluster_queue'
 # TYPE kueue_admitted_active_workloads gauge
-kueue_admitted_active_workloads{replica_role="leader",cluster_queue="default"} 1
+kueue_admitted_active_workloads{replica_role="leader",cluster_queue="cluster-queue"} 1
 
 # HELP kueue_admitted_workloads_total The total number of admitted workloads per 'cluster_queue'
 # TYPE kueue_admitted_workloads_total counter
-kueue_admitted_workloads_total{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_admitted_workloads_total{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_build_info Kueue build information. 1 labeled by git version, git commit, build date, go version, compiler, platform
 # TYPE kueue_build_info gauge
@@ -222,15 +222,15 @@ kueue_build_info{replica_role="leader",git_version="v0.11.0",git_commit="abc123"
 
 # HELP kueue_cluster_queue_info Reports ClusterQueue hierarchy information. The metric has value 1 and can be joined using labels.
 # TYPE kueue_cluster_queue_info gauge
-kueue_cluster_queue_info{replica_role="leader",cluster_queue="default"} 1
+kueue_cluster_queue_info{replica_role="leader",cluster_queue="cluster-queue"} 1
 
 # HELP kueue_cluster_queue_status Reports 'cluster_queue' with its 'status' (with possible values 'pending', 'active' or 'terminated').For a ClusterQueue, the metric only reports a value of 1 for one of the statuses.
 # TYPE kueue_cluster_queue_status gauge
-kueue_cluster_queue_status{replica_role="leader",cluster_queue="default",status="inadmissible"} 1
+kueue_cluster_queue_status{replica_role="leader",cluster_queue="cluster-queue",status="inadmissible"} 1
 
 # HELP kueue_cluster_queue_weighted_share Reports a value that representing the maximum of the ratios of usage above nominalquota to the lendable resources in the cohort, among all the resources provided bythe ClusterQueue, and divided by the weight.If zero, it means that the usage of the ClusterQueue is below the nominal quota.If the ClusterQueue has a weight of zero and is borrowing, this will return NaN.
 # TYPE kueue_cluster_queue_weighted_share gauge
-kueue_cluster_queue_weighted_share{replica_role="leader",cluster_queue="default"} 1
+kueue_cluster_queue_weighted_share{replica_role="leader",cluster_queue="cluster-queue"} 1
 
 # HELP kueue_cohort_info Reports Cohort hierarchy information. The metric has value 1 and can be joined using labels.
 # TYPE kueue_cohort_info gauge
@@ -238,11 +238,11 @@ kueue_cohort_info{replica_role="leader",cohort="default"} 1
 
 # HELP kueue_cohort_subtree_admitted_active_workloads The number of admitted Workloads that are active, per cohort's subtree
 # TYPE kueue_cohort_subtree_admitted_active_workloads gauge
-kueue_cohort_subtree_admitted_active_workloads{replica_role="leader",cluster_queue="default",cohort="default"} 1
+kueue_cohort_subtree_admitted_active_workloads{replica_role="leader",cluster_queue="cluster-queue",cohort="default"} 1
 
 # HELP kueue_cohort_subtree_admitted_workloads_total The total number of admitted workloads per cohort's subtree
 # TYPE kueue_cohort_subtree_admitted_workloads_total counter
-kueue_cohort_subtree_admitted_workloads_total{replica_role="leader",cluster_queue="default",cohort="default",priority_class="default-priority"} 1
+kueue_cohort_subtree_admitted_workloads_total{replica_role="leader",cluster_queue="cluster-queue",cohort="default",priority_class="default-priority"} 1
 
 # HELP kueue_cohort_weighted_share Reports a value that representing the maximum of the ratios of usage above nominalquota to the lendable resources in the Cohort, among all the resources provided bythe Cohort, and divided by the weight.If zero, it means that the usage of the Cohort is below the nominal quota.If the Cohort has a weight of zero and is borrowing, this will return NaN.
 # TYPE kueue_cohort_weighted_share gauge
@@ -250,60 +250,60 @@ kueue_cohort_weighted_share{replica_role="leader",cohort="default"} 1
 
 # HELP kueue_evicted_workloads_total The number of evicted workloads per 'cluster_queue', The label 'reason' can have the following values:- "Preempted" means that the workload was evicted in order to free resources for a workload with a higher priority or reclamation of nominal quota.- "PodsReadyTimeout" means that the eviction took place due to a PodsReady timeout.- "AdmissionCheck" means that the workload was evicted because at least one admission check transitioned to False.- "ClusterQueueStopped" means that the workload was evicted because the ClusterQueue is stopped.- "LocalQueueStopped" means that the workload was evicted because the LocalQueue is stopped.- "NodeFailures" means that the workload was evicted due to node failures when using TopologyAwareScheduling.- "Deactivated" means that the workload was evicted because spec.active is set to false. The label 'underlying_cause' can have the following values:- "" means that the value in 'reason' label is the root cause for eviction.- "AdmissionCheck" means that the workload was evicted by Kueue due to a rejected admission check.- "MaximumExecutionTimeExceeded" means that the workload was evicted by Kueue due to maximum execution time exceeded.- "RequeuingLimitExceeded" means that the workload was evicted by Kueue due to requeuing limit exceeded.
 # TYPE kueue_evicted_workloads_total counter
-kueue_evicted_workloads_total{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause=""} 1
+kueue_evicted_workloads_total{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause=""} 1
 
 # HELP kueue_evicted_workloads_once_total The number of unique workload evictions per 'cluster_queue', The label 'reason' can have the following values:- "Preempted" means that the workload was evicted in order to free resources for a workload with a higher priority or reclamation of nominal quota.- "PodsReadyTimeout" means that the eviction took place due to a PodsReady timeout.- "AdmissionCheck" means that the workload was evicted because at least one admission check transitioned to False.- "ClusterQueueStopped" means that the workload was evicted because the ClusterQueue is stopped.- "LocalQueueStopped" means that the workload was evicted because the LocalQueue is stopped.- "NodeFailures" means that the workload was evicted due to node failures when using TopologyAwareScheduling.- "Deactivated" means that the workload was evicted because spec.active is set to false. The label 'underlying_cause' can have the following values:- "" means that the value in 'reason' label is the root cause for eviction.- "WaitForStart" means that the pods have not been ready since admission, or the workload is not admitted.- "WaitForRecovery" means that the Pods were ready since the workload admission, but some pod has failed.- "AdmissionCheck" means that the workload was evicted by Kueue due to a rejected admission check.- "MaximumExecutionTimeExceeded" means that the workload was evicted by Kueue due to maximum execution time exceeded.- "RequeuingLimitExceeded" means that the workload was evicted by Kueue due to requeuing limit exceeded.
 # TYPE kueue_evicted_workloads_once_total counter
-kueue_evicted_workloads_once_total{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause=""} 1
+kueue_evicted_workloads_once_total{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause=""} 1
 
 # HELP kueue_finished_workloads The number of finished workloads per 'cluster_queue'.
 # TYPE kueue_finished_workloads gauge
-kueue_finished_workloads{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_finished_workloads{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_pending_workloads The number of pending workloads, per 'cluster_queue' and 'status'.'status' can have the following values:- "active" means that the workloads are in the admission queue.- "inadmissible" means there was a failed admission attempt for these workloads and they won't be retried until cluster conditions, which could make this workload admissible, change
 # TYPE kueue_pending_workloads gauge
-kueue_pending_workloads{replica_role="leader",cluster_queue="default",status="inadmissible"} 1
+kueue_pending_workloads{replica_role="leader",cluster_queue="cluster-queue",status="inadmissible"} 1
 
 # HELP kueue_pods_ready_to_evicted_time_seconds The number of seconds between a workload's pods being ready and eviction workloads per 'cluster_queue', The label 'reason' can have the following values:- "Preempted" means that the workload was evicted in order to free resources for a workload with a higher priority or reclamation of nominal quota.- "PodsReadyTimeout" means that the eviction took place due to a PodsReady timeout.- "AdmissionCheck" means that the workload was evicted because at least one admission check transitioned to False.- "ClusterQueueStopped" means that the workload was evicted because the ClusterQueue is stopped.- "LocalQueueStopped" means that the workload was evicted because the LocalQueue is stopped.- "NodeFailures" means that the workload was evicted due to node failures when using TopologyAwareScheduling.- "Deactivated" means that the workload was evicted because spec.active is set to false. The label 'underlying_cause' can have the following values:- "" means that the value in 'reason' label is the root cause for eviction.- "AdmissionCheck" means that the workload was evicted by Kueue due to a rejected admission check.- "MaximumExecutionTimeExceeded" means that the workload was evicted by Kueue due to maximum execution time exceeded.- "RequeuingLimitExceeded" means that the workload was evicted by Kueue due to requeuing limit exceeded.
 # TYPE kueue_pods_ready_to_evicted_time_seconds histogram
-kueue_pods_ready_to_evicted_time_seconds_bucket{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause="",le="1"} 1
-kueue_pods_ready_to_evicted_time_seconds_bucket{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause="",le="+Inf"} 1
-kueue_pods_ready_to_evicted_time_seconds_sum{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause=""} 0.5
-kueue_pods_ready_to_evicted_time_seconds_count{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause=""} 1
+kueue_pods_ready_to_evicted_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause="",le="1"} 1
+kueue_pods_ready_to_evicted_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause="",le="+Inf"} 1
+kueue_pods_ready_to_evicted_time_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause=""} 0.5
+kueue_pods_ready_to_evicted_time_seconds_count{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause=""} 1
 
 # HELP kueue_preempted_workloads_total The number of preempted workloads per 'preempting_cluster_queue', The label 'reason' can have the following values:- "InClusterQueue" means that the workload was preempted by a workload in the same ClusterQueue.- "InCohortReclamation" means that the workload was preempted by a workload in the same cohort due to reclamation of nominal quota.- "InCohortFairSharing" means that the workload was preempted by a workload in the same cohort Fair Sharing.- "InCohortReclaimWhileBorrowing" means that the workload was preempted by a workload in the same cohort due to reclamation of nominal quota while borrowing.
 # TYPE kueue_preempted_workloads_total counter
-kueue_preempted_workloads_total{replica_role="leader",reason="Preempted",underlying_cause="",preempting_cluster_queue="default"} 1
+kueue_preempted_workloads_total{replica_role="leader",reason="Preempted",underlying_cause="",preempting_cluster_queue="cluster-queue"} 1
 
 # HELP kueue_quota_reserved_wait_time_seconds The time between a workload was created or requeued until it got quota reservation, per 'cluster_queue'
 # TYPE kueue_quota_reserved_wait_time_seconds histogram
-kueue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_quota_reserved_wait_time_seconds_sum{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_quota_reserved_wait_time_seconds_count{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_quota_reserved_wait_time_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_quota_reserved_wait_time_seconds_count{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_quota_reserved_workloads_total The total number of quota reserved workloads per 'cluster_queue'
 # TYPE kueue_quota_reserved_workloads_total counter
-kueue_quota_reserved_workloads_total{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_quota_reserved_workloads_total{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_ready_wait_time_seconds The time between a workload was created or requeued until ready, per 'cluster_queue'
 # TYPE kueue_ready_wait_time_seconds histogram
-kueue_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_ready_wait_time_seconds_sum{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_ready_wait_time_seconds_count{replica_role="leader",cluster_queue="default",priority_class="default-priority"} 1
+kueue_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_ready_wait_time_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_ready_wait_time_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_ready_wait_time_seconds_count{replica_role="leader",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_replaced_workload_slices_total The number of replaced workload slices per 'cluster_queue'
 # TYPE kueue_replaced_workload_slices_total counter
-kueue_replaced_workload_slices_total{replica_role="leader",cluster_queue="default"} 1
+kueue_replaced_workload_slices_total{replica_role="leader",cluster_queue="cluster-queue"} 1
 
 # HELP kueue_resource_flavor_quota_reserved_workloads Kueue kueue resource flavor quota reserved workloads metric.
 # TYPE kueue_resource_flavor_quota_reserved_workloads gauge
-kueue_resource_flavor_quota_reserved_workloads{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="cpu",priority_class="default-priority"} 1
+kueue_resource_flavor_quota_reserved_workloads{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu",priority_class="default-priority"} 1
 
 # HELP kueue_reserving_active_workloads The number of Workloads that are reserving quota, per 'cluster_queue'
 # TYPE kueue_reserving_active_workloads gauge
-kueue_reserving_active_workloads{replica_role="leader",cluster_queue="default"} 1
+kueue_reserving_active_workloads{replica_role="leader",cluster_queue="cluster-queue"} 1
 
 # HELP kueue_workload_creation_latency_seconds The time between a job was created until its workload was created, per 'job_kind'. Entries are only recorded for objects with generation 1.
 # TYPE kueue_workload_creation_latency_seconds histogram
@@ -314,10 +314,10 @@ kueue_workload_creation_latency_seconds_count{replica_role="leader",job_kind="Jo
 
 # HELP kueue_workload_eviction_latency_seconds The time from workload eviction (WorkloadEvicted condition becomes True) until the workload returns to Pending (quota released).Observed on status transition from admitted or quota-reserved to pending while WorkloadEvicted remains True.Each matching update observes one latency sample (seconds) into this histogram; Prometheus aggregates samples across workloads.Uses the eviction condition LastTransitionTime on the updated object as the start time; cluster_queue is taken from status.admission.cluster_queue on the pre-update object when set and non-empty (otherwise no sample is recorded for that update). The label 'reason' can have the following values:- "Preempted" means that the workload was evicted in order to free resources for a workload with a higher priority or reclamation of nominal quota.- "PodsReadyTimeout" means that the eviction took place due to a PodsReady timeout.- "AdmissionCheck" means that the workload was evicted because at least one admission check transitioned to False.- "ClusterQueueStopped" means that the workload was evicted because the ClusterQueue is stopped.- "LocalQueueStopped" means that the workload was evicted because the LocalQueue is stopped.- "NodeFailures" means that the workload was evicted due to node failures when using TopologyAwareScheduling.- "Deactivated" means that the workload was evicted because spec.active is set to false.
 # TYPE kueue_workload_eviction_latency_seconds histogram
-kueue_workload_eviction_latency_seconds_bucket{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause="",le="1"} 1
-kueue_workload_eviction_latency_seconds_bucket{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause="",le="+Inf"} 1
-kueue_workload_eviction_latency_seconds_sum{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause=""} 0.5
-kueue_workload_eviction_latency_seconds_count{replica_role="leader",cluster_queue="default",reason="Preempted",underlying_cause=""} 1
+kueue_workload_eviction_latency_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause="",le="1"} 1
+kueue_workload_eviction_latency_seconds_bucket{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause="",le="+Inf"} 1
+kueue_workload_eviction_latency_seconds_sum{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause=""} 0.5
+kueue_workload_eviction_latency_seconds_count{replica_role="leader",cluster_queue="cluster-queue",reason="Preempted",underlying_cause=""} 1
 
 # HELP leader_election_master_status Kueue leader election master status metric.
 # TYPE leader_election_master_status gauge
@@ -381,7 +381,7 @@ workqueue_retries{replica_role="leader"} 1
 
 # HELP workqueue_unfinished_work_seconds Kueue workqueue unfinished work seconds metric.
 # TYPE workqueue_unfinished_work_seconds gauge
-workqueue_unfinished_work_seconds{replica_role="leader",cluster_queue="default"} 1
+workqueue_unfinished_work_seconds{replica_role="leader",cluster_queue="cluster-queue"} 1
 
 # HELP workqueue_work_duration_seconds Kueue workqueue work duration seconds metric.
 # TYPE workqueue_work_duration_seconds gauge
@@ -389,231 +389,231 @@ workqueue_work_duration_seconds{replica_role="leader"} 1
 
 # HELP kueue_local_queue_admission_checks_wait_time_seconds The time from when a workload got the quota reservation until admission, per 'local_queue'
 # TYPE kueue_local_queue_admission_checks_wait_time_seconds histogram
-kueue_local_queue_admission_checks_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_local_queue_admission_checks_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_local_queue_admission_checks_wait_time_seconds_sum{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_local_queue_admission_checks_wait_time_seconds_count{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_admission_checks_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_local_queue_admission_checks_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_local_queue_admission_checks_wait_time_seconds_sum{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_local_queue_admission_checks_wait_time_seconds_count{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_admission_wait_time_seconds The time between a workload was created or requeued until admission, per 'local_queue'
 # TYPE kueue_local_queue_admission_wait_time_seconds histogram
-kueue_local_queue_admission_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_local_queue_admission_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_local_queue_admission_wait_time_seconds_sum{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_local_queue_admission_wait_time_seconds_count{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_admission_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_local_queue_admission_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_local_queue_admission_wait_time_seconds_sum{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_local_queue_admission_wait_time_seconds_count{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_admitted_until_ready_wait_time_seconds The time between a workload was admitted until ready, per 'local_queue'
 # TYPE kueue_local_queue_admitted_until_ready_wait_time_seconds histogram
-kueue_local_queue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_local_queue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_local_queue_admitted_until_ready_wait_time_seconds_sum{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_local_queue_admitted_until_ready_wait_time_seconds_count{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_local_queue_admitted_until_ready_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_local_queue_admitted_until_ready_wait_time_seconds_sum{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_local_queue_admitted_until_ready_wait_time_seconds_count{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_admitted_active_workloads The number of admitted Workloads that are active, per 'localQueue'
 # TYPE kueue_local_queue_admitted_active_workloads gauge
-kueue_local_queue_admitted_active_workloads{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default"} 1
+kueue_local_queue_admitted_active_workloads{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue"} 1
 
 # HELP kueue_local_queue_admitted_workloads_total The total number of admitted workloads per 'local_queue'
 # TYPE kueue_local_queue_admitted_workloads_total counter
-kueue_local_queue_admitted_workloads_total{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_admitted_workloads_total{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_evicted_workloads_total The number of evicted workloads per 'local_queue', The label 'reason' can have the following values:- "Preempted" means that the workload was evicted in order to free resources for a workload with a higher priority or reclamation of nominal quota.- "PodsReadyTimeout" means that the eviction took place due to a PodsReady timeout.- "AdmissionCheck" means that the workload was evicted because at least one admission check transitioned to False.- "ClusterQueueStopped" means that the workload was evicted because the ClusterQueue is stopped.- "LocalQueueStopped" means that the workload was evicted because the LocalQueue is stopped.- "NodeFailures" means that the workload was evicted due to node failures when using TopologyAwareScheduling.- "Deactivated" means that the workload was evicted because spec.active is set to false. The label 'underlying_cause' can have the following values:- "" means that the value in 'reason' label is the root cause for eviction.- "AdmissionCheck" means that the workload was evicted by Kueue due to a rejected admission check.- "MaximumExecutionTimeExceeded" means that the workload was evicted by Kueue due to maximum execution time exceeded.- "RequeuingLimitExceeded" means that the workload was evicted by Kueue due to requeuing limit exceeded.
 # TYPE kueue_local_queue_evicted_workloads_total counter
-kueue_local_queue_evicted_workloads_total{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",reason="Preempted",underlying_cause=""} 1
+kueue_local_queue_evicted_workloads_total{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",reason="Preempted",underlying_cause=""} 1
 
 # HELP kueue_local_queue_finished_workloads The number of finished workloads, per 'local_queue'.
 # TYPE kueue_local_queue_finished_workloads gauge
-kueue_local_queue_finished_workloads{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_finished_workloads{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_finished_workloads_total The total number of finished workloads per 'local_queue'
 # TYPE kueue_local_queue_finished_workloads_total counter
-kueue_local_queue_finished_workloads_total{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_finished_workloads_total{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_pending_workloads The number of pending workloads, per 'local_queue' and 'status'.'status' can have the following values:- "active" means that the workloads are in the admission queue.- "inadmissible" means there was a failed admission attempt for these workloads and they won't be retried until cluster conditions, which could make this workload admissible, change
 # TYPE kueue_local_queue_pending_workloads gauge
-kueue_local_queue_pending_workloads{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",status="active"} 1
+kueue_local_queue_pending_workloads{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",status="inadmissible"} 1
 
 # HELP kueue_local_queue_quota_reserved_wait_time_seconds The time between a workload was created or requeued until it got quota reservation, per 'local_queue'
 # TYPE kueue_local_queue_quota_reserved_wait_time_seconds histogram
-kueue_local_queue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_local_queue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_local_queue_quota_reserved_wait_time_seconds_sum{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_local_queue_quota_reserved_wait_time_seconds_count{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_local_queue_quota_reserved_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_local_queue_quota_reserved_wait_time_seconds_sum{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_local_queue_quota_reserved_wait_time_seconds_count{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_quota_reserved_workloads_total The total number of quota reserved workloads per 'local_queue'
 # TYPE kueue_local_queue_quota_reserved_workloads_total counter
-kueue_local_queue_quota_reserved_workloads_total{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_quota_reserved_workloads_total{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_ready_wait_time_seconds The time between a workload was created or requeued until ready, per 'local_queue'
 # TYPE kueue_local_queue_ready_wait_time_seconds histogram
-kueue_local_queue_ready_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="1"} 1
-kueue_local_queue_ready_wait_time_seconds_bucket{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority",le="+Inf"} 1
-kueue_local_queue_ready_wait_time_seconds_sum{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 0.5
-kueue_local_queue_ready_wait_time_seconds_count{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default",priority_class="default-priority"} 1
+kueue_local_queue_ready_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="1"} 1
+kueue_local_queue_ready_wait_time_seconds_bucket{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority",le="+Inf"} 1
+kueue_local_queue_ready_wait_time_seconds_sum{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 0.5
+kueue_local_queue_ready_wait_time_seconds_count{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue",priority_class="default-priority"} 1
 
 # HELP kueue_local_queue_reserving_active_workloads The number of Workloads that are reserving quota, per 'localQueue'
 # TYPE kueue_local_queue_reserving_active_workloads gauge
-kueue_local_queue_reserving_active_workloads{replica_role="leader",name="gpu",namespace="team-a",cluster_queue="default"} 1
+kueue_local_queue_reserving_active_workloads{replica_role="leader",name="user-queue",namespace="default",cluster_queue="cluster-queue"} 1
 
 # HELP kueue_local_queue_status Reports 'localQueue' with its 'active' status (with possible values 'True', 'False', or 'Unknown').For a LocalQueue, the metric only reports a value of 1 for one of the statuses.
 # TYPE kueue_local_queue_status gauge
-kueue_local_queue_status{replica_role="leader",name="gpu",namespace="team-a",status="active"} 1
+kueue_local_queue_status{replica_role="leader",name="user-queue",namespace="default",status="active"} 1
 
 # HELP kueue_cluster_queue_borrowing_limit Reports the cluster_queue's resource borrowing limit within all the flavors
 # TYPE kueue_cluster_queue_borrowing_limit gauge
-kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="cpu"} 1
+kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cluster_queue_borrowing_limit Reports the cluster_queue's resource borrowing limit within all the flavors
 # TYPE kueue_cluster_queue_borrowing_limit gauge
-kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="memory"} 1
+kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cluster_queue_borrowing_limit Reports the cluster_queue's resource borrowing limit within all the flavors
 # TYPE kueue_cluster_queue_borrowing_limit gauge
-kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cluster_queue_borrowing_limit Reports the cluster_queue's resource borrowing limit within all the flavors
 # TYPE kueue_cluster_queue_borrowing_limit gauge
-kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cluster_queue_borrowing_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_cluster_queue_lending_limit Reports the cluster_queue's resource lending limit within all the flavors
 # TYPE kueue_cluster_queue_lending_limit gauge
-kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="cpu"} 1
+kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cluster_queue_lending_limit Reports the cluster_queue's resource lending limit within all the flavors
 # TYPE kueue_cluster_queue_lending_limit gauge
-kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="memory"} 1
+kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cluster_queue_lending_limit Reports the cluster_queue's resource lending limit within all the flavors
 # TYPE kueue_cluster_queue_lending_limit gauge
-kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cluster_queue_lending_limit Reports the cluster_queue's resource lending limit within all the flavors
 # TYPE kueue_cluster_queue_lending_limit gauge
-kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cluster_queue_lending_limit{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_cluster_queue_nominal_quota Reports the cluster_queue's resource nominal quota within all the flavors
 # TYPE kueue_cluster_queue_nominal_quota gauge
-kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="cpu"} 1
+kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cluster_queue_nominal_quota Reports the cluster_queue's resource nominal quota within all the flavors
 # TYPE kueue_cluster_queue_nominal_quota gauge
-kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="memory"} 1
+kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cluster_queue_nominal_quota Reports the cluster_queue's resource nominal quota within all the flavors
 # TYPE kueue_cluster_queue_nominal_quota gauge
-kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cluster_queue_nominal_quota Reports the cluster_queue's resource nominal quota within all the flavors
 # TYPE kueue_cluster_queue_nominal_quota gauge
-kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cluster_queue_nominal_quota{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_cluster_queue_resource_pending Reports the cluster_queue's total pending resource requests. Unlike resource_reservation, pending workloads have not yet been assigned to flavors.
 # TYPE kueue_cluster_queue_resource_pending gauge
-kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="cpu"} 1
+kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cluster_queue_resource_pending Reports the cluster_queue's total pending resource requests. Unlike resource_reservation, pending workloads have not yet been assigned to flavors.
 # TYPE kueue_cluster_queue_resource_pending gauge
-kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="memory"} 1
+kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cluster_queue_resource_pending Reports the cluster_queue's total pending resource requests. Unlike resource_reservation, pending workloads have not yet been assigned to flavors.
 # TYPE kueue_cluster_queue_resource_pending gauge
-kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cluster_queue_resource_pending Reports the cluster_queue's total pending resource requests. Unlike resource_reservation, pending workloads have not yet been assigned to flavors.
 # TYPE kueue_cluster_queue_resource_pending gauge
-kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cluster_queue_resource_pending{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_cluster_queue_resource_reservation Reports the cluster_queue's total resource reservation within all the flavors
 # TYPE kueue_cluster_queue_resource_reservation gauge
-kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="cpu"} 1
+kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cluster_queue_resource_reservation Reports the cluster_queue's total resource reservation within all the flavors
 # TYPE kueue_cluster_queue_resource_reservation gauge
-kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="memory"} 1
+kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cluster_queue_resource_reservation Reports the cluster_queue's total resource reservation within all the flavors
 # TYPE kueue_cluster_queue_resource_reservation gauge
-kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cluster_queue_resource_reservation Reports the cluster_queue's total resource reservation within all the flavors
 # TYPE kueue_cluster_queue_resource_reservation gauge
-kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cluster_queue_resource_reservation{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_cluster_queue_resource_usage Reports the cluster_queue's total resource usage within all the flavors
 # TYPE kueue_cluster_queue_resource_usage gauge
-kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="cpu"} 1
+kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cluster_queue_resource_usage Reports the cluster_queue's total resource usage within all the flavors
 # TYPE kueue_cluster_queue_resource_usage gauge
-kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="memory"} 1
+kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cluster_queue_resource_usage Reports the cluster_queue's total resource usage within all the flavors
 # TYPE kueue_cluster_queue_resource_usage gauge
-kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cluster_queue_resource_usage Reports the cluster_queue's total resource usage within all the flavors
 # TYPE kueue_cluster_queue_resource_usage gauge
-kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cluster_queue_resource_usage{replica_role="leader",cluster_queue="cluster-queue",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_cohort_subtree_quota Reports the cohort's nominal quota aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_quota gauge
-kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="on-demand",resource="cpu"} 1
+kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cohort_subtree_quota Reports the cohort's nominal quota aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_quota gauge
-kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="on-demand",resource="memory"} 1
+kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cohort_subtree_quota Reports the cohort's nominal quota aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_quota gauge
-kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cohort_subtree_quota Reports the cohort's nominal quota aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_quota gauge
-kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cohort_subtree_quota{replica_role="leader",cohort="default",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_cohort_subtree_resource_reservations Reports the cohort's resource reservations aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_resource_reservations gauge
-kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="on-demand",resource="cpu"} 1
+kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_cohort_subtree_resource_reservations Reports the cohort's resource reservations aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_resource_reservations gauge
-kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="on-demand",resource="memory"} 1
+kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_cohort_subtree_resource_reservations Reports the cohort's resource reservations aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_resource_reservations gauge
-kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_cohort_subtree_resource_reservations Reports the cohort's resource reservations aggregated within the cohort's subtree. The values are reported per resource and flavor
 # TYPE kueue_cohort_subtree_resource_reservations gauge
-kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_cohort_subtree_resource_reservations{replica_role="leader",cohort="default",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_local_queue_resource_reservation Reports the localQueue's total resource reservation within all the flavors
 # TYPE kueue_local_queue_resource_reservation gauge
-kueue_local_queue_resource_reservation{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="cpu"} 1
+kueue_local_queue_resource_reservation{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_local_queue_resource_reservation Reports the localQueue's total resource reservation within all the flavors
 # TYPE kueue_local_queue_resource_reservation gauge
-kueue_local_queue_resource_reservation{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="memory"} 1
+kueue_local_queue_resource_reservation{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_local_queue_resource_reservation Reports the localQueue's total resource reservation within all the flavors
 # TYPE kueue_local_queue_resource_reservation gauge
-kueue_local_queue_resource_reservation{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_local_queue_resource_reservation{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_local_queue_resource_reservation Reports the localQueue's total resource reservation within all the flavors
 # TYPE kueue_local_queue_resource_reservation gauge
-kueue_local_queue_resource_reservation{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_local_queue_resource_reservation{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="example.com/fpga"} 1
 
 # HELP kueue_local_queue_resource_usage Reports the localQueue's total resource usage within all the flavors
 # TYPE kueue_local_queue_resource_usage gauge
-kueue_local_queue_resource_usage{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="cpu"} 1
+kueue_local_queue_resource_usage{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="cpu"} 1
 
 # HELP kueue_local_queue_resource_usage Reports the localQueue's total resource usage within all the flavors
 # TYPE kueue_local_queue_resource_usage gauge
-kueue_local_queue_resource_usage{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="memory"} 1
+kueue_local_queue_resource_usage{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="memory"} 1
 
 # HELP kueue_local_queue_resource_usage Reports the localQueue's total resource usage within all the flavors
 # TYPE kueue_local_queue_resource_usage gauge
-kueue_local_queue_resource_usage{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="nvidia.com/gpu"} 1
+kueue_local_queue_resource_usage{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="nvidia.com/gpu"} 1
 
 # HELP kueue_local_queue_resource_usage Reports the localQueue's total resource usage within all the flavors
 # TYPE kueue_local_queue_resource_usage gauge
-kueue_local_queue_resource_usage{replica_role="leader",name="gpu",namespace="team-a",flavor="on-demand",resource="example.com/fpga"} 1
+kueue_local_queue_resource_usage{replica_role="leader",name="user-queue",namespace="default",flavor="default-flavor",resource="example.com/fpga"} 1
