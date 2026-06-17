@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ipaddress
 import logging
+import os
 from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from typing import Any, Self
@@ -112,7 +113,7 @@ def _build_verify(config: dict[str, Any]) -> bool | str:
         return config['tls_ca_cert']
     if not is_affirmative(config['tls_verify']):
         return False
-    return True
+    return os.environ.get('REQUESTS_CA_BUNDLE') or os.environ.get('CURL_CA_BUNDLE') or True
 
 
 def _build_cert(config: dict[str, Any]) -> str | tuple[str, str] | None:

@@ -46,6 +46,17 @@ def mid_stream_raising_transport_factory() -> Callable[[Exception], httpx2.MockT
     return _factory
 
 
+CA_ENV_VARS = ('REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE')
+
+
+@pytest.fixture
+def clean_ca_env(monkeypatch):
+    """Strip CA-bundle env vars so each test controls the CA environment it reads."""
+    for name in CA_ENV_VARS:
+        monkeypatch.delenv(name, raising=False)
+    return monkeypatch
+
+
 @pytest.fixture
 def captured_requests() -> list[httpx2.Request]:
     return []

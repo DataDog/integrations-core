@@ -11,6 +11,7 @@ from datadog_checks.base.utils.httpx2 import (
     HTTPX2Wrapper,
     _build_env_proxy_transport,
     _build_proxy_transport,
+    _build_verify,
     _env_no_proxy,
     _env_proxies,
     _ProxyRoutingTransport,
@@ -405,6 +406,25 @@ def test_full_instance_proxy_ignores_env(clean_proxy_env):
             router = http._client._transport
             # Both schemes are instance-configured, so nothing is attributed to the environment.
             assert router._env_schemes == set()
+
+
+def test_skip_proxy_preserves_env_ca_bundle(clean_proxy_env, clean_ca_env, capturing_transport):
+    # skip_proxy disables trust_env, but the env CA bundle must still apply, matching RequestsWrapper.
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/ca.pem')
+    with HTTPX2Wrapper({'skip_proxy': True}, {}, transport=capturing_transport) as http:
+        assert http._client.trust_env is False
+        assert http.options['verify'] == '/env/ca.pem'
+
+
+def test_env_ca_bundle_threads_into_proxied_inners(clean_proxy_env, clean_ca_env):
+    # A proxy disables trust_env too, so the env-resolved CA bundle must thread into the proxied transports.
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/ca.pem')
+    verify = _build_verify({'tls_ca_cert': None, 'tls_verify': True})
+    with mock.patch('datadog_checks.base.utils.httpx2.httpx2.HTTPTransport') as transport_cls:
+        _build_env_proxy_transport({'http': 'http://1.2.3.4:3128'}, None, verify, None)
+    calls = transport_cls.call_args_list
+    assert calls, 'expected the direct and proxied inner transports to be built'
+    assert all(call.kwargs['verify'] == '/env/ca.pem' for call in calls)
 
 
 def test_skip_proxy_ignores_env_proxy(clean_proxy_env):

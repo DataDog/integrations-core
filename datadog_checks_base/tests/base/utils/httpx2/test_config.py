@@ -118,9 +118,40 @@ def test_per_request_timeout_value_construction(capturing_transport, captured_re
     assert captured_requests[0].extensions['timeout'] == expected
 
 
-def test_verify_defaults_to_true(capturing_transport):
+def test_verify_defaults_to_true(capturing_transport, clean_ca_env):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     assert http.options['verify'] is True
+
+
+def test_verify_uses_requests_ca_bundle_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/requests.pem'
+
+
+def test_verify_falls_back_to_curl_ca_bundle_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('CURL_CA_BUNDLE', '/env/curl.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/curl.pem'
+
+
+def test_verify_requests_ca_bundle_wins_over_curl(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    clean_ca_env.setenv('CURL_CA_BUNDLE', '/env/curl.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/requests.pem'
+
+
+def test_explicit_tls_ca_cert_wins_over_env_ca_bundle(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    http = HTTPX2Wrapper({'tls_ca_cert': '/etc/ssl/ca.pem'}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/etc/ssl/ca.pem'
+
+
+def test_verify_off_ignores_env_ca_bundle(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    http = HTTPX2Wrapper({'tls_verify': False}, {}, transport=capturing_transport)
+    assert http.options['verify'] is False
 
 
 def test_verify_false_when_tls_verify_off(capturing_transport):
