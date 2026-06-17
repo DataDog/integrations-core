@@ -14,6 +14,7 @@ from datadog_checks.argocd.resources_constants import (
     APPLICATION_INCLUDE,
     CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
+    REPOSITORY_INCLUDE,
 )
 from datadog_checks.dev.http import MockResponse
 
@@ -157,7 +158,7 @@ def test_collect_scrubs_credentials_from_operation_state_message(mock_http_respo
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -178,7 +179,7 @@ def test_collect_strips_credentials_from_external_urls(mock_http_response_per_en
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -204,7 +205,7 @@ def test_real_helper_ships_multisource_history_and_scrubs_its_repo_urls(aggregat
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = ArgocdCheck("argocd", {}, [_instance()])
+    check = _check()
 
     check._resource_collector.collect()
 
