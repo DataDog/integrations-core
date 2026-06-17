@@ -8,7 +8,8 @@ from unittest.mock import call
 
 import pytest
 
-from ddev.cli.release.branch.create import compute_next_milestone, ensure_build_agent_yaml_updated, update_release_json
+from ddev.cli.release.branch.build_agent import ensure_build_agent_yaml_updated
+from ddev.cli.release.branch.create import compute_next_milestone, update_release_json
 from ddev.utils.fs import Path
 
 
