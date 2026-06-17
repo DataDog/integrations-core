@@ -257,6 +257,13 @@ def test_build_proxy_transport_builds_router_when_proxy_set():
     transport.close()
 
 
+def test_build_proxy_transport_builds_router_for_socks_proxy():
+    """A socks5h:// proxy URL builds a routing transport, matching RequestsWrapper's documented SOCKS support."""
+    transport = _build_proxy_transport({'http': 'socks5h://1.2.3.4:1080'}, None, True, None)
+    assert isinstance(transport, _ProxyRoutingTransport)
+    transport.close()
+
+
 def test_build_proxy_transport_skips_direct_allocation_when_no_scheme_usable():
     with mock.patch('datadog_checks.base.utils.httpx2.httpx2.HTTPTransport') as transport_cls:
         result = _build_proxy_transport({'all_proxy': 'http://p:3128'}, None, True, None)
