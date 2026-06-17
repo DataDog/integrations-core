@@ -427,23 +427,16 @@ def test_group_per_user_services(aggregator, check, instance_group_per_user_serv
     with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
         c.check(instance_group_per_user_services)
 
-    # Both per-user instances collapse to the template name, so the grouped tag is submitted twice
-    grouped_tags = ['windows_service:OneSyncSvc', 'windows_service_state:running', 'display_name:Sync Host']
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=grouped_tags, count=2)
-    aggregator.assert_metric('windows_service.state', value=1, tags=grouped_tags, count=2)
-
-    # The LUID-suffixed names must no longer be emitted
-    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
-        aggregator.assert_service_check(
-            c.SERVICE_CHECK_NAME,
-            status=c.OK,
-            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
-            count=0,
-        )
-
-    # Non per-user services are untouched
-    dnscache_tags = ['windows_service:Dnscache', 'windows_service_state:running', 'display_name:DNS Client']
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=dnscache_tags, count=1)
+    services = [
+        # Both per-user instances collapse to the template name, so the grouped tag is submitted twice
+        ServiceAssertion('OneSyncSvc', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host'], count=2),
+        # The LUID-suffixed names must no longer be emitted
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING, count=0),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING, count=0),
+        # Non per-user services are untouched
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['display_name:DNS Client']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_group_per_user_services_disabled(aggregator, check, instance_group_per_user_services):
@@ -453,21 +446,18 @@ def test_group_per_user_services_disabled(aggregator, check, instance_group_per_
     with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
         c.check(instance_group_per_user_services)
 
-    # Without grouping each instance keeps its full LUID-suffixed name
-    for suffix in ('443f50', '18f113'):
-        aggregator.assert_service_check(
-            c.SERVICE_CHECK_NAME,
-            status=c.OK,
-            tags=[
-                f'windows_service:OneSyncSvc_{suffix}',
-                'windows_service_state:running',
-                f'display_name:Sync Host_{suffix}',
-            ],
-            count=1,
-        )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:OneSyncSvc', 'windows_service_state:running'], count=0
-    )
+    services = [
+        # Without grouping each instance keeps its full LUID-suffixed name
+        ServiceAssertion(
+            'OneSyncSvc_443f50', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host_443f50']
+        ),
+        ServiceAssertion(
+            'OneSyncSvc_18f113', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host_18f113']
+        ),
+        # The grouped template name is not emitted
+        ServiceAssertion('OneSyncSvc', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_group_per_user_services_ignores_non_user_service(aggregator, check, instance_group_per_user_services):
@@ -487,12 +477,12 @@ def test_group_per_user_services_ignores_non_user_service(aggregator, check, ins
     with patch('win32service.EnumServicesStatusEx', return_value=mock_services):
         c.check(instance_group_per_user_services)
 
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=['windows_service:MyService_abc123', 'windows_service_state:running', 'display_name:My Service_abc123'],
-        count=1,
-    )
+    services = [
+        ServiceAssertion(
+            'MyService_abc123', win32service.SERVICE_RUNNING, extra_tags=['display_name:My Service_abc123']
+        ),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_group_per_user_services_with_name_filter(aggregator, check, instance_group_per_user_services):
@@ -505,23 +495,14 @@ def test_group_per_user_services_with_name_filter(aggregator, check, instance_gr
     with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
         c.check(instance_group_per_user_services)
 
-    grouped_tags = ['windows_service:OneSyncSvc', 'windows_service_state:running', 'display_name:Sync Host']
-    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=grouped_tags, count=2)
-
-    # The grouped template name must not be reported UNKNOWN by the services_unseen path
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.UNKNOWN,
-        tags=['windows_service:OneSyncSvc', 'windows_service_state:unknown'],
-        count=0,
-    )
-    # The non-matching service is not reported
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=['windows_service:Dnscache', 'windows_service_state:running', 'display_name:DNS Client'],
-        count=0,
-    )
+    services = [
+        ServiceAssertion('OneSyncSvc', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host'], count=2),
+        # The grouped template name must not be reported UNKNOWN by the services_unseen path
+        ServiceAssertion('OneSyncSvc', -1, count=0),
+        # The non-matching service is not reported
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 @pytest.mark.e2e
