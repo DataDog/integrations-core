@@ -42,6 +42,7 @@ from datadog_checks.postgres.relationsmanager import (
     RELATION_METRICS,
     TABLE_BLOAT,
     RelationsManager,
+    get_pg_class_query,
 )
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
@@ -466,7 +467,7 @@ class PostgreSql(DatabaseCheck):
 
         # Dynamic queries for relationsmanager
         if self._config.relations:
-            for query in DYNAMIC_RELATION_QUERIES:
+            for query in DYNAMIC_RELATION_QUERIES + [get_pg_class_query(self.version)]:
                 query = copy.copy(query)
                 formatted_query = self._relations_manager.filter_relation_query(query['query'], 'nspname')
                 query['query'] = formatted_query
