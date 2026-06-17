@@ -26,13 +26,8 @@ def test_check(dd_agent_check, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_e2e_discovery(dd_agent_check, discovery_config):
-    aggregator = dd_agent_check(
-        discovery_config,
-        check_rate=True,
-        discovery_min_instances=1,
-        discovery_timeout=30,
-    )
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
 
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
