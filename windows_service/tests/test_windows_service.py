@@ -505,6 +505,86 @@ def test_group_per_user_services_with_name_filter(aggregator, check, instance_gr
     assert_service_check_and_metrics(aggregator, services)
 
 
+def test_per_user_false_excludes_per_user_services(aggregator, check):
+    # `per_user: false` collects only non-per-user services, so per-user instances are dropped.
+    instance = {'services': [{'per_user': False}], 'disable_legacy_service_tag': True}
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.OK,
+        tags=['windows_service:Dnscache', 'windows_service_state:running'],
+        count=1,
+    )
+    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
+        aggregator.assert_service_check(
+            c.SERVICE_CHECK_NAME,
+            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
+            count=0,
+        )
+
+
+def test_per_user_true_collects_only_per_user_services(aggregator, check):
+    instance = {'services': [{'per_user': True}], 'disable_legacy_service_tag': True}
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
+        aggregator.assert_service_check(
+            c.SERVICE_CHECK_NAME,
+            status=c.OK,
+            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
+            count=1,
+        )
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        tags=['windows_service:Dnscache', 'windows_service_state:running'],
+        count=0,
+    )
+
+
+def test_per_user_composes_with_name_filter(aggregator, check):
+    # A name filter that matches the per-user instances but is gated to non-per-user collects nothing.
+    instance = {'services': [{'name': 'OneSyncSvc', 'per_user': False}], 'disable_legacy_service_tag': True}
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
+        aggregator.assert_service_check(
+            c.SERVICE_CHECK_NAME,
+            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
+            count=0,
+        )
+    # The named filter still goes unmatched and reports UNKNOWN once.
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.UNKNOWN,
+        tags=['windows_service:OneSyncSvc', 'windows_service_state:unknown'],
+        count=1,
+    )
+
+
+def test_per_user_false_with_grouping_warns(aggregator, check):
+    instance = {
+        'services': [{'per_user': False}],
+        'group_per_user_services': True,
+        'disable_legacy_service_tag': True,
+    }
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    assert any('will not be grouped' in w for w in c.warnings)
+
+
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)

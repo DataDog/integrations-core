@@ -22,9 +22,14 @@ SERVICE_USERSERVICE_INSTANCE = 0x80
 USER_SERVICE_LUID_SUFFIX_RE = re.compile(r'_[0-9A-Fa-f]+$')
 
 
+def _is_per_user_service(service_type: int) -> bool:
+    """True for per-user service instances (named <template>_<LUID>)."""
+    return bool(service_type & SERVICE_USERSERVICE_INSTANCE)
+
+
 def _group_per_user_service_name(name: str, service_type: int) -> str:
     """Strip the per-user LUID suffix so instances group under their template name."""
-    if service_type & SERVICE_USERSERVICE_INSTANCE:
+    if _is_per_user_service(service_type):
         return USER_SERVICE_LUID_SUFFIX_RE.sub('', name)
     return name
 
@@ -42,10 +47,11 @@ class TriggerInfo(ctypes.Structure):
 
 
 class ServiceFilter(object):
-    def __init__(self, name=None, startup_type=None, trigger_start=None):
+    def __init__(self, name=None, startup_type=None, trigger_start=None, per_user=None):
         self.name = name
         self.startup_type = startup_type
         self.trigger_start = trigger_start
+        self.per_user = per_user
 
         self._init_patterns()
 
@@ -57,9 +63,12 @@ class ServiceFilter(object):
         except re.error as e:
             raise Exception("Regular expression syntax error in '{}': {}".format(pattern, str(e))) from None
 
-    def match(self, service_view):
+    def match(self, service_view, service_type):
         if self.name is not None:
             if not self._name_re.match(service_view.name):
+                return False
+        if self.per_user is not None:
+            if self.per_user != _is_per_user_service(service_type):
                 return False
         if self.startup_type is not None:
             if self.startup_type.lower() != service_view.startup_type_string().lower():
@@ -79,6 +88,8 @@ class ServiceFilter(object):
             vals.append('startup_type={}'.format(self.startup_type))
         if self.trigger_start is not None:
             vals.append('trigger_start={}'.format(self.trigger_start))
+        if self.per_user is not None:
+            vals.append('per_user={}'.format(self.per_user))
         # Example:
         #   - ServiceFilter(name=EventLog)
         #   - ServiceFilter(startup_type=automatic)
@@ -113,7 +124,8 @@ class ServiceFilter(object):
                 name = cls._wmi_compat_name(name)
             startup_type = item.get('startup_type', None)
             trigger_start = item.get('trigger_start', None)
-            obj = cls(name=name, startup_type=startup_type, trigger_start=trigger_start)
+            per_user = item.get('per_user', None)
+            obj = cls(name=name, startup_type=startup_type, trigger_start=trigger_start, per_user=per_user)
         else:
             raise Exception("Invalid type '{}' for service".format(type(item).__name__))
         return obj
@@ -317,6 +329,14 @@ class WindowsService(AgentCheck):
 
         group_per_user_services = instance.get('group_per_user_services', False)
 
+        # Exclusion (per_user: false) takes precedence over grouping; excluded services are never
+        # collected, so they can't be grouped.
+        if group_per_user_services and any(f.per_user is False for f in service_filters):
+            self.warning(
+                "group_per_user_services is enabled but a services filter excludes per-user services "
+                "(per_user: false); excluded services are not collected and will not be grouped."
+            )
+
         for service_status_process_enum in service_status_process_enums:
             service_name = service_status_process_enum["ServiceName"]
             display_name = service_status_process_enum["DisplayName"]
@@ -343,7 +363,7 @@ class WindowsService(AgentCheck):
             if 'ALL' not in services:
                 for service_filter in service_filters:
                     try:
-                        if service_filter.match(service_view):
+                        if service_filter.match(service_view, service_type):
                             self.log.debug('Matched %s with %s', service_view, service_filter)
                             services_unseen.discard(service_filter.name)
                             break
