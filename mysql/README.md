@@ -137,6 +137,7 @@ To configure this check for an Agent running on a host:
         extra_innodb_metrics: true
         schema_size_metrics: false
         disable_innodb_metrics: false
+        disable_binlog_size_metrics: false
   ```
 
 **Note**: Wrap your password in single quotes in case a special character is present.

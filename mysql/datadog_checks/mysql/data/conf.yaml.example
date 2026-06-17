@@ -313,6 +313,17 @@ instances:
         #
         # disable_innodb_metrics: false
 
+        ## @param disable_binlog_size_metrics - boolean - optional - default: false
+        ## Set to `true` to disable the collection of binary log size metrics.
+        ##
+        ## By default, when binary logging is enabled, the check runs `SHOW BINARY LOGS;` to compute the
+        ## `mysql.binlog.disk_use` metric. Some MySQL implementations such as Aurora can retain thousands of
+        ## binary log files, which makes `SHOW BINARY LOGS;` slow and can contend on binary log mutexes.
+        ##
+        ## Enabling this option skips that query and the `mysql.binlog.disk_use` metric is no longer collected.
+        #
+        # disable_binlog_size_metrics: false
+
         ## @param schema_size_metrics - boolean - optional - default: false
         ## Set to `true` to collect schema size metrics.
         ##
