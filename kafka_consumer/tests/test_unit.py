@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
 from contextlib import nullcontext as does_not_raise
 
@@ -708,3 +709,61 @@ def test_kafka_cluster_id_override(check, kafka_instance, dd_run_check, aggregat
         for metric in aggregator.metrics(metric_name):
             for tag in expected_override_tags:
                 assert tag in metric.tags, f"{tag} not in {metric.tags} for {metric_name}"
+
+
+def _connection_error_events(check_instance):
+    return [
+        json.loads(c[0][0])
+        for c in check_instance.event_platform_event.call_args_list
+        if c[0][1] == 'data-streams-message' and json.loads(c[0][0]).get('config_type') == 'connection_error'
+    ]
+
+
+def _setup_failing_check(check, kafka_instance, dd_run_check):
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = seed_mock_client()
+    kafka_consumer_check.client.request_metadata_update.side_effect = Exception('broker down')
+    kafka_consumer_check.event_platform_event = mock.Mock()
+    with pytest.raises(Exception, match="Unable to connect to the AdminClient"):
+        dd_run_check(kafka_consumer_check)
+    return kafka_consumer_check
+
+
+def test_connection_error_emits_dsm_event(check, kafka_instance, dd_run_check):
+    """A connection_error event is emitted when request_metadata_update fails and cluster monitoring is on."""
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
+
+    events = _connection_error_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['reason'] == 'broker down'
+    assert events[0]['bootstrap_servers'] == kafka_instance['kafka_connect_str']
+    assert 'collection_timestamp' in events[0]
+
+
+def test_connection_error_includes_cluster_id_override(check, kafka_instance, dd_run_check):
+    """connection_error event uses kafka_cluster_id_override when configured."""
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_instance['kafka_cluster_id_override'] = 'my-cluster'
+    kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
+
+    events = _connection_error_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['kafka_cluster_id'] == 'my-cluster'
+
+
+def test_connection_error_not_emitted_without_cluster_monitoring(check, kafka_instance, dd_run_check):
+    """No connection_error event is emitted when cluster monitoring is disabled."""
+    kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
+    assert not _connection_error_events(kafka_consumer_check)
+
+
+def test_connection_error_sink_failure_does_not_mask_broker_error(check, kafka_instance, dd_run_check):
+    """Sink failure during connection_error emission does not mask the original AdminClient error."""
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = seed_mock_client()
+    kafka_consumer_check.client.request_metadata_update.side_effect = Exception('broker down')
+    kafka_consumer_check.event_platform_event = mock.Mock(side_effect=Exception('intake unavailable'))
+    with pytest.raises(Exception, match="Unable to connect to the AdminClient"):
+        dd_run_check(kafka_consumer_check)
