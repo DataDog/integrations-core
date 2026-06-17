@@ -129,6 +129,11 @@ class AggregatorStub(object):
     def submit_event_platform_event(self, check, check_id, raw_event, event_type):
         self._event_platform_events[event_type].append(raw_event)
 
+    def scan_and_submit_event_platform_event(self, check, check_id, raw_event, event_type):
+        # Passthrough stub: the Agent scans the event with the Sensitive Data Scanner
+        # before submitting it. The stub stores the raw event unchanged.
+        self._event_platform_events[event_type].append(raw_event)
+
     def submit_histogram_bucket(
         self,
         check,
