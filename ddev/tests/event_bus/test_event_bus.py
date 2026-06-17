@@ -92,22 +92,22 @@ class Secretary(AsyncProcessor[Memo]):
         self.failed_deliveries: list[tuple[BaseMessage, Exception]] = []
         self.hook_failures: list[ProcessorHookError] = []
 
-    async def process_message(self, message: Memo) -> None:
+    async def process_message(self, message: Memo):
         if message.content.startswith("fail_processing"):
             raise ValueError("Processing failed intentionally")
         self.delivered_memos.append(message)
 
-    async def on_success(self, message: Memo) -> None:
+    async def on_success(self, message: Memo):
         if message.content == "fail_success_hook":
             raise RuntimeError("Success hook failed intentionally")
         self.confirmations.append(message)
 
-    async def on_error(self, error: Exception) -> None:
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError):
         if isinstance(error, MessageProcessingError):
             if error.message.content == "fail_processing_and_error":
                 raise RuntimeError("Error hook failed intentionally")
             self.failed_deliveries.append((error.message, error.original_exception))
-        elif isinstance(error, ProcessorHookError):
+        else:
             self.hook_failures.append(error)
 
 
@@ -116,7 +116,7 @@ class Analyst(AsyncProcessor[TaskAssignment | Announcement]):
         super().__init__(name)
         self.completed_tasks: list[BaseMessage] = []
 
-    async def process_message(self, message: TaskAssignment | Announcement) -> None:
+    async def process_message(self, message: TaskAssignment | Announcement):
         if isinstance(message, TaskAssignment) and message.priority < 0:
             raise ValueError("Analyst failed intentionally")
         self.completed_tasks.append(message)
@@ -127,7 +127,7 @@ class Manager(AsyncProcessor[Memo]):
         super().__init__(name)
         self.processed_memos: list[Memo] = []
 
-    async def process_message(self, message: Memo) -> None:
+    async def process_message(self, message: Memo):
         self.processed_memos.append(message)
         if message.subject == "new_hire":
             self.submit_message(Announcement(id="new_hire", urgent=False, announcement_type="NewHireAnnouncement"))
@@ -153,14 +153,14 @@ class MockOrchestrator(EventBusOrchestrator):
         self.received_messages: list[BaseMessage] = []
         self.finalized_exception: Exception | None = None
 
-    async def on_initialize(self) -> None:
+    async def on_initialize(self):
         self.events.append("initialize")
 
-    async def on_finalize(self, exception: Exception | None) -> None:
+    async def on_finalize(self, exception: Exception | None):
         self.events.append("finalize")
         self.finalized_exception = exception
 
-    async def on_message_received(self, message: BaseMessage) -> None:
+    async def on_message_received(self, message: BaseMessage):
         self.events.append(f"received_{message.id}")
         self.received_messages.append(message)
 
@@ -215,7 +215,7 @@ def test_workflow_success(
     secretary: Secretary,
     analyst: Analyst,
     manager: Manager,
-) -> None:
+):
     new_hire_memo = Memo("new_hire_memo", subject="new_hire", content="Welcome John!")
 
     orchestrator.submit_message(new_hire_memo)
@@ -252,7 +252,7 @@ def test_processor_processing_failure(
     secretary: Secretary,
     memo_content: str,
     expected_error_type: type[Exception],
-) -> None:
+):
     """Secretary's on_error returns cleanly, so the failure is handled and the bus continues."""
     orchestrator.submit_message(Memo("failed_memo", content=memo_content))
 
@@ -268,9 +268,7 @@ def test_processor_processing_failure(
     assert isinstance(error, expected_error_type)
 
 
-def test_processor_success_hook_failure_routed_to_on_error(
-    orchestrator: MockOrchestrator, secretary: Secretary
-) -> None:
+def test_processor_success_hook_failure_routed_to_on_error(orchestrator: MockOrchestrator, secretary: Secretary):
     """on_success failure is wrapped and routed to the processor's on_error."""
     orchestrator.submit_message(Memo("hook_fail_memo", content="fail_success_hook"))
 
@@ -292,7 +290,7 @@ def test_processor_success_hook_failure_routed_to_on_error(
     assert orchestrator.finalized_exception is None
 
 
-def test_mixed_messages(orchestrator: MockOrchestrator, secretary: Secretary, analyst: Analyst) -> None:
+def test_mixed_messages(orchestrator: MockOrchestrator, secretary: Secretary, analyst: Analyst):
     orchestrator.submit_message(Memo("memo1"))
     orchestrator.submit_message(TaskAssignment("task1"))
     orchestrator.submit_message(Announcement("announcement1"))
@@ -315,7 +313,7 @@ def test_orchestrator_timing(
     max_timeout: int,
     grace_period: int,
     upper_limit: int,
-) -> None:
+):
     orchestrator._max_timeout = max_timeout
     orchestrator._grace_period = grace_period
 
@@ -346,7 +344,7 @@ def test_orchestrator_timing(
         "max_timeout_equal_to_grace_period",
     ],
 )
-def test_validate_parameters(max_timeout: float, grace_period: float, expectation: AbstractContextManager) -> None:
+def test_validate_parameters(max_timeout: float, grace_period: float, expectation: AbstractContextManager):
     logger = logging.getLogger("test")
     with expectation:
         MockOrchestrator(logger, max_timeout=max_timeout, grace_period=grace_period)
@@ -354,7 +352,7 @@ def test_validate_parameters(max_timeout: float, grace_period: float, expectatio
 
 def test_default_on_error_with_default_policy_logs_and_continues(
     orchestrator: MockOrchestrator, analyst: Analyst, caplog: pytest.LogCaptureFixture
-) -> None:
+):
     """Analyst uses the default re-raising on_error; under fail_fast=False the bus logs and continues."""
     orchestrator.submit_message(TaskAssignment("bad_task", priority=-1))
     orchestrator.run()
@@ -365,7 +363,7 @@ def test_default_on_error_with_default_policy_logs_and_continues(
     assert "Analyst failed intentionally" in caplog.text
 
 
-def test_default_on_error_with_fail_fast_stops_bus(secretary: Secretary, analyst: Analyst, manager: Manager) -> None:
+def test_default_on_error_with_fail_fast_stops_bus(secretary: Secretary, analyst: Analyst, manager: Manager):
     """Default on_error re-raises; under fail_fast=True the bus stops."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
@@ -383,7 +381,7 @@ def test_default_on_error_with_fail_fast_stops_bus(secretary: Secretary, analyst
 
 def test_processor_on_error_failure_logs_under_default_policy(
     orchestrator: MockOrchestrator, secretary: Secretary, caplog: pytest.LogCaptureFixture
-) -> None:
+):
     """on_error itself raising a non-Fatal error is logged under fail_fast=False; bus continues."""
     orchestrator.submit_message(Memo("double_fail_memo", content="fail_processing_and_error"))
 
@@ -396,7 +394,7 @@ def test_processor_on_error_failure_logs_under_default_policy(
     assert "Error hook failed intentionally" in caplog.text
 
 
-def test_processor_on_error_failure_stops_bus_under_fail_fast(secretary: Secretary) -> None:
+def test_processor_on_error_failure_stops_bus_under_fail_fast(secretary: Secretary):
     """on_error itself raising a non-Fatal error stops the bus when fail_fast=True."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
@@ -411,7 +409,7 @@ def test_processor_on_error_failure_stops_bus_under_fail_fast(secretary: Secreta
     assert isinstance(orchestrator.finalized_exception, RuntimeError)
 
 
-def test_on_error_returning_cleanly_continues_under_fail_fast(secretary: Secretary) -> None:
+def test_on_error_returning_cleanly_continues_under_fail_fast(secretary: Secretary):
     """A processor whose on_error returns cleanly keeps the bus running even with fail_fast=True."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
@@ -428,7 +426,7 @@ def test_on_error_returning_cleanly_continues_under_fail_fast(secretary: Secreta
     assert len(secretary.failed_deliveries) == 1
 
 
-def test_processor_on_error_recovers_processing_failure(orchestrator: MockOrchestrator, secretary: Secretary) -> None:
+def test_processor_on_error_recovers_processing_failure(orchestrator: MockOrchestrator, secretary: Secretary):
     """process_message() failures handled by on_error keep the bus running normally."""
     orchestrator.submit_message(Memo("recoverable_memo", content="fail_processing"))
     orchestrator.submit_message(Memo("ok_memo", content="ok"))
@@ -442,7 +440,7 @@ def test_processor_on_error_recovers_processing_failure(orchestrator: MockOrches
     assert len(secretary.failed_deliveries) == 1
 
 
-def test_no_subscribers() -> None:
+def test_no_subscribers():
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1)
 
@@ -467,7 +465,7 @@ def test_no_subscribers() -> None:
 def test_orchestrator_hook_failure_surfaces_under_fail_fast(
     hook_name: HookName,
     hook_attr: str,
-) -> None:
+):
     """Each orchestrator-level hook surfaces its failure through run() when fail_fast=True."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
@@ -494,7 +492,7 @@ def test_orchestrator_hook_failure_surfaces_under_fail_fast(
         assert len(secretary.delivered_memos) == 0
 
 
-def test_initialization_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture) -> None:
+def test_initialization_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture):
     """Under fail_fast=False the default on_error re-raise is logged and the bus continues."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1)
@@ -510,7 +508,7 @@ def test_initialization_failure_swallowed_under_default_policy(caplog: pytest.Lo
     assert "Init failed" in caplog.text
 
 
-def test_orchestrator_on_error_can_handle_initialization_failure() -> None:
+def test_orchestrator_on_error_can_handle_initialization_failure():
     """A custom orchestrator on_error can swallow init failures cleanly."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
@@ -520,7 +518,7 @@ def test_orchestrator_on_error_can_handle_initialization_failure() -> None:
     async def on_init_fail():
         raise RuntimeError("Init failed")
 
-    async def on_error_handle(error):
+    async def on_error_handle(error: OrchestratorHookError):
         seen.append(error)
         # Return cleanly = handled
 
@@ -535,7 +533,7 @@ def test_orchestrator_on_error_can_handle_initialization_failure() -> None:
     assert orchestrator.finalized_exception is None
 
 
-def test_finalize_receives_exception_on_process_messages_failure(mocker: MockerFixture) -> None:
+def test_finalize_receives_exception_on_process_messages_failure(mocker: MockerFixture):
     """
     Ensure that exceptions raised during message processing (after initialization)
     are passed to the finalize hook, similar to test_initialization_failure.
@@ -554,7 +552,7 @@ def test_finalize_receives_exception_on_process_messages_failure(mocker: MockerF
     assert str(orchestrator.finalized_exception) == "Process failed"
 
 
-def test_queue_retrieval_error(orchestrator: MockOrchestrator, mocker: MockerFixture) -> None:
+def test_queue_retrieval_error(orchestrator: MockOrchestrator, mocker: MockerFixture):
     # Patch asyncio.sleep to skip the wait
     mocker.patch("asyncio.sleep")
 
@@ -579,7 +577,7 @@ def test_queue_retrieval_error(orchestrator: MockOrchestrator, mocker: MockerFix
     assert any(m.id == "recovered" for m in orchestrator.received_messages)
 
 
-def test_max_timeout_interruption(orchestrator: MockOrchestrator) -> None:
+def test_max_timeout_interruption(orchestrator: MockOrchestrator):
     # Set a very short max_timeout
     orchestrator._max_timeout = 0.5
     orchestrator._grace_period = 5.0  # Long grace period
@@ -608,7 +606,7 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator) -> None:
     assert slow_processor.cancelled
 
 
-def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secretary: Secretary) -> None:
+def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secretary: Secretary):
     import threading
 
     class CPUBoundProcessor(SyncProcessor[Announcement]):
@@ -641,13 +639,13 @@ def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secreta
     assert secretary.delivered_memos[0].id == "async_memo"
 
 
-def test_processor_submit_without_bus() -> None:
+def test_processor_submit_without_bus():
     processor = Secretary("orphan")
     with pytest.raises(ProcessorQueueError, match="This processor has not been added"):
         processor.submit_message(Memo("fail"))
 
 
-def test_fatal_processing_error_stops_orchestrator(orchestrator: MockOrchestrator) -> None:
+def test_fatal_processing_error_stops_orchestrator(orchestrator: MockOrchestrator):
     # Capture the original method to preserve its behavior (tracking received messages)
     original_on_message = orchestrator.on_message_received
 
@@ -676,7 +674,7 @@ def test_fatal_processing_error_stops_orchestrator(orchestrator: MockOrchestrato
 
 def test_orchestrator_hook_failure_swallowed_under_default_policy(
     secretary: Secretary, caplog: pytest.LogCaptureFixture
-) -> None:
+):
     """Under fail_fast=False, an orchestrator hook failure is logged and processing continues."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1)
@@ -701,10 +699,10 @@ def test_orchestrator_hook_failure_swallowed_under_default_policy(
     assert len(secretary.delivered_memos) == 2
 
 
-def test_processor_on_error_can_signal_fatal(orchestrator: MockOrchestrator, secretary: Secretary) -> None:
+def test_processor_on_error_can_signal_fatal(orchestrator: MockOrchestrator, secretary: Secretary):
     """on_error raising FatalProcessingError stops the bus regardless of fail_fast."""
 
-    async def fatal_on_error(error: Exception) -> None:
+    async def fatal_on_error(error: Exception):
         raise FatalProcessingError("on_error decided to stop the bus")
 
     secretary.on_error = fatal_on_error  # type: ignore[method-assign]
@@ -719,12 +717,12 @@ def test_processor_on_error_can_signal_fatal(orchestrator: MockOrchestrator, sec
     assert len(secretary.delivered_memos) == 0
 
 
-def test_finalize_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture) -> None:
+def test_finalize_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture):
     """Under fail_fast=False on_finalize failures route through on_error and are absorbed."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1)
 
-    async def on_finalize_boom(exception: Exception | None) -> None:
+    async def on_finalize_boom(exception: Exception | None):
         orchestrator.events.append("finalize")
         raise RuntimeError("finalize boom")
 
@@ -736,17 +734,17 @@ def test_finalize_failure_swallowed_under_default_policy(caplog: pytest.LogCaptu
     assert "finalize boom" in caplog.text
 
 
-def test_finalize_failure_takes_precedence_over_earlier_exception_under_fail_fast() -> None:
+def test_finalize_failure_takes_precedence_over_earlier_exception_under_fail_fast():
     """When init and finalize both fail under fail_fast=True, the finalize failure surfaces."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1, fail_fast=True)
 
     saw_exception: list[Exception | None] = []
 
-    async def on_init_fail() -> None:
+    async def on_init_fail():
         raise RuntimeError("init failed")
 
-    async def on_finalize_boom(exception: Exception | None) -> None:
+    async def on_finalize_boom(exception: Exception | None):
         orchestrator.events.append("finalize")
         saw_exception.append(exception)
         raise RuntimeError("finalize boom")
@@ -770,7 +768,7 @@ def test_finalize_failure_takes_precedence_over_earlier_exception_under_fail_fas
 
 def test_skip_message_error_from_on_message_received(
     orchestrator: MockOrchestrator, secretary: Secretary, caplog: pytest.LogCaptureFixture
-) -> None:
+):
     """SkipMessageError from on_message_received skips dispatch and continues with the next message."""
 
     async def on_message_skip_first(message: BaseMessage):
@@ -791,7 +789,7 @@ def test_skip_message_error_from_on_message_received(
 
 def test_skip_message_error_outside_on_message_received_has_no_special_behavior(
     bare_orchestrator: MockOrchestrator, caplog: pytest.LogCaptureFixture
-) -> None:
+):
     """SkipMessageError raised in processor scope has no special skip behavior."""
 
     class SkipperProcessor(AsyncProcessor[Memo]):
@@ -799,7 +797,7 @@ def test_skip_message_error_outside_on_message_received_has_no_special_behavior(
             super().__init__(name)
             self.attempts: list[Memo] = []
 
-        async def process_message(self, message: Memo) -> None:
+        async def process_message(self, message: Memo):
             self.attempts.append(message)
             raise SkipMessageError("skip from processor scope")
 
@@ -816,7 +814,7 @@ def test_skip_message_error_outside_on_message_received_has_no_special_behavior(
     assert "Skipping message" not in caplog.text
 
 
-def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrchestrator) -> None:
+def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrchestrator):
     """Processor processes only messages matching a custom predicate on message attributes."""
 
     class HighPriorityAnalyst(AsyncProcessor[TaskAssignment]):
@@ -828,7 +826,7 @@ def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrc
         def should_process_message(self, message: BaseMessage) -> bool:
             return isinstance(message, TaskAssignment) and message.priority >= self.min_priority
 
-        async def process_message(self, message: TaskAssignment) -> None:
+        async def process_message(self, message: TaskAssignment):
             self.processed.append(message)
 
     analyst = HighPriorityAnalyst("high_priority_analyst", min_priority=10)
@@ -842,9 +840,7 @@ def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrc
     assert analyst.processed[0].id == "high_task"
 
 
-def test_should_process_message_is_independent_per_processor(
-    bare_orchestrator: MockOrchestrator, secretary: Secretary
-) -> None:
+def test_should_process_message_is_independent_per_processor(bare_orchestrator: MockOrchestrator, secretary: Secretary):
     """Each processor filters independently — one skipping a message does not affect the others."""
 
     class UrgentMemosOnlyProcessor(AsyncProcessor[Memo]):
@@ -855,7 +851,7 @@ def test_should_process_message_is_independent_per_processor(
         def should_process_message(self, message: BaseMessage) -> bool:
             return isinstance(message, Memo) and message.subject == "urgent"
 
-        async def process_message(self, message: Memo) -> None:
+        async def process_message(self, message: Memo):
             self.processed.append(message)
 
     urgent_proc = UrgentMemosOnlyProcessor("urgent_only")

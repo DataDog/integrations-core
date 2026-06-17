@@ -1,0 +1,38 @@
+{
+  "id": "labAlwaysFail",
+  "versionId": "10000000-0000-0000-0000-000000000003",
+  "name": "Lab Always Fail",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "lab/fail",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "11111111-0000-0000-0000-000000000003",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "lab-fail-aaaa-bbbb-cccc-000000000003"
+    },
+    {
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "throw new Error('intentional lab failure');"
+      },
+      "id": "22222222-0000-0000-0000-000000000003",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Code", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

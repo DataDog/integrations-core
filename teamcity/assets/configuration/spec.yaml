@@ -67,6 +67,7 @@ files:
         value:
           type: string
           example: http://teamcity.<ACCOUNT_NAME>.com
+        fleet_configurable: false
       - name: projects
         description: |
           Mapping of TeamCity projects and build configurations to collect events and metrics from the TeamCity REST API.
@@ -192,6 +193,7 @@ files:
           items:
             type: string
           example: [<BUILD_CONFIG_REGEX>]
+        fleet_configurable: false
       - name: global_build_configs_exclude
         description: |
           List of build configuration RegEx patterns to exclude across all monitored projects.
@@ -202,6 +204,7 @@ files:
           items:
             type: string
           example: [<BUILD_CONFIG_REGEX>]
+        fleet_configurable: false
       - name: projects_refresh_interval
         description: |
           Configure projects refresh interval (seconds) in which the check discovers updated projects and build 

@@ -116,6 +116,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: device_exclude
             description: |
               Instruct the check to not collect from matching devices.
@@ -218,6 +219,7 @@ files:
             value:
               example: false
               type: boolean
+            fleet_configurable: false
           - name: device_tag_re
             description: |
               Instruct the check to apply additional tags to matching
@@ -232,6 +234,7 @@ files:
                 /dev/sda3: role:db,disk_size:large
                 "c:": volume:boot
               type: object
+            fleet_configurable: false
           - name: min_disk_size
             description: Exclude devices with a total disk size less than a minimum value (in MiB)
             fleet_configurable: true
@@ -283,6 +286,7 @@ files:
                   type: string
                 - name: type
                   type: string
+            fleet_configurable: false
 
           - name:  lowercase_device_tag
             fleet_configurable: true

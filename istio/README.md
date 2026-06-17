@@ -90,6 +90,25 @@ This annotation specifies the container `discovery` to match the default contain
 
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
+##### Ambient mode configuration
+
+Istio ambient mode, generally available in Istio v1.24, replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance. The check scrapes each endpoint that is set. Adjust the URLs in the example below to match your cluster's hostnames and ports.
+
+Example static configuration in `istio.d/conf.yaml` covering all three components:
+
+```yaml
+init_config:
+
+instances:
+  - istio_mode: ambient
+    use_openmetrics: true
+    ztunnel_endpoint: http://ztunnel.istio-system.svc:15020/stats/prometheus
+    waypoint_endpoint: http://waypoint.<NAMESPACE>.svc:15020/stats/prometheus
+    istiod_endpoint: http://istiod.istio-system.svc:15014/metrics
+```
+
+Replace `<NAMESPACE>` with the namespace where you ran `istioctl waypoint apply`. Omit `waypoint_endpoint` if you have not deployed a waypoint proxy. The same options can be set via the Autodiscovery annotation syntax shown in the [Control plane configuration](#control-plane-configuration) section above.
+
 #### Disable sidecar injection for Datadog Agent pods
 
 If you are installing the [Datadog Agent in a container][10], Datadog recommends that you first disable Istio's sidecar injection.

@@ -1,8 +1,13 @@
 # Agent Check: DCGM Exporter
+{{< callout url="https://docs.datadoghq.com/gpu_monitoring/setup/?tab=datadogoperator" >}}
+
+This is a legacy integration that is no longer being developed or fully supported. For advanced insights into your GPU fleet, use Datadog's GPU Monitoring instead of installing this integration.
+{{< /callout >}}
 
 ## Overview
+We recommend using [GPU Monitoring][18], which not only provides metric parity with this integration, but even more metrics and guided remediation actions across your AI stack. [See the Datadog GPU Monitoring documentation][19] for setup instructions. 
 
-This check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
+This legacy check submits metrics exposed by the [NVIDIA DCGM Exporter][16] in Datadog Agent format. For more information on NVIDIA Data Center GPU Manager (DCGM), see [NVIDIA DCGM][15].
 
 **Minimum Agent version:** 7.47.0
 
@@ -405,3 +410,5 @@ Additional helpful documentation, links, and articles:
 [15]: https://developer.nvidia.com/dcgm
 [16]: https://github.com/NVIDIA/dcgm-exporter
 [17]: https://docs.datadoghq.com/integrations/nvml/#metrics
+[18]: https://docs.datadoghq.com/gpu_monitoring/
+[19]: https://docs.datadoghq.com/gpu_monitoring/setup/?tab=datadogoperator

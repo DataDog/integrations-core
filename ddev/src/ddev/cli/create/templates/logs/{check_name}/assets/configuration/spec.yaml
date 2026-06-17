@@ -1,0 +1,9 @@
+name: {integration_name}
+files:
+- name: {check_name}.yaml
+  options:
+  - template: logs
+    example:
+    - type: file
+      path: /var/log/{check_name}.log
+      source: {check_name}

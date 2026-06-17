@@ -2931,6 +2931,5 @@
   ],
   "layout_type": "ordered",
   "notify_list": [],
-  "pause_auto_refresh": false,
   "reflow_type": "fixed"
 }

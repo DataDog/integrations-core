@@ -20,6 +20,14 @@ files:
       description: The hostname used to connect to the system.
       value:
         type: string
+    - name: reported_hostname
+      description: |
+        Set the reported hostname for this instance. Overrides the default hostname resolution,
+        which uses the `server` value. Useful when the agent connects via localhost or 127.0.0.1
+        (e.g., co-located with ClickHouse in the same pod) to avoid reporting a non-unique hostname.
+      value:
+        type: string
+      fleet_configurable: false
     - name: port
       description: |
         The port used to connect to the system.
@@ -78,16 +86,19 @@ files:
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - name: tls_verify
       description: Whether or not to connect securely using TLS. The server must also support this.
       value:
         type: boolean
         example: False
+      fleet_configurable: false
     - name: verify
       description: Indicates if a certificate is required and if it will be validated after a connection is established.
       value:
         type: boolean
         example: True
+      fleet_configurable: false
     - name: dbm
       description: |
         Enable Database Monitoring (DBM) to collect query samples, metrics, and completions.
@@ -95,6 +106,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: database_identifier
       description: |
         Controls how the database is identified. Each unique value of this identifier will appear in DBM as a separate
@@ -115,11 +127,25 @@ files:
             type: string
             display_default: "$server:$port:$db"
             example: "$env-$server:$port:$db"
+          fleet_configurable: false
     - name: single_endpoint_mode
       description: Set to `true` when connecting through a single endpoint for ClickHouse Cloud.
       value:
         type: boolean
         example: false
+      fleet_configurable: false
+    - name: use_legacy_queries
+      description: Enable the legacy query set for collecting metrics. Set to `false` to disable.
+      value:
+        type: boolean
+        example: true
+      fleet_configurable: false
+    - name: use_advanced_queries
+      description: Enable the advanced query set for collecting metrics. Set to `false` to disable.
+      value:
+        type: boolean
+        example: true
+      fleet_configurable: false
     - name: query_samples
       description: Configure collection of database samples snapshots from system.processes
       options:
@@ -130,6 +156,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the samples snapshot collection interval (in seconds). Each collection involves a single query to
@@ -137,12 +164,14 @@ files:
           value:
             type: number
             example: 1
+          fleet_configurable: false
         - name: payload_row_limit
           description: |
             Set the maximum number of active sessions to include in each samples snapshot.
           value:
             type: integer
             example: 1000
+          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -151,6 +180,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
     - name: query_metrics
       description: Configure collection of query metrics
       options:
@@ -160,6 +190,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query metric collection interval (in seconds). Each collection involves a single query to
@@ -168,6 +199,7 @@ files:
           value:
             type: number
             example: 10
+          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -176,6 +208,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
         - name: full_statement_text_cache_max_size
           hidden: true
           description: |
@@ -183,6 +216,7 @@ files:
           value:
             type: number
             default: 10000
+          fleet_configurable: false
         - name: full_statement_text_samples_per_hour_per_query
           hidden: true
           description: |
@@ -190,6 +224,7 @@ files:
           value:
             type: number
             default: 1
+          fleet_configurable: false
     - name: query_completions
       description: Configure collection of query completions from system.query_log
       options:
@@ -200,6 +235,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query completions collection interval (in seconds).
@@ -207,6 +243,7 @@ files:
           value:
             type: number
             example: 10
+          fleet_configurable: false
         - name: samples_per_hour_per_query
           description: |
             Set the maximum number of samples to collect per hour per unique query signature.
@@ -214,6 +251,7 @@ files:
           value:
             type: number
             example: 15
+          fleet_configurable: false
         - name: seen_samples_cache_maxsize
           hidden: true
           description: |
@@ -221,6 +259,7 @@ files:
           value:
             type: number
             default: 10000
+          fleet_configurable: false
         - name: max_samples_per_collection
           hidden: true
           description: |
@@ -229,6 +268,7 @@ files:
           value:
             type: number
             default: 1000
+          fleet_configurable: false
         - name: explained_queries_per_hour_per_query
           hidden: true
           description: |
@@ -238,6 +278,7 @@ files:
             type: number
             default: 60
             minimum: 1
+          fleet_configurable: false
         - name: explained_queries_cache_maxsize
           hidden: true
           description: |
@@ -245,6 +286,7 @@ files:
           value:
             type: number
             default: 5000
+          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -252,6 +294,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
     - name: query_errors
       description: Configure collection of query errors from system.query_log
       options:
@@ -263,18 +306,21 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query errors collection interval (in seconds).
           value:
             type: number
             example: 10
+          fleet_configurable: false
         - name: samples_per_hour_per_query
           description: |
             Set the maximum number of error samples to collect per hour per unique query signature.
           value:
             type: number
             example: 60
+          fleet_configurable: false
         - name: seen_samples_cache_maxsize
           hidden: true
           description: |
@@ -282,6 +328,7 @@ files:
           value:
             type: number
             default: 10000
+          fleet_configurable: false
         - name: max_samples_per_collection
           hidden: true
           description: |
@@ -289,10 +336,133 @@ files:
           value:
             type: number
             default: 1000
+          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
             Run the query errors collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
+    - name: schema_metrics
+      description: |
+        Configure per-table size and per-view refresh gauges derived from
+        `system.tables` and `system.view_refreshes`. Independent of
+        `collect_schemas` (which controls catalog structure collection)
+        so users can dashboard table sizes without enabling Schema Explorer.
+        Requires `dbm: true`.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of per-table size and per-view refresh gauges.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the schema metrics collection interval (in seconds). These
+            gauges change continuously, so 60s is a reasonable default.
+          value:
+            type: number
+            example: 60
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the schema metrics collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
+    - name: collect_schemas
+      description: |
+        Configure collection of ClickHouse catalog metadata (databases,
+        tables, views, columns) for Database Monitoring's Schema Explorer.
+        Requires `dbm: true`.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of catalog metadata. When enabled, the agent
+            polls `system.tables`, `system.columns`, and
+            `system.view_refreshes` (ClickHouse 24.3+) and emits one
+            `kind=clickhouse_databases` payload per cycle.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          description: |
+            Set the schema collection interval (in seconds). Catalog data
+            changes slowly; 600s (10 min) is a reasonable default.
+          value:
+            type: number
+            example: 600
+        - name: max_tables
+          description: |
+            Maximum number of tables plus views to collect per cycle
+            across all databases.
+          value:
+            type: integer
+            example: 300
+        - name: max_columns
+          description: |
+            Maximum number of columns to collect per table/view.
+          value:
+            type: integer
+            example: 1000
+        - name: max_query_duration
+          description: |
+            Maximum duration of the schema collection queries in seconds.
+            Applied to each query via the `max_execution_time` ClickHouse setting.
+          value:
+            type: integer
+            example: 60
+        - name: include_databases
+          description: |
+            A list of regex patterns to include databases. Any database whose
+            name matches any one of these patterns will be included. If empty,
+            all databases (other than those excluded) are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "mydb"
+        - name: exclude_databases
+          description: |
+            A list of regex patterns to exclude databases. Any database whose
+            name matches any one of these patterns will be excluded. The
+            ClickHouse system databases (`system`, `INFORMATION_SCHEMA`,
+            `information_schema`) are always excluded regardless of this setting.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "tmp_.*"
+        - name: include_tables
+          description: |
+            A list of regex patterns to include tables. Any table whose name
+            matches any one of these patterns will be included. If empty, all
+            tables (other than those excluded) are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "events.*"
+        - name: exclude_tables
+          description: |
+            A list of regex patterns to exclude tables. Any table whose name
+            matches any one of these patterns will be excluded.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - ".*_tmp"
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the metadata collection synchronously. For testing only.
           value:
             type: boolean
             example: false
@@ -308,6 +478,7 @@ files:
           value:
             type: boolean
             example: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the parts and merges collection interval (in seconds). All four system tables
@@ -315,6 +486,7 @@ files:
           value:
             type: number
             example: 60
+          fleet_configurable: false
         - name: max_parts_rows
           description: |
             Maximum number of rows to include in the per-cycle event payload from system.parts,
@@ -324,6 +496,7 @@ files:
           value:
             type: integer
             example: 500
+          fleet_configurable: false
         - name: max_mutations_rows
           description: |
             Maximum number of rows to include in the per-cycle event payload from system.mutations,
@@ -331,6 +504,7 @@ files:
           value:
             type: integer
             example: 200
+          fleet_configurable: false
         - name: max_detached_parts_rows
           description: |
             Maximum number of rows returned from system.detached_parts per cycle.
@@ -339,6 +513,7 @@ files:
           value:
             type: integer
             example: 1000
+          fleet_configurable: false
         - name: max_replication_queue_rows
           description: |
             Maximum number of rows returned from system.replication_queue per cycle,
@@ -347,6 +522,7 @@ files:
           value:
             type: integer
             example: 1000
+          fleet_configurable: false
         - name: table_metrics_include_partition_tag
           description: |
             Add a partition tag to parts gauges (clickhouse.table.parts.*).
@@ -356,6 +532,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
         - name: table_metrics_max_tables
           description: |
             Cap per-table gauge emission to the top N tables by active part count.
@@ -363,6 +540,7 @@ files:
           value:
             type: integer
             example: 200
+          fleet_configurable: false
         - name: stalled_merge_elapsed_threshold_seconds
           description: |
             Number of seconds a merge must be running before it is counted as stalled
@@ -372,6 +550,7 @@ files:
           value:
             type: integer
             example: 3600
+          fleet_configurable: false
         - name: stuck_replication_num_tries
           description: |
             Minimum number of failed attempts (num_tries) before a replication queue entry
@@ -382,6 +561,7 @@ files:
           value:
             type: integer
             example: 3
+          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -389,6 +569,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
     - template: instances/db
       overrides:
         custom_queries.value.example:
@@ -405,16 +586,42 @@ files:
   - template: logs
     example:
     - source: clickhouse
+      service: clickhouse
       type: file
       path:  /var/log/clickhouse-server/clickhouse-server.log
+      tags:
+        - format:plain
       log_processing_rules:
         - type: multi_line
-          name: log_start_with_date
-          pattern: \d{4}\.\d{2}\.\d{2}
+          name: new_log_start_with_date
+          pattern: '\d{4}\.\d{2}\.\d{2}'
     - source: clickhouse
+      service: clickhouse
       type: file
       path: /var/log/clickhouse-server/clickhouse-server.err.log
+      tags:
+        - format:plain
       log_processing_rules:
         - type: multi_line
-          name: log_start_with_date
-          pattern: \d{4}\.\d{2}\.\d{2}
+          name: new_log_start_with_date
+          pattern: '\d{4}\.\d{2}\.\d{2}'
+    - source: clickhouse
+      service: clickhouse
+      type: file
+      path:  /var/log/clickhouse-server/clickhouse-server.log
+      tags:
+        - format:json
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_json
+          pattern: '\{'
+    - source: clickhouse
+      service: clickhouse
+      type: file
+      path: /var/log/clickhouse-server/clickhouse-server.err.log
+      tags:
+        - format:json
+      log_processing_rules:
+        - type: multi_line
+          name: new_log_start_with_json
+          pattern: '\{'
