@@ -404,7 +404,7 @@ class AgentCheck(object):
 
         return limit
 
-    def _build_http_client(self, instance) -> HTTPClientProtocol:
+    def _build_http_client(self, instance: dict[str, Any]) -> HTTPClientProtocol:
         if is_affirmative(instance.get('use_httpx2', False)):
             from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
