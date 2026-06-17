@@ -214,11 +214,6 @@ def test_no_inode_metrics_when_total_is_zero(aggregator, dd_run_check):
     ):
         aggregator.assert_metric(name, count=0)
 
-    assert 1 == 1
-    assert 2 == 2
-    return
-    assert 3 == 2
-
 
 @pytest.mark.usefixtures('psutil_mocks')
 def test_rw(aggregator, dd_run_check):
