@@ -69,6 +69,11 @@ class SapHanaDataObservability(DBMAsyncJob):
             job_name="data-observability",
         )
         self._queries, self._schedulers = self._filter_valid_queries(do_config.queries or ())
+        self._log.debug(
+            "Data Observability job initialized: %d valid queries, config_id=%s",
+            len(self._queries),
+            do_config.config_id,
+        )
 
     def _shutdown(self) -> None:
         if self._do_conn is not None:
@@ -81,6 +86,7 @@ class SapHanaDataObservability(DBMAsyncJob):
     def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[tuple[Query, ...], dict[str, CronScheduler]]:
         valid: list[Query] = []
         schedulers: dict[str, CronScheduler] = {}
+        n_skipped = 0
         for q in queries:
             key = _query_key(q)
             if q.schedule:
@@ -93,14 +99,22 @@ class SapHanaDataObservability(DBMAsyncJob):
                         q.schedule,
                         e,
                     )
+                    n_skipped += 1
                     continue
             elif not (q.interval_seconds and q.interval_seconds > 0):
                 self._log.warning(
                     "Skipping DO query key=%s: neither schedule nor positive interval_seconds set",
                     key,
                 )
+                n_skipped += 1
                 continue
             valid.append(q)
+        if n_skipped:
+            self._log.warning(
+                "Data Observability: %d of %d queries were skipped due to invalid scheduling configuration.",
+                n_skipped,
+                n_skipped + len(valid),
+            )
         return tuple(valid), schedulers
 
     def _get_due_queries(self) -> list[DueQuery]:
@@ -131,6 +145,11 @@ class SapHanaDataObservability(DBMAsyncJob):
         if self._do_conn is not None and self._do_conn_timeout_s == timeout_seconds:
             return self._do_conn
         if self._do_conn is not None:
+            self._log.debug(
+                "Data Observability: reopening DO connection (timeout changed from %ds to %ds).",
+                self._do_conn_timeout_s,
+                timeout_seconds,
+            )
             try:
                 self._do_conn.close()
             except Exception:
@@ -143,7 +162,20 @@ class SapHanaDataObservability(DBMAsyncJob):
         conn_props.setdefault('user', self._check._username)
         conn_props.setdefault('password', self._check._password)
         conn_props['statementTimeout'] = timeout_seconds * 1000
-        self._do_conn = hana_connect(**conn_props)
+        try:
+            self._do_conn = hana_connect(**conn_props)
+        except HanaError as e:
+            self._log.error(
+                "Data Observability: failed to open DO connection to %s:%s — %s",
+                self._check._server,
+                self._check._port,
+                e,
+            )
+            raise
+        self._log.debug(
+            "Data Observability: DO connection opened (statementTimeout=%dms).",
+            timeout_seconds * 1000,
+        )
         self._do_conn_timeout_s = timeout_seconds
         return self._do_conn
 
@@ -177,6 +209,7 @@ class SapHanaDataObservability(DBMAsyncJob):
                 e,
                 query_spec.query,
             )
+            self._log.warning("Data Observability: resetting DO connection after query failure.")
             self._do_conn = None
             self._do_conn_timeout_s = None
             return {
@@ -212,6 +245,12 @@ class SapHanaDataObservability(DBMAsyncJob):
         return payload
 
     def run_job(self) -> None:
+        if not self._queries:
+            self._log.warning(
+                "Data Observability job is enabled but no queries are configured. "
+                "Waiting for Remote Configuration to deliver DO_QUERY_ACTIONS."
+            )
+            return
         due_queries = self._get_due_queries()
         if not due_queries:
             self._log.debug("No data observability queries due for execution.")
