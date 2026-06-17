@@ -513,18 +513,12 @@ def test_per_user_false_excludes_per_user_services(aggregator, check):
     with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
         c.check(instance)
 
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.OK,
-        tags=['windows_service:Dnscache', 'windows_service_state:running'],
-        count=1,
-    )
-    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
-        aggregator.assert_service_check(
-            c.SERVICE_CHECK_NAME,
-            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
-            count=0,
-        )
+    services = [
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING),
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING, count=0),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_per_user_true_collects_only_per_user_services(aggregator, check):
@@ -534,18 +528,12 @@ def test_per_user_true_collects_only_per_user_services(aggregator, check):
     with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
         c.check(instance)
 
-    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
-        aggregator.assert_service_check(
-            c.SERVICE_CHECK_NAME,
-            status=c.OK,
-            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
-            count=1,
-        )
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        tags=['windows_service:Dnscache', 'windows_service_state:running'],
-        count=0,
-    )
+    services = [
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_per_user_composes_with_name_filter(aggregator, check):
@@ -556,19 +544,13 @@ def test_per_user_composes_with_name_filter(aggregator, check):
     with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
         c.check(instance)
 
-    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
-        aggregator.assert_service_check(
-            c.SERVICE_CHECK_NAME,
-            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
-            count=0,
-        )
-    # The named filter still goes unmatched and reports UNKNOWN once.
-    aggregator.assert_service_check(
-        c.SERVICE_CHECK_NAME,
-        status=c.UNKNOWN,
-        tags=['windows_service:OneSyncSvc', 'windows_service_state:unknown'],
-        count=1,
-    )
+    services = [
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING, count=0),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING, count=0),
+        # The named filter still goes unmatched and reports UNKNOWN once.
+        ServiceAssertion('OneSyncSvc', -1, count=1),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
 
 
 def test_per_user_false_with_grouping_warns(aggregator, check):
