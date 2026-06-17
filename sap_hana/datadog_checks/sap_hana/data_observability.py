@@ -246,7 +246,7 @@ class SapHanaDataObservability(DBMAsyncJob):
 
     def run_job(self) -> None:
         if not self._queries:
-            self._log.warning(
+            self._log.debug(
                 "Data Observability job is enabled but no queries are configured. "
                 "Waiting for Remote Configuration to deliver DO_QUERY_ACTIONS."
             )
