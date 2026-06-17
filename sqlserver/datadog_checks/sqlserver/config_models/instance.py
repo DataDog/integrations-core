@@ -128,6 +128,57 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class CustomSqlSelectFields(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    entity_id: Optional[str] = None
+    metric_config_id: Optional[int] = None
+
+
+class Entity(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    account: str
+    database: str
+    platform: str
+    schema_: str = Field(..., alias='schema')
+    table: str
+
+
+class Query(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
+    dbname: str
+    entity: Entity
+    interval_seconds: int
+    monitor_id: int
+    query: str
+    query_timeout: Optional[int] = Field(
+        None,
+        description='Per-query statement timeout in milliseconds. Overrides the\nconnection-level DEFAULT_COMMAND_TIMEOUT (10 s) for this query.\nConverted to seconds (ceil) before being applied. Minimum 1 s.\n',
+    )
+    type: Optional[str] = None
+
+
+class DataObservability(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    config_id: Optional[str] = None
+    enabled: Optional[bool] = None
+    queries: Optional[tuple[Query, ...]] = None
+    run_sync: Optional[bool] = None
+
+
 class DatabaseIdentifier(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -442,6 +493,7 @@ class InstanceConfig(BaseModel):
     connection_string: Optional[str] = None
     connector: Optional[str] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    data_observability: Optional[DataObservability] = None
     database: Optional[str] = None
     database_autodiscovery: Optional[bool] = None
     database_autodiscovery_interval: Optional[int] = None
