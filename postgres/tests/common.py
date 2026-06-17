@@ -10,6 +10,7 @@ from datadog_checks.base.stubs.aggregator import normalize_tags
 from datadog_checks.dev import get_docker_hostname
 from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.postgres import util
 from datadog_checks.postgres.util import (
     CHECKSUM_METRICS,
     NEWER_14_METRICS,
@@ -62,25 +63,31 @@ if USING_LATEST is True:
 
 SCHEMA_NAME = 'schemaname'
 
-COMMON_METRICS = [
-    'postgresql.before_xid_wraparound',
-    'postgresql.commits',
-    'postgresql.rollbacks',
-    'postgresql.disk_read',
-    'postgresql.buffer_hit',
-    'postgresql.rows_returned',
-    'postgresql.rows_fetched',
-    'postgresql.rows_inserted',
-    'postgresql.rows_updated',
-    'postgresql.rows_deleted',
-    'postgresql.database_size',
-    'postgresql.deadlocks',
-    'postgresql.deadlocks.count',
-    'postgresql.temp_bytes',
-    'postgresql.temp_files',
-    'postgresql.blk_read_time',
-    'postgresql.blk_write_time',
-]
+
+def _iterate_metric_name(query):
+    metric_prefix = 'postgresql'
+    if 'columns' in query:
+        if 'metric_prefix' in query:
+            metric_prefix = f'{query["metric_prefix"]}'
+        for column in query['columns']:
+            if column['type'].startswith('tag'):
+                continue
+            yield f'{metric_prefix}.{column["name"]}'
+    else:
+        metrics = query['metrics'].values() if 'metrics' in query else query.values()
+        for metric in metrics:
+            yield f'{metric_prefix}.{metric[0]}'
+
+
+# Derived from the util declarations the instance/database collectors emit per database, so a scope
+# metric added to one of those dicts automatically extends this assertion on the versions that expose
+# it. All tested versions are >= 9.2, so the 9.2+ deadlock/temp/blk metrics always apply.
+COMMON_METRICS = sorted(
+    set(_iterate_metric_name(util.COMMON_METRICS))
+    | set(_iterate_metric_name(util.NEWER_92_METRICS))
+    | set(_iterate_metric_name(util.DATABASE_SIZE_METRICS))
+    | set(_iterate_metric_name(util.QUERY_PG_STAT_DATABASE))
+)
 
 DBM_MIGRATED_METRICS = [
     'postgresql.connections',
@@ -94,19 +101,20 @@ CONFLICT_METRICS = [
     'postgresql.conflicts.deadlock',
 ]
 
-COMMON_BGW_METRICS = [
-    'postgresql.bgwriter.checkpoints_timed',
-    'postgresql.bgwriter.checkpoints_requested',
-    'postgresql.bgwriter.buffers_checkpoint',
-    'postgresql.bgwriter.buffers_clean',
-    'postgresql.bgwriter.maxwritten_clean',
-    'postgresql.bgwriter.buffers_alloc',
-    'postgresql.bgwriter.write_time',
-    'postgresql.bgwriter.sync_time',
-]
+# The bgwriter/checkpointer metrics common to every version are exactly those collected from the
+# PG 17+ pg_stat_checkpointer query; the < 17 path emits the same set plus the two PG_BELOW_17 extras.
+COMMON_BGW_METRICS = sorted(_iterate_metric_name(util.QUERY_PG_BGWRITER_CHECKPOINTER))
 
-COMMON_BGW_METRICS_PG_ABOVE_94 = ['postgresql.archiver.archived_count', 'postgresql.archiver.failed_count']
-COMMON_BGW_METRICS_PG_BELOW_17 = ['postgresql.bgwriter.buffers_backend', 'postgresql.bgwriter.buffers_backend_fsync']
+COMMON_BGW_METRICS_PG_ABOVE_94 = sorted(_iterate_metric_name(util.COMMON_ARCHIVER_METRICS))
+# Metrics the < 17 bgwriter query collects on top of the common set (pg_stat_bgwriter dropped these in 17).
+COMMON_BGW_METRICS_PG_BELOW_17 = sorted(
+    (
+        set(_iterate_metric_name(util.COMMON_BGW_METRICS_LT_17))
+        | set(_iterate_metric_name(util.NEWER_91_BGW_METRICS_LT_17))
+        | set(_iterate_metric_name(util.NEWER_92_BGW_METRICS_LT_17))
+    )
+    - set(COMMON_BGW_METRICS)
+)
 
 CONNECTION_METRICS = ['postgresql.max_connections', 'postgresql.percent_usage_connections']
 CONNECTION_METRICS_BY_DB = [
@@ -129,21 +137,6 @@ CHECK_PERFORMANCE_METRICS = [
 ]
 
 requires_static_version = pytest.mark.skipif(USING_LATEST, reason='Version `latest` is ever-changing, skipping')
-
-
-def _iterate_metric_name(query):
-    metric_prefix = 'postgresql'
-    if 'columns' in query:
-        if 'metric_prefix' in query:
-            metric_prefix = f'{query["metric_prefix"]}'
-        for column in query['columns']:
-            if column['type'].startswith('tag'):
-                continue
-            yield f'{metric_prefix}.{column["name"]}'
-    else:
-        metrics = query['metrics'].values() if 'metrics' in query else query.values()
-        for metric in metrics:
-            yield f'{metric_prefix}.{metric[0]}'
 
 
 def _get_expected_replication_tags(check, pg_instance, with_host=True, with_db=False, with_version=True, **kwargs):
@@ -239,18 +232,25 @@ def check_common_metrics(aggregator, expected_tags, count=1):
     aggregator.assert_metric('postgresql.running', count=count, value=1, tags=expected_tags)
 
 
+# Counts of objects created by the test fixtures (see tests/compose and the datadog_test schema).
+# They track the fixture data, not anything declared in util.py, so they are named constants rather
+# than derived. PG 11+ adds 2 partition child tables + 2 parent tables to the public schema.
+FIXTURE_PUBLIC_TABLE_COUNT = 18
+FIXTURE_PUBLIC_TABLE_COUNT_WITH_PARTITIONS = 25
+FIXTURE_DB_COUNT = 15
+
+
 def check_db_count(aggregator, expected_tags, count=1):
-    table_count = 18
-    # We create 2 additional partition tables when partition is available + 2 parent tables
+    table_count = FIXTURE_PUBLIC_TABLE_COUNT
     if float(POSTGRES_VERSION) >= 11.0:
-        table_count = 25
+        table_count = FIXTURE_PUBLIC_TABLE_COUNT_WITH_PARTITIONS
     aggregator.assert_metric(
         'postgresql.table.count',
         value=table_count,
         count=count,
         tags=expected_tags + ['db:{}'.format(DB_NAME), 'schema:public'],
     )
-    aggregator.assert_metric('postgresql.db.count', value=15, count=1)
+    aggregator.assert_metric('postgresql.db.count', value=FIXTURE_DB_COUNT, count=1)
 
 
 def check_connection_metrics(aggregator, expected_tags, count=1):
