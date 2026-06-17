@@ -21,6 +21,8 @@ from zipfile import ZipFile
 import pathspec
 import urllib3
 from dotenv import dotenv_values
+from packaging.markers import default_environment
+from packaging.requirements import InvalidRequirement, Requirement
 from utils import iter_wheels
 
 
@@ -51,6 +53,14 @@ INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
 CUSTOM_BUILT_INDEX = f'{INDEX_BASE_URL}/built'
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
+KAFKA_REQUIREMENT_NAME = 'confluent-kafka'
+WINDOWS_MARKER_ENV = {
+    **default_environment(),
+    'os_name': 'nt',
+    'sys_platform': 'win32',
+    'platform_machine': 'AMD64',
+    'platform_system': 'Windows',
+}
 
 
 class WheelSizes(TypedDict):
@@ -352,6 +362,67 @@ def calculate_wheel_sizes(wheel_path: Path) -> WheelSizes:
     return {'compressed': compressed_size, 'uncompressed': uncompressed_size}
 
 
+def get_applicable_kafka_pin(raw_requirement: str) -> str | None:
+    """Return the exact confluent-kafka pin if the requirement applies on Windows."""
+    raw_requirement = raw_requirement.split('#', 1)[0].strip()
+    if not raw_requirement:
+        return None
+
+    try:
+        requirement = Requirement(raw_requirement)
+    except InvalidRequirement:
+        return None
+
+    if normalize_project_name(requirement.name) != KAFKA_REQUIREMENT_NAME:
+        return None
+    if requirement.marker and not requirement.marker.evaluate(WINDOWS_MARKER_ENV):
+        return None
+
+    exact_pins = [specifier.version for specifier in requirement.specifier if specifier.operator == '==']
+    if len(exact_pins) != 1:
+        return None
+    return exact_pins[0]
+
+
+def assert_kafka_version_matches() -> None:
+    """Abort if CONFLUENT_KAFKA_VERSION env disagrees with the pin in requirements.in.
+
+    Env is set only in .builders/images/windows-x86_64/Dockerfile.
+    Bump checklist when changing the confluent-kafka version:
+      1. agent_requirements.in              confluent-kafka==X.Y.Z
+      2. Dockerfile  ENV CONFLUENT_KAFKA_VERSION   this value
+      3. build_script.ps1                   -Hash for the vX.Y.Z tarball
+      4. build_script.ps1                   $desired_commit for vcpkg
+    """
+    expected = os.environ.get('CONFLUENT_KAFKA_VERSION')
+    if not expected:
+        return
+    requirements = MOUNT_DIR / 'requirements.in'
+    if not requirements.is_file():
+        abort(f'CONFLUENT_KAFKA_VERSION is set but {requirements} is missing — is the build mount configured?')
+    pins = set()
+    for raw in requirements.read_text(encoding='utf-8').splitlines():
+        pin = get_applicable_kafka_pin(raw)
+        if pin:
+            pins.add(pin)
+    if not pins:
+        abort(
+            f'CONFLUENT_KAFKA_VERSION ({expected}) is set but no confluent-kafka== pin '
+            f'found in {requirements}. Did agent_requirements.in change shape?'
+        )
+    if len(pins) > 1:
+        abort(
+            f'CONFLUENT_KAFKA_VERSION ({expected}) is set but multiple Windows confluent-kafka pins '
+            f'were found in {requirements}: {", ".join(sorted(pins))}.'
+        )
+    pin = pins.pop()
+    if pin != expected:
+        abort(
+            f'CONFLUENT_KAFKA_VERSION ({expected}) disagrees with confluent-kafka pin ({pin}). '
+            f'Bump ENV in .builders/images/windows-x86_64/Dockerfile in lockstep with agent_requirements.in.'
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
     parser.add_argument('--python', required=True)
@@ -365,6 +436,9 @@ def main():
         python_path = PY2_PATH
     else:
         abort(f'Invalid python version: {python_version}')
+
+    # No-op on Linux/macOS: CONFLUENT_KAFKA_VERSION is set only in the Windows Dockerfile.
+    assert_kafka_version_matches()
 
     wheels_dir = MOUNT_DIR / 'wheels'
     built_wheels_dir = wheels_dir / 'built'

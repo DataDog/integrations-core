@@ -3,12 +3,16 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 . C:\helpers.ps1
 
-# The librdkafka version needs to stay in sync with the confluent-kafka version,
-# thus we extract the version from the requirements file
-$kafka_version = Get-Content 'C:\mnt\requirements.in' | perl -nE 'say/^\D*(\d+\.\d+\.\d+)\D*$/ if /confluent-kafka==/'
+# Source of truth is the Dockerfile ENV; build_wheels.py asserts this stays
+# in lockstep with the confluent-kafka pin in agent_requirements.in.
+$kafka_version = $Env:CONFLUENT_KAFKA_VERSION
+if (-not $kafka_version) {
+    throw "CONFLUENT_KAFKA_VERSION env is not set"
+}
 Write-Host "Will build librdkafka $kafka_version"
 
 # Download and unpack the source
+# -Hash must be bumped in lockstep with CONFLUENT_KAFKA_VERSION (see Dockerfile checklist).
 Get-RemoteFile `
   -Uri "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${kafka_version}.tar.gz" `
   -Path "librdkafka-${kafka_version}.tar.gz" `
@@ -24,6 +28,7 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
+# $desired_commit must be bumped in lockstep with CONFLUENT_KAFKA_VERSION (see Dockerfile checklist).
 $desired_commit = "3e797c57a635d3ce8f3473ef344ea44c09c246c8"
 
 # Clone and configure vcpkg
@@ -66,3 +71,14 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
 
+# Drop build intermediates so they don't bloat this image layer. Surfaces partial
+# failures as warnings so they're greppable in the docker build log rather than
+# silently shipping a fatter image.
+Set-Location C:\
+foreach ($path in @('C:\vcpkg', 'C:\librdkafka', "C:\librdkafka-${kafka_version}.tar")) {
+    try {
+        Remove-Item -Recurse -Force $path -ErrorAction Stop
+    } catch {
+        Write-Warning "Cleanup of $path failed (image will be larger than expected): $_"
+    }
+}

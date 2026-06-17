@@ -168,20 +168,36 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
 
 ENV CURL_VERSION="8.20.0"
 
+# Must match the confluent-kafka pin in agent_requirements.in.
+# build_wheels.py asserts these stay in sync at wheel-build time.
+#
+# Bump checklist (update all in lockstep):
+#   1. agent_requirements.in            confluent-kafka==X.Y.Z
+#   2. ENV CONFLUENT_KAFKA_VERSION      this line
+#   3. build_script.ps1                 -Hash for the librdkafka vX.Y.Z tarball
+#   4. build_script.ps1                 $desired_commit for vcpkg (only if upstream
+#                                       deps demand a newer toolchain)
+ENV CONFLUENT_KAFKA_VERSION="2.13.2"
+
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
 RUN python -m pip install --no-warn-script-location -r C:\runner_dependencies.txt
 
 COPY build_script.ps1 C:\build_script.ps1
 COPY update_librdkafka_manifest.py C:\update_librdkafka_manifest.py
-ENV DD_BUILD_COMMAND="pwsh C:\build_script.ps1"
+
+RUN New-Item -Path "C:\include" -ItemType Directory
+RUN New-Item -Path "C:\lib" -ItemType Directory
+RUN New-Item -Path "C:\bin" -ItemType Directory
+
+# Build librdkafka and its vcpkg deps (OpenSSL, curl, zlib, zstd) at image-build
+# time so binaries are baked into image layers and survive across wheel-build runs.
+# Previously this ran at wheel-build time on every run (~25 min per run).
+RUN RunOnVSConsole -Command 'pwsh C:\build_script.ps1'
 
 # Python packages that we want to build regardless of whether prebuilt versions exist on PyPI
 ENV PIP_NO_BINARY="confluent_kafka"
 # Where to find native dependencies when building extensions and for wheel repairing
-RUN New-Item -Path "C:\include" -ItemType Directory
-RUN New-Item -Path "C:\lib" -ItemType Directory
-RUN New-Item -Path "C:\bin" -ItemType Directory
 ENV INCLUDE="C:\include"
 ENV LIB="C:\lib"
 RUN Add-ToPath -Append "C:\bin"
