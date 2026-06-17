@@ -46,7 +46,7 @@ def mid_stream_raising_transport_factory() -> Callable[[Exception], httpx2.MockT
     return _factory
 
 
-CA_ENV_VARS = ('REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE')
+CA_ENV_VARS = ('REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE', 'SSL_CERT_DIR')
 
 
 @pytest.fixture

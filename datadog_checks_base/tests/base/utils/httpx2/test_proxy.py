@@ -416,6 +416,14 @@ def test_skip_proxy_preserves_env_ca_bundle(clean_proxy_env, clean_ca_env, captu
         assert http.options['verify'] == '/env/ca.pem'
 
 
+def test_skip_proxy_preserves_ssl_cert_file_env(clean_proxy_env, clean_ca_env, capturing_transport):
+    # skip_proxy disables trust_env, which gates SSL_CERT_FILE in httpx2; the env CA must still apply.
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    with HTTPX2Wrapper({'skip_proxy': True}, {}, transport=capturing_transport) as http:
+        assert http._client.trust_env is False
+        assert http.options['verify'] == '/env/ssl_cert_file.pem'
+
+
 def test_env_ca_bundle_threads_into_proxied_inners(clean_proxy_env, clean_ca_env):
     # A proxy disables trust_env too, so the env-resolved CA bundle must thread into the proxied transports.
     clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/ca.pem')

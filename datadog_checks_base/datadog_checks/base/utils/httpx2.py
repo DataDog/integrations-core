@@ -113,7 +113,13 @@ def _build_verify(config: dict[str, Any]) -> bool | str:
         return config['tls_ca_cert']
     if not is_affirmative(config['tls_verify']):
         return False
-    return os.environ.get('REQUESTS_CA_BUNDLE') or os.environ.get('CURL_CA_BUNDLE') or True
+    return (
+        os.environ.get('REQUESTS_CA_BUNDLE')
+        or os.environ.get('CURL_CA_BUNDLE')
+        or os.environ.get('SSL_CERT_FILE')
+        or os.environ.get('SSL_CERT_DIR')
+        or True
+    )
 
 
 def _build_cert(config: dict[str, Any]) -> str | tuple[str, str] | None:

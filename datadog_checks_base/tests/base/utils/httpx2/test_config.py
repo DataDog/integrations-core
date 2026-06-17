@@ -154,6 +154,44 @@ def test_verify_off_ignores_env_ca_bundle(capturing_transport, clean_ca_env):
     assert http.options['verify'] is False
 
 
+def test_verify_uses_ssl_cert_file_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/ssl_cert_file.pem'
+
+
+def test_verify_falls_back_to_ssl_cert_dir_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_DIR', '/env/certs')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/certs'
+
+
+def test_verify_ssl_cert_file_wins_over_ssl_cert_dir(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    clean_ca_env.setenv('SSL_CERT_DIR', '/env/certs')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/ssl_cert_file.pem'
+
+
+def test_verify_requests_ca_bundle_wins_over_ssl_cert_file(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/requests.pem'
+
+
+def test_explicit_tls_ca_cert_wins_over_ssl_cert_file(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({'tls_ca_cert': '/etc/ssl/ca.pem'}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/etc/ssl/ca.pem'
+
+
+def test_verify_off_ignores_ssl_cert_file_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({'tls_verify': False}, {}, transport=capturing_transport)
+    assert http.options['verify'] is False
+
+
 def test_verify_false_when_tls_verify_off(capturing_transport):
     http = HTTPX2Wrapper({'tls_verify': False}, {}, transport=capturing_transport)
     assert http.options['verify'] is False
