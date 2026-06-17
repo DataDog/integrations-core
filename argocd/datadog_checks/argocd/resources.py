@@ -92,17 +92,32 @@ def _scrub_url_credentials(text: str) -> str:
     return URL_CREDENTIALS_PATTERN.sub(r"\1", text)
 
 
+def _scrub_repo_urls(container: dict) -> None:
+    """Strip credentials from a source's repoURL and from any multi-source repoURLs, in place."""
+    source = container.get("source")
+    if isinstance(source, dict) and isinstance(source.get("repoURL"), str):
+        source["repoURL"] = _strip_url_userinfo(source["repoURL"])
+    for src in container.get("sources") or []:
+        if isinstance(src, dict) and isinstance(src.get("repoURL"), str):
+            src["repoURL"] = _strip_url_userinfo(src["repoURL"])
+
+
 def _sanitize_item(item: dict, resource_type: str) -> None:
     """Strip embedded credentials from repo URLs and free-text messages in place before they ship."""
     if resource_type == "argocd_application":
-        spec = item.get("spec") or {}
-        source = spec.get("source")
-        if isinstance(source, dict) and isinstance(source.get("repoURL"), str):
-            source["repoURL"] = _strip_url_userinfo(source["repoURL"])
-        for src in spec.get("sources") or []:
-            if isinstance(src, dict) and isinstance(src.get("repoURL"), str):
-                src["repoURL"] = _strip_url_userinfo(src["repoURL"])
-        for condition in (item.get("status") or {}).get("conditions") or []:
+        status = item.get("status") or {}
+        _scrub_repo_urls(item.get("spec") or {})
+        for entry in status.get("history") or []:
+            if isinstance(entry, dict):
+                _scrub_repo_urls(entry)
+        operation_state = status.get("operationState")
+        if isinstance(operation_state, dict) and isinstance(operation_state.get("message"), str):
+            operation_state["message"] = _scrub_url_credentials(operation_state["message"])
+        summary = status.get("summary") or {}
+        external_urls = summary.get("externalURLs")
+        if isinstance(external_urls, list):
+            summary["externalURLs"] = [_strip_url_userinfo(u) if isinstance(u, str) else u for u in external_urls]
+        for condition in status.get("conditions") or []:
             if isinstance(condition, dict) and isinstance(condition.get("message"), str):
                 condition["message"] = _scrub_url_credentials(condition["message"])
     elif resource_type == "argocd_repository":
