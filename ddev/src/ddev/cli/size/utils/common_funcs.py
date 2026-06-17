@@ -405,7 +405,7 @@ def get_dependencies_sizes(
 
         file_data.append(
             {
-                "Name": str(dep),
+                "Names": str(dep),
                 "Version": version,
                 "Size_Bytes": int(size),
                 "Size": convert_to_human_readable_size(size),
