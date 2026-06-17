@@ -389,6 +389,112 @@ def test_service_restart_detection(aggregator, check, instance_basic):
     )
 
 
+# Per-user service instances carry SERVICE_USER_OWN_PROCESS (0x50) plus the
+# SERVICE_USERSERVICE_INSTANCE flag (0x80). Templates (not enumerated) lack the 0x80 bit.
+USER_SERVICE_INSTANCE_TYPE = 0x10 | 0x40 | 0x80
+WIN32_OWN_PROCESS_TYPE = 0x10
+
+
+def _per_user_mock_services():
+    return [
+        {
+            'ServiceName': 'OneSyncSvc_443f50',
+            'DisplayName': 'Sync Host_443f50',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 1234,
+            'ServiceType': USER_SERVICE_INSTANCE_TYPE,
+        },
+        {
+            'ServiceName': 'OneSyncSvc_18f113',
+            'DisplayName': 'Sync Host_18f113',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 5678,
+            'ServiceType': USER_SERVICE_INSTANCE_TYPE,
+        },
+        {
+            'ServiceName': 'Dnscache',
+            'DisplayName': 'DNS Client',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 9999,
+            'ServiceType': WIN32_OWN_PROCESS_TYPE,
+        },
+    ]
+
+
+def test_group_per_user_services(aggregator, check, instance_group_per_user_services):
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance_group_per_user_services)
+
+    # Both per-user instances collapse to the template name, so the grouped tag is submitted twice
+    grouped_tags = ['windows_service:OneSyncSvc', 'windows_service_state:running', 'display_name:Sync Host']
+    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=grouped_tags, count=2)
+    aggregator.assert_metric('windows_service.state', value=1, tags=grouped_tags, count=2)
+
+    # The LUID-suffixed names must no longer be emitted
+    for suffixed in ('OneSyncSvc_443f50', 'OneSyncSvc_18f113'):
+        aggregator.assert_service_check(
+            c.SERVICE_CHECK_NAME,
+            status=c.OK,
+            tags=[f'windows_service:{suffixed}', 'windows_service_state:running'],
+            count=0,
+        )
+
+    # Non per-user services are untouched
+    dnscache_tags = ['windows_service:Dnscache', 'windows_service_state:running', 'display_name:DNS Client']
+    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=dnscache_tags, count=1)
+
+
+def test_group_per_user_services_disabled(aggregator, check, instance_group_per_user_services):
+    instance_group_per_user_services['group_per_user_services'] = False
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance_group_per_user_services)
+
+    # Without grouping each instance keeps its full LUID-suffixed name
+    for suffix in ('443f50', '18f113'):
+        aggregator.assert_service_check(
+            c.SERVICE_CHECK_NAME,
+            status=c.OK,
+            tags=[
+                f'windows_service:OneSyncSvc_{suffix}',
+                'windows_service_state:running',
+                f'display_name:Sync Host_{suffix}',
+            ],
+            count=1,
+        )
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME, status=c.OK, tags=['windows_service:OneSyncSvc', 'windows_service_state:running'], count=0
+    )
+
+
+def test_group_per_user_services_ignores_non_user_service(aggregator, check, instance_group_per_user_services):
+    # A regular service whose name happens to end in _<hex> must not be stripped: it lacks the
+    # SERVICE_USERSERVICE_INSTANCE flag.
+    mock_services = [
+        {
+            'ServiceName': 'MyService_abc123',
+            'DisplayName': 'My Service_abc123',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 4242,
+            'ServiceType': WIN32_OWN_PROCESS_TYPE,
+        },
+    ]
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=mock_services):
+        c.check(instance_group_per_user_services)
+
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.OK,
+        tags=['windows_service:MyService_abc123', 'windows_service_state:running', 'display_name:My Service_abc123'],
+        count=1,
+    )
+
+
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)
