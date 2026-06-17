@@ -55,6 +55,7 @@ MULTI_QUERIES = [
     },
 ]
 
+
 def _make_do_instance(queries=None, config_id='test-config-123', extra=None):
     instance = deepcopy(BASE_INSTANCE)
     instance['data_observability'] = {
@@ -68,11 +69,13 @@ def _make_do_instance(queries=None, config_id='test-config-123', extra=None):
         instance.update(extra)
     return instance
 
+
 def _make_mock_cursor(rows=None, description=None):
     mock_cursor = MagicMock()
     mock_cursor.description = description if description is not None else [('count',)]
     mock_cursor.fetchmany.return_value = rows if rows is not None else [(42,)]
     return mock_cursor
+
 
 def _make_connection_mocks(mock_cursor=None):
     """Return (mock_connection, mock_cursor, ctx_patcher_fn).
@@ -101,9 +104,11 @@ def _make_connection_mocks(mock_cursor=None):
 
     return mock_connection, mock_cursor, open_calls
 
+
 def _create_check(instance):
     check = SQLServer('sqlserver', {}, [instance])
     return check
+
 
 def _setup_and_run(instance=None, queries=None, mock_cursor=None):
     if instance is None:
@@ -115,10 +120,13 @@ def _setup_and_run(instance=None, queries=None, mock_cursor=None):
     check.data_observability.run_job()
     return check, mock_connection, cursor, open_calls
 
+
 def _get_do_event_calls(mock_epe):
     return [c for c in mock_epe.call_args_list if len(c[0]) >= 2 and c[0][1] == EVENT_TRACK_TYPE]
 
+
 # ── Basic execution ──────────────────────────────────────────────────────────
+
 
 def test_no_queries_does_nothing(aggregator):
     instance = _make_do_instance(queries=[])
@@ -131,6 +139,7 @@ def test_no_queries_does_nothing(aggregator):
     mock_connection._open_managed_db_connections.assert_not_called()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
+
 def test_single_query_success(aggregator):
     _setup_and_run()
 
@@ -139,6 +148,7 @@ def test_single_query_success(aggregator):
     assert len(metrics) == 1
     assert metrics[0].value == 1
     assert 'status:success' in metrics[0].tags
+
 
 def test_multi_query_execution(aggregator):
     _setup_and_run(queries=deepcopy(MULTI_QUERIES))
@@ -151,7 +161,9 @@ def test_multi_query_execution(aggregator):
     assert all(m.value == 1 for m in status_metrics)
     assert all('status:success' in m.tags for m in status_metrics)
 
+
 # ── Per-dbname connections ────────────────────────────────────────────────────
+
 
 def test_per_dbname_connection_opened(aggregator):
     """_open_managed_db_connections is called with db_name=q.dbname."""
@@ -161,6 +173,7 @@ def test_per_dbname_connection_opened(aggregator):
 
     assert len(open_calls) == 1
     assert open_calls[0]['db_name'] == 'other_db'
+
 
 def test_multiple_queries_different_dbnames(aggregator):
     """Queries to different dbnames open separate connections."""
@@ -176,6 +189,7 @@ def test_multiple_queries_different_dbnames(aggregator):
     assert open_calls[0]['db_name'] == 'db_one'
     assert open_calls[1]['db_name'] == 'db_two'
 
+
 def test_azure_sql_db_no_use_statement(aggregator):
     """Azure SQL DB safety: connecting via db_name never issues USE <dbname>.
 
@@ -190,7 +204,9 @@ def test_azure_sql_db_no_use_statement(aggregator):
     # get_cursor is called with same db_name (no USE issued)
     # Implicit: no USE statement is constructed in the data_observability path
 
+
 # ── Error handling ────────────────────────────────────────────────────────────
+
 
 def test_query_failure_does_not_block_subsequent(aggregator):
     """First query raises pyodbc.Error; second query still runs."""
@@ -213,6 +229,7 @@ def test_query_failure_does_not_block_subsequent(aggregator):
     status_metrics = aggregator.metrics('dd.sqlserver.data_observability.query_executions')
     assert len(status_metrics) == 2
 
+
 def test_no_description_does_not_block_subsequent(aggregator):
     """cursor.description is None (non-SELECT) triggers per-query error; subsequent queries still run."""
     mock_cursor = _make_mock_cursor()
@@ -231,6 +248,7 @@ def test_no_description_does_not_block_subsequent(aggregator):
     assert len(status_metrics) == 2
     assert 'status:error' in status_metrics[0].tags
     assert 'status:success' in status_metrics[1].tags
+
 
 def test_query_with_no_description(aggregator):
     """Non-SELECT queries (cursor.description is None) emit error result."""
@@ -257,6 +275,7 @@ def test_query_with_no_description(aggregator):
     metrics = aggregator.metrics('dd.sqlserver.data_observability.query_executions')
     assert len(metrics) == 1
     assert 'status:error' in metrics[0].tags
+
 
 def test_error_event_payload(aggregator):
     """Failed query emits an event payload with error details."""
@@ -285,7 +304,9 @@ def test_error_event_payload(aggregator):
     assert payload['monitor_id'] == 1
     assert 'duration_s' in payload
 
+
 # ── Scheduling ────────────────────────────────────────────────────────────────
+
 
 def test_per_query_interval_tracking(aggregator):
     instance = _make_do_instance()
@@ -308,6 +329,7 @@ def test_per_query_interval_tracking(aggregator):
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 1
 
+
 def test_failed_query_updates_last_execution(aggregator):
     """A failed query still updates _last_execution so it is not retried until the next interval."""
     import pyodbc
@@ -327,7 +349,9 @@ def test_failed_query_updates_last_execution(aggregator):
     check.data_observability.run_job()
     assert len(aggregator.metrics('dd.sqlserver.data_observability.query_executions')) == 0
 
+
 # ── Payload structure ─────────────────────────────────────────────────────────
+
 
 def test_event_payload_structure(aggregator):
     with patch.object(SQLServer, 'event_platform_event') as mock_epe:
@@ -354,6 +378,7 @@ def test_event_payload_structure(aggregator):
     assert 'db_port' in payload
     assert 'db_name' in payload
 
+
 def test_payload_db_type_is_sqlserver(aggregator):
     with patch.object(SQLServer, 'event_platform_event') as mock_epe:
         _setup_and_run()
@@ -362,6 +387,7 @@ def test_payload_db_type_is_sqlserver(aggregator):
         payload = json.loads(do_calls[0][0][0])
 
     assert payload['db_type'] == 'sqlserver'
+
 
 def test_payload_entity_platform_mssql(aggregator):
     """Entity object is serialised verbatim from the query spec; platform=mssql for SQL Server queries."""
@@ -372,6 +398,7 @@ def test_payload_entity_platform_mssql(aggregator):
         payload = json.loads(do_calls[0][0][0])
 
     assert payload['entity']['platform'] == 'mssql'
+
 
 def test_payload_db_name_reflects_query_dbname(aggregator):
     query = deepcopy(BASE_QUERY)
@@ -384,6 +411,7 @@ def test_payload_db_name_reflects_query_dbname(aggregator):
         payload = json.loads(do_calls[0][0][0])
 
     assert payload['db_name'] == 'analytics_db'
+
 
 def test_payload_cloud_metadata_included(aggregator):
     """cloud_metadata is included in the payload when azure/aws/gcp is configured."""
@@ -402,6 +430,7 @@ def test_payload_cloud_metadata_included(aggregator):
     assert 'cloud_metadata' in payload
     assert 'azure' in payload['cloud_metadata']
 
+
 def test_payload_cloud_metadata_absent_when_not_configured(aggregator):
     """cloud_metadata key is not present when no cloud provider is configured."""
     with patch.object(SQLServer, 'event_platform_event') as mock_epe:
@@ -411,6 +440,7 @@ def test_payload_cloud_metadata_absent_when_not_configured(aggregator):
         payload = json.loads(do_calls[0][0][0])
 
     assert 'cloud_metadata' not in payload
+
 
 def test_entity_schema_alias(aggregator):
     """Entity schema field serialises as 'schema' (alias) not 'schema_'."""
@@ -422,6 +452,7 @@ def test_entity_schema_alias(aggregator):
 
     assert payload['entity']['schema'] == 'dbo'
     assert 'schema_' not in payload['entity']
+
 
 def test_custom_sql_select_fields_in_payload(aggregator):
     query = deepcopy(BASE_QUERY)
@@ -440,6 +471,7 @@ def test_custom_sql_select_fields_in_payload(aggregator):
     assert custom['metric_config_id'] == 42
     assert custom['entity_id'] == 'ent-abc-123'
 
+
 def test_tags_include_monitor_id(aggregator):
     _setup_and_run()
 
@@ -454,7 +486,9 @@ def test_tags_include_monitor_id(aggregator):
     assert 'monitor_id:1' in exec_metrics[0].tags
     assert 'status:success' in exec_metrics[0].tags
 
+
 # ── query_timeout conversion ──────────────────────────────────────────────────
+
 
 def test_query_timeout_ms_to_seconds_conversion(aggregator):
     """query_timeout in ms is converted to ceiling-seconds before setting on the connection."""
@@ -467,6 +501,7 @@ def test_query_timeout_ms_to_seconds_conversion(aggregator):
     _, timeout_s, *_ = mock_conn.set_command_timeout.call_args[0]
     assert timeout_s == 180
 
+
 def test_query_timeout_ceiling(aggregator):
     """Fractional ms values are rounded up (ceil), minimum 1 s."""
     query = deepcopy(BASE_QUERY)
@@ -476,6 +511,7 @@ def test_query_timeout_ceiling(aggregator):
 
     _, timeout_s, *_ = mock_conn.set_command_timeout.call_args[0]
     assert timeout_s == 2
+
 
 def test_query_timeout_minimum_1s(aggregator):
     """Sub-second timeouts are clamped to 1 s minimum."""
@@ -487,6 +523,7 @@ def test_query_timeout_minimum_1s(aggregator):
     _, timeout_s, *_ = mock_conn.set_command_timeout.call_args[0]
     assert timeout_s == 1
 
+
 def test_no_query_timeout_skips_set_command_timeout(aggregator):
     """When query_timeout is not set, set_command_timeout is not called."""
     query = deepcopy(BASE_QUERY)
@@ -496,7 +533,9 @@ def test_no_query_timeout_skips_set_command_timeout(aggregator):
 
     mock_conn.set_command_timeout.assert_not_called()
 
+
 # ── Miscellaneous ─────────────────────────────────────────────────────────────
+
 
 def test_collection_interval_none_uses_default():
     """collection_interval=None should not crash."""
@@ -510,11 +549,13 @@ def test_collection_interval_none_uses_default():
     check = SQLServer('sqlserver', {}, [instance])
     assert check.data_observability._enabled
 
+
 def test_fetchmany_called_with_max_rows(aggregator):
     """fetchmany is called with MAX_RESULT_ROWS to cap memory usage."""
     mock_cursor = _make_mock_cursor()
     _setup_and_run(mock_cursor=mock_cursor)
     mock_cursor.fetchmany.assert_called_once_with(MAX_RESULT_ROWS)
+
 
 def test_pyodbc_cursor_description_columns_from_description(aggregator):
     """columns are built from cursor.description (no DictCursor in pyodbc)."""
