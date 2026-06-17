@@ -22,9 +22,9 @@ SERVICE_USERSERVICE_INSTANCE = 0x80
 USER_SERVICE_LUID_SUFFIX_RE = re.compile(r'_[0-9A-Fa-f]+$')
 
 
-def _group_per_user_service_name(name, service_type):
+def _group_per_user_service_name(name: str, service_type: int) -> str:
     """Strip the per-user LUID suffix so instances group under their template name."""
-    if service_type & SERVICE_USERSERVICE_INSTANCE and USER_SERVICE_LUID_SUFFIX_RE.search(name):
+    if service_type & SERVICE_USERSERVICE_INSTANCE:
         return USER_SERVICE_LUID_SUFFIX_RE.sub('', name)
     return name
 
@@ -327,8 +327,13 @@ class WindowsService(AgentCheck):
             service_view = ServiceView(scm_handle, service_name)
 
             # Names used for tags; for per-user services these collapse the per-session LUID suffix
-            # so all instances report under their template name. The full instance name is kept for
-            # service handles and the restart PID cache.
+            # so all instances report under their template name.
+            # The full instance name is kept for service handles and the restart PID cache.
+            # Multiple instances thus collapse into a single series; if they are in different states
+            # the reported state reflects whichever instance is emitted last.
+            # We generally expect multiple per-user instances per host to be rare (terminal service
+            # sessions only); the main win is grouping the windows_service tag across hosts (and thus
+            # service checks) for easier monitoring.
             reported_name = service_name
             reported_display_name = display_name
             if group_per_user_services:

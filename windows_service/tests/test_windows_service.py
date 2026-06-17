@@ -495,6 +495,35 @@ def test_group_per_user_services_ignores_non_user_service(aggregator, check, ins
     )
 
 
+def test_group_per_user_services_with_name_filter(aggregator, check, instance_group_per_user_services):
+    # Grouping must also apply when services are selected by a name filter (not just ALL). The
+    # prefix regex matches the full LUID-suffixed instance names, but the emitted tag is grouped.
+    instance_group_per_user_services['services'] = ['OneSyncSvc']
+
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance_group_per_user_services)
+
+    grouped_tags = ['windows_service:OneSyncSvc', 'windows_service_state:running', 'display_name:Sync Host']
+    aggregator.assert_service_check(c.SERVICE_CHECK_NAME, status=c.OK, tags=grouped_tags, count=2)
+
+    # The grouped template name must not be reported UNKNOWN by the services_unseen path
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.UNKNOWN,
+        tags=['windows_service:OneSyncSvc', 'windows_service_state:unknown'],
+        count=0,
+    )
+    # The non-matching service is not reported
+    aggregator.assert_service_check(
+        c.SERVICE_CHECK_NAME,
+        status=c.OK,
+        tags=['windows_service:Dnscache', 'windows_service_state:running', 'display_name:DNS Client'],
+        count=0,
+    )
+
+
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)
