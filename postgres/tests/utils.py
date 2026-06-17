@@ -12,42 +12,34 @@ from datadog_checks.base import AgentCheck
 
 from .common import PASSWORD_ADMIN, POSTGRES_VERSION, USER_ADMIN
 
-requires_over_10 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 10,
-    reason='This test is for over 10 only (make sure POSTGRES_VERSION is set)',
-)
-requires_over_11 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 11,
-    reason='This test is for over 11 only (make sure POSTGRES_VERSION is set)',
-)
-requires_over_12 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 12,
-    reason='This test is for over 12 only (make sure POSTGRES_VERSION is set)',
-)
-requires_over_13 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 13,
-    reason='This test is for over 13 only (make sure POSTGRES_VERSION is set)',
-)
-requires_over_14 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 14,
-    reason='This test is for over 14 only (make sure POSTGRES_VERSION is set)',
-)
-requires_over_15 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 15,
-    reason='This test is for over 15 only (make sure POSTGRES_VERSION is set)',
-)
-requires_over_16 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 16,
-    reason='This test is for over 16 only (make sure POSTGRES_VERSION is set)',
-)
-requires_under_17 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= 17,
-    reason='This test is for under 17 only (make sure POSTGRES_VERSION is set)',
-)
-requires_over_17 = pytest.mark.skipif(
-    POSTGRES_VERSION is None or float(POSTGRES_VERSION) < 17,
-    reason='This test is for over 17 only (make sure POSTGRES_VERSION is set)',
-)
+
+def requires_over(version: float) -> pytest.MarkDecorator:
+    """Skip a test unless POSTGRES_VERSION is set and is at least `version`."""
+    return pytest.mark.skipif(
+        POSTGRES_VERSION is None or float(POSTGRES_VERSION) < version,
+        reason=f'This test is for over {version} only (make sure POSTGRES_VERSION is set)',
+    )
+
+
+def requires_under(version: float) -> pytest.MarkDecorator:
+    """Skip a test unless POSTGRES_VERSION is set and is below `version`."""
+    return pytest.mark.skipif(
+        POSTGRES_VERSION is None or float(POSTGRES_VERSION) >= version,
+        reason=f'This test is for under {version} only (make sure POSTGRES_VERSION is set)',
+    )
+
+
+# Thin aliases kept so existing tests need no change. New gating should call requires_over/under directly.
+requires_over_10 = requires_over(10)
+requires_over_11 = requires_over(11)
+requires_over_12 = requires_over(12)
+requires_over_13 = requires_over(13)
+requires_over_14 = requires_over(14)
+requires_over_15 = requires_over(15)
+requires_over_16 = requires_over(16)
+requires_over_17 = requires_over(17)
+requires_over_18 = requires_over(18)
+requires_under_17 = requires_under(17)
 
 
 def _get_conn(db_instance, dbname=None, user=None, password=None, application_name='test', autocommit=True):
