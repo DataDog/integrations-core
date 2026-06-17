@@ -2,6 +2,26 @@
 
 <!-- towncrier release notes start -->
 
+## 39.0.0 / 2026-06-15
+
+***Changed***:
+
+* Make docker_run wait for Docker Compose service health by default. ([#23628](https://github.com/DataDog/integrations-core/pull/23628))
+* Legacy migration: remove `validate jmx-metrics` from the legacy CLI; the command is now provided natively by ddev. ([#23652](https://github.com/DataDog/integrations-core/pull/23652))
+
+***Added***:
+
+* Add `include_total` option to the Windows perf-counter spec template, allowing integrations to opt in to collecting the `_Total` aggregate instance. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+* Modernize the `ddev create -t check` scaffold template to use Python 3.13 idioms. ([#23705](https://github.com/DataDog/integrations-core/pull/23705))
+* Fail `ddev validate agent-reqs` when `requirements-agent-release.txt` pins a `datadog-*` package whose integration folder is no longer present in the repo. ([#23813](https://github.com/DataDog/integrations-core/pull/23813))
+
+***Fixed***:
+
+* Make `generate-profile-from-mibs` emit `symbol` instead of the deprecated `column` field on table metric tags, and accept `symbol` in `validate-profile`. ([#23543](https://github.com/DataDog/integrations-core/pull/23543))
+* Fix `get_agent_requirement_line` to ignore unknown OS platforms (e.g. `Supported OS::AIX`) when computing agent requirement lines. ([#23608](https://github.com/DataDog/integrations-core/pull/23608))
+* Restore the legacy `validate jmx-metrics` command file to keep the release pipeline's in-toto attestation valid; the command is still served by `ddev`. ([#23687](https://github.com/DataDog/integrations-core/pull/23687))
+* Keep registry.datadoghq.com Agent 6 and 7 builds from receiving a Python suffix. ([#23790](https://github.com/DataDog/integrations-core/pull/23790))
+
 ## 38.0.0 / 2026-04-29
 
 ***Changed***:

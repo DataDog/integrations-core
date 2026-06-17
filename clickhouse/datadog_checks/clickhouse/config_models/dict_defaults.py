@@ -57,6 +57,14 @@ def instance_query_errors():
     )
 
 
+def instance_schema_metrics():
+    return instance.SchemaMetrics(
+        enabled=False,
+        collection_interval=60,
+        run_sync=False,
+    )
+
+
 def instance_collect_schemas():
     return instance.CollectSchemas(
         enabled=False,
