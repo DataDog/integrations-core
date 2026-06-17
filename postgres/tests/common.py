@@ -1,6 +1,34 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+"""Shared test helpers for the postgres integration.
+
+How to add a version-gated metric
+---------------------------------
+postgres collects metrics in two lanes. Adding a metric to either is a content-only change; the
+test scaffolding below derives the rest.
+
+Relation / structured-query lane (pg_class et al.):
+  1. Append an ``(sql_expression, column_descriptor)`` pair to ``relationsmanager.get_pg_class_query``,
+     inside the appropriate ``if version >= V<major>`` block. This builder is the reference pattern
+     for version-gated structured queries: the SELECT projection and the column descriptors are
+     assembled in lockstep so they cannot drift.
+  2. Add the ``postgresql.*`` row to ``metadata.csv``.
+  3. Add a changelog entry.
+
+Scope / metric-dict lane (``util.py`` dicts read by ``metrics_cache.py``):
+  1. Declare the metric in the right group for its minimum version (e.g. ``NEWER_14_METRICS`` for
+     PG 14+); the existing ``if version >= V<major>`` merges in ``metrics_cache.py`` pick it up.
+  2. Add the ``postgresql.*`` row to ``metadata.csv``.
+  3. Add a changelog entry.
+
+You do not edit the test metric lists or version markers: ``COMMON_METRICS`` and the bgwriter
+variants below derive from the util declarations via ``_iterate_metric_name`` and auto-scope to the
+versions that expose each metric; ``requires_over(n)`` / ``requires_under(n)`` in ``utils.py`` gate
+tests for any version; and ``test_metadata_consistency.py`` fails if a declared metric has no
+``metadata.csv`` row.
+"""
+
 import os
 from sys import maxsize
 
