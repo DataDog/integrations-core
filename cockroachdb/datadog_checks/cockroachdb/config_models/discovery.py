@@ -23,7 +23,6 @@ def candidates(service: Service) -> Iterator[dict[str, Any]]:
                     'openmetrics_endpoint': 'http://{service.host}:{port.number}/_status/vars'.format(
                         service=service, **ctx
                     ),
-                    'histogram_buckets_as_distributions': True,
                 }
             ],
         }
