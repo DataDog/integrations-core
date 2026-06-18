@@ -20,9 +20,7 @@ def candidates(service: Service) -> Iterator[dict[str, Any]]:
             'init_config': {},
             'instances': [
                 {
-                    'openmetrics_endpoint': 'http://{service.host}:{port.number}'.format(
-                        service=service, **ctx
-                    ),
+                    'openmetrics_endpoint': 'http://{service.host}:{port.number}'.format(service=service, **ctx),
                 }
             ],
         }
