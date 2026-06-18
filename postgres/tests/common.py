@@ -8,15 +8,16 @@ How to add a version-gated metric
 postgres collects metrics in two lanes. Adding a metric to either is a content-only change; the
 test scaffolding below derives the rest.
 
-Relation / structured-query lane (pg_class et al.):
-  1. Append an ``(sql_expression, column_descriptor)`` pair to ``relationsmanager.get_pg_class_query``,
-     inside the appropriate ``if version >= V<major>`` block. This builder is the reference pattern
-     for version-gated structured queries: the SELECT projection and the column descriptors are
-     assembled in lockstep so they cannot drift.
+Structured-query lane (``build_versioned_query``: pg_class, pg_stat_wal, et al.):
+  1. Append an ``(sql_expression, column_descriptor)`` pair to the query's column list (e.g.
+     ``relationsmanager.get_pg_class_query`` or ``util.STAT_WAL_COLUMNS``). If the column exists only
+     on some server versions, add a third element to the pair: a ``VersionRange(min_version=...,
+     max_version=...)``. ``build_versioned_query`` keeps the SELECT projection and the column
+     descriptors in lockstep, so a single declaration replaces the old ``_LT_<major>`` twin constants.
   2. Add the ``postgresql.*`` row to ``metadata.csv``.
   3. Add a changelog entry.
 
-Scope / metric-dict lane (``util.py`` dicts read by ``metrics_cache.py``):
+Scope metric-dict lane (``util.py`` dicts read by ``metrics_cache.py``):
   1. Declare the metric in the right group for its minimum version (e.g. ``NEWER_14_METRICS`` for
      PG 14+); the existing ``if version >= V<major>`` merges in ``metrics_cache.py`` pick it up.
   2. Add the ``postgresql.*`` row to ``metadata.csv``.
@@ -55,12 +56,11 @@ from datadog_checks.postgres.util import (
     STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
-    STAT_WAL_METRICS,
-    STAT_WAL_METRICS_LT_18,
     SUBSCRIPTION_STATE_METRICS,
     WAL_FILE_METRICS,
+    get_stat_wal_query,
 )
-from datadog_checks.postgres.version_utils import VersionUtils
+from datadog_checks.postgres.version_utils import V14, V18, VersionUtils
 
 HOST = get_docker_hostname()
 PORT = '5432'
@@ -489,12 +489,9 @@ def check_file_wal_metrics(aggregator, expected_tags, count=1):
 def check_stat_wal_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 14.0:
         return
-    if float(POSTGRES_VERSION) < 18.0:
-        for metric_name in _iterate_metric_name(STAT_WAL_METRICS_LT_18):
-            aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
-    else:
-        for metric_name in _iterate_metric_name(STAT_WAL_METRICS):
-            aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
+    version = V18 if float(POSTGRES_VERSION) >= 18.0 else V14
+    for metric_name in _iterate_metric_name(get_stat_wal_query(version)):
+        aggregator.assert_metric(metric_name, count=count, tags=expected_tags)
 
 
 def check_performance_metrics(aggregator, expected_tags, count=1, is_aurora=False):
