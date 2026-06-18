@@ -2,16 +2,15 @@
   "supported_auth_methods": [],
   "additional_config_fields": [
     {
-      "type": "text",
+      "text": {},
       "key": "username",
       "label": "Username",
       "help": "ZeroFox Username.",
       "editable": true,
-      "required": true,
-      "pattern": null
+      "required": true
     },
     {
-      "type": "password",
+      "password": {},
       "key": "password",
       "label": "password",
       "help": "ZeroFox Password.",
