@@ -8,7 +8,6 @@ import psycopg
 import pytest
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
-from datadog_checks.postgres.explain_parameterized_queries import EXPECTED_PARAMETER_TYPE_ERRORS
 from datadog_checks.postgres.util import DBExplainError
 from datadog_checks.postgres.version_utils import V12
 
@@ -323,10 +322,19 @@ def test_create_prepared_statement_datatype_mismatch_maps_to_code(integration_ch
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("exception_class", EXPECTED_PARAMETER_TYPE_ERRORS)
-def test_explain_prepared_statement_type_mismatch_returns_none(integration_check, dbm_instance, exception_class):
+@pytest.mark.parametrize(
+    "exception_class,expected_error_code",
+    [
+        (psycopg.errors.IndeterminateDatatype, DBExplainError.indeterminate_datatype),
+        (psycopg.errors.DatatypeMismatch, DBExplainError.datatype_mismatch),
+        (psycopg.errors.UndefinedFunction, DBExplainError.undefined_function),
+    ],
+)
+def test_explain_prepared_statement_type_mismatch_maps_to_code(
+    integration_check, dbm_instance, exception_class, expected_error_code
+):
     """When EXPLAIN EXECUTE hits a parameter type-resolution error the statement can't be explained,
-    so _explain_prepared_statement returns None as a sentinel rather than raising."""
+    so _explain_prepared_statement returns the specific mapped error code rather than raising."""
     check = integration_check(dbm_instance)
     epq = check.statement_samples._explain_parameterized_queries
 
@@ -336,14 +344,16 @@ def test_explain_prepared_statement_type_mismatch_returns_none(integration_check
             '_execute_query_and_fetch_rows',
             side_effect=exception_class("operator does not exist: bigint = text"),
         ):
-            result = epq._explain_prepared_statement(
+            rows, explain_error = epq._explain_prepared_statement(
                 None,
                 "SELECT id FROM t WHERE id = $1",
                 "SELECT id FROM t WHERE id = $1",
                 "test_sig",
             )
 
-    assert result is None
+    assert rows is None
+    assert explain_error is not None
+    assert explain_error[0] == expected_error_code
 
 
 @pytest.mark.unit

@@ -112,10 +112,13 @@ class ExplainParameterizedQueries:
                 return None, error_code, err_msg
 
             try:
-                result = self._explain_prepared_statement(conn, statement, obfuscated_statement, query_signature)
-                if result is None:
-                    # an expected parameter type-resolution failure surfaced during EXPLAIN EXECUTE
-                    return None, DBExplainError.undefined_function, None
+                result, explain_error = self._explain_prepared_statement(
+                    conn, statement, obfuscated_statement, query_signature
+                )
+                if explain_error is not None:
+                    # an expected, deterministic parameter type-resolution failure surfaced during EXPLAIN EXECUTE
+                    error_code, err_msg = explain_error
+                    return None, error_code, err_msg
                 elif result:
                     plan = result[0][0][0]
                     return plan, DBExplainError.explained_with_prepared_statement, None
@@ -157,11 +160,7 @@ class ExplainParameterizedQueries:
                 query_signature,
                 e,
             )
-            if isinstance(e, psycopg.errors.IndeterminateDatatype):
-                return DBExplainError.indeterminate_datatype, '{}'.format(type(e))
-            if isinstance(e, psycopg.errors.DatatypeMismatch):
-                return DBExplainError.datatype_mismatch, '{}'.format(type(e))
-            return DBExplainError.undefined_function, '{}'.format(type(e))
+            return self._map_parameter_type_error(e)
         except Exception as e:
             self._log_failed_statement(
                 'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
@@ -171,6 +170,15 @@ class ExplainParameterizedQueries:
                 e,
             )
             raise
+
+    def _map_parameter_type_error(self, e: Exception) -> Tuple[DBExplainError, str]:
+        # Map an unresolved parameter-type error to its specific explain error code so cached responses
+        # and emitted error tags reflect the actual failure rather than a generic one.
+        if isinstance(e, psycopg.errors.IndeterminateDatatype):
+            return DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+        if isinstance(e, psycopg.errors.DatatypeMismatch):
+            return DBExplainError.datatype_mismatch, '{}'.format(type(e))
+        return DBExplainError.undefined_function, '{}'.format(type(e))
 
     def _log_failed_statement(
         self, message: str, statement: str, obfuscated_statement: str, query_signature: str, e: Exception
@@ -201,14 +209,17 @@ class ExplainParameterizedQueries:
     @tracked_method(agent_check_getter=agent_check_getter)
     def _explain_prepared_statement(
         self, conn, statement: str, obfuscated_statement: str, query_signature: str
-    ) -> Optional[List]:
+    ) -> Tuple[Optional[List], Optional[Tuple[DBExplainError, str]]]:
+        # Returns (rows, None) on success, or (None, (DBExplainError, err_msg)) when a parameter's type can't be
+        # resolved during EXPLAIN EXECUTE. Other unexpected errors are re-raised.
         try:
             prepared_statement_query = self._generate_prepared_statement_query(conn, query_signature)
-            return self._execute_query_and_fetch_rows(
+            rows = self._execute_query_and_fetch_rows(
                 conn,
                 EXPLAIN_QUERY.format(explain_function=self._explain_function),
                 (prepared_statement_query,),
             )
+            return rows, None
         except EXPECTED_PARAMETER_TYPE_ERRORS as e:
             # The parameter types couldn't be resolved during EXPLAIN EXECUTE, so the query can't be explained.
             self._log_failed_statement(
@@ -218,7 +229,7 @@ class ExplainParameterizedQueries:
                 query_signature,
                 e,
             )
-            return None
+            return None, self._map_parameter_type_error(e)
         except Exception as e:
             self._log_failed_statement(
                 'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
