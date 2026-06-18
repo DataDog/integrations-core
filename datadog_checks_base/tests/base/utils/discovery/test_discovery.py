@@ -223,3 +223,24 @@ def test_from_ports_yields_template_contexts():
         {'port': Port(number=9090, name='metrics')},
         {'port': Port(number=8080, name='http')},
     ]
+
+
+def test_from_ports_renders_candidate_instances():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='http'),
+            Port(number=9090, name='metrics'),
+        ),
+    )
+
+    candidates = [
+        {'init_config': {}, 'instances': [{'host': service.host, 'port': ctx['port'].number}]}
+        for ctx in from_ports(service, port_hints=[9090])
+    ]
+
+    assert candidates == [
+        {'init_config': {}, 'instances': [{'host': '127.0.0.1', 'port': 9090}]},
+        {'init_config': {}, 'instances': [{'host': '127.0.0.1', 'port': 8080}]},
+    ]
