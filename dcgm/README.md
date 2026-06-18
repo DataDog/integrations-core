@@ -1,7 +1,7 @@
 # Agent Check: DCGM Exporter
-{{< callout url="https://docs.datadoghq.com/gpu_monitoring/setup/?tab=datadogoperator" >}}
+{{< callout >}}
 
-This is a legacy integration that is no longer being developed or fully supported. For advanced insights into your GPU fleet, use Datadog's GPU Monitoring instead of installing this integration.
+This is a legacy integration that is no longer being developed or fully supported. For advanced insights into your GPU fleet, use Datadog's [GPU Monitoring](https://docs.datadoghq.com/gpu_monitoring/) instead of installing this integration.
 {{< /callout >}}
 
 ## Overview
