@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.nginx import Nginx
 
 from .common import HERE, HOST, PORT, PORT_SSL, TAGS, USING_VTS
@@ -25,7 +25,7 @@ def dd_environment(instance, instance_vts):
         env_vars={'NGINX_CONFIG_FOLDER': config_dir},
         endpoints='http://{}:{}/nginx_status'.format(HOST, PORT),
     ):
-        yield instance
+        yield instance, get_e2e_discovery_metadata()
 
 
 INSTANCE = {
