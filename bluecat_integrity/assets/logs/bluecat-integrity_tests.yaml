@@ -119,10 +119,10 @@ tests:
           tc: false
         question:
          -
-          domainName: "C-Lab-24.contoso.local."
-          questionTypeId: 6
           class: "IN"
+          domainName: "C-Lab-24.contoso.local."
           questionType: "SOA"
+          questionTypeId: 6
         rcodeName: "NoError"
         time: 1772082903782342100
       request_op_code_value: "Query"
@@ -305,10 +305,10 @@ tests:
           tc: false
         question:
          -
-          domainName: "google.com"
-          questionTypeId: 1
           class: "IN"
+          domainName: "google.com"
           questionType: "A"
+          questionTypeId: 1
         rcodeName: "Refused"
         time: 1771522139229097200
       responsePort: 53
@@ -532,48 +532,48 @@ tests:
       responseData:
         additional:
          -
-          recordTypeId: 1
-          recordType: "A"
+          class: "IN"
           domainName: "bdds1.google.local."
           rData: "10.10.10.10"
-          class: "IN"
+          recordType: "A"
+          recordTypeId: 1
           ttl: 3600
          -
-          recordTypeId: 1
-          recordType: "A"
+          class: "IN"
           domainName: "bdds2.google.local."
           rData: "10.10.10.10"
-          class: "IN"
+          recordType: "A"
+          recordTypeId: 1
           ttl: 3600
          -
-          recordTypeId: 28
-          recordType: "AAAA"
+          class: "IN"
           domainName: "bdds1.google.local."
           rData: "::1"
-          class: "IN"
+          recordType: "AAAA"
+          recordTypeId: 28
           ttl: 86400
         answers:
          -
-          recordTypeId: 6
-          recordType: "SOA"
+          class: "IN"
           domainName: "google.local."
           rData: "bdds1.google.local.postmaster.no.email.please.783096803360060025920003600"
-          class: "IN"
+          recordType: "SOA"
+          recordTypeId: 6
           ttl: 3600
         authority:
          -
-          recordTypeId: 2
-          recordType: "NS"
+          class: "IN"
           domainName: "google.local."
           rData: "bdds1.google.local."
-          class: "IN"
+          recordType: "NS"
+          recordTypeId: 2
           ttl: 86400
          -
-          recordTypeId: 2
-          recordType: "NS"
+          class: "IN"
           domainName: "google.local."
           rData: "bdds2.google.local."
-          class: "IN"
+          recordType: "NS"
+          recordTypeId: 2
           ttl: 86400
         fullRcode: 0
         header:
@@ -597,16 +597,16 @@ tests:
           extendedRcode: 0
           options:
            -
-            optName: "Expire"
             optCode: 9
+            optName: "Expire"
             optValue: "ACeNAA=="
           udpPayloadSize: 1232
         question:
          -
-          domainName: "google.local."
-          questionTypeId: 6
           class: "IN"
+          domainName: "google.local."
           questionType: "SOA"
+          questionTypeId: 6
         rcodeName: "NoError"
         time: 1772001593205088500
       responsePort: 53
@@ -844,10 +844,10 @@ tests:
           tc: false
         question:
          -
-          domainName: "google.com"
-          questionTypeId: 1
           class: "IN"
+          domainName: "google.com"
           questionType: "A"
+          questionTypeId: 1
         rcodeName: "NoError"
         time: 1771522139229097200
       request_op_code_value: "Query"
@@ -984,9 +984,9 @@ tests:
             optionData: "4d 53 46 54 20 35 2e 30"
             optionId: 60
            -
+            optionId: 55
             parameterRequest:
              - 1
-            optionId: 55
           secs: 0
           siaddr: "10.10.10.10"
           xId: "0xcef7266d"
@@ -1149,9 +1149,9 @@ tests:
             optionId: 1
             subnetMask: "10.10.10.10"
            -
+            optionId: 3
             router:
              - "10.10.10.10"
-            optionId: 3
            -
             domainNameSever:
              - "10.10.10.10"
@@ -1291,16 +1291,16 @@ tests:
           messageTypeId: 7
           options:
            -
+            iaNaOptions:
+             -
+              ipv6Addr: "::1"
+              optionId: 5
+              preferredLifetime: 54000
+              validLifetime: 86400
             iaid: "14005056"
             optionId: 3
             t1: 0
             t2: 0
-            iaNaOptions:
-             -
-              preferredLifetime: 54000
-              ipv6Addr: "::1"
-              validLifetime: 86400
-              optionId: 5
            -
             duid: "000100013125ebe8005056831e56"
             optionId: 1
@@ -1425,16 +1425,16 @@ tests:
           messageTypeId: 2
           options:
            -
+            iaNaOptions:
+             -
+              ipv6Addr: "::1"
+              optionId: 5
+              preferredLifetime: 54000
+              validLifetime: 86400
             iaid: "14005056"
             optionId: 3
             t1: 0
             t2: 0
-            iaNaOptions:
-             -
-              preferredLifetime: 54000
-              ipv6Addr: "::1"
-              validLifetime: 86400
-              optionId: 5
            -
             duid: "000100013125ebe8005056831e56"
             optionId: 1

@@ -8,6 +8,7 @@ from psycopg import ClientCursor
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.postgres.statements import PG_STAT_STATEMENTS_METRICS_COLUMNS
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 
 from .common import (
     DB_NAME,
@@ -517,4 +518,71 @@ def test_fqt_cache_deduplication_v2(aggregator, integration_check, dbm_instance_
 
     assert len(matching) == 1, (
         f"Expected exactly 1 FQT event across 3 cycles but got {len(matching)}; TTL cache deduplication may be broken"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Ignored (/* DDIGNORE */) queries are learned once and never re-fetched
+# ---------------------------------------------------------------------------
+
+
+@requires_over_10
+def test_ignored_queries_do_not_cause_lookup_cycles_v2(aggregator, integration_check, dbm_instance_v2):
+    """The check's own /* DDIGNORE */ queries run every cycle and would otherwise trigger a query-text
+    fetch each time. Once classified as DDIGNORE, a key must be remembered and skipped so it never costs
+    another fetch on a later cycle (unless it genuinely vanished from pg_stat_statements in between)."""
+    conn = psycopg.connect(
+        host=HOST, dbname=DB_NAME, user="bob", password="bob", autocommit=True, cursor_factory=ClientCursor
+    )
+
+    check = integration_check(dbm_instance_v2)
+    check._connect()
+
+    # First cycle selects and instantiates the V2 collector; capture it before installing the spy.
+    conn.cursor().execute("SELECT city FROM persons WHERE city = %s", ("hello",))
+    run_one_check(check, cancel=False)
+    job = check.statement_metrics
+    assert isinstance(job, PostgresStatementMetricsV2)
+
+    # Spy on the text fetch across every cycle, recording which keys were classified as DDIGNORE and
+    # which keys vanished from pgss before each fetch (legitimate re-fetches if they later return).
+    original_fetch = job._fetch_query_texts
+    ddignore_keys_seen: set = set()
+    refetched_ddignore: set = set()
+    vanished_before_fetch: set = set()
+
+    def _spy(keys):
+        # A key already known to be DDIGNORE that is fetched again — and did not vanish in the
+        # meantime — means it slipped past the skip and is still costing a lookup every cycle.
+        replayed = (set(keys) & ddignore_keys_seen) - vanished_before_fetch
+        refetched_ddignore.update(replayed)
+        texts = original_fetch(keys)
+        for key, text in texts.items():
+            if text and text.startswith('/* DDIGNORE */'):
+                ddignore_keys_seen.add(key)
+        return texts
+
+    original_resolve = job._resolve_obfuscations
+
+    def _resolve_spy(changed_pgss_keys, vanished_pgss_keys):
+        vanished_before_fetch.update(vanished_pgss_keys)
+        return original_resolve(changed_pgss_keys, vanished_pgss_keys)
+
+    with (
+        mock.patch.object(job, '_fetch_query_texts', side_effect=_spy),
+        mock.patch.object(job, '_resolve_obfuscations', side_effect=_resolve_spy),
+    ):
+        for _ in range(8):
+            conn.cursor().execute("SELECT city FROM persons WHERE city = %s", ("hello",))
+            run_one_check(check, cancel=False)
+
+    conn.close()
+
+    if not ddignore_keys_seen:
+        # Some Postgres versions (e.g. 18) normalize the leading comment out of the stored
+        # pg_stat_statements text, so /* DDIGNORE */ queries never reach the fetch path and
+        # there is nothing to assert about skipping them here.
+        pytest.skip("No /* DDIGNORE */ queries surfaced in pg_stat_statements on this version")
+    assert not refetched_ddignore, (
+        f"DDIGNORE keys were re-fetched on later cycles instead of being skipped: {sorted(refetched_ddignore)}"
     )

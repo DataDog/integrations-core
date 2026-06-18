@@ -7,10 +7,10 @@ tests:
   result:
     custom:
       level: "INFO"
-      timestamp: 1718139721000
       logger:
         lineno: 72
         name: "cpu_executor.py"
+      timestamp: 1718139721000
     message: '# CPU blocks: 7281'
     status: "info"
     tags:
