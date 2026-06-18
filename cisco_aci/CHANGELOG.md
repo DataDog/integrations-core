@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 5.0.0 / 2026-05-14
+## 5.0.0 / 2026-05-14 / Agent 7.80.0
 
 ***Removed***:
 
