@@ -30,7 +30,12 @@ class Query(object):
         self.schema = schema
         self.fields = fields
         self.view = view
-        self.query = compact_query(query.format("{}.{}".format(schema, view)))
+        q = compact_query(query.format("{}.{}".format(schema, view)))
+        if schema == 'SYS':
+            # Single-tenant HANA Express: SYS views lack the DATABASE_NAME column
+            q = q.replace('SELECT DATABASE_NAME,', "SELECT 'SYSTEMDB' AS DATABASE_NAME,")
+            q = q.replace('GROUP BY DATABASE_NAME,', 'GROUP BY')
+        self.query = q
 
 
 class MasterDatabase(Query):
@@ -233,6 +238,7 @@ class GlobalSystemDiskUsage(Query):
     """
 
     def __init__(self, schema):
+        total_col = 'FILE_SIZE' if schema == 'SYS' else 'TOTAL_SIZE'
         super(GlobalSystemDiskUsage, self).__init__(
             schema=schema,
             fields=('db_name', 'host', 'resource', 'used', 'total'),
@@ -243,9 +249,9 @@ class GlobalSystemDiskUsage(Query):
                   HOST,
                   USAGE_TYPE,
                   USED_SIZE,
-                  TOTAL_SIZE
-                FROM {}
-            """,
+                  {}
+                FROM {{}}
+            """.format(total_col),
         )
 
 
