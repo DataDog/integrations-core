@@ -1892,8 +1892,8 @@ def _discovery_noop(*args: Any, **kwargs: Any) -> None:
 
 @contextmanager
 def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRunStats]:
-    metric_methods = (
-        '_submit_metric',
+    aggregator_methods = (
+        'submit_metric',
         'submit_histogram_bucket',
     )
     noop_methods = (
@@ -1907,15 +1907,15 @@ def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRu
         'write_persistent_cache',
     )
     originals: dict[str, Any] = {}
+    aggregator_originals: dict[str, Any] = {}
     stats = _DiscoveryRunStats()
 
     def _count_metric(*args: Any, **kwargs: Any) -> None:
         stats.metric_count += 1
 
-    for method in metric_methods:
-        if hasattr(check, method):
-            originals[method] = getattr(check, method)
-            setattr(check, method, _count_metric)
+    for method in aggregator_methods:
+        aggregator_originals[method] = getattr(aggregator, method)
+        setattr(aggregator, method, _count_metric)
 
     for method in noop_methods:
         if hasattr(check, method):
@@ -1932,5 +1932,7 @@ def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRu
     finally:
         if logger is not None:
             logger.removeFilter(log_filter)
+        for method, original in aggregator_originals.items():
+            setattr(aggregator, method, original)
         for method, original in originals.items():
             setattr(check, method, original)
