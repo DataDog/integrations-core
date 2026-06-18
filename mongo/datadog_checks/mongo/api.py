@@ -258,7 +258,7 @@ class MongoApi(object):
             {'$queryStats': {}},
             {'$sort': {'metrics.execCount': -1}},
         ]
-        return self['admin'].aggregate(pipeline, session=session, maxTimeMS=self._timeout)
+        return self['admin'].aggregate(pipeline, session=session, maxTimeMS=self._timeout, allowDiskUse=True)
 
     @property
     def hostname(self):
