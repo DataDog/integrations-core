@@ -5,6 +5,7 @@
 import pytest
 
 from ddev.ai.tools.fs.append_file import AppendFileTool
+from ddev.ai.tools.fs.copy_path import CopyPathTool
 from ddev.ai.tools.fs.create_file import CreateFileTool
 from ddev.ai.tools.fs.edit_file import EditFileTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -53,6 +54,11 @@ def append_tool(registry: FileRegistry, owner_id: str) -> AppendFileTool:
 @pytest.fixture
 def mkdir_tool(permissive_policy: FileAccessPolicy) -> MkdirTool:
     return MkdirTool(permissive_policy)
+
+
+@pytest.fixture
+def copy_tool(permissive_policy: FileAccessPolicy) -> CopyPathTool:
+    return CopyPathTool(permissive_policy)
 
 
 @pytest.fixture
