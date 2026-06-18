@@ -178,6 +178,10 @@ class Query(BaseModel):
     )
     monitor_id: int
     query: str
+    query_timeout: int = Field(
+        ...,
+        description='Statement timeout for this query in milliseconds. Overrides the instance-level\nquery_timeout for this query only.\n',
+    )
     schedule: Optional[str] = Field(
         None,
         description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
