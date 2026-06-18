@@ -1,0 +1,1 @@
+Fix query metrics collection failure on Atlas clusters caused by sort memory limit when using `$queryStats` without `allowDiskUse=True`.
