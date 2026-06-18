@@ -188,11 +188,14 @@ def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
             for field_name, template in candidate.items():
                 if not isinstance(field_name, str):
                     loader.errors.append(f'{candidate_location}: Candidate field names must be strings')
-                if not isinstance(template, str):
-                    loader.errors.append(f'{candidate_location}, {field_name}: Candidate templates must be strings')
+                if not isinstance(template, (str, bool, int, float)):
+                    loader.errors.append(
+                        f'{candidate_location}, {field_name}: Candidate values must be strings or scalar literals'
+                    )
                     continue
 
-                _validate_discovery_template(template, loader, candidate_location, field_name)
+                if isinstance(template, str):
+                    _validate_discovery_template(template, loader, candidate_location, field_name)
 
 
 def _validate_discovery_template(template: str, loader: Any, location: str, field_name: str) -> None:
