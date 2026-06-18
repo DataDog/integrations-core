@@ -4,6 +4,7 @@
 
 import logging
 import re
+from typing import Dict, List, Optional, Tuple
 
 import psycopg
 
@@ -25,6 +26,16 @@ SELECT CARDINALITY(parameter_types) FROM pg_prepared_statements WHERE name = 'dd
 EXECUTE_PREPARED_STATEMENT_QUERY = 'EXECUTE dd_{prepared_statement}{parameters}'
 
 EXPLAIN_QUERY = 'SELECT {explain_function}(%s)'
+
+# Errors raised when PostgreSQL can't resolve a parameter's type while preparing or explaining a parameterized
+# query (e.g. untyped NULL parameters from ORMs using the extended query protocol: "operator does not exist:
+# bigint = text"). The parameter types that made the original query valid aren't available in pg_stat_activity,
+# so these queries can't be explained and the failure is deterministic for a given query signature.
+EXPECTED_PARAMETER_TYPE_ERRORS = (
+    psycopg.errors.IndeterminateDatatype,
+    psycopg.errors.UndefinedFunction,
+    psycopg.errors.DatatypeMismatch,
+)
 
 
 def agent_check_getter(self):
@@ -73,7 +84,9 @@ class ExplainParameterizedQueries:
         self._explain_function = explain_function
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def explain_statement(self, dbname, statement, obfuscated_statement, query_signature):
+    def explain_statement(
+        self, dbname: str, statement: str, obfuscated_statement: str, query_signature: str
+    ) -> Tuple[Optional[Dict], Optional[DBExplainError], Optional[str]]:
         if self._check.version < V12:
             # if pg version < 12, skip explaining parameterized queries because
             # plan_cache_mode is not supported
@@ -86,18 +99,24 @@ class ExplainParameterizedQueries:
         with self._check.db_pool.get_connection(dbname) as conn:
             try:
                 self._set_plan_cache_mode(conn)
-                self._create_prepared_statement(conn, statement, obfuscated_statement, query_signature)
-            except psycopg.errors.IndeterminateDatatype as e:
-                return None, DBExplainError.indeterminate_datatype, '{}'.format(type(e))
-            except psycopg.errors.UndefinedFunction as e:
-                return None, DBExplainError.undefined_function, '{}'.format(type(e))
+                prepared_statement_error = self._create_prepared_statement(
+                    conn, statement, obfuscated_statement, query_signature
+                )
             except Exception as e:
-                # if we fail to create a prepared statement, we cannot explain the query
+                # an unexpected failure creating the prepared statement means we cannot explain the query
                 return None, DBExplainError.failed_to_explain_with_prepared_statement, '{}'.format(type(e))
+
+            if prepared_statement_error is not None:
+                # an expected, deterministic parameter type-resolution failure (e.g. untyped NULL parameters).
+                error_code, err_msg = prepared_statement_error
+                return None, error_code, err_msg
 
             try:
                 result = self._explain_prepared_statement(conn, statement, obfuscated_statement, query_signature)
-                if result:
+                if result is None:
+                    # an expected parameter type-resolution failure surfaced during EXPLAIN EXECUTE
+                    return None, DBExplainError.undefined_function, None
+                elif result:
                     plan = result[0][0][0]
                     return plan, DBExplainError.explained_with_prepared_statement, None
                 else:
@@ -117,23 +136,51 @@ class ExplainParameterizedQueries:
         self._execute_query(conn, "SET plan_cache_mode = force_generic_plan")
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _create_prepared_statement(self, conn, statement, obfuscated_statement, query_signature):
+    def _create_prepared_statement(
+        self, conn, statement: str, obfuscated_statement: str, query_signature: str
+    ) -> Optional[Tuple[DBExplainError, str]]:
+        # Returns None on success, or a (DBExplainError, err_msg) tuple when the query can't be prepared because
+        # a parameter's type can't be resolved. Other unexpected errors are re-raised.
         try:
             self._execute_query(
                 conn,
                 PREPARE_STATEMENT_QUERY.format(query_signature=query_signature, statement=statement),
             )
-        except Exception as e:
-            logged_statement = obfuscated_statement
-            if self._config.log_unobfuscated_plans:
-                logged_statement = statement
-            logger.debug(
+            return None
+        except EXPECTED_PARAMETER_TYPE_ERRORS as e:
+            # The parameter types can't be resolved, so this query can't be prepared (and therefore can't be
+            # explained). Map the failure to the corresponding explain error code.
+            self._log_failed_statement(
                 'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
                 query_signature,
-                logged_statement,
+                e,
+            )
+            if isinstance(e, psycopg.errors.IndeterminateDatatype):
+                return DBExplainError.indeterminate_datatype, '{}'.format(type(e))
+            if isinstance(e, psycopg.errors.DatatypeMismatch):
+                return DBExplainError.datatype_mismatch, '{}'.format(type(e))
+            return DBExplainError.undefined_function, '{}'.format(type(e))
+        except Exception as e:
+            self._log_failed_statement(
+                'Failed to create prepared statement when explaining statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
+                query_signature,
                 e,
             )
             raise
+
+    def _log_failed_statement(
+        self, message: str, statement: str, obfuscated_statement: str, query_signature: str, e: Exception
+    ) -> None:
+        # Logs the obfuscated statement by default, falling back to the raw statement only when explicitly
+        # configured. The message is expected to interpolate (query_signature, statement, error) in that order.
+        logged_statement = obfuscated_statement
+        if self._config.log_unobfuscated_plans:
+            logged_statement = statement
+        logger.debug(message, query_signature, logged_statement, e)
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _get_number_of_parameters_for_prepared_statement(self, conn, query_signature):
@@ -152,7 +199,9 @@ class ExplainParameterizedQueries:
         return EXECUTE_PREPARED_STATEMENT_QUERY.format(prepared_statement=query_signature, parameters=parameters)
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _explain_prepared_statement(self, conn, statement, obfuscated_statement, query_signature):
+    def _explain_prepared_statement(
+        self, conn, statement: str, obfuscated_statement: str, query_signature: str
+    ) -> Optional[List]:
         try:
             prepared_statement_query = self._generate_prepared_statement_query(conn, query_signature)
             return self._execute_query_and_fetch_rows(
@@ -160,14 +209,22 @@ class ExplainParameterizedQueries:
                 EXPLAIN_QUERY.format(explain_function=self._explain_function),
                 (prepared_statement_query,),
             )
-        except Exception as e:
-            logged_statement = obfuscated_statement
-            if self._config.log_unobfuscated_plans:
-                logged_statement = statement
-            logger.debug(
+        except EXPECTED_PARAMETER_TYPE_ERRORS as e:
+            # The parameter types couldn't be resolved during EXPLAIN EXECUTE, so the query can't be explained.
+            self._log_failed_statement(
                 'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
                 query_signature,
-                logged_statement,
+                e,
+            )
+            return None
+        except Exception as e:
+            self._log_failed_statement(
+                'Failed to explain parameterized statement(%s)=[%s] | err=[%s]',
+                statement,
+                obfuscated_statement,
+                query_signature,
                 e,
             )
             raise
