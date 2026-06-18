@@ -171,7 +171,9 @@ def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
             continue
 
         port_hints = strategy.get('port_hints')
-        if not isinstance(port_hints, list) or not all(isinstance(port, int) for port in port_hints):
+        if not isinstance(port_hints, list) or not all(
+            isinstance(port, int) and not isinstance(port, bool) for port in port_hints
+        ):
             loader.errors.append(f'{strategy_location}: Attribute `port_hints` must be an array of integers')
 
         candidates = strategy.get('candidates')
