@@ -1,0 +1,5 @@
+ad_identifiers:
+  - cockroach
+discovery: {}
+init_config:
+instances: []
