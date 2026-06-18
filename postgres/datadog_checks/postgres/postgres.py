@@ -81,8 +81,6 @@ from .util import (
     STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
-    STAT_WAL_METRICS,
-    STAT_WAL_METRICS_LT_18,
     SUBSCRIPTION_STATE_METRICS,
     VACUUM_PROGRESS_METRICS,
     VACUUM_PROGRESS_METRICS_LT_17,
@@ -91,10 +89,11 @@ from .util import (
     DatabaseHealthCheckError,  # noqa: F401
     fmt,
     get_schema_field,
+    get_stat_wal_query,
     payload_pg_version,
     warning_with_tags,
 )
-from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, V18, VersionUtils
+from .version_utils import V9, V9_2, V10, V12, V13, V14, V15, V16, V17, VersionUtils
 
 try:
     import datadog_agent
@@ -441,10 +440,7 @@ class PostgreSql(DatabaseCheck):
             queries.append(SNAPSHOT_TXID_METRICS_LT_13)
         if self.version >= V14:
             if self.is_aurora is False:
-                if self.version >= V18:
-                    queries.append(STAT_WAL_METRICS)
-                else:
-                    queries.append(STAT_WAL_METRICS_LT_18)
+                queries.append(get_stat_wal_query(self.version))
             queries.append(QUERY_PG_REPLICATION_SLOTS_STATS)
             queries.append(SUBSCRIPTION_STATE_METRICS)
         if self.version >= V15:

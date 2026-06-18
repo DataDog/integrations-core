@@ -23,6 +23,7 @@ from semver import VersionInfo
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.postgres.config_models.instance import Relations
+from datadog_checks.postgres.version_utils import build_versioned_query
 
 ALL_SCHEMAS = object()
 RELATION_NAME = 'relation_name'
@@ -222,18 +223,15 @@ WHERE C.relkind = 'r'
 
 
 def get_pg_class_query(version: VersionInfo) -> dict:
-    """Build the pg_class relation-metrics query (version-gating extension point).
+    """Build the pg_class relation-metrics query for `version`.
 
-    The SELECT projection and the column descriptors are assembled in lockstep from a single list of
-    (SQL expression, column descriptor) pairs, so they cannot drift. Columns that only newer PostgreSQL
-    majors expose are appended only when `version` is new enough (e.g. inside an `if version >= V<major>`
-    block); see the note on PG_CLASS_FROM_CLAUSE above for why this gating is required. No column is
-    version-gated yet; this preserves the exact metric set of the former static QUERY_PG_CLASS constant.
+    Reference pattern for version-gated structured queries: the (SQL expression, column descriptor)
+    pairs are handed to build_versioned_query, which keeps the SELECT projection and the column
+    descriptors in lockstep. To collect a column only newer majors expose, add a third element to its
+    pair — a VersionRange (see the note on PG_CLASS_FROM_CLAUSE above for why this gating is required).
+    No column is version-gated yet, so this preserves the exact metric set of the former QUERY_PG_CLASS.
     """
-    if version is None:
-        raise ValueError("get_pg_class_query requires a resolved server version, got None")
-
-    # (SQL expression, column descriptor) pairs, in SELECT order.
+    # (SQL expression, column descriptor[, VersionRange]) pairs, in SELECT order.
     relation_columns = [
         ('current_database()', {'name': 'db', 'type': 'tag'}),
         ('N.nspname', {'name': 'schema', 'type': 'tag'}),
@@ -287,13 +285,7 @@ def get_pg_class_query(version: VersionInfo) -> dict:
         ('C.xmin', {'name': 'relation.xmin', 'type': 'gauge'}),
     ]
 
-    select_clause = ',\n  '.join(expr for expr, _ in relation_columns)
-    return {
-        'name': 'pg_class',
-        # Leading newline mirrors the former QUERY_PG_CLASS triple-quoted literal byte-for-byte.
-        'query': '\nSELECT\n  ' + select_clause + PG_CLASS_FROM_CLAUSE,
-        'columns': [descriptor for _, descriptor in relation_columns],
-    }
+    return build_versioned_query('pg_class', relation_columns, PG_CLASS_FROM_CLAUSE, version)
 
 
 # The pg_statio_all_tables view will contain one row for each table in the current database,

@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.postgres import relationsmanager, util
-from datadog_checks.postgres.version_utils import V18
+from datadog_checks.postgres.version_utils import V14, V18
 
 from .common import _iterate_metric_name
 
@@ -44,8 +44,10 @@ def _declared_metric_names():
     """Every postgresql.* metric the integration declares through util/relationsmanager.
 
     Collected by introspection so a new metric added to any existing declaration (a util dict, a
-    relation query, or the version-gated pg_class builder) is covered with no edit here. The pg_class
-    builder is evaluated at the highest supported version so all version-gated columns are included.
+    relation query, or a version-gated query builder) is covered with no edit here. Builders are
+    evaluated across the versions that bound their column sets so every gated column is included: the
+    pg_class builder only adds columns in newer majors (highest version suffices), but pg_stat_wal
+    dropped its I/O timing columns in PG 18, so both sides of that split are evaluated.
     """
     names = set()
     for module in (util, relationsmanager):
@@ -53,6 +55,8 @@ def _declared_metric_names():
             if _is_metric_container(obj):
                 names.update(_iterate_metric_name(obj))
     names.update(_iterate_metric_name(relationsmanager.get_pg_class_query(V18)))
+    for version in (V14, V18):
+        names.update(_iterate_metric_name(util.get_stat_wal_query(version)))
     return names
 
 
