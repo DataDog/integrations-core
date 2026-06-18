@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 import pytest
 
 from datadog_checks.base.stubs import tagger
@@ -120,3 +122,145 @@ def test_empty_instance(dd_run_check):
     ):
         check = KueueCheck('kueue', {}, [{}])
         dd_run_check(check)
+
+
+class FakeKubernetesAPIClient:
+    def __init__(self, *workload_snapshots):
+        self.workload_snapshots = list(workload_snapshots)
+
+    def list_workloads(self):
+        return self.workload_snapshots.pop(0)
+
+
+def load_workloads(name):
+    with open(get_fixture_path(f'workloads/{name}.json')) as f:
+        return json.load(f)
+
+
+def test_workload_events_suppress_first_poll(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'))
+
+    dd_run_check(check)
+
+    aggregator.assert_event('Kueue Workload', count=0)
+
+
+def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.reset()
+    tagger.set_tags(
+        {
+            'kubernetes_kueue_queue://clusterqueue//default': ['cluster_queue_tag:value'],
+            'kubernetes_kueue_queue://localqueue/team-a/gpu': ['local_queue_tag:value'],
+            'kueue_workload://team-a/training-job': ['workload_tag:value'],
+        }
+    )
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    expected_tags = [
+        'test:tag',
+        'kube_namespace:team-a',
+        'kueue_workload:training-job',
+        'kueue_workload_uid:workload-uid',
+        'kueue_local_queue:gpu',
+        'kueue_cluster_queue:default',
+        'kueue_workload_priority:100',
+        'kueue_workload_priority_class:high',
+        'cluster_queue_tag:value',
+        'local_queue_tag:value',
+        'workload_tag:value',
+    ]
+    aggregator.assert_event(
+        'Workload team-a/training-job quota reserved. Quota reserved in ClusterQueue default',
+        source_type_name='kueue',
+        tags=[*expected_tags, 'kueue_transition:quota_reserved'],
+    )
+    aggregator.assert_event(
+        'Workload team-a/training-job admitted. The workload is admitted Queued wait time was 8s.',
+        source_type_name='kueue',
+        tags=[*expected_tags, 'kueue_transition:admitted'],
+    )
+    aggregator.assert_event(
+        'Workload team-a/training-job running. All pods are ready',
+        source_type_name='kueue',
+        tags=[*expected_tags, 'kueue_transition:running'],
+    )
+
+
+def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check.kube_client = FakeKubernetesAPIClient(
+        load_workloads('pending'),
+        load_workloads('admitted'),
+        load_workloads('admitted'),
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    aggregator.assert_event('Workload team-a/training-job admitted.', count=1, exact_match=False)
+
+
+def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.reset()
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'), load_workloads('evicted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    expected_evicted_tags = [
+        'test:tag',
+        'kube_namespace:team-a',
+        'kueue_workload:training-job',
+        'kueue_workload_uid:workload-uid',
+        'kueue_local_queue:gpu',
+        'kueue_transition:evicted',
+        'kueue_workload_priority:100',
+        'kueue_workload_priority_class:high',
+        'kueue_cluster_queue:default',
+        'kueue_eviction_reason:Preempted',
+        'kueue_preemption_reason:InClusterQueue',
+        'kueue_preempted_by:preempting-workload-uid',
+    ]
+    aggregator.assert_event(
+        'Workload team-a/training-job evicted. Preempted to accommodate a workload '
+        '(UID: preempting-workload-uid) due to prioritization in the ClusterQueue Eviction reason: Preempted. '
+        'Preemption reason: InClusterQueue.',
+        alert_type='warning',
+        tags=expected_evicted_tags,
+    )
+    aggregator.assert_event(
+        'Workload team-a/training-job finished. Reached expected number of succeeded pods Finished reason: Succeeded.',
+        alert_type='info',
+    )
+
+
+def test_workload_events_namespace_filter(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck(
+        'kueue',
+        {},
+        [
+            {
+                **instance,
+                'collect_workload_events': True,
+                'workload_events_namespaces': ['default'],
+            }
+        ],
+    )
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    aggregator.assert_event('Workload team-a/training-job', count=0)

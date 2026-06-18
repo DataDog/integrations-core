@@ -36,6 +36,10 @@ def instance_cluster_check():
     return True
 
 
+def instance_collect_workload_events():
+    return False
+
+
 def instance_collect_counters_with_distributions():
     return False
 
