@@ -9,10 +9,10 @@ from datadog_checks.mysql import MySql
 from . import common
 
 
-def _build_check(disable_binlog_size_metrics):
+def _build_check(binlog_size_metrics):
     options = {'replication': False}
-    if disable_binlog_size_metrics is not None:
-        options['disable_binlog_size_metrics'] = disable_binlog_size_metrics
+    if binlog_size_metrics is not None:
+        options['binlog_size_metrics'] = binlog_size_metrics
     instance = {
         'host': 'localhost',
         'user': 'datadog',
@@ -38,17 +38,17 @@ def _collect(check):
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize('disable_binlog_size_metrics', [None, False])
-def test_binlog_size_metrics_collected_by_default(disable_binlog_size_metrics):
-    """Binary log size metrics are collected when binlog is enabled and the option is not set or false."""
-    check = _build_check(disable_binlog_size_metrics)
+@pytest.mark.parametrize('binlog_size_metrics', [None, True])
+def test_binlog_size_metrics_collected_by_default(binlog_size_metrics):
+    """Binary log size metrics are collected when binlog is enabled and the option is not set or true."""
+    check = _build_check(binlog_size_metrics)
     binary_log_stats = _collect(check)
     binary_log_stats.assert_called_once()
 
 
 @pytest.mark.unit
 def test_binlog_size_metrics_disabled_by_option():
-    """Setting disable_binlog_size_metrics to true skips the SHOW BINARY LOGS query."""
-    check = _build_check(disable_binlog_size_metrics=True)
+    """Setting binlog_size_metrics to false skips the SHOW BINARY LOGS query."""
+    check = _build_check(binlog_size_metrics=False)
     binary_log_stats = _collect(check)
     binary_log_stats.assert_not_called()

@@ -1,1 +1,1 @@
-Add the `disable_binlog_size_metrics` option to skip binary log size collection.
+Add the `binlog_size_metrics` option to skip binary log size collection.
