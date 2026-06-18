@@ -49,12 +49,16 @@ class CopyPathTool(BaseTool[CopyPathInput]):
             source = self._policy.assert_readable(tool_input.source)
             if source.is_dir():
                 for entry in source.rglob("*"):
-                    if entry.is_file():
+                    if entry.is_file() or entry.is_symlink():
                         try:
                             self._policy.assert_readable(entry)
                         except FileAccessError as e:
                             return ToolResult(success=False, error=str(e))
             destination = self._policy.assert_writable(tool_input.destination)
+            if destination.is_dir():
+                for entry in destination.rglob("*"):
+                    if entry.is_symlink() and entry.is_dir():
+                        self._policy.assert_writable(entry.resolve())
         except FileAccessError as e:
             return ToolResult(success=False, error=str(e))
 

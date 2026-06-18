@@ -185,6 +185,31 @@ async def test_copy_directory_overwrite_flag_replaces_conflicts(copy_tool: CopyP
     assert (dst / "conflict.txt").read_text(encoding="utf-8") == "new"
 
 
+async def test_copy_directory_destination_symlink_outside_write_root_is_rejected(tmp_path) -> None:
+    write_root = tmp_path / "write_root"
+    write_root.mkdir()
+    policy = FileAccessPolicy(write_root=write_root, deny_patterns=())
+    tool = CopyPathTool(policy)
+
+    outside = tmp_path / "outside"
+    outside.mkdir()
+
+    dst = write_root / "dst_dir"
+    dst.mkdir()
+    (dst / "sub").symlink_to(outside, target_is_directory=True)
+
+    src = tmp_path / "src_dir"
+    src.mkdir()
+    (src / "sub" / "file.txt").parent.mkdir(parents=True)
+    (src / "sub" / "file.txt").write_text("secret", encoding="utf-8")
+
+    result = await tool.run({"source": str(src), "destination": str(dst)})
+
+    assert result.success is False
+    assert result.error is not None
+    assert not (outside / "file.txt").exists()
+
+
 async def test_copy_directory_denied_child_is_rejected(tmp_path) -> None:
     # write_root is a subdirectory; src lives outside it so deny patterns apply to its contents.
     write_root = tmp_path / "write_root"
