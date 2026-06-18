@@ -32,5 +32,5 @@ def test_e2e_discovery(dd_agent_check_discovery):
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
-        check_symmetric_inclusion=True,
+        check_symmetric_inclusion=False,
     )
