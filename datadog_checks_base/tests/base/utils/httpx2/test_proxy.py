@@ -113,6 +113,11 @@ def test_no_proxy_string_is_split_off_proxies(clean_proxy_env):
         assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']  # ';' normalized to ','
 
 
+def test_no_proxy_string_strips_whitespace_around_entries(clean_proxy_env):
+    with HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'no_proxy': 'a.com, b.com ; c.com'}}, {}) as http:
+        assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']
+
+
 def test_no_proxy_list_is_passed_through_unchanged(clean_proxy_env):
     proxy = {'http': 'http://i:1', 'no_proxy': ['a.com', 'b.com']}
     with HTTPX2Wrapper({'proxy': proxy}, {}) as http:
@@ -149,6 +154,13 @@ def test_injected_transport_keeps_trust_env(clean_proxy_env):
     # No proxy and an injected transport: no router is built, so trust_env stays on for .netrc/SSL_CERT_FILE.
     sink: list[str] = []
     with HTTPX2Wrapper({}, {}, transport=_recording_transport('inj', sink)) as http:
+        assert http._client.trust_env is True
+
+
+def test_injected_transport_with_proxy_keeps_trust_env(clean_proxy_env):
+    # Injected transport wins and builds no router, so a configured proxy is inert; trust_env stays on.
+    sink: list[str] = []
+    with HTTPX2Wrapper({'proxy': {'http': 'http://i:1'}}, {}, transport=_recording_transport('inj', sink)) as http:
         assert http._client.trust_env is True
 
 

@@ -216,7 +216,7 @@ def _resolve_proxy(
     proxies = proxies.copy()
     no_proxy = proxies.pop('no_proxy', None)
     if isinstance(no_proxy, str):
-        no_proxy = no_proxy.replace(';', ',').split(',')
+        no_proxy = [host.strip() for host in no_proxy.replace(';', ',').split(',') if host.strip()]
     # A proxy block carrying only no_proxy has no explicit proxy URL to route through, but the
     # no_proxy list is retained so it can be applied against an environment proxy (HTTP_PROXY etc.).
     if not proxies:
@@ -263,24 +263,20 @@ class _ProxyRoutingTransport(httpx2.BaseTransport):
             transport.close()
 
 
-def _proxy_is_active(proxies: dict[str, str] | None) -> bool:
-    """True when a proxy is actively configured: the skip_proxy sentinel, or a usable http/https URL."""
-    if not proxies:
-        return False
-    if proxies == PROXY_SETTINGS_DISABLED:
-        return True
-    return bool(proxies.get('http') or proxies.get('https'))
-
-
 def _build_proxy_transport(
     proxies: dict[str, str] | None,
     no_proxy: list[str] | None,
     verify: bool | str,
     cert: str | tuple[str, str] | None,
+    *,
     env_schemes: set[str] | None = None,
     env_no_proxy: list[str] | None = None,
 ) -> _ProxyRoutingTransport | None:
-    """Build the per-request routing transport, or None when no real proxy is configured."""
+    """Build the per-request routing transport, or None when no real proxy is configured.
+
+    env_schemes/env_no_proxy carry the two-tier NO_PROXY contract and are supplied only by
+    _build_env_proxy_transport; direct callers leave them unset.
+    """
     # None => no custom transport; the client builds its default and trust_env decides env proxies.
     if not proxies or proxies == PROXY_SETTINGS_DISABLED:
         return None
@@ -331,7 +327,7 @@ def _build_env_proxy_transport(
     if not merged:
         return None
     env_schemes = {scheme for scheme in env if not instance_proxies.get(scheme)}
-    return _build_proxy_transport(merged, no_proxy, verify, cert, env_schemes, _env_no_proxy())
+    return _build_proxy_transport(merged, no_proxy, verify, cert, env_schemes=env_schemes, env_no_proxy=_env_no_proxy())
 
 
 class HTTPX2ResponseAdapter:
@@ -567,13 +563,14 @@ class HTTPX2Wrapper:
                 proxies, self.no_proxy_uris, self.options['verify'], self.options['cert']
             )
             transport = router
+        # trust_env is off only when our router owns proxy resolution or skip_proxy is set.
+        trust_env = router is None and proxies != PROXY_SETTINGS_DISABLED
         kwargs: dict[str, Any] = {
             'headers': self.options['headers'],
             'timeout': _make_timeout(self.options['timeout'][0], self.options['timeout'][1]),
             'follow_redirects': self.options['allow_redirects'],
             'verify': self.options['verify'],
-            # trust_env is off only when a router owns proxy resolution or skip_proxy is set.
-            'trust_env': router is None and not _proxy_is_active(proxies),
+            'trust_env': trust_env,
         }
         if self.options['cert'] is not None:
             kwargs['cert'] = self.options['cert']
