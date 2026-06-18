@@ -2,6 +2,40 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+"""SAP HANA schema collection for DBM.
+
+Control flow (the base `SchemaCollector.collect_schemas` drives this, see
+`datadog_checks.base.utils.db.schemas`):
+
+    _get_databases()  -> the single current tenant, or [] to skip the cycle
+    _get_cursor(db)   -> HanaSchemaQueryBuilder builds+runs one catalog query, streams rows
+    _get_next(cursor) -> groups consecutive rows by (schema, table) into one object
+    _map_row(...)     -> shapes the object into the DBM metadata payload
+    maybe_flush(...)  -> emits a payload once enough columns have accumulated
+
+Responsibility split:
+  * HanaSchemaQueryBuilder owns all SQL/query-policy decisions (the catalog query, schema
+    include/exclude filters, the optional table-statistics join, and the SQL-level caps).
+  * HanaSchemaCollector owns runtime concerns (streaming, row grouping, payload flushing).
+
+Collection-policy decisions, all enforced in one query for cost control:
+  * Tables and views are capped in SQL (`LIMIT max_tables` / `LIMIT max_views`) so an oversized
+    tenant never streams more objects than configured. Tables and views are capped
+    independently rather than sharing one budget.
+  * Columns are capped in SQL via a `ROW_NUMBER()` window (`rn <= max_columns`) so the server
+    sends at most `max_columns` rows per object; `_get_next` re-applies the same cap as a
+    defensive client-side guard.
+  * System schemas (`SYS`, `SYSTEM`, `PUBLIC`, and `_SYS_*`) are always excluded; visibility
+    is otherwise governed by the catalog-view grants the monitoring user holds, not by
+    per-object privileges.
+  * The `SYS.M_TABLE_STATISTICS` join (row counts + last-modified time) is added only when a
+    one-time permission probe succeeds, so a missing grant degrades gracefully.
+
+Payloads flush by accumulated column count rather than the base class's per-table count; see
+`PAYLOAD_COLUMN_CHUNK_SIZE` below and the memory benchmark in
+`sap_hana/benchmarks/schema_collection_memory/` for the rationale and measured impact.
+"""
+
 from __future__ import annotations
 
 import contextlib
