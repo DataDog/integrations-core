@@ -1,0 +1,5 @@
+ad_identifiers:
+  - nginx
+discovery: {}
+init_config:
+instances: []
