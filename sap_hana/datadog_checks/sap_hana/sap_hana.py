@@ -212,9 +212,9 @@ class SapHanaCheck(AgentCheck):
             return
         if time.time() - self._last_schema_collection_time < self._schema_collection_interval:
             return
-        self._last_schema_collection_time = time.time()
         try:
             self._schema_collector.collect_schemas()
+            self._last_schema_collection_time = time.time()
         except Exception as e:
             self.log.error('Error collecting HANA schemas: %s', e)
 

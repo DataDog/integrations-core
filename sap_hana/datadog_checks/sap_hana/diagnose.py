@@ -57,6 +57,14 @@ def run_diagnostics(check: SapHanaCheck):
     HanaDiagnose(check)._run()
 
 
+def _classify_access_error(error) -> HanaConfigurationError:
+    """Map a query exception to a privilege or generic catalog-access diagnostic code."""
+    error_lower = str(error).lower()
+    if 'insufficient privilege' in error_lower or 'not authorized' in error_lower:
+        return HanaConfigurationError.missing_catalog_privilege
+    return HanaConfigurationError.catalog_view_inaccessible
+
+
 class HanaDiagnose:
     def __init__(self, check: SapHanaCheck):
         self._check = check
@@ -101,11 +109,14 @@ class HanaDiagnose:
                 cursor.execute("SELECT VERSION FROM SYS.M_DATABASE")
                 row = cursor.fetchone()
         except Exception as e:
+            # A failed version query is an access problem, not a version mismatch, so report the
+            # privilege/access diagnostic whose remediation matches the real cause.
+            access_code = _classify_access_error(e)
             self._fail(
-                code.value,
-                diagnosis="Could not determine SAP HANA version: {}".format(e),
-                description=DIAGNOSTIC_METADATA[code.value]['description'],
-                remediation=DIAGNOSTIC_METADATA[code.value]['remediation'],
+                access_code.value,
+                diagnosis="Could not read SAP HANA version from SYS.M_DATABASE: {}".format(e),
+                description=DIAGNOSTIC_METADATA[access_code.value]['description'],
+                remediation=DIAGNOSTIC_METADATA[access_code.value]['remediation'],
                 rawerror=str(e),
             )
             return
@@ -153,11 +164,7 @@ class HanaDiagnose:
                 cursor.execute("SELECT COUNT(*) FROM {}".format(view))
                 cursor.fetchone()
         except Exception as e:
-            error_lower = str(e).lower()
-            if 'insufficient privilege' in error_lower or 'not authorized' in error_lower:
-                code = HanaConfigurationError.missing_catalog_privilege
-            else:
-                code = HanaConfigurationError.catalog_view_inaccessible
+            code = _classify_access_error(e)
             self._fail(
                 name,
                 diagnosis="Could not query {}: {}".format(view, e),

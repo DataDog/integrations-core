@@ -154,7 +154,7 @@ class TestHanaSchemaCollector:
 
     def test_system_schemas_excluded_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        query, params = check._schema_collector._build_query()
+        query, params = check._schema_collector._query_builder.build()
         assert "NOT IN ('SYS', 'SYSTEM', 'PUBLIC')" in query
         assert r"NOT LIKE '\_SYS\_%' ESCAPE '\'" in query
         assert 'SYS.M_TABLES' in query
@@ -166,14 +166,14 @@ class TestHanaSchemaCollector:
 
     def test_exclude_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'exclude_schemas': ['EXCL']}})
-        query, params = check._schema_collector._build_query()
+        query, params = check._schema_collector._query_builder.build()
         assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
         assert 'AND v.SCHEMA_NAME NOT IN (?)' in query
         assert params == ('EXCL', 'EXCL')
 
     def test_include_schemas_filter_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'include_schemas': ['ONLY']}})
-        query, params = check._schema_collector._build_query()
+        query, params = check._schema_collector._query_builder.build()
         assert 'AND t.SCHEMA_NAME IN (?)' in query
         assert 'AND v.SCHEMA_NAME IN (?)' in query
         assert params == ('ONLY', 'ONLY')
@@ -194,8 +194,13 @@ class TestHanaSchemaCollector:
 
     def test_max_tables_limit_in_sql(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'max_tables': 3}})
-        query, _ = check._schema_collector._build_query()
+        query, _ = check._schema_collector._query_builder.build()
         assert 'LIMIT 3' in query
+
+    def test_max_views_limit_in_sql(self):
+        check = _make_check({'collect_schemas': {'enabled': True, 'max_views': 7}})
+        query, _ = check._schema_collector._query_builder.build()
+        assert 'LIMIT 7' in query
 
     def test_maybe_collect_schemas_time_gated(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 600}})
@@ -211,6 +216,28 @@ class TestHanaSchemaCollector:
         # Immediate second call is gated
         check._maybe_collect_schemas()
         assert check.database_monitoring_metadata.call_count == 1
+
+    def test_maybe_collect_schemas_failure_does_not_advance_timestamp(self):
+        check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 600}})
+        check._conn = mock.MagicMock()
+        check._schema_collector.collect_schemas = mock.MagicMock(side_effect=Exception('transient'))
+
+        check._maybe_collect_schemas()
+        # A failed collection must not advance the schedule, so the next run retries promptly.
+        assert check._last_schema_collection_time == 0
+        check._maybe_collect_schemas()
+        assert check._schema_collector.collect_schemas.call_count == 2
+
+    def test_maybe_collect_schemas_success_advances_timestamp(self):
+        check = _make_check({'collect_schemas': {'enabled': True, 'collection_interval': 600}})
+        check._conn = mock.MagicMock()
+        check._schema_collector.collect_schemas = mock.MagicMock(return_value=True)
+
+        check._maybe_collect_schemas()
+        assert check._last_schema_collection_time > 0
+        # Within the interval the next call is gated.
+        check._maybe_collect_schemas()
+        assert check._schema_collector.collect_schemas.call_count == 1
 
     def test_maybe_collect_schemas_skips_without_connection(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
@@ -304,7 +331,7 @@ class TestHanaSchemaCollector:
         result = check._schema_collector._get_databases()
         assert result == [{'name': 'PROD_DB', 'description': ''}]
 
-    def test_get_databases_execute_exception_falls_back_to_server(self):
+    def test_get_databases_execute_exception_skips_collection(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
         conn = mock.MagicMock()
         cursor = mock.MagicMock()
@@ -312,8 +339,20 @@ class TestHanaSchemaCollector:
         cursor.execute.side_effect = Exception('connection error')
         check._conn = conn
 
+        # No hostname fallback: an unreadable current database skips collection entirely.
         result = check._schema_collector._get_databases()
-        assert result == [{'name': check._server, 'description': ''}]
+        assert result == []
+
+    def test_get_databases_no_rows_skips_collection(self):
+        check = _make_check({'collect_schemas': {'enabled': True}})
+        conn = mock.MagicMock()
+        cursor = mock.MagicMock()
+        conn.cursor.return_value = cursor
+        cursor.fetchone.return_value = None
+        check._conn = conn
+
+        result = check._schema_collector._get_databases()
+        assert result == []
 
     def test_is_column_table_false(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
@@ -333,7 +372,7 @@ class TestHanaSchemaCollector:
 
     def test_include_and_exclude_combined(self):
         check = _make_check({'collect_schemas': {'enabled': True, 'include_schemas': ['A'], 'exclude_schemas': ['B']}})
-        query, params = check._schema_collector._build_query()
+        query, params = check._schema_collector._query_builder.build()
         assert 'AND t.SCHEMA_NAME IN (?)' in query
         assert 'AND t.SCHEMA_NAME NOT IN (?)' in query
         assert 'AND v.SCHEMA_NAME IN (?)' in query
@@ -389,15 +428,15 @@ class TestHanaSchemaCollector:
 
     def test_stats_join_when_available(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        check._schema_collector._has_table_statistics = True
-        query, _ = check._schema_collector._build_query()
+        check._schema_collector._query_builder._has_table_statistics = True
+        query, _ = check._schema_collector._query_builder.build()
         assert 'SYS.M_TABLE_STATISTICS' in query
         assert 'ts.LAST_MODIFY_TIME' in query
 
     def test_stats_join_omitted_when_unavailable(self):
         check = _make_check({'collect_schemas': {'enabled': True}})
-        check._schema_collector._has_table_statistics = False
-        query, _ = check._schema_collector._build_query()
+        check._schema_collector._query_builder._has_table_statistics = False
+        query, _ = check._schema_collector._query_builder.build()
         assert 'SYS.M_TABLE_STATISTICS' not in query
         assert 'NULL AS LAST_UPDATED_ON' in query
 
@@ -481,6 +520,25 @@ class TestHanaDiagnose:
 
         results = self._run(check)
         assert results[HanaConfigurationError.version_unsupported.value].result == 1
+
+    def test_version_query_privilege_error_not_version_unsupported(self):
+        check = _make_check()
+        conn = mock.MagicMock()
+        cursor = mock.MagicMock()
+        conn.cursor.return_value = cursor
+
+        def execute_side_effect(query, *args, **kwargs):
+            if 'VERSION' in query and 'M_DATABASE' in query:
+                raise Exception('insufficient privilege: Not authorized')
+
+        cursor.execute.side_effect = execute_side_effect
+        check.get_connection = mock.MagicMock(return_value=conn)
+
+        results = self._run(check)
+        # A privilege error reading the version must map to the privilege diagnostic,
+        # not a misleading "version unsupported" result.
+        assert HanaConfigurationError.version_unsupported.value not in results
+        assert results[HanaConfigurationError.missing_catalog_privilege.value].result == 1
 
     def test_privilege_error_on_catalog_view(self):
         check = _make_check()

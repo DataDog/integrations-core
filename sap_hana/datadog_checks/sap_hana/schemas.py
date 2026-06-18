@@ -14,6 +14,14 @@ if TYPE_CHECKING:
     from .config_models.instance import CollectSchemas
     from .sap_hana import SapHanaCheck
 
+# Flush a schema payload once this many columns have accumulated. The base SchemaCollector
+# chunks payloads by table count (`payload_chunk_size`, default 10,000 tables), but a HANA
+# tenant is a single "database", so that threshold rarely trips: every table for the tenant
+# stays resident and is emitted as one large `json.dumps`. Chunking by accumulated column
+# count instead bounds payload size and peak memory regardless of how wide the tables are.
+# The memory benchmark in `sap_hana/benchmarks/schema_collection_memory/` shows the impact:
+# collecting 1000 tables x 1000 columns with limits disabled produced 21 payloads (~95 MB,
+# ~94 MiB peak RSS), while the limited run emitted 1 payload (~1.8 MB, ~61 MiB peak RSS).
 PAYLOAD_COLUMN_CHUNK_SIZE = 50_000
 
 CURRENT_DATABASE_QUERY = "SELECT DATABASE_NAME FROM SYS.M_DATABASE"
@@ -70,6 +78,8 @@ limited_views AS (
       AND v.SCHEMA_NAME NOT LIKE '\_SYS\_%' ESCAPE '\'
       {include_clause_v}
       {exclude_clause_v}
+    ORDER BY v.SCHEMA_NAME, v.VIEW_NAME
+    LIMIT {max_views}
 ),
 all_objects AS (
     SELECT * FROM limited_tables
@@ -111,10 +121,74 @@ class HanaSchemaCollectorConfig(SchemaCollectorConfig):
         super().__init__()
         self.collection_interval = int(config.collection_interval or 600)
         self.max_tables = int(config.max_tables or 2000)
+        self.max_views = int(config.max_views or 2000)
         self.max_columns = int(config.max_columns or 500)
         self.exclude_schemas = set(config.exclude_schemas or ())
         self.include_schemas = set(config.include_schemas or ())
         self.payload_column_chunk_size = PAYLOAD_COLUMN_CHUNK_SIZE
+
+
+class HanaSchemaQueryBuilder:
+    """Builds the catalog query that collects schema metadata in SQL.
+
+    Owns the query-policy decisions: schema include/exclude filters, the optional table
+    statistics join, and the SQL-level table/view/column caps. The collector delegates here so
+    that runtime concerns (streaming, row grouping, payload flushing) stay separate.
+    """
+
+    def __init__(self, config: HanaSchemaCollectorConfig, log):
+        self._config = config
+        self._log = log
+        self._has_table_statistics: bool | None = None
+
+    def ensure_stats_permission(self, conn) -> None:
+        """Probe SELECT access to SYS.M_TABLE_STATISTICS once and cache the result."""
+        if self._has_table_statistics is not None:
+            return
+        try:
+            with closing(conn.cursor()) as cur:
+                cur.execute(STATS_PERMISSION_PROBE)
+                cur.fetchone()
+            self._has_table_statistics = True
+        except Exception as e:
+            self._log.debug("SYS.M_TABLE_STATISTICS not accessible, skipping stats join: %s", e)
+            self._has_table_statistics = False
+
+    def build(self) -> tuple[str, tuple]:
+        """Return the catalog query and its bind parameters."""
+        include_clause, include_clause_v, include_params = self._schema_clause('IN', self._config.include_schemas)
+        exclude_clause, exclude_clause_v, exclude_params = self._schema_clause('NOT IN', self._config.exclude_schemas)
+        # Both limited_tables and limited_views CTEs carry the same ?-placeholders, so params repeat.
+        params = include_params + exclude_params + include_params + exclude_params
+        if self._has_table_statistics:
+            stats_join = STATS_JOIN_FRAGMENT
+            stats_column = 'ts.LAST_MODIFY_TIME AS LAST_UPDATED_ON'
+        else:
+            stats_join = ''
+            stats_column = 'NULL AS LAST_UPDATED_ON'
+        query = SCHEMA_OBJECTS_QUERY.format(
+            include_clause=include_clause,
+            exclude_clause=exclude_clause,
+            include_clause_v=include_clause_v,
+            exclude_clause_v=exclude_clause_v,
+            stats_join=stats_join,
+            stats_column=stats_column,
+            max_tables=int(self._config.max_tables),
+            max_views=int(self._config.max_views),
+            max_columns=int(self._config.max_columns),
+        )
+        return query, tuple(params)
+
+    @staticmethod
+    def _schema_clause(operator: str, schemas):
+        """Build matching SCHEMA_NAME filters for the tables (t) and views (v) CTEs."""
+        if not schemas:
+            return '', '', []
+        names = sorted(schemas)
+        placeholders = ', '.join('?' for _ in names)
+        table_clause = 'AND t.SCHEMA_NAME {} ({})'.format(operator, placeholders)
+        view_clause = 'AND v.SCHEMA_NAME {} ({})'.format(operator, placeholders)
+        return table_clause, view_clause, names
 
 
 class HanaSchemaCollector(SchemaCollector):
@@ -123,8 +197,8 @@ class HanaSchemaCollector(SchemaCollector):
 
     def __init__(self, check: SapHanaCheck, config: CollectSchemas):
         super().__init__(check, HanaSchemaCollectorConfig(config))
+        self._query_builder = HanaSchemaQueryBuilder(self._config, self._log)
         self._pending_row = None
-        self._has_table_statistics: bool | None = None
 
     def _reset(self) -> None:
         super()._reset()
@@ -149,77 +223,28 @@ class HanaSchemaCollector(SchemaCollector):
             with closing(self._check._conn.cursor()) as cursor:
                 cursor.execute(CURRENT_DATABASE_QUERY)
                 row = cursor.fetchone()
-                if row:
-                    db_name = row[0]
-                    description = ''
-                    try:
-                        cursor.execute(CURRENT_DATABASE_DESCRIPTION_QUERY)
-                        desc_row = cursor.fetchone()
-                        if desc_row:
-                            description = desc_row[0] or ''
-                    except Exception:
-                        pass
-                    return [{'name': db_name, 'description': description}]
+                if not row:
+                    self._log.warning("SYS.M_DATABASE returned no rows; skipping schema collection")
+                    return []
+                db_name = row[0]
+                description = ''
+                try:
+                    cursor.execute(CURRENT_DATABASE_DESCRIPTION_QUERY)
+                    desc_row = cursor.fetchone()
+                    if desc_row:
+                        description = desc_row[0] or ''
+                except Exception:
+                    pass
+                return [{'name': db_name, 'description': description}]
         except Exception as e:
-            self._log.warning("Could not fetch current HANA database info: %s", e)
-        return [{'name': self._check._server, 'description': ''}]
-
-    def _probe_stats_permission(self, conn) -> bool:
-        try:
-            with closing(conn.cursor()) as cur:
-                cur.execute(STATS_PERMISSION_PROBE)
-                cur.fetchone()
-            return True
-        except Exception as e:
-            self._log.debug("SYS.M_TABLE_STATISTICS not accessible, skipping stats join: %s", e)
-            return False
-
-    def _build_query(self):
-        """Build the objects query with schema filters, optional stats join, and table cap in SQL."""
-        include_params: list = []
-        exclude_params: list = []
-        include_clause = ''
-        exclude_clause = ''
-        include_clause_v = ''
-        exclude_clause_v = ''
-        if self._config.include_schemas:
-            include = sorted(self._config.include_schemas)
-            placeholders = ', '.join('?' for _ in include)
-            include_clause = 'AND t.SCHEMA_NAME IN ({})'.format(placeholders)
-            include_clause_v = 'AND v.SCHEMA_NAME IN ({})'.format(placeholders)
-            include_params.extend(include)
-        if self._config.exclude_schemas:
-            exclude = sorted(self._config.exclude_schemas)
-            placeholders = ', '.join('?' for _ in exclude)
-            exclude_clause = 'AND t.SCHEMA_NAME NOT IN ({})'.format(placeholders)
-            exclude_clause_v = 'AND v.SCHEMA_NAME NOT IN ({})'.format(placeholders)
-            exclude_params.extend(exclude)
-        # Both limited_tables and limited_views CTEs have their own ?-placeholders, so params repeat.
-        params = include_params + exclude_params + include_params + exclude_params
-        if self._has_table_statistics:
-            stats_join = STATS_JOIN_FRAGMENT
-            stats_column = 'ts.LAST_MODIFY_TIME AS LAST_UPDATED_ON'
-        else:
-            stats_join = ''
-            stats_column = 'NULL AS LAST_UPDATED_ON'
-        query = SCHEMA_OBJECTS_QUERY.format(
-            include_clause=include_clause,
-            exclude_clause=exclude_clause,
-            include_clause_v=include_clause_v,
-            exclude_clause_v=exclude_clause_v,
-            stats_join=stats_join,
-            stats_column=stats_column,
-            max_tables=int(self._config.max_tables),
-            max_columns=int(self._config.max_columns),
-        )
-        return query, tuple(params)
+            self._log.warning("Could not determine current HANA database; skipping schema collection: %s", e)
+            return []
 
     @contextlib.contextmanager
     def _get_cursor(self, _database_name):
         conn = self._check._conn
-        if self._has_table_statistics is None:
-            self._has_table_statistics = self._probe_stats_permission(conn)
-        query, params = self._build_query()
+        self._query_builder.ensure_stats_permission(conn)
+        query, params = self._query_builder.build()
         with closing(conn.cursor()) as cursor:
             cursor.execute(query, params)
             self._pending_row = cursor.fetchone()

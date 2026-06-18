@@ -141,6 +141,7 @@ The Agent can collect SAP HANA catalog metadata (schemas, tables, views, and col
      enabled: true
      collection_interval: 600
      max_tables: 2000
+     max_views: 2000
      max_columns: 500
 ```
 

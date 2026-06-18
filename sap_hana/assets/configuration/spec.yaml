@@ -127,6 +127,12 @@ files:
             value:
               type: integer
               example: 500
+          - name: max_views
+            description: |
+              Maximum number of views to collect per cycle across all schemas.
+            value:
+              type: integer
+              example: 2000
           - name: include_schemas
             description: |
               A list of schema names to include. Any schema whose name is in
