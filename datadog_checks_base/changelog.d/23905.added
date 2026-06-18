@@ -1,1 +1,0 @@
-Add ``AgentCheck.submit_generic_resource`` to submit resource snapshots on the ``genresources`` event-platform track with allow-list field selection.

@@ -297,26 +297,26 @@ tests:
         aisf_scored_at: "2025-01-15T12:00:03.013Z"
         attachment_details:
          -
-          payload_id: 16131
           filename: "image001.jpg"
-          sha256: "034fdb050c475dd01cefec6730672f4950433a14c2edfa8a4517ad1123456789"
-          size_in_bytes: 27745
           id: 81873
           md5: "c38bfbd7a7eecc1943f0368123456789"
+          payload_id: 16131
+          sha256: "034fdb050c475dd01cefec6730672f4950433a14c2edfa8a4517ad1123456789"
+          size_in_bytes: 27745
          -
-          payload_id: 16132
           filename: "image002.jpg"
-          sha256: "a8f972d88ea73dee703d0a9c77fa2081150275cf251621a5c8f4b51123456789"
-          size_in_bytes: 30352
           id: 81874
           md5: "bddc253eb03f31a10e8c70d123456789"
+          payload_id: 16132
+          sha256: "a8f972d88ea73dee703d0a9c77fa2081150275cf251621a5c8f4b51123456789"
+          size_in_bytes: 30352
          -
-          payload_id: 16133
           filename: "image003.jpg"
-          sha256: "31a575c971b683cede7c6af9b60df636c8227ab5accac6b20239cd9123456789"
-          size_in_bytes: 125246
           id: 81875
           md5: "faf8647b390ffadc84c548b123456789"
+          payload_id: 16133
+          sha256: "31a575c971b683cede7c6af9b60df636c8227ab5accac6b20239cd9123456789"
+          size_in_bytes: 125246
         attachments_count: 3
         comments_count: 0
         created_at: "2025-01-11T12:44:14.000Z"
@@ -330,10 +330,10 @@ tests:
         risk_score: 85
         rule_details:
          -
-          source_rule_type: "local"
-          name: "Test"
           id: 2618
+          name: "Test"
           priority: 2
+          source_rule_type: "local"
         rules_count: 1
         sha256: "d7374941971c1d282afccddbbc7b1f8577d190ea52f59d17b9a9ca7123456789"
         subject: "Cofense: Initial UltiPro account activation email for new hires"
@@ -341,14 +341,14 @@ tests:
         updated_at: "2025-01-15T12:00:03.489Z"
         urls:
          -
-          raw: "https://gateway.example.com/"
           id: 61425
+          raw: "https://gateway.example.com/"
          -
-          raw: "http://portal.cofense.com=20"
           id: 204330
+          raw: "http://portal.cofense.com=20"
          -
-          raw: "http://portal.cofense.com"
           id: 204331
+          raw: "http://portal.cofense.com"
         urls_count: 3
       id: "123539"
       links:
