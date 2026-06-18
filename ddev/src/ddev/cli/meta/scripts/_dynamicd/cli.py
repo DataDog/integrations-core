@@ -81,7 +81,7 @@ def _get_api_keys(app: Application) -> tuple[str, str]:
     if not llm_api_key:
         app.display_error(
             "Anthropic API key not configured. Either:\n"
-            "  1. Set env var: export ANTHROPIC_API_KEY=<your-key>\n"
+            "  1. Set env var: export ANTHROPIC_API_KEY=<your-key> (or DD_ANTHROPIC_API_KEY)\n"
             "  2. Or run: ddev config set ai.anthropic_api_key <your-key>"
         )
         app.abort()
