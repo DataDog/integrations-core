@@ -47,6 +47,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._agent_clients = agent_clients
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
+        self._agent_logger: AgentLogger | None = None
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
@@ -135,7 +136,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             raise FatalProcessingError(f"Phase '{message.phase_id}' failed: {message.error}")
 
     async def on_finalize(self, exception: Exception | None) -> None:
-        if getattr(self, "_agent_logger", None) is not None:
+        if self._agent_logger is not None:
             self._agent_logger.close()
         if exception is not None and self._failed_phase is not None:
             self._logger.error(

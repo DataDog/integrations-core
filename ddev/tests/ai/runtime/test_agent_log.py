@@ -118,6 +118,15 @@ async def test_close_is_idempotent(tmp_path):
     logger.close()  # must not raise
 
 
+async def test_emit_after_close_is_silently_dropped(tmp_path):
+    logger = AgentLogger(tmp_path)
+    scope = AgentScope(owner_id="p1", role=AgentRole.PHASE)
+    logger.close()
+    cb = logger.as_callback_set()
+    await cb.fire_agent_start(scope, "sys", [])
+    assert not (tmp_path / AgentRole.PHASE.value / "p1.jsonl").exists()
+
+
 async def test_non_serializable_values_fall_back_to_str(tmp_path):
     logger = AgentLogger(tmp_path)
     cb = logger.as_callback_set()

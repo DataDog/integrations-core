@@ -158,6 +158,7 @@ class ReActProcess:
 
     async def run_once(self, prompt: str) -> AgentResponse:
         """Run a single agent turn with no tools available, firing scoped callbacks.
+        Does not fire on_agent_start/on_agent_finish callbacks.
         The caller is responsible for token accounting."""
         try:
             await self._callbacks.fire_before_agent_send(self._scope, prompt, 1)
