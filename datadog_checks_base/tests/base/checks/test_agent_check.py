@@ -161,6 +161,74 @@ def test_discover_config_returns_empty_for_base_check():
     assert json.loads(AgentCheck.discover_config(payload)) == []
 
 
+def test_discover_config_returns_empty_for_malformed_payload():
+    assert json.loads(AgentCheck.discover_config('not-json')) == []
+    assert json.loads(AgentCheck.discover_config('null')) == []
+
+
+def test_discover_config_returns_empty_when_generate_configs_raises():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            raise RuntimeError('generate failed')
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
+def test_generated_discovery_candidates_swallows_missing_discovery_module():
+    from datadog_checks.base.checks.base import _generated_discovery_candidates
+    from datadog_checks.base.utils.discovery import Service
+
+    class FakeCheck(AgentCheck):
+        pass
+
+    FakeCheck.__module__ = 'datadog_checks.fake_integration.checks.check'
+    service = Service(id='svc', host='10.0.0.1')
+    module_name = 'datadog_checks.fake_integration.config_models.discovery'
+
+    err = ImportError('No module named ...')
+    err.name = module_name
+
+    with patch('datadog_checks.base.checks.base.importlib.import_module', side_effect=err):
+        assert list(_generated_discovery_candidates(FakeCheck, service)) == []
+
+
+def test_generated_discovery_candidates_swallows_missing_config_models_package():
+    from datadog_checks.base.checks.base import _generated_discovery_candidates
+    from datadog_checks.base.utils.discovery import Service
+
+    class FakeCheck(AgentCheck):
+        pass
+
+    FakeCheck.__module__ = 'datadog_checks.fake_integration.checks.check'
+    service = Service(id='svc', host='10.0.0.1')
+
+    err = ImportError('No module named ...')
+    err.name = 'datadog_checks.fake_integration.config_models'
+
+    with patch('datadog_checks.base.checks.base.importlib.import_module', side_effect=err):
+        assert list(_generated_discovery_candidates(FakeCheck, service)) == []
+
+
+def test_generated_discovery_candidates_reraises_unrelated_import_error():
+    from datadog_checks.base.checks.base import _generated_discovery_candidates
+    from datadog_checks.base.utils.discovery import Service
+
+    class FakeCheck(AgentCheck):
+        pass
+
+    FakeCheck.__module__ = 'datadog_checks.fake_integration.checks.check'
+    service = Service(id='svc', host='10.0.0.1')
+
+    err = ImportError('No module named ...')
+    err.name = 'some_external_dependency'
+
+    with patch('datadog_checks.base.checks.base.importlib.import_module', side_effect=err):
+        with pytest.raises(ImportError):
+            _generated_discovery_candidates(FakeCheck, service)
+
+
 def test_generate_configs_loads_generated_discovery_module():
     from datadog_checks.base.utils.discovery import Port, Service
 
