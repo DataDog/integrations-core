@@ -60,11 +60,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._agent_logger: AgentLogger | None = None
+        self._resources: RunResources | None = None
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
-        self._agent_logger: AgentLogger | None = None
-        self._resources: RunResources | None = None
 
     async def on_initialize(self) -> None:
         self._discover_phases()
