@@ -130,6 +130,10 @@ def ddev(
         app.config_file.load()
     except OSError as e:  # no cov
         app.abort(f'Error loading configuration: {e}')
+
+    for warning in app.config_file.load_warnings:
+        app.display_warning(warning)
+
     if app.config.upgrade_check:
         upgrade_check.upgrade_check(app, __version__)
 

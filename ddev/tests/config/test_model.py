@@ -2,10 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import sys
 
 import pytest
 
+from ddev.config.command_resolver import clear_cache
 from ddev.config.model import ConfigurationError, RootConfig, get_github_token, get_github_user
+
+
+@pytest.fixture(autouse=True)
+def _clear_command_cache():
+    """Isolate command-cache state between tests."""
+    clear_cache()
+    yield
+    clear_cache()
 
 
 def test_default():
@@ -1058,6 +1068,140 @@ class TestTrello:
             _ = config.trello.token
 
 
+class TestDynamicD:
+    def test_default(self):
+        config = RootConfig({})
+
+        assert config.dynamicd.llm_api_key is None
+        assert config.dynamicd.llm_api_key_fetch_command is None
+        assert 'dynamicd' not in config.raw_data
+
+    def test_not_table(self, helpers):
+        config = RootConfig({'dynamicd': 9000})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd
+                  must be a table"""
+            ),
+        ):
+            _ = config.dynamicd
+
+    def test_parse_fields_does_not_execute_fetch_command(self, mocker):
+        run_command_mock = mocker.patch('ddev.config.model.run_command')
+        config = RootConfig({'dynamicd': {'llm_api_key_fetch_command': 'echo from-command'}})
+
+        config.parse_fields()
+
+        run_command_mock.assert_not_called()
+
+    def test_parse_fields_validates_fetch_command_type(self, helpers):
+        config = RootConfig({'dynamicd': {'llm_api_key_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                dynamicd -> llm_api_key_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+    def test_resolve_llm_api_key_fetch_command_takes_precedence(self, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'dynamicd': {'llm_api_key': 'plain-key', 'llm_api_key_fetch_command': 'echo command-key'}})
+
+        assert config.dynamicd.resolve_llm_api_key() == 'command-key'
+
+    def test_resolve_llm_api_key_plain_fallback(self, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'dynamicd': {'llm_api_key': 'plain-key'}})
+
+        assert config.dynamicd.resolve_llm_api_key() == 'plain-key'
+
+    def test_resolve_llm_api_key_env_fallback(self, monkeypatch):
+        monkeypatch.setenv('ANTHROPIC_API_KEY', 'env-key')
+        config = RootConfig({'dynamicd': {}})
+
+        assert config.dynamicd.resolve_llm_api_key() == 'env-key'
+
+
+class TestLazySecretCommandParsing:
+    def test_parse_fields_does_not_execute_fetch_commands_for_all_sections(self, mocker):
+        run_command_mock = mocker.patch('ddev.config.model.run_command')
+        config = RootConfig(
+            {
+                'github': {
+                    'user_fetch_command': 'echo gh-user',
+                    'token_fetch_command': 'echo gh-token',
+                },
+                'pypi': {'auth_fetch_command': 'echo pypi-auth'},
+                'trello': {
+                    'key_fetch_command': 'echo trello-key',
+                    'token_fetch_command': 'echo trello-token',
+                },
+                'orgs': {
+                    'default': {
+                        'api_key_fetch_command': 'echo dd-api',
+                        'app_key_fetch_command': 'echo dd-app',
+                    }
+                },
+                'dynamicd': {'llm_api_key_fetch_command': 'echo llm-key'},
+            }
+        )
+
+        config.parse_fields()
+
+        run_command_mock.assert_not_called()
+
+    def test_parse_fields_validates_github_fetch_command_type(self, helpers):
+        config = RootConfig({'github': {'user_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                github -> user_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+    def test_parse_fields_validates_pypi_fetch_command_type(self, helpers):
+        config = RootConfig({'pypi': {'auth_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                pypi -> auth_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+    def test_parse_fields_validates_trello_fetch_command_type(self, helpers):
+        config = RootConfig({'trello': {'key_fetch_command': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                trello -> key_fetch_command
+                  must be a string"""
+            ),
+        ):
+            config.parse_fields()
+
+
 class TestTerminal:
     def test_default(self):
         config = RootConfig({})
@@ -1474,3 +1618,142 @@ class TestGitHubConfig:
 
         # raw_data should still be empty
         assert config.raw_data['github'] == {}
+
+
+class TestCommandFieldsGitHub:
+    def test_user_fetch_command_takes_precedence_over_plain_user(self):
+        config = RootConfig({'github': {'user': 'plain', 'user_fetch_command': 'echo cmd_user'}})
+        assert config.github.user == 'cmd_user'
+
+    def test_user_fetch_command_fallback_to_plain_when_no_command(self):
+        config = RootConfig({'github': {'user': 'plain'}})
+        assert config.github.user == 'plain'
+
+    def test_token_fetch_command_takes_precedence_over_plain_token(self):
+        config = RootConfig({'github': {'token': 'plain', 'token_fetch_command': 'echo cmd_token'}})
+        assert config.github.token == 'cmd_token'
+
+    def test_token_fetch_command_fallback_to_plain_when_no_command(self):
+        config = RootConfig({'github': {'token': 'plain'}})
+        assert config.github.token == 'plain'
+
+    def test_user_fetch_command_cached(self, mocker):
+        spy = mocker.patch('subprocess.run', wraps=__import__('subprocess').run)
+        config = RootConfig({'github': {'user_fetch_command': 'echo cached_user'}})
+        _ = config.github.user
+        config._field_github = None.__class__()  # reset property cache only
+        config._field_github = config.raw_data.get('github')
+        # Re-access via fresh model - same command string should use process cache
+        config2 = RootConfig({'github': {'user_fetch_command': 'echo cached_user'}})
+        _ = config2.github.user
+        assert spy.call_count == 1  # command ran only once across both accesses
+
+    def test_user_fetch_command_failure_raises_configuration_error(self):
+        config = RootConfig({'github': {'user_fetch_command': 'exit 1'}})
+        with pytest.raises(ConfigurationError):
+            _ = config.github.user
+
+    def test_user_fetch_command_failure_message_is_actionable(self):
+        config = RootConfig({'github': {'user_fetch_command': 'echo super-secret && exit 1'}})
+        with pytest.raises(ConfigurationError) as exc_info:
+            _ = config.github.user
+        message = str(exc_info.value)
+        assert 'github.user_fetch_command' in message
+        assert 'exit code' in message
+        assert 'writes the secret to stdout' in message
+        assert 'super-secret' not in message
+
+    def test_token_fetch_command_failure_raises_configuration_error(self):
+        config = RootConfig({'github': {'token_fetch_command': 'exit 1'}})
+        with pytest.raises(ConfigurationError):
+            _ = config.github.token
+
+
+class TestCommandFieldsPyPI:
+    def test_auth_fetch_command_takes_precedence(self):
+        config = RootConfig({'pypi': {'auth': 'plain', 'auth_fetch_command': 'echo cmd_auth'}})
+        assert config.pypi.auth == 'cmd_auth'
+
+    def test_auth_plain_fallback(self):
+        config = RootConfig({'pypi': {'auth': 'plain'}})
+        assert config.pypi.auth == 'plain'
+
+    def test_auth_fetch_command_failure_raises(self):
+        config = RootConfig({'pypi': {'auth_fetch_command': 'exit 1'}})
+        with pytest.raises(ConfigurationError):
+            _ = config.pypi.auth
+
+    def test_auth_fetch_command_empty_output_message_is_actionable(self):
+        config = RootConfig({'pypi': {'auth_fetch_command': f'{sys.executable} -c "pass"'}})
+        with pytest.raises(ConfigurationError) as exc_info:
+            _ = config.pypi.auth
+        message = str(exc_info.value)
+        assert 'pypi.auth_fetch_command' in message
+        assert 'empty output' in message
+        assert 'non-empty value' in message
+
+
+class TestCommandFieldsTrello:
+    def test_key_fetch_command_takes_precedence(self):
+        config = RootConfig({'trello': {'key': 'plain', 'key_fetch_command': 'echo cmd_key'}})
+        assert config.trello.key == 'cmd_key'
+
+    def test_key_plain_fallback(self):
+        config = RootConfig({'trello': {'key': 'plain'}})
+        assert config.trello.key == 'plain'
+
+    def test_token_fetch_command_takes_precedence(self):
+        config = RootConfig({'trello': {'token': 'plain', 'token_fetch_command': 'echo cmd_token'}})
+        assert config.trello.token == 'cmd_token'
+
+    def test_token_fetch_command_failure_raises(self):
+        config = RootConfig({'trello': {'token_fetch_command': 'exit 1'}})
+        with pytest.raises(ConfigurationError):
+            _ = config.trello.token
+
+
+class TestCommandFieldsOrg:
+    def test_api_key_fetch_command_takes_precedence(self):
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': 'plain', 'api_key_fetch_command': 'echo cmd_api', 'app_key': ''}},
+                'org': 'myorg',
+            }
+        )
+        assert config.org.config.get('api_key') == 'cmd_api'
+
+    def test_api_key_plain_fallback(self):
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': 'plain', 'app_key': ''}},
+                'org': 'myorg',
+            }
+        )
+        assert config.org.config.get('api_key') == 'plain'
+
+    def test_app_key_fetch_command_takes_precedence(self):
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': '', 'app_key': 'plain', 'app_key_fetch_command': 'echo cmd_app'}},
+                'org': 'myorg',
+            }
+        )
+        assert config.org.config.get('app_key') == 'cmd_app'
+
+    def test_app_key_plain_fallback(self):
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': '', 'app_key': 'plain'}},
+                'org': 'myorg',
+            }
+        )
+        assert config.org.config.get('app_key') == 'plain'
+
+    def test_non_command_keys_unaffected(self):
+        config = RootConfig(
+            {
+                'orgs': {'myorg': {'api_key': '', 'app_key': '', 'site': 'mysite.com'}},
+                'org': 'myorg',
+            }
+        )
+        assert config.org.config.get('site') == 'mysite.com'

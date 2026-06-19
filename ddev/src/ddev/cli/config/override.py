@@ -65,7 +65,7 @@ def override(app: Application):
     from rich.syntax import Syntax
 
     from ddev.config.file import DDEV_TOML, RootConfig, deep_merge_with_list_handling
-    from ddev.config.utils import scrub_config
+    from ddev.config.scrubber import scrub_config
     from ddev.utils.fs import Path
     from ddev.utils.toml import dumps_toml_data
 
