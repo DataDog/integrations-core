@@ -1956,16 +1956,24 @@ def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRu
             originals[method] = getattr(check, method)
             setattr(check, method, _discovery_noop)
 
-    log_filter = _DiscoveryErrorDowngrade()
-    logger = getattr(getattr(check, 'log', None), 'logger', None)
-    if logger is not None:
-        logger.addFilter(log_filter)
+    # Attach the downgrade filter to a dedicated child logger and point check.log at it.
+    # This scopes suppression to records that flow through check.log during this run — including
+    # any threads spawned by check.run() that log via the same adapter — without touching the
+    # shared class-level logger that concurrent real check instances also use.
+    log_adapter = getattr(check, 'log', None)
+    shared_logger = getattr(log_adapter, 'logger', None)
+    if shared_logger is not None:
+        discovery_logger = logging.getLogger(shared_logger.name + '._discovery')
+        log_filter = _DiscoveryErrorDowngrade()
+        discovery_logger.addFilter(log_filter)
+        log_adapter.logger = discovery_logger
 
     try:
         yield stats
     finally:
-        if logger is not None:
-            logger.removeFilter(log_filter)
+        if shared_logger is not None:
+            log_adapter.logger = shared_logger
+            discovery_logger.removeFilter(log_filter)
         check.aggregator = original_aggregator
         for method, original in originals.items():
             setattr(check, method, original)

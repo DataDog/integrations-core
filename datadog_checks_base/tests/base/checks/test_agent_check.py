@@ -361,6 +361,22 @@ def test_suppress_discovery_side_effects_downgrades_error_logs():
     assert not any(isinstance(f, _DiscoveryErrorDowngrade) for f in check.log.logger.filters)
 
 
+def test_suppress_discovery_side_effects_does_not_touch_shared_logger():
+    from datadog_checks.base.checks.base import _DiscoveryErrorDowngrade, _suppress_discovery_side_effects
+
+    check = AgentCheck()
+    shared_logger = check.log.logger
+
+    with _suppress_discovery_side_effects(check):
+        # check.log now points at a child logger, not the shared one
+        assert check.log.logger is not shared_logger
+        assert check.log.logger.name == shared_logger.name + '._discovery'
+        # the shared logger must have no downgrade filter attached
+        assert not any(isinstance(f, _DiscoveryErrorDowngrade) for f in shared_logger.filters)
+
+    assert check.log.logger is shared_logger
+
+
 def test_suppress_discovery_side_effects_restores_methods_on_exception():
     from datadog_checks.base.checks.base import _discovery_noop, _suppress_discovery_side_effects
 
