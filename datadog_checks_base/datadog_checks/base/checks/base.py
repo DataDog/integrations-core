@@ -1849,9 +1849,11 @@ def _generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> 
     try:
         discovery = importlib.import_module(module_name)
     except ImportError as e:
-        # Missing generated discovery is the normal "not opted in" case. If
-        # discovery.py exists and fails to import one of its own dependencies,
-        # let that error surface to the caller.
+        # Two shapes of "not opted in":
+        #   1. config_models/discovery.py missing → e.name == module_name
+        #   2. config_models/ package missing     → e.name is a shorter prefix
+        # Both satisfy startswith. e.name being an unrelated module (a real
+        # broken dependency inside discovery.py) does not, so it re-raises.
         if e.name and module_name.startswith(e.name):
             return ()
         raise
