@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 40.0.0 / 2026-06-19
+
+***Changed***:
+
+* Stop declaring `black` as a direct dependency. The `apply_black` calls used to format auto-generated config-model files now go through `ruff format`, using the repo's centralized `[tool.ruff]` configuration. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+
 ## 39.0.0 / 2026-06-15
 
 ***Changed***:
