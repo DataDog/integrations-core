@@ -136,7 +136,7 @@ files:
           - name: include_schemas
             description: |
               A list of schema names to include. Any schema whose name is in
-              this list are included. If empty, all schemas (other than
+              this list is included. If empty, all schemas (other than
               those excluded) are included.
             value:
               type: array
