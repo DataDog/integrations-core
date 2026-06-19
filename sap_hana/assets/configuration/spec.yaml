@@ -136,7 +136,7 @@ files:
           - name: include_schemas
             description: |
               A list of schema names to include. Any schema whose name is in
-              this list will be included. If empty, all schemas (other than
+              this list are included. If empty, all schemas (other than
               those excluded) are included.
             value:
               type: array
@@ -147,7 +147,7 @@ files:
           - name: exclude_schemas
             description: |
               A list of schema names to exclude. Any schema whose name is in
-              this list will be excluded. SAP HANA system schemas are always
+              this list is excluded. SAP HANA system schemas are always
               excluded regardless of this setting.
             value:
               type: array

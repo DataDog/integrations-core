@@ -134,7 +134,7 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
 
 #### Schema collection
 
-The Agent can collect SAP HANA catalog metadata (schemas, tables, views, and columns) for Data Quality features in Data Observability. When the monitoring user has access to `SYS.M_TABLE_STATISTICS`, the Agent also collects row counts and last modification times for tables. Collection is disabled by default. To enable it, ensure that the monitoring user can read the required views (see [Granting privileges](#granting-privileges)) and add the following block to your `sap_hana.d/conf.yaml` file:
+The Agent can collect SAP HANA catalog metadata (schemas, tables, views, and columns) for Data Quality features in Data Observability. When the monitoring user has access to `SYS.M_TABLE_STATISTICS`, the Agent also collects row counts and last modification times for tables. Collection is disabled by default. To enable schema collection, ensure that the monitoring user can read the required views (see [Granting privileges](#granting-privileges)) and add the following block to your `sap_hana.d/conf.yaml` file:
 
 ```yaml
    collect_schemas:

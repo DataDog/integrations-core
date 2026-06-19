@@ -29,7 +29,7 @@ docker logs -f saphanabenchmark   # wait for "Startup finished!"
 # 2. Populate the database and run both modes.
 python benchmark.py
 
-# Re-run measurements without recreating the schema:
+# Re-run measurements without recreating the schema.
 python benchmark.py --skip-setup
 
 # 3. Tear down.
@@ -51,7 +51,7 @@ memory error, set `NUM_COLUMNS` to 500 or lower.
 
 ## Notes on memory investigation
 
-**`setfetchsize` (no effect on memory)**
+### `setfetchsize` (no effect on memory)
 `cursor.setfetchsize(10_000)` was tried on the hdbcli cursor before `execute()` to reduce
 the C-layer result buffer. It had no measurable effect on peak RSS (1042 MiB → 1043 MiB).
 The reason: the dominant memory consumer is the Python-side `_queued_rows` list
@@ -61,10 +61,10 @@ layer. The base `SchemaCollector` flushes when `len(_queued_rows) >= payload_chu
 1000-table schema is below the 10,000 threshold, everything flushes at once. The
 `max_tables` / `max_columns` limits are the effective memory control.
 
-**Column-based flush threshold (1.5x RSS reduction with limits)**
+### Column-based flush threshold (1.5x RSS reduction with limits)
 The base class `payload_chunk_size` counts tables, which is a poor proxy for memory when
 tables are wide. `HanaSchemaCollector` overrides `maybe_flush` to flush after every
-`PAYLOAD_COLUMN_CHUNK_SIZE` (50,000) columns instead. For 1000-column tables this flushes
+`PAYLOAD_COLUMN_CHUNK_SIZE` (50,000) columns instead. For 1000-column tables, this flushes
 every 50 tables, keeping `_queued_rows` from growing unboundedly. Result on the 1000×1000
 schema (RSS before = without column-flush override; RSS after = with override):
 
@@ -76,7 +76,7 @@ schema (RSS before = without column-flush override; RSS after = with override):
 The limited case is unaffected: 300 × 50 = 15,000 columns never reaches the 50,000
 threshold so it still flushes once at the end.
 
-**SQL column limit via `ROW_NUMBER()`**
+### SQL column limit via `ROW_NUMBER()`
 The original query joined `SYS.TABLE_COLUMNS` without a column count cap, so the server
 returned all 1000 columns per table regardless of `max_columns`; Python discarded the
 excess. Pushing the limit into SQL with a `limited_columns` CTE using `ROW_NUMBER() OVER
@@ -97,6 +97,6 @@ columns) in the limited case.
 ## Expected outcome
 
 The limited run (max\_tables=300, max\_columns=50) processes 300 tables × 50 columns =
-15 000 column dicts. The unlimited run processes 1000 tables × 1000 columns = 1 000 000
+15,000 column dicts. The unlimited run processes 1000 tables × 1000 columns = 1,000,000
 column dicts, all held in memory at once before the single `json.dumps` flush. The
 unlimited peak RSS is expected to be ~1.5x larger than the limited run.
