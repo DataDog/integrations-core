@@ -1879,6 +1879,10 @@ def _try_discovery_candidate(cls: type[AgentCheck], check_name: str, candidate: 
         raise ConfigurationError('config-discovery: generated instances must be a list')
     if not instances:
         raise ConfigurationError('config-discovery: generated candidate has no instances')
+    if is_affirmative(init_config.get('process_isolation', False)) or any(
+        is_affirmative(inst.get('process_isolation', False)) for inst in instances if isinstance(inst, dict)
+    ):
+        raise ConfigurationError('config-discovery: process_isolation is not supported during discovery')
 
     check = cls(check_name, copy.deepcopy(init_config), copy.deepcopy(instances))
     with _suppress_discovery_side_effects(check) as stats:

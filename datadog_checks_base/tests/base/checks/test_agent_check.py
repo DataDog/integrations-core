@@ -155,6 +155,26 @@ def test_discover_config_rejects_candidate_with_only_service_check():
     assert json.loads(DiscoveryCheck.discover_config(payload)) == []
 
 
+@pytest.mark.parametrize(
+    'init_config,instance',
+    [
+        pytest.param({'process_isolation': True}, {}, id='init_config'),
+        pytest.param({}, {'process_isolation': True}, id='instance'),
+    ],
+)
+def test_discover_config_rejects_process_isolation(init_config, instance):
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': init_config, 'instances': [instance]}
+
+        def check(self, _instance):
+            self.gauge('my.metric', 1.0)
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
 def test_discover_config_returns_empty_for_base_check():
     payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
 
