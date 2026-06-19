@@ -8,7 +8,7 @@
 
 * Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
 
-## 15.17.0 / 2026-05-14
+## 15.17.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
