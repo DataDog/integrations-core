@@ -1823,19 +1823,23 @@ class AgentCheck(object):
         return _parse_ast_config(stdout.strip().decode('utf-8'))
 
 
+def _integration_package(cls: type[AgentCheck]) -> str | None:
+    parts = cls.__module__.split('.')
+    if len(parts) >= 2 and parts[0] == 'datadog_checks':
+        return parts[1]
+    return None
+
+
 def _discovery_check_name(cls: type[AgentCheck]) -> str:
-    module_parts = cls.__module__.split('.')
-    if len(module_parts) >= 2 and module_parts[0] == 'datadog_checks':
-        return module_parts[1]
-    return cls.__name__
+    return _integration_package(cls) or cls.__name__
 
 
 def _generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> Iterable[dict[str, Any]]:
-    module_parts = cls.__module__.split('.')
-    if len(module_parts) < 2 or module_parts[0] != 'datadog_checks':
+    package = _integration_package(cls)
+    if package is None:
         return ()
 
-    module_name = f'{module_parts[0]}.{module_parts[1]}.config_models.discovery'
+    module_name = f'datadog_checks.{package}.config_models.discovery'
     try:
         discovery = importlib.import_module(module_name)
     except ImportError as e:
