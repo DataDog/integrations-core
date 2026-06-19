@@ -6,14 +6,9 @@
 
 ***Changed***:
 
-* Stop declaring `black` as a direct dependency. The `apply_black` calls used to format auto-generated config-model files now go through `ruff format`, using the repo's centralized `[tool.ruff]` configuration. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
-
-## 39.0.0 / 2026-06-15
-
-***Changed***:
-
 * Make docker_run wait for Docker Compose service health by default. ([#23628](https://github.com/DataDog/integrations-core/pull/23628))
 * Legacy migration: remove `validate jmx-metrics` from the legacy CLI; the command is now provided natively by ddev. ([#23652](https://github.com/DataDog/integrations-core/pull/23652))
+* Stop declaring `black` as a direct dependency. The `apply_black` calls used to format auto-generated config-model files now go through `ruff format`, using the repo's centralized `[tool.ruff]` configuration. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
 
 ***Added***:
 
