@@ -6,21 +6,21 @@ import os
 from copy import deepcopy
 
 import pytest
+from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata
 
-from datadog_checks.dev import docker_run, get_docker_hostname
 from datadog_checks.php_fpm import PHPFPMCheck
 
 HOST = get_docker_hostname()
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 DEFAULT_INSTANCE = {
-    'status_url': 'http://{}:8080/some_status'.format(HOST),
-    'ping_url': 'http://{}:8080/some_ping'.format(HOST),
+    'status_url': 'http://{}:8080/status'.format(HOST),
+    'ping_url': 'http://{}:8080/ping'.format(HOST),
 }
 
 INSTANCE_FASTCGI = {
-    'status_url': 'http://{}:9000/some_status'.format(HOST),
-    'ping_url': 'http://{}:9000/some_ping'.format(HOST),
+    'status_url': 'http://{}:9000/status'.format(HOST),
+    'ping_url': 'http://{}:9000/ping'.format(HOST),
     'use_fastcgi': True,
 }
 
@@ -42,18 +42,18 @@ def instance_fastcgi():
 
 @pytest.fixture
 def ping_url_tag():
-    return 'ping_url:http://{}:8080/some_ping'.format(HOST)
+    return 'ping_url:http://{}:8080/ping'.format(HOST)
 
 
 @pytest.fixture
 def ping_url_tag_fastcgi():
-    return 'ping_url:http://{}:9000/some_ping'.format(HOST)
+    return 'ping_url:http://{}:9000/ping'.format(HOST)
 
 
 @pytest.fixture(scope='session')
 def dd_environment():
     with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), endpoints='http://{}:8080'.format(HOST)):
-        yield DEFAULT_INSTANCE
+        yield DEFAULT_INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture

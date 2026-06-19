@@ -1,0 +1,5 @@
+ad_identifiers:
+  - php-fpm
+discovery: {}
+init_config:
+instances: []
