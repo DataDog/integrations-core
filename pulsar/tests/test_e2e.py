@@ -29,6 +29,7 @@ def test_check(dd_agent_check, instance):
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(check_rate=True)
 
+    aggregator.assert_metric('pulsar.topics_count', at_least=1)
     aggregator.assert_service_check('pulsar.openmetrics.health', ServiceCheck.OK, at_least=1)
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
