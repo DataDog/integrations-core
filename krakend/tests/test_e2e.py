@@ -24,7 +24,13 @@ def test_e2e(dd_agent_check, instance: InstanceBuilder):
 
 
 @pytest.mark.e2e
-def test_e2e_discovery(dd_agent_check_discovery):
+def test_e2e_discovery(dd_agent_check_discovery, is_lab):
+    # In the lab environment we currently do not mount auto_conf.yaml into the
+    # Agent container, so the Agent has no Autodiscovery template to trigger
+    # config discovery.
+    if is_lab:
+        pytest.skip('lab does not currently support configuration discovery')
+
     aggregator = dd_agent_check_discovery(check_rate=True)
 
     metadata_metrics = get_metrics_from_metadata()
