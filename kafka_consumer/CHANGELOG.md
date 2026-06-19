@@ -14,7 +14,7 @@
 * Add broker list to the cluster monitoring heartbeat payload. ([#23898](https://github.com/DataDog/integrations-core/pull/23898))
 * Emit connection_error DSM event when the integration cannot connect to Kafka. ([#23902](https://github.com/DataDog/integrations-core/pull/23902))
 
-## 7.3.0 / 2026-05-14
+## 7.3.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
