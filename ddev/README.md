@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | Package | [![PyPI - Version](https://img.shields.io/pypi/v/ddev.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/ddev/) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ddev.svg?logo=python&label=Python&logoColor=gold)](https://pypi.org/project/ddev/) |
-| Meta | [![code style - black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) [![types - Mypy](https://img.shields.io/badge/types-Mypy-blue.svg)](https://github.com/python/mypy) [![imports - isort](https://img.shields.io/badge/imports-isort-ef8336.svg)](https://github.com/pycqa/isort) [![License - MIT](https://img.shields.io/badge/license-BSD--3--Clause-9400d3.svg)](https://spdx.org/licenses/) |
+| Meta | [![linting - Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff) [![types - Mypy](https://img.shields.io/badge/types-Mypy-blue.svg)](https://github.com/python/mypy) [![imports - isort](https://img.shields.io/badge/imports-isort-ef8336.svg)](https://github.com/pycqa/isort) [![License - MIT](https://img.shields.io/badge/license-BSD--3--Clause-9400d3.svg)](https://spdx.org/licenses/) |
 
 -----
 

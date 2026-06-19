@@ -16,9 +16,9 @@ $ ddev test postgres -l
 ┏━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
 ┃ Name   ┃ Type    ┃ Features ┃ Dependencies    ┃ Environment variables   ┃ Scripts   ┃
 ┡━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━┩
-│ lint   │ virtual │          │ black==22.12.0  │                         │ all       │
-│        │         │          │ pydantic==2.7.3 │                         │ fmt       │
-│        │         │          │ ruff==0.0.257   │                         │ style     │
+│ lint   │ virtual │          │ ruff==0.11.10    │                        │ all       │
+│        │         │          │ pydantic==2.11.5 │                        │ fmt       │
+│        │         │          │ pip              │                        │ style     │
 ├────────┼─────────┼──────────┼─────────────────┼─────────────────────────┼───────────┤
 │ latest │ virtual │ deps     │                 │ POSTGRES_VERSION=latest │ benchmark │
 │        │         │          │                 │                         │ test      │
