@@ -1879,6 +1879,10 @@ def _try_discovery_candidate(cls: type[AgentCheck], check_name: str, candidate: 
         raise ConfigurationError('config-discovery: generated instances must be a list')
     if not instances:
         raise ConfigurationError('config-discovery: generated candidate has no instances')
+    # Only single-instance candidates are validated: check.run() evaluates self.instances[0],
+    # so additional instances would be accepted without validation.
+    if len(instances) > 1:
+        raise ConfigurationError('config-discovery: multi-instance candidates are not supported')
     # process_isolation routes submissions through run_with_isolation(), which passes the
     # module-level aggregator directly and therefore bypasses _DiscoveryAggregatorProxy.
     if is_affirmative(init_config.get('process_isolation', False)) or any(

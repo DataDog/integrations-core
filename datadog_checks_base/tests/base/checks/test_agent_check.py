@@ -155,6 +155,19 @@ def test_discover_config_rejects_candidate_with_only_service_check():
     assert json.loads(DiscoveryCheck.discover_config(payload)) == []
 
 
+def test_discover_config_rejects_multi_instance_candidate():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{}, {}]}
+
+        def check(self, instance):
+            self.gauge('my.metric', 1.0)
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
 @pytest.mark.parametrize(
     'init_config,instance',
     [
