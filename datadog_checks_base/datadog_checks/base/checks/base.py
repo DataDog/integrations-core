@@ -31,11 +31,7 @@ from datadog_checks.base.utils.agent.utils import should_profile_memory
 from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
-from datadog_checks.base.utils.models.validation.security import (
-    DEFAULT_TRUSTED_PROVIDERS,
-    SecurityConfig,
-    check_field_trusted_provider,
-)
+from datadog_checks.base.utils.models import validation
 from datadog_checks.base.utils.tagging import GENERIC_TAGS
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -493,7 +489,7 @@ class AgentCheck(object):
         return self.__logs_enabled
 
     @property
-    def security_config(self) -> SecurityConfig:
+    def security_config(self) -> "validation.security.SecurityConfig":
         """
         Returns the integration security configuration, loaded once and cached.
 
@@ -501,14 +497,14 @@ class AgentCheck(object):
         """
         if self.__security_config is None:
             trusted_providers = datadog_agent.get_config('integration_trusted_providers')
-            self.__security_config = SecurityConfig(
+            self.__security_config = validation.security.SecurityConfig(
                 check_name=self.name,
                 provider=self.provider,
                 ignore_untrusted_file_params=bool(datadog_agent.get_config('integration_ignore_untrusted_file_params')),
                 file_paths_allowlist=datadog_agent.get_config('integration_file_paths_allowlist') or [],
                 trusted_providers=trusted_providers
                 if trusted_providers is not None
-                else list(DEFAULT_TRUSTED_PROVIDERS),
+                else list(validation.security.DEFAULT_TRUSTED_PROVIDERS),
                 excluded_checks=datadog_agent.get_config('integration_security_excluded_checks') or [],
             )
 
@@ -751,7 +747,7 @@ class AgentCheck(object):
                     for field_name in GLOBAL_SECURE_FIELDS & configured_fields:
                         value = config.get(field_name)
                         if value is not None:
-                            check_field_trusted_provider(field_name, value, security_config)
+                            validation.security.check_field_trusted_provider(field_name, value, security_config)
                 except ValueError as e:
                     raise ConfigurationError(str(e)) from None
                 return config_model
