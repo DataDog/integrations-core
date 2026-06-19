@@ -277,12 +277,7 @@ class ModelConsumer:
                     ]
                 )
                 for field_name, template in candidate.items():
-                    if isinstance(template, str):
-                        lines.append(
-                            f"                    {field_name!r}: {template!r}.format(service=service, **ctx),"
-                        )
-                    else:
-                        lines.append(f"                    {field_name!r}: {template!r},")
+                    lines.append(f"                    {field_name!r}: {template!r}.format(service=service, **ctx),")
                 lines.extend(
                     [
                         '                }',

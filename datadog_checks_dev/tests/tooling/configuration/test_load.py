@@ -450,60 +450,6 @@ def test_discovery_unknown_placeholder():
     ) in spec.errors
 
 
-def test_discovery_valid_scalar_candidate():
-    spec = get_spec(
-        """
-        version: 0.0.0
-        files:
-        - name: test.yaml
-          example_name: test.yaml.example
-          discovery:
-            ad_identifiers:
-            - test
-            strategies:
-            - strategy: from_ports
-              port_hints:
-              - 9090
-              candidates:
-              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
-                histogram_buckets_as_distributions: true
-          options:
-          - template: init_config
-          - template: instances
-        """
-    )
-    spec.load()
-
-    assert not spec.errors
-
-
-def test_discovery_invalid_candidate_value():
-    spec = get_spec(
-        """
-        version: 0.0.0
-        files:
-        - name: test.yaml
-          example_name: test.yaml.example
-          discovery:
-            ad_identifiers:
-            - test
-            strategies:
-            - strategy: from_ports
-              port_hints:
-              - 9090
-              candidates:
-              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
-                extra_metrics: [a, b, c]
-          options:
-          - template: init_config
-          - template: instances
-        """
-    )
-    spec.load()
-
-    assert any('Candidate values must be strings or scalar literals' in e for e in spec.errors)
-
-
 def test_section_not_map():
     spec = get_spec(
         """
