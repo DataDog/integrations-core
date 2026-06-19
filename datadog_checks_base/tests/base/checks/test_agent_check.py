@@ -302,9 +302,9 @@ def test_suppress_discovery_side_effects_restores_methods_after_exit():
     check = AgentCheck()
 
     with _suppress_discovery_side_effects(check):
-        assert check.service_check is _discovery_noop
+        assert check.send_log is _discovery_noop
 
-    assert check.service_check is not _discovery_noop
+    assert check.send_log is not _discovery_noop
 
 
 def test_suppress_discovery_side_effects_downgrades_error_logs():
@@ -335,10 +335,41 @@ def test_suppress_discovery_side_effects_restores_methods_on_exception():
 
     with pytest.raises(RuntimeError):
         with _suppress_discovery_side_effects(check):
-            assert check.service_check is _discovery_noop
+            assert check.send_log is _discovery_noop
             raise RuntimeError('body failed')
 
-    assert check.service_check is not _discovery_noop
+    assert check.send_log is not _discovery_noop
+
+
+def test_suppress_discovery_side_effects_suppresses_aggregator_submissions():
+    from unittest.mock import MagicMock
+
+    from datadog_checks.base.checks.base import _DiscoveryAggregatorProxy, _suppress_discovery_side_effects
+
+    check = AgentCheck()
+
+    with _suppress_discovery_side_effects(check):
+        assert isinstance(check.aggregator, _DiscoveryAggregatorProxy)
+        proxy = check.aggregator
+        proxy.submit_event_platform_event = MagicMock()
+        proxy.submit_event = MagicMock()
+        proxy.submit_service_check = MagicMock()
+
+        check.database_monitoring_query_sample('{}')
+        check.database_monitoring_query_metrics('{}')
+        check.database_monitoring_query_activity('{}')
+        check.database_monitoring_metadata('{}')
+        check.event_platform_event('{}', 'my-track')
+        check.event({'msg_title': 'test', 'msg_text': 'body', 'alert_type': 'info'})
+        check.service_check('my.check', AgentCheck.OK)
+
+        assert proxy.submit_event_platform_event.call_count == 5
+        assert proxy.submit_event.call_count == 1
+        assert proxy.submit_service_check.call_count == 1
+
+    # After exit, check.aggregator is restored and proxy is no longer used
+    check.service_check('my.check', AgentCheck.OK)
+    assert proxy.submit_service_check.call_count == 1  # still 1, not 2
 
 
 @pytest.fixture

@@ -832,28 +832,28 @@ class AgentCheck(object):
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
+        self.aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-samples")
 
     def database_monitoring_query_metrics(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
+        self.aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metrics")
 
     def database_monitoring_query_activity(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
+        self.aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-activity")
 
     def database_monitoring_metadata(self, raw_event):
         # type: (str) -> None
         if raw_event is None:
             return
 
-        aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
+        self.aggregator.submit_event_platform_event(self, self.check_id, to_native_string(raw_event), "dbm-metadata")
 
     def event_platform_event(self, raw_event, event_track_type):
         # type: (str | bytes, str) -> None
@@ -872,7 +872,7 @@ class AgentCheck(object):
             raw_event = bytes(raw_event)
         elif not isinstance(raw_event, bytes):
             raw_event = to_native_string(raw_event)
-        aggregator.submit_event_platform_event(self, self.check_id, raw_event, event_track_type)
+        self.aggregator.submit_event_platform_event(self, self.check_id, raw_event, event_track_type)
 
     def submit_generic_resource(self, *, type, key, fields, include, seen_at=None, expire_at=None):
         # type: (str, str, dict | None, dict, int | None, int | None) -> None
@@ -1295,7 +1295,7 @@ class AgentCheck(object):
 
         message = self.sanitize(message)
 
-        aggregator.submit_service_check(
+        self.aggregator.submit_service_check(
             self, self.check_id, self._format_namespace(name, raw), status, tags, hostname, message
         )
 
@@ -1711,7 +1711,7 @@ class AgentCheck(object):
         if self.__NAMESPACE__:
             event.setdefault('source_type_name', self.__NAMESPACE__)
 
-        aggregator.submit_event(self, self.check_id, event)
+        self.aggregator.submit_event(self, self.check_id, event)
 
     def _normalize_tags_type(self, tags, device_name=None, metric_name=None):
         # type: (Sequence[Union[None, str, bytes]], str, str) -> List[str]
@@ -1904,6 +1904,15 @@ class _DiscoveryAggregatorProxy:
     def submit_histogram_bucket(self, *args: Any, **kwargs: Any) -> None:
         self._stats.metric_count += 1
 
+    def submit_event(self, *args: Any, **kwargs: Any) -> None:
+        pass
+
+    def submit_service_check(self, *args: Any, **kwargs: Any) -> None:
+        pass
+
+    def submit_event_platform_event(self, *args: Any, **kwargs: Any) -> None:
+        pass
+
 
 class _DiscoveryErrorDowngrade(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
@@ -1920,10 +1929,7 @@ def _discovery_noop(*args: Any, **kwargs: Any) -> None:
 @contextmanager
 def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRunStats]:
     noop_methods = (
-        'event',
-        'event_platform_event',
         'send_log',
-        'service_check',
         'service_metadata',
         'set_external_tags',
         'set_metadata',
