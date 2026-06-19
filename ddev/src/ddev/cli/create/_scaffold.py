@@ -455,7 +455,7 @@ def _display_tree(app: Application, root: Path, files: list[TemplateFile]) -> No
         try:
             rel = f.target_path.relative_to(root)
         except ValueError:
-            rel = Path(str(f.target_path))
+            rel = _StdPath(str(f.target_path))
         branch: dict = tree
         for part in rel.parts:
             branch = branch.setdefault(part, {})
