@@ -8,6 +8,10 @@ from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
 
 DISCOVERY_STRATEGY_FIELDS = {'strategy', 'port_hints', 'candidates'}
 DISCOVERY_FIELDS = {'ad_identifiers', 'strategies'}
+# Keep in sync with Port/Service fields in
+# datadog_checks_base/datadog_checks/base/utils/discovery/service.py
+# (importing datadog_checks_base here is not possible: ddev is a standalone
+# CLI with no runtime dependency on datadog_checks_base)
 DISCOVERY_FROM_PORTS_PLACEHOLDERS = {
     'service': {'id', 'host'},
     'port': {'name', 'number'},
