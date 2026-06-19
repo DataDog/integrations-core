@@ -2,20 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import warnings
-from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 import yaml
 from datamodel_code_generator import DataModelType
-from datamodel_code_generator.format import CodeFormatter, PythonVersion
+from datamodel_code_generator.format import PythonVersion
 from datamodel_code_generator.model import get_data_model_types
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
 
+from datadog_checks.dev.tooling.configuration.consumers.model.code_formatter import format_with_ruff
 from datadog_checks.dev.tooling.configuration.consumers.model.model_file import build_model_file
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 from datadog_checks.dev.tooling.configuration.consumers.openapi_document import build_openapi_document
-from datadog_checks.dev.tooling.constants import get_root
 
 PYTHON_VERSION = PythonVersion.PY_39
 
@@ -32,9 +31,8 @@ VALIDATORS_DOCUMENTATION = '''# Here you can include additional config validator
 
 
 class ModelConsumer:
-    def __init__(self, spec: dict, code_formatter: CodeFormatter = None):
+    def __init__(self, spec: dict):
         self.spec = spec
-        self.code_formatter = code_formatter or self.create_code_formatter()
 
     def render(self) -> Dict[str, Dict[str, str]]:
         """
@@ -139,7 +137,6 @@ class ModelConsumer:
             model_id,
             section_name,
             model_info,
-            self.code_formatter,
         )
         # instance.py or shared.py
         model_files[model_file_name] = (model_file_contents, errors)
@@ -209,11 +206,6 @@ class ModelConsumer:
 
         return new_section
 
-    @staticmethod
-    def create_code_formatter():
-        path = Path(get_root())
-        return CodeFormatter(PYTHON_VERSION, settings_path=path if path.is_dir() else None)
-
     def _build_deprecation_file(self, deprecation_data):
         file_needs_formatting = False
         deprecations_file_lines = []
@@ -228,7 +220,7 @@ class ModelConsumer:
         deprecations_file_lines.append('')
         deprecations_file_contents = '\n'.join(deprecations_file_lines)
         if file_needs_formatting:
-            deprecations_file_contents = self.code_formatter.apply_black(deprecations_file_contents)
+            deprecations_file_contents = format_with_ruff(deprecations_file_contents)
         return deprecations_file_contents
 
     @staticmethod
@@ -257,7 +249,7 @@ class ModelConsumer:
         model_info.defaults_file_lines.append('')
         defaults_file_contents = '\n'.join(model_info.defaults_file_lines)
         if model_info.defaults_file_needs_value_normalization:
-            defaults_file_contents = self.code_formatter.apply_black(defaults_file_contents)
+            defaults_file_contents = format_with_ruff(defaults_file_contents)
         return defaults_file_contents
 
     def _build_discovery_file(self, discovery: dict[str, Any]) -> str:
