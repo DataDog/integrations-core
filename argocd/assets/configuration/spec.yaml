@@ -2,6 +2,15 @@ name: "ArgoCD"
 fleet_configurable: true
 files:
 - name: argocd.yaml
+  discovery:
+    ad_identifiers:
+      - argocd
+    strategies:
+      - strategy: from_ports
+        port_hints:
+          - 8082
+        candidates:
+          - app_controller_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:

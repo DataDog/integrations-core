@@ -7,6 +7,7 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
+from datadog_checks.dev.http import MockResponse
 
 from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.argocd.resources import ArgocdResourceCollector
@@ -15,7 +16,6 @@ from datadog_checks.argocd.resources_constants import (
     CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
 )
-from datadog_checks.dev.http import MockResponse
 
 pytestmark = pytest.mark.unit
 
