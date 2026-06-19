@@ -1,1 +1,0 @@
-Skip code coverage gate validation for extras repos, which do not enforce a required per-integration coverage threshold.
