@@ -289,6 +289,7 @@ class AgentCheck(object):
         self.agentConfig = agentConfig  # type: AgentConfigType
         self.instance = instance  # type: InstanceType
         self.instances = instances  # type: List[InstanceType]
+        self.aggregator = aggregator
         self.warnings = []  # type: List[str]
         self.disable_generic_tags = (
             is_affirmative(self.instance.get('disable_generic_tags', False)) if instance else False
@@ -817,7 +818,7 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        aggregator.submit_histogram_bucket(
+        self.aggregator.submit_histogram_bucket(
             self,
             self.check_id,
             self._format_namespace(name, raw),
@@ -1077,7 +1078,7 @@ class AgentCheck(object):
             self.warning(err_msg)
             return
 
-        aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
+        self.aggregator.submit_metric(self, self.check_id, mtype, name, value, tags, hostname, flush_first_value)
 
     def gauge(self, name, value, tags=None, hostname=None, device_name=None, raw=False):
         # type: (str, float, Sequence[str], str, str, bool) -> None
@@ -1897,6 +1898,17 @@ class _DiscoveryRunStats:
     metric_count: int = 0
 
 
+class _DiscoveryAggregatorProxy:
+    def __init__(self, stats: _DiscoveryRunStats) -> None:
+        self._stats = stats
+
+    def submit_metric(self, *args: Any, **kwargs: Any) -> None:
+        self._stats.metric_count += 1
+
+    def submit_histogram_bucket(self, *args: Any, **kwargs: Any) -> None:
+        self._stats.metric_count += 1
+
+
 class _DiscoveryErrorDowngrade(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         if record.levelno >= logging.ERROR:
@@ -1911,10 +1923,6 @@ def _discovery_noop(*args: Any, **kwargs: Any) -> None:
 
 @contextmanager
 def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRunStats]:
-    aggregator_methods = (
-        'submit_metric',
-        'submit_histogram_bucket',
-    )
     noop_methods = (
         'event',
         'event_platform_event',
@@ -1926,15 +1934,10 @@ def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRu
         'write_persistent_cache',
     )
     originals: dict[str, Any] = {}
-    aggregator_originals: dict[str, Any] = {}
     stats = _DiscoveryRunStats()
 
-    def _count_metric(*args: Any, **kwargs: Any) -> None:
-        stats.metric_count += 1
-
-    for method in aggregator_methods:
-        aggregator_originals[method] = getattr(aggregator, method)
-        setattr(aggregator, method, _count_metric)
+    original_aggregator = check.aggregator
+    check.aggregator = _DiscoveryAggregatorProxy(stats)
 
     for method in noop_methods:
         if hasattr(check, method):
@@ -1951,7 +1954,6 @@ def _suppress_discovery_side_effects(check: AgentCheck) -> Iterator[_DiscoveryRu
     finally:
         if logger is not None:
             logger.removeFilter(log_filter)
-        for method, original in aggregator_originals.items():
-            setattr(aggregator, method, original)
+        check.aggregator = original_aggregator
         for method, original in originals.items():
             setattr(check, method, original)

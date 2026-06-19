@@ -274,26 +274,26 @@ def test_suppress_discovery_side_effects_counts_metrics():
 
 def test_suppress_discovery_side_effects_restores_metric_methods_after_exit():
     from datadog_checks.base.checks import base as base_module
-    from datadog_checks.base.checks.base import _suppress_discovery_side_effects
+    from datadog_checks.base.checks.base import _DiscoveryAggregatorProxy, _suppress_discovery_side_effects
 
     check = AgentCheck()
-    original_check_submit_metric = check._submit_metric
-    original_check_submit_histogram_bucket = check.submit_histogram_bucket
-    original_submit_metric = base_module.aggregator.submit_metric
-    original_submit_histogram_bucket = base_module.aggregator.submit_histogram_bucket
+    original_aggregator = check.aggregator
 
     with _suppress_discovery_side_effects(check) as stats:
         assert stats.metric_count == 0
+        assert isinstance(check.aggregator, _DiscoveryAggregatorProxy)
+        assert check.aggregator is not original_aggregator
+        # global aggregator must not be touched (thread safety): methods must
+        # not appear as instance attributes (which would indicate monkey-patching)
+        assert 'submit_metric' not in vars(base_module.aggregator)
+        assert 'submit_histogram_bucket' not in vars(base_module.aggregator)
         check.gauge('my.metric', 1.0)
         check.submit_histogram_bucket('my.histogram', 3, 0, 1, True, '', [])
         assert stats.metric_count == 2
-        assert check._submit_metric == original_check_submit_metric
-        assert check.submit_histogram_bucket == original_check_submit_histogram_bucket
-        assert base_module.aggregator.submit_metric is not original_submit_metric
-        assert base_module.aggregator.submit_histogram_bucket is not original_submit_histogram_bucket
 
-    assert base_module.aggregator.submit_metric is original_submit_metric
-    assert base_module.aggregator.submit_histogram_bucket is original_submit_histogram_bucket
+    assert check.aggregator is original_aggregator
+    assert 'submit_metric' not in vars(base_module.aggregator)
+    assert 'submit_histogram_bucket' not in vars(base_module.aggregator)
 
 
 def test_suppress_discovery_side_effects_restores_methods_after_exit():
