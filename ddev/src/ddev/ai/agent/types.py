@@ -62,6 +62,7 @@ class TokenUsage:
     cache_read_input_tokens: int  # tokens read from prompt cache
     cache_creation_input_tokens: int  # tokens written to prompt cache
     context_usage: ContextUsage | None = None  # None only for agents that don't provide context tracking
+    web_search_requests: int = 0  # number of web search requests (billed separately from tokens)
 
 
 @dataclass(frozen=True)

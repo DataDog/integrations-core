@@ -17,6 +17,7 @@ from ddev.ai.tools.registry import ToolRegistry
 if TYPE_CHECKING:
     from anthropic.types import (
         CacheControlEphemeralParam,
+        Message,
         TextBlockParam,
         ToolParam,
         ToolResultBlockParam,
@@ -24,6 +25,13 @@ if TYPE_CHECKING:
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
+
+# web_search_20260209  is not ZDR-eligible by default.
+WEB_SEARCH_VERSION: Final[str] = "web_search_20250305"
+
+NATIVE_TOOL_DEFINITIONS: Final[dict[str, ToolParam]] = {
+    "web_search": {"type": WEB_SEARCH_VERSION, "name": "web_search"},
+}
 
 # 1h TTL for the static prefix (system + tools): paid once, read for the whole session.
 STATIC_CACHE_CONTROL: Final[CacheControlEphemeralParam] = {"type": "ephemeral", "ttl": "1h"}
@@ -86,9 +94,6 @@ class AnthropicAgent(BaseAgent[MessageParam]):
 
     def _map_stop_reason(self, raw: str) -> StopReason:
         """Map a raw Anthropic stop_reason string to the generic StopReason enum."""
-        # pause_turn gets an explicit check to provide a more informative message than "Unknown stop_reason"
-        if raw == "pause_turn":
-            raise AgentError("pause_turn is not supported in batch mode") from None
         mapping = {
             "end_turn": StopReason.END_TURN,
             "tool_use": StopReason.TOOL_USE,
@@ -96,9 +101,59 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             "stop_sequence": StopReason.OTHER,
             "refusal": StopReason.OTHER,
         }
+        if raw == "pause_turn":
+            # pause_turn should be consumed by _create_until_complete before reaching here.
+            raise AgentError("pause_turn leaked past continuation loop") from None
         if raw not in mapping:
             raise AgentError(f"Unknown stop_reason: {raw!r}") from None
         return mapping[raw]
+
+    def _native_tool_defs(self, allowed_tools: list[str] | None) -> list[ToolParam]:
+        """Resolve the registry's native (server) tool names to Anthropic definitions.
+
+        Native tools are gated by allowed_tools just like client tools: None means all.
+        """
+        names = self._tools.native_tool_names
+        if allowed_tools is not None:
+            allowed = set(allowed_tools)
+            names = [n for n in names if n in allowed]
+        return [NATIVE_TOOL_DEFINITIONS[name] for name in names]
+
+    @staticmethod
+    def _web_search_requests(response: Message) -> int:
+        """Web search request count from one response (0 if absent). Robust to fakes/providers."""
+        server_use = getattr(response.usage, "server_tool_use", None)
+        return getattr(server_use, "web_search_requests", 0) or 0
+
+    async def _create_until_complete(
+        self,
+        *,
+        request_messages: list[MessageParam],
+        system_param: list[TextBlockParam],
+        tool_defs: list[ToolParam],
+    ) -> tuple[Message, list[MessageParam], list[Message]]:
+        """Call messages.create, transparently continuing across pause_turn.
+
+        Returns (final_response, paused_turns, all_responses). all_responses includes
+        all intermediate responses so the caller can sum token usage across calls.
+        """
+        paused_turns: list[MessageParam] = []
+        all_responses: list[Message] = []
+        messages = request_messages
+        while True:
+            response = await self._client.messages.create(
+                model=self._model,
+                max_tokens=self._max_tokens,
+                system=system_param,
+                messages=messages,
+                tools=tool_defs if tool_defs else anthropic.NOT_GIVEN,
+            )
+            all_responses.append(response)
+            if response.stop_reason != "pause_turn":
+                return response, paused_turns, all_responses
+            paused_turn: MessageParam = {"role": "assistant", "content": response.content}
+            paused_turns.append(paused_turn)
+            messages = [*messages, paused_turn]
 
     def _to_tool_result_params(self, messages: list[ToolResultMessage]) -> list[ToolResultBlockParam]:
         """Convert model-agnostic ToolResultMessages to Anthropic SDK ToolResultBlockParams."""
@@ -156,7 +211,8 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         Returns:
             An AgentResponse object containing the response from the agent.
         """
-        tool_defs = self._with_tools_cache_breakpoint(self._get_tool_definitions(allowed_tools))
+        tool_defs = self._get_tool_definitions(allowed_tools) + self._native_tool_defs(allowed_tools)
+        tool_defs = self._with_tools_cache_breakpoint(tool_defs)
 
         api_content: str | list[ToolResultBlockParam] = (
             self._to_tool_result_params(content) if isinstance(content, list) else content
@@ -173,12 +229,10 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         ]
 
         try:
-            response = await self._client.messages.create(
-                model=self._model,
-                max_tokens=self._max_tokens,
-                system=system_param,
-                messages=messages,
-                tools=tool_defs if tool_defs else anthropic.NOT_GIVEN,
+            response, paused_turns, all_responses = await self._create_until_complete(
+                request_messages=messages,
+                system_param=system_param,
+                tool_defs=tool_defs,
             )
         except anthropic.APIConnectionError as e:
             raise AgentConnectionError(f"Connection failed: {e}") from e
@@ -203,18 +257,28 @@ class AnthropicAgent(BaseAgent[MessageParam]):
                 text_parts.append(block.text)
             elif isinstance(block, anthropic.types.ToolUseBlock):
                 tool_calls.append(ToolCall(id=block.id, name=block.name, input=dict(block.input)))
-        # ThinkingBlock and RedactedThinkingBlock are intentionally ignored.
-        # Extended thinking support can add a `thinking: str` field to AgentResponse later.
+        # ThinkingBlock, RedactedThinkingBlock, ServerToolUseBlock, and WebSearchToolResultBlock
+        # are intentionally not parsed as tool_calls — server tool results are preserved verbatim
+        # in history so Anthropic can resolve encrypted_content / encrypted_index for citations.
 
-        cache_read = response.usage.cache_read_input_tokens or 0
-        cache_creation = response.usage.cache_creation_input_tokens or 0
-        used_tokens = response.usage.input_tokens + cache_read + cache_creation
+        # Sum token usage across all calls (paused turns also consume tokens).
+        # context_usage reflects the final call's position in the context window.
+        total_input = sum(r.usage.input_tokens for r in all_responses)
+        total_output = sum(r.usage.output_tokens for r in all_responses)
+        total_cache_read = sum(r.usage.cache_read_input_tokens or 0 for r in all_responses)
+        total_cache_creation = sum(r.usage.cache_creation_input_tokens or 0 for r in all_responses)
+        final_cache_read = response.usage.cache_read_input_tokens or 0
+        final_cache_creation = response.usage.cache_creation_input_tokens or 0
+        final_used_tokens = response.usage.input_tokens + final_cache_read + final_cache_creation
+        # Sum across all calls: searches in paused turns are reported on their own responses.
+        web_search_requests = sum(self._web_search_requests(r) for r in all_responses)
         usage = TokenUsage(
-            input_tokens=response.usage.input_tokens,
-            output_tokens=response.usage.output_tokens,
-            cache_read_input_tokens=cache_read,
-            cache_creation_input_tokens=cache_creation,
-            context_usage=ContextUsage(window_size=await self._get_context_window(), used_tokens=used_tokens),
+            input_tokens=total_input,
+            output_tokens=total_output,
+            cache_read_input_tokens=total_cache_read,
+            cache_creation_input_tokens=total_cache_creation,
+            context_usage=ContextUsage(window_size=await self._get_context_window(), used_tokens=final_used_tokens),
+            web_search_requests=web_search_requests,
         )
 
         agent_response = AgentResponse(
@@ -227,6 +291,9 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         # Save to history only after a successful response. Use the unmarked form so the
         # cache_control breakpoint is only ever on the latest user message — this keeps the
         # request below the 4-marker limit regardless of conversation length.
-        self._history.extend([user_msg_for_history, {"role": "assistant", "content": response.content}])
+        # Paused turns are inserted before the final turn so multi-turn citations remain valid.
+        self._history.append(user_msg_for_history)
+        self._history.extend(paused_turns)
+        self._history.append({"role": "assistant", "content": response.content})
 
         return agent_response

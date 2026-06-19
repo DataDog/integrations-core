@@ -9,7 +9,7 @@ from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
-from ddev.ai.tools.registry import ToolRegistry, filter_read_only
+from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry, filter_read_only
 
 # ---------------------------------------------------------------------------
 # Fake tools — implement ToolProtocol without depending on BaseTool
@@ -155,7 +155,10 @@ def test_available_tool_names_returns_fresh_copy():
 
 
 OWNER_ID = "test-agent"
-TOOLS_WITHOUT_EXTRA_DEPS = [n for n in ToolRegistry.available_tool_names() if n != "spawn_subagent"]
+# Exclude spawn_subagent (needs process_factory wiring) and native tools (no ToolProtocol instance).
+TOOLS_WITHOUT_EXTRA_DEPS = [
+    n for n in ToolRegistry.available_tool_names() if n not in ("spawn_subagent", *NATIVE_TOOL_NAMES)
+]
 
 PROCESS_FACTORY = object()  # opaque sentinel — from_names only stores it on the spawn tool
 
@@ -237,6 +240,55 @@ def test_filter_read_only(input_names, expected):
 def test_filter_read_only_unknown_name_raises():
     with pytest.raises(ValueError, match="Unknown tool name"):
         filter_read_only(["read_file", "teleport"])
+
+
+# ---------------------------------------------------------------------------
+# Native (server) tool support
+# ---------------------------------------------------------------------------
+
+
+def test_available_tool_names_includes_web_search():
+    assert "web_search" in ToolRegistry.available_tool_names()
+
+
+def test_from_names_native_only(tmp_path):
+    registry = from_names(["web_search"], tmp_path)
+    assert registry.definitions == []
+    assert registry.native_tool_names == ["web_search"]
+
+
+def test_from_names_client_and_native(tmp_path):
+    registry = from_names(["read_file", "web_search"], tmp_path)
+    assert len(registry.definitions) == 1
+    assert registry.definitions[0]["name"] == "read_file"
+    assert registry.native_tool_names == ["web_search"]
+
+
+def test_from_names_native_not_in_tools_dict(tmp_path):
+    registry = from_names(["web_search"], tmp_path)
+    assert "web_search" not in registry._tools
+
+
+def test_from_names_bogus_raises(tmp_path):
+    with pytest.raises(ValueError, match="Unknown tool name: 'bogus'"):
+        from_names(["bogus"], tmp_path)
+
+
+def test_native_tool_names_property_returns_copy(tmp_path):
+    registry = from_names(["web_search"], tmp_path)
+    snapshot = registry.native_tool_names
+    snapshot.clear()
+    assert registry.native_tool_names == ["web_search"]
+
+
+def test_filter_read_only_includes_native_read_only():
+    result = filter_read_only(["read_file", "web_search", "create_file"])
+    assert result == ["read_file", "web_search"]
+
+
+def test_filter_read_only_unknown_still_raises():
+    with pytest.raises(ValueError, match="Unknown tool name"):
+        filter_read_only(["web_search", "bogus"])
 
 
 def test_from_names_reuses_supplied_file_registry(tmp_path):
