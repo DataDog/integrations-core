@@ -61,3 +61,41 @@ def test():
                 }
         """
     )
+
+
+def test_with_scalar_candidate():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            ad_identifiers:
+            - test
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+                histogram_buckets_as_distributions: true
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: openmetrics_endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    model_definitions = consumer.render()
+    files = model_definitions['test.yaml']
+
+    discovery_contents, discovery_errors = files['discovery.py']
+    assert not discovery_errors
+    assert "'histogram_buckets_as_distributions': True," in discovery_contents
