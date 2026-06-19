@@ -8,8 +8,9 @@ import hashlib
 import json
 import random
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import TypedDict
+from typing import Any, NotRequired, TypedDict
 from urllib.parse import quote
 
 from confluent_kafka import IsolationLevel, TopicPartition
@@ -26,6 +27,17 @@ class SchemaDefinition(TypedDict):
 class SubjectVersionInfo(TypedDict):
     version: int
     schema_id: int
+    compatibility: NotRequired[str | None]
+
+
+class SchemaInfo(TypedDict):
+    schema_content: str
+    topic_name: str
+    schema_for: str
+    schema_version: int | None
+    schema_id: int | None
+    schema_type: str
+    compatibility: str | None
 
 
 class ClusterMetadataCollector:
@@ -48,12 +60,14 @@ class ClusterMetadataCollector:
         self.TOPIC_CONFIG_BATCH_SIZE = 100  # Max topics to describe_configs per check run
 
         self.SCHEMA_VERSION_CHECK_BATCH_SIZE = 200  # Lightweight calls, can do more per run
+        self.SCHEMA_COMPATIBILITY_BATCH_SIZE = 200  # Lightweight calls, refreshed on configs cadence
         self.SCHEMA_FETCH_CONCURRENCY = 10  # Parallel HTTP requests
 
         # Cache size limits
         self.BROKER_CONFIG_CACHE_MAX_SIZE = 1_000
         self.TOPIC_CONFIG_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE = 20_000
+        self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
@@ -63,8 +77,10 @@ class ClusterMetadataCollector:
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
         self.SCHEMA_VERSION_CHECK_CACHE_KEY = 'kafka_schema_version_check_cache'
+        self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY = 'kafka_schema_compatibility_fetch_cache'
         self.SCHEMA_LATEST_VERSION_CACHE_KEY = 'kafka_schema_latest_version_cache'
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
+        self.GLOBAL_COMPATIBILITY_CACHE_KEY = 'kafka_schema_global_compatibility_cache'
 
         self._schema_registry_oauth_token = None
         self._schema_registry_oauth_token_expiry = 0
@@ -156,26 +172,51 @@ class ClusterMetadataCollector:
 
         return access_token, expires_at
 
-    def _get_schema_registry_subjects(self):
-        base_url = self.config._collect_schema_registry
-        response = self.http.get(f"{base_url}/subjects")
+    def _schema_registry_get(self, path: str, **kwargs: Any) -> Any:
+        """GET a Schema Registry path and return the parsed JSON body."""
+        url = f"{self.config._collect_schema_registry}{path}"
+        response = self.http.get(url, **kwargs)
         response.raise_for_status()
         return response.json()
+
+    def _get_schema_registry_subjects(self):
+        return self._schema_registry_get('/subjects')
 
     def _get_schema_registry_versions(self, subject: str) -> list[int]:
         """Fetch the list of version numbers for a subject (lightweight call)."""
-        base_url = self.config._collect_schema_registry
         encoded_subject = quote(subject, safe='')
-        response = self.http.get(f"{base_url}/subjects/{encoded_subject}/versions")
-        response.raise_for_status()
-        return response.json()
+        return self._schema_registry_get(f'/subjects/{encoded_subject}/versions')
 
     def _get_schema_registry_latest_version(self, subject):
-        base_url = self.config._collect_schema_registry
         encoded_subject = quote(subject, safe='')
-        response = self.http.get(f"{base_url}/subjects/{encoded_subject}/versions/latest")
-        response.raise_for_status()
-        return response.json()
+        return self._schema_registry_get(f'/subjects/{encoded_subject}/versions/latest')
+
+    def _get_schema_registry_global_compatibility(self) -> str | None:
+        """Return the global compatibility level from the Schema Registry."""
+        return self._schema_registry_get('/config').get('compatibilityLevel')
+
+    def _get_schema_registry_subject_compatibility(self, subject: str) -> str | None:
+        """Return the effective compatibility for a subject, falling back to global."""
+        encoded_subject = quote(subject, safe='')
+        return self._schema_registry_get(
+            f'/config/{encoded_subject}',
+            params={'defaultToGlobal': 'true'},
+        ).get('compatibilityLevel')
+
+    def _parallel_fetch(self, fn: Callable[[str], Any], subjects: list[str], error_label: str) -> dict[str, Any]:
+        """Run fn(subject) for each subject concurrently; drop and log individual failures."""
+        results: dict[str, Any] = {}
+        if not subjects:
+            return results
+        with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
+            future_to_subject = {executor.submit(fn, subject): subject for subject in subjects}
+            for future in as_completed(future_to_subject):
+                subject = future_to_subject[future]
+                try:
+                    results[subject] = future.result()
+                except Exception as e:
+                    self.log.warning("Error fetching %s for %s: %s", error_label, subject, e)
+        return results
 
     def collect_all_metadata(self, highwater_offsets):
         try:
@@ -411,7 +452,7 @@ class ClusterMetadataCollector:
                 if not broker_meta:
                     continue
 
-                tags = self._get_tags(cluster_id) + [
+                metric_tags = self._get_tags(cluster_id) + [
                     f'broker_id:{broker_id_str}',
                     f'broker_host:{broker_meta.host}',
                     f'broker_port:{broker_meta.port}',
@@ -443,7 +484,7 @@ class ClusterMetadataCollector:
                         try:
                             value = float(config_data[config_name]) if config_data[config_name] else 0
                             metric_name = f"broker.config.{config_name.replace('.', '_')}"
-                            self.check.gauge(metric_name, value, tags=tags)
+                            self.check.gauge(metric_name, value, tags=metric_tags)
                         except (ValueError, TypeError):
                             self.log.debug(
                                 "Could not convert broker %s config %s value %r to float",
@@ -457,7 +498,6 @@ class ClusterMetadataCollector:
 
                 fetched_broker_configs[broker_id_str] = {
                     'event_text': event_text,
-                    'tags': tags,
                     'broker_host': broker_meta.host,
                     'broker_port': broker_meta.port,
                 }
@@ -475,19 +515,6 @@ class ClusterMetadataCollector:
 
         for broker_id in brokers_to_emit:
             info = fetched_broker_configs[broker_id]
-            self.check.event(
-                {
-                    'timestamp': int(time.time()),
-                    'event_type': 'config_change',
-                    'source_type_name': 'kafka',
-                    'msg_title': f'Broker {broker_id} Configuration',
-                    'msg_text': info['event_text'],
-                    'tags': info['tags'] + ['event_type:broker_config'],
-                    'aggregation_key': f'kafka_broker_config_{broker_id}',
-                    'alert_type': 'info',
-                }
-            )
-
             self.check.event_platform_event(
                 json.dumps(
                     {
@@ -758,7 +785,6 @@ class ClusterMetadataCollector:
 
                 fetched_topic_configs[topic_name] = {
                     'event_text': event_text,
-                    'tags': topic_tags,
                 }
 
         self._mark_items_fetched(
@@ -774,19 +800,6 @@ class ClusterMetadataCollector:
 
         for topic_name in topics_to_emit:
             info = fetched_topic_configs[topic_name]
-            self.check.event(
-                {
-                    'timestamp': int(time.time()),
-                    'event_type': 'info',
-                    'source_type_name': 'kafka',
-                    'msg_title': f'Topic: {topic_name} (custom config)',
-                    'msg_text': info['event_text'],
-                    'tags': info['tags'] + ['event_type:topic_config'],
-                    'aggregation_key': f'kafka_topic_config_{topic_name}',
-                    'alert_type': 'info',
-                }
-            )
-
             self.check.event_platform_event(
                 json.dumps(
                     {
@@ -916,6 +929,21 @@ class ClusterMetadataCollector:
         except Exception as e:
             self.log.debug("Could not write schema latest version cache: %s", e)
 
+    def _load_global_compatibility_cache(self) -> str | None:
+        """Return the last successfully fetched global compatibility level."""
+        try:
+            return self.check.read_persistent_cache(self.GLOBAL_COMPATIBILITY_CACHE_KEY) or None
+        except Exception as e:
+            self.log.debug("Could not read global compatibility cache: %s", e)
+            return None
+
+    def _save_global_compatibility_cache(self, value: str) -> None:
+        """Persist the last known global compatibility level."""
+        try:
+            self.check.write_persistent_cache(self.GLOBAL_COMPATIBILITY_CACHE_KEY, value)
+        except Exception as e:
+            self.log.debug("Could not write global compatibility cache: %s", e)
+
     def _collect_schema_registry_info(self, metadata):
         if not self.config._collect_schema_registry:
             return
@@ -942,6 +970,18 @@ class ClusterMetadataCollector:
 
         self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
 
+        try:
+            global_compatibility = self._get_schema_registry_global_compatibility()
+            if global_compatibility is not None:
+                self._save_global_compatibility_cache(global_compatibility)
+            else:
+                # A transient empty /config response shouldn't drop global_compatibility from
+                # this cycle's payloads — fall back to the last known value, same as the error path.
+                global_compatibility = self._load_global_compatibility_cache()
+        except Exception as e:
+            self.log.warning("Failed to fetch global compatibility from Schema Registry: %s", e)
+            global_compatibility = self._load_global_compatibility_cache()
+
         # --- Tier 1: Lightweight version checks ---
         # GET /subjects/{subject}/versions returns just [1, 2, 3] — very cheap.
         # We use this to detect if a subject has a new version without fetching schema content.
@@ -955,19 +995,7 @@ class ClusterMetadataCollector:
         latest_version_cache = self._load_latest_version_cache()
 
         # Fetch version lists in parallel (lightweight calls)
-        version_responses = {}
-        if subjects_to_check:
-            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
-                future_to_subject = {
-                    executor.submit(self._get_schema_registry_versions, subject): subject
-                    for subject in subjects_to_check
-                }
-                for future in as_completed(future_to_subject):
-                    subject = future_to_subject[future]
-                    try:
-                        version_responses[subject] = future.result()
-                    except Exception as e:
-                        self.log.warning("Error getting version list for %s: %s", subject, e)
+        version_responses = self._parallel_fetch(self._get_schema_registry_versions, subjects_to_check, "version list")
 
         # Mark all checked subjects as fetched (even if they errored)
         self._mark_items_fetched(
@@ -1001,19 +1029,23 @@ class ClusterMetadataCollector:
         schema_id_cache_updated = False
 
         # Fetch latest versions in parallel for subjects that changed
-        schema_responses = {}
-        if subjects_needing_full_fetch:
-            with ThreadPoolExecutor(max_workers=self.SCHEMA_FETCH_CONCURRENCY) as executor:
-                future_to_subject = {
-                    executor.submit(self._get_schema_registry_latest_version, subject): subject
-                    for subject in subjects_needing_full_fetch
-                }
-                for future in as_completed(future_to_subject):
-                    subject = future_to_subject[future]
-                    try:
-                        schema_responses[subject] = future.result()
-                    except Exception as e:
-                        self.log.warning("Error getting schema details for %s: %s", subject, e)
+        schema_responses = self._parallel_fetch(
+            self._get_schema_registry_latest_version, subjects_needing_full_fetch, "schema details"
+        )
+
+        compatibility_responses = self._collect_subject_compatibilities(subjects, subjects_needing_full_fetch)
+
+        # Apply standalone compatibility updates to existing cache entries so a flip alone (without a
+        # version bump) flows into the next schema emission via the cache_content key. This must run
+        # before the schema_responses loop below replaces latest_version_cache[subject] for
+        # version-bumped subjects; the `subject in schema_responses` guard keeps the two write sites
+        # mutually exclusive per subject.
+        for subject, compatibility in compatibility_responses.items():
+            if compatibility is None or subject in schema_responses:
+                continue
+            entry = latest_version_cache.get(subject)
+            if isinstance(entry, dict):
+                entry['compatibility'] = compatibility
 
         fetched_schemas = {}
 
@@ -1026,8 +1058,19 @@ class ClusterMetadataCollector:
                 self.log.warning("Schema Registry returned incomplete data for %s: %s", subject, latest_schema)
                 continue
 
-            # Update the latest version cache with version and schema_id
-            latest_version_cache[subject] = {'version': schema_version, 'schema_id': schema_id}
+            # A None here means either the fetch failed or the response carried no
+            # compatibilityLevel. With defaultToGlobal=true the registry returns the effective
+            # level for any existing subject, so in practice None signals a fetch failure — fall
+            # back to the cached value rather than overwriting it with None.
+            compatibility = compatibility_responses.get(subject)
+            if compatibility is None:
+                compatibility = (latest_version_cache.get(subject) or {}).get('compatibility')
+
+            latest_version_cache[subject] = {
+                'version': schema_version,
+                'schema_id': schema_id,
+                'compatibility': compatibility,
+            }
 
             # Use permanent schema ID cache to avoid processing unchanged schemas.
             schema_id_str = str(schema_id)
@@ -1043,29 +1086,13 @@ class ClusterMetadataCollector:
                 }
                 schema_id_cache_updated = True
 
-            topic_name, schema_for = self._parse_subject(subject)
-
-            subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
-            event_tags = subject_tags + [
-                f'schema_id:{schema_id}',
-                f'schema_version:{schema_version}',
-                f'schema_type:{schema_type}',
-                f'topic:{topic_name}',
-                f'schema_for:{schema_for}',
-                'event_type:schema_registry',
-            ]
-
-            cache_content = f"{schema_id}:{schema_version}:{schema_content}"
+            cache_content = f"{schema_id}:{schema_version}:{compatibility}:{global_compatibility}:{schema_content}"
 
             fetched_schemas[subject] = {
                 'cache_content': cache_content,
-                'schema_content': schema_content,
-                'topic_name': topic_name,
-                'schema_for': schema_for,
-                'schema_version': schema_version,
-                'schema_id': schema_id,
-                'schema_type': schema_type,
-                'event_tags': event_tags,
+                **self._build_schema_info(
+                    subject, schema_content, schema_type, schema_version, schema_id, compatibility
+                ),
             }
 
         # Persist caches
@@ -1075,6 +1102,9 @@ class ClusterMetadataCollector:
 
         # Build lightweight cache_content strings for all known subjects (from cache, no extra HTTP calls).
         # This allows re-emission of unchanged schemas when the event cache TTL expires.
+        # Note: changing the cache_content format (e.g. adding the compatibility fields) makes every
+        # cached subject hash differently on the first run after an upgrade, so all known schemas
+        # re-emit once. This is self-healing and bounded to a single collection cycle.
         all_schema_cache_contents = {subject: info['cache_content'] for subject, info in fetched_schemas.items()}
         for subject in subjects:
             if subject in all_schema_cache_contents:
@@ -1094,77 +1124,130 @@ class ClusterMetadataCollector:
             if not id_entry:
                 continue
 
-            all_schema_cache_contents[subject] = f"{schema_id}:{version}:{id_entry['schema']}"
+            cached_compat = cached_info.get('compatibility')
+            all_schema_cache_contents[subject] = (
+                f"{schema_id}:{version}:{cached_compat}:{global_compatibility}:{id_entry['schema']}"
+            )
 
         # Determine which subjects need event emission (changed or TTL expired)
         schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
 
-        # Build full payloads only for subjects that need emission
-        for subject in schemas_to_emit:
+        self._emit_schema_registry_events(
+            schemas_to_emit,
+            fetched_schemas,
+            latest_version_cache,
+            schema_id_cache,
+            cluster_id,
+            global_compatibility,
+        )
+
+    def _collect_subject_compatibilities(
+        self,
+        subjects: list[str],
+        subjects_needing_full_fetch: list[str],
+    ) -> dict[str, str | None]:
+        """Fetch per-subject compatibility on a cadence and return the raw results.
+
+        Compatibility is refreshed on its own cadence so a flip without a version bump is still picked
+        up; a per-subject flip therefore surfaces only on the next compat-fetch cadence (up to
+        CONFIGS_REFRESH_INTERVAL + jitter later), while a global flip re-emits immediately via
+        global_compatibility.
+
+        The SCHEMA_COMPATIBILITY_BATCH_SIZE clamp bounds only the cadence-driven `compat_due` list;
+        version-bumped subjects are always fetched on top of that budget, so the effective ceiling on
+        /config/{subject} calls is SCHEMA_VERSION_CHECK_BATCH_SIZE (which bounds
+        subjects_needing_full_fetch), not SCHEMA_COMPATIBILITY_BATCH_SIZE. They are equal today, so
+        there is no over-fetch.
+        """
+        compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
+        remaining_slots = max(0, self.SCHEMA_COMPATIBILITY_BATCH_SIZE - len(subjects_needing_full_fetch))
+        compat_due = compat_due[:remaining_slots]
+        compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
+
+        compatibility_responses: dict[str, str | None] = self._parallel_fetch(
+            self._get_schema_registry_subject_compatibility, compat_subjects_to_fetch, "compatibility"
+        )
+        if compat_subjects_to_fetch:
+            # Mark all attempted subjects as fetched (even if they errored), mirroring the version
+            # tier: a subject that fails this run isn't retried until the next configs cadence rather
+            # than hammered every check, at the cost of holding stale compatibility until then.
+            self._mark_items_fetched(
+                self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
+                compat_subjects_to_fetch,
+                ttl_base=self.CONFIGS_REFRESH_INTERVAL,
+                ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+                max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
+            )
+
+        return compatibility_responses
+
+    def _build_schema_info(
+        self,
+        subject: str,
+        schema_content: str,
+        schema_type: str,
+        schema_version: int | None,
+        schema_id: int | None,
+        compatibility: str | None,
+    ) -> SchemaInfo:
+        """Assemble the canonical schema info dict used to build a data-streams schema payload."""
+        topic_name, schema_for = self._parse_subject(subject)
+        return {
+            'schema_content': schema_content,
+            'topic_name': topic_name,
+            'schema_for': schema_for,
+            'schema_version': schema_version,
+            'schema_id': schema_id,
+            'schema_type': schema_type,
+            'compatibility': compatibility,
+        }
+
+    def _emit_schema_registry_events(
+        self,
+        subjects_to_emit: list[str],
+        fetched_schemas: dict[str, dict],
+        latest_version_cache: dict[str, SubjectVersionInfo],
+        schema_id_cache: dict[str, SchemaDefinition],
+        cluster_id: str,
+        global_compatibility: str | None,
+    ):
+        """Emit a data-streams-message payload for each subject that changed or whose event TTL expired."""
+        for subject in subjects_to_emit:
             if subject in fetched_schemas:
                 info = fetched_schemas[subject]
             else:
-                # Reconstruct from caches
                 cached_info = latest_version_cache.get(subject, {})
-                version = cached_info.get('version')
                 schema_id = cached_info.get('schema_id')
                 id_entry = schema_id_cache.get(str(schema_id), {})
-                schema_content = id_entry.get('schema', '')
-                schema_type = id_entry.get('schema_type', 'AVRO')
+                info = self._build_schema_info(
+                    subject,
+                    id_entry.get('schema', ''),
+                    id_entry.get('schema_type', 'AVRO'),
+                    cached_info.get('version'),
+                    schema_id,
+                    cached_info.get('compatibility'),
+                )
 
-                topic_name, schema_for = self._parse_subject(subject)
+            ds_payload = {
+                'collection_timestamp': int(time.time() * 1000),
+                'kafka_cluster_id': cluster_id,
+                **self._original_cluster_id_field(),
+                'subject': subject,
+                'topic': info['topic_name'],
+                'schema_for': info['schema_for'],
+                'schema_id': info['schema_id'],
+                'schema_version': info['schema_version'],
+                'schema_type': info['schema_type'],
+                'config_type': 'schema',
+                'schema': info['schema_content'],
+            }
+            subject_compat = info.get('compatibility')
+            if subject_compat is not None:
+                ds_payload['compatibility'] = subject_compat
+            if global_compatibility is not None:
+                ds_payload['global_compatibility'] = global_compatibility
 
-                subject_tags = self._get_tags(cluster_id) + [f'subject:{subject}']
-                event_tags = subject_tags + [
-                    f'schema_id:{schema_id}',
-                    f'schema_version:{version}',
-                    f'schema_type:{schema_type}',
-                    f'topic:{topic_name}',
-                    f'schema_for:{schema_for}',
-                    'event_type:schema_registry',
-                ]
-
-                info = {
-                    'schema_content': schema_content,
-                    'topic_name': topic_name,
-                    'schema_for': schema_for,
-                    'schema_version': version,
-                    'schema_id': schema_id,
-                    'schema_type': schema_type,
-                    'event_tags': event_tags,
-                }
-
-            self.check.event(
-                {
-                    'timestamp': int(time.time()),
-                    'event_type': 'info',
-                    'source_type_name': 'kafka',
-                    'msg_title': f'{info["topic_name"]} ({info["schema_for"]}) - Schema v{info["schema_version"]}',
-                    'msg_text': info['schema_content'],
-                    'tags': info['event_tags'],
-                    'aggregation_key': f'kafka_schema_{subject}_{info["schema_version"]}',
-                    'alert_type': 'info',
-                }
-            )
-
-            self.check.event_platform_event(
-                json.dumps(
-                    {
-                        'collection_timestamp': int(time.time() * 1000),
-                        'kafka_cluster_id': cluster_id,
-                        **self._original_cluster_id_field(),
-                        'subject': subject,
-                        'topic': info['topic_name'],
-                        'schema_for': info['schema_for'],
-                        'schema_id': info['schema_id'],
-                        'schema_version': info['schema_version'],
-                        'schema_type': info['schema_type'],
-                        'config_type': 'schema',
-                        'schema': info['schema_content'],
-                    }
-                ),
-                "data-streams-message",
-            )
+            self.check.event_platform_event(json.dumps(ds_payload), "data-streams-message")
 
     @staticmethod
     def _parse_subject(subject: str) -> tuple[str, str]:

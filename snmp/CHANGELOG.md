@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 12.4.0 / 2026-05-14
+## 13.0.0 / 2026-06-09
+
+***Changed***:
+
+* Breaking change: Fixed metric type for `snmp.cppmSystemMemoryFree`, `snmp.cppmSystemMemoryTotal`, `snmp.cppmSystemDiskSpaceFree`, and `snmp.cppmSystemDiskSpaceTotal` in the aruba-clearpass profile. These were previously submitted as rates due to their underlying `Counter64` SNMP type, producing incorrect values. They are now submitted as gauges. Customers with existing dashboards or monitors on these metrics will see a discontinuity between historical rate datapoints and new gauge datapoints; please rebuild any affected widgets or monitors. ([#23791](https://github.com/DataDog/integrations-core/pull/23791))
+
+## 12.4.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 

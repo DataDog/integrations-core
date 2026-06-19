@@ -1,3 +1,57 @@
+## Datadog Agent version [7.80.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7802)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.80.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7801)
+
+### Integration Updates
+* SQL Server [23.1.1](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
+## Datadog Agent version [7.80.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7800)
+
+### New Integrations
+* Apache NiFi [1.0.0](https://github.com/DataDog/integrations-core/blob/master/nifi/CHANGELOG.md)
+### Integration Updates
+* Active Directory [4.7.0](https://github.com/DataDog/integrations-core/blob/master/active_directory/CHANGELOG.md)
+* Apache [7.5.0](https://github.com/DataDog/integrations-core/blob/master/apache/CHANGELOG.md)
+* ASP.NET [4.7.0](https://github.com/DataDog/integrations-core/blob/master/aspdotnet/CHANGELOG.md)
+* Datadog Checks Base [37.38.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Cisco ACI [5.0.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md) **BREAKING CHANGE**
+* ClickHouse [6.7.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* Consul [5.5.0](https://github.com/DataDog/integrations-core/blob/master/consul/CHANGELOG.md)
+* .NET CLR [4.7.0](https://github.com/DataDog/integrations-core/blob/master/dotnetclr/CHANGELOG.md)
+* Exchange Server [4.7.0](https://github.com/DataDog/integrations-core/blob/master/exchange_server/CHANGELOG.md)
+* Fluentd [5.6.0](https://github.com/DataDog/integrations-core/blob/master/fluentd/CHANGELOG.md)
+* GuardDog [1.2.1](https://github.com/DataDog/integrations-core/blob/master/guarddog/CHANGELOG.md)
+* Harbor [6.4.1](https://github.com/DataDog/integrations-core/blob/master/harbor/CHANGELOG.md)
+* HyperV [3.4.0](https://github.com/DataDog/integrations-core/blob/master/hyperv/CHANGELOG.md)
+* IIS [5.7.0](https://github.com/DataDog/integrations-core/blob/master/iis/CHANGELOG.md)
+* Istio [9.5.2](https://github.com/DataDog/integrations-core/blob/master/istio/CHANGELOG.md)
+* Kafka Actions [2.7.0](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [7.3.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* Kafka [4.6.0](https://github.com/DataDog/integrations-core/blob/master/kafka/CHANGELOG.md)
+* Mac Audit Logs [1.4.2](https://github.com/DataDog/integrations-core/blob/master/mac_audit_logs/CHANGELOG.md)
+* MongoDB [10.10.1](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.17.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Nutanix [1.3.0](https://github.com/DataDog/integrations-core/blob/master/nutanix/CHANGELOG.md)
+* Postgres [23.8.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Proxmox [2.5.2](https://github.com/DataDog/integrations-core/blob/master/proxmox/CHANGELOG.md)
+* SNMP [12.4.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md)
+* SQL Server [23.1.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Temporal [4.6.0](https://github.com/DataDog/integrations-core/blob/master/temporal/CHANGELOG.md)
+* Traefik Mesh [3.5.1](https://github.com/DataDog/integrations-core/blob/master/traefik_mesh/CHANGELOG.md)
+* Windows performance counters [3.5.0](https://github.com/DataDog/integrations-core/blob/master/windows_performance_counters/CHANGELOG.md)
+
+## Datadog Agent version [7.79.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7792)
+
+### Integration Updates
+* SQL Server [23.0.2](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+
+## Datadog Agent version [7.79.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7791)
+
+### Integration Updates
+* n8n [2.0.0](https://github.com/DataDog/integrations-core/blob/master/n8n/CHANGELOG.md) **BREAKING CHANGE**
+
 ## Datadog Agent version [7.79.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7790)
 
 ### Integration Updates
@@ -128,16 +182,18 @@
 
 ## Datadog Agent version [7.78.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7781)
 
-* There were no integration updates for this version of the Agent.
+### New Integrations
+* Control-M [1.1.0](https://github.com/DataDog/integrations-core/blob/master/control_m/CHANGELOG.md)
+* KrakenD [1.4.0](https://github.com/DataDog/integrations-core/blob/master/krakend/CHANGELOG.md)
+* Lustre [1.5.0](https://github.com/DataDog/integrations-core/blob/master/lustre/CHANGELOG.md)
+* n8n [1.1.0](https://github.com/DataDog/integrations-core/blob/master/n8n/CHANGELOG.md)
+* Prefect [1.0.0](https://github.com/DataDog/integrations-core/blob/master/prefect/CHANGELOG.md)
 
 ## Datadog Agent version [7.78.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7780)
 
 ### New Integrations
 * BeyondTrust Privileged Remote Access [1.0.0](https://github.com/DataDog/integrations-core/blob/master/beyondtrust_privileged_remote_access/CHANGELOG.md)
-* Control-M [1.1.0](https://github.com/DataDog/integrations-core/blob/master/control_m/CHANGELOG.md)
 * DO Query Actions [1.0.0](https://github.com/DataDog/integrations-core/blob/master/do_query_actions/CHANGELOG.md)
-* n8n [1.1.0](https://github.com/DataDog/integrations-core/blob/master/n8n/CHANGELOG.md)
-* Prefect [1.0.0](https://github.com/DataDog/integrations-core/blob/master/prefect/CHANGELOG.md)
 ### Integration Updates
 * ActiveMQ XML [5.5.0](https://github.com/DataDog/integrations-core/blob/master/activemq_xml/CHANGELOG.md)
 * ActiveMQ [5.3.0](https://github.com/DataDog/integrations-core/blob/master/activemq/CHANGELOG.md)
@@ -229,7 +285,6 @@
 * Karpenter [3.4.0](https://github.com/DataDog/integrations-core/blob/master/karpenter/CHANGELOG.md)
 * Keda [2.4.0](https://github.com/DataDog/integrations-core/blob/master/keda/CHANGELOG.md)
 * Kong [6.4.0](https://github.com/DataDog/integrations-core/blob/master/kong/CHANGELOG.md)
-* KrakenD [1.4.0](https://github.com/DataDog/integrations-core/blob/master/krakend/CHANGELOG.md)
 * Kubernetes API server metrics [7.5.0](https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/CHANGELOG.md)
 * Kubernetes Controller Manager [8.4.0](https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/CHANGELOG.md)
 * Kube DNS [7.4.0](https://github.com/DataDog/integrations-core/blob/master/kube_dns/CHANGELOG.md)
@@ -249,7 +304,6 @@
 * Lighttpd [5.5.0](https://github.com/DataDog/integrations-core/blob/master/lighttpd/CHANGELOG.md)
 * Linkerd [7.4.0](https://github.com/DataDog/integrations-core/blob/master/linkerd/CHANGELOG.md)
 * LiteLLM [2.4.0](https://github.com/DataDog/integrations-core/blob/master/litellm/CHANGELOG.md)
-* Lustre [1.5.0](https://github.com/DataDog/integrations-core/blob/master/lustre/CHANGELOG.md)
 * Mac Audit Logs [1.4.0](https://github.com/DataDog/integrations-core/blob/master/mac_audit_logs/CHANGELOG.md)
 * MapR [3.4.0](https://github.com/DataDog/integrations-core/blob/master/mapr/CHANGELOG.md)
 * MapReduce [7.4.0](https://github.com/DataDog/integrations-core/blob/master/mapreduce/CHANGELOG.md)
@@ -438,7 +492,6 @@
 * Karpenter [3.3.0](https://github.com/DataDog/integrations-core/blob/master/karpenter/CHANGELOG.md)
 * Keda [2.3.0](https://github.com/DataDog/integrations-core/blob/master/keda/CHANGELOG.md)
 * Kong [6.3.0](https://github.com/DataDog/integrations-core/blob/master/kong/CHANGELOG.md)
-* KrakenD [1.3.0](https://github.com/DataDog/integrations-core/blob/master/krakend/CHANGELOG.md)
 * Kubernetes API server metrics [7.4.0](https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/CHANGELOG.md)
 * Kubernetes Controller Manager [8.3.0](https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/CHANGELOG.md)
 * Kube DNS [7.3.0](https://github.com/DataDog/integrations-core/blob/master/kube_dns/CHANGELOG.md)
@@ -459,7 +512,6 @@
 * Linkerd [7.3.0](https://github.com/DataDog/integrations-core/blob/master/linkerd/CHANGELOG.md)
 * Linux proc extras [4.3.0](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/CHANGELOG.md)
 * LiteLLM [2.3.0](https://github.com/DataDog/integrations-core/blob/master/litellm/CHANGELOG.md)
-* Lustre [1.4.0](https://github.com/DataDog/integrations-core/blob/master/lustre/CHANGELOG.md)
 * Mac Audit Logs [1.3.0](https://github.com/DataDog/integrations-core/blob/master/mac_audit_logs/CHANGELOG.md)
 * MapR [3.3.0](https://github.com/DataDog/integrations-core/blob/master/mapr/CHANGELOG.md)
 * MapReduce [7.3.0](https://github.com/DataDog/integrations-core/blob/master/mapreduce/CHANGELOG.md)
@@ -736,7 +788,6 @@
 * Keda [2.2.0](https://github.com/DataDog/integrations-core/blob/master/keda/CHANGELOG.md)
 * Keycloak [1.2.0](https://github.com/DataDog/integrations-core/blob/master/keycloak/CHANGELOG.md)
 * Kong [6.2.0](https://github.com/DataDog/integrations-core/blob/master/kong/CHANGELOG.md)
-* KrakenD [1.2.0](https://github.com/DataDog/integrations-core/blob/master/krakend/CHANGELOG.md)
 * Kubernetes API server metrics [7.3.0](https://github.com/DataDog/integrations-core/blob/master/kube_apiserver_metrics/CHANGELOG.md)
 * Kubernetes Controller Manager [8.2.0](https://github.com/DataDog/integrations-core/blob/master/kube_controller_manager/CHANGELOG.md)
 * Kube DNS [7.2.0](https://github.com/DataDog/integrations-core/blob/master/kube_dns/CHANGELOG.md)
@@ -758,7 +809,6 @@
 * Linux Audit Logs [1.2.0](https://github.com/DataDog/integrations-core/blob/master/linux_audit_logs/CHANGELOG.md)
 * Linux proc extras [4.2.0](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/CHANGELOG.md)
 * LiteLLM [2.2.0](https://github.com/DataDog/integrations-core/blob/master/litellm/CHANGELOG.md)
-* Lustre [1.3.0](https://github.com/DataDog/integrations-core/blob/master/lustre/CHANGELOG.md)
 * Mac Audit Logs [1.2.0](https://github.com/DataDog/integrations-core/blob/master/mac_audit_logs/CHANGELOG.md)
 * MapR [3.2.0](https://github.com/DataDog/integrations-core/blob/master/mapr/CHANGELOG.md)
 * MapReduce [7.2.0](https://github.com/DataDog/integrations-core/blob/master/mapreduce/CHANGELOG.md)
