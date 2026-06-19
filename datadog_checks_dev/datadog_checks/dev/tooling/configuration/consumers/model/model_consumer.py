@@ -287,4 +287,4 @@ class ModelConsumer:
                 )
 
         lines.append('')
-        return self.code_formatter.apply_black('\n'.join(lines))
+        return format_with_ruff('\n'.join(lines))
