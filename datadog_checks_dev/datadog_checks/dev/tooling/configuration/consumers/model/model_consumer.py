@@ -264,6 +264,8 @@ class ModelConsumer:
         ]
 
         for strategy_index, strategy in enumerate(discovery['strategies']):
+            if strategy['strategy'] != 'from_ports':
+                raise NotImplementedError(strategy['strategy'])
             lines.append(f'    # discovery[{strategy_index}]: from_ports')
             lines.append(f'    for ctx in from_ports(service, port_hints={strategy["port_hints"]!r}):')
 
