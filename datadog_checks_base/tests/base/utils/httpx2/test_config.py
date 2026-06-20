@@ -274,7 +274,7 @@ def test_remapper_invert_flips_value(capturing_transport):
     assert http.options['verify'] is False
 
 
-def test_remapper_invert_with_explicit_default(capturing_transport):
+def test_remapper_invert_with_explicit_default(capturing_transport, clean_ca_env):
     # Remapped field absent from instance, explicit default takes effect, then invert flips it.
     remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
     http = HTTPX2Wrapper({}, {}, remapper=remapper, transport=capturing_transport)
@@ -282,7 +282,7 @@ def test_remapper_invert_with_explicit_default(capturing_transport):
     assert http.options['verify'] is True
 
 
-def test_remapper_instance_wins_over_remapped_field(capturing_transport):
+def test_remapper_instance_wins_over_remapped_field(capturing_transport, clean_ca_env):
     # If the standard field is present in instance, the remapped alternative is ignored.
     remapper = {'ssl_validation': {'name': 'tls_verify'}}
     http = HTTPX2Wrapper(
