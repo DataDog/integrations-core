@@ -102,8 +102,8 @@ def test_init_config_proxy_overrides_agent(clean_proxy_env):
 
 def test_use_agent_proxy_false_skips_agent_config():
     with mock.patch(AGENT_GET_CONFIG, return_value={'http': 'http://a:3'}):
-        http = HTTPX2Wrapper({}, {'use_agent_proxy': False})
-    assert http.options['proxies'] is None
+        with HTTPX2Wrapper({}, {'use_agent_proxy': False}) as http:
+            assert http.options['proxies'] is None
 
 
 def test_no_proxy_string_is_split_off_proxies(clean_proxy_env):
@@ -129,13 +129,13 @@ def test_no_proxy_list_is_passed_through_unchanged(clean_proxy_env):
 
 
 def test_skip_proxy_instance_yields_disabled_sentinel():
-    http = HTTPX2Wrapper({'proxy': {'http': 'unused'}, 'skip_proxy': True}, {})
-    assert http.options['proxies'] == PROXY_SETTINGS_DISABLED
+    with HTTPX2Wrapper({'proxy': {'http': 'unused'}, 'skip_proxy': True}, {}) as http:
+        assert http.options['proxies'] == PROXY_SETTINGS_DISABLED
 
 
 def test_skip_proxy_init_config_yields_disabled_sentinel():
-    http = HTTPX2Wrapper({}, {'skip_proxy': True, 'proxy': {'http': 'unused'}})
-    assert http.options['proxies'] == PROXY_SETTINGS_DISABLED
+    with HTTPX2Wrapper({}, {'skip_proxy': True, 'proxy': {'http': 'unused'}}) as http:
+        assert http.options['proxies'] == PROXY_SETTINGS_DISABLED
 
 
 def test_legacy_no_proxy_true_maps_to_skip_proxy():
@@ -228,10 +228,10 @@ def test_single_star_routes_all_direct():
 
 def test_no_proxy_configured_keeps_trust_env_default_and_builds_no_router():
     with mock.patch(AGENT_GET_CONFIG, return_value=None):
-        http = HTTPX2Wrapper({}, {})
-    assert http.options['proxies'] is None
-    assert http._client.trust_env is True
-    assert not isinstance(http._client._transport, _ProxyRoutingTransport)
+        with HTTPX2Wrapper({}, {}) as http:
+            assert http.options['proxies'] is None
+            assert http._client.trust_env is True
+            assert not isinstance(http._client._transport, _ProxyRoutingTransport)
 
 
 # --- a proxy dict with no usable http/https scheme is treated as unconfigured ---
@@ -246,11 +246,11 @@ def test_no_proxy_configured_keeps_trust_env_default_and_builds_no_router():
 )
 def test_proxy_with_no_usable_scheme_keeps_trust_env_and_builds_no_router(proxy, clean_proxy_env):
     with mock.patch(AGENT_GET_CONFIG, return_value=None):
-        http = HTTPX2Wrapper({'proxy': proxy}, {})
-    # No usable proxy URL and no env proxy to fill from: env proxies stay honored and no router is
-    # installed, rather than silently disabling both the proxy and HTTP_PROXY/HTTPS_PROXY.
-    assert http._client.trust_env is True
-    assert not isinstance(http._client._transport, _ProxyRoutingTransport)
+        with HTTPX2Wrapper({'proxy': proxy}, {}) as http:
+            # No usable proxy URL and no env proxy to fill from: env proxies stay honored and no router is
+            # installed, rather than silently disabling both the proxy and HTTP_PROXY/HTTPS_PROXY.
+            assert http._client.trust_env is True
+            assert not isinstance(http._client._transport, _ProxyRoutingTransport)
 
 
 # --- _build_proxy_transport decides whether a custom transport is needed ---
@@ -381,8 +381,8 @@ def test_no_proxy_uris_stored_on_wrapper(clean_proxy_env):
 
 def test_no_proxy_uris_none_when_no_proxy_configured():
     with mock.patch(AGENT_GET_CONFIG, return_value=None):
-        http = HTTPX2Wrapper({}, {})
-    assert http.no_proxy_uris is None
+        with HTTPX2Wrapper({}, {}) as http:
+            assert http.no_proxy_uris is None
 
 
 # --- partial proxy block: the environment fills the scheme the instance left unset (Codex follow-up #2) ---

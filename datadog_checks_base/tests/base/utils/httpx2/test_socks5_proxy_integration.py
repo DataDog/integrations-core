@@ -16,6 +16,8 @@ pytestmark = [
 def test_socks5_proxy(socks5_proxy):
     instance = {'proxy': {'http': 'socks5h://{}'.format(socks5_proxy)}}
     init_config = {}
-    http = HTTPX2Wrapper(instance, init_config)
-    http.get('http://www.google.com')
-    http.get('http://nginx')
+    with HTTPX2Wrapper(instance, init_config) as http:
+        with http.get('http://www.google.com') as resp:
+            assert resp.status_code == 200
+        with http.get('http://nginx') as resp:
+            assert resp.ok
