@@ -1,9 +1,13 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from unittest import mock
+
 import pytest
 
 from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
+
+AGENT_GET_CONFIG = 'datadog_checks.base.utils.httpx2.datadog_agent.get_config'
 
 
 def test_default_headers_include_user_agent(capturing_transport):
@@ -221,9 +225,10 @@ def test_tls_no_cert_when_not_configured(capturing_transport):
     assert http.options['cert'] is None
 
 
-def test_options_proxies_is_none(capturing_transport):
-    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
-    assert http.options['proxies'] is None
+def test_options_proxies_is_none(capturing_transport, clean_proxy_env):
+    with mock.patch(AGENT_GET_CONFIG, return_value=None):
+        http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+        assert http.options['proxies'] is None
 
 
 @pytest.mark.parametrize(

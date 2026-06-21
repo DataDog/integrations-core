@@ -20,26 +20,6 @@ from datadog_checks.base.utils.httpx2 import (
 AGENT_GET_CONFIG = 'datadog_checks.base.utils.httpx2.datadog_agent.get_config'
 GET_ENV_PROXIES = 'datadog_checks.base.utils.httpx2.get_environment_proxies'
 
-PROXY_ENV_VARS = (
-    'HTTP_PROXY',
-    'HTTPS_PROXY',
-    'ALL_PROXY',
-    'NO_PROXY',
-    'http_proxy',
-    'https_proxy',
-    'all_proxy',
-    'no_proxy',
-    'REQUEST_METHOD',
-)
-
-
-@pytest.fixture
-def clean_proxy_env(monkeypatch):
-    """Strip proxy-related env vars so each test controls the environment it reads."""
-    for name in PROXY_ENV_VARS:
-        monkeypatch.delenv(name, raising=False)
-    return monkeypatch
-
 
 def _recording_transport(label: str, sink: list[str]) -> httpx2.MockTransport:
     def handler(_request: httpx2.Request) -> httpx2.Response:

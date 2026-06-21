@@ -327,7 +327,8 @@ def _build_env_proxy_transport(
     if not merged:
         return None
     env_schemes = {scheme for scheme in env if not instance_proxies.get(scheme)}
-    return _build_proxy_transport(merged, no_proxy, verify, cert, env_schemes=env_schemes, env_no_proxy=_env_no_proxy())
+    env_no_proxy = _env_no_proxy() if env_schemes else []
+    return _build_proxy_transport(merged, no_proxy, verify, cert, env_schemes=env_schemes, env_no_proxy=env_no_proxy)
 
 
 class HTTPX2ResponseAdapter:

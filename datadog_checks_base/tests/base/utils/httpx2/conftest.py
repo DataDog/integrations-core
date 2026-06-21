@@ -57,6 +57,27 @@ def clean_ca_env(monkeypatch):
     return monkeypatch
 
 
+PROXY_ENV_VARS = (
+    'HTTP_PROXY',
+    'HTTPS_PROXY',
+    'ALL_PROXY',
+    'NO_PROXY',
+    'http_proxy',
+    'https_proxy',
+    'all_proxy',
+    'no_proxy',
+    'REQUEST_METHOD',
+)
+
+
+@pytest.fixture
+def clean_proxy_env(monkeypatch):
+    """Strip proxy-related env vars so each test controls the environment it reads."""
+    for name in PROXY_ENV_VARS:
+        monkeypatch.delenv(name, raising=False)
+    return monkeypatch
+
+
 @pytest.fixture
 def captured_requests() -> list[httpx2.Request]:
     return []
