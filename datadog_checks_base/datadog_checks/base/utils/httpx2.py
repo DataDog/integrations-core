@@ -533,6 +533,7 @@ class HTTPX2Wrapper:
         config = {field: instance.get(field, value) for field, value in default_fields.items()}
 
         remapper = dict(remapper) if remapper else {}
+        # DEFAULT_REMAPPED_FIELDS intentionally wins over caller entries, matching http.py:282.
         remapper.update(DEFAULT_REMAPPED_FIELDS)
 
         for remapped_field, data in remapper.items():
@@ -557,9 +558,8 @@ class HTTPX2Wrapper:
         proxies = self.options['proxies']
         # An injected transport (e.g. tests) wins; otherwise build one router that owns all proxy resolution:
         # instance schemes, env-filled schemes, and the no_proxy bypass. skip_proxy installs no router.
-        has_routing_work = bool(proxies or self.no_proxy_uris)
         router = None
-        if transport is None and proxies != PROXY_SETTINGS_DISABLED and has_routing_work:
+        if transport is None and proxies != PROXY_SETTINGS_DISABLED and (proxies or self.no_proxy_uris):
             router = _build_env_proxy_transport(
                 proxies, self.no_proxy_uris, self.options['verify'], self.options['cert']
             )
