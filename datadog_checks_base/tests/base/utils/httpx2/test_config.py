@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
 
-AGENT_GET_CONFIG = 'datadog_checks.base.utils.httpx2.datadog_agent.get_config'
+from .common import AGENT_GET_CONFIG
 
 
 def test_default_headers_include_user_agent(capturing_transport):

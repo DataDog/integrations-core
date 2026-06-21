@@ -17,7 +17,8 @@ from datadog_checks.base.utils.httpx2 import (
     _ProxyRoutingTransport,
 )
 
-AGENT_GET_CONFIG = 'datadog_checks.base.utils.httpx2.datadog_agent.get_config'
+from .common import AGENT_GET_CONFIG
+
 GET_ENV_PROXIES = 'datadog_checks.base.utils.httpx2.get_environment_proxies'
 
 
