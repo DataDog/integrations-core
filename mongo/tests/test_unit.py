@@ -670,7 +670,7 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
     datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
 
 
-def test_query_stats_does_not_use_server_side_sort_or_allow_disk_use():
+def test_query_stats_does_not_use_server_side_sort_or_allow_disk_use() -> None:
     api = MongoApi.__new__(MongoApi)
     api._timeout = 123
     admin_db = mock.MagicMock()
