@@ -36,7 +36,10 @@ def resolve_packages(
     all_packages: list[str],
     head_tags: list[str] | None = None,
 ) -> tuple[list[str], str]:
-    """Resolve packages to release from a JSON list (errors on unknown names) or, when empty, from tags at HEAD (ignoring tags with no matching package)."""
+    """Resolve packages to release from a JSON list, or from tags at HEAD when empty.
+
+    A JSON list errors on unknown names; tag detection ignores tags with no matching package.
+    """
     selected = selected.strip()
     known = set(all_packages)
 
