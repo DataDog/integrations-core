@@ -14,6 +14,7 @@ from cachetools import TTLCache
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
+from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
@@ -48,6 +49,7 @@ from datadog_checks.postgres.statements import PostgresStatementMetrics
 from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 
 from .__about__ import __version__
+from .cloud import detect_cloud_endpoint
 from .config import build_config, sanitize
 from .diagnose import run_diagnostics
 from .util import (
@@ -275,10 +277,21 @@ class PostgreSql(DatabaseCheck):
                     self._config.aws.instance_endpoint,
                 )
             )
+            self._recover_rds_endpoint_tags(self._config.aws.instance_endpoint)
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
             self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+        else:
+            # the configured host may be a CNAME/proxy masking a managed cloud DB endpoint;
+            # follow the DNS CNAME chain to discover it without requiring extra config
+            cloud_endpoint = detect_cloud_endpoint(self._config.host)
+            if cloud_endpoint:
+                self.tags.append(
+                    "dd.internal.resource:{}:{}".format(cloud_endpoint.resource_type, cloud_endpoint.endpoint)
+                )
+                if cloud_endpoint.provider == "aws" and cloud_endpoint.product == "rds":
+                    self._recover_rds_endpoint_tags(cloud_endpoint.endpoint)
         if self._config.azure.deployment_type and self._config.azure.fully_qualified_domain_name:
             deployment_type = self._config.azure.deployment_type
             # some `deployment_type`s map to multiple `resource_type`s
@@ -294,6 +307,16 @@ class PostgreSql(DatabaseCheck):
                 self.database_identifier,
             )
         )
+
+    def _recover_rds_endpoint_tags(self, endpoint):
+        """Add supplemental RDS tags (region, dbinstanceidentifier, ...) parsed from an endpoint.
+
+        ``build_tags`` only parses these from ``host``, so a CNAME/proxy host misses them.
+        Tags already present (e.g. when the endpoint equals ``host``) are not duplicated.
+        """
+        for tag in rds_parse_tags_from_endpoint(endpoint):
+            if tag not in self.tags:
+                self.tags.append(tag)
 
     def _new_query_executor(self, queries, db):
         return QueryExecutor(

@@ -89,6 +89,57 @@ def test_get_instance_with_default(pg_instance, collect_default_database, integr
         assert dbfilter in res['query']
 
 
+def test_set_resource_tags_discovers_rds_via_cname(pg_instance, integration_check):
+    """When the host is a CNAME masking an RDS endpoint, the resource and supplemental tags are recovered."""
+    from datadog_checks.postgres.cloud import CloudEndpoint
+
+    endpoint = 'mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com'
+    with mock.patch(
+        'datadog_checks.postgres.postgres.detect_cloud_endpoint',
+        return_value=CloudEndpoint(provider='aws', product='rds', resource_type='aws_rds_instance', endpoint=endpoint),
+    ) as m:
+        check = integration_check(pg_instance)
+
+    assert 'dd.internal.resource:aws_rds_instance:{}'.format(endpoint) in check.tags
+    # supplemental RDS tags recovered from the discovered endpoint
+    assert 'dbinstanceidentifier:mydb' in check.tags
+    assert 'region:us-east-1' in check.tags
+    assert 'hostname:{}'.format(endpoint) in check.tags
+    assert 'host:{}'.format(endpoint) in check.tags
+    m.assert_called_once_with(pg_instance['host'])
+
+
+def test_set_resource_tags_no_cloud_endpoint(pg_instance, integration_check):
+    """When no cloud endpoint is discovered, no aws_rds_instance resource tag is added."""
+    with mock.patch('datadog_checks.postgres.postgres.detect_cloud_endpoint', return_value=None) as m:
+        check = integration_check(pg_instance)
+
+    assert not any(t.startswith('dd.internal.resource:aws_rds_instance:') for t in check.tags)
+    m.assert_called_once_with(pg_instance['host'])
+
+
+def test_set_resource_tags_instance_endpoint_recovers_supplemental_tags(pg_instance, integration_check):
+    """An explicit instance_endpoint (proxy/CNAME) recovers the supplemental RDS tags."""
+    endpoint = 'mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com'
+    pg_instance['aws'] = {'instance_endpoint': endpoint}
+    check = integration_check(pg_instance)
+
+    assert 'dd.internal.resource:aws_rds_instance:{}'.format(endpoint) in check.tags
+    assert 'dbinstanceidentifier:mydb' in check.tags
+    assert 'region:us-east-1' in check.tags
+
+
+def test_set_resource_tags_direct_rds_host_no_duplicate_tags(pg_instance, integration_check):
+    """A direct RDS host backfills instance_endpoint; supplemental tags must not be duplicated."""
+    endpoint = 'mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com'
+    pg_instance['host'] = endpoint
+    pg_instance['reported_hostname'] = 'myhost'  # avoid real DNS resolution
+    check = integration_check(pg_instance)
+
+    assert check.tags.count('region:us-east-1') == 1
+    assert check.tags.count('dbinstanceidentifier:mydb') == 1
+
+
 @pytest.mark.parametrize(
     'test_case, params',
     [
