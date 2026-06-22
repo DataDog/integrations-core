@@ -140,13 +140,30 @@ def parse_connection_string_properties(cs):
 def _escape_odbc_connection_string_value(value: str) -> str:
     """Return a value escaped for an ODBC connection string."""
     # SQL Server passwords may contain symbols, but ODBC connection strings use
-    # semicolons to separate key/value pairs. Microsoft documents wrapping
-    # special-character passwords in braces and escaping a literal right brace as
-    # "}}"; the outer braces are delimiters, not part of the password.
+    # semicolons to separate key/value pairs. The ODBC string spec wraps such
+    # values in braces and escapes a literal right brace as "}}"; the outer
+    # braces are delimiters, not part of the password.
     # Password: pa;ss}word
     # Connection string: Server=host;UID=datadog;PWD={pa;ss}}word};
-    # Docs: https://learn.microsoft.com/en-us/sql/relational-databases/security/strong-passwords
+    # Sources: https://learn.microsoft.com/en-us/sql/relational-databases/security/strong-passwords
+    # https://sqlprotocoldoc.z19.web.core.windows.net/MS-ODBCSTR/%5BMS-ODBCSTR%5D-100604.pdf
     return '{{{}}}'.format(value.replace('}', '}}'))
+
+
+def _escape_legacy_freetds_odbc_connection_string_value(value: str) -> str:
+    """Return a value escaped for legacy FreeTDS ODBC connection strings."""
+    # FreeTDS 1.3.6 does not decode "}}" inside braced values. It treats "}" as
+    # part of the password unless the next character is ";", so the legacy retry
+    # keeps the brace raw.
+    # Password: pa;ss}word
+    # Connection string: Driver=FreeTDS;Server=host;UID=datadog;PWD={pa;ss}word};
+    # Source: https://github.com/FreeTDS/freetds/blob/v1.3.6/src/odbc/connectparams.c
+    return '{{{}}}'.format(value)
+
+
+def _is_freetds_driver(driver: str | None) -> bool:
+    """Return whether an ODBC driver value points to FreeTDS."""
+    return bool(driver and ('freetds' in driver.lower() or 'libtdsodbc' in driver.lower()))
 
 
 def _escape_adodbapi_connection_string_value(value: str) -> str:
@@ -284,17 +301,7 @@ class Connection(object):
                 # autocommit: true disables implicit transaction
                 rawconn = adodbapi.connect(cs, {'timeout': self.timeout, 'autocommit': True})
             else:
-                cs += self._conn_string_odbc(db_key, db_name=db_name)
-                if self.managed_auth_enabled:
-                    token_struct = generate_managed_identity_token(
-                        self.managed_identity_client_id, self.managed_identity_scope
-                    )
-                    rawconn = pyodbc.connect(
-                        cs, timeout=self.timeout, autocommit=True, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
-                    )
-                else:
-                    rawconn = pyodbc.connect(cs, timeout=self.timeout, autocommit=True)
-                rawconn.timeout = self.timeout
+                rawconn = self._open_odbc_connection(cs, db_key, db_name=db_name)
 
             self.service_check_handler(AgentCheck.OK, host, database, is_default=is_default)
             if conn_key not in self._conns:
@@ -342,6 +349,33 @@ class Connection(object):
                 # if not the default db, we should still log this exception
                 # to give the customer an opportunity to fix the issue
                 self.log.debug(check_err_message)
+
+    def _open_odbc_connection(self, connection_string_prefix: str, db_key: str, db_name: str | None = None) -> object:
+        """Open an ODBC connection, retrying legacy FreeTDS brace parsing when needed."""
+        conn_str = connection_string_prefix + self._conn_string_odbc(db_key, db_name=db_name)
+        try:
+            return self._pyodbc_connect(conn_str)
+        except Exception:
+            _, _, _, password, _, driver = self._get_access_info(db_key, db_name)
+            if not password or '}' not in password or not _is_freetds_driver(driver):
+                raise
+
+            conn_str = connection_string_prefix + self._conn_string_odbc(
+                db_key, db_name=db_name, escape_func=_escape_legacy_freetds_odbc_connection_string_value
+            )
+            return self._pyodbc_connect(conn_str)
+
+    def _pyodbc_connect(self, conn_str: str) -> object:
+        """Open a pyodbc connection with the configured authentication mode."""
+        if self.managed_auth_enabled:
+            token_struct = generate_managed_identity_token(self.managed_identity_client_id, self.managed_identity_scope)
+            rawconn = pyodbc.connect(
+                conn_str, timeout=self.timeout, autocommit=True, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct}
+            )
+        else:
+            rawconn = pyodbc.connect(conn_str, timeout=self.timeout, autocommit=True)
+        rawconn.timeout = self.timeout
+        return rawconn
 
     def _setup_new_connection(self, rawconn):
         with rawconn.cursor() as cursor:
@@ -631,7 +665,7 @@ class Connection(object):
                     " however %s has been selected" % (key, other_connector, self.connector)
                 )
 
-    def _conn_string_odbc(self, db_key, conn_key=None, db_name=None):
+    def _conn_string_odbc(self, db_key, conn_key=None, db_name=None, escape_func=_escape_odbc_connection_string_value):
         """Return a connection string to use with odbc"""
         if conn_key:
             dsn, host, username, password, database, driver = conn_key.split(":")
@@ -662,7 +696,7 @@ class Connection(object):
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
-            conn_str += 'PWD={};'.format(_escape_odbc_connection_string_value(password))
+            conn_str += 'PWD={};'.format(escape_func(password))
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):

@@ -310,6 +310,41 @@ def test_connection_string_escapes_password_special_characters(
     assert expected_password_parameter in conn_str
 
 
+@pytest.mark.unit
+def test_odbc_connection_retries_legacy_freetds_password_brace_escape(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    instance_minimal_defaults.update(
+        {'connector': 'odbc', 'driver': 'FreeTDS', 'password': SPECIAL_CHARACTERS_PASSWORD}
+    )
+    connection = Connection({}, instance_minimal_defaults, None)
+    rawconn = mock.MagicMock()
+    connection._pyodbc_connect = mock.MagicMock(side_effect=[Exception("login failed"), rawconn])
+
+    assert connection._open_odbc_connection('', 'database') is rawconn
+
+    first_conn_str = connection._pyodbc_connect.call_args_list[0].args[0]
+    retry_conn_str = connection._pyodbc_connect.call_args_list[1].args[0]
+    assert 'PWD={Pa;ss}}"word123!};' in first_conn_str
+    assert 'PWD={Pa;ss}"word123!};' in retry_conn_str
+
+
+@pytest.mark.unit
+def test_odbc_connection_does_not_retry_legacy_escape_for_non_freetds(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    instance_minimal_defaults.update(
+        {'connector': 'odbc', 'driver': '{ODBC Driver 18 for SQL Server}', 'password': SPECIAL_CHARACTERS_PASSWORD}
+    )
+    connection = Connection({}, instance_minimal_defaults, None)
+    connection._pyodbc_connect = mock.MagicMock(side_effect=Exception("login failed"))
+
+    with pytest.raises(Exception, match="login failed"):
+        connection._open_odbc_connection('', 'database')
+
+    connection._pyodbc_connect.assert_called_once()
+
+
 @pytest.fixture
 def special_characters_password_login(sa_conn: object) -> tuple[str, str]:
     with sa_conn.cursor() as cursor:
