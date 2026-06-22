@@ -39,6 +39,23 @@ class WebSearchCall:
 
 
 @dataclass(frozen=True)
+class WebSearchCitation:
+    """A source cited by the model in a web-search-enabled response."""
+
+    url: str
+    cited_text: str
+    title: str | None = None
+
+
+@dataclass(frozen=True)
+class WebSearchActivity:
+    """All web search activity from a single agent turn: queries made and sources cited."""
+
+    searches: list[WebSearchCall] = field(default_factory=list)
+    citations: list[WebSearchCitation] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
 class ToolResultMessage:
     """Wraps a tool result to be sent back to the agent, keyed by the originating tool call ID."""
 
@@ -83,4 +100,4 @@ class AgentResponse:
     text: str
     tool_calls: list[ToolCall]
     usage: TokenUsage
-    web_searches: list[WebSearchCall] = field(default_factory=list)
+    web_activity: WebSearchActivity = field(default_factory=WebSearchActivity)

@@ -546,10 +546,10 @@ async def test_web_searches_surfaced_with_query_and_result_count() -> None:
     result = await agent.send("Search for the weather")
 
     assert result.tool_calls == []
-    assert len(result.web_searches) == 1
-    assert result.web_searches[0].query == "weather in Tuvalu"
-    assert result.web_searches[0].result_count == 3
-    assert result.web_searches[0].error is None
+    assert len(result.web_activity.searches) == 1
+    assert result.web_activity.searches[0].query == "weather in Tuvalu"
+    assert result.web_activity.searches[0].result_count == 3
+    assert result.web_activity.searches[0].error is None
 
 
 async def test_web_search_error_surfaced() -> None:
@@ -564,17 +564,84 @@ async def test_web_search_error_surfaced() -> None:
 
     result = await agent.send("Search")
 
-    assert len(result.web_searches) == 1
-    assert result.web_searches[0].error == "max_uses_exceeded"
-    assert result.web_searches[0].result_count == 0
+    assert len(result.web_activity.searches) == 1
+    assert result.web_activity.searches[0].error == "max_uses_exceeded"
+    assert result.web_activity.searches[0].result_count == 0
 
 
-async def test_no_web_searches_yields_empty_list() -> None:
+async def test_no_web_searches_yields_empty_activity() -> None:
     agent, _ = make_agent(mock_response=make_response("end_turn", [make_text_block("hi")]))
 
     result = await agent.send("Hi")
 
-    assert result.web_searches == []
+    assert result.web_activity.searches == []
+    assert result.web_activity.citations == []
+
+
+async def test_web_search_citations_extracted_from_text_block() -> None:
+    citation = anthropic.types.CitationsWebSearchResultLocation(
+        type="web_search_result_location",
+        url="https://example.com/page",
+        title="Example Page",
+        cited_text="some cited excerpt",
+        encrypted_index="enc123",
+    )
+    block = anthropic.types.TextBlock(type="text", text="Here is the answer.", citations=[citation])
+    resp = make_response("end_turn", [block])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("What is X?")
+
+    assert len(result.web_activity.citations) == 1
+    c = result.web_activity.citations[0]
+    assert c.url == "https://example.com/page"
+    assert c.title == "Example Page"
+    assert c.cited_text == "some cited excerpt"
+
+
+async def test_non_web_search_citations_are_ignored() -> None:
+    char_citation = anthropic.types.CitationCharLocation(
+        type="char_location",
+        cited_text="some text",
+        document_index=0,
+        document_title=None,
+        end_char_index=10,
+        start_char_index=0,
+    )
+    block = anthropic.types.TextBlock(type="text", text="Based on the doc.", citations=[char_citation])
+    resp = make_response("end_turn", [block])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Hi")
+
+    assert result.web_activity.citations == []
+
+
+async def test_citations_across_multiple_text_blocks() -> None:
+    citation1 = anthropic.types.CitationsWebSearchResultLocation(
+        type="web_search_result_location",
+        url="https://a.com",
+        title="A",
+        cited_text="text a",
+        encrypted_index="e1",
+    )
+    citation2 = anthropic.types.CitationsWebSearchResultLocation(
+        type="web_search_result_location",
+        url="https://b.com",
+        title="B",
+        cited_text="text b",
+        encrypted_index="e2",
+    )
+    block1 = anthropic.types.TextBlock(type="text", text="First.", citations=[citation1])
+    block2 = anthropic.types.TextBlock(type="text", text="Second.", citations=[citation2])
+    resp = make_response("end_turn", [block1, block2])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Hi")
+
+    assert len(result.web_activity.citations) == 2
+    assert result.web_activity.citations[0].url == "https://a.com"
+    assert result.web_activity.citations[1].url == "https://b.com"
 
 
 # ---------------------------------------------------------------------------

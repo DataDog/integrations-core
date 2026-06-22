@@ -18,7 +18,9 @@ from ddev.ai.agent.types import (
     TokenUsage,
     ToolCall,
     ToolResultMessage,
+    WebSearchActivity,
     WebSearchCall,
+    WebSearchCitation,
 )
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -289,10 +291,14 @@ class AnthropicAgent(BaseAgent[MessageParam]):
 
         text_parts: list[str] = []
         tool_calls: list[ToolCall] = []
+        citations: list[WebSearchCitation] = []
 
         for block in response.content:
             if isinstance(block, anthropic.types.TextBlock):
                 text_parts.append(block.text)
+                for c in block.citations or []:
+                    if isinstance(c, anthropic.types.CitationsWebSearchResultLocation):
+                        citations.append(WebSearchCitation(url=c.url, title=c.title, cited_text=c.cited_text))
             elif isinstance(block, anthropic.types.ToolUseBlock):
                 tool_calls.append(ToolCall(id=block.id, name=block.name, input=dict(block.input)))
         # ThinkingBlock, RedactedThinkingBlock, ServerToolUseBlock, and WebSearchToolResultBlock
@@ -324,7 +330,10 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             text="\n".join(text_parts),
             tool_calls=tool_calls,
             usage=usage,
-            web_searches=self._extract_web_searches(all_responses),
+            web_activity=WebSearchActivity(
+                searches=self._extract_web_searches(all_responses),
+                citations=citations,
+            ),
         )
 
         # Save to history only after a successful response. Use the unmarked form so the
