@@ -75,15 +75,6 @@ instances:
     #
     # probes_metrics_endpoint: http://10.8.0.1:10255/metrics/probes
 
-    ## @param cadvisor_port - integer - optional - default: 4194
-    ## Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
-    ## This port is closed by default on k8s 1.7+ and OpenShift, enable it
-    ## via the `--cadvisor-port=4194` kubelet option.
-    ##
-    ## Port to connect to, uncomment and set accordingly to enable collection.
-    #
-    # cadvisor_port: 4194
-
     ## @param enabled_rates - list of strings - optional
     ## Allow list of rate type metrics to collect from cadvisor.
     #
@@ -96,6 +87,15 @@ instances:
     #
     # enabled_gauges:
     #   - filesystem.*
+
+    ## @param cadvisor_port - integer - optional - default: 4194
+    ## Metric collection for legacy (< 1.7.6) clusters via the kubelet's cadvisor port.
+    ## This port is closed by default on k8s 1.7+ and OpenShift, enable it
+    ## via the `--cadvisor-port=4194` kubelet option.
+    ##
+    ## Port to connect to, uncomment and set accordingly to enable collection.
+    #
+    # cadvisor_port: 4194
 
     ## @param health_service_check - boolean - optional - default: true
     ## Send a service check reporting about the health of the Prometheus endpoint.
