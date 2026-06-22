@@ -10,6 +10,7 @@ files:
     options:
     - name: kube_state_url
       fleet_configurable: true
+      display_priority: 5
       required: true
       description: |
         To enable Kube State metrics you must specify the URL exposing the API
@@ -17,6 +18,7 @@ files:
         type: string
         example: http://example.com:8080/metrics
     - name: join_standard_tags
+      display_priority: 2
       description: |
         To enable joining standard tags from labels, you must set this parameter to true.
         It will join standard tags found in these labels coming from info Kube State metrics (*_labels).
@@ -31,6 +33,7 @@ files:
         type: boolean
         example: false
     - name: hostname_override
+      display_priority: 1
       description: |
         By default the hostname for metrics containing the node label is
         overridden by the value of the label, this can be deactivated (all metrics
