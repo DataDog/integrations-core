@@ -7,6 +7,7 @@ from contextlib import ExitStack
 
 import pytest
 
+from datadog_checks.dev import get_e2e_discovery_metadata
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
@@ -33,7 +34,7 @@ def dd_environment():
         )
         instances = [{'openmetrics_endpoint': f'http://{keda_host}:{keda_port}/metrics'}]
 
-        yield {'instances': instances}
+        yield {'instances': instances}, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
