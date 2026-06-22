@@ -26,12 +26,8 @@ from datadog_checks.sqlserver.connection_errors import (
 from .common import CHECK_NAME, SQLSERVER_YEAR
 
 KEY_PREFIX = "dbm-test-"
-FREETDS_SPECIAL_CHARACTERS_PASSWORD_LOGIN = 'datadog_freetds_special_characters_password'
-FREETDS_SPECIAL_CHARACTERS_PASSWORD = 'Pa;ssword123!'
-ODBC_SPECIAL_CHARACTERS_PASSWORD_LOGIN = 'datadog_odbc_special_characters_password'
-ODBC_SPECIAL_CHARACTERS_PASSWORD = 'Pa;ss}word123!'
-ADODBAPI_SPECIAL_CHARACTERS_PASSWORD_LOGIN = 'datadog_adodbapi_special_characters_password'
-ADODBAPI_SPECIAL_CHARACTERS_PASSWORD = 'Pa;ss"word123!'
+SPECIAL_CHARACTERS_PASSWORD_LOGIN = 'datadog_special_characters_password'
+SPECIAL_CHARACTERS_PASSWORD = 'Pa;ss}"word123!'
 
 
 @pytest.mark.unit
@@ -296,8 +292,8 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
 @pytest.mark.parametrize(
     'connector,password,expected_password_parameter',
     [
-        pytest.param('odbc', 'pa;ss}word', 'PWD={pa;ss}}word};', id='odbc'),
-        pytest.param('adodbapi', 'pa;ss"word', 'Password="pa;ss""word";', id='adodbapi'),
+        pytest.param('odbc', SPECIAL_CHARACTERS_PASSWORD, 'PWD={Pa;ss}}"word123!};', id='odbc'),
+        pytest.param('adodbapi', SPECIAL_CHARACTERS_PASSWORD, 'Password="Pa;ss}""word123!";', id='adodbapi'),
     ],
 )
 def test_connection_string_escapes_password_special_characters(
@@ -314,46 +310,8 @@ def test_connection_string_escapes_password_special_characters(
     assert expected_password_parameter in conn_str
 
 
-def special_characters_password_credentials(instance: dict[str, object]) -> tuple[str, str]:
-    if instance.get('connector') == 'adodbapi':
-        return ADODBAPI_SPECIAL_CHARACTERS_PASSWORD_LOGIN, ADODBAPI_SPECIAL_CHARACTERS_PASSWORD
-    driver = str(instance.get('driver', '')).lower()
-    if 'freetds' in driver or 'tdsodbc' in driver:
-        return FREETDS_SPECIAL_CHARACTERS_PASSWORD_LOGIN, FREETDS_SPECIAL_CHARACTERS_PASSWORD
-    return ODBC_SPECIAL_CHARACTERS_PASSWORD_LOGIN, ODBC_SPECIAL_CHARACTERS_PASSWORD
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    'instance,expected_password',
-    [
-        pytest.param({'connector': 'odbc', 'driver': 'FreeTDS'}, FREETDS_SPECIAL_CHARACTERS_PASSWORD, id='freetds'),
-        pytest.param(
-            {'connector': 'odbc', 'driver': '/opt/homebrew/lib/libtdsodbc.so'},
-            FREETDS_SPECIAL_CHARACTERS_PASSWORD,
-            id='freetds-path',
-        ),
-        pytest.param(
-            {'connector': 'odbc', 'driver': '{ODBC Driver 18 for SQL Server}'},
-            ODBC_SPECIAL_CHARACTERS_PASSWORD,
-            id='microsoft-odbc',
-        ),
-        pytest.param(
-            {'connector': 'adodbapi', 'adoprovider': 'MSOLEDBSQL'},
-            ADODBAPI_SPECIAL_CHARACTERS_PASSWORD,
-            id='adodbapi',
-        ),
-    ],
-)
-def test_special_characters_password_credentials(instance: dict[str, object], expected_password: str) -> None:
-    _, password = special_characters_password_credentials(instance)
-
-    assert password == expected_password
-
-
 @pytest.fixture
-def special_characters_password_login(instance_docker: dict[str, object], sa_conn: object) -> tuple[str, str]:
-    login, password = special_characters_password_credentials(instance_docker)
+def special_characters_password_login(sa_conn: object) -> tuple[str, str]:
     with sa_conn.cursor() as cursor:
         cursor.execute(
             """
@@ -363,7 +321,7 @@ def special_characters_password_login(instance_docker: dict[str, object], sa_con
                 CREATE LOGIN [{login}] WITH PASSWORD = '{password}', CHECK_POLICY = OFF
             ELSE
                 ALTER LOGIN [{login}] WITH PASSWORD = '{password}', CHECK_POLICY = OFF
-            """.format(login=login, password=password)
+            """.format(login=SPECIAL_CHARACTERS_PASSWORD_LOGIN, password=SPECIAL_CHARACTERS_PASSWORD)
         )
         cursor.execute(
             """
@@ -371,9 +329,9 @@ def special_characters_password_login(instance_docker: dict[str, object], sa_con
                 SELECT 1 FROM sys.database_principals WHERE name = N'{login}'
             )
                 CREATE USER [{login}] FOR LOGIN [{login}]
-            """.format(login=login)
+            """.format(login=SPECIAL_CHARACTERS_PASSWORD_LOGIN)
         )
-    return login, password
+    return SPECIAL_CHARACTERS_PASSWORD_LOGIN, SPECIAL_CHARACTERS_PASSWORD
 
 
 @pytest.mark.integration
