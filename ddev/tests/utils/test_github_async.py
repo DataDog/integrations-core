@@ -18,6 +18,7 @@ from ddev.utils.github_async import (
     PaginationData,
     async_github_client,
 )
+from ddev.utils.github_async.client import RetryableDownloadError
 from ddev.utils.github_async.models import (
     ArtifactsList,
     GitHubUser,
@@ -842,12 +843,6 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malici
     assert list(dest.rglob("*")) == []
 
 
-@pytest.fixture
-def fast_retries(monkeypatch):
-    """Drop the backoff waits so retry tests run instantly (wait_max=0 caps every wait to 0)."""
-    monkeypatch.setattr("ddev.utils.github_async.client.DOWNLOAD_WAIT_MAX", 0.0)
-
-
 def _patch_signed_download(monkeypatch, handler: Any) -> None:
     """Route the anonymous signed-URL download through a mock transport."""
     real_async_client = httpx.AsyncClient
@@ -861,92 +856,32 @@ def _patch_signed_download(monkeypatch, handler: Any) -> None:
 
 
 @pytest.mark.asyncio
-async def test_download_artifact_retries_transient_network_error(monkeypatch, tmp_path, fast_retries) -> None:
-    redirect_calls = 0
+async def test_download_artifact_retryable_status_raises_retryable_error(monkeypatch, tmp_path) -> None:
+    """A retryable server status (429/5xx) surfaces as RetryableDownloadError so the caller can retry."""
 
     def github_handler(request: httpx.Request) -> httpx.Response:
-        nonlocal redirect_calls
-        redirect_calls += 1
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
 
-    download_calls = 0
-
     def signed_handler(request: httpx.Request) -> httpx.Response:
-        nonlocal download_calls
-        download_calls += 1
-        if download_calls < 3:
-            raise httpx.ConnectError("connection reset")
-        return httpx.Response(200, content=_make_zip({"hello.txt": b"hi"}))
+        return httpx.Response(503, content=b"unavailable")
 
     _patch_signed_download(monkeypatch, signed_handler)
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
-    await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
-
-    assert download_calls == 3
-    # The redirect is re-resolved on every attempt so the signed URL never goes stale.
-    assert redirect_calls == 3
-    assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
+    with pytest.raises(RetryableDownloadError):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
 @pytest.mark.asyncio
-async def test_download_artifact_retries_corrupt_download(monkeypatch, tmp_path, fast_retries) -> None:
-    download_calls = 0
+async def test_download_artifact_non_retryable_status_propagates(monkeypatch, tmp_path) -> None:
+    """A non-retryable status (e.g. 404) propagates as httpx.HTTPStatusError, not RetryableDownloadError."""
 
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
 
     def signed_handler(request: httpx.Request) -> httpx.Response:
-        nonlocal download_calls
-        download_calls += 1
-        if download_calls < 2:
-            return httpx.Response(200, content=b"truncated not-a-zip")
-        return httpx.Response(200, content=_make_zip({"hello.txt": b"hi"}))
-
-    _patch_signed_download(monkeypatch, signed_handler)
-    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
-    await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
-
-    assert download_calls == 2
-    assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
-
-
-@pytest.mark.asyncio
-async def test_download_artifact_retries_server_error(monkeypatch, tmp_path, fast_retries) -> None:
-    download_calls = 0
-
-    def github_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
-
-    def signed_handler(request: httpx.Request) -> httpx.Response:
-        nonlocal download_calls
-        download_calls += 1
-        if download_calls < 2:
-            return httpx.Response(503, content=b"unavailable")
-        return httpx.Response(200, content=_make_zip({"hello.txt": b"hi"}))
-
-    _patch_signed_download(monkeypatch, signed_handler)
-    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
-    await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
-
-    assert download_calls == 2
-    assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
-
-
-@pytest.mark.asyncio
-async def test_download_artifact_does_not_retry_not_found(monkeypatch, tmp_path, fast_retries) -> None:
-    download_calls = 0
-
-    def github_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
-
-    def signed_handler(request: httpx.Request) -> httpx.Response:
-        nonlocal download_calls
-        download_calls += 1
         return httpx.Response(404, content=b"gone")
 
     _patch_signed_download(monkeypatch, signed_handler)
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
-
-    assert download_calls == 1
