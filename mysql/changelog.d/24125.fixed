@@ -1,0 +1,1 @@
+Fix `mysql.index.reads`, `mysql.index.updates`, and `mysql.index.deletes` being submitted as gauge instead of monotonic_count, causing them to report raw cumulative totals rather than per-interval counts.
