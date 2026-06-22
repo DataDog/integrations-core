@@ -33,15 +33,6 @@ DEFAULT_BASE_URL = "https://api.github.com"
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
 
-RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
-
-
-class RetryableDownloadError(Exception):
-    """Marker for a retryable server response (429/5xx) during an artifact download.
-
-    Raised by ``download_artifact`` so the caller can decide whether and how to retry.
-    """
-
 
 # ---------------------------------------------------------------------------
 # Pagination + response wrappers
@@ -598,23 +589,16 @@ class AsyncGitHubClient:
         bearer token is not leaked to the redirect target. Each zip member is
         validated against ``dest_path`` before extraction (zip-slip protection).
 
-        This performs a single attempt. Retryable server responses (429/5xx) are raised
-        as ``RetryableDownloadError``; transient network failures and corrupt downloads
-        propagate as ``httpx.TransportError`` and ``zipfile.BadZipFile``. The caller owns
-        the retry policy.
+        This performs a single attempt with no retries; any failure propagates to the
+        caller.
 
         Args:
             archive_download_url: The artifact's ``archive_download_url`` (absolute or relative to the API base).
             dest_path: Directory where the zip contents will be extracted. Created if missing.
             timeout: Optional timeout for both HTTP requests.
         """
-        try:
-            location = await self._resolve_artifact_redirect(archive_download_url, timeout)
-            await self._download_and_extract_zip(location, dest_path, timeout)
-        except httpx.HTTPStatusError as exc:
-            if exc.response.status_code in RETRYABLE_STATUS_CODES:
-                raise RetryableDownloadError(str(exc)) from exc
-            raise
+        location = await self._resolve_artifact_redirect(archive_download_url, timeout)
+        await self._download_and_extract_zip(location, dest_path, timeout)
 
 
 # ---------------------------------------------------------------------------

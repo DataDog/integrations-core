@@ -7,23 +7,14 @@ import asyncio
 import dataclasses
 import json
 import logging
-import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-import httpx
-import stamina
-
 from ddev.cli.ci.tests.messages import BatchFinished, TestBatch
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
-from ddev.utils.github_async.client import RetryableDownloadError
 from ddev.utils.github_async.models import WorkflowRun
-
-DOWNLOAD_RETRY_ATTEMPTS = 4
-DOWNLOAD_WAIT_INITIAL = 1.0
-DOWNLOAD_WAIT_MAX = 30.0
 
 
 def _conclusion_to_status(conclusion: str | None) -> Literal["success", "failure", "skipped"]:
@@ -175,7 +166,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                         continue
                     target = run_path / f"{artifact.id}-{artifact.name}"
                     try:
-                        await self._download_artifact_with_retry(artifact.archive_download_url, target)
+                        await self._client.download_artifact(artifact.archive_download_url, target)
                         self._logger.info("Downloaded artifact %s -> %s", artifact.id, target, extra=log_extra)
                     except Exception as exc:
                         self._logger.warning(
@@ -196,15 +187,3 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 extra=log_extra,
             )
         return run_path
-
-    async def _download_artifact_with_retry(self, archive_download_url: str, dest_path: Path) -> None:
-        """Download a single artifact, retrying transient failures with exponential backoff."""
-        async for attempt in stamina.retry_context(
-            on=(httpx.TransportError, zipfile.BadZipFile, RetryableDownloadError),
-            attempts=DOWNLOAD_RETRY_ATTEMPTS,
-            timeout=None,
-            wait_initial=DOWNLOAD_WAIT_INITIAL,
-            wait_max=DOWNLOAD_WAIT_MAX,
-        ):
-            with attempt:
-                await self._client.download_artifact(archive_download_url, dest_path)

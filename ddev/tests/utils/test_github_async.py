@@ -18,7 +18,6 @@ from ddev.utils.github_async import (
     PaginationData,
     async_github_client,
 )
-from ddev.utils.github_async.client import RetryableDownloadError
 from ddev.utils.github_async.models import (
     ArtifactsList,
     GitHubUser,
@@ -856,30 +855,14 @@ def _patch_signed_download(monkeypatch, handler: Any) -> None:
 
 
 @pytest.mark.asyncio
-async def test_download_artifact_retryable_status_raises_retryable_error(monkeypatch, tmp_path) -> None:
-    """A retryable server status (429/5xx) surfaces as RetryableDownloadError so the caller can retry."""
+async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) -> None:
+    """A failed signed-URL download propagates as httpx.HTTPStatusError (no retries)."""
 
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
 
     def signed_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, content=b"unavailable")
-
-    _patch_signed_download(monkeypatch, signed_handler)
-    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
-    with pytest.raises(RetryableDownloadError):
-        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
-
-
-@pytest.mark.asyncio
-async def test_download_artifact_non_retryable_status_propagates(monkeypatch, tmp_path) -> None:
-    """A non-retryable status (e.g. 404) propagates as httpx.HTTPStatusError, not RetryableDownloadError."""
-
-    def github_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
-
-    def signed_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(404, content=b"gone")
 
     _patch_signed_download(monkeypatch, signed_handler)
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))

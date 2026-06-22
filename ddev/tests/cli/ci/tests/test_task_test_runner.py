@@ -13,12 +13,10 @@ from typing import Any
 
 import pytest
 
-from ddev.cli.ci.tests import task_test_runner as task_test_runner_module
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions, _conclusion_to_status
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.client import RetryableDownloadError
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
@@ -558,49 +556,3 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
     assert client.update_check_run_calls[0]["conclusion"] == "success"
-
-
-# ---------------------------------------------------------------------------
-# _download_artifact_with_retry
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture
-def fast_retries(monkeypatch):
-    """Drop the backoff waits so retry tests run instantly (wait_max=0 caps every wait to 0)."""
-    monkeypatch.setattr(task_test_runner_module, "DOWNLOAD_WAIT_MAX", 0.0)
-
-
-class _FlakyDownloadClient:
-    """Stub client whose ``download_artifact`` fails ``fail_times`` times before succeeding."""
-
-    def __init__(self, error: Exception, fail_times: int) -> None:
-        self._error = error
-        self._fail_times = fail_times
-        self.calls = 0
-
-    async def download_artifact(self, archive_download_url: str, dest_path: Path, timeout: float | None = None) -> None:
-        self.calls += 1
-        if self.calls <= self._fail_times:
-            raise self._error
-
-
-@pytest.mark.asyncio
-async def test_download_artifact_with_retry_retries_retryable_error(tmp_path: Path, fast_retries) -> None:
-    client = _FlakyDownloadClient(RetryableDownloadError("503"), fail_times=2)
-    runner = _make_runner(client, tmp_path)  # type: ignore[arg-type]
-
-    await runner._download_artifact_with_retry("https://api.github.com/artifact/1/zip", tmp_path / "out")
-
-    assert client.calls == 3
-
-
-@pytest.mark.asyncio
-async def test_download_artifact_with_retry_does_not_retry_non_retryable(tmp_path: Path, fast_retries) -> None:
-    client = _FlakyDownloadClient(RuntimeError("boom"), fail_times=5)
-    runner = _make_runner(client, tmp_path)  # type: ignore[arg-type]
-
-    with pytest.raises(RuntimeError):
-        await runner._download_artifact_with_retry("https://api.github.com/artifact/1/zip", tmp_path / "out")
-
-    assert client.calls == 1
