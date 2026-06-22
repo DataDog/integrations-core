@@ -113,8 +113,8 @@ def test_appliances_filter(dd_run_check, aggregator, mocker, instance, ips, filt
 @pytest.mark.parametrize(
     'bad_ip',
     [
-        pytest.param('attacker.example.com', id='hostname'),
-        pytest.param('attacker.example.com:8443', id='host_port'),
+        pytest.param('appliance.example.com', id='hostname'),
+        pytest.param('appliance.example.com:8443', id='host_port'),
         pytest.param('localhost:9999', id='localhost_port'),
         pytest.param('', id='empty'),
     ],
@@ -125,7 +125,7 @@ def test_appliances_with_non_ip_address_are_skipped(dd_run_check, aggregator, mo
 
     payload = [
         {**APPLIANCE_PAYLOAD[0], 'ip': '10.0.0.1'},
-        {**APPLIANCE_PAYLOAD[0], 'ip': bad_ip, 'hostName': 'malicious'},
+        {**APPLIANCE_PAYLOAD[0], 'ip': bad_ip, 'hostName': 'invalid-appliance'},
     ]
     _setup_mocks(mocker, check, payload, appliance_client=_mock_appliance_client(TGZ_DATA))
 
