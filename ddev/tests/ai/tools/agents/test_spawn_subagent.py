@@ -137,7 +137,10 @@ def make_tool(
 ) -> SpawnSubagentTool:
     return SpawnSubagentTool(
         owner_id=owner_id,
-        agent_config=agent_config or AgentConfig(name="writer", tools=parent_tools or ["read_file", "edit_file"], system_prompt_path=Path("/fake.md")),
+        agent_config=agent_config
+        or AgentConfig(
+            name="writer", tools=parent_tools or ["read_file", "edit_file"], system_prompt_path=Path("/fake.md")
+        ),
         process_factory=factory,
     )
 
@@ -233,7 +236,8 @@ async def test_child_runtime_config_inherits_parent_settings_and_requested_tools
         provider="anthropic",
         tools=["read_file", "edit_file", "spawn_subagent"],
         model="custom-model",
-        max_tokens=123, system_prompt_path=Path("/fake.md")
+        max_tokens=123,
+        system_prompt_path=Path("/fake.md"),
     )
     factory = FakeProcessFactory(tmp_path, lambda: MockAgent([make_response(text="ok")]))
     tool = make_tool(

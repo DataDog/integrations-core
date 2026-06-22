@@ -2,10 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pathlib import Path
 import asyncio
 import json
 import os
+from pathlib import Path
 
 import httpx
 import pytest
@@ -303,7 +303,9 @@ async def test_failure_missing_endpoint_url(flow_dir, message_queue):
 def test_validate_config_rejects_agent():
     with pytest.raises(FlowConfigError, match="must not declare 'agent'"):
         InspectEndpointPhase.validate_config(
-            "p", PhaseConfig(name="inspect", class_="AgenticPhase", agent="x"), {"x": AgentConfig(name="x", system_prompt_path=Path("/fake.md"))}
+            "p",
+            PhaseConfig(name="inspect", class_="AgenticPhase", agent="x"),
+            {"x": AgentConfig(name="x", system_prompt_path=Path("/fake.md"))},
         )
 
 

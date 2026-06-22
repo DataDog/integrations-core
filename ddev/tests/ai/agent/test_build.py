@@ -100,7 +100,14 @@ def test_build_runtime_uses_explicit_system_prompt(file_registry, clients):
     ],
 )
 def test_build_runtime_forwards_model_and_max_tokens(file_registry, clients, model, max_tokens):
-    config = AgentConfig(name="writer", provider="anthropic", model=model, max_tokens=max_tokens, tools=[], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(
+        name="writer",
+        provider="anthropic",
+        model=model,
+        max_tokens=max_tokens,
+        tools=[],
+        system_prompt_path=Path("/fake.md"),
+    )
     runtime = build_runtime(make_factory(clients, file_registry), config)
 
     assert runtime.agent._model == model
@@ -116,7 +123,9 @@ def test_build_runtime_uses_config_tools(file_registry, clients):
 
 
 def test_build_runtime_wires_spawn_subagent_tool(file_registry, clients):
-    config = AgentConfig(name="writer", provider="anthropic", tools=["spawn_subagent"], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(
+        name="writer", provider="anthropic", tools=["spawn_subagent"], system_prompt_path=Path("/fake.md")
+    )
     factory = make_factory(clients, file_registry)
     sentinel_process_factory = object()
     runtime = build_runtime(factory, config, process_factory=sentinel_process_factory)
@@ -128,7 +137,9 @@ def test_build_runtime_wires_spawn_subagent_tool(file_registry, clients):
 
 
 def test_build_runtime_reuses_shared_file_registry(file_registry, clients):
-    config = AgentConfig(name="writer", provider="anthropic", tools=["read_file", "edit_file"], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(
+        name="writer", provider="anthropic", tools=["read_file", "edit_file"], system_prompt_path=Path("/fake.md")
+    )
     runtime = build_runtime(make_factory(clients, file_registry), config, owner_id="owner")
 
     for tool in runtime.tool_registry._tools.values():

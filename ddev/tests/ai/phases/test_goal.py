@@ -2,8 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pathlib import Path
 import json
+from pathlib import Path
 
 import pytest
 
@@ -213,7 +213,8 @@ async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
         provider="anthropic",
         tools=["read_file", "edit_file", "grep", "create_file"],
         model="custom-model",
-        max_tokens=999, system_prompt_path=Path("/fake.md")
+        max_tokens=999,
+        system_prompt_path=Path("/fake.md"),
     )
 
     await run_goal_loop(

@@ -77,8 +77,9 @@ class ConfigurationEngine:
 
     def __init__(
         self,
-        core_dir: Path,
         user_dirs: list[str] | None = None,
+        *,
+        core_dir: Path = CORE_FLOWS_DIR,
     ) -> None:
         self._core_dir = core_dir
         self._scan_dirs: list[Path] = self._deduplicate([core_dir] + self._resolve_user_dirs(user_dirs or []))
@@ -87,11 +88,6 @@ class ConfigurationEngine:
         self._flows: dict[str, _RegistryEntry[FlowConfig]] = {}
         self._conflicts: list[ConfigConflict] = []
         self._build_registries()
-
-    @classmethod
-    def from_user_dirs(cls, user_dirs: list[str] | None = None) -> ConfigurationEngine:
-        """Create an engine scanning the core flows dir plus any user-provided dirs."""
-        return cls(core_dir=CORE_FLOWS_DIR, user_dirs=user_dirs or [])
 
     def _deduplicate(self, dirs: list[Path]) -> list[Path]:
         seen: set[Path] = set()

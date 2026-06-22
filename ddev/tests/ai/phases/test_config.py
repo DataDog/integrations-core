@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
