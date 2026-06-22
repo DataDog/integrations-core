@@ -706,6 +706,110 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1778525222848
  -
+  sample: "<134>May 11 18:47:07 test-system {\"_path\":\"conn\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T18:47:07.850764Z\",\"ts\":\"2026-05-11T18:47:02.848960Z\",\"uid\":\"C1234567890abcdef1\",\"id.orig_h\":\"10.250.7.2\",\"id.orig_h_name\":{\"src\":\"DNS_PTR\",\"vals\":[\"workstation-1.corp.example.com\"]},\"id.orig_p\":60099,\"id.resp_h\":\"10.252.75.69\",\"id.resp_h_name\":{\"src\":\"DNS_PTR\",\"vals\":[\"server-1.corp.example.com\"]},\"id.resp_p\":8651,\"id.vlan\":1039,\"proto\":\"tcp\",\"service\":\"http\",\"orig_bytes\":1024,\"resp_bytes\":4096,\"conn_state\":\"SF\",\"local_orig\":true,\"local_resp\":true,\"missed_bytes\":0,\"history\":\"ShADadtT\",\"orig_pkts\":8,\"resp_pkts\":12,\"orig_ip_bytes\":1320,\"resp_ip_bytes\":4488,\"community_id\":\"1:xyz789\",\"orig_l2_addr\":\"aa:bb:cc:11:22:33\",\"resp_l2_addr\":\"aa:bb:cc:44:55:66\"}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "conn"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T18:47:07.850764Z"
+      community_id: "1:xyz789"
+      conn_state: "SF"
+      connection_state: "Normal establishment and termination"
+      history: "ShADadtT"
+      id:
+        orig_h: "10.250.7.2"
+        orig_h_name:
+          src: "DNS_PTR"
+          vals:
+           - "workstation-1.corp.example.com"
+        orig_p: 60099
+        resp_h: "10.252.75.69"
+        resp_h_name:
+          src: "DNS_PTR"
+          vals:
+           - "server-1.corp.example.com"
+        resp_p: 8651
+        vlan: 1039
+      local_orig: true
+      local_resp: true
+      missed_bytes: 0
+      network:
+        bytes_read: 1024
+        bytes_written: 4096
+        client:
+          ip: "10.250.7.2"
+          port: 60099
+        destination:
+          ip: "10.252.75.69"
+          port: 8651
+      ocsf:
+        activity_id: 2
+        activity_name: "Close"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          boundary: "Localhost"
+          boundary_id: 1
+          community_uid: "1:xyz789"
+          direction: "Lateral"
+          direction_id: 3
+          flag_history: "ShADadtT"
+          protocol_name: "tcp"
+          uid: "C1234567890abcdef1"
+        dst_endpoint:
+          hostname: "server-1.corp.example.com"
+          ip: "10.252.75.69"
+          mac: "aa:bb:cc:44:55:66"
+          port: 8651
+        metadata:
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "C1234567890abcdef1"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          hostname: "workstation-1.corp.example.com"
+          ip: "10.250.7.2"
+          mac: "aa:bb:cc:11:22:33"
+          port: 60099
+        status: "Success"
+        status_detail: "SF"
+        status_id: 1
+        time: 1778525222848
+        traffic:
+          bytes: 5120
+          bytes_in: 4096
+          bytes_missed: 0
+          bytes_out: 1024
+          packets: 20
+          packets_in: 12
+          packets_out: 8
+      orig_bytes: 1024
+      orig_ip_bytes: 1320
+      orig_l2_addr: "aa:bb:cc:11:22:33"
+      orig_pkts: 8
+      proto: "tcp"
+      resp_bytes: 4096
+      resp_ip_bytes: 4488
+      resp_l2_addr: "aa:bb:cc:44:55:66"
+      resp_pkts: 12
+      service: "http"
+      ts: "2026-05-11T18:47:02.848960Z"
+      uid: "C1234567890abcdef1"
+      zeek:
+        missed_bytes: 0
+        proto: "tcp"
+    message: '<134>May 11 18:47:07 test-system {"_path":"conn","_system_name":"test-system","_write_ts":"2026-05-11T18:47:07.850764Z","ts":"2026-05-11T18:47:02.848960Z","uid":"C1234567890abcdef1","id.orig_h":"10.250.7.2","id.orig_h_name":{"src":"DNS_PTR","vals":["workstation-1.corp.example.com"]},"id.orig_p":60099,"id.resp_h":"10.252.75.69","id.resp_h_name":{"src":"DNS_PTR","vals":["server-1.corp.example.com"]},"id.resp_p":8651,"id.vlan":1039,"proto":"tcp","service":"http","orig_bytes":1024,"resp_bytes":4096,"conn_state":"SF","local_orig":true,"local_resp":true,"missed_bytes":0,"history":"ShADadtT","orig_pkts":8,"resp_pkts":12,"orig_ip_bytes":1320,"resp_ip_bytes":4488,"community_id":"1:xyz789","orig_l2_addr":"aa:bb:cc:11:22:33","resp_l2_addr":"aa:bb:cc:44:55:66"}'
+    service: "conn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1778525222848
+ -
   sample: "<134>May 11 18:46:03 ndr-pvg3-1 {\"_path\":\"conn_long\",\"_system_name\":\"ndr-pvg3-1\",\"_write_ts\":\"2026-05-11T18:46:03.887017Z\",\"ts\":\"2026-05-11T18:36:03.886935Z\",\"uid\":\"12345678901234568\",\"id.orig_h\":\"10.250.5.75\",\"id.orig_p\":63231,\"id.resp_h\":\"172.64.5.1\",\"id.resp_p\":443,\"id.vlan\":1000,\"proto\":\"tcp\",\"service\":\"ssl\",\"duration\":600.0000820159912,\"orig_bytes\":7071,\"resp_bytes\":18980,\"conn_state\":\"S1\",\"local_orig\":true,\"local_resp\":false,\"missed_bytes\":0,\"history\":\"ShADadtT\",\"orig_pkts\":32,\"resp_pkts\":37,\"orig_ip_bytes\":8380,\"resp_ip_bytes\":20532,\"community_id\":\"1:def456\",\"corelight_shunted\":false}"
   service: "corelight"
   result:

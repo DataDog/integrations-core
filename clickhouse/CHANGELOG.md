@@ -20,7 +20,7 @@
 * Store advanced-queries metric definitions as JSON loaded on first check run. ([#23829](https://github.com/DataDog/integrations-core/pull/23829))
 * Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
 
-## 6.7.0 / 2026-05-14
+## 6.7.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
