@@ -37,7 +37,7 @@ DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
 MAX_CONTINUATIONS: Final[int] = 10
 
-# web_search_20260209  is not ZDR-eligible by default.
+# Pinned to the ZDR-eligible version; web_search_20260209 is not ZDR-eligible by default.
 WEB_SEARCH_VERSION: Final[str] = "web_search_20250305"
 
 NATIVE_TOOL_DEFINITIONS: Final[dict[str, ToolParam]] = {
@@ -106,10 +106,8 @@ class AnthropicAgent(BaseAgent[MessageParam]):
     def _get_tool_definitions(self, allowed_tools: list[str] | None) -> list[ToolParam]:
         """Filter tool definitions by allowlist. None means all tools."""
         definitions = self._tools.definitions
-        if allowed_tools is None:
-            return definitions
-        allowed = set(allowed_tools)
-        return [d for d in definitions if d["name"] in allowed]
+        allowed_names = set(self._filter_by_allowed([d["name"] for d in definitions], allowed_tools))
+        return [d for d in definitions if d["name"] in allowed_names]
 
     def _map_stop_reason(self, raw: str) -> StopReason:
         """Map a raw Anthropic stop_reason string to the generic StopReason enum."""

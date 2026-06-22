@@ -118,7 +118,12 @@ class ToolRegistry:
 
     @staticmethod
     def available_tool_names() -> list[str]:
-        """All tool names from_names can resolve: client tools + native (server) tools."""
+        """All tool names from_names can resolve: client tools + native (server) tools.
+
+        Native tools are appended last. The cache breakpoint in AnthropicAgent lands on
+        the final element of this list, so the last native tool in NATIVE_TOOL_NAMES acts
+        as the static-prefix cache anchor. Keep that tool last when adding new native tools.
+        """
         return [*TOOL_MANIFEST, *NATIVE_TOOL_NAMES]
 
     @classmethod

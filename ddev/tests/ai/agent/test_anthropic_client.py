@@ -29,12 +29,15 @@ def make_usage(
     output_tokens: int = 20,
     cache_read: int | None = None,
     cache_creation: int | None = None,
+    web_search_requests: int = 0,
 ) -> SimpleNamespace:
+    server_tool_use = SimpleNamespace(web_search_requests=web_search_requests)
     return SimpleNamespace(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         cache_read_input_tokens=cache_read,
         cache_creation_input_tokens=cache_creation,
+        server_tool_use=server_tool_use,
     )
 
 
@@ -740,8 +743,8 @@ async def test_error_during_paused_continuation_leaves_history_unchanged() -> No
 
 
 async def test_pause_turn_token_usage_summed_across_calls() -> None:
-    pause_usage = make_usage(input_tokens=100, output_tokens=50)
-    final_usage = make_usage(input_tokens=200, output_tokens=80)
+    pause_usage = make_usage(input_tokens=100, output_tokens=50, web_search_requests=2)
+    final_usage = make_usage(input_tokens=200, output_tokens=80, web_search_requests=1)
     pause_resp = make_response("pause_turn", [make_text_block("p")], usage=pause_usage)
     final_resp = make_response("end_turn", [make_text_block("done")], usage=final_usage)
 
@@ -756,6 +759,7 @@ async def test_pause_turn_token_usage_summed_across_calls() -> None:
 
     assert result.usage.input_tokens == 300  # 100 + 200
     assert result.usage.output_tokens == 130  # 50 + 80
+    assert result.usage.web_search_requests == 3  # 2 + 1
 
 
 # ---------------------------------------------------------------------------
