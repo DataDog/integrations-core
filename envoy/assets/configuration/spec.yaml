@@ -2,6 +2,15 @@ name: Envoy
 fleet_configurable: true
 files:
 - name: envoy.yaml
+  discovery:
+    ad_identifiers:
+      - envoy
+    strategies:
+      - strategy: from_ports
+        port_hints:
+          - 8001
+        candidates:
+          - openmetrics_endpoint: "http://{service.host}:{port.number}/stats/prometheus"
   options:
   - template: init_config
     options:
