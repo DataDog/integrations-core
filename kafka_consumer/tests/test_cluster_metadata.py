@@ -12,6 +12,7 @@ import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
 from datadog_checks.kafka_consumer.client import KafkaClient
+from datadog_checks.kafka_consumer.event_cache_mixin import EVENT_CACHE_TTL
 
 pytestmark = [pytest.mark.unit]
 
@@ -917,10 +918,10 @@ def test_schema_registry_two_tier_ttl(check):
     collector = kafka_consumer_check.metadata_collector
 
     # Schema version checks reuse the same refresh interval as broker/topic configs
-    assert collector.CONFIGS_REFRESH_INTERVAL == 180  # default 3 min
+    assert collector._configs_refresh_interval == 180  # default 3 min
 
     # All events (broker, topic, schema) share the same re-emission TTL
-    assert collector.EVENT_CACHE_TTL == 3600  # 1 hour
+    assert EVENT_CACHE_TTL == 3600  # 1 hour
 
 
 def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, aggregator):
@@ -1130,8 +1131,8 @@ def test_kafka_configs_refresh_interval(check, interval, expected_interval, expe
     kafka_consumer_check = check(instance)
     collector = kafka_consumer_check.metadata_collector
 
-    assert collector.CONFIGS_REFRESH_INTERVAL == expected_interval
-    assert collector.CONFIGS_REFRESH_JITTER == expected_jitter
+    assert collector._configs_refresh_interval == expected_interval
+    assert collector._configs_refresh_jitter == expected_jitter
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
@@ -1860,3 +1861,75 @@ def test_malformed_cache_does_not_abort_collection(check, aggregator):
     )
     aggregator.assert_metric('kafka.consumer_group.members', count=1)
     aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def test_heartbeat_connect_api_status_present_when_urls_configured(check):
+    """connect_api_status appears in heartbeat payload when Connect URLs are configured."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'kafka_connect_url': 'http://connect:8083',
+    }
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    with mock.patch.object(
+        kafka_consumer_check._connector_collector,
+        'collect',
+        return_value={'http://connect:8083': True},
+    ):
+        kafka_consumer_check._send_cluster_monitoring_heartbeat(
+            total_contexts=0,
+            cluster_id='test-cluster',
+            connect_status={'http://connect:8083': True},
+        )
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert 'connect_api_status' in hb_events[0]
+    assert hb_events[0]['connect_api_status'] == {'http://connect:8083': True}
+
+
+def test_heartbeat_connect_api_status_absent_when_no_urls(check):
+    """connect_api_status is absent from heartbeat payload when no Connect URLs are configured."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=0, cluster_id='test-cluster')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert 'connect_api_status' not in hb_events[0]
+
+
+def test_collect_connect_status_returns_none_when_unconfigured(check):
+    """_collect_connect_status returns None when no Connect URLs are configured."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+
+    result = kafka_consumer_check._collect_connect_status('test-cluster')
+    assert result is None
+
+
+def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
+    """_collect_connect_status returns {} when the collector raises, instead of propagating."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'kafka_connect_url': 'http://connect:8083',
+    }
+    kafka_consumer_check = check(instance)
+
+    with mock.patch.object(
+        kafka_consumer_check._connector_collector,
+        'collect',
+        side_effect=Exception("connection refused"),
+    ):
+        result = kafka_consumer_check._collect_connect_status('test-cluster')
+
+    assert result == {}

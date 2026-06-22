@@ -36,18 +36,16 @@ class KafkaConnectCollector(EventCacheMixin):
         self.log = log
         self.http = check.http
 
-        configs_refresh = self.config._kafka_configs_refresh_interval
-        self._configs_refresh_interval = configs_refresh
-        self._configs_refresh_jitter = max(15, configs_refresh // 10)
+        self._init_cache_intervals(self.config._kafka_configs_refresh_interval)
 
         self._oauth_token: str | None = None
         self._oauth_token_expiry: float = 0.0
-        self._http_kwargs: dict = {}
+        self._http_kwargs: dict[str, Any] = {}
         self._configure_http()
 
     def _configure_http(self) -> None:
         """Build per-request HTTP kwargs for Kafka Connect auth and TLS."""
-        self._http_kwargs = {}
+        self._http_kwargs: dict[str, Any] = {}
 
         if self.config._kafka_connect_username and self.config._kafka_connect_password:
             self._http_kwargs['auth'] = (self.config._kafka_connect_username, self.config._kafka_connect_password)
@@ -64,31 +62,37 @@ class KafkaConnectCollector(EventCacheMixin):
         elif self.config._kafka_connect_tls_cert:
             self._http_kwargs['cert'] = self.config._kafka_connect_tls_cert
 
-    def _get_request_kwargs(self) -> dict:
+    def _get_request_kwargs(self) -> dict[str, Any]:
         """Return per-request kwargs including the current OAuth bearer token if set."""
-        kwargs = dict(self._http_kwargs)
+        kwargs: dict[str, Any] = dict(self._http_kwargs)
         if self._oauth_token:
-            extra_headers = {'Authorization': f'Bearer {self._oauth_token}'}
+            extra_headers: dict[str, str] = {'Authorization': f'Bearer {self._oauth_token}'}
             oauth_config = self.config._kafka_connect_oauth_token_provider
             if oauth_config:
                 custom_headers = oauth_config.get('custom_headers')
                 if custom_headers:
                     extra_headers.update(custom_headers)
             kwargs['extra_headers'] = extra_headers
+        else:
+            # Mask any schema-registry auth that may have been set globally on check.http
+            # via ChainMap fallback (http.py:469). Explicitly override to prevent leakage.
+            if 'auth' not in kwargs:
+                kwargs['auth'] = None
+            kwargs['extra_headers'] = {'Authorization': ''}
         return kwargs
 
-    def _fetch_oidc_token(self, oauth_config: dict) -> tuple[str, float]:
+    def _fetch_oidc_token(self, oauth_config: dict[str, Any]) -> tuple[str, float]:
         """Fetch an OIDC token using client credentials grant."""
         token_url = oauth_config['url']
         client_id = oauth_config['client_id']
         client_secret = oauth_config['client_secret']
 
-        data: dict = {'grant_type': 'client_credentials'}
+        data: dict[str, Any] = {'grant_type': 'client_credentials'}
         scope = oauth_config.get('scope')
         if scope:
             data['scope'] = scope
 
-        options: dict = {'auth': (client_id, client_secret), 'timeout': self.config._request_timeout}
+        options: dict[str, Any] = {'auth': (client_id, client_secret), 'timeout': self.config._request_timeout}
         tls_ca_cert = oauth_config.get('tls_ca_cert')
         if tls_ca_cert:
             options['verify'] = tls_ca_cert
@@ -126,8 +130,11 @@ class KafkaConnectCollector(EventCacheMixin):
             try:
                 self._refresh_oauth_token()
             except Exception as e:
-                self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
-                return dict.fromkeys(self.config._kafka_connect_urls, False)
+                if self._oauth_token and time.time() < self._oauth_token_expiry:
+                    self.log.warning("OAuth refresh failed, proceeding with existing token: %s", e)
+                else:
+                    self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
+                    return dict.fromkeys(self.config._kafka_connect_urls, False)
 
         connectivity: dict[str, bool] = {}
 

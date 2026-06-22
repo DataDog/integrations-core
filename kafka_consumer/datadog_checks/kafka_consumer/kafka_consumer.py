@@ -131,16 +131,7 @@ class KafkaCheck(AgentCheck):
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
-            connect_status: dict[str, bool] | None = None
-            if self.config._kafka_connect_urls:
-                try:
-                    connect_status = self._connector_collector.collect(
-                        self.config._kafka_cluster_id_override or cluster_id
-                    )
-                except Exception as e:
-                    self.log.error("Error collecting connector metadata: %s", e)
-                    connect_status = {}
-
+            connect_status = self._collect_connect_status(cluster_id)
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id, connect_status)
 
             try:
@@ -176,6 +167,16 @@ class KafkaCheck(AgentCheck):
                 'reason': reason,
             }
         )
+
+    def _collect_connect_status(self, cluster_id: str) -> dict[str, bool] | None:
+        """Collect connector status for all configured Connect URLs, or None if unconfigured."""
+        if not self.config._kafka_connect_urls:
+            return None
+        try:
+            return self._connector_collector.collect(self.config._kafka_cluster_id_override or cluster_id)
+        except Exception as e:
+            self.log.error("Error collecting connector metadata: %s", e)
+            return {}
 
     def _send_cluster_monitoring_heartbeat(
         self, total_contexts: int, cluster_id: str, connect_status: dict[str, bool] | None = None

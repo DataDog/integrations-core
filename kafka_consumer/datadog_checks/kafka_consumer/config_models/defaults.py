@@ -52,18 +52,6 @@ def instance_kafka_connect_collect_task_metrics():
     return False
 
 
-def instance_kafka_connect_confluent_cloud_cluster_id():
-    return 'lkc-xyz789'
-
-
-def instance_kafka_connect_confluent_cloud_environment_id():
-    return 'env-abc123'
-
-
-def instance_kafka_connect_confluent_cloud_url():
-    return 'https://api.confluent.cloud'
-
-
 def instance_kafka_connect_tls_verify():
     return True
 

@@ -477,7 +477,7 @@ instances:
 
     ## @param kafka_connect_tls_verify - boolean - optional - default: true
     ## Whether to verify the Kafka Connect TLS certificate.
-    ## Set to false to disable verification (not recommended for production).
+    ## Set to `false` to skip TLS certificate verification, which is not recommended for production.
     #
     # kafka_connect_tls_verify: true
 

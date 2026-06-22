@@ -51,10 +51,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         self.log = log
         self.http = check.http
 
-        # Broker/topic config refresh interval (configurable, default 3 min)
-        configs_refresh = self.config._kafka_configs_refresh_interval
-        self._configs_refresh_interval = configs_refresh
-        self._configs_refresh_jitter = max(15, configs_refresh // 10)  # 10% jitter, min 15s
+        self._init_cache_intervals(self.config._kafka_configs_refresh_interval)
         self.BROKER_CONFIG_BATCH_SIZE = 5  # Max brokers to describe_configs per run (one per call, Kafka limitation)
         self.TOPIC_CONFIG_BATCH_SIZE = 100  # Max topics to describe_configs per check run
 

@@ -19,6 +19,11 @@ class EventCacheMixin:
     self._configs_refresh_interval, self._configs_refresh_jitter.
     """
 
+    def _init_cache_intervals(self, configs_refresh: int) -> None:
+        """Initialise refresh interval and jitter from the configured refresh period."""
+        self._configs_refresh_interval = configs_refresh
+        self._configs_refresh_jitter = max(15, configs_refresh // 10)
+
     def _get_items_to_fetch(self, cache_key: str, item_keys: list[str]) -> list[str]:
         """Return items that need fetching, sorted oldest-expiry-first."""
         current_time = time.time()

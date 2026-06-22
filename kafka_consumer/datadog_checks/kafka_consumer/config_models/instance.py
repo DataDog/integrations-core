@@ -93,9 +93,6 @@ class InstanceConfig(BaseModel):
     kafka_cluster_id_override: Optional[str] = None
     kafka_configs_refresh_interval: Optional[int] = None
     kafka_connect_collect_task_metrics: Optional[bool] = None
-    kafka_connect_confluent_cloud_cluster_id: Optional[str] = None
-    kafka_connect_confluent_cloud_environment_id: Optional[str] = None
-    kafka_connect_confluent_cloud_url: Optional[str] = None
     kafka_connect_oauth_token_provider: Optional[KafkaConnectOauthTokenProvider] = None
     kafka_connect_password: Optional[str] = None
     kafka_connect_str: Union[str, tuple[str, ...]]

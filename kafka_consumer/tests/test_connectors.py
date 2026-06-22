@@ -512,6 +512,21 @@ def test_collect_oauth_failure_returns_endpoints_as_false():
     assert result == {'http://localhost:8083': False}
 
 
+def test_collect_multi_endpoint_partial_failure():
+    """One endpoint failing does not prevent the other from being collected."""
+    collector, _, config, _ = make_collector(connect_urls=['http://ok:8083', 'http://bad:8083'])
+    config._kafka_connect_oauth_token_provider = None
+
+    with mock.patch.object(
+        collector,
+        '_collect_rest',
+        side_effect=[None, ConnectionError("refused")],
+    ):
+        result = collector.collect('cluster-1')
+
+    assert result == {'http://ok:8083': True, 'http://bad:8083': False}
+
+
 # ---------------------------------------------------------------------------
 # _refresh_oauth_token
 # ---------------------------------------------------------------------------
