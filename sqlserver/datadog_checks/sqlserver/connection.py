@@ -139,13 +139,25 @@ def parse_connection_string_properties(cs):
 
 def _escape_odbc_connection_string_value(value: str) -> str:
     """Return a value escaped for an ODBC connection string."""
-    # MS Learn "Strong Passwords": brace special-character passwords and double right braces.
+    # SQL Server passwords may contain symbols, but ODBC connection strings use
+    # semicolons to separate key/value pairs. Microsoft documents wrapping
+    # special-character passwords in braces and escaping a literal right brace as
+    # "}}"; the outer braces are delimiters, not part of the password.
+    # Password: pa;ss}word
+    # Connection string: Server=host;UID=datadog;PWD={pa;ss}}word};
+    # Docs: https://learn.microsoft.com/en-us/sql/relational-databases/security/strong-passwords
     return '{{{}}}'.format(value.replace('}', '}}'))
 
 
 def _escape_adodbapi_connection_string_value(value: str) -> str:
     """Return a value escaped for an adodbapi connection string."""
-    # MS Learn OLE DB Driver keywords: quote string values and double the enclosing quote.
+    # adodbapi uses an ADO/OLE DB connection string, where semicolons separate
+    # key/value pairs. Quoting keeps semicolons inside the password value; a
+    # literal quote inside that value is escaped by doubling it. The outer quotes
+    # are delimiters, not part of the password.
+    # Password: pa;ss"word
+    # Connection string: Provider=MSOLEDBSQL;User ID=datadog;Password="pa;ss""word";
+    # Docs: https://learn.microsoft.com/en-us/sql/connect/oledb/applications/using-connection-string-keywords-with-oledb-driver-for-sql-server
     return '"{}"'.format(value.replace('"', '""'))
 
 
