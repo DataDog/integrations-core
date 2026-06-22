@@ -9,7 +9,8 @@
         "ddtags": [
             "server:mongodb://testUser2:*****@localhost:27017/test",
             "clustername:my_cluster",
-            "hosting_type:self-hosted"
+            "hosting_type:self-hosted",
+            "mongo_version:4.1.13"
         ],
         "timestamp": 1715911398111.2722,
         "service": "my_service",

@@ -42,6 +42,8 @@ def _assert_mongodb_instance_event(
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['host'] == check._resolved_hostname
     assert mongodb_instance_event['dbms'] == "mongo"
+    if check._mongo_version:
+        expected_tags = expected_tags + [f'mongo_version:{check._mongo_version}']
     assert sorted(mongodb_instance_event['tags']) == sorted(expected_tags)
 
     expected_instance_metadata = {

@@ -670,6 +670,21 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
     datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
 
 
+def test_get_tags_includes_mongo_version(check, instance, dd_run_check):
+    '''
+    Once metadata has been refreshed, `_get_tags` must include the raw MongoDB
+    version as a `mongo_version:<version>` tag so that every emitted metric and
+    DBM payload carries it.
+    '''
+    mongo_check = check(instance)
+    with mock_pymongo('standalone') as mocked_client:
+        mocked_client.server_info = mock.MagicMock(return_value={'version': '7.0.5'})
+        dd_run_check(mongo_check)
+
+    assert mongo_check._mongo_version == '7.0.5'
+    assert 'mongo_version:7.0.5' in mongo_check._get_tags()
+
+
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
