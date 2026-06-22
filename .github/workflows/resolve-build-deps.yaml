@@ -216,15 +216,35 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    # The librdkafka native binary is ABI-coupled to confluent-kafka and
+    # currently rebuilt inside the Windows container on every wheel build (~25
+    # min). Caching the artifact on the host and mounting it back in skips the
+    # vcpkg + librdkafka compile when the inputs are unchanged. The cache key
+    # captures every input that can change the binary (the confluent-kafka pin
+    # plus the Windows image directory, which includes the librdkafka tarball
+    # hash, vcpkg commit, and the OPENSSL_VERSION/CURL_VERSION env values that
+    # get patched into the vcpkg manifest), so any pin change forces a fresh
+    # build automatically.
+    - name: Cache Windows native deps
+      if: startsWith(matrix.job.image, 'windows-')
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      with:
+        path: .native_cache/${{ matrix.job.image }}
+        key: ${{ matrix.job.image }}-native-deps-${{ hashFiles('agent_requirements.in', '.builders/images/windows-x86_64/**') }}
+
+    - name: Compute native cache args
+      if: startsWith(matrix.job.image, 'windows-')
+      run: echo "NATIVE_CACHE_ARGS=--native-cache .native_cache/${{ matrix.job.image }}" >> "$GITHUB_ENV"
+
     - name: Build image and wheels
       if: matrix.job.rebuild == 'true'
-      run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
+      run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt ${NATIVE_CACHE_ARGS:-}
 
     - name: Pull image and build wheels
       if: matrix.job.rebuild == 'false'
       run: |
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt ${NATIVE_CACHE_ARGS:-}
 
     - name: Publish image
       if: matrix.job.rebuild == 'true'
