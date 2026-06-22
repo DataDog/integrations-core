@@ -26,6 +26,8 @@ from datadog_checks.sqlserver.connection_errors import (
 from .common import CHECK_NAME, SQLSERVER_YEAR
 
 KEY_PREFIX = "dbm-test-"
+SEMICOLON_PASSWORD_LOGIN = 'datadog_semicolon_password'
+SEMICOLON_PASSWORD = 'Pa;ssword123!'
 
 
 @pytest.mark.unit
@@ -308,56 +310,43 @@ def test_connection_string_escapes_password_special_characters(
     assert expected_password_parameter in conn_str
 
 
-def drop_semicolon_password_login(sa_conn: object) -> None:
+@pytest.fixture
+def semicolon_password_login(sa_conn: object) -> tuple[str, str]:
     with sa_conn.cursor() as cursor:
         cursor.execute(
             """
-            SELECT session_id FROM sys.dm_exec_sessions WHERE login_name = N'datadog_semicolon_password'
-            """
-        )
-        for row in cursor.fetchall():
-            cursor.execute('KILL {}'.format(row[0]))
-        cursor.execute(
-            """
-            IF EXISTS (
-                SELECT 1 FROM sys.database_principals WHERE name = N'datadog_semicolon_password'
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.server_principals WHERE name = N'{login}'
             )
-                DROP USER [datadog_semicolon_password]
-            """
+                CREATE LOGIN [{login}] WITH PASSWORD = '{password}', CHECK_POLICY = OFF
+            """.format(login=SEMICOLON_PASSWORD_LOGIN, password=SEMICOLON_PASSWORD)
         )
         cursor.execute(
             """
-            IF EXISTS (
-                SELECT 1 FROM sys.server_principals WHERE name = N'datadog_semicolon_password'
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.database_principals WHERE name = N'{login}'
             )
-                DROP LOGIN [datadog_semicolon_password]
-            """
+                CREATE USER [{login}] FOR LOGIN [{login}]
+            """.format(login=SEMICOLON_PASSWORD_LOGIN)
         )
+    return SEMICOLON_PASSWORD_LOGIN, SEMICOLON_PASSWORD
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_connection_with_semicolon_in_password(instance_docker: dict[str, object], sa_conn: object) -> None:
-    login_name = 'datadog_semicolon_password'
-    password = 'Pa;ssword123!'
+def test_connection_with_semicolon_in_password(
+    instance_docker: dict[str, object], semicolon_password_login: tuple[str, str]
+) -> None:
+    login_name, password = semicolon_password_login
+    instance_docker['username'] = login_name
+    instance_docker['password'] = password
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
 
-    drop_semicolon_password_login(sa_conn)
-    with sa_conn.cursor() as cursor:
-        cursor.execute("CREATE LOGIN [datadog_semicolon_password] WITH PASSWORD = 'Pa;ssword123!', CHECK_POLICY = OFF")
-        cursor.execute("CREATE USER [datadog_semicolon_password] FOR LOGIN [datadog_semicolon_password]")
-
-    try:
-        instance_docker['username'] = login_name
-        instance_docker['password'] = password
-        check = SQLServer(CHECK_NAME, {}, [instance_docker])
-        check.initialize_connection()
-
-        with check.connection.open_managed_default_connection(KEY_PREFIX):
-            with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-                cursor.execute("select 1")
-                assert cursor.fetchall()
-    finally:
-        drop_semicolon_password_login(sa_conn)
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+            cursor.execute("select 1")
+            assert cursor.fetchall()
 
 
 @pytest.mark.flaky
