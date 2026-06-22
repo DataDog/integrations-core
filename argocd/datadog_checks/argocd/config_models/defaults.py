@@ -68,6 +68,18 @@ def instance_genresources_max_resources_per_cycle():
     return 10000
 
 
+def instance_genresources_rescrape_interval_seconds():
+    return 1200
+
+
+def instance_genresources_stream_applications_enabled():
+    return False
+
+
+def instance_genresources_stream_backoff_max_seconds():
+    return 30
+
+
 def instance_genresources_ttl_seconds():
     return 21600
 
