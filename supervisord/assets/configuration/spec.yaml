@@ -2,6 +2,17 @@ name: Supervisord
 fleet_configurable: true
 files:
 - name: supervisord.yaml
+  discovery:
+    ad_identifiers:
+      - supervisord
+    strategies:
+      - strategy: from_ports
+        port_hints:
+          - 9001
+        candidates:
+          - name: "{service.id}"
+            host: "{service.host}"
+            port: "{port.number}"
   options:
     - template: init_config
       options:
