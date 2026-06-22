@@ -5,7 +5,7 @@ import copy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from . import common
@@ -25,7 +25,7 @@ def dd_environment():
             CheckEndpoints(common.MOCKED_INSTANCE['openmetrics_endpoint']),
         ],
     ):
-        yield common.MOCKED_INSTANCE, common.E2E_METADATA
+        yield common.MOCKED_INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')
