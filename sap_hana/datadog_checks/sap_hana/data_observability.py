@@ -156,11 +156,11 @@ class SapHanaDataObservability(DBMAsyncJob):
                 pass
         from hdbcli.dbapi import connect as hana_connect  # noqa: PLC0415
 
-        conn_props = self._check.instance.get('connection_properties', {}).copy()
-        conn_props.setdefault('address', self._check._server)
-        conn_props.setdefault('port', self._check._port)
-        conn_props.setdefault('user', self._check._username)
-        conn_props.setdefault('password', self._check._password)
+        # Use the check's connection-property builder so that TLS settings from
+        # use_tls/tls_* instance options are applied here too.  The DO job opens
+        # its own connection (instead of reusing self._check._conn) because it
+        # needs a per-query statementTimeout that must not affect main-check queries.
+        conn_props = self._check._get_connection_properties()
         conn_props['statementTimeout'] = timeout_seconds * 1000
         try:
             self._do_conn = hana_connect(**conn_props)
