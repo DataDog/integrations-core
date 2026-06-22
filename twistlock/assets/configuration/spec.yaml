@@ -10,6 +10,7 @@ files:
   - template: instances
     options:
     - name: url
+      display_priority: 3
       fleet_configurable: true
       formats: ["url"]
       required: true
@@ -18,6 +19,7 @@ files:
         example: 'http://localhost:8081'
         type: string
     - name: project
+      display_priority: 1
       description: |
         The Twistlock project if enabled.
         See https://cdn.twistlock.com/docs/api/twistlock_api.html
@@ -32,4 +34,6 @@ files:
         password.description: |
           The password to use if services are behind basic or NTLM auth.
           In the case of SaaS version this is your Prisma Cloud Secret Key.
+        username.display_priority: 5
+        password.display_priority: 4
     - template: instances/default
