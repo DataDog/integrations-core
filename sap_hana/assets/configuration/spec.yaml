@@ -156,6 +156,7 @@ files:
               example:
                 - "TMP_SCHEMA"
       - name: data_observability
+        hidden: true
         display_priority: 0
         fleet_configurable: true
         description: |
