@@ -1,0 +1,1 @@
+Reuse the auxiliary SQL Server schema collection connection for legacy table detail queries.
