@@ -36,17 +36,7 @@ def resolve_packages(
     all_packages: list[str],
     head_tags: list[str] | None = None,
 ) -> tuple[list[str], str]:
-    """Resolve the list of packages to release.
-
-    Resolution order:
-    - JSON array   → use the provided list verbatim; unknown names are an error
-    - empty string → auto-detect from git tags at HEAD; tags that do not map to a
-      real package (e.g. ``*-bootstrap-*`` sentinel tags used to bootstrap a
-      release branch) are ignored
-
-    Returns ``(packages, mode_description)``.
-    Raises ``ValueError`` on invalid input or unknown manually selected packages.
-    """
+    """Resolve packages to release from a JSON list (errors on unknown names) or, when empty, from tags at HEAD (ignoring tags with no matching package)."""
     selected = selected.strip()
     known = set(all_packages)
 
