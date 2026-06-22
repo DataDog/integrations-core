@@ -37,6 +37,7 @@ def test_scans_yaml_and_yml_extensions(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: /fake.md
     """,
     )
     write_yaml(
@@ -46,6 +47,7 @@ def test_scans_yaml_and_yml_extensions(tmp_path):
         - type: agent
           config:
             name: agent_b
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -63,6 +65,7 @@ def test_scans_recursively(tmp_path):
         - type: agent
           config:
             name: nested_agent
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -84,6 +87,7 @@ def test_mixed_types_in_single_file(tmp_path):
         - type: agent
           config:
             name: my_agent
+            system_prompt_path: /fake.md
         - type: phase
           config:
             name: my_phase
@@ -113,6 +117,7 @@ def test_no_conflicts_when_names_are_unique(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: /fake.md
     """,
     )
     write_yaml(
@@ -122,6 +127,7 @@ def test_no_conflicts_when_names_are_unique(tmp_path):
         - type: agent
           config:
             name: agent_b
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -137,6 +143,7 @@ def test_conflict_detected_same_name_same_type(tmp_path):
         - type: agent
           config:
             name: shared_agent
+            system_prompt_path: /fake.md
     """,
     )
     write_yaml(
@@ -146,6 +153,7 @@ def test_conflict_detected_same_name_same_type(tmp_path):
         - type: agent
           config:
             name: shared_agent
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -165,6 +173,7 @@ def test_same_name_different_types_no_conflict(tmp_path):
         - type: agent
           config:
             name: shared_name
+            system_prompt_path: /fake.md
         - type: phase
           config:
             name: shared_name
@@ -185,6 +194,7 @@ def test_conflict_sources_are_in_scan_order(tmp_path):
           config:
             name: dup
             model: first
+            system_prompt_path: /fake.md
     """,
     )
     b_path = write_yaml(
@@ -195,6 +205,7 @@ def test_conflict_sources_are_in_scan_order(tmp_path):
           config:
             name: dup
             model: second
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -228,6 +239,7 @@ def test_conflicted_resource_not_in_registry(tmp_path):
         - type: agent
           config:
             name: dup
+            system_prompt_path: /fake.md
     """,
     )
     write_yaml(
@@ -237,6 +249,7 @@ def test_conflicted_resource_not_in_registry(tmp_path):
         - type: agent
           config:
             name: dup
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -274,6 +287,7 @@ def test_user_dir_resources_are_picked_up(tmp_path):
         - type: agent
           config:
             name: core_agent
+            system_prompt_path: /fake.md
     """,
     )
     write_yaml(
@@ -283,6 +297,7 @@ def test_user_dir_resources_are_picked_up(tmp_path):
         - type: agent
           config:
             name: user_agent
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=core, user_dirs=[str(user)])
@@ -304,6 +319,7 @@ def test_user_dir_conflict_with_core_dir(tmp_path):
           config:
             name: shared
             model: core-model
+            system_prompt_path: /fake.md
     """,
     )
     write_yaml(
@@ -314,6 +330,7 @@ def test_user_dir_conflict_with_core_dir(tmp_path):
           config:
             name: shared
             model: user-model
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=core, user_dirs=[str(user)])
@@ -338,6 +355,7 @@ def test_multiple_user_dirs_cascade(tmp_path):
         - type: agent
           config:
             name: agent_u1
+            system_prompt_path: /fake.md
     """,
     )
     write_yaml(
@@ -347,6 +365,7 @@ def test_multiple_user_dirs_cascade(tmp_path):
         - type: agent
           config:
             name: agent_u2
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=core, user_dirs=[str(u1), str(u2)])
@@ -364,6 +383,7 @@ def test_overlapping_scan_dirs_no_double_processing(tmp_path):
         - type: agent
           config:
             name: shared_agent
+            system_prompt_path: /fake.md
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path, user_dirs=[str(tmp_path)])
@@ -377,6 +397,7 @@ def test_yaml_and_yml_same_stem_no_double_processing(tmp_path):
         - type: agent
           config:
             name: only_once
+            system_prompt_path: /fake.md
     """
     (tmp_path / "x.yaml").write_text(textwrap.dedent(content))
     (tmp_path / "x.yml").write_text(textwrap.dedent(content))
@@ -504,6 +525,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: /fake.md
             variables:
               - name: endpoint
                 default: http://localhost:9090
@@ -529,6 +551,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: /fake.md
             variables:
               - name: integration_name
         - type: phase
@@ -654,6 +677,7 @@ def test_build_flow_variable_resolved_from_flow(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: prompts/agent_a.md
             variables:
               - name: integration_name
         - type: phase
@@ -685,6 +709,7 @@ def test_build_flow_same_default_no_conflict(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: prompts/agent_a.md
             variables:
               - name: endpoint
                 default: http://localhost:9090
@@ -751,6 +776,7 @@ def test_runtime_override_takes_precedence_over_default(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: prompts/agent_a.md
             variables:
               - name: endpoint
                 default: http://default
@@ -782,6 +808,7 @@ def test_missing_variable_error_lists_all_missing(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: /fake.md
             variables:
               - name: var_one
               - name: var_two
@@ -823,6 +850,7 @@ def test_build_flow_relative_paths_resolved(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: prompts/agent_a.md
         - type: phase
           config:
             name: phase_a
@@ -857,6 +885,7 @@ def test_build_flow_absolute_prompt_path_preserved(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: prompts/agent_a.md
         - type: phase
           config:
             name: phase_a
@@ -890,6 +919,7 @@ def test_build_flow_goal_path_resolved(tmp_path):
         - type: agent
           config:
             name: agent_a
+            system_prompt_path: prompts/agent_a.md
         - type: phase
           config:
             name: phase_a

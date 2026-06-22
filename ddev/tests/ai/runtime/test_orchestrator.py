@@ -107,6 +107,7 @@ def minimal_flow(tmp_path):
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: a
@@ -173,6 +174,7 @@ async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_pat
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: a
@@ -202,6 +204,7 @@ async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
             - type: agent
               config:
                 name: writer
+                system_prompt_path: prompts/writer.md
             - type: phase
               config:
                 name: a
@@ -234,7 +237,10 @@ def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
     provider = RunResources(
         agent_clients={},
         file_access_policy=file_access_policy,
-        agents={"a": AgentConfig(name="a"), "b": AgentConfig(name="b")},
+        agents={
+            "a": AgentConfig(name="a", system_prompt_path=Path("/a.md")),
+            "b": AgentConfig(name="b", system_prompt_path=Path("/b.md")),
+        },
         callbacks=Callbacks(),
     )
     with pytest.raises(ResourceUnavailableError, match="No agent definition named 'missing'"):
@@ -256,6 +262,7 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: real
@@ -296,6 +303,7 @@ async def test_phase_in_flow_with_unknown_type_raises(tmp_path, make_orchestrato
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: a
@@ -326,6 +334,7 @@ async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: real
@@ -372,6 +381,7 @@ async def test_on_initialize_invokes_validate_config(tmp_path, make_orchestrator
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: a
@@ -400,6 +410,7 @@ async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, make_orc
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: real
@@ -470,6 +481,7 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator, 
         - type: agent
           config:
             name: writer
+            system_prompt_path: prompts/writer.md
         - type: phase
           config:
             name: failing

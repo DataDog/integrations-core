@@ -29,11 +29,16 @@ def test_variable_declaration_without_default():
 
 def test_agent_config_requires_name():
     with pytest.raises(ValidationError):
-        AgentConfig.model_validate({"provider": "anthropic"})
+        AgentConfig.model_validate({"provider": "anthropic", "system_prompt_path": "/p.md"})
+
+
+def test_agent_config_requires_system_prompt_path():
+    with pytest.raises(ValidationError):
+        AgentConfig.model_validate({"name": "my_agent"})
 
 
 def test_agent_config_minimal():
-    a = AgentConfig.model_validate({"name": "my_agent"})
+    a = AgentConfig.model_validate({"name": "my_agent", "system_prompt_path": "/prompts/my_agent.md"})
     assert a.name == "my_agent"
     assert a.provider == "anthropic"
     assert a.variables == []
@@ -73,7 +78,7 @@ def test_agent_config_unknown_tool_raises():
 
 def test_resource_envelope_agent_type():
     adapter = TypeAdapter(ResourceEnvelope)
-    result = adapter.validate_python({"type": "agent", "config": {"name": "a"}})
+    result = adapter.validate_python({"type": "agent", "config": {"name": "a", "system_prompt_path": "/p.md"}})
     assert isinstance(result, AgentEnvelope)
 
 

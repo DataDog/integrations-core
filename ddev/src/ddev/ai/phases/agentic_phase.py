@@ -282,7 +282,6 @@ class AgenticPhase(Phase):
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()
 
-        assert self._agent_config.system_prompt_path is not None, "path resolved by ConfigurationEngine"
         system_prompt = render_prompt(
             self._agent_config.system_prompt_path,
             context,

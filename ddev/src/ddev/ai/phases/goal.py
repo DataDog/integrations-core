@@ -276,6 +276,7 @@ async def run_goal_loop(
         name=parent_agent_config.name,
         provider=parent_agent_config.provider,
         tools=filter_read_only(parent_agent_config.tools),
+        system_prompt_path=parent_agent_config.system_prompt_path,
     )
     try:
         reviewer_process = process_factory.create(

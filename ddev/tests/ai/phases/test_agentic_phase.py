@@ -112,7 +112,7 @@ def test_render_memory_prompt_raises_when_no_source():
 )
 def test_validate_config_rejects_invalid(config, match):
     with pytest.raises(FlowConfigError, match=match):
-        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig(name="writer")})
+        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig(name="writer", system_prompt_path=Path("/fake.md"))})
 
 
 def test_validate_config_accepts_valid():
@@ -121,7 +121,7 @@ def test_validate_config_accepts_valid():
         PhaseConfig(
             name="test_phase", class_="AgenticPhase", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]
         ),
-        {"writer": AgentConfig(name="writer")},
+        {"writer": AgentConfig(name="writer", system_prompt_path=Path("/fake.md"))},
     )
 
 

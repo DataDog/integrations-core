@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
 import pytest
 
 from ddev.ai.config.models import AgentConfig
@@ -165,7 +166,7 @@ def from_names(tool_names: list[str], tmp_path, *, owner_id: str = OWNER_ID) -> 
         tool_names,
         owner_id=owner_id,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
-        agent_config=AgentConfig.model_construct(name="test_agent", provider="anthropic", tools=tool_names),
+        agent_config=AgentConfig.model_construct(name="test_agent", provider="anthropic", tools=tool_names, system_prompt_path=Path("/fake.md")),
         process_factory=PROCESS_FACTORY,
     )
 
@@ -199,7 +200,7 @@ def test_from_names_spawn_subagent_gets_runtime_context(tmp_path):
 
     tool = registry._tools["spawn_subagent"]
     assert isinstance(tool, SpawnSubagentTool)
-    assert tool._agent_config == AgentConfig(name="test_agent", tools=["read_file", "spawn_subagent"])
+    assert tool._agent_config == AgentConfig(name="test_agent", tools=["read_file", "spawn_subagent"], system_prompt_path=Path("/fake.md"))
     assert tool._process_factory is PROCESS_FACTORY
     assert tool._allowed_tools == {"read_file"}
 
@@ -246,14 +247,14 @@ def test_from_names_reuses_supplied_file_registry(tmp_path):
         ["read_file", "create_file"],
         owner_id="a",
         file_registry=shared,
-        agent_config=AgentConfig(name="test_agent", tools=["read_file", "create_file"]),
+        agent_config=AgentConfig(name="test_agent", tools=["read_file", "create_file"], system_prompt_path=Path("/fake.md")),
         process_factory=PROCESS_FACTORY,
     )
     reg_b = ToolRegistry.from_names(
         ["read_file", "create_file"],
         owner_id="b",
         file_registry=shared,
-        agent_config=AgentConfig(name="test_agent", tools=["read_file", "create_file"]),
+        agent_config=AgentConfig(name="test_agent", tools=["read_file", "create_file"], system_prompt_path=Path("/fake.md")),
         process_factory=PROCESS_FACTORY,
     )
 

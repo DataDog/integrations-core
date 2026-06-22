@@ -352,13 +352,13 @@ class ConfigurationEngine:
         return p
 
     def _resolve_agent_paths(self, config: AgentConfig, source_file: Path) -> AgentConfig:
-        source_dir = source_file.parent
-        if config.system_prompt_path is None:
-            system_prompt = source_dir / "prompts" / f"{config.name}.md"
-        else:
-            system_prompt = config.system_prompt_path
+        system_prompt = config.system_prompt_path
+        if not system_prompt.is_absolute():
+            system_prompt = source_file.parent / system_prompt
         if not system_prompt.exists():
             raise FlowConfigError(f"System prompt not found for agent {config.name!r}: {system_prompt}")
+        if system_prompt is config.system_prompt_path:
+            return config
         return config.model_copy(update={"system_prompt_path": system_prompt})
 
     def _resolve_phase_paths(self, config: PhaseConfig, source_file: Path) -> PhaseConfig:
@@ -369,9 +369,13 @@ class ConfigurationEngine:
             new_prompt = self._resolve_relative(source_dir, task.prompt_path)
             if new_prompt is not task.prompt_path:
                 updates["prompt_path"] = new_prompt
+            if new_prompt is not None and not new_prompt.exists():
+                raise FlowConfigError(f"Prompt not found for task {task.name!r} in phase {config.name!r}: {new_prompt}")
             new_goal = self._resolve_relative(source_dir, task.goal_path)
             if new_goal is not task.goal_path:
                 updates["goal_path"] = new_goal
+            if new_goal is not None and not new_goal.exists():
+                raise FlowConfigError(f"Goal not found for task {task.name!r} in phase {config.name!r}: {new_goal}")
             resolved_tasks.append(task.model_copy(update=updates) if updates else task)
 
         checkpoint = config.checkpoint
@@ -379,5 +383,7 @@ class ConfigurationEngine:
             new_memory = self._resolve_relative(source_dir, checkpoint.memory_prompt_path)
             if new_memory is not checkpoint.memory_prompt_path:
                 checkpoint = checkpoint.model_copy(update={"memory_prompt_path": new_memory})
+            if new_memory is not None and not new_memory.exists():
+                raise FlowConfigError(f"Memory prompt not found for phase {config.name!r}: {new_memory}")
 
         return config.model_copy(update={"tasks": resolved_tasks, "checkpoint": checkpoint})

@@ -82,7 +82,7 @@ class AgentConfig(BaseModel):
     max_tokens: int | None = None
     tools: list[str] = Field(default_factory=list)
     variables: list[VariableDeclaration] = Field(default_factory=list)
-    system_prompt_path: Path | None = None
+    system_prompt_path: Path
 
     @field_validator("tools", mode="after")
     @classmethod
