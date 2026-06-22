@@ -502,7 +502,8 @@ QUERY_PG_STAT_RECOVERY_PREFETCH = {
             skip_rep,
             wal_distance,
             block_distance,
-            io_depth
+            io_depth,
+            EXTRACT(EPOCH FROM (now() - stats_reset))
         FROM pg_stat_recovery_prefetch
     """.strip(),
     'columns': [
@@ -515,6 +516,7 @@ QUERY_PG_STAT_RECOVERY_PREFETCH = {
         {'name': 'recovery_prefetch.wal_distance', 'type': 'gauge'},
         {'name': 'recovery_prefetch.block_distance', 'type': 'gauge'},
         {'name': 'recovery_prefetch.io_depth', 'type': 'gauge'},
+        {'name': 'recovery_prefetch.stats_reset_age', 'type': 'gauge'},
     ],
 }
 
