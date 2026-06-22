@@ -220,22 +220,6 @@ instances:
     #   - TLS_CHACHA20_POLY1305_SHA256
     #   - TLS_AES_128_GCM_SHA256
 
-    ## Configure the Data Observability async job, which executes monitoring
-    ## queries delivered via Remote Configuration.
-    #
-    # data_observability:
-
-        ## @param enabled - boolean - optional - default: false
-        ## Enable the Data Observability job.
-        #
-        # enabled: false
-
-        ## @param collection_interval - number - optional - default: 10
-        ## How often (in seconds) the job wakes up to check which queries are
-        ## due. Individual queries have their own interval_seconds.
-        #
-        # collection_interval: 10
-
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
