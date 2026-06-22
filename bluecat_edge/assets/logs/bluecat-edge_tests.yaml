@@ -120,6 +120,8 @@ tests:
           criteria:
             queryDomain: "amazon.in"
           eventType: "block"
+          id: "1768562642346-70ad5103-90f2-40ea-a98d-48926b823575"
+          name: "Local Policy"
         query: "amazon.in."
         queryClassId: 1
         queryId: 8121
