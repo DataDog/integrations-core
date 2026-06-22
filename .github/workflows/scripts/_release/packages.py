@@ -39,27 +39,32 @@ def resolve_packages(
     """Resolve the list of packages to release.
 
     Resolution order:
-    - JSON array   → use the provided list verbatim
-    - empty string → auto-detect from git tags at HEAD
+    - JSON array   → use the provided list verbatim; unknown names are an error
+    - empty string → auto-detect from git tags at HEAD; tags that do not map to a
+      real package (e.g. ``*-bootstrap-*`` sentinel tags used to bootstrap a
+      release branch) are ignored
 
     Returns ``(packages, mode_description)``.
-    Raises ``ValueError`` on invalid input or unknown package names.
+    Raises ``ValueError`` on invalid input or unknown manually selected packages.
     """
     selected = selected.strip()
+    known = set(all_packages)
 
     if selected:
         try:
             packages = json.loads(selected)
         except json.JSONDecodeError as e:
             raise ValueError(f"SELECTED_PACKAGES is not valid JSON: {e}") from e
-        mode = f"manual ({selected})"
-    else:
-        tags = head_tags if head_tags is not None else get_tags_at_head()
-        packages = detect_from_tags(tags)
-        mode = "auto-detect from tags at HEAD"
+        unknown = sorted(set(packages) - known)
+        if unknown:
+            raise ValueError(f"Unknown packages: {', '.join(unknown)}")
+        return packages, f"manual ({selected})"
 
-    unknown = sorted(set(packages) - set(all_packages))
-    if unknown:
-        raise ValueError(f"Unknown packages: {', '.join(unknown)}")
+    tags = head_tags if head_tags is not None else get_tags_at_head()
+    detected = detect_from_tags(tags)
+    packages = [name for name in detected if name in known]
+    ignored = sorted(set(detected) - known)
+    if ignored:
+        print(f"Ignoring tag(s) at HEAD with no matching package: {', '.join(ignored)}")
 
-    return packages, mode
+    return packages, "auto-detect from tags at HEAD"
