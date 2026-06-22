@@ -1115,8 +1115,8 @@ class ClusterMetadataCollector(EventCacheMixin):
             self._mark_items_fetched(
                 self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
                 compat_subjects_to_fetch,
-                ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-                ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+                ttl_base=self._configs_refresh_interval,
+                ttl_jitter=self._configs_refresh_jitter,
                 max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
             )
 
@@ -1274,4 +1274,3 @@ class ClusterMetadataCollector(EventCacheMixin):
             selected_configs.append((key, remaining[key]))
 
         return dict(selected_configs)
-

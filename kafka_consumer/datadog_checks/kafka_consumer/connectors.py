@@ -302,4 +302,3 @@ class KafkaConnectCollector(EventCacheMixin):
             event = json.loads(content)
             event['collection_timestamp'] = int(time.time() * 1000)
             self.check.event_platform_event(json.dumps(event), 'data-streams-message')
-
