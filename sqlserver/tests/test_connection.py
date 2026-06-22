@@ -308,15 +308,34 @@ def test_connection_string_escapes_password_with_semicolon(
     assert expected_password_parameter in conn_str
 
 
+def drop_semicolon_password_login(sa_conn: object) -> None:
+    with sa_conn.cursor() as cursor:
+        cursor.execute(
+            """
+            IF EXISTS (
+                SELECT 1 FROM sys.database_principals WHERE name = N'datadog_semicolon_password'
+            )
+                DROP USER [datadog_semicolon_password]
+            """
+        )
+        cursor.execute(
+            """
+            IF EXISTS (
+                SELECT 1 FROM sys.server_principals WHERE name = N'datadog_semicolon_password'
+            )
+                DROP LOGIN [datadog_semicolon_password]
+            """
+        )
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_connection_with_semicolon_in_password(instance_docker: dict[str, object], sa_conn: object) -> None:
     login_name = 'datadog_semicolon_password'
     password = 'Pa;ssword123!'
 
+    drop_semicolon_password_login(sa_conn)
     with sa_conn.cursor() as cursor:
-        cursor.execute("DROP USER IF EXISTS [datadog_semicolon_password]")
-        cursor.execute("DROP LOGIN IF EXISTS [datadog_semicolon_password]")
         cursor.execute("CREATE LOGIN [datadog_semicolon_password] WITH PASSWORD = 'Pa;ssword123!', CHECK_POLICY = OFF")
         cursor.execute("CREATE USER [datadog_semicolon_password] FOR LOGIN [datadog_semicolon_password]")
 
@@ -331,9 +350,7 @@ def test_connection_with_semicolon_in_password(instance_docker: dict[str, object
                 cursor.execute("select 1")
                 assert cursor.fetchall()
     finally:
-        with sa_conn.cursor() as cursor:
-            cursor.execute("DROP USER IF EXISTS [datadog_semicolon_password]")
-            cursor.execute("DROP LOGIN IF EXISTS [datadog_semicolon_password]")
+        drop_semicolon_password_login(sa_conn)
 
 
 @pytest.mark.flaky
