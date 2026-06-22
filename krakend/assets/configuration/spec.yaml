@@ -2,6 +2,15 @@ name: KrakenD
 fleet_configurable: true
 files:
 - name: krakend.yaml
+  discovery:
+    ad_identifiers:
+    - krakend
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 9090
+      candidates:
+      - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:
