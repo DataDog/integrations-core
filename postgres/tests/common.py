@@ -53,14 +53,14 @@ from datadog_checks.postgres.util import (
     QUERY_PG_WAIT_EVENT_METRICS,
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
-    STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     SUBSCRIPTION_STATE_METRICS,
     WAL_FILE_METRICS,
+    get_stat_io_query,
     get_stat_wal_query,
 )
-from datadog_checks.postgres.version_utils import V14, V18, VersionUtils
+from datadog_checks.postgres.version_utils import V14, V16, V18, VersionUtils
 
 HOST = get_docker_hostname()
 PORT = '5432'
@@ -547,12 +547,13 @@ def check_checksum_metrics(aggregator, expected_tags, count=1):
 def check_stat_io_metrics(aggregator, expected_tags, count=1):
     if float(POSTGRES_VERSION) < 16:
         return
+    version = V18 if float(POSTGRES_VERSION) >= 18.0 else V16
     expected_stat_io_tags = expected_tags + [
         'backend_type:walsender',
         'context:normal',
         'object:relation',
     ]
-    for metric_name in _iterate_metric_name(STAT_IO_METRICS):
+    for metric_name in _iterate_metric_name(get_stat_io_query(version)):
         aggregator.assert_metric(metric_name, count=count, tags=expected_stat_io_tags)
 
 
