@@ -1,8 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datamodel_code_generator.format import CodeFormatter
-
+from datadog_checks.dev.tooling.configuration.consumers.model.code_formatter import format_with_ruff
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 
 
@@ -11,14 +10,12 @@ def build_model_file(
     model_id: str,
     section_name: str,
     model_info: ModelInfo,
-    code_formatter: CodeFormatter,
 ):
     """
     :param parsed_document: OpenApi parsed document
     :param model_id: instance or shared
     :param section_name: init or instances
     :param model_info: Information to build the model file
-    :param code_formatter:
     """
     # Whether or not there are options with default values
     options_with_defaults = len(model_info.defaults_file_lines) > 0
@@ -54,7 +51,7 @@ def build_model_file(
     model_file_lines.append('')
     model_file_contents = '\n'.join(model_file_lines)
     if any(len(line) > 120 for line in model_file_lines):
-        model_file_contents = code_formatter.apply_black(model_file_contents)
+        model_file_contents = format_with_ruff(model_file_contents)
     return model_file_contents
 
 
@@ -109,27 +106,44 @@ def _add_imports(model_file_lines, need_defaults, need_deprecations):
 
 
 def _fix_types(model_file_lines):
-    for i, line in enumerate(model_file_lines):
-        line = model_file_lines[i] = line.replace('dict[', 'MappingProxyType[')
-        if 'list[' not in line:
-            continue
+    # Operate on the joined document (as UTF-8 bytes) so the bracket-tracking
+    # pass below works even when the upstream parser pre-wraps `list[...]`
+    # across multiple lines. Iterating bytes keeps the algorithm safe for
+    # non-ASCII content (descriptions, examples) since `[`, `]`, and `list`
+    # are all single-byte ASCII while UTF-8 continuation bytes never collide
+    # with them.
+    content = '\n'.join(model_file_lines).replace('dict[', 'MappingProxyType[')
+    if 'list[' not in content:
+        model_file_lines[:] = content.split('\n')
+        return
 
-        buffer = bytearray()
-        containers = []
+    encoded = content.encode('utf-8')
+    buffer = bytearray()
+    containers = []
+    open_bracket = ord(b'[')
+    close_bracket = ord(b']')
+    whitespace = (ord(b' '), ord(b'\t'), ord(b'\n'))
 
-        for char in line:
-            if char == '[':
-                if buffer[-4:] == b'list':
-                    containers.append(True)
-                    buffer[-4:] = b'tuple'
-                else:
-                    containers.append(False)
-            elif char == ']' and containers.pop():
-                buffer.extend(b', ...')
+    for byte in encoded:
+        if byte == open_bracket:
+            if buffer[-4:] == b'list':
+                containers.append(True)
+                buffer[-4:] = b'tuple'
+            else:
+                containers.append(False)
+        elif byte == close_bracket and containers and containers.pop():
+            # Insert `, ...` after the last non-whitespace byte already in the
+            # buffer so the sentinel sits on the same line as the previous
+            # content (`tuple[X], ...` style) even when the parser wrapped the
+            # closing `]` onto its own line.
+            insert_at = len(buffer)
+            while insert_at > 0 and buffer[insert_at - 1] in whitespace:
+                insert_at -= 1
+            buffer[insert_at:insert_at] = b', ...'
 
-            buffer.append(ord(char))
+        buffer.append(byte)
 
-        model_file_lines[i] = buffer.decode('utf-8')
+    model_file_lines[:] = buffer.decode('utf-8').split('\n')
 
 
 def _add_secure_fields_constant(model_file_lines, require_trusted_providers):

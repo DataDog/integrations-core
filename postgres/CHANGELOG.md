@@ -2,7 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 23.8.1 / 2026-05-20
+## 23.9.1 / 2026-06-16
+
+***Fixed***:
+
+* Move cursor yield for Postgres schemas outside transaction. This should avoid creating a broken pool connection on timeout ([#24051](https://github.com/DataDog/integrations-core/pull/24051))
+* Cache ignored ``/* DDIGNORE */`` queries in incremental query metrics collector to avoid repeated lookups. ([#24056](https://github.com/DataDog/integrations-core/pull/24056))
+
+## 23.9.0 / 2026-06-09
+
+***Added***:
+
+* Support cron `schedule` field for Data Observability queries. ([#23529](https://github.com/DataDog/integrations-core/pull/23529))
+* Add V2 statement metrics collection pipeline with change detection and cached obfuscation, reducing collection latency and memory allocations on the Python and Go runtimes. ([#23823](https://github.com/DataDog/integrations-core/pull/23823))
+* Collect ``relkind`` for Postgres tables in DBM schema metadata. ([#23888](https://github.com/DataDog/integrations-core/pull/23888))
+* Honor the per-query ``query_timeout`` for Data Observability queries. ([#23896](https://github.com/DataDog/integrations-core/pull/23896))
+
+***Fixed***:
+
+* Set dbms=postgresql in obfuscation options to align query_signature with dbm-logs-processor. ([#23926](https://github.com/DataDog/integrations-core/pull/23926))
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+* Make statement_timeout local for Postgres schemas collection ([#23954](https://github.com/DataDog/integrations-core/pull/23954))
+
+## 23.8.1 / 2026-05-20 / Agent 7.80.0
 
 ***Fixed***:
 
