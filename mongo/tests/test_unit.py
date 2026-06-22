@@ -11,8 +11,6 @@ from urllib.parse import quote_plus
 import mock
 import pytest
 from bson import json_util
-from pymongo.errors import ConnectionFailure, OperationFailure
-
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
@@ -21,6 +19,7 @@ from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, 
 from datadog_checks.mongo.dbm.utils import get_explain_plan, should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
 from datadog_checks.mongo.utils import parse_mongo_uri
+from pymongo.errors import ConnectionFailure, OperationFailure
 
 from . import common
 from .conftest import mock_pymongo
@@ -668,6 +667,19 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         mocked_client.server_info = mock.MagicMock(return_value={'version': '3.6.23-13.0'})
         dd_run_check(check)
     datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
+
+
+def test_query_stats_does_not_use_server_side_sort_or_allow_disk_use():
+    api = MongoApi.__new__(MongoApi)
+    api._timeout = 123
+    admin_db = mock.MagicMock()
+    api._cli = {'admin': admin_db}
+
+    cursor = object()
+    admin_db.aggregate.return_value = cursor
+
+    assert api.query_stats(session='session') is cursor
+    admin_db.aggregate.assert_called_once_with([{'$queryStats': {}}], session='session', maxTimeMS=123)
 
 
 @mock.patch(
