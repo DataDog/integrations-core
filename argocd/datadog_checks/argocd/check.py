@@ -54,7 +54,8 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super().check(instance)
 
     def cancel(self):
-        self._resource_collector.stop()
+        if self._resource_collector is not None:
+            self._resource_collector.stop()
         super().cancel()
 
     def parse_config(self):

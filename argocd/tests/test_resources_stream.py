@@ -9,6 +9,7 @@ import threading
 from unittest.mock import Mock, patch
 
 from datadog_checks.argocd import ArgocdCheck
+from datadog_checks.argocd.resources import ArgocdResourceCollector
 from datadog_checks.argocd.stream_listener import ArgocdApplicationStreamListener
 
 
@@ -41,6 +42,19 @@ def _event(event_type: str, application: dict) -> bytes:
     return json.dumps({"result": {"type": event_type, "application": application}}).encode()
 
 
+def _check(**overrides) -> ArgocdCheck:
+    """Build an ArgocdCheck with config models loaded and the genresources collector attached.
+
+    Production builds the collector lazily on the first ``check()`` once
+    ``check_initializations`` has populated ``self.config``; tests reach into
+    ``check._resource_collector`` directly, so we mirror that bootstrap here.
+    """
+    check = ArgocdCheck("argocd", {}, [_instance(**overrides)])
+    check.load_configuration_models()
+    check._resource_collector = ArgocdResourceCollector(check)
+    return check
+
+
 def test_handle_line_routes_added_and_deleted_to_the_collector():
     collector = Mock()
     listener = _listener(collector)
@@ -69,7 +83,7 @@ def test_handle_line_ignores_malformed_and_non_application_frames():
 
 
 def test_emit_stream_application_dedupes_unchanged_app():
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_stream_applications_enabled=True)])
+    check = _check(genresources_stream_applications_enabled=True)
     app = _application("web", resource_version="100")
 
     with patch.object(check, "submit_generic_resource") as submit:
@@ -80,7 +94,7 @@ def test_emit_stream_application_dedupes_unchanged_app():
 
 
 def test_forget_application_lets_a_readded_app_resubmit():
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_stream_applications_enabled=True)])
+    check = _check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     app = _application("web", resource_version="100")
 
@@ -93,7 +107,7 @@ def test_forget_application_lets_a_readded_app_resubmit():
 
 
 def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener():
-    check = ArgocdCheck("argocd", {}, [_instance()])  # streaming defaults off
+    check = _check()  # streaming defaults off
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
@@ -106,7 +120,7 @@ def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener():
 
 
 def test_collect_with_streaming_on_starts_listener_and_rescrapes_all_types():
-    check = ArgocdCheck("argocd", {}, [_instance(genresources_stream_applications_enabled=True)])
+    check = _check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:

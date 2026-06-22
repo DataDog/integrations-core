@@ -221,9 +221,9 @@ class ArgocdResourceCollector:
         self._resubmit_interval: int = max(1, self._ttl_seconds // 2)
         self._collection_interval: int = config.genresources_collection_interval_seconds
         self._last_collect: float = 0.0
-        self._stream_enabled: bool = bool(instance.get("genresources_stream_applications_enabled", False))
-        self._rescrape_interval: int = instance.get("genresources_rescrape_interval_seconds", 1200)
-        self._backoff_max: int = instance.get("genresources_stream_backoff_max_seconds", 30)
+        self._stream_enabled: bool = bool(config.genresources_stream_applications_enabled)
+        self._rescrape_interval: int = config.genresources_rescrape_interval_seconds
+        self._backoff_max: int = config.genresources_stream_backoff_max_seconds
         self._last_rescrape: float = 0.0
         self._submitted_lock = threading.RLock()
         self._listener: ArgocdApplicationStreamListener | None = None
@@ -248,8 +248,6 @@ class ArgocdResourceCollector:
             )
 
     def collect(self) -> None:
-<<<<<<< Updated upstream
-=======
         if not self._endpoint:
             self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
             for spec in RESOURCE_TYPE_SPECS:
@@ -261,40 +259,11 @@ class ArgocdResourceCollector:
             self._collect_polling()
 
     def _collect_polling(self) -> None:
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         seen_at = int(time.time())
         if seen_at - self._last_collect < self._collection_interval:
             return
         self._last_collect = seen_at
 
-        if not self._endpoint:
-            self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
-            for spec in RESOURCE_TYPE_SPECS:
-                self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=[f"resource_type:{spec.resource_type}"])
-            return
-        if self._stream_enabled:
-            self._collect_with_stream()
-        else:
-            self._collect_polling()
-
-<<<<<<< Updated upstream
-=======
-    def _collect_polling(self) -> None:
-        seen_at = int(time.time())
-        if seen_at - self._last_collect < self._collection_interval:
-            return
-        self._last_collect = seen_at
-
->>>>>>> Stashed changes
         expire_at = seen_at + self._ttl_seconds
         force_full = (seen_at - self._last_full_submit) >= self._resubmit_interval
         if force_full:
@@ -409,34 +378,6 @@ class ArgocdResourceCollector:
             key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
         include = self._includes[spec.resource_type]
         cache_key = f"{spec.resource_type}{KEY_SEPARATOR}{key}"
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        if force_full or self._submitted.get(cache_key) != token:
-            try:
-                self.check.submit_generic_resource(
-                    type=spec.resource_type,
-                    key=key,
-                    fields=item,
-                    include=include,
-                    seen_at=seen_at,
-                    expire_at=expire_at,
-                )
-                self._submitted[cache_key] = token
-            except Exception:
-                self.check.log.exception("genresources: failed to submit %s (key=%s)", spec.resource_type, key)
-=======
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-        token = _change_token(item)
         with self._submitted_lock:
             if force_full or self._submitted.get(cache_key) != token:
                 try:
@@ -451,17 +392,4 @@ class ArgocdResourceCollector:
                     self._submitted[cache_key] = token
                 except Exception:
                     self.check.log.exception("genresources: failed to submit %s (key=%s)", spec.resource_type, key)
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         return cache_key
