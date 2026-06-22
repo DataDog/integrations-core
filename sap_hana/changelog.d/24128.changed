@@ -1,0 +1,1 @@
+Run SAP HANA schema collection in a background thread to avoid blocking the main check loop.
