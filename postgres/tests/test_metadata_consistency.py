@@ -55,6 +55,7 @@ def _declared_metric_names():
             if _is_metric_container(obj):
                 names.update(_iterate_metric_name(obj))
     names.update(_iterate_metric_name(relationsmanager.get_pg_class_query(V18)))
+    names.update(_iterate_metric_name(util.get_replication_slots_query(V18)))
     for version in (V14, V18):
         names.update(_iterate_metric_name(util.get_stat_wal_query(version)))
     return names
