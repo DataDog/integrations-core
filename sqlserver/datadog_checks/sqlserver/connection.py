@@ -161,9 +161,9 @@ def _escape_legacy_freetds_odbc_connection_string_value(value: str) -> str:
     return '{{{}}}'.format(value)
 
 
-def _is_freetds_driver(driver: str | None) -> bool:
+def _is_freetds_driver(driver: str) -> bool:
     """Return whether an ODBC driver value points to FreeTDS."""
-    return bool(driver and ('freetds' in driver.lower() or 'libtdsodbc' in driver.lower()))
+    return 'freetds' in driver.lower() or 'libtdsodbc' in driver.lower()
 
 
 def _escape_adodbapi_connection_string_value(value: str) -> str:
@@ -656,7 +656,7 @@ class Connection(object):
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
         escape_func = _escape_odbc_connection_string_value
-        if _is_freetds_driver(driver):
+        if driver and _is_freetds_driver(driver):
             escape_func = _escape_legacy_freetds_odbc_connection_string_value
 
         if self.managed_auth_enabled:
