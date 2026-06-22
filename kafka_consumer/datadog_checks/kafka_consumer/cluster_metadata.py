@@ -874,8 +874,9 @@ class ClusterMetadataCollector:
                 tags=group_meta_tags,
             )
 
+            member_ids = sorted(getattr(m, 'member_id', '') or '' for m in members)
             member_hash = hashlib.sha256(
-                ','.join(sorted(getattr(m, 'member_id', '') or '' for m in members)).encode()
+                json.dumps(member_ids, separators=(',', ':')).encode()
             ).hexdigest()
             current_member_hashes[group_id] = member_hash
 
@@ -908,7 +909,13 @@ class ClusterMetadataCollector:
         """Return the previous member-hash map, or None if unreadable."""
         try:
             cached = self.check.read_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY)
-            return json.loads(cached) if cached else None
+            if not cached:
+                return None
+            result = json.loads(cached)
+            if not isinstance(result, dict):
+                self.log.debug("Consumer group members cache has unexpected shape; discarding")
+                return None
+            return result
         except Exception as e:
             self.log.debug("Could not read consumer group members cache: %s", e)
             return None
@@ -942,9 +949,13 @@ class ClusterMetadataCollector:
             return True
         for member in members:
             target = getattr(member, 'target_assignment', None)
-            assignment = getattr(member, 'assignment', None)
-            if target is None or assignment is None:
+            if target is None:
+                # Classic-protocol member: no KIP-848 target, skip.
                 continue
+            assignment = getattr(member, 'assignment', None)
+            if assignment is None:
+                # Member has a target but no current assignment — unambiguous drift.
+                return True
             current_tps = {(tp.topic, tp.partition) for tp in assignment.topic_partitions}
             target_tps = {(tp.topic, tp.partition) for tp in target.topic_partitions}
             if current_tps != target_tps:

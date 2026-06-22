@@ -1795,7 +1795,7 @@ def test_membership_changes_not_emitted_on_first_run(check, aggregator):
 def test_membership_changes_not_emitted_when_members_unchanged(check, aggregator):
     """No membership_changes when the member set is identical to the previous run."""
     member = _make_member(client_id='c1')
-    prev_hash = hashlib.sha256(b'm-c1').hexdigest()
+    prev_hash = hashlib.sha256(b'["m-c1"]').hexdigest()
     cache_key = 'kafka_consumer_group_members_cache'
     describe_result = _make_group_describe(members=[member])
     _collect_groups_with_cache(
@@ -1809,7 +1809,7 @@ def test_membership_changes_not_emitted_when_members_unchanged(check, aggregator
 def test_membership_changes_emitted_when_members_differ(check, aggregator):
     """membership_changes fires exactly once when the member set differs from the prior run."""
     cache_key = 'kafka_consumer_group_members_cache'
-    old_hash = hashlib.sha256(b'm-old').hexdigest()
+    old_hash = hashlib.sha256(b'["m-old"]').hexdigest()
     describe_result = _make_group_describe(members=[_make_member(client_id='new')])
     _collect_groups_with_cache(
         check,
@@ -1830,3 +1830,33 @@ def test_membership_changes_emitted_when_members_differ(check, aggregator):
             'is_simple_consumer_group:false',
         ],
     )
+
+
+def test_consumer_group_rebalancing_when_assignment_none_but_target_present(check, aggregator):
+    """A KIP-848 member with no current assignment but a non-empty target reports rebalancing=1."""
+    member = _make_member(assignment_tps=None, target_tps=[('orders', 0)])
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=1)
+
+
+def test_membership_hash_delimiter_collision(check, aggregator):
+    """Member IDs that share characters with the delimiter produce distinct hashes."""
+    ids_a = ['a,b', 'c']
+    ids_b = ['a', 'b,c']
+    hash_a = hashlib.sha256(json.dumps(sorted(ids_a), separators=(',', ':')).encode()).hexdigest()
+    hash_b = hashlib.sha256(json.dumps(sorted(ids_b), separators=(',', ':')).encode()).hexdigest()
+    assert hash_a != hash_b
+
+
+def test_malformed_cache_does_not_abort_collection(check, aggregator):
+    """A non-dict cache value is silently discarded and group gauges are still emitted."""
+    cache_key = 'kafka_consumer_group_members_cache'
+    describe_result = _make_group_describe(members=[_make_member()])
+    _collect_groups_with_cache(
+        check,
+        describe_result,
+        seed={cache_key: json.dumps([])},  # list instead of dict
+    )
+    aggregator.assert_metric('kafka.consumer_group.members', count=1)
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
