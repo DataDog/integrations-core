@@ -14,6 +14,7 @@ from datadog_checks.argocd.resources_constants import (
     APPLICATION_INCLUDE,
     CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
+    REPOSITORY_INCLUDE,
 )
 from datadog_checks.dev.http import MockResponse
 
@@ -122,6 +123,115 @@ def test_application_include_contains_kubernetes_resource_identity_for_automatic
         "status.resources[*].version",
         "status.resources[*].requiresPruning",
     } <= set(APPLICATION_INCLUDE["paths"])
+
+
+def test_application_include_adds_pilot_metadata_and_state_fields():
+    assert {
+        "metadata.uid",
+        "metadata.creationTimestamp",
+        "status.health.lastTransitionTime",
+        "status.operationState.retryCount",
+    } <= set(APPLICATION_INCLUDE["paths"])
+
+
+def test_application_include_contains_deployment_history_and_operation_fields():
+    assert {
+        "status.operationState.message",
+        "status.summary.externalURLs[*]",
+        "status.history[*].source.repoURL",
+        "status.history[*].source.path",
+        "status.history[*].sources[*].repoURL",
+        "status.history[*].revisions[*]",
+    } <= set(APPLICATION_INCLUDE["paths"])
+
+
+def test_collect_scrubs_credentials_from_operation_state_message(mock_http_response_per_endpoint):
+    app = _application("broken")
+    app["status"]["operationState"] = {
+        "phase": "Failed",
+        "message": "sync failed: https://oauth2:t0ken@github.com/org/repo: auth required",
+    }
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = _check()
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    app_call = next(c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application")
+    message = app_call.kwargs["fields"]["status"]["operationState"]["message"]
+    assert "t0ken" not in message
+    assert "https://github.com/org/repo" in message
+
+
+def test_collect_strips_credentials_from_external_urls(mock_http_response_per_endpoint):
+    app = _application("web")
+    app["status"]["summary"] = {"externalURLs": ["https://user:t0ken@app.example.com"]}
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = _check()
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        check._resource_collector.collect()
+
+    app_call = next(c for c in submit.call_args_list if c.kwargs["type"] == "argocd_application")
+    assert app_call.kwargs["fields"]["status"]["summary"]["externalURLs"] == ["https://app.example.com"]
+
+
+def test_real_helper_ships_multisource_history_and_scrubs_its_repo_urls(aggregator, mock_http_response_per_endpoint):
+    # Runs the real helper: proves nested [*] (history[*].sources[*]) projects AND history repoURLs are scrubbed.
+    app = _application("checkout")
+    app["status"]["history"] = [
+        {
+            "id": 1,
+            "source": {"repoURL": "https://oauth2:t0ken@github.com/org/repo", "path": "guestbook"},
+            "sources": [{"repoURL": "https://oauth2:t0ken@github.com/org/multi", "path": "base"}],
+        }
+    ]
+    mock_http_response_per_endpoint(
+        {
+            APPLICATIONS_URL: [_items_response([app])],
+            CLUSTERS_URL: [_items_response([])],
+            REPOSITORIES_URL: [_items_response([])],
+        }
+    )
+    check = _check()
+
+    check._resource_collector.collect()
+
+    payloads = aggregator.get_event_platform_events("genresources", parse_json=False)
+    blob = b"".join(p if isinstance(p, bytes) else p.encode() for p in payloads)
+    assert b"guestbook" in blob  # single-source history field projected
+    assert b"base" in blob  # multi-source history field projected (nested [*] works)
+    assert b"t0ken" not in blob  # both history repoURLs scrubbed before ship
+
+
+def test_cluster_include_contains_connection_and_shard_fields():
+    assert {
+        "connectionState.attemptedAt",
+        "info.connectionState.status",
+        "shard",
+    } <= set(CLUSTER_INCLUDE["paths"])
+
+
+def test_repository_include_contains_connection_and_capability_flags():
+    assert {
+        "connectionState.attemptedAt",
+        "insecure",
+        "enableLfs",
+        "enableOCI",
+        "forceHttpBasicAuth",
+    } <= set(REPOSITORY_INCLUDE["paths"])
 
 
 def test_application_key_uses_app_identity_not_destination(mock_http_response_per_endpoint):
