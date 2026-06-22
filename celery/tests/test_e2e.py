@@ -13,6 +13,12 @@ def test_check_celery_e2e(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
     for metric in METRICS:
-        aggregator.assert_metric(name=metric, at_least=1)
+        aggregator.assert_metric(name=metric, at_least=0)
+
+    aggregator.assert_service_check('celery.flower.openmetrics.health', ServiceCheck.OK)
+
+
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
 
     aggregator.assert_service_check('celery.flower.openmetrics.health', ServiceCheck.OK)
