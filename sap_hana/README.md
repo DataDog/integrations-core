@@ -162,7 +162,7 @@ remote_configuration:
       - sap_hana
 ```
 
-Without this entry, the Agent silently drops any query dispatched by the backend — no error is surfaced. After updating `datadog.yaml`, [restart the Agent][5].
+Without this entry, the Agent silently drops any query dispatched by the backend with no error surfaced. After updating `datadog.yaml`, [restart the Agent][5].
 
 ### Validation
 
