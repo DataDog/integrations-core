@@ -162,6 +162,8 @@ remote_configuration:
 
 Without this entry, the Agent silently drops any query dispatched by the backend with no error surfaced. After updating `datadog.yaml`, [restart the Agent][5].
 
+Data Observability query actions require schema collection to be enabled. Ensure the `collect_schemas` block is present and `enabled: true` in your `sap_hana.d/conf.yaml` (see [Schema collection](#schema-collection)).
+
 ### Validation
 
 Run the [Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
