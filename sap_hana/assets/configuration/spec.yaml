@@ -155,6 +155,13 @@ files:
                 type: string
               example:
                 - "TMP_SCHEMA"
+          - name: run_sync
+            hidden: true
+            description: Run the schema collection job synchronously (for testing).
+            value:
+              type: boolean
+              example: false
+              display_default: false
       - name: data_observability
         hidden: true
         display_priority: 0
