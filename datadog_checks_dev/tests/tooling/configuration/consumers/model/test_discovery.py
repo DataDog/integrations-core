@@ -40,6 +40,8 @@ def test():
     assert not discovery_errors
     assert discovery_contents == normalize_yaml(
         """
+        from __future__ import annotations
+
         from collections.abc import Iterator
         from typing import Any
 
