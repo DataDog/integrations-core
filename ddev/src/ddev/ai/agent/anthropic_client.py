@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
+MAX_CONTINUATIONS: Final[int] = 10
 
 # web_search_20260209  is not ZDR-eligible by default.
 WEB_SEARCH_VERSION: Final[str] = "web_search_20250305"
@@ -84,13 +85,21 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             self._context_window = info.max_input_tokens
         return self._context_window
 
+    @staticmethod
+    def _filter_by_allowed(names: list[str], allowed_tools: list[str] | None) -> list[str]:
+        """Filter names by allowlist. None means all names."""
+        if allowed_tools is None:
+            return names
+        allowed = set(allowed_tools)
+        return [n for n in names if n in allowed]
+
     def _get_tool_definitions(self, allowed_tools: list[str] | None) -> list[ToolParam]:
         """Filter tool definitions by allowlist. None means all tools."""
         definitions = self._tools.definitions
-        if allowed_tools is not None:
-            allowed = set(allowed_tools)
-            definitions = [d for d in definitions if d["name"] in allowed]
-        return definitions
+        if allowed_tools is None:
+            return definitions
+        allowed = set(allowed_tools)
+        return [d for d in definitions if d["name"] in allowed]
 
     def _map_stop_reason(self, raw: str) -> StopReason:
         """Map a raw Anthropic stop_reason string to the generic StopReason enum."""
@@ -113,10 +122,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
 
         Native tools are gated by allowed_tools just like client tools: None means all.
         """
-        names = self._tools.native_tool_names
-        if allowed_tools is not None:
-            allowed = set(allowed_tools)
-            names = [n for n in names if n in allowed]
+        names = self._filter_by_allowed(self._tools.native_tool_names, allowed_tools)
         return [NATIVE_TOOL_DEFINITIONS[name] for name in names]
 
     @staticmethod
@@ -140,7 +146,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         paused_turns: list[MessageParam] = []
         all_responses: list[Message] = []
         messages = request_messages
-        while True:
+        for _ in range(MAX_CONTINUATIONS):
             response = await self._client.messages.create(
                 model=self._model,
                 max_tokens=self._max_tokens,
@@ -154,6 +160,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             paused_turn: MessageParam = {"role": "assistant", "content": response.content}
             paused_turns.append(paused_turn)
             messages = [*messages, paused_turn]
+        raise AgentError(f"pause_turn did not resolve after {MAX_CONTINUATIONS} continuations")
 
     def _to_tool_result_params(self, messages: list[ToolResultMessage]) -> list[ToolResultBlockParam]:
         """Convert model-agnostic ToolResultMessages to Anthropic SDK ToolResultBlockParams."""

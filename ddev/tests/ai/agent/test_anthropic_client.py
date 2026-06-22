@@ -8,7 +8,12 @@ from unittest.mock import AsyncMock, MagicMock
 import anthropic
 import pytest
 
-from ddev.ai.agent.anthropic_client import NATIVE_TOOL_DEFINITIONS, WEB_SEARCH_VERSION, AnthropicAgent
+from ddev.ai.agent.anthropic_client import (
+    MAX_CONTINUATIONS,
+    NATIVE_TOOL_DEFINITIONS,
+    WEB_SEARCH_VERSION,
+    AnthropicAgent,
+)
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import StopReason, ToolResultMessage
 from ddev.ai.tools.core.types import ToolResult
@@ -823,3 +828,24 @@ async def test_multi_turn_only_latest_user_message_in_request_has_cache_control(
     latest_blocks = second_call_messages[-1]["content"]
     assert all("cache_control" not in b for b in latest_blocks[:-1])
     assert latest_blocks[-1]["cache_control"] == {"type": "ephemeral"}
+
+
+# ---------------------------------------------------------------------------
+# pause_turn continuation cap
+# ---------------------------------------------------------------------------
+
+
+async def test_pause_turn_raises_after_max_continuations() -> None:
+    pause_resp = make_response("pause_turn", [make_text_block("still searching...")])
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(return_value=pause_resp)
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    with pytest.raises(AgentError, match=f"pause_turn did not resolve after {MAX_CONTINUATIONS} continuations"):
+        await agent.send("Hi")
+
+    assert client.messages.create.await_count == MAX_CONTINUATIONS

@@ -75,7 +75,7 @@ class ToolSpec:
 NATIVE_TOOL_READ_ONLY: dict[str, bool] = {
     "web_search": True,
 }
-NATIVE_TOOL_NAMES: frozenset[str] = frozenset(NATIVE_TOOL_READ_ONLY)
+NATIVE_TOOL_NAMES: list[str] = list(NATIVE_TOOL_READ_ONLY)
 
 TOOL_MANIFEST: dict[str, ToolSpec] = {
     "read_file": ToolSpec("fs.read_file", "ReadFileTool", factory=_file_registry_factory, read_only=True),
