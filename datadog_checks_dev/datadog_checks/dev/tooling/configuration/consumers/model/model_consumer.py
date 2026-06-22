@@ -254,6 +254,8 @@ class ModelConsumer:
 
     def _build_discovery_file(self, discovery: dict[str, Any]) -> str:
         lines = [
+            'from __future__ import annotations',
+            '',
             'from collections.abc import Iterator',
             'from typing import Any',
             '',
