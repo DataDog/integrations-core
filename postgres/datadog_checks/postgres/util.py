@@ -753,33 +753,44 @@ QUERY_PG_STAT_WAL_RECEIVER = {
     ],
 }
 
-QUERY_PG_REPLICATION_SLOTS = {
-    'name': 'pg_replication_slots',
-    'query': """
-    SELECT
-        slot_name,
-        slot_type,
-        CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END,
-        CASE WHEN active THEN 'active' ELSE 'inactive' END,
-        CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END,
-        CASE WHEN catalog_xmin IS NULL THEN NULL ELSE age(catalog_xmin) END,
-        pg_wal_lsn_diff(
-        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, restart_lsn),
-        pg_wal_lsn_diff(
-        CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END, confirmed_flush_lsn)
-    FROM pg_replication_slots;
-    """.strip(),
-    'columns': [
-        {'name': 'slot_name', 'type': 'tag'},
-        {'name': 'slot_type', 'type': 'tag'},
-        {'name': 'slot_persistence', 'type': 'tag'},
-        {'name': 'slot_state', 'type': 'tag'},
-        {'name': 'replication_slot.xmin_age', 'type': 'gauge'},
+# Current WAL position, used to express each slot LSN as a byte delay behind the server.
+REPLICATION_SLOT_CURRENT_LSN = (
+    'CASE WHEN pg_is_in_recovery() THEN pg_last_wal_receive_lsn() ELSE pg_current_wal_lsn() END'
+)
+
+# pg_replication_slots columns. two_phase_at is the LSN from which a two-phase slot must retain WAL;
+# it was added in PG 18, so it is gated to those servers with a VersionRange.
+REPLICATION_SLOTS_COLUMNS = [
+    ('slot_name', {'name': 'slot_name', 'type': 'tag'}),
+    ('slot_type', {'name': 'slot_type', 'type': 'tag'}),
+    ("CASE WHEN temporary THEN 'temporary' ELSE 'permanent' END", {'name': 'slot_persistence', 'type': 'tag'}),
+    ("CASE WHEN active THEN 'active' ELSE 'inactive' END", {'name': 'slot_state', 'type': 'tag'}),
+    ('CASE WHEN xmin IS NULL THEN NULL ELSE age(xmin) END', {'name': 'replication_slot.xmin_age', 'type': 'gauge'}),
+    (
+        'CASE WHEN catalog_xmin IS NULL THEN NULL ELSE age(catalog_xmin) END',
         {'name': 'replication_slot.catalog_xmin_age', 'type': 'gauge'},
+    ),
+    (
+        'pg_wal_lsn_diff({}, restart_lsn)'.format(REPLICATION_SLOT_CURRENT_LSN),
         {'name': 'replication_slot.restart_delay_bytes', 'type': 'gauge'},
+    ),
+    (
+        'pg_wal_lsn_diff({}, confirmed_flush_lsn)'.format(REPLICATION_SLOT_CURRENT_LSN),
         {'name': 'replication_slot.confirmed_flush_delay_bytes', 'type': 'gauge'},
-    ],
-}
+    ),
+    (
+        'pg_wal_lsn_diff({}, two_phase_at)'.format(REPLICATION_SLOT_CURRENT_LSN),
+        {'name': 'replication_slot.two_phase_at_delay_bytes', 'type': 'gauge'},
+        VersionRange(min_version=V18),
+    ),
+]
+
+
+def get_replication_slots_query(version: VersionInfo) -> dict:
+    """Build the pg_replication_slots query for `version`; two_phase_at was added in PG 18."""
+    return build_versioned_query(
+        'pg_replication_slots', REPLICATION_SLOTS_COLUMNS, '\n  FROM pg_replication_slots\n', version
+    )
 
 # Require PG14+
 QUERY_PG_REPLICATION_SLOTS_STATS = {
