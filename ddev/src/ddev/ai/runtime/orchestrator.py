@@ -11,6 +11,7 @@ from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -46,10 +47,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._agent_clients = agent_clients
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
+        self._agent_logger: AgentLogger | None = None
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
-        self._resources: RunResources | None = None
 
     async def on_initialize(self) -> None:
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
@@ -93,17 +94,20 @@ class PhaseOrchestrator(EventBusOrchestrator):
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
 
+        self._agent_logger = AgentLogger(checkpoint_manager.root)
+        run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
+
         self._resources = RunResources(
             agent_clients=self._agent_clients,
             file_access_policy=self._file_access_policy,
             agents=config.agents,
-            artifact_root=checkpoint_manager.root,
+            callbacks=run_callbacks,
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,
             flow_variables=config.variables,
             config_dir=config_dir,
-            callbacks=self._callbacks,
+            callbacks=run_callbacks,
             logger=self._logger,
         )
 
@@ -132,6 +136,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
             raise FatalProcessingError(f"Phase '{message.phase_id}' failed: {message.error}")
 
     async def on_finalize(self, exception: Exception | None) -> None:
+        if self._agent_logger is not None:
+            self._agent_logger.close()
         if exception is not None and self._failed_phase is not None:
             self._logger.error(
                 "Pipeline aborted: phase '%s' failed: %s",

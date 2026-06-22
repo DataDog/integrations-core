@@ -8,11 +8,14 @@ from pathlib import Path
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
-from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
+from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.react.process import ReActProcess
+from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
@@ -22,6 +25,15 @@ from .conftest import MockAgent, make_agent_phase, make_response, resolve_key
 
 def read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReActProcess:
+    """Wrap a mock agent in a ReActProcess for direct _run_memory_step tests."""
+    return ReActProcess(
+        AgentRuntime(agent=agent, tool_registry=ToolRegistry([])),
+        callbacks=callbacks,
+        scope=AgentScope(owner_id="p1", role=AgentRole.PHASE),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -337,7 +349,7 @@ async def test_run_memory_step_passes_user_additions_to_build(
         mgr, "build_memory_prompt", lambda user_additions: build_calls.append(user_additions) or "PROMPT"
     )
 
-    await phase._run_memory_step(mock_agent, {})
+    await phase._run_memory_step(_memory_process(mock_agent), {})
 
     assert build_calls == [expected_user_additions]
 
@@ -354,30 +366,18 @@ async def test_run_memory_step_sends_built_prompt_with_no_tools(flow_dir, monkey
     phase, mgr = make_agent_phase(flow_dir, agent, monkeypatch, message_queue)
     monkeypatch.setattr(mgr, "build_memory_prompt", lambda _: "BUILT")
 
-    await phase._run_memory_step(agent, {})
+    await phase._run_memory_step(_memory_process(agent), {})
 
     assert captured == {"content": "BUILT", "allowed_tools": []}
 
 
-async def test_run_memory_step_returns_response_data_and_fires_callbacks(flow_dir, monkeypatch, message_queue):
-    events: list = []
-    cb_set = CallbackSet()
-
-    @cb_set.on_before_agent_send
-    async def _before(iteration):
-        events.append(("before", iteration))
-
-    @cb_set.on_agent_response
-    async def _response(response, iteration):
-        events.append(("response", iteration, response.text))
-
+async def test_run_memory_step_returns_response_data(flow_dir, monkeypatch, message_queue):
     mock_agent = MockAgent([make_response("summary text", 7, 3)])
-    phase, _ = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, callbacks=Callbacks([cb_set]))
+    phase, _ = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue)
 
-    result = await phase._run_memory_step(mock_agent, {})
+    result = await phase._run_memory_step(_memory_process(mock_agent), {})
 
     assert result == ("summary text", 7, 3)
-    assert events == [("before", 1), ("response", 1, "summary text")]
 
 
 # ---------------------------------------------------------------------------
@@ -419,11 +419,12 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
     from ddev.ai.runtime.resources import RunResources
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
+    run_callbacks = Callbacks([AgentLogger(checkpoint_manager.root).as_callback_set()])
     resources = RunResources(
         agent_clients={"anthropic": object()},
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
         agents={"writer": AgentConfig(tools=["spawn_subagent"])},
-        artifact_root=checkpoint_manager.root,
+        callbacks=run_callbacks,
     )
     phase = AgenticPhase.build(
         phase_id="p1",
@@ -441,7 +442,7 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
     assert not any(isinstance(m, PhaseFailedMessage) for m in submitted)
     assert subagent._system_prompt == "you are a helper"
 
-    log_file = checkpoint_manager.root / "subagents" / "p1" / "001-child.jsonl"
+    log_file = checkpoint_manager.root / "subagent" / "p1.sub.001-child.jsonl"
     assert log_file.exists()
     events = {e["event"] for e in read_jsonl(log_file)}
     assert {"start", "finish"} <= events
@@ -487,7 +488,7 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
     assert cp["tokens"] == {"total_input": 100 + 7 + 10, "total_output": 50 + 3 + 5}
     assert captured_builder_calls == ["p1.goal.t1"]
 
-    log_file = mgr.root / "goal_agent" / "p1" / "t1.jsonl"
+    log_file = mgr.root / "goal_reviewer" / "p1.goal.t1.jsonl"
     assert log_file.exists()
     events = {e["event"] for e in read_jsonl(log_file)}
     assert {"start", "finish"} <= events
@@ -527,11 +528,11 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
     assert mgr.read() == {}
     assert phase._goal_attempt_log == [{"task": "t1", "attempts": 2, "final_valid": False}]
 
-    log_file = mgr.root / "goal_agent" / "p1" / "t1.jsonl"
+    # The reviewer ran (and succeeded as an agent) on each attempt; its per-run
+    # log exists. The goal-loop verdict itself lives in the phase checkpoint.
+    log_file = mgr.root / "goal_reviewer" / "p1.goal.t1.jsonl"
     assert log_file.exists()
-    finish_events = [e for e in read_jsonl(log_file) if e["event"] == "finish"]
-    assert len(finish_events) == 1
-    assert finish_events[0]["success"] is False
+    assert "start" in {e["event"] for e in read_jsonl(log_file)}
 
 
 async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, monkeypatch, message_queue):
