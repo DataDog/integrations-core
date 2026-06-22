@@ -17,6 +17,20 @@ from .common import (
 )
 
 
+def test_e2e_discovery(dd_agent_check_discovery):
+    # NOTE: This test requires ArgoCD running as a Docker container exposing port 8082.
+    # The existing test environment uses Kubernetes (kind), which uses a different
+    # discovery mechanism. This test validates the discovery configuration pattern
+    # for Docker-based deployments.
+    pytest.skip("Test environment uses Kubernetes (kind); Docker-based config discovery not available")
+    aggregator = dd_agent_check_discovery(check_rate=True)
+
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_submission_type=True, check_symmetric_inclusion=False
+    )
+    aggregator.assert_service_check('argocd.app_controller.openmetrics.health', status=ServiceCheck.OK)
+
+
 @pytest.mark.e2e
 def test_e2e_openmetrics_v1(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
