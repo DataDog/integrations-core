@@ -517,6 +517,66 @@ async def test_server_result_blocks_preserved_in_history_not_parsed() -> None:
     assert agent.history[-1] == {"role": "assistant", "content": content}
 
 
+def make_server_tool_use(id: str, query: str) -> anthropic.types.ServerToolUseBlock:
+    return anthropic.types.ServerToolUseBlock(type="server_tool_use", id=id, name="web_search", input={"query": query})
+
+
+def make_web_search_result(tool_use_id: str, result_count: int) -> anthropic.types.WebSearchToolResultBlock:
+    results = [
+        anthropic.types.WebSearchResultBlock(
+            type="web_search_result", encrypted_content="x", page_age=None, title=f"r{i}", url=f"http://x/{i}"
+        )
+        for i in range(result_count)
+    ]
+    return anthropic.types.WebSearchToolResultBlock(
+        type="web_search_tool_result", tool_use_id=tool_use_id, content=results
+    )
+
+
+async def test_web_searches_surfaced_with_query_and_result_count() -> None:
+    content = [
+        make_text_block("Searching..."),
+        make_server_tool_use("srv1", "weather in Cáceres"),
+        make_web_search_result("srv1", result_count=3),
+        make_text_block("Here is the forecast."),
+    ]
+    resp = make_response("end_turn", content)
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Search for the weather")
+
+    assert result.tool_calls == []
+    assert len(result.web_searches) == 1
+    assert result.web_searches[0].query == "weather in Cáceres"
+    assert result.web_searches[0].result_count == 3
+    assert result.web_searches[0].error is None
+
+
+async def test_web_search_error_surfaced() -> None:
+    error = anthropic.types.WebSearchToolResultError(
+        type="web_search_tool_result_error", error_code="max_uses_exceeded"
+    )
+    content = [
+        make_server_tool_use("srv1", "too many"),
+        anthropic.types.WebSearchToolResultBlock(type="web_search_tool_result", tool_use_id="srv1", content=error),
+    ]
+    agent, _ = make_agent(mock_response=make_response("end_turn", content))
+
+    result = await agent.send("Search")
+
+    assert len(result.web_searches) == 1
+    assert result.web_searches[0].error == "max_uses_exceeded"
+    assert result.web_searches[0].result_count == 0
+
+
+async def test_no_web_searches_yields_empty_list() -> None:
+    agent, _ = make_agent(mock_response=make_response("end_turn", [make_text_block("hi")]))
+
+    result = await agent.send("Hi")
+
+    assert result.web_searches == []
+
+
 # ---------------------------------------------------------------------------
 # pause_turn continuation loop
 # ---------------------------------------------------------------------------

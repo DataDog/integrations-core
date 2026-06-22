@@ -11,7 +11,15 @@ from anthropic.types import MessageParam
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
-from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
+from ddev.ai.agent.types import (
+    AgentResponse,
+    ContextUsage,
+    StopReason,
+    TokenUsage,
+    ToolCall,
+    ToolResultMessage,
+    WebSearchCall,
+)
 from ddev.ai.tools.registry import ToolRegistry
 
 if TYPE_CHECKING:
@@ -130,6 +138,34 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         """Web search request count from one response (0 if absent). Robust to fakes/providers."""
         server_use = getattr(response.usage, "server_tool_use", None)
         return getattr(server_use, "web_search_requests", 0) or 0
+
+    @staticmethod
+    def _extract_web_searches(responses: list[Message]) -> list[WebSearchCall]:
+        """Collect server-side web searches (query + result count) across all responses.
+
+        Web searches are server tools: the model emits a ``ServerToolUseBlock`` (the query)
+        and Anthropic answers inline with a ``WebSearchToolResultBlock`` (the results). They
+        never become client ``ToolCall``s, so we surface them here for logging.
+        """
+        queries: dict[str, str] = {}
+        results: dict[str, tuple[int, str | None]] = {}
+        for response in responses:
+            for block in response.content:
+                if isinstance(block, anthropic.types.ServerToolUseBlock) and block.name == "web_search":
+                    query = block.input.get("query", "") if isinstance(block.input, dict) else ""
+                    queries[block.id] = str(query)
+                elif isinstance(block, anthropic.types.WebSearchToolResultBlock):
+                    content = block.content
+                    if isinstance(content, list):
+                        results[block.tool_use_id] = (len(content), None)
+                    else:
+                        results[block.tool_use_id] = (0, getattr(content, "error_code", "error"))
+
+        searches: list[WebSearchCall] = []
+        for use_id, query in queries.items():
+            count, error = results.get(use_id, (0, None))
+            searches.append(WebSearchCall(query=query, result_count=count, error=error))
+        return searches
 
     async def _create_until_complete(
         self,
@@ -293,6 +329,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             text="\n".join(text_parts),
             tool_calls=tool_calls,
             usage=usage,
+            web_searches=self._extract_web_searches(all_responses),
         )
 
         # Save to history only after a successful response. Use the unmarked form so the

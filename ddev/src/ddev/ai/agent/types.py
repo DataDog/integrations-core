@@ -4,7 +4,7 @@
 
 """Wire types for the agent layer: enums, dataclasses, and response shapes."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
@@ -27,6 +27,15 @@ class ToolCall:
     id: str
     name: str
     input: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class WebSearchCall:
+    """A server-side web search the model performed (Anthropic native tool)."""
+
+    query: str
+    result_count: int = 0
+    error: str | None = None
 
 
 @dataclass(frozen=True)
@@ -74,3 +83,4 @@ class AgentResponse:
     text: str
     tool_calls: list[ToolCall]
     usage: TokenUsage
+    web_searches: list[WebSearchCall] = field(default_factory=list)
