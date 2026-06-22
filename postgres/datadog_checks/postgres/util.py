@@ -1322,43 +1322,36 @@ FROM pg_stat_subscription_stats
     ],
 }
 
-# Requires PG16+
+# pg_stat_io columns, collected on PG 16+. The byte-throughput columns (extend_bytes, read_bytes,
+# write_bytes) were added in PG 18, so they are gated to servers from 18 onward with a VersionRange.
 # Capping at 200 rows for caution. This should always return less data points than that. Adjust if needed
-STAT_IO_METRICS = {
-    'name': 'stat_io_metrics',
-    'query': """
-SELECT backend_type,
-       object,
-       context,
-       evictions,
-       extend_time,
-       extends,
-       fsync_time,
-       fsyncs,
-       hits,
-       read_time,
-       reads,
-       write_time,
-       writes
-FROM pg_stat_io
-LIMIT 200
-""",
-    'columns': [
-        {'name': 'backend_type', 'type': 'tag'},
-        {'name': 'object', 'type': 'tag'},
-        {'name': 'context', 'type': 'tag'},
-        {'name': 'io.evictions', 'type': 'monotonic_count'},
-        {'name': 'io.extend_time', 'type': 'monotonic_count'},
-        {'name': 'io.extends', 'type': 'monotonic_count'},
-        {'name': 'io.fsync_time', 'type': 'monotonic_count'},
-        {'name': 'io.fsyncs', 'type': 'monotonic_count'},
-        {'name': 'io.hits', 'type': 'monotonic_count'},
-        {'name': 'io.read_time', 'type': 'monotonic_count'},
-        {'name': 'io.reads', 'type': 'monotonic_count'},
-        {'name': 'io.write_time', 'type': 'monotonic_count'},
-        {'name': 'io.writes', 'type': 'monotonic_count'},
-    ],
-}
+STAT_IO_COLUMNS = [
+    ('backend_type', {'name': 'backend_type', 'type': 'tag'}),
+    ('object', {'name': 'object', 'type': 'tag'}),
+    ('context', {'name': 'context', 'type': 'tag'}),
+    ('evictions', {'name': 'io.evictions', 'type': 'monotonic_count'}),
+    ('extend_bytes', {'name': 'io.extend_bytes', 'type': 'monotonic_count'}, VersionRange(min_version=V18)),
+    ('extend_time', {'name': 'io.extend_time', 'type': 'monotonic_count'}),
+    ('extends', {'name': 'io.extends', 'type': 'monotonic_count'}),
+    ('fsync_time', {'name': 'io.fsync_time', 'type': 'monotonic_count'}),
+    ('fsyncs', {'name': 'io.fsyncs', 'type': 'monotonic_count'}),
+    ('hits', {'name': 'io.hits', 'type': 'monotonic_count'}),
+    ('read_bytes', {'name': 'io.read_bytes', 'type': 'monotonic_count'}, VersionRange(min_version=V18)),
+    ('read_time', {'name': 'io.read_time', 'type': 'monotonic_count'}),
+    ('reads', {'name': 'io.reads', 'type': 'monotonic_count'}),
+    ('reuses', {'name': 'io.reuses', 'type': 'monotonic_count'}),
+    ('write_bytes', {'name': 'io.write_bytes', 'type': 'monotonic_count'}, VersionRange(min_version=V18)),
+    ('write_time', {'name': 'io.write_time', 'type': 'monotonic_count'}),
+    ('writeback_time', {'name': 'io.writeback_time', 'type': 'monotonic_count'}),
+    ('writebacks', {'name': 'io.writebacks', 'type': 'monotonic_count'}),
+    ('writes', {'name': 'io.writes', 'type': 'monotonic_count'}),
+]
+
+
+def get_stat_io_query(version: VersionInfo) -> dict:
+    """Build the pg_stat_io query for `version` (PG 16+); its byte-throughput columns were added in PG 18."""
+    return build_versioned_query('stat_io_metrics', STAT_IO_COLUMNS, '\n  FROM pg_stat_io\n  LIMIT 200\n', version)
+
 
 # Measures the age (in seconds) of idle-in-transaction sessions holding exclusive relation locks.
 # Limits result set to 10 rows to avoid tag explosion.

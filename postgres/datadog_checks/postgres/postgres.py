@@ -78,7 +78,6 @@ from .util import (
     SLRU_METRICS,
     SNAPSHOT_TXID_METRICS,
     SNAPSHOT_TXID_METRICS_LT_13,
-    STAT_IO_METRICS,
     STAT_SUBSCRIPTION_METRICS,
     STAT_SUBSCRIPTION_STATS_METRICS,
     SUBSCRIPTION_STATE_METRICS,
@@ -89,6 +88,7 @@ from .util import (
     DatabaseHealthCheckError,  # noqa: F401
     fmt,
     get_schema_field,
+    get_stat_io_query,
     get_stat_wal_query,
     payload_pg_version,
     warning_with_tags,
@@ -448,7 +448,7 @@ class PostgreSql(DatabaseCheck):
             queries.append(QUERY_PG_STAT_RECOVERY_PREFETCH)
         if self.version >= V16:
             if self._config.dbm:
-                queries.append(STAT_IO_METRICS)
+                queries.append(get_stat_io_query(self.version))
 
         if self._config.dbm and self._config.locks_idle_in_transaction.enabled:
             query_def = copy.deepcopy(IDLE_TX_LOCK_AGE_METRICS)
