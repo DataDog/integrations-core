@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+version = ["1.19"]
+
+[envs.default.overrides]
+matrix.version.env-vars = [
+  { key = "FLINK_VERSION", value = "1.19.1", if = ["1.19"] },
+]
