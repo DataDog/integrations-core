@@ -5,6 +5,8 @@ services:
     image: "haproxy:${HAPROXY_VERSION}"
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    expose:
+      - "8404"
     ports:
       - "13834:13834"
       - "13835:13835"
