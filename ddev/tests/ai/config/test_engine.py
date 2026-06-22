@@ -87,6 +87,7 @@ def test_mixed_types_in_single_file(tmp_path):
         - type: phase
           config:
             name: my_phase
+            class: AgenticPhase
         - type: flow
           config:
             name: my_flow
@@ -167,6 +168,7 @@ def test_same_name_different_types_no_conflict(tmp_path):
         - type: phase
           config:
             name: shared_name
+            class: AgenticPhase
     """,
     )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -209,6 +211,7 @@ def test_three_sources_all_listed_in_conflict(tmp_path):
             - type: phase
               config:
                 name: shared_phase
+                class: AgenticPhase
         """,
         )
     engine = ConfigurationEngine(core_dir=tmp_path)
@@ -453,6 +456,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
         - type: phase
           config:
             name: my_phase
+            class: AgenticPhase
             agent: ghost_agent
         - type: flow
           config:
@@ -468,6 +472,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
         - type: flow
           config:
             name: my_flow
@@ -483,6 +488,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
         - type: phase
           config:
             name: phase_b
+            class: AgenticPhase
         - type: flow
           config:
             name: my_flow
@@ -504,6 +510,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
             variables:
               - name: endpoint
@@ -527,6 +534,7 @@ def test_scanning_succeeds_even_with_conflicts(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
         - type: flow
           config:
@@ -567,9 +575,11 @@ def test_build_flow_raises_on_cycle(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
         - type: phase
           config:
             name: phase_b
+            class: AgenticPhase
         - type: flow
           config:
             name: my_flow
@@ -647,6 +657,7 @@ def test_build_flow_variable_resolved_from_flow(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
         - type: flow
           config:
@@ -676,6 +687,7 @@ def test_build_flow_same_default_no_conflict(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
             variables:
               - name: endpoint
@@ -701,11 +713,13 @@ def test_variable_default_promoted_from_second_source(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             variables:
               - name: shared_var
         - type: phase
           config:
             name: phase_b
+            class: AgenticPhase
             variables:
               - name: shared_var
                 default: from_b
@@ -737,6 +751,7 @@ def test_runtime_override_takes_precedence_over_default(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
         - type: flow
           config:
@@ -767,6 +782,7 @@ def test_missing_variable_error_lists_all_missing(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
         - type: flow
           config:
@@ -804,6 +820,7 @@ def test_build_flow_relative_paths_resolved(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
             tasks:
               - name: task1
@@ -837,6 +854,7 @@ def test_build_flow_absolute_prompt_path_preserved(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
             tasks:
               - name: task1
@@ -869,6 +887,7 @@ def test_build_flow_goal_path_resolved(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
             tasks:
               - name: task1
@@ -902,6 +921,7 @@ def test_build_flow_user_supplied_system_prompt_path_preserved(tmp_path):
         - type: phase
           config:
             name: phase_a
+            class: AgenticPhase
             agent: agent_a
             tasks:
               - name: task1
@@ -983,15 +1003,19 @@ def test_build_flow_multi_cycle_reports_both(tmp_path):
         - type: phase
           config:
             name: p1
+            class: AgenticPhase
         - type: phase
           config:
             name: p2
+            class: AgenticPhase
         - type: phase
           config:
             name: p3
+            class: AgenticPhase
         - type: phase
           config:
             name: p4
+            class: AgenticPhase
         - type: flow
           config:
             name: my_flow

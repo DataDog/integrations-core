@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -25,6 +26,21 @@ from ddev.ai.config.models import (
 ResourceKind = Literal["agent", "phase", "flow"]
 
 _log = logging.getLogger(__name__)
+
+
+def import_prefix_from_path(path: Path) -> str:
+    """Derive the dotted import prefix for path from sys.path entries."""
+    path = path.resolve()
+    for entry in sys.path:
+        if not entry:
+            continue
+        root = Path(entry).resolve()
+        try:
+            rel = path.relative_to(root)
+        except ValueError:
+            continue
+        return ".".join(rel.parts)
+    raise RuntimeError(f"Could not derive import prefix for {path}")
 
 
 @dataclass
@@ -63,10 +79,8 @@ class ConfigurationEngine:
         self,
         core_dir: Path,
         user_dirs: list[str] | None = None,
-        src_root: Path | None = None,
     ) -> None:
         self._core_dir = core_dir
-        self._src_root = src_root or Path(__file__).parent.parent.parent.parent  # ddev/src/
         self._scan_dirs: list[Path] = self._deduplicate([core_dir] + self._resolve_user_dirs(user_dirs or []))
         self._agents: dict[str, _RegistryEntry[AgentConfig]] = {}
         self._phases: dict[str, _RegistryEntry[PhaseConfig]] = {}
@@ -173,11 +187,7 @@ class ConfigurationEngine:
         return list(self._conflicts)
 
     def phase_discovery_targets(self) -> list[tuple[Path, str]]:
-        """Return (phases_dir, import_prefix) pairs for phases/ directories under scan_dirs.
-
-        Only directories under ``src_root`` can have their import prefix derived
-        automatically. Directories outside it emit a WARNING and are skipped.
-        """
+        """Return (phases_dir, import_prefix) pairs for phases/ directories under scan_dirs."""
         targets: list[tuple[Path, str]] = []
         seen: set[Path] = set()
         for scan_dir in self._scan_dirs:
@@ -189,12 +199,11 @@ class ConfigurationEngine:
                     continue
                 seen.add(resolved)
                 try:
-                    rel = phases_dir.relative_to(self._src_root)
-                    import_prefix = ".".join(rel.parts)
+                    import_prefix = import_prefix_from_path(phases_dir)
                     targets.append((phases_dir, import_prefix))
-                except ValueError:
+                except RuntimeError:
                     _log.warning(
-                        "phases/ directory %s is outside the ddev src tree — "
+                        "phases/ directory %s is not under any sys.path entry — "
                         "its phase classes cannot be auto-imported and will be unavailable at runtime",
                         phases_dir,
                     )

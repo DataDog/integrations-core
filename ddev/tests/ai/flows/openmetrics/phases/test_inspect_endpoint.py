@@ -112,7 +112,7 @@ def _make_phase(
     phase = InspectEndpointPhase(
         phase_id=phase_id,
         dependencies=[],
-        config=PhaseConfig(name="inspect"),
+        config=PhaseConfig(name="inspect", class_="AgenticPhase"),
         checkpoint_manager=checkpoint_manager,
         context=context,
     )
@@ -301,23 +301,25 @@ async def test_failure_missing_endpoint_url(flow_dir, message_queue):
 
 def test_validate_config_rejects_agent():
     with pytest.raises(FlowConfigError, match="must not declare 'agent'"):
-        InspectEndpointPhase.validate_config("p", PhaseConfig(name="inspect", agent="x"), {"x": AgentConfig(name="x")})
+        InspectEndpointPhase.validate_config(
+            "p", PhaseConfig(name="inspect", class_="AgenticPhase", agent="x"), {"x": AgentConfig(name="x")}
+        )
 
 
 def test_validate_config_rejects_tasks():
-    config = PhaseConfig(name="inspect", tasks=[TaskConfig(name="t", prompt="hi")])
+    config = PhaseConfig(name="inspect", class_="AgenticPhase", tasks=[TaskConfig(name="t", prompt="hi")])
     with pytest.raises(FlowConfigError, match="must not declare 'tasks'"):
         InspectEndpointPhase.validate_config("p", config, {})
 
 
 def test_validate_config_rejects_checkpoint():
-    config = PhaseConfig(name="inspect", checkpoint=CheckpointConfig(memory_prompt="x"))
+    config = PhaseConfig(name="inspect", class_="AgenticPhase", checkpoint=CheckpointConfig(memory_prompt="x"))
     with pytest.raises(FlowConfigError, match="must not declare 'checkpoint'"):
         InspectEndpointPhase.validate_config("p", config, {})
 
 
 def test_validate_config_accepts_minimal():
-    InspectEndpointPhase.validate_config("p", PhaseConfig(name="inspect"), {})
+    InspectEndpointPhase.validate_config("p", PhaseConfig(name="inspect", class_="AgenticPhase"), {})
 
 
 # ---------------------------------------------------------------------------

@@ -79,7 +79,7 @@ def test_resource_envelope_agent_type():
 
 def test_resource_envelope_phase_type():
     adapter = TypeAdapter(ResourceEnvelope)
-    result = adapter.validate_python({"type": "phase", "config": {"name": "p"}})
+    result = adapter.validate_python({"type": "phase", "config": {"name": "p", "class": "AgenticPhase"}})
     assert isinstance(result, PhaseEnvelope)
 
 

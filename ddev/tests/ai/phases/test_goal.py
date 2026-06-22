@@ -9,8 +9,7 @@ import pytest
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-from ddev.ai.config.models import AgentConfig
-from ddev.ai.phases.config import TaskConfig
+from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
     GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,

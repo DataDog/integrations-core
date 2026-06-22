@@ -12,8 +12,8 @@ import pytest
 
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.engine import ConfigurationEngine
+from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.phases.base import Phase
-from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
@@ -110,6 +110,7 @@ def minimal_flow(tmp_path):
         - type: phase
           config:
             name: a
+            class: AgenticPhase
             agent: writer
             tasks:
               - name: task_a
@@ -117,6 +118,7 @@ def minimal_flow(tmp_path):
         - type: phase
           config:
             name: b
+            class: AgenticPhase
             agent: writer
             tasks:
               - name: task_b
@@ -203,6 +205,7 @@ async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
             - type: phase
               config:
                 name: a
+                class: AgenticPhase
                 agent: nonexistent_agent
                 tasks:
                   - name: task_a
@@ -256,6 +259,7 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make
         - type: phase
           config:
             name: real
+            class: AgenticPhase
             agent: writer
             tasks:
               - name: t1
@@ -325,6 +329,7 @@ async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
         - type: phase
           config:
             name: real
+            class: AgenticPhase
             agent: writer
             tasks:
               - name: t1
@@ -332,6 +337,7 @@ async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
         - type: phase
           config:
             name: orphan
+            class: AgenticPhase
             agent: writer
             tasks:
               - name: t2
@@ -369,6 +375,7 @@ async def test_on_initialize_invokes_validate_config(tmp_path, make_orchestrator
         - type: phase
           config:
             name: a
+            class: AgenticPhase
             agent: writer
             tasks: []
         - type: flow
@@ -396,6 +403,7 @@ async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, make_orc
         - type: phase
           config:
             name: real
+            class: AgenticPhase
             agent: writer
             tasks:
               - name: t1
@@ -403,6 +411,7 @@ async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, make_orc
         - type: phase
           config:
             name: orphan
+            class: AgenticPhase
             agent: writer
             tasks: []
         - type: flow

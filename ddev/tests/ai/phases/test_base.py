@@ -37,7 +37,7 @@ def _make_stub_phase(
     phase = _StubPhase(
         phase_id=phase_id,
         dependencies=dependencies or [],
-        config=PhaseConfig(name="test_phase"),
+        config=PhaseConfig(name="test_phase", class_="AgenticPhase"),
         checkpoint_manager=checkpoint_manager,
         context=flow_context,
         outcome=outcome,
@@ -57,7 +57,7 @@ def test_build_creates_properly_initialized_instance(flow_dir):
         runtime_variables={"var1": "val1"},
         flow_variables={"var2": "val2"},
     )
-    config = PhaseConfig(name="test_phase")
+    config = PhaseConfig(name="test_phase", class_="AgenticPhase")
 
     phase = _StubPhase.build(
         phase_id="p1",

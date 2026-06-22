@@ -5,8 +5,7 @@
 import pytest
 from pydantic import ValidationError
 
-from ddev.ai.config.models import AgentConfig, PhaseConfig
-from ddev.ai.phases.config import CheckpointConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 
 # ---------------------------------------------------------------------------
 # TaskConfig
@@ -131,7 +130,9 @@ def test_agent_config_name_required():
 
 
 def test_phase_config_defaults():
-    pc = PhaseConfig(name="my_phase", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do it.")])
+    pc = PhaseConfig(
+        name="my_phase", class_="AgenticPhase", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do it.")]
+    )
     assert pc.class_ == "AgenticPhase"
     assert pc.context_compact_threshold_pct == 80
     assert pc.checkpoint is None
@@ -140,6 +141,7 @@ def test_phase_config_defaults():
 def test_phase_config_with_checkpoint():
     pc = PhaseConfig(
         name="my_phase",
+        class_="AgenticPhase",
         agent="writer",
         tasks=[TaskConfig(name="t1", prompt="Do it.")],
         checkpoint=CheckpointConfig(memory_prompt="List files."),
