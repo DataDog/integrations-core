@@ -4,8 +4,8 @@
 import re
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
-from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynamic_transformer
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynamic_transformer
 from datadog_checks.base.utils.tagging import tagger
 
 from .config_models import ConfigMixin
@@ -128,7 +128,9 @@ class KueueOpenMetricsScraper(OpenMetricsScraper):
         tags = []
 
         if cluster_queue := labels.get('cluster_queue'):
-            tags.extend(tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or [])
+            tags.extend(
+                tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or []
+            )
 
         if metric.name in LOCAL_QUEUE_METRIC_MAP:
             namespace = labels.get('namespace')
