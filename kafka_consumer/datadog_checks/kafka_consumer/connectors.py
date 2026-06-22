@@ -9,7 +9,8 @@ import time
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
-from datadog_checks.kafka_consumer.event_cache_mixin import EventCacheMixin
+from datadog_checks.kafka_consumer.cache import CacheHelper
+from datadog_checks.kafka_consumer.cluster_metadata import _get_tags, _original_cluster_id_field
 
 if TYPE_CHECKING:
     from datadog_checks.kafka_consumer.config import KafkaConfig
@@ -27,7 +28,7 @@ def _short_class_name(full_class: str) -> str:
     return full_class.rsplit('.', 1)[-1] if full_class else full_class
 
 
-class KafkaConnectCollector(EventCacheMixin):
+class KafkaConnectCollector:
     """Collects Kafka Connect connector metrics and config events."""
 
     def __init__(self, check, config: 'KafkaConfig', log: logging.Logger) -> None:
@@ -36,7 +37,7 @@ class KafkaConnectCollector(EventCacheMixin):
         self.log = log
         self.http = check.http
 
-        self._init_cache_intervals(self.config._kafka_configs_refresh_interval)
+        self.cache = CacheHelper(check, log, config._kafka_configs_refresh_interval)
 
         self._oauth_token: str | None = None
         self._oauth_token_expiry: float = 0.0
@@ -169,7 +170,7 @@ class KafkaConnectCollector(EventCacheMixin):
             )
             return
 
-        tags_base = self._get_tags(cluster_id) + [f'connect_url:{url}']
+        tags_base = _get_tags(self.config, cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
 
         self._emit_connector_metrics(connectors_data, tags_base)
@@ -241,7 +242,7 @@ class KafkaConnectCollector(EventCacheMixin):
             # across cycles and dedup actually fires on unchanged configs.
             content = {
                 'kafka_cluster_id': cluster_id,
-                **self._original_cluster_id_field(),
+                **_original_cluster_id_field(self.config),
                 'connector': name,
                 'connector_type': connector_type,
                 'connector_state': connector_state,
@@ -254,7 +255,7 @@ class KafkaConnectCollector(EventCacheMixin):
 
         safe_url = quote(url, safe='')
         cache_key = f'{CONNECTOR_CONFIG_CACHE_KEY}:{safe_url}'
-        connectors_to_emit = self._get_events_to_send(
+        connectors_to_emit = self.cache.get_events_to_send(
             cache_key, connector_contents, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE
         )
 
@@ -267,7 +268,7 @@ class KafkaConnectCollector(EventCacheMixin):
     def _collect_plugins(self, url: str, cluster_id: str) -> None:
         safe_url = quote(url, safe='')
         fetch_cache_key = f'{CONNECTOR_PLUGINS_CACHE_KEY}:{safe_url}'
-        items_to_fetch = self._get_items_to_fetch(fetch_cache_key, ['plugins'])
+        items_to_fetch = self.cache.get_items_to_fetch(fetch_cache_key, ['plugins'])
         if not items_to_fetch:
             return
 
@@ -279,24 +280,24 @@ class KafkaConnectCollector(EventCacheMixin):
         response.raise_for_status()
         plugins = response.json()
 
-        self._mark_items_fetched(
+        self.cache.mark_items_fetched(
             fetch_cache_key,
             ['plugins'],
-            ttl_base=self._configs_refresh_interval,
-            ttl_jitter=self._configs_refresh_jitter,
+            ttl_base=self.cache.refresh_interval,
+            ttl_jitter=self.cache.refresh_jitter,
         )
 
         event_cache_key = f'{CONNECTOR_PLUGINS_EVENT_CACHE_KEY}:{safe_url}'
         # Exclude collection_timestamp from hashed content so dedup fires on unchanged plugin lists.
         content_dict = {
             'kafka_cluster_id': cluster_id,
-            **self._original_cluster_id_field(),
+            **_original_cluster_id_field(self.config),
             'connect_url': url,
             'config_type': 'connector_plugins',
             'plugins': plugins,
         }
         content = json.dumps(content_dict, sort_keys=True)
-        if self._get_events_to_send(
+        if self.cache.get_events_to_send(
             event_cache_key, {'plugins': content}, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE
         ):
             event = json.loads(content)

@@ -11,8 +11,8 @@ from unittest import mock
 import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
+from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
-from datadog_checks.kafka_consumer.event_cache_mixin import EVENT_CACHE_TTL
 
 pytestmark = [pytest.mark.unit]
 
@@ -768,7 +768,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # First call at t=1000: no cache, event should be sent
     with mock.patch('time.time', return_value=1000.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' in events_to_send, "First call should send event (no cache)"
 
     # Get the expire_at from first call (should be 1000 + 3600 = 4600)
@@ -778,7 +778,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # Second call at t=1100: cache exists and valid (1100 < 4600), event should NOT be sent
     with mock.patch('time.time', return_value=1100.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' not in events_to_send, "Second call should NOT send event (cache valid)"
 
     # Verify expire_at was NOT updated (this is the bug fix!)
@@ -788,7 +788,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # Third call at t=4601: cache expired (4601 >= 4600), event should be sent
     with mock.patch('time.time', return_value=4601.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' in events_to_send, "Third call should send event (cache expired)"
 
     # Verify expire_at WAS updated after sending event (should be 4601 + 3600 = 8201)
@@ -918,7 +918,7 @@ def test_schema_registry_two_tier_ttl(check):
     collector = kafka_consumer_check.metadata_collector
 
     # Schema version checks reuse the same refresh interval as broker/topic configs
-    assert collector._configs_refresh_interval == 180  # default 3 min
+    assert collector.cache.refresh_interval == 180  # default 3 min
 
     # All events (broker, topic, schema) share the same re-emission TTL
     assert EVENT_CACHE_TTL == 3600  # 1 hour
@@ -1131,8 +1131,8 @@ def test_kafka_configs_refresh_interval(check, interval, expected_interval, expe
     kafka_consumer_check = check(instance)
     collector = kafka_consumer_check.metadata_collector
 
-    assert collector._configs_refresh_interval == expected_interval
-    assert collector._configs_refresh_jitter == expected_jitter
+    assert collector.cache.refresh_interval == expected_interval
+    assert collector.cache.refresh_jitter == expected_jitter
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):

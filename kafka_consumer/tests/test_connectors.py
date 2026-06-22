@@ -7,6 +7,7 @@ import time
 import mock
 import pytest
 
+from datadog_checks.kafka_consumer.cluster_metadata import _get_tags, _original_cluster_id_field
 from datadog_checks.kafka_consumer.connectors import (
     KafkaConnectCollector,
     _short_class_name,
@@ -204,31 +205,31 @@ def test_dedup_unchanged_content_not_reemitted():
     collector, _, _, cache_store = make_collector()
     items = {'connector-a': '{"config":"stable"}'}
 
-    first = collector._get_events_to_send('test_key', items)
+    first = collector.cache.get_events_to_send('test_key', items)
     assert 'connector-a' in first
 
-    second = collector._get_events_to_send('test_key', items)
+    second = collector.cache.get_events_to_send('test_key', items)
     assert 'connector-a' not in second, "unchanged content should not re-emit within TTL"
 
 
 def test_dedup_changed_content_reemitted():
     collector, _, _, _ = make_collector()
-    collector._get_events_to_send('test_key', {'connector-a': '{"config":"v1"}'})
-    second = collector._get_events_to_send('test_key', {'connector-a': '{"config":"v2"}'})
+    collector.cache.get_events_to_send('test_key', {'connector-a': '{"config":"v1"}'})
+    second = collector.cache.get_events_to_send('test_key', {'connector-a': '{"config":"v2"}'})
     assert 'connector-a' in second
 
 
 def test_dedup_ttl_expiry_triggers_reemit():
     collector, _, _, cache_store = make_collector()
     items = {'connector-a': '{"config":"stable"}'}
-    collector._get_events_to_send('test_key', items)
+    collector.cache.get_events_to_send('test_key', items)
 
     # Manually expire the cache entry
     cached = json.loads(cache_store['test_key'])
     cached['connector-a']['expire_at'] = time.time() - 1
     cache_store['test_key'] = json.dumps(cached)
 
-    third = collector._get_events_to_send('test_key', items)
+    third = collector.cache.get_events_to_send('test_key', items)
     assert 'connector-a' in third, "should re-emit after TTL expiry"
 
 
@@ -354,7 +355,7 @@ def test_collect_plugins_skips_when_ttl_not_expired(monkeypatch):
 
 def test_get_items_to_fetch_returns_all_on_empty_cache():
     collector, _, _, _ = make_collector()
-    result = collector._get_items_to_fetch('nonexistent_key', ['a', 'b'])
+    result = collector.cache.get_items_to_fetch('nonexistent_key', ['a', 'b'])
     assert result == ['a', 'b']
 
 
@@ -362,14 +363,14 @@ def test_get_items_to_fetch_skips_unexpired_items():
     collector, _, _, cache_store = make_collector()
     future = time.time() + 9999
     cache_store['test_key'] = json.dumps({'item-a': future, 'item-b': 0})
-    result = collector._get_items_to_fetch('test_key', ['item-a', 'item-b'])
+    result = collector.cache.get_items_to_fetch('test_key', ['item-a', 'item-b'])
     assert result == ['item-b']
     assert 'item-a' not in result
 
 
 def test_mark_items_fetched_writes_expiry():
     collector, _, _, cache_store = make_collector()
-    collector._mark_items_fetched('test_key', ['item-a'], ttl_base=100, ttl_jitter=0)
+    collector.cache.mark_items_fetched('test_key', ['item-a'], ttl_base=100, ttl_jitter=0)
     cached = json.loads(cache_store['test_key'])
     assert 'item-a' in cached
     assert cached['item-a'] > time.time()
@@ -379,7 +380,7 @@ def test_mark_items_fetched_evicts_oldest_when_over_max():
     collector, _, _, cache_store = make_collector()
     existing = {f'key-{i}': time.time() + i for i in range(10)}
     cache_store['test_key'] = json.dumps(existing)
-    collector._mark_items_fetched('test_key', ['new-key'], ttl_base=100, ttl_jitter=0, max_cache_size=5)
+    collector.cache.mark_items_fetched('test_key', ['new-key'], ttl_base=100, ttl_jitter=0, max_cache_size=5)
     cached = json.loads(cache_store['test_key'])
     assert len(cached) <= 5
     assert 'new-key' in cached
@@ -388,20 +389,20 @@ def test_mark_items_fetched_evicts_oldest_when_over_max():
 def test_get_items_to_fetch_handles_corrupt_cache():
     collector, _, _, cache_store = make_collector()
     cache_store['bad_key'] = 'not-valid-json'
-    result = collector._get_items_to_fetch('bad_key', ['item'])
+    result = collector.cache.get_items_to_fetch('bad_key', ['item'])
     assert result == ['item']
 
 
 def test_get_events_to_send_handles_corrupt_cache():
     collector, _, _, cache_store = make_collector()
     cache_store['bad_key'] = 'not-valid-json'
-    result = collector._get_events_to_send('bad_key', {'item': 'content'})
+    result = collector.cache.get_events_to_send('bad_key', {'item': 'content'})
     assert result == ['item']
 
 
 def test_get_events_to_send_empty_items():
     collector, _, _, _ = make_collector()
-    result = collector._get_events_to_send('some_key', {})
+    result = collector.cache.get_events_to_send('some_key', {})
     assert result == []
 
 
@@ -411,42 +412,42 @@ def test_get_events_to_send_empty_items():
 
 
 def test_get_tags_without_cluster_id():
-    collector, _, config, _ = make_collector()
+    _, _, config, _ = make_collector()
     config._custom_tags = ['env:prod']
     config._kafka_cluster_id_override = None
-    tags = collector._get_tags()
+    tags = _get_tags(config)
     assert tags == ['env:prod']
 
 
 def test_get_tags_with_cluster_id():
-    collector, _, config, _ = make_collector()
+    _, _, config, _ = make_collector()
     config._custom_tags = []
     config._kafka_cluster_id_override = None
-    tags = collector._get_tags('cluster-abc')
+    tags = _get_tags(config, 'cluster-abc')
     assert 'kafka_cluster_id:cluster-abc' in tags
 
 
 def test_get_tags_with_cluster_id_override():
-    collector, _, config, _ = make_collector()
+    _, _, config, _ = make_collector()
     config._custom_tags = []
     config._kafka_cluster_id_override = 'override-id'
     config._auto_detected_cluster_id = 'real-id'
-    tags = collector._get_tags('override-id')
+    tags = _get_tags(config, 'override-id')
     assert 'original_kafka_cluster_id:real-id' in tags
 
 
 def test_original_cluster_id_field_when_override_set():
-    collector, _, config, _ = make_collector()
+    _, _, config, _ = make_collector()
     config._kafka_cluster_id_override = 'override-id'
     config._auto_detected_cluster_id = 'real-id'
-    result = collector._original_cluster_id_field()
+    result = _original_cluster_id_field(config)
     assert result == {'original_kafka_cluster_id': 'real-id'}
 
 
 def test_original_cluster_id_field_when_no_override():
-    collector, _, config, _ = make_collector()
+    _, _, config, _ = make_collector()
     config._kafka_cluster_id_override = None
-    result = collector._original_cluster_id_field()
+    result = _original_cluster_id_field(config)
     assert result == {}
 
 
@@ -644,7 +645,7 @@ def test_fetch_oidc_token_uses_scope_and_ca_cert():
 def test_mark_items_fetched_uses_defaults_when_none():
     collector, _, _, cache_store = make_collector()
     # Call without explicit ttl_base/ttl_jitter → should use _configs_refresh_interval defaults
-    collector._mark_items_fetched('test_key', ['item-a'])
+    collector.cache.mark_items_fetched('test_key', ['item-a'])
     cached = json.loads(cache_store['test_key'])
     assert 'item-a' in cached
     assert cached['item-a'] > time.time()
@@ -654,7 +655,7 @@ def test_mark_items_fetched_handles_corrupt_cache():
     collector, _, _, cache_store = make_collector()
     cache_store['bad_key'] = 'not-valid-json'
     # Should not raise
-    collector._mark_items_fetched('bad_key', ['item'], ttl_base=100, ttl_jitter=0)
+    collector.cache.mark_items_fetched('bad_key', ['item'], ttl_base=100, ttl_jitter=0)
     cached = json.loads(cache_store['bad_key'])
     assert 'item' in cached
 
@@ -663,7 +664,7 @@ def test_mark_items_fetched_handles_write_failure():
     collector, check, _, _ = make_collector()
     check.write_persistent_cache.side_effect = Exception("disk full")
     # Should not raise
-    collector._mark_items_fetched('test_key', ['item'], ttl_base=100, ttl_jitter=0)
+    collector.cache.mark_items_fetched('test_key', ['item'], ttl_base=100, ttl_jitter=0)
     collector.log.debug.assert_called()
 
 
@@ -676,6 +677,6 @@ def test_get_events_to_send_handles_write_failure():
     collector, check, _, _ = make_collector()
     check.write_persistent_cache.side_effect = Exception("disk full")
     # Should not raise, should return the items to send
-    result = collector._get_events_to_send('test_key', {'item': 'content'})
+    result = collector.cache.get_events_to_send('test_key', {'item': 'content'})
     assert result == ['item']
     collector.log.debug.assert_called()

@@ -14,8 +14,25 @@ from urllib.parse import quote
 from confluent_kafka import IsolationLevel, TopicPartition
 from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
+from datadog_checks.kafka_consumer.cache import CacheHelper
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
-from datadog_checks.kafka_consumer.event_cache_mixin import EventCacheMixin
+
+
+def _get_tags(config, cluster_id: str | None = None) -> list[str]:
+    """Build metric tags, appending cluster ID tags when provided."""
+    tags = list(config._custom_tags)
+    if cluster_id:
+        tags.append(f'kafka_cluster_id:{cluster_id}')
+        if config._kafka_cluster_id_override:
+            tags.append(f'original_kafka_cluster_id:{config._auto_detected_cluster_id}')
+    return tags
+
+
+def _original_cluster_id_field(config) -> dict[str, str]:
+    """Return the original cluster ID event field when a cluster ID override is active."""
+    if config._kafka_cluster_id_override:
+        return {'original_kafka_cluster_id': config._auto_detected_cluster_id}
+    return {}
 
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
 
@@ -41,7 +58,7 @@ class SchemaInfo(TypedDict):
     compatibility: str | None
 
 
-class ClusterMetadataCollector(EventCacheMixin):
+class ClusterMetadataCollector:
     """Collects Kafka cluster metadata (brokers, topics, consumer groups, schemas)."""
 
     def __init__(self, check, client, config, log):
@@ -51,7 +68,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         self.log = log
         self.http = check.http
 
-        self._init_cache_intervals(self.config._kafka_configs_refresh_interval)
+        self.cache = CacheHelper(check, log, config._kafka_configs_refresh_interval)
         self.BROKER_CONFIG_BATCH_SIZE = 5  # Max brokers to describe_configs per run (one per call, Kafka limitation)
         self.TOPIC_CONFIG_BATCH_SIZE = 100  # Max topics to describe_configs per check run
 
@@ -258,7 +275,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         )
 
         self.log.debug("Found %s brokers in cluster %s", len(brokers), cluster_id)
-        broker_tags = self._get_tags(cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
+        broker_tags = _get_tags(self.config,cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
         self.check.gauge('broker.count', len(brokers), tags=broker_tags)
 
         try:
@@ -266,7 +283,7 @@ class ClusterMetadataCollector(EventCacheMixin):
             cluster_info = cluster_future.result(timeout=self.config._request_timeout)
 
             if cluster_info.controller:
-                controller_tags = self._get_tags(cluster_id) + [
+                controller_tags = _get_tags(self.config,cluster_id) + [
                     f'controller_id:{cluster_info.controller.id}',
                     f'controller_host:{cluster_info.controller.host}',
                     f'controller_port:{cluster_info.controller.port}',
@@ -291,7 +308,7 @@ class ClusterMetadataCollector(EventCacheMixin):
 
         # Emit per-broker metrics (fast, in-memory only)
         for broker_id, broker_metadata in brokers.items():
-            tags = self._get_tags(cluster_id) + [
+            tags = _get_tags(self.config,cluster_id) + [
                 f'broker_id:{broker_id}',
                 f'broker_host:{broker_metadata.host}',
                 f'broker_port:{broker_metadata.port}',
@@ -299,7 +316,7 @@ class ClusterMetadataCollector(EventCacheMixin):
             self.check.gauge('broker.leader_count', broker_leader_count.get(broker_id, 0), tags=tags)
             self.check.gauge('broker.partition_count', broker_partition_count.get(broker_id, 0), tags=tags)
 
-        broker_ids_to_fetch = self._get_items_to_fetch(
+        broker_ids_to_fetch = self.cache.get_items_to_fetch(
             self.BROKER_CONFIG_FETCH_CACHE_KEY, [str(bid) for bid in brokers.keys()]
         )
         fetched_broker_configs = {}
@@ -318,7 +335,7 @@ class ClusterMetadataCollector(EventCacheMixin):
                 if not broker_meta:
                     continue
 
-                metric_tags = self._get_tags(cluster_id) + [
+                metric_tags = _get_tags(self.config,cluster_id) + [
                     f'broker_id:{broker_id_str}',
                     f'broker_host:{broker_meta.host}',
                     f'broker_port:{broker_meta.port}',
@@ -368,16 +385,16 @@ class ClusterMetadataCollector(EventCacheMixin):
                     'broker_port': broker_meta.port,
                 }
 
-        self._mark_items_fetched(
+        self.cache.mark_items_fetched(
             self.BROKER_CONFIG_FETCH_CACHE_KEY,
             broker_ids_batch,
-            ttl_base=self._configs_refresh_interval,
-            ttl_jitter=self._configs_refresh_jitter,
+            ttl_base=self.cache.refresh_interval,
+            ttl_jitter=self.cache.refresh_jitter,
             max_cache_size=self.BROKER_CONFIG_CACHE_MAX_SIZE,
         )
 
         broker_contents = {bid: info['event_text'] for bid, info in fetched_broker_configs.items()}
-        brokers_to_emit = self._get_events_to_send(self.BROKER_CONFIG_CACHE_KEY, broker_contents)
+        brokers_to_emit = self.cache.get_events_to_send(self.BROKER_CONFIG_CACHE_KEY, broker_contents)
 
         for broker_id in brokers_to_emit:
             info = fetched_broker_configs[broker_id]
@@ -386,7 +403,7 @@ class ClusterMetadataCollector(EventCacheMixin):
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
-                        **self._original_cluster_id_field(),
+                        **_original_cluster_id_field(self.config),
                         'broker_id': str(broker_id),
                         'broker_host': info['broker_host'],
                         'broker_port': info['broker_port'],
@@ -464,7 +481,7 @@ class ClusterMetadataCollector(EventCacheMixin):
 
         self.log.debug("Found %s topics", len(topic_partitions))
 
-        self.check.gauge('topic.count', len(topic_partitions), tags=self._get_tags(cluster_id))
+        self.check.gauge('topic.count', len(topic_partitions), tags=_get_tags(self.config,cluster_id))
 
         earliest_offsets = self._fetch_earliest_offsets(topic_partitions)
 
@@ -486,7 +503,7 @@ class ClusterMetadataCollector(EventCacheMixin):
             if topic_name in KAFKA_INTERNAL_TOPICS:
                 continue
 
-            topic_tags = self._get_tags(cluster_id) + [f'topic:{topic_name}']
+            topic_tags = _get_tags(self.config,cluster_id) + [f'topic:{topic_name}']
 
             if not partitions:
                 self.log.warning("No partitions found for topic %s", topic_name)
@@ -600,7 +617,7 @@ class ClusterMetadataCollector(EventCacheMixin):
 
         # --- Topic config fetching (batched describe_configs) ---
         all_topic_names = [name for name in topic_partitions.keys() if name not in KAFKA_INTERNAL_TOPICS]
-        topic_names_to_fetch = self._get_items_to_fetch(self.TOPIC_CONFIG_FETCH_CACHE_KEY, all_topic_names)
+        topic_names_to_fetch = self.cache.get_items_to_fetch(self.TOPIC_CONFIG_FETCH_CACHE_KEY, all_topic_names)
 
         # Batch: cap the number of topic configs fetched per check run.
         topic_names_to_fetch = topic_names_to_fetch[: self.TOPIC_CONFIG_BATCH_SIZE]
@@ -616,7 +633,7 @@ class ClusterMetadataCollector(EventCacheMixin):
 
             for resource, future in futures.items():
                 topic_name = resource.name
-                topic_tags = self._get_tags(cluster_id) + [f'topic:{topic_name}']
+                topic_tags = _get_tags(self.config,cluster_id) + [f'topic:{topic_name}']
 
                 try:
                     config_result = future.result(timeout=self.config._request_timeout)
@@ -653,16 +670,16 @@ class ClusterMetadataCollector(EventCacheMixin):
                     'event_text': event_text,
                 }
 
-        self._mark_items_fetched(
+        self.cache.mark_items_fetched(
             self.TOPIC_CONFIG_FETCH_CACHE_KEY,
             topic_names_to_fetch,
-            ttl_base=self._configs_refresh_interval,
-            ttl_jitter=self._configs_refresh_jitter,
+            ttl_base=self.cache.refresh_interval,
+            ttl_jitter=self.cache.refresh_jitter,
             max_cache_size=self.TOPIC_CONFIG_CACHE_MAX_SIZE,
         )
 
         topic_contents = {name: info['event_text'] for name, info in fetched_topic_configs.items()}
-        topics_to_emit = self._get_events_to_send(self.TOPIC_CONFIG_CACHE_KEY, topic_contents)
+        topics_to_emit = self.cache.get_events_to_send(self.TOPIC_CONFIG_CACHE_KEY, topic_contents)
 
         for topic_name in topics_to_emit:
             info = fetched_topic_configs[topic_name]
@@ -671,7 +688,7 @@ class ClusterMetadataCollector(EventCacheMixin):
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
-                        **self._original_cluster_id_field(),
+                        **_original_cluster_id_field(self.config),
                         'topic': topic_name,
                         'config_type': 'topic',
                         'config': json.loads(info['event_text']),
@@ -700,7 +717,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         consumer_groups = consumer_groups_result.valid
 
         self.log.debug("Found %s consumer groups", len(consumer_groups))
-        self.check.gauge('consumer_group.count', len(consumer_groups), tags=self._get_tags(cluster_id))
+        self.check.gauge('consumer_group.count', len(consumer_groups), tags=_get_tags(self.config,cluster_id))
 
         group_ids = [group.group_id for group in consumer_groups]
         if not group_ids:
@@ -718,7 +735,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         current_member_hashes = {}
 
         for group_id, group_info in group_id_to_info.items():
-            group_tags = self._get_tags(cluster_id) + [f'consumer_group:{group_id}']
+            group_tags = _get_tags(self.config,cluster_id) + [f'consumer_group:{group_id}']
             state = group_info.state
             members = group_info.members
             coordinator = group_info.coordinator
@@ -909,7 +926,7 @@ class ClusterMetadataCollector(EventCacheMixin):
 
         self.log.debug("Found %d subjects in schema registry", len(subjects))
 
-        self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
+        self.check.gauge('schema_registry.subjects', len(subjects), tags=_get_tags(self.config,cluster_id))
 
         try:
             global_compatibility = self._get_schema_registry_global_compatibility()
@@ -926,7 +943,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         # --- Tier 1: Lightweight version checks ---
         # GET /subjects/{subject}/versions returns just [1, 2, 3] — very cheap.
         # We use this to detect if a subject has a new version without fetching schema content.
-        subjects_to_check = self._get_items_to_fetch(self.SCHEMA_VERSION_CHECK_CACHE_KEY, subjects)
+        subjects_to_check = self.cache.get_items_to_fetch(self.SCHEMA_VERSION_CHECK_CACHE_KEY, subjects)
 
         subjects_to_check = subjects_to_check[: self.SCHEMA_VERSION_CHECK_BATCH_SIZE]
 
@@ -939,7 +956,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         version_responses = self._parallel_fetch(self._get_schema_registry_versions, subjects_to_check, "version list")
 
         # Mark all checked subjects as fetched (even if they errored)
-        self._mark_items_fetched(
+        self.cache.mark_items_fetched(
             self.SCHEMA_VERSION_CHECK_CACHE_KEY,
             subjects_to_check,
             max_cache_size=self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE,
@@ -1071,7 +1088,7 @@ class ClusterMetadataCollector(EventCacheMixin):
             )
 
         # Determine which subjects need event emission (changed or TTL expired)
-        schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
+        schemas_to_emit = self.cache.get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
 
         self._emit_schema_registry_events(
             schemas_to_emit,
@@ -1091,7 +1108,7 @@ class ClusterMetadataCollector(EventCacheMixin):
 
         Compatibility is refreshed on its own cadence so a flip without a version bump is still picked
         up; a per-subject flip therefore surfaces only on the next compat-fetch cadence (up to
-        CONFIGS_REFRESH_INTERVAL + jitter later), while a global flip re-emits immediately via
+        cache.refresh_interval + jitter later), while a global flip re-emits immediately via
         global_compatibility.
 
         The SCHEMA_COMPATIBILITY_BATCH_SIZE clamp bounds only the cadence-driven `compat_due` list;
@@ -1100,7 +1117,7 @@ class ClusterMetadataCollector(EventCacheMixin):
         subjects_needing_full_fetch), not SCHEMA_COMPATIBILITY_BATCH_SIZE. They are equal today, so
         there is no over-fetch.
         """
-        compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
+        compat_due = self.cache.get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
         remaining_slots = max(0, self.SCHEMA_COMPATIBILITY_BATCH_SIZE - len(subjects_needing_full_fetch))
         compat_due = compat_due[:remaining_slots]
         compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
@@ -1112,11 +1129,11 @@ class ClusterMetadataCollector(EventCacheMixin):
             # Mark all attempted subjects as fetched (even if they errored), mirroring the version
             # tier: a subject that fails this run isn't retried until the next configs cadence rather
             # than hammered every check, at the cost of holding stale compatibility until then.
-            self._mark_items_fetched(
+            self.cache.mark_items_fetched(
                 self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
                 compat_subjects_to_fetch,
-                ttl_base=self._configs_refresh_interval,
-                ttl_jitter=self._configs_refresh_jitter,
+                ttl_base=self.cache.refresh_interval,
+                ttl_jitter=self.cache.refresh_jitter,
                 max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
             )
 
@@ -1172,7 +1189,7 @@ class ClusterMetadataCollector(EventCacheMixin):
             ds_payload = {
                 'collection_timestamp': int(time.time() * 1000),
                 'kafka_cluster_id': cluster_id,
-                **self._original_cluster_id_field(),
+                **_original_cluster_id_field(self.config),
                 'subject': subject,
                 'topic': info['topic_name'],
                 'schema_for': info['schema_for'],
