@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import warnings
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import yaml
 from datamodel_code_generator import DataModelType
@@ -64,6 +64,8 @@ class ModelConsumer:
                 continue
 
             model_files.update(self._build_model_files(model_info, package_info))
+            if 'discovery' in spec_file:
+                model_files['discovery.py'] = (self._build_discovery_file(spec_file['discovery']), [])
             rendered_files[spec_file['name']] = {file_name: model_files[file_name] for file_name in sorted(model_files)}
 
         return rendered_files
@@ -249,3 +251,42 @@ class ModelConsumer:
         if model_info.defaults_file_needs_value_normalization:
             defaults_file_contents = format_with_ruff(defaults_file_contents)
         return defaults_file_contents
+
+    def _build_discovery_file(self, discovery: dict[str, Any]) -> str:
+        lines = [
+            'from collections.abc import Iterator',
+            'from typing import Any',
+            '',
+            'from datadog_checks.base.utils.discovery import Service, from_ports',
+            '',
+            '',
+            'def candidates(service: Service) -> Iterator[dict[str, Any]]:',
+        ]
+
+        for strategy_index, strategy in enumerate(discovery['strategies']):
+            if strategy['strategy'] != 'from_ports':
+                raise NotImplementedError(strategy['strategy'])
+            lines.append(f'    # discovery[{strategy_index}]: from_ports')
+            lines.append(f'    for ctx in from_ports(service, port_hints={strategy["port_hints"]!r}):')
+
+            for candidate in strategy['candidates']:
+                lines.extend(
+                    [
+                        '        yield {',
+                        "            'init_config': {},",
+                        "            'instances': [",
+                        '                {',
+                    ]
+                )
+                for field_name, template in candidate.items():
+                    lines.append(f"                    {field_name!r}: {template!r}.format(service=service, **ctx),")
+                lines.extend(
+                    [
+                        '                }',
+                        '            ],',
+                        '        }',
+                    ]
+                )
+
+        lines.append('')
+        return format_with_ruff('\n'.join(lines))
