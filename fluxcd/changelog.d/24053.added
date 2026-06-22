@@ -1,0 +1,1 @@
+Add `fluxcd.gotk.resource.info` metric for Flux 2.1+ kube-state-metrics monitoring.
