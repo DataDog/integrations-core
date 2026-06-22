@@ -22,6 +22,7 @@ def test_e2e_discovery(dd_agent_check_discovery):
     # NOTE: For discovery to work, the supervisord container must use an image
     # whose name contains 'supervisord' (e.g. vimagick/supervisord).
     # The test environment uses datadog/docker-library which won't match.
+    pytest.skip("Test environment uses 'datadog/docker-library'; discovery requires an image with 'supervisord' in its name")
     aggregator = dd_agent_check_discovery(check_rate=True)
 
     aggregator.assert_service_check("supervisord.can_connect", status=AgentCheck.OK)
