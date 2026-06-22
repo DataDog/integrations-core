@@ -24,8 +24,7 @@ if TYPE_CHECKING:
 @click.option("--to-dd-org", type=str, help="Send metrics to Datadog using the specified organization name.")
 @click.option("--to-dd-key", type=str, help="Send metrics to datadoghq.com using the specified API key.")
 @click.option("--python", "version", help="Python version (e.g 3.12).  If not specified, all versions will be analyzed")
-@click.option("--dependency-sizes", type=click.Path(exists=True), help="Path to the dependency sizes file. If no")
-@click.option("--commit", help="Commit hash to check the status of. It takes the commit's dependency sizes file.")
+@click.option("--commit", help="Commit hash used when sending metrics to Datadog.")
 @common_params  # platform, compressed, format, show_gui
 @click.pass_obj
 def status(
@@ -38,7 +37,6 @@ def status(
     wheels_storage: str,
     to_dd_org: str | None,
     to_dd_key: str | None,
-    dependency_sizes: Path | None,
     commit: str | None,
 ) -> None:
     """
@@ -65,7 +63,6 @@ def status(
             format,
             to_dd_org,
             commit,
-            dependency_sizes,
             to_dd_key,
             app,
         )
@@ -76,15 +73,6 @@ def status(
         combinations = [(p, v) for p in platforms for v in versions]
 
         for plat, ver in combinations:
-            if commit:
-                from ddev.cli.size.utils.common_funcs import get_last_dependency_sizes_artifact
-
-                dependency_sizes = get_last_dependency_sizes_artifact(app, commit, plat, ver, compressed)
-                if not dependency_sizes:
-                    app.display_error(
-                        "Could not find dependency sizes in the artifacts: falling back to local lockfiles"
-                    )
-
             parameters: CLIParameters = {
                 "app": app,
                 "platform": plat,
@@ -98,7 +86,6 @@ def status(
                 status_mode(
                     repo_path,
                     parameters,
-                    dependency_sizes,
                 )
             )
         if format:
@@ -121,7 +108,6 @@ def validate_parameters(
     format: list[str],
     to_dd_org: str | None,
     commit: str | None,
-    dependency_sizes: Path | None,
     to_dd_key: str | None,
     app: Application,
 ) -> None:
@@ -132,16 +118,10 @@ def validate_parameters(
     if version and version not in valid_versions:
         errors.append(f"Invalid version: {version!r}")
 
-    if commit and dependency_sizes:
-        errors.append("Pass either 'commit' or 'dependency-sizes'. Both options cannot be supplied.")
-
     if format:
         for fmt in format:
             if fmt not in ["png", "csv", "markdown", "json"]:
                 errors.append(f"Invalid format: {fmt!r}. Only png, csv, markdown, and json are supported.")
-
-    if dependency_sizes and not dependency_sizes.is_file():
-        errors.append(f"Dependency sizes file does not exist: {dependency_sizes!r}")
 
     if to_dd_org and to_dd_key:
         errors.append("Specify either --to-dd-org or --to-dd-key, not both")
@@ -156,7 +136,6 @@ def validate_parameters(
 def status_mode(
     repo_path: Path,
     params: CLIParameters,
-    dependency_sizes: Path | None,
 ) -> list[FileDataEntryPlatformVersion]:
     from ddev.cli.size.utils.common_funcs import (
         format_modules,
@@ -166,23 +145,10 @@ def status_mode(
     )
 
     with params["app"].status("Calculating sizes..."):
-        if dependency_sizes:
-            from ddev.cli.size.utils.common_funcs import get_dependencies_from_json
-
-            params["app"].display_debug(
-                f"Getting dependencies from artifacts for {params['platform']} {params['version']}"
-            )
-            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies_from_json(
-                dependency_sizes, params["platform"], params["version"], params["compressed"]
-            )
-
-        else:
-            params["app"].display_debug(
-                f"Getting dependencies from lockfiles for {params['platform']} {params['version']}"
-            )
-            modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
-                repo_path, params["platform"], params["version"], params["compressed"], params["wheels_storage"]
-            )
+        params["app"].display_debug(f"Getting dependencies from lockfiles for {params['platform']} {params['version']}")
+        modules = get_files(repo_path, params["compressed"], params["version"]) + get_dependencies(
+            repo_path, params["platform"], params["version"], params["compressed"], params["wheels_storage"]
+        )
 
     formatted_modules = format_modules(modules, params["platform"], params["version"])
     formatted_modules.sort(key=lambda x: x["Size_Bytes"], reverse=True)
