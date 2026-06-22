@@ -45,6 +45,11 @@ class BaseAgent[TMessage](ABC):
         """Read-only snapshot of the conversation history."""
         return deepcopy(self._history)
 
+    @property
+    def system_prompt(self) -> str:
+        """The agent's active system prompt."""
+        return self._system_prompt
+
     def reset(self) -> None:
         """Clear conversation history to start a new conversation."""
         self._history = []

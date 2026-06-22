@@ -6,7 +6,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from importlib import import_module
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from anthropic.types import ToolParam
@@ -18,8 +17,8 @@ from .core.protocol import ToolProtocol
 from .core.types import ToolResult
 
 if TYPE_CHECKING:
-    from ddev.ai.agent.build import AgentRuntimeBuilder
     from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.react.factory import ReActProcessFactory
 
 
 @dataclass
@@ -29,8 +28,7 @@ class ToolContext:
     file_registry: FileRegistry
     owner_id: str
     agent_config: AgentConfig
-    runtime_builder: AgentRuntimeBuilder
-    artifact_root: Path
+    process_factory: ReActProcessFactory
 
     @property
     def policy(self) -> FileAccessPolicy:
@@ -53,8 +51,7 @@ def _spawn_subagent_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
     return tool_cls(
         owner_id=ctx.owner_id,
         agent_config=ctx.agent_config,
-        runtime_builder=ctx.runtime_builder,
-        log_dir=ctx.artifact_root / "subagents" / ctx.owner_id,
+        process_factory=ctx.process_factory,
     )
 
 
@@ -120,21 +117,21 @@ class ToolRegistry:
         owner_id: str,
         file_registry: FileRegistry,
         agent_config: AgentConfig,
-        runtime_builder: AgentRuntimeBuilder,
-        artifact_root: Path,
+        process_factory: ReActProcessFactory,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
         The file_registry is shared across all owners in a run so that the access
         policy applies globally; hashes inside it are partitioned by owner_id so
         each owner must still read-before-write on its own.
+
+        ``process_factory`` is only consumed by tools that spawn child agents.
         """
         ctx = ToolContext(
             file_registry=file_registry,
             owner_id=owner_id,
             agent_config=agent_config,
-            runtime_builder=runtime_builder,
-            artifact_root=artifact_root,
+            process_factory=process_factory,
         )
         tools: list[ToolProtocol] = []
         for name in tool_names:

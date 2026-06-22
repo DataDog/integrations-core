@@ -4,20 +4,18 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic import Field
+from pydantic import Field, ValidationError
 
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason
-from ddev.ai.react.process import ReActProcess
-from ddev.ai.tools.agents.agent_logger import AgentLogger
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 if TYPE_CHECKING:
-    from ddev.ai.agent.build import AgentRuntimeBuilder
     from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.react.factory import ReActProcessFactory
 
 
 class SpawnSubagentInput(BaseToolInput):
@@ -60,15 +58,13 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
         self,
         owner_id: str,
         agent_config: AgentConfig,
-        runtime_builder: AgentRuntimeBuilder,
-        log_dir: Path,
+        process_factory: ReActProcessFactory,
     ) -> None:
         self._owner_id = owner_id
         self._agent_config = agent_config
-        self._runtime_builder = runtime_builder
+        self._process_factory = process_factory
         # Parent may itself have spawn_subagent; never offer it to children.
         self._allowed_tools = set(agent_config.tools) - {self.name}
-        self._log_dir = log_dir
         self._counter = 0
 
     @property
@@ -81,7 +77,6 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
     async def __call__(self, tool_input: SpawnSubagentInput) -> ToolResult:
         label = self._label(tool_input)
 
-        # Subset validation — return failed ToolResult; no log file is opened.
         if self.name in tool_input.tools:
             return ToolResult(
                 success=False,
@@ -100,76 +95,35 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
                 ),
             )
 
-        try:
-            self._log_dir.mkdir(parents=True, exist_ok=True)
-        except OSError as e:
-            return ToolResult(
-                success=False,
-                error=(f"Subagent {label!r} not spawned: cannot create log directory {self._log_dir}: {e}"),
-            )
-
         self._counter += 1
         subagent_id = f"{self._owner_id}.sub.{self._counter:03d}-{label}"
-        log_path = self._log_dir / f"{self._counter:03d}-{label}.jsonl"
+        child_scope = AgentScope(owner_id=subagent_id, role=AgentRole.SUBAGENT)
 
         try:
-            logger = AgentLogger(log_path)
-        except OSError as e:
-            return ToolResult(
-                success=False,
-                error=f"Subagent {label!r} not spawned: cannot open log file {log_path}: {e}",
-            )
-
-        try:
-            logger.log_start(
+            child_config = self._agent_config.model_copy(update={"tools": tool_input.tools})
+            process = self._process_factory.create(
+                scope=child_scope,
+                agent_config=child_config,
                 system_prompt=tool_input.system_prompt,
-                prompt=tool_input.prompt,
-                tools=tool_input.tools,
             )
-
-            try:
-                child_config = self._agent_config.model_copy(update={"tools": tool_input.tools})
-                runtime = self._runtime_builder(
-                    agent_config=child_config,
-                    system_prompt=tool_input.system_prompt,
-                    owner_id=subagent_id,
-                )
-            except Exception as e:
-                logger.log_finish(success=False, error=f"build failed: {type(e).__name__}: {e}")
-                return ToolResult(
-                    success=False,
-                    error=f"Subagent {label!r} failed to build: {type(e).__name__}: {e}",
-                )
-
-            process = ReActProcess(
-                runtime,
-                callbacks=logger.build_callbacks(),
-            )
-            try:
-                result = await process.start(tool_input.prompt)
-            except Exception as e:
-                logger.log_finish(success=False, error=f"{type(e).__name__}: {e}")
-                return ToolResult(
-                    success=False,
-                    error=f"Subagent {label!r} failed: {type(e).__name__}: {e}",
-                )
-
-            logger.log_finish(
-                success=True,
-                iterations=result.iterations,
-                total_input_tokens=result.total_input_tokens,
-                total_output_tokens=result.total_output_tokens,
-                stop_reason=str(result.final_response.stop_reason),
-            )
-
-            data = result.final_response.text
-            if result.final_response.stop_reason == StopReason.MAX_TOKENS:
-                data = "[SUBAGENT HIT MAX_TOKENS — RESPONSE MAY BE TRUNCATED]\n\n" + data
+        except ValidationError as e:
             return ToolResult(
-                success=True,
-                data=data,
-                total_input_tokens=result.total_input_tokens,
-                total_output_tokens=result.total_output_tokens,
+                success=False, error=f"Invalid child config for {label!r}: {e.error_count()} validation error(s)"
             )
-        finally:
-            logger.close()
+        except Exception as e:
+            return ToolResult(success=False, error=f"Subagent {label!r} failed to build: {type(e).__name__}: {e}")
+
+        try:
+            result = await process.start(tool_input.prompt)
+        except Exception as e:
+            return ToolResult(success=False, error=f"Subagent {label!r} failed: {type(e).__name__}: {e}")
+
+        data = result.final_response.text
+        if result.final_response.stop_reason == StopReason.MAX_TOKENS:
+            data = "[SUBAGENT HIT MAX_TOKENS — RESPONSE MAY BE TRUNCATED]\n\n" + data
+        return ToolResult(
+            success=True,
+            data=data,
+            total_input_tokens=result.total_input_tokens,
+            total_output_tokens=result.total_output_tokens,
+        )

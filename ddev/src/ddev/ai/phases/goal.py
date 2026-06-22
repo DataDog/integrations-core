@@ -10,13 +10,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ddev.ai.agent.build import AgentRuntimeFactory
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.config import AgentConfig, TaskConfig
 from ddev.ai.phases.template import render_inline, render_prompt
+from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
-from ddev.ai.tools.agents.agent_logger import AgentLogger
 from ddev.ai.tools.registry import filter_read_only
 
 GOAL_REVIEWER_SYSTEM_PROMPT = """\
@@ -258,77 +258,38 @@ async def run_goal_loop(
     worker_process: ReActProcess,
     initial_result: ReActResult,
     parent_agent_config: AgentConfig,
-    runtime_factory: AgentRuntimeFactory,
+    process_factory: ReActProcessFactory,
     callbacks: Callbacks,
     phase_id: str,
-    log_root: Path,
     compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
 ) -> GoalLoopOutcome:
     """Drive the reviewer + worker-retry loop for a single task with a goal.
 
-    Reviewer activity is logged to ``<log_root>/goal_agent/<phase_id>/<task_name>.jsonl``
-    via AgentLogger. The reviewer's ReActProcess uses only the logger's callbacks —
-    the phase callbacks see only the bracketing before/after_goal_check events.
+    The reviewer runs as a scoped ``GOAL_REVIEWER`` process; its per-run activity
+    is captured by the run-wide logging callbacks bound to ``process_factory``.
+    The phase callbacks see only the bracketing before/after_goal_check events.
     """
-    log_dir = log_root / "goal_agent" / phase_id
-    log_path = log_dir / f"{task.name}.jsonl"
-    try:
-        log_dir.mkdir(parents=True, exist_ok=True)
-    except OSError as e:
-        raise OSError(f"Goal reviewer log directory could not be created at {log_dir}: {e}") from e
-
-    reviewer_owner_id = f"{phase_id}.goal.{task.name}"
+    reviewer_scope = AgentScope(owner_id=f"{phase_id}.goal.{task.name}", role=AgentRole.GOAL_REVIEWER)
     reviewer_config = AgentConfig(
         provider=parent_agent_config.provider,
         tools=filter_read_only(parent_agent_config.tools),
     )
-    reviewer_runtime = runtime_factory.build_runtime(
-        agent_config=reviewer_config,
-        system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
-        owner_id=reviewer_owner_id,
-    )
-
     try:
-        agent_logger = AgentLogger(log_path)
-    except OSError as e:
-        raise OSError(f"Goal reviewer log could not be opened at {log_path}: {e}") from e
-
-    try:
-        agent_logger.log_start(
+        reviewer_process = process_factory.create(
+            scope=reviewer_scope,
+            agent_config=reviewer_config,
             system_prompt=GOAL_REVIEWER_SYSTEM_PROMPT,
-            prompt=f"<goal loop for task {task.name!r}>",
-            tools=[d["name"] for d in reviewer_runtime.tool_registry.definitions],
         )
-        reviewer_process = ReActProcess(
-            reviewer_runtime,
-            callbacks=agent_logger.build_callbacks(),
-        )
+    except Exception as e:
+        raise RuntimeError(f"Failed to create reviewer process for task {task.name}: {e}") from e
 
-        outcome = await _drive_goal_loop(
-            task=task,
-            goal_text=goal_text,
-            rendered_task_prompt=rendered_task_prompt,
-            worker_process=worker_process,
-            initial_result=initial_result,
-            reviewer_process=reviewer_process,
-            callbacks=callbacks,
-            compact_if_needed=compact_if_needed,
-        )
-        agent_logger.log_finish(
-            success=True,
-            attempts=outcome.attempts,
-            total_input_tokens=outcome.total_input_tokens,
-            total_output_tokens=outcome.total_output_tokens,
-        )
-        return outcome
-    except GoalValidationError as e:
-        agent_logger.log_finish(
-            success=False,
-            attempts=e.attempts,
-            total_input_tokens=e.input_tokens,
-            total_output_tokens=e.output_tokens,
-            error=f"{type(e).__name__}: {e}",
-        )
-        raise
-    finally:
-        agent_logger.close()
+    return await _drive_goal_loop(
+        task=task,
+        goal_text=goal_text,
+        rendered_task_prompt=rendered_task_prompt,
+        worker_process=worker_process,
+        initial_result=initial_result,
+        reviewer_process=reviewer_process,
+        callbacks=callbacks,
+        compact_if_needed=compact_if_needed,
+    )

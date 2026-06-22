@@ -9,11 +9,14 @@ from typing import Any
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
+from ddev.ai.react.process import ReActProcess
+from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
@@ -64,7 +67,12 @@ class MockAgent:
         self.send_calls: list[str | list[ToolResultMessage]] = []
         self.compact_call_count: int = 0
         self.name = "mock"
+        self._system_prompt = ""
         self._history: list[Any] = []
+
+    @property
+    def system_prompt(self) -> str:
+        return self._system_prompt
 
     async def send(
         self,
@@ -88,35 +96,38 @@ class MockAgent:
         return None
 
 
-class MockRuntimeFactory:
-    """Minimal AgentRuntimeFactory that injects a MockAgent for testing."""
+class MockProcessFactory:
+    """Minimal ReActProcessFactory that wraps a MockAgent in a ReActProcess.
+
+    Goal-reviewer creations (role == GOAL_REVIEWER) are routed through the
+    optional ``goal_runtime_builder(owner_id) -> AgentRuntime`` hook so goal tests
+    can supply a fixed reviewer agent; all other creations reuse ``mock_agent``.
+    """
 
     def __init__(
         self,
         mock_agent: MockAgent,
+        callbacks: Callbacks,
         captured_kwargs: dict[str, Any] | None = None,
         goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
     ) -> None:
         self._mock_agent = mock_agent
+        self._callbacks = callbacks
         self._captured = captured_kwargs
         self._goal_runtime_builder = goal_runtime_builder
 
-    def build_runtime(
-        self,
-        *,
-        agent_config: AgentConfig,
-        system_prompt: str,
-        owner_id: str,
-    ) -> AgentRuntime:
-        if self._goal_runtime_builder is not None and ".goal." in owner_id:
-            return self._goal_runtime_builder(owner_id)
-        if self._captured is not None:
-            self._captured["agent_config"] = agent_config
-            self._captured["system_prompt"] = system_prompt
-            self._captured["owner_id"] = owner_id
-        self._mock_agent.name = owner_id
-        self._mock_agent._system_prompt = system_prompt
-        return AgentRuntime(agent=self._mock_agent, tool_registry=ToolRegistry([]))
+    def create(self, *, scope: AgentScope, agent_config: AgentConfig, system_prompt: str) -> ReActProcess:
+        if self._goal_runtime_builder is not None and scope.role == AgentRole.GOAL_REVIEWER:
+            runtime = self._goal_runtime_builder(scope.owner_id)
+        else:
+            if self._captured is not None:
+                self._captured["agent_config"] = agent_config
+                self._captured["system_prompt"] = system_prompt
+                self._captured["owner_id"] = scope.owner_id
+            self._mock_agent.name = scope.owner_id
+            self._mock_agent._system_prompt = system_prompt
+            runtime = AgentRuntime(agent=self._mock_agent, tool_registry=ToolRegistry([]))
+        return ReActProcess(runtime, callbacks=self._callbacks, scope=scope)
 
 
 def make_agent_phase(
@@ -139,8 +150,8 @@ def make_agent_phase(
 ) -> tuple[AgenticPhase, CheckpointManager]:
     """Build an AgenticPhase ready for process_message-driven tests.
 
-    Injects a MockRuntimeFactory so no real LLM or tools are constructed. Pass
-    ``captured_worker_kwargs`` (a dict) to record build_runtime inputs.
+    Injects a MockProcessFactory so no real LLM or tools are constructed. Pass
+    ``captured_worker_kwargs`` (a dict) to record the worker create() inputs.
     Pass ``goal_runtime_builder`` as a callable (owner_id: str) -> AgentRuntime for goal tests.
     """
     config = PhaseConfig(
@@ -150,15 +161,20 @@ def make_agent_phase(
         context_compact_threshold_pct=context_compact_threshold_pct,
     )
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
+    # Compose run-wide JSONL logging onto any caller-supplied callbacks, exactly
+    # as the orchestrator does, so per-agent logs land under the checkpoint root.
+    run_logger = AgentLogger(checkpoint_manager.root)
+    effective_callbacks = (callbacks or Callbacks()).with_set(run_logger.as_callback_set())
     context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
         config_dir=flow_dir,
-        callbacks=callbacks or Callbacks(),
+        callbacks=effective_callbacks,
     )
 
-    runtime_factory = MockRuntimeFactory(
+    process_factory = MockProcessFactory(
         mock_agent=mock_agent,
+        callbacks=effective_callbacks,
         captured_kwargs=captured_worker_kwargs,
         goal_runtime_builder=goal_runtime_builder,
     )
@@ -169,7 +185,7 @@ def make_agent_phase(
         checkpoint_manager=checkpoint_manager,
         context=context,
         agent_config=agent_config or AgentConfig(tools=[]),
-        runtime_factory=runtime_factory,
+        process_factory=process_factory,
     )
     phase.queue = message_queue
     return phase, checkpoint_manager

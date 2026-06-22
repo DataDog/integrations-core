@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
@@ -19,10 +20,9 @@ from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
-    from ddev.ai.agent.base import BaseAgent
-    from ddev.ai.agent.build import AgentRuntimeFactory
     from ddev.ai.phases.goal import GoalLoopOutcome
     from ddev.ai.phases.resources import PhaseResources
+    from ddev.ai.react.factory import ReActProcessFactory
     from ddev.ai.react.types import ReActResult
 
 
@@ -64,7 +64,7 @@ class AgenticPhase(Phase):
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
         agent_config: AgentConfig,
-        runtime_factory: AgentRuntimeFactory,
+        process_factory: ReActProcessFactory,
     ) -> None:
         super().__init__(
             phase_id=phase_id,
@@ -75,7 +75,8 @@ class AgenticPhase(Phase):
         )
         self._agent_name = cast(str, config.agent)
         self._agent_config = agent_config
-        self._runtime_factory = runtime_factory
+        self._process_factory = process_factory
+        self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE)
         self._goal_attempt_log: list[dict[str, Any]] = []
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0
@@ -107,7 +108,7 @@ class AgenticPhase(Phase):
         # config.agent is guaranteed set & known by validate_config.
         agent_name = cast(str, config.agent)
         agent_config = resources.agent_config(agent_name)
-        runtime_factory = resources.agent_runtime_factory()
+        process_factory = resources.process_factory
 
         return cls(
             phase_id=phase_id,
@@ -116,7 +117,7 @@ class AgenticPhase(Phase):
             checkpoint_manager=checkpoint_manager,
             context=context,
             agent_config=agent_config,
-            runtime_factory=runtime_factory,
+            process_factory=process_factory,
         )
 
     def before_react(self) -> None:
@@ -218,10 +219,9 @@ class AgenticPhase(Phase):
                 worker_process=process,
                 initial_result=result,
                 parent_agent_config=self._agent_config,
-                runtime_factory=self._runtime_factory,
+                process_factory=self._process_factory,
                 callbacks=self._callbacks,
                 phase_id=self._phase_id,
-                log_root=self._checkpoint_manager.root,
                 compact_if_needed=lambda r: self._compact_if_needed(process, r),
             )
         except GoalValidationError as e:
@@ -258,7 +258,7 @@ class AgenticPhase(Phase):
 
     async def _run_memory_step(
         self,
-        agent: BaseAgent[Any],
+        process: ReActProcess,
         context: dict[str, Any],
     ) -> tuple[str, int, int]:
         """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
@@ -267,9 +267,7 @@ class AgenticPhase(Phase):
             user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
-        await self._callbacks.fire_before_agent_send(1)
-        response = await agent.send(memory_prompt, allowed_tools=[])
-        await self._callbacks.fire_agent_response(response, 1)
+        response = await process.run_once(memory_prompt)
         return response.text, response.usage.input_tokens, response.usage.output_tokens
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
@@ -280,17 +278,20 @@ class AgenticPhase(Phase):
             context,
             self._resolver,
         )
-        runtime = self._runtime_factory.build_runtime(
-            agent_config=self._agent_config,
-            system_prompt=system_prompt,
-            owner_id=self._phase_id,
-        )
-        process = ReActProcess(runtime, callbacks=self._callbacks)
+        try:
+            process = self._process_factory.create(
+                scope=self._scope,
+                agent_config=self._agent_config,
+                system_prompt=system_prompt,
+            )
+        except Exception as e:
+            raise RuntimeError(f"Failed to create process for phase {self._phase_id}: {e}") from e
+
         await self.run_tasks(process, context)
 
         self.after_react()
 
-        memory_text, mem_in, mem_out = await self._run_memory_step(runtime.agent, context)
+        memory_text, mem_in, mem_out = await self._run_memory_step(process, context)
 
         extra: dict[str, Any] = {}
         if self._goal_attempt_log:
