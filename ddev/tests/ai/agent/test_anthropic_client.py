@@ -536,7 +536,7 @@ def make_web_search_result(tool_use_id: str, result_count: int) -> anthropic.typ
 async def test_web_searches_surfaced_with_query_and_result_count() -> None:
     content = [
         make_text_block("Searching..."),
-        make_server_tool_use("srv1", "weather in Cáceres"),
+        make_server_tool_use("srv1", "weather in Tuvalu"),
         make_web_search_result("srv1", result_count=3),
         make_text_block("Here is the forecast."),
     ]
@@ -547,7 +547,7 @@ async def test_web_searches_surfaced_with_query_and_result_count() -> None:
 
     assert result.tool_calls == []
     assert len(result.web_searches) == 1
-    assert result.web_searches[0].query == "weather in Cáceres"
+    assert result.web_searches[0].query == "weather in Tuvalu"
     assert result.web_searches[0].result_count == 3
     assert result.web_searches[0].error is None
 

@@ -119,17 +119,12 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             "refusal": StopReason.OTHER,
         }
         if raw == "pause_turn":
-            # pause_turn should be consumed by _create_until_complete before reaching here.
             raise AgentError("pause_turn leaked past continuation loop") from None
         if raw not in mapping:
             raise AgentError(f"Unknown stop_reason: {raw!r}") from None
         return mapping[raw]
 
     def _native_tool_defs(self, allowed_tools: list[str] | None) -> list[ToolParam]:
-        """Resolve the registry's native (server) tool names to Anthropic definitions.
-
-        Native tools are gated by allowed_tools just like client tools: None means all.
-        """
         names = self._filter_by_allowed(self._tools.native_tool_names, allowed_tools)
         return [NATIVE_TOOL_DEFINITIONS[name] for name in names]
 

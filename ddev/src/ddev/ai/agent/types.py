@@ -31,7 +31,7 @@ class ToolCall:
 
 @dataclass(frozen=True)
 class WebSearchCall:
-    """A server-side web search the model performed (Anthropic native tool)."""
+    """A server-side web search the model performed."""
 
     query: str
     result_count: int = 0
