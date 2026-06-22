@@ -336,8 +336,7 @@ class ConfigurationEngine:
         for var_name, state in declarations.items():
             if var_name in flow_config.variables:
                 resolved[var_name] = flow_config.variables[var_name]
-            elif state.has_default:
-                assert state.default is not None
+            elif state.default is not None:
                 resolved[var_name] = state.default
             else:
                 missing.append(f"  {var_name!r} (declared in {', '.join(state.sources)})")
