@@ -157,12 +157,19 @@ class Query(BaseModel):
     custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
     dbname: str
     entity: Entity
-    interval_seconds: int
+    interval_seconds: Optional[int] = Field(
+        None,
+        description='How often (in seconds) to run this query. Ignored when schedule is set\n(see schedule for the precedence rule).\n',
+    )
     monitor_id: int
     query: str
     query_timeout: Optional[int] = Field(
         None,
         description='Per-query statement timeout in milliseconds. Overrides the\nconnection-level DEFAULT_COMMAND_TIMEOUT (10 s) for this query.\nConverted to seconds (ceil) before being applied. Minimum 1 s.\n',
+    )
+    schedule: Optional[str] = Field(
+        None,
+        description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
     )
     type: Optional[str] = None
 
