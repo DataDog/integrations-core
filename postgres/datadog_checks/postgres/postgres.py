@@ -65,7 +65,6 @@ from .util import (
     INDEX_PROGRESS_METRICS,
     QUERY_PG_CONTROL_CHECKPOINT,
     QUERY_PG_CONTROL_CHECKPOINT_LT_10,
-    QUERY_PG_REPLICATION_SLOTS,
     QUERY_PG_REPLICATION_SLOTS_STATS,
     QUERY_PG_REPLICATION_STATS_METRICS,
     QUERY_PG_STAT_DATABASE,
@@ -88,6 +87,7 @@ from .util import (
     DatabaseConfigurationError,
     DatabaseHealthCheckError,  # noqa: F401
     fmt,
+    get_replication_slots_query,
     get_schema_field,
     get_stat_wal_query,
     payload_pg_version,
@@ -423,7 +423,7 @@ class PostgreSql(DatabaseCheck):
                     queries.append(WAL_FILE_METRICS)
             if self._config.collect_buffercache_metrics:
                 queries.append(BUFFERCACHE_METRICS)
-            queries.append(QUERY_PG_REPLICATION_SLOTS)
+            queries.append(get_replication_slots_query(self.version))
             queries.append(QUERY_PG_REPLICATION_STATS_METRICS)
             queries.append(VACUUM_PROGRESS_METRICS if self.version >= V17 else VACUUM_PROGRESS_METRICS_LT_17)
             queries.append(STAT_SUBSCRIPTION_METRICS)
