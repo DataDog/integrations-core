@@ -2,9 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
-
 from datadog_checks.php_fpm import PHPFPMCheck
 
 pytestmark = pytest.mark.e2e

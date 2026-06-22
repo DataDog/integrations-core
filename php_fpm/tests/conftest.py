@@ -6,8 +6,8 @@ import os
 from copy import deepcopy
 
 import pytest
-from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata
 
+from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata
 from datadog_checks.php_fpm import PHPFPMCheck
 
 HOST = get_docker_hostname()
