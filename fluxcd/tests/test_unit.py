@@ -29,7 +29,12 @@ def test_ksm_metrics(dd_run_check, aggregator, mock_metrics_ksm):
     check = FluxcdCheck(
         "fluxcd",
         {},
-        [{"openmetrics_endpoint": "http://localhost:3000/metrics", "kube_state_metrics_endpoint": "http://localhost:3001/metrics"}],
+        [
+            {
+                "openmetrics_endpoint": "http://localhost:3000/metrics",
+                "kube_state_metrics_endpoint": "http://localhost:3001/metrics",
+            }
+        ],
     )
     dd_run_check(check)
     for metric_name in KSM_METRICS:
