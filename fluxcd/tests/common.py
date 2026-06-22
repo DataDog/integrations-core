@@ -29,7 +29,6 @@ EXPECTED_METRICS = {
         "fluxcd.gotk.reconcile.duration.seconds.bucket",
         "fluxcd.gotk.reconcile.duration.seconds.count",
         "fluxcd.gotk.reconcile.duration.seconds.sum",
-        "fluxcd.gotk.resource.info",
         "fluxcd.gotk.suspend.status",
         "fluxcd.leader_election_master_status",
         "fluxcd.process.cpu_seconds.count",
@@ -45,4 +44,8 @@ EXPECTED_METRICS = {
         "fluxcd.workqueue.retries.count",
         "fluxcd.workqueue.unfinished_work",
     },
+}
+
+KSM_METRICS = {
+    "fluxcd.gotk.resource.info",
 }
