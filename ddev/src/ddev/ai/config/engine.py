@@ -355,8 +355,11 @@ class ConfigurationEngine:
         source_dir = source_file.parent
         if config.system_prompt_path is None:
             system_prompt = source_dir / "prompts" / f"{config.name}.md"
-            return config.model_copy(update={"system_prompt_path": system_prompt})
-        return config
+        else:
+            system_prompt = config.system_prompt_path
+        if not system_prompt.exists():
+            raise FlowConfigError(f"System prompt not found for agent {config.name!r}: {system_prompt}")
+        return config.model_copy(update={"system_prompt_path": system_prompt})
 
     def _resolve_phase_paths(self, config: PhaseConfig, source_file: Path) -> PhaseConfig:
         source_dir = source_file.parent

@@ -645,6 +645,8 @@ def test_unknown_type_value_raises(tmp_path):
 
 
 def test_build_flow_variable_resolved_from_flow(tmp_path):
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "agent_a.md").write_text("system prompt")
     write_yaml(
         tmp_path,
         "config.yaml",
@@ -674,6 +676,8 @@ def test_build_flow_variable_resolved_from_flow(tmp_path):
 
 
 def test_build_flow_same_default_no_conflict(tmp_path):
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "agent_a.md").write_text("system prompt")
     write_yaml(
         tmp_path,
         "config.yaml",
@@ -738,6 +742,8 @@ def test_variable_default_promoted_from_second_source(tmp_path):
 
 def test_runtime_override_takes_precedence_over_default(tmp_path):
     """Flow-level variables override declared defaults."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "agent_a.md").write_text("system prompt")
     write_yaml(
         tmp_path,
         "config.yaml",
