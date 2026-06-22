@@ -1,0 +1,1 @@
+Add Data Observability RC query actions support: execute Remote Configuration-delivered monitoring queries against SAP HANA and forward results as `do-query-results` events.
