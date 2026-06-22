@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from io import StringIO
+from typing import Any
 
 import yaml
 
@@ -63,6 +64,13 @@ class OptionWriter(object):
 def construct_yaml(obj, **kwargs):
     kwargs.setdefault('default_flow_style', False)
     return yaml.safe_dump(obj, sort_keys=False, **kwargs)
+
+
+def construct_discovery_auto_conf(discovery: dict[str, Any]) -> str:
+    lines = ['ad_identifiers:']
+    lines.extend(f'  {line}' for line in construct_yaml(discovery['ad_identifiers']).splitlines())
+    lines.extend(['discovery: {}', 'init_config:', 'instances: []'])
+    return '\n'.join(lines) + '\n'
 
 
 def value_type_string(value):
@@ -326,5 +334,8 @@ class ExampleConsumer(object):
                             writer.errors.append('\n'.join(valid_fields))
 
                 files[file['example_name']] = (writer.contents, writer.errors)
+
+                if 'discovery' in file:
+                    files['auto_conf.yaml'] = (construct_discovery_auto_conf(file['discovery']), [])
 
         return files
