@@ -10,3 +10,9 @@ def test_e2e_openmetrics_v2(dd_agent_check):
 
     aggregator.assert_service_check('keda.openmetrics.health', ServiceCheck.OK, count=1)
     assert_service_checks(aggregator)
+
+
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
+
+    aggregator.assert_service_check('keda.openmetrics.health', ServiceCheck.OK)
