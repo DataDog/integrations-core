@@ -604,11 +604,13 @@ def _test_index_metrics(aggregator, index_metrics, metric_tags):
         if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:testdb', 'table:users', 'index:id'),
                 count=1,
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags
                 + (
                     'db:datadog_test_schemas',
@@ -619,6 +621,7 @@ def _test_index_metrics(aggregator, index_metrics, metric_tags):
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'),
                 count=1,
             )
