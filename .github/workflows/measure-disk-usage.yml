@@ -22,6 +22,7 @@ jobs:
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
+        ref: ${{ github.event.workflow_run.head_sha }}
         fetch-depth: 0
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -49,20 +50,16 @@ jobs:
       id: cmd
       env:
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        EVENT_NAME: ${{ github.event.workflow_run.event }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
       run: |
-        cmd="ddev -v size status --commit \"$HEAD_SHA\" --format json"
-
-        if [ "$EVENT_NAME" = "push" ] && [ "$HEAD_BRANCH" = "master" ]; then 
-          cmd="$cmd --to-dd-key ${{ steps.dd-sts.outputs.api_key }}"
-        fi
+        cmd="ddev -v size status --commit \"$HEAD_SHA\" --branch \"$HEAD_BRANCH\" --format json --to-dd-key \"\$DD_API_KEY\""
         echo "cmd=$cmd" >> $GITHUB_OUTPUT
     
 
     - name: Measure disk usage (Uncompressed)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
       run: |
         echo "Running for uncompressed sizes"
         ${{ steps.cmd.outputs.cmd }}
@@ -70,6 +67,7 @@ jobs:
     - name: Measure disk usage (Compressed)
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
       run: |
         echo "Running for compressed sizes"
         ${{ steps.cmd.outputs.cmd }} --compressed
