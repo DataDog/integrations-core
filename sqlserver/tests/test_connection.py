@@ -288,16 +288,16 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'connector,expected_password_parameter',
+    'connector,password,expected_password_parameter',
     [
-        pytest.param('odbc', 'PWD={pa;ss}}word};', id='odbc'),
-        pytest.param('adodbapi', 'Password="pa;ss}word";', id='adodbapi'),
+        pytest.param('odbc', 'pa;ss}word', 'PWD={pa;ss}}word};', id='odbc'),
+        pytest.param('adodbapi', 'pa;ss"word', 'Password="pa;ss""word";', id='adodbapi'),
     ],
 )
-def test_connection_string_escapes_password_with_semicolon(
-    instance_minimal_defaults: dict[str, object], connector: str, expected_password_parameter: str
+def test_connection_string_escapes_password_special_characters(
+    instance_minimal_defaults: dict[str, object], connector: str, password: str, expected_password_parameter: str
 ) -> None:
-    instance_minimal_defaults.update({'connector': connector, 'password': 'pa;ss}word'})
+    instance_minimal_defaults.update({'connector': connector, 'password': password})
     connection = Connection({}, instance_minimal_defaults, None)
 
     if connector == 'odbc':

@@ -139,11 +139,13 @@ def parse_connection_string_properties(cs):
 
 def _escape_odbc_connection_string_value(value: str) -> str:
     """Return a value escaped for an ODBC connection string."""
+    # MS Learn "Strong Passwords": brace special-character passwords and double right braces.
     return '{{{}}}'.format(value.replace('}', '}}'))
 
 
 def _escape_adodbapi_connection_string_value(value: str) -> str:
     """Return a value escaped for an adodbapi connection string."""
+    # MS Learn OLE DB Driver keywords: quote string values and double the enclosing quote.
     return '"{}"'.format(value.replace('"', '""'))
 
 
