@@ -26,8 +26,8 @@ from datadog_checks.sqlserver.connection_errors import (
 from .common import CHECK_NAME, SQLSERVER_YEAR
 
 KEY_PREFIX = "dbm-test-"
-SEMICOLON_PASSWORD_LOGIN = 'datadog_semicolon_password'
-SEMICOLON_PASSWORD = 'Pa;ssword123!'
+SPECIAL_CHARACTERS_PASSWORD_LOGIN = 'datadog_special_characters_password'
+SPECIAL_CHARACTERS_PASSWORD = 'Pa;ss}"word123!'
 
 
 @pytest.mark.unit
@@ -311,7 +311,7 @@ def test_connection_string_escapes_password_special_characters(
 
 
 @pytest.fixture
-def semicolon_password_login(sa_conn: object) -> tuple[str, str]:
+def special_characters_password_login(sa_conn: object) -> tuple[str, str]:
     with sa_conn.cursor() as cursor:
         cursor.execute(
             """
@@ -319,7 +319,7 @@ def semicolon_password_login(sa_conn: object) -> tuple[str, str]:
                 SELECT 1 FROM sys.server_principals WHERE name = N'{login}'
             )
                 CREATE LOGIN [{login}] WITH PASSWORD = '{password}', CHECK_POLICY = OFF
-            """.format(login=SEMICOLON_PASSWORD_LOGIN, password=SEMICOLON_PASSWORD)
+            """.format(login=SPECIAL_CHARACTERS_PASSWORD_LOGIN, password=SPECIAL_CHARACTERS_PASSWORD)
         )
         cursor.execute(
             """
@@ -327,17 +327,17 @@ def semicolon_password_login(sa_conn: object) -> tuple[str, str]:
                 SELECT 1 FROM sys.database_principals WHERE name = N'{login}'
             )
                 CREATE USER [{login}] FOR LOGIN [{login}]
-            """.format(login=SEMICOLON_PASSWORD_LOGIN)
+            """.format(login=SPECIAL_CHARACTERS_PASSWORD_LOGIN)
         )
-    return SEMICOLON_PASSWORD_LOGIN, SEMICOLON_PASSWORD
+    return SPECIAL_CHARACTERS_PASSWORD_LOGIN, SPECIAL_CHARACTERS_PASSWORD
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_connection_with_semicolon_in_password(
-    instance_docker: dict[str, object], semicolon_password_login: tuple[str, str]
+def test_connection_with_special_characters_in_password(
+    instance_docker: dict[str, object], special_characters_password_login: tuple[str, str]
 ) -> None:
-    login_name, password = semicolon_password_login
+    login_name, password = special_characters_password_login
     instance_docker['username'] = login_name
     instance_docker['password'] = password
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
