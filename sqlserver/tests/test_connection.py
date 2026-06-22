@@ -312,6 +312,13 @@ def drop_semicolon_password_login(sa_conn: object) -> None:
     with sa_conn.cursor() as cursor:
         cursor.execute(
             """
+            SELECT session_id FROM sys.dm_exec_sessions WHERE login_name = N'datadog_semicolon_password'
+            """
+        )
+        for row in cursor.fetchall():
+            cursor.execute('KILL {}'.format(row[0]))
+        cursor.execute(
+            """
             IF EXISTS (
                 SELECT 1 FROM sys.database_principals WHERE name = N'datadog_semicolon_password'
             )
