@@ -1432,7 +1432,6 @@ files:
                 - monitor_id
                 - dbname
                 - query
-                - interval_seconds
                 - entity
               properties:
               - name: monitor_id
@@ -1444,7 +1443,17 @@ files:
               - name: query
                 type: string
               - name: interval_seconds
+                description: |
+                  How often (in seconds) to run this query. Ignored when schedule is set
+                  (see schedule for the precedence rule).
                 type: integer
+              - name: schedule
+                description: |
+                  A standard 5-field cron expression (minute hour dom month dow) specifying
+                  when to run this query. When both schedule and interval_seconds are set,
+                  schedule wins and interval_seconds is ignored. If neither is set, the
+                  query is skipped at runtime with a warning.
+                type: string
               - name: query_timeout
                 type: integer
                 description: |
