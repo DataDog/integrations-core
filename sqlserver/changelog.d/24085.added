@@ -1,1 +1,1 @@
-Add Data Observability async job module to execute RC-delivered monitoring queries per database. Queries can be scheduled with a per-query cron expression in addition to a fixed interval.
+Add Data Observability async job module to execute RC-delivered monitoring queries per database.
