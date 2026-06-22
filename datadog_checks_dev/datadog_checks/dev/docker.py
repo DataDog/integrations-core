@@ -42,6 +42,30 @@ def get_container_ip(container_id_or_name):
     return run_command(command, capture='out', check=True).stdout.strip()
 
 
+def get_e2e_discovery_metadata(
+    check_root: str | os.PathLike[str] | None = None,
+) -> dict[str, list[str]]:
+    """Return Docker volume metadata for an e2e discovery run.
+
+    Mounts the integration's ``auto_conf.yaml`` into the agent container.
+
+    Use ``dd_agent_check_discovery`` alongside this metadata so that the static
+    per-env config is temporarily replaced with an empty-instances file, leaving
+    ``auto_conf.yaml`` as the sole AD template driving config-discovery.
+    """
+    check_root = os.fspath(check_root or find_check_root(depth=1))
+    check_name = os.path.basename(check_root)
+    check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
+    auto_conf = os.path.join(check_pkg, 'data', 'auto_conf.yaml')
+
+    return {
+        'docker_volumes': [
+            f'{auto_conf}:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro',
+            '/var/run/docker.sock:/var/run/docker.sock:ro',
+        ],
+    }
+
+
 def compose_file_active(compose_file):
     """
     Returns a `bool` indicating whether or not a compose file has any active services.

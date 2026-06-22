@@ -8,7 +8,7 @@ import pytest
 import tenacity
 
 from datadog_checks.dev.ci import running_on_ci
-from datadog_checks.dev.docker import ComposeFileUp, compose_file_active, docker_run
+from datadog_checks.dev.docker import ComposeFileUp, compose_file_active, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.subprocess import run_command
 
 from .common import not_windows_ci
@@ -16,6 +16,26 @@ from .common import not_windows_ci
 pytestmark = [not_windows_ci]
 HERE = os.path.dirname(os.path.abspath(__file__))
 DOCKER_DIR = os.path.join(HERE, 'docker')
+
+
+def test_get_e2e_discovery_metadata(tmp_path):
+    check_root = tmp_path / 'test_check'
+    check_package_root = check_root / 'datadog_checks' / 'test_check'
+    data_dir = check_package_root / 'data'
+    data_dir.mkdir(parents=True)
+    (data_dir / 'auto_conf.yaml').write_text(
+        'ad_identifiers:\n  - test\ndiscovery: {}\ninit_config:\ninstances: []\n',
+        encoding='utf-8',
+    )
+
+    metadata = get_e2e_discovery_metadata(check_root)
+
+    assert metadata == {
+        'docker_volumes': [
+            f'{check_package_root}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/test_check.d/auto_conf.yaml:ro',
+            '/var/run/docker.sock:/var/run/docker.sock:ro',
+        ],
+    }
 
 
 class TestComposeFileActive:
