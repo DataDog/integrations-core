@@ -7,6 +7,8 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
+from __future__ import annotations
+
 from collections.abc import Iterator
 from typing import Any
 
