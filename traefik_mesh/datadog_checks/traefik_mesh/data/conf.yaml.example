@@ -51,6 +51,16 @@ instances:
     #
   - openmetrics_endpoint: http://<PROXY_ENDPOINT>:<METRICS_PORT>
 
+    ## @param traefik_proxy_api_endpoint - string - optional - default: http://<PROXY_ENDPOINT>:<API_PORT>
+    ## URL of the Traefik Mesh proxy to query.
+    #
+    # traefik_proxy_api_endpoint: http://<PROXY_ENDPOINT>:<API_PORT>
+
+    ## @param traefik_controller_api_endpoint - string - optional - default: http://<CONTROLLER_ENDPOINT>:<API_PORT>
+    ## URL of the Traefik Mesh controller to query.
+    #
+    # traefik_controller_api_endpoint: http://<CONTROLLER_ENDPOINT>:<API_PORT>
+
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
     ## All configuration options will use the prefix-less name.
@@ -641,13 +651,3 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
-
-    ## @param traefik_proxy_api_endpoint - string - optional - default: http://<PROXY_ENDPOINT>:<API_PORT>
-    ## URL of the Traefik Mesh proxy to query.
-    #
-    # traefik_proxy_api_endpoint: http://<PROXY_ENDPOINT>:<API_PORT>
-
-    ## @param traefik_controller_api_endpoint - string - optional - default: http://<CONTROLLER_ENDPOINT>:<API_PORT>
-    ## URL of the Traefik Mesh controller to query.
-    #
-    # traefik_controller_api_endpoint: http://<CONTROLLER_ENDPOINT>:<API_PORT>
