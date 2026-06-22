@@ -7,11 +7,10 @@ from contextlib import ExitStack
 
 import pytest
 
+from datadog_checks.dev import get_e2e_discovery_metadata
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
-
-from datadog_checks.dev import get_e2e_discovery_metadata
 
 from . import common
 
