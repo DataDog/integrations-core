@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Literal, Self
 
 import httpx
+import stamina
 from pydantic import BaseModel, ConfigDict, Field
 
 from .models import (
@@ -32,6 +33,15 @@ GITHUB_API_VERSION = "2022-11-28"
 DEFAULT_BASE_URL = "https://api.github.com"
 
 _LINK_RE = re.compile(r'<([^>]+)>;\s*rel="([^"]+)"')
+
+RETRYABLE_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
+DOWNLOAD_RETRY_ATTEMPTS = 4
+DOWNLOAD_WAIT_INITIAL = 1.0
+DOWNLOAD_WAIT_MAX = 30.0
+
+
+class RetryableDownloadError(Exception):
+    """Internal marker for a retryable server response (429/5xx) during an artifact download."""
 
 
 # ---------------------------------------------------------------------------
@@ -589,13 +599,30 @@ class AsyncGitHubClient:
         bearer token is not leaked to the redirect target. Each zip member is
         validated against ``dest_path`` before extraction (zip-slip protection).
 
+        The whole operation is retried with exponential backoff on transient network
+        failures, retryable server responses (429/5xx), and corrupt downloads, so each
+        attempt re-resolves a fresh signed URL.
+
         Args:
             archive_download_url: The artifact's ``archive_download_url`` (absolute or relative to the API base).
             dest_path: Directory where the zip contents will be extracted. Created if missing.
             timeout: Optional timeout for both HTTP requests.
         """
-        location = await self._resolve_artifact_redirect(archive_download_url, timeout)
-        await self._download_and_extract_zip(location, dest_path, timeout)
+        async for attempt in stamina.retry_context(
+            on=(httpx.TransportError, zipfile.BadZipFile, RetryableDownloadError),
+            attempts=DOWNLOAD_RETRY_ATTEMPTS,
+            timeout=None,
+            wait_initial=DOWNLOAD_WAIT_INITIAL,
+            wait_max=DOWNLOAD_WAIT_MAX,
+        ):
+            with attempt:
+                try:
+                    location = await self._resolve_artifact_redirect(archive_download_url, timeout)
+                    await self._download_and_extract_zip(location, dest_path, timeout)
+                except httpx.HTTPStatusError as exc:
+                    if exc.response.status_code in RETRYABLE_STATUS_CODES:
+                        raise RetryableDownloadError(str(exc)) from exc
+                    raise
 
 
 # ---------------------------------------------------------------------------
