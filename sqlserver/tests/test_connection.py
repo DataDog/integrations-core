@@ -286,6 +286,56 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
     assert result_host == expected_host
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'connector,expected_password_parameter',
+    [
+        pytest.param('odbc', 'PWD={pa;ss}}word};', id='odbc'),
+        pytest.param('adodbapi', 'Password="pa;ss}word";', id='adodbapi'),
+    ],
+)
+def test_connection_string_escapes_password_with_semicolon(
+    instance_minimal_defaults: dict[str, object], connector: str, expected_password_parameter: str
+) -> None:
+    instance_minimal_defaults.update({'connector': connector, 'password': 'pa;ss}word'})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    if connector == 'odbc':
+        conn_str = connection._conn_string_odbc('database')
+    else:
+        conn_str = connection._conn_string_adodbapi('database')
+
+    assert expected_password_parameter in conn_str
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_connection_with_semicolon_in_password(instance_docker: dict[str, object], sa_conn: object) -> None:
+    login_name = 'datadog_semicolon_password'
+    password = 'Pa;ssword123!'
+
+    with sa_conn.cursor() as cursor:
+        cursor.execute("DROP USER IF EXISTS [datadog_semicolon_password]")
+        cursor.execute("DROP LOGIN IF EXISTS [datadog_semicolon_password]")
+        cursor.execute("CREATE LOGIN [datadog_semicolon_password] WITH PASSWORD = 'Pa;ssword123!', CHECK_POLICY = OFF")
+        cursor.execute("CREATE USER [datadog_semicolon_password] FOR LOGIN [datadog_semicolon_password]")
+
+    try:
+        instance_docker['username'] = login_name
+        instance_docker['password'] = password
+        check = SQLServer(CHECK_NAME, {}, [instance_docker])
+        check.initialize_connection()
+
+        with check.connection.open_managed_default_connection(KEY_PREFIX):
+            with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+                cursor.execute("select 1")
+                assert cursor.fetchall()
+    finally:
+        with sa_conn.cursor() as cursor:
+            cursor.execute("DROP USER IF EXISTS [datadog_semicolon_password]")
+            cursor.execute("DROP LOGIN IF EXISTS [datadog_semicolon_password]")
+
+
 @pytest.mark.flaky
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')

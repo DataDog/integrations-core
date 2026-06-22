@@ -137,6 +137,16 @@ def parse_connection_string_properties(cs):
     return params
 
 
+def _escape_odbc_connection_string_value(value: str) -> str:
+    """Return a value escaped for an ODBC connection string."""
+    return '{{{}}}'.format(value.replace('}', '}}'))
+
+
+def _escape_adodbapi_connection_string_value(value: str) -> str:
+    """Return a value escaped for an adodbapi connection string."""
+    return '"{}"'.format(value.replace('"', '""'))
+
+
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
@@ -638,7 +648,7 @@ class Connection(object):
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
-            conn_str += 'PWD={};'.format(password)
+            conn_str += 'PWD={};'.format(_escape_odbc_connection_string_value(password))
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):
@@ -659,7 +669,7 @@ class Connection(object):
             conn_str += 'User ID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
-            conn_str += 'Password={};'.format(password)
+            conn_str += 'Password={};'.format(_escape_adodbapi_connection_string_value(password))
         if not username and not password:
             conn_str += 'Integrated Security=SSPI;'
         return conn_str
