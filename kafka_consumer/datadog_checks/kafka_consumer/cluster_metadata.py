@@ -875,9 +875,7 @@ class ClusterMetadataCollector:
             )
 
             member_ids = sorted(getattr(m, 'member_id', '') or '' for m in members)
-            member_hash = hashlib.sha256(
-                json.dumps(member_ids, separators=(',', ':')).encode()
-            ).hexdigest()
+            member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
 
             if prev_member_hashes is not None:
