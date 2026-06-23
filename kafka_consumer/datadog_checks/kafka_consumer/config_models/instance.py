@@ -20,9 +20,7 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(
-    ['tls_ca_cert', 'tls_cert', 'tls_crlfile', 'tls_private_key']
-)
+SECURE_FIELD_NAMES = frozenset(['tls_ca_cert', 'tls_cert', 'tls_crlfile', 'tls_private_key'])
 
 
 class KafkaConnectOauthTokenProvider(BaseModel):
@@ -115,9 +113,7 @@ class InstanceConfig(BaseModel):
     sasl_oauth_token_provider: Optional[SaslOauthTokenProvider] = None
     sasl_plain_password: Optional[str] = None
     sasl_plain_username: Optional[str] = None
-    schema_registry_oauth_token_provider: Optional[
-        SchemaRegistryOauthTokenProvider
-    ] = None
+    schema_registry_oauth_token_provider: Optional[SchemaRegistryOauthTokenProvider] = None
     schema_registry_password: Optional[str] = None
     schema_registry_tls_ca_cert: Optional[str] = None
     schema_registry_tls_cert: Optional[str] = None
@@ -139,18 +135,14 @@ class InstanceConfig(BaseModel):
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
-        return validation.core.initialize_config(
-            getattr(validators, 'initialize_instance', identity)(values)
-        )
+        return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
 
     @field_validator('*', mode='before')
     def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            value = getattr(validators, f'instance_{info.field_name}', identity)(
-                value, field=field
-            )
+            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
 
             if info.field_name in SECURE_FIELD_NAMES:
                 validation.security.check_field_trusted_provider(
@@ -163,6 +155,4 @@ class InstanceConfig(BaseModel):
 
     @model_validator(mode='after')
     def _final_validation(cls, model):
-        return validation.core.check_model(
-            getattr(validators, 'check_instance', identity)(model)
-        )
+        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))
