@@ -791,7 +791,7 @@ tests:
     timestamp: 1763531560065
  -
   sample: |-
-    {{
+    {
       "event_count" : 1,
       "user_name" : "John Doe",
       "ISP_name" : "Example ISP Ltd.",
@@ -830,8 +830,73 @@ tests:
           product:
             name: Cato Networks SASE Platform
             vendor_name: Cato Networks
+          uid: a1b2c3d4e5f60001
+          event_code: Connectivity
+          version: 1.5.0
+        severity: Informational
+        activity_name: Logon
+        category_uid: 3
+        category_name: Identity & Access Management
+        src_endpoint:
+          hostname: DESKTOP-ABC0123
+          ip: 10.10.10.10
+        actor:
+          user:
+            email_addr: test@example.com
+            name: John Doe
+        status_id: 1
+        service:
+          name: Cato VPN
+        class_uid: 3002
+        activity_id: 1
+        time: 1763478630001
+        severity_id: 1
+        class_name: Authentication
+        user:
+          uid: '1000001'
+          email_addr: test@example.com
+          name: John Doe
+        status: Success
+      event_count: 1
+      user_name: John Doe
+      ISP_name: Example ISP Ltd.
+      time_str: '2025-11-18T15:10:30Z'
+      network:
+        client:
+          geoip: {}
+          ip: 10.10.10.10
+      src_ip: 10.10.10.10
+      internalId: a1b2c3d4e5f60001
+      device_name: DESKTOP-ABC0123
+      event_type: Connectivity
+      usr:
+        name: John Doe
+        id: 1000001
+        email: test@example.com
+      src_country_code: IN
+      account_name: test-account
+      vpn_user_email: test@example.com
+      action: Succeeded
+      src_site_id: 1000001
+      client_version: 6.4.6.8830
+      pop_name: Mumbai
+      tunnel_protocol: DTLS
+      evt:
+        name: Connectivity
+      internal_id: a1b2c3d4e5f60001
+      event_sub_type: Connected
+      os_version: '11'
+      link_type: Cato
+      src_is_site_or_vpn: SDP User
+      account_id: 20000232
+      event_id: a1b2c3d4e5f60001
+      user_id: 1000001
+      src_country: India
+      src_site_name: John Doe
+      os_type: OS_WINDOWS
+      time: 1763478630001
     message: |-
-      {{
+      {
         "event_count" : 1,
         "user_name" : "John Doe",
         "ISP_name" : "Example ISP Ltd.",
@@ -865,7 +930,7 @@ tests:
     status: "info"
     tags:
       - "source:LOGS_SOURCE"
-    timestamp: 1
+    timestamp: 1763478630001
  -
   sample: |-
     {
