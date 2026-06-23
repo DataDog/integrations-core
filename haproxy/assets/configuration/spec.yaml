@@ -10,7 +10,8 @@ files:
       port_hints:
       - 8404
       candidates:
-      - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
+      - use_openmetrics: "true"
+        openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:
