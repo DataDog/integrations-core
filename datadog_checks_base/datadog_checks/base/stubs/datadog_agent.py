@@ -92,6 +92,21 @@ class DatadogAgentStub(object):
             metric_value, check_name, metric_name, metric_type, values
         )
 
+    def assert_reported_issue(self, check_name, issue_id, issue):
+        reported = self._sent_reported_issues[check_name]
+        matching = [reported_issue for reported_issue in reported if reported_issue['id'] == issue_id]
+        assert matching, 'No reported issue with id {} for check {}. Found: {}'.format(
+            issue_id, check_name, reported
+        )
+        assert matching[0] == issue, 'Expected reported issue {} for check {}, found {}.'.format(
+            issue, check_name, matching[0]
+        )
+
+    def assert_resolved_issue(self, issue_id):
+        assert issue_id in self._sent_resolved_issues, 'Expected resolved issue {}. Found: {}'.format(
+            issue_id, self._sent_resolved_issues
+        )
+
     def get_hostname(self):
         return self._hostname
 
