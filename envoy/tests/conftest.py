@@ -8,6 +8,7 @@ import time
 
 import pytest
 import requests
+
 from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.envoy import Envoy
 
