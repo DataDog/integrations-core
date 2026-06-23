@@ -63,12 +63,12 @@ class ServiceFilter(object):
         except re.error as e:
             raise Exception("Regular expression syntax error in '{}': {}".format(pattern, str(e))) from None
 
-    def match(self, service_view, service_type):
+    def match(self, service_view):
         if self.name is not None:
             if not self._name_re.match(service_view.name):
                 return False
         if self.per_user is not None:
-            if self.per_user != _is_per_user_service(service_type):
+            if self.per_user != _is_per_user_service(service_view.service_type):
                 return False
         if self.startup_type is not None:
             if self.startup_type.lower() != service_view.startup_type_string().lower():
@@ -142,9 +142,11 @@ class ServiceView(object):
     STARTUP_TYPE_UNKNOWN = "unknown"
     DISPLAY_NAME_UNKNOWN = "Not_Found"
 
-    def __init__(self, scm_handle, name):
+    def __init__(self, scm_handle, name, service_type=0):
         self.scm_handle = scm_handle
         self.name = name
+        # Provided by EnumServicesStatusEx; carries the SERVICE_USERSERVICE_INSTANCE flag.
+        self.service_type = service_type
 
         self._hSvc = None
         self._startup_type = None
@@ -344,7 +346,7 @@ class WindowsService(AgentCheck):
             service_pid = service_status_process_enum["ProcessId"]
             service_type = service_status_process_enum.get("ServiceType", 0)
 
-            service_view = ServiceView(scm_handle, service_name)
+            service_view = ServiceView(scm_handle, service_name, service_type)
 
             # Names used for tags; for per-user services these collapse the per-session LUID suffix
             # so all instances report under their template name.
@@ -363,7 +365,7 @@ class WindowsService(AgentCheck):
             if 'ALL' not in services:
                 for service_filter in service_filters:
                     try:
-                        if service_filter.match(service_view, service_type):
+                        if service_filter.match(service_view):
                             self.log.debug('Matched %s with %s', service_view, service_filter)
                             services_unseen.discard(service_filter.name)
                             break
