@@ -14,6 +14,7 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.phases.base import Phase
+from ddev.ai.phases.loader import PhaseLoader
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
@@ -42,8 +43,10 @@ def make_orchestrator(file_access_policy, tmp_path):
     """Factory that builds a PhaseOrchestrator with test defaults."""
 
     def _make(engine: ConfigurationEngine | None = None, **overrides: Any) -> PhaseOrchestrator:
+        _engine = engine or ConfigurationEngine(FLOW_NAME, core_dir=tmp_path)
         kwargs: dict[str, Any] = {
-            "engine": engine or ConfigurationEngine(FLOW_NAME, core_dir=tmp_path),
+            "engine": _engine,
+            "phase_loader": PhaseLoader(),
             "checkpoint_path": tmp_path / "checkpoints.yaml",
             "runtime_variables": {},
             "agent_clients": {"anthropic": MagicMock()},
@@ -56,21 +59,15 @@ def make_orchestrator(file_access_policy, tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# PhaseOrchestrator registry ownership
+# PhaseOrchestrator loader independence
 # ---------------------------------------------------------------------------
 
 
-def test_two_orchestrators_have_independent_registries(tmp_path, make_orchestrator):
-    """Each PhaseOrchestrator owns its own registry; registering in one does not affect the other."""
+def test_two_orchestrators_have_independent_loaders(make_orchestrator):
+    """Each orchestrator uses its own PhaseLoader; their load() calls return independent registries."""
     o1 = make_orchestrator()
     o2 = make_orchestrator()
-
-    class ExclusivePhase(Phase):
-        pass
-
-    o1._phase_registry.register("ExclusivePhase", ExclusivePhase)
-    assert "ExclusivePhase" in o1._phase_registry.known_names()
-    assert "ExclusivePhase" not in o2._phase_registry.known_names()
+    assert o1._phase_loader is not o2._phase_loader
 
 
 # ---------------------------------------------------------------------------
@@ -506,8 +503,16 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator, 
         async def execute(self, context):
             raise RuntimeError("intentional failure")
 
-    orchestrator = make_orchestrator(engine=engine, grace_period=0.1)
-    orchestrator._phase_registry.register("FailingPhase", FailingPhase)
+    class _FailingPhaseLoader(PhaseLoader):
+        def _discover(self, registry):
+            super()._discover(registry)
+            registry.register("FailingPhase", FailingPhase)
+
+    orchestrator = make_orchestrator(
+        engine=engine,
+        phase_loader=_FailingPhaseLoader(),
+        grace_period=0.1,
+    )
 
     with pytest.raises(FatalProcessingError, match="Phase 'failing' failed"):
         orchestrator.run()

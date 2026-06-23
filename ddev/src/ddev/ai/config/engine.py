@@ -54,7 +54,6 @@ _ENVELOPE_ADAPTER: TypeAdapter[ResourceEnvelope] = TypeAdapter(ResourceEnvelope)
 
 # Absolute paths to the ddev-shipped flows and phases directories.
 CORE_FLOWS_DIR: Path = Path(__file__).parent.parent / "flows"
-CORE_PHASES_DIR: Path = Path(__file__).parent.parent / "phases"
 
 
 class ConfigurationEngine:
@@ -63,7 +62,7 @@ class ConfigurationEngine:
     def __init__(
         self,
         flow_name: str,
-        user_dirs: list[str] | oNone = None,
+        user_dirs: list[str] | None = None,
         *,
         core_dir: Path = CORE_FLOWS_DIR,
     ) -> None:
@@ -185,10 +184,6 @@ class ConfigurationEngine:
     @property
     def conflicts(self) -> list[ConfigConflict]:
         return list(self._conflicts)
-
-    @property
-    def scan_dirs(self) -> list[Path]:
-        return list(self._scan_dirs)
 
     @staticmethod
     def get_agent_prompt(agent_name: str, flow_dir: Path) -> Path:
