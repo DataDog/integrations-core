@@ -32,7 +32,10 @@ services:
     command: celery -A tasks worker --loglevel=DEBUG; celery -A tasks events --dump
 
   flower:
-    image: mher/flower:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.flower
+    image: flower:latest
     depends_on:
       - redis-standalone
     expose:
