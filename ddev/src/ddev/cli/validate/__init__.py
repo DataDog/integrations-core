@@ -11,7 +11,6 @@ from datadog_checks.dev.tooling.commands.validate.dep import dep
 from datadog_checks.dev.tooling.commands.validate.eula import eula
 from datadog_checks.dev.tooling.commands.validate.imports import imports
 from datadog_checks.dev.tooling.commands.validate.integration_style import integration_style
-from datadog_checks.dev.tooling.commands.validate.jmx_metrics import jmx_metrics
 from datadog_checks.dev.tooling.commands.validate.license_headers import license_headers
 from datadog_checks.dev.tooling.commands.validate.models import models
 from datadog_checks.dev.tooling.commands.validate.package import package
@@ -23,10 +22,12 @@ from datadog_checks.dev.tooling.commands.validate.typos import typos
 from ddev.cli.validate.all import all
 from ddev.cli.validate.ci import ci
 from ddev.cli.validate.http import http
+from ddev.cli.validate.jmx_metrics import jmx_metrics
 from ddev.cli.validate.labeler import labeler
 from ddev.cli.validate.licenses import licenses
 from ddev.cli.validate.metadata import metadata
 from ddev.cli.validate.openmetrics import openmetrics
+from ddev.cli.validate.qa_label import qa_label
 from ddev.cli.validate.version import version
 
 
@@ -57,6 +58,7 @@ validate.add_command(metadata)
 validate.add_command(models)
 validate.add_command(openmetrics)
 validate.add_command(package)
+validate.add_command(qa_label)
 validate.add_command(readmes)
 validate.add_command(saved_views)
 validate.add_command(service_checks)

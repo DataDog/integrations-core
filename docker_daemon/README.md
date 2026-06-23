@@ -44,7 +44,7 @@ For either option, your hosts need cgroup memory management enabled for the Dock
           -v /proc/:/host/proc/:ro \
           -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
           -e API_KEY={YOUR_DD_API_KEY} \
-          datadog/docker-dd-agent:latest
+          registry.datadoghq.com/docker-dd-agent:latest
 
 In the command above, you are able to pass your API key to the Datadog Agent using Docker's `-e` environment variable flag. Other variables include:
 
@@ -72,7 +72,7 @@ docker run -d --name dd-agent \
   -v /proc/:/host/proc/:ro \
   -v /cgroup/:/host/sys/fs/cgroup:ro \
   -e API_KEY={YOUR API KEY} \
-  datadog/docker-dd-agent:latest
+  registry.datadoghq.com/docker-dd-agent:latest
 ```
 
 #### Alpine Linux based container
@@ -87,7 +87,7 @@ docker run -d --name dd-agent \
   -v /proc/:/host/proc/:ro \
   -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
   -e API_KEY={YOUR API KEY} \
-  datadog/docker-dd-agent:latest-alpine
+  registry.datadoghq.com/docker-dd-agent:latest-alpine
 ```
 
 #### Image versioning

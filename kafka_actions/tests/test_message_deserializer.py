@@ -270,9 +270,11 @@ class TestMessageDeserializer:
         assert result[1] is None, "Should have no schema ID"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 2: uses_schema_registry=True with plain Avro message - should fail (missing magic byte)
+        # Test 2: uses_schema_registry=True with plain Avro message - falls back to string (non-UTF-8 bytes → error)
         result = deserializer.deserialize_message(avro_message_no_sr, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when uses_schema_registry=True"
+        assert result[0].startswith("<deserialization error:"), (
+            "Non-UTF-8 avro bytes produce error after string fallback"
+        )
         assert result[1] is None
 
         # Test 3: uses_schema_registry=True with Schema Registry format - should succeed
@@ -281,17 +283,18 @@ class TestMessageDeserializer:
         assert result[1] == 350, "Should extract schema ID 350"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 4: Wrong magic byte - should fail
+        # Test 4: Wrong magic byte - falls back to string (non-UTF-8 bytes → error)
         wrong_magic_byte = (
             b'\x01\x00\x00\x01\x5e\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
         )
         result = deserializer.deserialize_message(wrong_magic_byte, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail with wrong magic byte"
+        assert result[0].startswith("<deserialization error:"), "Non-UTF-8 bytes produce error after string fallback"
 
-        # Test 5: Message too short (less than 5 bytes) - should fail
+        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - falls back to string
         too_short = b'\x00\x00\x01'
         result = deserializer.deserialize_message(too_short, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        assert result[0] is not None, "Too-short message falls back to string, not an error"
+        assert result[1] is None
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=avro_message_no_sr)
@@ -406,10 +409,10 @@ class TestMessageDeserializer:
         assert result[1] is None, "Should have no schema ID"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 2: uses_schema_registry=True with plain Protobuf message - should fail
+        # Test 2: uses_schema_registry=True with plain Protobuf message - falls back to string (non-UTF-8 → error)
         result = deserializer.deserialize_message(protobuf_message_no_sr, 'protobuf', protobuf_schema, True)
         assert result[0].startswith("<deserialization error:"), (
-            "Protobuf should fail when uses_schema_registry=True but no SR format"
+            "Non-UTF-8 protobuf bytes produce error after string fallback"
         )
         assert result[1] is None
 
@@ -419,15 +422,16 @@ class TestMessageDeserializer:
         assert result[1] == 350, "Should extract schema ID 350"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 4: Wrong magic byte - should fail
+        # Test 4: Wrong magic byte - falls back to string (non-UTF-8 bytes → error)
         wrong_magic_byte = b'\x01\x00\x00\x01\x5e' + protobuf_message_no_sr
         result = deserializer.deserialize_message(wrong_magic_byte, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail with wrong magic byte"
+        assert result[0].startswith("<deserialization error:"), "Non-UTF-8 bytes produce error after string fallback"
 
-        # Test 5: Message too short (less than 5 bytes) - should fail
+        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - falls back to string
         too_short = b'\x00\x00\x01'
         result = deserializer.deserialize_message(too_short, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        assert result[0] is not None, "Too-short message falls back to string, not an error"
+        assert result[1] is None
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=protobuf_message_no_sr)
@@ -654,6 +658,31 @@ class TestMessageDeserializer:
         msg = DeserializedMessage(kafka_msg, deserializer, config)
         assert msg.value == {'price': 99.95}
         assert msg.key == 'order-42'
+
+    def test_schema_registry_wrong_magic_byte_falls_back_to_string(self):
+        """When uses_schema_registry=True but first byte is not 0x00, fall back to string decoding."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # A plain UTF-8 string message — no schema registry framing.
+        plain_text = b'hello-world'
+        result, schema_id = deserializer.deserialize_message(plain_text, 'avro', uses_schema_registry=True)
+
+        assert result == json.dumps('hello-world')
+        assert schema_id is None
+        log.debug.assert_called()
+
+    def test_schema_registry_wrong_magic_byte_non_utf8_returns_error(self):
+        """When fallback-to-string is triggered but bytes are not valid UTF-8, return error string."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # Bytes that are not valid UTF-8 and don't start with 0x00.
+        invalid_utf8 = b'\xff\xfe\xfd'
+        result, schema_id = deserializer.deserialize_message(invalid_utf8, 'json', uses_schema_registry=True)
+
+        assert result.startswith("<deserialization error:")
+        assert schema_id is None
 
     def test_skip_bytes_runs_before_schema_registry_detection(self):
         """skip_bytes is applied before the Confluent SR magic-byte check.

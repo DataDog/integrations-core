@@ -201,11 +201,11 @@ tests:
           activity_name: "Logon"
           actor:
             user:
+              email_addr: "testtest@datadoghq.com"
               name: "Test Test"
               type: "User"
               type_id: 1
               uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
-              email_addr: "testtest@datadoghq.com"
           category_name: "Identity & Access Management"
           category_uid: 3
           class_name: "Authentication"
@@ -244,8 +244,8 @@ tests:
           type_name: "Authentication: Logon"
           type_uid: 300201
           user:
-            name: "Test Test"
             email_addr: "testtest@datadoghq.com"
+            name: "Test Test"
             type: "User"
             type_id: 1
             uid: "0abb8889-005c-4307-85c2-97a5d3cd0964"
@@ -256,18 +256,18 @@ tests:
           appId: "23523755-3a2b-41ca-9315-f81f3f566a95"
           appliedConditionalAccessPolicies:
           -
-            result: "success"
             conditionsNotSatisfied: 0
             conditionsSatisfied: 3
+            displayName: "Require MFA"
             enforcedGrantControls:
             - "Mfa"
-            displayName: "Require MFA"
             id: "ccb90f89-cdaf-4ae6-9dd1-a9ee6ea86a90"
+            result: "success"
           authenticationDetails:
           -
             authenticationStepDateTime: "2020-05-13T12:35:19.6363979+00:00"
-            authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
             authenticationStepRequirement: "MultiConditionalAccess"
+            authenticationStepResultDetail: "MFA requirement satisfied by claim in the token"
             succeeded: false
           clientAppUsed: "Browser"
           conditionalAccessStatus: "success"
@@ -328,7 +328,7 @@ tests:
         "tenantId": "4d3bac44-0230-4732-9e70-cc00736f0a97",
         "resultSignature": "None",
         "durationMs": 0,
-        "callerIpAddress": "192.182.149.21",
+        "callerIpAddress": "192.182.149.21:43210",
         "correlationId": "a13bd0fa-70d0-4e60-ae23-b687377b4695",
         "Level": 4,
         "properties": {
@@ -353,7 +353,7 @@ tests:
               "id": "018af091-5465-4aed-9d6f-8c40981b2375",
               "displayName": null,
               "userPrincipalName": "test.test@datadoghq.com",
-              "ipAddress": "192.182.149.21",
+              "ipAddress": "192.182.149.21:43210",
               "roles": []
             }
           },
@@ -384,7 +384,7 @@ tests:
     result:
       custom:
         Level: 4
-        callerIpAddress: "192.182.149.21"
+        callerIpAddress: "192.182.149.21:43210"
         category: "AuditLogs"
         correlationId: "a13bd0fa-70d0-4e60-ae23-b687377b4695"
         duration: 0.0
@@ -397,6 +397,7 @@ tests:
           client:
             geoip: {}
             ip: "192.182.149.21"
+            port: 43210
         ocsf:
           activity_id: 6
           activity_name: "Delete"
@@ -427,6 +428,7 @@ tests:
           severity_id: 1
           src_endpoint:
             ip: "192.182.149.21"
+            port: 43210
           status: "Success"
           status_code: ""
           status_id: 1
@@ -444,8 +446,8 @@ tests:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
           activityDisplayName: "Delete user"
           additionalDetails:
-            - value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:141.0) Gecko/20100101 Firefox/141.0"
-              key: "User-Agent"
+            - key: "User-Agent"
+              value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:141.0) Gecko/20100101 Firefox/141.0"
           category: "UserManagement"
           correlationId: "a13bd0fa-70d0-4e60-ae23-b687377b4695"
           id: "Directory_a13bd0fa-70d0-4e60-ae23-b687377b4695_VTP26_161277857"
@@ -453,7 +455,7 @@ tests:
           initiatedBy:
             user:
               id: "018af091-5465-4aed-9d6f-8c40981b2375"
-              ipAddress: "192.182.149.21"
+              ipAddress: "192.182.149.21:43210"
               userPrincipalName: "test.test@datadoghq.com"
           loggedByService: "Core Directory"
           operationName: "Delete user"
@@ -463,10 +465,10 @@ tests:
           resultReason: ""
           resultType: ""
           targetResources:
-            - modifiedProperties:
-                - newValue: '"False"'
-                  displayName: "Is Hard Deleted"
-              id: "1606d62c-71bc-42ff-a03c-87809c6b0e68"
+            - id: "1606d62c-71bc-42ff-a03c-87809c6b0e68"
+              modifiedProperties:
+                - displayName: "Is Hard Deleted"
+                  newValue: '"False"'
               type: "User"
               userPrincipalName: "deleted_user@datadoghq.com"
           tenantGeo: "NA"
@@ -481,7 +483,7 @@ tests:
           name: "test.test@datadoghq.com"
       message: |-
         {
-          "callerIpAddress" : "192.182.149.21",
+          "callerIpAddress" : "192.182.149.21:43210",
           "resourceId" : "/tenants/4d3bac44-0230-4732-9e70-cc00736f0a97/providers/Microsoft.aadiam",
           "operationVersion" : "1.0",
           "tenantId" : "4d3bac44-0230-4732-9e70-cc00736f0a97",
@@ -522,7 +524,7 @@ tests:
             "resultType" : "",
             "initiatedBy" : {
               "user" : {
-                "ipAddress" : "192.182.149.21",
+                "ipAddress" : "192.182.149.21:43210",
                 "id" : "018af091-5465-4aed-9d6f-8c40981b2375",
                 "userPrincipalName" : "test.test@datadoghq.com"
               }
@@ -681,8 +683,8 @@ tests:
           activityDisplayName: "Add member to role"
           additionalDetails:
           -
-            value: "9205c433-2781-42be-a046-c21ef6b5e608"
             key: "AppId"
+            value: "9205c433-2781-42be-a046-c21ef6b5e608"
           category: "RoleManagement"
           correlationId: "5d3c3340-5c5e-419c-9ae9-193b1669f84e"
           id: "Directory_5d3c3340-5c5e-419c-9ae9-193b1669f84e_D4P59_168172641"
@@ -702,23 +704,23 @@ tests:
           targetResources:
           -
             displayName: "Test Service Principal"
+            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
             modifiedProperties:
             -
-              newValue: "\"260a316b-1246-41c7-bc20-16569a1bd28d\""
               displayName: "Role.ObjectID"
+              newValue: "\"260a316b-1246-41c7-bc20-16569a1bd28d\""
             -
-              newValue: "\"Security Administrator\""
               displayName: "Role.DisplayName"
+              newValue: "\"Security Administrator\""
             -
-              newValue: "\"194ae4cb-b126-40b2-bd5b-6091b380977d\""
               displayName: "Role.TemplateId"
+              newValue: "\"194ae4cb-b126-40b2-bd5b-6091b380977d\""
             -
-              newValue: "\"SecurityAdmins\""
               displayName: "Role.WellKnownObjectName"
+              newValue: "\"SecurityAdmins\""
             -
-              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
               displayName: "TargetId.ServicePrincipalNames"
-            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
+              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
             type: "ServicePrincipal"
           -
             id: "260a316b-1246-41c7-bc20-16569a1bd28d"
@@ -946,11 +948,11 @@ tests:
           activityDisplayName: "Add member to group"
           additionalDetails:
           -
-            value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
             key: "User-Agent"
+            value: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"
           -
-            value: "9205c433-2781-42be-a046-c21ef6b5e608"
             key: "AppId"
+            value: "9205c433-2781-42be-a046-c21ef6b5e608"
           category: "GroupManagement"
           correlationId: "67c2eef3-4b38-4017-82dd-ecc064c38151"
           id: "Directory_67c2eef3-4b38-4017-82dd-ecc064c38151_M4V7T_12366951"
@@ -970,17 +972,17 @@ tests:
           targetResources:
           -
             displayName: "Test Application"
+            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
             modifiedProperties:
             -
-              newValue: "\"3b3bf2cd-049a-4f35-9e63-dc2a0a830807\""
               displayName: "Group.ObjectID"
+              newValue: "\"3b3bf2cd-049a-4f35-9e63-dc2a0a830807\""
             -
-              newValue: "\"Security-Research-Admins\""
               displayName: "Group.DisplayName"
+              newValue: "\"Security-Research-Admins\""
             -
-              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
               displayName: "TargetId.ServicePrincipalNames"
-            id: "febf6383-8bed-4efb-8244-c9a456a1f172"
+              newValue: "\"9205c433-2781-42be-a046-c21ef6b5e608\""
             type: "ServicePrincipal"
           -
             groupType: "unknownFutureValue"
@@ -1180,14 +1182,14 @@ tests:
           activityDateTime: "2020-04-08T07:40:53.1695436+00:00"
           activityDisplayName: "Validate user authentication"
           additionalDetails:
-            - value: "00000000-0000-0000-0000-000000000000"
-              key: "targetTenant"
-            - value: "None"
-              key: "targetEntityType"
-            - value: "UPN"
-              key: "actorIdentityType"
-            - value: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
-              key: "RequestId"
+            - key: "targetTenant"
+              value: "00000000-0000-0000-0000-000000000000"
+            - key: "targetEntityType"
+              value: "None"
+            - key: "actorIdentityType"
+              value: "UPN"
+            - key: "RequestId"
+              value: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
           category: "Authentication"
           correlationId: "f32c392f-d8a3-4846-b89d-8c4cb9a404d8"
           id: "B2C_f32c392f-d8a3-4846-b89d-8c4cb9a404d8_4d3bac44-0230-4732-9e70-cc00736f0a97_134000182275995730"

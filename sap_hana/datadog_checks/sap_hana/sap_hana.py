@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import functools
+import time
 from collections import defaultdict
 from contextlib import closing
 from datetime import datetime
@@ -25,7 +27,10 @@ from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
+from .config_models.instance import CollectSchemas
+from .diagnose import run_diagnostics
 from .exceptions import OperationalError, QueryExecutionError
+from .schemas import HanaSchemaCollector
 from .utils import compute_percent, positive
 
 
@@ -85,8 +90,16 @@ class SapHanaCheck(AgentCheck):
         # Save master database hostname to act as the default if `use_hana_hostnames` is true
         self._master_hostname = None
 
+        # Schema collection (DBM)
+        collect_schemas = CollectSchemas(**(self.instance.get('collect_schemas') or {}))
+        self._schema_collector = HanaSchemaCollector(self, collect_schemas) if collect_schemas.enabled else None
+        self._schema_collection_interval = int(collect_schemas.collection_interval or 600)
+        self._last_schema_collection_time = 0
+        self._dbms_version = None
+
         self.check_initializations.append(self.parse_config)
         self.check_initializations.append(self.set_default_methods)
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
 
     def check(self, _):
         if self._only_custom_queries:
@@ -111,6 +124,7 @@ class SapHanaCheck(AgentCheck):
                 except Exception as e:
                     self.log.exception('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
+            self._maybe_collect_schemas()
         finally:
             if self._connection_lost:
                 self.service_check(
@@ -158,6 +172,51 @@ class SapHanaCheck(AgentCheck):
 
         if self.logs_enabled:
             self._default_methods.append(self.query_audit_logs)
+
+    # Properties required by SchemaCollector base class
+
+    @property
+    def reported_hostname(self):
+        return self._server
+
+    @property
+    def database_identifier(self):
+        return '{}:{}'.format(self._server, self._port)
+
+    @property
+    def dbms(self):
+        return 'saphana'
+
+    @property
+    def dbms_version(self):
+        if self._dbms_version is None and self._conn is not None:
+            try:
+                with closing(self._conn.cursor()) as cursor:
+                    cursor.execute("SELECT VERSION FROM SYS.M_DATABASE")
+                    row = cursor.fetchone()
+                    self._dbms_version = str(row[0]).split()[0] if row else 'unknown'
+            except Exception:
+                self._dbms_version = 'unknown'
+        return self._dbms_version or 'unknown'
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def cloud_metadata(self):
+        return {}
+
+    def _maybe_collect_schemas(self):
+        if not self._schema_collector or not self._conn:
+            return
+        if time.time() - self._last_schema_collection_time < self._schema_collection_interval:
+            return
+        try:
+            self._schema_collector.collect_schemas()
+            self._last_schema_collection_time = time.time()
+        except Exception as e:
+            self.log.error('Error collecting HANA schemas: %s', e)
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html

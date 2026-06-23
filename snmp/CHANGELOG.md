@@ -2,7 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 12.3.2 / 2026-04-15
+## 13.0.0 / 2026-06-09
+
+***Changed***:
+
+* Breaking change: Fixed metric type for `snmp.cppmSystemMemoryFree`, `snmp.cppmSystemMemoryTotal`, `snmp.cppmSystemDiskSpaceFree`, and `snmp.cppmSystemDiskSpaceTotal` in the aruba-clearpass profile. These were previously submitted as rates due to their underlying `Counter64` SNMP type, producing incorrect values. They are now submitted as gauges. Customers with existing dashboards or monitors on these metrics will see a discontinuity between historical rate datapoints and new gauge datapoints; please rebuild any affected widgets or monitors. ([#23791](https://github.com/DataDog/integrations-core/pull/23791))
+
+## 12.4.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add Cisco Catalyst CW9800H1 (OID 1.3.6.1.4.1.9.1.3324) to cisco-catalyst-wlc SNMP profile. ([#23551](https://github.com/DataDog/integrations-core/pull/23551))
+
+## 12.3.2 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

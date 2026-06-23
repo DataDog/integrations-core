@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import random
-from contextlib import ExitStack
-from typing import Generator
+from collections.abc import AsyncIterator
+from contextlib import ExitStack, asynccontextmanager
+from typing import Any, Generator
 
 import pytest
 import vcr
 from datadog_checks.dev.tooling.utils import set_root
+from pytest_mock import MockerFixture
 
 from ddev.cli.application import Application
 from ddev.cli.terminal import Terminal
@@ -24,6 +26,7 @@ from ddev.utils.platform import Platform
 
 from .helpers import APPLICATION, LOCAL_REPO_BRANCH, PLATFORM
 from .helpers.git import ClonedRepo
+from .helpers.github_async import FakeAsyncGitHubClient
 from .helpers.runner import CliRunner
 
 # Rewrite assertions on the assertions helper module
@@ -76,6 +79,28 @@ def github_manager(local_repo, config_file, terminal) -> GitHubManager:
         token=config_file.model.github.token,
         status=terminal.status,
     )
+
+
+@pytest.fixture
+def fake_async_github(mocker: MockerFixture) -> FakeAsyncGitHubClient:
+    """Patch `async_github_client` to yield a `FakeAsyncGitHubClient` and stub the token."""
+    fake = FakeAsyncGitHubClient()
+
+    @asynccontextmanager
+    async def fake_context(
+        token: str,
+        default_timeout: float = 30.0,
+        transport: Any = None,
+    ) -> AsyncIterator[FakeAsyncGitHubClient]:
+        yield fake
+
+    # Patch both import sites: the deep module name (for `from ...client import async_github_client`)
+    # and the package-level name (for `from ddev.utils.github_async import async_github_client`,
+    # which production code uses inside method bodies). Removing either leaves one import style unmocked.
+    mocker.patch('ddev.utils.github_async.client.async_github_client', fake_context)
+    mocker.patch('ddev.utils.github_async.async_github_client', fake_context)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': 'ghp_test'})
+    return fake
 
 
 @pytest.fixture

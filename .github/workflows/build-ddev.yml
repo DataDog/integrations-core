@@ -53,27 +53,6 @@ jobs:
         fi
         echo "base_tags=team:agent-integrations,service:ddev,context:$context" >> $GITHUB_OUTPUT
 
-  should-sign-and-upload:
-    name: Determine signing conditions
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        # Override workflow-level working-directory since this job does not checkout code
-        working-directory: .
-    outputs:
-      result: ${{ steps.check.outputs.result }}
-    steps:
-    - id: check
-      env:
-        EVENT_NAME: ${{ github.event_name }}
-        REF: ${{ github.ref }}
-      run: |
-        result=false
-        if [[ "$EVENT_NAME" == "schedule" || ( "$EVENT_NAME" == "push" && "$REF" == refs/tags/* ) ]]; then
-          result=true
-        fi
-        echo "result=$result" >> $GITHUB_OUTPUT
-
   python-artifacts:
     name: Build wheel and source distribution
     runs-on: ubuntu-latest
@@ -158,6 +137,7 @@ jobs:
       CARGO_BUILD_TARGET: ${{ matrix.job.target }}
       PYAPP_REPO: pyapp
       PYAPP_VERSION: "0.24.0"
+      PYAPP_SHA256: "10cd152500685ddea610a8e280f3ca5502c4cff072bfb344cb9abd88a0c40928"
       PYAPP_PIP_EXTERNAL: "1"
 
     steps:
@@ -180,11 +160,19 @@ jobs:
         dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Fetch PyApp
-      run: >-
-        mkdir $PYAPP_REPO && curl -L
-        https://github.com/ofek/pyapp/releases/download/v$PYAPP_VERSION/source.tar.gz
-        |
-        tar --strip-components=1 -xzf - -C $PYAPP_REPO
+      run: |-
+        set -euo pipefail
+        mkdir "$PYAPP_REPO"
+        curl -fsSL -o pyapp.tar.gz \
+          "https://github.com/ofek/pyapp/releases/download/v$PYAPP_VERSION/source.tar.gz"
+        # sha256sum on Linux/Windows-bash; shasum on macOS (Git-for-Windows bash lacks shasum)
+        if command -v sha256sum >/dev/null 2>&1; then
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | sha256sum -c -
+        else
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | shasum -a 256 -c -
+        fi
+        tar --strip-components=1 -xzf pyapp.tar.gz -C "$PYAPP_REPO"
+        rm pyapp.tar.gz
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -205,7 +193,7 @@ jobs:
     # picks up the fix from https://github.com/pypa/hatch/pull/2196 and now
     # *requires* virtualenv>=21, so they must be bumped together.
     - name: Install Hatch
-      run: uv pip install --system "hatch==1.16.5" "virtualenv==21.3.0"
+      run: uv pip install --system "hatch==1.16.5" "virtualenv==21.3.3"
 
     - name: Install Hatch environment collector plugin
       run: uv pip install --system -e . --no-deps
@@ -352,7 +340,6 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
     needs:
     - define-tags
-    - should-sign-and-upload
     - binaries
     runs-on: windows-2022
     permissions:
@@ -464,21 +451,108 @@ jobs:
         mv build/*/release/*/*.{exe,msi} installers
 
     - name: Upload installers
-      if: needs.should-sign-and-upload.outputs.result == 'true'
+      if: github.event_name == 'schedule' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
         path: ddev/installers/*
         if-no-files-found: error
 
-  macos-packaging:
-    name: Build macOS installer and sign/notarize artifacts
-    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event.pull_request.head.repo.full_name == github.repository
+  test-macos-build:
+    name: Test macOS packaging
+    if: (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     needs:
     - define-tags
-    - should-sign-and-upload
     - binaries
     runs-on: macos-14-large
+    permissions:
+      # needed for dd-sts
+      id-token: write
+    env:
+      VERSION: ${{ needs.binaries.outputs.version }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Get Datadog credentials
+      id: dd-sts
+      uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+      with:
+        policy: integrations-core-api-key
+
+    - name: Tag Job
+      uses: ./.github/actions/tag-job
+      if: ${{ github.event.pull_request.head.repo.fork != true }}
+      with:
+        tags: '${{ needs.define-tags.outputs.base_tags }},step:test-package-macos,os:macos'
+        dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install PyOxidizer ${{ env.PYOXIDIZER_VERSION }}
+      run: pip install pyoxidizer==${{ env.PYOXIDIZER_VERSION }}
+
+    - name: Download staged managed binaries
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        pattern: staged-managed-${{ runner.os }}-*
+        path: ddev/archives
+        merge-multiple: true
+
+    - name: Extract staged managed binaries
+      run: |-
+        mkdir bin
+        for f in archives/*; do
+          tar -xzf "$f" -C bin
+        done
+
+    # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
+    - name: Prepare managed binaries
+      run: |-
+        mkdir targets
+        for f in bin/*; do
+          if [[ "$f" =~ ${{ env.VERSION }}-(.+)$ ]]; then
+            target="${BASH_REMATCH[1]}"
+            mkdir "targets/$target"
+            mv "$f" "targets/$target/${{ env.APP_NAME }}"
+          fi
+        done
+
+    - name: Build universal binary
+      run: >-
+        pyoxidizer build macos_universal_binary
+        --release
+        --var version ${{ env.VERSION }}
+
+    - name: Prepare universal binary
+      id: binary
+      run: |-
+        binary=$(echo build/*/release/*/${{ env.APP_NAME }})
+        chmod +x "$binary"
+        echo "path=$binary" >> "$GITHUB_OUTPUT"
+
+    - name: Build PKG
+      run: >-
+        python release/macos/build_pkg.py
+        --binary ${{ steps.binary.outputs.path }}
+        --version ${{ env.VERSION }}
+        staged
+
+    - name: Verify PKG was produced
+      run: ls staged/*.pkg
+
+  macos-packaging:
+    name: Build macOS installer and sign/notarize artifacts
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')) || github.event_name == 'schedule'
+    needs:
+    - define-tags
+    - binaries
+    runs-on: macos-14-large
+    environment: ddev-sign-upload
     permissions:
       # needed for dd-sts
       id-token: write
@@ -513,14 +587,16 @@ jobs:
     - name: Install rcodesign
       env:
         ARCHIVE_NAME: "apple-codesign-0.27.0-x86_64-apple-darwin"
-      run: >-
-        curl -L
-        "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
-        |
-        tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+        RCODESIGN_SHA256: "bca6e648afaddd48f1c3d5dd25aa516659992cbbd2ba7131ba6add739aa895d3"
+      run: |-
+        set -euo pipefail
+        curl -fsSL -o rcodesign.tar.gz \
+          "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
+        echo "$RCODESIGN_SHA256 *rcodesign.tar.gz" | shasum -a 256 -c -
+        tar --strip-components=1 -xzf rcodesign.tar.gz -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+        rm rcodesign.tar.gz
 
     - name: Write credentials
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       env:
         APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTIFICATE }}"
         APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY: "${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_PRIVATE_KEY }}"
@@ -599,11 +675,9 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign standalone binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize standalone binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     - name: Archive standalone binaries
@@ -636,11 +710,9 @@ jobs:
       run: ${{ steps.script-extract.outputs.script }}
 
     - name: Sign managed binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-sign.outputs.script }}
 
     - name: Notarize managed binaries
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: ${{ steps.script-notarize.outputs.script }}
 
     # bin/<APP_NAME>-<VERSION>-<TARGET> -> targets/<TARGET>/<APP_NAME>
@@ -683,7 +755,6 @@ jobs:
         echo "path=$pkg_file" >> "$GITHUB_OUTPUT"
 
     - name: Sign PKG
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign sign -vv
         --pem-source /tmp/certificate-installer.pem
@@ -692,7 +763,6 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Notarize PKG
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       run: >-
         rcodesign notary-submit
         --api-key-path /tmp/app-store-connect.json
@@ -700,11 +770,73 @@ jobs:
         "signed/${{ steps.pkg.outputs.path }}"
 
     - name: Upload installer
-      if: needs.should-sign-and-upload.outputs.result == 'true'
       uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
       with:
         name: installers-${{ runner.os }}
         path: ddev/signed/${{ steps.pkg.outputs.path }}
+        if-no-files-found: error
+
+  # Extraction runs in its own unprivileged job so the dependency-resolving install of
+  # ddev never executes inside the privileged publish job (which holds contents: write
+  # and id-token: write). A compromised transitive dep can still execute here, but it
+  # has no access to release credentials and cannot tamper with archives/installers.
+  extract-release-notes:
+    name: Extract release notes
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    # Extraction is best-effort end-to-end: any failure in setup, install, configure,
+    # or the extraction itself must not block the release. We pre-create an empty
+    # release-notes.md, run the install/extract steps with continue-on-error so they
+    # never fail the job, and always upload the artifact. The publish job can rely on
+    # extract-release-notes succeeding; the body it consumes may be empty.
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Initialize empty release notes
+      working-directory: .
+      run: ': > release-notes.md'
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      continue-on-error: true
+      with:
+        python-version: "${{ env.PYTHON_VERSION }}"
+
+    - name: Install ddev from local folder
+      continue-on-error: true
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
+
+    - name: Configure ddev
+      continue-on-error: true
+      working-directory: .
+      run: |-
+        ddev config override
+        ddev config set upgrade_check false
+
+    - name: Extract release notes from CHANGELOG
+      continue-on-error: true
+      working-directory: .
+      run: |
+        version="${GITHUB_REF_NAME#ddev-v}"
+        if ! ddev release changelog show ddev "$version" --file release-notes.md; then
+          echo "::warning::Failed to extract changelog section for ddev $version; release body will be empty."
+          : > release-notes.md
+        fi
+
+    - name: Upload release notes
+      if: always()
+      uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      with:
+        name: release-notes
+        path: release-notes.md
         if-no-files-found: error
 
   publish:
@@ -716,6 +848,7 @@ jobs:
     - binaries
     - windows-packaging
     - macos-packaging
+    - extract-release-notes
     runs-on: ubuntu-latest
 
     permissions:
@@ -761,6 +894,14 @@ jobs:
         path: installers
         merge-multiple: true
 
+    # Downloaded by exact name (not pattern) so this step cannot pull in artifacts
+    # uploaded by other jobs.
+    - name: Download release notes
+      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+      with:
+        name: release-notes
+        path: release-notes
+
     # Publish wheels to PyPI using Trusted Publishers.
     # https://docs.pypi.org/trusted-publishers/using-a-publisher/
     # This job needs to run from within the pypi-ddev environment. PyPi validates the
@@ -774,6 +915,7 @@ jobs:
     - name: Add assets to current release
       uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
       with:
+        body_path: release-notes/release-notes.md
         files: |-
           archives/*
           installers/*

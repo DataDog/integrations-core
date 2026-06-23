@@ -1,1 +1,0 @@
-Fix explain statement query construction when statement text contains dollar-quote delimiters.

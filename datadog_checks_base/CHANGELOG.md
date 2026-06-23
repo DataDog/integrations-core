@@ -2,13 +2,55 @@
 
 <!-- towncrier release notes start -->
 
+## 37.40.1 / 2026-06-18
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+* Bump PyJWT to 2.13.0. ([#24074](https://github.com/DataDog/integrations-core/pull/24074))
+
+## 37.40.0 / 2026-06-09
+
+***Added***:
+
+* Add ``AgentCheck.submit_generic_resource`` to submit resource snapshots on the ``genresources`` event-platform track with allow-list field selection. ([#23905](https://github.com/DataDog/integrations-core/pull/23905))
+
+***Fixed***:
+
+* Fix ``resolve_db_host`` treating loopback IP literals (e.g. ``::1``) as DNS resolution failures, which caused database checks to submit metrics with the wrong host tag and miss agent host tags. ([#23849](https://github.com/DataDog/integrations-core/pull/23849))
+
+## 37.39.1 / 2026-06-08
+
+***Fixed***:
+
+* Send each logical database as its own independent schema snapshot, so an error or partial collection for one database does not affect others. ([#23913](https://github.com/DataDog/integrations-core/pull/23913))
+
+## 37.39.0 / 2026-05-29
+
+***Added***:
+
+* Add file-based YAML metrics loading for OpenMetrics V2 checks with composable predicates ([#22750](https://github.com/DataDog/integrations-core/pull/22750))
+* Add ``CronExpression`` and ``CronScheduler`` utilities for cron-style scheduling inside check methods. ([#23741](https://github.com/DataDog/integrations-core/pull/23741))
+
+## 37.38.0 / 2026-05-22 / Agent 7.80.0
+
+***Security***:
+
+* Bump urllib3 to 2.7.0 to address CVE-2026-44431 and CVE-2026-44432. ([#23767](https://github.com/DataDog/integrations-core/pull/23767))
+
+## 37.37.0 / 2026-05-14
+
+***Added***:
+
+* Add a per-performance-object `include_total` option (default `false`) to the Windows perf-counter framework. When set to `true`, the `_Total` aggregate instance is collected instead of being excluded by default. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+
 ## 37.36.0 / 2026-04-24
 
 ***Added***:
 
 * Add parameterized query support to QueryExecutor. ([#23469](https://github.com/DataDog/integrations-core/pull/23469))
 
-## 37.35.1 / 2026-04-28
+## 37.35.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 
