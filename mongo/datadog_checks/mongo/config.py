@@ -3,12 +3,36 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import certifi
+from urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.mongo.common import DEFAULT_TIMEOUT
 from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
+
+_ATLAS_SUFFIX = '.mongodb.net'
+
+
+def _is_atlas_host(host):
+    """Return True if the host is a MongoDB Atlas endpoint (ends with .mongodb.net).
+
+    Accepts either a bare host[:port] string or a full MongoDB URI. A substring
+    check ('mongodb.net' in host) would match attacker-controlled hostnames like
+    'evil.mongodb.net.attacker.com', so we anchor to the domain suffix.
+    """
+    host_str = str(host).lower()
+    if '://' in host_str:
+        try:
+            netloc = urlparse(host_str).netloc
+            if '@' in netloc:
+                netloc = netloc.split('@', 1)[1]
+            hostnames = [h.split(':')[0] for h in netloc.split(',')]
+        except Exception:
+            return False
+    else:
+        hostnames = [host_str.split(':')[0].rstrip('/')]
+    return any(h == 'mongodb.net' or h.endswith(_ATLAS_SUFFIX) for h in hostnames)
 
 
 class MongoConfig(object):
@@ -26,7 +50,8 @@ class MongoConfig(object):
             if isinstance(raw_hosts, str):
                 raw_hosts = [raw_hosts]
             server = instance.get('server', '') or ''
-            if any('mongodb.net' in str(h) for h in raw_hosts) or 'mongodb.net' in server:
+            all_hosts = list(raw_hosts) + ([server] if server else [])
+            if any(_is_atlas_host(h) for h in all_hosts):
                 tls = True
                 log.debug('Auto-enabling TLS: detected MongoDB Atlas host (mongodb.net)')
 

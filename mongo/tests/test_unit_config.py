@@ -92,6 +92,13 @@ def test_non_atlas_host_tls_not_auto_enabled():
     assert config.tls_params == {}
 
 
+def test_spoofed_atlas_hostname_not_auto_enabled():
+    # 'mongodb.net' appears mid-string — must not trigger auto-TLS
+    instance = {'hosts': ['evil.mongodb.net.attacker.com:27017']}
+    config = MongoConfig(instance, mock.Mock(), {})
+    assert config.tls_params == {}
+
+
 def test_atlas_server_uri_auto_enables_tls():
     instance = {'server': 'mongodb://user:pass@mycluster-shard-00-00.abc123.mongodb.net:27017/admin'}
     config = MongoConfig(instance, mock.Mock(), {})
