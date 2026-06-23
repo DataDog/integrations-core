@@ -18,15 +18,27 @@ class MongoConfig(object):
 
         # x.509 authentication
 
+        # Auto-enable TLS for MongoDB Atlas: Atlas mandates TLS and the driver surfaces a
+        # misleading "connection closed" error when tls is omitted rather than a TLS error.
+        tls = instance.get('tls')
+        if tls is None:
+            raw_hosts = instance.get('hosts', [])
+            if isinstance(raw_hosts, str):
+                raw_hosts = [raw_hosts]
+            server = instance.get('server', '') or ''
+            if any('mongodb.net' in str(h) for h in raw_hosts) or 'mongodb.net' in server:
+                tls = True
+                log.debug('Auto-enabling TLS: detected MongoDB Atlas host (mongodb.net)')
+
         cacert_cert_dir = instance.get('tls_ca_file')
         if cacert_cert_dir is None and (
-            is_affirmative(instance.get('options', {}).get("tls")) or is_affirmative(instance.get('tls'))
+            is_affirmative(instance.get('options', {}).get("tls")) or is_affirmative(tls)
         ):
             cacert_cert_dir = certifi.where()
 
         self.tls_params = exclude_undefined_keys(
             {
-                'tls': instance.get('tls'),
+                'tls': tls,
                 'tlsCertificateKeyFile': instance.get('tls_certificate_key_file'),
                 'tlsCAFile': cacert_cert_dir,
                 'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames'),
