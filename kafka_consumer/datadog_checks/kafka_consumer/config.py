@@ -128,9 +128,6 @@ class KafkaConfig:
         self._kafka_connect_tls_key = instance.get('kafka_connect_tls_key')
         self._kafka_connect_tls_ca_cert = instance.get('kafka_connect_tls_ca_cert')
         self._kafka_connect_oauth_token_provider = instance.get('kafka_connect_oauth_token_provider')
-        self._kafka_connect_collect_task_metrics = is_affirmative(
-            instance.get('kafka_connect_collect_task_metrics', False)
-        )
 
     @staticmethod
     def _parse_connect_urls(value: str | list[str] | tuple[str, ...] | None) -> list[str]:

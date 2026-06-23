@@ -48,10 +48,6 @@ def instance_kafka_configs_refresh_interval():
     return 180
 
 
-def instance_kafka_connect_collect_task_metrics():
-    return False
-
-
 def instance_kafka_connect_tls_verify():
     return True
 

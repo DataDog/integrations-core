@@ -583,11 +583,3 @@ files:
             type: string
             example: /path/to/oauth_ca_cert.pem
           fleet_configurable: false
-      - name: kafka_connect_collect_task_metrics
-        description: |
-          Collect per-task metrics. Can be high cardinality for connectors with many tasks.
-        fleet_configurable: true
-        value:
-          type: boolean
-          example: false
-          display_default: false

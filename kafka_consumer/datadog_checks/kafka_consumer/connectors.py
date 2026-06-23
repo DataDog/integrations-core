@@ -10,12 +10,14 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
 from datadog_checks.kafka_consumer.cache import CacheHelper
-from datadog_checks.kafka_consumer.cluster_metadata import _get_tags, _original_cluster_id_field
 
 if TYPE_CHECKING:
     from datadog_checks.kafka_consumer.config import KafkaConfig
 
-SENSITIVE_KEY_PATTERN = re.compile(r'(?i)(password|secret|\.key$|sasl\.jaas\.config|api\.key|api\.secret)')
+SENSITIVE_KEY_PATTERN = re.compile(
+    r'(?i)(password|secret|\.key$|_key$|sasl\.jaas\.config|api\.key|api\.secret'
+    r'|token|passphrase|keyfile|connection\.url|basic\.auth\.user\.info|private\.key)'
+)
 
 CONNECTOR_CONFIG_CACHE_KEY = 'kafka_connector_config_cache'
 CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
@@ -121,6 +123,21 @@ class KafkaConnectCollector:
         self._oauth_token_expiry = expires_at
         self.log.debug("Kafka Connect OAuth token refreshed, expires at %s", expires_at)
 
+    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
+        """Build metric tags, appending cluster ID tags when provided."""
+        tags = list(self.config._custom_tags)
+        if cluster_id:
+            tags.append(f'kafka_cluster_id:{cluster_id}')
+            if self.config._kafka_cluster_id_override:
+                tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
+        return tags
+
+    def _original_cluster_id_field(self) -> dict[str, str]:
+        """Return the original cluster ID event field when a cluster ID override is active."""
+        if self.config._kafka_cluster_id_override:
+            return {'original_kafka_cluster_id': self.config._auto_detected_cluster_id}
+        return {}
+
     def collect(self, cluster_id: str) -> dict[str, bool]:
         """Collect connector data and return connectivity status per endpoint.
 
@@ -170,7 +187,7 @@ class KafkaConnectCollector:
             )
             return
 
-        tags_base = _get_tags(self.config, cluster_id) + [f'connect_url:{url}']
+        tags_base = self._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
 
         self._emit_connector_metrics(connectors_data, tags_base)
@@ -191,19 +208,12 @@ class KafkaConnectCollector:
                 f'connector:{name}',
                 f'connector_type:{connector_type}',
                 f'connector_class:{connector_class}',
+                f'connector_full_class:{full_class}',
                 f'connector_state:{connector_state}',
             ]
-            self.check.gauge(
-                'connector.running',
-                1 if connector_state == 'RUNNING' else 0,
-                tags=connector_tags,
-            )
 
             tasks = status.get('tasks') or []
-            count_tags = tags_base + [
-                f'connector:{name}',
-                f'connector_type:{connector_type}',
-            ]
+            count_tags = connector_tags + [f'connector_status:{connector_state.lower()}']
             self.check.gauge('connector.task.count', len(tasks), tags=count_tags)
 
             task_state_counts: dict[str, int] = {}
@@ -211,18 +221,17 @@ class KafkaConnectCollector:
                 state = (task.get('state') or 'UNKNOWN').lower()
                 task_state_counts[state] = task_state_counts.get(state, 0) + 1
             for state_name, count in task_state_counts.items():
-                self.check.gauge('connector.tasks', count, tags=count_tags + [f'task_state:{state_name}'])
+                self.check.gauge('connector.tasks', count, tags=connector_tags + [f'task_state:{state_name}'])
 
-            if self.config._kafka_connect_collect_task_metrics:
-                for task in tasks:
-                    task_id = task.get('id', '')
-                    task_state = (task.get('state') or 'UNKNOWN').lower()
-                    task_tags = connector_tags + [f'task_id:{task_id}', f'task_state:{task_state}']
-                    self.check.gauge(
-                        'connector.task.running',
-                        1 if task_state == 'running' else 0,
-                        tags=task_tags,
-                    )
+            for task in tasks:
+                task_id = task.get('id', '')
+                task_state = (task.get('state') or 'UNKNOWN').lower()
+                task_tags = connector_tags + [f'task_id:{task_id}', f'task_state:{task_state}']
+                self.check.gauge(
+                    'connector.task.running',
+                    1 if task_state == 'running' else 0,
+                    tags=task_tags,
+                )
 
     def _emit_connector_config_events(self, connectors_data: dict[str, Any], cluster_id: str, url: str) -> None:
         connector_contents: dict[str, str] = {}
@@ -238,11 +247,9 @@ class KafkaConnectCollector:
 
             redacted_config = {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in raw_config.items()}
 
-            # Exclude collection_timestamp from hashed content so the hash is stable
-            # across cycles and dedup actually fires on unchanged configs.
             content = {
                 'kafka_cluster_id': cluster_id,
-                **_original_cluster_id_field(self.config),
+                **self._original_cluster_id_field(),
                 'connector': name,
                 'connector_type': connector_type,
                 'connector_state': connector_state,
@@ -288,10 +295,9 @@ class KafkaConnectCollector:
         )
 
         event_cache_key = f'{CONNECTOR_PLUGINS_EVENT_CACHE_KEY}:{safe_url}'
-        # Exclude collection_timestamp from hashed content so dedup fires on unchanged plugin lists.
         content_dict = {
             'kafka_cluster_id': cluster_id,
-            **_original_cluster_id_field(self.config),
+            **self._original_cluster_id_field(),
             'connect_url': url,
             'config_type': 'connector_plugins',
             'plugins': plugins,

@@ -18,23 +18,8 @@ from datadog_checks.kafka_consumer.cache import CacheHelper
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 
-def _get_tags(config, cluster_id: str | None = None) -> list[str]:
-    """Build metric tags, appending cluster ID tags when provided."""
-    tags = list(config._custom_tags)
-    if cluster_id:
-        tags.append(f'kafka_cluster_id:{cluster_id}')
-        if config._kafka_cluster_id_override:
-            tags.append(f'original_kafka_cluster_id:{config._auto_detected_cluster_id}')
-    return tags
-
-
-def _original_cluster_id_field(config) -> dict[str, str]:
-    """Return the original cluster ID event field when a cluster ID override is active."""
-    if config._kafka_cluster_id_override:
-        return {'original_kafka_cluster_id': config._auto_detected_cluster_id}
-    return {}
-
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
+
 
 
 class SchemaDefinition(TypedDict):
@@ -96,63 +81,59 @@ class ClusterMetadataCollector:
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
         self.GLOBAL_COMPATIBILITY_CACHE_KEY = 'kafka_schema_global_compatibility_cache'
 
-        self._schema_registry_oauth_token = None
-        self._schema_registry_oauth_token_expiry = 0
+        self._schema_registry_oauth_token: str | None = None
+        self._schema_registry_oauth_token_expiry: float = 0.0
+        self._schema_registry_http_kwargs: dict[str, Any] = {}
 
         if self.config._collect_schema_registry:
-            self._configure_schema_registry_http_client()
+            self._build_schema_registry_http_kwargs()
 
-    def _configure_schema_registry_http_client(self):
-        """Configure the HTTP client with authentication and TLS settings for Schema Registry."""
+    def _build_schema_registry_http_kwargs(self) -> None:
+        """Build per-request HTTP kwargs for Schema Registry auth and TLS."""
+        kwargs: dict[str, Any] = {}
+
         if self.config._schema_registry_username and self.config._schema_registry_password:
-            self.log.debug("Configuring Schema Registry with Basic Authentication")
-            self.http.options['auth'] = (
-                self.config._schema_registry_username,
-                self.config._schema_registry_password,
-            )
+            kwargs['auth'] = (self.config._schema_registry_username, self.config._schema_registry_password)
 
         if not self.config._schema_registry_tls_verify:
-            self.log.debug("Schema Registry TLS verification is disabled")
-            self.http.options['verify'] = False
+            kwargs['verify'] = False
         elif self.config._schema_registry_tls_ca_cert:
-            self.log.debug("Using custom CA certificate for Schema Registry")
-            self.http.options['verify'] = self.config._schema_registry_tls_ca_cert
+            kwargs['verify'] = self.config._schema_registry_tls_ca_cert
         else:
-            self.http.options['verify'] = True
+            kwargs['verify'] = True
 
         if self.config._schema_registry_tls_cert and self.config._schema_registry_tls_key:
-            self.log.debug("Configuring Schema Registry with client certificate authentication")
-            self.http.options['cert'] = (
-                self.config._schema_registry_tls_cert,
-                self.config._schema_registry_tls_key,
-            )
+            kwargs['cert'] = (self.config._schema_registry_tls_cert, self.config._schema_registry_tls_key)
         elif self.config._schema_registry_tls_cert:
-            self.http.options['cert'] = self.config._schema_registry_tls_cert
+            kwargs['cert'] = self.config._schema_registry_tls_cert
 
-    def _refresh_schema_registry_oauth_token(self):
+        self._schema_registry_http_kwargs = kwargs
+
+    def _get_schema_registry_request_kwargs(self) -> dict[str, Any]:
+        """Return per-request kwargs including the current OAuth bearer token if set."""
+        kwargs: dict[str, Any] = dict(self._schema_registry_http_kwargs)
+        if self._schema_registry_oauth_token:
+            extra_headers: dict[str, str] = {'Authorization': f'Bearer {self._schema_registry_oauth_token}'}
+            oauth_config = self.config._schema_registry_oauth_token_provider
+            if oauth_config:
+                custom_headers = oauth_config.get('custom_headers')
+                if custom_headers:
+                    extra_headers.update(custom_headers)
+            kwargs['extra_headers'] = extra_headers
+        return kwargs
+
+    def _refresh_schema_registry_oauth_token(self) -> None:
         """Fetch or refresh the OAuth token for Schema Registry if configured and expired."""
         oauth_config = self.config._schema_registry_oauth_token_provider
         if not oauth_config:
             return
 
-        # Check if token is still valid (with 30s buffer)
         if self._schema_registry_oauth_token and time.time() < (self._schema_registry_oauth_token_expiry - 30):
             return
 
         token, expires_at = self._fetch_oidc_token(oauth_config)
-
         self._schema_registry_oauth_token = token
         self._schema_registry_oauth_token_expiry = expires_at
-        headers = {
-            **self.http.options.get('headers', {}),
-            'Authorization': f'Bearer {token}',
-        }
-
-        custom_headers = oauth_config.get("custom_headers")
-        if custom_headers:
-            headers.update(custom_headers)
-
-        self.http.options['headers'] = headers
         self.log.debug("Schema Registry OAuth token refreshed, expires at %s", expires_at)
 
     def _fetch_oidc_token(self, oauth_config: dict) -> tuple[str, float]:
@@ -186,9 +167,10 @@ class ClusterMetadataCollector:
 
         return access_token, expires_at
 
-    def _schema_registry_get(self, path: str, **kwargs: Any) -> Any:
+    def _schema_registry_get(self, path: str, **extra_kwargs: Any) -> Any:
         """GET a Schema Registry path and return the parsed JSON body."""
         url = f"{self.config._collect_schema_registry}{path}"
+        kwargs = {**self._get_schema_registry_request_kwargs(), **extra_kwargs}
         response = self.http.get(url, **kwargs)
         response.raise_for_status()
         return response.json()
@@ -275,7 +257,7 @@ class ClusterMetadataCollector:
         )
 
         self.log.debug("Found %s brokers in cluster %s", len(brokers), cluster_id)
-        broker_tags = _get_tags(self.config, cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
+        broker_tags = self._get_tags(cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
         self.check.gauge('broker.count', len(brokers), tags=broker_tags)
 
         try:
@@ -283,7 +265,7 @@ class ClusterMetadataCollector:
             cluster_info = cluster_future.result(timeout=self.config._request_timeout)
 
             if cluster_info.controller:
-                controller_tags = _get_tags(self.config, cluster_id) + [
+                controller_tags = self._get_tags(cluster_id) + [
                     f'controller_id:{cluster_info.controller.id}',
                     f'controller_host:{cluster_info.controller.host}',
                     f'controller_port:{cluster_info.controller.port}',
@@ -308,7 +290,7 @@ class ClusterMetadataCollector:
 
         # Emit per-broker metrics (fast, in-memory only)
         for broker_id, broker_metadata in brokers.items():
-            tags = _get_tags(self.config, cluster_id) + [
+            tags = self._get_tags(cluster_id) + [
                 f'broker_id:{broker_id}',
                 f'broker_host:{broker_metadata.host}',
                 f'broker_port:{broker_metadata.port}',
@@ -335,7 +317,7 @@ class ClusterMetadataCollector:
                 if not broker_meta:
                     continue
 
-                metric_tags = _get_tags(self.config, cluster_id) + [
+                metric_tags = self._get_tags(cluster_id) + [
                     f'broker_id:{broker_id_str}',
                     f'broker_host:{broker_meta.host}',
                     f'broker_port:{broker_meta.port}',
@@ -403,7 +385,7 @@ class ClusterMetadataCollector:
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
-                        **_original_cluster_id_field(self.config),
+                        **self._original_cluster_id_field(),
                         'broker_id': str(broker_id),
                         'broker_host': info['broker_host'],
                         'broker_port': info['broker_port'],
@@ -481,7 +463,7 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %s topics", len(topic_partitions))
 
-        self.check.gauge('topic.count', len(topic_partitions), tags=_get_tags(self.config, cluster_id))
+        self.check.gauge('topic.count', len(topic_partitions), tags=self._get_tags(cluster_id))
 
         earliest_offsets = self._fetch_earliest_offsets(topic_partitions)
 
@@ -503,7 +485,7 @@ class ClusterMetadataCollector:
             if topic_name in KAFKA_INTERNAL_TOPICS:
                 continue
 
-            topic_tags = _get_tags(self.config, cluster_id) + [f'topic:{topic_name}']
+            topic_tags = self._get_tags(cluster_id) + [f'topic:{topic_name}']
 
             if not partitions:
                 self.log.warning("No partitions found for topic %s", topic_name)
@@ -633,7 +615,7 @@ class ClusterMetadataCollector:
 
             for resource, future in futures.items():
                 topic_name = resource.name
-                topic_tags = _get_tags(self.config, cluster_id) + [f'topic:{topic_name}']
+                topic_tags = self._get_tags(cluster_id) + [f'topic:{topic_name}']
 
                 try:
                     config_result = future.result(timeout=self.config._request_timeout)
@@ -688,7 +670,7 @@ class ClusterMetadataCollector:
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
-                        **_original_cluster_id_field(self.config),
+                        **self._original_cluster_id_field(),
                         'topic': topic_name,
                         'config_type': 'topic',
                         'config': json.loads(info['event_text']),
@@ -717,7 +699,7 @@ class ClusterMetadataCollector:
         consumer_groups = consumer_groups_result.valid
 
         self.log.debug("Found %s consumer groups", len(consumer_groups))
-        self.check.gauge('consumer_group.count', len(consumer_groups), tags=_get_tags(self.config, cluster_id))
+        self.check.gauge('consumer_group.count', len(consumer_groups), tags=self._get_tags(cluster_id))
 
         group_ids = [group.group_id for group in consumer_groups]
         if not group_ids:
@@ -735,7 +717,7 @@ class ClusterMetadataCollector:
         current_member_hashes = {}
 
         for group_id, group_info in group_id_to_info.items():
-            group_tags = _get_tags(self.config, cluster_id) + [f'consumer_group:{group_id}']
+            group_tags = self._get_tags(cluster_id) + [f'consumer_group:{group_id}']
             state = group_info.state
             members = group_info.members
             coordinator = group_info.coordinator
@@ -926,7 +908,7 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %d subjects in schema registry", len(subjects))
 
-        self.check.gauge('schema_registry.subjects', len(subjects), tags=_get_tags(self.config, cluster_id))
+        self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
 
         try:
             global_compatibility = self._get_schema_registry_global_compatibility()
@@ -1189,7 +1171,7 @@ class ClusterMetadataCollector:
             ds_payload = {
                 'collection_timestamp': int(time.time() * 1000),
                 'kafka_cluster_id': cluster_id,
-                **_original_cluster_id_field(self.config),
+                **self._original_cluster_id_field(),
                 'subject': subject,
                 'topic': info['topic_name'],
                 'schema_for': info['schema_for'],
@@ -1291,3 +1273,18 @@ class ClusterMetadataCollector:
             selected_configs.append((key, remaining[key]))
 
         return dict(selected_configs)
+
+    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
+        """Build metric tags, appending cluster ID tags when provided."""
+        tags = list(self.config._custom_tags)
+        if cluster_id:
+            tags.append(f'kafka_cluster_id:{cluster_id}')
+            if self.config._kafka_cluster_id_override:
+                tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
+        return tags
+
+    def _original_cluster_id_field(self) -> dict[str, str]:
+        """Return the original cluster ID event field when a cluster ID override is active."""
+        if self.config._kafka_cluster_id_override:
+            return {'original_kafka_cluster_id': self.config._auto_detected_cluster_id}
+        return {}

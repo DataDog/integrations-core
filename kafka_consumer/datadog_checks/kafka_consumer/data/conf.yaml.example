@@ -534,8 +534,3 @@ instances:
         ## Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
         #
         # tls_ca_cert: /path/to/oauth_ca_cert.pem
-
-    ## @param kafka_connect_collect_task_metrics - boolean - optional - default: false
-    ## Collect per-task metrics. Can be high cardinality for connectors with many tasks.
-    #
-    # kafka_connect_collect_task_metrics: false

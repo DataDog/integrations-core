@@ -1186,9 +1186,10 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     assert call_args[1]['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
     assert call_args[1]['auth'] == ('my-client-id', 'my-client-secret')
 
-    # Verify Bearer header was set on the HTTP client
-    headers = kafka_consumer_check.metadata_collector.http.options.get('headers', {})
-    assert headers.get('Authorization') == 'Bearer oidc-test-token-123'
+    # Verify Bearer token is stored and included in per-request kwargs
+    assert kafka_consumer_check.metadata_collector._schema_registry_oauth_token == 'oidc-test-token-123'
+    request_kwargs = kafka_consumer_check.metadata_collector._get_schema_registry_request_kwargs()
+    assert request_kwargs.get('extra_headers', {}).get('Authorization') == 'Bearer oidc-test-token-123'
 
     # Verify schema registry still works (subjects metric emitted)
     aggregator.assert_metric('kafka.schema_registry.subjects', value=1)
@@ -1242,10 +1243,9 @@ def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggr
     dd_run_check(kafka_consumer_check)
     mock_http.post.assert_called_once()
 
-    # Verify new token was set
-    headers = collector.http.options.get('headers', {})
-    assert headers.get('Authorization') == 'Bearer new-refreshed-token'
     assert collector._schema_registry_oauth_token == 'new-refreshed-token'
+    request_kwargs = collector._get_schema_registry_request_kwargs()
+    assert request_kwargs.get('extra_headers', {}).get('Authorization') == 'Bearer new-refreshed-token'
 
 
 def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
@@ -1371,12 +1371,14 @@ def test_schema_registry_url_encodes_subject_names(check):
     subject = 'google/protobuf/timestamp.proto'
 
     collector._get_schema_registry_versions(subject)
-    collector.http.get.assert_called_with('http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions')
+    collector.http.get.assert_called_with(
+        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions', verify=True
+    )
 
     collector.http.get.reset_mock()
     collector._get_schema_registry_latest_version(subject)
     collector.http.get.assert_called_with(
-        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest'
+        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest', verify=True
     )
 
     collector.http.get.reset_mock()
@@ -1385,6 +1387,7 @@ def test_schema_registry_url_encodes_subject_names(check):
     collector.http.get.assert_called_with(
         'http://localhost:8081/config/google%2Fprotobuf%2Ftimestamp.proto',
         params={'defaultToGlobal': 'true'},
+        verify=True,
     )
 
 

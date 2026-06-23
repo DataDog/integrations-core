@@ -7,7 +7,6 @@ import time
 import mock
 import pytest
 
-from datadog_checks.kafka_consumer.cluster_metadata import _get_tags, _original_cluster_id_field
 from datadog_checks.kafka_consumer.connectors import (
     KafkaConnectCollector,
     _short_class_name,
@@ -23,7 +22,6 @@ pytestmark = [pytest.mark.unit]
 
 def make_collector(
     connect_urls=None,
-    collect_task_metrics=False,
     cache_store=None,
 ):
     """Build a KafkaConnectCollector backed by MagicMock check/config/log."""
@@ -53,7 +51,6 @@ def make_collector(
     config._kafka_connect_tls_cert = None
     config._kafka_connect_tls_key = None
     config._kafka_connect_oauth_token_provider = None
-    config._kafka_connect_collect_task_metrics = collect_task_metrics
     config._kafka_configs_refresh_interval = 3600
     config._request_timeout = 10
     config._custom_tags = []
@@ -158,42 +155,31 @@ def test_emit_connector_metrics_gauges():
     collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, ['connect_url:http://localhost:8083'])
 
     emitted = {call.args[0] for call in check.gauge.call_args_list}
-    assert 'connector.running' in emitted
+    assert 'connector.running' not in emitted
     assert 'connector.task.count' in emitted
     assert 'connector.tasks' in emitted
+    assert 'connector.task.running' in emitted
 
 
-def test_emit_connector_metrics_running_state():
+def test_emit_connector_metrics_connector_status_tag():
     collector, check, _, _ = make_collector()
     collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
 
-    running_calls = [
-        c
-        for c in check.gauge.call_args_list
-        if c.args[0] == 'connector.running' and 'connector:demo-source' in c.kwargs.get('tags', [])
-    ]
-    assert running_calls, "no connector.running gauge for demo-source"
-    assert running_calls[0].args[1] == 1
+    task_count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.count']
+    source_calls = [c for c in task_count_calls if 'connector:demo-source' in c.kwargs.get('tags', [])]
+    assert source_calls, "no connector.task.count for demo-source"
+    assert 'connector_status:running' in source_calls[0].kwargs['tags']
 
-    paused_calls = [
-        c
-        for c in check.gauge.call_args_list
-        if c.args[0] == 'connector.running' and 'connector:demo-heartbeat' in c.kwargs.get('tags', [])
-    ]
-    assert paused_calls, "no connector.running gauge for demo-heartbeat"
-    assert paused_calls[0].args[1] == 0
+    heartbeat_calls = [c for c in task_count_calls if 'connector:demo-heartbeat' in c.kwargs.get('tags', [])]
+    assert heartbeat_calls, "no connector.task.count for demo-heartbeat"
+    assert 'connector_status:paused' in heartbeat_calls[0].kwargs['tags']
 
 
-def test_task_metrics_gated_by_flag():
-    collector_off, check_off, _, _ = make_collector(collect_task_metrics=False)
-    collector_off._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
-    per_task = [c for c in check_off.gauge.call_args_list if c.args[0] == 'connector.task.running']
-    assert per_task == [], "expected no per-task gauges when flag is False"
-
-    collector_on, check_on, _, _ = make_collector(collect_task_metrics=True)
-    collector_on._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
-    per_task = [c for c in check_on.gauge.call_args_list if c.args[0] == 'connector.task.running']
-    assert per_task, "expected per-task gauges when flag is True"
+def test_task_metrics_always_collected():
+    collector, check, _, _ = make_collector()
+    collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
+    per_task = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.running']
+    assert per_task, "expected per-task gauges to always be emitted"
 
 
 # ---------------------------------------------------------------------------
@@ -412,42 +398,42 @@ def test_get_events_to_send_empty_items():
 
 
 def test_get_tags_without_cluster_id():
-    _, _, config, _ = make_collector()
+    collector, _, config, _ = make_collector()
     config._custom_tags = ['env:prod']
     config._kafka_cluster_id_override = None
-    tags = _get_tags(config)
+    tags = collector._get_tags()
     assert tags == ['env:prod']
 
 
 def test_get_tags_with_cluster_id():
-    _, _, config, _ = make_collector()
+    collector, _, config, _ = make_collector()
     config._custom_tags = []
     config._kafka_cluster_id_override = None
-    tags = _get_tags(config, 'cluster-abc')
+    tags = collector._get_tags('cluster-abc')
     assert 'kafka_cluster_id:cluster-abc' in tags
 
 
 def test_get_tags_with_cluster_id_override():
-    _, _, config, _ = make_collector()
+    collector, _, config, _ = make_collector()
     config._custom_tags = []
     config._kafka_cluster_id_override = 'override-id'
     config._auto_detected_cluster_id = 'real-id'
-    tags = _get_tags(config, 'override-id')
+    tags = collector._get_tags('override-id')
     assert 'original_kafka_cluster_id:real-id' in tags
 
 
 def test_original_cluster_id_field_when_override_set():
-    _, _, config, _ = make_collector()
+    collector, _, config, _ = make_collector()
     config._kafka_cluster_id_override = 'override-id'
     config._auto_detected_cluster_id = 'real-id'
-    result = _original_cluster_id_field(config)
+    result = collector._original_cluster_id_field()
     assert result == {'original_kafka_cluster_id': 'real-id'}
 
 
 def test_original_cluster_id_field_when_no_override():
-    _, _, config, _ = make_collector()
+    collector, _, config, _ = make_collector()
     config._kafka_cluster_id_override = None
-    result = _original_cluster_id_field(config)
+    result = collector._original_cluster_id_field()
     assert result == {}
 
 

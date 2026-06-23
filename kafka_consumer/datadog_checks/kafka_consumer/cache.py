@@ -85,9 +85,7 @@ class CacheHelper:
         except Exception as e:
             self._log.debug("Could not write cache %s: %s", cache_key, e)
 
-    def get_events_to_send(
-        self, cache_key: str, items: dict[str, str], max_cache_size: int | None = None
-    ) -> list[str]:
+    def get_events_to_send(self, cache_key: str, items: dict[str, str], max_cache_size: int | None = None) -> list[str]:
         """Return item keys whose events should be emitted (new, changed, or TTL expired).
 
         Writes the updated hash/expiry cache back to persistent storage.
