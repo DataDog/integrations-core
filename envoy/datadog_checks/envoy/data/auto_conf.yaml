@@ -1,0 +1,5 @@
+ad_identifiers:
+  - envoyproxy/envoy
+discovery: {}
+init_config:
+instances: []

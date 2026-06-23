@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 
@@ -35,4 +34,13 @@ def test_e2e(dd_agent_check, exercise_envoy):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check(
         'envoy.openmetrics.health', Envoy.OK, tags=['endpoint:{}'.format(DEFAULT_INSTANCE['openmetrics_endpoint'])]
+    )
+
+
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        check_symmetric_inclusion=False,
     )
