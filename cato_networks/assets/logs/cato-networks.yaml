@@ -128,11 +128,13 @@ facets:
     name: Action ID
     path: ocsf.action_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -168,26 +170,29 @@ facets:
     name: Auth Protocol ID
     path: ocsf.auth_protocol_id
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Category Name
+    name: Category
     path: ocsf.category_name
     source: log
   - groups:
       - OCSF
-    name: Category UID
+    name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Class Name
+    name: Class
     path: ocsf.class_name
     source: log
   - groups:
       - OCSF
-    name: Class UID
+    name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Confidence
@@ -197,16 +202,6 @@ facets:
       - OCSF
     name: Confidence ID
     path: ocsf.confidence_id
-    source: log
-  - groups:
-      - OCSF
-    name: Direction
-    path: ocsf.connection_info.direction
-    source: log
-  - groups:
-      - OCSF
-    name: Direction ID
-    path: ocsf.connection_info.direction_id
     source: log
   - groups:
       - OCSF
@@ -243,11 +238,13 @@ facets:
     name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Finding Info Analytic Name
@@ -325,14 +322,15 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Rcode
+    name: Response Code
     path: ocsf.rcode
     source: log
   - groups:
       - OCSF
-    name: Rcode ID
+    name: Response Code ID
     path: ocsf.rcode_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Service Name
@@ -348,6 +346,7 @@ facets:
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Source Endpoint Hostname
@@ -368,11 +367,13 @@ facets:
     name: Source Endpoint Owner Name
     path: ocsf.src_endpoint.owner.name
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: State
@@ -398,11 +399,14 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
-  - groups:
+    type: integer
+  - facetType: range
+    groups:
       - OCSF
     name: Event Time
     path: ocsf.time
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Type Name
@@ -410,9 +414,10 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Type UID
+    name: Type ID
     path: ocsf.type_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Target Email Address
