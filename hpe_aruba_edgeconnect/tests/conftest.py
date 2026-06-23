@@ -62,7 +62,6 @@ def dd_environment(instance, dd_save_state):
         orch_port = find_free_port(HOST)
         appliance_port = find_free_port(HOST)
         orch_ip = f'{HOST}:{orch_port}'
-        appliance_ip = '192.168.200.10'
 
         def _ready():
             ctx = ssl.create_default_context()
@@ -88,7 +87,6 @@ def dd_environment(instance, dd_save_state):
                 'ORCH_PASSWORD': '',
                 'APPLIANCE_USERNAME': 'admin',
                 'APPLIANCE_PASSWORD': '',
-                'APPLIANCE_IP': appliance_ip,
             },
         ):
             yield {'instances': [inst]}
