@@ -9,6 +9,7 @@ services:
     environment:
       ORCH_USERNAME: "${ORCH_USERNAME}"
       ORCH_PASSWORD: "${ORCH_PASSWORD}"
+      APPLIANCE_IP: "${APPLIANCE_IP:-}"
     restart: "no"
 
   appliance:

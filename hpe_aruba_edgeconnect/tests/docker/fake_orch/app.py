@@ -77,11 +77,13 @@ def login():
 
 @app.route("/gms/rest/appliance")
 def appliances():
-    return jsonify([
-        _appliance(_appliance_ip(), "1.NE", "SydneySP01", "SYD", startup_time=86400),
-        _appliance(PEER_NEWYORK_IP, "4.NE", "NewYorkSP01", "NYC"),
-        _appliance(PEER_SANFRAN_IP, "5.NE", "SanFranSP02", "SFO"),
-    ])
+    return jsonify(
+        [
+            _appliance(_appliance_ip(), "1.NE", "SydneySP01", "SYD", startup_time=86400),
+            _appliance(PEER_NEWYORK_IP, "4.NE", "NewYorkSP01", "NYC"),
+            _appliance(PEER_SANFRAN_IP, "5.NE", "SanFranSP02", "SFO"),
+        ]
+    )
 
 
 @app.route("/gms/rest/gms/overlays/config")
