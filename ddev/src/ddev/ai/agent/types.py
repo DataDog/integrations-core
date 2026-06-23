@@ -39,20 +39,30 @@ class WebSearchCall:
 
 
 @dataclass(frozen=True)
-class WebSearchCitation:
-    """A source cited by the model in a web-search-enabled response."""
+class WebFetchCall:
+    """A server-side web fetch the model performed."""
 
     url: str
+    retrieved_at: str | None = None
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class WebCitation:
+    """A source cited by the model (web search result or fetched document)."""
+
     cited_text: str
+    url: str | None = None
     title: str | None = None
 
 
 @dataclass(frozen=True)
-class WebSearchActivity:
-    """All web search activity from a single agent turn: queries made and sources cited."""
+class WebActivity:
+    """All web activity from a single agent turn: searches, fetches, and cited sources."""
 
     searches: list[WebSearchCall] = field(default_factory=list)
-    citations: list[WebSearchCitation] = field(default_factory=list)
+    fetches: list[WebFetchCall] = field(default_factory=list)
+    citations: list[WebCitation] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -89,6 +99,7 @@ class TokenUsage:
     cache_creation_input_tokens: int  # tokens written to prompt cache
     context_usage: ContextUsage | None = None  # None only for agents that don't provide context tracking
     web_search_requests: int = 0  # number of web search requests (billed separately from tokens)
+    web_fetch_requests: int = 0  # number of web fetch requests (billed separately from tokens)
 
 
 @dataclass(frozen=True)
@@ -100,4 +111,4 @@ class AgentResponse:
     text: str
     tool_calls: list[ToolCall]
     usage: TokenUsage
-    web_activity: WebSearchActivity = field(default_factory=WebSearchActivity)
+    web_activity: WebActivity = field(default_factory=WebActivity)
