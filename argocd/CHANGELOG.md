@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.7.0 / 2026-06-18
+
+***Added***:
+
+* Add more fields for metadata collection ([#24091](https://github.com/DataDog/integrations-core/pull/24091))
+
 ## 4.6.0 / 2026-06-15
 
 ***Added***:
