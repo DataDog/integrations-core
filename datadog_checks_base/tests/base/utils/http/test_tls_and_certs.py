@@ -322,7 +322,7 @@ class TestAIAChasing:
 
         mock_create_socket_connection.assert_called_with('localhost', port)
 
-    def test_load_intermediate_certs_does_not_send_auth_headers(self):
+    def test_aia_chasing_fetches_issuer_without_configured_auth_headers(self):
         http = RequestsWrapper(
             {
                 'headers': {'Authorization': 'Bearer token'},
@@ -331,19 +331,35 @@ class TestAIAChasing:
             },
             {'proxy': {'https': 'http://proxy:3128'}},
         )
-        request_headers = []
+        service_calls = [0]
+        issuer_headers = []
 
-        def request(wrapper, method, url, options):
-            assert method == 'get'
+        def get(url, **kwargs):
+            if url == 'https://service.test:443':
+                service_calls[0] += 1
+                if service_calls[0] == 1:
+                    raise SSLError('missing intermediate')
+                return mock.MagicMock()
+
             assert url == 'http://issuer.test/ca.der'
-            request_headers.append(wrapper.options['headers'])
+            issuer_headers.append(kwargs['headers'])
             return mock.MagicMock(content=build_cert())
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper._request', autospec=True, side_effect=request):
-            http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), [])
+        mock_context = mock.MagicMock()
+        mock_secure_sock = mock.MagicMock()
+        mock_context.wrap_socket.return_value.__enter__.return_value = mock_secure_sock
+        mock_secure_sock.getpeercert.return_value = build_cert('http://issuer.test/ca.der')
+        mock_secure_sock.version.return_value = 'TLSv1.3'
 
-        assert request_headers
-        assert all('Authorization' not in headers for headers in request_headers)
+        with mock.patch('datadog_checks.base.utils.http.create_socket_connection'):
+            with mock.patch('datadog_checks.base.utils.http.create_ssl_context', return_value=mock_context):
+                with mock.patch('datadog_checks.base.utils.http.RequestsWrapper._mount_https_adapter'):
+                    with mock.patch('requests.Session.get', side_effect=get):
+                        http.get('https://service.test:443')
+
+        assert service_calls[0] == 2
+        assert issuer_headers
+        assert all('Authorization' not in headers for headers in issuer_headers)
 
     def test_load_intermediate_certs_falls_back_to_plain_http(self):
         http = RequestsWrapper({}, {})
