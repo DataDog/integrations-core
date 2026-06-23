@@ -21,7 +21,6 @@ files:
     - name: fetch_intermediate_certs
       description: |
         Whether or not to perform AIA chasing in order to load the full certificate chain.
-        The AIA URI is fetched with a credential-free session, so instance credentials are never sent to it.
       fleet_configurable: true
       value:
         example: false
@@ -92,7 +91,6 @@ files:
       fleet_configurable: true
       description: |
         Whether or not to perform AIA chasing in order to load the full certificate chain.
-        The AIA URI is fetched with a credential-free session, so instance credentials are never sent to it.
 
         This overrides `fetch_intermediate_certs` defined in `init_config`.
       value:
