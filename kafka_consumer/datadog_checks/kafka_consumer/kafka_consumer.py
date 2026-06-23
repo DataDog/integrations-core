@@ -67,7 +67,9 @@ class KafkaCheck(AgentCheck):
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            if consumer_contexts_count < self._context_limit:
+            # Cluster monitoring always requires highwater offsets (for topic.message_rate and other
+            # cluster metadata metrics), so bypass the consumer context limit in that case.
+            if consumer_contexts_count < self._context_limit or self.config._cluster_monitoring_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
                 # If cluster monitoring is enabled, always fetch all broker highwater marks
