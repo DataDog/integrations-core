@@ -600,9 +600,6 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
 
 
 def _test_index_metrics(aggregator, index_metrics, metric_tags, e2e=False):
-    # In E2E, monotonic_count metrics with collection_interval=300 aren't emitted:
-    # check_rate=True runs the check twice but the second run skips the query (interval not elapsed),
-    # so no delta is ever flushed. Use at_least=0 to avoid false failures in E2E.
     usage_count = 0 if e2e else 1
     for mname in index_metrics:
         if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
