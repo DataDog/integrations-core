@@ -721,7 +721,7 @@
                     {
                         "id": 4800789162924586,
                         "definition": {
-                            "title": "Cluster reconciliation (controllers, legacy)",
+                            "title": "Cluster Reconciliation (controllers, legacy)",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -802,7 +802,7 @@
                     {
                         "id": 4800789162924587,
                         "definition": {
-                            "title": "Source acquisition (controllers, legacy)",
+                            "title": "Source Acquisition (controllers, legacy)",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -1050,7 +1050,7 @@
         {
             "id": 851940491562172,
             "definition": {
-                "title": "Controller Runtimes ",
+                "title": "Controller Runtimes",
                 "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
