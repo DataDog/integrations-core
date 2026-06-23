@@ -251,6 +251,16 @@ def test_available_tool_names_includes_web_search():
     assert "web_search" in ToolRegistry.available_tool_names()
 
 
+def test_available_tool_names_includes_web_fetch():
+    assert "web_fetch" in ToolRegistry.available_tool_names()
+
+
+def test_from_names_multiple_native(tmp_path):
+    registry = from_names(["web_search", "web_fetch"], tmp_path)
+    assert registry.definitions == []
+    assert registry.native_tool_names == ["web_search", "web_fetch"]
+
+
 def test_from_names_native_only(tmp_path):
     registry = from_names(["web_search"], tmp_path)
     assert registry.definitions == []
@@ -282,8 +292,8 @@ def test_native_tool_names_not_affected_by_input_mutation():
 
 
 def test_filter_read_only_includes_native_read_only():
-    result = filter_read_only(["read_file", "web_search", "create_file"])
-    assert result == ["read_file", "web_search"]
+    result = filter_read_only(["read_file", "web_search", "web_fetch", "create_file"])
+    assert result == ["read_file", "web_search", "web_fetch"]
 
 
 def test_filter_read_only_unknown_still_raises():

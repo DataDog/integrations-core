@@ -74,6 +74,7 @@ class ToolSpec:
 # Server (provider-executed) tools.
 NATIVE_TOOL_READ_ONLY: dict[str, bool] = {
     "web_search": True,
+    "web_fetch": True,
 }
 NATIVE_TOOL_NAMES: list[str] = list(NATIVE_TOOL_READ_ONLY)
 

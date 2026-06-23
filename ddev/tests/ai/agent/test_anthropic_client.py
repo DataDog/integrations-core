@@ -11,6 +11,7 @@ import pytest
 from ddev.ai.agent.anthropic_client import (
     MAX_CONTINUATIONS,
     NATIVE_TOOL_DEFINITIONS,
+    WEB_FETCH_VERSION,
     WEB_SEARCH_VERSION,
     AnthropicAgent,
     CompletionResult,
@@ -31,8 +32,9 @@ def make_usage(
     cache_read: int | None = None,
     cache_creation: int | None = None,
     web_search_requests: int = 0,
+    web_fetch_requests: int = 0,
 ) -> SimpleNamespace:
-    server_tool_use = SimpleNamespace(web_search_requests=web_search_requests)
+    server_tool_use = SimpleNamespace(web_search_requests=web_search_requests, web_fetch_requests=web_fetch_requests)
     return SimpleNamespace(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
@@ -462,6 +464,34 @@ async def test_web_search_max_uses_stays_below_continuation_budget() -> None:
     assert web_search["max_uses"] == MAX_CONTINUATIONS - 1
 
 
+async def test_web_fetch_injected_with_citations_enabled() -> None:
+    registry = ToolRegistry([], native_tool_names=["web_fetch"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Fetch a page")
+
+    web_fetch = next(t for t in create_mock.call_args.kwargs["tools"] if t.get("name") == "web_fetch")
+    assert web_fetch["type"] == WEB_FETCH_VERSION
+    assert web_fetch["citations"] == {"enabled": True}
+    assert web_fetch["max_uses"] == MAX_CONTINUATIONS - 1
+
+
+async def test_both_native_tools_injected_together() -> None:
+    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search", "web_fetch"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Hi")
+
+    sent_tools = create_mock.call_args.kwargs["tools"]
+    sent_names = [t["name"] for t in sent_tools]
+    assert sent_names == ["read_file", "web_search", "web_fetch"]
+    # Static cache breakpoint only on the last entry.
+    assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert all("cache_control" not in t for t in sent_tools[:-1])
+
+
 async def test_create_until_complete_returns_completion_result() -> None:
     final = make_response("end_turn", [make_text_block("done")])
     agent, _ = make_agent(mock_response=final)
@@ -602,7 +632,85 @@ async def test_no_web_searches_yields_empty_activity() -> None:
     result = await agent.send("Hi")
 
     assert result.web_activity.searches == []
+    assert result.web_activity.fetches == []
     assert result.web_activity.citations == []
+
+
+def make_server_fetch_use(id: str, url: str) -> anthropic.types.ServerToolUseBlock:
+    return anthropic.types.ServerToolUseBlock(type="server_tool_use", id=id, name="web_fetch", input={"url": url})
+
+
+def make_web_fetch_result(tool_use_id: str, url: str, retrieved_at: str) -> anthropic.types.WebFetchToolResultBlock:
+    doc = anthropic.types.DocumentBlock(
+        type="document",
+        source=anthropic.types.PlainTextSource(type="text", media_type="text/plain", data="page body"),
+    )
+    fetched = anthropic.types.WebFetchBlock(type="web_fetch_result", url=url, retrieved_at=retrieved_at, content=doc)
+    return anthropic.types.WebFetchToolResultBlock(
+        type="web_fetch_tool_result", tool_use_id=tool_use_id, content=fetched
+    )
+
+
+async def test_web_fetches_surfaced_with_url_and_retrieved_at() -> None:
+    content = [
+        make_text_block("Fetching..."),
+        make_server_fetch_use("srv1", "https://example.com/doc"),
+        make_web_fetch_result("srv1", "https://example.com/doc", "2026-01-01T00:00:00Z"),
+        make_text_block("Here is the content."),
+    ]
+    resp = make_response("end_turn", content)
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Fetch the doc")
+
+    assert result.tool_calls == []
+    assert len(result.web_activity.fetches) == 1
+    fetch = result.web_activity.fetches[0]
+    assert fetch.url == "https://example.com/doc"
+    assert fetch.retrieved_at == "2026-01-01T00:00:00Z"
+    assert fetch.error is None
+
+
+async def test_web_fetch_error_surfaced() -> None:
+    error = anthropic.types.WebFetchToolResultErrorBlock(
+        type="web_fetch_tool_result_error", error_code="url_not_accessible"
+    )
+    content = [
+        make_server_fetch_use("srv1", "https://example.com/missing"),
+        anthropic.types.WebFetchToolResultBlock(type="web_fetch_tool_result", tool_use_id="srv1", content=error),
+    ]
+    agent, _ = make_agent(mock_response=make_response("end_turn", content))
+
+    result = await agent.send("Fetch")
+
+    assert len(result.web_activity.fetches) == 1
+    assert result.web_activity.fetches[0].error == "url_not_accessible"
+    assert result.web_activity.fetches[0].retrieved_at is None
+
+
+async def test_web_fetch_requests_summed_into_usage() -> None:
+    resp = make_response("end_turn", [make_text_block("done")], usage=make_usage(web_fetch_requests=2))
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Fetch")
+
+    assert result.usage.web_fetch_requests == 2
+
+
+async def test_web_fetch_result_preserved_in_history_not_parsed() -> None:
+    content = [
+        make_text_block("Fetching..."),
+        make_server_fetch_use("srv1", "https://example.com/doc"),
+        make_web_fetch_result("srv1", "https://example.com/doc", "2026-01-01T00:00:00Z"),
+        make_text_block("Done."),
+    ]
+    resp = make_response("end_turn", content)
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Fetch")
+
+    assert result.tool_calls == []
+    assert agent.history[-1] == {"role": "assistant", "content": content}
 
 
 async def test_web_search_citations_extracted_from_text_block() -> None:
@@ -626,12 +734,12 @@ async def test_web_search_citations_extracted_from_text_block() -> None:
     assert c.cited_text == "some cited excerpt"
 
 
-async def test_non_web_search_citations_are_ignored() -> None:
+async def test_web_fetch_char_citation_surfaced() -> None:
     char_citation = anthropic.types.CitationCharLocation(
         type="char_location",
-        cited_text="some text",
+        cited_text="some cited text",
         document_index=0,
-        document_title=None,
+        document_title="Fetched Doc",
         end_char_index=10,
         start_char_index=0,
     )
@@ -641,7 +749,11 @@ async def test_non_web_search_citations_are_ignored() -> None:
 
     result = await agent.send("Hi")
 
-    assert result.web_activity.citations == []
+    assert len(result.web_activity.citations) == 1
+    c = result.web_activity.citations[0]
+    assert c.url is None
+    assert c.title == "Fetched Doc"
+    assert c.cited_text == "some cited text"
 
 
 async def test_citations_across_multiple_text_blocks() -> None:

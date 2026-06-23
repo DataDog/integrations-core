@@ -115,6 +115,11 @@ def test_agent_config_web_search_validates():
     assert "web_search" in ac.tools
 
 
+def test_agent_config_web_fetch_validates():
+    ac = AgentConfig(tools=["read_file", "web_fetch"])
+    assert "web_fetch" in ac.tools
+
+
 def test_agent_config_unknown_tool_raises():
     with pytest.raises(ValidationError, match="Unknown tool names"):
         AgentConfig(tools=["read_file", "teleport"])

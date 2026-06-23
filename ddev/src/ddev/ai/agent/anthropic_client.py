@@ -19,9 +19,10 @@ from ddev.ai.agent.types import (
     TokenUsage,
     ToolCall,
     ToolResultMessage,
-    WebSearchActivity,
+    WebActivity,
+    WebCitation,
+    WebFetchCall,
     WebSearchCall,
-    WebSearchCitation,
 )
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -38,12 +39,19 @@ DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
 MAX_CONTINUATIONS: Final[int] = 10
 
-# Pinned to the ZDR-eligible version; web_search_20260209 is not ZDR-eligible by default.
+# Pinned to the ZDR-eligible versions; the _20260209 variants are not ZDR-eligible by default.
 WEB_SEARCH_VERSION: Final[str] = "web_search_20250305"
+WEB_FETCH_VERSION: Final[str] = "web_fetch_20250910"
 
 NATIVE_TOOL_DEFINITIONS: Final[dict[str, ToolParam]] = {
     # max_uses stays below MAX_CONTINUATIONS so a turn is always left to receive the final response.
     "web_search": {"type": WEB_SEARCH_VERSION, "name": "web_search", "max_uses": MAX_CONTINUATIONS - 1},
+    "web_fetch": {
+        "type": WEB_FETCH_VERSION,
+        "name": "web_fetch",
+        "max_uses": MAX_CONTINUATIONS - 1,
+        "citations": {"enabled": True},
+    },
 }
 
 # 1h TTL for the static prefix (system + tools): paid once, read for the whole session.
@@ -68,7 +76,7 @@ class ResponseContent:
 
     text: str
     tool_calls: list[ToolCall]
-    citations: list[WebSearchCitation]
+    citations: list[WebCitation]
 
 
 class AnthropicAgent(BaseAgent[MessageParam]):
@@ -149,10 +157,10 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         return [NATIVE_TOOL_DEFINITIONS[name] for name in names]
 
     @staticmethod
-    def _web_search_requests(response: Message) -> int:
-        """Web search request count from one response (0 if absent). Robust to fakes/providers."""
+    def _server_tool_requests(response: Message, attr: str) -> int:
+        """Server tool request count from one response (0 if absent). Robust to fakes/providers."""
         server_use = getattr(response.usage, "server_tool_use", None)
-        return getattr(server_use, "web_search_requests", 0)
+        return getattr(server_use, attr, 0)
 
     @staticmethod
     def _extract_web_searches(responses: list[Message]) -> list[WebSearchCall]:
@@ -181,6 +189,34 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             count, error = results.get(use_id, (0, None))
             searches.append(WebSearchCall(query=query, result_count=count, error=error))
         return searches
+
+    @staticmethod
+    def _extract_web_fetches(responses: list[Message]) -> list[WebFetchCall]:
+        """Collect server-side web fetches (url + retrieved_at/error) across all responses.
+
+        Like web searches, fetches are server tools: the model emits a ``ServerToolUseBlock``
+        (the url) and Anthropic answers inline with a ``WebFetchToolResultBlock``. They never
+        become client ``ToolCall``s, so we surface them here for logging.
+        """
+        urls: dict[str, str] = {}
+        results: dict[str, tuple[str | None, str | None]] = {}
+        for response in responses:
+            for block in response.content:
+                if isinstance(block, anthropic.types.ServerToolUseBlock) and block.name == "web_fetch":
+                    url = block.input.get("url", "")
+                    urls[block.id] = str(url)
+                elif isinstance(block, anthropic.types.WebFetchToolResultBlock):
+                    content = block.content
+                    if isinstance(content, anthropic.types.WebFetchToolResultErrorBlock):
+                        results[block.tool_use_id] = (None, content.error_code)
+                    else:
+                        results[block.tool_use_id] = (content.retrieved_at, None)
+
+        fetches: list[WebFetchCall] = []
+        for use_id, url in urls.items():
+            retrieved_at, error = results.get(use_id, (None, None))
+            fetches.append(WebFetchCall(url=url, retrieved_at=retrieved_at, error=error))
+        return fetches
 
     async def _create_until_complete(
         self,
@@ -287,20 +323,29 @@ class AnthropicAgent(BaseAgent[MessageParam]):
 
     @staticmethod
     def _parse_response_content(response: Message) -> ResponseContent:
-        """Extract text, client tool calls, and web-search citations from response blocks.
+        """Extract text, client tool calls, and web-search/fetch citations from response blocks.
 
         Server tool blocks are intentionally skipped: they stay verbatim in history so
         Anthropic can resolve encrypted_content / encrypted_index for citations.
         """
         text_parts: list[str] = []
         tool_calls: list[ToolCall] = []
-        citations: list[WebSearchCitation] = []
+        citations: list[WebCitation] = []
         for block in response.content:
             if isinstance(block, anthropic.types.TextBlock):
                 text_parts.append(block.text)
                 for c in block.citations or []:
                     if isinstance(c, anthropic.types.CitationsWebSearchResultLocation):
-                        citations.append(WebSearchCitation(url=c.url, title=c.title, cited_text=c.cited_text))
+                        citations.append(WebCitation(url=c.url, title=c.title, cited_text=c.cited_text))
+                    elif isinstance(
+                        c,
+                        (
+                            anthropic.types.CitationCharLocation,
+                            anthropic.types.CitationPageLocation,
+                            anthropic.types.CitationContentBlockLocation,
+                        ),
+                    ):
+                        citations.append(WebCitation(cited_text=c.cited_text, title=c.document_title))
             elif isinstance(block, anthropic.types.ToolUseBlock):
                 tool_calls.append(ToolCall(id=block.id, name=block.name, input=dict(block.input)))
         return ResponseContent(text="\n".join(text_parts), tool_calls=tool_calls, citations=citations)
@@ -320,7 +365,8 @@ class AnthropicAgent(BaseAgent[MessageParam]):
                 window_size=await self._get_context_window(),
                 used_tokens=final.usage.input_tokens + final_cache_read + final_cache_creation,
             ),
-            web_search_requests=sum(self._web_search_requests(r) for r in all_responses),
+            web_search_requests=sum(self._server_tool_requests(r, "web_search_requests") for r in all_responses),
+            web_fetch_requests=sum(self._server_tool_requests(r, "web_fetch_requests") for r in all_responses),
         )
 
     def _append_history(
@@ -374,8 +420,9 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             text=parsed.text,
             tool_calls=parsed.tool_calls,
             usage=await self._build_usage(completion),
-            web_activity=WebSearchActivity(
+            web_activity=WebActivity(
                 searches=self._extract_web_searches(completion.all_responses),
+                fetches=self._extract_web_fetches(completion.all_responses),
                 citations=parsed.citations,
             ),
         )

@@ -11,9 +11,10 @@ from ddev.ai.agent.types import (
     StopReason,
     TokenUsage,
     ToolCall,
-    WebSearchActivity,
+    WebActivity,
+    WebCitation,
+    WebFetchCall,
     WebSearchCall,
-    WebSearchCitation,
 )
 from ddev.ai.react.types import ReActResult
 from ddev.ai.runtime.agent_log import AgentLogger
@@ -136,9 +137,9 @@ async def test_emit_after_close_is_silently_dropped(tmp_path):
 
 
 async def test_agent_response_logs_web_searches_and_citations(tmp_path):
-    activity = WebSearchActivity(
+    activity = WebActivity(
         searches=[WebSearchCall(query="python typing", result_count=5)],
-        citations=[WebSearchCitation(url="https://docs.python.org", cited_text="PEP 484", title="PEP 484")],
+        citations=[WebCitation(url="https://docs.python.org", cited_text="PEP 484", title="PEP 484")],
     )
     response = AgentResponse(
         stop_reason=StopReason.END_TURN,
@@ -158,6 +159,35 @@ async def test_agent_response_logs_web_searches_and_citations(tmp_path):
     assert ev["web_citations"] == [{"url": "https://docs.python.org", "title": "PEP 484", "cited_text": "PEP 484"}]
 
 
+async def test_agent_response_logs_web_fetches(tmp_path):
+    activity = WebActivity(
+        fetches=[WebFetchCall(url="https://example.com/doc", retrieved_at="2026-01-01T00:00:00Z")],
+    )
+    response = AgentResponse(
+        stop_reason=StopReason.END_TURN,
+        text="here",
+        tool_calls=[],
+        usage=TokenUsage(
+            input_tokens=10,
+            output_tokens=5,
+            cache_read_input_tokens=0,
+            cache_creation_input_tokens=0,
+            web_fetch_requests=1,
+        ),
+        web_activity=activity,
+    )
+    logger = AgentLogger(tmp_path)
+    cb = logger.as_callback_set()
+
+    await cb.fire_agent_response(PHASE, response, 1)
+
+    ev = read_events(tmp_path / "phase" / "p1.jsonl")[0]
+    assert ev["web_fetches"] == [
+        {"url": "https://example.com/doc", "retrieved_at": "2026-01-01T00:00:00Z", "error": None}
+    ]
+    assert ev["tokens"]["web_fetch_requests"] == 1
+
+
 async def test_agent_response_logs_empty_web_activity(tmp_path):
     logger = AgentLogger(tmp_path)
     cb = logger.as_callback_set()
@@ -166,6 +196,7 @@ async def test_agent_response_logs_empty_web_activity(tmp_path):
 
     events = read_events(tmp_path / "phase" / "p1.jsonl")
     assert events[0]["web_searches"] == []
+    assert events[0]["web_fetches"] == []
     assert events[0]["web_citations"] == []
 
 
