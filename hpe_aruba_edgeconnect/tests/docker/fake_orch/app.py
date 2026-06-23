@@ -4,7 +4,6 @@
 """Fake HPE Aruba EdgeConnect orchestrator for E2E tests."""
 
 import os
-import socket
 import ssl
 
 from flask import Flask, jsonify, request
@@ -22,10 +21,7 @@ PEER_SANFRAN_IP = "10.0.0.3"
 
 
 def _appliance_ip():
-    explicit = os.environ.get("APPLIANCE_IP")
-    if explicit:
-        return explicit
-    return socket.gethostbyname("dd-appliance")
+    return os.environ["APPLIANCE_IP"]
 
 
 def _appliance(ip, ne_pk, host_name, site, startup_time=None):
