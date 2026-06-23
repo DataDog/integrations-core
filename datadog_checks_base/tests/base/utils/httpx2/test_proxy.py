@@ -153,10 +153,25 @@ def test_request_routes_to_matching_scheme_proxy():
     assert _served_by([], 'https://api.example.com/') == 'proxy-https'
 
 
-def test_proxy_configured_installs_router_and_disables_trust_env():
+def test_proxy_configured_installs_router_and_disables_trust_env(clean_proxy_env):
     with HTTPX2Wrapper({'proxy': {'http': 'http://1.2.3.4:3128'}}, {}) as http:
         assert http._client.trust_env is False
         assert isinstance(http._client._transport, _ProxyRoutingTransport)
+
+
+def test_wrapper_built_router_routes_https_through_proxy(clean_proxy_env):
+    # Send a real request through the wrapper's OWN router and observe which inner served it.
+    # The inner transports are built internally, so patch httpx2.HTTPTransport to return recording doubles.
+    sink: list[str] = []
+
+    def fake_transport_cls(*args, **kwargs):
+        label = 'proxy' if 'proxy' in kwargs else 'direct'
+        return _recording_transport(label, sink)
+
+    with mock.patch('datadog_checks.base.utils.httpx2.httpx2.HTTPTransport', side_effect=fake_transport_cls):
+        with HTTPX2Wrapper({'proxy': {'https': 'http://1.2.3.4:3128'}}, {}) as http:
+            http.get('https://api.example.com/')
+    assert sink == ['proxy']
 
 
 # --- no_proxy host, subdomain, and leading-dot bypass ---
@@ -278,6 +293,29 @@ def test_same_proxy_url_for_both_schemes_shares_one_transport():
     transport = _build_proxy_transport({'http': 'http://p:3128', 'https': 'http://p:3128'}, None, True, None)
     assert transport._scheme_transports['http'] is transport._scheme_transports['https']
     transport.close()  # would double-close the shared inner without the id() dedup
+
+
+class _CountingTransport(httpx2.BaseTransport):
+    """A spy like _recording_transport, but it records its label on close() instead of on a request."""
+
+    def __init__(self, closed: list[str], label: str) -> None:
+        self._closed = closed
+        self._label = label
+
+    def handle_request(self, request: httpx2.Request) -> httpx2.Response:
+        return httpx2.Response(200)
+
+    def close(self) -> None:
+        self._closed.append(self._label)
+
+
+def test_close_closes_each_unique_inner_once():
+    closed: list[str] = []
+    shared = _CountingTransport(closed, 'proxy')  # one object sitting behind both schemes
+    direct = _CountingTransport(closed, 'direct')
+    routing = _ProxyRoutingTransport({'http': shared, 'https': shared}, direct, None)
+    routing.close()
+    assert sorted(closed) == ['direct', 'proxy']
 
 
 def test_proxy_with_only_no_proxy_and_no_env_proxy_is_treated_as_unconfigured(monkeypatch):
