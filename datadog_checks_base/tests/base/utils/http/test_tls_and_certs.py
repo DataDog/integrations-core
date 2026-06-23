@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import datetime
 import logging
 import ssl
 
 import mock
 import pytest
+from cryptography import x509
+from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -15,6 +20,32 @@ from datadog_checks.dev.utils import ON_WINDOWS
 pytestmark = [pytest.mark.unit]
 
 TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
+
+
+def build_cert(aia_uri=None):
+    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'example.test')])
+    builder = (
+        x509.CertificateBuilder()
+        .subject_name(name)
+        .issuer_name(name)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.datetime(2020, 1, 1))
+        .not_valid_after(datetime.datetime(2050, 1, 1))
+    )
+    if aia_uri:
+        builder = builder.add_extension(
+            x509.AuthorityInformationAccess(
+                [
+                    x509.AccessDescription(
+                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
+                    )
+                ]
+            ),
+            critical=False,
+        )
+    return builder.sign(key, hashes.SHA256()).public_bytes(serialization.Encoding.DER)
 
 
 class TestCert:
@@ -290,6 +321,60 @@ class TestAIAChasing:
                         http.get('https://localhost:{}'.format(port))
 
         mock_create_socket_connection.assert_called_with('localhost', port)
+
+    def test_load_intermediate_certs_uses_clean_sessions(self):
+        http = RequestsWrapper(
+            {
+                'username': 'admin',
+                'password': 'secret',
+                'headers': {'Authorization': 'Bearer token'},
+                'tls_cert': '/path/to/client.crt',
+                'proxy': {'http': 'http://proxy:3128'},
+            },
+            {'proxy': {'https': 'http://proxy:3128'}},
+        )
+        session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=build_cert())
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
+            http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), [])
+
+        for call in wrapper.call_args_list:
+            assert call.args[0] == {'tls_verify': True, 'skip_proxy': True}
+            assert call.args[1] == {}
+        assert session.get.call_count == 1
+
+    def test_load_intermediate_certs_falls_back_to_plain_http(self):
+        http = RequestsWrapper({}, {})
+        secure, plain = mock.MagicMock(), mock.MagicMock()
+        secure.get.side_effect = Exception('TLS handshake failed')
+        plain.get.return_value = mock.MagicMock(content=build_cert())
+
+        def make_wrapper(instance, init_config, *args, **kwargs):
+            return plain if instance['tls_verify'] is False else secure
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', side_effect=make_wrapper) as wrapper:
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
+
+        configs = [call.args[0] for call in wrapper.call_args_list]
+        assert configs[0] == {'tls_verify': True, 'skip_proxy': True}
+        assert {'tls_verify': False, 'skip_proxy': True} in configs
+        assert secure.get.called and plain.get.called
+
+    def test_load_intermediate_certs_recurses(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        session = mock.MagicMock()
+        session.get.side_effect = [
+            mock.MagicMock(content=build_cert('http://issuer.test/root.der')),
+            mock.MagicMock(content=build_cert()),
+        ]
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('http://issuer.test/intermediate.der'), certs)
+
+        assert session.get.call_count == 2
+        assert len(certs) == 2
 
     def test_fetch_intermediate_certs_tls_ciphers(self):
         """Test that fetch_intermediate_certs uses the correct ciphers."""

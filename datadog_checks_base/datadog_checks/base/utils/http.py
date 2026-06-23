@@ -580,18 +580,30 @@ class RequestsWrapper(object):
 
             uri = access_description.access_location.value
 
-            # Assume HTTP for now
-            try:
-                response = self.get(uri)  # SKIP_HTTP_VALIDATION
-            except Exception as e:
-                self.logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+            intermediate_cert = self._fetch_intermediate_cert(uri)
+            if intermediate_cert is None:
                 continue
-            else:
-                intermediate_cert = response.content
 
             certs.append(intermediate_cert)
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
+
+    def _fetch_intermediate_cert(self, uri):
+        for tls_verify in (True, False):
+            try:
+                response = RequestsWrapper({'tls_verify': tls_verify, 'skip_proxy': True}, {}, logger=self.logger).get(
+                    uri
+                )
+            except Exception as e:
+                self.logger.debug(
+                    'Error fetching intermediate certificate from `%s` (tls_verify=%s): %s', uri, tls_verify, e
+                )
+                continue
+            else:
+                return response.content
+
+        self.logger.error('Error fetching intermediate certificate from `%s`', uri)
+        return None
 
     def _create_session(self):
         """
