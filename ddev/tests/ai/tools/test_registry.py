@@ -254,14 +254,14 @@ def test_available_tool_names_includes_web_search():
 def test_from_names_native_only(tmp_path):
     registry = from_names(["web_search"], tmp_path)
     assert registry.definitions == []
-    assert registry.native_tool_names == ["web_search"]
+    assert list(registry.native_tool_names) == ["web_search"]
 
 
 def test_from_names_client_and_native(tmp_path):
     registry = from_names(["read_file", "web_search"], tmp_path)
     assert len(registry.definitions) == 1
     assert registry.definitions[0]["name"] == "read_file"
-    assert registry.native_tool_names == ["web_search"]
+    assert list(registry.native_tool_names) == ["web_search"]
 
 
 def test_from_names_native_not_in_tools_dict(tmp_path):
@@ -274,11 +274,11 @@ def test_from_names_bogus_raises(tmp_path):
         from_names(["bogus"], tmp_path)
 
 
-def test_native_tool_names_property_returns_copy(tmp_path):
-    registry = from_names(["web_search"], tmp_path)
-    snapshot = registry.native_tool_names
-    snapshot.clear()
-    assert registry.native_tool_names == ["web_search"]
+def test_native_tool_names_not_affected_by_input_mutation():
+    names = ["web_search"]
+    registry = ToolRegistry([], native_tool_names=names)
+    names.append("web_fetch")
+    assert list(registry.native_tool_names) == ["web_search"]
 
 
 def test_filter_read_only_includes_native_read_only():

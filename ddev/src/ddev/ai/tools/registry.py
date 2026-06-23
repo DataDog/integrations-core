@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING
@@ -107,14 +107,14 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
 class ToolRegistry:
     """Registry holding all available tools."""
 
-    def __init__(self, tools: list[ToolProtocol], native_tool_names: list[str] | None = None) -> None:
+    def __init__(self, tools: list[ToolProtocol], native_tool_names: Sequence[str] | None = None) -> None:
         self._tools: dict[str, ToolProtocol] = {tool.name: tool for tool in tools}
-        self._native_tool_names: list[str] = native_tool_names or []
+        self._native_tool_names: tuple[str, ...] = tuple(native_tool_names or ())
 
     @property
-    def native_tool_names(self) -> list[str]:
+    def native_tool_names(self) -> Sequence[str]:
         """Provider-executed tool names selected for this registry (order preserved)."""
-        return list(self._native_tool_names)
+        return self._native_tool_names
 
     @staticmethod
     def available_tool_names() -> list[str]:
