@@ -21,6 +21,11 @@ files:
     - name: fetch_intermediate_certs
       description: |
         Whether or not to perform AIA chasing in order to load the full certificate chain.
+
+        The certificate's Authority Information Access URI is peer-controlled, so it is
+        always fetched with a fresh, credential-free HTTP session that carries none of the
+        instance's authentication settings. The fetch is attempted over TLS first and falls
+        back to plain HTTP, never sending the instance's credentials.
       fleet_configurable: true
       value:
         example: false
@@ -91,6 +96,11 @@ files:
       fleet_configurable: true
       description: |
         Whether or not to perform AIA chasing in order to load the full certificate chain.
+
+        The certificate's Authority Information Access URI is peer-controlled, so it is
+        always fetched with a fresh, credential-free HTTP session that carries none of the
+        instance's authentication settings. The fetch is attempted over TLS first and falls
+        back to plain HTTP, never sending the instance's credentials.
 
         This overrides `fetch_intermediate_certs` defined in `init_config`.
       value:
