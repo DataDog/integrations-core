@@ -140,7 +140,7 @@ facets:
     source: log
   - groups:
     - OCSF
-    name: Connection Info Protocol Name
+    name: Protocol Name
     path: ocsf.connection_info.protocol_name
     source: log
   - groups:
@@ -155,7 +155,7 @@ facets:
     source: log
   - groups:
     - OCSF
-    name: Device IP Address
+    name: Device IP
     path: ocsf.device.ip
     source: log
   - groups:
@@ -182,12 +182,12 @@ facets:
     type: integer
   - groups:
     - OCSF
-    name: Finding Information Analytic Name
+    name: Finding Info Analytic Name
     path: ocsf.finding_info.analytic.name
     source: log
   - groups:
     - OCSF
-    name: Finding Information Analytic Unique ID
+    name: Finding Info Analytic UID
     path: ocsf.finding_info.analytic.uid
     source: log
   - groups:

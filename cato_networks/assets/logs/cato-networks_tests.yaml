@@ -791,175 +791,110 @@ tests:
     timestamp: 1763531560065
  -
   sample: |-
-    {
-      "ISP_name" : "Example ISP Ltd.",
+    {{
       "event_count" : 1,
-      "event_sub_type" : "Connected",
+      "user_name" : "John Doe",
+      "ISP_name" : "Example ISP Ltd.",
       "time_str" : "2025-11-18T15:10:30Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "a1b2c3d4e5f60001",
       "device_name" : "DESKTOP-ABC0123",
       "event_type" : "Connectivity",
-      "src_ip" : "10.10.10.10",
       "src_country_code" : "IN",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "action" : "Succeeded",
       "src_site_id" : 1000001,
+      "client_version" : "6.4.6.8830",
+      "pop_name" : "Mumbai",
+      "tunnel_protocol" : "DTLS",
       "internal_id" : "a1b2c3d4e5f60001",
+      "event_sub_type" : "Connected",
+      "os_version" : "11",
+      "link_type" : "Cato",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
       "event_id" : "a1b2c3d4e5f60001",
       "user_id" : 1000001,
       "src_country" : "India",
       "src_site_name" : "John Doe",
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
       "os_type" : "OS_WINDOWS",
-      "os_version" : "11",
-      "account_name" : "test-account",
-      "client_version" : "6.4.6.8830",
-      "pop_name" : "Mumbai",
-      "tunnel_protocol" : "DTLS",
-      "link_type" : "Cato",
       "time" : 1763478630001
     }
   result:
     custom:
-      ISP_name: "Example ISP Ltd."
-      account_id: 20000232
-      account_name: "test-account"
-      action: "Succeeded"
-      client_version: "6.4.6.8830"
-      device_name: "DESKTOP-ABC0123"
-      event_count: 1
-      event_id: "a1b2c3d4e5f60001"
       event_status: "info"
-      event_sub_type: "Connected"
-      evt:
-        name: "Connectivity"
-      internalId: "a1b2c3d4e5f60001"
-      internal_id: "a1b2c3d4e5f60001"
-      link_type: "Cato"
-      network:
-        client:
-          geoip: {}
-          ip: "10.10.10.10"
-      os_type: "OS_WINDOWS"
-      os_version: "11"
-      pop_name: "Mumbai"
       service: "events"
-      src_country: "India"
-      src_country_code: "IN"
-      src_is_site_or_vpn: "SDP User"
-      src_site_id: 1000001
-      src_site_name: "John Doe"
-      time: 1763478630001
-      time_str: "2025-11-18T15:10:30Z"
-      tunnel_protocol: "DTLS"
-      usr:
-        email: "test@example.com"
-        id: 1000001
-        name: "John Doe"
-      user_name: John Doe
-      src_ip: 10.10.10.10
-      event_type: Connectivity
       ocsf:
-        severity: Informational
-        activity_name: Logon
         metadata:
-          uid: a1b2c3d4e5f60001
           product:
             name: Cato Networks SASE Platform
             vendor_name: Cato Networks
-          event_code: Connectivity
-          version: 1.5.0
-        category_uid: 3
-        category_name: Identity & Access Management
-        src_endpoint:
-          hostname: DESKTOP-ABC0123
-          ip: 10.10.10.10
-        actor:
-          user:
-            email_addr: test@example.com
-            name: John Doe
-        status_id: 1
-        class_uid: 3002
-        activity_id: 1
-        severity_id: 1
-        class_name: Authentication
-        status: Success
-        time: 1763478630001
-        user:
-          uid: '1000001'
-          email_addr: test@example.com
-          name: John Doe
-        service:
-          name: Cato VPN
-      vpn_user_email: test@example.com
-      user_id: 1000001
     message: |-
-      {
-        "ISP_name" : "Example ISP Ltd.",
+      {{
         "event_count" : 1,
-        "event_sub_type" : "Connected",
+        "user_name" : "John Doe",
+        "ISP_name" : "Example ISP Ltd.",
         "time_str" : "2025-11-18T15:10:30Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "a1b2c3d4e5f60001",
         "device_name" : "DESKTOP-ABC0123",
         "event_type" : "Connectivity",
-        "src_ip" : "10.10.10.10",
         "src_country_code" : "IN",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "action" : "Succeeded",
         "src_site_id" : 1000001,
+        "client_version" : "6.4.6.8830",
+        "pop_name" : "Mumbai",
+        "tunnel_protocol" : "DTLS",
         "internal_id" : "a1b2c3d4e5f60001",
+        "event_sub_type" : "Connected",
+        "os_version" : "11",
+        "link_type" : "Cato",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
         "event_id" : "a1b2c3d4e5f60001",
         "user_id" : 1000001,
         "src_country" : "India",
         "src_site_name" : "John Doe",
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
         "os_type" : "OS_WINDOWS",
-        "os_version" : "11",
-        "account_name" : "test-account",
-        "client_version" : "6.4.6.8830",
-        "pop_name" : "Mumbai",
-        "tunnel_protocol" : "DTLS",
-        "link_type" : "Cato",
         "time" : 1763478630001
       }
     service: "events"
     status: "info"
     tags:
       - "source:LOGS_SOURCE"
-    timestamp: 1763478630001
+    timestamp: 1
  -
   sample: |-
     {
-      "ISP_name" : "Example Telecom Oy",
       "event_count" : 1,
-      "event_sub_type" : "Disconnected",
+      "user_name" : "John Doe",
+      "ISP_name" : "Example Telecom Oy",
       "time_str" : "2025-11-19T10:15:39Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "b2c3d4e5f6a70002",
       "device_name" : "Johns-MacBook-Pro",
       "event_type" : "Connectivity",
-      "src_ip" : "10.10.10.10",
       "src_country_code" : "FI",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "src_site_id" : 1000002,
+      "client_version" : "5.13.0.10503",
+      "pop_name" : "Helsinki",
+      "tunnel_protocol" : "DTLS",
       "internal_id" : "b2c3d4e5f6a70002",
+      "event_sub_type" : "Disconnected",
+      "os_version" : "15.7.3",
+      "link_type" : "Cato",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
       "event_id" : "b2c3d4e5f6a70002",
       "user_id" : 1000002,
       "src_country" : "Finland",
       "src_site_name" : "John Doe",
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
       "os_type" : "OS_MAC",
-      "os_version" : "15.7.3",
-      "account_name" : "test-account",
-      "client_version" : "5.13.0.10503",
-      "pop_name" : "Helsinki",
-      "tunnel_protocol" : "DTLS",
-      "link_type" : "Cato",
       "time" : 1763547339002
     }
   result:
@@ -1037,32 +972,32 @@ tests:
       user_id: 1000002
     message: |-
       {
-        "ISP_name" : "Example Telecom Oy",
         "event_count" : 1,
-        "event_sub_type" : "Disconnected",
+        "user_name" : "John Doe",
+        "ISP_name" : "Example Telecom Oy",
         "time_str" : "2025-11-19T10:15:39Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "b2c3d4e5f6a70002",
         "device_name" : "Johns-MacBook-Pro",
         "event_type" : "Connectivity",
-        "src_ip" : "10.10.10.10",
         "src_country_code" : "FI",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "src_site_id" : 1000002,
+        "client_version" : "5.13.0.10503",
+        "pop_name" : "Helsinki",
+        "tunnel_protocol" : "DTLS",
         "internal_id" : "b2c3d4e5f6a70002",
+        "event_sub_type" : "Disconnected",
+        "os_version" : "15.7.3",
+        "link_type" : "Cato",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
         "event_id" : "b2c3d4e5f6a70002",
         "user_id" : 1000002,
         "src_country" : "Finland",
         "src_site_name" : "John Doe",
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
         "os_type" : "OS_MAC",
-        "os_version" : "15.7.3",
-        "account_name" : "test-account",
-        "client_version" : "5.13.0.10503",
-        "pop_name" : "Helsinki",
-        "tunnel_protocol" : "DTLS",
-        "link_type" : "Cato",
         "time" : 1763547339002
       }
     service: "events"
@@ -1073,19 +1008,25 @@ tests:
  -
   sample: |-
     {
-      "ISP_name" : "Example Telecom Oy",
       "event_count" : 1,
-      "event_sub_type" : "Client Connectivity Policy",
+      "user_name" : "John Doe",
+      "ISP_name" : "Example Telecom Oy",
       "time_str" : "2025-11-19T10:12:48Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "c3d4e5f6a7b80003",
       "device_name" : "Johns-MacBook-Pro",
       "event_type" : "Connectivity",
-      "src_ip" : "10.10.10.10",
       "src_country_code" : "FI",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "action" : "Allow",
       "src_site_id" : 1000002,
+      "client_version" : "5.13.0.10503",
+      "pop_name" : "Helsinki",
       "internal_id" : "c3d4e5f6a7b80003",
       "rule_name" : "authenticated-unmanaged-device",
+      "event_sub_type" : "Client Connectivity Policy",
+      "os_version" : "15.7.3",
       "rule_id" : "7648",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
@@ -1093,13 +1034,7 @@ tests:
       "user_id" : 1000002,
       "src_country" : "Finland",
       "src_site_name" : "John Doe",
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
       "os_type" : "OS_MAC",
-      "os_version" : "15.7.3",
-      "account_name" : "test-account",
-      "client_version" : "5.13.0.10503",
-      "pop_name" : "Helsinki",
       "event_message" : "OS_MAC, OS version (), oesis 4.3.5002.0, no relevant software identified. Private and Internet access granted by policy rule authenticated-unmanaged-device",
       "time" : 1763547168003
     }
@@ -1185,19 +1120,25 @@ tests:
       user_id: 1000002
     message: |-
       {
-        "ISP_name" : "Example Telecom Oy",
         "event_count" : 1,
-        "event_sub_type" : "Client Connectivity Policy",
+        "user_name" : "John Doe",
+        "ISP_name" : "Example Telecom Oy",
         "time_str" : "2025-11-19T10:12:48Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "c3d4e5f6a7b80003",
         "device_name" : "Johns-MacBook-Pro",
         "event_type" : "Connectivity",
-        "src_ip" : "10.10.10.10",
         "src_country_code" : "FI",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "action" : "Allow",
         "src_site_id" : 1000002,
+        "client_version" : "5.13.0.10503",
+        "pop_name" : "Helsinki",
         "internal_id" : "c3d4e5f6a7b80003",
         "rule_name" : "authenticated-unmanaged-device",
+        "event_sub_type" : "Client Connectivity Policy",
+        "os_version" : "15.7.3",
         "rule_id" : "7648",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
@@ -1205,13 +1146,7 @@ tests:
         "user_id" : 1000002,
         "src_country" : "Finland",
         "src_site_name" : "John Doe",
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
         "os_type" : "OS_MAC",
-        "os_version" : "15.7.3",
-        "account_name" : "test-account",
-        "client_version" : "5.13.0.10503",
-        "pop_name" : "Helsinki",
         "event_message" : "OS_MAC, OS version (), oesis 4.3.5002.0, no relevant software identified. Private and Internet access granted by policy rule authenticated-unmanaged-device",
         "time" : 1763547168003
       }
@@ -1223,39 +1158,39 @@ tests:
  -
   sample: |-
     {
+      "dns_record_type" : "A",
       "event_count" : 1,
-      "event_sub_type" : "WAN Firewall",
+      "user_name" : "John Doe",
+      "dns_query" : "host.example.com",
       "time_str" : "2025-11-18T12:18:51Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "d4e5f6a7b8c90004",
       "device_name" : "DESKTOP-DNS0123",
+      "domain_name" : "dns1.example.com",
       "event_type" : "Security",
-      "src_ip" : "10.10.10.10",
+      "application_name" : "DNS",
+      "src_country_code" : "FI",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "action" : "Block",
-      "src_port" : 50323,
-      "dest_ip" : "10.10.10.11",
+      "src_site_id" : 1000003,
+      "pop_name" : "Helsinki",
       "dest_port" : 53,
       "internal_id" : "d4e5f6a7b8c90004",
-      "application_name" : "DNS",
-      "domain_name" : "dns1.example.com",
       "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "dns_answer" : "1.2.3.4",
+      "ip_protocol" : "UDP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 50323,
       "rule_id" : "253668",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
       "event_id" : "d4e5f6a7b8c90004",
       "user_id" : 1000003,
       "src_site_name" : "John Doe",
-      "src_site_id" : 1000003,
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
-      "pop_name" : "Helsinki",
       "src_country" : "Finland",
-      "src_country_code" : "FI",
-      "ip_protocol" : "UDP",
-      "traffic_direction" : "WANBOUND",
-      "dns_query" : "host.example.com",
-      "dns_record_type" : "A",
-      "dns_answer": "1.2.3.4",
-      "account_name" : "test-account",
+      "dest_ip" : "10.10.10.11",
       "time" : 1763473131004
     }
   result:
@@ -1364,39 +1299,39 @@ tests:
       dns_answer: 1.2.3.4
     message: |-
       {
+        "dns_record_type" : "A",
         "event_count" : 1,
-        "event_sub_type" : "WAN Firewall",
+        "user_name" : "John Doe",
+        "dns_query" : "host.example.com",
         "time_str" : "2025-11-18T12:18:51Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "d4e5f6a7b8c90004",
         "device_name" : "DESKTOP-DNS0123",
+        "domain_name" : "dns1.example.com",
         "event_type" : "Security",
-        "src_ip" : "10.10.10.10",
+        "application_name" : "DNS",
+        "src_country_code" : "FI",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "action" : "Block",
-        "src_port" : 50323,
-        "dest_ip" : "10.10.10.11",
+        "src_site_id" : 1000003,
+        "pop_name" : "Helsinki",
         "dest_port" : 53,
         "internal_id" : "d4e5f6a7b8c90004",
-        "application_name" : "DNS",
-        "domain_name" : "dns1.example.com",
         "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "dns_answer" : "1.2.3.4",
+        "ip_protocol" : "UDP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 50323,
         "rule_id" : "253668",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
         "event_id" : "d4e5f6a7b8c90004",
         "user_id" : 1000003,
         "src_site_name" : "John Doe",
-        "src_site_id" : 1000003,
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
-        "pop_name" : "Helsinki",
         "src_country" : "Finland",
-        "src_country_code" : "FI",
-        "ip_protocol" : "UDP",
-        "traffic_direction" : "WANBOUND",
-        "dns_query" : "host.example.com",
-        "dns_record_type" : "A",
-        "dns_answer": "1.2.3.4",
-        "account_name" : "test-account",
+        "dest_ip" : "10.10.10.11",
         "time" : 1763473131004
       }
     service: "events"
@@ -1408,35 +1343,35 @@ tests:
   sample: |-
     {
       "event_count" : 1,
-      "event_sub_type" : "WAN Firewall",
+      "user_name" : "John Doe",
       "time_str" : "2025-11-18T19:23:50Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "e5f6a7b8c9d00005",
       "device_name" : "LAPTOP-HTTP0123",
+      "domain_name" : "app.example.com",
       "event_type" : "Security",
-      "src_ip" : "10.10.10.10",
+      "application_name" : "HTTP(S)",
+      "src_country_code" : "EE",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "action" : "Monitor",
-      "src_port" : 49914,
-      "dest_ip" : "10.10.10.11",
+      "src_site_id" : 1000004,
+      "pop_name" : "Helsinki",
       "dest_port" : 443,
       "internal_id" : "e5f6a7b8c9d00005",
-      "application_name" : "HTTP(S)",
-      "domain_name" : "app.example.com",
       "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "TCP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 49914,
       "rule_id" : "6422041642034481894",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
       "event_id" : "e5f6a7b8c9d00005",
       "user_id" : 1000004,
       "src_site_name" : "John Doe",
-      "src_site_id" : 1000004,
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
-      "pop_name" : "Helsinki",
       "src_country" : "Estonia",
-      "src_country_code" : "EE",
-      "ip_protocol" : "TCP",
-      "traffic_direction" : "WANBOUND",
-      "account_name" : "test-account",
+      "dest_ip" : "10.10.10.11",
       "time" : 1763498630005
     }
   result:
@@ -1536,35 +1471,35 @@ tests:
     message: |-
       {
         "event_count" : 1,
-        "event_sub_type" : "WAN Firewall",
+        "user_name" : "John Doe",
         "time_str" : "2025-11-18T19:23:50Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "e5f6a7b8c9d00005",
         "device_name" : "LAPTOP-HTTP0123",
+        "domain_name" : "app.example.com",
         "event_type" : "Security",
-        "src_ip" : "10.10.10.10",
+        "application_name" : "HTTP(S)",
+        "src_country_code" : "EE",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "action" : "Monitor",
-        "src_port" : 49914,
-        "dest_ip" : "10.10.10.11",
+        "src_site_id" : 1000004,
+        "pop_name" : "Helsinki",
         "dest_port" : 443,
         "internal_id" : "e5f6a7b8c9d00005",
-        "application_name" : "HTTP(S)",
-        "domain_name" : "app.example.com",
         "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "TCP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 49914,
         "rule_id" : "6422041642034481894",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
         "event_id" : "e5f6a7b8c9d00005",
         "user_id" : 1000004,
         "src_site_name" : "John Doe",
-        "src_site_id" : 1000004,
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
-        "pop_name" : "Helsinki",
         "src_country" : "Estonia",
-        "src_country_code" : "EE",
-        "ip_protocol" : "TCP",
-        "traffic_direction" : "WANBOUND",
-        "account_name" : "test-account",
+        "dest_ip" : "10.10.10.11",
         "time" : 1763498630005
       }
     service: "events"
@@ -1576,35 +1511,35 @@ tests:
   sample: |-
     {
       "event_count" : 1,
-      "event_sub_type" : "WAN Firewall",
+      "user_name" : "John Doe",
       "time_str" : "2025-11-18T13:39:30Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "f6a7b8c9d0e10006",
       "device_name" : "DESKTOP-SSH0123",
+      "domain_name" : "ssh.example.com",
       "event_type" : "Security",
-      "src_ip" : "10.10.10.10",
+      "application_name" : "SSH-V2",
+      "src_country_code" : "SE",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "action" : "Monitor",
-      "src_port" : 47938,
-      "dest_ip" : "10.10.10.11",
+      "src_site_id" : 1000005,
+      "pop_name" : "Stockholm",
       "dest_port" : 22,
       "internal_id" : "f6a7b8c9d0e10006",
-      "application_name" : "SSH-V2",
-      "domain_name" : "ssh.example.com",
       "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "TCP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 47938,
       "rule_id" : "1234810669101761930",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
       "event_id" : "f6a7b8c9d0e10006",
       "user_id" : 1000005,
       "src_site_name" : "John Doe",
-      "src_site_id" : 1000005,
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
-      "pop_name" : "Stockholm",
       "src_country" : "Sweden",
-      "src_country_code" : "SE",
-      "ip_protocol" : "TCP",
-      "traffic_direction" : "WANBOUND",
-      "account_name" : "test-account",
+      "dest_ip" : "10.10.10.11",
       "time" : 1763477970006
     }
   result:
@@ -1706,35 +1641,35 @@ tests:
     message: |-
       {
         "event_count" : 1,
-        "event_sub_type" : "WAN Firewall",
+        "user_name" : "John Doe",
         "time_str" : "2025-11-18T13:39:30Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "f6a7b8c9d0e10006",
         "device_name" : "DESKTOP-SSH0123",
+        "domain_name" : "ssh.example.com",
         "event_type" : "Security",
-        "src_ip" : "10.10.10.10",
+        "application_name" : "SSH-V2",
+        "src_country_code" : "SE",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "action" : "Monitor",
-        "src_port" : 47938,
-        "dest_ip" : "10.10.10.11",
+        "src_site_id" : 1000005,
+        "pop_name" : "Stockholm",
         "dest_port" : 22,
         "internal_id" : "f6a7b8c9d0e10006",
-        "application_name" : "SSH-V2",
-        "domain_name" : "ssh.example.com",
         "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "TCP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 47938,
         "rule_id" : "1234810669101761930",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
         "event_id" : "f6a7b8c9d0e10006",
         "user_id" : 1000005,
         "src_site_name" : "John Doe",
-        "src_site_id" : 1000005,
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
-        "pop_name" : "Stockholm",
         "src_country" : "Sweden",
-        "src_country_code" : "SE",
-        "ip_protocol" : "TCP",
-        "traffic_direction" : "WANBOUND",
-        "account_name" : "test-account",
+        "dest_ip" : "10.10.10.11",
         "time" : 1763477970006
       }
     service: "events"
@@ -1746,34 +1681,34 @@ tests:
   sample: |-
     {
       "event_count" : 1,
-      "event_sub_type" : "WAN Firewall",
+      "user_name" : "John Doe",
       "time_str" : "2025-11-18T15:50:24Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "a7b8c9d0e1f20007",
       "device_name" : "DESKTOP-RDP0123",
       "event_type" : "Security",
-      "src_ip" : "10.10.10.10",
+      "application_name" : "RDP",
+      "src_country_code" : "IN",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "action" : "Monitor",
-      "src_port" : 51234,
-      "dest_ip" : "10.10.10.11",
+      "src_site_id" : 1000006,
+      "pop_name" : "Mumbai",
       "dest_port" : 3389,
       "internal_id" : "a7b8c9d0e1f20007",
-      "application_name" : "RDP",
       "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "UDP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 51234,
       "rule_id" : "4600855063782837704",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
       "event_id" : "a7b8c9d0e1f20007",
       "user_id" : 1000006,
       "src_site_name" : "John Doe",
-      "src_site_id" : 1000006,
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
-      "pop_name" : "Mumbai",
       "src_country" : "India",
-      "src_country_code" : "IN",
-      "ip_protocol" : "UDP",
-      "traffic_direction" : "WANBOUND",
-      "account_name" : "test-account",
+      "dest_ip" : "10.10.10.11",
       "time" : 1763485824007
     }
   result:
@@ -1870,34 +1805,34 @@ tests:
     message: |-
       {
         "event_count" : 1,
-        "event_sub_type" : "WAN Firewall",
+        "user_name" : "John Doe",
         "time_str" : "2025-11-18T15:50:24Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "a7b8c9d0e1f20007",
         "device_name" : "DESKTOP-RDP0123",
         "event_type" : "Security",
-        "src_ip" : "10.10.10.10",
+        "application_name" : "RDP",
+        "src_country_code" : "IN",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "action" : "Monitor",
-        "src_port" : 51234,
-        "dest_ip" : "10.10.10.11",
+        "src_site_id" : 1000006,
+        "pop_name" : "Mumbai",
         "dest_port" : 3389,
         "internal_id" : "a7b8c9d0e1f20007",
-        "application_name" : "RDP",
         "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "UDP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 51234,
         "rule_id" : "4600855063782837704",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
         "event_id" : "a7b8c9d0e1f20007",
         "user_id" : 1000006,
         "src_site_name" : "John Doe",
-        "src_site_id" : 1000006,
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
-        "pop_name" : "Mumbai",
         "src_country" : "India",
-        "src_country_code" : "IN",
-        "ip_protocol" : "UDP",
-        "traffic_direction" : "WANBOUND",
-        "account_name" : "test-account",
+        "dest_ip" : "10.10.10.11",
         "time" : 1763485824007
       }
     service: "events"
@@ -1909,34 +1844,34 @@ tests:
   sample: |-
     {
       "event_count" : 1,
-      "event_sub_type" : "WAN Firewall",
+      "user_name" : "John Doe",
       "time_str" : "2025-11-19T16:03:59Z",
+      "src_ip" : "10.10.10.10",
       "internalId" : "b8c9d0e1f2a30008",
       "device_name" : "DESKTOP-SMB0123",
       "event_type" : "Security",
-      "src_ip" : "10.10.10.10",
+      "application_name" : "Netbios General (Parent of all Netbios apps)",
+      "src_country_code" : "IN",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
       "action" : "Monitor",
-      "src_port" : 49152,
-      "dest_ip" : "10.10.10.11",
+      "src_site_id" : 1000007,
+      "pop_name" : "New Delhi",
       "dest_port" : 445,
       "internal_id" : "b8c9d0e1f2a30008",
-      "application_name" : "Netbios General (Parent of all Netbios apps)",
       "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "UDP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 49152,
       "rule_id" : "2963872298229056376",
       "src_is_site_or_vpn" : "SDP User",
       "account_id" : 20000232,
       "event_id" : "b8c9d0e1f2a30008",
       "user_id" : 1000007,
       "src_site_name" : "John Doe",
-      "src_site_id" : 1000007,
-      "user_name" : "John Doe",
-      "vpn_user_email" : "test@example.com",
-      "pop_name" : "New Delhi",
       "src_country" : "India",
-      "src_country_code" : "IN",
-      "ip_protocol" : "UDP",
-      "traffic_direction" : "WANBOUND",
-      "account_name" : "test-account",
+      "dest_ip" : "10.10.10.11",
       "time" : 1763568239008
     }
   result:
@@ -2033,34 +1968,34 @@ tests:
     message: |-
       {
         "event_count" : 1,
-        "event_sub_type" : "WAN Firewall",
+        "user_name" : "John Doe",
         "time_str" : "2025-11-19T16:03:59Z",
+        "src_ip" : "10.10.10.10",
         "internalId" : "b8c9d0e1f2a30008",
         "device_name" : "DESKTOP-SMB0123",
         "event_type" : "Security",
-        "src_ip" : "10.10.10.10",
+        "application_name" : "Netbios General (Parent of all Netbios apps)",
+        "src_country_code" : "IN",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
         "action" : "Monitor",
-        "src_port" : 49152,
-        "dest_ip" : "10.10.10.11",
+        "src_site_id" : 1000007,
+        "pop_name" : "New Delhi",
         "dest_port" : 445,
         "internal_id" : "b8c9d0e1f2a30008",
-        "application_name" : "Netbios General (Parent of all Netbios apps)",
         "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "UDP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 49152,
         "rule_id" : "2963872298229056376",
         "src_is_site_or_vpn" : "SDP User",
         "account_id" : 20000232,
         "event_id" : "b8c9d0e1f2a30008",
         "user_id" : 1000007,
         "src_site_name" : "John Doe",
-        "src_site_id" : 1000007,
-        "user_name" : "John Doe",
-        "vpn_user_email" : "test@example.com",
-        "pop_name" : "New Delhi",
         "src_country" : "India",
-        "src_country_code" : "IN",
-        "ip_protocol" : "UDP",
-        "traffic_direction" : "WANBOUND",
-        "account_name" : "test-account",
+        "dest_ip" : "10.10.10.11",
         "time" : 1763568239008
       }
     service: "events"
