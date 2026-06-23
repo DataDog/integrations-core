@@ -30,8 +30,7 @@ def _discovery_check_name(cls: type[AgentCheck]) -> str:
 
 
 def generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> Iterable[dict[str, Any]]:
-    package = _pkg(cls)
-    if package is None:
+    if (package := _pkg(cls)) is None:
         return ()
 
     module_name = f'datadog_checks.{package}.config_models.discovery'
