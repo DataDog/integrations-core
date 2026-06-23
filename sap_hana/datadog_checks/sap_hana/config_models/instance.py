@@ -108,6 +108,14 @@ class DataObservability(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -128,6 +136,7 @@ class InstanceConfig(BaseModel):
     connection_properties: Optional[MappingProxyType[str, Any]] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     data_observability: Optional[DataObservability] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
@@ -137,6 +146,7 @@ class InstanceConfig(BaseModel):
     password: str
     persist_db_connections: Optional[bool] = None
     port: Optional[int] = None
+    reported_hostname: Optional[str] = None
     schema_: Optional[str] = Field(None, alias='schema')
     server: str
     service: Optional[str] = None
