@@ -647,6 +647,8 @@ tests:
           uid: '3145367409754000885'
           name: Block QUIC services
         time: 1763473282069
+        action_id: 2
+        action: Denied
       vpn_user_email: test@example.com
       dest_port: 443
       user_id: 0
@@ -1528,6 +1530,8 @@ tests:
           uid: '6422041642034481894'
           name: Default WAN Firewall Rule
         time: 1763498630005
+        action_id: 3
+        action: Observed
       vpn_user_email: test@example.com
       dest_port: 443
       src_port: 49914

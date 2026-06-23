@@ -119,198 +119,312 @@ facets:
     path: usr.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
+    name: Action
+    path: ocsf.action
+    source: log
+  - groups:
+      - OCSF
+    name: Action ID
+    path: ocsf.action_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
     name: Email Address
     path: ocsf.actor.user.email_addr
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Name
     path: ocsf.actor.user.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Unique ID
     path: ocsf.actor.user.uid
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Application Name
     path: ocsf.app_name
     source: log
   - groups:
-    - OCSF
+      - OCSF
+    name: Auth Protocol
+    path: ocsf.auth_protocol
+    source: log
+  - groups:
+      - OCSF
+    name: Auth Protocol ID
+    path: ocsf.auth_protocol_id
+    source: log
+  - groups:
+      - OCSF
+    name: Category Name
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category UID
+    path: ocsf.category_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Class Name
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class UID
+    path: ocsf.class_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Confidence
+    path: ocsf.confidence
+    source: log
+  - groups:
+      - OCSF
+    name: Confidence ID
+    path: ocsf.confidence_id
+    source: log
+  - groups:
+      - OCSF
+    name: Direction
+    path: ocsf.connection_info.direction
+    source: log
+  - groups:
+      - OCSF
+    name: Direction ID
+    path: ocsf.connection_info.direction_id
+    source: log
+  - groups:
+      - OCSF
     name: Protocol Name
     path: ocsf.connection_info.protocol_name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Device Description
     path: ocsf.device.desc
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Device Hostname
     path: ocsf.device.hostname
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Device IP
     path: ocsf.device.ip
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Device Name
     path: ocsf.device.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Destination Endpoint Domain
     path: ocsf.dst_endpoint.domain
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
-  - facetType: range
-    groups:
-    - OCSF
+  - groups:
+      - OCSF
     name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
-    type: integer
   - groups:
-    - OCSF
+      - OCSF
     name: Finding Info Analytic Name
     path: ocsf.finding_info.analytic.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Finding Info Analytic UID
     path: ocsf.finding_info.analytic.uid
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Finding Information Description
     path: ocsf.finding_info.desc
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Finding Information Product Name
     path: ocsf.finding_info.product.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Finding Info Title
     path: ocsf.finding_info.title
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Finding Info Unique ID
     path: ocsf.finding_info.uid
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Message
     path: ocsf.message
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Event Code
     path: ocsf.metadata.event_code
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Product Name
     path: ocsf.metadata.product.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Vendor Name
     path: ocsf.metadata.product.vendor_name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Metadata Event UID
     path: ocsf.metadata.uid
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Policy Name
     path: ocsf.policy.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Policy Unique ID
     path: ocsf.policy.uid
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: DNS Query Hostname
     path: ocsf.query.hostname
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Query Resource Record Type
     path: ocsf.query.type
     source: log
   - groups:
-    - OCSF
+      - OCSF
+    name: Rcode
+    path: ocsf.rcode
+    source: log
+  - groups:
+      - OCSF
+    name: Rcode ID
+    path: ocsf.rcode_id
+    source: log
+  - groups:
+      - OCSF
     name: Service Name
     path: ocsf.service.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+  - groups:
+      - OCSF
     name: Source Endpoint Hostname
     path: ocsf.src_endpoint.hostname
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Source Endpoint Owner Email Address
     path: ocsf.src_endpoint.owner.email_addr
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Source Endpoint Owner Name
     path: ocsf.src_endpoint.owner.name
     source: log
-  - facetType: range
-    groups:
-    - OCSF
+  - groups:
+      - OCSF
     name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
-    type: integer
   - groups:
-    - OCSF
+      - OCSF
+    name: State
+    path: ocsf.state
+    source: log
+  - groups:
+      - OCSF
+    name: State ID
+    path: ocsf.state_id
+    source: log
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
     name: Status Detail
     path: ocsf.status_detail
     source: log
-  - facetType: range
-    groups:
-    - OCSF
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+  - groups:
+      - OCSF
     name: Event Time
     path: ocsf.time
     source: log
-    type: integer
   - groups:
-    - OCSF
+      - OCSF
+    name: Type Name
+    path: ocsf.type_name
+    source: log
+  - groups:
+      - OCSF
+    name: Type UID
+    path: ocsf.type_uid
+    source: log
+  - groups:
+      - OCSF
     name: Target Email Address
     path: ocsf.user.email_addr
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Target Name
     path: ocsf.user.name
     source: log
   - groups:
-    - OCSF
+      - OCSF
     name: Target Unique ID
     path: ocsf.user.uid
     source: log
@@ -500,13 +614,13 @@ pipeline:
         query: "*"
       processors:
         - type: string-builder-processor
-          name: Add ocsf.metadata.product.name
+          name: Add product name
           enabled: true
           template: "Cato Networks SASE Platform"
           target: ocsf.metadata.product.name
           replaceMissing: false
         - type: string-builder-processor
-          name: Add ocsf.metadata.product.vendor_name
+          name: Add product vendor
           enabled: true
           template: "Cato Networks"
           target: ocsf.metadata.product.vendor_name
@@ -549,17 +663,27 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
+                    query: '@trigger:"Story Created"'
+                  name: Create
+                  id: 1
+                - filter:
                     query: "@status:Closed"
                   name: Close
                   id: 3
                 - filter:
                     query: "*"
-                  name: Create
-                  id: 1
+                  name: Other
+                  id: 99
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
               fallback:
+                values:
+                  ocsf.activity_name: Other
+                  ocsf.activity_id: "99"
+                sources:
+                  ocsf.activity_name:
+                    - trigger
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
@@ -2371,6 +2495,35 @@ pipeline:
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@action:Allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@action:(Block OR Drop)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@action:(Monitor OR Notify)"
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: "@action:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+              fallback:
+                values:
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
+                sources:
+                  ocsf.action:
+                    - action
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
