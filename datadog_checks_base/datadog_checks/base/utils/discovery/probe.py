@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Any
 
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
-from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.format import json
 
 if TYPE_CHECKING:
@@ -54,17 +53,9 @@ def generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> I
 
 
 def _parse_service_json(service_json: str) -> Service:
-    from datadog_checks.base.utils.discovery import Port, Service
+    from datadog_checks.base.utils.discovery import Service
 
-    raw_service = json.decode(service_json)
-    return Service(
-        id=raw_service['id'],
-        host=raw_service['host'],
-        ports=tuple(
-            Port(number=int(port['number']), name=to_native_string(port.get('name') or ''))
-            for port in raw_service.get('ports', ())
-        ),
-    )
+    return Service.model_validate(json.decode(service_json))
 
 
 @dataclasses.dataclass

@@ -2,27 +2,30 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections.abc import Iterable, Iterator
-from dataclasses import dataclass, field
+
+from pydantic import BaseModel, ConfigDict
 
 from .cache import Cache
 from .filter import Filter
 
 
-@dataclass(frozen=True)
-class Port:
+class Port(BaseModel):
     """An Autodiscovery-exposed port on a service."""
+
+    model_config = ConfigDict(frozen=True)
 
     number: int
     name: str = ""
 
 
-@dataclass(frozen=True)
-class Service:
+class Service(BaseModel):
     """An Autodiscovery-discovered service instance."""
+
+    model_config = ConfigDict(frozen=True)
 
     id: str
     host: str
-    ports: tuple[Port, ...] = field(default_factory=tuple)
+    ports: tuple[Port, ...] = ()
 
 
 class Discovery:
