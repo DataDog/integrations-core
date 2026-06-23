@@ -8,6 +8,25 @@ $PSNativeCommandUseErrorActionPreference = $true
 $kafka_version = Get-Content 'C:\mnt\requirements.in' | perl -nE 'say/^\D*(\d+\.\d+\.\d+)\D*$/ if /confluent-kafka==/'
 Write-Host "Will build librdkafka $kafka_version"
 
+# If the resolve-build-deps workflow mounted a populated native cache, restore
+# the librdkafka artifacts and skip the vcpkg + msbuild compile. The cache key
+# on the workflow side already accounts for everything that can change the
+# binary (confluent-kafka pin, Dockerfile env values, this script), so a
+# present cache is by definition compatible with this build.
+$native_cache = "C:\native_cache"
+$cache_marker = "$native_cache\bin\librdkafka.dll"
+if (Test-Path -Path $cache_marker) {
+    Write-Host "Restoring librdkafka artifacts from $native_cache"
+    Copy-Item -Path "$native_cache\bin\*" -Destination "C:\bin" -Recurse -Force
+    Copy-Item -Path "$native_cache\lib\*" -Destination "C:\lib" -Recurse -Force
+    if (-Not (Test-Path -Path "C:\include\librdkafka")) {
+        New-Item -Path "C:\include\librdkafka" -ItemType Directory | Out-Null
+    }
+    Copy-Item -Path "$native_cache\include\librdkafka\*" -Destination "C:\include\librdkafka" -Recurse -Force
+    Write-Host "Restored librdkafka from cache; skipping vcpkg + msbuild compile."
+    exit 0
+}
+
 # Download and unpack the source
 Get-RemoteFile `
   -Uri "https://github.com/confluentinc/librdkafka/archive/refs/tags/v${kafka_version}.tar.gz" `
@@ -65,4 +84,16 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
+
+# Populate the native cache mount (if mounted) so actions/cache can persist the
+# artifacts for subsequent runs that hit on the same inputs hash.
+if (Test-Path -Path $native_cache) {
+    Write-Host "Populating native cache at $native_cache"
+    New-Item -Path "$native_cache\bin" -ItemType Directory -Force | Out-Null
+    New-Item -Path "$native_cache\lib" -ItemType Directory -Force | Out-Null
+    New-Item -Path "$native_cache\include\librdkafka" -ItemType Directory -Force | Out-Null
+    Copy-Item -Path "$bindir\*" -Destination "$native_cache\bin" -Recurse -Force
+    Copy-Item -Path "$libdir\*" -Destination "$native_cache\lib" -Recurse -Force
+    Copy-Item -Path "$includedir\librdkafka\*" -Destination "$native_cache\include\librdkafka" -Recurse -Force
+}
 

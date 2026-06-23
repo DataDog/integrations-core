@@ -177,6 +177,9 @@ def build_image():
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--constraints',
                         help='Path to a pip constraints file for pinning transitive dependency versions.')
+    parser.add_argument('--native-cache', dest='native_cache',
+                        help='Host directory mounted into the build container to cache native dependencies '
+                             '(currently only used by the Windows image to persist librdkafka build outputs).')
     args = parser.parse_args()
 
     image: str = args.image
@@ -246,13 +249,20 @@ def build_image():
             if args.digest:
                 script_args.append('--use-built-index')
 
-            check_process([
+            run_command = [
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
                 # Anything created within directories mounted to the container cannot be removed by the host
                 '-e', 'PYTHONDONTWRITEBYTECODE=1',
-                image_name, *script_args,
-            ])
+            ]
+
+            if args.native_cache and windows_image:
+                native_cache_dir = Path(args.native_cache).absolute()
+                native_cache_dir.mkdir(parents=True, exist_ok=True)
+                run_command.extend(['-v', f'{native_cache_dir}:C:\\native_cache'])
+
+            run_command.extend([image_name, *script_args])
+            check_process(run_command)
 
             output_dir = Path(args.output_dir)
             output_dir.parent.mkdir(parents=True, exist_ok=True)
