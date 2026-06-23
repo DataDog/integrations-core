@@ -445,6 +445,10 @@ integration/delinea_secret_server:
 - changed-files:
   - any-glob-to-any-file:
     - delinea_secret_server/**/*
+integration/dell_powerflex:
+- changed-files:
+  - any-glob-to-any-file:
+    - dell_powerflex/**/*
 integration/directory:
 - changed-files:
   - any-glob-to-any-file:
@@ -885,6 +889,10 @@ integration/kubevirt_handler:
 - changed-files:
   - any-glob-to-any-file:
     - kubevirt_handler/**/*
+integration/kueue:
+- changed-files:
+  - any-glob-to-any-file:
+    - kueue/**/*
 integration/kuma:
 - changed-files:
   - any-glob-to-any-file:
@@ -1125,6 +1133,10 @@ integration/palo_alto_cortex_xdr:
 - changed-files:
   - any-glob-to-any-file:
     - palo_alto_cortex_xdr/**/*
+integration/palo_alto_networks_cortex_xsoar:
+- changed-files:
+  - any-glob-to-any-file:
+    - palo_alto_networks_cortex_xsoar/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:

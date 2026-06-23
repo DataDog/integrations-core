@@ -242,6 +242,7 @@ argocd.commit_server.process.virtual_memory.max_bytes,gauge,,byte,,The maximum a
 argocd.commit_server.userinfo.request.duration.seconds.bucket,count,,,,The userinfo requests duration histogram buckets,0,argocd,commit_server userinfo request duration seconds bucket,,
 argocd.commit_server.userinfo.request.duration.seconds.count,count,,,,The count aggregation of the userinfo requests duration histogram,0,argocd,commit_server userinfo request duration seconds count,,
 argocd.commit_server.userinfo.request.duration.seconds.sum,count,,second,,The sum aggregation of the userinfo requests duration histogram,0,argocd,commit_server userinfo request duration seconds sum,,
+argocd.genresources.api.up,gauge,,,,Reachability of the ArgoCD REST API used by the generic resources collector. Emits 1 per resource_type tag on success and 0 on failure.,0,argocd,genresources api up,,
 argocd.notifications_controller.go.gc.duration.seconds.count,count,,second,,The summary count of garbage collection cycles in the API Server,0,argocd,notifications_controller go gc duration seconds count,,
 argocd.notifications_controller.go.gc.duration.seconds.quantile,gauge,,second,,A summary of the pause duration of garbage collection cycles in the API Server,0,argocd,notifications_controller go gc duration seconds,,
 argocd.notifications_controller.go.gc.duration.seconds.sum,count,,second,,The sum of the pause duration of garbage collection cycles in the API Server,0,argocd,notifications_controller go gc duration seconds sum,,

@@ -2,6 +2,56 @@
 
 <!-- towncrier release notes start -->
 
+## 17.0.1 / 2026-06-19
+
+***Fixed***:
+
+* Gate `ddev release branch create` and `update-build-agent-yaml.yml` on the matching `DataDog/datadog-agent` branch existing so neither writer can produce a release-branch pointer to a missing upstream branch. ([#23987](https://github.com/DataDog/integrations-core/pull/23987))
+* Skip code coverage gate validation for extras repos, which do not enforce a required per-integration coverage threshold. ([#24099](https://github.com/DataDog/integrations-core/pull/24099))
+
+## 17.0.0 / 2026-06-16
+
+***Changed***:
+
+* Migrated ``ddev validate ci`` from Codecov to Datadog Code Coverage. ([#23360](https://github.com/DataDog/integrations-core/pull/23360))
+* Require a changelog entry when an integration's `conf.yaml.example` is modified, and expose the expected path through the new `Integration.example_config` property. ([#23655](https://github.com/DataDog/integrations-core/pull/23655))
+* Refresh the `ddev create` UX: the command is now a click group with one subcommand per integration type (`check`, `check-only`, `jmx`, `logs`, `event`, `metrics-crawler`). Manifest-less is the new default; pass `--include-manifest` to keep generating a `manifest.json`. New per-subcommand options `--display-name`, `--metrics-prefix`, and `--platforms` populate `.ddev/config.toml` overrides. The `tile`, `snmp_tile`, and `marketplace` types are no longer exposed; `--non-interactive` is removed; `--skip-manifest` is accepted with a deprecation warning; `--type` is accepted as a deprecation shim that dispatches to the matching subcommand. ([#23859](https://github.com/DataDog/integrations-core/pull/23859))
+
+***Added***:
+
+* Rework event bus error handling around a single `on_error` router and a new `fail_fast` orchestrator policy. The `ddev validate all` command is updated to align with the new lifecycle (the orchestrator no longer aborts the process from inside `on_finalize`; the command checks `had_failures` and exits accordingly).
+
+  * Add `fail_fast` constructor option to `EventBusOrchestrator` (default `False`). When an `on_error` handler raises a non-Fatal exception, `fail_fast=True` stops the bus while `fail_fast=False` logs and continues.
+  * Add `EventBusOrchestrator.on_error(error)`: handles `on_initialize`, `on_message_received`, and `on_finalize` failures. Default re-raises so unmodified subclasses fall through to `fail_fast`.
+  * `BaseProcessor.on_error` signature changes from `on_error(message, error)` to `on_error(error)`. The message is now reachable as `error.message` on the wrapped exception (alongside `error.processor_name` and `error.original_exception`). Existing subclasses that override `on_error` must update their signature and replace `message` with `error.message` — code using the old signature will fail at runtime. The default implementation now re-raises so unmodified processors fall through to the new `fail_fast` policy.
+  * Add `HookExecutionError` hierarchy (`OrchestratorHookError`, `ProcessorHookError`) and `HookName` enum for identifying which hook failed.
+  * Add `SkipMessageError`: raise from `on_message_received` to skip dispatch for the current message and continue the loop.
+  * `on_initialize` and `on_finalize` failures now route through `on_error` instead of always propagating from `run()`. Under default `fail_fast=False` they log and continue; subclasses that need the old behavior should pass `fail_fast=True` or override `on_error` to escalate. `ValidationOrchestrator` opts into `fail_fast=True` so finalize failures still surface in the validation report. ([#23489](https://github.com/DataDog/integrations-core/pull/23489))
+* `ddev dep promote` now prints a link to the dependency-wheel-promotion workflow's recent runs page after dispatching, so users can jump straight to their queued run. ([#23563](https://github.com/DataDog/integrations-core/pull/23563))
+* Add `ddev release changelog show` command to print the section of a target's `CHANGELOG.md` for a given version. ([#23586](https://github.com/DataDog/integrations-core/pull/23586))
+* Add decibel-milliwatt as a new canonical unit ([#23601](https://github.com/DataDog/integrations-core/pull/23601))
+* Legacy migration: `validate jmx-metrics` is now implemented natively in ddev (was previously delegated to datadog_checks_dev). ([#23652](https://github.com/DataDog/integrations-core/pull/23652))
+* Add Application.annotate_error/annotate_warning/annotate_display_queue helpers that emit GitHub Actions workflow annotations on CI. ([#23654](https://github.com/DataDog/integrations-core/pull/23654))
+* Restructure `ddev.utils.github_async` into a package with lazy model imports, add `create_pull_request` and `add_labels_to_issue` endpoints, and add a `FakeAsyncGitHubClient` test helper with a `mock_response` API. ([#23685](https://github.com/DataDog/integrations-core/pull/23685))
+* Add `ddev release port-commit` command to backport a commit to a target branch. ([#23686](https://github.com/DataDog/integrations-core/pull/23686))
+* Accept a PR number, ``PR-<number>`` token, or GitHub PR URL as input to ``port-commit``, and fetch the target commit from origin when it is not in the local object database. ([#23703](https://github.com/DataDog/integrations-core/pull/23703))
+* Add --explicit-package-bases to default mypy_args ([#23742](https://github.com/DataDog/integrations-core/pull/23742))
+* Add a `validate qa-label` check that fails CI unless the pull request carries exactly one of the `qa/required` or `qa/skip-qa` labels. ([#23748](https://github.com/DataDog/integrations-core/pull/23748))
+* Skip integrations pinned in Agent release requirements but not actually shipped in a given Agent release, configurable under `[overrides.release.agent.unreleased-integrations]` in `.ddev/config.toml`. ([#23813](https://github.com/DataDog/integrations-core/pull/23813))
+* Print the exact workflow run URL when dispatching `ddev dep promote`, via a new `return_run_details` option on `GitHubManager.dispatch_workflow`. ([#23828](https://github.com/DataDog/integrations-core/pull/23828))
+* Add subcommand-based `ddev create` interface (`check`, `check-only`, `jmx`, `logs`, `event`, `metrics-crawler`) with `--display-name`, `--metrics-prefix`, `--platforms`, and `--include-manifest` options for manifest-less integrations. ([#23859](https://github.com/DataDog/integrations-core/pull/23859))
+
+***Fixed***:
+
+* Include .yaml workflow files in update-python-config so all workflow Python pins are updated. ([#23573](https://github.com/DataDog/integrations-core/pull/23573))
+* Fix type annotation of on_error in the EventBusOrchestrator by narrowing it down to OrchestratorHookError. This better represents the actual error passed to the method. ([#23575](https://github.com/DataDog/integrations-core/pull/23575))
+* Retry agent check invocations on transient failures to address SNMP E2E flake from autodiscovery reload races. ([#23646](https://github.com/DataDog/integrations-core/pull/23646))
+* Derive `Repository.full_name` and a new `Repository.org` from the `origin` git remote so ddev works correctly when run from a worktree or a fork, instead of guessing from the working-directory basename. ([#23656](https://github.com/DataDog/integrations-core/pull/23656))
+* Allow release branch tagging to continue before the matching Agent branch exists. ([#23711](https://github.com/DataDog/integrations-core/pull/23711))
+* Reword the `qa-label` validation messages to make explicit that the check refers to the Datadog Agent release cycle. ([#23784](https://github.com/DataDog/integrations-core/pull/23784))
+* Use registry.datadoghq.com in Agent image examples. ([#23790](https://github.com/DataDog/integrations-core/pull/23790))
+* Bump datadog_checks_dev requirement. ([#24050](https://github.com/DataDog/integrations-core/pull/24050))
+
 ## 16.1.1 / 2026-04-29
 
 ***Fixed***:

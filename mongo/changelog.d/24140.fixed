@@ -1,0 +1,1 @@
+Remove server-side sort from MongoDB query metrics collection to avoid queryStats sort memory failures.

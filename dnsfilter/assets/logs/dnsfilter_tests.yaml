@@ -69,6 +69,7 @@ tests:
       - 40
       categories_names:
       - Content Servers
+      code: NOERROR
       collection_id: 12500
       collection_name: testing collection
       collections:
@@ -83,13 +84,16 @@ tests:
         question:
           name: criteo.com
           type: A
+      domain: criteo.com
       evt:
         outcome: allowed
       fqdn: gum.criteo.com
       id: 2800
       local_ipv4_address: 172.0.0.1
       local_ipv6_address: fdfe:9042:c53d:0:84bd:853e:965f:babc
+      local_user_id: 4568300
       local_user_login: ASSETTAG-EID\John
+      local_user_name: John
       mac_address: c0b883203abc
       method: 20
       method_name: Category
@@ -99,11 +103,69 @@ tests:
           ip: 10.0.0.1
       network_name: Your First Network
       networkid: 8397000
+      ocsf:
+        action: Allowed
+        action_id: 1
+        activity_id: 1
+        activity_name: Query
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Outbound
+          direction_id: 2
+          protocol_name: udp
+        disposition: Allowed
+        disposition_id: 1
+        dst_endpoint:
+          ip: 10.0.0.2
+          uid: '212800'
+        duration: 0
+        firewall_rule:
+          name: Content Servers
+          uid: '40'
+        is_alert: false
+        metadata:
+          event_code: Category
+          original_time: '2025-05-23 05:20:24.085'
+          product:
+            name: DNSFilter
+            vendor_name: DNSFilter
+          profiles:
+          - security_control
+          uid: '2800'
+          version: 1.5.0
+        query:
+          hostname: gum.criteo.com
+          type: A
+        rcode: NoError
+        rcode_id: 0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          hostname: AssetTag-EID
+          intermediate_ips:
+          - 10.0.0.1
+          ip: 172.0.0.1
+          mac: c0b883203abc
+          name: AssetTag-EID
+          owner:
+            name: John
+            uid: '4568300'
+          uid: 69290bde-69c4-4205-b320-56a8712b9abc
+        status: Success
+        status_code: NOERROR
+        status_id: 1
+        time: 1747977624085
       policy_id: 1259000
       policy_name: Your First Policy
       protocol: udp
+      question_type: A
       region: BOM
+      request_address: 10.0.0.1
       responsetime: 0
+      result: allowed
       scheduled_policy_id: 56611
       scheduled_policy_name: test-DD
       server_address: 10.0.0.2
@@ -115,68 +177,6 @@ tests:
       usr:
         id: 4568300
         name: John
-      local_user_id: 4568300
-      local_user_name: John
-      ocsf:
-        severity: Informational
-        activity_name: Query
-        metadata:
-          uid: '2800'
-          product:
-            name: DNSFilter
-            vendor_name: DNSFilter
-          event_code: Category
-          original_time: '2025-05-23 05:20:24.085'
-          version: 1.5.0
-          profiles:
-          - security_control
-        category_uid: 4
-        category_name: Network Activity
-        status_code: NOERROR
-        src_endpoint:
-          uid: 69290bde-69c4-4205-b320-56a8712b9abc
-          hostname: AssetTag-EID
-          intermediate_ips:
-          - 10.0.0.1
-          ip: 172.0.0.1
-          name: AssetTag-EID
-          mac: c0b883203abc
-          owner:
-            uid: '4568300'
-            name: John
-        query:
-          hostname: gum.criteo.com
-          type: A
-        rcode: NoError
-        duration: 0
-        rcode_id: 0
-        status_id: 1
-        connection_info:
-          protocol_name: udp
-          direction_id: 2
-          direction: Outbound
-        class_uid: 4003
-        activity_id: 1
-        severity_id: 1
-        time: 1747977624085
-        class_name: DNS Activity
-        status: Success
-        dst_endpoint:
-          uid: '212800'
-          ip: 10.0.0.2
-        disposition: Allowed
-        action_id: 1
-        action: Allowed
-        disposition_id: 1
-        is_alert: false
-        firewall_rule:
-          uid: '40'
-          name: Content Servers
-      domain: criteo.com
-      code: NOERROR
-      result: allowed
-      request_address: 10.0.0.1
-      question_type: A
     message: |-
       {
         "local_user_id" : 4568300,
@@ -727,6 +727,7 @@ tests:
       - 24
       categories_names:
       - Parked Sites & Domains
+      code: NOERROR
       collection_id: 12500
       collection_name: testing collection
       collections:
@@ -741,13 +742,16 @@ tests:
         question:
           name: wwwassuranceretraite.fr
           type: AAAA
+      domain: wwwassuranceretraite.fr
       evt:
         outcome: blocked
       fqdn: wwwassuranceretraite.fr
       id: 2600
       local_ipv4_address: 192.169.190.1
       local_ipv6_address: fdfe:9042:c53d:0:84bd:853e:965f:babc
+      local_user_id: 4682000
       local_user_login: ASSETTAG-EID\John
+      local_user_name: John
       mac_address: c0b88320cabc
       method: 39
       method_name: Category
@@ -757,11 +761,69 @@ tests:
           ip: 10.0.0.1
       network_name: Your First Network
       networkid: 8397500
+      ocsf:
+        action: Denied
+        action_id: 2
+        activity_id: 1
+        activity_name: Query
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Outbound
+          direction_id: 2
+          protocol_name: tcp
+        disposition: Blocked
+        disposition_id: 2
+        dst_endpoint:
+          ip: 10.0.0.2
+          uid: '212800'
+        duration: 301
+        firewall_rule:
+          name: Parked Sites & Domains
+          uid: '24'
+        is_alert: false
+        metadata:
+          event_code: Category
+          original_time: '2025-05-19 11:54:37.118'
+          product:
+            name: DNSFilter
+            vendor_name: DNSFilter
+          profiles:
+          - security_control
+          uid: '2600'
+          version: 1.5.0
+        query:
+          hostname: wwwassuranceretraite.fr
+          type: AAAA
+        rcode: NoError
+        rcode_id: 0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          hostname: AssetTag-EID
+          intermediate_ips:
+          - 10.0.0.1
+          ip: 192.169.190.1
+          mac: c0b88320cabc
+          name: AssetTag-EID
+          owner:
+            name: John
+            uid: '4682000'
+          uid: ca652fb5-f2e9-499d-8f8d-466aa8db5abc
+        status: Failure
+        status_code: NOERROR
+        status_id: 2
+        time: 1747655677118
       policy_id: 1259000
       policy_name: Your First Policy
       protocol: tcp
+      question_type: AAAA
       region: BOM
+      request_address: 10.0.0.1
       responsetime: 301
+      result: blocked
       scheduled_policy_id: 56600
       scheduled_policy_name: test-DD
       server_address: 10.0.0.2
@@ -773,68 +835,6 @@ tests:
       usr:
         id: 4682000
         name: John
-      local_user_id: 4682000
-      local_user_name: John
-      ocsf:
-        severity: Informational
-        activity_name: Query
-        metadata:
-          uid: '2600'
-          product:
-            name: DNSFilter
-            vendor_name: DNSFilter
-          event_code: Category
-          original_time: '2025-05-19 11:54:37.118'
-          version: 1.5.0
-          profiles:
-          - security_control
-        category_uid: 4
-        category_name: Network Activity
-        status_code: NOERROR
-        src_endpoint:
-          uid: ca652fb5-f2e9-499d-8f8d-466aa8db5abc
-          hostname: AssetTag-EID
-          intermediate_ips:
-          - 10.0.0.1
-          ip: 192.169.190.1
-          name: AssetTag-EID
-          mac: c0b88320cabc
-          owner:
-            uid: '4682000'
-            name: John
-        query:
-          hostname: wwwassuranceretraite.fr
-          type: AAAA
-        rcode: NoError
-        duration: 301
-        rcode_id: 0
-        status_id: 2
-        connection_info:
-          protocol_name: tcp
-          direction_id: 2
-          direction: Outbound
-        class_uid: 4003
-        activity_id: 1
-        severity_id: 1
-        time: 1747655677118
-        class_name: DNS Activity
-        status: Failure
-        dst_endpoint:
-          uid: '212800'
-          ip: 10.0.0.2
-        disposition: Blocked
-        action_id: 2
-        action: Denied
-        disposition_id: 2
-        is_alert: false
-        firewall_rule:
-          uid: '24'
-          name: Parked Sites & Domains
-      domain: wwwassuranceretraite.fr
-      code: NOERROR
-      result: blocked
-      request_address: 10.0.0.1
-      question_type: AAAA
     message: |-
       {
         "local_user_id" : 4682000,
