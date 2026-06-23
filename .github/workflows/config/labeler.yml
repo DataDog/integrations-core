@@ -889,6 +889,10 @@ integration/kubevirt_handler:
 - changed-files:
   - any-glob-to-any-file:
     - kubevirt_handler/**/*
+integration/kueue:
+- changed-files:
+  - any-glob-to-any-file:
+    - kueue/**/*
 integration/kuma:
 - changed-files:
   - any-glob-to-any-file:
