@@ -8,7 +8,6 @@ from urllib.request import urlopen
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, get_docker_hostname, get_here
-from datadog_checks.dev.docker import get_container_ip
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
 
@@ -64,17 +63,12 @@ def dd_environment(instance, dd_save_state):
         appliance_port = find_free_port(HOST)
         orch_ip = f'{HOST}:{orch_port}'
 
-        def _appliance_ready():
-            ctx = ssl.create_default_context()
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
-            urlopen(f'https://{HOST}:{appliance_port}/health', timeout=2, context=ctx)
-
         def _ready():
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
             urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
+            urlopen(f'https://{HOST}:{appliance_port}/health', timeout=2, context=ctx)
 
         inst = instance(
             orch_ip,
@@ -85,8 +79,7 @@ def dd_environment(instance, dd_save_state):
         with docker_run(
             compose_file=COMPOSE_FILE,
             build=True,
-            service_name='appliance',
-            conditions=[WaitFor(_appliance_ready, attempts=60, wait=1)],
+            conditions=[WaitFor(_ready, attempts=60, wait=1)],
             env_vars={
                 'HOST_PORT': str(orch_port),
                 'APPLIANCE_PORT': str(appliance_port),
@@ -96,22 +89,7 @@ def dd_environment(instance, dd_save_state):
                 'APPLIANCE_PASSWORD': '',
             },
         ):
-            appliance_ip = get_container_ip('dd-appliance')
-            with docker_run(
-                compose_file=COMPOSE_FILE,
-                build=True,
-                conditions=[WaitFor(_ready, attempts=60, wait=1)],
-                env_vars={
-                    'HOST_PORT': str(orch_port),
-                    'APPLIANCE_PORT': str(appliance_port),
-                    'ORCH_USERNAME': 'admin',
-                    'ORCH_PASSWORD': '',
-                    'APPLIANCE_USERNAME': 'admin',
-                    'APPLIANCE_PASSWORD': '',
-                    'APPLIANCE_IP': appliance_ip,
-                },
-            ):
-                yield {'instances': [inst]}
+            yield {'instances': [inst]}
 
 
 @pytest.fixture(scope='session')
