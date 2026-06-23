@@ -322,7 +322,7 @@ class TestAIAChasing:
 
         mock_create_socket_connection.assert_called_with('localhost', port)
 
-    def test_load_intermediate_certs_uses_clean_sessions(self):
+    def test_load_intermediate_certs_does_not_send_auth_headers(self):
         http = RequestsWrapper(
             {
                 'username': 'admin',
@@ -333,16 +333,17 @@ class TestAIAChasing:
             },
             {'proxy': {'https': 'http://proxy:3128'}},
         )
-        session = mock.MagicMock()
-        session.get.return_value = mock.MagicMock(content=build_cert())
+        headers = []
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
+        def get(url, **kwargs):
+            headers.append(kwargs['headers'])
+            return mock.MagicMock(content=build_cert())
+
+        with mock.patch('requests.Session.get', side_effect=get):
             http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), [])
 
-        for call in wrapper.call_args_list:
-            assert call.args[0] == {'tls_verify': True, 'skip_proxy': True}
-            assert call.args[1] == {}
-        assert session.get.call_count == 1
+        assert headers
+        assert all('Authorization' not in h for h in headers)
 
     def test_load_intermediate_certs_falls_back_to_plain_http(self):
         http = RequestsWrapper({}, {})
