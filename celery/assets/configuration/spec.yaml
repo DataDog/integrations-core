@@ -5,6 +5,7 @@ files:
   discovery:
     ad_identifiers:
       - flower
+      - mher/flower
     strategies:
       - strategy: from_ports
         port_hints:
