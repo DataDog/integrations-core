@@ -1,0 +1,6 @@
+ad_identifiers:
+  - flower
+  - mher/flower
+discovery: {}
+init_config:
+instances: []
