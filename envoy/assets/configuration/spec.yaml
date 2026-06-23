@@ -4,7 +4,7 @@ files:
 - name: envoy.yaml
   discovery:
     ad_identifiers:
-    - envoyproxy/envoy
+    - envoy
     strategies:
     - strategy: from_ports
       port_hints:

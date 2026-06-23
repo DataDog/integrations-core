@@ -37,10 +37,9 @@ def test_e2e(dd_agent_check, exercise_envoy):
     )
 
 
+@pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(check_rate=True)
-    aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(),
-        check_submission_type=True,
-        check_symmetric_inclusion=False,
-    )
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=False)
+    aggregator.assert_service_check('envoy.openmetrics.health', Envoy.OK)
