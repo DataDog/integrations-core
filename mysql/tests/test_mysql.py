@@ -339,7 +339,7 @@ def _assert_complex_config(
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
-    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
+    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags, e2e=e2e)
     # test optional metrics
     optional_metrics = (
         variables.TRADITIONAL_REPLICATION_METRICS
@@ -599,28 +599,35 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         aggregator.assert_metric(mname, hostname=expected_hostname, at_least=0)
 
 
-def _test_index_metrics(aggregator, index_metrics, metric_tags):
+def _test_index_metrics(aggregator, index_metrics, metric_tags, e2e=False):
+    # In E2E, monotonic_count metrics with collection_interval=300 aren't emitted:
+    # check_rate=True runs the check twice but the second run skips the query (interval not elapsed),
+    # so no delta is ever flushed. Use at_least=0 to avoid false failures in E2E.
+    usage_count = 0 if e2e else 1
     for mname in index_metrics:
         if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:testdb', 'table:users', 'index:id'),
-                count=1,
+                at_least=usage_count,
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags
                 + (
                     'db:datadog_test_schemas',
                     'table:cities',
                     'index:single_column_index',
                 ),
-                count=1,
+                at_least=usage_count,
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'),
-                count=1,
+                at_least=usage_count,
             )
         if mname == 'mysql.index.size':
             aggregator.assert_metric(mname, tags=metric_tags + ('db:testdb', 'table:users', 'index:id'), count=1)
