@@ -139,7 +139,7 @@ def test_build_runtime_native_tool_in_registry(file_registry, clients):
     config = AgentConfig(provider="anthropic", tools=["read_file", "web_search"])
     runtime = build_runtime(make_factory(clients, file_registry), config)
 
-    assert list(runtime.tool_registry.native_tool_names) == ["web_search"]
+    assert runtime.tool_registry.native_tool_names == ("web_search",)
     assert len(runtime.tool_registry.definitions) == 1
     assert runtime.tool_registry.definitions[0]["name"] == "read_file"
 
@@ -148,7 +148,7 @@ def test_build_runtime_no_native_tools_empty_list(file_registry, clients):
     config = AgentConfig(provider="anthropic", tools=["read_file"])
     runtime = build_runtime(make_factory(clients, file_registry), config)
 
-    assert list(runtime.tool_registry.native_tool_names) == []
+    assert runtime.tool_registry.native_tool_names == ()
 
 
 async def test_shared_registry_does_not_share_parent_read_authorization(file_registry, clients, tmp_path):
