@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, overload
 
 import anthropic
@@ -41,7 +42,8 @@ MAX_CONTINUATIONS: Final[int] = 10
 WEB_SEARCH_VERSION: Final[str] = "web_search_20250305"
 
 NATIVE_TOOL_DEFINITIONS: Final[dict[str, ToolParam]] = {
-    "web_search": {"type": WEB_SEARCH_VERSION, "name": "web_search"},
+    # max_uses stays below MAX_CONTINUATIONS so a turn is always left to receive the final response.
+    "web_search": {"type": WEB_SEARCH_VERSION, "name": "web_search", "max_uses": MAX_CONTINUATIONS - 1},
 }
 
 # 1h TTL for the static prefix (system + tools): paid once, read for the whole session.
@@ -49,6 +51,24 @@ STATIC_CACHE_CONTROL: Final[CacheControlEphemeralParam] = {"type": "ephemeral", 
 # Default TTL (currently 5 min, but Anthropic may change it) for the sliding breakpoint
 # on the last user message: re-written each turn, so a longer TTL would be wasted.
 SLIDING_CACHE_CONTROL: Final[CacheControlEphemeralParam] = {"type": "ephemeral"}
+
+
+@dataclass(frozen=True)
+class CompletionResult:
+    """Outcome of driving messages.create across pause_turn continuations."""
+
+    final_response: Message
+    paused_turns: list[MessageParam]
+    all_responses: list[Message]
+
+
+@dataclass(frozen=True)
+class ResponseContent:
+    """Parsed pieces of a single response's content blocks."""
+
+    text: str
+    tool_calls: list[ToolCall]
+    citations: list[WebSearchCitation]
 
 
 class AnthropicAgent(BaseAgent[MessageParam]):
@@ -168,11 +188,11 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         request_messages: list[MessageParam],
         system_param: list[TextBlockParam],
         tool_defs: list[ToolParam],
-    ) -> tuple[Message, list[MessageParam], list[Message]]:
+    ) -> CompletionResult:
         """Call messages.create, transparently continuing across pause_turn.
 
-        Returns (final_response, paused_turns, all_responses). all_responses includes
-        all intermediate responses so the caller can sum token usage across calls.
+        all_responses includes all intermediate responses so the caller can sum
+        token usage across calls.
         """
         paused_turns: list[MessageParam] = []
         all_responses: list[Message] = []
@@ -187,7 +207,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             )
             all_responses.append(response)
             if response.stop_reason != "pause_turn":
-                return response, paused_turns, all_responses
+                return CompletionResult(final_response=response, paused_turns=paused_turns, all_responses=all_responses)
             paused_turn: MessageParam = {"role": "assistant", "content": response.content}
             paused_turns.append(paused_turn)
             messages = [*messages, paused_turn]
@@ -237,37 +257,21 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             return tool_defs
         return [*tool_defs[:-1], {**tool_defs[-1], "cache_control": STATIC_CACHE_CONTROL}]
 
-    async def send(
-        self,
-        content: str | list[ToolResultMessage],
-        allowed_tools: list[str] | None = None,
-    ) -> AgentResponse:
-        """Send a message to the agent and return the response.
-        Args:
-            content: The content to send to the agent.
-            allowed_tools: The tools in the ToolRegistry to allow the agent to use.
-        Returns:
-            An AgentResponse object containing the response from the agent.
-        """
+    def _assemble_tool_defs(self, allowed_tools: list[str] | None) -> list[ToolParam]:
+        """Combine client and native tool defs, with the static cache breakpoint on the last."""
         tool_defs = self._get_tool_definitions(allowed_tools) + self._native_tool_defs(allowed_tools)
-        tool_defs = self._with_tools_cache_breakpoint(tool_defs)
+        return self._with_tools_cache_breakpoint(tool_defs)
 
-        api_content: str | list[ToolResultBlockParam] = (
-            self._to_tool_result_params(content) if isinstance(content, list) else content
-        )
-        user_msg_for_history: MessageParam = {"role": "user", "content": api_content}
-        user_msg_for_request: MessageParam = {
-            "role": "user",
-            "content": self._with_user_cache_breakpoint(api_content),
-        }
-        messages = [*self._history, user_msg_for_request]
-
-        system_param: list[TextBlockParam] = [
-            {"type": "text", "text": self._system_prompt, "cache_control": STATIC_CACHE_CONTROL}
-        ]
-
+    async def _call_api(
+        self,
+        *,
+        messages: list[MessageParam],
+        system_param: list[TextBlockParam],
+        tool_defs: list[ToolParam],
+    ) -> CompletionResult:
+        """Drive the continuation loop, mapping Anthropic SDK errors to agent errors."""
         try:
-            response, paused_turns, all_responses = await self._create_until_complete(
+            return await self._create_until_complete(
                 request_messages=messages,
                 system_param=system_param,
                 tool_defs=tool_defs,
@@ -281,16 +285,16 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         except anthropic.APIResponseValidationError as e:
             raise AgentError(f"Response validation failed: {e}") from e
 
-        # stop_reason is None only in streaming responses; we use non-streaming, so None is unexpected
-        if response.stop_reason is None:
-            raise AgentError("Received null stop_reason from API")
+    @staticmethod
+    def _parse_response_content(response: Message) -> ResponseContent:
+        """Extract text, client tool calls, and web-search citations from response blocks.
 
-        stop_reason = self._map_stop_reason(response.stop_reason)
-
+        Server tool blocks are intentionally skipped: they stay verbatim in history so
+        Anthropic can resolve encrypted_content / encrypted_index for citations.
+        """
         text_parts: list[str] = []
         tool_calls: list[ToolCall] = []
         citations: list[WebSearchCitation] = []
-
         for block in response.content:
             if isinstance(block, anthropic.types.TextBlock):
                 text_parts.append(block.text)
@@ -299,47 +303,83 @@ class AnthropicAgent(BaseAgent[MessageParam]):
                         citations.append(WebSearchCitation(url=c.url, title=c.title, cited_text=c.cited_text))
             elif isinstance(block, anthropic.types.ToolUseBlock):
                 tool_calls.append(ToolCall(id=block.id, name=block.name, input=dict(block.input)))
-        # ThinkingBlock, RedactedThinkingBlock, ServerToolUseBlock, and WebSearchToolResultBlock
-        # are intentionally not parsed as tool_calls — server tool results are preserved verbatim
-        # in history so Anthropic can resolve encrypted_content / encrypted_index for citations.
+        return ResponseContent(text="\n".join(text_parts), tool_calls=tool_calls, citations=citations)
 
-        # Sum token usage across all calls (paused turns also consume tokens).
-        # context_usage reflects the final call's position in the context window.
-        total_input = sum(r.usage.input_tokens for r in all_responses)
-        total_output = sum(r.usage.output_tokens for r in all_responses)
-        total_cache_read = sum(r.usage.cache_read_input_tokens or 0 for r in all_responses)
-        total_cache_creation = sum(r.usage.cache_creation_input_tokens or 0 for r in all_responses)
-        final_cache_read = response.usage.cache_read_input_tokens or 0
-        final_cache_creation = response.usage.cache_creation_input_tokens or 0
-        final_used_tokens = response.usage.input_tokens + final_cache_read + final_cache_creation
-        # Sum across all calls: searches in paused turns are reported on their own responses.
-        web_search_requests = sum(self._web_search_requests(r) for r in all_responses)
-        usage = TokenUsage(
-            input_tokens=total_input,
-            output_tokens=total_output,
-            cache_read_input_tokens=total_cache_read,
-            cache_creation_input_tokens=total_cache_creation,
-            context_usage=ContextUsage(window_size=await self._get_context_window(), used_tokens=final_used_tokens),
-            web_search_requests=web_search_requests,
+    async def _build_usage(self, completion: CompletionResult) -> TokenUsage:
+        """Sum token and web-search usage across all responses; context reflects the final call."""
+        all_responses = completion.all_responses
+        final = completion.final_response
+        final_cache_read = final.usage.cache_read_input_tokens or 0
+        final_cache_creation = final.usage.cache_creation_input_tokens or 0
+        return TokenUsage(
+            input_tokens=sum(r.usage.input_tokens for r in all_responses),
+            output_tokens=sum(r.usage.output_tokens for r in all_responses),
+            cache_read_input_tokens=sum(r.usage.cache_read_input_tokens or 0 for r in all_responses),
+            cache_creation_input_tokens=sum(r.usage.cache_creation_input_tokens or 0 for r in all_responses),
+            context_usage=ContextUsage(
+                window_size=await self._get_context_window(),
+                used_tokens=final.usage.input_tokens + final_cache_read + final_cache_creation,
+            ),
+            web_search_requests=sum(self._web_search_requests(r) for r in all_responses),
         )
 
+    def _append_history(
+        self, user_msg: MessageParam, paused_turns: list[MessageParam], final_response: Message
+    ) -> None:
+        """Append the user turn, any paused turns, and the final assistant turn to history.
+
+        Paused turns precede the final turn so multi-turn citations remain valid.
+        """
+        self._history.append(user_msg)
+        self._history.extend(paused_turns)
+        self._history.append({"role": "assistant", "content": final_response.content})
+
+    async def send(
+        self,
+        content: str | list[ToolResultMessage],
+        allowed_tools: list[str] | None = None,
+    ) -> AgentResponse:
+        """Send a message to the agent and return the response.
+        Args:
+            content: The content to send to the agent.
+            allowed_tools: The tools in the ToolRegistry to allow the agent to use.
+        Returns:
+            An AgentResponse object containing the response from the agent.
+        """
+        tool_defs = self._assemble_tool_defs(allowed_tools)
+
+        api_content: str | list[ToolResultBlockParam] = (
+            self._to_tool_result_params(content) if isinstance(content, list) else content
+        )
+        user_msg_for_history: MessageParam = {"role": "user", "content": api_content}
+        user_msg_for_request: MessageParam = {
+            "role": "user",
+            "content": self._with_user_cache_breakpoint(api_content),
+        }
+        messages = [*self._history, user_msg_for_request]
+        system_param: list[TextBlockParam] = [
+            {"type": "text", "text": self._system_prompt, "cache_control": STATIC_CACHE_CONTROL}
+        ]
+
+        completion = await self._call_api(messages=messages, system_param=system_param, tool_defs=tool_defs)
+        final = completion.final_response
+
+        # stop_reason is None only in streaming responses; we use non-streaming, so None is unexpected
+        if final.stop_reason is None:
+            raise AgentError("Received null stop_reason from API")
+
+        parsed = self._parse_response_content(final)
         agent_response = AgentResponse(
-            stop_reason=stop_reason,
-            text="\n".join(text_parts),
-            tool_calls=tool_calls,
-            usage=usage,
+            stop_reason=self._map_stop_reason(final.stop_reason),
+            text=parsed.text,
+            tool_calls=parsed.tool_calls,
+            usage=await self._build_usage(completion),
             web_activity=WebSearchActivity(
-                searches=self._extract_web_searches(all_responses),
-                citations=citations,
+                searches=self._extract_web_searches(completion.all_responses),
+                citations=parsed.citations,
             ),
         )
 
-        # Save to history only after a successful response. Use the unmarked form so the
-        # cache_control breakpoint is only ever on the latest user message — this keeps the
-        # request below the 4-marker limit regardless of conversation length.
-        # Paused turns are inserted before the final turn so multi-turn citations remain valid.
-        self._history.append(user_msg_for_history)
-        self._history.extend(paused_turns)
-        self._history.append({"role": "assistant", "content": response.content})
-
+        # Save to history only after a successful response.
+        self._append_history(user_msg_for_history, completion.paused_turns, final)
         return agent_response

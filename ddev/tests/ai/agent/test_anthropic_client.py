@@ -13,6 +13,7 @@ from ddev.ai.agent.anthropic_client import (
     NATIVE_TOOL_DEFINITIONS,
     WEB_SEARCH_VERSION,
     AnthropicAgent,
+    CompletionResult,
 )
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import StopReason, ToolResultMessage
@@ -448,6 +449,29 @@ async def test_native_tool_injected_into_request() -> None:
 
     sent_tools = create_mock.call_args.kwargs["tools"]
     assert any(t.get("type") == WEB_SEARCH_VERSION for t in sent_tools)
+
+
+async def test_web_search_max_uses_stays_below_continuation_budget() -> None:
+    registry = ToolRegistry([], native_tool_names=["web_search"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Search for something")
+
+    web_search = next(t for t in create_mock.call_args.kwargs["tools"] if t.get("type") == WEB_SEARCH_VERSION)
+    assert web_search["max_uses"] == MAX_CONTINUATIONS - 1
+
+
+async def test_create_until_complete_returns_completion_result() -> None:
+    final = make_response("end_turn", [make_text_block("done")])
+    agent, _ = make_agent(mock_response=final)
+
+    result = await agent._create_until_complete(request_messages=[], system_param=[], tool_defs=[])
+
+    assert isinstance(result, CompletionResult)
+    assert result.final_response is final
+    assert result.paused_turns == []
+    assert result.all_responses == [final]
 
 
 async def test_native_tool_appended_after_client_tools() -> None:
