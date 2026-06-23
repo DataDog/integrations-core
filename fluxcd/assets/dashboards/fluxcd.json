@@ -218,7 +218,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (HelmChart,HelmRelease,Kustomization) AND $kube_cluster_name}"
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -275,7 +275,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (HelmChart,HelmRelease,Kustomization) AND ready:False AND $kube_cluster_name}"
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND ready:false AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -320,7 +320,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (GitRepository,HelmRepository,OCIRepository) AND $kube_cluster_name}"
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -376,7 +376,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (GitRepository,HelmRepository,OCIRepository) AND ready:False AND $kube_cluster_name}"
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND ready:false AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -558,19 +558,19 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query0",
-                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (HelmChart,HelmRelease,Kustomization) AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (HelmChart,HelmRelease,Kustomization) AND ready:True AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND ready:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (HelmChart,HelmRelease,Kustomization) AND suspended:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND suspended:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -645,19 +645,19 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query0",
-                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (GitRepository,HelmRepository,OCIRepository) AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (GitRepository,HelmRepository,OCIRepository) AND ready:True AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND ready:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
                                         },
                                         {
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (GitRepository,HelmRepository,OCIRepository) AND suspended:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND suspended:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
                                         }
                                     ],
                                     "response_format": "scalar",
