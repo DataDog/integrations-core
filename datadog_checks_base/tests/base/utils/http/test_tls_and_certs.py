@@ -4,13 +4,16 @@
 import datetime
 import logging
 import ssl
+from contextlib import contextmanager
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from threading import Thread
 
 import mock
 import pytest
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
+from cryptography.x509.oid import AuthorityInformationAccessOID, ExtendedKeyUsageOID, NameOID
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils.http import RequestsWrapper
@@ -46,6 +49,111 @@ def build_cert(aia_uri=None):
             critical=False,
         )
     return builder.sign(key, hashes.SHA256()).public_bytes(serialization.Encoding.DER)
+
+
+def build_chain(aia_uri):
+    root_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    intermediate_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    leaf_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    root_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'Test Root')])
+    intermediate_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'Test Intermediate')])
+    leaf_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'localhost')])
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    root = (
+        x509.CertificateBuilder()
+        .subject_name(root_name)
+        .issuer_name(root_name)
+        .public_key(root_key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now - datetime.timedelta(days=1))
+        .not_valid_after(now + datetime.timedelta(days=30))
+        .add_extension(x509.BasicConstraints(ca=True, path_length=1), critical=True)
+        .sign(root_key, hashes.SHA256())
+    )
+    intermediate = (
+        x509.CertificateBuilder()
+        .subject_name(intermediate_name)
+        .issuer_name(root_name)
+        .public_key(intermediate_key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now - datetime.timedelta(days=1))
+        .not_valid_after(now + datetime.timedelta(days=30))
+        .add_extension(x509.BasicConstraints(ca=True, path_length=0), critical=True)
+        .sign(root_key, hashes.SHA256())
+    )
+    leaf = (
+        x509.CertificateBuilder()
+        .subject_name(leaf_name)
+        .issuer_name(intermediate_name)
+        .public_key(leaf_key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(now - datetime.timedelta(days=1))
+        .not_valid_after(now + datetime.timedelta(days=30))
+        .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
+        .add_extension(x509.SubjectAlternativeName([x509.DNSName('localhost')]), critical=False)
+        .add_extension(x509.ExtendedKeyUsage([ExtendedKeyUsageOID.SERVER_AUTH]), critical=False)
+        .add_extension(
+            x509.AuthorityInformationAccess(
+                [
+                    x509.AccessDescription(
+                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
+                    )
+                ]
+            ),
+            critical=False,
+        )
+        .sign(intermediate_key, hashes.SHA256())
+    )
+    return root, intermediate, leaf, leaf_key
+
+
+class RecordingHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.server.headers.append(dict(self.headers))
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(self.server.body)
+
+    def log_message(self, *args):
+        pass
+
+
+class OkHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b'ok')
+
+    def log_message(self, *args):
+        pass
+
+
+@contextmanager
+def run_server(server):
+    thread = Thread(target=server.serve_forever)
+    thread.daemon = True
+    thread.start()
+    try:
+        yield server
+    finally:
+        server.shutdown()
+        thread.join()
+        server.server_close()
+
+
+def write_cert(path, cert):
+    path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
+
+
+def write_key(path, key):
+    path.write_bytes(
+        key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.TraditionalOpenSSL,
+            serialization.NoEncryption(),
+        )
+    )
 
 
 class TestCert:
@@ -322,44 +430,45 @@ class TestAIAChasing:
 
         mock_create_socket_connection.assert_called_with('localhost', port)
 
-    def test_aia_chasing_fetches_issuer_without_configured_auth_headers(self):
-        http = RequestsWrapper(
-            {
-                'headers': {'Authorization': 'Bearer token'},
-                'tls_cert': '/path/to/client.crt',
-                'proxy': {'http': 'http://proxy:3128'},
-            },
-            {'proxy': {'https': 'http://proxy:3128'}},
-        )
-        service_calls = [0]
-        issuer_headers = []
+    def test_aia_chasing_fetches_issuer_without_configured_auth_headers(self, tmp_path):
+        issuer_server = ThreadingHTTPServer(('127.0.0.1', 0), RecordingHandler)
+        issuer_server.headers = []
+        issuer_server.body = b''
 
-        def get(url, **kwargs):
-            if url == 'https://service.test:443':
-                service_calls[0] += 1
-                if service_calls[0] == 1:
-                    raise SSLError('missing intermediate')
-                return mock.MagicMock()
+        with run_server(issuer_server):
+            aia_uri = 'http://127.0.0.1:{}/ca.der'.format(issuer_server.server_port)
+            root, intermediate, leaf, leaf_key = build_chain(aia_uri)
+            issuer_server.body = intermediate.public_bytes(serialization.Encoding.DER)
 
-            assert url == 'http://issuer.test/ca.der'
-            issuer_headers.append(kwargs['headers'])
-            return mock.MagicMock(content=build_cert())
+            root_path = tmp_path / 'root.pem'
+            leaf_path = tmp_path / 'leaf.pem'
+            key_path = tmp_path / 'leaf.key'
+            write_cert(root_path, root)
+            write_cert(leaf_path, leaf)
+            write_key(key_path, leaf_key)
 
-        mock_context = mock.MagicMock()
-        mock_secure_sock = mock.MagicMock()
-        mock_context.wrap_socket.return_value.__enter__.return_value = mock_secure_sock
-        mock_secure_sock.getpeercert.return_value = build_cert('http://issuer.test/ca.der')
-        mock_secure_sock.version.return_value = 'TLSv1.3'
+            service_server = ThreadingHTTPServer(('127.0.0.1', 0), OkHandler)
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            context.load_cert_chain(str(leaf_path), str(key_path))
+            service_server.socket = context.wrap_socket(service_server.socket, server_side=True)
 
-        with mock.patch('datadog_checks.base.utils.http.create_socket_connection'):
-            with mock.patch('datadog_checks.base.utils.http.create_ssl_context', return_value=mock_context):
-                with mock.patch('datadog_checks.base.utils.http.RequestsWrapper._mount_https_adapter'):
-                    with mock.patch('requests.Session.get', side_effect=get):
-                        http.get('https://service.test:443')
+            error = None
+            response = None
+            with run_server(service_server):
+                http = RequestsWrapper(
+                    {'headers': {'Authorization': 'Bearer token'}, 'tls_ca_cert': str(root_path), 'skip_proxy': True},
+                    {},
+                )
+                try:
+                    response = http.get('https://localhost:{}'.format(service_server.server_port))
+                except Exception as e:
+                    error = e
 
-        assert service_calls[0] == 2
-        assert issuer_headers
-        assert all('Authorization' not in headers for headers in issuer_headers)
+        assert issuer_server.headers
+        assert all('Authorization' not in headers for headers in issuer_server.headers)
+        if error:
+            raise error
+        assert response.status_code == 200
 
     def test_load_intermediate_certs_falls_back_to_plain_http(self):
         http = RequestsWrapper({}, {})

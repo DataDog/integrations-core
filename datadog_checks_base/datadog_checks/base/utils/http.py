@@ -584,9 +584,16 @@ class RequestsWrapper(object):
             if intermediate_cert is None:
                 continue
 
-            certs.append(intermediate_cert)
+            certs.append(self._serialize_intermediate_cert(intermediate_cert))
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
+
+    def _serialize_intermediate_cert(self, der_cert):
+        return (
+            _http_utils.cryptography_x509_load_certificate(der_cert)
+            .public_bytes(_http_utils.cryptography_serialization.Encoding.PEM)
+            .decode('utf-8')
+        )
 
     def _fetch_intermediate_cert(self, uri):
         for tls_verify in (True, False):
