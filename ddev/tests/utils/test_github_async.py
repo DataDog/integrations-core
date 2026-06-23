@@ -726,6 +726,21 @@ async def test_update_check_run_omits_unset_fields() -> None:
     assert captured == {"conclusion": "failure"}
 
 
+@pytest.mark.asyncio
+async def test_update_check_run_requires_conclusion_when_completed() -> None:
+    requested = False
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal requested
+        requested = True
+        return _json_response(_check_run_payload())
+
+    client = _make_client(httpx.MockTransport(handler))
+    with pytest.raises(ValueError, match="conclusion is required"):
+        await client.update_check_run("o", "r", 77, status="completed")
+    assert requested is False
+
+
 # ---------------------------------------------------------------------------
 # download_artifact
 # ---------------------------------------------------------------------------

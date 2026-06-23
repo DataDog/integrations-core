@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any
 
@@ -20,10 +19,9 @@ from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
-    CheckRun,
-    WorkflowDispatchResult,
     WorkflowRun,
 )
+from tests.helpers.github_async import FakeAsyncGitHubClient
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -61,154 +59,25 @@ def _artifact(idx: int, expired: bool = False, archive_download_url: Any = _DEFA
     )
 
 
-class _FakeClient:
-    """Minimal stand-in for AsyncGitHubClient that records calls and replays canned responses."""
-
-    def __init__(
-        self,
-        run_statuses: list[str],
-        conclusion: str | None = "success",
-        artifacts: list[Artifact] | None = None,
-        workflow_url: str = "https://github.com/o/r/actions/runs/123",
-        fail_at: dict[str, Exception] | None = None,
-        get_workflow_run_fail_after: int = -1,
-        download_failure_for_url: str | None = None,
-        list_artifacts_failure: bool = False,
-    ) -> None:
-        self._run_statuses = list(run_statuses)
-        self._conclusion = conclusion
-        self._artifacts = artifacts if artifacts is not None else [_artifact(1), _artifact(2)]
-        self._workflow_url = workflow_url
-        self._fail_at = fail_at or {}
-        self._get_workflow_run_fail_after = get_workflow_run_fail_after
-        self._get_workflow_run_call_count = 0
-        self._download_failure_for_url = download_failure_for_url
-        self._list_artifacts_failure = list_artifacts_failure
-        self.dispatch_calls: list[dict[str, Any]] = []
-        self.get_workflow_run_calls: list[int] = []
-        self.create_check_run_calls: list[dict[str, Any]] = []
-        self.update_check_run_calls: list[dict[str, Any]] = []
-        self.list_artifacts_calls: list[int] = []
-        self.download_calls: list[tuple[str, Path]] = []
-
-    async def create_workflow_dispatch(
-        self,
-        owner: str,
-        repo: str,
-        workflow_id: str | int,
-        ref: str,
-        inputs: dict[str, str] | None = None,
-        timeout: float | None = None,
-    ) -> GitHubResponse[WorkflowDispatchResult]:
-        self.dispatch_calls.append(
-            {"owner": owner, "repo": repo, "workflow_id": workflow_id, "ref": ref, "inputs": inputs}
-        )
-        if "create_workflow_dispatch" in self._fail_at:
-            raise self._fail_at["create_workflow_dispatch"]
-        return _wrap(WorkflowDispatchResult(workflow_run_id=123))
-
-    async def get_workflow_run(
-        self, owner: str, repo: str, run_id: int, timeout: float | None = None
-    ) -> GitHubResponse[WorkflowRun]:
-        self.get_workflow_run_calls.append(run_id)
-        self._get_workflow_run_call_count += 1
-        if (
-            self._get_workflow_run_fail_after >= 0
-            and self._get_workflow_run_call_count > self._get_workflow_run_fail_after
-            and "get_workflow_run" in self._fail_at
-        ):
-            raise self._fail_at["get_workflow_run"]
-        if self._get_workflow_run_fail_after < 0 and "get_workflow_run" in self._fail_at:
-            raise self._fail_at["get_workflow_run"]
-        # Pop the next status; stay at the last one if we're polled extra times.
-        status = self._run_statuses.pop(0) if len(self._run_statuses) > 1 else self._run_statuses[0]
-        conclusion = self._conclusion if status == "completed" else None
-        return _wrap(
-            WorkflowRun(
-                id=run_id,
-                name="test-batch",
-                status=status,
-                conclusion=conclusion,
-                html_url=self._workflow_url,
-            )
-        )
-
-    async def create_check_run(
-        self,
-        owner: str,
-        repo: str,
-        name: str,
-        head_sha: str,
-        status: str,
-        details_url: str | None = None,
-        output: dict[str, Any] | None = None,
-        timeout: float | None = None,
-    ) -> GitHubResponse[CheckRun]:
-        self.create_check_run_calls.append(
-            {
-                "owner": owner,
-                "repo": repo,
-                "name": name,
-                "head_sha": head_sha,
-                "status": status,
-                "details_url": details_url,
-            }
-        )
-        if "create_check_run" in self._fail_at:
-            raise self._fail_at["create_check_run"]
-        return _wrap(
-            CheckRun(id=999, name=name, status=status, conclusion=None, head_sha=head_sha, html_url=details_url)
-        )
-
-    async def update_check_run(
-        self,
-        owner: str,
-        repo: str,
-        check_run_id: int,
-        status: str | None = None,
-        conclusion: str | None = None,
-        details_url: str | None = None,
-        output: dict[str, Any] | None = None,
-        timeout: float | None = None,
-    ) -> GitHubResponse[CheckRun]:
-        self.update_check_run_calls.append(
-            {
-                "check_run_id": check_run_id,
-                "status": status,
-                "conclusion": conclusion,
-                "details_url": details_url,
-            }
-        )
-        if "update_check_run" in self._fail_at:
-            raise self._fail_at["update_check_run"]
-        return _wrap(
-            CheckRun(
-                id=check_run_id,
-                name="test-batch",
-                status=status or "completed",
-                conclusion=conclusion,
-                html_url=details_url,
-                head_sha="base-sha-aaa",
-            )
-        )
-
-    async def list_workflow_run_artifacts(
-        self, owner: str, repo: str, run_id: int, per_page: int = 30, timeout: float | None = None
-    ) -> AsyncIterator[GitHubResponse[ArtifactsList]]:
-        self.list_artifacts_calls.append(run_id)
-        if self._list_artifacts_failure:
-            raise RuntimeError("boom-list-artifacts")
-        yield _wrap(ArtifactsList(total_count=len(self._artifacts), artifacts=list(self._artifacts)))
-
-    async def download_artifact(self, archive_download_url: str, dest_path: Path, timeout: float | None = None) -> None:
-        self.download_calls.append((archive_download_url, dest_path))
-        if "download_artifact" in self._fail_at:
-            raise self._fail_at["download_artifact"]
-        if self._download_failure_for_url is not None and archive_download_url == self._download_failure_for_url:
-            raise RuntimeError(f"download failure for {archive_download_url}")
+def _workflow_run(status: str = "completed", conclusion: str | None = "success") -> WorkflowRun:
+    return WorkflowRun(
+        id=123,
+        name="test-batch",
+        status=status,
+        conclusion=conclusion if status == "completed" else None,
+        html_url="https://github.com/o/r/actions/runs/123",
+    )
 
 
-def _make_runner(client: _FakeClient, tmp_path: Path) -> TaskTestRunner:
+def _artifacts_page(artifacts: list[Artifact]) -> GitHubResponse[ArtifactsList]:
+    return _wrap(ArtifactsList(total_count=len(artifacts), artifacts=list(artifacts)))
+
+
+def _mock_artifacts(fake: FakeAsyncGitHubClient, artifacts: list[Artifact]) -> None:
+    fake.mock_response("list_workflow_run_artifacts", _artifacts_page(artifacts))
+
+
+def _make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner:
     options = TestRunnerOptions(
         owner="DataDog",
         repo="integrations-core",
@@ -233,6 +102,10 @@ def _drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
     while not queue.empty():
         out.append(queue.get_nowait())
     return out
+
+
+def _batch(batch_id: str = "batch-err") -> TestBatch:
+    return TestBatch(id=batch_id, job_list=[_job()], jobs_count=1, integrations=["ntp"])
 
 
 # ---------------------------------------------------------------------------
@@ -264,21 +137,23 @@ def test_conclusion_to_status(conclusion: str | None, expected: str) -> None:
 
 @pytest.mark.asyncio
 async def test_process_message_happy_path(tmp_path: Path) -> None:
-    artifacts = [_artifact(1), _artifact(2)]
-    client = _FakeClient(run_statuses=["completed"], conclusion="success", artifacts=artifacts)
-    runner = _make_runner(client, tmp_path)
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [_artifact(1), _artifact(2)])
+    runner = _make_runner(fake, tmp_path)
 
     batch = TestBatch(id="batch-1", job_list=[_job("j1"), _job("j2")], jobs_count=2, integrations=["ntp", "kafka"])
     await runner.process_message(batch)
 
-    # Dispatch once, with the right shape
-    assert len(client.dispatch_calls) == 1
-    call = client.dispatch_calls[0]
-    assert call == {
+    # Dispatch once, with the right shape.
+    dispatch_calls = fake.calls_to("create_workflow_dispatch")
+    assert len(dispatch_calls) == 1
+    assert dispatch_calls[0].kwargs == {
         "owner": "DataDog",
         "repo": "integrations-core",
         "workflow_id": "test-batch.yaml",
         "ref": "master",
+        "timeout": None,
         "inputs": {
             "batch_id": "batch-1",
             "checkout_sha": "merge-sha-bbb",
@@ -309,20 +184,22 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     }
 
     # Check run opened with the PR head SHA, in_progress, with the workflow URL as details_url.
-    assert len(client.create_check_run_calls) == 1
-    cr = client.create_check_run_calls[0]
+    create_calls = fake.calls_to("create_check_run")
+    assert len(create_calls) == 1
+    cr = create_calls[0].kwargs
     assert cr["head_sha"] == "base-sha-aaa"
     assert cr["status"] == "in_progress"
     assert cr["name"] == "test-batch/batch-1"
     assert cr["details_url"] == "https://github.com/o/r/actions/runs/123"
 
     # Both artifacts downloaded under <base>/<run_id>/<id>-<name> (collision-safe path).
-    assert len(client.download_calls) == 2
-    assert client.download_calls[0] == (
+    download_calls = fake.calls_to("download_artifact")
+    assert len(download_calls) == 2
+    assert (download_calls[0].kwargs["archive_download_url"], download_calls[0].kwargs["dest_path"]) == (
         "https://api.github.com/artifact/1/zip",
         tmp_path / "123" / "1-artifact-1",
     )
-    assert client.download_calls[1] == (
+    assert (download_calls[1].kwargs["archive_download_url"], download_calls[1].kwargs["dest_path"]) == (
         "https://api.github.com/artifact/2/zip",
         tmp_path / "123" / "2-artifact-2",
     )
@@ -339,8 +216,9 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     assert finished.artifacts_path == str(tmp_path / "123")
 
     # Check run closed with the GitHub conclusion.
-    assert len(client.update_check_run_calls) == 1
-    upd = client.update_check_run_calls[0]
+    update_calls = fake.calls_to("update_check_run")
+    assert len(update_calls) == 1
+    upd = update_calls[0].kwargs
     assert upd["check_run_id"] == 999
     assert upd["status"] == "completed"
     assert upd["conclusion"] == "success"
@@ -348,11 +226,12 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_process_message_failure_path(tmp_path: Path) -> None:
-    client = _FakeClient(run_statuses=["completed"], conclusion="failure", artifacts=[_artifact(1)])
-    runner = _make_runner(client, tmp_path)
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "failure"))
+    _mock_artifacts(fake, [_artifact(1)])
+    runner = _make_runner(fake, tmp_path)
 
-    batch = TestBatch(id="batch-2", job_list=[_job()], jobs_count=1, integrations=["ntp"])
-    await runner.process_message(batch)
+    await runner.process_message(TestBatch(id="batch-2", job_list=[_job()], jobs_count=1, integrations=["ntp"]))
 
     submitted = _drain_queue(runner.queue)
     assert len(submitted) == 1
@@ -360,22 +239,45 @@ async def test_process_message_failure_path(tmp_path: Path) -> None:
     assert isinstance(finished, BatchFinished)
     assert finished.status == "failure"
 
-    assert len(client.update_check_run_calls) == 1
-    assert client.update_check_run_calls[0]["status"] == "completed"
-    assert client.update_check_run_calls[0]["conclusion"] == "failure"
+    update_calls = fake.calls_to("update_check_run")
+    assert len(update_calls) == 1
+    assert update_calls[0].kwargs["status"] == "completed"
+    assert update_calls[0].kwargs["conclusion"] == "failure"
+
+
+@pytest.mark.asyncio
+async def test_process_message_skipped_conclusion(tmp_path: Path) -> None:
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "skipped"))
+    _mock_artifacts(fake, [])
+    runner = _make_runner(fake, tmp_path)
+
+    await runner.process_message(_batch())
+
+    # A "skipped" GitHub conclusion maps to a "skipped" BatchFinished and a "skipped" check run.
+    submitted = _drain_queue(runner.queue)
+    assert len(submitted) == 1
+    finished = submitted[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.status == "skipped"
+
+    update_calls = fake.calls_to("update_check_run")
+    assert len(update_calls) == 1
+    assert update_calls[0].kwargs["conclusion"] == "skipped"
 
 
 @pytest.mark.asyncio
 async def test_process_message_polls_until_completed(tmp_path: Path) -> None:
-    statuses = ["queued", "in_progress", "in_progress", "completed"]
-    client = _FakeClient(run_statuses=statuses, conclusion="success", artifacts=[])
-    runner = _make_runner(client, tmp_path)
+    fake = FakeAsyncGitHubClient()
+    # Initial get + polls until "completed"; FIFO one-shots replay in order.
+    for status in ("queued", "in_progress", "in_progress", "completed"):
+        fake.mock_response("get_workflow_run", _workflow_run(status, "success"), once=True)
+    _mock_artifacts(fake, [])
+    runner = _make_runner(fake, tmp_path)
 
-    batch = TestBatch(id="batch-3", job_list=[_job()], jobs_count=1, integrations=["ntp"])
-    await runner.process_message(batch)
+    await runner.process_message(TestBatch(id="batch-3", job_list=[_job()], jobs_count=1, integrations=["ntp"]))
 
-    # Initial get + 3 polls until "completed" pops out.
-    assert len(client.get_workflow_run_calls) == len(statuses)
+    assert len(fake.calls_to("get_workflow_run")) == 4
     submitted = _drain_queue(runner.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
@@ -384,100 +286,32 @@ async def test_process_message_polls_until_completed(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_process_message_skips_expired_artifacts(tmp_path: Path) -> None:
-    artifacts = [
-        _artifact(1),
-        _artifact(2, expired=True),
-        _artifact(3, archive_download_url=None),
-    ]
-    client = _FakeClient(run_statuses=["completed"], conclusion="success", artifacts=artifacts)
-    runner = _make_runner(client, tmp_path)
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(
+        fake,
+        [
+            _artifact(1),
+            _artifact(2, expired=True),
+            _artifact(3, archive_download_url=None),
+        ],
+    )
+    runner = _make_runner(fake, tmp_path)
 
-    batch = TestBatch(id="batch-4", job_list=[_job()], jobs_count=1, integrations=["ntp"])
-    await runner.process_message(batch)
+    await runner.process_message(TestBatch(id="batch-4", job_list=[_job()], jobs_count=1, integrations=["ntp"]))
 
     # Only the non-expired artifact with a download URL should be fetched.
-    assert len(client.download_calls) == 1
-    assert client.download_calls[0][0] == "https://api.github.com/artifact/1/zip"
-
-
-# ---------------------------------------------------------------------------
-# Error paths — try/finally always closes the check
-# ---------------------------------------------------------------------------
-
-
-def _batch(batch_id: str = "batch-err") -> TestBatch:
-    return TestBatch(id=batch_id, job_list=[_job()], jobs_count=1, integrations=["ntp"])
-
-
-@pytest.mark.parametrize(
-    "failure_point",
-    [
-        "create_workflow_dispatch",
-        "get_workflow_run_initial",
-        "get_workflow_run_mid_poll",
-        "submit_message",
-    ],
-)
-@pytest.mark.asyncio
-async def test_process_message_failures_propagate_and_close_check_run(tmp_path: Path, failure_point: str) -> None:
-    boom = RuntimeError(f"boom-{failure_point}")
-    fail_at: dict[str, Exception] = {}
-    get_workflow_run_fail_after = -1
-    run_statuses = ["completed"]
-
-    if failure_point == "create_workflow_dispatch":
-        fail_at = {"create_workflow_dispatch": boom}
-    elif failure_point == "get_workflow_run_initial":
-        fail_at = {"get_workflow_run": boom}
-    elif failure_point == "get_workflow_run_mid_poll":
-        fail_at = {"get_workflow_run": boom}
-        get_workflow_run_fail_after = 1
-        run_statuses = ["queued", "completed"]
-
-    client = _FakeClient(
-        run_statuses=run_statuses,
-        conclusion="success",
-        artifacts=[_artifact(1)],
-        fail_at=fail_at,
-        get_workflow_run_fail_after=get_workflow_run_fail_after,
-    )
-    runner = _make_runner(client, tmp_path)
-
-    if failure_point == "submit_message":
-
-        class _BoomQueue:
-            def put_nowait(self, _: Any) -> None:
-                raise boom
-
-        runner.queue = _BoomQueue()  # type: ignore[assignment]
-
-    with pytest.raises(RuntimeError, match=f"boom-{failure_point}"):
-        await runner.process_message(_batch())
-
-    if failure_point in ("create_workflow_dispatch", "get_workflow_run_initial"):
-        # Failure happened before the check was opened.
-        assert client.create_check_run_calls == []
-        assert client.update_check_run_calls == []
-        return
-
-    # In every other case the check run was opened and the finally closed it.
-    assert len(client.create_check_run_calls) == 1
-    assert len(client.update_check_run_calls) == 1
-    closed = client.update_check_run_calls[0]
-    assert closed["status"] == "completed"
-
-    if failure_point == "submit_message":
-        # Workflow completed cleanly; finally closed with success before submit raised.
-        assert closed["conclusion"] == "success"
-    else:
-        # Any other failure inside the try-block leaves final_conclusion at "cancelled".
-        assert closed["conclusion"] == "cancelled"
+    download_calls = fake.calls_to("download_artifact")
+    assert len(download_calls) == 1
+    assert download_calls[0].kwargs["archive_download_url"] == "https://api.github.com/artifact/1/zip"
 
 
 @pytest.mark.asyncio
 async def test_process_message_null_conclusion(tmp_path: Path) -> None:
-    client = _FakeClient(run_statuses=["completed"], conclusion=None, artifacts=[])
-    runner = _make_runner(client, tmp_path)
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", None))
+    _mock_artifacts(fake, [])
+    runner = _make_runner(fake, tmp_path)
 
     await runner.process_message(_batch())
 
@@ -488,21 +322,25 @@ async def test_process_message_null_conclusion(tmp_path: Path) -> None:
     assert isinstance(finished, BatchFinished)
     assert finished.status == "failure"
 
-    assert len(client.update_check_run_calls) == 1
-    assert client.update_check_run_calls[0]["conclusion"] == "neutral"
+    update_calls = fake.calls_to("update_check_run")
+    assert len(update_calls) == 1
+    assert update_calls[0].kwargs["conclusion"] == "neutral"
 
 
 @pytest.mark.asyncio
 async def test_process_message_emits_batch_finished_when_listing_artifacts_fails(tmp_path: Path) -> None:
-    client = _FakeClient(run_statuses=["completed"], conclusion="success", list_artifacts_failure=True)
-    runner = _make_runner(client, tmp_path)
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    fake.mock_response("list_workflow_run_artifacts", RuntimeError("boom-list-artifacts"))
+    runner = _make_runner(fake, tmp_path)
 
     # A failure listing artifacts must not abort the batch: the check run is still closed
     # and exactly one BatchFinished is emitted with the workflow's real conclusion.
     await runner.process_message(_batch())
 
-    assert len(client.update_check_run_calls) == 1
-    assert client.update_check_run_calls[0]["conclusion"] == "success"
+    update_calls = fake.calls_to("update_check_run")
+    assert len(update_calls) == 1
+    assert update_calls[0].kwargs["conclusion"] == "success"
 
     submitted = _drain_queue(runner.queue)
     assert len(submitted) == 1
@@ -513,18 +351,16 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
 
 @pytest.mark.asyncio
 async def test_process_message_swallows_check_run_close_failure(tmp_path: Path) -> None:
-    client = _FakeClient(
-        run_statuses=["completed"],
-        conclusion="success",
-        artifacts=[_artifact(1)],
-        fail_at={"update_check_run": RuntimeError("boom-close")},
-    )
-    runner = _make_runner(client, tmp_path)
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [_artifact(1)])
+    fake.mock_response("update_check_run", RuntimeError("boom-close"))
+    runner = _make_runner(fake, tmp_path)
 
     # A failure closing the check run must not propagate or suppress the BatchFinished.
     await runner.process_message(_batch())
 
-    assert len(client.update_check_run_calls) == 1
+    assert len(fake.calls_to("update_check_run")) == 1
     submitted = _drain_queue(runner.queue)
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
@@ -533,19 +369,20 @@ async def test_process_message_swallows_check_run_close_failure(tmp_path: Path) 
 
 @pytest.mark.asyncio
 async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path: Path) -> None:
-    artifacts = [_artifact(1), _artifact(2), _artifact(3)]
-    client = _FakeClient(
-        run_statuses=["completed"],
-        conclusion="success",
-        artifacts=artifacts,
-        download_failure_for_url="https://api.github.com/artifact/2/zip",
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [_artifact(1), _artifact(2), _artifact(3)])
+    fake.mock_response(
+        "download_artifact",
+        RuntimeError("download failure for artifact 2"),
+        archive_download_url="https://api.github.com/artifact/2/zip",
     )
-    runner = _make_runner(client, tmp_path)
+    runner = _make_runner(fake, tmp_path)
 
     await runner.process_message(_batch())
 
     # All three were attempted; the failure for #2 didn't abort #3.
-    urls = [call[0] for call in client.download_calls]
+    urls = [call.kwargs["archive_download_url"] for call in fake.calls_to("download_artifact")]
     assert urls == [
         "https://api.github.com/artifact/1/zip",
         "https://api.github.com/artifact/2/zip",
@@ -555,4 +392,89 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
     assert len(submitted) == 1
     assert isinstance(submitted[0], BatchFinished)
     assert submitted[0].status == "success"
-    assert client.update_check_run_calls[0]["conclusion"] == "success"
+    assert fake.calls_to("update_check_run")[0].kwargs["conclusion"] == "success"
+
+
+# ---------------------------------------------------------------------------
+# Error paths — try/finally always closes the check run that was opened
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("failure_point", ["create_workflow_dispatch", "get_workflow_run_initial"])
+@pytest.mark.asyncio
+async def test_failure_before_check_run_opens_does_not_create_check_run(tmp_path: Path, failure_point: str) -> None:
+    boom = RuntimeError(f"boom-{failure_point}")
+    fake = FakeAsyncGitHubClient()
+    if failure_point == "create_workflow_dispatch":
+        fake.mock_response("create_workflow_dispatch", boom)
+    else:
+        fake.mock_response("get_workflow_run", boom)
+    runner = _make_runner(fake, tmp_path)
+
+    with pytest.raises(RuntimeError, match=f"boom-{failure_point}"):
+        await runner.process_message(_batch())
+
+    # The check run is never opened, so there is nothing to close.
+    fake.assert_not_called("create_check_run")
+    fake.assert_not_called("update_check_run")
+
+
+@pytest.mark.asyncio
+async def test_failure_mid_poll_closes_check_run_as_cancelled(tmp_path: Path) -> None:
+    boom = RuntimeError("boom-mid-poll")
+    fake = FakeAsyncGitHubClient()
+    # Initial get succeeds (still running), the first poll raises.
+    fake.mock_response("get_workflow_run", _workflow_run("queued"), once=True)
+    fake.mock_response("get_workflow_run", boom, once=True)
+    runner = _make_runner(fake, tmp_path)
+
+    with pytest.raises(RuntimeError, match="boom-mid-poll"):
+        await runner.process_message(_batch())
+
+    # The check run was opened and the finally closed it as cancelled.
+    assert len(fake.calls_to("create_check_run")) == 1
+    update_calls = fake.calls_to("update_check_run")
+    assert len(update_calls) == 1
+    assert update_calls[0].kwargs["status"] == "completed"
+    assert update_calls[0].kwargs["conclusion"] == "cancelled"
+
+
+@pytest.mark.asyncio
+async def test_failure_at_create_check_run_does_not_close_check_run(tmp_path: Path) -> None:
+    boom = RuntimeError("boom-create-check-run")
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    fake.mock_response("create_check_run", boom)
+    runner = _make_runner(fake, tmp_path)
+
+    with pytest.raises(RuntimeError, match="boom-create-check-run"):
+        await runner.process_message(_batch())
+
+    # The open was attempted but failed before the try/finally, so there is no check run to close.
+    assert len(fake.calls_to("create_check_run")) == 1
+    fake.assert_not_called("update_check_run")
+
+
+@pytest.mark.asyncio
+async def test_failure_at_submit_message_closes_check_run_as_success(tmp_path: Path) -> None:
+    boom = RuntimeError("boom-submit-message")
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [_artifact(1)])
+    runner = _make_runner(fake, tmp_path)
+
+    class _BoomQueue:
+        def put_nowait(self, _: Any) -> None:
+            raise boom
+
+    runner.queue = _BoomQueue()  # type: ignore[assignment]
+
+    with pytest.raises(RuntimeError, match="boom-submit-message"):
+        await runner.process_message(_batch())
+
+    # Workflow completed cleanly; the finally closed the check run as success before submit raised.
+    assert len(fake.calls_to("create_check_run")) == 1
+    update_calls = fake.calls_to("update_check_run")
+    assert len(update_calls) == 1
+    assert update_calls[0].kwargs["status"] == "completed"
+    assert update_calls[0].kwargs["conclusion"] == "success"
