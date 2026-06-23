@@ -275,7 +275,7 @@ class ClusterMetadataCollector:
         )
 
         self.log.debug("Found %s brokers in cluster %s", len(brokers), cluster_id)
-        broker_tags = _get_tags(self.config,cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
+        broker_tags = _get_tags(self.config, cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
         self.check.gauge('broker.count', len(brokers), tags=broker_tags)
 
         try:
@@ -283,7 +283,7 @@ class ClusterMetadataCollector:
             cluster_info = cluster_future.result(timeout=self.config._request_timeout)
 
             if cluster_info.controller:
-                controller_tags = _get_tags(self.config,cluster_id) + [
+                controller_tags = _get_tags(self.config, cluster_id) + [
                     f'controller_id:{cluster_info.controller.id}',
                     f'controller_host:{cluster_info.controller.host}',
                     f'controller_port:{cluster_info.controller.port}',
@@ -308,7 +308,7 @@ class ClusterMetadataCollector:
 
         # Emit per-broker metrics (fast, in-memory only)
         for broker_id, broker_metadata in brokers.items():
-            tags = _get_tags(self.config,cluster_id) + [
+            tags = _get_tags(self.config, cluster_id) + [
                 f'broker_id:{broker_id}',
                 f'broker_host:{broker_metadata.host}',
                 f'broker_port:{broker_metadata.port}',
@@ -335,7 +335,7 @@ class ClusterMetadataCollector:
                 if not broker_meta:
                     continue
 
-                metric_tags = _get_tags(self.config,cluster_id) + [
+                metric_tags = _get_tags(self.config, cluster_id) + [
                     f'broker_id:{broker_id_str}',
                     f'broker_host:{broker_meta.host}',
                     f'broker_port:{broker_meta.port}',
@@ -481,7 +481,7 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %s topics", len(topic_partitions))
 
-        self.check.gauge('topic.count', len(topic_partitions), tags=_get_tags(self.config,cluster_id))
+        self.check.gauge('topic.count', len(topic_partitions), tags=_get_tags(self.config, cluster_id))
 
         earliest_offsets = self._fetch_earliest_offsets(topic_partitions)
 
@@ -503,7 +503,7 @@ class ClusterMetadataCollector:
             if topic_name in KAFKA_INTERNAL_TOPICS:
                 continue
 
-            topic_tags = _get_tags(self.config,cluster_id) + [f'topic:{topic_name}']
+            topic_tags = _get_tags(self.config, cluster_id) + [f'topic:{topic_name}']
 
             if not partitions:
                 self.log.warning("No partitions found for topic %s", topic_name)
@@ -633,7 +633,7 @@ class ClusterMetadataCollector:
 
             for resource, future in futures.items():
                 topic_name = resource.name
-                topic_tags = _get_tags(self.config,cluster_id) + [f'topic:{topic_name}']
+                topic_tags = _get_tags(self.config, cluster_id) + [f'topic:{topic_name}']
 
                 try:
                     config_result = future.result(timeout=self.config._request_timeout)
@@ -717,7 +717,7 @@ class ClusterMetadataCollector:
         consumer_groups = consumer_groups_result.valid
 
         self.log.debug("Found %s consumer groups", len(consumer_groups))
-        self.check.gauge('consumer_group.count', len(consumer_groups), tags=_get_tags(self.config,cluster_id))
+        self.check.gauge('consumer_group.count', len(consumer_groups), tags=_get_tags(self.config, cluster_id))
 
         group_ids = [group.group_id for group in consumer_groups]
         if not group_ids:
@@ -735,7 +735,7 @@ class ClusterMetadataCollector:
         current_member_hashes = {}
 
         for group_id, group_info in group_id_to_info.items():
-            group_tags = _get_tags(self.config,cluster_id) + [f'consumer_group:{group_id}']
+            group_tags = _get_tags(self.config, cluster_id) + [f'consumer_group:{group_id}']
             state = group_info.state
             members = group_info.members
             coordinator = group_info.coordinator
@@ -926,7 +926,7 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %d subjects in schema registry", len(subjects))
 
-        self.check.gauge('schema_registry.subjects', len(subjects), tags=_get_tags(self.config,cluster_id))
+        self.check.gauge('schema_registry.subjects', len(subjects), tags=_get_tags(self.config, cluster_id))
 
         try:
             global_compatibility = self._get_schema_registry_global_compatibility()
