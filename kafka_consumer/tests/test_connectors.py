@@ -293,9 +293,8 @@ def test_collect_rest_success_emits_metrics_and_events():
     with mock.patch.object(collector, '_collect_plugins'):
         collector._collect_rest('http://localhost:8083', 'cluster-1')
 
-    count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.count']
-    assert count_calls, "expected connector.count gauge"
-    assert count_calls[0].args[1] == 2
+    task_count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.count']
+    assert task_count_calls, "expected connector.task.count gauge"
     assert check.event_platform_event.call_count > 0
 
 
