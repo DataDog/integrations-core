@@ -52,7 +52,6 @@ class _VarState:
 
 _ENVELOPE_ADAPTER: TypeAdapter[ResourceEnvelope] = TypeAdapter(ResourceEnvelope)
 
-# Absolute paths to the ddev-shipped flows and phases directories.
 CORE_FLOWS_DIR: Path = Path(__file__).parent.parent / "flows"
 
 

@@ -8,10 +8,12 @@ import logging
 import sys
 from pathlib import Path
 
-from ddev.ai.config.engine import CORE_PHASES_DIR
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+
+
+CORE_PHASES_DIR: Path = Path(__file__).parent
 
 
 def _import_prefix_from_path(path: Path) -> str:
