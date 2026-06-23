@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.base import is_affirmative
+from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import ENDPOINT_PROMETHEUS, HAPROXY_LEGACY, requires_new_environment
@@ -40,3 +40,15 @@ def test_checkv2(dd_agent_check, instancev2, prometheus_metricsv2):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
+
+    aggregator.assert_service_check('haproxy.openmetrics.health', AgentCheck.OK, at_least=1)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        check_symmetric_inclusion=False,
+    )
