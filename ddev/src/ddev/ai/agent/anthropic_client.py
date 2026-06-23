@@ -132,7 +132,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
     def _web_search_requests(response: Message) -> int:
         """Web search request count from one response (0 if absent). Robust to fakes/providers."""
         server_use = getattr(response.usage, "server_tool_use", None)
-        return getattr(server_use, "web_search_requests", 0) or 0
+        return getattr(server_use, "web_search_requests", 0)
 
     @staticmethod
     def _extract_web_searches(responses: list[Message]) -> list[WebSearchCall]:
@@ -147,14 +147,14 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         for response in responses:
             for block in response.content:
                 if isinstance(block, anthropic.types.ServerToolUseBlock) and block.name == "web_search":
-                    query = block.input.get("query", "") if isinstance(block.input, dict) else ""
+                    query = block.input.get("query", "")
                     queries[block.id] = str(query)
                 elif isinstance(block, anthropic.types.WebSearchToolResultBlock):
                     content = block.content
-                    if isinstance(content, list):
-                        results[block.tool_use_id] = (len(content), None)
+                    if isinstance(content, anthropic.types.WebSearchToolResultError):
+                        results[block.tool_use_id] = (0, content.error_code)
                     else:
-                        results[block.tool_use_id] = (0, getattr(content, "error_code", "error"))
+                        results[block.tool_use_id] = (len(content), None)
 
         searches: list[WebSearchCall] = []
         for use_id, query in queries.items():
