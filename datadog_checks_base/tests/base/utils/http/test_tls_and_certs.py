@@ -325,25 +325,25 @@ class TestAIAChasing:
     def test_load_intermediate_certs_does_not_send_auth_headers(self):
         http = RequestsWrapper(
             {
-                'username': 'admin',
-                'password': 'secret',
                 'headers': {'Authorization': 'Bearer token'},
                 'tls_cert': '/path/to/client.crt',
                 'proxy': {'http': 'http://proxy:3128'},
             },
             {'proxy': {'https': 'http://proxy:3128'}},
         )
-        headers = []
+        request_headers = []
 
-        def get(url, **kwargs):
-            headers.append(kwargs['headers'])
+        def request(wrapper, method, url, options):
+            assert method == 'get'
+            assert url == 'http://issuer.test/ca.der'
+            request_headers.append(wrapper.options['headers'])
             return mock.MagicMock(content=build_cert())
 
-        with mock.patch('requests.Session.get', side_effect=get):
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper._request', autospec=True, side_effect=request):
             http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), [])
 
-        assert headers
-        assert all('Authorization' not in h for h in headers)
+        assert request_headers
+        assert all('Authorization' not in headers for headers in request_headers)
 
     def test_load_intermediate_certs_falls_back_to_plain_http(self):
         http = RequestsWrapper({}, {})
