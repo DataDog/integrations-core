@@ -9,6 +9,7 @@ from collections import defaultdict
 from contextlib import closing
 from datetime import datetime
 from itertools import chain
+from string import Template
 
 import certifi
 
@@ -53,6 +54,8 @@ class SapHanaCheck(AgentCheck):
         self._use_tls = self.instance.get('use_tls', False)
         self._only_custom_queries = is_affirmative(self.instance.get('only_custom_queries', False))
         self._schema = self.instance.get('schema', "SYS_DATABASES")
+        self._reported_hostname = self.instance.get('reported_hostname') or None
+        self._database_identifier = None
 
         # Add server & port tags
         self._tags.append('server:{}'.format(self._server))
@@ -190,11 +193,33 @@ class SapHanaCheck(AgentCheck):
 
     @property
     def reported_hostname(self):
-        return self._server
+        return self._reported_hostname or self._server
 
     @property
     def database_identifier(self):
-        return '{}:{}'.format(self._server, self._port)
+        if self._database_identifier is None:
+            db_id_config = self.instance.get('database_identifier') or {}
+            template_str = (
+                db_id_config.get('template', '$reported_hostname')
+                if isinstance(db_id_config, dict)
+                else '$reported_hostname'
+            )
+            template = Template(template_str)
+            tag_dict = {}
+            tags = self._tags.copy()
+            tags.sort()
+            for t in tags:
+                if ':' in t:
+                    key, value = t.split(':', 1)
+                    if key in tag_dict:
+                        tag_dict[key] += f",{value}"
+                    else:
+                        tag_dict[key] = value
+            tag_dict['reported_hostname'] = self.reported_hostname
+            tag_dict['host'] = str(self._server)
+            tag_dict['port'] = str(self._port)
+            self._database_identifier = template.safe_substitute(**tag_dict)
+        return self._database_identifier
 
     @property
     def dbms(self):

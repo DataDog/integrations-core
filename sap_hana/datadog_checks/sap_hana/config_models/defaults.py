@@ -44,6 +44,10 @@ def instance_port():
     return 30015
 
 
+def instance_reported_hostname():
+    return None
+
+
 def instance_schema_():
     return 'SYS_DATABASES'
 

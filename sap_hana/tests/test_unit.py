@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
 
-from .common import TIMEOUT
+from .common import PORT, TIMEOUT
 
 pytestmark = pytest.mark.unit
 
@@ -189,6 +189,60 @@ def test_custom_query_configuration(instance):
     cursor.fetchmany = rows_generator()
 
     gauge.assert_not_called()
+
+
+class TestReportedHostname:
+    def test_default_falls_back_to_server(self, instance):
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.reported_hostname == instance['server']
+
+    def test_override(self, instance):
+        instance['reported_hostname'] = 'my-prod-hana'
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.reported_hostname == 'my-prod-hana'
+
+
+class TestDatabaseIdentifier:
+    def test_default_equals_reported_hostname(self, instance):
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.database_identifier == instance['server']
+
+    def test_reported_hostname_override_flows_through(self, instance):
+        instance['reported_hostname'] = 'my-prod-hana'
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.database_identifier == 'my-prod-hana'
+
+    @pytest.mark.parametrize(
+        'template, expected, tags',
+        [
+            ('$reported_hostname', 'my-hana', ['env:prod']),
+            ('$env-$reported_hostname', 'prod-my-hana', ['env:prod']),
+            ('$env-$reported_hostname', '$env-my-hana', []),
+            ('$env-$reported_hostname', 'prod,staging-my-hana', ['env:prod', 'env:staging']),
+        ],
+    )
+    def test_template(self, instance, template, expected, tags):
+        instance['reported_hostname'] = 'my-hana'
+        instance['database_identifier'] = {'template': template}
+        instance['tags'] = tags
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.database_identifier == expected
+
+    def test_template_port_variable(self, instance):
+        instance['reported_hostname'] = 'my-hana'
+        instance['database_identifier'] = {'template': '$reported_hostname:$port'}
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.database_identifier == f'my-hana:{PORT}'
+
+    def test_template_host_variable(self, instance):
+        instance['database_identifier'] = {'template': '$host:$port'}
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.database_identifier == f"{instance['server']}:{PORT}"
+
+    def test_result_is_cached(self, instance):
+        instance['reported_hostname'] = 'my-hana'
+        check = SapHanaCheck('sap_hana', {}, [instance])
+        assert check.database_identifier is check.database_identifier
 
 
 class TestConnectionProperties:
