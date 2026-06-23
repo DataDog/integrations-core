@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import sys
 from pathlib import Path
 from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.engine import ConfigurationEngine
+from ddev.ai.config.engine import CORE_PHASES_DIR, ConfigurationEngine
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.phases.base import FlowContext
@@ -21,11 +22,25 @@ from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
 
+def _import_prefix_from_path(path: Path) -> str:
+    """Derive the dotted import prefix for path from sys.path entries."""
+    resolved = path.resolve()
+    for entry in sys.path:
+        if not entry:
+            continue
+        root = Path(entry).resolve()
+        try:
+            rel = resolved.relative_to(root)
+        except ValueError:
+            continue
+        return ".".join(rel.parts)
+    raise RuntimeError(f"Could not derive import prefix for {path}")
+
+
 class PhaseOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
         engine: ConfigurationEngine,
-        flow_name: str,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
         agent_clients: dict[str, Any],
@@ -53,7 +68,6 @@ class PhaseOrchestrator(EventBusOrchestrator):
             max_timeout=max_timeout,
         )
         self._engine = engine
-        self._flow_name = flow_name
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
         self._agent_clients = agent_clients
@@ -67,20 +81,49 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
     async def on_initialize(self) -> None:
         self._discover_phases()
-        resolved = self._engine.build_flow(self._flow_name)
+        resolved = self._engine.build_flow()
         self._validate_phase_classes(resolved)
         self._agent_logger, self._resources, checkpoint_manager, context = self._build_runtime(resolved)
         self._register_phases(resolved, self._resources, checkpoint_manager, context)
         self.submit_message(PhaseTrigger(id="start", phase_id=None))
 
     def _discover_phases(self) -> None:
-        discover_and_register_phases(
-            self._phase_registry,
-            Path(__file__).parent.parent / "phases",
-            "ddev.ai.phases",
-        )
-        for phases_dir, import_prefix in self._engine.phase_discovery_targets():
+        for phases_dir, import_prefix in self._phase_discovery_targets():
             discover_and_register_phases(self._phase_registry, phases_dir, import_prefix)
+
+    def _phase_discovery_targets(self) -> list[tuple[Path, str]]:
+        targets: list[tuple[Path, str]] = []
+        seen: set[Path] = set()
+
+        if CORE_PHASES_DIR.is_dir():
+            try:
+                prefix = _import_prefix_from_path(CORE_PHASES_DIR)
+                seen.add(CORE_PHASES_DIR.resolve())
+                targets.append((CORE_PHASES_DIR, prefix))
+            except RuntimeError:
+                self._logger.warning(
+                    "CORE_PHASES_DIR %s is not under any sys.path entry — core phase classes will be unavailable",
+                    CORE_PHASES_DIR,
+                )
+
+        for scan_dir in self._engine.scan_dirs:
+            for phases_dir in scan_dir.rglob("phases"):
+                if not phases_dir.is_dir():
+                    continue
+                resolved = phases_dir.resolve()
+                if resolved in seen:
+                    continue
+                seen.add(resolved)
+                try:
+                    prefix = _import_prefix_from_path(phases_dir)
+                    targets.append((phases_dir, prefix))
+                except RuntimeError:
+                    self._logger.warning(
+                        "phases/ directory %s is not under any sys.path entry — "
+                        "its phase classes cannot be auto-imported and will be unavailable at runtime",
+                        phases_dir,
+                    )
+        return targets
 
     def _validate_phase_classes(self, resolved: ResolvedFlow) -> None:
         for phase_id, phase_config in resolved.phases.items():

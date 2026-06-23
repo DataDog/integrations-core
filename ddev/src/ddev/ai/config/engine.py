@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 import logging
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -22,25 +21,10 @@ from ddev.ai.config.models import (
     ResourceEnvelope,
     VariableDeclaration,
 )
-
 ResourceKind = Literal["agent", "phase", "flow"]
 
 _log = logging.getLogger(__name__)
 
-
-def import_prefix_from_path(path: Path) -> str:
-    """Derive the dotted import prefix for path from sys.path entries."""
-    path = path.resolve()
-    for entry in sys.path:
-        if not entry:
-            continue
-        root = Path(entry).resolve()
-        try:
-            rel = path.relative_to(root)
-        except ValueError:
-            continue
-        return ".".join(rel.parts)
-    raise RuntimeError(f"Could not derive import prefix for {path}")
 
 
 @dataclass
@@ -68,27 +52,43 @@ class _VarState:
 
 _ENVELOPE_ADAPTER: TypeAdapter[ResourceEnvelope] = TypeAdapter(ResourceEnvelope)
 
-# Absolute path to the ddev-shipped flow configs directory.
+# Absolute paths to the ddev-shipped flows and phases directories.
 CORE_FLOWS_DIR: Path = Path(__file__).parent.parent / "flows"
+CORE_PHASES_DIR: Path = Path(__file__).parent.parent / "phases"
 
 
 class ConfigurationEngine:
-    """Parses typed resource objects from YAML files in one or more directories."""
+    """Parses typed resource objects from YAML files for a specific named flow."""
 
     def __init__(
         self,
-        user_dirs: list[str] | None = None,
+        flow_name: str,
+        user_dirs: list[str] | oNone = None,
         *,
         core_dir: Path = CORE_FLOWS_DIR,
     ) -> None:
+        self._flow_name = flow_name
         self._core_dir = core_dir
-        self._scan_dirs: list[Path] = self._deduplicate([core_dir] + self._resolve_user_dirs(user_dirs or []))
+        all_base_dirs = [core_dir] + self._resolve_user_dirs(user_dirs or [])
+        self._scan_dirs: list[Path] = self._deduplicate(self._expand_flow_dirs(all_base_dirs, flow_name))
         self._agents: dict[str, _RegistryEntry[AgentConfig]] = {}
         self._phases: dict[str, _RegistryEntry[PhaseConfig]] = {}
         self._flows: dict[str, _RegistryEntry[FlowConfig]] = {}
         self._conflicts: list[ConfigConflict] = []
         self._file_errors: dict[Path, str] = {}
         self._build_registries()
+
+    def _expand_flow_dirs(self, base_dirs: list[Path], flow_name: str) -> list[Path]:
+        """For each base dir, include <base>/<flow_name>/ and <base>/shared/ if they exist."""
+        result = []
+        for base in base_dirs:
+            flow_sub = base / flow_name
+            if flow_sub.is_dir():
+                result.append(flow_sub)
+            shared_sub = base / "shared"
+            if shared_sub.is_dir():
+                result.append(shared_sub)
+        return result
 
     def _deduplicate(self, dirs: list[Path]) -> list[Path]:
         seen: set[Path] = set()
@@ -186,31 +186,18 @@ class ConfigurationEngine:
     def conflicts(self) -> list[ConfigConflict]:
         return list(self._conflicts)
 
-    def phase_discovery_targets(self) -> list[tuple[Path, str]]:
-        """Return (phases_dir, import_prefix) pairs for phases/ directories under scan_dirs."""
-        targets: list[tuple[Path, str]] = []
-        seen: set[Path] = set()
-        for scan_dir in self._scan_dirs:
-            for phases_dir in scan_dir.rglob("phases"):
-                if not phases_dir.is_dir():
-                    continue
-                resolved = phases_dir.resolve()
-                if resolved in seen:
-                    continue
-                seen.add(resolved)
-                try:
-                    import_prefix = import_prefix_from_path(phases_dir)
-                    targets.append((phases_dir, import_prefix))
-                except RuntimeError:
-                    _log.warning(
-                        "phases/ directory %s is not under any sys.path entry — "
-                        "its phase classes cannot be auto-imported and will be unavailable at runtime",
-                        phases_dir,
-                    )
-        return targets
+    @property
+    def scan_dirs(self) -> list[Path]:
+        return list(self._scan_dirs)
 
-    def build_flow(self, name: str) -> ResolvedFlow:
+    @staticmethod
+    def get_agent_prompt(agent_name: str, flow_dir: Path) -> Path:
+        """Return the conventional system prompt path for an agent."""
+        return flow_dir / "prompts" / f"{agent_name}.md"
+
+    def build_flow(self) -> ResolvedFlow:
         """Validate and return a fully resolved flow. Raises FlowConfigError on any problem."""
+        name = self._flow_name
         self._check_no_conflicts()
         flow_config = self._get_flow_config(name)
         phases = self._collect_phases(flow_config, name)
@@ -367,12 +354,16 @@ class ConfigurationEngine:
         return p
 
     def _resolve_agent_paths(self, config: AgentConfig, source_file: Path) -> AgentConfig:
-        system_prompt = config.system_prompt_path
-        if not system_prompt.is_absolute():
-            system_prompt = source_file.parent / system_prompt
+        source_dir = source_file.parent
+        if config.system_prompt_path is None:
+            system_prompt = self.get_agent_prompt(config.name, source_dir)
+        elif not config.system_prompt_path.is_absolute():
+            system_prompt = source_dir / config.system_prompt_path
+        else:
+            system_prompt = config.system_prompt_path
         if not system_prompt.exists():
             raise FlowConfigError(f"System prompt not found for agent {config.name!r}: {system_prompt}")
-        if system_prompt is config.system_prompt_path:
+        if system_prompt == config.system_prompt_path:
             return config
         return config.model_copy(update={"system_prompt_path": system_prompt})
 

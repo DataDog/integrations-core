@@ -32,9 +32,9 @@ def test_agent_config_requires_name():
         AgentConfig.model_validate({"provider": "anthropic", "system_prompt_path": "/p.md"})
 
 
-def test_agent_config_requires_system_prompt_path():
-    with pytest.raises(ValidationError):
-        AgentConfig.model_validate({"name": "my_agent"})
+def test_agent_config_system_prompt_path_optional():
+    a = AgentConfig.model_validate({"name": "my_agent"})
+    assert a.system_prompt_path is None
 
 
 def test_agent_config_minimal():

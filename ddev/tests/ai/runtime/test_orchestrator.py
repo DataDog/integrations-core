@@ -22,9 +22,14 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
 
 
+FLOW_NAME = "test_flow"
+
+
 def make_engine(tmp_path: Path, yaml_content: str) -> ConfigurationEngine:
-    (tmp_path / "flow.yaml").write_text(yaml_content)
-    return ConfigurationEngine(core_dir=tmp_path)
+    flow_dir = tmp_path / FLOW_NAME
+    flow_dir.mkdir(exist_ok=True)
+    (flow_dir / "flow.yaml").write_text(yaml_content)
+    return ConfigurationEngine(FLOW_NAME, core_dir=tmp_path)
 
 
 @pytest.fixture
@@ -36,12 +41,9 @@ def file_access_policy(tmp_path) -> FileAccessPolicy:
 def make_orchestrator(file_access_policy, tmp_path):
     """Factory that builds a PhaseOrchestrator with test defaults."""
 
-    def _make(
-        engine: ConfigurationEngine | None = None, flow_name: str = "test_flow", **overrides: Any
-    ) -> PhaseOrchestrator:
+    def _make(engine: ConfigurationEngine | None = None, **overrides: Any) -> PhaseOrchestrator:
         kwargs: dict[str, Any] = {
-            "engine": engine or ConfigurationEngine(core_dir=tmp_path),
-            "flow_name": flow_name,
+            "engine": engine or ConfigurationEngine(FLOW_NAME, core_dir=tmp_path),
             "checkpoint_path": tmp_path / "checkpoints.yaml",
             "runtime_variables": {},
             "agent_clients": {"anthropic": MagicMock()},
@@ -99,10 +101,12 @@ async def test_on_message_received_ignores_other_messages(make_orchestrator):
 @pytest.fixture
 def minimal_flow(tmp_path):
     """Two-phase flow: 'a' is root, 'b' depends on 'a'."""
-    prompts_dir = tmp_path / "prompts"
+    flow_dir = tmp_path / FLOW_NAME
+    flow_dir.mkdir()
+    prompts_dir = flow_dir / "prompts"
     prompts_dir.mkdir()
     (prompts_dir / "writer.md").write_text("system prompt")
-    (tmp_path / "flow.yaml").write_text(
+    (flow_dir / "flow.yaml").write_text(
         dedent("""\
         - type: agent
           config:
@@ -133,11 +137,11 @@ def minimal_flow(tmp_path):
                 dependencies: [a]
     """)
     )
-    return ConfigurationEngine(core_dir=tmp_path)
+    return ConfigurationEngine(FLOW_NAME, core_dir=tmp_path)
 
 
 async def test_on_initialize_registers_all_flow_phases(minimal_flow, make_orchestrator):
-    orchestrator = make_orchestrator(engine=minimal_flow, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=minimal_flow)
     await orchestrator.on_initialize()
 
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
@@ -146,7 +150,7 @@ async def test_on_initialize_registers_all_flow_phases(minimal_flow, make_orches
 
 
 async def test_on_initialize_wires_dependencies(minimal_flow, make_orchestrator):
-    orchestrator = make_orchestrator(engine=minimal_flow, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=minimal_flow)
     await orchestrator.on_initialize()
 
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
@@ -156,7 +160,7 @@ async def test_on_initialize_wires_dependencies(minimal_flow, make_orchestrator)
 
 
 async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_orchestrator):
-    orchestrator = make_orchestrator(engine=minimal_flow, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=minimal_flow)
     await orchestrator.on_initialize()
 
     assert not orchestrator._queue.empty()
@@ -166,8 +170,8 @@ async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_or
 
 
 async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_path, make_orchestrator):
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
     engine = make_engine(
         tmp_path,
         dedent("""\
@@ -190,13 +194,13 @@ async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_pat
               - phase: a
         """),
     )
-    orchestrator = make_orchestrator(engine=engine, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=engine)
     with pytest.raises(FlowConfigError, match="Unknown phase type"):
         await orchestrator.on_initialize()
 
 
 async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
-    (tmp_path / "prompts").mkdir()
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
     with pytest.raises(FlowConfigError):
         engine = make_engine(
             tmp_path,
@@ -220,12 +224,12 @@ async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
                   - phase: a
             """),
         )
-        orchestrator = make_orchestrator(engine=engine, flow_name="test_flow")
+        orchestrator = make_orchestrator(engine=engine)
         await orchestrator.on_initialize()
 
 
 async def test_file_registry_getter_is_idempotent(minimal_flow, make_orchestrator):
-    orchestrator = make_orchestrator(engine=minimal_flow, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=minimal_flow)
     await orchestrator.on_initialize()
     assert orchestrator._resources is not None
     assert orchestrator._resources.file_registry is orchestrator._resources.file_registry
@@ -238,8 +242,8 @@ def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
         agent_clients={},
         file_access_policy=file_access_policy,
         agents={
-            "a": AgentConfig(name="a", system_prompt_path=Path("/a.md")),
-            "b": AgentConfig(name="b", system_prompt_path=Path("/b.md")),
+            "a": AgentConfig(name="a"),
+            "b": AgentConfig(name="b"),
         },
         callbacks=Callbacks(),
     )
@@ -254,8 +258,8 @@ def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
 
 async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make_orchestrator):
     """A phase defined in the resource list but absent from flow: may have an unknown class — no error."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
     engine = make_engine(
         tmp_path,
         dedent("""\
@@ -286,7 +290,7 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make
               - phase: real
         """),
     )
-    orchestrator = make_orchestrator(engine=engine, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=engine)
     await orchestrator.on_initialize()
 
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
@@ -295,8 +299,8 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make
 
 async def test_phase_in_flow_with_unknown_type_raises(tmp_path, make_orchestrator):
     """A phase referenced from flow: with an unknown class must raise FlowConfigError."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
     engine = make_engine(
         tmp_path,
         dedent("""\
@@ -319,15 +323,15 @@ async def test_phase_in_flow_with_unknown_type_raises(tmp_path, make_orchestrato
               - phase: a
         """),
     )
-    orchestrator = make_orchestrator(engine=engine, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=engine)
     with pytest.raises(FlowConfigError, match="Unknown phase type"):
         await orchestrator.on_initialize()
 
 
 async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
     """A phase defined in the resource list but not in flow runs without error."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
     engine = make_engine(
         tmp_path,
         dedent("""\
@@ -358,7 +362,7 @@ async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
               - phase: real
         """),
     )
-    orchestrator = make_orchestrator(engine=engine, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=engine)
     with caplog.at_level(logging.WARNING):
         await orchestrator.on_initialize()  # must not raise
 
@@ -373,8 +377,8 @@ async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
 
 async def test_on_initialize_invokes_validate_config(tmp_path, make_orchestrator):
     """validate_config is called for each scheduled phase; raising propagates as FlowConfigError."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
     engine = make_engine(
         tmp_path,
         dedent("""\
@@ -395,15 +399,15 @@ async def test_on_initialize_invokes_validate_config(tmp_path, make_orchestrator
               - phase: a
         """),
     )
-    orchestrator = make_orchestrator(engine=engine, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=engine)
     with pytest.raises(FlowConfigError, match="at least one task"):
         await orchestrator.on_initialize()
 
 
 async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, make_orchestrator):
     """A phase defined but not in flow must not trigger its validate_config."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
     engine = make_engine(
         tmp_path,
         dedent("""\
@@ -432,7 +436,7 @@ async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, make_orc
               - phase: real
         """),
     )
-    orchestrator = make_orchestrator(engine=engine, flow_name="test_flow")
+    orchestrator = make_orchestrator(engine=engine)
     await orchestrator.on_initialize()  # must not raise
 
 
@@ -473,8 +477,8 @@ async def test_on_finalize_no_exception_no_log(make_orchestrator, caplog):
 
 def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator, file_access_policy):
     """Full pipeline: a failing phase must cause run() to raise RuntimeError."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
+    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
     engine = make_engine(
         tmp_path,
         dedent("""\
@@ -502,7 +506,7 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator, 
         async def execute(self, context):
             raise RuntimeError("intentional failure")
 
-    orchestrator = make_orchestrator(engine=engine, flow_name="test_flow", grace_period=0.1)
+    orchestrator = make_orchestrator(engine=engine, grace_period=0.1)
     orchestrator._phase_registry.register("FailingPhase", FailingPhase)
 
     with pytest.raises(FatalProcessingError, match="Phase 'failing' failed"):
