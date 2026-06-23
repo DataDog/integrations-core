@@ -142,22 +142,23 @@ class ServiceView(object):
     STARTUP_TYPE_UNKNOWN = "unknown"
     DISPLAY_NAME_UNKNOWN = "Not_Found"
 
-    def __init__(self, scm_handle, name, service_type=0):
+    def __init__(self, scm_handle, name, service_type=None):
         self.scm_handle = scm_handle
         self.name = name
-        # Provided by EnumServicesStatusEx; carries the SERVICE_USERSERVICE_INSTANCE flag.
-        self.service_type = service_type
 
         self._hSvc = None
         self._startup_type = None
         self._service_config = None
         self._is_delayed_auto = None
         self._trigger_count = None
+        self._service_type = service_type
 
     def __str__(self):
         vals = []
         if self.name is not None:
             vals.append('name={}'.format(self.name))
+        if self._service_type is not None:
+            vals.append('service_type=0x{:X}'.format(self._service_type))
         if self._startup_type is not None:
             vals.append('startup_type={}'.format(self.startup_type_string()))
         if self._trigger_count is not None:
@@ -180,6 +181,12 @@ class ServiceView(object):
         if self._service_config is None:
             self._service_config = win32service.QueryServiceConfig(self.hSvc)
         return self._service_config
+
+    @property
+    def service_type(self):
+        if self._service_type is None:
+            self._service_type = self.service_config[0]
+        return self._service_type
 
     @property
     def startup_type(self):
