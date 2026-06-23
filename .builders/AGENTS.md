@@ -25,4 +25,25 @@ Pin Python packages to exact versions with `==`:
   (e.g. `cryptography<49`) are acceptable only when a transitive constraint
   requires it; add a comment explaining why.
 - In inline `pip install` commands inside a Dockerfile, pin every package
-  (e.g. `pip install meson==1.11.1 ninja==1.13.0`), never a bare package name.
+  (e.g. `pip install meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION`),
+  never a bare package name.
+
+## Keeping Pins Up To Date
+
+Pins in the builder images are tracked by Renovate (the `build dependencies`
+group in `renovate.json`) so they don't rot. For a version to be trackable:
+
+- Hoist it into its own `ENV NAME="X.Y.Z"` declaration and reference it from the
+  `RUN` step (`$Env:NAME` under `pwsh`, `${NAME}` under bash). A `# renovate:`
+  comment cannot live mid-`RUN` because line continuations break it, so the
+  annotation must sit on the line directly above the `ENV`.
+- Annotate the `ENV` with the datasource and package name on the preceding line:
+
+```dockerfile
+# renovate: datasource=pypi depName=meson
+ENV MESON_VERSION="1.11.1"
+```
+
+The matcher lives in `renovate.json` under `customManagers` (scoped to the
+builder Dockerfiles under `.builders/images/`). It currently covers the `pypi`
+datasource; extend it there when adding pins from other ecosystems.

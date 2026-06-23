@@ -93,6 +93,7 @@ IGNORED_FILES = frozenset({
     'test_dependencies.txt',
     # Contributor documentation; not baked into any image or artifact.
     'AGENTS.md',
+    'CLAUDE.md',
 })
 
 
