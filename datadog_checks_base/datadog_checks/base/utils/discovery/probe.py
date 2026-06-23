@@ -46,6 +46,10 @@ def generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> I
             return ()
         raise
 
+    # This function is expected to examine the attributes of the provided
+    # service (ports, host, etc.) and return an iterator which yields
+    # appropriate candidate configurations (for example, `{init_config: {},
+    # instances: [{"endpoint": "http://host:1234"}]}`).
     return discovery.candidates(service)
 
 
