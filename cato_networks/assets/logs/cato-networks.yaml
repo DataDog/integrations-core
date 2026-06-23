@@ -119,164 +119,200 @@ facets:
     path: usr.name
     source: log
   - groups:
-      - OCSF
-    name: Activity ID
-    path: ocsf.activity_id
-    source: log
-  - groups:
-      - OCSF
-    name: Activity Name
-    path: ocsf.activity_name
-    source: log
-  - groups:
-      - OCSF
-    name: Actor User Email
+    - OCSF
+    name: Email Address
     path: ocsf.actor.user.email_addr
     source: log
   - groups:
-      - OCSF
-    name: Actor User Name
+    - OCSF
+    name: Name
     path: ocsf.actor.user.name
     source: log
   - groups:
-      - OCSF
-    name: App Name
+    - OCSF
+    name: Unique ID
+    path: ocsf.actor.user.uid
+    source: log
+  - groups:
+    - OCSF
+    name: Application Name
     path: ocsf.app_name
     source: log
   - groups:
-      - OCSF
-    name: Category Name
-    path: ocsf.category_name
-    source: log
-  - groups:
-      - OCSF
-    name: Category UID
-    path: ocsf.category_uid
-    source: log
-  - groups:
-      - OCSF
-    name: Class Name
-    path: ocsf.class_name
-    source: log
-  - groups:
-      - OCSF
-    name: Class UID
-    path: ocsf.class_uid
-    source: log
-  - groups:
-      - OCSF
-    name: Confidence ID
-    path: ocsf.confidence_id
-    source: log
-  - groups:
-      - OCSF
-    name: Direction ID
-    path: ocsf.connection_info.direction_id
-    source: log
-  - groups:
-      - OCSF
-    name: Protocol Name
+    - OCSF
+    name: Connection Info Protocol Name
     path: ocsf.connection_info.protocol_name
     source: log
   - groups:
-      - OCSF
-    name: Destination Domain
+    - OCSF
+    name: Device Description
+    path: ocsf.device.desc
+    source: log
+  - groups:
+    - OCSF
+    name: Device Hostname
+    path: ocsf.device.hostname
+    source: log
+  - groups:
+    - OCSF
+    name: Device IP Address
+    path: ocsf.device.ip
+    source: log
+  - groups:
+    - OCSF
+    name: Device Name
+    path: ocsf.device.name
+    source: log
+  - groups:
+    - OCSF
+    name: Destination Endpoint Domain
     path: ocsf.dst_endpoint.domain
     source: log
   - groups:
-      - OCSF
-    name: Destination IP
+    - OCSF
+    name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
-  - groups:
-      - OCSF
-    name: Destination Port
+  - facetType: range
+    groups:
+    - OCSF
+    name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
+    type: integer
   - groups:
-      - OCSF
-    name: Analytic Name
+    - OCSF
+    name: Finding Information Analytic Name
     path: ocsf.finding_info.analytic.name
     source: log
   - groups:
-      - OCSF
-    name: Finding Title
+    - OCSF
+    name: Finding Information Analytic Unique ID
+    path: ocsf.finding_info.analytic.uid
+    source: log
+  - groups:
+    - OCSF
+    name: Finding Information Description
+    path: ocsf.finding_info.desc
+    source: log
+  - groups:
+    - OCSF
+    name: Finding Information Product Name
+    path: ocsf.finding_info.product.name
+    source: log
+  - groups:
+    - OCSF
+    name: Finding Info Title
     path: ocsf.finding_info.title
     source: log
   - groups:
-      - OCSF
-    name: Finding UID
+    - OCSF
+    name: Finding Info Unique ID
     path: ocsf.finding_info.uid
     source: log
   - groups:
-      - OCSF
+    - OCSF
     name: Message
     path: ocsf.message
     source: log
   - groups:
-      - OCSF
+    - OCSF
     name: Event Code
     path: ocsf.metadata.event_code
     source: log
   - groups:
-      - OCSF
+    - OCSF
     name: Product Name
     path: ocsf.metadata.product.name
     source: log
   - groups:
-      - OCSF
+    - OCSF
     name: Vendor Name
     path: ocsf.metadata.product.vendor_name
     source: log
   - groups:
-      - OCSF
-    name: Metadata UID
+    - OCSF
+    name: Metadata Event UID
     path: ocsf.metadata.uid
     source: log
   - groups:
-      - OCSF
-    name: Severity
-    path: ocsf.severity
+    - OCSF
+    name: Policy Name
+    path: ocsf.policy.name
     source: log
   - groups:
-      - OCSF
-    name: Severity ID
-    path: ocsf.severity_id
+    - OCSF
+    name: Policy Unique ID
+    path: ocsf.policy.uid
     source: log
   - groups:
-      - OCSF
-    name: Source Hostname
+    - OCSF
+    name: DNS Query Hostname
+    path: ocsf.query.hostname
+    source: log
+  - groups:
+    - OCSF
+    name: Query Resource Record Type
+    path: ocsf.query.type
+    source: log
+  - groups:
+    - OCSF
+    name: Service Name
+    path: ocsf.service.name
+    source: log
+  - groups:
+    - OCSF
+    name: Source Endpoint Hostname
     path: ocsf.src_endpoint.hostname
     source: log
   - groups:
-      - OCSF
-    name: Source IP
+    - OCSF
+    name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
   - groups:
-      - OCSF
-    name: Source Port
+    - OCSF
+    name: Source Endpoint Owner Email Address
+    path: ocsf.src_endpoint.owner.email_addr
+    source: log
+  - groups:
+    - OCSF
+    name: Source Endpoint Owner Name
+    path: ocsf.src_endpoint.owner.name
+    source: log
+  - facetType: range
+    groups:
+    - OCSF
+    name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
+    type: integer
   - groups:
-      - OCSF
-    name: Status
-    path: ocsf.status
+    - OCSF
+    name: Status Detail
+    path: ocsf.status_detail
+    source: log
+  - facetType: range
+    groups:
+    - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+    type: integer
+  - groups:
+    - OCSF
+    name: Target Email Address
+    path: ocsf.user.email_addr
     source: log
   - groups:
-      - OCSF
-    name: Status ID
-    path: ocsf.status_id
+    - OCSF
+    name: Target Name
+    path: ocsf.user.name
     source: log
   - groups:
-      - OCSF
-    name: Type Name
-    path: ocsf.type_name
-    source: log
-  - groups:
-      - OCSF
-    name: Type UID
-    path: ocsf.type_uid
+    - OCSF
+    name: Target Unique ID
+    path: ocsf.user.uid
     source: log
 pipeline:
   type: pipeline
@@ -503,7 +539,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:\"Detection and Response\""
+        query: '@ocsf.metadata.event_code:"Detection and Response"'
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 2004
@@ -513,27 +549,17 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@trigger:\"Story Created\""
-                  name: Create
-                  id: 1
-                - filter:
                     query: "@status:Closed"
                   name: Close
                   id: 3
                 - filter:
                     query: "*"
-                  name: Other
-                  id: 99
+                  name: Create
+                  id: 1
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
               fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - trigger
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
@@ -973,7 +999,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:Connectivity AND @event_sub_type:\"Client Connectivity Policy\""
+        query: '@ocsf.metadata.event_code:Connectivity AND @event_sub_type:"Client Connectivity Policy"'
       processors:
         - type: string-builder-processor
           name: Add ocsf.service.name
@@ -990,48 +1016,59 @@ pipeline:
               categories:
                 - filter:
                     query: "*"
-                  name: Other
-                  id: 99
+                  name: Logon
+                  id: 1
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - event_sub_type
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Success
                   id: 1
                 - filter:
                     query: "@action:(Block OR Deny)"
                   name: Failure
                   id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@action:Allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@action:(Block OR Drop)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@action:(Monitor OR Notify)"
+                  name: Observed
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
                   id: 99
               targets:
-                name: ocsf.status
-                id: ocsf.status_id
+                name: ocsf.action
+                id: ocsf.action_id
               fallback:
                 values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
                 sources:
-                  ocsf.status:
+                  ocsf.action:
                     - action
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Informational
                   id: 1
                 - filter:
@@ -1157,20 +1194,20 @@ pipeline:
             className: Authentication
             classUid: 3002
             extensions: []
-            profiles: []
+            profiles: [security_control]
     - type: pipeline
       name: OCSF sub pipeline for class DNS Activity [4003]
       enabled: true
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:Security AND @application_name:(DNS OR \"DNS over HTTPS - DoH\" OR \"DNS over TLS\" OR \"DNS over TCP\" OR Quad9)"
+        query: '@ocsf.metadata.event_code:Security AND @application_name:(DNS OR "DNS over HTTPS - DoH" OR "DNS over TLS" OR "DNS over TCP" OR Quad9)'
       processors:
         - type: attribute-remapper
-          name: Map `dns_response` to `ocsf.answer.rdata`
+          name: Map `dns_answer` to `ocsf.answer.rdata`
           enabled: true
           sources:
-            - dns_response
+            - dns_answer
           sourceType: attribute
           target: ocsf.answer.rdata
           targetType: attribute
@@ -1192,59 +1229,66 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@action:(Allow OR Block OR Drop)"
+                    query: "*"
                   name: Traffic
                   id: 6
-                - filter:
-                    query: "@action:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - action
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Success
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
                   name: Failure
                   id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@action:Allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@action:(Block OR Drop)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@action:(Monitor OR Notify)"
+                  name: Observed
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
                   id: 99
               targets:
-                name: ocsf.status
-                id: ocsf.status_id
+                name: ocsf.action
+                id: ocsf.action_id
               fallback:
                 values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
                 sources:
-                  ocsf.status:
+                  ocsf.action:
                     - action
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Informational
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
-                  name: High
-                  id: 4
+                  name: Medium
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
@@ -1298,7 +1342,6 @@ pipeline:
               target: ocsf.query.type
               preserveSource: true
               overrideOnConflict: true
-              #TODO: move this to an array-processor
             - type: schema-remapper
               name: Map `ocsf.answers` to `ocsf.answers`
               sources:
@@ -1390,7 +1433,7 @@ pipeline:
                   name: BADCOOKIE
                   id: 23
                 - filter:
-                    query: '@dns_reply_code:*'
+                    query: "@dns_reply_code:*"
                   name: Other
                   id: 99
               targets:
@@ -1553,63 +1596,66 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
-                  name: Connect
-                  id: 1
-                - filter:
-                    query: "@action:(Block OR Drop)"
-                  name: Close
-                  id: 2
-                - filter:
-                    query: "@action:*"
-                  name: Other
-                  id: 99
+                    query: "*"
+                  name: Traffic
+                  id: 6
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - action
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Success
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
                   name: Failure
                   id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@action:Allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@action:(Block OR Drop)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@action:(Monitor OR Notify)"
+                  name: Observed
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
                   id: 99
               targets:
-                name: ocsf.status
-                id: ocsf.status_id
+                name: ocsf.action
+                id: ocsf.action_id
               fallback:
                 values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
                 sources:
-                  ocsf.status:
+                  ocsf.action:
                     - action
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Informational
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
-                  name: High
-                  id: 4
+                  name: Medium
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
@@ -1789,7 +1835,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:Security AND @application_name:(SMBV3 OR \"Netbios General (Parent of all Netbios apps)\")"
+        query: '@ocsf.metadata.event_code:Security AND @application_name:(SMBV3 OR "Netbios General (Parent of all Netbios apps)")'
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 4006
@@ -1799,59 +1845,66 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
-                  name: Connect
-                  id: 6
-                - filter:
-                    query: "@action:*"
-                  name: Other
-                  id: 99
+                    query: "*"
+                  name: Unknown
+                  id: 0
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - action
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Success
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
                   name: Failure
                   id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@action:Allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@action:(Block OR Drop)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@action:(Monitor OR Notify)"
+                  name: Observed
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
                   id: 99
               targets:
-                name: ocsf.status
-                id: ocsf.status_id
+                name: ocsf.action
+                id: ocsf.action_id
               fallback:
                 values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
                 sources:
-                  ocsf.status:
+                  ocsf.action:
                     - action
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Informational
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
                   name: High
-                  id: 4
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
@@ -2041,63 +2094,70 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
-                  name: Open
-                  id: 1
-                - filter:
                     query: "@action:(Block OR Drop)"
                   name: Close
                   id: 2
                 - filter:
-                    query: "@action:*"
-                  name: Other
-                  id: 99
+                    query: "*"
+                  name: Traffic
+                  id: 6
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - action
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Success
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
                   name: Failure
                   id: 2
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@action:Allow"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@action:(Block OR Drop)"
+                  name: Denied
+                  id: 2
+                - filter:
+                    query: "@action:(Monitor OR Notify)"
+                  name: Observed
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
                   id: 99
               targets:
-                name: ocsf.status
-                id: ocsf.status_id
+                name: ocsf.action
+                id: ocsf.action_id
               fallback:
                 values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
+                  ocsf.action: Other
+                  ocsf.action_id: "99"
                 sources:
-                  ocsf.status:
+                  ocsf.action:
                     - action
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Informational
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
-                  name: High
-                  id: 4
+                  name: Medium
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
@@ -2277,7 +2337,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:Security AND -@application_name:(DNS OR \"DNS over HTTPS - DoH\" OR \"DNS over TLS\" OR \"DNS over TCP\" OR Quad9 OR SSH-V2 OR RDP OR SMBV3 OR \"Netbios General (Parent of all Netbios apps)\")"
+        query: "@ocsf.metadata.event_code:Security AND -@ocsf.class_uid:*"
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 4001
@@ -2287,63 +2347,41 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
-                  name: Open
-                  id: 1
-                - filter:
                     query: "@action:(Block OR Drop)"
                   name: Close
                   id: 2
                 - filter:
-                    query: "@action:*"
-                  name: Other
-                  id: 99
+                    query: "*"
+                  name: Traffic
+                  id: 6
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - action
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Success
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
                   name: Failure
                   id: 2
-                - filter:
-                    query: "@action:*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
-              fallback:
-                values:
-                  ocsf.status: Other
-                  ocsf.status_id: "99"
-                sources:
-                  ocsf.status:
-                    - action
             - type: schema-category-mapper
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@action:Allow"
+                    query: "@action:(Allow OR Monitor OR Notify)"
                   name: Informational
                   id: 1
                 - filter:
                     query: "@action:(Block OR Drop)"
-                  name: High
-                  id: 4
+                  name: Medium
+                  id: 3
                 - filter:
                     query: "@action:*"
                   name: Other
@@ -2738,8 +2776,8 @@ pipeline:
                   id: 1
                 - filter:
                     query: "@action:Failed"
-                  name: High
-                  id: 4
+                  name: Medium
+                  id: 3
                 - filter:
                     query: "*"
                   name: Other

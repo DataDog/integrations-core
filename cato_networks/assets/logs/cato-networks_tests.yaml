@@ -607,7 +607,7 @@ tests:
       domain_name: signaler-pa.clients6.google.com
       event_type: Security
       ocsf:
-        severity: High
+        severity: Medium
         activity_name: Close
         metadata:
           uid: e278205a1f4c73
@@ -636,7 +636,7 @@ tests:
           protocol_name: UDP
         class_uid: 4001
         activity_id: 2
-        severity_id: 4
+        severity_id: 3
         dst_endpoint:
           port: 443
           ip: 10.10.10.10
@@ -1152,9 +1152,11 @@ tests:
           event_code: Connectivity
           uid: c3d4e5f6a7b80003
           version: 1.5.0
+          profiles:
+            - security_control
         time: 1763547168003
         severity: Informational
-        activity_name: Client Connectivity Policy
+        activity_name: Logon
         category_uid: 3
         category_name: Identity & Access Management
         src_endpoint:
@@ -1167,7 +1169,7 @@ tests:
             name: John Doe
         status_id: 1
         class_uid: 3002
-        activity_id: 99
+        activity_id: 1
         severity_id: 1
         class_name: Authentication
         user:
@@ -1177,6 +1179,8 @@ tests:
         status: Success
         service:
           name: Cato VPN
+        action_id: 1
+        action: Allowed
       vpn_user_email: test@example.com
       user_id: 1000002
     message: |-
@@ -1305,7 +1309,7 @@ tests:
       domain_name: dns1.example.com
       event_type: Security
       ocsf:
-        severity: High
+        severity: Medium
         activity_name: Traffic
         metadata:
           uid: d4e5f6a7b8c90004
@@ -1337,7 +1341,7 @@ tests:
           protocol_name: UDP
         class_uid: 4003
         activity_id: 6
-        severity_id: 4
+        severity_id: 3
         dst_endpoint:
           port: 53
           ip: 10.10.10.11
@@ -1348,6 +1352,10 @@ tests:
           uid: '253668'
           name: Default WAN Firewall Rule
         time: 1763473131004
+        answers:
+          - rdata: 1.2.3.4
+        action_id: 2
+        action: Denied
       vpn_user_email: test@example.com
       dest_port: 53
       src_port: 50323
@@ -1480,8 +1488,8 @@ tests:
       domain_name: app.example.com
       event_type: Security
       ocsf:
-        severity: Monitor
-        activity_name: Monitor
+        severity: Informational
+        activity_name: Traffic
         metadata:
           uid: e5f6a7b8c9d00005
           product:
@@ -1502,20 +1510,20 @@ tests:
           ip: 10.10.10.10
         message: Default WAN Firewall Rule
         app_name: HTTP(S)
-        status_id: 99
+        status_id: 1
         connection_info:
           direction_id: 99
           direction: WANBOUND
           protocol_name: TCP
         class_uid: 4001
-        activity_id: 99
-        severity_id: 99
+        activity_id: 6
+        severity_id: 1
         dst_endpoint:
           port: 443
           ip: 10.10.10.11
           domain: app.example.com
         class_name: Network Activity
-        status: Monitor
+        status: Success
         policy:
           uid: '6422041642034481894'
           name: Default WAN Firewall Rule
@@ -1648,8 +1656,8 @@ tests:
       domain_name: ssh.example.com
       event_type: Security
       ocsf:
-        severity: Monitor
-        activity_name: Monitor
+        severity: Informational
+        activity_name: Traffic
         metadata:
           uid: f6a7b8c9d0e10006
           product:
@@ -1670,24 +1678,26 @@ tests:
           ip: 10.10.10.10
         message: Default WAN Firewall Rule
         app_name: SSH-V2
-        status_id: 99
+        status_id: 1
         connection_info:
           direction_id: 99
           direction: WANBOUND
           protocol_name: TCP
         class_uid: 4007
-        activity_id: 99
-        severity_id: 99
+        activity_id: 6
+        severity_id: 1
         dst_endpoint:
           port: 22
           ip: 10.10.10.11
           domain: ssh.example.com
         class_name: SSH Activity
-        status: Monitor
+        status: Success
         policy:
           uid: '1234810669101761930'
           name: Default WAN Firewall Rule
         time: 1763477970006
+        action_id: 3
+        action: Observed
       vpn_user_email: test@example.com
       dest_port: 22
       src_port: 47938
@@ -1811,8 +1821,8 @@ tests:
       src_ip: 10.10.10.10
       event_type: Security
       ocsf:
-        severity: Monitor
-        activity_name: Monitor
+        severity: Informational
+        activity_name: Traffic
         metadata:
           uid: a7b8c9d0e1f20007
           product:
@@ -1833,23 +1843,25 @@ tests:
           ip: 10.10.10.10
         message: Default WAN Firewall Rule
         app_name: RDP
-        status_id: 99
+        status_id: 1
         connection_info:
           direction_id: 99
           direction: WANBOUND
           protocol_name: UDP
         class_uid: 4005
-        activity_id: 99
-        severity_id: 99
+        activity_id: 6
+        severity_id: 1
         dst_endpoint:
           port: 3389
           ip: 10.10.10.11
         class_name: RDP Activity
-        status: Monitor
+        status: Success
         policy:
           uid: '4600855063782837704'
           name: Default WAN Firewall Rule
         time: 1763485824007
+        action_id: 3
+        action: Observed
       vpn_user_email: test@example.com
       dest_port: 3389
       src_port: 51234
@@ -1972,8 +1984,8 @@ tests:
       src_ip: 10.10.10.10
       event_type: Security
       ocsf:
-        severity: Monitor
-        activity_name: Monitor
+        severity: Informational
+        activity_name: Unknown
         metadata:
           uid: b8c9d0e1f2a30008
           product:
@@ -1994,23 +2006,25 @@ tests:
           ip: 10.10.10.10
         message: Default WAN Firewall Rule
         app_name: Netbios General (Parent of all Netbios apps)
-        status_id: 99
+        status_id: 1
         connection_info:
           direction_id: 99
           direction: WANBOUND
           protocol_name: UDP
         class_uid: 4006
-        activity_id: 99
-        severity_id: 99
+        activity_id: 0
+        severity_id: 1
         dst_endpoint:
           port: 445
           ip: 10.10.10.11
         class_name: SMB Activity
-        status: Monitor
+        status: Success
         policy:
           uid: '2963872298229056376'
           name: Default WAN Firewall Rule
         time: 1763568239008
+        action_id: 3
+        action: Observed
       vpn_user_email: test@example.com
       dest_port: 445
       src_port: 49152
