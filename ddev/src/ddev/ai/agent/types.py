@@ -4,7 +4,7 @@
 
 """Wire types for the agent layer: enums, dataclasses, and response shapes."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
@@ -27,6 +27,32 @@ class ToolCall:
     id: str
     name: str
     input: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class WebSearchCall:
+    """A server-side web search the model performed."""
+
+    query: str
+    result_count: int = 0
+    error: str | None = None
+
+
+@dataclass(frozen=True)
+class WebSearchCitation:
+    """A source cited by the model in a web-search-enabled response."""
+
+    url: str
+    cited_text: str
+    title: str | None = None
+
+
+@dataclass(frozen=True)
+class WebSearchActivity:
+    """All web search activity from a single agent turn: queries made and sources cited."""
+
+    searches: list[WebSearchCall] = field(default_factory=list)
+    citations: list[WebSearchCitation] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -62,6 +88,7 @@ class TokenUsage:
     cache_read_input_tokens: int  # tokens read from prompt cache
     cache_creation_input_tokens: int  # tokens written to prompt cache
     context_usage: ContextUsage | None = None  # None only for agents that don't provide context tracking
+    web_search_requests: int = 0  # number of web search requests (billed separately from tokens)
 
 
 @dataclass(frozen=True)
@@ -73,3 +100,4 @@ class AgentResponse:
     text: str
     tool_calls: list[ToolCall]
     usage: TokenUsage
+    web_activity: WebSearchActivity = field(default_factory=WebSearchActivity)

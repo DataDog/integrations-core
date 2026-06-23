@@ -81,7 +81,16 @@ class AgentLogger:
                         "output": response.usage.output_tokens,
                         "cache_read": response.usage.cache_read_input_tokens,
                         "cache_creation": response.usage.cache_creation_input_tokens,
+                        "web_search_requests": response.usage.web_search_requests,
                     },
+                    "web_searches": [
+                        {"query": ws.query, "result_count": ws.result_count, "error": ws.error}
+                        for ws in response.web_activity.searches
+                    ],
+                    "web_citations": [
+                        {"url": c.url, "title": c.title, "cited_text": c.cited_text}
+                        for c in response.web_activity.citations
+                    ],
                 },
             )
 

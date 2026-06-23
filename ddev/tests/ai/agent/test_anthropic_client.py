@@ -8,11 +8,17 @@ from unittest.mock import AsyncMock, MagicMock
 import anthropic
 import pytest
 
-from ddev.ai.agent.anthropic_client import AnthropicAgent
+from ddev.ai.agent.anthropic_client import (
+    MAX_CONTINUATIONS,
+    NATIVE_TOOL_DEFINITIONS,
+    WEB_SEARCH_VERSION,
+    AnthropicAgent,
+    CompletionResult,
+)
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import StopReason, ToolResultMessage
 from ddev.ai.tools.core.types import ToolResult
-from ddev.ai.tools.registry import ToolRegistry
+from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -24,12 +30,15 @@ def make_usage(
     output_tokens: int = 20,
     cache_read: int | None = None,
     cache_creation: int | None = None,
+    web_search_requests: int = 0,
 ) -> SimpleNamespace:
+    server_tool_use = SimpleNamespace(web_search_requests=web_search_requests)
     return SimpleNamespace(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
         cache_read_input_tokens=cache_read,
         cache_creation_input_tokens=cache_creation,
+        server_tool_use=server_tool_use,
     )
 
 
@@ -422,18 +431,359 @@ async def test_reset_clears_history() -> None:
 
 
 # ---------------------------------------------------------------------------
-# pause_turn raises AgentError
+# Native (server) tool injection
 # ---------------------------------------------------------------------------
 
 
-async def test_pause_turn_raises_agent_error() -> None:
-    resp = make_response("pause_turn", [])
+def test_native_tool_definitions_cover_all_native_names() -> None:
+    """Every name in NATIVE_TOOL_NAMES must have an entry in NATIVE_TOOL_DEFINITIONS."""
+    assert set(NATIVE_TOOL_DEFINITIONS.keys()) == set(NATIVE_TOOL_NAMES)
+
+
+async def test_native_tool_injected_into_request() -> None:
+    registry = ToolRegistry([], native_tool_names=["web_search"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Search for something")
+
+    sent_tools = create_mock.call_args.kwargs["tools"]
+    assert any(t.get("type") == WEB_SEARCH_VERSION for t in sent_tools)
+
+
+async def test_web_search_max_uses_stays_below_continuation_budget() -> None:
+    registry = ToolRegistry([], native_tool_names=["web_search"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Search for something")
+
+    web_search = next(t for t in create_mock.call_args.kwargs["tools"] if t.get("type") == WEB_SEARCH_VERSION)
+    assert web_search["max_uses"] == MAX_CONTINUATIONS - 1
+
+
+async def test_create_until_complete_returns_completion_result() -> None:
+    final = make_response("end_turn", [make_text_block("done")])
+    agent, _ = make_agent(mock_response=final)
+
+    result = await agent._create_until_complete(request_messages=[], system_param=[], tool_defs=[])
+
+    assert isinstance(result, CompletionResult)
+    assert result.final_response is final
+    assert result.paused_turns == []
+    assert result.all_responses == [final]
+
+
+async def test_native_tool_appended_after_client_tools() -> None:
+    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Hi")
+
+    sent_tools = create_mock.call_args.kwargs["tools"]
+    assert sent_tools[0]["name"] == "read_file"
+    assert sent_tools[-1]["name"] == "web_search"
+    # Cache breakpoint must be on the last tool (web_search), not on read_file.
+    assert "cache_control" not in sent_tools[0]
+    assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+
+
+async def test_allowed_tools_gates_native_tool() -> None:
+    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Hi", allowed_tools=["read_file"])
+
+    sent_names = [t["name"] for t in create_mock.call_args.kwargs["tools"]]
+    assert "web_search" not in sent_names
+    assert "read_file" in sent_names
+
+
+async def test_allowed_tools_none_passes_all_including_native() -> None:
+    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Hi", allowed_tools=None)
+
+    sent_names = [t["name"] for t in create_mock.call_args.kwargs["tools"]]
+    assert "read_file" in sent_names
+    assert "web_search" in sent_names
+
+
+async def test_no_native_tools_request_unchanged() -> None:
+    registry = ToolRegistry([FakeTool("read_file")])
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(tools=registry, mock_response=resp)
+
+    await agent.send("Hi")
+
+    sent_names = [t["name"] for t in create_mock.call_args.kwargs["tools"]]
+    assert sent_names == ["read_file"]
+
+
+async def test_server_result_blocks_preserved_in_history_not_parsed() -> None:
+    server_use = SimpleNamespace(type="server_tool_use", id="srvtoolu_01", name="web_search")
+    search_result = SimpleNamespace(type="web_search_tool_result", tool_use_id="srvtoolu_01", content=[])
+    content = [
+        make_text_block("Searching..."),
+        server_use,
+        search_result,
+        make_text_block("Here are the results."),
+    ]
+    resp = make_response("end_turn", content)
     agent, _ = make_agent(mock_response=resp)
 
-    with pytest.raises(AgentError):
-        await agent.send("Hi")
+    result = await agent.send("Search for X")
 
-    assert agent.history == []
+    assert result.tool_calls == []
+    assert "Searching..." in result.text
+    assert "Here are the results." in result.text
+    assert agent.history[-1] == {"role": "assistant", "content": content}
+
+
+def make_server_tool_use(id: str, query: str) -> anthropic.types.ServerToolUseBlock:
+    return anthropic.types.ServerToolUseBlock(type="server_tool_use", id=id, name="web_search", input={"query": query})
+
+
+def make_web_search_result(tool_use_id: str, result_count: int) -> anthropic.types.WebSearchToolResultBlock:
+    results = [
+        anthropic.types.WebSearchResultBlock(
+            type="web_search_result", encrypted_content="x", page_age=None, title=f"r{i}", url=f"http://x/{i}"
+        )
+        for i in range(result_count)
+    ]
+    return anthropic.types.WebSearchToolResultBlock(
+        type="web_search_tool_result", tool_use_id=tool_use_id, content=results
+    )
+
+
+async def test_web_searches_surfaced_with_query_and_result_count() -> None:
+    content = [
+        make_text_block("Searching..."),
+        make_server_tool_use("srv1", "weather in Tuvalu"),
+        make_web_search_result("srv1", result_count=3),
+        make_text_block("Here is the forecast."),
+    ]
+    resp = make_response("end_turn", content)
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Search for the weather")
+
+    assert result.tool_calls == []
+    assert len(result.web_activity.searches) == 1
+    assert result.web_activity.searches[0].query == "weather in Tuvalu"
+    assert result.web_activity.searches[0].result_count == 3
+    assert result.web_activity.searches[0].error is None
+
+
+async def test_web_search_error_surfaced() -> None:
+    error = anthropic.types.WebSearchToolResultError(
+        type="web_search_tool_result_error", error_code="max_uses_exceeded"
+    )
+    content = [
+        make_server_tool_use("srv1", "too many"),
+        anthropic.types.WebSearchToolResultBlock(type="web_search_tool_result", tool_use_id="srv1", content=error),
+    ]
+    agent, _ = make_agent(mock_response=make_response("end_turn", content))
+
+    result = await agent.send("Search")
+
+    assert len(result.web_activity.searches) == 1
+    assert result.web_activity.searches[0].error == "max_uses_exceeded"
+    assert result.web_activity.searches[0].result_count == 0
+
+
+async def test_no_web_searches_yields_empty_activity() -> None:
+    agent, _ = make_agent(mock_response=make_response("end_turn", [make_text_block("hi")]))
+
+    result = await agent.send("Hi")
+
+    assert result.web_activity.searches == []
+    assert result.web_activity.citations == []
+
+
+async def test_web_search_citations_extracted_from_text_block() -> None:
+    citation = anthropic.types.CitationsWebSearchResultLocation(
+        type="web_search_result_location",
+        url="https://example.com/page",
+        title="Example Page",
+        cited_text="some cited excerpt",
+        encrypted_index="enc123",
+    )
+    block = anthropic.types.TextBlock(type="text", text="Here is the answer.", citations=[citation])
+    resp = make_response("end_turn", [block])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("What is X?")
+
+    assert len(result.web_activity.citations) == 1
+    c = result.web_activity.citations[0]
+    assert c.url == "https://example.com/page"
+    assert c.title == "Example Page"
+    assert c.cited_text == "some cited excerpt"
+
+
+async def test_non_web_search_citations_are_ignored() -> None:
+    char_citation = anthropic.types.CitationCharLocation(
+        type="char_location",
+        cited_text="some text",
+        document_index=0,
+        document_title=None,
+        end_char_index=10,
+        start_char_index=0,
+    )
+    block = anthropic.types.TextBlock(type="text", text="Based on the doc.", citations=[char_citation])
+    resp = make_response("end_turn", [block])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Hi")
+
+    assert result.web_activity.citations == []
+
+
+async def test_citations_across_multiple_text_blocks() -> None:
+    citation1 = anthropic.types.CitationsWebSearchResultLocation(
+        type="web_search_result_location",
+        url="https://a.com",
+        title="A",
+        cited_text="text a",
+        encrypted_index="e1",
+    )
+    citation2 = anthropic.types.CitationsWebSearchResultLocation(
+        type="web_search_result_location",
+        url="https://b.com",
+        title="B",
+        cited_text="text b",
+        encrypted_index="e2",
+    )
+    block1 = anthropic.types.TextBlock(type="text", text="First.", citations=[citation1])
+    block2 = anthropic.types.TextBlock(type="text", text="Second.", citations=[citation2])
+    resp = make_response("end_turn", [block1, block2])
+    agent, _ = make_agent(mock_response=resp)
+
+    result = await agent.send("Hi")
+
+    assert len(result.web_activity.citations) == 2
+    assert result.web_activity.citations[0].url == "https://a.com"
+    assert result.web_activity.citations[1].url == "https://b.com"
+
+
+# ---------------------------------------------------------------------------
+# pause_turn continuation loop
+# ---------------------------------------------------------------------------
+
+
+async def test_pause_turn_triggers_continuation() -> None:
+    pause_content = [make_text_block("Searching...")]
+    pause_resp = make_response("pause_turn", pause_content)
+    final_resp = make_response("end_turn", [make_text_block("Done.")])
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(side_effect=[pause_resp, final_resp])
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    result = await agent.send("Hi")
+
+    assert client.messages.create.await_count == 2
+    assert result.stop_reason is StopReason.END_TURN
+    # Paused turn must appear in history before the final assistant turn.
+    assert agent.history[-2] == {"role": "assistant", "content": pause_content}
+    assert agent.history[-1] == {"role": "assistant", "content": final_resp.content}
+
+
+async def test_pause_turn_second_call_includes_paused_turn_in_messages() -> None:
+    pause_content = [make_text_block("interim")]
+    pause_resp = make_response("pause_turn", pause_content)
+    final_resp = make_response("end_turn", [make_text_block("done")])
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(side_effect=[pause_resp, final_resp])
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    await agent.send("Hi")
+
+    second_call_messages = client.messages.create.call_args_list[1].kwargs["messages"]
+    assert second_call_messages[-1] == {"role": "assistant", "content": pause_content}
+
+
+async def test_multiple_consecutive_pause_turns() -> None:
+    pause1_content = [make_text_block("p1")]
+    pause2_content = [make_text_block("p2")]
+    final_content = [make_text_block("done")]
+    pause1 = make_response("pause_turn", pause1_content)
+    pause2 = make_response("pause_turn", pause2_content)
+    final = make_response("end_turn", final_content)
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(side_effect=[pause1, pause2, final])
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    result = await agent.send("Hi")
+
+    assert client.messages.create.await_count == 3
+    assert result.stop_reason is StopReason.END_TURN
+    # Both paused turns appear in history in order.
+    assert agent.history[-3] == {"role": "assistant", "content": pause1_content}
+    assert agent.history[-2] == {"role": "assistant", "content": pause2_content}
+    assert agent.history[-1] == {"role": "assistant", "content": final_content}
+
+
+async def test_error_during_paused_continuation_leaves_history_unchanged() -> None:
+    ok_resp = make_response("end_turn", [make_text_block("ok")])
+    pause_resp = make_response("pause_turn", [make_text_block("pausing")])
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(
+        side_effect=[
+            ok_resp,
+            pause_resp,
+            anthropic.APIConnectionError(request=MagicMock()),
+        ]
+    )
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    await agent.send("First")
+    history_after_first = agent.history[:]
+
+    with pytest.raises(AgentConnectionError):
+        await agent.send("Second")
+
+    assert agent.history == history_after_first
+
+
+async def test_pause_turn_token_usage_summed_across_calls() -> None:
+    pause_usage = make_usage(input_tokens=100, output_tokens=50, web_search_requests=2)
+    final_usage = make_usage(input_tokens=200, output_tokens=80, web_search_requests=1)
+    pause_resp = make_response("pause_turn", [make_text_block("p")], usage=pause_usage)
+    final_resp = make_response("end_turn", [make_text_block("done")], usage=final_usage)
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(side_effect=[pause_resp, final_resp])
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    result = await agent.send("Hi")
+
+    assert result.usage.input_tokens == 300  # 100 + 200
+    assert result.usage.output_tokens == 130  # 50 + 80
+    assert result.usage.web_search_requests == 3  # 2 + 1
 
 
 # ---------------------------------------------------------------------------
@@ -633,3 +983,24 @@ async def test_multi_turn_only_latest_user_message_in_request_has_cache_control(
     latest_blocks = second_call_messages[-1]["content"]
     assert all("cache_control" not in b for b in latest_blocks[:-1])
     assert latest_blocks[-1]["cache_control"] == {"type": "ephemeral"}
+
+
+# ---------------------------------------------------------------------------
+# pause_turn continuation cap
+# ---------------------------------------------------------------------------
+
+
+async def test_pause_turn_raises_after_max_continuations() -> None:
+    pause_resp = make_response("pause_turn", [make_text_block("still searching...")])
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(return_value=pause_resp)
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    with pytest.raises(AgentError, match=f"pause_turn did not resolve after {MAX_CONTINUATIONS} continuations"):
+        await agent.send("Hi")
+
+    assert client.messages.create.await_count == MAX_CONTINUATIONS

@@ -6,7 +6,15 @@ import json
 from pathlib import Path
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
+from ddev.ai.agent.types import (
+    AgentResponse,
+    StopReason,
+    TokenUsage,
+    ToolCall,
+    WebSearchActivity,
+    WebSearchCall,
+    WebSearchCitation,
+)
 from ddev.ai.react.types import ReActResult
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.core.types import ToolResult
@@ -125,6 +133,40 @@ async def test_emit_after_close_is_silently_dropped(tmp_path):
     cb = logger.as_callback_set()
     await cb.fire_agent_start(scope, "sys", [])
     assert not (tmp_path / AgentRole.PHASE.value / "p1.jsonl").exists()
+
+
+async def test_agent_response_logs_web_searches_and_citations(tmp_path):
+    activity = WebSearchActivity(
+        searches=[WebSearchCall(query="python typing", result_count=5)],
+        citations=[WebSearchCitation(url="https://docs.python.org", cited_text="PEP 484", title="PEP 484")],
+    )
+    response = AgentResponse(
+        stop_reason=StopReason.END_TURN,
+        text="here",
+        tool_calls=[],
+        usage=TokenUsage(input_tokens=10, output_tokens=5, cache_read_input_tokens=0, cache_creation_input_tokens=0),
+        web_activity=activity,
+    )
+    logger = AgentLogger(tmp_path)
+    cb = logger.as_callback_set()
+
+    await cb.fire_agent_response(PHASE, response, 1)
+
+    events = read_events(tmp_path / "phase" / "p1.jsonl")
+    ev = events[0]
+    assert ev["web_searches"] == [{"query": "python typing", "result_count": 5, "error": None}]
+    assert ev["web_citations"] == [{"url": "https://docs.python.org", "title": "PEP 484", "cited_text": "PEP 484"}]
+
+
+async def test_agent_response_logs_empty_web_activity(tmp_path):
+    logger = AgentLogger(tmp_path)
+    cb = logger.as_callback_set()
+
+    await cb.fire_agent_response(PHASE, make_response("hi"), 1)
+
+    events = read_events(tmp_path / "phase" / "p1.jsonl")
+    assert events[0]["web_searches"] == []
+    assert events[0]["web_citations"] == []
 
 
 async def test_non_serializable_values_fall_back_to_str(tmp_path):

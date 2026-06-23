@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING
@@ -71,6 +71,12 @@ class ToolSpec:
     read_only: bool = False
 
 
+# Server (provider-executed) tools.
+NATIVE_TOOL_READ_ONLY: dict[str, bool] = {
+    "web_search": True,
+}
+NATIVE_TOOL_NAMES: list[str] = list(NATIVE_TOOL_READ_ONLY)
+
 TOOL_MANIFEST: dict[str, ToolSpec] = {
     "read_file": ToolSpec("fs.read_file", "ReadFileTool", factory=_file_registry_factory, read_only=True),
     "create_file": ToolSpec("fs.create_file", "CreateFileTool", factory=_file_registry_factory, read_only=False),
@@ -101,13 +107,24 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
 class ToolRegistry:
     """Registry holding all available tools."""
 
-    def __init__(self, tools: list[ToolProtocol]) -> None:
+    def __init__(self, tools: list[ToolProtocol], native_tool_names: Sequence[str] | None = None) -> None:
         self._tools: dict[str, ToolProtocol] = {tool.name: tool for tool in tools}
+        self._native_tool_names: tuple[str, ...] = tuple(native_tool_names or ())
+
+    @property
+    def native_tool_names(self) -> Sequence[str]:
+        """Provider-executed tool names selected for this registry (order preserved)."""
+        return self._native_tool_names
 
     @staticmethod
     def available_tool_names() -> list[str]:
-        """Return all tool names that from_names can resolve."""
-        return list(TOOL_MANIFEST)
+        """All tool names from_names can resolve: client tools + native (server) tools.
+
+        Native tools are appended last. The cache breakpoint in AnthropicAgent lands on
+        the final element of this list, so the last native tool in NATIVE_TOOL_NAMES acts
+        as the static-prefix cache anchor. Keep that tool last when adding new native tools.
+        """
+        return [*TOOL_MANIFEST, *NATIVE_TOOL_NAMES]
 
     @classmethod
     def from_names(
@@ -134,13 +151,17 @@ class ToolRegistry:
             process_factory=process_factory,
         )
         tools: list[ToolProtocol] = []
+        native_tool_names: list[str] = []
         for name in tool_names:
+            if name in NATIVE_TOOL_NAMES:
+                native_tool_names.append(name)
+                continue
             spec = TOOL_MANIFEST.get(name)
             if spec is None:
                 raise ValueError(f"Unknown tool name: {name!r}")
             tool_cls = getattr(import_module(f"{__package__}.{spec.module}"), spec.cls)
             tools.append(spec.factory(tool_cls, ctx))
-        return cls(tools)
+        return cls(tools, native_tool_names=native_tool_names)
 
     @property
     def definitions(self) -> list[ToolParam]:
@@ -156,9 +177,13 @@ class ToolRegistry:
 
 
 def filter_read_only(tool_names: list[str]) -> list[str]:
-    """Return only the names whose ToolSpec has read_only=True. Unknown names raise."""
+    """Return only the read-only names. Unknown names raise."""
     out: list[str] = []
     for name in tool_names:
+        if name in NATIVE_TOOL_READ_ONLY:
+            if NATIVE_TOOL_READ_ONLY[name]:
+                out.append(name)
+            continue
         spec = TOOL_MANIFEST.get(name)
         if spec is None:
             raise ValueError(f"Unknown tool name: {name!r}")
