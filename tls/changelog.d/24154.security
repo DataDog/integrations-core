@@ -1,0 +1,1 @@
+Fetch AIA intermediate certificates with a fresh credential-free HTTP session (TLS first, then plain HTTP) so the instance's authentication settings can never leak to the peer-controlled Authority Information Access URI.
