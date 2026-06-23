@@ -87,6 +87,7 @@ class ConfigurationEngine:
         self._phases: dict[str, _RegistryEntry[PhaseConfig]] = {}
         self._flows: dict[str, _RegistryEntry[FlowConfig]] = {}
         self._conflicts: list[ConfigConflict] = []
+        self._file_errors: dict[Path, str] = {}
         self._build_registries()
 
     def _deduplicate(self, dirs: list[Path]) -> list[Path]:
@@ -118,7 +119,10 @@ class ConfigurationEngine:
                 if resolved in seen_files:
                     continue
                 seen_files.add(resolved)
-                self._parse_file(yaml_file, pending)
+                try:
+                    self._parse_file(yaml_file, pending)
+                except FlowConfigError as e:
+                    self._file_errors[yaml_file] = str(e)
 
         for (obj_type, name), entries in pending.items():
             if len(entries) > 1:
@@ -229,9 +233,18 @@ class ConfigurationEngine:
         )
         raise FlowConfigError(f"Configuration conflicts must be resolved before building a flow:\n{lines}")
 
+    def _format_file_errors(self) -> str:
+        if not self._file_errors:
+            return ""
+        lines = "\n".join(f"  {p}: {e}" for p, e in self._file_errors.items())
+        return f"\nNote: these files failed to parse and may contain the missing resource:\n{lines}"
+
     def _get_flow_config(self, name: str) -> FlowConfig:
         if name not in self._flows:
-            raise FlowConfigError(f"Flow {name!r} not found. Available flows: {sorted(self._flows)}")
+            raise FlowConfigError(
+                f"Flow {name!r} not found. Available flows: {sorted(self._flows)}"
+                + self._format_file_errors()
+            )
         return self._flows[name].config
 
     def _collect_phases(self, flow_config: FlowConfig, flow_name: str) -> dict[str, PhaseConfig]:
@@ -242,7 +255,10 @@ class ConfigurationEngine:
                 raise FlowConfigError(f"Duplicate phase in flow {flow_name!r}: {entry.phase!r}")
             seen.add(entry.phase)
             if entry.phase not in self._phases:
-                raise FlowConfigError(f"Flow {flow_name!r} references unknown phase: {entry.phase!r}")
+                raise FlowConfigError(
+                    f"Flow {flow_name!r} references unknown phase: {entry.phase!r}"
+                    + self._format_file_errors()
+                )
             phases[entry.phase] = self._phases[entry.phase].config
         return phases
 
@@ -252,7 +268,10 @@ class ConfigurationEngine:
             if phase_config.agent is None:
                 continue
             if phase_config.agent not in self._agents:
-                raise FlowConfigError(f"Phase {phase_name!r} references unknown agent: {phase_config.agent!r}")
+                raise FlowConfigError(
+                    f"Phase {phase_name!r} references unknown agent: {phase_config.agent!r}"
+                    + self._format_file_errors()
+                )
             agents[phase_config.agent] = self._agents[phase_config.agent].config
         return agents
 

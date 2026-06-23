@@ -619,23 +619,25 @@ def test_build_flow_raises_on_cycle(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# _parse_file failure modes
+# _parse_file failure modes — errors are stored, not raised at init
 # ---------------------------------------------------------------------------
 
 
-def test_non_list_yaml_file_raises(tmp_path):
+def test_non_list_yaml_file_stored_not_raised(tmp_path):
     (tmp_path / "config.yaml").write_text("key: value\n")
-    with pytest.raises(FlowConfigError, match="expected a YAML list"):
-        ConfigurationEngine(core_dir=tmp_path)
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    assert len(engine._file_errors) == 1
+    assert "expected a YAML list" in next(iter(engine._file_errors.values()))
 
 
-def test_malformed_yaml_raises_flow_config_error(tmp_path):
+def test_malformed_yaml_stored_not_raised(tmp_path):
     (tmp_path / "bad.yaml").write_text("key: [unclosed\n")
-    with pytest.raises(FlowConfigError, match="Malformed YAML"):
-        ConfigurationEngine(core_dir=tmp_path)
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    assert len(engine._file_errors) == 1
+    assert "Malformed YAML" in next(iter(engine._file_errors.values()))
 
 
-def test_unreadable_file_raises_flow_config_error(tmp_path, monkeypatch):
+def test_unreadable_file_stored_not_raised(tmp_path, monkeypatch):
     bad = tmp_path / "bad.yaml"
     bad.write_text("- type: agent\n  config:\n    name: x\n")
     original_read_text = Path.read_text
@@ -646,20 +648,64 @@ def test_unreadable_file_raises_flow_config_error(tmp_path, monkeypatch):
         return original_read_text(self, *args, **kwargs)
 
     monkeypatch.setattr(Path, "read_text", _fail_for_bad)
-    with pytest.raises(FlowConfigError, match="Could not read"):
-        ConfigurationEngine(core_dir=tmp_path)
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    assert len(engine._file_errors) == 1
+    assert "Could not read" in next(iter(engine._file_errors.values()))
 
 
-def test_list_element_not_a_mapping_raises(tmp_path):
+def test_list_element_not_a_mapping_stored_not_raised(tmp_path):
     (tmp_path / "config.yaml").write_text("- just_a_string\n")
-    with pytest.raises(FlowConfigError):
-        ConfigurationEngine(core_dir=tmp_path)
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    assert len(engine._file_errors) == 1
 
 
-def test_unknown_type_value_raises(tmp_path):
+def test_unknown_type_value_stored_not_raised(tmp_path):
     (tmp_path / "config.yaml").write_text("- type: widget\n  config:\n    name: x\n")
-    with pytest.raises(FlowConfigError):
-        ConfigurationEngine(core_dir=tmp_path)
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    assert len(engine._file_errors) == 1
+
+
+def test_broken_unrelated_file_does_not_block_build_flow(tmp_path):
+    """A broken file that has nothing to do with the requested flow is silently skipped."""
+    (tmp_path / "broken.yaml").write_text("key: value\n")
+    write_yaml(
+        tmp_path,
+        "flow.yaml",
+        """\
+        - type: phase
+          config:
+            name: my_phase
+            class: AgenticPhase
+        - type: flow
+          config:
+            name: my_flow
+            flow:
+              - phase: my_phase
+    """,
+    )
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    assert len(engine._file_errors) == 1
+    resolved = engine.build_flow("my_flow")
+    assert resolved.name == "my_flow"
+
+
+def test_broken_file_error_surfaced_when_resource_missing(tmp_path):
+    """When a resource is missing and a file failed to parse, the parse error appears in the message."""
+    (tmp_path / "broken.yaml").write_text("key: value\n")
+    write_yaml(
+        tmp_path,
+        "flow.yaml",
+        """\
+        - type: flow
+          config:
+            name: my_flow
+            flow:
+              - phase: ghost_phase
+    """,
+    )
+    engine = ConfigurationEngine(core_dir=tmp_path)
+    with pytest.raises(FlowConfigError, match="failed to parse"):
+        engine.build_flow("my_flow")
 
 
 # ---------------------------------------------------------------------------
