@@ -1,0 +1,706 @@
+{
+  "title": "Kata Containers",
+  "description": "## Kata Containers\n\nPer-sandbox observability for Kata Containers, a secure container runtime using lightweight VMs as isolation boundaries. All metrics are scoped to `sandbox_id` and enriched with Kubernetes orchestrator tags.\n\n**Further reading:**\n- [Kata Containers Documentation](https://katacontainers.io/docs/)\n- [Kata 2.0 Metrics Reference](https://github.com/kata-containers/kata-containers/blob/main/docs/design/kata-2-0-metrics.md)\n- [Datadog Kata Containers Integration](https://docs.datadoghq.com/integrations/kata_containers/)",
+  "widgets": [
+    {
+      "id": 1001,
+      "definition": {
+        "title": "Fleet Overview",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1002,
+            "definition": {
+              "type": "note",
+              "content": "## Kata Containers\n\nEach sandbox runs inside a lightweight VM. The corecheck scrapes each shim's Unix socket directly and enriches metrics with Kubernetes orchestrator tags (`cluster_name`, `kube_namespace`, `pod_name`).\n\n**Further reading:**\n- [Kata Containers Documentation](https://katacontainers.io/docs/)\n- [Kata 2.0 Metrics Reference](https://github.com/kata-containers/kata-containers/blob/main/docs/design/kata-2-0-metrics.md)",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 4, "height": 4 }
+          },
+          {
+            "id": 1003,
+            "definition": {
+              "title": "Running Sandboxes",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kata.running_shim_count{$cluster_name,$node_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": { "type": "area", "yaxis": { "include_zero": true } }
+            },
+            "layout": { "x": 4, "y": 0, "width": 2, "height": 2 }
+          },
+          {
+            "id": 1004,
+            "definition": {
+              "title": "Total Pod CPU Overhead",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kata.shim.pod.overhead.cpu{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": { "type": "area", "yaxis": { "include_zero": true } }
+            },
+            "layout": { "x": 6, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 1005,
+            "definition": {
+              "title": "Total Pod Memory Overhead",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kata.shim.pod.overhead.memory.in.bytes{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }]
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "timeseries_background": { "type": "area", "yaxis": { "include_zero": true } }
+            },
+            "layout": { "x": 9, "y": 0, "width": 3, "height": 2 }
+          },
+          {
+            "id": 1006,
+            "definition": {
+              "title": "Running Sandboxes Over Time",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:kata.running_shim_count{$cluster_name,$node_name} by {host}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "dog_classic", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "area"
+                }
+              ]
+            },
+            "layout": { "x": 4, "y": 2, "width": 8, "height": 2 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 0, "width": 12, "height": 5 }
+    },
+    {
+      "id": 2001,
+      "definition": {
+        "title": "Pod Overhead",
+        "background_color": "vivid_green",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2002,
+            "definition": {
+              "type": "note",
+              "content": "CPU and memory cost of the Kata VM infrastructure (hypervisor + agent) per sandbox, beyond the workload itself. Tagged: `sandbox_id`, `pod_name`, `kube_namespace`, `cluster_name`.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 2003,
+            "definition": {
+              "title": "Pod CPU Overhead by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.shim.pod.overhead.cpu{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,pod_name}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "green", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 6, "height": 3 }
+          },
+          {
+            "id": 2004,
+            "definition": {
+              "title": "Pod Memory Overhead by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.shim.pod.overhead.memory.in.bytes{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,pod_name}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "green", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": { "include_zero": true }
+            },
+            "layout": { "x": 6, "y": 1, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 5, "width": 12, "height": 5 }
+    },
+    {
+      "id": 3001,
+      "definition": {
+        "title": "Shim",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3002,
+            "definition": {
+              "type": "note",
+              "content": "`containerd-shim-kata-v2` metrics scraped directly from each sandbox's Unix socket. One shim per sandbox. Tagged: `sandbox_id`, `pod_name`, `kube_namespace`, `cluster_name`.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 3003,
+            "definition": {
+              "title": "Shim Open FDs by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.shim.fds{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,pod_name}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "purple", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 3004,
+            "definition": {
+              "title": "Shim Threads by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.shim.threads{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,pod_name}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "purple", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 4, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 3005,
+            "definition": {
+              "title": "Go Goroutines by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.go.goroutines{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,pod_name}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "purple", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 8, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 3006,
+            "definition": {
+              "title": "Agent RPC Avg Latency by Sandbox (ms)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "sum_rate",
+                      "query": "avg:kata.shim.agent.rpc.durations.histogram.milliseconds.sum{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,action}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "count_rate",
+                      "query": "avg:kata.shim.agent.rpc.durations.histogram.milliseconds.count{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,action}.as_rate()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "sum_rate / count_rate",
+                      "alias": "avg latency (ms)"
+                    }
+                  ],
+                  "style": { "palette": "purple", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 3 }
+          },
+          {
+            "id": 3007,
+            "definition": {
+              "title": "Shim RPC Avg Latency by Sandbox (ms)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "sum_rate",
+                      "query": "avg:kata.shim.rpc.durations.histogram.milliseconds.sum{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,action}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "count_rate",
+                      "query": "avg:kata.shim.rpc.durations.histogram.milliseconds.count{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,action}.as_rate()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "sum_rate / count_rate",
+                      "alias": "avg latency (ms)"
+                    }
+                  ],
+                  "style": { "palette": "purple", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 4, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 10, "width": 12, "height": 8 }
+    },
+    {
+      "id": 4001,
+      "definition": {
+        "title": "Guest OS",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4002,
+            "definition": {
+              "type": "note",
+              "content": "Metrics from inside the guest VM, proxied by the shim. Tagged: `sandbox_id`, `pod_name`, `kube_namespace`, `cluster_name`, plus `cpu`, `disk`, or `interface`.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 4003,
+            "definition": {
+              "title": "Guest CPU Time by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.guest.cpu.time{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,cpu,item}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 6, "height": 3 }
+          },
+          {
+            "id": 4004,
+            "definition": {
+              "title": "Guest Memory by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.guest.meminfo{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,item}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": { "include_zero": true }
+            },
+            "layout": { "x": 6, "y": 1, "width": 6, "height": 3 }
+          },
+          {
+            "id": 4005,
+            "definition": {
+              "title": "Guest Disk Stats by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.guest.diskstat{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,disk,item}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 4, "width": 6, "height": 3 }
+          },
+          {
+            "id": 4006,
+            "definition": {
+              "title": "Guest Network Stats by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.guest.netdev.stat{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,interface,item}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "cool", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 6, "y": 4, "width": 6, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 18, "width": 12, "height": 8 }
+    },
+    {
+      "id": 5001,
+      "definition": {
+        "title": "Hypervisor",
+        "background_color": "vivid_yellow",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5002,
+            "definition": {
+              "type": "note",
+              "content": "Hypervisor process (QEMU, Firecracker, etc.) resource usage per sandbox. Tagged: `sandbox_id`, `pod_name`, `kube_namespace`, `cluster_name`.",
+              "background_color": "yellow",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": { "x": 0, "y": 0, "width": 12, "height": 1 }
+          },
+          {
+            "id": 5003,
+            "definition": {
+              "title": "Hypervisor Open FDs by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.hypervisor.fds{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,pod_name}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "yellow", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 0, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 5004,
+            "definition": {
+              "title": "Hypervisor Threads by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.hypervisor.threads{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,pod_name}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "yellow", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 4, "y": 1, "width": 4, "height": 3 }
+          },
+          {
+            "id": 5005,
+            "definition": {
+              "title": "Hypervisor IO Stats by Sandbox",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": ["avg", "max", "value"],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:kata.hypervisor.io.stat{$cluster_name,$node_name,$namespace,$pod_name,$sandbox_id} by {sandbox_id,item}"
+                    }
+                  ],
+                  "formulas": [{ "formula": "query1" }],
+                  "style": { "palette": "yellow", "line_type": "solid", "line_width": "normal" },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": { "x": 8, "y": 1, "width": 4, "height": 3 }
+          }
+        ]
+      },
+      "layout": { "x": 0, "y": 26, "width": 12, "height": 5 }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "cluster_name",
+      "prefix": "cluster_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "node_name",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "namespace",
+      "prefix": "kube_namespace",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "pod_name",
+      "prefix": "pod_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "sandbox_id",
+      "prefix": "sandbox_id",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
