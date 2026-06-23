@@ -13,6 +13,8 @@ from typing import List  # noqa: F401
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+
+import datadog_checks.base.checks.openmetrics.parser_optimizations  # noqa: F401
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
