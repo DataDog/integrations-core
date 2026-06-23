@@ -1,0 +1,1 @@
+Add `reported_hostname` config option and `database_identifier.template` templating to control the Data Observability account identifier.
