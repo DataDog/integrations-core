@@ -317,6 +317,24 @@ def test_connection_string_escapes_password_special_characters(
     assert expected_password_parameter in conn_str
 
 
+@pytest.mark.unit
+def test_freetds_password_with_closing_brace_semicolon_raises_limitation(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    password = 'pass};word'
+    instance_minimal_defaults.update({'connector': 'odbc', 'driver': 'FreeTDS', 'password': password})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    with pytest.raises(ConfigurationError) as exc_info:
+        connection._conn_string_odbc('database')
+
+    error_message = str(exc_info.value)
+    assert "'};'" in error_message
+    assert 'FreeTDS' in error_message
+    assert 'Microsoft ODBC Driver for SQL Server' in error_message
+    assert password not in error_message
+
+
 @pytest.fixture
 def special_characters_password_login(sa_conn: object) -> tuple[str, str]:
     with sa_conn.cursor() as cursor:

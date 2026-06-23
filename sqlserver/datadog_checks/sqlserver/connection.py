@@ -656,7 +656,8 @@ class Connection(object):
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
         escape_func = _escape_odbc_connection_string_value
-        if driver and _is_freetds_driver(driver):
+        is_freetds_driver = driver and _is_freetds_driver(driver)
+        if is_freetds_driver:
             escape_func = _escape_legacy_freetds_odbc_connection_string_value
 
         if self.managed_auth_enabled:
@@ -683,6 +684,11 @@ class Connection(object):
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
+            if is_freetds_driver and '};' in password:
+                raise ConfigurationError(
+                    "SQL Server passwords containing the sequence '};' cannot be represented in FreeTDS ODBC "
+                    "connection strings. Use Microsoft ODBC Driver for SQL Server or change the password."
+                )
             conn_str += 'PWD={};'.format(escape_func(password))
         return conn_str
 
