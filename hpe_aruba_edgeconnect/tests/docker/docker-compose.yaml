@@ -1,3 +1,9 @@
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: "192.168.200.0/24"
+
 services:
   orch:
     build:
@@ -18,7 +24,10 @@ services:
       dockerfile: tests/docker/fake_appliance/Dockerfile
     container_name: dd-appliance
     ports:
-      - "${APPLIANCE_PORT}:8444"
+      - "${APPLIANCE_PORT}:443"
+    networks:
+      default:
+        ipv4_address: "192.168.200.10"
     environment:
       APPLIANCE_USERNAME: "${APPLIANCE_USERNAME}"
       APPLIANCE_PASSWORD: "${APPLIANCE_PASSWORD}"

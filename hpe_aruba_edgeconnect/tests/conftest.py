@@ -62,14 +62,14 @@ def dd_environment(instance, dd_save_state):
         orch_port = find_free_port(HOST)
         appliance_port = find_free_port(HOST)
         orch_ip = f'{HOST}:{orch_port}'
-        appliance_ip = f'{HOST}:{appliance_port}'
+        appliance_ip = '192.168.200.10'
 
         def _ready():
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
             urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
-            urlopen(f'https://{appliance_ip}/health', timeout=2, context=ctx)
+            urlopen(f'https://{HOST}:{appliance_port}/health', timeout=2, context=ctx)
 
         inst = instance(
             orch_ip,
