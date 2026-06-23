@@ -40,7 +40,6 @@ LICENSE_HEADER = "(C) Datadog, Inc."
 
 INTEGRATIONS_WITHOUT_MODELS = {
     'snmp',  # Deprecated
-    'tokumx',  # Python 2 only
 }
 
 

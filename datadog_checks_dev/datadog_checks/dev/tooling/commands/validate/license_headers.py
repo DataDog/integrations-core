@@ -25,7 +25,6 @@ IGNORES = {
     "mysql": ["datadog_checks/mysql/databases_data.py"],  # deleted in master but still in release branches
     "php_fpm": ["datadog_checks/php_fpm/vendor"],
     "snmp": ["tests/mibs"],
-    "tokumx": ["datadog_checks/tokumx/vendor"],
 }
 
 
