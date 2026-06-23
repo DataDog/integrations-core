@@ -239,13 +239,6 @@ class TLSRemoteCheck(object):
             self.load_intermediate_certs(intermediate_cert)
 
     def _fetch_intermediate_cert(self, uri):
-        """Fetch an AIA CA Issuers URI using fresh, credential-free HTTP sessions.
-
-        The URI originates from the peer certificate and is therefore untrusted. To avoid
-        leaking the instance's credentials or auth configuration (VULN-1192), every attempt
-        uses a brand new session that carries none of the instance's settings. We try secure
-        TLS first and fall back to a session without TLS verification, never with credentials.
-        """
         for tls_verify in (True, False):
             session = RequestsWrapper({'tls_verify': tls_verify}, {})
             try:

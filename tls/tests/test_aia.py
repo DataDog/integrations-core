@@ -11,194 +11,115 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 
 try:
     from unittest.mock import MagicMock, patch
-except ImportError:  # Python 2
+except ImportError:
     from mock import MagicMock, patch
 
 from datadog_checks.tls.tls import TLSCheck
 from datadog_checks.tls.tls_remote import TLSRemoteCheck
 
-# Keys that, if present in a session's configuration, would carry the instance's
-# credentials or authentication material to the AIA endpoint.
-CREDENTIAL_FIELDS = (
-    'auth_token',
-    'auth_type',
-    'aws_host',
-    'aws_region',
-    'aws_service',
-    'extra_headers',
-    'headers',
-    'kerberos_auth',
-    'kerberos_keytab',
-    'kerberos_principal',
-    'ntlm_domain',
-    'password',
-    'proxy',
-    'tls_ca_cert',
-    'tls_cert',
-    'tls_private_key',
-    'tls_private_key_password',
-    'username',
-)
 
-
-def _build_cert(aia_uri=None):
-    """Build a self-signed DER certificate, optionally with an AIA CA Issuers extension."""
+def build_cert(aia_uri=None):
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'example.test')])
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'example.test')])
     builder = (
         x509.CertificateBuilder()
-        .subject_name(subject)
-        .issuer_name(issuer)
+        .subject_name(name)
+        .issuer_name(name)
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
         .not_valid_before(datetime.datetime(2020, 1, 1))
         .not_valid_after(datetime.datetime(2050, 1, 1))
     )
-    if aia_uri is not None:
+    if aia_uri:
         builder = builder.add_extension(
             x509.AuthorityInformationAccess(
                 [
                     x509.AccessDescription(
-                        AuthorityInformationAccessOID.CA_ISSUERS,
-                        x509.UniformResourceIdentifier(aia_uri),
+                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
                     )
                 ]
             ),
             critical=False,
         )
-    cert = builder.sign(key, hashes.SHA256())
-    return cert.public_bytes(serialization.Encoding.DER)
-
-
-def _make_checker(instance):
-    instance = dict(instance)
-    instance.setdefault('server', 'example.test')
-    check = TLSCheck('tls', {}, [instance])
-    return TLSRemoteCheck(check), check
+    return builder.sign(key, hashes.SHA256()).public_bytes(serialization.Encoding.DER)
 
 
 @pytest.fixture
-def credentialed_instance():
-    return {
+def checker():
+    instance = {
         'server': 'example.test',
         'username': 'admin',
         'password': 'secret',
-        'auth_type': 'basic',
         'headers': {'Authorization': 'Bearer token'},
-        'extra_headers': {'X-Custom': 'value'},
         'tls_cert': '/path/to/client.crt',
-        'tls_private_key': '/path/to/client.key',
-        'tls_ca_cert': '/path/to/ca.crt',
         'proxy': {'http': 'http://proxy:3128'},
     }
+    check = TLSCheck('tls', {}, [instance])
+    check._http = MagicMock()  # spy on the instance's configured (credentialed) session
+    return TLSRemoteCheck(check), check
 
 
-def _assert_credential_free(call):
-    instance_arg = call.args[0] if call.args else call.kwargs.get('instance', {})
-    for field in CREDENTIAL_FIELDS:
-        assert not instance_arg.get(field), 'AIA fetch session must not carry the instance credential `{}`'.format(
-            field
-        )
+def session_configs(wrapper):
+    return [(c.args[0], c.args[1]) for c in wrapper.call_args_list]
 
 
-def test_aia_fetch_uses_credential_free_session(credentialed_instance):
-    """The instance's credentials must never reach the attacker-controlled AIA URI."""
-    checker, check = _make_checker(credentialed_instance)
-    leaf = _build_cert(aia_uri='http://issuer.test/ca.der')
-    intermediate = _build_cert()  # no AIA -> recursion stops
-
-    instance_session = MagicMock()
-    check._http = instance_session  # spy on the instance's configured (credentialed) session
-
+def test_aia_fetch_never_uses_instance_credentials(checker):
+    remote, check = checker
+    leaf = build_cert(aia_uri='http://issuer.test/ca.der')
     session = MagicMock()
-    session.get.return_value = MagicMock(content=intermediate)
+    session.get.return_value = MagicMock(content=build_cert())
 
     with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session) as wrapper:
-        checker.load_intermediate_certs(leaf)
+        remote.load_intermediate_certs(leaf)
 
-    assert wrapper.call_count >= 1
-    for call in wrapper.call_args_list:
-        _assert_credential_free(call)
-
-    # The instance's own HTTP session must never be used for the AIA fetch.
-    assert instance_session.get.call_count == 0
+    assert check._http.get.call_count == 0
+    for instance, init_config in session_configs(wrapper):
+        assert set(instance) <= {'tls_verify'}
+        assert init_config == {}
 
 
-def test_aia_fetch_no_opt_in_flag_required(credentialed_instance):
-    """Credential-free fetching applies even when `fetch_intermediate_certs` is not set."""
-    assert 'fetch_intermediate_certs' not in credentialed_instance
-    checker, _ = _make_checker(credentialed_instance)
-    leaf = _build_cert(aia_uri='http://issuer.test/ca.der')
-    intermediate = _build_cert()
-
-    session = MagicMock()
-    session.get.return_value = MagicMock(content=intermediate)
-
-    with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session) as wrapper:
-        checker.load_intermediate_certs(leaf)
-
-    assert wrapper.call_count >= 1
-    for call in wrapper.call_args_list:
-        _assert_credential_free(call)
-
-
-def test_aia_fetch_tls_first_then_plain_fallback(credentialed_instance):
-    """Fetch over secure TLS first; on failure retry without TLS verification."""
-    checker, _ = _make_checker(credentialed_instance)
-    leaf = _build_cert(aia_uri='https://issuer.test/ca.der')
-    intermediate = _build_cert()
-
-    secure_session = MagicMock()
-    secure_session.get.side_effect = Exception('TLS handshake failed')
-    plain_session = MagicMock()
-    plain_session.get.return_value = MagicMock(content=intermediate)
+def test_aia_fetch_tries_tls_then_plain_fallback(checker):
+    remote, _ = checker
+    leaf = build_cert(aia_uri='https://issuer.test/ca.der')
+    secure, plain = MagicMock(), MagicMock()
+    secure.get.side_effect = Exception('TLS handshake failed')
+    plain.get.return_value = MagicMock(content=build_cert())
 
     def make_wrapper(instance, init_config, *args, **kwargs):
-        return plain_session if instance.get('tls_verify') is False else secure_session
+        return plain if instance.get('tls_verify') is False else secure
 
     with patch('datadog_checks.tls.tls_remote.RequestsWrapper', side_effect=make_wrapper) as wrapper:
-        checker.load_intermediate_certs(leaf)
+        remote.load_intermediate_certs(leaf)
 
-    tls_verify_values = [
-        (c.args[0] if c.args else c.kwargs['instance']).get('tls_verify') for c in wrapper.call_args_list
+    verifies = [instance.get('tls_verify') for instance, _ in session_configs(wrapper)]
+    assert verifies[0] is True and False in verifies
+    assert secure.get.called and plain.get.called
+
+
+def test_aia_fetch_caches_uri(checker):
+    remote, _ = checker
+    leaf = build_cert(aia_uri='http://issuer.test/ca.der')
+    session = MagicMock()
+    session.get.return_value = MagicMock(content=build_cert())
+
+    with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session):
+        remote.load_intermediate_certs(leaf)
+        first = session.get.call_count
+        remote.load_intermediate_certs(leaf)
+
+    assert first >= 1 and session.get.call_count == first
+
+
+def test_aia_fetch_recurses_into_fetched_cert(checker):
+    remote, _ = checker
+    leaf = build_cert(aia_uri='http://issuer.test/intermediate.der')
+    session = MagicMock()
+    session.get.side_effect = [
+        MagicMock(content=build_cert(aia_uri='http://issuer.test/root.der')),
+        MagicMock(content=build_cert()),
     ]
-    # Secure attempt (verify on / default) must come before the no-TLS fallback (verify off).
-    assert tls_verify_values[0] is not False
-    assert False in tls_verify_values
-    assert secure_session.get.called
-    assert plain_session.get.called
-
-
-def test_aia_fetch_caching_prevents_refetch(credentialed_instance):
-    """A successfully fetched URI is cached and not fetched again within the refresh interval."""
-    checker, _ = _make_checker(credentialed_instance)
-    leaf = _build_cert(aia_uri='http://issuer.test/ca.der')
-    intermediate = _build_cert()
-
-    session = MagicMock()
-    session.get.return_value = MagicMock(content=intermediate)
 
     with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session):
-        checker.load_intermediate_certs(leaf)
-        first_calls = session.get.call_count
-        checker.load_intermediate_certs(leaf)
-        second_calls = session.get.call_count
-
-    assert first_calls >= 1
-    assert second_calls == first_calls  # cache hit -> no additional fetch
-
-
-def test_aia_fetch_recurses_into_fetched_cert(credentialed_instance):
-    """Chasing recurses through the fetched intermediate's own AIA extension."""
-    checker, _ = _make_checker(credentialed_instance)
-    leaf = _build_cert(aia_uri='http://issuer.test/intermediate.der')
-    intermediate = _build_cert(aia_uri='http://issuer.test/root.der')
-    root = _build_cert()  # terminates recursion
-
-    session = MagicMock()
-    session.get.side_effect = [MagicMock(content=intermediate), MagicMock(content=root)]
-
-    with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session):
-        checker.load_intermediate_certs(leaf)
+        remote.load_intermediate_certs(leaf)
 
     assert session.get.call_count == 2
