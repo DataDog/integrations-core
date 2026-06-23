@@ -188,6 +188,7 @@ class KafkaConnectCollector:
             return
 
         tags_base = self._get_tags(cluster_id) + [f'connect_url:{url}']
+        self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
 
         self._emit_connector_metrics(connectors_data, tags_base)
         self._emit_connector_config_events(connectors_data, cluster_id, url)
