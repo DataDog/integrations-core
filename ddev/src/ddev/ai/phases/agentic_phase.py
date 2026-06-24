@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.config.errors import FlowConfigError
@@ -71,8 +71,7 @@ class AgenticPhase(Phase):
             checkpoint_manager=checkpoint_manager,
             context=context,
         )
-        assert config.agent is not None, "validated by validate_config"
-        self._agent_name = config.agent
+        self._agent_name = cast(str, config.agent)
         self._agent_config = agent_config
         self._process_factory = process_factory
         self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE)
@@ -104,8 +103,7 @@ class AgenticPhase(Phase):
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
     ) -> AgenticPhase:
-        agent_name = config.agent
-        assert agent_name is not None, "validated by validate_config"
+        agent_name = cast(str, config.agent)
         agent_config = resources.agent_config(agent_name)
         process_factory = resources.process_factory
 
