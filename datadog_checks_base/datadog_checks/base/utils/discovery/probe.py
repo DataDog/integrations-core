@@ -174,7 +174,13 @@ def _try_discovery_candidate(cls: type[AgentCheck], check_name: str, candidate: 
 
 
 def run_discovery(cls: type[AgentCheck], service_json: str) -> str:
-    """Entry point called by AgentCheck.discover_config."""
+    """Entry point called by AgentCheck.discover_config.
+
+    A candidate is accepted only if the real check collected at least one metric
+    (``stats.metric_count > 0``). Integrations whose only discovery signal is a
+    service check are therefore not discoverable by this criterion; this is a
+    known limitation.
+    """
     log = logging.getLogger(__name__)
 
     try:
