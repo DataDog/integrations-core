@@ -23,7 +23,7 @@ def _wait_for_resource(*, kind, name, condition, namespace=None, timeout="300s")
     run_command(command)
 
 
-def wait_for_metric_families(endpoint, families):
+def wait_for_metric_families(endpoint: str, families: list[str]) -> None:
     with urlopen(endpoint, timeout=5) as response:
         metrics = response.read().decode("utf-8")
 
