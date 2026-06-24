@@ -1,0 +1,1 @@
+Fix ``ignore_tags`` not filtering autodiscovery tags from the exporter pod.
