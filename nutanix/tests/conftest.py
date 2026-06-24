@@ -8,8 +8,8 @@ import os
 from datetime import datetime
 
 import pytest
+from requests.exceptions import HTTPError
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckEndpoints
 
@@ -142,8 +142,12 @@ def mock_instance():
 
 
 @pytest.fixture
-def mock_http_get(mock_http):
+def mock_http_get(mocker):
     def mock_response(url, params=None, *args, **kwargs):
+        mock_resp = mocker.Mock()
+        mock_resp.status_code = 200
+        mock_resp.raise_for_status = mocker.Mock()
+
         page = None
 
         if params:
@@ -161,46 +165,67 @@ def mock_http_get(mock_http):
             page = 0
 
         if '/console' in url:
-            return MockHTTPResponse()
+            return mock_resp
 
         if (
             "/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts/d8787814-4fe8-4ba5-931f-e1ee31c294a6"
             in url
         ):
-            return MockHTTPResponse(json_data=load_fixture("host_stats_00064715_d8787814.json"))
+            response_data = load_fixture("host_stats_00064715_d8787814.json")
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if (
             "/api/clustermgmt/v4.0/stats/clusters/aabbccdd-1111-2222-3333-444455556666/hosts/eeee1111-2222-3333-4444-555566667777"
             in url
         ):
-            return MockHTTPResponse(json_data=load_fixture("host_stats_aabbccdd_eeee1111.json"))
+            response_data = load_fixture("host_stats_aabbccdd_eeee1111.json")
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if "/api/clustermgmt/v4.0/stats/clusters/00064715-c043-5d8f-ee4b-176ec875554d" in url:
-            return MockHTTPResponse(json_data=load_fixture("cluster_stats_00064715.json"))
+            response_data = load_fixture("cluster_stats_00064715.json")
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if "/api/clustermgmt/v4.0/stats/clusters/aabbccdd-1111-2222-3333-444455556666" in url:
-            return MockHTTPResponse(json_data=load_fixture("cluster_stats_aabbccdd.json"))
+            response_data = load_fixture("cluster_stats_aabbccdd.json")
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if '/api/clustermgmt/v4.0/config/disks' in url:
-            return MockHTTPResponse(json_data=load_fixture_page("disks.json", page))
+            response_data = load_fixture_page("disks.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if '/api/clustermgmt/v4.0/config/clusters/d07db284-6df6-4ca2-88cd-9dd5ed71ac08/hosts' in url:
-            return MockHTTPResponse(status_code=400)
+            mock_resp.status_code = 400
+            return mock_resp
 
         if '/api/clustermgmt/v4.0/config/clusters/00064715-c043-5d8f-ee4b-176ec875554d/hosts' in url:
-            return MockHTTPResponse(json_data=load_fixture_page("hosts_00064715.json", page))
+            response_data = load_fixture_page("hosts_00064715.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if '/api/clustermgmt/v4.0/config/clusters/aabbccdd-1111-2222-3333-444455556666/hosts' in url:
-            return MockHTTPResponse(json_data=load_fixture_page("hosts_aabbccdd.json", page))
+            response_data = load_fixture_page("hosts_aabbccdd.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if '/api/clustermgmt/v4.0/config/clusters' in url:
-            return MockHTTPResponse(json_data=load_fixture_page("clusters.json", page))
+            response_data = load_fixture_page("clusters.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if '/api/prism/v4.0/config/categories' in url:
-            return MockHTTPResponse(json_data=load_fixture_page("categories.json", page))
+            response_data = load_fixture_page("categories.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if 'api/vmm/v4.0/ahv/stats/vms' in url:
-            return MockHTTPResponse(json_data=load_fixture_page("vms_stats.json", page))
+            response_data = load_fixture_page("vms_stats.json", page)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if 'api/vmm/v4.0/ahv/config/vms' in url:
             response_data = load_fixture_page("vms.json", page)
@@ -219,7 +244,8 @@ def mock_http_get(mock_http):
                     response_data = dict(response_data)
                     response_data['data'] = filtered
 
-            return MockHTTPResponse(json_data=response_data)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         # Events endpoint - paginated
         if 'api/monitoring/v4.0/serviceability/events' in url:
@@ -230,7 +256,8 @@ def mock_http_get(mock_http):
                 response_data = dict(response_data)
                 response_data['data'] = _filter_after(response_data.get('data', []), 'creationTime', filter_param)
 
-            return MockHTTPResponse(json_data=response_data)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         if 'api/monitoring/v4.0/serviceability/audits' in url:
             response_data = load_fixture_page("audits.json", page)
@@ -240,7 +267,8 @@ def mock_http_get(mock_http):
                 response_data = dict(response_data)
                 response_data['data'] = _filter_after(response_data.get('data', []), 'creationTime', filter_param)
 
-            return MockHTTPResponse(json_data=response_data)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         # Individual alert fetch by ID (e.g. /alerts/{uuid})
         import re
@@ -251,8 +279,11 @@ def mock_http_get(mock_http):
             all_alerts = load_fixture_page("alerts.json", 0).get('data', [])
             alert_data = next((a for a in all_alerts if a.get('extId') == alert_ext_id), None)
             if alert_data:
-                return MockHTTPResponse(json_data={"data": alert_data})
-            return MockHTTPResponse(status_code=404)
+                mock_resp.json = mocker.Mock(return_value={"data": alert_data})
+            else:
+                mock_resp.status_code = 404
+                mock_resp.raise_for_status = mocker.Mock(side_effect=HTTPError(response=mock_resp))
+            return mock_resp
 
         if 'api/monitoring/v4.0/serviceability/alerts' in url:
             response_data = load_fixture_page("alerts.json", page)
@@ -268,8 +299,8 @@ def mock_http_get(mock_http):
                 response_data = dict(response_data)
                 response_data['data'] = _filter_after(response_data.get('data', []), 'creationTime', filter_param)
 
-            return MockHTTPResponse(json_data=response_data)
-
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
         if 'api/prism/v4.0/config/tasks' in url:
             response_data = load_fixture_page("tasks.json", page)
 
@@ -278,10 +309,12 @@ def mock_http_get(mock_http):
                 response_data = dict(response_data)
                 response_data['data'] = _filter_after(response_data.get('data', []), 'createdTime', filter_param)
 
-            return MockHTTPResponse(json_data=response_data)
+            mock_resp.json = mocker.Mock(return_value=response_data)
+            return mock_resp
 
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
-        return MockHTTPResponse(status_code=404)
+        mock_resp.status_code = 404
+        mock_resp.raise_for_status = mocker.Mock(side_effect=HTTPError(response=mock_resp))
+        return mock_resp
 
-    mock_http.get.side_effect = mock_response
-    return mock_http.get
+    return mocker.patch('requests.Session.get', side_effect=mock_response)
