@@ -84,6 +84,8 @@ def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_respons
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.gpu', 'resource_flavor_tag:value')
     aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'cluster_queue_tag:value')
     aggregator.assert_metric_has_tag('kueue.local_queue.pending_workloads', 'local_queue_tag:value')
+    aggregator.assert_metric_has_tag('kueue.local_queue.resource_reservation.cpu', 'local_queue_tag:value')
+    aggregator.assert_metric_has_tag('kueue.local_queue.resource_usage.cpu', 'local_queue_tag:value')
     tagger.assert_called('kubernetes_kueue_queue://clusterqueue//cluster-queue', tagger.ORCHESTRATOR)
     tagger.assert_called('kubernetes_kueue_queue://localqueue/default/user-queue', tagger.ORCHESTRATOR)
     tagger.assert_called('kueue_resource_flavor://default-flavor', tagger.ORCHESTRATOR)
