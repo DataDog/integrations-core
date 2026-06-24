@@ -255,7 +255,7 @@ def test_load_calls_validate_config_for_flow_phases():
     """AgenticPhase.validate_config rejects empty tasks list."""
     loader = PhaseLoader()
     agents = {"writer": AgentConfig(name="writer")}
-    phase = PhaseConfig(name="p", class_="AgenticPhase", agent="writer", tasks=[])
+    phase = PhaseConfig(name="p", agent="writer", tasks=[])
     resolved = ResolvedFlow(name="my_flow", agents=agents, phases={"p": phase}, flow=[FlowEntry(phase="p")], variables={})
     with pytest.raises(FlowConfigError, match="at least one task"):
         loader.load(resolved)

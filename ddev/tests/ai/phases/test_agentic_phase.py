@@ -97,16 +97,16 @@ def test_render_memory_prompt_raises_when_no_source():
     "config,match",
     [
         (
-            PhaseConfig(name="test_phase", class_="AgenticPhase", tasks=[TaskConfig(name="t1", prompt="x")]),
+            PhaseConfig(name="test_phase", tasks=[TaskConfig(name="t1", prompt="x")]),
             "requires 'agent'",
         ),
         (
             PhaseConfig(
-                name="test_phase", class_="AgenticPhase", agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]
+                name="test_phase", agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]
             ),
             "unknown agent",
         ),
-        (PhaseConfig(name="test_phase", class_="AgenticPhase", agent="writer"), "at least one task"),
+        (PhaseConfig(name="test_phase", agent="writer"), "at least one task"),
     ],
     ids=["missing_agent", "unknown_agent", "empty_tasks"],
 )
@@ -121,7 +121,7 @@ def test_validate_config_accepts_valid():
     AgenticPhase.validate_config(
         "p1",
         PhaseConfig(
-            name="test_phase", class_="AgenticPhase", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]
+            name="test_phase", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]
         ),
         {"writer": AgentConfig(name="writer", system_prompt_path=Path("/fake.md"))},
     )
@@ -451,7 +451,6 @@ async def test_spawn_subagent_wiring(flow_dir, monkeypatch, message_queue):
         phase_id="p1",
         config=PhaseConfig(
             name="test_phase",
-            class_="AgenticPhase",
             agent="writer",
             tasks=[TaskConfig(name="t1", prompt="Do the work.")],
         ),

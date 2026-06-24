@@ -133,7 +133,7 @@ def test_agent_config_name_required():
 
 def test_phase_config_defaults():
     pc = PhaseConfig(
-        name="my_phase", class_="AgenticPhase", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do it.")]
+        name="my_phase", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do it.")]
     )
     assert pc.class_ == "AgenticPhase"
     assert pc.context_compact_threshold_pct == 80
@@ -143,7 +143,6 @@ def test_phase_config_defaults():
 def test_phase_config_with_checkpoint():
     pc = PhaseConfig(
         name="my_phase",
-        class_="AgenticPhase",
         agent="writer",
         tasks=[TaskConfig(name="t1", prompt="Do it.")],
         checkpoint=CheckpointConfig(memory_prompt="List files."),

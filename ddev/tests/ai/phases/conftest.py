@@ -158,7 +158,6 @@ def make_agent_phase(
     """
     config = PhaseConfig(
         name="default",
-        class_="AgenticPhase",
         agent="writer",
         tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
         checkpoint=checkpoint,
