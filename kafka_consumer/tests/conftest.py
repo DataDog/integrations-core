@@ -5,6 +5,7 @@ import copy
 import os
 import time
 
+import mock
 import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
@@ -13,10 +14,83 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
 
 from . import common
 from .common import get_cluster_id
 from .runners import Consumer, Producer
+
+
+SAMPLE_CONNECTORS_RESPONSE = {
+    'demo-source': {
+        'info': {
+            'type': 'source',
+            'config': {
+                'connector.class': 'org.apache.kafka.connect.mirror.MirrorSourceConnector',
+                'tasks.max': '2',
+                'topics': 'demo-orders',
+            },
+        },
+        'status': {
+            'connector': {'state': 'RUNNING'},
+            'tasks': [
+                {'id': 0, 'state': 'RUNNING', 'worker_id': 'connect:8083'},
+                {'id': 1, 'state': 'RUNNING', 'worker_id': 'connect:8083'},
+            ],
+        },
+    },
+    'demo-heartbeat': {
+        'info': {
+            'type': 'source',
+            'config': {'connector.class': 'org.apache.kafka.connect.mirror.MirrorHeartbeatConnector'},
+        },
+        'status': {
+            'connector': {'state': 'PAUSED'},
+            'tasks': [{'id': 0, 'state': 'PAUSED', 'worker_id': 'connect:8083'}],
+        },
+    },
+}
+
+
+@pytest.fixture
+def make_collector():
+    def _make(connect_urls=None, cache_store=None):
+        check = mock.MagicMock()
+        check.OK = 0
+        check.WARNING = 1
+        check.CRITICAL = 2
+
+        if cache_store is None:
+            cache_store = {}
+
+        def read_cache(key):
+            return cache_store.get(key, '')
+
+        def write_cache(key, value):
+            cache_store[key] = value
+
+        check.read_persistent_cache.side_effect = read_cache
+        check.write_persistent_cache.side_effect = write_cache
+
+        config = mock.MagicMock()
+        config._kafka_connect_urls = connect_urls or []
+        config._kafka_connect_username = None
+        config._kafka_connect_password = None
+        config._kafka_connect_tls_verify = True
+        config._kafka_connect_tls_ca_cert = None
+        config._kafka_connect_tls_cert = None
+        config._kafka_connect_tls_key = None
+        config._kafka_connect_oauth_token_provider = None
+        config._kafka_configs_refresh_interval = 3600
+        config._request_timeout = 10
+        config._custom_tags = []
+        config._kafka_cluster_id_override = None
+        config._auto_detected_cluster_id = ''
+
+        log = mock.MagicMock()
+        return KafkaConnectCollector(check, config, log), check, config, cache_store
+
+    return _make
 
 
 @pytest.fixture(scope='session')

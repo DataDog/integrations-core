@@ -123,21 +123,6 @@ class KafkaConnectCollector:
         self._oauth_token_expiry = expires_at
         self.log.debug("Kafka Connect OAuth token refreshed, expires at %s", expires_at)
 
-    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
-        """Build metric tags, appending cluster ID tags when provided."""
-        tags = list(self.config._custom_tags)
-        if cluster_id:
-            tags.append(f'kafka_cluster_id:{cluster_id}')
-            if self.config._kafka_cluster_id_override:
-                tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
-        return tags
-
-    def _original_cluster_id_field(self) -> dict[str, str]:
-        """Return the original cluster ID event field when a cluster ID override is active."""
-        if self.config._kafka_cluster_id_override:
-            return {'original_kafka_cluster_id': self.config._auto_detected_cluster_id}
-        return {}
-
     def collect(self, cluster_id: str) -> dict[str, bool]:
         """Collect connector data and return connectivity status per endpoint.
 
@@ -187,7 +172,7 @@ class KafkaConnectCollector:
             )
             return
 
-        tags_base = self._get_tags(cluster_id) + [f'connect_url:{url}']
+        tags_base = self.config._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
 
         self._emit_connector_metrics(connectors_data, tags_base)
@@ -213,8 +198,7 @@ class KafkaConnectCollector:
             ]
 
             tasks = status.get('tasks') or []
-            count_tags = connector_tags + [f'connector_status:{connector_state.lower()}']
-            self.check.gauge('connector.task.count', len(tasks), tags=count_tags)
+            self.check.gauge('connector.task.count', len(tasks), tags=connector_tags)
 
             task_state_counts: dict[str, int] = {}
             for task in tasks:
@@ -249,7 +233,7 @@ class KafkaConnectCollector:
 
             content = {
                 'kafka_cluster_id': cluster_id,
-                **self._original_cluster_id_field(),
+                **self.config._original_cluster_id_field(),
                 'connector': name,
                 'connector_type': connector_type,
                 'connector_state': connector_state,
@@ -297,7 +281,7 @@ class KafkaConnectCollector:
         event_cache_key = f'{CONNECTOR_PLUGINS_EVENT_CACHE_KEY}:{safe_url}'
         content_dict = {
             'kafka_cluster_id': cluster_id,
-            **self._original_cluster_id_field(),
+            **self.config._original_cluster_id_field(),
             'connect_url': url,
             'config_type': 'connector_plugins',
             'plugins': plugins,

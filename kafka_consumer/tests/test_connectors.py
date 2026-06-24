@@ -7,94 +7,15 @@ import time
 import mock
 import pytest
 
+from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.connectors import (
-    KafkaConnectCollector,
+    CONNECTOR_PLUGINS_CACHE_KEY,
     _short_class_name,
 )
 
+from .conftest import SAMPLE_CONNECTORS_RESPONSE
+
 pytestmark = [pytest.mark.unit]
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def make_collector(
-    connect_urls=None,
-    cache_store=None,
-):
-    """Build a KafkaConnectCollector backed by MagicMock check/config/log."""
-    check = mock.MagicMock()
-    check.OK = 0
-    check.WARNING = 1
-    check.CRITICAL = 2
-
-    if cache_store is None:
-        cache_store = {}
-
-    def read_cache(key):
-        return cache_store.get(key, '')
-
-    def write_cache(key, value):
-        cache_store[key] = value
-
-    check.read_persistent_cache.side_effect = read_cache
-    check.write_persistent_cache.side_effect = write_cache
-
-    config = mock.MagicMock()
-    config._kafka_connect_urls = connect_urls or []
-    config._kafka_connect_username = None
-    config._kafka_connect_password = None
-    config._kafka_connect_tls_verify = True
-    config._kafka_connect_tls_ca_cert = None
-    config._kafka_connect_tls_cert = None
-    config._kafka_connect_tls_key = None
-    config._kafka_connect_oauth_token_provider = None
-    config._kafka_configs_refresh_interval = 3600
-    config._request_timeout = 10
-    config._custom_tags = []
-    config._kafka_cluster_id_override = None
-    config._auto_detected_cluster_id = ''
-
-    log = mock.MagicMock()
-    return KafkaConnectCollector(check, config, log), check, config, cache_store
-
-
-SAMPLE_CONNECTORS_RESPONSE = {
-    'demo-source': {
-        'info': {
-            'type': 'source',
-            'config': {
-                'connector.class': 'org.apache.kafka.connect.mirror.MirrorSourceConnector',
-                'tasks.max': '2',
-                'topics': 'demo-orders',
-            },
-        },
-        'status': {
-            'connector': {'state': 'RUNNING'},
-            'tasks': [
-                {'id': 0, 'state': 'RUNNING', 'worker_id': 'connect:8083'},
-                {'id': 1, 'state': 'RUNNING', 'worker_id': 'connect:8083'},
-            ],
-        },
-    },
-    'demo-heartbeat': {
-        'info': {
-            'type': 'source',
-            'config': {'connector.class': 'org.apache.kafka.connect.mirror.MirrorHeartbeatConnector'},
-        },
-        'status': {
-            'connector': {'state': 'PAUSED'},
-            'tasks': [{'id': 0, 'state': 'PAUSED', 'worker_id': 'connect:8083'}],
-        },
-    },
-}
-
-
-# ---------------------------------------------------------------------------
-# _short_class_name
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
@@ -109,12 +30,7 @@ def test_short_class_name(full_class, expected):
     assert _short_class_name(full_class) == expected
 
 
-# ---------------------------------------------------------------------------
-# Sensitive key redaction in config events
-# ---------------------------------------------------------------------------
-
-
-def test_sensitive_keys_redacted_in_config_event():
+def test_sensitive_keys_redacted_in_config_event(make_collector):
     """Full config is captured but sensitive keys are replaced with [hidden]."""
     collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     connectors_data = {
@@ -133,7 +49,13 @@ def test_sensitive_keys_redacted_in_config_event():
         }
     }
 
-    collector._emit_connector_config_events(connectors_data, 'cluster-1', 'http://localhost:8083')
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = connectors_data
+    collector.http.get.return_value = mock_resp
+
+    with mock.patch.object(collector, '_collect_plugins'):
+        collector.collect('cluster-1')
+
     assert check.event_platform_event.call_count == 1
 
     payload = json.loads(check.event_platform_event.call_args[0][0])
@@ -145,12 +67,7 @@ def test_sensitive_keys_redacted_in_config_event():
     assert cfg['tasks.max'] == '2'
 
 
-# ---------------------------------------------------------------------------
-# _emit_connector_metrics
-# ---------------------------------------------------------------------------
-
-
-def test_emit_connector_metrics_gauges():
+def test_emit_connector_metrics_gauges(make_collector):
     collector, check, _, _ = make_collector()
     collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, ['connect_url:http://localhost:8083'])
 
@@ -161,33 +78,28 @@ def test_emit_connector_metrics_gauges():
     assert 'connector.task.running' in emitted
 
 
-def test_emit_connector_metrics_connector_status_tag():
+def test_emit_connector_metrics_connector_state_tag(make_collector):
     collector, check, _, _ = make_collector()
     collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
 
     task_count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.count']
     source_calls = [c for c in task_count_calls if 'connector:demo-source' in c.kwargs.get('tags', [])]
     assert source_calls, "no connector.task.count for demo-source"
-    assert 'connector_status:running' in source_calls[0].kwargs['tags']
+    assert 'connector_state:RUNNING' in source_calls[0].kwargs['tags']
 
     heartbeat_calls = [c for c in task_count_calls if 'connector:demo-heartbeat' in c.kwargs.get('tags', [])]
     assert heartbeat_calls, "no connector.task.count for demo-heartbeat"
-    assert 'connector_status:paused' in heartbeat_calls[0].kwargs['tags']
+    assert 'connector_state:PAUSED' in heartbeat_calls[0].kwargs['tags']
 
 
-def test_task_metrics_always_collected():
+def test_task_metrics_always_collected(make_collector):
     collector, check, _, _ = make_collector()
     collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
     per_task = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.running']
     assert per_task, "expected per-task gauges to always be emitted"
 
 
-# ---------------------------------------------------------------------------
-# _get_events_to_send (dedup logic)
-# ---------------------------------------------------------------------------
-
-
-def test_dedup_unchanged_content_not_reemitted():
+def test_dedup_unchanged_content_not_reemitted(make_collector):
     collector, _, _, cache_store = make_collector()
     items = {'connector-a': '{"config":"stable"}'}
 
@@ -198,19 +110,18 @@ def test_dedup_unchanged_content_not_reemitted():
     assert 'connector-a' not in second, "unchanged content should not re-emit within TTL"
 
 
-def test_dedup_changed_content_reemitted():
+def test_dedup_changed_content_reemitted(make_collector):
     collector, _, _, _ = make_collector()
     collector.cache.get_events_to_send('test_key', {'connector-a': '{"config":"v1"}'})
     second = collector.cache.get_events_to_send('test_key', {'connector-a': '{"config":"v2"}'})
     assert 'connector-a' in second
 
 
-def test_dedup_ttl_expiry_triggers_reemit():
+def test_dedup_ttl_expiry_triggers_reemit(make_collector):
     collector, _, _, cache_store = make_collector()
     items = {'connector-a': '{"config":"stable"}'}
     collector.cache.get_events_to_send('test_key', items)
 
-    # Manually expire the cache entry
     cached = json.loads(cache_store['test_key'])
     cached['connector-a']['expire_at'] = time.time() - 1
     cache_store['test_key'] = json.dumps(cached)
@@ -219,31 +130,26 @@ def test_dedup_ttl_expiry_triggers_reemit():
     assert 'connector-a' in third, "should re-emit after TTL expiry"
 
 
-# ---------------------------------------------------------------------------
-# _emit_connector_config_events — timestamp not in hash
-# ---------------------------------------------------------------------------
-
-
-def test_collection_timestamp_excluded_from_hash():
+def test_collection_timestamp_excluded_from_hash(make_collector):
     """Verify that config events with identical content don't re-emit on the next cycle."""
     collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
 
-    collector._emit_connector_config_events(SAMPLE_CONNECTORS_RESPONSE, 'cluster-1', 'http://localhost:8083')
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
+    collector.http.get.return_value = mock_resp
+
+    with mock.patch.object(collector, '_collect_plugins'):
+        collector.collect('cluster-1')
     first_count = check.event_platform_event.call_count
 
-    # Second call with same data — should not emit again within TTL
-    collector._emit_connector_config_events(SAMPLE_CONNECTORS_RESPONSE, 'cluster-1', 'http://localhost:8083')
+    with mock.patch.object(collector, '_collect_plugins'):
+        collector.collect('cluster-1')
     second_count = check.event_platform_event.call_count
 
     assert second_count == first_count, f"expected no new events on second call, got {second_count - first_count} more"
 
 
-# ---------------------------------------------------------------------------
-# collect() — connectivity status dict
-# ---------------------------------------------------------------------------
-
-
-def test_collect_returns_connected_true_on_success():
+def test_collect_returns_connected_true_on_success(make_collector):
     collector, _, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     with mock.patch.object(collector, '_collect_rest'):
         result = collector.collect('cluster-1')
@@ -251,7 +157,7 @@ def test_collect_returns_connected_true_on_success():
     assert result == {'http://localhost:8083': True}
 
 
-def test_collect_returns_connected_false_on_failure():
+def test_collect_returns_connected_false_on_failure(make_collector):
     collector, _, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     with mock.patch.object(collector, '_collect_rest', side_effect=ConnectionError("refused")):
         result = collector.collect('cluster-1')
@@ -259,31 +165,20 @@ def test_collect_returns_connected_false_on_failure():
     assert result == {'http://localhost:8083': False}
 
 
-# ---------------------------------------------------------------------------
-# Older-worker compat — list response → warning, no crash
-# ---------------------------------------------------------------------------
-
-
-def test_older_worker_list_response_warns_and_returns():
+def test_older_worker_list_response_warns_and_returns(make_collector):
     collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     mock_resp = mock.MagicMock()
-    mock_resp.json.return_value = ['connector-a', 'connector-b']  # old-style list
+    mock_resp.json.return_value = ['connector-a', 'connector-b']
 
     collector.http.get.return_value = mock_resp
 
-    # Should not raise, should not emit metrics
     collector._collect_rest('http://localhost:8083', 'cluster-1')
 
     assert check.gauge.call_count == 0
     collector.log.warning.assert_called_once()
 
 
-# ---------------------------------------------------------------------------
-# _collect_rest — full success path with mocked HTTP
-# ---------------------------------------------------------------------------
-
-
-def test_collect_rest_success_emits_metrics_and_events():
+def test_collect_rest_success_emits_metrics_and_events(make_collector):
     collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     mock_resp = mock.MagicMock()
     mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
@@ -299,12 +194,7 @@ def test_collect_rest_success_emits_metrics_and_events():
     assert check.event_platform_event.call_count > 0
 
 
-# ---------------------------------------------------------------------------
-# _collect_plugins — success and skip-when-cached paths
-# ---------------------------------------------------------------------------
-
-
-def test_collect_plugins_emits_event_on_first_call():
+def test_collect_plugins_emits_event_on_first_call(make_collector):
     collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     plugins = [{'class': 'org.apache.kafka.connect.file.FileStreamSinkConnector', 'type': 'sink', 'version': '3.3.0'}]
 
@@ -319,12 +209,10 @@ def test_collect_plugins_emits_event_on_first_call():
     assert payload['config_type'] == 'connector_plugins'
 
 
-def test_collect_plugins_skips_when_ttl_not_expired(monkeypatch):
+def test_collect_plugins_skips_when_ttl_not_expired(make_collector, monkeypatch):
     collector, check, _, cache_store = make_collector(connect_urls=['http://localhost:8083'])
 
     from urllib.parse import quote
-
-    from datadog_checks.kafka_consumer.connectors import CONNECTOR_PLUGINS_CACHE_KEY
 
     safe_url = quote('http://localhost:8083', safe='')
     fetch_cache_key = f'{CONNECTOR_PLUGINS_CACHE_KEY}:{safe_url}'
@@ -334,18 +222,13 @@ def test_collect_plugins_skips_when_ttl_not_expired(monkeypatch):
     assert check.event_platform_event.call_count == 0
 
 
-# ---------------------------------------------------------------------------
-# _get_items_to_fetch and _mark_items_fetched
-# ---------------------------------------------------------------------------
-
-
-def test_get_items_to_fetch_returns_all_on_empty_cache():
+def test_get_items_to_fetch_returns_all_on_empty_cache(make_collector):
     collector, _, _, _ = make_collector()
     result = collector.cache.get_items_to_fetch('nonexistent_key', ['a', 'b'])
     assert result == ['a', 'b']
 
 
-def test_get_items_to_fetch_skips_unexpired_items():
+def test_get_items_to_fetch_skips_unexpired_items(make_collector):
     collector, _, _, cache_store = make_collector()
     future = time.time() + 9999
     cache_store['test_key'] = json.dumps({'item-a': future, 'item-b': 0})
@@ -354,7 +237,7 @@ def test_get_items_to_fetch_skips_unexpired_items():
     assert 'item-a' not in result
 
 
-def test_mark_items_fetched_writes_expiry():
+def test_mark_items_fetched_writes_expiry(make_collector):
     collector, _, _, cache_store = make_collector()
     collector.cache.mark_items_fetched('test_key', ['item-a'], ttl_base=100, ttl_jitter=0)
     cached = json.loads(cache_store['test_key'])
@@ -362,7 +245,7 @@ def test_mark_items_fetched_writes_expiry():
     assert cached['item-a'] > time.time()
 
 
-def test_mark_items_fetched_evicts_oldest_when_over_max():
+def test_mark_items_fetched_evicts_oldest_when_over_max(make_collector):
     collector, _, _, cache_store = make_collector()
     existing = {f'key-{i}': time.time() + i for i in range(10)}
     cache_store['test_key'] = json.dumps(existing)
@@ -372,77 +255,58 @@ def test_mark_items_fetched_evicts_oldest_when_over_max():
     assert 'new-key' in cached
 
 
-def test_get_items_to_fetch_handles_corrupt_cache():
+def test_get_items_to_fetch_handles_corrupt_cache(make_collector):
     collector, _, _, cache_store = make_collector()
     cache_store['bad_key'] = 'not-valid-json'
     result = collector.cache.get_items_to_fetch('bad_key', ['item'])
     assert result == ['item']
 
 
-def test_get_events_to_send_handles_corrupt_cache():
+def test_get_events_to_send_handles_corrupt_cache(make_collector):
     collector, _, _, cache_store = make_collector()
     cache_store['bad_key'] = 'not-valid-json'
     result = collector.cache.get_events_to_send('bad_key', {'item': 'content'})
     assert result == ['item']
 
 
-def test_get_events_to_send_empty_items():
+def test_get_events_to_send_empty_items(make_collector):
     collector, _, _, _ = make_collector()
     result = collector.cache.get_events_to_send('some_key', {})
     assert result == []
 
 
-# ---------------------------------------------------------------------------
-# _get_tags and _original_cluster_id_field
-# ---------------------------------------------------------------------------
+def _make_kafka_config(**kwargs):
+    return KafkaConfig({}, kwargs, mock.MagicMock())
 
 
 def test_get_tags_without_cluster_id():
-    collector, _, config, _ = make_collector()
-    config._custom_tags = ['env:prod']
-    config._kafka_cluster_id_override = None
-    tags = collector._get_tags()
-    assert tags == ['env:prod']
+    config = _make_kafka_config(tags=['env:prod'])
+    assert config._get_tags() == ['env:prod']
 
 
 def test_get_tags_with_cluster_id():
-    collector, _, config, _ = make_collector()
-    config._custom_tags = []
-    config._kafka_cluster_id_override = None
-    tags = collector._get_tags('cluster-abc')
-    assert 'kafka_cluster_id:cluster-abc' in tags
+    config = _make_kafka_config()
+    assert 'kafka_cluster_id:cluster-abc' in config._get_tags('cluster-abc')
 
 
 def test_get_tags_with_cluster_id_override():
-    collector, _, config, _ = make_collector()
-    config._custom_tags = []
-    config._kafka_cluster_id_override = 'override-id'
+    config = _make_kafka_config(kafka_cluster_id_override='override-id')
     config._auto_detected_cluster_id = 'real-id'
-    tags = collector._get_tags('override-id')
-    assert 'original_kafka_cluster_id:real-id' in tags
+    assert 'original_kafka_cluster_id:real-id' in config._get_tags('override-id')
 
 
 def test_original_cluster_id_field_when_override_set():
-    collector, _, config, _ = make_collector()
-    config._kafka_cluster_id_override = 'override-id'
+    config = _make_kafka_config(kafka_cluster_id_override='override-id')
     config._auto_detected_cluster_id = 'real-id'
-    result = collector._original_cluster_id_field()
-    assert result == {'original_kafka_cluster_id': 'real-id'}
+    assert config._original_cluster_id_field() == {'original_kafka_cluster_id': 'real-id'}
 
 
 def test_original_cluster_id_field_when_no_override():
-    collector, _, config, _ = make_collector()
-    config._kafka_cluster_id_override = None
-    result = collector._original_cluster_id_field()
-    assert result == {}
+    config = _make_kafka_config()
+    assert config._original_cluster_id_field() == {}
 
 
-# ---------------------------------------------------------------------------
-# _configure_http — auth and TLS configuration paths
-# ---------------------------------------------------------------------------
-
-
-def test_configure_http_sets_basic_auth():
+def test_configure_http_sets_basic_auth(make_collector):
     collector, _, config, _ = make_collector()
     config._kafka_connect_username = 'user'
     config._kafka_connect_password = 'pass'
@@ -469,7 +333,7 @@ def test_configure_http_sets_basic_auth():
     ],
     ids=["tls_verify_false", "tls_ca_cert", "client_cert_and_key", "cert_only"],
 )
-def test_configure_http_tls(config_overrides, attr, expected):
+def test_configure_http_tls(make_collector, config_overrides, attr, expected):
     collector, _, config, _ = make_collector()
     config._kafka_connect_username = None
     config._kafka_connect_password = None
@@ -484,12 +348,7 @@ def test_configure_http_tls(config_overrides, attr, expected):
     assert collector._http_kwargs[attr] == expected
 
 
-# ---------------------------------------------------------------------------
-# collect() — OAuth failure path
-# ---------------------------------------------------------------------------
-
-
-def test_collect_oauth_failure_returns_endpoints_as_false():
+def test_collect_oauth_failure_returns_endpoints_as_false(make_collector):
     collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
     config._kafka_connect_oauth_token_provider = {'url': 'http://auth', 'client_id': 'id', 'client_secret': 'sec'}
 
@@ -499,7 +358,7 @@ def test_collect_oauth_failure_returns_endpoints_as_false():
     assert result == {'http://localhost:8083': False}
 
 
-def test_collect_multi_endpoint_partial_failure():
+def test_collect_multi_endpoint_partial_failure(make_collector):
     """One endpoint failing does not prevent the other from being collected."""
     collector, _, config, _ = make_collector(connect_urls=['http://ok:8083', 'http://bad:8083'])
     config._kafka_connect_oauth_token_provider = None
@@ -514,12 +373,7 @@ def test_collect_multi_endpoint_partial_failure():
     assert result == {'http://ok:8083': True, 'http://bad:8083': False}
 
 
-# ---------------------------------------------------------------------------
-# _refresh_oauth_token
-# ---------------------------------------------------------------------------
-
-
-def test_refresh_oauth_token_stores_token():
+def test_refresh_oauth_token_stores_token(make_collector):
     collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
     config._kafka_connect_oauth_token_provider = {
         'url': 'http://auth/token',
@@ -534,7 +388,7 @@ def test_refresh_oauth_token_stores_token():
     assert collector._get_request_kwargs()['extra_headers']['Authorization'] == 'Bearer mytoken'
 
 
-def test_refresh_oauth_token_skips_when_still_valid():
+def test_refresh_oauth_token_skips_when_still_valid(make_collector):
     collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
     config._kafka_connect_oauth_token_provider = {
         'url': 'http://auth/token',
@@ -551,7 +405,7 @@ def test_refresh_oauth_token_skips_when_still_valid():
     mock_fetch.assert_not_called()
 
 
-def test_refresh_oauth_token_no_op_when_no_provider():
+def test_refresh_oauth_token_no_op_when_no_provider(make_collector):
     collector, _, config, _ = make_collector()
     config._kafka_connect_oauth_token_provider = None
 
@@ -561,7 +415,7 @@ def test_refresh_oauth_token_no_op_when_no_provider():
     mock_fetch.assert_not_called()
 
 
-def test_refresh_oauth_token_sets_custom_headers():
+def test_refresh_oauth_token_sets_custom_headers(make_collector):
     collector, _, config, _ = make_collector(connect_urls=['http://localhost:8083'])
     config._kafka_connect_oauth_token_provider = {
         'url': 'http://auth/token',
@@ -577,12 +431,7 @@ def test_refresh_oauth_token_sets_custom_headers():
     assert extra.get('X-Tenant') == 'tenant-1'
 
 
-# ---------------------------------------------------------------------------
-# _fetch_oidc_token — instance method using self.http
-# ---------------------------------------------------------------------------
-
-
-def test_fetch_oidc_token_returns_token_and_expiry():
+def test_fetch_oidc_token_returns_token_and_expiry(make_collector):
     collector, check, _, _ = make_collector()
 
     oauth_config = {
@@ -601,7 +450,7 @@ def test_fetch_oidc_token_returns_token_and_expiry():
     assert expires_at < time.time() + 700
 
 
-def test_fetch_oidc_token_uses_scope_and_ca_cert():
+def test_fetch_oidc_token_uses_scope_and_ca_cert(make_collector):
     collector, check, _, _ = make_collector()
 
     oauth_config = {
@@ -623,46 +472,32 @@ def test_fetch_oidc_token_uses_scope_and_ca_cert():
     assert call_kwargs['data']['scope'] == 'openid'
 
 
-# ---------------------------------------------------------------------------
-# _mark_items_fetched — defaults and exception paths
-# ---------------------------------------------------------------------------
-
-
-def test_mark_items_fetched_uses_defaults_when_none():
+def test_mark_items_fetched_uses_defaults_when_none(make_collector):
     collector, _, _, cache_store = make_collector()
-    # Call without explicit ttl_base/ttl_jitter → should use _configs_refresh_interval defaults
     collector.cache.mark_items_fetched('test_key', ['item-a'])
     cached = json.loads(cache_store['test_key'])
     assert 'item-a' in cached
     assert cached['item-a'] > time.time()
 
 
-def test_mark_items_fetched_handles_corrupt_cache():
+def test_mark_items_fetched_handles_corrupt_cache(make_collector):
     collector, _, _, cache_store = make_collector()
     cache_store['bad_key'] = 'not-valid-json'
-    # Should not raise
     collector.cache.mark_items_fetched('bad_key', ['item'], ttl_base=100, ttl_jitter=0)
     cached = json.loads(cache_store['bad_key'])
     assert 'item' in cached
 
 
-def test_mark_items_fetched_handles_write_failure():
+def test_mark_items_fetched_handles_write_failure(make_collector):
     collector, check, _, _ = make_collector()
     check.write_persistent_cache.side_effect = Exception("disk full")
-    # Should not raise
     collector.cache.mark_items_fetched('test_key', ['item'], ttl_base=100, ttl_jitter=0)
     collector.log.debug.assert_called()
 
 
-# ---------------------------------------------------------------------------
-# _get_events_to_send — write failure path
-# ---------------------------------------------------------------------------
-
-
-def test_get_events_to_send_handles_write_failure():
+def test_get_events_to_send_handles_write_failure(make_collector):
     collector, check, _, _ = make_collector()
     check.write_persistent_cache.side_effect = Exception("disk full")
-    # Should not raise, should return the items to send
     result = collector.cache.get_events_to_send('test_key', {'item': 'content'})
     assert result == ['item']
     collector.log.debug.assert_called()

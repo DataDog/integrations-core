@@ -129,6 +129,21 @@ class KafkaConfig:
         self._kafka_connect_tls_ca_cert = instance.get('kafka_connect_tls_ca_cert')
         self._kafka_connect_oauth_token_provider = instance.get('kafka_connect_oauth_token_provider')
 
+    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
+        """Build metric tags, appending cluster ID tags when provided."""
+        tags = list(self._custom_tags)
+        if cluster_id:
+            tags.append(f'kafka_cluster_id:{cluster_id}')
+            if self._kafka_cluster_id_override:
+                tags.append(f'original_kafka_cluster_id:{self._auto_detected_cluster_id}')
+        return tags
+
+    def _original_cluster_id_field(self) -> dict[str, str]:
+        """Return the original cluster ID event field when a cluster ID override is active."""
+        if self._kafka_cluster_id_override:
+            return {'original_kafka_cluster_id': self._auto_detected_cluster_id}
+        return {}
+
     @staticmethod
     def _parse_connect_urls(value: str | list[str] | tuple[str, ...] | None) -> list[str]:
         if not value:
