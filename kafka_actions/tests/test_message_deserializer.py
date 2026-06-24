@@ -8,7 +8,6 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
-
 from datadog_checks.kafka_actions.message_deserializer import DeserializedMessage, MessageDeserializer
 
 pytestmark = [pytest.mark.unit]
