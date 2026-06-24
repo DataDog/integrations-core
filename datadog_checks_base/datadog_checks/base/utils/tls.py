@@ -35,7 +35,6 @@ STANDARD_FIELDS = {
     'tls_private_key_password': None,
     'tls_validate_hostname': True,
     'tls_ciphers': 'ALL',
-    'tls_aia_chasing_max_depth': 1,
 }
 
 
@@ -48,7 +47,6 @@ class TlsConfig(BaseModel, frozen=True):
     tls_intermediate_ca_certs: tuple[str, ...] | None = None
     tls_cert: str | None = None
     tls_ciphers: str | tuple[str, ...] = 'ALL'
-    tls_aia_chasing_max_depth: int = 1
     tls_use_host_header: bool = False
     tls_ignore_warning: bool = False
     tls_private_key: str | None = None

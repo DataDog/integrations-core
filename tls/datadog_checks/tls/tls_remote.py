@@ -194,14 +194,9 @@ class TLSRemoteCheck(object):
 
         self.load_intermediate_certs(der_cert)
 
-    def load_intermediate_certs(self, der_cert, aia_chasing_max_depth=None):
+    def load_intermediate_certs(self, der_cert):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
-        if aia_chasing_max_depth is None:
-            aia_chasing_max_depth = self.agent_check.http.tls_config.get('tls_aia_chasing_max_depth', 1)
-        if aia_chasing_max_depth <= 0:
-            return
-
         try:
             cert = load_der_x509_certificate(der_cert)
         except Exception as e:
@@ -230,9 +225,7 @@ class TLSRemoteCheck(object):
             ):
                 continue
 
-            intermediate_cert = fetch_intermediate_cert(
-                uri, self.log, self.agent_check.http.tls_config, aia_chasing_max_depth - 1
-            )
+            intermediate_cert = fetch_intermediate_cert(uri, self.log, self.agent_check.http.tls_config)
             if intermediate_cert is None:
                 continue
             access_time = get_timestamp()
@@ -243,4 +236,4 @@ class TLSRemoteCheck(object):
                 self.agent_check._intermediate_cert_id_cache.add(cert_id)
 
             self.agent_check._intermediate_cert_uri_cache[uri] = access_time
-            self.load_intermediate_certs(intermediate_cert, aia_chasing_max_depth - 1)
+            self.load_intermediate_certs(intermediate_cert)

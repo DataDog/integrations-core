@@ -228,7 +228,7 @@ def test_cert_expired(aggregator, instance_remote_cert_expired):
 def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     c.get_tls_context = MagicMock(return_value=MagicMock())
-    c._http = MagicMock(tls_config={'tls_ca_cert': '/path/to/ca.pem', 'tls_aia_chasing_max_depth': 1})
+    c._http = MagicMock(tls_config={'tls_ca_cert': '/path/to/ca.pem'})
     uri = 'http://issuer.test/ca.der'
     access_description = MagicMock(
         access_method=AuthorityInformationAccessOID.CA_ISSUERS,
@@ -242,7 +242,7 @@ def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote
             c.checker.load_intermediate_certs(b'leaf')
             c.checker.load_intermediate_certs(b'leaf')
 
-    fetch.assert_called_once_with(uri, c.checker.log, c.http.tls_config, 0)
+    fetch.assert_called_once_with(uri, c.checker.log, c.http.tls_config)
     c.get_tls_context.return_value.load_verify_locations.assert_called_once_with(cadata=b'intermediate')
 
 

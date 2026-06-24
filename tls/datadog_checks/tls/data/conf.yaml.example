@@ -221,12 +221,6 @@ instances:
     #
     # tls_validate_hostname: true
 
-    ## @param tls_aia_chasing_max_depth - integer - optional - default: 1
-    ## The maximum number of AIA issuer certificate hops to follow when fetching intermediate certificates.
-    ## Set to 0 to disable recursive AIA chasing.
-    #
-    # tls_aia_chasing_max_depth: 1
-
     ## @param tls_ciphers - list of strings - optional
     ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
     ## `ALL` ciphers are used. For list of ciphers see: 
