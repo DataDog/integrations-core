@@ -20,7 +20,6 @@ from . import common
 from .common import get_cluster_id
 from .runners import Consumer, Producer
 
-
 SAMPLE_CONNECTORS_RESPONSE = {
     'demo-source': {
         'info': {
