@@ -11,7 +11,7 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.http import RequestsWrapper, create_ssl_context
+from datadog_checks.base.utils.http import create_ssl_context, fetch_intermediate_cert
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
@@ -225,7 +225,7 @@ class TLSRemoteCheck(object):
             ):
                 continue
 
-            intermediate_cert = self._fetch_intermediate_cert(uri)
+            intermediate_cert = fetch_intermediate_cert(uri, self.log)
             if intermediate_cert is None:
                 continue
             access_time = get_timestamp()
@@ -237,20 +237,3 @@ class TLSRemoteCheck(object):
 
             self.agent_check._intermediate_cert_uri_cache[uri] = access_time
             self.load_intermediate_certs(intermediate_cert)
-
-    def _fetch_intermediate_cert(self, uri):
-        for tls_verify in (True, False):
-            session = RequestsWrapper({'tls_verify': tls_verify}, {})
-            try:
-                response = session.get(uri)  # SKIP_HTTP_VALIDATION
-                response.raise_for_status()
-            except Exception as e:
-                self.log.debug(
-                    'Error fetching intermediate certificate from `%s` (tls_verify=%s): %s', uri, tls_verify, e
-                )
-                continue
-            else:
-                return response.content
-
-        self.log.error('Error fetching intermediate certificate from `%s`', uri)
-        return None

@@ -1,4 +1,4 @@
-# (C) Datadog, Inc. 2024-present
+# (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import datetime
@@ -69,12 +69,12 @@ def test_aia_fetch_never_uses_instance_credentials(checker):
     session = MagicMock()
     session.get.return_value = MagicMock(content=build_cert())
 
-    with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session) as wrapper:
+    with patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
         remote.load_intermediate_certs(leaf)
 
     assert check._http.get.call_count == 0
     for instance, init_config in session_configs(wrapper):
-        assert set(instance) <= {'tls_verify'}
+        assert instance == {'tls_verify': True, 'skip_proxy': True}
         assert init_config == {}
 
 
@@ -88,11 +88,12 @@ def test_aia_fetch_tries_tls_then_plain_fallback(checker):
     def make_wrapper(instance, init_config, *args, **kwargs):
         return plain if instance.get('tls_verify') is False else secure
 
-    with patch('datadog_checks.tls.tls_remote.RequestsWrapper', side_effect=make_wrapper) as wrapper:
+    with patch('datadog_checks.base.utils.http.RequestsWrapper', side_effect=make_wrapper) as wrapper:
         remote.load_intermediate_certs(leaf)
 
-    verifies = [instance.get('tls_verify') for instance, _ in session_configs(wrapper)]
-    assert verifies[0] is True and False in verifies
+    configs = [instance for instance, _ in session_configs(wrapper)]
+    assert configs[0] == {'tls_verify': True, 'skip_proxy': True}
+    assert {'tls_verify': False, 'skip_proxy': True} in configs
     assert secure.get.called and plain.get.called
 
 
@@ -102,7 +103,7 @@ def test_aia_fetch_caches_uri(checker):
     session = MagicMock()
     session.get.return_value = MagicMock(content=build_cert())
 
-    with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session):
+    with patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
         remote.load_intermediate_certs(leaf)
         first = session.get.call_count
         remote.load_intermediate_certs(leaf)
@@ -119,7 +120,7 @@ def test_aia_fetch_recurses_into_fetched_cert(checker):
         MagicMock(content=build_cert()),
     ]
 
-    with patch('datadog_checks.tls.tls_remote.RequestsWrapper', return_value=session):
+    with patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
         remote.load_intermediate_certs(leaf)
 
     assert session.get.call_count == 2

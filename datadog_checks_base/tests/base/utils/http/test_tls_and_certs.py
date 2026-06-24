@@ -442,6 +442,17 @@ class TestAIAChasing:
             raise error
         assert response.status_code == 200
 
+    def test_load_intermediate_certs_skips_invalid_issuer_response(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=b'not a certificate')
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), certs)
+
+        assert certs == []
+
     def test_load_intermediate_certs_falls_back_to_plain_http(self):
         http = RequestsWrapper({}, {})
         secure, plain = mock.MagicMock(), mock.MagicMock()

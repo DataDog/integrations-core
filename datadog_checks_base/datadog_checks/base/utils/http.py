@@ -220,6 +220,21 @@ class ResponseWrapper(ObjectProxy):
         return self
 
 
+def fetch_intermediate_cert(uri, logger):
+    for tls_verify in (True, False):
+        try:
+            response = RequestsWrapper({'tls_verify': tls_verify, 'skip_proxy': True}, {}, logger=logger).get(uri)
+            response.raise_for_status()
+        except Exception as e:
+            logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=%s): %s', uri, tls_verify, e)
+            continue
+        else:
+            return response.content
+
+    logger.error('Error fetching intermediate certificate from `%s`', uri)
+    return None
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
@@ -580,11 +595,16 @@ class RequestsWrapper(object):
 
             uri = access_description.access_location.value
 
-            intermediate_cert = self._fetch_intermediate_cert(uri)
+            intermediate_cert = fetch_intermediate_cert(uri, self.logger)
             if intermediate_cert is None:
                 continue
 
-            certs.append(self._serialize_intermediate_cert(intermediate_cert))
+            try:
+                certs.append(self._serialize_intermediate_cert(intermediate_cert))
+            except Exception as e:
+                self.logger.error('Error serializing intermediate certificate from `%s`: %s', uri, e)
+                continue
+
             self.load_intermediate_certs(intermediate_cert, certs)
         return certs
 
@@ -594,23 +614,6 @@ class RequestsWrapper(object):
             .public_bytes(_http_utils.cryptography_serialization.Encoding.PEM)
             .decode('utf-8')
         )
-
-    def _fetch_intermediate_cert(self, uri):
-        for tls_verify in (True, False):
-            try:
-                response = RequestsWrapper({'tls_verify': tls_verify, 'skip_proxy': True}, {}, logger=self.logger).get(
-                    uri
-                )
-            except Exception as e:
-                self.logger.debug(
-                    'Error fetching intermediate certificate from `%s` (tls_verify=%s): %s', uri, tls_verify, e
-                )
-                continue
-            else:
-                return response.content
-
-        self.logger.error('Error fetching intermediate certificate from `%s`', uri)
-        return None
 
     def _create_session(self):
         """
