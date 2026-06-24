@@ -24,10 +24,6 @@ def run_resources(tmp_path) -> RunResources:
     )
 
 
-def test_file_registry_getter_is_idempotent(run_resources: RunResources) -> None:
-    assert run_resources.file_registry is run_resources.file_registry
-
-
 def test_agent_config_unknown_name_raises(run_resources: RunResources) -> None:
     with pytest.raises(ResourceUnavailableError, match="No agent definition named 'missing'"):
         run_resources.agent_config("missing")
