@@ -462,15 +462,18 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
 
-        assert wrapper.call_args.args[0] == {
-            'tls_ca_cert': '/path/to/ca.pem',
-            'tls_ciphers': 'ECDHE-ECDSA-AES256-GCM-SHA384',
-            'tls_protocols_allowed': ['TLSv1.2'],
-            'tls_validate_hostname': False,
-            'tls_verify': True,
-            'skip_proxy': True,
-        }
-        assert wrapper.call_args.args[1] == {}
+        wrapper.assert_called_once_with(
+            {
+                'tls_ca_cert': '/path/to/ca.pem',
+                'tls_ciphers': 'ECDHE-ECDSA-AES256-GCM-SHA384',
+                'tls_protocols_allowed': ['TLSv1.2'],
+                'tls_validate_hostname': False,
+                'tls_verify': True,
+                'skip_proxy': True,
+            },
+            {},
+            logger=http.logger,
+        )
 
     def test_load_intermediate_certs_skips_unparseable_cert_body(self):
         http = RequestsWrapper({}, {})
