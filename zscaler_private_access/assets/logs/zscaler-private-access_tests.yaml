@@ -1182,97 +1182,97 @@ tests:
   -
     sample: |-
       {
-        "ClientAuditUpdate": 0,
-        "RequestID": "a1b2c3d4-0000-1111-2222-aabbccddeeff",
-        "ObjectID": 72058050378200001,
-        "EventType": "audit-logs",
-        "AuditOperationType": "Update",
-        "CustomerID": 72058050378200000,
-        "ObjectName": "ExampleOrg - API Client",
-        "ObjectType": "Client Credentials",
-        "ModifiedTime": "2025-08-28T12:34:56.000Z",
-        "AuditNewValue": "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1700000000000\",\"tokenExpiryTimeInSec\":\"1800\"}",
-        "ModifiedBy": 72057594037900000,
-        "User": "sysadmin@example.com",
-        "CreationTime": "2025-08-28T12:34:56.000Z",
-        "AuditOldValue": "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1699999999999\",\"tokenExpiryTimeInSec\":\"1800\"}",
-        "SessionID": "aAbBcCdDeEfFgGhHiIjJkK"
+      "ClientAuditUpdate" : 0,
+      "User" : "sysadmin@example.com",
+      "RequestID" : "a1b2c3d4-0000-1111-2222-aabbccddeeff",
+      "ObjectID" : 72058050378200001,
+      "EventType" : "audit-logs",
+      "AuditOperationType" : "Update",
+      "CustomerID" : 72058050378200000,
+      "ModifiedBy" : 72057594037900000,
+      "ObjectName" : "ExampleOrg - API Client",
+      "ObjectType" : "Client Credentials",
+      "ModifiedTime" : "2025-08-28T12:34:56.000Z",
+      "AuditNewValue" : "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1700000000000\",\"tokenExpiryTimeInSec\":\"1800\"}",
+      "CreationTime" : "2025-08-28T12:34:56.000Z",
+      "AuditOldValue" : "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1699999999999\",\"tokenExpiryTimeInSec\":\"1800\"}",
+      "SessionID" : "aAbBcCdDeEfFgGhHiIjJkK"
+    }
+  result:
+    custom:
+      AuditNewValue: "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1700000000000\",\"tokenExpiryTimeInSec\":\"1800\"}"
+      AuditOldValue: "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1699999999999\",\"tokenExpiryTimeInSec\":\"1800\"}"
+      AuditOperationType: "Update"
+      ClientAuditUpdate: 0
+      CreationTime: "2025-08-28T12:34:56.000Z"
+      CustomerID: 72058050378200000
+      EventType: "audit-logs"
+      ModifiedBy: 72057594037900000
+      ModifiedTime: "2025-08-28T12:34:56.000Z"
+      ObjectID: 72058050378200001
+      ObjectName: "ExampleOrg - API Client"
+      ObjectType: "Client Credentials"
+      RequestID: "a1b2c3d4-0000-1111-2222-aabbccddeeff"
+      SessionID: "aAbBcCdDeEfFgGhHiIjJkK"
+      User: "sysadmin@example.com"
+      ocsf:
+        activity_id: 3
+        activity_name: "Update"
+        actor:
+          user:
+            account:
+              uid: "72058050378200000"
+            name: "sysadmin@example.com"
+            uid: "72057594037900000"
+        api:
+          operation: "Update"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "API Activity"
+        class_uid: 6003
+        metadata:
+          event_code: "Update"
+          original_time: "2025-08-28T12:34:56.000Z"
+          product:
+            name: "Zscaler Private Access"
+            vendor_name: "Zscaler"
+          uid: "a1b2c3d4-0000-1111-2222-aabbccddeeff"
+          version: "1.5.0"
+        resources:
+         -
+          name: "ExampleOrg - API Client"
+          type: "Client Credentials"
+          uid: "72058050378200001"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          name: "unknown"
+        status: "Success"
+        status_id: 1
+        time: 1756384496000
+      timestamp: "2025-08-28T12:34:56.000Z"
+      usr:
+        email: "sysadmin@example.com"
+        id: 72057594037900000
+    message: |-
+      {
+        "ClientAuditUpdate" : 0,
+        "User" : "sysadmin@example.com",
+        "RequestID" : "a1b2c3d4-0000-1111-2222-aabbccddeeff",
+        "ObjectID" : 72058050378200001,
+        "EventType" : "audit-logs",
+        "AuditOperationType" : "Update",
+        "CustomerID" : 72058050378200000,
+        "ModifiedBy" : 72057594037900000,
+        "ObjectName" : "ExampleOrg - API Client",
+        "ObjectType" : "Client Credentials",
+        "ModifiedTime" : "2025-08-28T12:34:56.000Z",
+        "AuditNewValue" : "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1700000000000\",\"tokenExpiryTimeInSec\":\"1800\"}",
+        "CreationTime" : "2025-08-28T12:34:56.000Z",
+        "AuditOldValue" : "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1699999999999\",\"tokenExpiryTimeInSec\":\"1800\"}",
+        "SessionID" : "aAbBcCdDeEfFgGhHiIjJkK"
       }
-    result:
-      custom:
-        AuditNewValue: "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1700000000000\",\"tokenExpiryTimeInSec\":\"1800\"}"
-        AuditOldValue: "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1699999999999\",\"tokenExpiryTimeInSec\":\"1800\"}"
-        AuditOperationType: "Update"
-        ClientAuditUpdate: 0
-        CreationTime: "2025-08-28T12:34:56.000Z"
-        CustomerID: 72058050378200000
-        EventType: "audit-logs"
-        ModifiedBy: 72057594037900000
-        ModifiedTime: "2025-08-28T12:34:56.000Z"
-        ObjectID: 72058050378200001
-        ObjectName: "ExampleOrg - API Client"
-        ObjectType: "Client Credentials"
-        RequestID: "a1b2c3d4-0000-1111-2222-aabbccddeeff"
-        SessionID: "aAbBcCdDeEfFgGhHiIjJkK"
-        User: "sysadmin@example.com"
-        ocsf:
-          activity_id: 3
-          activity_name: "Update"
-          actor:
-            user:
-              account:
-                uid: "72058050378200000"
-              name: "sysadmin@example.com"
-              uid: "72057594037900000"
-          api:
-            operation: "Update"
-          category_name: "Application Activity"
-          category_uid: 6
-          class_name: "API Activity"
-          class_uid: 6003
-          metadata:
-            event_code: "Update"
-            original_time: "2025-08-28T12:34:56.000Z"
-            product:
-              name: "Zscaler Private Access"
-              vendor_name: "Zscaler"
-            uid: "a1b2c3d4-0000-1111-2222-aabbccddeeff"
-            version: "1.5.0"
-          resources:
-            -
-              name: "ExampleOrg - API Client"
-              type: "Client Credentials"
-              uid: "72058050378200001"
-          severity: "Informational"
-          severity_id: 1
-          src_endpoint:
-            name: "unknown"
-          status: "Success"
-          status_id: 1
-          time: 1756384496000
-        timestamp: "2025-08-28T12:34:56.000Z"
-        usr:
-          email: "sysadmin@example.com"
-          id: 72057594037900000
-      message: |-
-        {
-          "ClientAuditUpdate": 0,
-          "RequestID": "a1b2c3d4-0000-1111-2222-aabbccddeeff",
-          "ObjectID": 72058050378200001,
-          "EventType": "audit-logs",
-          "AuditOperationType": "Update",
-          "CustomerID": 72058050378200000,
-          "ObjectName": "ExampleOrg - API Client",
-          "ObjectType": "Client Credentials",
-          "ModifiedTime": "2025-08-28T12:34:56.000Z",
-          "AuditNewValue": "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1700000000000\",\"tokenExpiryTimeInSec\":\"1800\"}",
-          "ModifiedBy": 72057594037900000,
-          "User": "sysadmin@example.com",
-          "CreationTime": "2025-08-28T12:34:56.000Z",
-          "AuditOldValue": "{\"id\":\"72058050378200001\",\"name\":\"ExampleOrg - API Client\",\"clientId\":\"example_abc123def456\",\"clientSecret\":\"********\",\"enabled\":\"true\",\"iamClientId\":\"abc123def456\",\"isLocked\":\"false\",\"pinSessionEnabled\":\"false\",\"role\":{\"id\":\"28\",\"name\":\"API Full Access\"},\"syncVersion\":\"1699999999999\",\"tokenExpiryTimeInSec\":\"1800\"}",
-          "SessionID": "aAbBcCdDeEfFgGhHiIjJkK"
-        }
-      service: "audit-logs"
-      tags:
-        - "source:LOGS_SOURCE"
-      timestamp: 1756384496000
+    service: "audit-logs"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1756384496000
