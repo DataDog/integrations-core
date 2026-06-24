@@ -83,6 +83,8 @@ Note that when Temporal services in a cluster are deployed independently, every 
 
 The following Kubernetes annotation is applied to a pod under `metadata`, where `<CONTAINER_NAME>` is the name of your Temporal container (or a [custom identifier][16]):
 
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: temporal`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
   {
@@ -106,6 +108,8 @@ Apply the following configuration parameter to `logs`:
 **Example**
 
 The following Kubernetes annotation is applied to a pod under `metadata`, where `<CONTAINER_NAME>` is the name of your Temporal container (or a [custom identifier][16]):
+
+For log-only configuration, `DatadogInstrumentation` also supports `logs`; use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.logs: |

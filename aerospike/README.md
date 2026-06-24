@@ -79,6 +79,8 @@ For containerized environments, see [Configure integrations with Autodiscovery o
 
 Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
 
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: aerospike`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
   {
@@ -103,6 +105,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 **Example**
 
 Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
+
+For log-only configuration, `DatadogInstrumentation` also supports `logs`; use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
 
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.logs: |

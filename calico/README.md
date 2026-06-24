@@ -25,6 +25,8 @@ Using annotations:
 
 3. To use Autodiscovery, modify `prometheus-pod`. Add the following snippet to your Prometheus YAML configuration file:
 
+   For a Prometheus pod managed by a supported Kubernetes workload, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: openmetrics`, and set `containerImage` to match the Prometheus pod image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+
    ```
    metadata:
      [...]

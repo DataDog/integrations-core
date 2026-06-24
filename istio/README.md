@@ -90,6 +90,8 @@ This annotation specifies the container `discovery` to match the default contain
 
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: istio`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+
 ##### Ambient mode configuration
 
 Istio ambient mode, generally available in Istio v1.24, replaces sidecar injection with two shared components: the `ztunnel` DaemonSet (L4 zero-trust tunneling) and optional `waypoint` proxies (L7 HTTP/gRPC processing). Set `istio_mode: ambient` and configure one or more of `ztunnel_endpoint`, `waypoint_endpoint`, and `istiod_endpoint` on the same instance. The check scrapes each endpoint that is set. Adjust the URLs in the example below to match your cluster's hostnames and ports.
@@ -158,6 +160,8 @@ kubectl patch daemonset datadog-agent -p '{"spec":{"template":{"metadata":{"anno
 _Available for Agent versions >6.0_
 
 First, enable the Datadog Agent to perform log collection in Kubernetes. See [Kubernetes Log Collection][13].
+
+For log-only configuration, `DatadogInstrumentation` also supports `logs`; create one `DatadogInstrumentation` resource per target workload and use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
 
 #### Istio logs
 
