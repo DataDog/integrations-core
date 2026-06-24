@@ -12,7 +12,7 @@ from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
 from ddev.ai.runtime.agent_log import AgentLogger
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointReadError
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
@@ -105,6 +105,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
 
         completed, frontier = self._resolve_resume_state(config, checkpoint_manager)
+        if self._resume:
+            self._logger.info(
+                "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
+            )
 
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
@@ -143,8 +147,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
             self.register_processor(phase, [PhaseTrigger])
 
         self.submit_message(PhaseTrigger(id="start", phase_id=None))
-        for phase_id in completed:
-            self.submit_message(PhaseTrigger(id=f"{phase_id}_resumed", phase_id=phase_id))
+        for entry in config.flow:
+            if entry.phase in completed:
+                self.submit_message(PhaseTrigger(id=f"{entry.phase}_resumed", phase_id=entry.phase))
 
     def _resolve_resume_state(
         self,
@@ -161,7 +166,12 @@ class PhaseOrchestrator(EventBusOrchestrator):
         if not self._resume:
             return set(), set()
 
-        succeeded = checkpoint_manager.successful_phases()
+        try:
+            succeeded = checkpoint_manager.successful_phases()
+        except CheckpointReadError as e:
+            raise FlowConfigError(
+                f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
+            ) from e
         completed: set[str] = set()
         frontier: set[str] = set()
         for entry in config.flow:

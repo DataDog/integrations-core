@@ -68,7 +68,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._config_dir = context.config_dir
         self._callbacks = context.callbacks
         self._logger = context.logger
-        self._resume_frontier = phase_id in context.resume_frontier
+        self._is_resume_frontier = phase_id in context.resume_frontier
         self._started_at: datetime | None = None
         self._resolver: Callable[[str], str] | None = None
         self._executed = False

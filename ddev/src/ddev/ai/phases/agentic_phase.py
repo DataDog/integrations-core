@@ -317,9 +317,10 @@ class AgenticPhase(Phase):
             context,
             self._resolver,
         )
-        if self._resume_frontier:
-            prior = context.get("checkpoints", {}).get(self._phase_id) or {}
-            system_prompt += build_resume_notice(prior.get("error"))
+        if self._is_resume_frontier:
+            prior = (context.get("checkpoints") or {}).get(self._phase_id) or {}
+            error = prior.get("error") if isinstance(prior, dict) else None
+            system_prompt += build_resume_notice(error)
         try:
             process = self._process_factory.create(
                 scope=self._scope,

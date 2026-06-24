@@ -15,6 +15,7 @@ from ddev.ai.phases.base import Phase
 from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.resources import ResourceUnavailableError
+from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -496,9 +497,9 @@ def linear_flow(tmp_path):
 
 
 def _write_checkpoints(flow_dir: Path, statuses: dict[str, dict]) -> None:
-    import yaml
-
-    (flow_dir / "checkpoints.yaml").write_text(yaml.dump(statuses), encoding="utf-8")
+    manager = CheckpointManager(flow_dir / "checkpoints.yaml")
+    for phase_id, data in statuses.items():
+        manager.write_phase_checkpoint(phase_id, data)
 
 
 def _drain_trigger_phase_ids(orchestrator) -> list:
@@ -527,7 +528,7 @@ async def test_resume_marks_only_frontier_phase(linear_flow, make_orchestrator):
     await orchestrator.on_initialize()
 
     phases_by_name = {p.name: p for p in orchestrator._subscribers.get(PhaseTrigger, [])}
-    assert phases_by_name["c"]._resume_frontier is True
+    assert phases_by_name["c"]._is_resume_frontier is True
 
 
 async def test_resume_emits_triggers_for_completed_phases(linear_flow, make_orchestrator):
@@ -552,9 +553,9 @@ async def test_resume_dependency_closure_reruns_descendants_of_failure(linear_fl
 
     phases_by_name = {p.name: p for p in orchestrator._subscribers.get(PhaseTrigger, [])}
     assert set(phases_by_name) == {"a", "b", "c"}  # nothing skipped
-    assert phases_by_name["a"]._resume_frontier is True
-    assert phases_by_name["b"]._resume_frontier is False
-    assert phases_by_name["c"]._resume_frontier is False
+    assert phases_by_name["a"]._is_resume_frontier is True
+    assert phases_by_name["b"]._is_resume_frontier is False
+    assert phases_by_name["c"]._is_resume_frontier is False
 
 
 async def test_resume_with_no_checkpoints_frontier_is_root(linear_flow, make_orchestrator):
@@ -564,9 +565,9 @@ async def test_resume_with_no_checkpoints_frontier_is_root(linear_flow, make_orc
 
     phases_by_name = {p.name: p for p in orchestrator._subscribers.get(PhaseTrigger, [])}
     assert set(phases_by_name) == {"a", "b", "c"}
-    assert phases_by_name["a"]._resume_frontier is True
-    assert phases_by_name["b"]._resume_frontier is False
-    assert phases_by_name["c"]._resume_frontier is False
+    assert phases_by_name["a"]._is_resume_frontier is True
+    assert phases_by_name["b"]._is_resume_frontier is False
+    assert phases_by_name["c"]._is_resume_frontier is False
 
 
 async def test_no_resume_ignores_checkpoints(linear_flow, make_orchestrator):
@@ -577,6 +578,13 @@ async def test_no_resume_ignores_checkpoints(linear_flow, make_orchestrator):
 
     phases_by_name = {p.name: p for p in orchestrator._subscribers.get(PhaseTrigger, [])}
     assert set(phases_by_name) == {"a", "b", "c"}
-    assert all(p._resume_frontier is False for p in phases_by_name.values())
+    assert all(p._is_resume_frontier is False for p in phases_by_name.values())
     ids = _drain_trigger_phase_ids(orchestrator)
     assert ids == [None]  # only the initial trigger, no resume triggers
+
+
+async def test_resume_corrupt_checkpoints_raises_flow_config_error(linear_flow, make_orchestrator):
+    (linear_flow / "checkpoints.yaml").write_text("{ not: valid: yaml", encoding="utf-8")
+    orchestrator = make_orchestrator(linear_flow, resume=True)
+    with pytest.raises(FlowConfigError, match="Cannot resume"):
+        await orchestrator.on_initialize()
