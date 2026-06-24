@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import heapq
 import json
 from collections import defaultdict
 from time import time
@@ -89,7 +90,8 @@ class KafkaCheck(AgentCheck):
                 highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
-                    self._add_broker_timestamps(broker_timestamps, highwater_offsets)
+                    earliest_consumer_offsets = self._earliest_consumer_offsets(consumer_offsets)
+                    self._add_broker_timestamps(broker_timestamps, highwater_offsets, earliest_consumer_offsets)
                     self._save_broker_timestamps(broker_timestamps, persistent_cache_key)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
@@ -270,7 +272,17 @@ class KafkaCheck(AgentCheck):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
 
-    def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
+    def _earliest_consumer_offsets(self, consumer_offsets):
+        """Return the lowest committed offset per (topic, partition) across all consumer groups."""
+        earliest = {}
+        for offsets in consumer_offsets.values():
+            for topic_partition, offset in offsets.items():
+                if topic_partition not in earliest or offset < earliest[topic_partition]:
+                    earliest[topic_partition] = offset
+        return earliest
+
+    def _add_broker_timestamps(self, broker_timestamps, highwater_offsets, earliest_consumer_offsets=None):
+        earliest_consumer_offsets = earliest_consumer_offsets or {}
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
             # If the highwater offset went backwards (topic recreated,
@@ -281,11 +293,17 @@ class KafkaCheck(AgentCheck):
             for o in stale:
                 del timestamps[o]
             timestamps[highwater_offset] = time()
-            # If there's too many timestamps, we delete the oldest one (by
-            # timestamp, not by offset — evicting by min offset would discard
-            # the fresh post-reset entries and keep poisonous stale ones).
-            if len(timestamps) > self._max_timestamps:
-                del timestamps[min(timestamps, key=timestamps.get)]
+            # Once the cache fills up, prune and compact it instead of dropping a single entry.
+            if len(timestamps) >= self._max_timestamps:
+                # Samples older than the earliest consumer offset are useless — no consumer will ever
+                # interpolate there — so drop them, keeping one anchor at/below that offset.
+                earliest_consumer_offset = earliest_consumer_offsets.get((topic, partition))
+                if earliest_consumer_offset is not None:
+                    _prune_below_anchor(timestamps, earliest_consumer_offset)
+                # Compact what remains down to half capacity. The Visvalingam-Whyatt simplification keeps
+                # the oldest and newest samples and discards the points that least affect the
+                # offset/timestamp curve, so the cache spans a longer history at a coarsening resolution.
+                _visvalingam_whyatt(timestamps, max(2, self._max_timestamps // 2))
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
         """Saves broker timestamps to persistent cache."""
@@ -516,3 +534,68 @@ def _get_interpolated_timestamp(timestamps, offset):
         # reported lag stays bounded instead of growing arbitrarily with the extrapolation.
         timestamp = max(timestamp, timestamp_before - LAG_EXTRAPOLATION_LIMIT_SECONDS)
     return timestamp
+
+
+def _prune_below_anchor(timestamps, floor):
+    """Drop cached samples strictly below the largest offset at or below ``floor``, in place.
+
+    Samples below the earliest offset any consumer needs are useless, but we keep one anchor at or
+    below ``floor`` so the most-lagging consumer can still interpolate (rather than extrapolate).
+    """
+    below = [o for o in timestamps if o < floor]
+    if len(below) <= 1:
+        return
+    anchor = max(below)
+    for o in below:
+        if o != anchor:
+            del timestamps[o]
+
+
+def _visvalingam_whyatt(timestamps, target_count):
+    """Downsample an offset->timestamp series to ``target_count`` points in place.
+
+    Implements the Visvalingam-Whyatt line simplification algorithm: the two endpoints (the oldest
+    and newest samples) are always kept, and the interior point whose removal least distorts the
+    linear offset/timestamp interpolation is dropped repeatedly until the target size is reached.
+    A point's "significance" is the time error introduced by reconstructing it from its neighbors.
+
+    Runs in O(n log n) using a min-heap keyed by significance, a doubly-linked list of neighbors,
+    and lazy deletion of heap entries that become stale when a neighbor is removed.
+    """
+    if len(timestamps) <= target_count:
+        return timestamps
+
+    offsets = sorted(timestamps)
+    prev = {o: (offsets[i - 1] if i > 0 else None) for i, o in enumerate(offsets)}
+    nxt = {o: (offsets[i + 1] if i < len(offsets) - 1 else None) for i, o in enumerate(offsets)}
+    alive = set(offsets)
+
+    def significance(o):
+        before, after = prev[o], nxt[o]
+        predicted = timestamps[before] + (timestamps[after] - timestamps[before]) * (o - before) / (after - before)
+        return abs(timestamps[o] - predicted)
+
+    current = {}
+    heap = []
+    for o in offsets:
+        if prev[o] is not None and nxt[o] is not None:
+            current[o] = significance(o)
+            heap.append((current[o], o))
+    heapq.heapify(heap)
+
+    remaining = len(offsets)
+    while remaining > target_count and heap:
+        error, o = heapq.heappop(heap)
+        if o not in alive or error != current.get(o):
+            # Stale entry: the point was already removed, or its significance was recomputed.
+            continue
+        before, after = prev[o], nxt[o]
+        alive.discard(o)
+        del timestamps[o]
+        remaining -= 1
+        nxt[before], prev[after] = after, before
+        for neighbor in (before, after):
+            if prev[neighbor] is not None and nxt[neighbor] is not None:
+                current[neighbor] = significance(neighbor)
+                heapq.heappush(heap, (current[neighbor], neighbor))
+    return timestamps

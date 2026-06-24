@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
-from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp
+from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp, _visvalingam_whyatt
 
 pytestmark = [pytest.mark.unit]
 
@@ -454,6 +454,27 @@ def test_get_interpolated_timestamp_caps_left_extrapolation():
     assert _get_interpolated_timestamp({1000: 10000, 1100: 10100}, 1050) == 10050
 
 
+def test_visvalingam_whyatt_keeps_endpoints_and_drops_collinear():
+    # A perfectly linear series: every interior point is redundant, so any of them can go.
+    timestamps = {0: 0.0, 10: 10.0, 20: 20.0, 30: 30.0, 40: 40.0}
+    _visvalingam_whyatt(timestamps, 3)
+    assert len(timestamps) == 3
+    assert 0 in timestamps and 40 in timestamps  # endpoints are always preserved
+
+
+def test_visvalingam_whyatt_keeps_rate_changes():
+    # Constant rate up to offset 20, then a sharp acceleration: 10 is redundant, the kink at 20 isn't.
+    timestamps = {0: 0.0, 10: 10.0, 20: 20.0, 30: 100.0}
+    _visvalingam_whyatt(timestamps, 3)
+    assert set(timestamps) == {0, 20, 30}
+
+
+def test_visvalingam_whyatt_noop_when_within_target():
+    timestamps = {0: 0.0, 10: 10.0}
+    _visvalingam_whyatt(timestamps, 5)
+    assert timestamps == {0: 0.0, 10: 10.0}
+
+
 @pytest.mark.parametrize(
     'persistent_cache_contents, instance_overrides, consumer_lag_seconds_count',
     [
@@ -525,19 +546,32 @@ def test_add_broker_timestamps_purges_stale_offsets_on_reset(kafka_instance, che
     assert 170 in timestamps
 
 
-def test_add_broker_timestamps_evicts_by_oldest_timestamp(kafka_instance, check):
-    # Eviction must drop the entry with the oldest timestamp, not the smallest
-    # offset. Evicting by min(offset) would discard fresh post-reset entries
-    # and keep poisonous ones.
-    kafka_instance['timestamp_history_size'] = 2
+def test_add_broker_timestamps_compacts_when_full(kafka_instance, check):
+    # When the cache reaches capacity it is compacted down to half its size, keeping the oldest and
+    # newest samples and dropping the points that least affect the offset/timestamp curve.
+    kafka_instance['timestamp_history_size'] = 4
     check = check(kafka_instance)
-    broker_timestamps = {"topic1_0": {500: 50.0, 400: 999.0}}
-    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 600})
+    broker_timestamps = {"topic1_0": {10: 1.0, 20: 2.0, 30: 3.0}}
+    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 40})
 
     timestamps = broker_timestamps["topic1_0"]
-    assert 500 not in timestamps  # oldest by timestamp
-    assert 400 in timestamps
-    assert 600 in timestamps
+    assert len(timestamps) == 2
+    assert 10 in timestamps  # oldest endpoint preserved
+    assert 40 in timestamps  # newest endpoint preserved
+
+
+def test_add_broker_timestamps_prunes_below_earliest_consumer_offset(kafka_instance, check):
+    # At compaction time, samples older than the earliest consumer offset are useless (no consumer
+    # will ever interpolate there), so they are pruned — keeping one anchor at/below that offset.
+    kafka_instance['timestamp_history_size'] = 4
+    check = check(kafka_instance)
+    broker_timestamps = {"topic1_0": {10: 1.0, 20: 2.0, 30: 3.0}}
+    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 40}, {("topic1", 0): 25})
+
+    timestamps = broker_timestamps["topic1_0"]
+    assert 10 not in timestamps  # useless: below the earliest consumer offset and not the anchor
+    assert 20 in timestamps  # anchor: largest sample at/below the earliest consumer offset
+    assert 40 in timestamps
 
 
 def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator):

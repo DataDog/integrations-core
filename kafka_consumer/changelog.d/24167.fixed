@@ -1,1 +1,1 @@
-Cap interpolated estimated_consumer_lag for offsets older than the cached history and use the low watermark as a floor when cluster monitoring is enabled.
+Improve the accuracy of ``estimated_consumer_lag`` for consumers that are far behind: cap interpolation for offsets older than the cached broker history, use the low watermark as a floor for the lag offset when cluster monitoring is enabled, and retain a longer broker-timestamp history by compacting the cache (Visvalingam-Whyatt) and pruning samples below the earliest consumer offset instead of evicting the oldest one.
