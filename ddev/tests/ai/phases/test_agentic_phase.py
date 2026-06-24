@@ -852,3 +852,67 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
     assert phase._goal_attempt_log == [{"task": "t1", "attempts": 1, "final_valid": False}]
     assert phase._total_input_tokens == 10 + 8 + 6
     assert phase._total_output_tokens == 5 + 4 + 3
+
+
+# ---------------------------------------------------------------------------
+# process_message — resumed-run system-prompt injection
+# ---------------------------------------------------------------------------
+
+
+async def test_resume_frontier_phase_injects_notice_with_error(flow_dir, monkeypatch, message_queue):
+    """A frontier phase with a prior failed checkpoint gets the resume notice plus the error."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset({"p1"}),
+        captured_worker_kwargs=captured,
+    )
+    mgr.write_phase_checkpoint("p1", {"status": "failed", "error": "Error code: 500 - boom"})
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" in captured["system_prompt"]
+    assert "Error code: 500 - boom" in captured["system_prompt"]
+
+
+async def test_resume_frontier_phase_injects_notice_without_error(flow_dir, monkeypatch, message_queue):
+    """A frontier phase with no prior checkpoint (e.g. Ctrl+C) gets the notice but no error line."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset({"p1"}),
+        captured_worker_kwargs=captured,
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" in captured["system_prompt"]
+    assert "previous attempt recorded this error" not in captured["system_prompt"]
+
+
+async def test_non_frontier_phase_gets_no_resume_notice(flow_dir, monkeypatch, message_queue):
+    """A phase outside the frontier never gets the notice, even with a stale failed checkpoint."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset(),
+        captured_worker_kwargs=captured,
+    )
+    mgr.write_phase_checkpoint("p1", {"status": "failed", "error": "stale"})
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" not in captured["system_prompt"]
+    assert "stale" not in captured["system_prompt"]

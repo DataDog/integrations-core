@@ -42,6 +42,10 @@ class CheckpointManager:
         self._ensure_dir()
         self._path.write_text(yaml.dump(checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
 
+    def successful_phases(self) -> set[str]:
+        """Phase ids whose last recorded checkpoint reached 'success'."""
+        return {pid for pid, data in self.read().items() if isinstance(data, dict) and data.get("status") == "success"}
+
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""
         base_prompt = "Write a brief summary of what you accomplished in this phase."
