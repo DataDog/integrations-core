@@ -69,6 +69,7 @@ class KafkaCheck(AgentCheck):
         # Fetch the broker highwater offsets
         highwater_offsets = {}
         broker_timestamps = defaultdict(dict)
+        low_watermark_offsets = {}
         cluster_id = ""
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
@@ -89,9 +90,16 @@ class KafkaCheck(AgentCheck):
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
                 if self._data_streams_enabled:
+                    # Low watermark offsets are the physically meaningful floor for lag-in-time (and
+                    # for pruning the cache), but require an extra broker call, so we only fetch them
+                    # when cluster monitoring is enabled.
+                    if self.config._cluster_monitoring_enabled:
+                        low_watermark_offsets = self._get_low_watermark_offsets(consumer_offsets)
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
-                    earliest_consumer_offsets = self._earliest_consumer_offsets(consumer_offsets)
-                    self._add_broker_timestamps(broker_timestamps, highwater_offsets, earliest_consumer_offsets)
+                    # Prune cache entries below the lowest offset any consumer could read: the low
+                    # watermark when we have it, otherwise the earliest committed consumer offset.
+                    prune_floors = low_watermark_offsets or self._earliest_consumer_offsets(consumer_offsets)
+                    self._add_broker_timestamps(broker_timestamps, highwater_offsets, prune_floors)
                     self._save_broker_timestamps(broker_timestamps, persistent_cache_key)
             else:
                 self.warning("Context limit reached. Skipping highwater offset collection.")
@@ -124,16 +132,6 @@ class KafkaCheck(AgentCheck):
         self.config._auto_detected_cluster_id = cluster_id
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
-
-        # Low watermark offsets let us cap lag-in-time for consumers that have fallen out of
-        # retention. They are only needed (and only fetched) when cluster monitoring is enabled.
-        low_watermark_offsets = {}
-        if self.config._cluster_monitoring_enabled and self._data_streams_enabled:
-            consumer_partitions = {tp for offsets in consumer_offsets.values() for tp in offsets}
-            try:
-                low_watermark_offsets = self.client.get_low_watermark_offsets(consumer_partitions)
-            except Exception:
-                self.log.exception("There was a problem collecting the low watermark offsets.")
 
         self.report_highwater_offsets(highwater_offsets, reporting_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
@@ -272,6 +270,15 @@ class KafkaCheck(AgentCheck):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
 
+    def _get_low_watermark_offsets(self, consumer_offsets):
+        """Fetch low watermark (earliest) offsets for every consumed partition."""
+        consumer_partitions = {tp for offsets in consumer_offsets.values() for tp in offsets}
+        try:
+            return self.client.get_low_watermark_offsets(consumer_partitions)
+        except Exception:
+            self.log.exception("There was a problem collecting the low watermark offsets.")
+            return {}
+
     def _earliest_consumer_offsets(self, consumer_offsets):
         """Return the lowest committed offset per (topic, partition) across all consumer groups."""
         earliest = {}
@@ -281,8 +288,8 @@ class KafkaCheck(AgentCheck):
                     earliest[topic_partition] = offset
         return earliest
 
-    def _add_broker_timestamps(self, broker_timestamps, highwater_offsets, earliest_consumer_offsets=None):
-        earliest_consumer_offsets = earliest_consumer_offsets or {}
+    def _add_broker_timestamps(self, broker_timestamps, highwater_offsets, prune_floors=None):
+        prune_floors = prune_floors or {}
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
             # If the highwater offset went backwards (topic recreated,
@@ -295,11 +302,11 @@ class KafkaCheck(AgentCheck):
             timestamps[highwater_offset] = time()
             # Once the cache fills up, prune and compact it instead of dropping a single entry.
             if len(timestamps) >= self._max_timestamps:
-                # Samples older than the earliest consumer offset are useless — no consumer will ever
-                # interpolate there — so drop them, keeping one anchor at/below that offset.
-                earliest_consumer_offset = earliest_consumer_offsets.get((topic, partition))
-                if earliest_consumer_offset is not None:
-                    _prune_below_anchor(timestamps, earliest_consumer_offset)
+                # Samples below the lowest offset any consumer can read are useless — no consumer will
+                # ever interpolate there — so drop them, keeping one anchor at/below that floor.
+                prune_floor = prune_floors.get((topic, partition))
+                if prune_floor is not None:
+                    _prune_below_anchor(timestamps, prune_floor)
                 # Compact what remains down to half capacity. The Visvalingam-Whyatt simplification keeps
                 # the oldest and newest samples and discards the points that least affect the
                 # offset/timestamp curve, so the cache spans a longer history at a coarsening resolution.
