@@ -9,11 +9,10 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
 
+from .common import CONNECT_URL
 from .conftest import SAMPLE_CONNECTORS_RESPONSE
 
 pytestmark = [pytest.mark.unit]
-
-CONNECT_URL = 'http://localhost:8083'
 
 
 def dsm_events(aggregator, config_type):
