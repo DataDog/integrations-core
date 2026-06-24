@@ -39,7 +39,7 @@ WHEEL_NAME = f'datadog_postgres-{VERSION}-py3-none-any.whl'
 WHEEL_CONTENT = b'fake wheel bytes for testing'
 WHEEL_DIGEST = hashlib.sha256(WHEEL_CONTENT).hexdigest()
 WHEEL_LENGTH = len(WHEEL_CONTENT)
-REPO_URL = 'https://agent-integration-wheels-staging.s3.amazonaws.com'
+REPO_URL = 'https://agent-integration-wheels.datadoghq.com'
 
 POINTER = {
     'digest': WHEEL_DIGEST,

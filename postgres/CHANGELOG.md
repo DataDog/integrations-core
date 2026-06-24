@@ -24,7 +24,7 @@
 * Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
 * Make statement_timeout local for Postgres schemas collection ([#23954](https://github.com/DataDog/integrations-core/pull/23954))
 
-## 23.8.1 / 2026-05-20
+## 23.8.1 / 2026-05-20 / Agent 7.80.0
 
 ***Fixed***:
 

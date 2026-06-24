@@ -67,7 +67,9 @@ class KafkaCheck(AgentCheck):
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            if consumer_contexts_count < self._context_limit:
+            # Cluster monitoring always requires highwater offsets (for topic.message_rate and other
+            # cluster metadata metrics), so bypass the consumer context limit in that case.
+            if consumer_contexts_count < self._context_limit or self.config._cluster_monitoring_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
                 # If cluster monitoring is enabled, always fetch all broker highwater marks
@@ -100,7 +102,10 @@ class KafkaCheck(AgentCheck):
             consumer_offsets,
             highwater_offsets,
         )
-        if total_contexts >= self._context_limit:
+        # When cluster monitoring is enabled, all offsets and lag metrics are reported regardless
+        # of context count so that the full cluster picture is always available.
+        reporting_limit = float('inf') if self.config._cluster_monitoring_enabled else self._context_limit
+        if total_contexts >= self._context_limit and not self.config._cluster_monitoring_enabled:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
@@ -113,11 +118,11 @@ class KafkaCheck(AgentCheck):
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
 
-        self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
+        self.report_highwater_offsets(highwater_offsets, reporting_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
             consumer_offsets,
             highwater_offsets,
-            self._context_limit - len(highwater_offsets),
+            reporting_limit - len(highwater_offsets),
             broker_timestamps,
             cluster_id,
         )

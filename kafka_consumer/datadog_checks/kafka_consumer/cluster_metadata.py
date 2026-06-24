@@ -18,6 +18,8 @@ from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
+CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
+
 
 class SchemaDefinition(TypedDict):
     schema: str
@@ -75,6 +77,7 @@ class ClusterMetadataCollector:
         self.TOPIC_CONFIG_CACHE_KEY = 'kafka_topic_config_cache'
         self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
+        self.CONSUMER_GROUP_MEMBERS_CACHE_KEY = 'kafka_consumer_group_members_cache'
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
         self.SCHEMA_VERSION_CHECK_CACHE_KEY = 'kafka_schema_version_check_cache'
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY = 'kafka_schema_compatibility_fetch_cache'
@@ -848,6 +851,9 @@ class ClusterMetadataCollector:
             except Exception as e:
                 self.log.warning("Error getting consumer group details for %s: %s", group_id, e)
 
+        prev_member_hashes = self._load_member_hashes_cache()
+        current_member_hashes = {}
+
         for group_id, group_info in group_id_to_info.items():
             group_tags = self._get_tags(cluster_id) + [f'consumer_group:{group_id}']
             state = group_info.state
@@ -858,29 +864,101 @@ class ClusterMetadataCollector:
             if coordinator:
                 state_tags.append(f'coordinator:{coordinator.id}')
 
-            self.check.gauge('consumer_group.members', len(members), tags=state_tags)
+            # All group-level gauges share the same tag set so they can be correlated in dashboards.
+            group_meta_tags = self._build_group_meta_tags(state_tags, group_info)
 
-            member_info = []
-            topics_for_group = set()
+            self.check.gauge('consumer_group.members', len(members), tags=group_meta_tags)
+            self.check.gauge(
+                'consumer_group.rebalancing',
+                1 if self._is_group_rebalancing(state_name, members) else 0,
+                tags=group_meta_tags,
+            )
+
+            member_ids = sorted(getattr(m, 'member_id', '') or '' for m in members)
+            member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
+            current_member_hashes[group_id] = member_hash
+
+            if prev_member_hashes is not None:
+                prev_hash = prev_member_hashes.get(group_id)
+                if prev_hash is not None and prev_hash != member_hash:
+                    self.check.count('consumer_group.membership_changes', 1, tags=group_meta_tags)
 
             for member in members:
-                member_id = member.member_id
                 client_id = member.client_id
                 host = member.host
-
-                member_info.append({'member_id': member_id, 'client_id': client_id, 'host': host})
 
                 if hasattr(member, 'assignment') and member.assignment:
                     partition_count = len(member.assignment.topic_partitions)
 
+                    # Member-level gauges deliberately use state_tags, not group_meta_tags: the
+                    # group-level dimensional tags are omitted here to keep per-member cardinality bounded.
                     member_tags = state_tags + [
                         f'client_id:{client_id}',
                         f'member_host:{host}',
                     ]
+                    group_instance_id = getattr(member, 'group_instance_id', None)
+                    if group_instance_id is not None:
+                        member_tags.append(f'group_instance_id:{group_instance_id}')
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
-                    for tp in member.assignment.topic_partitions:
-                        topics_for_group.add(tp.topic)
+        self._save_member_hashes_cache(current_member_hashes)
+
+    def _load_member_hashes_cache(self) -> dict[str, str] | None:
+        """Return the previous member-hash map, or None if unreadable."""
+        try:
+            cached = self.check.read_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY)
+            if not cached:
+                return None
+            result = json.loads(cached)
+            if not isinstance(result, dict):
+                self.log.debug("Consumer group members cache has unexpected shape; discarding")
+                return None
+            return result
+        except Exception as e:
+            self.log.debug("Could not read consumer group members cache: %s", e)
+            return None
+
+    def _save_member_hashes_cache(self, hashes: dict[str, str]) -> None:
+        """Persist the current member-hash map."""
+        try:
+            self.check.write_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY, json.dumps(hashes))
+        except Exception as e:
+            self.log.debug("Could not write consumer group members cache: %s", e)
+
+    def _build_group_meta_tags(self, state_tags: list[str], group_info) -> list[str]:
+        """Build the group-level tag list, appending dimensional metadata when the broker provides it."""
+        tags = list(state_tags)
+        assignor = getattr(group_info, 'partition_assignor', None)
+        # KIP-848 and EMPTY-state groups report an empty assignor; skip it to avoid a blank-value tag.
+        if assignor:
+            tags.append(f'partition_assignor:{assignor}')
+        group_type = getattr(group_info, 'type', None)
+        if group_type is not None:
+            type_name = group_type.name if hasattr(group_type, 'name') else str(group_type)
+            tags.append(f'consumer_group_type:{type_name}')
+        is_simple = getattr(group_info, 'is_simple_consumer_group', None)
+        if is_simple is not None:
+            tags.append(f'is_simple_consumer_group:{str(bool(is_simple)).lower()}')
+        return tags
+
+    def _is_group_rebalancing(self, state_name: str, members) -> bool:
+        """Detect an in-progress rebalance via group state (classic) or assignment drift (KIP-848)."""
+        if state_name in CONSUMER_GROUP_REBALANCING_STATES:
+            return True
+        for member in members:
+            target = getattr(member, 'target_assignment', None)
+            if target is None:
+                # Classic-protocol member: no KIP-848 target, skip.
+                continue
+            assignment = getattr(member, 'assignment', None)
+            if assignment is None:
+                # Member has a target but no current assignment — unambiguous drift.
+                return True
+            current_tps = {(tp.topic, tp.partition) for tp in assignment.topic_partitions}
+            target_tps = {(tp.topic, tp.partition) for tp in target.topic_partitions}
+            if current_tps != target_tps:
+                return True
+        return False
 
     def _load_schema_id_cache(self) -> dict[str, SchemaDefinition]:
         """Load the permanent schema ID cache from persistent storage.
