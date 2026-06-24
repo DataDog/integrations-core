@@ -466,6 +466,85 @@ def test_discovery_rejects_ad_identifiers_field():
     assert 'test, test.yaml, discovery: Unknown field(s): ad_identifiers' in spec.errors
 
 
+def test_discovery_enabled_false_skips_validation():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            enabled: false
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - true
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_candidate_field_cross_check():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - unknown_field: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+            options:
+            - name: openmetrics_endpoint
+              description: endpoint
+              required: true
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, unknown_field: Not a recognized instance option'
+    ) in spec.errors
+
+
+def test_discovery_local_strategy_accepted():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: local:my_strategy
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:9090/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not any('Unsupported strategy' in e for e in spec.errors)
+
+
 def test_section_not_map():
     spec = get_spec(
         """

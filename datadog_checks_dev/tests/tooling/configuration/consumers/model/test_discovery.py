@@ -23,7 +23,7 @@ def test():
             options: []
           - template: instances
             options:
-            - name: openmetrics_endpoint
+            - name: endpoint
               description: words
               required: true
               value:

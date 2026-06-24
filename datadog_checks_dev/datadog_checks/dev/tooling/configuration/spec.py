@@ -6,7 +6,7 @@ from typing import Any
 
 from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
 
-DISCOVERY_FIELDS = {'strategies'}
+DISCOVERY_FIELDS = {'strategies', 'enabled'}
 SERVICE_PLACEHOLDERS = frozenset({'id', 'host'})
 
 
@@ -102,18 +102,6 @@ def files_validator(files, loader) -> None:
         else:
             example_file_names_origin[example_file_name] = file_index
 
-        if 'discovery' in config_file:
-            if 'auto_conf.yaml' in example_file_names_origin:
-                loader.errors.append(
-                    '{}, file #{}: Discovery auto_conf.yaml already used by file #{}'.format(
-                        loader.source, file_index, example_file_names_origin['auto_conf.yaml']
-                    )
-                )
-            else:
-                example_file_names_origin['auto_conf.yaml'] = file_index
-
-            discovery_validator(config_file['discovery'], loader, file_name)
-
         if 'options' not in config_file:
             loader.errors.append(f'{loader.source}, {file_name}: Every file must contain an `options` attribute')
             continue
@@ -125,8 +113,95 @@ def files_validator(files, loader) -> None:
 
         options_validator(options, loader, file_name)
 
+        if 'discovery' in config_file:
+            handle_discovery(config_file, loader, file_name, example_file_names_origin, file_index)
 
-def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
+
+def expand_template_items(items: list, loader, file_name: str, section: str) -> set[int]:
+    """Expand every template: item in items in-place, using per-item overrides.
+
+    Returns the set of 0-based indices that failed to resolve so callers can skip
+    further processing of those items.
+    """
+    failed: set[int] = set()
+    i = 0
+    while i < len(items):
+        item = items[i]
+        if not isinstance(item, dict) or 'template' not in item:
+            i += 1
+            continue
+
+        overrides: dict = {}
+        override_errors: list = []
+        resolved = False
+
+        while 'template' in item:
+            overrides.update(item.pop('overrides', {}))
+            try:
+                tmpl = loader.templates.load(item.pop('template'))
+            except Exception as e:
+                loader.errors.append(f'{loader.source}, {file_name}, {section} #{i + 1}: {e}')
+                break
+            else:
+                if 'name' in item:
+                    tmpl['name'] = item['name']
+
+            errors = loader.templates.apply_overrides(tmpl, overrides)
+            if errors:
+                override_errors.append(errors)
+
+            if isinstance(tmpl, dict):
+                tmpl.update(item)
+                item = tmpl
+                items[i] = tmpl
+            elif isinstance(tmpl, list):
+                if tmpl:
+                    item = tmpl[0]
+                    for k, tmpl_item in enumerate(tmpl):
+                        items.insert(i + 1 + k, tmpl_item)
+                    items.pop(i)
+                    if not isinstance(item, dict):
+                        loader.errors.append(
+                            f'{loader.source}, {file_name}, {section} #{i + 1}: Template item must be a mapping object'
+                        )
+                        break
+                else:
+                    loader.errors.append(
+                        f'{loader.source}, {file_name}, {section} #{i + 1}: Template refers to an empty array'
+                    )
+                    break
+            else:
+                loader.errors.append(
+                    f'{loader.source}, {file_name}, {section} #{i + 1}: '
+                    'Template does not refer to a mapping object nor array'
+                )
+                break
+        else:
+            resolved = True
+
+        if not resolved:
+            failed.add(i)
+        elif overrides:
+            for errors in override_errors:
+                error_message = '\n'.join(errors)
+                loader.errors.append(f'{loader.source}, {file_name}, {section} #{i + 1}: {error_message}')
+
+        i += 1
+
+    return failed
+
+
+def _get_instance_option_names(options: list) -> frozenset[str]:
+    """Return all option names from the instances section of a resolved options list."""
+    for section in options:
+        if isinstance(section, dict) and section.get('name') == 'instances':
+            section_opts = section.get('options', [])
+            if isinstance(section_opts, list):
+                return frozenset(opt['name'] for opt in section_opts if isinstance(opt, dict) and 'name' in opt)
+    return frozenset()
+
+
+def discovery_validator(discovery: Any, options: list, loader: Any, file_name: str) -> None:
     import datadog_checks.dev.tooling.configuration.discovery.core_strategies  # noqa: F401
     from datadog_checks.dev.tooling.configuration.discovery.registry import REGISTRY
 
@@ -145,6 +220,8 @@ def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
         loader.errors.append(f'{location}: Attribute `strategies` must be a non-empty array')
         return
 
+    instance_option_names = _get_instance_option_names(options)
+
     for strategy_index, stanza in enumerate(strategies, 1):
         strategy_location = f'{location}, strategy #{strategy_index}'
         if not isinstance(stanza, dict):
@@ -152,29 +229,35 @@ def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
             continue
 
         strategy_name = stanza.get('strategy')
-        if strategy_name not in REGISTRY:
+        is_local = isinstance(strategy_name, str) and strategy_name.startswith('local:')
+
+        if not is_local and strategy_name not in REGISTRY:
             loader.errors.append(f'{strategy_location}: Unsupported strategy `{strategy_name}`')
             continue
 
-        reg = REGISTRY[strategy_name]
-        invalid_fields = set(stanza) - reg.valid_fields
-        if invalid_fields:
-            fields = ', '.join(sorted(invalid_fields))
-            loader.errors.append(f'{strategy_location}: Unknown field(s): {fields}')
+        reg = REGISTRY.get(strategy_name) if not is_local else None
 
-        port_hints = stanza.get('port_hints')
-        if not isinstance(port_hints, list) or not all(
-            isinstance(port, int) and not isinstance(port, bool) for port in port_hints
-        ):
-            loader.errors.append(f'{strategy_location}: Attribute `port_hints` must be an array of integers')
+        if reg is not None:
+            invalid_fields = set(stanza) - reg.valid_fields
+            if invalid_fields:
+                fields = ', '.join(sorted(invalid_fields))
+                loader.errors.append(f'{strategy_location}: Unknown field(s): {fields}')
+
+            port_hints = stanza.get('port_hints')
+            if not isinstance(port_hints, list) or not all(
+                isinstance(port, int) and not isinstance(port, bool) for port in port_hints
+            ):
+                loader.errors.append(f'{strategy_location}: Attribute `port_hints` must be an array of integers')
 
         candidates = stanza.get('candidates')
         if not isinstance(candidates, list) or not candidates:
             loader.errors.append(f'{strategy_location}: Attribute `candidates` must be a non-empty array')
             continue
 
-        placeholders: dict[str, frozenset[str]] = {'service': SERVICE_PLACEHOLDERS}
-        placeholders.update(reg.context_fields)
+        placeholders: dict[str, frozenset[str]] | None = None
+        if reg is not None:
+            placeholders = {'service': SERVICE_PLACEHOLDERS}
+            placeholders.update(reg.context_fields)
 
         for candidate_index, candidate in enumerate(candidates, 1):
             candidate_location = f'{strategy_location}, candidate #{candidate_index}'
@@ -185,11 +268,15 @@ def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
             for field_name, template in candidate.items():
                 if not isinstance(field_name, str):
                     loader.errors.append(f'{candidate_location}: Candidate field names must be strings')
+                    continue
+                if instance_option_names and field_name not in instance_option_names:
+                    loader.errors.append(f'{candidate_location}, {field_name}: Not a recognized instance option')
                 if not isinstance(template, str):
                     loader.errors.append(f'{candidate_location}, {field_name}: Candidate templates must be strings')
                     continue
 
-                _validate_discovery_template(template, loader, candidate_location, field_name, placeholders)
+                if placeholders is not None:
+                    _validate_discovery_template(template, loader, candidate_location, field_name, placeholders)
 
 
 def _validate_discovery_template(
@@ -212,6 +299,34 @@ def _validate_discovery_template(
 
         if attr not in placeholders[root]:
             loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
+
+
+def handle_discovery(
+    config_file: dict, loader, file_name: str, example_file_names_origin: dict, file_index: int
+) -> None:
+    """Reserve auto_conf.yaml, expand strategy templates, honour enabled:false, then validate."""
+    if 'auto_conf.yaml' in example_file_names_origin:
+        loader.errors.append(
+            '{}, file #{}: Discovery auto_conf.yaml already used by file #{}'.format(
+                loader.source, file_index, example_file_names_origin['auto_conf.yaml']
+            )
+        )
+    else:
+        example_file_names_origin['auto_conf.yaml'] = file_index
+
+    discovery = config_file['discovery']
+    if not isinstance(discovery, dict):
+        loader.errors.append(f'{loader.source}, {file_name}, discovery: Attribute `discovery` must be a mapping object')
+        return
+
+    strategies = discovery.get('strategies')
+    if isinstance(strategies, list):
+        expand_template_items(strategies, loader, file_name, 'discovery, strategy')
+
+    if not discovery.get('enabled', True):
+        return
+
+    discovery_validator(discovery, config_file.get('options', []), loader, file_name)
 
 
 def options_validator(options, loader, file_name, *sections):
