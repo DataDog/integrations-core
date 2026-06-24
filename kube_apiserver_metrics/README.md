@@ -24,6 +24,7 @@ In this case, you can setup the integration against the `kubernetes` Service in 
 
 - The main use case to run the `kube_apiserver_metrics` check is as a [Cluster Level Check][4]. 
 - You can do this with [annotations on your service](#annotate-service), or by using a [local file](#local-file) through the Datadog Operator, Helm Chart or manually. 
+- To configure the same endpoint check without annotating the Service, use a `DatadogInstrumentation` resource that targets the Service. Service targets omit `containerImage`. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
 - To collect metrics, set the following parameters and values in an [Autodiscovery][8] template. 
 
 | Parameter         | Value                                                                 |

@@ -31,6 +31,8 @@ Metrics are collected from the Kuma control plane and the Envoy data planes.
 
 To configure the Agent to collect metrics from the Kuma control plane using autodiscovery, apply the following pod annotations to your `kuma-control-plane` deployment. This example assumes you installed Kuma using Helm. For more information about autodiscovery, see [Autodiscovery Integration Templates][4].
 
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: kuma` for the control plane or `integration: envoy` for data plane sidecars, and set `containerImage` to match each target image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+
 ```yaml
 # values.yaml
 controlPlane:
@@ -113,6 +115,8 @@ Enable log collection in your `datadog.yaml` file:
 ```yaml
 logs_enabled: true
 ```
+
+For log-only configuration, `DatadogInstrumentation` also supports `logs`; create one `DatadogInstrumentation` resource per target workload and use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
 
 ##### Control Plane Logs
 
