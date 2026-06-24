@@ -67,7 +67,6 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
 
 def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
-    tagger.reset()
     tagger.set_tags(
         {
             'kubernetes_kueue_queue://clusterqueue//cluster-queue': ['cluster_queue_tag:value'],
