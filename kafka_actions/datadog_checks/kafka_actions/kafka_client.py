@@ -627,14 +627,10 @@ class KafkaActionsClient:
             try:
                 result_partitions = future.result()
                 partition_errors = [
-                    f"{tp.topic}[{tp.partition}]: {tp.error}"
-                    for tp in result_partitions
-                    if tp.error is not None
+                    f"{tp.topic}[{tp.partition}]: {tp.error}" for tp in result_partitions if tp.error is not None
                 ]
                 if partition_errors:
-                    raise Exception(
-                        f"Per-partition errors for group '{group_id}': {'; '.join(partition_errors)}"
-                    )
+                    raise Exception(f"Per-partition errors for group '{group_id}': {'; '.join(partition_errors)}")
                 self.log.debug("Consumer group '%s' offsets updated for %d partitions", group_id, len(topic_partitions))
                 return True
             except Exception as e:
