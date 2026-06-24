@@ -17,6 +17,11 @@ from datadog_checks.kafka_consumer.constants import (
 
 MAX_TIMESTAMPS = 1000
 
+# When the consumer offset predates the oldest cached broker sample we extrapolate into the past,
+# where the affine offset/timestamp assumption is unreliable. Cap how far back we extrapolate so the
+# reported estimated_consumer_lag never exceeds the cached history window by more than this many seconds.
+LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
+
 
 class KafkaCheck(AgentCheck):
     __NAMESPACE__ = 'kafka'
@@ -118,6 +123,16 @@ class KafkaCheck(AgentCheck):
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
 
+        # Low watermark offsets let us cap lag-in-time for consumers that have fallen out of
+        # retention. They are only needed (and only fetched) when cluster monitoring is enabled.
+        low_watermark_offsets = {}
+        if self.config._cluster_monitoring_enabled and self._data_streams_enabled:
+            consumer_partitions = {tp for offsets in consumer_offsets.values() for tp in offsets}
+            try:
+                low_watermark_offsets = self.client.get_low_watermark_offsets(consumer_partitions)
+            except Exception:
+                self.log.exception("There was a problem collecting the low watermark offsets.")
+
         self.report_highwater_offsets(highwater_offsets, reporting_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
             consumer_offsets,
@@ -125,6 +140,7 @@ class KafkaCheck(AgentCheck):
             reporting_limit - len(highwater_offsets),
             broker_timestamps,
             cluster_id,
+            low_watermark_offsets,
         )
 
         # Collect cluster metadata if enabled
@@ -292,9 +308,16 @@ class KafkaCheck(AgentCheck):
         self.log.debug('%s highwater offsets reported', reported_contexts)
 
     def report_consumer_offsets_and_lag(
-        self, consumer_offsets, highwater_offsets, contexts_limit, broker_timestamps, cluster_id
+        self,
+        consumer_offsets,
+        highwater_offsets,
+        contexts_limit,
+        broker_timestamps,
+        cluster_id,
+        low_watermark_offsets=None,
     ):
         """Report the consumer offsets and consumer lag."""
+        low_watermark_offsets = low_watermark_offsets or {}
         reported_contexts = 0
         self.log.debug("Reporting consumer offsets and lag metrics")
         for consumer_group, offsets in consumer_offsets.items():
@@ -368,7 +391,12 @@ class KafkaCheck(AgentCheck):
                     timestamps = broker_timestamps["{}_{}".format(topic, partition)]
                     # The producer timestamp can be not set if there was an error fetching broker offsets.
                     producer_timestamp = timestamps.get(producer_offset, None)
-                    consumer_timestamp = _get_interpolated_timestamp(timestamps, consumer_offset)
+                    # A consumer that has fallen behind the low watermark can never read the messages
+                    # between its committed offset and the low watermark (they are out of retention), so
+                    # its effective position for lag-in-time is the low watermark.
+                    low_watermark = low_watermark_offsets.get((topic, partition))
+                    effective_offset = consumer_offset if low_watermark is None else max(consumer_offset, low_watermark)
+                    consumer_timestamp = _get_interpolated_timestamp(timestamps, effective_offset)
                     if consumer_timestamp is None or producer_timestamp is None:
                         continue
                     lag = producer_timestamp - consumer_timestamp
@@ -482,4 +510,9 @@ def _get_interpolated_timestamp(timestamps, offset):
     timestamp_after = timestamps[offset_after]
     slope = (timestamp_after - timestamp_before) / float(offset_after - offset_before)
     timestamp = slope * (offset - offset_after) + timestamp_after
+
+    if offset < offset_before:
+        # Extrapolating to the left of the oldest cached sample: clamp the timestamp so the
+        # reported lag stays bounded instead of growing arbitrarily with the extrapolation.
+        timestamp = max(timestamp, timestamp_before - LAG_EXTRAPOLATION_LIMIT_SECONDS)
     return timestamp

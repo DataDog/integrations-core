@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures import as_completed
 
-from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
-from confluent_kafka.admin import AdminClient
+from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, IsolationLevel, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient, OffsetSpec
 
 # AWS MSK IAM authentication support
 try:
@@ -167,6 +167,29 @@ class KafkaClient:
                 continue
             results.append((tp.topic, tp.partition, tp.offset))
         return results
+
+    def get_low_watermark_offsets(self, partitions):
+        """Batch-fetch log-start (low watermark) offsets via AdminClient.list_offsets(earliest)."""
+        requests = {TopicPartition(topic, partition): OffsetSpec.earliest() for topic, partition in partitions}
+        if not requests:
+            return {}
+
+        result = {}
+        try:
+            futures = self.kafka_client.list_offsets(
+                requests,
+                isolation_level=IsolationLevel.READ_UNCOMMITTED,
+                request_timeout=self.config._request_timeout,
+            )
+            for tp, future in futures.items():
+                try:
+                    result[(tp.topic, tp.partition)] = future.result().offset
+                except Exception as e:
+                    self.log.debug("Failed to fetch low watermark for %s:%s: %s", tp.topic, tp.partition, e)
+        except Exception as e:
+            self.log.warning("Failed to issue list_offsets request for low watermarks: %s", e)
+            return {}
+        return result
 
     def _list_topics(self):
         if self._cluster_metadata:

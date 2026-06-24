@@ -444,6 +444,16 @@ def test_get_interpolated_timestamp():
     assert _get_interpolated_timestamp({10: 200}, 15) is None
 
 
+def test_get_interpolated_timestamp_caps_left_extrapolation():
+    # Slope is 1 timestamp unit per offset; offset 0 is 1100 offsets before the oldest sample.
+    # Unclamped this would extrapolate to 9000, but we cap it at oldest_sample - 600 = 9400.
+    assert _get_interpolated_timestamp({1000: 10000, 1100: 10100}, 0) == 9400
+    # A modest left-extrapolation that stays within the 600s budget is left untouched.
+    assert _get_interpolated_timestamp({1000: 10000, 1100: 10100}, 900) == 9900
+    # Interpolation between known offsets is never affected by the cap.
+    assert _get_interpolated_timestamp({1000: 10000, 1100: 10100}, 1050) == 10050
+
+
 @pytest.mark.parametrize(
     'persistent_cache_contents, instance_overrides, consumer_lag_seconds_count',
     [
@@ -528,6 +538,33 @@ def test_add_broker_timestamps_evicts_by_oldest_timestamp(kafka_instance, check)
     assert 500 not in timestamps  # oldest by timestamp
     assert 400 in timestamps
     assert 600 in timestamps
+
+
+def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator):
+    # A consumer behind the low watermark can't read the out-of-retention messages between its
+    # committed offset and the low watermark, so lag-in-time is interpolated from the low watermark.
+    kafka_instance['data_streams_enabled'] = True
+    check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    check.client = mock_client
+
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 5}}
+    highwater_offsets = {("topic1", 0): 100}
+    broker_timestamps = {"topic1_0": {50: 1000.0, 100: 1100.0}}
+    low_watermark_offsets = {("topic1", 0): 50}
+
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
+        low_watermark_offsets,
+    )
+
+    # effective offset = max(5, 50) = 50 -> consumer_timestamp 1000, producer_timestamp 1100, lag 100.
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=100.0, count=1)
 
 
 def test_count_consumer_contexts(check, kafka_instance):
