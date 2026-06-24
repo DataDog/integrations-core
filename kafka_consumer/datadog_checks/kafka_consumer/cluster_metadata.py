@@ -21,7 +21,6 @@ from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
 
 
-
 class SchemaDefinition(TypedDict):
     schema: str
     schema_type: str
