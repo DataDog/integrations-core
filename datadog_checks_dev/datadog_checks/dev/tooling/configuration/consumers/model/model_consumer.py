@@ -65,7 +65,8 @@ class ModelConsumer:
 
             model_files.update(self._build_model_files(model_info, package_info))
             if 'discovery' in spec_file:
-                model_files['discovery.py'] = (self._build_discovery_file(spec_file['discovery']), [])
+                pkg_name = spec_file['name'].removesuffix('.yaml')
+                model_files['discovery.py'] = (self._build_discovery_file(spec_file['discovery'], pkg_name), [])
             rendered_files[spec_file['name']] = {file_name: model_files[file_name] for file_name in sorted(model_files)}
 
         return rendered_files
@@ -252,43 +253,29 @@ class ModelConsumer:
             defaults_file_contents = format_with_ruff(defaults_file_contents)
         return defaults_file_contents
 
-    def _build_discovery_file(self, discovery: dict[str, Any]) -> str:
+    def _build_discovery_file(self, discovery: dict[str, Any], pkg_name: str) -> str:
+        import datadog_checks.dev.tooling.configuration.discovery.core_strategies  # noqa: F401
+        from datadog_checks.dev.tooling.configuration.discovery.registry import REGISTRY
+
         lines = [
             'from __future__ import annotations',
             '',
             'from collections.abc import Iterator',
             'from typing import Any',
             '',
-            'from datadog_checks.base.utils.discovery import Service, from_ports',
+            'from datadog_checks.base.utils.discovery import Service, candidate_ports',
+            f'from datadog_checks.{pkg_name}.config_models.instance import InstanceConfig',
+            f'from datadog_checks.{pkg_name}.config_models.shared import SharedConfig',
             '',
             '',
             'def candidates(service: Service) -> Iterator[dict[str, Any]]:',
+            "    shared = SharedConfig().model_dump(mode='json', exclude_none=True)",
         ]
 
-        for strategy_index, strategy in enumerate(discovery['strategies']):
-            if strategy['strategy'] != 'from_ports':
-                raise NotImplementedError(strategy['strategy'])
-            lines.append(f'    # discovery[{strategy_index}]: from_ports')
-            lines.append(f'    for ctx in from_ports(service, port_hints={strategy["port_hints"]!r}):')
-
-            for candidate in strategy['candidates']:
-                lines.extend(
-                    [
-                        '        yield {',
-                        "            'init_config': {},",
-                        "            'instances': [",
-                        '                {',
-                    ]
-                )
-                for field_name, template in candidate.items():
-                    lines.append(f"                    {field_name!r}: {template!r}.format(service=service, **ctx),")
-                lines.extend(
-                    [
-                        '                }',
-                        '            ],',
-                        '        }',
-                    ]
-                )
+        for index, stanza in enumerate(discovery.get('strategies', [])):
+            strategy_name = stanza['strategy']
+            strat = REGISTRY[strategy_name]
+            lines.extend(strat.generate(stanza, index))
 
         lines.append('')
         return format_with_ruff('\n'.join(lines))

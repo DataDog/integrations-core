@@ -321,8 +321,6 @@ def test_discovery_valid():
         - name: test.yaml
           example_name: test.yaml.example
           discovery:
-            ad_identifiers:
-            - test
             strategies:
             - strategy: from_ports
               port_hints:
@@ -347,8 +345,6 @@ def test_discovery_reserves_auto_conf_name():
         - name: test.yaml
           example_name: test.yaml.example
           discovery:
-            ad_identifiers:
-            - test
             strategies:
             - strategy: from_ports
               port_hints:
@@ -377,8 +373,6 @@ def test_discovery_rejects_boolean_port_hints():
         - name: test.yaml
           example_name: test.yaml.example
           discovery:
-            ad_identifiers:
-            - test
             strategies:
             - strategy: from_ports
               port_hints:
@@ -403,8 +397,6 @@ def test_discovery_unsupported_strategy():
         - name: test.yaml
           example_name: test.yaml.example
           discovery:
-            ad_identifiers:
-            - test
             strategies:
             - strategy: from_services
               port_hints:
@@ -429,8 +421,6 @@ def test_discovery_unknown_placeholder():
         - name: test.yaml
           example_name: test.yaml.example
           discovery:
-            ad_identifiers:
-            - test
             strategies:
             - strategy: from_ports
               port_hints:
@@ -448,6 +438,32 @@ def test_discovery_unknown_placeholder():
         'test, test.yaml, discovery, strategy #1, candidate #1, openmetrics_endpoint: '
         'Unknown placeholder `service.hostname`'
     ) in spec.errors
+
+
+def test_discovery_rejects_ad_identifiers_field():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            ad_identifiers:
+            - test
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery: Unknown field(s): ad_identifiers' in spec.errors
 
 
 def test_section_not_map():

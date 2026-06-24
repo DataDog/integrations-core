@@ -6,16 +6,8 @@ from typing import Any
 
 from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
 
-DISCOVERY_STRATEGY_FIELDS = {'strategy', 'port_hints', 'candidates'}
-DISCOVERY_FIELDS = {'ad_identifiers', 'strategies'}
-# Keep in sync with Port/Service fields in
-# datadog_checks_base/datadog_checks/base/utils/discovery/discovery.py
-# (importing datadog_checks_base here is not possible: ddev is a standalone
-# CLI with no runtime dependency on datadog_checks_base)
-DISCOVERY_FROM_PORTS_PLACEHOLDERS = {
-    'service': {'id', 'host'},
-    'port': {'name', 'number'},
-}
+DISCOVERY_FIELDS = {'strategies'}
+SERVICE_PLACEHOLDERS = frozenset({'id', 'host'})
 
 
 def spec_validator(spec: dict, loader) -> None:
@@ -135,6 +127,9 @@ def files_validator(files, loader) -> None:
 
 
 def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
+    import datadog_checks.dev.tooling.configuration.discovery.core_strategies  # noqa: F401
+    from datadog_checks.dev.tooling.configuration.discovery.registry import REGISTRY
+
     location = f'{loader.source}, {file_name}, discovery'
     if not isinstance(discovery, dict):
         loader.errors.append(f'{location}: Attribute `discovery` must be a mapping object')
@@ -145,45 +140,41 @@ def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
         fields = ', '.join(sorted(invalid_fields))
         loader.errors.append(f'{location}: Unknown field(s): {fields}')
 
-    ad_identifiers = discovery.get('ad_identifiers')
-    if (
-        not isinstance(ad_identifiers, list)
-        or not ad_identifiers
-        or not all(isinstance(identifier, str) for identifier in ad_identifiers)
-    ):
-        loader.errors.append(f'{location}: Attribute `ad_identifiers` must be a non-empty array of strings')
-
     strategies = discovery.get('strategies')
     if not isinstance(strategies, list) or not strategies:
         loader.errors.append(f'{location}: Attribute `strategies` must be a non-empty array')
         return
 
-    for strategy_index, strategy in enumerate(strategies, 1):
+    for strategy_index, stanza in enumerate(strategies, 1):
         strategy_location = f'{location}, strategy #{strategy_index}'
-        if not isinstance(strategy, dict):
+        if not isinstance(stanza, dict):
             loader.errors.append(f'{strategy_location}: Strategy must be a mapping object')
             continue
 
-        invalid_fields = set(strategy) - DISCOVERY_STRATEGY_FIELDS
+        strategy_name = stanza.get('strategy')
+        if strategy_name not in REGISTRY:
+            loader.errors.append(f'{strategy_location}: Unsupported strategy `{strategy_name}`')
+            continue
+
+        reg = REGISTRY[strategy_name]
+        invalid_fields = set(stanza) - reg.valid_fields
         if invalid_fields:
             fields = ', '.join(sorted(invalid_fields))
             loader.errors.append(f'{strategy_location}: Unknown field(s): {fields}')
 
-        strategy_name = strategy.get('strategy')
-        if strategy_name != 'from_ports':
-            loader.errors.append(f'{strategy_location}: Unsupported strategy `{strategy_name}`')
-            continue
-
-        port_hints = strategy.get('port_hints')
+        port_hints = stanza.get('port_hints')
         if not isinstance(port_hints, list) or not all(
             isinstance(port, int) and not isinstance(port, bool) for port in port_hints
         ):
             loader.errors.append(f'{strategy_location}: Attribute `port_hints` must be an array of integers')
 
-        candidates = strategy.get('candidates')
+        candidates = stanza.get('candidates')
         if not isinstance(candidates, list) or not candidates:
             loader.errors.append(f'{strategy_location}: Attribute `candidates` must be a non-empty array')
             continue
+
+        placeholders: dict[str, frozenset[str]] = {'service': SERVICE_PLACEHOLDERS}
+        placeholders.update(reg.context_fields)
 
         for candidate_index, candidate in enumerate(candidates, 1):
             candidate_location = f'{strategy_location}, candidate #{candidate_index}'
@@ -198,10 +189,12 @@ def discovery_validator(discovery: Any, loader: Any, file_name: str) -> None:
                     loader.errors.append(f'{candidate_location}, {field_name}: Candidate templates must be strings')
                     continue
 
-                _validate_discovery_template(template, loader, candidate_location, field_name)
+                _validate_discovery_template(template, loader, candidate_location, field_name, placeholders)
 
 
-def _validate_discovery_template(template: str, loader: Any, location: str, field_name: str) -> None:
+def _validate_discovery_template(
+    template: str, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str]]
+) -> None:
     try:
         parsed_template = Formatter().parse(template)
     except ValueError as e:
@@ -213,11 +206,11 @@ def _validate_discovery_template(template: str, loader: Any, location: str, fiel
             continue
 
         root, separator, attr = placeholder.partition('.')
-        if not separator or root not in DISCOVERY_FROM_PORTS_PLACEHOLDERS:
+        if not separator or root not in placeholders:
             loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
             continue
 
-        if attr not in DISCOVERY_FROM_PORTS_PLACEHOLDERS[root]:
+        if attr not in placeholders[root]:
             loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
 
 
