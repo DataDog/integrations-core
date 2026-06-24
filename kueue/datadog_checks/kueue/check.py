@@ -132,7 +132,7 @@ class KueueOpenMetricsScraper(OpenMetricsScraper):
                 tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or []
             )
 
-        if metric.name in LOCAL_QUEUE_METRIC_MAP:
+        if metric.name in LOCAL_QUEUE_METRIC_MAP or RESOURCE_METRIC_MAP.get(metric.name, '').startswith('local_queue.'):
             namespace = labels.get('namespace')
             local_queue = labels.get('name')
             if namespace and local_queue:
