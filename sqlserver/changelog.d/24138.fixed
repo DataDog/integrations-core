@@ -1,0 +1,1 @@
+Escape SQL Server passwords when building connection strings.

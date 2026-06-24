@@ -73,7 +73,7 @@ RUN Get-RemoteFile `
     git config --global user.email 'agent-integrations-builder@datadoghq.com'
 
 # Install Rust
-ENV RUST_VERSION="1.74.1" `
+ENV RUST_VERSION="1.91.0" `
     RUSTUP_VERSION="1.26.0" `
     RUSTC_HASH="365d072ac4ef47f8774f4d2094108035e2291a0073702db25fa7797a30861fc9"
 RUN Get-RemoteFile `
@@ -85,11 +85,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.13.13"
+ENV PYTHON_VERSION="3.13.14"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash '3c9c81d80f91c002ced86d645422d81432c68c7d9b6b0e974768ca2e449a4d00'; `
+      -Hash 'c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -149,7 +149,11 @@ RUN Get-RemoteFile `
     Remove-Item win_flex_bison-$Env:WINFLEXBISON_VERSION.zip && `
     Add-ToPath -Append 'C:\winflexbison'
 # Meson + Ninja for building PostgreSQL 18+ on Windows
-RUN python -m pip install --no-warn-script-location meson ninja && `
+# renovate: datasource=pypi depName=meson
+ENV MESON_VERSION="1.11.1"
+# renovate: datasource=pypi depName=ninja
+ENV NINJA_VERSION="1.13.0"
+RUN python -m pip install --no-warn-script-location meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
 # libpq and pg_config as needed by psycopg
 ENV PG_VERSION="18.3"
@@ -166,7 +170,7 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.19.0"
+ENV CURL_VERSION="8.20.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt

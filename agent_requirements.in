@@ -10,7 +10,7 @@ cachetools==7.0.5
 clickhouse-connect==0.14.1
 cm-client==45.0.4
 confluent-kafka==2.13.2
-cryptography==46.0.7
+cryptography==48.0.1
 ddtrace==3.19.5
 dnspython==2.8.0
 fastavro==1.12.1
@@ -35,12 +35,12 @@ psutil==6.0.0
 psycopg[c,pool]==3.3.3
 pyasn1==0.6.3
 pydantic==2.12.5
-pyjwt==2.12.1
+pyjwt==2.13.0
 pymongo[srv]==4.8.0; python_version >= '3.9'
 pymqi==1.12.13
 pymysql==1.1.2
 pyodbc==5.3.0
-pyopenssl==26.0.0
+pyopenssl==26.2.0
 pysnmp-mibs==0.1.6
 pysnmp==7.1.22
 pysocks==1.7.1
@@ -64,6 +64,6 @@ service-identity[idna]==24.2.0
 simplejson==3.20.2
 supervisor==4.3.0
 tuf==4.0.0
-urllib3==2.6.3
+urllib3==2.7.0
 vertica-python==1.4.0
 wrapt==2.1.2

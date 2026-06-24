@@ -29,6 +29,7 @@ runs:
       env:
         CACHE_PROFILE: ${{ inputs.cache-profile }}
         INSTALL_MODE: ${{ inputs.install-mode }}
+        DDEV_VERSION: ${{ inputs.ddev-version }}
       run: |-
         case "$INSTALL_MODE" in
           local|pypi) ;;
@@ -46,6 +47,11 @@ runs:
             ;;
         esac
 
+        if [[ -n "$DDEV_VERSION" && ! "$DDEV_VERSION" =~ ^(===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9._*+!-]+(,(===|==|~=|!=|<=|>=|<|>)[A-Za-z0-9._*+!-]+)*$ ]]; then
+          echo "::error::Invalid ddev-version '$DDEV_VERSION'. Use a PEP 440-style version specifier such as ==16.0.0 or >=16,<17."
+          exit 1
+        fi
+
     - name: Compute cache date
       id: cache-date
       shell: bash
@@ -59,7 +65,7 @@ runs:
     - name: Restore local ddev cache
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' }}
       id: restore-local-ddev-base-cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       with:
         path: |
           ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
@@ -93,7 +99,7 @@ runs:
     - name: Restore local ddev cache without base package
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev' }}
       id: restore-local-ddev-cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       with:
         path: |
           ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
@@ -124,7 +130,7 @@ runs:
     - name: Restore PyPI ddev cache
       if: ${{ inputs.install-mode == 'pypi' }}
       id: restore-pypi-ddev-cache
-      uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       with:
         path: |
           ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
@@ -157,11 +163,13 @@ runs:
     - name: Install ddev from PyPI
       if: ${{ inputs.install-mode == 'pypi' }}
       shell: bash
-      run: uv pip install --system "ddev${{ inputs.ddev-version }}"
+      env:
+        DDEV_VERSION: ${{ inputs.ddev-version }}
+      run: uv pip install --system "ddev${DDEV_VERSION}"
 
     - name: Save local ddev cache
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' && steps.restore-local-ddev-base-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       continue-on-error: true
       with:
         path: |
@@ -171,7 +179,7 @@ runs:
 
     - name: Save local ddev cache without base package
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev' && steps.restore-local-ddev-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       continue-on-error: true
       with:
         path: |
@@ -181,7 +189,7 @@ runs:
 
     - name: Save PyPI ddev cache
       if: ${{ inputs.install-mode == 'pypi' && steps.restore-pypi-ddev-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
       continue-on-error: true
       with:
         path: |

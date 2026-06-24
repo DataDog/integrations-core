@@ -58,6 +58,10 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
+def instance_infrastructure_mode():
+    return 'full'
+
+
 def instance_kerberos_auth():
     return 'disabled'
 

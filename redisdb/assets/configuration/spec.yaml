@@ -170,6 +170,7 @@ files:
       value:
         type: integer
         example: 128
+      fleet_configurable: false
     - name: command_stats
       display_priority: 0
       description: Collect INFO COMMANDSTATS output as metrics.

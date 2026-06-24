@@ -62,10 +62,10 @@ instances:
 
 When `enable_cluster_monitoring` is enabled, the integration collects cluster-wide metrics for [Data Streams Monitoring][18] in addition to consumer lag:
 
-- **Brokers**: Configuration and health metrics
-- **Topics and partitions**: Sizes, offsets, and replication status
-- **Consumer groups**: Member details and group state
-- **Schema registry**: Schema metadata (requires `schema_registry_url`)
+- **Brokers**: Configuration and health metrics.
+- **Topics and partitions**: Sizes, offsets, and replication status.
+- **Consumer groups**: Member details, group state, rebalance detection, membership-change counting, and metadata exposed as tags (`partition_assignor`, `consumer_group_type`, `is_simple_consumer_group`, and `group_instance_id`). Empty groups are visible through the `consumer_group_state:EMPTY` tag on `kafka.consumer_group.members`.
+- **Schema registry**: Schema metadata (requires `schema_registry_url`).
 
 #### Batched collection
 

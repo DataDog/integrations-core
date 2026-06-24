@@ -137,6 +137,47 @@ def parse_connection_string_properties(cs):
     return params
 
 
+def _escape_odbc_connection_string_value(value: str) -> str:
+    """Return a value escaped for an ODBC connection string."""
+    # SQL Server passwords may contain symbols, but ODBC connection strings use
+    # semicolons to separate key/value pairs. The ODBC string spec wraps such
+    # values in braces and escapes a literal right brace as "}}"; the outer
+    # braces are delimiters, not part of the password.
+    # Password: pa;ss}word
+    # Connection string: Server=host;UID=datadog;PWD={pa;ss}}word};
+    # Sources: https://learn.microsoft.com/en-us/sql/relational-databases/security/strong-passwords
+    # https://sqlprotocoldoc.z19.web.core.windows.net/MS-ODBCSTR/%5BMS-ODBCSTR%5D-100604.pdf
+    return '{{{}}}'.format(value.replace('}', '}}'))
+
+
+def _escape_legacy_freetds_odbc_connection_string_value(value: str) -> str:
+    """Return a value escaped for legacy FreeTDS ODBC connection strings."""
+    # FreeTDS 1.3.6 does not decode "}}" inside braced values. It treats "}" as
+    # part of the password unless the next character is ";", so the FreeTDS path
+    # keeps the brace raw.
+    # Password: pa;ss}word
+    # Connection string: Driver=FreeTDS;Server=host;UID=datadog;PWD={pa;ss}word};
+    # Source: https://github.com/FreeTDS/freetds/blob/v1.3.6/src/odbc/connectparams.c
+    return '{{{}}}'.format(value)
+
+
+def _is_freetds_driver(driver: str) -> bool:
+    """Return whether an ODBC driver value points to FreeTDS."""
+    return 'freetds' in driver.lower() or 'libtdsodbc' in driver.lower()
+
+
+def _escape_adodbapi_connection_string_value(value: str) -> str:
+    """Return a value escaped for an adodbapi connection string."""
+    # adodbapi uses an ADO/OLE DB connection string, where semicolons separate
+    # key/value pairs. Quoting keeps semicolons inside the password value; a
+    # literal quote inside that value is escaped by doubling it. The outer quotes
+    # are delimiters, not part of the password.
+    # Password: pa;ss"word
+    # Connection string: Provider=MSOLEDBSQL;User ID=datadog;Password="pa;ss""word";
+    # Docs: https://learn.microsoft.com/en-us/sql/connect/oledb/applications/using-connection-string-keywords-with-oledb-driver-for-sql-server
+    return '"{}"'.format(value.replace('"', '""'))
+
+
 class Connection(object):
     """Manages the connection to a SQL Server instance."""
 
@@ -614,6 +655,11 @@ class Connection(object):
         else:
             dsn, host, username, password, database, driver = self._get_access_info(db_key, db_name)
 
+        escape_func = _escape_odbc_connection_string_value
+        is_freetds_driver = driver and _is_freetds_driver(driver)
+        if is_freetds_driver:
+            escape_func = _escape_legacy_freetds_odbc_connection_string_value
+
         if self.managed_auth_enabled:
             # if managed_identity authentication is configured,
             # remove the username/password from the CS, if set
@@ -638,7 +684,12 @@ class Connection(object):
             conn_str += 'UID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
-            conn_str += 'PWD={};'.format(password)
+            if is_freetds_driver and '};' in password:
+                raise ConfigurationError(
+                    "SQL Server passwords containing the sequence '};' cannot be represented in FreeTDS ODBC "
+                    "connection strings. Use Microsoft ODBC Driver for SQL Server or change the password."
+                )
+            conn_str += 'PWD={};'.format(escape_func(password))
         return conn_str
 
     def _conn_string_adodbapi(self, db_key, conn_key=None, db_name=None):
@@ -659,7 +710,7 @@ class Connection(object):
             conn_str += 'User ID={};'.format(username)
         self.log.debug("Connection string (before password) %s", conn_str)
         if password:
-            conn_str += 'Password={};'.format(password)
+            conn_str += 'Password={};'.format(_escape_adodbapi_connection_string_value(password))
         if not username and not password:
             conn_str += 'Integrated Security=SSPI;'
         return conn_str
