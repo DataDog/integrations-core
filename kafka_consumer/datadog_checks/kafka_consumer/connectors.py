@@ -16,8 +16,33 @@ if TYPE_CHECKING:
 
 SENSITIVE_KEY_PATTERN = re.compile(
     r'(?i)(password|secret|\.key$|_key$|sasl\.jaas\.config|api\.key|api\.secret'
-    r'|token|passphrase|keyfile|connection\.url|basic\.auth\.user\.info|private\.key)'
+    r'|\btoken\b|passphrase|keyfile|connection\.url|basic\.auth\.user\.info|private\.key)'
 )
+
+def _build_http_kwargs(
+    username: str | None,
+    password: str | None,
+    tls_verify: bool,
+    tls_ca_cert: str | None,
+    tls_cert: str | None,
+    tls_key: str | None,
+) -> dict[str, Any]:
+    """Build auth and TLS kwargs for a requests-compatible HTTP client."""
+    kwargs: dict[str, Any] = {}
+    if username and password:
+        kwargs['auth'] = (username, password)
+    if not tls_verify:
+        kwargs['verify'] = False
+    elif tls_ca_cert:
+        kwargs['verify'] = tls_ca_cert
+    else:
+        kwargs['verify'] = True
+    if tls_cert and tls_key:
+        kwargs['cert'] = (tls_cert, tls_key)
+    elif tls_cert:
+        kwargs['cert'] = tls_cert
+    return kwargs
+
 
 CONNECTOR_CONFIG_CACHE_KEY = 'kafka_connector_config_cache'
 CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
@@ -48,22 +73,14 @@ class KafkaConnectCollector:
 
     def _configure_http(self) -> None:
         """Build per-request HTTP kwargs for Kafka Connect auth and TLS."""
-        self._http_kwargs: dict[str, Any] = {}
-
-        if self.config._kafka_connect_username and self.config._kafka_connect_password:
-            self._http_kwargs['auth'] = (self.config._kafka_connect_username, self.config._kafka_connect_password)
-
-        if not self.config._kafka_connect_tls_verify:
-            self._http_kwargs['verify'] = False
-        elif self.config._kafka_connect_tls_ca_cert:
-            self._http_kwargs['verify'] = self.config._kafka_connect_tls_ca_cert
-        else:
-            self._http_kwargs['verify'] = True
-
-        if self.config._kafka_connect_tls_cert and self.config._kafka_connect_tls_key:
-            self._http_kwargs['cert'] = (self.config._kafka_connect_tls_cert, self.config._kafka_connect_tls_key)
-        elif self.config._kafka_connect_tls_cert:
-            self._http_kwargs['cert'] = self.config._kafka_connect_tls_cert
+        self._http_kwargs = _build_http_kwargs(
+            self.config._kafka_connect_username,
+            self.config._kafka_connect_password,
+            self.config._kafka_connect_tls_verify,
+            self.config._kafka_connect_tls_ca_cert,
+            self.config._kafka_connect_tls_cert,
+            self.config._kafka_connect_tls_key,
+        )
 
     def _get_request_kwargs(self) -> dict[str, Any]:
         """Return per-request kwargs including the current OAuth bearer token if set."""
@@ -76,12 +93,6 @@ class KafkaConnectCollector:
                 if custom_headers:
                     extra_headers.update(custom_headers)
             kwargs['extra_headers'] = extra_headers
-        else:
-            # Mask any schema-registry auth that may have been set globally on check.http
-            # via ChainMap fallback (http.py:469). Explicitly override to prevent leakage.
-            if 'auth' not in kwargs:
-                kwargs['auth'] = None
-            kwargs['extra_headers'] = {'Authorization': ''}
         return kwargs
 
     def _fetch_oidc_token(self, oauth_config: dict[str, Any]) -> tuple[str, float]:
@@ -187,7 +198,7 @@ class KafkaConnectCollector:
             connector_type = info.get('type', 'unknown')
             full_class = (info.get('config') or {}).get('connector.class', '')
             connector_class = _short_class_name(full_class)
-            connector_state = (status.get('connector') or {}).get('state', 'UNKNOWN')
+            connector_state = (status.get('connector') or {}).get('state', 'UNKNOWN').lower()
 
             connector_tags = tags_base + [
                 f'connector:{name}',
@@ -202,20 +213,17 @@ class KafkaConnectCollector:
 
             task_state_counts: dict[str, int] = {}
             for task in tasks:
-                state = (task.get('state') or 'UNKNOWN').lower()
-                task_state_counts[state] = task_state_counts.get(state, 0) + 1
-            for state_name, count in task_state_counts.items():
-                self.check.gauge('connector.tasks', count, tags=connector_tags + [f'task_state:{state_name}'])
-
-            for task in tasks:
-                task_id = task.get('id', '')
                 task_state = (task.get('state') or 'UNKNOWN').lower()
+                task_state_counts[task_state] = task_state_counts.get(task_state, 0) + 1
+                task_id = task.get('id', '')
                 task_tags = connector_tags + [f'task_id:{task_id}', f'task_state:{task_state}']
                 self.check.gauge(
                     'connector.task.running',
                     1 if task_state == 'running' else 0,
                     tags=task_tags,
                 )
+            for state_name, count in task_state_counts.items():
+                self.check.gauge('connector.tasks', count, tags=connector_tags + [f'task_state:{state_name}'])
 
     def _emit_connector_config_events(self, connectors_data: dict[str, Any], cluster_id: str, url: str) -> None:
         connector_contents: dict[str, str] = {}

@@ -104,11 +104,11 @@ def test_emit_connector_metrics_connector_state_tag(make_collector):
     task_count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.count']
     source_calls = [c for c in task_count_calls if 'connector:demo-source' in c.kwargs.get('tags', [])]
     assert source_calls, "no connector.task.count for demo-source"
-    assert 'connector_state:RUNNING' in source_calls[0].kwargs['tags']
+    assert 'connector_state:running' in source_calls[0].kwargs['tags']
 
     heartbeat_calls = [c for c in task_count_calls if 'connector:demo-heartbeat' in c.kwargs.get('tags', [])]
     assert heartbeat_calls, "no connector.task.count for demo-heartbeat"
-    assert 'connector_state:PAUSED' in heartbeat_calls[0].kwargs['tags']
+    assert 'connector_state:paused' in heartbeat_calls[0].kwargs['tags']
 
 
 def test_task_metrics_always_collected(make_collector):
@@ -548,3 +548,34 @@ def test_get_events_to_send_handles_write_failure(make_collector):
     result = collector.cache.get_events_to_send('test_key', {'item': 'content'})
     assert result == ['item']
     collector.log.debug.assert_called()
+
+
+def test_get_request_kwargs_no_token_sends_no_auth_header(make_collector):
+    """No-token path must not emit an Authorization header or override auth."""
+    collector, _, _, _ = make_collector()
+    collector._oauth_token = None
+
+    kwargs = collector._get_request_kwargs()
+
+    assert 'extra_headers' not in kwargs
+
+
+def test_connector_metrics_match_metadata(check, kafka_instance, dd_run_check, aggregator):
+    """Connector metrics emitted through a real KafkaCheck aggregator match metadata.csv."""
+    from datadog_checks.dev.utils import get_metadata_metrics
+
+    kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
+    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = seed_mock_kafka_client()
+
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
+    kafka_consumer_check._connector_collector.http = mock.MagicMock()
+    kafka_consumer_check._connector_collector.http.get.return_value = mock_resp
+
+    with mock.patch.object(kafka_consumer_check._connector_collector, '_collect_plugins'):
+        with mock.patch.object(kafka_consumer_check.metadata_collector, 'collect_all_metadata'):
+            dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

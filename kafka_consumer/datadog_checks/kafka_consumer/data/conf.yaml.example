@@ -457,8 +457,8 @@ instances:
         # tls_ca_cert: /path/to/oauth_ca_cert.pem
 
     ## @param kafka_connect_url - string or list of strings - optional - default: http://localhost:8083
-    ## Kafka Connect REST API URL or list of URLs. When set, collects connector metrics and
-    ## configuration events from the Kafka Connect REST API.
+    ## Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
+    ## collects connector metrics and configuration events from the Kafka Connect REST API.
     ## Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
     #
     # kafka_connect_url: http://localhost:8083

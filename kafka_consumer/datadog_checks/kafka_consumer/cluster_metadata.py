@@ -16,6 +16,7 @@ from confluent_kafka import IsolationLevel, TopicPartition
 from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
 from datadog_checks.kafka_consumer.cache import CacheHelper
+from datadog_checks.kafka_consumer.connectors import _build_http_kwargs
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
@@ -89,24 +90,14 @@ class ClusterMetadataCollector:
 
     def _build_schema_registry_http_kwargs(self) -> None:
         """Build per-request HTTP kwargs for Schema Registry auth and TLS."""
-        kwargs: dict[str, Any] = {}
-
-        if self.config._schema_registry_username and self.config._schema_registry_password:
-            kwargs['auth'] = (self.config._schema_registry_username, self.config._schema_registry_password)
-
-        if not self.config._schema_registry_tls_verify:
-            kwargs['verify'] = False
-        elif self.config._schema_registry_tls_ca_cert:
-            kwargs['verify'] = self.config._schema_registry_tls_ca_cert
-        else:
-            kwargs['verify'] = True
-
-        if self.config._schema_registry_tls_cert and self.config._schema_registry_tls_key:
-            kwargs['cert'] = (self.config._schema_registry_tls_cert, self.config._schema_registry_tls_key)
-        elif self.config._schema_registry_tls_cert:
-            kwargs['cert'] = self.config._schema_registry_tls_cert
-
-        self._schema_registry_http_kwargs = kwargs
+        self._schema_registry_http_kwargs = _build_http_kwargs(
+            self.config._schema_registry_username,
+            self.config._schema_registry_password,
+            self.config._schema_registry_tls_verify,
+            self.config._schema_registry_tls_ca_cert,
+            self.config._schema_registry_tls_cert,
+            self.config._schema_registry_tls_key,
+        )
 
     def _get_schema_registry_request_kwargs(self) -> dict[str, Any]:
         """Return per-request kwargs including the current OAuth bearer token if set."""

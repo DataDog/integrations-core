@@ -467,8 +467,8 @@ files:
           fleet_configurable: false
       - name: kafka_connect_url
         description: |
-          Kafka Connect REST API URL or list of URLs. When set, collects connector metrics and
-          configuration events from the Kafka Connect REST API.
+          Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
+          collects connector metrics and configuration events from the Kafka Connect REST API.
           Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
         fleet_configurable: true
         formats:

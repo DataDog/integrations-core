@@ -34,6 +34,8 @@ class KafkaCheck(AgentCheck):
 
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
+        # Eagerly constructed so the check object owns the collector's lifetime; collect() is a
+        # no-op when _kafka_connect_urls is empty, so this is safe without a URL guard.
         self._connector_collector = KafkaConnectCollector(self, self.config, self.log)
 
     def check(self, _):
