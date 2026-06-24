@@ -109,8 +109,6 @@ Apply the following configuration parameter to `logs`:
 
 The following Kubernetes annotation is applied to a pod under `metadata`, where `<CONTAINER_NAME>` is the name of your Temporal container (or a [custom identifier][16]):
 
-For log-only configuration, `DatadogInstrumentation` also supports `logs`; use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
-
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.logs: |
   [

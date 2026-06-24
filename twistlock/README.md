@@ -106,8 +106,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 3. Make sure the log section is included in the Pod annotation for the defender, where the container name can be found just below in the pod spec:
 
-   For log-only configuration, `DatadogInstrumentation` also supports `logs`; use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
-
    ```yaml
    ad.datadoghq.com/<container-name>.logs: '[{"source": "twistlock", "service": "twistlock"}]'
    ```
