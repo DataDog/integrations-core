@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
@@ -69,14 +68,14 @@ def test_unknown_provider_raises(file_registry, clients):
 
 
 def test_missing_client_raises(file_registry):
-    config = AgentConfig(name="writer", provider="anthropic", tools=[], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(name="writer", provider="anthropic", tools=[])
     factory = make_factory({}, file_registry)
     with pytest.raises(ValueError, match="No client provided for agent provider 'anthropic'"):
         build_runtime(factory, config)
 
 
 def test_build_runtime_returns_agent_runtime(file_registry, clients):
-    config = AgentConfig(name="writer", provider="anthropic", tools=[], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(name="writer", provider="anthropic", tools=[])
     runtime = build_runtime(make_factory(clients, file_registry), config)
 
     assert isinstance(runtime, AgentRuntime)
@@ -86,7 +85,7 @@ def test_build_runtime_returns_agent_runtime(file_registry, clients):
 
 
 def test_build_runtime_uses_explicit_system_prompt(file_registry, clients):
-    config = AgentConfig(name="writer", provider="anthropic", tools=[], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(name="writer", provider="anthropic", tools=[])
     runtime = build_runtime(make_factory(clients, file_registry), config, system_prompt="Project: integrations")
 
     assert runtime.agent._system_prompt == "Project: integrations"
@@ -106,7 +105,6 @@ def test_build_runtime_forwards_model_and_max_tokens(file_registry, clients, mod
         model=model,
         max_tokens=max_tokens,
         tools=[],
-        system_prompt_path=Path("/fake.md"),
     )
     runtime = build_runtime(make_factory(clients, file_registry), config)
 
@@ -115,7 +113,7 @@ def test_build_runtime_forwards_model_and_max_tokens(file_registry, clients, mod
 
 
 def test_build_runtime_uses_config_tools(file_registry, clients):
-    config = AgentConfig(name="writer", provider="anthropic", tools=["read_file"], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(name="writer", provider="anthropic", tools=["read_file"])
     runtime = build_runtime(make_factory(clients, file_registry), config)
 
     assert len(runtime.tool_registry.definitions) == 1
@@ -124,7 +122,7 @@ def test_build_runtime_uses_config_tools(file_registry, clients):
 
 def test_build_runtime_wires_spawn_subagent_tool(file_registry, clients):
     config = AgentConfig(
-        name="writer", provider="anthropic", tools=["spawn_subagent"], system_prompt_path=Path("/fake.md")
+        name="writer", provider="anthropic", tools=["spawn_subagent"]
     )
     factory = make_factory(clients, file_registry)
     sentinel_process_factory = object()
@@ -138,7 +136,7 @@ def test_build_runtime_wires_spawn_subagent_tool(file_registry, clients):
 
 def test_build_runtime_reuses_shared_file_registry(file_registry, clients):
     config = AgentConfig(
-        name="writer", provider="anthropic", tools=["read_file", "edit_file"], system_prompt_path=Path("/fake.md")
+        name="writer", provider="anthropic", tools=["read_file", "edit_file"]
     )
     runtime = build_runtime(make_factory(clients, file_registry), config, owner_id="owner")
 
@@ -148,7 +146,7 @@ def test_build_runtime_reuses_shared_file_registry(file_registry, clients):
 
 
 async def test_shared_registry_does_not_share_parent_read_authorization(file_registry, clients, tmp_path):
-    config = AgentConfig(name="writer", provider="anthropic", tools=[], system_prompt_path=Path("/fake.md"))
+    config = AgentConfig(name="writer", provider="anthropic", tools=[])
     path = tmp_path / "file.txt"
     path.write_text("before", encoding="utf-8")
     file_registry.record("parent", str(path), "before")
