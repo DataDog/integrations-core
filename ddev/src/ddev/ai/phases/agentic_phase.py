@@ -26,6 +26,35 @@ if TYPE_CHECKING:
     from ddev.ai.react.types import ReActResult
 
 
+RESUME_NOTICE = """
+
+---
+
+NOTE FROM THE HARNESS — RESUMED RUN
+
+This phase is being re-run because a previous execution of this flow failed or was \
+interrupted while this phase was the one in progress. You are picking up from where it stopped.
+
+Some of this phase's work may already be partially on disk from that earlier attempt — files \
+created or half-edited, assets generated, commands partially applied. Before doing new work, \
+inspect the current state of the files this phase is responsible for, reconcile anything that is \
+incomplete or inconsistent, and avoid blindly duplicating steps that were already finished. \
+Treat the on-disk state as the source of truth and bring it to a correct, complete result."""
+
+RESUME_NOTICE_ERROR = """
+
+The previous attempt recorded this error:
+
+{error}"""
+
+
+def build_resume_notice(error: str | None) -> str:
+    notice = RESUME_NOTICE
+    if error:
+        notice += RESUME_NOTICE_ERROR.format(error=error)
+    return notice
+
+
 def render_task_prompt(
     task: TaskConfig,
     config_dir: Path,
@@ -288,6 +317,9 @@ class AgenticPhase(Phase):
             context,
             self._resolver,
         )
+        if self._resume_frontier:
+            prior = context.get("checkpoints", {}).get(self._phase_id) or {}
+            system_prompt += build_resume_notice(prior.get("error"))
         try:
             process = self._process_factory.create(
                 scope=self._scope,

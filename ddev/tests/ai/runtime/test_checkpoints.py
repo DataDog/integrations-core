@@ -141,3 +141,24 @@ def test_resolve_template_variable_memory_suffix(manager):
 
 def test_resolve_template_variable_non_memory_key(manager):
     assert manager.resolve_template_variable("some_variable") == "<VARIABLE UNDEFINED: some_variable>"
+
+
+# ---------------------------------------------------------------------------
+# successful_phases
+# ---------------------------------------------------------------------------
+
+
+def test_successful_phases_empty_when_no_file(manager):
+    assert manager.successful_phases() == set()
+
+
+def test_successful_phases_returns_only_succeeded(manager):
+    manager.write_phase_checkpoint("a", {"status": "success"})
+    manager.write_phase_checkpoint("b", {"status": "failed", "error": "boom"})
+    manager.write_phase_checkpoint("c", {"status": "success"})
+    assert manager.successful_phases() == {"a", "c"}
+
+
+def test_successful_phases_ignores_malformed_entries(manager):
+    manager._path.write_text("a:\n  status: success\nb: not-a-dict\n")
+    assert manager.successful_phases() == {"a"}

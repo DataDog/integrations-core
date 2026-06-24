@@ -28,6 +28,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         agent_clients: dict[str, Any],
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
+        resume: bool = False,
         grace_period: float = 10,
         max_timeout: float = 600,
         logger: logging.Logger | None = None,
@@ -55,6 +56,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._agent_clients = agent_clients
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
+        self._resume = resume
         self._agent_logger: AgentLogger | None = None
         self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
@@ -102,6 +104,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
 
+        completed, frontier = self._resolve_resume_state(config, checkpoint_manager)
+
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
 
@@ -117,10 +121,14 @@ class PhaseOrchestrator(EventBusOrchestrator):
             config_dir=config_dir,
             callbacks=run_callbacks,
             logger=self._logger,
+            resume_frontier=frozenset(frontier),
         )
 
         for entry in config.flow:
             phase_id = entry.phase
+            if phase_id in completed:
+                self._logger.info("Resuming: skipping already-completed phase %r", phase_id)
+                continue
             phase_config = config.phases[phase_id]
             deps = dependency_map[phase_id]
             phase_cls = self._phase_registry.get(phase_config.type)
@@ -135,6 +143,34 @@ class PhaseOrchestrator(EventBusOrchestrator):
             self.register_processor(phase, [PhaseTrigger])
 
         self.submit_message(PhaseTrigger(id="start", phase_id=None))
+        for phase_id in completed:
+            self.submit_message(PhaseTrigger(id=f"{phase_id}_resumed", phase_id=phase_id))
+
+    def _resolve_resume_state(
+        self,
+        config: FlowConfig,
+        checkpoint_manager: CheckpointManager,
+    ) -> tuple[set[str], set[str]]:
+        """Compute (completed, frontier) for a resumed run; both empty when not resuming.
+
+        ``completed`` is the dependency-closed set of phases that succeeded *and* whose every
+        transitive dependency also succeeded. ``frontier`` is the phases that will run first
+        on resume (not completed, but all their dependencies are): the ones that may be sitting
+        on partial work from the interrupted run.
+        """
+        if not self._resume:
+            return set(), set()
+
+        succeeded = checkpoint_manager.successful_phases()
+        completed: set[str] = set()
+        frontier: set[str] = set()
+        for entry in config.flow:
+            deps_done = all(dep in completed for dep in entry.dependencies)
+            if entry.phase in succeeded and deps_done:
+                completed.add(entry.phase)
+            elif deps_done:
+                frontier.add(entry.phase)
+        return completed, frontier
 
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""
