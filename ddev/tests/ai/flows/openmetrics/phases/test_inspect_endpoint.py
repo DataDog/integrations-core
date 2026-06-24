@@ -99,8 +99,8 @@ def message_queue():
 
 
 def _make_phase(
-    flow_dir,
-    message_queue,
+    flow_dir: Path,
+    message_queue: asyncio.Queue,
     *,
     phase_id: str = PHASE_ID,
     runtime_variables: dict[str, str] | None = None,
@@ -121,7 +121,7 @@ def _make_phase(
     return phase, checkpoint_manager
 
 
-def _install_mock_transport(monkeypatch, handler):
+def _install_mock_transport(monkeypatch: pytest.MonkeyPatch, handler) -> None:
     """Patch httpx.AsyncClient inside the phase module to use a MockTransport handler."""
     real_client_cls = httpx.AsyncClient
 
@@ -146,7 +146,7 @@ def _raising_handler(exc: Exception):
     return handler
 
 
-def _read_jsonl(path) -> list[dict]:
+def _read_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
@@ -208,7 +208,7 @@ async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatc
 # ---------------------------------------------------------------------------
 
 
-async def _assert_phase_fails(phase, mgr, message_queue, *, error_contains: str):
+async def _assert_phase_fails(phase: InspectEndpointPhase, mgr: CheckpointManager, message_queue: asyncio.Queue, *, error_contains: str) -> Exception:
     """Run process_message, expect failure, drive on_error like the framework would."""
     trigger = PhaseTrigger(id="start", phase_id=None)
     try:

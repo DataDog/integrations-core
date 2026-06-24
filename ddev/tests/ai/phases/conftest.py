@@ -4,6 +4,7 @@
 
 import asyncio
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -12,7 +13,7 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.react.process import ReActProcess
@@ -133,19 +134,19 @@ class MockProcessFactory:
 
 
 def make_agent_phase(
-    flow_dir,
+    flow_dir: Path,
     mock_agent: MockAgent,
-    monkeypatch,
-    message_queue,
+    monkeypatch: pytest.MonkeyPatch,
+    message_queue: asyncio.Queue,
     *,
     phase_id: str = "p1",
     dependencies: list[str] | None = None,
     tasks: list[TaskConfig] | None = None,
-    checkpoint=None,
+    checkpoint: CheckpointConfig | None = None,
     flow_variables: dict[str, str] | None = None,
     runtime_variables: dict[str, str] | None = None,
     context_compact_threshold_pct: int = 80,
-    callbacks=None,
+    callbacks: Callbacks | None = None,
     captured_worker_kwargs: dict[str, Any] | None = None,
     goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
     agent_config: AgentConfig | None = None,

@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 
@@ -25,14 +27,14 @@ class _StubPhase(Phase):
 
 
 def _make_stub_phase(
-    flow_dir,
-    flow_context,
-    message_queue,
+    flow_dir: Path,
+    flow_context: FlowContext,
+    message_queue: asyncio.Queue,
     *,
-    phase_id="p1",
-    dependencies=None,
-    outcome=None,
-):
+    phase_id: str = "p1",
+    dependencies: list[str] | None = None,
+    outcome: PhaseOutcome | None = None,
+) -> tuple[_StubPhase, CheckpointManager]:
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
     phase = _StubPhase(
         phase_id=phase_id,

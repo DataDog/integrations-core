@@ -39,7 +39,7 @@ def file_access_policy(tmp_path) -> FileAccessPolicy:
 
 
 @pytest.fixture
-def make_orchestrator(file_access_policy, tmp_path):
+def make_orchestrator(file_access_policy: FileAccessPolicy, tmp_path: Path):
     """Factory that builds a PhaseOrchestrator with test defaults."""
 
     def _make(engine: ConfigurationEngine | None = None, **overrides: Any) -> PhaseOrchestrator:
