@@ -442,6 +442,36 @@ class TestAIAChasing:
             raise error
         assert response.status_code == 200
 
+    def test_load_intermediate_certs_uses_sanitized_tls_settings(self):
+        http = RequestsWrapper(
+            {
+                'headers': {'Authorization': 'Bearer token'},
+                'tls_ca_cert': '/path/to/ca.pem',
+                'tls_cert': '/path/to/client.crt',
+                'tls_ciphers': 'ECDHE-ECDSA-AES256-GCM-SHA384',
+                'tls_private_key': '/path/to/client.key',
+                'tls_protocols_allowed': ['TLSv1.2'],
+                'tls_validate_hostname': False,
+                'proxy': {'http': 'http://proxy:3128'},
+            },
+            {},
+        )
+        session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=build_cert())
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
+
+        assert wrapper.call_args.args[0] == {
+            'tls_ca_cert': '/path/to/ca.pem',
+            'tls_ciphers': 'ECDHE-ECDSA-AES256-GCM-SHA384',
+            'tls_protocols_allowed': ['TLSv1.2'],
+            'tls_validate_hostname': False,
+            'tls_verify': True,
+            'skip_proxy': True,
+        }
+        assert wrapper.call_args.args[1] == {}
+
     def test_load_intermediate_certs_skips_unparseable_cert_body(self):
         http = RequestsWrapper({}, {})
         certs = []
@@ -479,8 +509,9 @@ class TestAIAChasing:
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
 
         configs = [call.args[0] for call in wrapper.call_args_list]
-        assert configs[0] == {'tls_verify': True, 'skip_proxy': True}
-        assert {'tls_verify': False, 'skip_proxy': True} in configs
+        assert configs[0]['tls_verify'] is True
+        assert configs[0]['skip_proxy'] is True
+        assert any(config['tls_verify'] is False and config['skip_proxy'] is True for config in configs)
         assert secure.get.called and plain.get.called
 
     def test_load_intermediate_certs_stops_on_cert_cycle(self):

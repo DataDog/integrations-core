@@ -9,6 +9,7 @@ import re
 import socket
 import warnings
 from collections import ChainMap
+from collections.abc import Mapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from hashlib import sha256
@@ -92,6 +93,10 @@ DEFAULT_REMAPPED_FIELDS = {
     # TODO: Remove in 6.13
     'no_proxy': {'name': 'skip_proxy'},
 }
+AIA_TLS_CONFIG_FIELDS = frozenset(
+    {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
+)
+
 PROXY_SETTINGS_DISABLED = {
     # This will instruct `requests` to ignore the `HTTP_PROXY`/`HTTPS_PROXY`
     # environment variables. If the proxy options `http`/`https` are missing
@@ -229,11 +234,22 @@ def _der_to_pem(der_cert: bytes) -> str:
     )
 
 
-def fetch_intermediate_cert(uri: str, logger: logging.Logger) -> bytes | None:
+def _get_aia_tls_config(tls_config: Mapping[str, object] | None, tls_verify: bool) -> dict[str, object]:
+    # Keep trust/negotiation settings, but never auth, client certs, proxies, or session state.
+    config = {
+        key: value for key, value in (tls_config or {}).items() if key in AIA_TLS_CONFIG_FIELDS and value is not None
+    }
+    config['tls_verify'] = tls_verify
+    config['skip_proxy'] = True
+    return config
+
+
+def fetch_intermediate_cert(
+    uri: str, logger: logging.Logger | logging.LoggerAdapter, tls_config: Mapping[str, object] | None = None
+) -> bytes | None:
     for tls_verify in (True, False):
         try:
-            # Use default trust first; do not inherit caller TLS, auth, or proxy settings for AIA fetches.
-            response = RequestsWrapper({'tls_verify': tls_verify, 'skip_proxy': True}, {}, logger=logger).get(uri)
+            response = RequestsWrapper(_get_aia_tls_config(tls_config, tls_verify), {}, logger=logger).get(uri)
             response.raise_for_status()
         except Exception as e:
             logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=%s): %s', uri, tls_verify, e)
@@ -613,7 +629,7 @@ class RequestsWrapper(object):
 
             uri = access_description.access_location.value
 
-            intermediate_cert = fetch_intermediate_cert(uri, self.logger)
+            intermediate_cert = fetch_intermediate_cert(uri, self.logger, self.tls_config)
             if intermediate_cert is None:
                 continue
 
