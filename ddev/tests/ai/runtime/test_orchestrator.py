@@ -504,8 +504,8 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator, 
             raise RuntimeError("intentional failure")
 
     class _FailingPhaseLoader(PhaseLoader):
-        def _discover(self, registry):
-            super()._discover(registry)
+        def _discover(self, registry, flow_name):
+            super()._discover(registry, flow_name)
             registry.register("FailingPhase", FailingPhase)
 
     orchestrator = make_orchestrator(

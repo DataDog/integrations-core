@@ -21,10 +21,11 @@ from ddev.ai.config.models import (
     ResourceEnvelope,
     VariableDeclaration,
 )
+from ddev.ai.constants import CORE_FLOWS_DIR
+
 ResourceKind = Literal["agent", "phase", "flow"]
 
 _log = logging.getLogger(__name__)
-
 
 
 @dataclass
@@ -51,8 +52,6 @@ class _VarState:
 
 
 _ENVELOPE_ADAPTER: TypeAdapter[ResourceEnvelope] = TypeAdapter(ResourceEnvelope)
-
-CORE_FLOWS_DIR: Path = Path(__file__).parent.parent / "flows"
 
 
 class ConfigurationEngine:
