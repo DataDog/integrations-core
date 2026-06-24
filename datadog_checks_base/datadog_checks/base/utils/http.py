@@ -11,6 +11,7 @@ import warnings
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
+from hashlib import sha256
 from urllib.parse import quote, urlparse, urlunparse
 
 import lazy_loader
@@ -220,9 +221,18 @@ class ResponseWrapper(ObjectProxy):
         return self
 
 
-def fetch_intermediate_cert(uri, logger):
+def _der_to_pem(der_cert: bytes) -> str:
+    return (
+        _http_utils.cryptography_x509_load_certificate(der_cert)
+        .public_bytes(_http_utils.cryptography_serialization.Encoding.PEM)
+        .decode('utf-8')
+    )
+
+
+def fetch_intermediate_cert(uri: str, logger: logging.Logger) -> bytes | None:
     for tls_verify in (True, False):
         try:
+            # Use default trust first; do not inherit caller TLS, auth, or proxy settings for AIA fetches.
             response = RequestsWrapper({'tls_verify': tls_verify, 'skip_proxy': True}, {}, logger=logger).get(uri)
             response.raise_for_status()
         except Exception as e:
@@ -567,9 +577,17 @@ class RequestsWrapper(object):
         self.load_intermediate_certs(der_cert, certs)
         return certs
 
-    def load_intermediate_certs(self, der_cert, certs):
+    def load_intermediate_certs(self, der_cert, certs, visited_cert_ids=None):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        if visited_cert_ids is None:
+            visited_cert_ids = set()
+
+        cert_id = sha256(der_cert).digest()
+        if cert_id in visited_cert_ids:
+            return certs
+        visited_cert_ids.add(cert_id)
+
         try:
             cert = _http_utils.cryptography_x509_load_certificate(der_cert)
         except Exception as e:
@@ -600,20 +618,13 @@ class RequestsWrapper(object):
                 continue
 
             try:
-                certs.append(self._serialize_intermediate_cert(intermediate_cert))
+                certs.append(_der_to_pem(intermediate_cert))
             except Exception as e:
                 self.logger.error('Error serializing intermediate certificate from `%s`: %s', uri, e)
                 continue
 
-            self.load_intermediate_certs(intermediate_cert, certs)
+            self.load_intermediate_certs(intermediate_cert, certs, visited_cert_ids)
         return certs
-
-    def _serialize_intermediate_cert(self, der_cert):
-        return (
-            _http_utils.cryptography_x509_load_certificate(der_cert)
-            .public_bytes(_http_utils.cryptography_serialization.Encoding.PEM)
-            .decode('utf-8')
-        )
 
     def _create_session(self):
         """

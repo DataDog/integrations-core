@@ -442,11 +442,24 @@ class TestAIAChasing:
             raise error
         assert response.status_code == 200
 
-    def test_load_intermediate_certs_skips_invalid_issuer_response(self):
+    def test_load_intermediate_certs_skips_unparseable_cert_body(self):
         http = RequestsWrapper({}, {})
         certs = []
         session = mock.MagicMock()
         session.get.return_value = mock.MagicMock(content=b'not a certificate')
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), certs)
+
+        assert certs == []
+
+    def test_load_intermediate_certs_skips_http_error_response(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        response = mock.MagicMock(content=build_cert())
+        response.raise_for_status.side_effect = Exception('HTTP 404')
+        session = mock.MagicMock()
+        session.get.return_value = response
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), certs)
@@ -469,6 +482,19 @@ class TestAIAChasing:
         assert configs[0] == {'tls_verify': True, 'skip_proxy': True}
         assert {'tls_verify': False, 'skip_proxy': True} in configs
         assert secure.get.called and plain.get.called
+
+    def test_load_intermediate_certs_stops_on_cert_cycle(self):
+        http = RequestsWrapper({}, {})
+        cert = build_cert('http://issuer.test/ca.der')
+        certs = []
+        session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=cert)
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(cert, certs)
+
+        assert session.get.call_count == 1
+        assert len(certs) == 1
 
     def test_load_intermediate_certs_recurses(self):
         http = RequestsWrapper({}, {})
