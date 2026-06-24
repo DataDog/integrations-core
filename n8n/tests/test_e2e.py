@@ -35,6 +35,6 @@ def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(check_rate=True)
 
     aggregator.assert_metrics_using_metadata(
-        common.get_metadata_metrics_for_version(exclude_rare=True), check_symmetric_inclusion=False
+        common.get_metadata_metrics_for_version(), check_symmetric_inclusion=False
     )
     aggregator.assert_service_check('n8n.openmetrics.health', N8nCheck.OK)
