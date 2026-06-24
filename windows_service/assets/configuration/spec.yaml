@@ -82,4 +82,18 @@ files:
             value:
               type: boolean
               example: false
+          - name: group_per_user_services
+            description: |
+              Whether or not to group Windows per-user services under their template name.
+
+              Per-user services are instantiated per user logon session and named
+              `<service name>_<LUID>` (for example `OneSyncSvc_443f50`), which creates high
+              cardinality in the `windows_service` and `display_name` tags. When enabled, the
+              LUID suffix is stripped so all instances of a per-user service report under the
+              same template name.
+              See https://learn.microsoft.com/en-us/windows/application-management/per-user-services-in-windows
+            fleet_configurable: true
+            value:
+              type: boolean
+              example: false
           - template: instances/default
