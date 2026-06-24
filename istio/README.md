@@ -161,8 +161,6 @@ _Available for Agent versions >6.0_
 
 First, enable the Datadog Agent to perform log collection in Kubernetes. See [Kubernetes Log Collection][13].
 
-For log-only configuration, `DatadogInstrumentation` also supports `logs`; create one `DatadogInstrumentation` resource per target workload and use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
-
 #### Istio logs
 
 To collect Istio logs from your control plane (`istiod`), apply the following pod annotations for the deployment `istiod` in the `istio-system` namespace:

@@ -340,8 +340,6 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 Then, set [Log Integrations][14] as pod annotations. Alternatively, you can configure this with a [file, configmap, or key-value store][18].
 
-For log-only configuration, `DatadogInstrumentation` also supports `logs`; use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
-
 **Annotations v1/v2**
 
 ```yaml

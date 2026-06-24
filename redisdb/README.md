@@ -232,8 +232,6 @@ Then, set the following parameter in an [Autodiscovery template][14]. You can do
 | -------------------- | -------------------------------------------------------------------------- |
 | `<LOG_CONFIG>`       | `[{"source":"redis","service":"<YOUR_APP_NAME>"}]`                         |
 
-For log-only configuration, `DatadogInstrumentation` also supports `logs`; use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
-
 **Annotations v1/v2**
 
 ```yaml

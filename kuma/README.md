@@ -116,8 +116,6 @@ Enable log collection in your `datadog.yaml` file:
 logs_enabled: true
 ```
 
-For log-only configuration, `DatadogInstrumentation` also supports `logs`; create one `DatadogInstrumentation` resource per target workload and use `integration: logs` for log-only resources. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
-
 ##### Control Plane Logs
 
 To collect logs from the Kuma control plane, apply the following annotations to your `kuma-control-plane` deployment:
