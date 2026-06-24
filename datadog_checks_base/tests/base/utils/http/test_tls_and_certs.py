@@ -515,7 +515,8 @@ class TestAIAChasing:
         assert configs[0]['tls_verify'] is True
         assert configs[0]['skip_proxy'] is True
         assert any(config['tls_verify'] is False and config['skip_proxy'] is True for config in configs)
-        assert secure.get.called and plain.get.called
+        secure.get.assert_called_once_with('https://issuer.test/ca.der')
+        plain.get.assert_called_once_with('https://issuer.test/ca.der')
 
     def test_load_intermediate_certs_stops_on_cert_cycle(self):
         http = RequestsWrapper({}, {})
@@ -527,7 +528,7 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(cert, certs)
 
-        assert session.get.call_count == 1
+        session.get.assert_called_once_with('http://issuer.test/ca.der')
         assert len(certs) == 1
 
     def test_load_intermediate_certs_recurses(self):
@@ -542,7 +543,10 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('http://issuer.test/intermediate.der'), certs)
 
-        assert session.get.call_count == 2
+        assert session.get.call_args_list == [
+            mock.call('http://issuer.test/intermediate.der'),
+            mock.call('http://issuer.test/root.der'),
+        ]
         assert len(certs) == 2
 
     def test_fetch_intermediate_certs_tls_ciphers(self):
