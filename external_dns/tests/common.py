@@ -19,8 +19,10 @@ CHECK_NAME = 'external_dns'
 NAMESPACE = 'external_dns'
 
 E2E_PROMETHEUS_URL = 'http://localhost:7979/metrics'
-PROMETHEUS_HEALTH_TAGS = ['custom:tag', f'endpoint:{E2E_PROMETHEUS_URL}']
-OPENMETRICS_HEALTH_TAGS = PROMETHEUS_HEALTH_TAGS
+HEALTH_TAGS = ['custom:tag', f'endpoint:{E2E_PROMETHEUS_URL}']
+
+SERVICE_CHECK_OMV1 = f'{NAMESPACE}.prometheus.health'
+SERVICE_CHECK_OMV2 = f'{NAMESPACE}.openmetrics.health'
 
 # Non-zero counter values in metrics-legacy.txt and metrics-1.20.txt
 REGISTRY_ERRORS_COUNT = 3

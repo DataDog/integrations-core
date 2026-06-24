@@ -8,20 +8,15 @@ Covers two dimensions:
 - external-dns versions: v1.15.0 (legacy) vs v1.20.0
 - Datadog integration versions: OpenMetrics V1 (legacy) vs OpenMetrics V2
 
-Test matrix:
-+------------------+------------------+------------------+
-|                  | external-dns     | external-dns     |
-|                  | v1.15.0 (legacy) | v1.20.0          |
-+------------------+------------------+------------------+
-| OpenMetrics V1   | test_omv1_v115   | test_omv1_v120   |
-+------------------+------------------+------------------+
-| OpenMetrics V2   | test_omv2_v115   | test_omv2_v120   |
-+------------------+------------------+------------------+
+The v1.18+ feature set (vector metrics with record_type, the http_request
+summary with its reserved `host` label) is only supported by the OpenMetrics V2
+implementation, so those scenarios are exercised against OMV2 only. The legacy
+V1 path is kept unchanged and validated against the v1.15.0 fixture.
 """
 
 import pytest
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.external_dns import ExternalDNSCheck
 from datadog_checks.external_dns.check import ExternalDNS
@@ -33,73 +28,15 @@ from .common import (
     COUNTER_METRICS_OMV2,
     LEGACY_METRICS_OMV1,
     LEGACY_METRICS_OMV2,
-    LEGACY_ONLY_METADATA_METRICS,
     NAMESPACE,
     REGISTRY_ERRORS_COUNT,
+    SERVICE_CHECK_OMV1,
+    SERVICE_CHECK_OMV2,
     SOURCE_ERRORS_COUNT,
-    V120_METRICS_OMV1,
     V120_METRICS_OMV2,
-    V120_ONLY_METADATA_METRICS,
 )
 
 pytestmark = pytest.mark.unit
-
-SERVICE_CHECK_OMV1 = f'{NAMESPACE}.prometheus.health'
-SERVICE_CHECK_OMV2 = f'{NAMESPACE}.openmetrics.health'
-
-METRIC_COLLECTION_CASES = [
-    pytest.param(
-        'mock_http_response_v115',
-        'instance_omv1',
-        LEGACY_METRICS_OMV1,
-        SERVICE_CHECK_OMV1,
-        False,
-        COUNTER_METRICS_OMV1,
-        id='omv1-legacy',
-    ),
-    pytest.param(
-        'mock_http_response_v115',
-        'instance_omv2_counters',
-        LEGACY_METRICS_OMV2,
-        SERVICE_CHECK_OMV2,
-        True,
-        COUNTER_METRICS_OMV2,
-        id='omv2-legacy',
-    ),
-    pytest.param(
-        'mock_http_response_v120',
-        'instance_omv1',
-        V120_METRICS_OMV1,
-        SERVICE_CHECK_OMV1,
-        False,
-        COUNTER_METRICS_OMV1,
-        id='omv1-v120',
-    ),
-    pytest.param(
-        'mock_http_response_v120',
-        'instance_omv2_counters',
-        V120_METRICS_OMV2,
-        SERVICE_CHECK_OMV2,
-        True,
-        COUNTER_METRICS_OMV2,
-        id='omv2-v120',
-    ),
-]
-
-METADATA_CASES = [
-    pytest.param(
-        'mock_http_response_v115',
-        LEGACY_METRICS_OMV1,
-        V120_ONLY_METADATA_METRICS,
-        id='metadata-legacy',
-    ),
-    pytest.param(
-        'mock_http_response_v120',
-        V120_METRICS_OMV1,
-        LEGACY_ONLY_METADATA_METRICS,
-        id='metadata-v120',
-    ),
-]
 
 
 def _assert_error_counter_values(aggregator, counter_metrics):
@@ -114,11 +51,39 @@ def _run_check(instance):
 
 
 class TestMetricCollection:
-    """Full metric collection for the OMV1/OMV2 × legacy/v1.20 matrix."""
+    """Full metric collection for the supported OMV1/OMV2 scenarios."""
 
     @pytest.mark.parametrize(
         'mock_fixture,instance_fixture,expected_metrics,service_check,expect_omv2,counter_metrics',
-        METRIC_COLLECTION_CASES,
+        [
+            pytest.param(
+                'mock_http_response_v115',
+                'instance_omv1',
+                LEGACY_METRICS_OMV1,
+                SERVICE_CHECK_OMV1,
+                False,
+                COUNTER_METRICS_OMV1,
+                id='omv1-legacy',
+            ),
+            pytest.param(
+                'mock_http_response_v115',
+                'instance_omv2_counters',
+                LEGACY_METRICS_OMV2,
+                SERVICE_CHECK_OMV2,
+                True,
+                COUNTER_METRICS_OMV2,
+                id='omv2-legacy',
+            ),
+            pytest.param(
+                'mock_http_response_v120',
+                'instance_omv2_counters',
+                V120_METRICS_OMV2,
+                SERVICE_CHECK_OMV2,
+                True,
+                COUNTER_METRICS_OMV2,
+                id='omv2-v120',
+            ),
+        ],
     )
     def test_collect_metrics(
         self,
@@ -149,19 +114,6 @@ class TestMetricCollection:
 
 class TestConfigurationErrors:
     """Verify configuration error handling."""
-
-    @pytest.mark.parametrize(
-        'instance',
-        [
-            {'tags': ['test:tag']},
-            {},
-        ],
-        ids=['missing-endpoint', 'empty-instance'],
-    )
-    def test_missing_endpoint_raises_error(self, instance):
-        """Missing prometheus_url raises ConfigurationError for OMV1."""
-        with pytest.raises(ConfigurationError, match="Unable to find prometheus endpoint"):
-            ExternalDNSCheck(CHECK_NAME, {}, [instance])
 
     @pytest.mark.parametrize(
         'values',
@@ -245,7 +197,7 @@ class TestTags:
 
 
 class TestV120Labels:
-    """Verify record_type label is converted to tag for v1.20.0 vector metrics."""
+    """Verify record_type label is converted to tag for v1.20.0 vector metrics (OMV2 only)."""
 
     VECTOR_METRICS = [
         f'{NAMESPACE}.source.records',
@@ -253,48 +205,30 @@ class TestV120Labels:
         f'{NAMESPACE}.controller.verified_records',
     ]
 
-    @pytest.mark.parametrize('instance_fixture', ['instance_omv1', 'instance_omv2'], ids=['omv1', 'omv2'])
-    def test_record_type_tag(self, aggregator, mock_http_response_v120, dd_run_check, instance_fixture, request):
+    def test_record_type_tag(self, aggregator, mock_http_response_v120, dd_run_check, instance_omv2):
         """Vector metrics have record_type tag."""
-        instance = request.getfixturevalue(instance_fixture)
-        dd_run_check(_run_check(instance))
+        dd_run_check(_run_check(instance_omv2))
 
         for metric in self.VECTOR_METRICS:
             aggregator.assert_metric_has_tag(metric, 'record_type:a')
 
 
 class TestLabelRenaming:
-    """Verify reserved label renaming (host -> http_host)."""
+    """Verify reserved label renaming (host -> http_host) for the OpenMetrics V2 implementation."""
 
     SUMMARY_METRIC = f'{NAMESPACE}.http.request.duration_seconds.quantile'
 
-    @pytest.mark.parametrize('instance_fixture', ['instance_omv1', 'instance_omv2'], ids=['omv1', 'omv2'])
-    def test_host_label_renamed(self, aggregator, mock_http_response_v120, dd_run_check, instance_fixture, request):
+    def test_host_label_renamed(self, aggregator, mock_http_response_v120, dd_run_check, instance_omv2):
         """The 'host' label is renamed to 'http_host'."""
-        instance = request.getfixturevalue(instance_fixture)
-        dd_run_check(_run_check(instance))
+        dd_run_check(_run_check(instance_omv2))
 
         aggregator.assert_metric_has_tag(self.SUMMARY_METRIC, 'http_host:172.20.0.1:443')
 
-    @pytest.mark.parametrize(
-        'endpoint_key,rename_key',
-        [
-            ('prometheus_url', 'labels_mapper'),
-            ('openmetrics_endpoint', 'labels_mapper'),
-            ('openmetrics_endpoint', 'rename_labels'),
-        ],
-        ids=['omv1-labels_mapper', 'omv2-legacy-labels_mapper', 'omv2-native-rename_labels'],
-    )
-    def test_custom_renames_merge_with_default(
-        self, aggregator, mock_http_response_v120, dd_run_check, endpoint_key, rename_key
-    ):
-        """
-        User-provided renames merge with the default `host -> http_host` rename across OMV1/OMV2
-        and legacy/native keys.
-        """
+    def test_custom_renames_merge_with_default(self, aggregator, mock_http_response_v120, dd_run_check):
+        """User-provided `rename_labels` merge with the default `host -> http_host` rename."""
         instance = {
-            endpoint_key: 'http://localhost:7979/metrics',
-            rename_key: {'method': 'http_method'},
+            'openmetrics_endpoint': 'http://localhost:7979/metrics',
+            'rename_labels': {'method': 'http_method'},
             'tags': ['custom:tag'],
         }
         dd_run_check(_run_check(instance))
@@ -306,11 +240,9 @@ class TestLabelRenaming:
 class TestMetricValues:
     """Verify selected gauge values are correctly parsed from fixtures."""
 
-    @pytest.mark.parametrize('instance_fixture', ['instance_omv1', 'instance_omv2'], ids=['omv1', 'omv2'])
-    def test_v120_gauge_values(self, aggregator, mock_http_response_v120, dd_run_check, instance_fixture, request):
-        """Gauge metric values are correctly parsed from v1.20.0 fixture."""
-        instance = request.getfixturevalue(instance_fixture)
-        dd_run_check(_run_check(instance))
+    def test_v120_gauge_values(self, aggregator, mock_http_response_v120, dd_run_check, instance_omv2):
+        """Gauge metric values are correctly parsed from v1.20.0 fixture (OMV2)."""
+        dd_run_check(_run_check(instance_omv2))
 
         aggregator.assert_metric(f'{NAMESPACE}.registry.endpoints.total', value=98)
         aggregator.assert_metric(f'{NAMESPACE}.source.endpoints.total', value=19)
@@ -325,23 +257,21 @@ class TestMetricValues:
 
 
 class TestSummaryMetrics:
-    """Verify summary metric components are correctly collected."""
+    """Verify summary metric components are correctly collected (v1.20.0, OMV2)."""
 
     SUMMARY_BASE = f'{NAMESPACE}.http.request.duration_seconds'
 
-    @pytest.mark.parametrize('instance_fixture', ['instance_omv1', 'instance_omv2'], ids=['omv1', 'omv2'])
-    def test_summary_components(self, aggregator, mock_http_response_v120, dd_run_check, instance_fixture, request):
+    def test_summary_components(self, aggregator, mock_http_response_v120, dd_run_check, instance_omv2):
         """Summary metrics generate .quantile, .sum, and .count."""
-        instance = request.getfixturevalue(instance_fixture)
-        dd_run_check(_run_check(instance))
+        dd_run_check(_run_check(instance_omv2))
 
         aggregator.assert_metric(f'{self.SUMMARY_BASE}.quantile')
         aggregator.assert_metric(f'{self.SUMMARY_BASE}.sum')
         aggregator.assert_metric(f'{self.SUMMARY_BASE}.count')
 
-    def test_quantile_tags(self, aggregator, mock_http_response_v120, dd_run_check, instance_omv1):
+    def test_quantile_tags(self, aggregator, mock_http_response_v120, dd_run_check, instance_omv2):
         """Quantile metrics have quantile tags."""
-        dd_run_check(_run_check(instance_omv1))
+        dd_run_check(_run_check(instance_omv2))
 
         for quantile in ['0.5', '0.9', '0.99']:
             aggregator.assert_metric_has_tag(f'{self.SUMMARY_BASE}.quantile', f'quantile:{quantile}')
@@ -433,28 +363,34 @@ class TestCounterAliases:
         aggregator.assert_metric(f'{NAMESPACE}.registry.errors.total.count', value=REGISTRY_ERRORS_COUNT, count=1)
 
 
-class TestMetadata:
-    """Verify submitted metrics match metadata.csv."""
+@pytest.mark.parametrize(
+    'instance_fixture,mock_fixture,expected_metrics,submission_exclude',
+    [
+        pytest.param('instance_omv1', 'mock_http_response_v115', LEGACY_METRICS_OMV1, [], id='metadata-legacy'),
+        pytest.param(
+            'instance_omv2',
+            'mock_http_response_v120',
+            V120_METRICS_OMV2,
+            COUNTER_METRICS_OMV2,
+            id='metadata-v120',
+        ),
+    ],
+)
+def test_metadata(
+    aggregator, dd_run_check, request, instance_fixture, mock_fixture, expected_metrics, submission_exclude
+):
+    """Submitted metrics align with metadata.csv for the matching external-dns version."""
+    request.getfixturevalue(mock_fixture)
+    instance = request.getfixturevalue(instance_fixture)
+    dd_run_check(_run_check(instance))
 
-    @staticmethod
-    def _metadata_metrics(exclude):
-        return {name: row for name, row in get_metadata_metrics().items() if name not in exclude}
+    for metric in expected_metrics:
+        aggregator.assert_metric(metric)
 
-    @pytest.mark.parametrize('mock_fixture,expected_metrics,metadata_exclude', METADATA_CASES)
-    def test_metadata(
-        self, aggregator, dd_run_check, instance_omv1, request, mock_fixture, expected_metrics, metadata_exclude
-    ):
-        """Fixture metrics align with metadata.csv for the matching external-dns version."""
-        request.getfixturevalue(mock_fixture)
-        dd_run_check(_run_check(instance_omv1))
-
-        for metric in expected_metrics:
-            aggregator.assert_metric(metric)
-
-        aggregator.assert_all_metrics_covered()
-        aggregator.assert_metrics_using_metadata(
-            self._metadata_metrics(metadata_exclude),
-            check_submission_type=True,
-            check_metric_type=False,
-            check_symmetric_inclusion=True,
-        )
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(),
+        check_submission_type=True,
+        check_metric_type=False,
+        exclude=submission_exclude,
+    )

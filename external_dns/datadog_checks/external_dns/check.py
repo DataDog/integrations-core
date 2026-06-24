@@ -19,13 +19,8 @@ class ExternalDNS(OpenMetricsBaseCheckV2):
 
     @staticmethod
     def _normalize_instance(instance):
-        # Accept the OMV1 legacy `labels_mapper` alongside OMV2 `rename_labels`,
-        # and always include the default `host -> http_host` rename (`host` is a reserved Datadog tag).
-        user_renames = {
-            **instance.get('labels_mapper', {}),
-            **instance.get('rename_labels', {}),
-        }
-        return {**instance, 'rename_labels': {'host': 'http_host', **user_renames}}
+        # Always include the default `host -> http_host` rename (`host` is a reserved Datadog tag).
+        return {**instance, 'rename_labels': {'host': 'http_host', **instance.get('rename_labels', {})}}
 
     def get_default_config(self):
         return {'metrics': construct_metrics_config(METRIC_MAP)}

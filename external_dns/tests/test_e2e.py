@@ -5,15 +5,15 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 
-from .common import OPENMETRICS_HEALTH_TAGS, PROMETHEUS_HEALTH_TAGS
+from .common import HEALTH_TAGS, SERVICE_CHECK_OMV1, SERVICE_CHECK_OMV2
 
 
 @pytest.mark.e2e
 @pytest.mark.parametrize(
     'instance_fixture,service_check,tags',
     [
-        ('instance', 'external_dns.prometheus.health', PROMETHEUS_HEALTH_TAGS),
-        ('instance_e2e_omv2', 'external_dns.openmetrics.health', OPENMETRICS_HEALTH_TAGS),
+        ('instance', SERVICE_CHECK_OMV1, HEALTH_TAGS),
+        ('instance_e2e_omv2', SERVICE_CHECK_OMV2, HEALTH_TAGS),
     ],
     ids=['omv1', 'omv2'],
 )
