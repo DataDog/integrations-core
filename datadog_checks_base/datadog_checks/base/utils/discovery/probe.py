@@ -55,7 +55,7 @@ def generated_discovery_candidates(cls: type[AgentCheck], service: Service) -> I
 def _parse_service_json(service_json: str) -> Service:
     from datadog_checks.base.utils.discovery import Service
 
-    return Service.model_validate(json.decode(service_json))
+    return Service.model_validate_json(service_json)
 
 
 @dataclasses.dataclass
