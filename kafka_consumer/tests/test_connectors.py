@@ -7,26 +7,15 @@ import time
 import mock
 import pytest
 
-from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.config import KafkaConfig
 from datadog_checks.kafka_consumer.connectors import (
     CONNECTOR_PLUGINS_CACHE_KEY,
     _short_class_name,
 )
 
-from .conftest import SAMPLE_CONNECTORS_RESPONSE
+from .conftest import SAMPLE_CONNECTORS_RESPONSE, seed_mock_kafka_client
 
 pytestmark = [pytest.mark.unit]
-
-
-def _seed_mock_kafka_client():
-    """Minimal Kafka client mock sufficient for the connector-focused tests."""
-    client = mock.create_autospec(KafkaClient)
-    client.consumer_get_cluster_id_and_list_topics.return_value = ('cluster-1', [])
-    client.list_consumer_groups.return_value = []
-    client.list_consumer_group_offsets.return_value = []
-    client._cluster_metadata = None
-    return client
 
 
 @pytest.mark.parametrize(
@@ -43,11 +32,10 @@ def test_short_class_name(full_class, expected):
 
 def test_sensitive_keys_redacted_in_config_event(check, kafka_instance, dd_run_check):
     """Full config is captured but sensitive keys are replaced with [hidden]."""
-    # Arrange
     kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
     kafka_instance['enable_cluster_monitoring'] = True
     kafka_consumer_check = check(kafka_instance)
-    kafka_consumer_check.client = _seed_mock_kafka_client()
+    kafka_consumer_check.client = seed_mock_kafka_client()
 
     connectors_data = {
         'my-sink': {
@@ -69,13 +57,11 @@ def test_sensitive_keys_redacted_in_config_event(check, kafka_instance, dd_run_c
     kafka_consumer_check._connector_collector.http = mock.MagicMock()
     kafka_consumer_check._connector_collector.http.get.return_value = mock_resp
 
-    # Act
     with mock.patch.object(kafka_consumer_check._connector_collector, '_collect_plugins'):
         with mock.patch.object(kafka_consumer_check.metadata_collector, 'collect_all_metadata'):
             with mock.patch.object(kafka_consumer_check, 'event_platform_event') as mock_event:
                 dd_run_check(kafka_consumer_check)
 
-    # Assert
     connector_events = [
         json.loads(c.args[0])
         for c in mock_event.call_args_list
@@ -155,11 +141,10 @@ def test_dedup_ttl_expiry_triggers_reemit(make_collector):
 
 def test_collection_timestamp_excluded_from_hash(check, kafka_instance, dd_run_check):
     """Verify that config events with identical content don't re-emit on the next cycle."""
-    # Arrange
     kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
     kafka_instance['enable_cluster_monitoring'] = True
     kafka_consumer_check = check(kafka_instance)
-    kafka_consumer_check.client = _seed_mock_kafka_client()
+    kafka_consumer_check.client = seed_mock_kafka_client()
 
     mock_resp = mock.MagicMock()
     mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
@@ -169,7 +154,6 @@ def test_collection_timestamp_excluded_from_hash(check, kafka_instance, dd_run_c
     def _connector_event_count(call_args_list):
         return sum(1 for c in call_args_list if json.loads(c.args[0]).get('config_type') == 'connector')
 
-    # Act — two consecutive runs with identical connector data
     with mock.patch.object(kafka_consumer_check._connector_collector, '_collect_plugins'):
         with mock.patch.object(kafka_consumer_check.metadata_collector, 'collect_all_metadata'):
             with mock.patch.object(kafka_consumer_check, 'event_platform_event') as mock_event:
@@ -179,7 +163,6 @@ def test_collection_timestamp_excluded_from_hash(check, kafka_instance, dd_run_c
                 dd_run_check(kafka_consumer_check)
                 second_count = _connector_event_count(mock_event.call_args_list)
 
-    # Assert — connector config events are deduplicated on the second run
     new_events = second_count - first_count
     assert second_count == first_count, f"expected no new connector events on second call, got {new_events} more"
 

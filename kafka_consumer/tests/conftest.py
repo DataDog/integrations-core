@@ -14,11 +14,23 @@ from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
 
 from . import common
 from .common import get_cluster_id
 from .runners import Consumer, Producer
+
+
+def seed_mock_kafka_client():
+    """Minimal Kafka client mock sufficient for the connector-focused tests."""
+    client = mock.create_autospec(KafkaClient)
+    client.consumer_get_cluster_id_and_list_topics.return_value = ('cluster-1', [])
+    client.list_consumer_groups.return_value = []
+    client.list_consumer_group_offsets.return_value = []
+    client._cluster_metadata = None
+    return client
+
 
 SAMPLE_CONNECTORS_RESPONSE = {
     'demo-source': {
