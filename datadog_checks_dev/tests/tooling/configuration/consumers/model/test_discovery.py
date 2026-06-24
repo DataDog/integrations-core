@@ -17,7 +17,7 @@ def test():
               port_hints:
               - 9090
               candidates:
-              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+              - endpoint: http://{service.host}:{port.number}/m
           options:
           - template: init_config
             options: []
@@ -49,12 +49,17 @@ def test():
 
 
         def candidates(service: Service) -> Iterator[dict[str, Any]]:
-            shared = SharedConfig().model_dump(mode='json', exclude_none=True)
+            shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
+                mode='json', exclude_none=True
+            )
             # discovery[0]: from_ports
             for port in candidate_ports(service, [9090]):
                 ctx = {'port': port}
-                instance = InstanceConfig(
-                    openmetrics_endpoint='http://{service.host}:{port.number}/metrics'.format(service=service, **ctx),
+                instance_data = {
+                    'endpoint': 'http://{service.host}:{port.number}/m'.format(service=service, **ctx),
+                }
+                instance = InstanceConfig.model_validate(
+                    instance_data, context={'configured_fields': frozenset(instance_data)}
                 ).model_dump(mode='json', exclude_none=True)
                 yield {'init_config': shared, 'instances': [instance]}
         """

@@ -269,7 +269,9 @@ class ModelConsumer:
             '',
             '',
             'def candidates(service: Service) -> Iterator[dict[str, Any]]:',
-            "    shared = SharedConfig().model_dump(mode='json', exclude_none=True)",
+            "    shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(",
+            "        mode='json', exclude_none=True",
+            "    )",
         ]
 
         for index, stanza in enumerate(discovery.get('strategies', [])):

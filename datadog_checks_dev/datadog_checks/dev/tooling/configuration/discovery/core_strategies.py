@@ -24,13 +24,16 @@ def from_ports(stanza: dict[str, Any], index: int) -> list[str]:
         "        ctx = {'port': port}",
     ]
     for candidate in candidates:
-        lines.append('        instance = InstanceConfig(')
+        lines.append('        instance_data = {')
         for field_name, template in candidate.items():
             if '{' in str(template):
                 rendered = f"'{template}'.format(service=service, **ctx)"
             else:
                 rendered = repr(template)
-            lines.append(f'            {field_name}={rendered},')
+            lines.append(f'            {field_name!r}: {rendered},')
+        lines.append('        }')
+        lines.append("        instance = InstanceConfig.model_validate(")
+        lines.append("            instance_data, context={'configured_fields': frozenset(instance_data)}")
         lines.append("        ).model_dump(mode='json', exclude_none=True)")
         lines.append("        yield {'init_config': shared, 'instances': [instance]}")
     return lines
