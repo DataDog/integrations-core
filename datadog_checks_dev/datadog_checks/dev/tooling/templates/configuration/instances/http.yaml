@@ -349,6 +349,15 @@
       TLSv1.1
       TLSv1.2
       TLSv1.3
+- name: tls_aia_chasing_max_depth
+  display_priority: 0
+  fleet_configurable: true
+  value:
+    example: 1
+    type: integer
+  description: |
+    The maximum number of AIA issuer certificate hops to follow when fetching intermediate certificates.
+    Set to 0 to disable recursive AIA chasing.
 - name: tls_ciphers
   display_priority: 0
   description: |

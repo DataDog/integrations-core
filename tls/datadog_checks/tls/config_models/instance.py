@@ -60,6 +60,7 @@ class InstanceConfig(BaseModel):
     start_tls: Optional[Literal['postgres', 'mysql']] = None
     tags: Optional[tuple[str, ...]] = None
     timeout: Optional[int] = None
+    tls_aia_chasing_max_depth: Optional[int] = None
     tls_ca_cert: Optional[str] = None
     tls_cert: Optional[str] = None
     tls_ciphers: Optional[tuple[str, ...]] = None

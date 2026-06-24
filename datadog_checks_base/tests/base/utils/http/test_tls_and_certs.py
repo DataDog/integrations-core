@@ -452,6 +452,7 @@ class TestAIAChasing:
                 'tls_private_key': '/path/to/client.key',
                 'tls_protocols_allowed': ['TLSv1.2'],
                 'tls_validate_hostname': False,
+                'tls_aia_chasing_max_depth': 2,
                 'proxy': {'http': 'http://proxy:3128'},
             },
             {},
@@ -467,6 +468,7 @@ class TestAIAChasing:
             'tls_ciphers': 'ECDHE-ECDSA-AES256-GCM-SHA384',
             'tls_protocols_allowed': ['TLSv1.2'],
             'tls_validate_hostname': False,
+            'tls_aia_chasing_max_depth': 1,
             'tls_verify': True,
             'skip_proxy': True,
         }
@@ -527,8 +529,20 @@ class TestAIAChasing:
         assert session.get.call_count == 1
         assert len(certs) == 1
 
-    def test_load_intermediate_certs_recurses(self):
+    def test_load_intermediate_certs_stops_at_default_depth(self):
         http = RequestsWrapper({}, {})
+        certs = []
+        session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=build_cert('http://issuer.test/root.der'))
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('http://issuer.test/intermediate.der'), certs)
+
+        assert session.get.call_count == 1
+        assert len(certs) == 1
+
+    def test_load_intermediate_certs_recurses_when_depth_allows(self):
+        http = RequestsWrapper({'tls_aia_chasing_max_depth': 2}, {})
         certs = []
         session = mock.MagicMock()
         session.get.side_effect = [

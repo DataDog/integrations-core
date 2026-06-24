@@ -94,7 +94,14 @@ DEFAULT_REMAPPED_FIELDS = {
     'no_proxy': {'name': 'skip_proxy'},
 }
 AIA_TLS_CONFIG_FIELDS = frozenset(
-    {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
+    {
+        'tls_aia_chasing_max_depth',
+        'tls_ca_cert',
+        'tls_ciphers',
+        'tls_intermediate_ca_certs',
+        'tls_protocols_allowed',
+        'tls_validate_hostname',
+    }
 )
 
 PROXY_SETTINGS_DISABLED = {
@@ -234,22 +241,30 @@ def _der_to_pem(der_cert: bytes) -> str:
     )
 
 
-def _get_aia_tls_config(tls_config: Mapping[str, object] | None, tls_verify: bool) -> dict[str, object]:
+def _get_aia_tls_config(
+    tls_config: Mapping[str, object] | None, tls_verify: bool, aia_chasing_max_depth: int
+) -> dict[str, object]:
     # Keep trust/negotiation settings, but never auth, client certs, proxies, or session state.
     config = {
         key: value for key, value in (tls_config or {}).items() if key in AIA_TLS_CONFIG_FIELDS and value is not None
     }
+    config['tls_aia_chasing_max_depth'] = max(aia_chasing_max_depth, 0)
     config['tls_verify'] = tls_verify
     config['skip_proxy'] = True
     return config
 
 
 def fetch_intermediate_cert(
-    uri: str, logger: logging.Logger | logging.LoggerAdapter, tls_config: Mapping[str, object] | None = None
+    uri: str,
+    logger: logging.Logger | logging.LoggerAdapter,
+    tls_config: Mapping[str, object] | None = None,
+    aia_chasing_max_depth: int = 0,
 ) -> bytes | None:
     for tls_verify in (True, False):
         try:
-            response = RequestsWrapper(_get_aia_tls_config(tls_config, tls_verify), {}, logger=logger).get(uri)
+            response = RequestsWrapper(
+                _get_aia_tls_config(tls_config, tls_verify, aia_chasing_max_depth), {}, logger=logger
+            ).get(uri)
             response.raise_for_status()
         except Exception as e:
             logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=%s): %s', uri, tls_verify, e)
@@ -276,6 +291,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'tls_aia_chasing_max_depth',
         'tls_config',
     )
 
@@ -441,6 +457,13 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
+        try:
+            config['tls_aia_chasing_max_depth'] = max(0, int(float(config['tls_aia_chasing_max_depth'])))
+        except (TypeError, ValueError):
+            self.logger.warning('Invalid tls_aia_chasing_max_depth configured, using default value 1.')
+            config['tls_aia_chasing_max_depth'] = 1
+        self.tls_aia_chasing_max_depth = config['tls_aia_chasing_max_depth']
+
         self.tls_protocols_allowed = []
         for protocol in config['tls_protocols_allowed']:
             if protocol in SUPPORTED_PROTOCOL_VERSIONS:
@@ -549,7 +572,9 @@ class RequestsWrapper(object):
         try:
             response = request_method(url, **new_options)
         except SSLError as e:
-            # fetch the intermediate certs
+            if self.tls_aia_chasing_max_depth <= 0:
+                raise e
+
             parsed_url = urlparse(url)
             hostname = parsed_url.hostname
             port = parsed_url.port
@@ -593,11 +618,15 @@ class RequestsWrapper(object):
         self.load_intermediate_certs(der_cert, certs)
         return certs
 
-    def load_intermediate_certs(self, der_cert, certs, visited_cert_ids=None):
+    def load_intermediate_certs(self, der_cert, certs, visited_cert_ids=None, aia_chasing_max_depth=None):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
         if visited_cert_ids is None:
             visited_cert_ids = set()
+        if aia_chasing_max_depth is None:
+            aia_chasing_max_depth = self.tls_aia_chasing_max_depth
+        if aia_chasing_max_depth <= 0:
+            return certs
 
         cert_id = sha256(der_cert).digest()
         if cert_id in visited_cert_ids:
@@ -629,7 +658,7 @@ class RequestsWrapper(object):
 
             uri = access_description.access_location.value
 
-            intermediate_cert = fetch_intermediate_cert(uri, self.logger, self.tls_config)
+            intermediate_cert = fetch_intermediate_cert(uri, self.logger, self.tls_config, aia_chasing_max_depth - 1)
             if intermediate_cert is None:
                 continue
 
@@ -639,7 +668,7 @@ class RequestsWrapper(object):
                 self.logger.error('Error serializing intermediate certificate from `%s`: %s', uri, e)
                 continue
 
-            self.load_intermediate_certs(intermediate_cert, certs, visited_cert_ids)
+            self.load_intermediate_certs(intermediate_cert, certs, visited_cert_ids, aia_chasing_max_depth - 1)
         return certs
 
     def _create_session(self):

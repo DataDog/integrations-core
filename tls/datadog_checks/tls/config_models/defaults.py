@@ -56,6 +56,10 @@ def instance_timeout():
     return 10
 
 
+def instance_tls_aia_chasing_max_depth():
+    return 1
+
+
 def instance_tls_validate_hostname():
     return True
 
