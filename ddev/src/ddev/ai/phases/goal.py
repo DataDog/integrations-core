@@ -273,10 +273,9 @@ async def run_goal_loop(
     """
     reviewer_scope = AgentScope(owner_id=f"{phase_id}.goal.{task.name}", role=AgentRole.GOAL_REVIEWER)
     reviewer_config = AgentConfig(
-        name=parent_agent_config.name,
+        name=f"{parent_agent_config.name}_reviewer",
         provider=parent_agent_config.provider,
         tools=filter_read_only(parent_agent_config.tools),
-        system_prompt_path=parent_agent_config.system_prompt_path,
     )
     try:
         reviewer_process = process_factory.create(
