@@ -151,6 +151,18 @@ async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_or
     assert msg.phase_id is None
 
 
+async def test_on_initialize_passes_runtime_variables_to_phases(minimal_flow, make_orchestrator):
+    orchestrator = make_orchestrator(
+        engine=minimal_flow,
+        runtime_variables={"integration_name": "my_integration"},
+    )
+    await orchestrator.on_initialize()
+
+    processors = orchestrator._subscribers.get(PhaseTrigger, [])
+    for phase in processors:
+        assert phase._runtime_variables == {"integration_name": "my_integration"}
+
+
 # ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_finalize
 # ---------------------------------------------------------------------------
@@ -184,6 +196,27 @@ async def test_on_finalize_no_exception_no_log(make_orchestrator, caplog):
         await orchestrator.on_finalize(None)  # exception=None means clean exit — no log
 
     assert not any("Pipeline aborted" in r.message for r in caplog.records)
+
+
+async def test_on_finalize_swallows_agent_logger_close_error(
+    minimal_flow, make_orchestrator, monkeypatch, caplog
+):
+    orchestrator = make_orchestrator(engine=minimal_flow)
+    await orchestrator.on_initialize()
+    assert orchestrator._agent_logger is not None
+
+    def _raise():
+        raise RuntimeError("close failed")
+
+    monkeypatch.setattr(orchestrator._agent_logger, "close", _raise)
+
+    with caplog.at_level(logging.ERROR):
+        await orchestrator.on_finalize(None)  # must not raise
+
+    assert any(
+        "close failed" in r.message or (r.exc_info and "close failed" in str(r.exc_info[1]))
+        for r in caplog.records
+    )
 
 
 def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator, file_access_policy):
