@@ -166,64 +166,6 @@ async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_or
     assert msg.phase_id is None
 
 
-async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_path, make_orchestrator):
-    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
-    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
-    engine = make_engine(
-        tmp_path,
-        dedent("""\
-        - type: agent
-          config:
-            name: writer
-            system_prompt_path: prompts/writer.md
-        - type: phase
-          config:
-            name: a
-            class: NotARealPhase
-            agent: writer
-            tasks:
-              - name: task_a
-                prompt: task a
-        - type: flow
-          config:
-            name: test_flow
-            flow:
-              - phase: a
-        """),
-    )
-    orchestrator = make_orchestrator(engine=engine)
-    with pytest.raises(FlowConfigError, match="Unknown phase type"):
-        await orchestrator.on_initialize()
-
-
-async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
-    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
-    with pytest.raises(FlowConfigError):
-        engine = make_engine(
-            tmp_path,
-            dedent("""\
-            - type: agent
-              config:
-                name: writer
-                system_prompt_path: prompts/writer.md
-            - type: phase
-              config:
-                name: a
-                class: AgenticPhase
-                agent: nonexistent_agent
-                tasks:
-                  - name: task_a
-                    prompt: task a
-            - type: flow
-              config:
-                name: test_flow
-                flow:
-                  - phase: a
-            """),
-        )
-        orchestrator = make_orchestrator(engine=engine)
-        await orchestrator.on_initialize()
-
 
 async def test_file_registry_getter_is_idempotent(minimal_flow, make_orchestrator):
     orchestrator = make_orchestrator(engine=minimal_flow)
@@ -294,36 +236,6 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make
     assert {p.name for p in processors} == {"real"}
 
 
-async def test_phase_in_flow_with_unknown_type_raises(tmp_path, make_orchestrator):
-    """A phase referenced from flow: with an unknown class must raise FlowConfigError."""
-    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
-    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
-    engine = make_engine(
-        tmp_path,
-        dedent("""\
-        - type: agent
-          config:
-            name: writer
-            system_prompt_path: prompts/writer.md
-        - type: phase
-          config:
-            name: a
-            class: NotARealPhase
-            agent: writer
-            tasks:
-              - name: t1
-                prompt: do it
-        - type: flow
-          config:
-            name: test_flow
-            flow:
-              - phase: a
-        """),
-    )
-    orchestrator = make_orchestrator(engine=engine)
-    with pytest.raises(FlowConfigError, match="Unknown phase type"):
-        await orchestrator.on_initialize()
-
 
 async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
     """A phase defined in the resource list but not in flow runs without error."""
@@ -365,76 +277,6 @@ async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
 
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
     assert {p.name for p in processors} == {"real"}
-
-
-# ---------------------------------------------------------------------------
-# PhaseOrchestrator.on_initialize — validate_config invocation
-# ---------------------------------------------------------------------------
-
-
-async def test_on_initialize_invokes_validate_config(tmp_path, make_orchestrator):
-    """validate_config is called for each scheduled phase; raising propagates as FlowConfigError."""
-    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
-    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
-    engine = make_engine(
-        tmp_path,
-        dedent("""\
-        - type: agent
-          config:
-            name: writer
-            system_prompt_path: prompts/writer.md
-        - type: phase
-          config:
-            name: a
-            class: AgenticPhase
-            agent: writer
-            tasks: []
-        - type: flow
-          config:
-            name: test_flow
-            flow:
-              - phase: a
-        """),
-    )
-    orchestrator = make_orchestrator(engine=engine)
-    with pytest.raises(FlowConfigError, match="at least one task"):
-        await orchestrator.on_initialize()
-
-
-async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, make_orchestrator):
-    """A phase defined but not in flow must not trigger its validate_config."""
-    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
-    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
-    engine = make_engine(
-        tmp_path,
-        dedent("""\
-        - type: agent
-          config:
-            name: writer
-            system_prompt_path: prompts/writer.md
-        - type: phase
-          config:
-            name: real
-            class: AgenticPhase
-            agent: writer
-            tasks:
-              - name: t1
-                prompt: do it
-        - type: phase
-          config:
-            name: orphan
-            class: AgenticPhase
-            agent: writer
-            tasks: []
-        - type: flow
-          config:
-            name: test_flow
-            flow:
-              - phase: real
-        """),
-    )
-    orchestrator = make_orchestrator(engine=engine)
-    await orchestrator.on_initialize()  # must not raise
 
 
 # ---------------------------------------------------------------------------

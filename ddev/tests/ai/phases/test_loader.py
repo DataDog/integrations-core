@@ -251,13 +251,23 @@ def test_load_raises_on_unknown_class_in_flow():
         loader.load(resolved)
 
 
-def test_load_calls_validate_config_for_flow_phases():
-    """AgenticPhase.validate_config rejects empty tasks list."""
+@pytest.mark.parametrize(
+    "phase,agents,match",
+    [
+        (PhaseConfig(name="p", tasks=[]), {}, "requires 'agent'"),
+        (
+            PhaseConfig(name="p", agent="ghost", tasks=[]),
+            {"writer": AgentConfig(name="writer")},
+            "unknown agent",
+        ),
+        (PhaseConfig(name="p", agent="writer", tasks=[]), {"writer": AgentConfig(name="writer")}, "at least one task"),
+    ],
+    ids=["missing_agent", "unknown_agent", "empty_tasks"],
+)
+def test_load_calls_validate_config_for_flow_phases(phase, agents, match):
     loader = PhaseLoader()
-    agents = {"writer": AgentConfig(name="writer")}
-    phase = PhaseConfig(name="p", agent="writer", tasks=[])
     resolved = ResolvedFlow(name="my_flow", agents=agents, phases={"p": phase}, flow=[FlowEntry(phase="p")], variables={})
-    with pytest.raises(FlowConfigError, match="at least one task"):
+    with pytest.raises(FlowConfigError, match=match):
         loader.load(resolved)
 
 

@@ -89,45 +89,6 @@ def test_render_memory_prompt_raises_when_no_source():
 
 
 # ---------------------------------------------------------------------------
-# AgenticPhase.validate_config
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    "config,match",
-    [
-        (
-            PhaseConfig(name="test_phase", tasks=[TaskConfig(name="t1", prompt="x")]),
-            "requires 'agent'",
-        ),
-        (
-            PhaseConfig(
-                name="test_phase", agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]
-            ),
-            "unknown agent",
-        ),
-        (PhaseConfig(name="test_phase", agent="writer"), "at least one task"),
-    ],
-    ids=["missing_agent", "unknown_agent", "empty_tasks"],
-)
-def test_validate_config_rejects_invalid(config, match):
-    with pytest.raises(FlowConfigError, match=match):
-        AgenticPhase.validate_config(
-            "p1", config, {"writer": AgentConfig(name="writer", system_prompt_path=Path("/fake.md"))}
-        )
-
-
-def test_validate_config_accepts_valid():
-    AgenticPhase.validate_config(
-        "p1",
-        PhaseConfig(
-            name="test_phase", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]
-        ),
-        {"writer": AgentConfig(name="writer", system_prompt_path=Path("/fake.md"))},
-    )
-
-
-# ---------------------------------------------------------------------------
 # process_message — happy path
 # ---------------------------------------------------------------------------
 

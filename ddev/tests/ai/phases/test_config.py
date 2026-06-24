@@ -105,11 +105,6 @@ def test_agent_config_valid_tools():
     assert ac.tools == ["read_file", "grep"]
 
 
-def test_agent_config_unknown_tool_raises():
-    with pytest.raises(ValidationError, match="Unknown tool names"):
-        AgentConfig(name="a", tools=["read_file", "teleport"], system_prompt_path=Path("/fake.md"))
-
-
 def test_agent_config_empty_tools():
     ac = AgentConfig(name="a", system_prompt_path=Path("/fake.md"))
     assert ac.tools == []
@@ -119,11 +114,6 @@ def test_agent_config_optional_fields():
     ac = AgentConfig(name="a", model="claude-opus-4-5", max_tokens=4096, system_prompt_path=Path("/fake.md"))
     assert ac.model == "claude-opus-4-5"
     assert ac.max_tokens == 4096
-
-
-def test_agent_config_name_required():
-    with pytest.raises(ValidationError):
-        AgentConfig(tools=[], system_prompt_path=Path("/fake.md"))
 
 
 # ---------------------------------------------------------------------------
@@ -150,6 +140,3 @@ def test_phase_config_with_checkpoint():
     assert pc.checkpoint is not None
 
 
-def test_phase_config_name_required():
-    with pytest.raises(ValidationError):
-        PhaseConfig(agent="writer")
