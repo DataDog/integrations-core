@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.7.2 / 2026-06-24
+
+***Fixed***:
+
+* Fix `read_messages` hanging until the global timeout when a filter matched fewer messages than `n_messages_retrieved`. Consumption is now bounded to a snapshot of the log taken when the check starts (per-partition high watermark + `enable.partition.eof`), the default timeout is reduced from 20s to 5s, and a `hit_timeout` stat distinguishes a truncated read from a complete one. ([#24162](https://github.com/DataDog/integrations-core/pull/24162))
+
 ## 2.7.1 / 2026-06-09
 
 ***Fixed***:
