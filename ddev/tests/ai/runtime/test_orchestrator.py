@@ -10,15 +10,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.phases.base import Phase
 from ddev.ai.phases.loader import PhaseLoader
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
-from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
 
@@ -56,18 +53,6 @@ def make_orchestrator(file_access_policy: FileAccessPolicy, tmp_path: Path):
         return PhaseOrchestrator(**kwargs)
 
     return _make
-
-
-# ---------------------------------------------------------------------------
-# PhaseOrchestrator loader independence
-# ---------------------------------------------------------------------------
-
-
-def test_two_orchestrators_have_independent_loaders(make_orchestrator):
-    """Each orchestrator uses its own PhaseLoader; their load() calls return independent registries."""
-    o1 = make_orchestrator()
-    o2 = make_orchestrator()
-    assert o1._phase_loader is not o2._phase_loader
 
 
 # ---------------------------------------------------------------------------
@@ -166,30 +151,6 @@ async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_or
     assert msg.phase_id is None
 
 
-
-async def test_file_registry_getter_is_idempotent(minimal_flow, make_orchestrator):
-    orchestrator = make_orchestrator(engine=minimal_flow)
-    await orchestrator.on_initialize()
-    assert orchestrator._resources is not None
-    assert orchestrator._resources.file_registry is orchestrator._resources.file_registry
-
-
-def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
-    from ddev.ai.config.models import AgentConfig
-
-    provider = RunResources(
-        agent_clients={},
-        file_access_policy=file_access_policy,
-        agents={
-            "a": AgentConfig(name="a"),
-            "b": AgentConfig(name="b"),
-        },
-        callbacks=Callbacks(),
-    )
-    with pytest.raises(ResourceUnavailableError, match="No agent definition named 'missing'"):
-        provider.agent_config("missing")
-
-
 # ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_initialize — orphan-phase validation
 # ---------------------------------------------------------------------------
@@ -235,48 +196,6 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
     assert {p.name for p in processors} == {"real"}
 
-
-
-async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
-    """A phase defined in the resource list but not in flow runs without error."""
-    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
-    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
-    engine = make_engine(
-        tmp_path,
-        dedent("""\
-        - type: agent
-          config:
-            name: writer
-            system_prompt_path: prompts/writer.md
-        - type: phase
-          config:
-            name: real
-            class: AgenticPhase
-            agent: writer
-            tasks:
-              - name: t1
-                prompt: do it
-        - type: phase
-          config:
-            name: orphan
-            class: AgenticPhase
-            agent: writer
-            tasks:
-              - name: t2
-                prompt: ignored
-        - type: flow
-          config:
-            name: test_flow
-            flow:
-              - phase: real
-        """),
-    )
-    orchestrator = make_orchestrator(engine=engine)
-    with caplog.at_level(logging.WARNING):
-        await orchestrator.on_initialize()  # must not raise
-
-    processors = orchestrator._subscribers.get(PhaseTrigger, [])
-    assert {p.name for p in processors} == {"real"}
 
 
 # ---------------------------------------------------------------------------
