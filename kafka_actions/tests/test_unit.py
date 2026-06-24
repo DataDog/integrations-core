@@ -4,13 +4,37 @@
 
 import base64
 import json
-from unittest.mock import patch
+import logging
+from unittest.mock import MagicMock, patch
 
 import pytest
-
+from confluent_kafka import KafkaError
 from datadog_checks.kafka_actions import KafkaActionsCheck
+from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
 
 pytestmark = [pytest.mark.unit]
+
+
+def _futures(offsets):
+    """Build a {topic-partition: future} map mimicking AdminClient.list_offsets results."""
+    out = {}
+    for p, off in offsets.items():
+        fut = MagicMock()
+        fut.result.return_value = MagicMock(offset=off)
+        out[MagicMock(partition=p)] = fut
+    return out
+
+
+def _eof(partition):
+    """A mock poll() result representing a _PARTITION_EOF event."""
+    msg = MagicMock()
+    msg.error.return_value = MagicMock(code=MagicMock(return_value=KafkaError._PARTITION_EOF))
+    msg.partition.return_value = partition
+    return msg
+
+
+def _client():
+    return KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
 
 
 class MockKafkaMessage:
@@ -385,107 +409,113 @@ class TestReadMessagesAdvancedFiltering:
 
 
 class TestConsumeMessagesLatestOffset:
-    """Test that start_offset=-1 seeks back from high watermark instead of waiting at end."""
+    """Test that start_offset=-1 seeks back from the captured high watermark."""
 
     def test_latest_offset_seeks_back_from_high_watermark(self):
-        from unittest.mock import MagicMock
-
         consumer = MagicMock()
-        consumer.poll.return_value = None
-
         metadata = MagicMock()
         metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
         consumer.list_topics.return_value = metadata
+        consumer.poll.side_effect = [_eof(0), _eof(1)]
 
         mock_admin = MagicMock()
-        tp0, tp1 = MagicMock(partition=0), MagicMock(partition=1)
-        f0, f1 = MagicMock(), MagicMock()
-        f0.result.return_value = MagicMock(offset=100)
-        f1.result.return_value = MagicMock(offset=200)
-        mock_admin.list_offsets.return_value = {tp0: f0, tp1: f1}
+        mock_admin.list_offsets.return_value = _futures({0: 100, 1: 200})
 
-        import logging
-
-        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
-
-        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
-
+        client = _client()
         with (
             patch.object(client, 'get_consumer', return_value=consumer),
             patch.object(client, 'get_admin_client', return_value=mock_admin),
         ):
             list(client.consume_messages(topic='t', start_offset=-1, max_messages=10, timeout_ms=500))
 
-        mock_admin.list_offsets.assert_called_once()
         assigned = {tp.partition: tp.offset for tp in consumer.assign.call_args[0][0]}
         assert assigned[0] == 90  # max(0, 100 - 10)
         assert assigned[1] == 190  # max(0, 200 - 10)
+
+
+class TestConsumeMessagesSnapshotBound:
+    """Test that consumption never crosses the high watermark captured at the start."""
+
+    def test_does_not_yield_messages_at_or_beyond_high_watermark(self):
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+        # High watermark is 5; a message at offset 5 arrives after the snapshot and must be dropped.
+        consumer.poll.side_effect = [
+            MockKafkaMessage(key=b'k', value=b'v', partition=0, offset=0),
+            MockKafkaMessage(key=b'k', value=b'v', partition=0, offset=1),
+            MockKafkaMessage(key=b'k', value=b'v', partition=0, offset=5),
+        ]
+
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.return_value = _futures({0: 5})
+
+        client = _client()
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=500))
+
+        assert [m.offset() for m in result] == [0, 1]
 
 
 class TestConsumeMessagesStartTimestamp:
     """Test that start_timestamp resolves to per-partition offsets via offsets_for_times."""
 
     def test_start_timestamp_resolves_offsets(self):
-        from unittest.mock import MagicMock
-
         consumer = MagicMock()
-        consumer.poll.return_value = None
-
         metadata = MagicMock()
         metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
         consumer.list_topics.return_value = metadata
+        consumer.offsets_for_times.return_value = [
+            MagicMock(partition=0, offset=50),
+            MagicMock(partition=1, offset=120),
+        ]
+        consumer.poll.side_effect = [_eof(0), _eof(1)]
 
-        # offsets_for_times returns TopicPartitions with resolved offsets
-        resolved_tp0 = MagicMock(partition=0, offset=50)
-        resolved_tp1 = MagicMock(partition=1, offset=120)
-        consumer.offsets_for_times.return_value = [resolved_tp0, resolved_tp1]
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.return_value = _futures({0: 100, 1: 200})
 
-        import logging
-
-        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
-
-        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
-
-        with patch.object(client, 'get_consumer', return_value=consumer):
+        client = _client()
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
             list(client.consume_messages(topic='t', start_timestamp=1700000000000, max_messages=10, timeout_ms=500))
 
         consumer.offsets_for_times.assert_called_once()
-        call_args = consumer.offsets_for_times.call_args[0][0]
-        assert len(call_args) == 2
-        # Verify each TopicPartition was created with the timestamp
-        for tp in call_args:
+        for tp in consumer.offsets_for_times.call_args[0][0]:
             assert tp.offset == 1700000000000
+        assigned = {tp.partition: tp.offset for tp in consumer.assign.call_args[0][0]}
+        assert assigned == {0: 50, 1: 120}
 
-        assigned = consumer.assign.call_args[0][0]
-        assert len(assigned) == 2
-
-    def test_start_timestamp_includes_partitions_at_end(self):
-        from unittest.mock import MagicMock
-
+    def test_start_timestamp_skips_partitions_past_end(self):
         consumer = MagicMock()
-        consumer.poll.return_value = None
-
         metadata = MagicMock()
         metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
         consumer.list_topics.return_value = metadata
+        # Partition 0 has no message at/after the timestamp (offset=-1); it must not be assigned.
+        consumer.offsets_for_times.return_value = [
+            MagicMock(partition=0, offset=-1),
+            MagicMock(partition=1, offset=120),
+        ]
+        consumer.poll.side_effect = [_eof(1)]
 
-        # Partition 0 has no messages at the timestamp (offset=-1 = OFFSET_END), partition 1 does
-        resolved_tp0 = MagicMock(partition=0, offset=-1)
-        resolved_tp1 = MagicMock(partition=1, offset=120)
-        consumer.offsets_for_times.return_value = [resolved_tp0, resolved_tp1]
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.return_value = _futures({0: 100, 1: 200})
 
-        import logging
-
-        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
-
-        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
-
-        with patch.object(client, 'get_consumer', return_value=consumer):
+        client = _client()
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
             list(client.consume_messages(topic='t', start_timestamp=1700000000000, max_messages=10, timeout_ms=500))
 
-        # Both partitions should be assigned; partition 0 waits at end for new messages
         assigned = consumer.assign.call_args[0][0]
-        assert len(assigned) == 2
+        assert len(assigned) == 1
+        assert assigned[0].partition == 1
 
     def test_start_timestamp_overrides_start_offset(self, dd_run_check, aggregator):
         """Test that start_timestamp is passed through from check config."""
@@ -525,27 +555,53 @@ class TestConsumeMessagesStartTimestamp:
 
 
 class TestConsumeMessagesEarlyReturn:
-    """Test that consume_messages returns early on None poll or partition EOF."""
+    """Test that consume_messages stops when all partitions are drained (EOF), not on None."""
 
-    def test_none_poll_breaks_immediately(self):
-        from unittest.mock import MagicMock
-
+    def test_eof_drains_and_stops(self):
         consumer = MagicMock()
         metadata = MagicMock()
         metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
         consumer.list_topics.return_value = metadata
-        consumer.poll.side_effect = [MockKafkaMessage(key=b'k', value=b'v', partition=0, offset=0), None]
+        # A None poll must NOT end consumption; only EOF (or the watermark) does.
+        consumer.poll.side_effect = [
+            MockKafkaMessage(key=b'k', value=b'v', partition=0, offset=0),
+            None,
+            _eof(0),
+        ]
 
-        import logging
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.return_value = _futures({0: 100})
 
-        from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
-
-        client = KafkaActionsClient({'kafka_connect_str': 'localhost:9092'}, logging.getLogger('test'))
-        with patch.object(client, 'get_consumer', return_value=consumer):
-            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=30000))
+        client = _client()
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            result = list(client.consume_messages(topic='t', start_offset=0, max_messages=1000, timeout_ms=500))
 
         assert len(result) == 1
-        assert consumer.poll.call_count == 2
+        assert consumer.poll.call_count == 3
+
+    def test_empty_range_returns_without_polling(self):
+        consumer = MagicMock()
+        metadata = MagicMock()
+        metadata.topics = {'t': MagicMock(partitions={0: MagicMock()})}
+        consumer.list_topics.return_value = metadata
+
+        mock_admin = MagicMock()
+        # start (10) is already at the high watermark (10): nothing to read.
+        mock_admin.list_offsets.return_value = _futures({0: 10})
+
+        client = _client()
+        with (
+            patch.object(client, 'get_consumer', return_value=consumer),
+            patch.object(client, 'get_admin_client', return_value=mock_admin),
+        ):
+            result = list(client.consume_messages(topic='t', start_offset=10, max_messages=1000, timeout_ms=500))
+
+        assert result == []
+        consumer.assign.assert_not_called()
+        consumer.poll.assert_not_called()
 
 
 if __name__ == '__main__':
