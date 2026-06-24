@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
-from pathlib import Path
-
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
@@ -177,7 +175,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(name="writer", tools=[], system_prompt_path=Path("/fake.md")),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
@@ -214,7 +212,6 @@ async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
         tools=["read_file", "edit_file", "grep", "create_file"],
         model="custom-model",
         max_tokens=999,
-        system_prompt_path=Path("/fake.md"),
     )
 
     await run_goal_loop(
@@ -261,7 +258,7 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(name="writer", tools=[], system_prompt_path=Path("/fake.md")),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
@@ -301,7 +298,7 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
             rendered_task_prompt="TASK",
             worker_process=worker_process,
             initial_result=initial_result,
-            parent_agent_config=AgentConfig(name="writer", tools=[], system_prompt_path=Path("/fake.md")),
+            parent_agent_config=AgentConfig(name="writer", tools=[]),
             process_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
@@ -335,7 +332,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(name="writer", tools=[], system_prompt_path=Path("/fake.md")),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks(),
         phase_id="p1",
@@ -370,7 +367,7 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
             rendered_task_prompt="TASK",
             worker_process=worker_process,
             initial_result=initial_result,
-            parent_agent_config=AgentConfig(name="writer", tools=[], system_prompt_path=Path("/fake.md")),
+            parent_agent_config=AgentConfig(name="writer", tools=[]),
             process_factory=factory,
             callbacks=Callbacks(),
             phase_id="p1",
@@ -415,7 +412,7 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         rendered_task_prompt="TASK",
         worker_process=worker_process,
         initial_result=initial_result,
-        parent_agent_config=AgentConfig(name="writer", tools=[], system_prompt_path=Path("/fake.md")),
+        parent_agent_config=AgentConfig(name="writer", tools=[]),
         process_factory=factory,
         callbacks=Callbacks([cb_set]),
         phase_id="p1",
