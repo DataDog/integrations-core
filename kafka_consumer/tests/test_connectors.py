@@ -180,7 +180,8 @@ def test_collection_timestamp_excluded_from_hash(check, kafka_instance, dd_run_c
                 second_count = _connector_event_count(mock_event.call_args_list)
 
     # Assert — connector config events are deduplicated on the second run
-    assert second_count == first_count, f"expected no new connector events on second call, got {second_count - first_count} more"
+    new_events = second_count - first_count
+    assert second_count == first_count, f"expected no new connector events on second call, got {new_events} more"
 
 
 def test_collect_returns_connected_true_on_success(make_collector):

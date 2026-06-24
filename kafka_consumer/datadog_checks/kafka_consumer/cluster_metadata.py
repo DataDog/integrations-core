@@ -18,7 +18,6 @@ from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 from datadog_checks.kafka_consumer.cache import CacheHelper
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
-
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
 
 
