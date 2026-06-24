@@ -25,84 +25,64 @@ pytestmark = [pytest.mark.unit]
 TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
 
 
-def build_cert(aia_uri=None):
-    key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'example.test')])
-    builder = (
+def private_key():
+    return rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+
+def cert_name(common_name):
+    return x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, common_name)])
+
+
+def cert_builder(subject, issuer, key):
+    now = datetime.datetime.now(datetime.timezone.utc)
+    return (
         x509.CertificateBuilder()
-        .subject_name(name)
-        .issuer_name(name)
+        .subject_name(subject)
+        .issuer_name(issuer)
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
-        .not_valid_before(datetime.datetime(2020, 1, 1))
-        .not_valid_after(datetime.datetime(2050, 1, 1))
+        .not_valid_before(now - datetime.timedelta(days=1))
+        .not_valid_after(now + datetime.timedelta(days=30))
     )
+
+
+def aia_extension(uri):
+    return x509.AuthorityInformationAccess(
+        [x509.AccessDescription(AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(uri))]
+    )
+
+
+def build_cert(aia_uri=None):
+    key = private_key()
+    name = cert_name('example.test')
+    builder = cert_builder(name, name, key)
     if aia_uri:
-        builder = builder.add_extension(
-            x509.AuthorityInformationAccess(
-                [
-                    x509.AccessDescription(
-                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
-                    )
-                ]
-            ),
-            critical=False,
-        )
+        builder = builder.add_extension(aia_extension(aia_uri), critical=False)
     return builder.sign(key, hashes.SHA256()).public_bytes(serialization.Encoding.DER)
 
 
 def build_chain(aia_uri):
-    root_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    intermediate_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    leaf_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    root_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'Test Root')])
-    intermediate_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'Test Intermediate')])
-    leaf_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, 'localhost')])
-    now = datetime.datetime.now(datetime.timezone.utc)
+    root_key, intermediate_key, leaf_key = private_key(), private_key(), private_key()
+    root_name = cert_name('Test Root')
+    intermediate_name = cert_name('Test Intermediate')
+    leaf_name = cert_name('localhost')
 
     root = (
-        x509.CertificateBuilder()
-        .subject_name(root_name)
-        .issuer_name(root_name)
-        .public_key(root_key.public_key())
-        .serial_number(x509.random_serial_number())
-        .not_valid_before(now - datetime.timedelta(days=1))
-        .not_valid_after(now + datetime.timedelta(days=30))
+        cert_builder(root_name, root_name, root_key)
         .add_extension(x509.BasicConstraints(ca=True, path_length=1), critical=True)
         .sign(root_key, hashes.SHA256())
     )
     intermediate = (
-        x509.CertificateBuilder()
-        .subject_name(intermediate_name)
-        .issuer_name(root_name)
-        .public_key(intermediate_key.public_key())
-        .serial_number(x509.random_serial_number())
-        .not_valid_before(now - datetime.timedelta(days=1))
-        .not_valid_after(now + datetime.timedelta(days=30))
+        cert_builder(intermediate_name, root_name, intermediate_key)
         .add_extension(x509.BasicConstraints(ca=True, path_length=0), critical=True)
         .sign(root_key, hashes.SHA256())
     )
     leaf = (
-        x509.CertificateBuilder()
-        .subject_name(leaf_name)
-        .issuer_name(intermediate_name)
-        .public_key(leaf_key.public_key())
-        .serial_number(x509.random_serial_number())
-        .not_valid_before(now - datetime.timedelta(days=1))
-        .not_valid_after(now + datetime.timedelta(days=30))
+        cert_builder(leaf_name, intermediate_name, leaf_key)
         .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
         .add_extension(x509.SubjectAlternativeName([x509.DNSName('localhost')]), critical=False)
         .add_extension(x509.ExtendedKeyUsage([ExtendedKeyUsageOID.SERVER_AUTH]), critical=False)
-        .add_extension(
-            x509.AuthorityInformationAccess(
-                [
-                    x509.AccessDescription(
-                        AuthorityInformationAccessOID.CA_ISSUERS, x509.UniformResourceIdentifier(aia_uri)
-                    )
-                ]
-            ),
-            critical=False,
-        )
+        .add_extension(aia_extension(aia_uri), critical=False)
         .sign(intermediate_key, hashes.SHA256())
     )
     return root, intermediate, leaf, leaf_key
@@ -114,16 +94,6 @@ class RecordingHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(self.server.body)
-
-    def log_message(self, *args):
-        pass
-
-
-class OkHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'ok')
 
     def log_message(self, *args):
         pass
@@ -447,7 +417,9 @@ class TestAIAChasing:
             write_cert(leaf_path, leaf)
             write_key(key_path, leaf_key)
 
-            service_server = ThreadingHTTPServer(('127.0.0.1', 0), OkHandler)
+            service_server = ThreadingHTTPServer(('127.0.0.1', 0), RecordingHandler)
+            service_server.headers = []
+            service_server.body = b'ok'
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             context.load_cert_chain(str(leaf_path), str(key_path))
             service_server.socket = context.wrap_socket(service_server.socket, server_side=True)
