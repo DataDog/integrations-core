@@ -152,53 +152,6 @@ async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_or
 
 
 # ---------------------------------------------------------------------------
-# PhaseOrchestrator.on_initialize — orphan-phase validation
-# ---------------------------------------------------------------------------
-
-
-async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make_orchestrator):
-    """A phase defined in the resource list but absent from flow: may have an unknown class — no error."""
-    (tmp_path / FLOW_NAME / "prompts").mkdir(parents=True, exist_ok=True)
-    (tmp_path / FLOW_NAME / "prompts" / "writer.md").write_text("system prompt")
-    engine = make_engine(
-        tmp_path,
-        dedent("""\
-        - type: agent
-          config:
-            name: writer
-            system_prompt_path: prompts/writer.md
-        - type: phase
-          config:
-            name: real
-            class: AgenticPhase
-            agent: writer
-            tasks:
-              - name: t1
-                prompt: do it
-        - type: phase
-          config:
-            name: orphan
-            class: BogusType
-            agent: writer
-            tasks:
-              - name: t2
-                prompt: ignored
-        - type: flow
-          config:
-            name: test_flow
-            flow:
-              - phase: real
-        """),
-    )
-    orchestrator = make_orchestrator(engine=engine)
-    await orchestrator.on_initialize()
-
-    processors = orchestrator._subscribers.get(PhaseTrigger, [])
-    assert {p.name for p in processors} == {"real"}
-
-
-
-# ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_finalize
 # ---------------------------------------------------------------------------
 

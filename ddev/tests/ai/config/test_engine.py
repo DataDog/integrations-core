@@ -702,6 +702,47 @@ def test_build_flow_raises_on_cycle(tmp_path):
         engine.build_flow()
 
 
+def test_build_flow_excludes_phases_not_in_flow(tmp_path):
+    """Phases defined in YAML but absent from flow are silently excluded from ResolvedFlow."""
+    d = make_flow_dir(tmp_path)
+    (d / "prompts").mkdir()
+    (d / "prompts" / "writer.md").write_text("system prompt")
+    write_yaml(
+        d,
+        "config.yaml",
+        """\
+        - type: agent
+          config:
+            name: writer
+            system_prompt_path: prompts/writer.md
+        - type: phase
+          config:
+            name: scheduled
+            class: AgenticPhase
+            agent: writer
+            tasks:
+              - name: t
+                prompt: do it
+        - type: phase
+          config:
+            name: orphan
+            class: AgenticPhase
+            agent: writer
+            tasks:
+              - name: t
+                prompt: ignored
+        - type: flow
+          config:
+            name: my_flow
+            flow:
+              - phase: scheduled
+        """,
+    )
+    engine = ConfigurationEngine(FLOW_NAME, core_dir=tmp_path)
+    resolved = engine.build_flow()
+    assert set(resolved.phases) == {"scheduled"}
+
+
 # ---------------------------------------------------------------------------
 # _parse_file failure modes — errors are stored, not raised at init
 # ---------------------------------------------------------------------------
