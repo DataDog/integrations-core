@@ -90,6 +90,23 @@ def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_respons
     tagger.assert_called('kueue_resource_flavor://default-flavor', tagger.ORCHESTRATOR)
 
 
+def test_queue_tagger_tags_are_scoped(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.set_tags(
+        {
+            'kubernetes_kueue_queue://clusterqueue//cluster-queue': ['cluster_queue_tag:value'],
+        }
+    )
+
+    check = KueueCheck('kueue', {}, [instance])
+    dd_run_check(check)
+
+    go_goroutines_tags = _get_metric_tags(aggregator, 'kueue.go.goroutines')
+    local_queue_tags = _get_metric_tags(aggregator, 'kueue.local_queue.pending_workloads')
+    assert 'cluster_queue_tag:value' not in go_goroutines_tags
+    assert 'local_queue_tag:value' not in local_queue_tags
+
+
 def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     instance = {
@@ -121,3 +138,7 @@ def test_empty_instance(dd_run_check):
     ):
         check = KueueCheck('kueue', {}, [{}])
         dd_run_check(check)
+
+
+def _get_metric_tags(aggregator, metric_name):
+    return {tag for metric in aggregator.metrics(metric_name) for tag in metric.tags}
