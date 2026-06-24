@@ -108,6 +108,25 @@ def test_gauge_given_exclude_labels_returns_summed_values_if_present(aggregator,
     aggregator.assert_all_metrics_covered()
 
 
+def test_gauge_given_exclude_labels_without_aggregation_does_not_sum(aggregator, dd_run_check, mock_http_response):
+    # Default behavior (flag absent): labels are still excluded, but colliding samples are NOT summed —
+    # the three honda/civic color variants stay as three separate submissions instead of collapsing to 12.
+    mock_http_response(GAUGE_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'exclude_labels': ['color']})
+    dd_run_check(check)
+
+    for m in aggregator.metrics('test.cars_in_lot'):
+        assert not any(t.startswith('color:') for t in m.tags), f"Excluded tag 'color' found in {m.tags}"
+
+    honda_civic = [
+        m
+        for m in aggregator.metrics('test.cars_in_lot')
+        if 'make:honda' in m.tags and not any(t.startswith('license:') for t in m.tags)
+    ]
+    assert len(honda_civic) == 3
+    assert sorted(m.value for m in honda_civic) == [3.0, 4.0, 5.0]
+
+
 def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_check, mock_http_response):
     mock_http_response(COUNTER_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
@@ -125,6 +144,9 @@ def test_counter_given_exclude_labels_submits_summed_value(aggregator, dd_run_ch
         metric_type=aggregator.MONOTONIC_COUNT,
         tags=['endpoint:test', 'make:toyota', 'model:corolla'],
     )
+
+    # Exactly two contexts survive after color exclusion — no stray submissions.
+    assert len(aggregator.metrics('test.car_counter.count')) == 2
 
     for m in aggregator.metrics('test.car_counter.count'):
         assert not any(t.startswith('color:') for t in m.tags), f"Excluded tag 'color' found in {m.tags}"
@@ -237,13 +259,15 @@ def test_histogram_given_exclude_labels_ignores_exclusion(aggregator, dd_run_che
 
 
 def test_counter_given_created_samples_does_not_inflate_total(aggregator, dd_run_check, mock_http_response):
-    """_total and _created samples must not be collapsed together when aggregating."""
+    # With the classic Prometheus parser, `_created` lands in a separate untyped family that is dropped
+    # before aggregation, so only the two `_total` samples (120 + 95 = 215) are summed. Asserting a single
+    # surviving context guards against a `_created` timestamp leaking into the `.count` submission.
     mock_http_response(COUNTER_WITH_CREATED_PAYLOAD)
     check = get_check({'metrics': ['.+'], 'exclude_labels': ['color'], 'aggregate_metrics_on_label_exclusion': True})
     dd_run_check(check)
 
-    # Only _total samples should be summed: 120 + 95 = 215
-    # _created timestamps must NOT be added to this value
+    count_metrics = aggregator.metrics('test.car_counter.count')
+    assert len(count_metrics) == 1
     aggregator.assert_metric(
         'test.car_counter.count',
         215.0,

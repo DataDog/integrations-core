@@ -10,27 +10,29 @@ from prometheus_client.samples import Sample
 
 logger = logging.getLogger(__name__)
 
-# Metric types where pre-aggregation is meaningful. Histograms and summaries
-# have sub-metric structure (buckets, quantiles) that makes label-collision
-# aggregation ambiguous, so they are left unchanged.
-_AGGREGABLE_TYPES = frozenset(('gauge', 'counter'))
+# Metric types whose colliding samples can be combined by summation after a
+# label is excluded.
+AGGREGABLE_TYPES = frozenset(('gauge', 'counter'))
+
+# Metric types left untouched by summation. Summary quantiles are not additive,
+# so they cannot be merged across a collapsed dimension; histogram buckets are
+# additive in principle, but correct bucket/_sum/_count merging is not
+# implemented. When aggregation is active these types skip label exclusion
+# entirely so each source series stays a distinct context.
+NON_SUMMABLE_SUBMETRIC_TYPES = frozenset(('histogram', 'summary'))
 
 
-def should_aggregate(exclude_labels: set[str]) -> bool:
-    return bool(exclude_labels)
-
-
-# Pre-aggregate samples whose tags collide after label exclusion.
-# Only aggregates gauge and counter. Histogram and summary samples pass
-# through unchanged because their sub-metric structure makes aggregation ambiguous.
 def aggregate_sample_data(
     sample_data: Iterator[tuple[Sample, list[str], str]],
     metric_type: str,
 ) -> Iterator[tuple[Sample, list[str], str]]:
-    if metric_type not in _AGGREGABLE_TYPES:
+    """Sum gauge/counter samples whose tags collide after label exclusion; pass other types through."""
+    if metric_type not in AGGREGABLE_TYPES:
         yield from sample_data
         return
 
+    # Buffers one entry per surviving context; memory scales with the number of
+    # post-exclusion contexts, not the raw sample count.
     groups: dict[tuple[str, tuple[str, ...], str], list] = {}
 
     for sample, tags, hostname in sample_data:
@@ -46,4 +48,7 @@ def aggregate_sample_data(
 
 
 def _grouping_key(sample_name: str, tags: list[str], hostname: str) -> tuple[str, tuple[str, ...], str]:
+    # `sample_name` keeps a counter's `_total` and `_created` samples in separate
+    # groups when both reach this function (OpenMetrics parser), so summation
+    # cannot fold a creation timestamp into the counter value.
     return (sample_name, tuple(sorted(tags)), hostname)

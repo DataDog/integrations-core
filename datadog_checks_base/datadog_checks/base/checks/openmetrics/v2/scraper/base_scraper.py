@@ -25,7 +25,7 @@ from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
 
-from .aggregator import aggregate_sample_data, should_aggregate
+from .aggregator import NON_SUMMABLE_SUBMETRIC_TYPES, aggregate_sample_data
 
 
 class OpenMetricsScraper:
@@ -111,8 +111,8 @@ class OpenMetricsScraper:
 
             self.exclude_labels.add(entry)
 
-        self._aggregate_on_label_exclusion = is_affirmative(config.get('aggregate_metrics_on_label_exclusion', False))
-        self._should_aggregate = self._aggregate_on_label_exclusion and should_aggregate(self.exclude_labels)
+        aggregate_on_label_exclusion = is_affirmative(config.get('aggregate_metrics_on_label_exclusion', False))
+        self._should_aggregate = aggregate_on_label_exclusion and bool(self.exclude_labels)
 
         include_labels = config.get('include_labels', [])
         if not isinstance(include_labels, list):
@@ -373,7 +373,7 @@ class OpenMetricsScraper:
         """
         label_normalizer = get_label_normalizer(metric.type)
 
-        skip_label_exclusion = self._aggregate_on_label_exclusion and metric.type in ('histogram', 'summary')
+        skip_label_exclusion = self._should_aggregate and metric.type in NON_SUMMABLE_SUBMETRIC_TYPES
 
         for sample in metric.samples:
             value = sample.value
