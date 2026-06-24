@@ -35,7 +35,7 @@ def test_empty_directory_builds_empty_registries(tmp_path):
     engine = ConfigurationEngine(FLOW_NAME, core_dir=tmp_path)
     assert engine._agents == {}
     assert engine._phases == {}
-    assert engine._flows == {}
+    assert engine._flow is None
 
 
 def test_scans_yaml_and_yml_extensions(tmp_path):
@@ -114,7 +114,7 @@ def test_mixed_types_in_single_file(tmp_path):
     engine = ConfigurationEngine(FLOW_NAME, core_dir=tmp_path)
     assert "my_agent" in engine._agents
     assert "my_phase" in engine._phases
-    assert "my_flow" in engine._flows
+    assert engine._flow is not None
 
 
 # ---------------------------------------------------------------------------

@@ -25,9 +25,6 @@ from ddev.ai.constants import CORE_FLOWS_DIR
 
 ResourceKind = Literal["agent", "phase", "flow"]
 
-_log = logging.getLogger(__name__)
-
-
 @dataclass
 class ConfigConflict:
     name: str
@@ -63,14 +60,16 @@ class ConfigurationEngine:
         user_dirs: list[str] | None = None,
         *,
         core_dir: Path = CORE_FLOWS_DIR,
+        logger: logging.Logger | None = None,
     ) -> None:
         self._flow_name = flow_name
         self._core_dir = core_dir
+        self._logger = logger or logging.getLogger(__name__)
         all_base_dirs = [core_dir] + self._resolve_user_dirs(user_dirs or [])
         self._scan_dirs: list[Path] = self._deduplicate(self._expand_flow_dirs(all_base_dirs, flow_name))
         self._agents: dict[str, _RegistryEntry[AgentConfig]] = {}
         self._phases: dict[str, _RegistryEntry[PhaseConfig]] = {}
-        self._flows: dict[str, _RegistryEntry[FlowConfig]] = {}
+        self._flow: _RegistryEntry[FlowConfig] | None = None
         self._conflicts: list[ConfigConflict] = []
         self._file_errors: dict[Path, str] = {}
         self._build_registries()
@@ -130,9 +129,10 @@ class ConfigurationEngine:
                         sources=[e.source_file for e in entries],
                     )
                 )
+            elif obj_type == "flow":
+                self._flow = entries[0]
             else:
-                registry = self._registry_for(obj_type)
-                registry[name] = entries[0]
+                self._registry_for(obj_type)[name] = entries[0]
 
     def _parse_file(
         self,
@@ -170,8 +170,6 @@ class ConfigurationEngine:
                 return self._agents
             case "phase":
                 return self._phases
-            case "flow":
-                return self._flows
             case _:
                 raise AssertionError(f"Unknown resource type: {obj_type!r}")
 
@@ -220,12 +218,11 @@ class ConfigurationEngine:
         return f"\nNote: these files failed to parse and may contain the missing resource:\n{lines}"
 
     def _get_flow_config(self, name: str) -> FlowConfig:
-        if name not in self._flows:
+        if self._flow is None:
             raise FlowConfigError(
-                f"Flow {name!r} not found. Available flows: {sorted(self._flows)}"
-                + self._format_file_errors()
+                f"Flow {name!r} not found." + self._format_file_errors()
             )
-        return self._flows[name].config
+        return self._flow.config
 
     def _collect_phases(self, flow_config: FlowConfig, flow_name: str) -> dict[str, PhaseConfig]:
         phases = {}
