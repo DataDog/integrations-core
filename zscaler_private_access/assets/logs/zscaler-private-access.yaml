@@ -153,6 +153,7 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -160,24 +161,26 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Category Name
+    name: Category
     path: ocsf.category_name
     source: log
   - groups:
       - OCSF
-    name: Category UID
+    name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Class Name
+    name: Class
     path: ocsf.class_name
     source: log
   - groups:
       - OCSF
-    name: Class UID
+    name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Severity
@@ -188,6 +191,7 @@ facets:
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Status
@@ -198,6 +202,7 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Event Code
@@ -210,17 +215,17 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Product Vendor
+    name: Vendor Name
     path: ocsf.metadata.product.vendor_name
     source: log
   - groups:
       - OCSF
-    name: Source Endpoint IP
+    name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
   - groups:
       - OCSF
-    name: Destination Endpoint IP
+    name: Destination IP Address
     path: ocsf.dst_endpoint.ip
     source: log
   - groups:
@@ -230,17 +235,18 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: HTTP URL
+    name: Request URL String
     path: ocsf.http_request.url.url_string
     source: log
   - groups:
       - OCSF
-    name: HTTP Response Code
+    name: Response Code
     path: ocsf.http_response.code
     source: log
+    type: integer
   - groups:
       - OCSF
-    name: Actor User Name
+    name: Name
     path: ocsf.actor.user.name
     source: log
   - groups:
@@ -962,11 +968,14 @@ pipeline:
           template: "Zscaler"
           target: ocsf.metadata.product.vendor_name
           replaceMissing: false
-        - type: schema-remapper
+        - type: attribute-remapper
           name: Map `EventType` to `ocsf.metadata.event_code`
+          enabled: true
           sources:
             - EventType
+          sourceType: attribute
           target: ocsf.metadata.event_code
+          targetType: attribute
           preserveSource: true
           overrideOnConflict: true
     - type: pipeline
