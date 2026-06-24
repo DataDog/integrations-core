@@ -19,6 +19,7 @@ SENSITIVE_KEY_PATTERN = re.compile(
     r'|\btoken\b|passphrase|keyfile|connection\.url|basic\.auth\.user\.info|private\.key)'
 )
 
+
 def _build_http_kwargs(
     username: str | None,
     password: str | None,
