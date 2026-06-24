@@ -95,8 +95,6 @@ def models(ctx, check, sync, verbose):
     license_header_lines = get_license_header().splitlines(True) + ['\n', '\n']
     documentation_header_lines = get_config_models_documentation().splitlines(True) + ['\n']
 
-    code_formatter = ModelConsumer.create_code_formatter()
-
     if is_core_check:
         checks = checks.difference(INTEGRATIONS_WITHOUT_MODELS)
 
@@ -135,7 +133,7 @@ def models(ctx, check, sync, verbose):
             if not sync and not dir_exists(models_location) and not is_core_check:
                 continue
 
-        model_consumer = ModelConsumer(spec.data, code_formatter)
+        model_consumer = ModelConsumer(spec.data)
 
         # So formatters see config files
         with chdir(root):
