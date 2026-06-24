@@ -77,8 +77,13 @@ def test_sensitive_keys_redacted_in_config_event(check, kafka_instance, dd_run_c
 
 
 def test_emit_connector_metrics_gauges(make_collector):
-    collector, check, _, _ = make_collector()
-    collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, ['connect_url:http://localhost:8083'])
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
+    collector.http.get.return_value = mock_resp
+
+    with mock.patch.object(collector, '_collect_plugins'):
+        collector.collect('cluster-1')
 
     emitted = {call.args[0] for call in check.gauge.call_args_list}
     assert 'connector.running' not in emitted
@@ -88,8 +93,13 @@ def test_emit_connector_metrics_gauges(make_collector):
 
 
 def test_emit_connector_metrics_connector_state_tag(make_collector):
-    collector, check, _, _ = make_collector()
-    collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
+    collector.http.get.return_value = mock_resp
+
+    with mock.patch.object(collector, '_collect_plugins'):
+        collector.collect('cluster-1')
 
     task_count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.count']
     source_calls = [c for c in task_count_calls if 'connector:demo-source' in c.kwargs.get('tags', [])]
@@ -102,8 +112,14 @@ def test_emit_connector_metrics_connector_state_tag(make_collector):
 
 
 def test_task_metrics_always_collected(make_collector):
-    collector, check, _, _ = make_collector()
-    collector._emit_connector_metrics(SAMPLE_CONNECTORS_RESPONSE, [])
+    collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = SAMPLE_CONNECTORS_RESPONSE
+    collector.http.get.return_value = mock_resp
+
+    with mock.patch.object(collector, '_collect_plugins'):
+        collector.collect('cluster-1')
+
     per_task = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.task.running']
     assert per_task, "expected per-task gauges to always be emitted"
 
@@ -190,7 +206,7 @@ def test_older_worker_list_response_warns_and_returns(make_collector):
 
     collector.http.get.return_value = mock_resp
 
-    collector._collect_rest('http://localhost:8083', 'cluster-1')
+    collector.collect('cluster-1')
 
     assert check.gauge.call_count == 0
     collector.log.warning.assert_called_once()
@@ -204,7 +220,7 @@ def test_collect_rest_success_emits_metrics_and_events(make_collector):
     collector.http.get.return_value = mock_resp
 
     with mock.patch.object(collector, '_collect_plugins'):
-        collector._collect_rest('http://localhost:8083', 'cluster-1')
+        collector.collect('cluster-1')
 
     count_calls = [c for c in check.gauge.call_args_list if c.args[0] == 'connector.count']
     assert count_calls, "expected connector.count gauge"
@@ -216,18 +232,25 @@ def test_collect_plugins_emits_event_on_first_call(make_collector):
     collector, check, _, _ = make_collector(connect_urls=['http://localhost:8083'])
     plugins = [{'class': 'org.apache.kafka.connect.file.FileStreamSinkConnector', 'type': 'sink', 'version': '3.3.0'}]
 
-    mock_resp = mock.MagicMock()
-    mock_resp.json.return_value = plugins
+    def mock_get(url, **kwargs):
+        resp = mock.MagicMock()
+        resp.json.return_value = plugins if 'connector-plugins' in url else {}
+        return resp
 
-    collector.http.get.return_value = mock_resp
+    collector.http.get.side_effect = mock_get
 
-    collector._collect_plugins('http://localhost:8083', 'cluster-1')
-    assert check.event_platform_event.call_count == 1
-    payload = json.loads(check.event_platform_event.call_args[0][0])
-    assert payload['config_type'] == 'connector_plugins'
+    collector.collect('cluster-1')
+
+    plugin_events = [
+        json.loads(c.args[0])
+        for c in check.event_platform_event.call_args_list
+        if json.loads(c.args[0]).get('config_type') == 'connector_plugins'
+    ]
+    assert len(plugin_events) == 1
+    assert plugin_events[0]['config_type'] == 'connector_plugins'
 
 
-def test_collect_plugins_skips_when_ttl_not_expired(make_collector, monkeypatch):
+def test_collect_plugins_skips_when_ttl_not_expired(make_collector):
     collector, check, _, cache_store = make_collector(connect_urls=['http://localhost:8083'])
 
     from urllib.parse import quote
@@ -236,8 +259,14 @@ def test_collect_plugins_skips_when_ttl_not_expired(make_collector, monkeypatch)
     fetch_cache_key = f'{CONNECTOR_PLUGINS_CACHE_KEY}:{safe_url}'
     cache_store[fetch_cache_key] = json.dumps({'plugins': time.time() + 9999})
 
-    collector._collect_plugins('http://localhost:8083', 'cluster-1')
+    mock_resp = mock.MagicMock()
+    mock_resp.json.return_value = {}
+    collector.http.get.return_value = mock_resp
+
+    collector.collect('cluster-1')
+
     assert check.event_platform_event.call_count == 0
+    assert collector.http.get.call_count == 1
 
 
 def test_get_items_to_fetch_returns_all_on_empty_cache(make_collector):

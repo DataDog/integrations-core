@@ -97,6 +97,8 @@ def make_collector():
         config._custom_tags = []
         config._kafka_cluster_id_override = None
         config._auto_detected_cluster_id = ''
+        config._get_tags.return_value = []
+        config._original_cluster_id_field.return_value = {}
 
         log = mock.MagicMock()
         return KafkaConnectCollector(check, config, log), check, config, cache_store
