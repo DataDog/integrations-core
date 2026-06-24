@@ -1,0 +1,1 @@
+Cap interpolated estimated_consumer_lag for offsets older than the cached history and use the low watermark as a floor when cluster monitoring is enabled.
