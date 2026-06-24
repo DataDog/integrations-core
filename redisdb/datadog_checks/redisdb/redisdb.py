@@ -89,6 +89,7 @@ class Redis(AgentCheck):
                     'ssl_ca_certs',
                     'ssl_cert_reqs',
                     'ssl_check_hostname',
+                    'client_name',
                 ]
 
                 # Set a default timeout (in seconds) if no timeout is specified in the instance config
