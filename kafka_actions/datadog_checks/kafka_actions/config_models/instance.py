@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -205,8 +206,15 @@ class Offset(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    offset: int = Field(..., description='New offset value')
-    partition: int = Field(..., description='Partition number')
+    offset: Optional[int] = Field(
+        None,
+        description='Explicit offset to commit (non-negative). Mutually exclusive with reset_to.',
+    )
+    partition: int = Field(..., description='Non-negative partition number')
+    reset_to: Optional[Literal['earliest', 'latest']] = Field(
+        None,
+        description="Reset policy: 'earliest' commits the log-start offset; 'latest' commits\nthe high-watermark offset. Mutually exclusive with offset.\n",
+    )
     topic: str = Field(..., description='Topic name')
 
 
@@ -215,15 +223,19 @@ class UpdateConsumerGroupOffsets(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    cluster: str = Field(..., description='Kafka cluster identifier', examples=['prod-kafka-1'])
+    cluster: str = Field(
+        ...,
+        description='Kafka cluster UUID as returned by the broker metadata (AdminClient.list_topics().cluster_id).\nThis is NOT a human-readable name — it is the internal UUID assigned when the cluster was\ncreated (e.g. "MkU3OEVBNTcwNTJENDM2Qg"). The check compares this against the live\ncluster ID and aborts if they differ, preventing accidental execution on the wrong cluster.\n',
+        examples=['MkU3OEVBNTcwNTJENDM2Qg'],
+    )
     consumer_group: str = Field(..., description='Consumer group ID to update', examples=['order-processor'])
     offsets: tuple[Offset, ...] = Field(
         ...,
-        description='List of topic-partition-offset tuples to update',
+        description="List of topic-partition offset specifications. Each entry targets one\npartition and must specify exactly one of:\n  - offset: explicit non-negative integer offset to commit\n  - reset_to: 'earliest' or 'latest' — the check resolves the actual\n    partition offset at runtime via list_offsets before committing\n",
         examples=[
             [
                 {'offset': 1000, 'partition': 0, 'topic': 'orders'},
-                {'offset': 1500, 'partition': 1, 'topic': 'orders'},
+                {'partition': 1, 'reset_to': 'earliest', 'topic': 'orders'},
             ]
         ],
     )

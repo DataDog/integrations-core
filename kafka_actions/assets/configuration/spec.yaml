@@ -502,7 +502,17 @@ files:
       description: |
         Configuration for updating consumer group offsets.
         WARNING: Can cause duplicate processing or data loss.
-        Consumer group should be stopped (no active members).
+        The consumer group must have no active members before this action runs;
+        the check enforces this and will fail with a clear error if members are found.
+
+        The 'cluster' value must be the Kafka-internal cluster UUID (e.g.
+        "MkU3OEVBNTcwNTJENDM2Qg"), not a human-readable name. Retrieve it with:
+          kafka-topics.sh --bootstrap-server <host>:9092 --describe | head -1
+        or via the AdminClient metadata: admin.list_topics().cluster_id.
+
+        Each entry in 'offsets' must specify either an explicit 'offset' (a
+        non-negative integer) or a 'reset_to' policy ('earliest' or 'latest').
+        Mixing both fields in the same entry is an error.
       value:
         type: object
         required:
@@ -510,7 +520,7 @@ files:
           - consumer_group
           - offsets
         example:
-          cluster: prod-kafka-1
+          cluster: MkU3OEVBNTcwNTJENDM2Qg
           consumer_group: order-processor
           offsets:
             - topic: orders
@@ -518,42 +528,58 @@ files:
               offset: 1000
             - topic: orders
               partition: 1
-              offset: 1500
+              reset_to: earliest
         properties:
         - name: cluster
           type: string
-          description: Kafka cluster identifier
-          example: prod-kafka-1
+          description: |
+            Kafka cluster UUID as returned by the broker metadata (AdminClient.list_topics().cluster_id).
+            This is NOT a human-readable name — it is the internal UUID assigned when the cluster was
+            created (e.g. "MkU3OEVBNTcwNTJENDM2Qg"). The check compares this against the live
+            cluster ID and aborts if they differ, preventing accidental execution on the wrong cluster.
+          example: MkU3OEVBNTcwNTJENDM2Qg
         - name: consumer_group
           type: string
           description: Consumer group ID to update
           example: order-processor
         - name: offsets
           type: array
-          description: List of topic-partition-offset tuples to update
+          description: |
+            List of topic-partition offset specifications. Each entry targets one
+            partition and must specify exactly one of:
+              - offset: explicit non-negative integer offset to commit
+              - reset_to: 'earliest' or 'latest' — the check resolves the actual
+                partition offset at runtime via list_offsets before committing
           items:
             type: object
             required:
               - topic
               - partition
-              - offset
             properties:
             - name: topic
               type: string
               description: Topic name
             - name: partition
               type: integer
-              description: Partition number
+              description: Non-negative partition number
             - name: offset
               type: integer
-              description: New offset value
+              description: Explicit offset to commit (non-negative). Mutually exclusive with reset_to.
+            - name: reset_to
+              type: string
+              description: |
+                Reset policy: 'earliest' commits the log-start offset; 'latest' commits
+                the high-watermark offset. Mutually exclusive with offset.
+              enum:
+                - earliest
+                - latest
           example:
             - topic: orders
               partition: 0
               offset: 1000
             - topic: orders
               partition: 1
-              offset: 1500
+              reset_to: earliest
       fleet_configurable: false
     
     # ========================================================================

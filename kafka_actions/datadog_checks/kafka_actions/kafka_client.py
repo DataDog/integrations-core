@@ -561,6 +561,31 @@ class KafkaActionsClient:
                 self.log.error("Failed to delete consumer group '%s': %s", group_id, e)
                 raise
 
+    def check_consumer_group_inactive(self, consumer_group: str) -> None:
+        """Raise if the consumer group has active members.
+
+        alter_consumer_group_offsets requires a dead or empty group; active members
+        cause Kafka to return NON_EMPTY_GROUP errors per partition.
+        """
+        admin = self.get_admin_client()
+        futures = admin.describe_consumer_groups([consumer_group])
+        future = futures[consumer_group]
+        description = future.result()
+        if description.members:
+            raise Exception(
+                f"Consumer group '{consumer_group}' has {len(description.members)} active member(s). "
+                "Stop all consumers in the group before resetting offsets."
+            )
+
+    def resolve_offset(self, topic: str, partition: int, reset_to: str) -> int:
+        """Resolve 'earliest' or 'latest' to a concrete partition offset."""
+        admin = self.get_admin_client()
+        tp = TopicPartition(topic, partition)
+        spec = OffsetSpec.earliest() if reset_to == 'earliest' else OffsetSpec.latest()
+        futures = admin.list_offsets({tp: spec}, request_timeout=10)
+        result = futures[tp].result()
+        return result.offset
+
     def update_consumer_group_offsets(self, consumer_group: str, offsets: list[dict[str, Any]]) -> bool:
         """Update consumer group offsets for specific topic-partitions.
 
@@ -569,7 +594,8 @@ class KafkaActionsClient:
             offsets: List of offset specifications, each with:
                 - topic: Topic name
                 - partition: Partition number
-                - offset: New offset value
+                - offset: Explicit offset value (mutually exclusive with reset_to)
+                - reset_to: 'earliest' or 'latest' (mutually exclusive with offset)
 
         Returns:
             True if successful
@@ -581,9 +607,16 @@ class KafkaActionsClient:
             topic = offset_spec.get('topic')
             partition = offset_spec.get('partition')
             offset = offset_spec.get('offset')
+            reset_to = offset_spec.get('reset_to')
 
-            if topic is None or partition is None or offset is None:
-                raise ValueError("Each offset specification must have 'topic', 'partition', and 'offset'")
+            if topic is None or partition is None:
+                raise ValueError("Each offset specification must have 'topic' and 'partition'")
+            if offset is None and reset_to is None:
+                raise ValueError("Each offset specification must have 'offset' or 'reset_to'")
+
+            if reset_to is not None:
+                offset = self.resolve_offset(topic, partition, reset_to)
+                self.log.debug("Resolved '%s' for %s[%d] to offset %d", reset_to, topic, partition, offset)
 
             tp = TopicPartition(topic, partition, offset)
             topic_partitions.append(tp)
@@ -592,7 +625,16 @@ class KafkaActionsClient:
 
         for group_id, future in futures.items():
             try:
-                future.result()
+                result_partitions = future.result()
+                partition_errors = [
+                    f"{tp.topic}[{tp.partition}]: {tp.error}"
+                    for tp in result_partitions
+                    if tp.error is not None
+                ]
+                if partition_errors:
+                    raise Exception(
+                        f"Per-partition errors for group '{group_id}': {'; '.join(partition_errors)}"
+                    )
                 self.log.debug("Consumer group '%s' offsets updated for %d partitions", group_id, len(topic_partitions))
                 return True
             except Exception as e:

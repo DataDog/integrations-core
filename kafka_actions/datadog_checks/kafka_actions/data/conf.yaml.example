@@ -259,10 +259,20 @@ instances:
     ## @param update_consumer_group_offsets - mapping - optional
     ## Configuration for updating consumer group offsets.
     ## WARNING: Can cause duplicate processing or data loss.
-    ## Consumer group should be stopped (no active members).
+    ## The consumer group must have no active members before this action runs;
+    ## the check enforces this and will fail with a clear error if members are found.
+    ##
+    ## The 'cluster' value must be the Kafka-internal cluster UUID (e.g.
+    ## "MkU3OEVBNTcwNTJENDM2Qg"), not a human-readable name. Retrieve it with:
+    ##   kafka-topics.sh --bootstrap-server <host>:9092 --describe | head -1
+    ## or via the AdminClient metadata: admin.list_topics().cluster_id.
+    ##
+    ## Each entry in 'offsets' must specify either an explicit 'offset' (a
+    ## non-negative integer) or a 'reset_to' policy ('earliest' or 'latest').
+    ## Mixing both fields in the same entry is an error.
     #
     # update_consumer_group_offsets:
-    #   cluster: prod-kafka-1
+    #   cluster: MkU3OEVBNTcwNTJENDM2Qg
     #   consumer_group: order-processor
     #   offsets:
     #   - topic: orders
@@ -270,7 +280,7 @@ instances:
     #     offset: 1000
     #   - topic: orders
     #     partition: 1
-    #     offset: 1500
+    #     reset_to: earliest
 
     ## @param produce_message - mapping - optional
     ## Configuration for producing a message to a Kafka topic.

@@ -249,21 +249,119 @@ class TestUpdateConsumerGroupOffsetsValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_invalid_offset_entry(self):
-        """Test that invalid offset entry raises error."""
+    def test_missing_partition(self):
+        """Test that missing partition raises error."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
             'update_consumer_group_offsets': {
                 'cluster': 'test',
                 'consumer_group': 'test',
-                'offsets': [{'topic': 'test'}],  # Missing partition and offset
+                'offsets': [{'topic': 'test'}],
             },
         }
 
         with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'partition' parameter"):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
+
+    def test_missing_offset_and_reset_to(self):
+        """Test that an entry with neither offset nor reset_to raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [{'topic': 'test', 'partition': 0}],
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'offset' or 'reset_to'"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_both_offset_and_reset_to(self):
+        """Test that specifying both offset and reset_to raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [{'topic': 'test', 'partition': 0, 'offset': 100, 'reset_to': 'earliest'}],
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\] cannot specify both 'offset' and 'reset_to'"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_negative_offset(self):
+        """Test that a negative offset raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [{'topic': 'test', 'partition': 0, 'offset': -1}],
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\].offset must be a non-negative integer"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_negative_partition(self):
+        """Test that a negative partition raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [{'topic': 'test', 'partition': -1, 'offset': 0}],
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\].partition must be a non-negative integer"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_invalid_reset_to_value(self):
+        """Test that an unrecognised reset_to value raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [{'topic': 'test', 'partition': 0, 'reset_to': 'beginning'}],
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\].reset_to must be 'earliest' or 'latest'"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_valid_reset_to(self):
+        """Test that valid reset_to values pass validation."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [
+                    {'topic': 'test', 'partition': 0, 'reset_to': 'earliest'},
+                    {'topic': 'test', 'partition': 1, 'reset_to': 'latest'},
+                ],
+            },
+        }
+
+        config = KafkaActionsConfig(instance, None)
+        config.validate_config()  # should not raise
 
 
 class TestProduceMessageValidation:

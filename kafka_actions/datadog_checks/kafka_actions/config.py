@@ -313,14 +313,25 @@ class KafkaActionsConfig:
             if 'partition' not in offset_entry:
                 raise ConfigurationError(f"offsets[{i}] requires 'partition' parameter")
 
-            if 'offset' not in offset_entry:
-                raise ConfigurationError(f"offsets[{i}] requires 'offset' parameter")
+            if not isinstance(offset_entry.get('partition'), int) or offset_entry['partition'] < 0:
+                raise ConfigurationError(f"offsets[{i}].partition must be a non-negative integer")
 
-            if not isinstance(offset_entry.get('partition'), int):
-                raise ConfigurationError(f"offsets[{i}].partition must be an integer")
+            has_offset = 'offset' in offset_entry
+            has_reset_to = 'reset_to' in offset_entry
 
-            if not isinstance(offset_entry.get('offset'), int):
-                raise ConfigurationError(f"offsets[{i}].offset must be an integer")
+            if not has_offset and not has_reset_to:
+                raise ConfigurationError(f"offsets[{i}] requires 'offset' or 'reset_to'")
+
+            if has_offset and has_reset_to:
+                raise ConfigurationError(f"offsets[{i}] cannot specify both 'offset' and 'reset_to'")
+
+            if has_offset:
+                if not isinstance(offset_entry['offset'], int) or offset_entry['offset'] < 0:
+                    raise ConfigurationError(f"offsets[{i}].offset must be a non-negative integer")
+
+            if has_reset_to:
+                if offset_entry['reset_to'] not in ('earliest', 'latest'):
+                    raise ConfigurationError(f"offsets[{i}].reset_to must be 'earliest' or 'latest'")
 
     def _validate_produce_message(self):
         """Validate produce_message action configuration."""
