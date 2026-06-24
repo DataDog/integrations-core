@@ -1,1 +1,0 @@
-Fix ``resolve_db_host`` treating loopback IP literals (e.g. ``::1``) as DNS resolution failures, which caused database checks to submit metrics with the wrong host tag and miss agent host tags.

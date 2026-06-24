@@ -42,10 +42,15 @@ class KafkaCheck(AgentCheck):
 
         try:
             self.client.request_metadata_update()
-        except:
+        except Exception as e:
+            if self.config._cluster_monitoring_enabled:
+                try:
+                    self._send_cluster_monitoring_connection_error(str(e))
+                except Exception:
+                    self.log.warning("Failed to emit connection_error DSM event", exc_info=True)
             raise Exception(
                 "Unable to connect to the AdminClient. This is likely due to an error in the configuration."
-            )
+            ) from e
 
         try:
             # Fetch consumer offsets
@@ -62,7 +67,9 @@ class KafkaCheck(AgentCheck):
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            if consumer_contexts_count < self._context_limit:
+            # Cluster monitoring always requires highwater offsets (for topic.message_rate and other
+            # cluster metadata metrics), so bypass the consumer context limit in that case.
+            if consumer_contexts_count < self._context_limit or self.config._cluster_monitoring_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
                 # If cluster monitoring is enabled, always fetch all broker highwater marks
@@ -95,7 +102,10 @@ class KafkaCheck(AgentCheck):
             consumer_offsets,
             highwater_offsets,
         )
-        if total_contexts >= self._context_limit:
+        # When cluster monitoring is enabled, all offsets and lag metrics are reported regardless
+        # of context count so that the full cluster picture is always available.
+        reporting_limit = float('inf') if self.config._cluster_monitoring_enabled else self._context_limit
+        if total_contexts >= self._context_limit and not self.config._cluster_monitoring_enabled:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
@@ -108,11 +118,11 @@ class KafkaCheck(AgentCheck):
         if self.config._kafka_cluster_id_override:
             cluster_id = self.config._kafka_cluster_id_override
 
-        self.report_highwater_offsets(highwater_offsets, self._context_limit, cluster_id)
+        self.report_highwater_offsets(highwater_offsets, reporting_limit, cluster_id)
         self.report_consumer_offsets_and_lag(
             consumer_offsets,
             highwater_offsets,
-            self._context_limit - len(highwater_offsets),
+            reporting_limit - len(highwater_offsets),
             broker_timestamps,
             cluster_id,
         )
@@ -140,19 +150,31 @@ class KafkaCheck(AgentCheck):
             for broker_meta in cluster_metadata.brokers.values()
         ]
 
+    def _emit_cluster_monitoring_event(self, payload: dict) -> None:
+        payload.setdefault('collection_timestamp', int(time() * 1000))
+        payload.setdefault('bootstrap_servers', self.config._kafka_connect_str)
+        self.event_platform_event(json.dumps(payload), "data-streams-message")
+
+    def _send_cluster_monitoring_connection_error(self, reason: str) -> None:
+        self._emit_cluster_monitoring_event(
+            {
+                'kafka_cluster_id': self.config._kafka_cluster_id_override or '',
+                'config_type': 'connection_error',
+                'reason': reason,
+            }
+        )
+
     def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
         payload = {
-            'collection_timestamp': int(time() * 1000),
             'kafka_cluster_id': cluster_id,
             'config_type': 'heartbeat',
             'contexts': total_contexts,
             'contexts_limit': self._context_limit,
-            'bootstrap_servers': self.config._kafka_connect_str,
             'brokers': self._get_broker_list(),
         }
         if self.config._kafka_cluster_id_override:
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
-        self.event_platform_event(json.dumps(payload), "data-streams-message")
+        self._emit_cluster_monitoring_event(payload)
 
     def get_consumer_offsets(self):
         # {(consumer_group, topic, partition): offset}
