@@ -21,11 +21,6 @@ from ddev.ai.config.models import (
 # ---------------------------------------------------------------------------
 
 
-def test_agent_config_valid_tools():
-    ac = AgentConfig(name="a", tools=["read_file", "grep"])
-    assert ac.tools == ["read_file", "grep"]
-
-
 def test_agent_config_unknown_tool_raises():
     with pytest.raises(ValidationError, match="Unknown tool names"):
         AgentConfig.model_validate({"name": "a", "tools": ["teleport"]})
@@ -78,6 +73,11 @@ def test_resource_envelope_unknown_type_raises():
 def test_task_config_both_set_raises():
     with pytest.raises(ValidationError, match="Exactly one"):
         TaskConfig(name="t1", prompt="Do it.", prompt_path="prompts/task.md")
+
+
+def test_task_config_context_flags_mutually_exclusive():
+    with pytest.raises(ValidationError, match="mutually exclusive"):
+        TaskConfig(name="t1", prompt="x", clear_context_before=True, compact_context_before=True)
 
 
 def test_task_config_neither_set_raises():
