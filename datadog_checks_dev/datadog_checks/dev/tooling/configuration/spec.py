@@ -118,11 +118,13 @@ def files_validator(files, loader) -> None:
 
 
 def expand_template_items(items: list, loader, file_name: str, section: str) -> set[int]:
-    """Expand every template: item in items in-place, using per-item overrides.
+    """Expand every template: item in items in-place.
 
-    Returns the set of 0-based indices that failed to resolve so callers can skip
-    further processing of those items.
+    Overrides accumulate across all items (same semantics as options_validator).
+    Returns the set of 0-based indices that failed to resolve.
     """
+    overrides: dict = {}
+    override_errors: list = []
     failed: set[int] = set()
     i = 0
     while i < len(items):
@@ -131,8 +133,6 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
             i += 1
             continue
 
-        overrides: dict = {}
-        override_errors: list = []
         resolved = False
 
         while 'template' in item:
@@ -148,7 +148,7 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
 
             errors = loader.templates.apply_overrides(tmpl, overrides)
             if errors:
-                override_errors.append(errors)
+                override_errors.append((i, errors))
 
             if isinstance(tmpl, dict):
                 tmpl.update(item)
@@ -181,12 +181,13 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
 
         if not resolved:
             failed.add(i)
-        elif overrides:
-            for errors in override_errors:
-                error_message = '\n'.join(errors)
-                loader.errors.append(f'{loader.source}, {file_name}, {section} #{i + 1}: {error_message}')
 
         i += 1
+
+    if overrides:
+        for idx, errors in override_errors:
+            error_message = '\n'.join(errors)
+            loader.errors.append(f'{loader.source}, {file_name}, {section} #{idx + 1}: {error_message}')
 
     return failed
 
@@ -334,81 +335,19 @@ def options_validator(options, loader, file_name, *sections):
     if sections_display:
         sections_display += ', '
 
-    overrides = {}
-    override_errors = []
+    failed = expand_template_items(options, loader, file_name, f'{sections_display}option')
 
     option_names_origin = {}
-    hide_template = False
     for option_index, option in enumerate(options, 1):
+        if option_index - 1 in failed:
+            continue
+
         if not isinstance(option, dict):
             loader.errors.append(
                 '{}, {}, {}option #{}: Option attribute must be a mapping object'.format(
                     loader.source, file_name, sections_display, option_index
                 )
             )
-            continue
-
-        templates_resolved = False
-        while 'template' in option:
-            hide_template = option.get('hidden', False)
-
-            overrides.update(option.pop('overrides', {}))
-            try:
-                template = loader.templates.load(option.pop('template'))
-            except Exception as e:
-                loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
-                break
-
-            else:
-                # Handle the case where a template name is overriden
-                if 'name' in option:
-                    template['name'] = option['name']
-
-            errors = loader.templates.apply_overrides(template, overrides)
-            if errors:
-                override_errors.append((option_index, errors))
-
-            if isinstance(template, dict):
-                template.update(option)
-                option = template
-                options[option_index - 1] = template
-            elif isinstance(template, list):
-                if template:
-                    option = template[0]
-                    for item_index, template_item in enumerate(template):
-                        options.insert(option_index + item_index, template_item)
-
-                    # Delete what's at the current index
-                    options.pop(option_index - 1)
-
-                    # Perform this check once again
-                    if not isinstance(option, dict):
-                        loader.errors.append(
-                            '{}, {}, {}option #{}: Template option must be a mapping object'.format(
-                                loader.source, file_name, sections_display, option_index
-                            )
-                        )
-                        break
-                else:
-                    loader.errors.append(
-                        '{}, {}, {}option #{}: Template refers to an empty array'.format(
-                            loader.source, file_name, sections_display, option_index
-                        )
-                    )
-                    break
-            else:
-                loader.errors.append(
-                    '{}, {}, {}option #{}: Template does not refer to a mapping object nor array'.format(
-                        loader.source, file_name, sections_display, option_index
-                    )
-                )
-                break
-
-        # Only set upon success or if there were no templates
-        else:
-            templates_resolved = True
-
-        if not templates_resolved:
             continue
 
         if 'name' not in option:
@@ -427,7 +366,7 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        option.setdefault('hidden', hide_template)
+        option.setdefault('hidden', False)
         if not isinstance(option['hidden'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
@@ -573,14 +512,6 @@ def options_validator(options, loader, file_name, *sections):
             previous_sections = list(sections)
             previous_sections.append(option_name)
             options_validator(nested_options, loader, file_name, *previous_sections)
-
-    # If there are unused overrides, add the associated error messages
-    if overrides:
-        for option_index, errors in override_errors:
-            error_message = '\n'.join(errors)
-            loader.errors.append(
-                f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {error_message}'
-            )
 
 
 def formats_validator(formats, loader, file_name, sections_display, option_name, property_name=None):

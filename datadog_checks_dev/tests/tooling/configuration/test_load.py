@@ -3275,7 +3275,7 @@ def test_template_array_primitive():
         )
         spec.load()
 
-        assert 'test, test.yaml, instances, option #2: Template option must be a mapping object' in spec.errors
+        assert 'test, test.yaml, instances, option #2: Template item must be a mapping object' in spec.errors
 
 
 def test_template_primitive():
