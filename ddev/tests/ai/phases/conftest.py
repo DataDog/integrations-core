@@ -12,9 +12,9 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
@@ -157,6 +157,7 @@ def make_agent_phase(
     Pass ``goal_runtime_builder`` as a callable (owner_id: str) -> AgentRuntime for goal tests.
     """
     config = PhaseConfig(
+        name="default",
         agent="writer",
         tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
         checkpoint=checkpoint,
@@ -170,7 +171,6 @@ def make_agent_phase(
     context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
-        config_dir=flow_dir,
         callbacks=effective_callbacks,
     )
 
@@ -186,7 +186,8 @@ def make_agent_phase(
         config=config,
         checkpoint_manager=checkpoint_manager,
         context=context,
-        agent_config=agent_config or AgentConfig(tools=[]),
+        agent_config=agent_config
+        or AgentConfig(name="writer", tools=[], system_prompt_path=flow_dir / "prompts" / "writer.md"),
         process_factory=process_factory,
     )
     phase.queue = message_queue
@@ -217,7 +218,6 @@ def flow_context(flow_dir):
     return FlowContext(
         runtime_variables={},
         flow_variables={},
-        config_dir=flow_dir,
     )
 
 

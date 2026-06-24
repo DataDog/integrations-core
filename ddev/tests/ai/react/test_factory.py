@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
 from typing import Any
 
 from ddev.ai.agent.base import BaseAgent
@@ -9,7 +10,7 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.tools.registry import ToolRegistry
@@ -43,7 +44,7 @@ def test_create_returns_scoped_process_and_forwards_build_inputs():
     factory = ReActProcessFactory(runtime_builder, callbacks)
 
     scope = AgentScope(owner_id="p1.sub.001-x", role=AgentRole.SUBAGENT)
-    config = AgentConfig(tools=["read_file"])
+    config = AgentConfig(name="writer", tools=["read_file"], system_prompt_path=Path("/fake.md"))
     process = factory.create(scope=scope, agent_config=config, system_prompt="be helpful")
 
     assert isinstance(process, ReActProcess)

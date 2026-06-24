@@ -11,8 +11,9 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
@@ -44,24 +45,24 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
 def test_render_task_prompt_from_file(tmp_path):
     prompt_file = tmp_path / "task.md"
     prompt_file.write_text("Hello ${name}.")
-    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {"name": "Alice"})
+    result = render_task_prompt(TaskConfig(name="t1", prompt_path=tmp_path / "task.md"), {"name": "Alice"})
     assert result == "Hello Alice."
 
 
 def test_render_task_prompt_inline():
-    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), None, {"name": "Bob"})
+    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), {"name": "Bob"})
     assert result == "Hello Bob."
 
 
 def test_render_task_prompt_forwards_resolver(tmp_path):
     (tmp_path / "task.md").write_text("Memory: ${draft_memory}")
-    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {}, resolve_key)
+    result = render_task_prompt(TaskConfig(name="t1", prompt_path=tmp_path / "task.md"), {}, resolve_key)
     assert result == "Memory: resolved(draft_memory)"
 
 
 def test_render_task_prompt_raises_when_no_source():
     with pytest.raises(FlowConfigError, match="prompt"):
-        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_path=None), None, {})
+        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_path=None), {})
 
 
 # ---------------------------------------------------------------------------
@@ -71,20 +72,20 @@ def test_render_task_prompt_raises_when_no_source():
 
 def test_render_memory_prompt_from_file(tmp_path):
     (tmp_path / "mem.md").write_text("List files for ${phase_name}.")
-    result = render_memory_prompt(CheckpointConfig(memory_prompt_path="mem.md"), tmp_path, {"phase_name": "draft"})
+    result = render_memory_prompt(CheckpointConfig(memory_prompt_path=tmp_path / "mem.md"), {"phase_name": "draft"})
     assert result == "List files for draft."
 
 
 def test_render_memory_prompt_inline():
     result = render_memory_prompt(
-        CheckpointConfig(memory_prompt="List files for ${phase_name}."), None, {"phase_name": "draft"}
+        CheckpointConfig(memory_prompt="List files for ${phase_name}."), {"phase_name": "draft"}
     )
     assert result == "List files for draft."
 
 
 def test_render_memory_prompt_raises_when_no_source():
     with pytest.raises(FlowConfigError, match="memory_prompt"):
-        render_memory_prompt(CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), None, {})
+        render_memory_prompt(CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), {})
 
 
 # ---------------------------------------------------------------------------
@@ -95,20 +96,34 @@ def test_render_memory_prompt_raises_when_no_source():
 @pytest.mark.parametrize(
     "config,match",
     [
-        (PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
-        (PhaseConfig(agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
-        (PhaseConfig(agent="writer"), "at least one task"),
+        (
+            PhaseConfig(name="test_phase", tasks=[TaskConfig(name="t1", prompt="x")]),
+            "requires 'agent'",
+        ),
+        (
+            PhaseConfig(
+                name="test_phase", agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]
+            ),
+            "unknown agent",
+        ),
+        (PhaseConfig(name="test_phase", agent="writer"), "at least one task"),
     ],
     ids=["missing_agent", "unknown_agent", "empty_tasks"],
 )
 def test_validate_config_rejects_invalid(config, match):
     with pytest.raises(FlowConfigError, match=match):
-        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
+        AgenticPhase.validate_config(
+            "p1", config, {"writer": AgentConfig(name="writer", system_prompt_path=Path("/fake.md"))}
+        )
 
 
 def test_validate_config_accepts_valid():
     AgenticPhase.validate_config(
-        "p1", PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]), {"writer": AgentConfig()}
+        "p1",
+        PhaseConfig(
+            name="test_phase", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]
+        ),
+        {"writer": AgentConfig(name="writer", system_prompt_path=Path("/fake.md"))},
     )
 
 
@@ -221,7 +236,8 @@ async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatc
 
     assert captured["owner_id"] == "p1"
     assert captured["system_prompt"] == "Project: myproj"
-    assert captured["agent_config"] == AgentConfig(tools=[])
+    assert captured["agent_config"].name == "writer"
+    assert captured["agent_config"].tools == []
 
 
 async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, message_queue):
@@ -385,9 +401,8 @@ async def test_run_memory_step_returns_response_data(flow_dir, monkeypatch, mess
 # ---------------------------------------------------------------------------
 
 
-async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
+async def test_spawn_subagent_wiring(flow_dir, monkeypatch, message_queue):
     """Real runtime factory wires spawn_subagent logs under the checkpoint root."""
-    flow_dir = flow_context.config_dir
 
     def make_usage() -> TokenUsage:
         return TokenUsage(input_tokens=100, output_tokens=50, cache_read_input_tokens=0, cache_creation_input_tokens=0)
@@ -416,6 +431,7 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
 
     monkeypatch.setattr("ddev.ai.agent.build.AnthropicAgent", fake_anthropic_agent)
 
+    from ddev.ai.phases.base import FlowContext
     from ddev.ai.runtime.resources import RunResources
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
@@ -423,16 +439,25 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
     resources = RunResources(
         agent_clients={"anthropic": object()},
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
-        agents={"writer": AgentConfig(tools=["spawn_subagent"])},
+        agents={
+            "writer": AgentConfig(
+                name="writer", tools=["spawn_subagent"], system_prompt_path=flow_dir / "prompts" / "writer.md"
+            )
+        },
         callbacks=run_callbacks,
     )
+    context = FlowContext(runtime_variables={}, flow_variables={}, callbacks=run_callbacks)
     phase = AgenticPhase.build(
         phase_id="p1",
-        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        config=PhaseConfig(
+            name="test_phase",
+            agent="writer",
+            tasks=[TaskConfig(name="t1", prompt="Do the work.")],
+        ),
         deps=[],
         resources=resources,
         checkpoint_manager=checkpoint_manager,
-        context=flow_context,
+        context=context,
     )
     phase.queue = message_queue
 

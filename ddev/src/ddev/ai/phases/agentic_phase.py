@@ -6,12 +6,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
@@ -28,13 +28,12 @@ if TYPE_CHECKING:
 
 def render_task_prompt(
     task: TaskConfig,
-    config_dir: Path,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None = None,
 ) -> str:
     """Render a task prompt — from file if prompt_path is set, inline otherwise."""
     if task.prompt_path is not None:
-        return render_prompt(config_dir / task.prompt_path, context, resolver)
+        return render_prompt(task.prompt_path, context, resolver)
     if task.prompt is None:
         raise FlowConfigError("TaskConfig must set either 'prompt' or 'prompt_path'")
     return render_inline(task.prompt, context, resolver)
@@ -42,12 +41,11 @@ def render_task_prompt(
 
 def render_memory_prompt(
     checkpoint: CheckpointConfig,
-    config_dir: Path,
     context: dict[str, Any],
 ) -> str:
     """Render a checkpoint memory prompt — from file if memory_prompt_path is set, inline otherwise."""
     if checkpoint.memory_prompt_path is not None:
-        return render_prompt(config_dir / checkpoint.memory_prompt_path, context)
+        return render_prompt(checkpoint.memory_prompt_path, context)
     if checkpoint.memory_prompt is None:
         raise FlowConfigError("CheckpointConfig must set either 'memory_prompt' or 'memory_prompt_path'")
     return render_inline(checkpoint.memory_prompt, context)
@@ -105,7 +103,6 @@ class AgenticPhase(Phase):
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
     ) -> AgenticPhase:
-        # config.agent is guaranteed set & known by validate_config.
         agent_name = cast(str, config.agent)
         agent_config = resources.agent_config(agent_name)
         process_factory = resources.process_factory
@@ -198,7 +195,7 @@ class AgenticPhase(Phase):
         context: dict[str, Any],
         has_goal: bool,
     ) -> str:
-        prompt = render_task_prompt(task, self._config_dir, context, self._resolver)
+        prompt = render_task_prompt(task, context, self._resolver)
         if has_goal:
             return prompt + GOAL_TASK_SUFFIX
         return prompt
@@ -220,7 +217,7 @@ class AgenticPhase(Phase):
         prompt: str,
         result: ReActResult,
     ) -> ReActResult:
-        goal_text = render_goal_text(task, self._config_dir, context, self._resolver)
+        goal_text = render_goal_text(task, context, self._resolver)
         try:
             outcome: GoalLoopOutcome = await run_goal_loop(
                 task=task,
@@ -274,7 +271,7 @@ class AgenticPhase(Phase):
         """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
         user_additions = None
         if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
+            user_additions = render_memory_prompt(self._config.checkpoint, context)
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         response = await process.run_once(memory_prompt)
@@ -284,7 +281,7 @@ class AgenticPhase(Phase):
         self.before_react()
 
         system_prompt = render_prompt(
-            self._config_dir / "prompts" / f"{self._agent_name}.md",
+            self._agent_config.system_prompt_path,
             context,
             self._resolver,
         )

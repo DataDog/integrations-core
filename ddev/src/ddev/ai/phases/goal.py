@@ -4,15 +4,15 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any
+
+from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
@@ -110,13 +110,12 @@ class GoalLoopOutcome:
 
 def render_goal_text(
     task: TaskConfig,
-    config_dir: Path,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None,
 ) -> str:
     """Render the goal — from file if goal_path is set, inline otherwise."""
     if task.goal_path is not None:
-        return render_prompt(config_dir / task.goal_path, context, resolver)
+        return render_prompt(task.goal_path, context, resolver)
     assert task.goal is not None  # caller checks
     return render_inline(task.goal, context, resolver)
 
@@ -134,8 +133,17 @@ def build_reviewer_user_message(
     )
 
 
+class _ReviewerOutput(BaseModel):
+    model_config = ConfigDict(extra="ignore", strict=True)
+    valid: bool
+    reason: str = ""
+
+
+_REVIEWER_ADAPTER: TypeAdapter[_ReviewerOutput] = TypeAdapter(_ReviewerOutput)
+
+
 def parse_reviewer_output(text: str) -> tuple[bool, str] | None:
-    """Return (valid, reason) if text parses; None if it does not."""
+    """Return (valid, reason) if text parses as the reviewer JSON schema; None otherwise."""
     stripped = text.strip()
     if stripped.startswith("```"):
         stripped = stripped.strip("`")
@@ -143,16 +151,10 @@ def parse_reviewer_output(text: str) -> tuple[bool, str] | None:
             stripped = stripped[4:]
         stripped = stripped.strip()
     try:
-        obj = json.loads(stripped)
-    except (json.JSONDecodeError, ValueError):
+        parsed = _REVIEWER_ADAPTER.validate_json(stripped)
+    except ValidationError:
         return None
-    if not isinstance(obj, dict):
-        return None
-    valid = obj.get("valid")
-    reason = obj.get("reason", "")
-    if not isinstance(valid, bool) or not isinstance(reason, str):
-        return None
-    return valid, reason
+    return parsed.valid, parsed.reason
 
 
 async def _run_reviewer_once(
@@ -271,6 +273,7 @@ async def run_goal_loop(
     """
     reviewer_scope = AgentScope(owner_id=f"{phase_id}.goal.{task.name}", role=AgentRole.GOAL_REVIEWER)
     reviewer_config = AgentConfig(
+        name=f"{parent_agent_config.name}_reviewer",
         provider=parent_agent_config.provider,
         tools=filter_read_only(parent_agent_config.tools),
     )

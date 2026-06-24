@@ -5,12 +5,15 @@
 import asyncio
 import json
 import os
+from pathlib import Path
 
 import httpx
 import pytest
 from prometheus_client import Metric
 from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.flows.openmetrics.phases import inspect_endpoint as inspect_endpoint_module
 from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     EndpointInspectionError,
@@ -20,7 +23,6 @@ from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     _parse_exposition,
 )
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError
@@ -107,12 +109,11 @@ def _make_phase(
     context = FlowContext(
         runtime_variables=runtime_variables if runtime_variables is not None else {"endpoint_url": ENDPOINT_URL},
         flow_variables={},
-        config_dir=flow_dir,
     )
     phase = InspectEndpointPhase(
         phase_id=phase_id,
         dependencies=[],
-        config=PhaseConfig(),
+        config=PhaseConfig(name="inspect"),
         checkpoint_manager=checkpoint_manager,
         context=context,
     )
@@ -301,23 +302,27 @@ async def test_failure_missing_endpoint_url(flow_dir, message_queue):
 
 def test_validate_config_rejects_agent():
     with pytest.raises(FlowConfigError, match="must not declare 'agent'"):
-        InspectEndpointPhase.validate_config("p", PhaseConfig(agent="x"), {"x": AgentConfig()})
+        InspectEndpointPhase.validate_config(
+            "p",
+            PhaseConfig(name="inspect", agent="x"),
+            {"x": AgentConfig(name="x", system_prompt_path=Path("/fake.md"))},
+        )
 
 
 def test_validate_config_rejects_tasks():
-    config = PhaseConfig(tasks=[TaskConfig(name="t", prompt="hi")])
+    config = PhaseConfig(name="inspect", tasks=[TaskConfig(name="t", prompt="hi")])
     with pytest.raises(FlowConfigError, match="must not declare 'tasks'"):
         InspectEndpointPhase.validate_config("p", config, {})
 
 
 def test_validate_config_rejects_checkpoint():
-    config = PhaseConfig(checkpoint=CheckpointConfig(memory_prompt="x"))
+    config = PhaseConfig(name="inspect", checkpoint=CheckpointConfig(memory_prompt="x"))
     with pytest.raises(FlowConfigError, match="must not declare 'checkpoint'"):
         InspectEndpointPhase.validate_config("p", config, {})
 
 
 def test_validate_config_accepts_minimal():
-    InspectEndpointPhase.validate_config("p", PhaseConfig(), {})
+    InspectEndpointPhase.validate_config("p", PhaseConfig(name="inspect"), {})
 
 
 # ---------------------------------------------------------------------------

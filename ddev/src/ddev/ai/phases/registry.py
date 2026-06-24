@@ -6,8 +6,8 @@ import importlib
 import inspect
 from pathlib import Path
 
+from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.phases.base import Phase
-from ddev.ai.phases.config import FlowConfigError
 
 
 class PhaseRegistry:
@@ -16,6 +16,9 @@ class PhaseRegistry:
 
     def register(self, name: str, phase_cls: type[Phase]) -> None:
         self._registry[name] = phase_cls
+
+    def contains(self, name: str) -> bool:
+        return name in self._registry
 
     def known_names(self) -> list[str]:
         return sorted(self._registry)

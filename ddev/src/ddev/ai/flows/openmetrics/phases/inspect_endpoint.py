@@ -12,8 +12,9 @@ from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_string_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import AgentConfig, PhaseConfig
 from ddev.ai.phases.base import Phase, PhaseOutcome
-from ddev.ai.phases.config import AgentConfig, FlowConfigError, PhaseConfig
 
 REQUEST_TIMEOUT_SECONDS = 10.0
 RESPONSE_BODY_LIMIT_BYTES = 10 * 1024 * 1024  # 10 MB
