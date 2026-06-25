@@ -56,7 +56,7 @@ METRICS_COLUMNS = {
     'sum_select_range_check',
 }
 
-INTERNAL_COLUMNS = {'_dd_digest_text', '_dd_statement_source'}
+INTERNAL_COLUMNS = {'_dd_statement_id', '_dd_statement_source'}
 DIGEST_STATEMENT_SOURCE = 'events_statements_summary_by_digest'
 PREPARED_STATEMENT_SOURCE = 'prepared_statements_instances'
 
@@ -75,10 +75,10 @@ def _row_state_key(row):
     :return: a tuple uniquely identifying the cumulative database counter
     """
     statement_source = row.get('_dd_statement_source', DIGEST_STATEMENT_SOURCE)
-    if row['digest'] is not None:
-        return statement_source, row['schema_name'], row['digest']
+    if statement_source == PREPARED_STATEMENT_SOURCE:
+        return statement_source, row['schema_name'], row['_dd_statement_id']
 
-    return statement_source, row['schema_name'], row.get('_dd_digest_text', row['digest_text'])
+    return statement_source, row['schema_name'], row['digest']
 
 
 def _strip_internal_columns(row):
@@ -269,6 +269,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         sql_statement_summary = """\
             SELECT %s AS `_dd_statement_source`,
+                   NULL AS `_dd_statement_id`,
                    `schema_name`,
                    `digest`,
                    `digest_text`,
@@ -299,36 +300,35 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if collect_prepared_statements:
             # Every prepared statement object has a row in `performance_schema.prepared_statements_instances`.
-            # Group by `schema_name` and `digest_text` to get the totals for each statement.
             prepared_sql_statement_summary = """\
                 SELECT  %s AS `_dd_statement_source`,
+                        `object_instance_begin` AS `_dd_statement_id`,
                         `owner_object_schema` AS `schema_name`,
                         NULL AS `digest`,
                         `sql_text` AS `digest_text`,
-                        sum(`count_execute`) AS `count_star`,
-                        sum(`sum_timer_execute`) AS `sum_timer_wait`,
-                        sum(`sum_lock_time`) AS `sum_lock_time`,
-                        sum(`sum_errors`) AS `sum_errors`,
-                        sum(`sum_rows_affected`) AS `sum_rows_affected`,
-                        sum(`sum_rows_sent`) AS `sum_rows_sent`,
-                        sum(`sum_rows_examined`) AS `sum_rows_examined`,
-                        sum(`sum_select_scan`) AS `sum_select_scan`,
-                        sum(`sum_select_full_join`) AS `sum_select_full_join`,
-                        sum(`sum_no_index_used`) AS `sum_no_index_used`,
-                        sum(`sum_no_good_index_used`) AS `sum_no_good_index_used`,
-                        sum(`sum_sort_rows`) AS `sum_sort_rows`,
-                        sum(`sum_sort_merge_passes`) AS `sum_sort_merge_passes`,
-                        sum(`sum_sort_range`) AS `sum_sort_range`,
-                        sum(`sum_sort_scan`) AS `sum_sort_scan`,
-                        sum(`sum_created_tmp_tables`) AS `sum_created_tmp_tables`,
-                        sum(`sum_created_tmp_disk_tables`) AS `sum_created_tmp_disk_tables`,
-                        sum(`sum_select_full_range_join`) AS `sum_select_full_range_join`,
-                        sum(`sum_select_range`) AS `sum_select_range`,
-                        sum(`sum_select_range_check`) AS `sum_select_range_check`,
+                        `count_execute` AS `count_star`,
+                        `sum_timer_execute` AS `sum_timer_wait`,
+                        `sum_lock_time` AS `sum_lock_time`,
+                        `sum_errors` AS `sum_errors`,
+                        `sum_rows_affected` AS `sum_rows_affected`,
+                        `sum_rows_sent` AS `sum_rows_sent`,
+                        `sum_rows_examined` AS `sum_rows_examined`,
+                        `sum_select_scan` AS `sum_select_scan`,
+                        `sum_select_full_join` AS `sum_select_full_join`,
+                        `sum_no_index_used` AS `sum_no_index_used`,
+                        `sum_no_good_index_used` AS `sum_no_good_index_used`,
+                        `sum_sort_rows` AS `sum_sort_rows`,
+                        `sum_sort_merge_passes` AS `sum_sort_merge_passes`,
+                        `sum_sort_range` AS `sum_sort_range`,
+                        `sum_sort_scan` AS `sum_sort_scan`,
+                        `sum_created_tmp_tables` AS `sum_created_tmp_tables`,
+                        `sum_created_tmp_disk_tables` AS `sum_created_tmp_disk_tables`,
+                        `sum_select_full_range_join` AS `sum_select_full_range_join`,
+                        `sum_select_range` AS `sum_select_range`,
+                        `sum_select_range_check` AS `sum_select_range_check`,
                         NOW() AS `last_seen`
                 FROM performance_schema.prepared_statements_instances
                 WHERE `sql_text` NOT LIKE 'EXPLAIN %%' OR `sql_text` IS NULL
-                GROUP BY `owner_object_schema`, `sql_text`
                 """
 
             sql_statement_summary = f"""\
@@ -380,7 +380,6 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement
-            normalized_row['_dd_digest_text'] = row['digest_text']
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)

@@ -290,6 +290,7 @@ def test_statement_metrics_baselines_new_digest_before_merging_query_signature(d
     def row(digest, digest_text, count_star):
         return {
             '_dd_statement_source': statements.DIGEST_STATEMENT_SOURCE,
+            '_dd_statement_id': None,
             'schema_name': 'personio',
             'digest': digest,
             'digest_text': digest_text,
@@ -323,7 +324,7 @@ def test_statement_metrics_baselines_new_digest_before_merging_query_signature(d
     assert len(rows) == 1
     assert rows[0]['query_signature'] == query_signature
     assert rows[0]['count_star'] == 10
-    assert '_dd_digest_text' not in rows[0]
+    assert '_dd_statement_id' not in rows[0]
     assert '_dd_statement_source' not in rows[0]
 
 
@@ -1110,7 +1111,6 @@ def test_normalize_queries(dbm_instance):
             'digest': '44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb',
             'schema': 'network',
             'digest_text': 'SELECT * from table where name = ?',
-            '_dd_digest_text': 'SELECT * from table where name = ?',
             'query_signature': '761498b7d5f04d11',
             'dd_commands': None,
             'dd_comments': None,
@@ -1139,7 +1139,6 @@ def test_normalize_queries(dbm_instance):
             'digest': None,
             'schema': None,
             'digest_text': None,
-            '_dd_digest_text': None,
             'query_signature': None,
             'dd_commands': None,
             'dd_comments': None,
