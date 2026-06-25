@@ -94,14 +94,18 @@ class KafkaCheck(AgentCheck):
                 # cache-pruning floor. They require an extra broker call, so fetch them once here and
                 # only under cluster monitoring, then share with the metadata collector below.
                 if self.config._cluster_monitoring_enabled:
-                    low_watermark_offsets = self.metadata_collector._fetch_earliest_offsets(
+                    low_watermark_offsets = self.metadata_collector.fetch_earliest_offsets(
                         self.client.get_topic_partitions()
                     )
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     # Prune cache entries below the lowest offset any consumer could read: the low
                     # watermark when we have it, otherwise the earliest committed consumer offset.
-                    prune_floors = low_watermark_offsets or self._earliest_consumer_offsets(consumer_offsets)
+                    if low_watermark_offsets:
+                        prune_floors = low_watermark_offsets
+                    else:
+                        self.log.debug("No low watermarks available; pruning cache by earliest consumer offset")
+                        prune_floors = self._earliest_consumer_offsets(consumer_offsets)
                     self._add_broker_timestamps(broker_timestamps, highwater_offsets, prune_floors)
                     self._save_broker_timestamps(broker_timestamps, persistent_cache_key)
             else:
@@ -531,9 +535,14 @@ def _get_interpolated_timestamp(timestamps, offset):
     timestamp = slope * (offset - offset_after) + timestamp_after
 
     if offset < offset_before:
-        # Extrapolating to the left of the oldest cached sample: clamp the timestamp so the
-        # reported lag stays bounded instead of growing arbitrarily with the extrapolation.
+        # Extrapolating to the left of the oldest cached sample: clamp the timestamp so the reported
+        # lag stays bounded (at most LAG_EXTRAPOLATION_LIMIT_SECONDS beyond the cache window) instead
+        # of growing arbitrarily with the extrapolation. This bound is independent of cluster
+        # monitoring and the low-watermark floor — it always applies to lag-in-time.
         timestamp = max(timestamp, timestamp_before - LAG_EXTRAPOLATION_LIMIT_SECONDS)
+    # No symmetric right-side clamp: the newest cached sample is the highwater offset we just
+    # collected this run, and a consumer offset can never exceed the highwater, so extrapolating
+    # to the right of the newest sample is unreachable here.
     return timestamp
 
 
@@ -571,16 +580,11 @@ def _visvalingam_whyatt(timestamps, target_count):
     nxt = {o: (offsets[i + 1] if i < len(offsets) - 1 else None) for i, o in enumerate(offsets)}
     alive = set(offsets)
 
-    def significance(o):
-        before, after = prev[o], nxt[o]
-        predicted = timestamps[before] + (timestamps[after] - timestamps[before]) * (o - before) / (after - before)
-        return abs(timestamps[o] - predicted)
-
     current = {}
     heap = []
     for o in offsets:
         if prev[o] is not None and nxt[o] is not None:
-            current[o] = significance(o)
+            current[o] = _interpolation_error(o, prev, nxt, timestamps)
             heap.append((current[o], o))
     heapq.heapify(heap)
 
@@ -597,6 +601,13 @@ def _visvalingam_whyatt(timestamps, target_count):
         nxt[before], prev[after] = after, before
         for neighbor in (before, after):
             if prev[neighbor] is not None and nxt[neighbor] is not None:
-                current[neighbor] = significance(neighbor)
+                current[neighbor] = _interpolation_error(neighbor, prev, nxt, timestamps)
                 heapq.heappush(heap, (current[neighbor], neighbor))
     return timestamps
+
+
+def _interpolation_error(o, prev, nxt, timestamps):
+    """Time error introduced by reconstructing sample ``o`` from its neighbors via linear interpolation."""
+    before, after = prev[o], nxt[o]
+    predicted = timestamps[before] + (timestamps[after] - timestamps[before]) * (o - before) / (after - before)
+    return abs(timestamps[o] - predicted)

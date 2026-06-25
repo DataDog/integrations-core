@@ -10,7 +10,11 @@ import pytest
 
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
-from datadog_checks.kafka_consumer.kafka_consumer import _get_interpolated_timestamp, _visvalingam_whyatt
+from datadog_checks.kafka_consumer.kafka_consumer import (
+    _get_interpolated_timestamp,
+    _prune_below_anchor,
+    _visvalingam_whyatt,
+)
 
 pytestmark = [pytest.mark.unit]
 
@@ -454,25 +458,36 @@ def test_get_interpolated_timestamp_caps_left_extrapolation():
     assert _get_interpolated_timestamp({1000: 10000, 1100: 10100}, 1050) == 10050
 
 
-def test_visvalingam_whyatt_keeps_endpoints_and_drops_collinear():
-    # A perfectly linear series: every interior point is redundant, so any of them can go.
-    timestamps = {0: 0.0, 10: 10.0, 20: 20.0, 30: 30.0, 40: 40.0}
-    _visvalingam_whyatt(timestamps, 3)
-    assert len(timestamps) == 3
-    assert 0 in timestamps and 40 in timestamps  # endpoints are always preserved
-
-
-def test_visvalingam_whyatt_keeps_rate_changes():
-    # Constant rate up to offset 20, then a sharp acceleration: 10 is redundant, the kink at 20 isn't.
-    timestamps = {0: 0.0, 10: 10.0, 20: 20.0, 30: 100.0}
-    _visvalingam_whyatt(timestamps, 3)
-    assert set(timestamps) == {0, 20, 30}
-
-
-def test_visvalingam_whyatt_noop_when_within_target():
-    timestamps = {0: 0.0, 10: 10.0}
-    _visvalingam_whyatt(timestamps, 5)
-    assert timestamps == {0: 0.0, 10: 10.0}
+@pytest.mark.parametrize(
+    'timestamps, target_count, expected_len, required_offsets',
+    [
+        pytest.param(
+            {0: 0.0, 10: 10.0, 20: 20.0, 30: 30.0, 40: 40.0},
+            3,
+            3,
+            {0, 40},
+            id='linear series drops collinear interior points, keeps endpoints',
+        ),
+        pytest.param(
+            {0: 0.0, 10: 10.0, 20: 20.0, 30: 100.0},
+            3,
+            3,
+            {0, 20, 30},
+            id='keeps the rate-change kink at offset 20, drops redundant offset 10',
+        ),
+        pytest.param(
+            {0: 0.0, 10: 10.0},
+            5,
+            2,
+            {0, 10},
+            id='no-op when already within target',
+        ),
+    ],
+)
+def test_visvalingam_whyatt(timestamps, target_count, expected_len, required_offsets):
+    _visvalingam_whyatt(timestamps, target_count)
+    assert len(timestamps) == expected_len
+    assert required_offsets <= set(timestamps)
 
 
 @pytest.mark.parametrize(
@@ -599,6 +614,81 @@ def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator
 
     # effective offset = max(5, 50) = 50 -> consumer_timestamp 1000, producer_timestamp 1100, lag 100.
     aggregator.assert_metric("kafka.estimated_consumer_lag", value=100.0, count=1)
+
+
+def test_report_lag_in_time_caps_left_extrapolation_without_low_watermark(kafka_instance, check, aggregator):
+    # With cluster monitoring off there is no low watermark, so the consumer offset is used as-is.
+    # When it predates every cached sample, the lag is still bounded by the left-extrapolation cap
+    # (cache window + LAG_EXTRAPOLATION_LIMIT_SECONDS) rather than growing without limit.
+    kafka_instance['data_streams_enabled'] = True
+    check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    check.client = mock_client
+
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 0}}
+    highwater_offsets = {("topic1", 0): 1100}
+    broker_timestamps = {"topic1_0": {1000: 10000.0, 1100: 10100.0}}
+
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
+    )
+
+    # Unclamped extrapolation would give consumer_timestamp 9000 (lag 1100). The cap raises it to
+    # oldest_sample - 600 = 9400, so lag = 10100 - 9400 = 700 (cache window 100 + 600s budget).
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=700.0, count=1)
+
+
+def test_earliest_consumer_offsets_takes_cross_group_min(kafka_instance, check):
+    # The pruning floor is the lowest committed offset for a partition across every consumer group.
+    check = check(kafka_instance)
+    consumer_offsets = {
+        "group1": {("topic1", 0): 10, ("topic1", 1): 50},
+        "group2": {("topic1", 0): 5, ("topic2", 0): 99},
+    }
+    assert check._earliest_consumer_offsets(consumer_offsets) == {
+        ("topic1", 0): 5,
+        ("topic1", 1): 50,
+        ("topic2", 0): 99,
+    }
+
+
+@pytest.mark.parametrize(
+    'timestamps, floor, expected_offsets',
+    [
+        pytest.param(
+            {10: 1.0, 20: 2.0, 30: 3.0, 40: 4.0},
+            35,
+            {30, 40},
+            id='keeps one anchor (max below floor) and everything at/above it',
+        ),
+        pytest.param(
+            {10: 1.0, 20: 2.0, 30: 3.0},
+            30,
+            {20, 30},
+            id='offset equal to floor is retained, not pruned',
+        ),
+        pytest.param(
+            {30: 3.0, 40: 4.0},
+            10,
+            {30, 40},
+            id='no samples below floor: nothing pruned',
+        ),
+        pytest.param(
+            {20: 2.0, 30: 3.0},
+            25,
+            {20, 30},
+            id='single sample below floor is the anchor and is kept',
+        ),
+    ],
+)
+def test_prune_below_anchor(timestamps, floor, expected_offsets):
+    _prune_below_anchor(timestamps, floor)
+    assert set(timestamps) == expected_offsets
 
 
 def test_count_consumer_contexts(check, kafka_instance):

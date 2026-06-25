@@ -534,7 +534,7 @@ class ClusterMetadataCollector:
                 "data-streams-message",
             )
 
-    def _fetch_earliest_offsets(self, topic_partitions):
+    def fetch_earliest_offsets(self, topic_partitions):
         """Batch-fetch log-start offsets via AdminClient.list_offsets(earliest).
 
         Uses ListOffsets with the EARLIEST_TIMESTAMP sentinel, which the broker
