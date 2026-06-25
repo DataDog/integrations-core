@@ -9,6 +9,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.cluster_metadata import ClusterMetadataCollector
 from datadog_checks.kafka_consumer.config import KafkaConfig
+from datadog_checks.kafka_consumer.connectors import KafkaConnectCollector
 from datadog_checks.kafka_consumer.constants import (
     HIGH_WATERMARK,
     KAFKA_INTERNAL_TOPICS,
@@ -33,6 +34,9 @@ class KafkaCheck(AgentCheck):
 
         # Initialize cluster metadata collector
         self.metadata_collector = ClusterMetadataCollector(self, self.client, self.config, self.log)
+        # Eagerly constructed so the check object owns the collector's lifetime; collect() is a
+        # no-op when _kafka_connect_urls is empty, so this is safe without a URL guard.
+        self._connector_collector = KafkaConnectCollector(self, self.config, self.log)
 
     def check(self, _):
         """The main entrypoint of the check."""
@@ -129,7 +133,9 @@ class KafkaCheck(AgentCheck):
 
         # Collect cluster metadata if enabled
         if self.config._cluster_monitoring_enabled:
-            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
+            connect_status = self._collect_connect_status(cluster_id)
+            self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id, connect_status)
+
             try:
                 self.metadata_collector.collect_all_metadata(highwater_offsets)
             except Exception as e:
@@ -164,7 +170,19 @@ class KafkaCheck(AgentCheck):
             }
         )
 
-    def _send_cluster_monitoring_heartbeat(self, total_contexts: int, cluster_id: str) -> None:
+    def _collect_connect_status(self, cluster_id: str) -> dict[str, bool] | None:
+        """Collect connector status for all configured Connect URLs, or None if unconfigured."""
+        if not self.config._kafka_connect_urls:
+            return None
+        try:
+            return self._connector_collector.collect(self.config._kafka_cluster_id_override or cluster_id)
+        except Exception as e:
+            self.log.error("Error collecting connector metadata: %s", e)
+            return {}
+
+    def _send_cluster_monitoring_heartbeat(
+        self, total_contexts: int, cluster_id: str, connect_status: dict[str, bool] | None = None
+    ) -> None:
         payload = {
             'kafka_cluster_id': cluster_id,
             'config_type': 'heartbeat',
@@ -174,6 +192,8 @@ class KafkaCheck(AgentCheck):
         }
         if self.config._kafka_cluster_id_override:
             payload['original_kafka_cluster_id'] = self.config._auto_detected_cluster_id
+        if connect_status is not None:
+            payload['connect_api_status'] = connect_status
         self._emit_cluster_monitoring_event(payload)
 
     def get_consumer_offsets(self):
