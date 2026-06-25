@@ -56,6 +56,10 @@ METRICS_COLUMNS = {
     'sum_select_range_check',
 }
 
+INTERNAL_COLUMNS = {'_dd_digest_text', '_dd_statement_source'}
+DIGEST_STATEMENT_SOURCE = 'events_statements_summary_by_digest'
+PREPARED_STATEMENT_SOURCE = 'prepared_statements_instances'
+
 
 def _row_key(row):
     """
@@ -63,6 +67,36 @@ def _row_key(row):
     :return: a tuple uniquely identifying this row
     """
     return row['schema_name'], row['query_signature']
+
+
+def _row_state_key(row):
+    """
+    :param row: a normalized row from a MySQL statement metrics source
+    :return: a tuple uniquely identifying the cumulative database counter
+    """
+    statement_source = row.get('_dd_statement_source', DIGEST_STATEMENT_SOURCE)
+    if row['digest'] is not None:
+        return statement_source, row['schema_name'], row['digest']
+
+    return statement_source, row['schema_name'], row.get('_dd_digest_text', row['digest_text'])
+
+
+def _strip_internal_columns(row):
+    return {k: v for k, v in row.items() if k not in INTERNAL_COLUMNS}
+
+
+def _merge_rows_by_query_signature(rows):
+    merged_rows = {}
+    for row in rows:
+        query_key = _row_key(row)
+        if query_key in merged_rows:
+            for metric in METRICS_COLUMNS:
+                if metric in row:
+                    merged_rows[query_key][metric] = merged_rows[query_key].get(metric, 0) + row[metric]
+        else:
+            merged_rows[query_key] = _strip_internal_columns(row)
+
+    return list(merged_rows.values())
 
 
 class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
@@ -197,7 +231,8 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         monotonic_rows = self._filter_query_rows(monotonic_rows)
         monotonic_rows = self._normalize_queries(monotonic_rows)
         monotonic_rows = self._add_associated_rows(monotonic_rows)
-        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_key)
+        rows = self._state.compute_derivative_rows(monotonic_rows, METRICS_COLUMNS, key=_row_state_key)
+        rows = _merge_rows_by_query_signature(rows)
         return rows
 
     def _get_statement_count(self, tags):
@@ -229,11 +264,12 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         condition = (
             "WHERE `last_seen` >= %s"
             if only_query_recent_statements
-            else "WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL"
+            else "WHERE `digest_text` NOT LIKE 'EXPLAIN %%' OR `digest_text` IS NULL"
         )
 
         sql_statement_summary = """\
-            SELECT `schema_name`,
+            SELECT %s AS `_dd_statement_source`,
+                   `schema_name`,
                    `digest`,
                    `digest_text`,
                    `count_star`,
@@ -265,7 +301,8 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             # Every prepared statement object has a row in `performance_schema.prepared_statements_instances`.
             # Group by `schema_name` and `digest_text` to get the totals for each statement.
             prepared_sql_statement_summary = """\
-                SELECT  `owner_object_schema` AS `schema_name`,
+                SELECT  %s AS `_dd_statement_source`,
+                        `owner_object_schema` AS `schema_name`,
                         NULL AS `digest`,
                         `sql_text` AS `digest_text`,
                         sum(`count_execute`) AS `count_star`,
@@ -290,7 +327,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                         sum(`sum_select_range_check`) AS `sum_select_range_check`,
                         NOW() AS `last_seen`
                 FROM performance_schema.prepared_statements_instances
-                WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL
+                WHERE `sql_text` NOT LIKE 'EXPLAIN %%' OR `sql_text` IS NULL
                 GROUP BY `owner_object_schema`, `sql_text`
                 """
 
@@ -307,7 +344,12 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 """
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            args = [self._last_seen] if only_query_recent_statements else None
+            if only_query_recent_statements:
+                args = [DIGEST_STATEMENT_SOURCE, self._last_seen]
+            elif collect_prepared_statements:
+                args = [DIGEST_STATEMENT_SOURCE, PREPARED_STATEMENT_SOURCE]
+            else:
+                args = [DIGEST_STATEMENT_SOURCE]
             cursor.execute(sql_statement_summary, args)
 
             rows = cursor.fetchall() or []  # type: ignore
@@ -338,6 +380,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement
+            normalized_row['_dd_digest_text'] = row['digest_text']
             normalized_row['query_signature'] = compute_sql_signature(obfuscated_statement)
             metadata = statement['metadata']
             normalized_row['dd_tables'] = metadata.get('tables', None)
@@ -359,7 +402,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         for row in rows:
             key = (row['schema_name'], row['query_signature'])
             digest_rows = self._statement_rows.get(key, {})
-            digest_rows[row['digest']] = row
+            digest_rows[_row_state_key(row)] = row
             self._statement_rows[key] = digest_rows
 
         return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]
