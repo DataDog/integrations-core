@@ -225,7 +225,7 @@ def test_generate_configs_loads_generated_discovery_module():
     service = Service(id='svc', host='10.0.0.1', ports=(Port(number=9090),))
 
     with patch(
-        'datadog_checks.base.checks.base.importlib.import_module', return_value=discovery_module
+        'datadog_checks.base.utils.discovery.probe.importlib.import_module', return_value=discovery_module
     ) as import_module:
         assert list(GeneratedDiscoveryCheck.generate_configs(service)) == [
             {'init_config': {}, 'instances': [{'host': '10.0.0.1'}]},
