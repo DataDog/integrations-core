@@ -11,7 +11,7 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, ExtensionOID
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.log import get_check_logger
-from datadog_checks.base.utils.http import create_ssl_context, fetch_intermediate_cert
+from datadog_checks.base.utils.http import DEFAULT_AIA_CHASING_MAX_DEPTH, create_ssl_context, fetch_intermediate_cert
 from datadog_checks.base.utils.time import get_timestamp
 
 from .const import SERVICE_CHECK_CAN_CONNECT, SERVICE_CHECK_EXPIRATION, SERVICE_CHECK_VALIDATION
@@ -194,9 +194,14 @@ class TLSRemoteCheck(object):
 
         self.load_intermediate_certs(der_cert)
 
-    def load_intermediate_certs(self, der_cert):
+    def load_intermediate_certs(self, der_cert, max_depth=None):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
+        if max_depth is None:
+            max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
+        if max_depth <= 0:
+            return
+
         try:
             cert = load_der_x509_certificate(der_cert)
         except Exception as e:
@@ -236,4 +241,4 @@ class TLSRemoteCheck(object):
                 self.agent_check._intermediate_cert_id_cache.add(cert_id)
 
             self.agent_check._intermediate_cert_uri_cache[uri] = access_time
-            self.load_intermediate_certs(intermediate_cert)
+            self.load_intermediate_certs(intermediate_cert, max_depth - 1)

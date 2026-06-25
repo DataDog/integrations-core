@@ -576,6 +576,29 @@ class TestAIAChasing:
         secure.get.assert_called_once_with('https://issuer.test/ca.der')
         plain.get.assert_called_once_with('https://issuer.test/ca.der')
 
+    def test_aia_fetch_session_does_not_chase(self):
+        session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=build_cert())
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http_module.fetch_intermediate_cert('https://issuer.test/ca.der', logging.getLogger())
+
+        assert session.aia_chasing_max_depth == 0
+
+    def test_load_intermediate_certs_stops_at_max_depth(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        session = mock.MagicMock()
+        session.get.side_effect = [
+            mock.MagicMock(content=build_cert('http://issuer.test/{}.der'.format(i))) for i in range(10)
+        ]
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('http://issuer.test/start.der'), certs)
+
+        assert session.get.call_count == http_module.DEFAULT_AIA_CHASING_MAX_DEPTH
+        assert len(certs) == http_module.DEFAULT_AIA_CHASING_MAX_DEPTH
+
     def test_load_intermediate_certs_stops_on_cert_cycle(self):
         http = RequestsWrapper({}, {})
         cert = build_cert('http://issuer.test/ca.der')

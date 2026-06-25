@@ -98,6 +98,7 @@ AIA_TLS_CONFIG_FIELDS = frozenset(
 )
 AIA_ALLOWED_SCHEMES = frozenset({'http', 'https'})
 MAX_AIA_CERT_SIZE = 64 * 1024
+DEFAULT_AIA_CHASING_MAX_DEPTH = 5
 
 PROXY_SETTINGS_DISABLED = {
     # This will instruct `requests` to ignore the `HTTP_PROXY`/`HTTPS_PROXY`
@@ -298,7 +299,7 @@ def fetch_intermediate_cert(
 
     # Verified attempt first; only retry without verification on TLS failures.
     try:
-        response = RequestsWrapper(_get_aia_tls_config(tls_config, True), {}, logger=logger).get(uri)
+        response = _aia_fetch_session(tls_config, True, logger).get(uri)
         response.raise_for_status()
     except SSLError as e:
         logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=True): %s', uri, e)
@@ -309,13 +310,20 @@ def fetch_intermediate_cert(
         return _read_capped_content(response, uri, logger)
 
     try:
-        response = RequestsWrapper(_get_aia_tls_config(tls_config, False), {}, logger=logger).get(uri)
+        response = _aia_fetch_session(tls_config, False, logger).get(uri)
         response.raise_for_status()
     except Exception as e:
         logger.error('Error fetching intermediate certificate from `%s` after TLS fallback: %s', uri, e)
         return None
     else:
         return _read_capped_content(response, uri, logger)
+
+
+def _aia_fetch_session(tls_config, tls_verify, logger):
+    session = RequestsWrapper(_get_aia_tls_config(tls_config, tls_verify), {}, logger=logger)
+    # The fetch itself must never recurse into another AIA chase.
+    session.aia_chasing_max_depth = 0
+    return session
 
 
 class RequestsWrapper(object):
@@ -333,6 +341,7 @@ class RequestsWrapper(object):
         'auth_token_handler',
         'request_size',
         'tls_protocols_allowed',
+        'aia_chasing_max_depth',
         'tls_config',
     )
 
@@ -498,6 +507,8 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
+        self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
+
         self.tls_protocols_allowed = []
         for protocol in config['tls_protocols_allowed']:
             if protocol in SUPPORTED_PROTOCOL_VERSIONS:
@@ -606,6 +617,8 @@ class RequestsWrapper(object):
         try:
             response = request_method(url, **new_options)
         except SSLError as e:
+            if self.aia_chasing_max_depth <= 0:
+                raise e
             # fetch the intermediate certs
             parsed_url = urlparse(url)
             hostname = parsed_url.hostname
@@ -650,11 +663,15 @@ class RequestsWrapper(object):
         self.load_intermediate_certs(der_cert, certs)
         return certs
 
-    def load_intermediate_certs(self, der_cert, certs, visited_cert_ids=None):
+    def load_intermediate_certs(self, der_cert, certs, visited_cert_ids=None, max_depth=None):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
         if visited_cert_ids is None:
             visited_cert_ids = set()
+        if max_depth is None:
+            max_depth = self.aia_chasing_max_depth
+        if max_depth <= 0:
+            return certs
 
         cert_id = sha256(der_cert).digest()
         if cert_id in visited_cert_ids:
@@ -696,7 +713,7 @@ class RequestsWrapper(object):
                 self.logger.error('Error serializing intermediate certificate from `%s`: %s', uri, e)
                 continue
 
-            self.load_intermediate_certs(intermediate_cert, certs, visited_cert_ids)
+            self.load_intermediate_certs(intermediate_cert, certs, visited_cert_ids, max_depth - 1)
         return certs
 
     def _create_session(self):
