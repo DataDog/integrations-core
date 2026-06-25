@@ -6,7 +6,7 @@ import re
 import mock
 import pytest
 
-from datadog_checks.base.utils.discovery import Discovery
+from datadog_checks.base.utils.discovery import Discovery, Port, Service, candidate_ports
 
 
 def test_include_empty():
@@ -189,3 +189,42 @@ def test_key_in_items():
     d = Discovery(mock_get_items, include={'a.*': {'filter': 'xxxx'}}, key=lambda item: item['key'])
     assert list(d.get_items()) == [('a.*', 'a', {'key': 'a', 'value': 75}, {'filter': 'xxxx'})]
     assert mock_get_items.mock_calls == [mock.call()]
+
+
+def test_candidate_ports_prefers_hints_and_deduplicates():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='http'),
+            Port(number=9090, name='metrics'),
+            Port(number=8081, name='admin'),
+        ),
+    )
+
+    assert list(candidate_ports(service, [9090, 9090, 1234])) == [
+        Port(number=9090, name='metrics'),
+        Port(number=8080, name='http'),
+        Port(number=8081, name='admin'),
+    ]
+
+
+def test_discovery_strategy_passes_complete_contexts():
+    from datadog_checks.base.utils.discovery import discovery_strategy
+
+    @discovery_strategy(provides=('port',))
+    def my_strategy(service):
+        yield {'port': 8080}
+
+    assert list(my_strategy(None)) == [{'port': 8080}]
+
+
+def test_discovery_strategy_raises_on_missing_key():
+    from datadog_checks.base.utils.discovery import discovery_strategy
+
+    @discovery_strategy(provides=('port', 'host'))
+    def bad_strategy(service):
+        yield {'port': 8080}
+
+    with pytest.raises(ValueError, match="did not provide declared keys"):
+        list(bad_strategy(None))
