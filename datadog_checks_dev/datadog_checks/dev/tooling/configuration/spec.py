@@ -156,10 +156,16 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
                 items[i] = tmpl
             elif isinstance(tmpl, list):
                 if tmpl:
-                    item = tmpl[0]
+                    # Wrapper attributes (template/overrides already popped) such as
+                    # `hidden: true` apply to every expanded item; the item's own value wins.
+                    wrapper_attrs = {k: v for k, v in item.items() if k != 'name'}
                     for k, tmpl_item in enumerate(tmpl):
+                        if isinstance(tmpl_item, dict):
+                            for attr, value in wrapper_attrs.items():
+                                tmpl_item.setdefault(attr, value)
                         items.insert(i + 1 + k, tmpl_item)
                     items.pop(i)
+                    item = tmpl[0]
                     if not isinstance(item, dict):
                         loader.errors.append(
                             f'{loader.source}, {file_name}, {section} #{i + 1}: Template item must be a mapping object'

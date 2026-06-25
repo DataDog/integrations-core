@@ -381,7 +381,7 @@ class ModelConsumer:
         lines = ['        instance_data = {']
         for field_name, template in candidate.items():
             if '{' in str(template):
-                rendered = f"'{template}'.format(service=service, **ctx)"
+                rendered = f"{template!r}.format(service=service, **ctx)"
             else:
                 rendered = repr(template)
             lines.append(f'            {field_name!r}: {rendered},')
