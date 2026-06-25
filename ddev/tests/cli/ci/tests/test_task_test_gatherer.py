@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from pathlib import Path
 
 import pytest
@@ -20,27 +19,28 @@ from ddev.utils.github_async.models import JobStep, WorkflowJob
 # Helpers
 # ---------------------------------------------------------------------------
 
-COVERAGE_XML = '<?xml version="1.0"?>\n<coverage line-rate="1.0"></coverage>\n'
+FIXTURES = Path(__file__).parent / "fixtures"
 
-JUNIT_PASSING = """<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="pytest" tests="1" failures="0">
-  <testcase classname="tests.test_a" name="test_ok"/>
-</testsuite>
-"""
+COVERAGE_XML = (FIXTURES / "coverage-sample.xml").read_text(encoding="utf-8")
+JUNIT_PASSING = (FIXTURES / "test-unit-py3.13-4.4.xml").read_text(encoding="utf-8")
+JUNIT_E2E = (FIXTURES / "test-e2e-py3.13-4.4.xml").read_text(encoding="utf-8")
+JUNIT_FAILING = (FIXTURES / "test-unit-failing.xml").read_text(encoding="utf-8")
 
-JUNIT_FAILING = """<?xml version="1.0" encoding="utf-8"?>
-<testsuite name="pytest" tests="2" failures="1">
-  <testcase classname="tests.test_a" name="test_ok"/>
-  <testcase classname="tests.test_a" name="test_fail"><failure message="boom">trace</failure></testcase>
-</testsuite>
-"""
+# The single failing test case in JUNIT_FAILING, as parsed into a classname::name identifier.
+FAILING_TEST_ID = "nagios.tests.test_nagios.TestEventLogTailer::test_line_parser"
 
 
-def _batch_job(name: str, target: str = "ntp", environment: str = "py3.13", platform: str = "linux") -> BatchJob:
+def _batch_job(
+    name: str,
+    target: str = "ntp",
+    environment: str = "py3.13",
+    platform: str = "linux",
+    runner: str = "ubuntu-latest",
+) -> BatchJob:
     return BatchJob(
         name=name,
         target=target,
-        runner="ubuntu-latest",
+        runner=runner,
         environment=environment,
         platform=platform,
         unit_tests=True,
@@ -55,6 +55,7 @@ def _make_job_tree(
     *,
     coverage: bool = True,
     junit: str | None = JUNIT_PASSING,
+    e2e: bool = True,
 ) -> Path:
     job_dir = artifacts_path / job_name
     job_dir.mkdir(parents=True)
@@ -62,11 +63,14 @@ def _make_job_tree(
         (job_dir / "coverage.xml").write_text(COVERAGE_XML, encoding="utf-8")
     if junit is not None:
         (job_dir / f"test-unit-{environment}.xml").write_text(junit, encoding="utf-8")
+    if e2e:
+        (job_dir / f"test-e2e-{environment}.xml").write_text(JUNIT_E2E, encoding="utf-8")
     return job_dir
 
 
-def _write_metadata(artifacts_path: Path, jobs: list[dict]) -> None:
-    (artifacts_path / "metadata.json").write_text(json.dumps({"jobs": jobs}), encoding="utf-8")
+def _workflow_job(name: str, conclusion: str, failed_step: str | None = None, run_id: int = 100) -> WorkflowJob:
+    steps = [JobStep(name=failed_step, status="completed", conclusion="failure")] if failed_step else []
+    return WorkflowJob(id=1, run_id=run_id, name=name, status="completed", conclusion=conclusion, steps=steps)
 
 
 def _batch_finished(artifacts_path: Path, **overrides) -> BatchFinished:
@@ -105,10 +109,11 @@ def _make_gatherer(tmp_path: Path) -> TaskTestGatherer:
 async def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts, "j1")
-    _write_metadata(artifacts, [{"name": "j1", "conclusion": "success"}])
 
     gatherer = _make_gatherer(tmp_path)
-    await gatherer.process_message(_batch_finished(artifacts, job_list=[_batch_job("j1")]))
+    await gatherer.process_message(
+        _batch_finished(artifacts, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")])
+    )
 
     messages = _drain_queue(gatherer.queue)
     assert len(messages) == 1
@@ -122,42 +127,55 @@ async def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path) -
     assert status.failed_count == 0
     assert status.failed_checks == []
 
-    assert (tmp_path / "out" / "coverage" / "ntp-py3.13.xml").is_file()
-    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-test-unit-py3.13.xml").is_file()
+    assert (tmp_path / "out" / "coverage" / "ntp-py3.13-linux-ubuntu-latest.xml").is_file()
+    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-ubuntu-latest-test-unit-py3.13.xml").is_file()
+    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-ubuntu-latest-test-e2e-py3.13.xml").is_file()
 
 
 @pytest.mark.asyncio
 async def test_failure_path_records_failed_step_and_tests(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING)
-    _write_metadata(artifacts, [{"name": "j1", "conclusion": "failure", "failed_step": "Run unit tests"}])
 
     gatherer = _make_gatherer(tmp_path)
-    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=[_batch_job("j1")]))
+    await gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            status="failure",
+            job_list=[_batch_job("j1")],
+            jobs=[_workflow_job("j1", "failure", failed_step="Run unit tests")],
+        )
+    )
 
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.failed_count == 1
-    assert [check.name for check in status.failed_checks] == ["ntp"]
+    assert [check.integration for check in status.failed_checks] == ["ntp"]
 
     result = gatherer._results_by_run[100][0]
     assert result.status == "failure"
     assert result.failed_step == "Run unit tests"
-    assert result.failed_tests == ["tests.test_a::test_fail"]
+    assert result.failed_tests == [FAILING_TEST_ID]
 
 
 @pytest.mark.asyncio
 async def test_failed_check_carries_environment_error_and_tests(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING)
-    _write_metadata(artifacts, [{"name": "j1", "conclusion": "failure", "failed_step": "Run unit tests"}])
 
     gatherer = _make_gatherer(tmp_path)
-    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=[_batch_job("j1")]))
+    await gatherer.process_message(
+        _batch_finished(
+            artifacts,
+            status="failure",
+            job_list=[_batch_job("j1")],
+            jobs=[_workflow_job("j1", "failure", failed_step="Run unit tests")],
+        )
+    )
 
     check = _drain_queue(gatherer.queue)[0].workflows[0].failed_checks[0]
     assert check.environment == "py3.13"
-    assert check.error == "Run unit tests"
-    assert check.failed_tests == ["tests.test_a::test_fail"]
+    assert check.failed_step == "Run unit tests"
+    assert check.failed_tests == [FAILING_TEST_ID]
 
 
 @pytest.mark.asyncio
@@ -168,7 +186,7 @@ async def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
 
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.failed_count == 2
-    assert {check.error for check in status.failed_checks} == {"timed out"}
+    assert {check.failed_step for check in status.failed_checks} == {"timed out"}
 
 
 @pytest.mark.asyncio
@@ -176,19 +194,36 @@ async def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) 
     artifacts = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts, "j1", environment="py3.12", junit=JUNIT_PASSING)
     _make_job_tree(artifacts, "j2", environment="py3.13", junit=JUNIT_FAILING)
-    _write_metadata(
-        artifacts,
-        [{"name": "j1", "conclusion": "success"}, {"name": "j2", "conclusion": "failure"}],
-    )
 
     gatherer = _make_gatherer(tmp_path)
     job_list = [_batch_job("j1", environment="py3.12"), _batch_job("j2", target="kafka", environment="py3.13")]
-    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=job_list))
+    jobs = [_workflow_job("j1", "success"), _workflow_job("j2", "failure")]
+    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=job_list, jobs=jobs))
 
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.success_count == 1
     assert status.failed_count == 1
-    assert [check.name for check in status.failed_checks] == ["kafka"]
+    assert [check.integration for check in status.failed_checks] == ["kafka"]
+
+
+@pytest.mark.asyncio
+async def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path) -> None:
+    artifacts = tmp_path / "artifacts" / "100"
+    _make_job_tree(artifacts, "j1", e2e=False)
+    _make_job_tree(artifacts, "j2", e2e=False)
+
+    gatherer = _make_gatherer(tmp_path)
+    job_list = [
+        _batch_job("j1", platform="linux", runner="ubuntu-latest"),
+        _batch_job("j2", platform="windows", runner="windows-latest"),
+    ]
+    jobs = [_workflow_job("j1", "success"), _workflow_job("j2", "success")]
+    await gatherer.process_message(_batch_finished(artifacts, job_list=job_list, jobs=jobs))
+
+    # Both jobs share target+environment but differ by platform/runner: each keeps its own file.
+    coverage_dir = tmp_path / "out" / "coverage"
+    assert (coverage_dir / "ntp-py3.13-linux-ubuntu-latest.xml").is_file()
+    assert (coverage_dir / "ntp-py3.13-windows-windows-latest.xml").is_file()
 
 
 @pytest.mark.asyncio
@@ -197,13 +232,23 @@ async def test_accumulates_across_batches(tmp_path: Path) -> None:
 
     artifacts1 = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts1, "j1")
-    _write_metadata(artifacts1, [{"name": "j1", "conclusion": "success"}])
-    await gatherer.process_message(_batch_finished(artifacts1, id="b1", run_id=100, job_list=[_batch_job("j1")]))
+    await gatherer.process_message(
+        _batch_finished(
+            artifacts1, id="b1", run_id=100, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")]
+        )
+    )
 
     artifacts2 = tmp_path / "artifacts" / "200"
     _make_job_tree(artifacts2, "j1")
-    _write_metadata(artifacts2, [{"name": "j1", "conclusion": "success"}])
-    await gatherer.process_message(_batch_finished(artifacts2, id="b2", run_id=200, job_list=[_batch_job("j1")]))
+    await gatherer.process_message(
+        _batch_finished(
+            artifacts2,
+            id="b2",
+            run_id=200,
+            job_list=[_batch_job("j1")],
+            jobs=[_workflow_job("j1", "success", run_id=200)],
+        )
+    )
 
     messages = _drain_queue(gatherer.queue)
     assert len(messages) == 2
@@ -213,7 +258,7 @@ async def test_accumulates_across_batches(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_falls_back_to_forwarded_jobs_when_no_metadata(tmp_path: Path) -> None:
+async def test_per_job_status_comes_from_forwarded_jobs(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts, "j1", junit=JUNIT_FAILING)
     jobs = [
@@ -242,10 +287,11 @@ async def test_falls_back_to_forwarded_jobs_when_no_metadata(tmp_path: Path) -> 
 async def test_missing_artifact_dir_is_skipped(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     artifacts.mkdir(parents=True)
-    _write_metadata(artifacts, [{"name": "j1", "conclusion": "success"}])
 
     gatherer = _make_gatherer(tmp_path)
-    await gatherer.process_message(_batch_finished(artifacts, job_list=[_batch_job("j1")]))
+    await gatherer.process_message(
+        _batch_finished(artifacts, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")])
+    )
 
     result = gatherer._results_by_run[100][0]
     assert result.status == "success"
@@ -257,10 +303,11 @@ async def test_missing_artifact_dir_is_skipped(tmp_path: Path) -> None:
 async def test_malformed_junit_is_swallowed(tmp_path: Path) -> None:
     artifacts = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts, "j1", junit="<testsuite><testcase>")
-    _write_metadata(artifacts, [{"name": "j1", "conclusion": "success"}])
 
     gatherer = _make_gatherer(tmp_path)
-    await gatherer.process_message(_batch_finished(artifacts, job_list=[_batch_job("j1")]))
+    await gatherer.process_message(
+        _batch_finished(artifacts, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")])
+    )
 
     assert gatherer._results_by_run[100][0].failed_tests == []
 

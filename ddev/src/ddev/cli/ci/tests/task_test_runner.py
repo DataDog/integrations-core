@@ -15,7 +15,7 @@ from ddev.cli.ci.tests._status import conclusion_to_status
 from ddev.cli.ci.tests.messages import BatchFinished, TestBatch
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
-from ddev.utils.github_async.models import WorkflowRun
+from ddev.utils.github_async.models import WorkflowJob, WorkflowRun
 
 
 @dataclass(frozen=True)
@@ -88,6 +88,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             artifacts_path = await self._download_artifacts(run_id, log_extra)
             self._logger.info("Artifacts downloaded", extra=log_extra)
 
+            jobs = await self._list_jobs(run_id, log_extra)
+
             finished = BatchFinished(
                 id=message.id,
                 status=conclusion_to_status(raw),
@@ -95,6 +97,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 workflow_url=workflow_url,
                 artifacts_path=str(artifacts_path),
                 job_list=message.job_list,
+                jobs=jobs,
             )
         finally:
             try:
@@ -121,6 +124,16 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             if run.data.status == "completed":
                 self._logger.info("Workflow completed", extra=log_extra)
                 return run
+
+    async def _list_jobs(self, run_id: int, log_extra: dict[str, Any]) -> list[WorkflowJob]:
+        """Fetch the workflow run's jobs; on failure log a warning and return an empty list."""
+        jobs: list[WorkflowJob] = []
+        try:
+            async for page in self._client.list_workflow_jobs(self._options.owner, self._options.repo, run_id):
+                jobs.extend(page.data.jobs)
+        except Exception:
+            self._logger.warning("Failed to list workflow jobs", extra=log_extra, exc_info=True)
+        return jobs
 
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
         return {

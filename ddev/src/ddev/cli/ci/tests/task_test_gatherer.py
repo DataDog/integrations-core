@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import re
 import shutil
@@ -14,7 +13,6 @@ from ddev.cli.ci.tests._status import conclusion_to_status
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
     BatchJob,
-    FailedCheck,
     UpdatePRComment,
     WorkflowResult,
     WorkflowStatus,
@@ -27,12 +25,10 @@ from ddev.utils.junit import parse_junit_dir
 #     {job_name}/                     one directory per test target, named after BatchJob.name
 #       coverage.xml                  Cobertura coverage report
 #       test-{unit|e2e}-{env}.xml     pytest JUnit report(s)
-#     *metadata*.json                 optional per-job conclusions + failed step
-# The job-status source is the metadata file; if absent, we fall back to the jobs list forwarded
-# on the message (BatchFinished.jobs), and finally to the batch-level status.
+# Per-job conclusions and failed step come from the jobs forwarded on the message
+# (BatchFinished.jobs); jobs absent from that list fall back to the batch-level status.
 COVERAGE_GLOB = "coverage*.xml"
 JUNIT_GLOB = "test-*.xml"
-METADATA_GLOB = "*metadata*.json"
 
 
 class TaskTestGatherer(AsyncProcessor[BatchFinished]):
@@ -96,26 +92,10 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         """
         return UpdatePRComment(id=message_id, done=True, workflows=list(self._status_by_run.values()))
 
-    def _read_job_statuses(self, message: BatchFinished) -> dict[str, tuple[str | None, str | None]]:
-        """Map job name -> (conclusion, failed_step) from the metadata artifact, else the jobs list."""
+    @staticmethod
+    def _read_job_statuses(message: BatchFinished) -> dict[str, tuple[str | None, str | None]]:
+        """Map job name -> (conclusion, failed_step) from the jobs forwarded on the message."""
         statuses: dict[str, tuple[str | None, str | None]] = {}
-        artifacts_path = Path(message.artifacts_path)
-        if artifacts_path.exists():
-            for metadata_file in sorted(artifacts_path.rglob(METADATA_GLOB)):
-                try:
-                    data = json.loads(metadata_file.read_text(encoding="utf-8"))
-                except (OSError, json.JSONDecodeError):
-                    continue
-                entries = data.get("jobs", []) if isinstance(data, dict) else data
-                if not isinstance(entries, list):
-                    continue
-                for entry in entries:
-                    if isinstance(entry, dict) and entry.get("name"):
-                        conclusion = entry.get("conclusion") or entry.get("status")
-                        statuses[entry["name"]] = (conclusion, entry.get("failed_step"))
-        if statuses:
-            return statuses
-
         for job in message.jobs or []:
             failed_step = next((step.name for step in job.steps if step.conclusion == "failure"), None)
             statuses[job.name] = (job.conclusion, failed_step)
@@ -138,7 +118,7 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
 
     def _organize_artifacts(self, job_dir: Path, batch_job: BatchJob) -> None:
         """Copy coverage and JUnit files into the organized output tree with unique names."""
-        prefix = f"{batch_job.target}-{batch_job.environment}"
+        prefix = f"{batch_job.target}-{batch_job.environment}-{batch_job.platform}-{batch_job.runner}"
 
         coverage_dir = self._output_base_path / "coverage"
         for index, coverage_file in enumerate(sorted(job_dir.rglob(COVERAGE_GLOB))):
@@ -158,17 +138,7 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
     def _build_workflow_status(message: BatchFinished, results: list[WorkflowResult]) -> WorkflowStatus:
         success_count = sum(1 for result in results if result.status == "success")
         failed_count = sum(1 for result in results if result.status == "failure")
-        failed_checks = [
-            FailedCheck(
-                name=result.integration,
-                url=message.workflow_url,
-                environment=result.environment,
-                error=result.failed_step,
-                failed_tests=result.failed_tests,
-            )
-            for result in results
-            if result.status == "failure"
-        ]
+        failed_checks = [result for result in results if result.status == "failure"]
         return WorkflowStatus(
             url=message.workflow_url,
             id=message.run_id,

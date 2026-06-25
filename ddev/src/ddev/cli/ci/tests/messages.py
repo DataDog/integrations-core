@@ -26,13 +26,14 @@ class BatchJob:
 
 
 @dataclass
-class FailedCheck:
-    """A single failed (or timed-out) test job within a workflow."""
+class WorkflowResult:
+    """In-memory result for a single test job within a finished batch."""
 
-    name: str
-    url: str
-    environment: str = ""
-    error: str | None = None
+    integration: str
+    environment: str
+    platform: Literal["linux", "windows", "macos"]
+    status: Literal["success", "failure", "skipped"]
+    failed_step: str | None = None
     failed_tests: list[str] = field(default_factory=list)
 
 
@@ -44,19 +45,7 @@ class WorkflowStatus:
     id: int
     success_count: int | None
     failed_count: int | None
-    failed_checks: list[FailedCheck]
-
-
-@dataclass
-class WorkflowResult:
-    """In-memory result for a single test job within a finished batch."""
-
-    integration: str
-    environment: str
-    platform: Literal["linux", "windows", "macos"]
-    status: Literal["success", "failure", "skipped"]
-    failed_step: str | None = None
-    failed_tests: list[str] = field(default_factory=list)
+    failed_checks: list[WorkflowResult]
 
 
 @dataclass

@@ -48,6 +48,7 @@ from ddev.utils.github_async.models import (
     Label,
     PullRequest,
     WorkflowDispatchResult,
+    WorkflowJobsList,
     WorkflowRun,
 )
 
@@ -125,6 +126,11 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         # An empty page; tests that need artifacts register their own ArtifactsList.
         'list_workflow_run_artifacts': lambda: GitHubResponse(
             data=ArtifactsList(total_count=0, artifacts=[]),
+            headers={},
+        ),
+        # An empty page; tests that need jobs register their own WorkflowJobsList.
+        'list_workflow_jobs': lambda: GitHubResponse(
+            data=WorkflowJobsList(total_count=0, jobs=[]),
             headers={},
         ),
         # Download is a side-effecting no-op by default; per-URL failures are registered explicitly.
@@ -346,6 +352,36 @@ class FakeAsyncGitHubClient:
         )
         response = self._resolve_response(
             'list_workflow_run_artifacts',
+            {'owner': owner, 'repo': repo, 'run_id': run_id, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            if isinstance(page, GitHubResponse):
+                yield page
+            else:
+                yield GitHubResponse.model_validate({'data': page, 'headers': {}})
+
+    async def list_workflow_jobs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowJobsList]]:
+        """Async-generator mirror. A registered response may be a single page or a list of pages."""
+        self._record(
+            'list_workflow_jobs',
+            owner=owner,
+            repo=repo,
+            run_id=run_id,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_workflow_jobs',
             {'owner': owner, 'repo': repo, 'run_id': run_id, 'per_page': per_page, 'timeout': timeout},
         )
         if isinstance(response, BaseException):

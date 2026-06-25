@@ -20,6 +20,8 @@ from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
+    WorkflowJob,
+    WorkflowJobsList,
     WorkflowRun,
 )
 from tests.helpers.github_async import FakeAsyncGitHubClient
@@ -76,6 +78,14 @@ def _artifacts_page(artifacts: list[Artifact]) -> GitHubResponse[ArtifactsList]:
 
 def _mock_artifacts(fake: FakeAsyncGitHubClient, artifacts: list[Artifact]) -> None:
     fake.mock_response("list_workflow_run_artifacts", _artifacts_page(artifacts))
+
+
+def _workflow_job(name: str, conclusion: str = "success") -> WorkflowJob:
+    return WorkflowJob(id=1, run_id=123, name=name, status="completed", conclusion=conclusion)
+
+
+def _mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]) -> None:
+    fake.mock_response("list_workflow_jobs", _wrap(WorkflowJobsList(total_count=len(jobs), jobs=list(jobs))))
 
 
 def _make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner:
@@ -223,6 +233,39 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     assert upd["check_run_id"] == 999
     assert upd["status"] == "completed"
     assert upd["conclusion"] == "success"
+
+
+@pytest.mark.asyncio
+async def test_process_message_forwards_workflow_jobs(tmp_path: Path) -> None:
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [])
+    _mock_jobs(fake, [_workflow_job("j1", "success"), _workflow_job("j2", "failure")])
+    runner = _make_runner(fake, tmp_path)
+
+    await runner.process_message(_batch())
+
+    # The emitted BatchFinished carries the workflow's jobs for the gatherer to read.
+    finished = _drain_queue(runner.queue)[0]
+    assert isinstance(finished, BatchFinished)
+    assert [(job.name, job.conclusion) for job in finished.jobs] == [("j1", "success"), ("j2", "failure")]
+
+
+@pytest.mark.asyncio
+async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_path: Path) -> None:
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [])
+    fake.mock_response("list_workflow_jobs", RuntimeError("boom-list-jobs"))
+    runner = _make_runner(fake, tmp_path)
+
+    # A failure listing jobs must not abort the batch: BatchFinished is still emitted with empty jobs.
+    await runner.process_message(_batch())
+
+    finished = _drain_queue(runner.queue)[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.status == "success"
+    assert finished.jobs == []
 
 
 @pytest.mark.asyncio
