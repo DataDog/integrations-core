@@ -337,7 +337,27 @@ def test_from_yaml_missing_file(tmp_path):
         FlowConfig.from_yaml(tmp_path / "nonexistent.yaml", tmp_path)
 
 
-def test_from_yaml_prompt_file_wrong_type(tmp_path):
+def test_from_yaml_agent_file_wrong_type_is_skipped(tmp_path):
+    (tmp_path / "agents").mkdir()
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: prompt\n---\n\nYou are an agent.")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(
+        """\
+phases:
+  p1:
+    agent: writer
+    tasks:
+      - name: t1
+        prompt: "Do it."
+flow:
+  - phase: p1
+"""
+    )
+    with pytest.raises(FlowConfigError, match="No agent file found for"):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
+def test_from_yaml_prompt_file_wrong_type_is_skipped(tmp_path):
     _write_agent_file(tmp_path, "writer")
     (tmp_path / "prompts").mkdir()
     (tmp_path / "prompts" / "task1.md").write_text("---\ntype: agent\n---\n\nBody.")
@@ -354,7 +374,7 @@ flow:
   - phase: p1
 """
     )
-    with pytest.raises(FlowConfigError, match="expected 'type: prompt' or 'type: goal'"):
+    with pytest.raises(FlowConfigError, match="No prompt file found for prompt_ref"):
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 

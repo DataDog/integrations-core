@@ -14,27 +14,26 @@ from ddev.ai.tools.registry import ToolRegistry
 
 
 def parse_md_file(path: Path) -> tuple[dict[str, Any], str]:
-    """Parse a Markdown file with YAML front matter.
-
-    Returns (front_matter_dict, body_str). Raises FlowConfigError on any problem.
-    """
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as e:
         raise FlowConfigError(f"Cannot read {path}: {e}") from e
 
-    if not text.startswith("---"):
+    if not text.startswith("---\n"):
         raise FlowConfigError(f"{path}: missing YAML front matter (file must start with '---')")
 
-    parts = text.split("---", 2)
-    if len(parts) < 3:
-        raise FlowConfigError(f"{path}: missing YAML front matter closing '---'")
+    try:
+        raw_yaml, raw_body = text[4:].split("\n---\n", 1)
+    except ValueError as e:
+        raise FlowConfigError(f"{path}: missing YAML front matter closing '---'") from e
 
-    _, raw_yaml, raw_body = parts
     try:
         meta = yaml.safe_load(raw_yaml) or {}
     except yaml.YAMLError as e:
         raise FlowConfigError(f"{path}: Invalid YAML in front matter: {e}") from e
+
+    if not isinstance(meta, dict):
+        raise FlowConfigError(f"{path}: YAML front matter must be a mapping")
 
     return meta, raw_body.strip()
 
@@ -207,6 +206,61 @@ class FlowConfig(BaseModel):
 
         return self
 
+    @staticmethod
+    def _load_agents(agents_dir: Path) -> dict[str, AgentConfig]:
+        agents: dict[str, AgentConfig] = {}
+        if not agents_dir.is_dir():
+            return agents
+        for md_file in sorted(agents_dir.glob("*.md")):
+            meta, body = parse_md_file(md_file)
+            if meta.get("type") != "agent":
+                continue
+            fm = {k: v for k, v in meta.items() if k != "type"}
+            fm["system_prompt"] = body
+            try:
+                agents[md_file.stem] = AgentConfig.model_validate(fm)
+            except ValidationError as e:
+                raise FlowConfigError(f"Invalid agent config in {md_file}:\n{e}") from e
+        return agents
+
+    @staticmethod
+    def _load_prompts_and_goals(prompts_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
+        prompts: dict[str, str] = {}
+        goals: dict[str, str] = {}
+        if not prompts_dir.is_dir():
+            return prompts, goals
+        for md_file in sorted(prompts_dir.glob("*.md")):
+            meta, body = parse_md_file(md_file)
+            file_type = meta.get("type")
+            if file_type == "prompt":
+                prompts[md_file.stem] = body
+            elif file_type == "goal":
+                goals[md_file.stem] = body
+        return prompts, goals
+
+    def _validate_references(self, config_dir: Path) -> None:
+        for phase_id, phase in self.phases.items():
+            if phase.agent is not None and phase.agent not in self._agents:
+                raise FlowConfigError(
+                    f"Phase {phase_id!r} references unknown agent: {phase.agent!r} "
+                    f"(No agent file found for {phase.agent!r})"
+                )
+            for i, task in enumerate(phase.tasks):
+                if task.prompt_ref is not None and task.prompt_ref not in self._prompts:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
+                        f"No prompt file found for prompt_ref {task.prompt_ref!r}"
+                    )
+                if task.goal_ref is not None and task.goal_ref not in self._goals:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
+                        f"No goal file found for goal_ref {task.goal_ref!r}"
+                    )
+            if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
+                resolved = config_dir / phase.checkpoint.memory_prompt_path
+                if not resolved.exists():
+                    raise FlowConfigError(f"Phase {phase_id!r} checkpoint memory_prompt_path not found: {resolved}")
+
     @classmethod
     def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
         """Load, parse, and validate flow.yaml. Raises FlowConfigError on any problem."""
@@ -220,60 +274,8 @@ class FlowConfig(BaseModel):
         except ValidationError as e:
             raise FlowConfigError(f"Invalid flow config:\n{e}") from e
 
-        # Scan agents/ directory
-        agents: dict[str, AgentConfig] = {}
-        agents_dir = config_dir / "agents"
-        if agents_dir.is_dir():
-            for md_file in sorted(agents_dir.glob("*.md")):
-                meta, body = parse_md_file(md_file)
-                fm = {k: v for k, v in meta.items() if k != "type"}
-                fm["system_prompt"] = body
-                try:
-                    agents[md_file.stem] = AgentConfig.model_validate(fm)
-                except ValidationError as e:
-                    raise FlowConfigError(f"Invalid agent config in {md_file}:\n{e}") from e
-        config._agents = agents
-
-        # Scan prompts/ directory — build separate indexes for type:prompt and type:goal
-        prompts: dict[str, str] = {}
-        goals: dict[str, str] = {}
-        prompts_dir = config_dir / "prompts"
-        if prompts_dir.is_dir():
-            for md_file in sorted(prompts_dir.glob("*.md")):
-                meta, body = parse_md_file(md_file)
-                file_type = meta.get("type")
-                if file_type == "prompt":
-                    prompts[md_file.stem] = body
-                elif file_type == "goal":
-                    goals[md_file.stem] = body
-                else:
-                    raise FlowConfigError(
-                        f"{md_file}: expected 'type: prompt' or 'type: goal' in front matter, got {file_type!r}"
-                    )
-        config._prompts = prompts
-        config._goals = goals
-
-        # Validate cross-file references
-        for phase_id, phase in config.phases.items():
-            if phase.agent is not None and phase.agent not in agents:
-                raise FlowConfigError(
-                    f"Phase {phase_id!r} references unknown agent: {phase.agent!r} "
-                    f"(No agent file found for {phase.agent!r})"
-                )
-            for i, task in enumerate(phase.tasks):
-                if task.prompt_ref is not None and task.prompt_ref not in prompts:
-                    raise FlowConfigError(
-                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
-                        f"No prompt file found for prompt_ref {task.prompt_ref!r}"
-                    )
-                if task.goal_ref is not None and task.goal_ref not in goals:
-                    raise FlowConfigError(
-                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
-                        f"No goal file found for goal_ref {task.goal_ref!r}"
-                    )
-            if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
-                resolved = config_dir / phase.checkpoint.memory_prompt_path
-                if not resolved.exists():
-                    raise FlowConfigError(f"Phase {phase_id!r} checkpoint memory_prompt_path not found: {resolved}")
+        config._agents = cls._load_agents(config_dir / "agents")
+        config._prompts, config._goals = cls._load_prompts_and_goals(config_dir / "prompts")
+        config._validate_references(config_dir)
 
         return config
