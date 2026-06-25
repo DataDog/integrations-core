@@ -17,9 +17,19 @@ def test_check_n8n_e2e(
 ):
     aggregator = dd_agent_check(rate=True)
 
-    aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200', 'n8n_process:main'], at_least=1)
+    aggregator.assert_metric(
+        "n8n.readiness.check",
+        value=1,
+        tags=["status_code:200", "n8n_process:main"],
+        at_least=1,
+    )
     # Worker also exposes /healthz/readiness via QUEUE_HEALTH_CHECK_ACTIVE on its own port.
-    aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200', 'n8n_process:worker'], at_least=1)
+    aggregator.assert_metric(
+        "n8n.readiness.check",
+        value=1,
+        tags=["status_code:200", "n8n_process:worker"],
+        at_least=1,
+    )
 
     aggregator.assert_metrics_using_metadata(
         common.get_metadata_metrics_for_version(exclude_rare=True),
@@ -34,7 +44,5 @@ def test_check_n8n_e2e(
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(check_rate=True)
 
-    aggregator.assert_metrics_using_metadata(
-        common.get_metadata_metrics_for_version(), check_symmetric_inclusion=False
-    )
-    aggregator.assert_service_check('n8n.openmetrics.health', N8nCheck.OK)
+    aggregator.assert_metrics_using_metadata(common.get_metadata_metrics_for_version(), check_symmetric_inclusion=False)
+    aggregator.assert_service_check("n8n.openmetrics.health", N8nCheck.OK)
