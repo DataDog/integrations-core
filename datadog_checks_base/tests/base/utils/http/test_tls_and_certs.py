@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtendedKeyUsageOID, NameOID
 from requests.exceptions import SSLError
 
+from datadog_checks.base.utils import http as http_module
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.tls import TlsConfig
 from datadog_checks.dev.utils import ON_WINDOWS
@@ -426,7 +427,12 @@ class TestAIAChasing:
 
             error = None
             response = None
-            with run_server(service_server):
+            # The issuer server runs on loopback, which the SSRF guard blocks; this test targets
+            # header leakage, not the host allowlist (covered separately).
+            with (
+                run_server(service_server),
+                mock.patch('datadog_checks.base.utils.http._is_safe_aia_url', return_value=True),
+            ):
                 http = RequestsWrapper(
                     {'headers': {'Authorization': 'Bearer token'}, 'tls_ca_cert': str(root_path), 'skip_proxy': True},
                     {},
@@ -470,10 +476,60 @@ class TestAIAChasing:
                 'tls_validate_hostname': False,
                 'tls_verify': True,
                 'skip_proxy': True,
+                'allow_redirects': False,
             },
             {},
             logger=http.logger,
         )
+
+    def test_load_intermediate_certs_rejects_non_http_scheme(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        session = mock.MagicMock()
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
+            http.load_intermediate_certs(build_cert('unix:///var/run/docker.sock'), certs)
+
+        wrapper.assert_not_called()
+        session.get.assert_not_called()
+        assert certs == []
+
+    @pytest.mark.parametrize(
+        'uri',
+        [
+            'http://127.0.0.1/ca.der',
+            'http://169.254.169.254/latest/meta-data/',
+            'http://10.0.0.5/ca.der',
+        ],
+    )
+    def test_load_intermediate_certs_rejects_non_public_address(self, uri):
+        http = RequestsWrapper({}, {})
+        certs = []
+        session = mock.MagicMock()
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
+            http.load_intermediate_certs(build_cert(uri), certs)
+
+        wrapper.assert_not_called()
+        assert certs == []
+
+    def test_load_intermediate_certs_rejects_oversized_body(self):
+        http = RequestsWrapper({}, {})
+        certs = []
+        session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=b'x' * (64 * 1024 + 1))
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
+
+        assert certs == []
+
+    def test_fetched_intermediate_pem_loads_into_ssl_context(self):
+        from datadog_checks.base.utils.tls import create_ssl_context
+
+        pem = http_module._der_to_pem(build_cert())
+        # PEM output of fetched intermediates must be consumable as `tls_intermediate_ca_certs`.
+        create_ssl_context({'tls_verify': True, 'tls_intermediate_ca_certs': (pem,)})
 
     def test_load_intermediate_certs_skips_unparseable_cert_body(self):
         http = RequestsWrapper({}, {})
@@ -494,15 +550,17 @@ class TestAIAChasing:
         session = mock.MagicMock()
         session.get.return_value = response
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
             http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), certs)
 
+        # Non-TLS errors must not trigger the no-verify fallback (single attempt only).
+        assert wrapper.call_count == 1
         assert certs == []
 
     def test_load_intermediate_certs_falls_back_to_plain_http(self):
         http = RequestsWrapper({}, {})
         secure, plain = mock.MagicMock(), mock.MagicMock()
-        secure.get.side_effect = Exception('TLS handshake failed')
+        secure.get.side_effect = SSLError('TLS handshake failed')
         plain.get.return_value = mock.MagicMock(content=build_cert())
 
         def make_wrapper(instance, init_config, *args, **kwargs):

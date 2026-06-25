@@ -96,6 +96,8 @@ DEFAULT_REMAPPED_FIELDS = {
 AIA_TLS_CONFIG_FIELDS = frozenset(
     {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
 )
+AIA_ALLOWED_SCHEMES = frozenset({'http', 'https'})
+MAX_AIA_CERT_SIZE = 64 * 1024
 
 PROXY_SETTINGS_DISABLED = {
     # This will instruct `requests` to ignore the `HTTP_PROXY`/`HTTPS_PROXY`
@@ -235,30 +237,85 @@ def _der_to_pem(der_cert: bytes) -> str:
 
 
 def _get_aia_tls_config(tls_config: Mapping[str, object] | None, tls_verify: bool) -> dict[str, object]:
-    # Keep trust/negotiation settings, but never auth, client certs, proxies, or session state.
+    # Keep trust/negotiation settings, but never auth, client certs, proxies, redirects, or session state.
     config = {
         key: value for key, value in (tls_config or {}).items() if key in AIA_TLS_CONFIG_FIELDS and value is not None
     }
     config['tls_verify'] = tls_verify
     config['skip_proxy'] = True
+    config['allow_redirects'] = False
     return config
+
+
+def _is_safe_aia_url(uri: str, logger: logging.Logger | logging.LoggerAdapter) -> bool:
+    parsed = urlparse(uri)
+    if parsed.scheme not in AIA_ALLOWED_SCHEMES:
+        logger.debug('Skipping intermediate certificate URI with unsupported scheme: `%s`', uri)
+        return False
+
+    host = parsed.hostname
+    if not host:
+        logger.debug('Skipping intermediate certificate URI without a host: `%s`', uri)
+        return False
+
+    try:
+        addresses = [ipaddress.ip_address(host)]
+    except ValueError:
+        try:
+            addresses = [ipaddress.ip_address(info[4][0]) for info in socket.getaddrinfo(host, parsed.port)]
+        except OSError:
+            # Let the request layer surface resolution failures rather than guessing.
+            return True
+
+    for address in addresses:
+        if (
+            address.is_private
+            or address.is_loopback
+            or address.is_link_local
+            or address.is_reserved
+            or address.is_multicast
+            or address.is_unspecified
+        ):
+            logger.debug('Skipping intermediate certificate URI resolving to non-public address `%s`', address)
+            return False
+
+    return True
+
+
+def _read_capped_content(response, uri: str, logger: logging.Logger | logging.LoggerAdapter) -> bytes | None:
+    content = response.content
+    if len(content) > MAX_AIA_CERT_SIZE:
+        logger.debug('Intermediate certificate from `%s` exceeds %d bytes, skipping', uri, MAX_AIA_CERT_SIZE)
+        return None
+    return content
 
 
 def fetch_intermediate_cert(
     uri: str, logger: logging.Logger | logging.LoggerAdapter, tls_config: Mapping[str, object] | None = None
 ) -> bytes | None:
-    for tls_verify in (True, False):
-        try:
-            response = RequestsWrapper(_get_aia_tls_config(tls_config, tls_verify), {}, logger=logger).get(uri)
-            response.raise_for_status()
-        except Exception as e:
-            logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=%s): %s', uri, tls_verify, e)
-            continue
-        else:
-            return response.content
+    if not _is_safe_aia_url(uri, logger):
+        return None
 
-    logger.error('Error fetching intermediate certificate from `%s`', uri)
-    return None
+    # Verified attempt first; only retry without verification on TLS failures.
+    try:
+        response = RequestsWrapper(_get_aia_tls_config(tls_config, True), {}, logger=logger).get(uri)
+        response.raise_for_status()
+    except SSLError as e:
+        logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=True): %s', uri, e)
+    except Exception as e:
+        logger.error('Error fetching intermediate certificate from `%s`: %s', uri, e)
+        return None
+    else:
+        return _read_capped_content(response, uri, logger)
+
+    try:
+        response = RequestsWrapper(_get_aia_tls_config(tls_config, False), {}, logger=logger).get(uri)
+        response.raise_for_status()
+    except Exception as e:
+        logger.error('Error fetching intermediate certificate from `%s` after TLS fallback: %s', uri, e)
+        return None
+    else:
+        return _read_capped_content(response, uri, logger)
 
 
 class RequestsWrapper(object):
