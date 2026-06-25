@@ -10,7 +10,15 @@ from dataclasses import dataclass, field
 
 from aiolimiter import AsyncLimiter
 
-from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, InstrumentedAsyncLimiter, RateLimiterConfig
+from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, InstrumentedAsyncLimiter
+
+
+@dataclass(frozen=True)
+class RateLimiterConfig:
+    """Rate limit configuration for a single limiter tier."""
+
+    max_rate: float
+    time_period: float = RATE_LIMIT_TIME_PERIOD
 
 
 @dataclass
@@ -26,8 +34,8 @@ class RateLimiterFactoryConfig:
     - total_max_rate: 1,500 req/hr — = 15k octo-sts budget / 10 max concurrent runs
     """
 
-    default: RateLimiterConfig = field(default_factory=lambda: RateLimiterConfig(max_rate=360.0))
-    slow: RateLimiterConfig = field(default_factory=lambda: RateLimiterConfig(max_rate=120.0))
+    default: RateLimiterConfig = RateLimiterConfig(max_rate=360.0)
+    slow: RateLimiterConfig = RateLimiterConfig(max_rate=120.0)
     total_max_rate: float = 1500.0
     slow_integrations: frozenset[str] = field(default_factory=frozenset)
 
@@ -55,11 +63,11 @@ class RateLimiterFactory:
             )
         self._slow_integrations = cfg.slow_integrations
         self._default = InstrumentedAsyncLimiter(
-            AsyncLimiter(cfg.default.max_rate, RATE_LIMIT_TIME_PERIOD),
+            AsyncLimiter(cfg.default.max_rate, cfg.default.time_period),
             on_throttled=lambda: logger.debug("Default rate limiter throttling request") if logger else None,
         )
         self._slow = InstrumentedAsyncLimiter(
-            AsyncLimiter(cfg.slow.max_rate, RATE_LIMIT_TIME_PERIOD),
+            AsyncLimiter(cfg.slow.max_rate, cfg.slow.time_period),
             on_throttled=lambda: logger.debug("Slow rate limiter throttling request") if logger else None,
         )
 

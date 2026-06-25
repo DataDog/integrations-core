@@ -6,19 +6,11 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from typing import Any
 
 from aiolimiter import AsyncLimiter
 
 RATE_LIMIT_TIME_PERIOD = 3600.0  # 1 hour — matches GitHub's rate limit window
-
-
-@dataclass
-class RateLimiterConfig:
-    """Rate limit expressed in requests per hour."""
-
-    max_rate: float
 
 
 class InstrumentedAsyncLimiter:

@@ -6,8 +6,7 @@ import logging
 
 import pytest
 
-from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory, RateLimiterFactoryConfig
-from ddev.utils.rate_limiting import RateLimiterConfig
+from ddev.cli.ci.tests.rate_limiting import RateLimiterConfig, RateLimiterFactory, RateLimiterFactoryConfig
 
 # ---------------------------------------------------------------------------
 # Construction validation
