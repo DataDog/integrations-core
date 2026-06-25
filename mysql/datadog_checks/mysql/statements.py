@@ -300,6 +300,8 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if collect_prepared_statements:
             # Every prepared statement object has a row in `performance_schema.prepared_statements_instances`.
+            # MySQL documents `object_instance_begin` as the table's primary key:
+            # https://dev.mysql.com/doc/refman/8.4/en/performance-schema-prepared-statements-instances-table.html
             prepared_sql_statement_summary = """\
                 SELECT  %s AS `_dd_statement_source`,
                         `object_instance_begin` AS `_dd_statement_id`,
