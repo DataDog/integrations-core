@@ -18,7 +18,6 @@ from datadog_checks.kafka_consumer.constants import (
 
 MAX_TIMESTAMPS = 1000
 
-# Cap how far past the oldest cached sample we extrapolate, so estimated lag stays bounded.
 LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
 
 
@@ -518,6 +517,7 @@ def _get_interpolated_timestamp(timestamps, offset):
     timestamp = slope * (offset - offset_after) + timestamp_after
 
     if offset < offset_before:
+        # Cap how far past the oldest cached sample we extrapolate, so estimated lag stays bounded.
         timestamp = max(timestamp, timestamp_before - LAG_EXTRAPOLATION_LIMIT_SECONDS)
     return timestamp
 
