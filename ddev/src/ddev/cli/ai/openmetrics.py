@@ -99,6 +99,12 @@ def _report_artifacts(app: Application, integration_dir: Path) -> None:
     show_default=True,
     help='Maximum wall-clock seconds for the whole flow.',
 )
+@click.option(
+    '--verbose',
+    '-v',
+    is_flag=True,
+    help='Stream the full agent conversation (prompts, responses, tool calls).',
+)
 @click.pass_obj
 def openmetrics(
     app: Application,
@@ -110,6 +116,7 @@ def openmetrics(
     force: bool,
     resume: bool,
     timeout: float,
+    verbose: bool,
 ):
     """Scaffold an OpenMetrics integration for DISPLAY_NAME using an AI agent flow.
 
@@ -121,6 +128,7 @@ def openmetrics(
     from pathlib import Path
 
     import ddev.ai
+    from ddev.cli.ai.console_logger import build_console_callbacks
 
     if timeout <= 0:
         app.abort('`--timeout` must be greater than 0.')
@@ -211,7 +219,7 @@ def openmetrics(
         },
         agent_clients={'anthropic': anthropic.AsyncAnthropic(api_key=api_key)},
         file_access_policy=FileAccessPolicy(write_root=repo_path),
-        callbacks=None,
+        callbacks=build_console_callbacks(app, verbose=verbose or app.verbose, run_dir=run_dir),
         resume=resume,
         max_timeout=timeout,
     )
