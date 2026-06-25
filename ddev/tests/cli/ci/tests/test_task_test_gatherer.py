@@ -81,7 +81,7 @@ def _batch_finished(artifacts_path: Path, **overrides) -> BatchFinished:
         "workflow_url": "https://github.com/o/r/actions/runs/100",
         "artifacts_path": str(artifacts_path),
         "job_list": [_batch_job("j1")],
-        "jobs": None,
+        "workflow_jobs": None,
     }
     defaults.update(overrides)
     return BatchFinished(**defaults)
@@ -94,8 +94,8 @@ def _drain_queue(queue: asyncio.Queue[BaseMessage]) -> list[BaseMessage]:
     return messages
 
 
-def _make_gatherer(tmp_path: Path) -> TaskTestGatherer:
-    gatherer = TaskTestGatherer("gatherer", output_base_path=tmp_path / "out")
+def _make_gatherer(tmp_path: Path, expected_batches: int = 1) -> TaskTestGatherer:
+    gatherer = TaskTestGatherer("gatherer", output_base_path=tmp_path / "out", expected_batches=expected_batches)
     gatherer.queue = asyncio.Queue()
     return gatherer
 
@@ -112,14 +112,14 @@ async def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path) -
 
     gatherer = _make_gatherer(tmp_path)
     await gatherer.process_message(
-        _batch_finished(artifacts, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")])
+        _batch_finished(artifacts, job_list=[_batch_job("j1")], workflow_jobs=[_workflow_job("j1", "success")])
     )
 
     messages = _drain_queue(gatherer.queue)
     assert len(messages) == 1
     update = messages[0]
     assert isinstance(update, UpdatePRComment)
-    assert update.done is False
+    assert update.done is True
     assert len(update.workflows) == 1
     status = update.workflows[0]
     assert status.id == 100
@@ -143,7 +143,7 @@ async def test_failure_path_records_failed_step_and_tests(tmp_path: Path) -> Non
             artifacts,
             status="failure",
             job_list=[_batch_job("j1")],
-            jobs=[_workflow_job("j1", "failure", failed_step="Run unit tests")],
+            workflow_jobs=[_workflow_job("j1", "failure", failed_step="Run unit tests")],
         )
     )
 
@@ -168,7 +168,7 @@ async def test_failed_check_carries_environment_error_and_tests(tmp_path: Path) 
             artifacts,
             status="failure",
             job_list=[_batch_job("j1")],
-            jobs=[_workflow_job("j1", "failure", failed_step="Run unit tests")],
+            workflow_jobs=[_workflow_job("j1", "failure", failed_step="Run unit tests")],
         )
     )
 
@@ -198,7 +198,7 @@ async def test_multiple_jobs_aggregate_into_one_workflow_status(tmp_path: Path) 
     gatherer = _make_gatherer(tmp_path)
     job_list = [_batch_job("j1", environment="py3.12"), _batch_job("j2", target="kafka", environment="py3.13")]
     jobs = [_workflow_job("j1", "success"), _workflow_job("j2", "failure")]
-    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=job_list, jobs=jobs))
+    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=job_list, workflow_jobs=jobs))
 
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.success_count == 1
@@ -218,7 +218,7 @@ async def test_same_integration_different_platforms_do_not_overwrite(tmp_path: P
         _batch_job("j2", platform="windows", runner="windows-latest"),
     ]
     jobs = [_workflow_job("j1", "success"), _workflow_job("j2", "success")]
-    await gatherer.process_message(_batch_finished(artifacts, job_list=job_list, jobs=jobs))
+    await gatherer.process_message(_batch_finished(artifacts, job_list=job_list, workflow_jobs=jobs))
 
     # Both jobs share target+environment but differ by platform/runner: each keeps its own file.
     coverage_dir = tmp_path / "out" / "coverage"
@@ -227,16 +227,19 @@ async def test_same_integration_different_platforms_do_not_overwrite(tmp_path: P
 
 
 @pytest.mark.asyncio
-async def test_accumulates_across_batches(tmp_path: Path) -> None:
-    gatherer = _make_gatherer(tmp_path)
+async def test_no_pr_update_until_final_batch(tmp_path: Path) -> None:
+    gatherer = _make_gatherer(tmp_path, expected_batches=2)
 
     artifacts1 = tmp_path / "artifacts" / "100"
     _make_job_tree(artifacts1, "j1")
     await gatherer.process_message(
         _batch_finished(
-            artifacts1, id="b1", run_id=100, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")]
+            artifacts1, id="b1", run_id=100, job_list=[_batch_job("j1")], workflow_jobs=[_workflow_job("j1", "success")]
         )
     )
+
+    # First of two batches: nothing emitted yet — the PR must not be updated mid-run.
+    assert _drain_queue(gatherer.queue) == []
 
     artifacts2 = tmp_path / "artifacts" / "200"
     _make_job_tree(artifacts2, "j1")
@@ -246,15 +249,15 @@ async def test_accumulates_across_batches(tmp_path: Path) -> None:
             id="b2",
             run_id=200,
             job_list=[_batch_job("j1")],
-            jobs=[_workflow_job("j1", "success", run_id=200)],
+            workflow_jobs=[_workflow_job("j1", "success", run_id=200)],
         )
     )
 
+    # Final batch in: exactly one done=True update aggregating both runs.
     messages = _drain_queue(gatherer.queue)
-    assert len(messages) == 2
-    assert len(messages[0].workflows) == 1
-    assert len(messages[1].workflows) == 2
-    assert {status.id for status in messages[1].workflows} == {100, 200}
+    assert len(messages) == 1
+    assert messages[0].done is True
+    assert {status.id for status in messages[0].workflows} == {100, 200}
 
 
 @pytest.mark.asyncio
@@ -276,7 +279,9 @@ async def test_per_job_status_comes_from_forwarded_jobs(tmp_path: Path) -> None:
     ]
 
     gatherer = _make_gatherer(tmp_path)
-    await gatherer.process_message(_batch_finished(artifacts, status="failure", job_list=[_batch_job("j1")], jobs=jobs))
+    await gatherer.process_message(
+        _batch_finished(artifacts, status="failure", job_list=[_batch_job("j1")], workflow_jobs=jobs)
+    )
 
     result = gatherer._results_by_run[100][0]
     assert result.status == "failure"
@@ -290,7 +295,7 @@ async def test_missing_artifact_dir_is_skipped(tmp_path: Path) -> None:
 
     gatherer = _make_gatherer(tmp_path)
     await gatherer.process_message(
-        _batch_finished(artifacts, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")])
+        _batch_finished(artifacts, job_list=[_batch_job("j1")], workflow_jobs=[_workflow_job("j1", "success")])
     )
 
     result = gatherer._results_by_run[100][0]
@@ -306,7 +311,7 @@ async def test_malformed_junit_is_swallowed(tmp_path: Path) -> None:
 
     gatherer = _make_gatherer(tmp_path)
     await gatherer.process_message(
-        _batch_finished(artifacts, job_list=[_batch_job("j1")], jobs=[_workflow_job("j1", "success")])
+        _batch_finished(artifacts, job_list=[_batch_job("j1")], workflow_jobs=[_workflow_job("j1", "success")])
     )
 
     assert gatherer._results_by_run[100][0].failed_tests == []

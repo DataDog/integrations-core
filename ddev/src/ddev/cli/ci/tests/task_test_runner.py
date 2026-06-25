@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ddev.cli.ci.tests._status import conclusion_to_status
+from ddev.cli.ci.tests.common import conclusion_to_status
 from ddev.cli.ci.tests.messages import BatchFinished, TestBatch
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
@@ -97,7 +97,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 workflow_url=workflow_url,
                 artifacts_path=str(artifacts_path),
                 job_list=message.job_list,
-                jobs=jobs,
+                workflow_jobs=jobs,
             )
         finally:
             try:

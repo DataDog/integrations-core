@@ -9,7 +9,7 @@ import re
 import shutil
 from pathlib import Path
 
-from ddev.cli.ci.tests._status import conclusion_to_status
+from ddev.cli.ci.tests.common import conclusion_to_status
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
     BatchJob,
@@ -26,7 +26,7 @@ from ddev.utils.junit import parse_junit_dir
 #       coverage.xml                  Cobertura coverage report
 #       test-{unit|e2e}-{env}.xml     pytest JUnit report(s)
 # Per-job conclusions and failed step come from the jobs forwarded on the message
-# (BatchFinished.jobs); jobs absent from that list fall back to the batch-level status.
+# (BatchFinished.workflow_jobs); jobs absent from that list fall back to the batch-level status.
 COVERAGE_GLOB = "coverage*.xml"
 JUNIT_GLOB = "test-*.xml"
 
@@ -34,16 +34,22 @@ JUNIT_GLOB = "test-*.xml"
 class TaskTestGatherer(AsyncProcessor[BatchFinished]):
     """
     Reads ``BatchFinished`` messages, analyzes the downloaded artifacts on disk, builds per-job
-    ``WorkflowResult`` records, organizes coverage/JUnit files for later publishing, and emits an
-    ``UpdatePRComment`` reflecting the latest state of every finished workflow run.
+    ``WorkflowResult`` records, and organizes coverage/JUnit files for later publishing.
+
+    It accumulates the results of each batch and, once all expected batches have finished,
+    emits a single ``UpdatePRComment`` (``done=True``) with the aggregate state. It does not
+    post to GitHub and does not update the PR before the final batch is in — the PR-comment
+    consumer is separate.
 
     This task makes no GitHub API calls — it works exclusively from the artifacts the runner
     already downloaded to ``BatchFinished.artifacts_path``.
     """
 
-    def __init__(self, name: str, output_base_path: Path) -> None:
+    def __init__(self, name: str, output_base_path: Path, expected_batches: int) -> None:
         super().__init__(name)
         self._output_base_path = output_base_path
+        self._expected_batches = expected_batches
+        self._received_batches = 0
         self._status_by_run: dict[int, WorkflowStatus] = {}
         self._results_by_run: dict[int, list[WorkflowResult]] = {}
         self._lock = asyncio.Lock()
@@ -80,15 +86,17 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         async with self._lock:
             self._results_by_run[message.run_id] = results
             self._status_by_run[message.run_id] = status
-            snapshot = list(self._status_by_run.values())
+            self._received_batches += 1
+            is_final = self._received_batches >= self._expected_batches
 
-        self.submit_message(UpdatePRComment(id=message.id, done=False, workflows=snapshot))
-        self._logger.info("UpdatePRComment emitted", extra={"run_id": message.run_id})
+        if is_final:
+            self.submit_message(self.build_done_message(message.id))
+            self._logger.info("Final batch received, UpdatePRComment emitted", extra={"run_id": message.run_id})
 
     def build_done_message(self, message_id: str) -> UpdatePRComment:
         """Build the final ``done=True`` update from all accumulated results.
 
-        Intended to be submitted by the orchestrator's finalize hook once every batch is in.
+        Submitted by the gatherer once the final expected batch has been received.
         """
         return UpdatePRComment(id=message_id, done=True, workflows=list(self._status_by_run.values()))
 
@@ -96,7 +104,7 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
     def _read_job_statuses(message: BatchFinished) -> dict[str, tuple[str | None, str | None]]:
         """Map job name -> (conclusion, failed_step) from the jobs forwarded on the message."""
         statuses: dict[str, tuple[str | None, str | None]] = {}
-        for job in message.jobs or []:
+        for job in message.workflow_jobs or []:
             failed_step = next((step.name for step in job.steps if step.conclusion == "failure"), None)
             statuses[job.name] = (job.conclusion, failed_step)
         return statuses

@@ -67,7 +67,7 @@ class BatchFinished(BaseMessage):
     artifacts_path: str
     timed_out: bool = False
     job_list: list[BatchJob] = field(default_factory=list)
-    jobs: list[WorkflowJob] | None = None
+    workflow_jobs: list[WorkflowJob] | None = None
 
 
 @dataclass

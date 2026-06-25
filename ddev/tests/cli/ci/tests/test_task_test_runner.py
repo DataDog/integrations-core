@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from ddev.cli.ci.tests._status import conclusion_to_status
+from ddev.cli.ci.tests.common import conclusion_to_status
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.orchestrator import BaseMessage
@@ -248,7 +248,7 @@ async def test_process_message_forwards_workflow_jobs(tmp_path: Path) -> None:
     # The emitted BatchFinished carries the workflow's jobs for the gatherer to read.
     finished = _drain_queue(runner.queue)[0]
     assert isinstance(finished, BatchFinished)
-    assert [(job.name, job.conclusion) for job in finished.jobs] == [("j1", "success"), ("j2", "failure")]
+    assert [(job.name, job.conclusion) for job in finished.workflow_jobs] == [("j1", "success"), ("j2", "failure")]
 
 
 @pytest.mark.asyncio
@@ -265,7 +265,7 @@ async def test_process_message_emits_batch_finished_when_listing_jobs_fails(tmp_
     finished = _drain_queue(runner.queue)[0]
     assert isinstance(finished, BatchFinished)
     assert finished.status == "success"
-    assert finished.jobs == []
+    assert finished.workflow_jobs == []
 
 
 @pytest.mark.asyncio
