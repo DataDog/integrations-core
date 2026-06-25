@@ -3,10 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import ExitStack
+from urllib.request import urlopen
 
 import pytest
 
 from datadog_checks.dev import get_here, run_command
+from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
@@ -19,6 +21,15 @@ def _wait_for_resource(*, kind, name, condition, namespace=None, timeout="300s")
     if namespace:
         command.extend(["-n", namespace])
     run_command(command)
+
+
+def wait_for_metric_families(endpoint: str, families: list[str]) -> None:
+    with urlopen(endpoint, timeout=5) as response:
+        metrics = response.read().decode("utf-8")
+
+    missing = [family for family in families if family not in metrics]
+    if missing:
+        raise AssertionError("Tekton metric families are not available yet: {}".format(", ".join(missing)))
 
 
 def setup_tekton():
@@ -76,6 +87,22 @@ def dd_environment():
             port_forward(kubeconfig, 'tekton-pipelines', 9000, 'service', 'tekton-triggers-controller')
         )
         instances['triggers_controller_endpoint'] = f'http://{trigger_host}:{trigger_port}/metrics'
+
+        WaitFor(
+            wait_for_metric_families,
+            attempts=60,
+            wait=2,
+            args=(
+                instances['triggers_controller_endpoint'],
+                [
+                    'controller_clusterinterceptor_count',
+                    'controller_clustertriggerbinding_count',
+                    'controller_eventlistener_count',
+                    'controller_triggerbinding_count',
+                    'controller_triggertemplate_count',
+                ],
+            ),
+        )()
 
         yield {'instances': [instances]}
 
