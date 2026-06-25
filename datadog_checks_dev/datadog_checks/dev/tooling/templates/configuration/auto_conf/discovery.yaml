@@ -1,10 +1,12 @@
 - name: discovery
-  description: Fleet discovery configuration.
+  description: Enables configuration discovery
   enabled: true
   example: {}
 - template: init_config
+  description: Unused init configuration
+  enabled: true
   options: []
 - name: instances
-  description: Every instance is scheduled independently of the others.
+  description: Unused instance configuration
   enabled: true
   example: []

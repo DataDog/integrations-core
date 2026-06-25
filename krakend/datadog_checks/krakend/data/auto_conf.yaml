@@ -6,14 +6,14 @@
 ad_identifiers:
   - krakend
 
-## Fleet discovery configuration.
+## Enables configuration discovery
 #
 discovery: {}
 
-## All options defined here are available to all instances.
+## Unused init configuration
 #
 init_config:
 
-## Every instance is scheduled independently of the others.
+## Unused instance configuration
 #
 instances: []
