@@ -94,7 +94,9 @@ class KafkaCheck(AgentCheck):
                 # cache-pruning floor. They require an extra broker call, so fetch them once here and
                 # only under cluster monitoring, then share with the metadata collector below.
                 if self.config._cluster_monitoring_enabled:
-                    low_watermark_offsets = self._get_low_watermark_offsets()
+                    low_watermark_offsets = self.metadata_collector._fetch_earliest_offsets(
+                        self.client.get_topic_partitions()
+                    )
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     # Prune cache entries below the lowest offset any consumer could read: the low
@@ -270,20 +272,6 @@ class KafkaCheck(AgentCheck):
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
-
-    def _get_low_watermark_offsets(self):
-        """Fetch low watermark (earliest) offsets for every non-internal partition in the cluster."""
-        partitions = {
-            (topic, partition)
-            for topic, parts in self.client.get_topic_partitions().items()
-            if topic not in KAFKA_INTERNAL_TOPICS
-            for partition in parts
-        }
-        try:
-            return self.client.get_low_watermark_offsets(partitions)
-        except Exception:
-            self.log.exception("There was a problem collecting the low watermark offsets.")
-            return {}
 
     def _earliest_consumer_offsets(self, consumer_offsets):
         """Return the lowest committed offset per (topic, partition) across all consumer groups."""

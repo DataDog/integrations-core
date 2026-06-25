@@ -13,7 +13,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, NotRequired, TypedDict
 from urllib.parse import quote
 
-from confluent_kafka.admin import ConfigResource, ResourceType
+from confluent_kafka import IsolationLevel, TopicPartition
+from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 
@@ -532,6 +533,61 @@ class ClusterMetadataCollector:
                 ),
                 "data-streams-message",
             )
+
+    def _fetch_earliest_offsets(self, topic_partitions):
+        """Batch-fetch log-start offsets via AdminClient.list_offsets(earliest).
+
+        Uses ListOffsets with the EARLIEST_TIMESTAMP sentinel, which the broker
+        services from in-memory state without scanning .timeindex segment files.
+        Failures are logged and surface as missing entries — the caller skips
+        the earliest-dependent metrics rather than aborting the whole topic
+        metadata collection.
+        """
+        requests = {
+            TopicPartition(topic, partition): OffsetSpec.earliest()
+            for topic, partitions in topic_partitions.items()
+            if topic not in KAFKA_INTERNAL_TOPICS
+            for partition in partitions
+        }
+        if not requests:
+            return {}
+
+        result = {}
+        errors = 0
+        try:
+            futures = self.client.kafka_client.list_offsets(
+                requests,
+                isolation_level=IsolationLevel.READ_UNCOMMITTED,
+                request_timeout=self.config._request_timeout,
+            )
+            for tp, future in futures.items():
+                try:
+                    info = future.result()
+                    result[(tp.topic, tp.partition)] = info.offset
+                except Exception as e:
+                    errors += 1
+                    if errors <= 3:
+                        self.log.debug(
+                            "Failed to fetch earliest offset for %s:%s: %s",
+                            tp.topic,
+                            tp.partition,
+                            e,
+                        )
+        except Exception as e:
+            self.log.warning(
+                "Failed to issue list_offsets request; partition.beginning_offset, "
+                "partition.size, and topic.size will be skipped this run: %s",
+                e,
+            )
+            return {}
+        if errors:
+            self.log.warning(
+                "Failed to fetch earliest offset for %d/%d partitions; "
+                "earliest-dependent metrics will be skipped for those partitions",
+                errors,
+                len(requests),
+            )
+        return result
 
     def _collect_topic_metadata(self, metadata, highwater_offsets, low_watermark_offsets):
         self.log.debug("Collecting topic metadata")
