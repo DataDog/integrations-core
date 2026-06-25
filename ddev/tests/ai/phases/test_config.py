@@ -22,18 +22,18 @@ from ddev.ai.phases.config import (
 def test_task_config_with_prompt():
     tc = TaskConfig(name="t1", prompt="Do it.")
     assert tc.prompt == "Do it."
-    assert tc.prompt_path is None
+    assert tc.prompt_ref is None
 
 
-def test_task_config_with_prompt_path():
-    tc = TaskConfig(name="t1", prompt_path="prompts/task.md")
+def test_task_config_with_prompt_ref():
+    tc = TaskConfig(name="t1", prompt_ref="my_prompt")
+    assert tc.prompt_ref == "my_prompt"
     assert tc.prompt is None
-    assert tc.prompt_path is not None
 
 
-def test_task_config_both_set_raises():
+def test_task_config_both_prompt_and_ref_raises():
     with pytest.raises(ValidationError, match="Exactly one"):
-        TaskConfig(name="t1", prompt="Do it.", prompt_path="prompts/task.md")
+        TaskConfig(name="t1", prompt="Do it.", prompt_ref="my_prompt")
 
 
 def test_task_config_neither_set_raises():
@@ -105,9 +105,13 @@ def test_checkpoint_config_neither_set_raises():
 # ---------------------------------------------------------------------------
 
 
-def test_agent_config_valid_tools():
-    ac = AgentConfig(tools=["read_file", "grep"])
-    assert ac.tools == ["read_file", "grep"]
+def test_agent_config_defaults():
+    ac = AgentConfig()
+    assert ac.tools == []
+    assert ac.provider == "anthropic"
+    assert ac.model is None
+    assert ac.max_tokens is None
+    assert ac.system_prompt == ""
 
 
 def test_agent_config_web_search_validates():
@@ -122,18 +126,12 @@ def test_agent_config_web_fetch_validates():
 
 def test_agent_config_unknown_tool_raises():
     with pytest.raises(ValidationError, match="Unknown tool names"):
-        AgentConfig(tools=["read_file", "teleport"])
+        AgentConfig(tools=["teleport"])
 
 
-def test_agent_config_empty_tools():
-    ac = AgentConfig()
-    assert ac.tools == []
-
-
-def test_agent_config_optional_fields():
-    ac = AgentConfig(model="claude-opus-4-5", max_tokens=4096)
-    assert ac.model == "claude-opus-4-5"
-    assert ac.max_tokens == 4096
+def test_agent_config_system_prompt_set():
+    ac = AgentConfig(system_prompt="You are a writer.")
+    assert ac.system_prompt == "You are a writer."
 
 
 # ---------------------------------------------------------------------------
@@ -315,31 +313,6 @@ flow:
 """
     )
     with pytest.raises(FlowConfigError, match="System prompt not found"):
-        FlowConfig.from_yaml(flow_yaml, tmp_path)
-
-
-def test_from_yaml_missing_task_prompt_path(tmp_path):
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("system prompt")
-
-    flow_yaml = tmp_path / "flow.yaml"
-    flow_yaml.write_text(
-        """\
-agents:
-  writer:
-    tools: []
-phases:
-  p1:
-    agent: writer
-    tasks:
-      - name: t1
-        prompt_path: prompts/nonexistent.md
-flow:
-  - phase: p1
-"""
-    )
-    with pytest.raises(FlowConfigError, match="prompt_path not found"):
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 

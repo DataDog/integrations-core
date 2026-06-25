@@ -54,8 +54,8 @@ def _detect_cycles(
 class TaskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")
-    prompt_path: Path | None = None
     prompt: str | None = None
+    prompt_ref: str | None = None
     goal: str | None = None
     goal_path: Path | None = None
     max_goal_attempts: int = 5
@@ -64,8 +64,8 @@ class TaskConfig(BaseModel):
 
     @model_validator(mode="after")
     def exactly_one_prompt_source(self) -> TaskConfig:
-        if (self.prompt_path is None) == (self.prompt is None):
-            raise ValueError("Exactly one of 'prompt_path' or 'prompt' must be set")
+        if (self.prompt is None) == (self.prompt_ref is None):
+            raise ValueError("Exactly one of 'prompt' or 'prompt_ref' must be set")
         return self
 
     @model_validator(mode="after")
@@ -106,6 +106,7 @@ class AgentConfig(BaseModel):
     model: str | None = None
     max_tokens: int | None = None
     tools: list[str] = []
+    system_prompt: str = ""
 
     @field_validator("tools", mode="after")
     @classmethod
@@ -193,12 +194,6 @@ class FlowConfig(BaseModel):
 
         for phase_id, phase in self.phases.items():
             for i, task in enumerate(phase.tasks):
-                if task.prompt_path is not None:
-                    resolved = config_dir / task.prompt_path
-                    if not resolved.exists():
-                        raise FlowConfigError(
-                            f"Phase {phase_id!r} task {i} ({task.name!r}): prompt_path not found: {resolved}"
-                        )
                 if task.goal_path is not None:
                     resolved = config_dir / task.goal_path
                     if not resolved.exists():
