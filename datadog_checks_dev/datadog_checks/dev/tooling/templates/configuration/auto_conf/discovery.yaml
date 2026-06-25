@@ -1,0 +1,10 @@
+- name: discovery
+  description: Fleet discovery configuration.
+  enabled: true
+  example: {}
+- template: init_config
+  options: []
+- name: instances
+  description: Every instance is scheduled independently of the others.
+  enabled: true
+  example: []

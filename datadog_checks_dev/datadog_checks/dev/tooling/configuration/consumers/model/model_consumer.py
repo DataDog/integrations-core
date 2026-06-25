@@ -110,6 +110,11 @@ class ModelConsumer:
 
         errors: List[str] = []
         section_name = section['name']
+        # Options without a sub-options list are leaf nodes (e.g. `instances: []` in a
+        # fleet-discovery auto_conf.yaml). They carry no model schema; skip them.
+        if 'options' not in section:
+            return (package_info, model_files, model_info)
+
         if section_name == 'init_config':
             model_id = 'shared'
             model_file_name = f'{model_id}.py'
