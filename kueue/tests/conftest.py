@@ -7,6 +7,7 @@ from contextlib import ExitStack
 
 import pytest
 
+from datadog_checks.base.stubs import tagger
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
@@ -17,6 +18,13 @@ from .common import MOCKED_INSTANCE
 HERE = get_here()
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
+
+
+@pytest.fixture(autouse=True)
+def reset_tagger():
+    tagger.reset()
+    yield
+    tagger.reset()
 
 
 def wait_for_controller():
