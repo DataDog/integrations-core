@@ -491,6 +491,55 @@ def test_discovery_enabled_false_skips_validation():
     assert not spec.errors
 
 
+def test_discovery_unknown_port_attr_placeholder():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.portnum}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, openmetrics_endpoint: '
+        'Unknown placeholder `port.portnum`'
+    ) in spec.errors
+
+
+def test_discovery_port_hints_optional():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
 def test_discovery_candidate_field_cross_check():
     spec = get_spec(
         """

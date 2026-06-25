@@ -5,35 +5,19 @@ from __future__ import annotations
 
 from typing import Any
 
-from .registry import strategy
+from .registry import Input, strategy
 
 
 @strategy(
-    name='from_ports',
+    'from_ports',
     provides=('port',),
-    valid_fields=frozenset({'strategy', 'port_hints', 'candidates'}),
-    context_fields={'port': frozenset({'name', 'number'})},
+    inputs={'port_hints': Input('array[int]', required=False)},
+    runtime_imports=('from datadog_checks.base.utils.discovery import candidate_ports',),
 )
-def from_ports(stanza: dict[str, Any], index: int) -> list[str]:
-    """Generate Python source lines for a from_ports strategy stanza."""
+def from_ports(stanza: dict[str, Any]) -> list[str]:
+    """Open a loop over candidate ports and bind a `ctx` exposing the current `port`."""
     port_hints = stanza.get('port_hints', [])
-    candidates = stanza.get('candidates', [])
-    lines = [
-        f'    # discovery[{index}]: from_ports',
+    return [
         f'    for port in candidate_ports(service, {port_hints!r}):',
         "        ctx = {'port': port}",
     ]
-    for candidate in candidates:
-        lines.append('        instance_data = {')
-        for field_name, template in candidate.items():
-            if '{' in str(template):
-                rendered = f"'{template}'.format(service=service, **ctx)"
-            else:
-                rendered = repr(template)
-            lines.append(f'            {field_name!r}: {rendered},')
-        lines.append('        }')
-        lines.append("        instance = InstanceConfig.model_validate(")
-        lines.append("            instance_data, context={'configured_fields': frozenset(instance_data)}")
-        lines.append("        ).model_dump(mode='json', exclude_none=True)")
-        lines.append("        yield {'init_config': shared, 'instances': [instance]}")
-    return lines

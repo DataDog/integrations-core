@@ -6,8 +6,8 @@ from typing import Any
 
 from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
 
-DISCOVERY_FIELDS = {'strategies', 'enabled'}
-SERVICE_PLACEHOLDERS = frozenset({'id', 'host'})
+DISCOVERY_FIELDS = {'strategies'}
+DISCOVERY_TEMPLATE_CONTROL_FIELDS = {'template', 'overrides', 'enabled'}
 
 
 def spec_validator(spec: dict, loader) -> None:
@@ -202,9 +202,35 @@ def _get_instance_option_names(options: list) -> frozenset[str]:
     return frozenset()
 
 
+def _validate_strategy_input(stanza: dict, name: str, input_def: Any, loader: Any, location: str) -> None:
+    """Validate a single declared strategy input against the resolved stanza."""
+    if name not in stanza:
+        if input_def.required:
+            loader.errors.append(f'{location}: Attribute `{name}` is required')
+        return
+
+    value = stanza[name]
+    if input_def.type == 'array[int]':
+        if not isinstance(value, list) or not all(isinstance(v, int) and not isinstance(v, bool) for v in value):
+            loader.errors.append(f'{location}: Attribute `{name}` must be an array of integers')
+    elif input_def.type == 'integer':
+        if not isinstance(value, int) or isinstance(value, bool):
+            loader.errors.append(f'{location}: Attribute `{name}` must be an integer')
+    elif input_def.type == 'string':
+        if not isinstance(value, str):
+            loader.errors.append(f'{location}: Attribute `{name}` must be a string')
+    elif input_def.type == 'boolean':
+        if not isinstance(value, bool):
+            loader.errors.append(f'{location}: Attribute `{name}` must be true or false')
+
+
 def discovery_validator(discovery: Any, options: list, loader: Any, file_name: str) -> None:
     import datadog_checks.dev.tooling.configuration.discovery.core_strategies  # noqa: F401
-    from datadog_checks.dev.tooling.configuration.discovery.registry import REGISTRY
+    from datadog_checks.dev.tooling.configuration.discovery.registry import (
+        PORT_FIELDS,
+        REGISTRY,
+        SERVICE_FIELDS,
+    )
 
     location = f'{loader.source}, {file_name}, discovery'
     if not isinstance(discovery, dict):
@@ -238,27 +264,38 @@ def discovery_validator(discovery: Any, options: list, loader: Any, file_name: s
 
         reg = REGISTRY.get(strategy_name) if not is_local else None
 
-        if reg is not None:
-            invalid_fields = set(stanza) - reg.valid_fields
-            if invalid_fields:
-                fields = ', '.join(sorted(invalid_fields))
-                loader.errors.append(f'{strategy_location}: Unknown field(s): {fields}')
+        # Placeholders allowed in candidate templates: `service.*` is always
+        # available, and each context key the strategy `provides` exposes a Port.
+        placeholders: dict[str, frozenset[str]] = {'service': SERVICE_FIELDS}
 
-            port_hints = stanza.get('port_hints')
-            if not isinstance(port_hints, list) or not all(
-                isinstance(port, int) and not isinstance(port, bool) for port in port_hints
-            ):
-                loader.errors.append(f'{strategy_location}: Attribute `port_hints` must be an array of integers')
+        if reg is not None:
+            allowed_fields = {'strategy', 'candidates', *reg.inputs}
+            unknown = set(stanza) - allowed_fields
+            if unknown:
+                loader.errors.append(f'{strategy_location}: Unknown field(s): {", ".join(sorted(unknown))}')
+
+            for input_name, input_def in reg.inputs.items():
+                _validate_strategy_input(stanza, input_name, input_def, loader, strategy_location)
+
+            for provided in reg.provides:
+                placeholders[provided] = PORT_FIELDS
+        else:
+            # A local: strategy must declare its contract since dev cannot import it.
+            local_provides = stanza.get('provides')
+            if not isinstance(local_provides, list) or not all(isinstance(p, str) for p in local_provides):
+                loader.errors.append(f'{strategy_location}: Attribute `provides` must be an array of strings')
+            else:
+                # Dev cannot know the field set of a local-provided context, so any
+                # attribute is accepted on its placeholders.
+                for provided in local_provides:
+                    placeholders[provided] = None  # type: ignore[assignment]
+            if 'inputs' in stanza and not isinstance(stanza['inputs'], dict):
+                loader.errors.append(f'{strategy_location}: Attribute `inputs` must be a mapping object')
 
         candidates = stanza.get('candidates')
         if not isinstance(candidates, list) or not candidates:
             loader.errors.append(f'{strategy_location}: Attribute `candidates` must be a non-empty array')
             continue
-
-        placeholders: dict[str, frozenset[str]] | None = None
-        if reg is not None:
-            placeholders = {'service': SERVICE_PLACEHOLDERS}
-            placeholders.update(reg.context_fields)
 
         for candidate_index, candidate in enumerate(candidates, 1):
             candidate_location = f'{strategy_location}, candidate #{candidate_index}'
@@ -276,12 +313,11 @@ def discovery_validator(discovery: Any, options: list, loader: Any, file_name: s
                     loader.errors.append(f'{candidate_location}, {field_name}: Candidate templates must be strings')
                     continue
 
-                if placeholders is not None:
-                    _validate_discovery_template(template, loader, candidate_location, field_name, placeholders)
+                _validate_discovery_template(template, loader, candidate_location, field_name, placeholders)
 
 
 def _validate_discovery_template(
-    template: str, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str]]
+    template: str, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str] | None]
 ) -> None:
     try:
         parsed_template = Formatter().parse(template)
@@ -298,14 +334,59 @@ def _validate_discovery_template(
             loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
             continue
 
-        if attr not in placeholders[root]:
+        # A `None` field-set means the root's attributes are unknown to dev (a
+        # local: strategy's provided context), so any attribute is accepted.
+        allowed_attrs = placeholders[root]
+        if allowed_attrs is not None and attr not in allowed_attrs:
             loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
 
 
 def handle_discovery(
     config_file: dict, loader, file_name: str, example_file_names_origin: dict, file_index: int
 ) -> None:
-    """Reserve auto_conf.yaml, expand strategy templates, honour enabled:false, then validate."""
+    """Resolve discovery templates, honour `enabled`, reserve auto_conf.yaml, then validate.
+
+    Runs after option-template resolution so the validator sees fully resolved
+    data (D4). All discovery handling lives here, in one place at the tail of
+    per-file processing.
+    """
+    discovery = config_file['discovery']
+    if not isinstance(discovery, dict):
+        loader.errors.append(f'{loader.source}, {file_name}, discovery: Attribute `discovery` must be a mapping object')
+        return
+
+    location = f'{loader.source}, {file_name}, discovery'
+
+    # 1. Resolve a discovery-level template (if any), then expand strategy-item templates.
+    if 'template' in discovery:
+        overrides = discovery.pop('overrides', {})
+        try:
+            template = loader.templates.load(discovery.pop('template'))
+        except Exception as e:
+            loader.errors.append(f'{location}: {e}')
+            return
+        errors = loader.templates.apply_overrides(template, overrides)
+        if errors:
+            loader.errors.append(f'{location}: {chr(10).join(errors)}')
+        if not isinstance(template, dict):
+            loader.errors.append(f'{location}: Template does not refer to a mapping object')
+            return
+        template.update(discovery)
+        discovery = template
+        config_file['discovery'] = discovery
+
+    strategies = discovery.get('strategies')
+    if isinstance(strategies, list):
+        expand_template_items(strategies, loader, file_name, 'discovery, strategy')
+
+    # 2. Honour `enabled: false` as a kill switch: drop the stanza so no
+    #    discovery.py is generated and no auto_conf.yaml name is reserved.
+    enabled = discovery.pop('enabled', True)
+    if not enabled:
+        del config_file['discovery']
+        return
+
+    # 3. Reserve the auto_conf.yaml example name and flag a collision.
     if 'auto_conf.yaml' in example_file_names_origin:
         loader.errors.append(
             '{}, file #{}: Discovery auto_conf.yaml already used by file #{}'.format(
@@ -315,18 +396,7 @@ def handle_discovery(
     else:
         example_file_names_origin['auto_conf.yaml'] = file_index
 
-    discovery = config_file['discovery']
-    if not isinstance(discovery, dict):
-        loader.errors.append(f'{loader.source}, {file_name}, discovery: Attribute `discovery` must be a mapping object')
-        return
-
-    strategies = discovery.get('strategies')
-    if isinstance(strategies, list):
-        expand_template_items(strategies, loader, file_name, 'discovery, strategy')
-
-    if not discovery.get('enabled', True):
-        return
-
+    # 4. Validate on the fully resolved stanza and resolved options.
     discovery_validator(discovery, config_file.get('options', []), loader, file_name)
 
 

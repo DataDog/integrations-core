@@ -39,6 +39,35 @@ def test_option_no_section():
     )
 
 
+def test_discovery_stanza_does_not_emit_auto_conf():
+    consumer = get_example_consumer(
+        """
+        name: foo
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+
+    files = consumer.render()
+
+    # auto_conf.yaml is an Agent-facing runtime artifact, hand-maintained per
+    # integration. The example consumer must not generate it from a discovery stanza.
+    assert 'auto_conf.yaml' not in files
+    assert 'test.yaml.example' in files
+
+
 def test_section_with_option():
     consumer = get_example_consumer(
         """

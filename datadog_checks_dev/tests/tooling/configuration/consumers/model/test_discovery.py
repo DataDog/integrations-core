@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ...utils import get_model_consumer, normalize_yaml
+from ...utils import get_model_consumer, get_spec, normalize_yaml
 
 
 def test():
@@ -64,3 +64,101 @@ def test():
                 yield {'init_config': shared, 'instances': [instance]}
         """
     )
+
+
+def test_local_strategy():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: local:from_app_config
+              provides: [svc]
+              inputs: {config_path: string}
+              config_path: /etc/app.conf
+              candidates:
+              - endpoint: http://{service.host}:{svc.port}/m
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    assert 'from datadog_checks.test.config_models.discovery_strategies import from_app_config' in discovery_contents
+    assert "for ctx in from_app_config(service, config_path='/etc/app.conf'):" in discovery_contents
+    assert 'InstanceConfig.model_validate(' in discovery_contents
+
+
+def test_unknown_strategy_clean_error():
+    spec = get_spec(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_services
+              candidates:
+              - endpoint: http://{service.host}/m
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+    spec.load()
+
+    # An unknown strategy must surface as a clean spec error from validation,
+    # never as a traceback or NotImplementedError from the generator.
+    assert any('Unsupported strategy `from_services`' in e for e in spec.errors)
+
+
+def test_custom_files_are_stubbed():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints: [9090]
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/m
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    files = consumer.render()['test.yaml']
+    assert 'discovery_strategies.py' in files
+    assert 'discovery_overrides.py' in files
+    assert 'candidates(service, default)' in files['discovery_overrides.py'][0]
