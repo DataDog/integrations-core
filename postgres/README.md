@@ -286,7 +286,7 @@ To configure this check for an Agent running on Kubernetes:
 
 Set [Autodiscovery Integrations Templates][13] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][14].
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: postgres`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: postgres`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -526,3 +526,4 @@ Additional helpful documentation, links, and articles:
 [28]: https://docs.datadoghq.com/database_monitoring/setup_postgres/
 [29]: https://docs.datadoghq.com/database_monitoring/#postgres
 [30]: https://docs.datadoghq.com/integrations/postgres/?tab=host#faq
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

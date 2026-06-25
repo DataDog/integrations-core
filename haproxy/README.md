@@ -98,7 +98,7 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 Add pod annotations under `.spec.template.metadata` for a Deployment:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: haproxy`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: haproxy`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 ```yaml
 apiVersion: apps/v1
@@ -437,3 +437,4 @@ Need help? Contact [Datadog support][20].
 [28]: https://github.com/DataDog/integrations-core/blob/0e34b3309cc1371095762bfcaf121b0b45a4e263/haproxy/datadog_checks/haproxy/data/conf.yaml.example#L631
 [29]: https://docs.datadoghq.com/integrations/guide/versions-for-openmetrics-based-integrations
 [30]: https://docs.datadoghq.com/integrations/guide/prometheus-host-collection/
+[31]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

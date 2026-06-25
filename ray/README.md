@@ -61,7 +61,7 @@ labels:
 
 This example demonstrates the configuration as Kubernetes annotations on your Ray pods. See the [sample configuration file][4] for all available configuration options.
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: ray`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: ray`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
 
 ```yaml
 apiVersion: v1
@@ -196,3 +196,4 @@ Need help? Contact [Datadog support][9].
 [12]: https://docs.ray.io/en/latest/ray-observability/user-guides/configure-logging.html
 [13]: https://docs.datadoghq.com/agent/kubernetes/log/#setup
 [14]: https://docs.datadoghq.com/agent/kubernetes/log/#configuration
+[15]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

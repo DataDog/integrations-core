@@ -22,7 +22,7 @@ Edit the `external_dns.d/conf.yaml` file, in the `conf.d/` folder at the root of
 
 If you are using one Datadog Agent pod per Kubernetes worker node, use these example annotations on your external-dns pod to retrieve the data automatically:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: external_dns`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: external_dns`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][9].
 
 ```yaml
 apiVersion: v1
@@ -67,3 +67,4 @@ Need help? Contact [Datadog support][8].
 [6]: https://github.com/DataDog/integrations-core/blob/master/external_dns/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/external_dns/assets/service_checks.json
 [8]: https://docs.datadoghq.com/help/
+[9]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

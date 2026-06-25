@@ -36,7 +36,7 @@ Follow the instructions below to enable and configure this check for an Agent.
 
 For containerized environments, refer to the [Autodiscovery Integration Templates][3] for guidance on applying these instructions. Here's an example of how to configure this on the different Operator manifests using pod annotations:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration` to the check used by each target workload (`strimzi`, `kafka`, `kafka_consumer`, or `zk` in these examples), and set `containerImage` to match each target image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration` to the check used by each target workload (`strimzi`, `kafka`, `kafka_consumer`, or `zk` in these examples), and set `containerImage` to match each target image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
 
 ##### Cluster Operator:
 ```yaml
@@ -252,3 +252,4 @@ Additional helpful documentation, links, and articles:
 [16]: https://docs.datadoghq.com/agent/kubernetes/log/
 [17]: https://docs.datadoghq.com/integrations/kafka/?tab=host#kafka-consumer-integration
 [18]: https://www.datadoghq.com/blog/container-native-integrations/#messaging-and-streaming-with-strimzi
+[19]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
