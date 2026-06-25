@@ -603,10 +603,6 @@ class ClusterMetadataCollector:
 
         self.check.gauge('topic.count', len(topic_partitions), tags=self._get_tags(cluster_id))
 
-        # Low watermark (log-start) offsets are fetched once per run by the check and shared here,
-        # so partition.size, topic.size, and throughput reuse the same broker call as the lag path.
-        earliest_offsets = low_watermark_offsets
-
         now_ts = time.time()
         prev_ts = None
         previous_partition_offsets = {}
@@ -646,7 +642,7 @@ class ClusterMetadataCollector:
 
                 partition_metadata = topic_metadata.partitions.get(partition_id)
                 latest = highwater_offsets.get((topic_name, partition_id), 0)
-                earliest = earliest_offsets.get((topic_name, partition_id))
+                earliest = low_watermark_offsets.get((topic_name, partition_id))
 
                 if earliest is None:
                     have_all_earliest = False
