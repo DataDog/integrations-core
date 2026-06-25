@@ -62,7 +62,7 @@ def _row_key(row):
     :param row: a normalized row from events_statements_summary_by_digest
     :return: a tuple uniquely identifying this row
     """
-    return row['schema_name'], row['query_signature']
+    return row['schema_name'], row['query_signature'], row['digest']
 
 
 class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
