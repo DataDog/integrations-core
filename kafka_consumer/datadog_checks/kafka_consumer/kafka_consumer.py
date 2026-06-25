@@ -18,9 +18,7 @@ from datadog_checks.kafka_consumer.constants import (
 
 MAX_TIMESTAMPS = 1000
 
-# When the consumer offset predates the oldest cached broker sample we extrapolate into the past,
-# where the affine offset/timestamp assumption is unreliable. Cap how far back we extrapolate so the
-# reported estimated_consumer_lag never exceeds the cached history window by more than this many seconds.
+# Cap how far past the oldest cached sample we extrapolate, so estimated lag stays bounded.
 LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
 
 
@@ -89,18 +87,12 @@ class KafkaCheck(AgentCheck):
                             partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
-                # Low watermark (log-start) offsets feed cluster-metadata metrics (partition.size,
-                # topic.size, throughput) and, when data streams is enabled, the lag-in-time and
-                # cache-pruning floor. They require an extra broker call, so fetch them once here and
-                # only under cluster monitoring, then share with the metadata collector below.
                 if self.config._cluster_monitoring_enabled:
                     low_watermark_offsets = self.metadata_collector.fetch_earliest_offsets(
                         self.client.get_topic_partitions()
                     )
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
-                    # Prune cache entries below the lowest offset any consumer could read: the low
-                    # watermark when we have it, otherwise the earliest committed consumer offset.
                     if low_watermark_offsets:
                         prune_floors = low_watermark_offsets
                     else:
@@ -298,16 +290,10 @@ class KafkaCheck(AgentCheck):
             for o in stale:
                 del timestamps[o]
             timestamps[highwater_offset] = time()
-            # Once the cache fills up, prune and compact it instead of dropping a single entry.
             if len(timestamps) >= self._max_timestamps:
-                # Samples below the lowest offset any consumer can read are useless — no consumer will
-                # ever interpolate there — so drop them, keeping one anchor at/below that floor.
                 prune_floor = prune_floors.get((topic, partition))
                 if prune_floor is not None:
                     _prune_below_anchor(timestamps, prune_floor)
-                # Compact what remains down to half capacity. The Visvalingam-Whyatt simplification keeps
-                # the oldest and newest samples and discards the points that least affect the
-                # offset/timestamp curve, so the cache spans a longer history at a coarsening resolution.
                 _visvalingam_whyatt(timestamps, max(2, self._max_timestamps // 2))
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
@@ -414,9 +400,6 @@ class KafkaCheck(AgentCheck):
                     timestamps = broker_timestamps["{}_{}".format(topic, partition)]
                     # The producer timestamp can be not set if there was an error fetching broker offsets.
                     producer_timestamp = timestamps.get(producer_offset, None)
-                    # A consumer that has fallen behind the low watermark can never read the messages
-                    # between its committed offset and the low watermark (they are out of retention), so
-                    # its effective position for lag-in-time is the low watermark.
                     low_watermark = low_watermark_offsets.get((topic, partition))
                     effective_offset = consumer_offset if low_watermark is None else max(consumer_offset, low_watermark)
                     consumer_timestamp = _get_interpolated_timestamp(timestamps, effective_offset)
@@ -535,23 +518,11 @@ def _get_interpolated_timestamp(timestamps, offset):
     timestamp = slope * (offset - offset_after) + timestamp_after
 
     if offset < offset_before:
-        # Extrapolating to the left of the oldest cached sample: clamp the timestamp so the reported
-        # lag stays bounded (at most LAG_EXTRAPOLATION_LIMIT_SECONDS beyond the cache window) instead
-        # of growing arbitrarily with the extrapolation. This bound is independent of cluster
-        # monitoring and the low-watermark floor — it always applies to lag-in-time.
         timestamp = max(timestamp, timestamp_before - LAG_EXTRAPOLATION_LIMIT_SECONDS)
-    # No symmetric right-side clamp: the newest cached sample is the highwater offset we just
-    # collected this run, and a consumer offset can never exceed the highwater, so extrapolating
-    # to the right of the newest sample is unreachable here.
     return timestamp
 
 
 def _prune_below_anchor(timestamps, floor):
-    """Drop cached samples strictly below the largest offset at or below ``floor``, in place.
-
-    Samples below the earliest offset any consumer needs are useless, but we keep one anchor at or
-    below ``floor`` so the most-lagging consumer can still interpolate (rather than extrapolate).
-    """
     below = [o for o in timestamps if o < floor]
     if len(below) <= 1:
         return
@@ -562,16 +533,6 @@ def _prune_below_anchor(timestamps, floor):
 
 
 def _visvalingam_whyatt(timestamps, target_count):
-    """Downsample an offset->timestamp series to ``target_count`` points in place.
-
-    Implements the Visvalingam-Whyatt line simplification algorithm: the two endpoints (the oldest
-    and newest samples) are always kept, and the interior point whose removal least distorts the
-    linear offset/timestamp interpolation is dropped repeatedly until the target size is reached.
-    A point's "significance" is the time error introduced by reconstructing it from its neighbors.
-
-    Runs in O(n log n) using a min-heap keyed by significance, a doubly-linked list of neighbors,
-    and lazy deletion of heap entries that become stale when a neighbor is removed.
-    """
     if len(timestamps) <= target_count:
         return timestamps
 
@@ -592,7 +553,6 @@ def _visvalingam_whyatt(timestamps, target_count):
     while remaining > target_count and heap:
         error, o = heapq.heappop(heap)
         if o not in alive or error != current.get(o):
-            # Stale entry: the point was already removed, or its significance was recomputed.
             continue
         before, after = prev[o], nxt[o]
         alive.discard(o)
@@ -607,7 +567,6 @@ def _visvalingam_whyatt(timestamps, target_count):
 
 
 def _interpolation_error(o, prev, nxt, timestamps):
-    """Time error introduced by reconstructing sample ``o`` from its neighbors via linear interpolation."""
     before, after = prev[o], nxt[o]
     predicted = timestamps[before] + (timestamps[after] - timestamps[before]) * (o - before) / (after - before)
     return abs(timestamps[o] - predicted)
