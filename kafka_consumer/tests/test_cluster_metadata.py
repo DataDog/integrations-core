@@ -178,6 +178,11 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
         return result
 
     mock_admin_client.list_offsets.side_effect = mock_list_offsets
+
+    def mock_low_watermark_offsets(partitions):
+        return {(topic, partition): 10 if partition == 0 else 20 for topic, partition in partitions}
+
+    client.get_low_watermark_offsets.side_effect = mock_low_watermark_offsets
     client.consumer_get_cluster_id_and_list_topics.return_value = (cluster_id, [('test-topic', [0, 1])])
     client.list_consumer_group_offsets.return_value = []
     client.open_consumer.return_value = None

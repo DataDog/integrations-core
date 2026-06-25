@@ -604,23 +604,25 @@ def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator
 def test_get_low_watermark_offsets_delegates_to_client(kafka_instance, check):
     check = check(kafka_instance)
     mock_client = seed_mock_client()
+    mock_client.get_topic_partitions.return_value = {"topic1": [0, 1], "__consumer_offsets": [0]}
     mock_client.get_low_watermark_offsets.return_value = {("topic1", 0): 5}
     check.client = mock_client
 
-    consumer_offsets = {"group1": {("topic1", 0): 10, ("topic1", 1): 20}}
-    result = check._get_low_watermark_offsets(consumer_offsets)
+    result = check._get_low_watermark_offsets()
 
     assert result == {("topic1", 0): 5}
+    # Internal topics are excluded and every non-internal partition is requested.
     assert mock_client.get_low_watermark_offsets.call_args[0][0] == {("topic1", 0), ("topic1", 1)}
 
 
 def test_get_low_watermark_offsets_handles_errors(kafka_instance, check):
     check = check(kafka_instance)
     mock_client = seed_mock_client()
+    mock_client.get_topic_partitions.return_value = {"topic1": [0]}
     mock_client.get_low_watermark_offsets.side_effect = Exception("boom")
     check.client = mock_client
 
-    assert check._get_low_watermark_offsets({"group1": {("topic1", 0): 10}}) == {}
+    assert check._get_low_watermark_offsets() == {}
 
 
 def test_count_consumer_contexts(check, kafka_instance):

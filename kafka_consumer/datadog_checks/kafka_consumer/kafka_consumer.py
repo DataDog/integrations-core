@@ -89,12 +89,13 @@ class KafkaCheck(AgentCheck):
                             partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
+                # Low watermark (log-start) offsets feed cluster-metadata metrics (partition.size,
+                # topic.size, throughput) and, when data streams is enabled, the lag-in-time and
+                # cache-pruning floor. They require an extra broker call, so fetch them once here and
+                # only under cluster monitoring, then share with the metadata collector below.
+                if self.config._cluster_monitoring_enabled:
+                    low_watermark_offsets = self._get_low_watermark_offsets()
                 if self._data_streams_enabled:
-                    # Low watermark offsets are the physically meaningful floor for lag-in-time (and
-                    # for pruning the cache), but require an extra broker call, so we only fetch them
-                    # when cluster monitoring is enabled.
-                    if self.config._cluster_monitoring_enabled:
-                        low_watermark_offsets = self._get_low_watermark_offsets(consumer_offsets)
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     # Prune cache entries below the lowest offset any consumer could read: the low
                     # watermark when we have it, otherwise the earliest committed consumer offset.
@@ -147,7 +148,7 @@ class KafkaCheck(AgentCheck):
         if self.config._cluster_monitoring_enabled:
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
             try:
-                self.metadata_collector.collect_all_metadata(highwater_offsets)
+                self.metadata_collector.collect_all_metadata(highwater_offsets, low_watermark_offsets)
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
 
@@ -270,11 +271,16 @@ class KafkaCheck(AgentCheck):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
 
-    def _get_low_watermark_offsets(self, consumer_offsets):
-        """Fetch low watermark (earliest) offsets for every consumed partition."""
-        consumer_partitions = {tp for offsets in consumer_offsets.values() for tp in offsets}
+    def _get_low_watermark_offsets(self):
+        """Fetch low watermark (earliest) offsets for every non-internal partition in the cluster."""
+        partitions = {
+            (topic, partition)
+            for topic, parts in self.client.get_topic_partitions().items()
+            if topic not in KAFKA_INTERNAL_TOPICS
+            for partition in parts
+        }
         try:
-            return self.client.get_low_watermark_offsets(consumer_partitions)
+            return self.client.get_low_watermark_offsets(partitions)
         except Exception:
             self.log.exception("There was a problem collecting the low watermark offsets.")
             return {}
