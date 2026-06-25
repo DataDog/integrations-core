@@ -6,23 +6,23 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 
 from aiolimiter import AsyncLimiter
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, InstrumentedAsyncLimiter
 
 
-@dataclass(frozen=True)
-class RateLimiterConfig:
+class RateLimiterConfig(BaseModel):
     """Rate limit configuration for a single limiter tier."""
 
-    max_rate: float
-    time_period: float = RATE_LIMIT_TIME_PERIOD
+    model_config = ConfigDict(frozen=True)
+
+    max_rate: float = Field(gt=0)
+    time_period: float = Field(default=RATE_LIMIT_TIME_PERIOD, gt=0)
 
 
-@dataclass
-class RateLimiterFactoryConfig:
+class RateLimiterFactoryConfig(BaseModel):
     """Configuration for the Dispatcher's two-tier rate limiter factory.
 
     Rates are in requests per hour to match GitHub's documented limits.
@@ -36,8 +36,18 @@ class RateLimiterFactoryConfig:
 
     default: RateLimiterConfig = RateLimiterConfig(max_rate=360.0)
     slow: RateLimiterConfig = RateLimiterConfig(max_rate=120.0)
-    total_max_rate: float = 1500.0
-    slow_integrations: frozenset[str] = field(default_factory=frozenset)
+    total_max_rate: float = Field(default=1500.0, gt=0)
+    slow_integrations: frozenset[str] = frozenset()
+
+    @model_validator(mode="after")
+    def validate_combined_rate(self) -> RateLimiterFactoryConfig:
+        combined = self.default.max_rate + self.slow.max_rate
+        if combined > self.total_max_rate:
+            raise ValueError(
+                f"default ({self.default.max_rate} req/hr) + slow ({self.slow.max_rate} req/hr) = "
+                f"{combined} exceeds total_max_rate ({self.total_max_rate} req/hr)"
+            )
+        return self
 
 
 class RateLimiterFactory:
@@ -55,12 +65,6 @@ class RateLimiterFactory:
         logger: logging.Logger | None = None,
     ) -> None:
         cfg = config or RateLimiterFactoryConfig()
-        combined = cfg.default.max_rate + cfg.slow.max_rate
-        if combined > cfg.total_max_rate:
-            raise ValueError(
-                f"default ({cfg.default.max_rate} req/hr) + slow ({cfg.slow.max_rate} req/hr) = "
-                f"{combined} exceeds total_max_rate ({cfg.total_max_rate} req/hr)"
-            )
         self._slow_integrations = cfg.slow_integrations
         self._default = InstrumentedAsyncLimiter(
             AsyncLimiter(cfg.default.max_rate, cfg.default.time_period),

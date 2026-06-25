@@ -5,31 +5,69 @@ from __future__ import annotations
 import logging
 
 import pytest
+from pydantic import ValidationError
 
 from ddev.cli.ci.tests.rate_limiting import RateLimiterConfig, RateLimiterFactory, RateLimiterFactoryConfig
 
 # ---------------------------------------------------------------------------
-# Construction validation
+# RateLimiterConfig field validation
 # ---------------------------------------------------------------------------
 
 
-def test_factory_raises_when_combined_rate_exceeds_total():
-    config = RateLimiterFactoryConfig(
-        default=RateLimiterConfig(max_rate=800.0),
-        slow=RateLimiterConfig(max_rate=800.0),
-        total_max_rate=1500.0,
-    )
-    with pytest.raises(ValueError, match="exceeds total_max_rate"):
-        RateLimiterFactory(config)
+def test_rate_limiter_config_rejects_zero_max_rate():
+    with pytest.raises(ValidationError, match="greater than 0"):
+        RateLimiterConfig(max_rate=0)
 
 
-def test_factory_accepts_combined_rate_at_limit():
-    config = RateLimiterFactoryConfig(
+def test_rate_limiter_config_rejects_negative_max_rate():
+    with pytest.raises(ValidationError, match="greater than 0"):
+        RateLimiterConfig(max_rate=-1.0)
+
+
+def test_rate_limiter_config_rejects_zero_time_period():
+    with pytest.raises(ValidationError, match="greater than 0"):
+        RateLimiterConfig(max_rate=10.0, time_period=0)
+
+
+def test_rate_limiter_config_rejects_negative_time_period():
+    with pytest.raises(ValidationError, match="greater than 0"):
+        RateLimiterConfig(max_rate=10.0, time_period=-1.0)
+
+
+# ---------------------------------------------------------------------------
+# RateLimiterFactoryConfig construction validation
+# ---------------------------------------------------------------------------
+
+
+def test_factory_config_raises_when_combined_rate_exceeds_total():
+    with pytest.raises(ValidationError, match="exceeds total_max_rate"):
+        RateLimiterFactoryConfig(
+            default=RateLimiterConfig(max_rate=800.0),
+            slow=RateLimiterConfig(max_rate=800.0),
+            total_max_rate=1500.0,
+        )
+
+
+def test_factory_config_accepts_combined_rate_at_limit():
+    assert RateLimiterFactoryConfig(
         default=RateLimiterConfig(max_rate=750.0),
         slow=RateLimiterConfig(max_rate=750.0),
         total_max_rate=1500.0,
     )
-    assert RateLimiterFactory(config) is not None
+
+
+def test_factory_config_default_is_within_bounds():
+    assert RateLimiterFactoryConfig()
+
+
+def test_factory_config_rejects_zero_total_max_rate():
+    with pytest.raises(ValidationError, match="greater than 0"):
+        RateLimiterFactoryConfig(total_max_rate=0)
+
+
+# ---------------------------------------------------------------------------
+# RateLimiterFactory construction
+# ---------------------------------------------------------------------------
 
 
 def test_factory_default_config_is_within_bounds():
