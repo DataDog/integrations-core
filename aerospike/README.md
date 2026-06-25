@@ -79,8 +79,6 @@ For containerized environments, see [Configure integrations with Autodiscovery o
 
 Apply the following annotation to your pod, where `<CONTAINER_NAME>` is the Aerospike container name or a [custom identifier][15]:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: aerospike`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
-
 ```
 ad.datadoghq.com/<CONTAINER_NAME>.checks: |
   {
@@ -90,6 +88,8 @@ ad.datadoghq.com/<CONTAINER_NAME>.checks: |
     }
   } 
 ```
+
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: aerospike`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
 
 
 ##### Log collection

@@ -98,8 +98,6 @@ For containerized environments, see the [Autodiscovery Integration Templates][2]
 
 Add pod annotations under `.spec.template.metadata` for a Deployment:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: haproxy`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
-
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -123,6 +121,8 @@ spec:
       containers:
         - name: haproxy
 ```
+
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: haproxy`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->

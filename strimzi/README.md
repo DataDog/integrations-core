@@ -36,8 +36,6 @@ Follow the instructions below to enable and configure this check for an Agent.
 
 For containerized environments, refer to the [Autodiscovery Integration Templates][3] for guidance on applying these instructions. Here's an example of how to configure this on the different Operator manifests using pod annotations:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration` to the check used by each target workload (`strimzi`, `kafka`, `kafka_consumer`, or `zk` in these examples), and set `containerImage` to match each target image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
-
 ##### Cluster Operator:
 ```yaml
 apiVersion: apps/v1
@@ -115,6 +113,8 @@ spec:
 ...
 ```
 **Note**: The template used as for this example can be found [here][14].
+
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration` to the check used by each target workload (`strimzi`, `kafka`, `kafka_consumer`, or `zk` in these examples), and set `containerImage` to match each target image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
 
 See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
 

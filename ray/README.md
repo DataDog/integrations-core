@@ -61,8 +61,6 @@ labels:
 
 This example demonstrates the configuration as Kubernetes annotations on your Ray pods. See the [sample configuration file][4] for all available configuration options.
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: ray`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
-
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -85,6 +83,8 @@ spec:
     - name: 'ray'
 # (...)
 ```
+
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: ray`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
