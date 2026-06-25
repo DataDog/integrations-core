@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 37.40.1 / 2026-06-18
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+* Bump PyJWT to 2.13.0. ([#24074](https://github.com/DataDog/integrations-core/pull/24074))
+
 ## 37.40.0 / 2026-06-09
 
 ***Added***:

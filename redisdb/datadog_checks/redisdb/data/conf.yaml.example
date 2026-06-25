@@ -94,6 +94,12 @@ instances:
     #
     # ssl_check_hostname: true
 
+    ## @param client_name - string - optional
+    ## Set the connection name that appears in CLIENT LIST on the Redis server.
+    ## Useful for identifying agent connections. Requires the CLIENT SETNAME permission.
+    #
+    # client_name: <CLIENT_NAME>
+
     ## @param keys - list of strings - optional
     ## Enter the list of keys to collect the lengths from.
     ## The length is 1 for strings.
