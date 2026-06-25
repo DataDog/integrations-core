@@ -15,7 +15,13 @@ from ddev.ai.phases.base import Phase
 from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.resources import ResourceUnavailableError
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointStatus,
+    FailedCheckpoint,
+    SuccessCheckpoint,
+    TokenUsage,
+)
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -496,10 +502,26 @@ def linear_flow(tmp_path):
     return tmp_path
 
 
+def _make_checkpoint(data: dict) -> SuccessCheckpoint | FailedCheckpoint:
+    status = data.get("status")
+    ts = "2026-01-01T00:00:00+00:00"
+    if status == "success":
+        return SuccessCheckpoint(
+            status=CheckpointStatus.SUCCESS,
+            started_at=ts,
+            finished_at=ts,
+            tokens=TokenUsage(total_input=0, total_output=0),
+            memory_path="/tmp/mem.md",
+        )
+    return FailedCheckpoint(
+        status=CheckpointStatus.FAILED, started_at=None, finished_at=ts, error=data.get("error", "")
+    )
+
+
 def _write_checkpoints(flow_dir: Path, statuses: dict[str, dict]) -> None:
     manager = CheckpointManager(flow_dir / "checkpoints.yaml")
     for phase_id, data in statuses.items():
-        manager.write_phase_checkpoint(phase_id, data)
+        manager.write_phase_checkpoint(phase_id, _make_checkpoint(data))
 
 
 def _drain_trigger_phase_ids(orchestrator) -> list:

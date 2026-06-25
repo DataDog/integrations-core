@@ -6,7 +6,38 @@ from pathlib import Path
 
 import pytest
 
-from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointReadError
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointReadError,
+    CheckpointStatus,
+    FailedCheckpoint,
+    SuccessCheckpoint,
+    TokenUsage,
+)
+
+STARTED = "2026-01-01T00:00:00+00:00"
+FINISHED = "2026-01-01T00:01:00+00:00"
+
+
+def make_success(**kwargs) -> SuccessCheckpoint:
+    return SuccessCheckpoint(
+        status=CheckpointStatus.SUCCESS,
+        started_at=STARTED,
+        finished_at=FINISHED,
+        tokens=TokenUsage(total_input=10, total_output=20),
+        memory_path="/tmp/phase_memory.md",
+        **kwargs,
+    )
+
+
+def make_failed(**kwargs) -> FailedCheckpoint:
+    return FailedCheckpoint(
+        status=CheckpointStatus.FAILED,
+        started_at=STARTED,
+        finished_at=FINISHED,
+        error="something broke",
+        **kwargs,
+    )
 
 
 @pytest.fixture
@@ -35,10 +66,17 @@ def test_read_malformed_yaml_raises_checkpoint_read_error(manager):
 
 
 def test_read_unreadable_file_raises_checkpoint_read_error(manager, monkeypatch):
-    manager._path.write_text("phase1:\n  status: success\n")
+    manager.write_phase_checkpoint("phase1", make_success())
     monkeypatch.setattr("pathlib.Path.read_text", lambda *_, **__: (_ for _ in ()).throw(OSError("permission denied")))
     with pytest.raises(CheckpointReadError, match="checkpoints.yaml"):
         manager.read()
+
+
+def test_read_returns_validated_checkpoint(manager):
+    manager.write_phase_checkpoint("phase1", make_success())
+    data = manager.read()
+    assert isinstance(data["phase1"], SuccessCheckpoint)
+    assert data["phase1"].status == CheckpointStatus.SUCCESS
 
 
 # ---------------------------------------------------------------------------
@@ -47,30 +85,38 @@ def test_read_unreadable_file_raises_checkpoint_read_error(manager, monkeypatch)
 
 
 def test_write_and_read_back(manager):
-    manager.write_phase_checkpoint("phase1", {"status": "success", "tokens": 100})
+    manager.write_phase_checkpoint("phase1", make_success())
     data = manager.read()
-    assert data["phase1"]["status"] == "success"
-    assert data["phase1"]["tokens"] == 100
+    assert data["phase1"].status == CheckpointStatus.SUCCESS
+    assert data["phase1"].tokens.total_input == 10
+    assert data["phase1"].tokens.total_output == 20
+
+
+def test_write_preserves_extra_fields(manager):
+    manager.write_phase_checkpoint("phase1", make_success(endpoint_url="http://localhost:8080"))
+    data = manager.read()
+    assert isinstance(data["phase1"], SuccessCheckpoint)
+    assert data["phase1"].model_extra["endpoint_url"] == "http://localhost:8080"
 
 
 def test_write_creates_parent_dirs(tmp_path):
     manager = CheckpointManager(tmp_path / "nested" / "dir" / "checkpoints.yaml")
-    manager.write_phase_checkpoint("p", {"status": "success"})
-    assert manager.read()["p"]["status"] == "success"
+    manager.write_phase_checkpoint("p", make_success())
+    assert manager.read()["p"].status == CheckpointStatus.SUCCESS
 
 
 def test_write_multiple_phases(manager):
-    manager.write_phase_checkpoint("phase1", {"status": "success"})
-    manager.write_phase_checkpoint("phase2", {"status": "failed"})
+    manager.write_phase_checkpoint("phase1", make_success())
+    manager.write_phase_checkpoint("phase2", make_failed())
     data = manager.read()
-    assert data["phase1"]["status"] == "success"
-    assert data["phase2"]["status"] == "failed"
+    assert data["phase1"].status == CheckpointStatus.SUCCESS
+    assert data["phase2"].status == CheckpointStatus.FAILED
 
 
 def test_write_overwrites_existing_phase(manager):
-    manager.write_phase_checkpoint("phase1", {"status": "running"})
-    manager.write_phase_checkpoint("phase1", {"status": "success"})
-    assert manager.read()["phase1"]["status"] == "success"
+    manager.write_phase_checkpoint("phase1", make_failed())
+    manager.write_phase_checkpoint("phase1", make_success())
+    assert manager.read()["phase1"].status == CheckpointStatus.SUCCESS
 
 
 # ---------------------------------------------------------------------------
@@ -153,12 +199,52 @@ def test_successful_phases_empty_when_no_file(manager):
 
 
 def test_successful_phases_returns_only_succeeded(manager):
-    manager.write_phase_checkpoint("a", {"status": "success"})
-    manager.write_phase_checkpoint("b", {"status": "failed", "error": "boom"})
-    manager.write_phase_checkpoint("c", {"status": "success"})
+    manager.write_phase_checkpoint("a", make_success())
+    manager.write_phase_checkpoint("b", make_failed())
+    manager.write_phase_checkpoint("c", make_success())
     assert manager.successful_phases() == {"a", "c"}
 
 
-def test_successful_phases_ignores_malformed_entries(manager):
-    manager._path.write_text("a:\n  status: success\nb: not-a-dict\n")
-    assert manager.successful_phases() == {"a"}
+def test_read_raises_on_invalid_checkpoint_entry(manager):
+    manager.write_phase_checkpoint("a", make_success())
+    import yaml
+
+    raw = yaml.safe_load(manager._path.read_text())
+    raw["b"] = "not-a-dict"
+    manager._path.write_text(yaml.dump(raw))
+    with pytest.raises(CheckpointReadError, match="phase 'b'"):
+        manager.read()
+
+
+# ---------------------------------------------------------------------------
+# FailedCheckpoint fields
+# ---------------------------------------------------------------------------
+
+
+def test_failed_checkpoint_with_tokens(manager):
+    cp = make_failed(tokens=TokenUsage(total_input=5, total_output=15))
+    manager.write_phase_checkpoint("phase1", cp)
+    data = manager.read()
+    assert isinstance(data["phase1"], FailedCheckpoint)
+    assert data["phase1"].tokens is not None
+    assert data["phase1"].tokens.total_input == 5
+
+
+def test_failed_checkpoint_with_goal_validations(manager):
+    cp = make_failed(goal_validations=[{"attempt": 1, "result": "fail"}])
+    manager.write_phase_checkpoint("phase1", cp)
+    data = manager.read()
+    assert isinstance(data["phase1"], FailedCheckpoint)
+    assert data["phase1"].goal_validations == [{"attempt": 1, "result": "fail"}]
+
+
+def test_failed_checkpoint_started_at_none(manager):
+    cp = FailedCheckpoint(
+        status=CheckpointStatus.FAILED,
+        started_at=None,
+        finished_at=FINISHED,
+        error="crashed before start",
+    )
+    manager.write_phase_checkpoint("phase1", cp)
+    data = manager.read()
+    assert data["phase1"].started_at is None

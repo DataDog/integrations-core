@@ -2,14 +2,59 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
+from enum import StrEnum
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Literal
 
 import yaml
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 
 class CheckpointReadError(Exception):
     """Raised when checkpoints.yaml exists but cannot be read or parsed."""
+
+
+class CheckpointStatus(StrEnum):
+    SUCCESS = "success"
+    FAILED = "failed"
+
+
+class TokenUsage(BaseModel):
+    total_input: int
+    total_output: int
+
+
+class SuccessCheckpoint(BaseModel):
+    """Checkpoint written at the end of a successful phase execution."""
+
+    model_config = ConfigDict(extra="allow")
+
+    status: Literal[CheckpointStatus.SUCCESS]
+    started_at: str
+    finished_at: str
+    tokens: TokenUsage
+    memory_path: str
+
+
+class FailedCheckpoint(BaseModel):
+    """Checkpoint written when a phase terminates with an error."""
+
+    status: Literal[CheckpointStatus.FAILED]
+    started_at: str | None
+    finished_at: str
+    error: str
+    tokens: TokenUsage | None = None
+    goal_validations: list[dict[str, Any]] | None = None
+
+
+PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discriminator="status")]
+
+# TypeAdapter provides model_validate() for annotated union types that aren't BaseModel subclasses.
+_CHECKPOINT_ADAPTER: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)
+
+RESERVED_SUCCESS_KEYS: frozenset[str] = frozenset(SuccessCheckpoint.model_fields)
 
 
 class CheckpointManager:
@@ -26,25 +71,33 @@ class CheckpointManager:
     def _ensure_dir(self) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def read(self) -> dict[str, Any]:
-        """Return full checkpoint data, keyed by phase_id. Empty dict if file absent."""
+    def read(self) -> dict[str, PhaseCheckpoint]:
+        """Return validated checkpoints keyed by phase_id. Skips malformed entries. Empty dict if file absent."""
         if not self._path.exists():
             return {}
         try:
-            return yaml.safe_load(self._path.read_text(encoding="utf-8")) or {}
+            raw = yaml.safe_load(self._path.read_text(encoding="utf-8")) or {}
         except (OSError, yaml.YAMLError) as e:
             raise CheckpointReadError(f"Failed to load checkpoints from {self._path}: {e}") from e
 
-    def write_phase_checkpoint(self, phase_id: str, data: dict[str, Any]) -> None:
+        result: dict[str, PhaseCheckpoint] = {}
+        for phase_id, data in raw.items():
+            try:
+                result[phase_id] = _CHECKPOINT_ADAPTER.validate_python(data)
+            except ValidationError as e:
+                raise CheckpointReadError(f"Checkpoint for phase {phase_id!r} in {self._path} is invalid: {e}") from e
+        return result
+
+    def write_phase_checkpoint(self, phase_id: str, data: PhaseCheckpoint) -> None:
         """Write or overwrite one phase's section in checkpoints.yaml."""
-        checkpoints = self.read()
-        checkpoints[phase_id] = data
+        all_checkpoints = {pid: cp.model_dump(mode="json") for pid, cp in self.read().items()}
+        all_checkpoints[phase_id] = data.model_dump(mode="json")
         self._ensure_dir()
-        self._path.write_text(yaml.dump(checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
+        self._path.write_text(yaml.dump(all_checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
 
     def successful_phases(self) -> set[str]:
         """Phase ids whose last recorded checkpoint reached 'success'."""
-        return {pid for pid, data in self.read().items() if isinstance(data, dict) and data.get("status") == "success"}
+        return {pid for pid, data in self.read().items() if data.status == CheckpointStatus.SUCCESS}
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""

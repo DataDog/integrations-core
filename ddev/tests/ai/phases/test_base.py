@@ -9,7 +9,13 @@ import pytest
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.config import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointStatus,
+    FailedCheckpoint,
+    SuccessCheckpoint,
+    TokenUsage,
+)
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
 
 
@@ -109,9 +115,10 @@ async def test_on_error_writes_failed_checkpoint(flow_context, message_queue):
     await phase.on_error(wrapped)
 
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "failed"
-    assert checkpoint["error"] == "boom"
-    assert checkpoint["started_at"] is None  # not started yet
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.status == CheckpointStatus.FAILED
+    assert checkpoint.error == "boom"
+    assert checkpoint.started_at is None  # not started yet
 
 
 async def test_on_error_emits_failed_message(flow_context, message_queue):
@@ -136,8 +143,9 @@ async def test_on_error_writes_failed_checkpoint_after_start(flow_context, messa
     await phase.on_error(wrapped)
 
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "failed"
-    assert checkpoint["started_at"] is not None
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.status == CheckpointStatus.FAILED
+    assert checkpoint.started_at is not None
 
 
 # ---------------------------------------------------------------------------
@@ -223,13 +231,14 @@ async def test_process_message_writes_memory_and_checkpoint(flow_context, messag
     assert mgr.memory_content("p1") == "stub-memory-body"
 
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "success"
-    assert checkpoint["tokens"] == {"total_input": 123, "total_output": 45}
-    assert checkpoint["memory_path"] == str(mgr.memory_path("p1"))
-    assert checkpoint["custom_field"] == "custom_value"
-    assert checkpoint["count"] == 7
-    assert checkpoint["started_at"]
-    assert checkpoint["finished_at"]
+    assert isinstance(checkpoint, SuccessCheckpoint)
+    assert checkpoint.status == CheckpointStatus.SUCCESS
+    assert checkpoint.tokens == TokenUsage(total_input=123, total_output=45)
+    assert checkpoint.memory_path == str(mgr.memory_path("p1"))
+    assert checkpoint.custom_field == "custom_value"
+    assert checkpoint.count == 7
+    assert checkpoint.started_at
+    assert checkpoint.finished_at
 
 
 @pytest.mark.parametrize(
