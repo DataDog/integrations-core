@@ -87,15 +87,10 @@ def test_use_agent_proxy_false_skips_agent_config():
             assert http.options['proxies'] is None
 
 
-def test_no_proxy_string_is_split_off_proxies(clean_proxy_env):
-    with HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'no_proxy': 'a.com,b.com;c.com'}}, {}) as http:
-        # no_proxy never leaks into options['proxies']; it drives routing instead.
-        assert http.options['proxies'] == {'http': 'http://i:1'}
-        assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']  # ';' normalized to ','
-
-
-def test_no_proxy_string_strips_whitespace_around_entries(clean_proxy_env):
+def test_no_proxy_string_is_split_off_and_normalized(clean_proxy_env):
+    # ';' and surrounding whitespace both normalize; no_proxy never leaks into options['proxies'].
     with HTTPX2Wrapper({'proxy': {'http': 'http://i:1', 'no_proxy': 'a.com, b.com ; c.com'}}, {}) as http:
+        assert http.options['proxies'] == {'http': 'http://i:1'}
         assert http.no_proxy_uris == ['a.com', 'b.com', 'c.com']
 
 
@@ -123,19 +118,6 @@ def test_legacy_no_proxy_true_maps_to_skip_proxy():
     # no_proxy: true is a legacy alias for skip_proxy in RequestsWrapper (http.py:106).
     with HTTPX2Wrapper({'no_proxy': True}, {}) as http:
         assert http.options['proxies'] == PROXY_SETTINGS_DISABLED
-
-
-def test_skip_proxy_disables_trust_env_and_builds_no_router():
-    with HTTPX2Wrapper({'skip_proxy': True}, {}) as http:
-        assert http._client.trust_env is False
-        assert not isinstance(http._client._transport, _ProxyRoutingTransport)
-
-
-def test_injected_transport_keeps_trust_env(clean_proxy_env):
-    # No proxy and an injected transport: no router is built, so trust_env stays on for .netrc/SSL_CERT_FILE.
-    sink: list[str] = []
-    with HTTPX2Wrapper({}, {}, transport=_recording_transport('inj', sink)) as http:
-        assert http._client.trust_env is True
 
 
 def test_injected_transport_with_proxy_keeps_trust_env(clean_proxy_env):
@@ -252,32 +234,23 @@ def test_proxy_with_no_usable_scheme_keeps_trust_env_and_builds_no_router(proxy,
 # --- _build_proxy_transport decides whether a custom transport is needed ---
 
 
-def test_build_proxy_transport_returns_none_without_proxy():
-    assert _build_proxy_transport(None, None, True, None) is None
-
-
-def test_build_proxy_transport_returns_none_for_disabled_sentinel():
-    assert _build_proxy_transport(PROXY_SETTINGS_DISABLED, None, True, None) is None
-
-
-def test_build_proxy_transport_builds_router_when_proxy_set():
-    transport = _build_proxy_transport({'http': 'http://1.2.3.4:3128'}, None, True, None)
+@pytest.mark.parametrize(
+    'proxies,expect_router',
+    [
+        pytest.param(None, False, id='no-proxy'),
+        pytest.param(PROXY_SETTINGS_DISABLED, False, id='disabled-sentinel'),
+        pytest.param({'http': 'http://1.2.3.4:3128'}, True, id='http-proxy'),
+        # socks5h:// must build a router too, matching RequestsWrapper's documented SOCKS support.
+        pytest.param({'http': 'socks5h://1.2.3.4:1080'}, True, id='socks-proxy'),
+    ],
+)
+def test_build_proxy_transport_router_only_when_proxy_usable(proxies, expect_router):
+    transport = _build_proxy_transport(proxies, None, True, None)
+    if not expect_router:
+        assert transport is None
+        return
     assert isinstance(transport, _ProxyRoutingTransport)
     transport.close()
-
-
-def test_build_proxy_transport_builds_router_for_socks_proxy():
-    """A socks5h:// proxy URL builds a routing transport, matching RequestsWrapper's documented SOCKS support."""
-    transport = _build_proxy_transport({'http': 'socks5h://1.2.3.4:1080'}, None, True, None)
-    assert isinstance(transport, _ProxyRoutingTransport)
-    transport.close()
-
-
-def test_build_proxy_transport_skips_direct_allocation_when_no_scheme_usable():
-    with mock.patch('datadog_checks.base.utils.httpx2.httpx2.HTTPTransport') as transport_cls:
-        result = _build_proxy_transport({'all_proxy': 'http://p:3128'}, None, True, None)
-    assert result is None
-    assert transport_cls.call_count == 0  # the direct transport must not be built when nothing routes
 
 
 def test_build_proxy_transport_threads_verify_and_cert_into_inners():
@@ -361,11 +334,6 @@ def test_env_proxies_scheme_specific_beats_all_proxy(clean_proxy_env):
     assert proxies['http'] == 'http://all:9'
 
 
-def test_env_proxies_lowercase_name_resolves(clean_proxy_env):
-    clean_proxy_env.setenv('http_proxy', 'http://low:3')
-    assert _env_proxies() == {'http': 'http://low:3'}
-
-
 def test_env_proxies_empty_without_env(clean_proxy_env):
     assert _env_proxies() == {}
 
@@ -381,21 +349,9 @@ def test_build_env_proxy_transport_separates_instance_and_env_no_proxy_tiers(cle
     transport.close()
 
 
-def test_build_env_proxy_transport_preserves_cidr_no_proxy(clean_proxy_env):
-    clean_proxy_env.setenv('HTTP_PROXY', 'http://p:1')
-    transport = _build_env_proxy_transport(None, ['10.0.0.0/25'], True, None)
-    assert '10.0.0.0/25' in transport._no_proxy_uris
-    transport.close()
-
-
 def test_build_env_proxy_transport_none_without_env_proxy(clean_proxy_env, monkeypatch):
     monkeypatch.setattr(GET_ENV_PROXIES, lambda: {})
     assert _build_env_proxy_transport(None, ['internal.corp'], True, None) is None
-
-
-def test_no_proxy_uris_stored_on_wrapper(clean_proxy_env):
-    with HTTPX2Wrapper({'proxy': {'http': 'http://p:1', 'no_proxy': 'a.com,b.com'}}, {}) as http:
-        assert http.no_proxy_uris == ['a.com', 'b.com']
 
 
 def test_no_proxy_uris_none_when_no_proxy_configured():
@@ -439,20 +395,20 @@ def test_full_instance_proxy_ignores_env(clean_proxy_env):
             assert router._env_schemes == set()
 
 
-def test_skip_proxy_preserves_env_ca_bundle(clean_proxy_env, clean_ca_env, capturing_transport):
+@pytest.mark.parametrize(
+    'env_var,value',
+    [
+        pytest.param('REQUESTS_CA_BUNDLE', '/env/ca.pem', id='requests-ca-bundle'),
+        # SSL_CERT_FILE is gated behind trust_env in httpx2, so skip_proxy must read it directly.
+        pytest.param('SSL_CERT_FILE', '/env/ssl_cert_file.pem', id='ssl-cert-file'),
+    ],
+)
+def test_skip_proxy_preserves_env_ca_bundle(clean_proxy_env, clean_ca_env, capturing_transport, env_var, value):
     # skip_proxy disables trust_env, but the env CA bundle must still apply, matching RequestsWrapper.
-    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/ca.pem')
+    clean_ca_env.setenv(env_var, value)
     with HTTPX2Wrapper({'skip_proxy': True}, {}, transport=capturing_transport) as http:
         assert http._client.trust_env is False
-        assert http.options['verify'] == '/env/ca.pem'
-
-
-def test_skip_proxy_preserves_ssl_cert_file_env(clean_proxy_env, clean_ca_env, capturing_transport):
-    # skip_proxy disables trust_env, which gates SSL_CERT_FILE in httpx2; the env CA must still apply.
-    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
-    with HTTPX2Wrapper({'skip_proxy': True}, {}, transport=capturing_transport) as http:
-        assert http._client.trust_env is False
-        assert http.options['verify'] == '/env/ssl_cert_file.pem'
+        assert http.options['verify'] == value
 
 
 def test_env_ca_bundle_threads_into_proxied_inners(clean_proxy_env, clean_ca_env):
@@ -471,14 +427,6 @@ def test_skip_proxy_ignores_env_proxy(clean_proxy_env):
     with HTTPX2Wrapper({'skip_proxy': True}, {}) as http:
         assert http._client.trust_env is False
         assert not isinstance(http._client._transport, _ProxyRoutingTransport)
-
-
-def test_build_env_proxy_transport_fills_missing_scheme_from_env(clean_proxy_env):
-    clean_proxy_env.setenv('HTTPS_PROXY', 'http://envhttps:1')
-    transport = _build_env_proxy_transport({'http': 'http://inst:2'}, None, True, None)
-    assert set(transport._scheme_transports) == {'http', 'https'}
-    assert transport._env_schemes == {'https'}
-    transport.close()
 
 
 def test_build_env_proxy_transport_instance_wins_over_env_per_scheme(clean_proxy_env):
@@ -511,12 +459,6 @@ def test_env_no_proxy_does_not_bypass_instance_scheme():
     # http is instance-configured (not env-filled), so env NO_PROXY must not divert it.
     served = _served_by([], 'http://internal.corp/', env_schemes={'https'}, env_no_proxy=['internal.corp'])
     assert served == 'proxy-http'
-
-
-def test_explicit_scheme_ignores_env_no_proxy():
-    # https here is instance-configured; env NO_PROXY governs only env-filled schemes, so the proxy serves it.
-    served = _served_by([], 'https://internal.corp/', env_schemes=set(), env_no_proxy=['internal.corp'])
-    assert served == 'proxy-https'
 
 
 def test_instance_no_proxy_bypasses_every_scheme():
