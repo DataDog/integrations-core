@@ -16,6 +16,18 @@ SERVICE_PATTERN_FLAGS = re.IGNORECASE
 
 SERVICE_CONFIG_TRIGGER_INFO = 8
 
+# Per-user service instance flag (SERVICE_USERSERVICE_INSTANCE in winsvc.h). Set on the
+# per-session instances of a per-user service (named <template>_<LUID>), not on the template.
+SERVICE_USERSERVICE_INSTANCE = 0x80
+USER_SERVICE_LUID_SUFFIX_RE = re.compile(r'_[0-9A-Fa-f]+$')
+
+
+def _group_per_user_service_name(name: str, service_type: int) -> str:
+    """Strip the per-user LUID suffix so instances group under their template name."""
+    if service_type & SERVICE_USERSERVICE_INSTANCE:
+        return USER_SERVICE_LUID_SUFFIX_RE.sub('', name)
+    return name
+
 
 def QueryServiceConfig2W(*args):
     """
@@ -303,13 +315,30 @@ class WindowsService(AgentCheck):
         # See test_name_regex_order()
         service_filters = sorted(service_filters, reverse=True, key=lambda x: len(x.name or ""))
 
+        group_per_user_services = instance.get('group_per_user_services', False)
+
         for service_status_process_enum in service_status_process_enums:
             service_name = service_status_process_enum["ServiceName"]
             display_name = service_status_process_enum["DisplayName"]
             state = service_status_process_enum["CurrentState"]
             service_pid = service_status_process_enum["ProcessId"]
+            service_type = service_status_process_enum.get("ServiceType", 0)
 
             service_view = ServiceView(scm_handle, service_name)
+
+            # Names used for tags; for per-user services these collapse the per-session LUID suffix
+            # so all instances report under their template name.
+            # The full instance name is kept for service handles and the restart PID cache.
+            # Multiple instances thus collapse into a single series; if they are in different states
+            # the reported state reflects whichever instance is emitted last.
+            # We generally expect multiple per-user instances per host to be rare (terminal service
+            # sessions only); the main win is grouping the windows_service tag across hosts (and thus
+            # service checks) for easier monitoring.
+            reported_name = service_name
+            reported_display_name = display_name
+            if group_per_user_services:
+                reported_name = _group_per_user_service_name(service_name, service_type)
+                reported_display_name = _group_per_user_service_name(display_name, service_type)
 
             if 'ALL' not in services:
                 for service_filter in service_filters:
@@ -338,11 +367,11 @@ class WindowsService(AgentCheck):
             status = self.STATE_TO_STATUS.get(state, self.UNKNOWN)
             state_string = self.STATE_TO_STRING.get(state, self.UNKNOWN_LITERAL)
 
-            tags = ['windows_service:{}'.format(service_name), 'windows_service_state:{}'.format(state_string)]
+            tags = ['windows_service:{}'.format(reported_name), 'windows_service_state:{}'.format(state_string)]
             tags.extend(custom_tags)
 
             if instance.get('collect_display_name_as_tag', False):
-                tags.append('display_name:{}'.format(display_name))
+                tags.append('display_name:{}'.format(reported_display_name))
 
             if instance.get('windows_service_startup_type_tag', False):
                 try:
@@ -355,7 +384,7 @@ class WindowsService(AgentCheck):
 
             if not instance.get('disable_legacy_service_tag', False):
                 self._log_deprecation('service_tag', 'windows_service')
-                tags.append('service:{}'.format(service_name))
+                tags.append('service:{}'.format(reported_name))
 
             self.service_check(self.SERVICE_CHECK_NAME, status, tags=tags)
             self.log.debug('service state for %s %s', service_name, status)
