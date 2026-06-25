@@ -3468,6 +3468,48 @@ def test_template_hide_duplicate():
     assert not spec.errors
 
 
+def test_template_override_resolves_against_nested_template():
+    """An override targeting a nested template must defer until that template expands.
+
+    Mirrors the Windows perf-counter integrations (e.g. active_directory): the
+    `extra_metrics` option is itself a `common/perf_counters.metrics` template that
+    is spliced into the instances list, and the `extra_metrics.value.example`
+    override only resolves once that nested template is expanded.
+    """
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          options:
+          - template: init_config
+            options:
+            - template: init_config/perf_counters
+            - template: init_config/default
+          - template: instances
+            options:
+            - template: instances/perf_counters
+              overrides:
+                extra_metrics.value.example:
+                  NTDS:
+                    name: ds
+                    counters:
+                      - 'DS % Writes from LDAP': writes_from_ldap
+            - template: instances/default
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+    instances = next(opt for opt in spec.data['files'][0]['options'] if opt['name'] == 'instances')
+    extra_metrics = next(opt for opt in instances['options'] if opt['name'] == 'extra_metrics')
+    assert extra_metrics['value']['example'] == {
+        'NTDS': {'name': 'ds', 'counters': [{'DS % Writes from LDAP': 'writes_from_ldap'}]}
+    }
+
+
 def test_template_array_wrapper_hidden_propagates_to_items():
     with TempDir() as d:
         template_file = path_join(d, 'pair.yaml')

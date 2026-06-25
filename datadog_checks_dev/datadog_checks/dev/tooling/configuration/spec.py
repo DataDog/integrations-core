@@ -117,25 +117,44 @@ def files_validator(files, loader) -> None:
             handle_discovery(config_file, loader, file_name, example_file_names_origin, file_index)
 
 
-def expand_template_items(items: list, loader, file_name: str, section: str) -> set[int]:
+def expand_template_items(
+    items: list, loader, file_name: str, section: str, propagate_hidden: bool = False
+) -> set[int]:
     """Expand every template: item in items in-place.
 
-    Overrides are scoped to the item being expanded.
+    Overrides are shared across the whole list: ``apply_overrides`` pops each
+    override as it is applied, so an override that cannot resolve against the
+    current item is retried against later items, including nested templates that
+    are spliced into the list as they expand (e.g. ``extra_metrics.value.*``).
+
+    When ``propagate_hidden`` is set, a template wrapper's ``hidden`` value is
+    carried forward (via ``setdefault``, so an item's own value wins) to every
+    following item until the next template wrapper. Plain items do not start or
+    reset propagation. This is the historical option-template behaviour that
+    specs such as the Windows perf-counter checks and haproxy rely on to hide a
+    block of legacy options; it is left off for discovery strategies, which have
+    no ``hidden`` concept.
+
     Returns the set of 0-based indices that failed to resolve.
     """
+    overrides: dict = {}
     override_errors: list = []
     failed: set[int] = set()
+    pending_hidden = False
     i = 0
     while i < len(items):
         item = items[i]
         if not isinstance(item, dict) or 'template' not in item:
+            if propagate_hidden and isinstance(item, dict):
+                item.setdefault('hidden', pending_hidden)
             i += 1
             continue
 
         resolved = False
-        overrides: dict = {}
 
         while 'template' in item:
+            if propagate_hidden:
+                pending_hidden = item.get('hidden', False)
             overrides.update(item.pop('overrides', {}))
             try:
                 tmpl = loader.templates.load(item.pop('template'))
@@ -156,13 +175,7 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
                 items[i] = tmpl
             elif isinstance(tmpl, list):
                 if tmpl:
-                    # Wrapper attributes (template/overrides already popped) such as
-                    # `hidden: true` apply to every expanded item; the item's own value wins.
-                    wrapper_attrs = {k: v for k, v in item.items() if k != 'name'}
                     for k, tmpl_item in enumerate(tmpl):
-                        if isinstance(tmpl_item, dict):
-                            for attr, value in wrapper_attrs.items():
-                                tmpl_item.setdefault(attr, value)
                         items.insert(i + 1 + k, tmpl_item)
                     items.pop(i)
                     item = tmpl[0]
@@ -185,12 +198,16 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
         else:
             resolved = True
 
+        if resolved and propagate_hidden and isinstance(item, dict):
+            item.setdefault('hidden', pending_hidden)
+
         if not resolved:
             failed.add(i)
 
         i += 1
 
-    if override_errors:
+    # Only overrides still present were never applied to any item; report those.
+    if overrides and override_errors:
         for idx, errors in override_errors:
             error_message = '\n'.join(errors)
             loader.errors.append(f'{loader.source}, {file_name}, {section} #{idx + 1}: {error_message}')
@@ -427,7 +444,7 @@ def options_validator(options, loader, file_name, *sections):
     if sections_display:
         sections_display += ', '
 
-    failed = expand_template_items(options, loader, file_name, f'{sections_display}option')
+    failed = expand_template_items(options, loader, file_name, f'{sections_display}option', propagate_hidden=True)
 
     option_names_origin = {}
     for option_index, option in enumerate(options, 1):
