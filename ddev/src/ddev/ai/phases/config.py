@@ -51,6 +51,24 @@ def _detect_cycles(
     return cycles, False
 
 
+def _topological_sort(flow: list[FlowEntry]) -> list[FlowEntry]:
+    """Stable topological sort of an acyclic flow: dependencies before dependents.
+
+    Phases with no ordering constraint between them keep their original
+    declaration order. The caller must guarantee the graph is acyclic.
+    """
+    remaining_deps = {entry.phase: set(entry.dependencies) for entry in flow}
+
+    ordered: list[FlowEntry] = []
+    emitted: set[str] = set()
+    while len(ordered) < len(flow):
+        # First phase in declaration order whose dependencies are all emitted.
+        nxt = next(entry for entry in flow if entry.phase not in emitted and remaining_deps[entry.phase] <= emitted)
+        ordered.append(nxt)
+        emitted.add(nxt.phase)
+    return ordered
+
+
 class TaskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")
@@ -132,6 +150,8 @@ class FlowEntry(BaseModel):
 
 
 class FlowConfig(BaseModel):
+    """Validated flow entries, topologically sorted."""
+
     model_config = ConfigDict(extra="forbid")
     variables: dict[str, str] = {}
     agents: dict[str, AgentConfig]
@@ -166,6 +186,7 @@ class FlowConfig(BaseModel):
             suffix = f"\n  (showing first {len(cycles)}; more cycles exist)" if truncated else ""
             raise ValueError(f"Cycle(s) detected in flow:\n  {formatted}{suffix}")
 
+        self.flow = _topological_sort(self.flow)
         return self
 
     @classmethod

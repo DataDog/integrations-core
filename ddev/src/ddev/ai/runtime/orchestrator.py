@@ -158,10 +158,11 @@ class PhaseOrchestrator(EventBusOrchestrator):
     ) -> tuple[set[str], set[str]]:
         """Compute (completed, frontier) for a resumed run; both empty when not resuming.
 
-        ``completed`` is the dependency-closed set of phases that succeeded *and* whose every
+        ``completed`` is the dependency-closed set of phases that succeeded and whose every
         transitive dependency also succeeded. ``frontier`` is the phases that will run first
-        on resume (not completed, but all their dependencies are): the ones that may be sitting
-        on partial work from the interrupted run.
+        on resume (not completed, but all their dependencies are).
+
+        The single-pass closure relies on ``config.flow`` being topologically sorted.
         """
         if not self._resume:
             return set(), set()

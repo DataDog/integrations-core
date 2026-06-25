@@ -588,3 +588,39 @@ async def test_resume_corrupt_checkpoints_raises_flow_config_error(linear_flow, 
     orchestrator = make_orchestrator(linear_flow, resume=True)
     with pytest.raises(FlowConfigError, match="Cannot resume"):
         await orchestrator.on_initialize()
+
+
+async def test_resume_closure_independent_of_flow_declaration_order(tmp_path, make_orchestrator):
+    """A flow declared dependents-first still resolves the resume closure correctly."""
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "flow.yaml").write_text(
+        dedent("""\
+        agents:
+          writer:
+            tools: []
+        phases:
+          a:
+            agent: writer
+            tasks: [{name: ta, prompt: a}]
+          b:
+            agent: writer
+            tasks: [{name: tb, prompt: b}]
+          c:
+            agent: writer
+            tasks: [{name: tc, prompt: c}]
+        flow:
+          - phase: c
+            dependencies: [b]
+          - phase: b
+            dependencies: [a]
+          - phase: a
+        """)
+    )
+    _write_checkpoints(tmp_path, {"a": {"status": "success"}, "b": {"status": "success"}})
+    orchestrator = make_orchestrator(tmp_path, resume=True)
+    await orchestrator.on_initialize()
+
+    processors = orchestrator._subscribers.get(PhaseTrigger, [])
+    assert {p.name for p in processors} == {"c"}  # a and b skipped, c is the frontier
+    assert processors[0]._is_resume_frontier is True
