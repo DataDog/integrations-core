@@ -252,6 +252,7 @@ class _ProxyRoutingTransport(httpx2.BaseTransport):
         if transport is None:
             return self._direct.handle_request(request)
         # Tier 2: env NO_PROXY only diverts schemes filled from the environment, never an explicit proxy.
+        # Matching mirrors RequestsWrapper's should_bypass_proxy (host/CIDR), not httpx's URL-pattern mounts.
         if scheme in self._env_schemes and self._env_no_proxy and should_bypass_proxy(url, self._env_no_proxy):
             return self._direct.handle_request(request)
         return transport.handle_request(request)
