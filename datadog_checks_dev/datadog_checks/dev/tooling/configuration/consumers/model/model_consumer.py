@@ -110,11 +110,6 @@ class ModelConsumer:
 
         errors: List[str] = []
         section_name = section['name']
-        # Options without a sub-options list are leaf nodes (e.g. `instances: []` in a
-        # fleet-discovery auto_conf.yaml). They carry no model schema; skip them.
-        if 'options' not in section:
-            return (package_info, model_files, model_info)
-
         if section_name == 'init_config':
             model_id = 'shared'
             model_file_name = f'{model_id}.py'
@@ -123,6 +118,10 @@ class ModelConsumer:
             model_id = 'instance'
             model_file_name = f'{model_id}.py'
             schema_name = 'InstanceConfig'
+            # auto_conf.yaml files may define instances as a leaf (no sub-options) to
+            # emit `instances: []` without providing a model schema.
+            if 'options' not in section:
+                return (package_info, model_files, model_info)
             if section['multiple_instances_defined']:
                 section = self._merge_instances(section, errors)
         # Skip anything checks don't use directly
