@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 15.17.2 / 2026-06-18
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 15.17.1 / 2026-06-09
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
 ## 15.17.0 / 2026-05-14
 
 ***Added***:

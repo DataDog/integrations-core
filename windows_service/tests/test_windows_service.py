@@ -389,6 +389,184 @@ def test_service_restart_detection(aggregator, check, instance_basic):
     )
 
 
+# Per-user service instances carry SERVICE_USER_OWN_PROCESS (0x50) plus the
+# SERVICE_USERSERVICE_INSTANCE flag (0x80). Templates (not enumerated) lack the 0x80 bit.
+USER_SERVICE_INSTANCE_TYPE = 0x10 | 0x40 | 0x80
+WIN32_OWN_PROCESS_TYPE = 0x10
+
+
+def _per_user_mock_services():
+    return [
+        {
+            'ServiceName': 'OneSyncSvc_443f50',
+            'DisplayName': 'Sync Host_443f50',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 1234,
+            'ServiceType': USER_SERVICE_INSTANCE_TYPE,
+        },
+        {
+            'ServiceName': 'OneSyncSvc_18f113',
+            'DisplayName': 'Sync Host_18f113',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 5678,
+            'ServiceType': USER_SERVICE_INSTANCE_TYPE,
+        },
+        {
+            'ServiceName': 'Dnscache',
+            'DisplayName': 'DNS Client',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 9999,
+            'ServiceType': WIN32_OWN_PROCESS_TYPE,
+        },
+    ]
+
+
+def test_group_per_user_services(aggregator, check, instance_group_per_user_services):
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance_group_per_user_services)
+
+    services = [
+        # Both per-user instances collapse to the template name, so the grouped tag is submitted twice
+        ServiceAssertion('OneSyncSvc', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host'], count=2),
+        # The LUID-suffixed names must no longer be emitted
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING, count=0),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING, count=0),
+        # Non per-user services are untouched
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, extra_tags=['display_name:DNS Client']),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_group_per_user_services_disabled(aggregator, check, instance_group_per_user_services):
+    instance_group_per_user_services['group_per_user_services'] = False
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance_group_per_user_services)
+
+    services = [
+        # Without grouping each instance keeps its full LUID-suffixed name
+        ServiceAssertion(
+            'OneSyncSvc_443f50', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host_443f50']
+        ),
+        ServiceAssertion(
+            'OneSyncSvc_18f113', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host_18f113']
+        ),
+        # The grouped template name is not emitted
+        ServiceAssertion('OneSyncSvc', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_group_per_user_services_ignores_non_user_service(aggregator, check, instance_group_per_user_services):
+    # A regular service whose name happens to end in _<hex> must not be stripped: it lacks the
+    # SERVICE_USERSERVICE_INSTANCE flag.
+    mock_services = [
+        {
+            'ServiceName': 'MyService_abc123',
+            'DisplayName': 'My Service_abc123',
+            'CurrentState': win32service.SERVICE_RUNNING,
+            'ProcessId': 4242,
+            'ServiceType': WIN32_OWN_PROCESS_TYPE,
+        },
+    ]
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=mock_services):
+        c.check(instance_group_per_user_services)
+
+    services = [
+        ServiceAssertion(
+            'MyService_abc123', win32service.SERVICE_RUNNING, extra_tags=['display_name:My Service_abc123']
+        ),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_group_per_user_services_with_name_filter(aggregator, check, instance_group_per_user_services):
+    # Grouping must also apply when services are selected by a name filter (not just ALL). The
+    # prefix regex matches the full LUID-suffixed instance names, but the emitted tag is grouped.
+    instance_group_per_user_services['services'] = ['OneSyncSvc']
+
+    c = check(instance_group_per_user_services)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance_group_per_user_services)
+
+    services = [
+        ServiceAssertion('OneSyncSvc', win32service.SERVICE_RUNNING, extra_tags=['display_name:Sync Host'], count=2),
+        # The grouped template name must not be reported UNKNOWN by the services_unseen path
+        ServiceAssertion('OneSyncSvc', -1, count=0),
+        # The non-matching service is not reported
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_per_user_false_excludes_per_user_services(aggregator, check):
+    # `per_user: false` collects only non-per-user services, so per-user instances are dropped.
+    instance = {'services': [{'per_user': False}], 'disable_legacy_service_tag': True}
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    services = [
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING),
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING, count=0),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_per_user_true_collects_only_per_user_services(aggregator, check):
+    instance = {'services': [{'per_user': True}], 'disable_legacy_service_tag': True}
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    services = [
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING),
+        ServiceAssertion('Dnscache', win32service.SERVICE_RUNNING, count=0),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_per_user_composes_with_name_filter(aggregator, check):
+    # A name filter that matches the per-user instances but is gated to non-per-user collects nothing.
+    instance = {'services': [{'name': 'OneSyncSvc', 'per_user': False}], 'disable_legacy_service_tag': True}
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    services = [
+        ServiceAssertion('OneSyncSvc_443f50', win32service.SERVICE_RUNNING, count=0),
+        ServiceAssertion('OneSyncSvc_18f113', win32service.SERVICE_RUNNING, count=0),
+        # The named filter still goes unmatched and reports UNKNOWN once.
+        ServiceAssertion('OneSyncSvc', -1, count=1),
+    ]
+    assert_service_check_and_metrics(aggregator, services)
+
+
+def test_per_user_false_with_grouping_warns(aggregator, check):
+    instance = {
+        'services': [{'per_user': False}],
+        'group_per_user_services': True,
+        'disable_legacy_service_tag': True,
+    }
+    c = check(instance)
+
+    with patch('win32service.EnumServicesStatusEx', return_value=_per_user_mock_services()):
+        c.check(instance)
+
+    assert any('will not be grouped' in w for w in c.warnings)
+
+
 @pytest.mark.e2e
 def test_basic_e2e(dd_agent_check, check, instance_basic):
     aggregator = dd_agent_check(instance_basic)
