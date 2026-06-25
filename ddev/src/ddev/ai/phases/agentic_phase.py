@@ -32,13 +32,13 @@ RESUME_NOTICE = """
 
 NOTE FROM THE HARNESS — RESUMED RUN
 
-This phase is being re-run because a previous execution of this flow failed or was \
+This phase is being re-run because a previous execution of this flow failed or was
 interrupted while this phase was the one in progress. You are picking up from where it stopped.
 
-Some of this phase's work may already be partially on disk from that earlier attempt — files \
-created or half-edited, assets generated, commands partially applied. Before doing new work, \
-inspect the current state of the files this phase is responsible for, reconcile anything that is \
-incomplete or inconsistent, and avoid blindly duplicating steps that were already finished. \
+Some of this phase's work may already be partially on disk from that earlier attempt — files
+created or half-edited, assets generated, commands partially applied. Before doing new work,
+inspect the current state of the files this phase is responsible for, reconcile anything that is
+incomplete or inconsistent, and avoid blindly duplicating steps that were already finished.
 Treat the on-disk state as the source of truth and bring it to a correct, complete result."""
 
 RESUME_NOTICE_ERROR = """
