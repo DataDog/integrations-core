@@ -12,9 +12,9 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointStatus,
+    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
-    TokenUsage,
 )
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
 
@@ -233,7 +233,7 @@ async def test_process_message_writes_memory_and_checkpoint(flow_context, messag
     checkpoint = mgr.read()["p1"]
     assert isinstance(checkpoint, SuccessCheckpoint)
     assert checkpoint.status == CheckpointStatus.SUCCESS
-    assert checkpoint.tokens == TokenUsage(total_input=123, total_output=45)
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=123, total_output=45)
     assert checkpoint.memory_path == str(mgr.memory_path("p1"))
     assert checkpoint.custom_field == "custom_value"
     assert checkpoint.count == 7

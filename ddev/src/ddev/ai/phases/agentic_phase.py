@@ -16,7 +16,7 @@ from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_go
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
-from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus, FailedCheckpoint, TokenUsage
+from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus, CheckpointTokenInfo, FailedCheckpoint
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
@@ -356,7 +356,7 @@ class AgenticPhase(Phase):
                     started_at=self._started_at.isoformat() if self._started_at else None,
                     finished_at=datetime.now(UTC).isoformat(),
                     error=str(error.original_exception),
-                    tokens=TokenUsage(
+                    tokens=CheckpointTokenInfo(
                         total_input=self._total_input_tokens,
                         total_output=self._total_output_tokens,
                     ),

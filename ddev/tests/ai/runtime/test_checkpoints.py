@@ -10,9 +10,9 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointReadError,
     CheckpointStatus,
+    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
-    TokenUsage,
 )
 
 STARTED = "2026-01-01T00:00:00+00:00"
@@ -24,7 +24,7 @@ def make_success(**kwargs) -> SuccessCheckpoint:
         status=CheckpointStatus.SUCCESS,
         started_at=STARTED,
         finished_at=FINISHED,
-        tokens=TokenUsage(total_input=10, total_output=20),
+        tokens=CheckpointTokenInfo(total_input=10, total_output=20),
         memory_path="/tmp/phase_memory.md",
         **kwargs,
     )
@@ -222,7 +222,7 @@ def test_read_raises_on_invalid_checkpoint_entry(manager):
 
 
 def test_failed_checkpoint_with_tokens(manager):
-    cp = make_failed(tokens=TokenUsage(total_input=5, total_output=15))
+    cp = make_failed(tokens=CheckpointTokenInfo(total_input=5, total_output=15))
     manager.write_phase_checkpoint("phase1", cp)
     data = manager.read()
     assert isinstance(data["phase1"], FailedCheckpoint)

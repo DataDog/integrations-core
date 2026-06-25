@@ -21,7 +21,7 @@ class CheckpointStatus(StrEnum):
     FAILED = "failed"
 
 
-class TokenUsage(BaseModel):
+class CheckpointTokenInfo(BaseModel):
     total_input: int
     total_output: int
 
@@ -34,7 +34,7 @@ class SuccessCheckpoint(BaseModel):
     status: Literal[CheckpointStatus.SUCCESS]
     started_at: str
     finished_at: str
-    tokens: TokenUsage
+    tokens: CheckpointTokenInfo
     memory_path: str
 
 
@@ -45,7 +45,7 @@ class FailedCheckpoint(BaseModel):
     started_at: str | None
     finished_at: str
     error: str
-    tokens: TokenUsage | None = None
+    tokens: CheckpointTokenInfo | None = None
     goal_validations: list[dict[str, Any]] | None = None
 
 

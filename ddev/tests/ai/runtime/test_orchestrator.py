@@ -18,9 +18,9 @@ from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointStatus,
+    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
-    TokenUsage,
 )
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.runtime.resources import RunResources
@@ -510,7 +510,7 @@ def _make_checkpoint(data: dict) -> SuccessCheckpoint | FailedCheckpoint:
             status=CheckpointStatus.SUCCESS,
             started_at=ts,
             finished_at=ts,
-            tokens=TokenUsage(total_input=0, total_output=0),
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
             memory_path="/tmp/mem.md",
         )
     return FailedCheckpoint(

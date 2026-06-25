@@ -25,9 +25,9 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointStatus,
+    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
-    TokenUsage,
 )
 from ddev.event_bus.exceptions import MessageProcessingError
 
@@ -192,7 +192,7 @@ async def test_success_with_prometheus_body(flow_dir, message_queue, monkeypatch
     assert "sample_metric_names" not in checkpoint.model_extra
     assert checkpoint.status_code == 200
     assert checkpoint.endpoint_url == ENDPOINT_URL
-    assert checkpoint.tokens == TokenUsage(total_input=0, total_output=0)
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=0, total_output=0)
 
 
 async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatch):

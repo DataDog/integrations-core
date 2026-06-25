@@ -16,8 +16,13 @@ from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
-from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus, FailedCheckpoint, SuccessCheckpoint
-from ddev.ai.runtime.checkpoints import TokenUsage as CheckpointTokenInfo
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointStatus,
+    CheckpointTokenInfo,
+    FailedCheckpoint,
+    SuccessCheckpoint,
+)
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 

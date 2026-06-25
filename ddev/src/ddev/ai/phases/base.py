@@ -19,9 +19,9 @@ from ddev.ai.runtime.checkpoints import (
     RESERVED_SUCCESS_KEYS,
     CheckpointManager,
     CheckpointStatus,
+    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
-    TokenUsage,
 )
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
@@ -158,7 +158,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             status=CheckpointStatus.SUCCESS,
             started_at=self._started_at.isoformat(),
             finished_at=datetime.now(UTC).isoformat(),
-            tokens=TokenUsage(
+            tokens=CheckpointTokenInfo(
                 total_input=outcome.total_input_tokens,
                 total_output=outcome.total_output_tokens,
             ),
