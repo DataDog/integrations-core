@@ -463,7 +463,7 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        option.setdefault('hidden', False)
+        # `hidden` is already set on every option by expand_template_items (propagate_hidden).
         if not isinstance(option['hidden'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
