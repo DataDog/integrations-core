@@ -7,7 +7,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from pydantic import (BaseModel, ConfigDict, Field, PrivateAttr,
+                      ValidationError, field_validator, model_validator)
 
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -135,13 +136,28 @@ class FlowEntry(BaseModel):
 class FlowConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     variables: dict[str, str] = {}
-    agents: dict[str, AgentConfig]
     phases: dict[str, PhaseConfig]
     flow: list[FlowEntry]
 
+    _agents: dict[str, AgentConfig] = PrivateAttr(default_factory=dict)
+    _prompts: dict[str, str] = PrivateAttr(default_factory=dict)
+    _goals: dict[str, str] = PrivateAttr(default_factory=dict)
+
+    @property
+    def agents(self) -> dict[str, AgentConfig]:
+        return self._agents
+
+    @property
+    def prompts(self) -> dict[str, str]:
+        return self._prompts
+
+    @property
+    def goals(self) -> dict[str, str]:
+        return self._goals
+
     @model_validator(mode="after")
     def cross_references(self) -> FlowConfig:
-        """Validate all cross-references between agents, phases, and dependencies."""
+        """Validate all cross-references between phases and dependencies."""
         scheduled = {entry.phase for entry in self.flow}
         seen: set[str] = set()
         for entry in self.flow:
@@ -156,10 +172,6 @@ class FlowConfig(BaseModel):
                 if dep not in scheduled:
                     raise ValueError(f"Phase {entry.phase!r} depends on {dep!r} which is not scheduled in flow")
 
-        for phase_id, phase in self.phases.items():
-            if phase.agent is not None and phase.agent not in self.agents:
-                raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
-
         dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
         cycles, truncated = _detect_cycles(dependency_map)
         if cycles:
@@ -172,6 +184,8 @@ class FlowConfig(BaseModel):
     @classmethod
     def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
         """Load, parse, and validate flow.yaml. Raises FlowConfigError on any problem."""
+        from ddev.ai.phases.frontmatter import parse_md_file
+
         try:
             raw = yaml.safe_load(path.read_text())
         except (OSError, yaml.YAMLError) as e:
@@ -182,20 +196,60 @@ class FlowConfig(BaseModel):
         except ValidationError as e:
             raise FlowConfigError(f"Invalid flow config:\n{e}") from e
 
-        config._validate_files(config_dir)
-        return config
+        # Scan agents/ directory
+        agents: dict[str, AgentConfig] = {}
+        agents_dir = config_dir / "agents"
+        if agents_dir.is_dir():
+            for md_file in sorted(agents_dir.glob("*.md")):
+                meta, body = parse_md_file(md_file)
+                fm = {k: v for k, v in meta.items() if k != "type"}
+                fm["system_prompt"] = body
+                try:
+                    agents[md_file.stem] = AgentConfig.model_validate(fm)
+                except ValidationError as e:
+                    raise FlowConfigError(f"Invalid agent config in {md_file}:\n{e}") from e
+        config._agents = agents
 
-    def _validate_files(self, config_dir: Path) -> None:
-        """Check all referenced files exist."""
-        for agent_name in self.agents:
-            system_prompt = config_dir / "prompts" / f"{agent_name}.md"
-            if not system_prompt.exists():
-                raise FlowConfigError(f"System prompt not found for agent {agent_name!r}: {system_prompt}")
+        # Scan prompts/ directory — build separate indexes for type:prompt and type:goal
+        prompts: dict[str, str] = {}
+        goals: dict[str, str] = {}
+        prompts_dir = config_dir / "prompts"
+        if prompts_dir.is_dir():
+            for md_file in sorted(prompts_dir.glob("*.md")):
+                meta, body = parse_md_file(md_file)
+                file_type = meta.get("type")
+                if file_type == "prompt":
+                    prompts[md_file.stem] = body
+                elif file_type == "goal":
+                    goals[md_file.stem] = body
+                else:
+                    raise FlowConfigError(
+                        f"{md_file}: expected 'type: prompt' or 'type: goal' in front matter, got {file_type!r}"
+                    )
+        config._prompts = prompts
+        config._goals = goals
 
-        for phase_id, phase in self.phases.items():
-            # goal_ref validation happens in Task 3 (FlowConfig.from_yaml scanning goals/ dir)
-
+        # Validate cross-file references
+        for phase_id, phase in config.phases.items():
+            if phase.agent is not None and phase.agent not in agents:
+                raise FlowConfigError(
+                    f"Phase {phase_id!r} references unknown agent: {phase.agent!r} "
+                    f"(No agent file found for {phase.agent!r})"
+                )
+            for i, task in enumerate(phase.tasks):
+                if task.prompt_ref is not None and task.prompt_ref not in prompts:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
+                        f"No prompt file found for prompt_ref {task.prompt_ref!r}"
+                    )
+                if task.goal_ref is not None and task.goal_ref not in goals:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
+                        f"No goal file found for goal_ref {task.goal_ref!r}"
+                    )
             if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
                 resolved = config_dir / phase.checkpoint.memory_prompt_path
                 if not resolved.exists():
                     raise FlowConfigError(f"Phase {phase_id!r} checkpoint memory_prompt_path not found: {resolved}")
+
+        return config

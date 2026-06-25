@@ -5,14 +5,8 @@
 import pytest
 from pydantic import ValidationError
 
-from ddev.ai.phases.config import (
-    AgentConfig,
-    CheckpointConfig,
-    FlowConfig,
-    FlowConfigError,
-    PhaseConfig,
-    TaskConfig,
-)
+from ddev.ai.phases.config import (AgentConfig, CheckpointConfig, FlowConfig,
+                                   FlowConfigError, PhaseConfig, TaskConfig)
 
 # ---------------------------------------------------------------------------
 # TaskConfig
@@ -162,7 +156,6 @@ def test_phase_config_with_checkpoint():
 
 def _minimal_config(**overrides) -> dict:
     base = {
-        "agents": {"writer": {"tools": []}},
         "phases": {"p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]}},
         "flow": [{"phase": "p1"}],
     }
@@ -191,7 +184,6 @@ def test_flow_config_unknown_dependency():
 
 def test_flow_config_dependency_not_scheduled_in_flow():
     raw = {
-        "agents": {"writer": {"tools": []}},
         "phases": {
             "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
             "p2": {"agent": "writer", "tasks": [{"name": "t2", "prompt": "Review it."}]},
@@ -209,16 +201,8 @@ def test_flow_config_duplicate_phase_raises():
         FlowConfig.model_validate(raw)
 
 
-def test_flow_config_unknown_agent_in_phase():
-    raw = _minimal_config()
-    raw["phases"]["p1"]["agent"] = "nonexistent"
-    with pytest.raises(ValidationError, match="unknown agent"):
-        FlowConfig.model_validate(raw)
-
-
 def test_flow_config_phase_without_agent_validates():
     raw = {
-        "agents": {"writer": {"tools": []}},
         "phases": {
             "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
             "noop": {"type": "SomeCustomPhase"},
@@ -241,7 +225,6 @@ def test_flow_config_with_variables():
 
 def test_flow_config_multiple_phases_and_deps():
     raw = {
-        "agents": {"writer": {"tools": []}},
         "phases": {
             "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
             "p2": {"agent": "writer", "tasks": [{"name": "t2", "prompt": "Review it."}]},
@@ -263,22 +246,52 @@ def test_flow_config_extra_field_raises():
         FlowConfig.model_validate(raw)
 
 
+def test_flow_config_extra_agents_key_raises():
+    raw = _minimal_config()
+    raw["agents"] = {"writer": {"tools": []}}
+    with pytest.raises(ValidationError, match="extra"):
+        FlowConfig.model_validate(raw)
+
+
+# ---------------------------------------------------------------------------
+# FlowConfig.from_yaml helpers
+# ---------------------------------------------------------------------------
+
+
+def _write_agent_file(config_dir, name: str, body: str = "You are an agent.", **kwargs) -> None:
+    agents_dir = config_dir / "agents"
+    agents_dir.mkdir(exist_ok=True)
+    front_matter = {"type": "agent", **kwargs}
+    import yaml as _yaml
+
+    content = f"---\n{_yaml.dump(front_matter)}---\n\n{body}"
+    (agents_dir / f"{name}.md").write_text(content)
+
+
+def _write_prompt_file(config_dir, name: str, body: str = "Do it.") -> None:
+    prompts_dir = config_dir / "prompts"
+    prompts_dir.mkdir(exist_ok=True)
+    content = f"---\ntype: prompt\n---\n\n{body}"
+    (prompts_dir / f"{name}.md").write_text(content)
+
+
+def _write_goal_file(config_dir, name: str, body: str = "Verify output.") -> None:
+    prompts_dir = config_dir / "prompts"
+    prompts_dir.mkdir(exist_ok=True)
+    content = f"---\ntype: goal\n---\n\n{body}"
+    (prompts_dir / f"{name}.md").write_text(content)
+
+
 # ---------------------------------------------------------------------------
 # FlowConfig.from_yaml
 # ---------------------------------------------------------------------------
 
 
 def test_from_yaml_valid(tmp_path):
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("system prompt")
-
+    _write_agent_file(tmp_path, "writer")
     flow_yaml = tmp_path / "flow.yaml"
     flow_yaml.write_text(
         """\
-agents:
-  writer:
-    tools: []
 phases:
   p1:
     agent: writer
@@ -291,17 +304,14 @@ flow:
     )
     config = FlowConfig.from_yaml(flow_yaml, tmp_path)
     assert "p1" in config.phases
+    assert config.agents["writer"].system_prompt == "You are an agent."
 
 
-def test_from_yaml_missing_system_prompt(tmp_path):
-    (tmp_path / "prompts").mkdir()
-
+def test_from_yaml_missing_agent_file(tmp_path):
+    (tmp_path / "agents").mkdir()
     flow_yaml = tmp_path / "flow.yaml"
     flow_yaml.write_text(
         """\
-agents:
-  writer:
-    tools: []
 phases:
   p1:
     agent: writer
@@ -312,7 +322,7 @@ flow:
   - phase: p1
 """
     )
-    with pytest.raises(FlowConfigError, match="System prompt not found"):
+    with pytest.raises(FlowConfigError, match="No agent file found for"):
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 
@@ -328,16 +338,93 @@ def test_from_yaml_missing_file(tmp_path):
         FlowConfig.from_yaml(tmp_path / "nonexistent.yaml", tmp_path)
 
 
+def test_from_yaml_prompt_file_wrong_type(tmp_path):
+    _write_agent_file(tmp_path, "writer")
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "task1.md").write_text("---\ntype: agent\n---\n\nBody.")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(
+        """\
+phases:
+  p1:
+    agent: writer
+    tasks:
+      - name: t1
+        prompt_ref: task1
+flow:
+  - phase: p1
+"""
+    )
+    with pytest.raises(FlowConfigError, match="expected 'type: prompt' or 'type: goal'"):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
+def test_from_yaml_missing_goal_ref_file(tmp_path):
+    _write_agent_file(tmp_path, "writer")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(
+        """\
+phases:
+  p1:
+    agent: writer
+    tasks:
+      - name: t1
+        prompt: "Do it."
+        goal_ref: nonexistent
+flow:
+  - phase: p1
+"""
+    )
+    with pytest.raises(FlowConfigError, match="No goal file found for"):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
+def test_from_yaml_missing_prompt_ref_file(tmp_path):
+    _write_agent_file(tmp_path, "writer")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(
+        """\
+phases:
+  p1:
+    agent: writer
+    tasks:
+      - name: t1
+        prompt_ref: nonexistent
+flow:
+  - phase: p1
+"""
+    )
+    with pytest.raises(FlowConfigError, match="No prompt file found for"):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
+def test_from_yaml_unknown_agent_in_phase(tmp_path):
+    _write_agent_file(tmp_path, "writer")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(
+        """\
+phases:
+  p1:
+    agent: nonexistent
+    tasks:
+      - name: t1
+        prompt: "Do it."
+flow:
+  - phase: p1
+"""
+    )
+    with pytest.raises(FlowConfigError, match="unknown agent"):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
 # ---------------------------------------------------------------------------
 # FlowConfig cycle detection via model_validate
 # ---------------------------------------------------------------------------
 
 
 def _three_phase_config() -> dict:
-    agent = {"tools": []}
     task = {"name": "t", "prompt": "Do it."}
     return {
-        "agents": {"writer": agent},
         "phases": {
             "p1": {"agent": "writer", "tasks": [task]},
             "p2": {"agent": "writer", "tasks": [task]},
@@ -379,10 +466,8 @@ def test_flow_config_acyclic_chain_ok():
 
 
 def test_flow_disjoined_graphs_ok():
-    agent = {"tools": []}
     task = {"name": "t", "prompt": "Do it."}
     raw = {
-        "agents": {"writer": agent},
         "phases": {
             "p1": {"agent": "writer", "tasks": [task]},
             "p2": {"agent": "writer", "tasks": [task]},
@@ -408,10 +493,8 @@ def test_flow_config_self_dependency_raises():
 
 
 def test_flow_config_two_independent_cycles_reports_both():
-    agent = {"tools": []}
     task = {"name": "t", "prompt": "Do it."}
     raw = {
-        "agents": {"writer": agent},
         "phases": {
             "p1": {"agent": "writer", "tasks": [task]},
             "p2": {"agent": "writer", "tasks": [task]},
