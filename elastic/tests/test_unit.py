@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
-from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
+from datadog_checks.elastic.elastic import AuthenticationError, RequestError, get_value_from_path
 from datadog_checks.elastic.metrics import INDEX_STATS_METRICS, stats_for_version
 
 from .common import URL, get_fixture_path
@@ -160,6 +160,17 @@ def test__get_data_throws_authentication_error(instance):
             check._get_data(url='test.com')
 
 
+def test__get_data_throws_request_error(instance):
+    with mock.patch(
+        'requests.Session.get',
+        return_value=MockResponse(status_code=400, json_data={"error": {"type": "illegal_argument_exception"}}),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        with pytest.raises(RequestError):
+            check._get_data(url='test.com')
+
+
 def test__get_data_creates_critical_service_alert(aggregator, instance):
     with mock.patch(
         'requests.Session.get',
@@ -272,3 +283,59 @@ def test__get_index_metrics_empty_key(aggregator, instance, mock_http_response):
             aggregator.assert_metric(m, count=0)
         else:
             aggregator.assert_metric(m)
+
+
+@pytest.mark.parametrize(
+    'version',
+    [
+        pytest.param([5, 1, 0]),
+        pytest.param([7, 0, 1]),
+        pytest.param([7, 2, 0]),
+        pytest.param([8, 0, 0]),
+    ],
+)
+def test__get_index_search_stats(aggregator, instance, mock_http_response, version):
+    mock_http_response(
+        json_data={
+            'indices': {
+                'testindex': {
+                    'total': {'search': {'query_total': 3, 'query_time_in_millis': 200}},
+                }
+            }
+        },
+    )
+    check = ESCheck('elastic', {}, instances=[instance])
+
+    check._get_index_search_stats(admin_forwarder=False, version=version, base_tags=[])
+
+    aggregator.assert_metric(
+        "elasticsearch.index.search.query.total", metric_type=aggregator.GAUGE, tags=['index_name:testindex'], value=3
+    )
+    aggregator.assert_metric(
+        "elasticsearch.index.search.query.time", metric_type=aggregator.GAUGE, tags=['index_name:testindex'], value=200
+    )
+
+
+def test__get_index_search_stats_handles_illegal_argument_exception(aggregator, instance):
+    with mock.patch(
+        'requests.Session.get',
+        return_value=MockResponse(status_code=400, json_data={"error": {"type": "illegal_argument_exception"}}),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        # Make sure we do not throw an exception and move on
+        check._get_index_search_stats(admin_forwarder=False, version=[7, 1, 0], base_tags=[])
+
+    aggregator.assert_metric("elasticsearch.index.search.query.total", count=0)
+    aggregator.assert_metric("elasticsearch.index.search.query.time", count=0)
+
+
+def test__get_index_search_stats_raises_on_authentication_error(aggregator, instance):
+    with mock.patch(
+        'requests.Session.get',
+        return_value=MockResponse(status_code=400, json_data={"error": {"type": "cluster_block_exception"}}),
+    ):
+        check = ESCheck('elastic', {}, instances=[instance])
+
+        with pytest.raises(AuthenticationError):
+            check._get_index_search_stats(admin_forwarder=False, version=[8, 8, 2], base_tags=[])
