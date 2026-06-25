@@ -238,7 +238,7 @@ class FlowConfig(BaseModel):
                 goals[md_file.stem] = body
         return prompts, goals
 
-    def _validate_references(self, config_dir: Path) -> None:
+    def _validate_phase_references(self, config_dir: Path) -> None:
         for phase_id, phase in self.phases.items():
             if phase.agent is not None and phase.agent not in self._agents:
                 raise FlowConfigError(
@@ -276,6 +276,6 @@ class FlowConfig(BaseModel):
 
         config._agents = cls._load_agents(config_dir / "agents")
         config._prompts, config._goals = cls._load_prompts_and_goals(config_dir / "prompts")
-        config._validate_references(config_dir)
+        config._validate_phase_references(config_dir)
 
         return config
