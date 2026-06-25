@@ -9,7 +9,6 @@ services:
     environment:
       ORCH_USERNAME: "${ORCH_USERNAME}"
       ORCH_PASSWORD: "${ORCH_PASSWORD}"
-      APPLIANCE_IP: "${APPLIANCE_IP}"
     restart: "no"
 
   appliance:
@@ -18,7 +17,7 @@ services:
       dockerfile: tests/docker/fake_appliance/Dockerfile
     container_name: dd-appliance
     ports:
-      - "${APPLIANCE_PORT}:8444"
+      - "${APPLIANCE_PORT}:443"
     environment:
       APPLIANCE_USERNAME: "${APPLIANCE_USERNAME}"
       APPLIANCE_PASSWORD: "${APPLIANCE_PASSWORD}"

@@ -23,6 +23,6 @@ RUN mkdir -p /app/certs \
 
 COPY tests/docker/fake_appliance/app.py app.py
 
-EXPOSE 8444
+EXPOSE 443
 
 CMD ["python", "app.py"]
