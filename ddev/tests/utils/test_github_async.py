@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
 import dataclasses
 import json
 from typing import Any
+from unittest.mock import MagicMock
 
 import httpx
 import pytest
+from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import (
     GITHUB_API_VERSION,
@@ -26,6 +29,7 @@ from ddev.utils.github_async.models import (
     PullRequestReviewComment,
     WorkflowRun,
 )
+from ddev.utils.rate_limiting import InstrumentedAsyncLimiter
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -633,3 +637,63 @@ async def test_per_request_timeout_forwarded() -> None:
     client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
     result = await client.get_workflow_run("o", "r", 42, timeout=2.0)
     assert result.data.id == 42
+
+
+# ---------------------------------------------------------------------------
+# Rate limiter wiring in AsyncGitHubClient
+# ---------------------------------------------------------------------------
+
+
+async def _assert_blocks(coro, timeout: float = 0.05) -> None:
+    """Assert that a coroutine blocks without completing within the timeout."""
+    with pytest.raises(asyncio.TimeoutError):
+        await asyncio.wait_for(coro, timeout=timeout)
+
+
+async def test_client_request_without_rate_limiter_goes_through() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response(_workflow_run_payload())
+
+    async with async_github_client(token=TOKEN, transport=httpx.MockTransport(handler)) as client:
+        result = await client.get_workflow_run("o", "r", 42)
+
+    assert result.data.id == 42
+
+
+async def test_client_request_with_rate_limiter_consumes_token() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response(_workflow_run_payload())
+
+    real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
+    on_throttled = MagicMock()
+    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_throttled=on_throttled)
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        result = await client.get_workflow_run("o", "r", 42)
+
+    assert result.data.id == 42
+    on_throttled.assert_not_called()
+    assert not real_limiter.has_capacity()
+
+
+async def test_client_request_throttled_when_bucket_exhausted() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response(_workflow_run_payload())
+
+    real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
+    on_throttled = MagicMock()
+    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_throttled=on_throttled)
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        await client.get_workflow_run("o", "r", 42)  # drains the single token
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        await _assert_blocks(client.get_workflow_run("o", "r", 42))
+
+    on_throttled.assert_called_once()
