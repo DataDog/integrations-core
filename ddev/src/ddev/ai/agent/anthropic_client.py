@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, overload
 
@@ -34,6 +35,12 @@ if TYPE_CHECKING:
         ToolParam,
         ToolResultBlockParam,
     )
+
+# The pinned anthropic SDK lags the live API's enum values (e.g. the web_fetch error code
+# ``url_not_in_prior_context`` is absent from older ``WebFetchToolResultErrorCode`` literals),
+# so serializing a raw ``Message`` makes Pydantic emit a noisy ``UserWarning``. The value still
+# round-trips fine as a string; silence only this serializer warning to keep the console clean.
+warnings.filterwarnings("ignore", message="^Pydantic serializer warnings", module=r"pydantic\.main")
 
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
