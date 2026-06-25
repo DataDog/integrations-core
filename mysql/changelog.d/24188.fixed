@@ -1,0 +1,1 @@
+Fix `mysql.queries.count` being inflated when multiple query digest variants map to the same normalized query signature, causing reported query counts to be hundreds to thousands of times higher than actual execution rates after a database restart.
