@@ -20,39 +20,39 @@ class RateLimiterConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    hourly_max_rate: float = Field(gt=0)
+    max_rate: float = Field(gt=0)
     time_period: float = Field(default=RATE_LIMIT_TIME_PERIOD, gt=0)
 
     @property
-    def limiter_max_rate(self) -> float:
-        """Bucket size to pass to AsyncLimiter for the configured time_period."""
-        return self.hourly_max_rate * self.time_period / SECONDS_PER_HOUR
+    def hourly_rate(self) -> float:
+        """Effective rate expressed in requests per hour."""
+        return self.max_rate / self.time_period * SECONDS_PER_HOUR
 
 
 class RateLimiterFactoryConfig(BaseModel):
     """Configuration for the Dispatcher's two-tier rate limiter factory.
 
-    All rates are in requests per hour to match GitHub's documented limits.
-    The sum of default.hourly_max_rate and slow.hourly_max_rate must not exceed total_max_rate.
+    Each tier defines its own max_rate and time_period. The combined hourly rate of
+    both tiers must not exceed total_hourly_max_rate.
 
     Default values:
-    - default: 360 req/hr (6 req/min) — typical integrations
-    - slow: 120 req/hr (2 req/min) — integrations with long-running tests
-    - total_max_rate: 1,500 req/hr — = 15k octo-sts budget / 10 max concurrent runs
+    - default: 360 req/hr — typical integrations
+    - slow: 120 req/hr — integrations with long-running tests
+    - total_hourly_max_rate: 1,500 req/hr — = 15k octo-sts budget / 10 max concurrent runs
     """
 
-    default: RateLimiterConfig = RateLimiterConfig(hourly_max_rate=360.0)
-    slow: RateLimiterConfig = RateLimiterConfig(hourly_max_rate=120.0)
-    total_max_rate: float = Field(default=1500.0, gt=0)
+    default: RateLimiterConfig = RateLimiterConfig(max_rate=360.0)
+    slow: RateLimiterConfig = RateLimiterConfig(max_rate=120.0)
+    total_hourly_max_rate: float = Field(default=1500.0, gt=0)
     slow_integrations: frozenset[str] = frozenset()
 
     @model_validator(mode="after")
     def validate_combined_rate(self) -> RateLimiterFactoryConfig:
-        combined = self.default.hourly_max_rate + self.slow.hourly_max_rate
-        if combined > self.total_max_rate:
+        combined = self.default.hourly_rate + self.slow.hourly_rate
+        if combined > self.total_hourly_max_rate:
             raise ValueError(
-                f"default ({self.default.hourly_max_rate} req/hr) + slow ({self.slow.hourly_max_rate} req/hr) = "
-                f"{combined} exceeds total_max_rate ({self.total_max_rate} req/hr)"
+                f"default ({self.default.hourly_rate} req/hr) + slow ({self.slow.hourly_rate} req/hr) = "
+                f"{combined} exceeds total_hourly_max_rate ({self.total_hourly_max_rate} req/hr)"
             )
         return self
 
@@ -74,11 +74,11 @@ class RateLimiterFactory:
         cfg = config or RateLimiterFactoryConfig()
         self._slow_integrations = cfg.slow_integrations
         self._default = InstrumentedAsyncLimiter(
-            AsyncLimiter(cfg.default.limiter_max_rate, cfg.default.time_period),
+            AsyncLimiter(cfg.default.max_rate, cfg.default.time_period),
             on_throttled=lambda: logger.debug("Default rate limiter throttling request") if logger else None,
         )
         self._slow = InstrumentedAsyncLimiter(
-            AsyncLimiter(cfg.slow.limiter_max_rate, cfg.slow.time_period),
+            AsyncLimiter(cfg.slow.max_rate, cfg.slow.time_period),
             on_throttled=lambda: logger.debug("Slow rate limiter throttling request") if logger else None,
         )
 

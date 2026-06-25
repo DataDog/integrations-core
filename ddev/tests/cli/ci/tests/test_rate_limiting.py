@@ -14,36 +14,34 @@ from ddev.cli.ci.tests.rate_limiting import RateLimiterConfig, RateLimiterFactor
 # ---------------------------------------------------------------------------
 
 
-def test_rate_limiter_config_rejects_zero_hourly_max_rate():
+def test_rate_limiter_config_rejects_zero_max_rate():
     with pytest.raises(ValidationError, match="greater than 0"):
-        RateLimiterConfig(hourly_max_rate=0)
+        RateLimiterConfig(max_rate=0)
 
 
-def test_rate_limiter_config_rejects_negative_hourly_max_rate():
+def test_rate_limiter_config_rejects_negative_max_rate():
     with pytest.raises(ValidationError, match="greater than 0"):
-        RateLimiterConfig(hourly_max_rate=-1.0)
+        RateLimiterConfig(max_rate=-1.0)
 
 
 def test_rate_limiter_config_rejects_zero_time_period():
     with pytest.raises(ValidationError, match="greater than 0"):
-        RateLimiterConfig(hourly_max_rate=10.0, time_period=0)
+        RateLimiterConfig(max_rate=10.0, time_period=0)
 
 
 def test_rate_limiter_config_rejects_negative_time_period():
     with pytest.raises(ValidationError, match="greater than 0"):
-        RateLimiterConfig(hourly_max_rate=10.0, time_period=-1.0)
+        RateLimiterConfig(max_rate=10.0, time_period=-1.0)
 
 
-def test_rate_limiter_config_limiter_max_rate_scales_with_time_period():
-    # 360 req/hr over a 60s window = 6 tokens per window
-    cfg = RateLimiterConfig(hourly_max_rate=360.0, time_period=60.0)
-    assert cfg.limiter_max_rate == pytest.approx(6.0)
+def test_rate_limiter_config_hourly_rate_with_default_period():
+    # 360 tokens per 3600s = 360 req/hr
+    assert RateLimiterConfig(max_rate=360.0).hourly_rate == pytest.approx(360.0)
 
 
-def test_rate_limiter_config_limiter_max_rate_default_time_period():
-    # 360 req/hr over a 3600s window = 360 tokens per window
-    cfg = RateLimiterConfig(hourly_max_rate=360.0)
-    assert cfg.limiter_max_rate == pytest.approx(360.0)
+def test_rate_limiter_config_hourly_rate_with_custom_period():
+    # 6 tokens per 60s = 360 req/hr
+    assert RateLimiterConfig(max_rate=6.0, time_period=60.0).hourly_rate == pytest.approx(360.0)
 
 
 # ---------------------------------------------------------------------------
@@ -52,18 +50,28 @@ def test_rate_limiter_config_limiter_max_rate_default_time_period():
 
 
 def test_factory_config_raises_when_combined_rate_exceeds_total():
-    with pytest.raises(ValidationError, match="exceeds total_max_rate"):
+    with pytest.raises(ValidationError, match="exceeds total_hourly_max_rate"):
         RateLimiterFactoryConfig(
-            default=RateLimiterConfig(hourly_max_rate=800.0),
-            slow=RateLimiterConfig(hourly_max_rate=800.0),
+            default=RateLimiterConfig(max_rate=800.0),
+            slow=RateLimiterConfig(max_rate=800.0),
             total_hourly_max_rate=1500.0,
+        )
+
+
+def test_factory_config_raises_when_combined_rate_exceeds_total_mixed_periods():
+    # default: 6 req/min = 360 req/hr, slow: 6 req/min = 360 req/hr, combined = 720 > 500
+    with pytest.raises(ValidationError, match="exceeds total_hourly_max_rate"):
+        RateLimiterFactoryConfig(
+            default=RateLimiterConfig(max_rate=6.0, time_period=60.0),
+            slow=RateLimiterConfig(max_rate=6.0, time_period=60.0),
+            total_hourly_max_rate=500.0,
         )
 
 
 def test_factory_config_accepts_combined_rate_at_limit():
     assert RateLimiterFactoryConfig(
-        default=RateLimiterConfig(hourly_max_rate=750.0),
-        slow=RateLimiterConfig(hourly_max_rate=750.0),
+        default=RateLimiterConfig(max_rate=750.0),
+        slow=RateLimiterConfig(max_rate=750.0),
         total_hourly_max_rate=1500.0,
     )
 
@@ -72,9 +80,9 @@ def test_factory_config_default_is_within_bounds():
     assert RateLimiterFactoryConfig()
 
 
-def test_factory_config_rejects_negative_total_max_rate():
+def test_factory_config_rejects_negative_total_hourly_max_rate():
     with pytest.raises(ValidationError, match="greater than 0"):
-        RateLimiterFactoryConfig(total_max_rate=-1.0)
+        RateLimiterFactoryConfig(total_hourly_max_rate=-1.0)
 
 
 # ---------------------------------------------------------------------------
