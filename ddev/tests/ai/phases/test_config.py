@@ -5,8 +5,7 @@
 import pytest
 from pydantic import ValidationError
 
-from ddev.ai.phases.config import (AgentConfig, CheckpointConfig, FlowConfig,
-                                   FlowConfigError, PhaseConfig, TaskConfig)
+from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfig, FlowConfigError, PhaseConfig, TaskConfig
 
 # ---------------------------------------------------------------------------
 # TaskConfig

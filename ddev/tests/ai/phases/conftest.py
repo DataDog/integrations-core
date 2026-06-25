@@ -5,6 +5,7 @@
 import asyncio
 from collections.abc import Callable
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -132,6 +133,15 @@ class MockProcessFactory:
         return ReActProcess(runtime, callbacks=self._callbacks, scope=scope)
 
 
+def make_mock_resources(agent_config: AgentConfig | None = None) -> MagicMock:
+    """Build a minimal PhaseResources mock for tests."""
+    resources = MagicMock()
+    resources.agent_config.return_value = agent_config or AgentConfig(tools=[])
+    resources.prompt.side_effect = lambda name: f"prompt:{name}"
+    resources.goal.side_effect = lambda name: f"goal:{name}"
+    return resources
+
+
 def make_agent_phase(
     flow_dir,
     mock_agent: MockAgent,
@@ -156,6 +166,7 @@ def make_agent_phase(
     ``captured_worker_kwargs`` (a dict) to record the worker create() inputs.
     Pass ``goal_runtime_builder`` as a callable (owner_id: str) -> AgentRuntime for goal tests.
     """
+    effective_agent_config = agent_config or AgentConfig(tools=[])
     config = PhaseConfig(
         agent="writer",
         tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
@@ -186,8 +197,9 @@ def make_agent_phase(
         config=config,
         checkpoint_manager=checkpoint_manager,
         context=context,
-        agent_config=agent_config or AgentConfig(tools=[]),
+        agent_config=effective_agent_config,
         process_factory=process_factory,
+        resources=make_mock_resources(effective_agent_config),
     )
     phase.queue = message_queue
     return phase, checkpoint_manager
@@ -205,10 +217,10 @@ def resolve_key(key: str) -> str:
 
 @pytest.fixture
 def flow_dir(tmp_path):
-    """Create a minimal flow directory with a system prompt."""
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("You are a writer for ${phase_name}.")
+    """Create a minimal flow directory with an agent definition."""
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    (agents_dir / "writer.md").write_text("---\ntype: agent\n---\n\nYou are a writer for ${phase_name}.")
     return tmp_path
 
 

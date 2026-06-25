@@ -67,29 +67,33 @@ def test_parse_reviewer_output_rejects(text):
 # ---------------------------------------------------------------------------
 
 
-def test_render_goal_text_inline_and_path(tmp_path):
-    inline = render_goal_text(
+def test_render_goal_text_inline(tmp_path):
+    result = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="check ${name}"),
-        tmp_path,
+        None,
         {"name": "Alice"},
-        None,
     )
-    assert inline == "check Alice"
+    assert result == "check Alice"
 
-    (tmp_path / "goal.md").write_text("verify ${target}")
-    from_file = render_goal_text(
-        TaskConfig(name="t", prompt="x", goal_path="goal.md"),
-        tmp_path,
-        {"target": "endpoint"},
-        None,
+
+def test_render_goal_text_from_ref():
+    from unittest.mock import MagicMock
+
+    resources = MagicMock()
+    resources.goal.side_effect = lambda name: f"verify ${{{name}_target}}"
+    result = render_goal_text(
+        TaskConfig(name="t", prompt_ref="t", goal_ref="mygoal"),
+        resources,
+        {"mygoal_target": "endpoint"},
     )
-    assert from_file == "verify endpoint"
+    assert result == "verify endpoint"
+    resources.goal.assert_called_once_with("mygoal")
 
 
 def test_render_goal_text_forwards_resolver(tmp_path):
     result = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="see ${draft_memory}"),
-        tmp_path,
+        None,
         {},
         resolve_key,
     )

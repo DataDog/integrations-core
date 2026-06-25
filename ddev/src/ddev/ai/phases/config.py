@@ -7,8 +7,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
-from pydantic import (BaseModel, ConfigDict, Field, PrivateAttr,
-                      ValidationError, field_validator, model_validator)
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, ValidationError, field_validator, model_validator
 
 from ddev.ai.tools.registry import ToolRegistry
 

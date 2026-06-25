@@ -7,17 +7,19 @@ from __future__ import annotations
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig, TaskConfig
-from ddev.ai.phases.template import render_inline, render_prompt
+from ddev.ai.phases.config import AgentConfig, FlowConfigError, TaskConfig
+from ddev.ai.phases.template import render_inline
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.registry import filter_read_only
+
+if TYPE_CHECKING:
+    from ddev.ai.phases.resources import PhaseResources
 
 GOAL_REVIEWER_SYSTEM_PROMPT = """\
 You are a strict, independent reviewer. Your only job is to verify whether a
@@ -110,14 +112,18 @@ class GoalLoopOutcome:
 
 def render_goal_text(
     task: TaskConfig,
-    config_dir: Path,
+    resources: PhaseResources | None,
     context: dict[str, Any],
-    resolver: Callable[[str], str] | None,
+    resolver: Callable[[str], str] | None = None,
 ) -> str:
-    """Render the goal — from file if goal_path is set, inline otherwise."""
-    if task.goal_path is not None:
-        return render_prompt(config_dir / task.goal_path, context, resolver)
-    assert task.goal is not None  # caller checks
+    """Render goal text — from goal_ref lookup if set, inline goal string otherwise."""
+    if task.goal_ref is not None:
+        if resources is None:
+            raise FlowConfigError("TaskConfig uses 'goal_ref' but no PhaseResources was supplied")
+        body = resources.goal(task.goal_ref)
+        return render_inline(body, context, resolver)
+    if task.goal is None:
+        raise FlowConfigError("TaskConfig must set either 'goal' or 'goal_ref' when goal checking is active")
     return render_inline(task.goal, context, resolver)
 
 
