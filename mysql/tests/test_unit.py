@@ -777,10 +777,28 @@ class TestShowReplicaStatusQuery:
                 'my-channel',
                 'SHOW REPLICA STATUS',
                 (),
-                id='mariadb_ignores_channel',
+                id='mariadb_modern_with_channel',
             ),
             pytest.param(
-                '10.4.0-MariaDB', 'MariaDB', True, '', 'SHOW SLAVE STATUS', (), id='mariadb_legacy_no_channel'
+                '10.5.1-MariaDB',
+                'MariaDB',
+                True,
+                '',
+                'SHOW ALL REPLICAS STATUS',
+                (),
+                id='mariadb_modern_no_channel',
+            ),
+            pytest.param(
+                '10.4.0-MariaDB', 'MariaDB', True, '', 'SHOW ALL SLAVES STATUS', (), id='mariadb_legacy_no_channel'
+            ),
+            pytest.param(
+                '10.4.0-MariaDB',
+                'MariaDB',
+                True,
+                'my-channel',
+                'SHOW SLAVE STATUS',
+                (),
+                id='mariadb_legacy_with_channel',
             ),
         ],
     )

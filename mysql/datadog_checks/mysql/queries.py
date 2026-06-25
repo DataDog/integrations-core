@@ -293,6 +293,10 @@ def show_replica_status_query(version, is_mariadb: bool, channel: str = '') -> t
         base_query = "SHOW SLAVE STATUS"
     if channel and not is_mariadb:
         return ("{0} FOR CHANNEL %s".format(base_query), (channel,))
+    elif is_mariadb and not channel:
+        # Without a specific channel, use ALL to return every replication channel.
+        # MariaDB uses Connection_name (not Channel_Name) to identify channels.
+        return ("SHOW ALL {0}S STATUS".format(base_query.split()[1]), ())
     else:
         return ("{0}".format(base_query), ())
 

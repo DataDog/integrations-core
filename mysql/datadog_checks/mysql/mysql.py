@@ -1170,7 +1170,12 @@ class MySql(DatabaseCheck):
             for replica in replica_status:
                 # MySQL <5.7 does not have Channel_Name.
                 # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
+                channel = (
+                    self._config.replication_channel
+                    or replica.get('Channel_Name')
+                    or replica.get('Connection_name')
+                    or 'default'
+                )
                 for key, value in replica.items():
                     if value is not None:
                         replica_results[key]['channel:{0}'.format(channel)] = value
