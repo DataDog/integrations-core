@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 17.0.1 / 2026-06-19
+
+***Fixed***:
+
+* Gate `ddev release branch create` and `update-build-agent-yaml.yml` on the matching `DataDog/datadog-agent` branch existing so neither writer can produce a release-branch pointer to a missing upstream branch. ([#23987](https://github.com/DataDog/integrations-core/pull/23987))
+* Skip code coverage gate validation for extras repos, which do not enforce a required per-integration coverage threshold. ([#24099](https://github.com/DataDog/integrations-core/pull/24099))
+
 ## 17.0.0 / 2026-06-16
 
 ***Changed***:
