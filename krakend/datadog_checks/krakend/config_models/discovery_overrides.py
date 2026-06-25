@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Here you can override the generated discovery candidates() for this integration.
+# Override the generated discovery candidates() for this integration.
 #
 # Define a candidates(service, default) function to wrap or replace the generated
 # candidate generation. `default` is the generated generator; call it to reuse
