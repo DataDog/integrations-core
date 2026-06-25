@@ -1,0 +1,1 @@
+Add async GitHub client rate limiting to the Dispatcher to prevent octo-sts token exhaustion.
