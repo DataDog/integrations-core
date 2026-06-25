@@ -293,6 +293,7 @@ class ModelConsumer:
         # discovery_strategies function for local: ones) plus the section models.
         import_lines = [
             'from datadog_checks.base.utils.discovery import Service',
+            f'from datadog_checks.{pkg_name}.config_models import discovery_overrides',
             f'from datadog_checks.{pkg_name}.config_models.instance import InstanceConfig',
             f'from datadog_checks.{pkg_name}.config_models.shared import SharedConfig',
         ]
@@ -313,7 +314,7 @@ class ModelConsumer:
             *self._merge_import_lines(import_lines),
             '',
             '',
-            'def candidates(service: Service) -> Iterator[dict[str, Any]]:',
+            'def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:',
             "    shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(",
             "        mode='json', exclude_none=True",
             "    )",
@@ -326,7 +327,19 @@ class ModelConsumer:
             for candidate in stanza.get('candidates', []):
                 lines.extend(self._emit_candidate_body(candidate))
 
-        lines.append('')
+        lines.extend(
+            [
+                '',
+                '',
+                'def candidates(service: Service) -> Iterator[dict[str, Any]]:',
+                "    override = getattr(discovery_overrides, 'candidates', None)",
+                '    if override is None:',
+                '        yield from _generated_candidates(service)',
+                '    else:',
+                '        yield from override(service, default=_generated_candidates)',
+                '',
+            ]
+        )
         return format_with_ruff('\n'.join(lines))
 
     @staticmethod

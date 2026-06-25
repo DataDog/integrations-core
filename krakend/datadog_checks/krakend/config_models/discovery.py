@@ -13,11 +13,12 @@ from collections.abc import Iterator
 from typing import Any
 
 from datadog_checks.base.utils.discovery import Service, candidate_ports
+from datadog_checks.krakend.config_models import discovery_overrides
 from datadog_checks.krakend.config_models.instance import InstanceConfig
 from datadog_checks.krakend.config_models.shared import SharedConfig
 
 
-def candidates(service: Service) -> Iterator[dict[str, Any]]:
+def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
     shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
         mode='json', exclude_none=True
     )
@@ -31,3 +32,11 @@ def candidates(service: Service) -> Iterator[dict[str, Any]]:
             instance_data, context={'configured_fields': frozenset(instance_data)}
         ).model_dump(mode='json', exclude_none=True)
         yield {'init_config': shared, 'instances': [instance]}
+
+
+def candidates(service: Service) -> Iterator[dict[str, Any]]:
+    override = getattr(discovery_overrides, 'candidates', None)
+    if override is None:
+        yield from _generated_candidates(service)
+    else:
+        yield from override(service, default=_generated_candidates)
