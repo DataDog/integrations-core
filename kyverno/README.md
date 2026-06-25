@@ -20,7 +20,7 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 Kyverno consists of multiple controllers such as Backup, Admissions, Cleanup, and Reports controllers. Each of these controllers can be monitored. Each Kyverno controller has Prometheus-formatted metrics readily available at `/metrics` on port `8000`. For the Agent to start collecting metrics, the Kyverno controller pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample kyverno.d/conf.yaml][4]. 
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: kyverno`, and set `containerImage` to match each controller image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: kyverno`, and set `containerImage` to match each controller image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][11].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `kyverno.controller.drop.count` metric is exposed only after an object is dropped by a controller.
 
@@ -127,3 +127,4 @@ Need help? Contact [Datadog support][9].
 [8]: https://github.com/DataDog/integrations-core/blob/master/kyverno/assets/service_checks.json
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
+[11]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

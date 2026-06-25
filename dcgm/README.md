@@ -289,7 +289,7 @@ LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint": "http://%%host%%:9
 
 Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][11].
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: dcgm`, and set `containerImage` to match each exporter image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: dcgm`, and set `containerImage` to match each exporter image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][20].
 
 **Annotations v2** (for Datadog Agent v7.47+)
 
@@ -414,3 +414,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://docs.datadoghq.com/integrations/nvml/#metrics
 [18]: https://docs.datadoghq.com/gpu_monitoring/
 [19]: https://docs.datadoghq.com/gpu_monitoring/setup/?tab=datadogoperator
+[20]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

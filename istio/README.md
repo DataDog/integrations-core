@@ -90,7 +90,7 @@ This annotation specifies the container `discovery` to match the default contain
 
 The method for applying these annotations varies depending on the [Istio deployment strategy (Istioctl, Helm, Operator)][22] used. Consult the Istio documentation for the proper method to apply these pod annotations. See the [sample istio.d/conf.yaml][8] for all available configuration options.
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: istio`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: istio`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][33].
 
 ##### Ambient mode configuration
 
@@ -312,3 +312,4 @@ Additional helpful documentation, links, and articles:
 [30]: https://docs.datadoghq.com/security/application_security/?source=istio-tile-overview
 [31]: https://docs.datadoghq.com/security/application_security/setup/istio/?source=istio-tile-setup
 [32]: https://www.datadoghq.com/blog/app-api-protection-envoy-istio-nginx-haproxy/
+[33]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

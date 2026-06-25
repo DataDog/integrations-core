@@ -445,7 +445,7 @@ Ensure that `url` matches your Airflow [webserver `base_url`][19], the URL used 
 
 If you are using the [official Airflow Helm chart][24], this should be applied on the `webserver` pod and its `webserver` container. For example, with the [`webserver.podAnnotations`][22], your Autodiscovery Annotations may look like the following:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: airflow`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: airflow`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][28].
 
 ```yaml
 webserver:
@@ -610,3 +610,4 @@ Need help? Contact [Datadog support][11].
 [25]: https://airflow.apache.org/docs/apache-airflow-providers-datadog/stable/index.html
 [26]: https://airflow.apache.org/docs/docker-stack/entrypoint.html#installing-additional-requirements
 [27]: https://docs.datadoghq.com/developers/dogstatsd/?tab=cgroups#origin-detection
+[28]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

@@ -20,7 +20,7 @@ This check uses [OpenMetrics][5] to collect metrics from the OpenMetrics endpoin
 
 The Argo Rollouts controller has Prometheus-formatted metrics readily available at `/metrics` on port `8090`. For the Agent to start collecting metrics, the Argo Rollouts pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample argo_rollouts.d/conf.yaml][4].
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: argo_rollouts`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD](https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/).
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: argo_rollouts`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][12].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `argo_rollouts.info.replicas.updated` metric is exposed only after a replica is updated.
 
@@ -103,3 +103,4 @@ Additional helpful documentation, links, and articles:
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/agent/kubernetes/log/
 [11]: https://www.datadoghq.com/blog/container-native-ci-cd-integrations/
+[12]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
