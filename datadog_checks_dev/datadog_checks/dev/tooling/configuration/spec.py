@@ -388,7 +388,8 @@ def handle_discovery(
             return
         errors = loader.templates.apply_overrides(template, overrides)
         if errors:
-            loader.errors.append(f'{location}: {chr(10).join(errors)}')
+            error_message = '\n'.join(errors)
+            loader.errors.append(f'{location}: {error_message}')
         if not isinstance(template, dict):
             loader.errors.append(f'{location}: Template does not refer to a mapping object')
             return
