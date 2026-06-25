@@ -57,7 +57,7 @@ class TaskConfig(BaseModel):
     prompt: str | None = None
     prompt_ref: str | None = None
     goal: str | None = None
-    goal_path: Path | None = None
+    goal_ref: str | None = None
     max_goal_attempts: int = 5
     clear_context_before: bool = False
     compact_context_before: bool = False
@@ -76,11 +76,11 @@ class TaskConfig(BaseModel):
 
     @model_validator(mode="after")
     def goal_consistency(self) -> TaskConfig:
-        if self.goal is not None and self.goal_path is not None:
-            raise ValueError("At most one of 'goal' or 'goal_path' may be set")
-        has_goal = self.goal is not None or self.goal_path is not None
+        if self.goal is not None and self.goal_ref is not None:
+            raise ValueError("At most one of 'goal' or 'goal_ref' may be set")
+        has_goal = self.goal is not None or self.goal_ref is not None
         if not has_goal and "max_goal_attempts" in self.model_fields_set:
-            raise ValueError("'max_goal_attempts' may only be set when 'goal' or 'goal_path' is set")
+            raise ValueError("'max_goal_attempts' may only be set when 'goal' or 'goal_ref' is set")
         if has_goal and self.max_goal_attempts < 1:
             raise ValueError("'max_goal_attempts' must be at least 1")
         return self
@@ -193,13 +193,7 @@ class FlowConfig(BaseModel):
                 raise FlowConfigError(f"System prompt not found for agent {agent_name!r}: {system_prompt}")
 
         for phase_id, phase in self.phases.items():
-            for i, task in enumerate(phase.tasks):
-                if task.goal_path is not None:
-                    resolved = config_dir / task.goal_path
-                    if not resolved.exists():
-                        raise FlowConfigError(
-                            f"Phase {phase_id!r} task {i} ({task.name!r}): goal_path not found: {resolved}"
-                        )
+            # goal_ref validation happens in Task 3 (FlowConfig.from_yaml scanning goals/ dir)
 
             if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
                 resolved = config_dir / phase.checkpoint.memory_prompt_path

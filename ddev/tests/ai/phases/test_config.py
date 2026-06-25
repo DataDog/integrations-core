@@ -49,7 +49,7 @@ def test_task_config_extra_field_raises():
 @pytest.mark.parametrize(
     "kwargs,match",
     [
-        ({"name": "t", "prompt": "x", "goal": "g", "goal_path": "g.md"}, "At most one of 'goal' or 'goal_path'"),
+        ({"name": "t", "prompt": "x", "goal": "g", "goal_ref": "g_ref"}, "At most one of 'goal' or 'goal_ref'"),
         ({"name": "t", "prompt": "x", "max_goal_attempts": 3}, "'max_goal_attempts' may only be set"),
         ({"name": "t", "prompt": "x", "goal": "g", "max_goal_attempts": 0}, "must be at least 1"),
     ],
@@ -64,14 +64,14 @@ def test_task_config_goal_validation_rejects(kwargs, match):
     "kwargs",
     [
         {"name": "t", "prompt": "x", "goal": "verify it"},
-        {"name": "t", "prompt": "x", "goal_path": "g.md"},
+        {"name": "t", "prompt": "x", "goal_ref": "my_goal"},
         {"name": "t", "prompt": "x", "goal": "verify it", "max_goal_attempts": 7},
     ],
-    ids=["goal", "goal_path", "goal_with_custom_attempts"],
+    ids=["goal", "goal_ref", "goal_with_custom_attempts"],
 )
 def test_task_config_goal_accepts_valid(kwargs):
     tc = TaskConfig(**kwargs)
-    assert (tc.goal is not None) ^ (tc.goal_path is not None)
+    assert (tc.goal is not None) ^ (tc.goal_ref is not None)
     assert tc.max_goal_attempts == kwargs.get("max_goal_attempts", 5)
 
 
@@ -326,31 +326,6 @@ def test_from_yaml_invalid_yaml(tmp_path):
 def test_from_yaml_missing_file(tmp_path):
     with pytest.raises(FlowConfigError, match="Failed to load"):
         FlowConfig.from_yaml(tmp_path / "nonexistent.yaml", tmp_path)
-
-
-def test_from_yaml_missing_task_goal_path(tmp_path):
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("system prompt")
-    flow_yaml = tmp_path / "flow.yaml"
-    flow_yaml.write_text(
-        """\
-agents:
-  writer:
-    tools: []
-phases:
-  p1:
-    agent: writer
-    tasks:
-      - name: t1
-        prompt: "Do it."
-        goal_path: prompts/goal.md
-flow:
-  - phase: p1
-"""
-    )
-    with pytest.raises(FlowConfigError, match="goal_path not found"):
-        FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 
 # ---------------------------------------------------------------------------
