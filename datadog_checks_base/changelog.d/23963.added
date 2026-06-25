@@ -1,1 +1,1 @@
-Add helpers for generating and validating discovered Autodiscovery configurations.
+Add configuration discovery runtime (Service/Port types, candidate_ports, probing harness, and discovery entry points).
