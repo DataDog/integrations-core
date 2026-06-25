@@ -3468,6 +3468,52 @@ def test_template_hide_duplicate():
     assert not spec.errors
 
 
+def test_template_array_wrapper_hidden_propagates_to_items():
+    with TempDir() as d:
+        template_file = path_join(d, 'pair.yaml')
+        ensure_parent_dir_exists(template_file)
+        write_file(
+            template_file,
+            """
+            - name: foo
+              description: words
+              value:
+                type: string
+            - name: bar
+              description: words
+              hidden: false
+              value:
+                type: string
+            """,
+        )
+
+        spec = get_spec(
+            """
+            version: 0.0.0
+            files:
+            - name: test.yaml
+              example_name: test.yaml.example
+              options:
+              - name: instances
+                description: words
+                options:
+                - template: pair
+                  hidden: true
+            """,
+            template_paths=[d],
+        )
+        spec.load()
+
+        assert not spec.errors
+
+        options = spec.data['files'][0]['options'][0]['options']
+        hidden_by_name = {option['name']: option['hidden'] for option in options}
+        # The wrapper's `hidden: true` applies to every expanded item...
+        assert hidden_by_name['foo'] is True
+        # ...but an item's own explicit value wins.
+        assert hidden_by_name['bar'] is False
+
+
 def test_value_one_of_with_type():
     spec = get_spec(
         """
