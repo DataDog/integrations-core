@@ -594,6 +594,101 @@ def test_discovery_local_strategy_accepted():
     assert not any('Unsupported strategy' in e for e in spec.errors)
 
 
+def test_discovery_local_strategy_requires_contract():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: local:my_strategy
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:9090/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `provides` must be an array of strings' in spec.errors
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `inputs` must be a mapping object' in spec.errors
+
+
+def test_discovery_local_strategy_validates_declared_inputs():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: local:my_strategy
+              provides: [svc]
+              inputs:
+                config_path: string
+                retries: integer
+              config_path: /etc/app.conf
+              retries: true
+              ignored: value
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{svc.port}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `retries` must be an integer' in spec.errors
+    assert 'test, test.yaml, discovery, strategy #1: Unknown field(s): ignored' in spec.errors
+
+
+def test_discovery_strategy_template_overrides_are_scoped_to_each_item(tmp_path):
+    discovery_templates = tmp_path / 'discovery'
+    discovery_templates.mkdir()
+    (discovery_templates / 'test_ports.yaml').write_text(
+        """
+        strategy: from_ports
+        port_hints: []
+        candidates:
+        - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+        """
+    )
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - template: discovery/test_ports
+              overrides:
+                port_hints: [9090]
+            - template: discovery/test_ports
+          options:
+          - template: init_config
+          - template: instances
+            options:
+            - name: openmetrics_endpoint
+              description: endpoint
+              required: true
+              value:
+                type: string
+        """,
+        template_paths=[str(tmp_path)],
+    )
+    spec.load()
+
+    assert not spec.errors
+    assert spec.data['files'][0]['discovery']['strategies'][0]['port_hints'] == [9090]
+    assert spec.data['files'][0]['discovery']['strategies'][1]['port_hints'] == []
+
+
 def test_section_not_map():
     spec = get_spec(
         """

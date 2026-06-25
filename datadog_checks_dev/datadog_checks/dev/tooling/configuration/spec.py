@@ -120,10 +120,9 @@ def files_validator(files, loader) -> None:
 def expand_template_items(items: list, loader, file_name: str, section: str) -> set[int]:
     """Expand every template: item in items in-place.
 
-    Overrides accumulate across all items (same semantics as options_validator).
+    Overrides are scoped to the item being expanded.
     Returns the set of 0-based indices that failed to resolve.
     """
-    overrides: dict = {}
     override_errors: list = []
     failed: set[int] = set()
     i = 0
@@ -134,6 +133,7 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
             continue
 
         resolved = False
+        overrides: dict = {}
 
         while 'template' in item:
             overrides.update(item.pop('overrides', {}))
@@ -184,7 +184,7 @@ def expand_template_items(items: list, loader, file_name: str, section: str) -> 
 
         i += 1
 
-    if overrides:
+    if override_errors:
         for idx, errors in override_errors:
             error_message = '\n'.join(errors)
             loader.errors.append(f'{loader.source}, {file_name}, {section} #{idx + 1}: {error_message}')
@@ -230,6 +230,7 @@ def discovery_validator(discovery: Any, options: list, loader: Any, file_name: s
         PORT_FIELDS,
         REGISTRY,
         SERVICE_FIELDS,
+        Input,
     )
 
     location = f'{loader.source}, {file_name}, discovery'
@@ -289,8 +290,22 @@ def discovery_validator(discovery: Any, options: list, loader: Any, file_name: s
                 # attribute is accepted on its placeholders.
                 for provided in local_provides:
                     placeholders[provided] = None  # type: ignore[assignment]
-            if 'inputs' in stanza and not isinstance(stanza['inputs'], dict):
+
+            local_inputs = stanza.get('inputs')
+            if not isinstance(local_inputs, dict):
                 loader.errors.append(f'{strategy_location}: Attribute `inputs` must be a mapping object')
+                local_inputs = {}
+            elif not all(isinstance(k, str) and isinstance(v, str) for k, v in local_inputs.items()):
+                loader.errors.append(f'{strategy_location}: Attribute `inputs` must map input names to type strings')
+                local_inputs = {}
+
+            allowed_fields = {'strategy', 'candidates', 'provides', 'inputs', *local_inputs}
+            unknown = set(stanza) - allowed_fields
+            if unknown:
+                loader.errors.append(f'{strategy_location}: Unknown field(s): {", ".join(sorted(unknown))}')
+
+            for input_name, input_type in local_inputs.items():
+                _validate_strategy_input(stanza, input_name, Input(input_type), loader, strategy_location)
 
         candidates = stanza.get('candidates')
         if not isinstance(candidates, list) or not candidates:
