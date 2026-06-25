@@ -176,7 +176,7 @@
                         "id": 7877152359004176,
                         "definition": {
                             "type": "note",
-                            "content": "This section provides an overview of how many fluxcd objects are present and how many of them are failing. It also shows a high-level view of how long reconciliation takes. Objects are divided into two groups: source manifests (for example a git repository) and cluster reconcilers (for instance a Helm chart).\n\nCounts use the **maximum** of legacy controller totals (`fluxcd.gotk.reconcile.condition`, still emitted on older Flux) and kube-state-metrics (`fluxcd.gotk.resource.info`, Flux 2.1+). This lets either path populate the widget without double-counting. The readiness tables below pair **kube-state-metrics** with the **legacy** `reconcile.condition` and `suspend.status` metrics.",
+                            "content": "This section provides an overview of how many fluxcd objects are present and how many of them are failing. It also shows a high-level view of how long reconciliation takes. Objects are divided into two groups: source manifests (for example a git repository) and cluster reconcilers (for instance a Helm chart).\n\nCounts use the **maximum** of legacy controller totals (`fluxcd.gotk.reconcile.condition`, still emitted on older Flux) and kube-state-metrics (`fluxcd.gotk.resource.info`, Flux 2.1+; set `kube_state_metrics_endpoint` on the check instance to collect these metrics). This lets either path populate the widget without double-counting. Reconciliation duration uses controller metrics (`fluxcd.gotk.reconcile.duration.seconds`). The readiness tables below pair **kube-state-metrics** with the **legacy** `reconcile.condition` and `suspend.status` metrics.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -721,7 +721,7 @@
                     {
                         "id": 4800789162924586,
                         "definition": {
-                            "title": "Cluster Reconciliation (controllers, legacy)",
+                            "title": "Cluster reconciliation (controllers, legacy)",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -802,7 +802,7 @@
                     {
                         "id": 4800789162924587,
                         "definition": {
-                            "title": "Source Acquisition (controllers, legacy)",
+                            "title": "Source acquisition (controllers, legacy)",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
