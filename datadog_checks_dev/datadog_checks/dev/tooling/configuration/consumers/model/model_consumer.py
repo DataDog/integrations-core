@@ -80,7 +80,7 @@ class ModelConsumer:
                     section_package_info,
                     section_model_files,
                     section_model_info,
-                ) = self._process_section(section)
+                ) = self._process_section(section, spec_file['name'])
                 package_info.extend(section_package_info)
                 model_files.update(section_model_files)
                 model_info.update(section_model_info)
@@ -100,7 +100,7 @@ class ModelConsumer:
 
         return rendered_files
 
-    def _process_section(self, section) -> (List[Tuple[str, str]], dict, ModelInfo):
+    def _process_section(self, section, spec_file_name: str = '') -> (List[Tuple[str, str]], dict, ModelInfo):
         # Values to return
         # [(model_id, schema_name)]
         package_info: List[Tuple[str, str]] = []
@@ -120,7 +120,7 @@ class ModelConsumer:
             schema_name = 'InstanceConfig'
             # auto_conf.yaml files may define instances as a leaf (no sub-options) to
             # emit `instances: []` without providing a model schema.
-            if 'options' not in section:
+            if 'options' not in section and spec_file_name == 'auto_conf.yaml':
                 return (package_info, model_files, model_info)
             if section['multiple_instances_defined']:
                 section = self._merge_instances(section, errors)
