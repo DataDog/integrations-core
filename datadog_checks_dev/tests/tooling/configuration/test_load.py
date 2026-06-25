@@ -337,34 +337,6 @@ def test_discovery_valid():
     assert not spec.errors
 
 
-def test_discovery_reserves_auto_conf_name():
-    spec = get_spec(
-        """
-        version: 0.0.0
-        files:
-        - name: test.yaml
-          example_name: test.yaml.example
-          discovery:
-            strategies:
-            - strategy: from_ports
-              port_hints:
-              - 9090
-              candidates:
-              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
-          options:
-          - template: init_config
-          - template: instances
-        - name: auto_conf.yaml
-          options:
-          - template: init_config
-          - template: instances
-        """
-    )
-    spec.load()
-
-    assert 'test, file #2: Example file name `auto_conf.yaml` already used by file #1' in spec.errors
-
-
 def test_discovery_rejects_boolean_port_hints():
     spec = get_spec(
         """

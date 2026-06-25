@@ -114,7 +114,7 @@ def files_validator(files, loader) -> None:
         options_validator(options, loader, file_name)
 
         if 'discovery' in config_file:
-            handle_discovery(config_file, loader, file_name, example_file_names_origin, file_index)
+            handle_discovery(config_file, loader, file_name)
 
 
 def expand_template_items(
@@ -379,10 +379,8 @@ def _validate_discovery_template(
             loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
 
 
-def handle_discovery(
-    config_file: dict, loader, file_name: str, example_file_names_origin: dict, file_index: int
-) -> None:
-    """Resolve discovery templates, honour `enabled`, reserve auto_conf.yaml, then validate.
+def handle_discovery(config_file: dict, loader, file_name: str) -> None:
+    """Resolve discovery templates, honour `enabled`, then validate.
 
     Runs after option-template resolution so the validator sees fully resolved
     data (D4). All discovery handling lives here, in one place at the tail of
@@ -419,23 +417,13 @@ def handle_discovery(
         expand_template_items(strategies, loader, file_name, 'discovery, strategy')
 
     # 2. Honour `enabled: false` as a kill switch: drop the stanza so no
-    #    discovery.py is generated and no auto_conf.yaml name is reserved.
+    #    discovery.py is generated.
     enabled = discovery.pop('enabled', True)
     if not enabled:
         del config_file['discovery']
         return
 
-    # 3. Reserve the auto_conf.yaml example name and flag a collision.
-    if 'auto_conf.yaml' in example_file_names_origin:
-        loader.errors.append(
-            '{}, file #{}: Discovery auto_conf.yaml already used by file #{}'.format(
-                loader.source, file_index, example_file_names_origin['auto_conf.yaml']
-            )
-        )
-    else:
-        example_file_names_origin['auto_conf.yaml'] = file_index
-
-    # 4. Validate on the fully resolved stanza and resolved options.
+    # 3. Validate on the fully resolved stanza and resolved options.
     discovery_validator(discovery, config_file.get('options', []), loader, file_name)
 
 
