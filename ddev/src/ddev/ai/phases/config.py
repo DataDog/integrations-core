@@ -5,11 +5,38 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, ValidationError, field_validator, model_validator
 
 from ddev.ai.tools.registry import ToolRegistry
+
+
+def parse_md_file(path: Path) -> tuple[dict[str, Any], str]:
+    """Parse a Markdown file with YAML front matter.
+
+    Returns (front_matter_dict, body_str). Raises FlowConfigError on any problem.
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as e:
+        raise FlowConfigError(f"Cannot read {path}: {e}") from e
+
+    if not text.startswith("---"):
+        raise FlowConfigError(f"{path}: missing YAML front matter (file must start with '---')")
+
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        raise FlowConfigError(f"{path}: missing YAML front matter closing '---'")
+
+    _, raw_yaml, raw_body = parts
+    try:
+        meta = yaml.safe_load(raw_yaml) or {}
+    except yaml.YAMLError as e:
+        raise FlowConfigError(f"{path}: Invalid YAML in front matter: {e}") from e
+
+    return meta, raw_body.strip()
 
 
 class FlowConfigError(Exception):
@@ -183,8 +210,6 @@ class FlowConfig(BaseModel):
     @classmethod
     def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
         """Load, parse, and validate flow.yaml. Raises FlowConfigError on any problem."""
-        from ddev.ai.phases.frontmatter import parse_md_file
-
         try:
             raw = yaml.safe_load(path.read_text())
         except (OSError, yaml.YAMLError) as e:

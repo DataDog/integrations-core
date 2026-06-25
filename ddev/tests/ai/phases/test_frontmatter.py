@@ -5,7 +5,7 @@
 import pytest
 
 from ddev.ai.phases.config import FlowConfigError
-from ddev.ai.phases.frontmatter import parse_md_file
+from ddev.ai.phases.config import parse_md_file
 
 
 def test_parse_md_file_returns_front_matter_and_body(tmp_path):
