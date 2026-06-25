@@ -70,8 +70,6 @@ Note: The listed metrics can only be collected if they are available. Some metri
 
 For LiteLLM Proxy running on Kubernetes, configuration can be easily done via pod annotations. See the example below:
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: litellm`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
-
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -96,6 +94,8 @@ spec:
     - name: <CONTAINER_NAME>
 # (...)
 ```
+
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: litellm`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
 
 For more information and alternative ways to configure the check in Kubernetes-based environments, see the [Kubernetes Integration Setup documentation][3].
 
