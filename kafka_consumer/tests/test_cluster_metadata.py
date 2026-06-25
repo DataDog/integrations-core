@@ -11,6 +11,7 @@ from unittest import mock
 import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
+from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
 
 pytestmark = [pytest.mark.unit]
@@ -767,7 +768,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # First call at t=1000: no cache, event should be sent
     with mock.patch('time.time', return_value=1000.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' in events_to_send, "First call should send event (no cache)"
 
     # Get the expire_at from first call (should be 1000 + 3600 = 4600)
@@ -777,7 +778,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # Second call at t=1100: cache exists and valid (1100 < 4600), event should NOT be sent
     with mock.patch('time.time', return_value=1100.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' not in events_to_send, "Second call should NOT send event (cache valid)"
 
     # Verify expire_at was NOT updated (this is the bug fix!)
@@ -787,7 +788,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # Third call at t=4601: cache expired (4601 >= 4600), event should be sent
     with mock.patch('time.time', return_value=4601.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' in events_to_send, "Third call should send event (cache expired)"
 
     # Verify expire_at WAS updated after sending event (should be 4601 + 3600 = 8201)
@@ -917,10 +918,10 @@ def test_schema_registry_two_tier_ttl(check):
     collector = kafka_consumer_check.metadata_collector
 
     # Schema version checks reuse the same refresh interval as broker/topic configs
-    assert collector.CONFIGS_REFRESH_INTERVAL == 180  # default 3 min
+    assert collector.cache.refresh_interval == 180  # default 3 min
 
     # All events (broker, topic, schema) share the same re-emission TTL
-    assert collector.EVENT_CACHE_TTL == 3600  # 1 hour
+    assert EVENT_CACHE_TTL == 3600  # 1 hour
 
 
 def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, aggregator):
@@ -1130,8 +1131,8 @@ def test_kafka_configs_refresh_interval(check, interval, expected_interval, expe
     kafka_consumer_check = check(instance)
     collector = kafka_consumer_check.metadata_collector
 
-    assert collector.CONFIGS_REFRESH_INTERVAL == expected_interval
-    assert collector.CONFIGS_REFRESH_JITTER == expected_jitter
+    assert collector.cache.refresh_interval == expected_interval
+    assert collector.cache.refresh_jitter == expected_jitter
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
@@ -1185,9 +1186,10 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     assert call_args[1]['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
     assert call_args[1]['auth'] == ('my-client-id', 'my-client-secret')
 
-    # Verify Bearer header was set on the HTTP client
-    headers = kafka_consumer_check.metadata_collector.http.options.get('headers', {})
-    assert headers.get('Authorization') == 'Bearer oidc-test-token-123'
+    # Verify Bearer token is stored and included in per-request kwargs
+    assert kafka_consumer_check.metadata_collector._schema_registry_oauth_token == 'oidc-test-token-123'
+    request_kwargs = kafka_consumer_check.metadata_collector._get_schema_registry_request_kwargs()
+    assert request_kwargs.get('extra_headers', {}).get('Authorization') == 'Bearer oidc-test-token-123'
 
     # Verify schema registry still works (subjects metric emitted)
     aggregator.assert_metric('kafka.schema_registry.subjects', value=1)
@@ -1241,10 +1243,9 @@ def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggr
     dd_run_check(kafka_consumer_check)
     mock_http.post.assert_called_once()
 
-    # Verify new token was set
-    headers = collector.http.options.get('headers', {})
-    assert headers.get('Authorization') == 'Bearer new-refreshed-token'
     assert collector._schema_registry_oauth_token == 'new-refreshed-token'
+    request_kwargs = collector._get_schema_registry_request_kwargs()
+    assert request_kwargs.get('extra_headers', {}).get('Authorization') == 'Bearer new-refreshed-token'
 
 
 def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
@@ -1370,12 +1371,14 @@ def test_schema_registry_url_encodes_subject_names(check):
     subject = 'google/protobuf/timestamp.proto'
 
     collector._get_schema_registry_versions(subject)
-    collector.http.get.assert_called_with('http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions')
+    collector.http.get.assert_called_with(
+        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions', verify=True
+    )
 
     collector.http.get.reset_mock()
     collector._get_schema_registry_latest_version(subject)
     collector.http.get.assert_called_with(
-        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest'
+        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest', verify=True
     )
 
     collector.http.get.reset_mock()
@@ -1384,6 +1387,7 @@ def test_schema_registry_url_encodes_subject_names(check):
     collector.http.get.assert_called_with(
         'http://localhost:8081/config/google%2Fprotobuf%2Ftimestamp.proto',
         params={'defaultToGlobal': 'true'},
+        verify=True,
     )
 
 
@@ -1860,3 +1864,75 @@ def test_malformed_cache_does_not_abort_collection(check, aggregator):
     )
     aggregator.assert_metric('kafka.consumer_group.members', count=1)
     aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def test_heartbeat_connect_api_status_present_when_urls_configured(check):
+    """connect_api_status appears in heartbeat payload when Connect URLs are configured."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'kafka_connect_url': 'http://connect:8083',
+    }
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    with mock.patch.object(
+        kafka_consumer_check._connector_collector,
+        'collect',
+        return_value={'http://connect:8083': True},
+    ):
+        kafka_consumer_check._send_cluster_monitoring_heartbeat(
+            total_contexts=0,
+            cluster_id='test-cluster',
+            connect_status={'http://connect:8083': True},
+        )
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert 'connect_api_status' in hb_events[0]
+    assert hb_events[0]['connect_api_status'] == {'http://connect:8083': True}
+
+
+def test_heartbeat_connect_api_status_absent_when_no_urls(check):
+    """connect_api_status is absent from heartbeat payload when no Connect URLs are configured."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=0, cluster_id='test-cluster')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert 'connect_api_status' not in hb_events[0]
+
+
+def test_collect_connect_status_returns_none_when_unconfigured(check):
+    """_collect_connect_status returns None when no Connect URLs are configured."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+
+    result = kafka_consumer_check._collect_connect_status('test-cluster')
+    assert result is None
+
+
+def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
+    """_collect_connect_status returns {} when the collector raises, instead of propagating."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'kafka_connect_url': 'http://connect:8083',
+    }
+    kafka_consumer_check = check(instance)
+
+    with mock.patch.object(
+        kafka_consumer_check._connector_collector,
+        'collect',
+        side_effect=Exception("connection refused"),
+    ):
+        result = kafka_consumer_check._collect_connect_status('test-cluster')
+
+    assert result == {}

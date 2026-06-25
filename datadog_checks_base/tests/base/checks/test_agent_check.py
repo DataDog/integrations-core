@@ -44,6 +44,196 @@ def test_check_version():
     assert check.check_version == base_package_version
 
 
+def test_discover_config_accepts_successful_candidate_only():
+    class DiscoveryCheck(AgentCheck):
+        calls = []
+
+        @classmethod
+        def generate_configs(cls, service):
+            assert service.id == 'svc'
+            assert service.host == '10.0.0.1'
+            for port in service.ports:
+                yield {
+                    'init_config': {'selected_port': port.number},
+                    'instances': [{'port': port.number, 'accept': port.number == 9090}],
+                }
+
+        def check(self, instance):
+            self.calls.append(instance['port'])
+            assert self.init_config == {'selected_port': instance['port']}
+            self.gauge('trial_metric', 1)
+            self.service_check('trial_service', AgentCheck.OK)
+            self.set_metadata('version', '1')
+            if not instance['accept']:
+                raise Exception('candidate failed')
+
+    payload = json.dumps(
+        {
+            'id': 'svc',
+            'host': '10.0.0.1',
+            'ports': [
+                {'number': 8080, 'name': 'http'},
+                {'number': 9090, 'name': 'metrics'},
+                {'number': 9443, 'name': 'metrics-tls'},
+            ],
+        }
+    )
+
+    with mock.patch('datadog_checks.base.checks.base.aggregator.submit_metric') as submit_metric:
+        configs = json.loads(DiscoveryCheck.discover_config(payload))
+
+    assert configs == [
+        {
+            'init_config': {'selected_port': 9090},
+            'instances': [{'port': 9090, 'accept': True}],
+        }
+    ]
+    assert DiscoveryCheck.calls == [8080, 9090]
+    submit_metric.assert_not_called()
+
+
+def test_discover_config_accepts_histogram_bucket_candidate():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{'host': service.host}]}
+
+        def check(self, instance):
+            self.submit_histogram_bucket('histogram.bucket', 3, 0, 1, True, instance['host'], [])
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    with patch('datadog_checks.base.checks.base.aggregator.submit_histogram_bucket') as submit_histogram_bucket:
+        configs = json.loads(DiscoveryCheck.discover_config(payload))
+
+    assert configs == [{'init_config': {}, 'instances': [{'host': '10.0.0.1'}]}]
+    submit_histogram_bucket.assert_not_called()
+
+
+def test_discover_config_rejects_candidate_with_no_metrics():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{}]}
+
+        def check(self, instance):
+            pass  # successful run, but submits no metric
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
+def test_discover_config_rejects_candidate_with_none_metric():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{}]}
+
+        def check(self, instance):
+            self.gauge('trial_metric', None)
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    with mock.patch('datadog_checks.base.checks.base.aggregator.submit_metric') as submit_metric:
+        assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+    submit_metric.assert_not_called()
+
+
+def test_discover_config_rejects_candidate_with_only_service_check():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{}]}
+
+        def check(self, instance):
+            self.service_check('health', AgentCheck.OK)  # service check, no metric
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
+def test_discover_config_rejects_multi_instance_candidate():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{}, {}]}
+
+        def check(self, instance):
+            self.gauge('my.metric', 1.0)
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
+@pytest.mark.parametrize(
+    'init_config,instance',
+    [
+        pytest.param({'process_isolation': True}, {}, id='init_config'),
+        pytest.param({}, {'process_isolation': True}, id='instance'),
+    ],
+)
+def test_discover_config_rejects_process_isolation(init_config, instance):
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': init_config, 'instances': [instance]}
+
+        def check(self, _instance):
+            self.gauge('my.metric', 1.0)
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
+def test_discover_config_returns_empty_for_base_check():
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+
+    assert json.loads(AgentCheck.discover_config(payload)) == []
+
+
+def test_discover_config_returns_empty_for_malformed_payload():
+    assert json.loads(AgentCheck.discover_config('not-json')) == []
+    assert json.loads(AgentCheck.discover_config('null')) == []
+
+
+def test_discover_config_returns_empty_when_generate_configs_raises():
+    class DiscoveryCheck(AgentCheck):
+        @classmethod
+        def generate_configs(cls, service):
+            raise RuntimeError('generate failed')
+
+    payload = json.dumps({'id': 'svc', 'host': '10.0.0.1', 'ports': []})
+    assert json.loads(DiscoveryCheck.discover_config(payload)) == []
+
+
+def test_generate_configs_loads_generated_discovery_module():
+    from datadog_checks.base.utils.discovery import Port, Service
+
+    discovery_module = types.SimpleNamespace()
+
+    def candidates(service):
+        yield {'init_config': {}, 'instances': [{'host': service.host}]}
+
+    discovery_module.candidates = candidates
+
+    class GeneratedDiscoveryCheck(AgentCheck):
+        __module__ = 'datadog_checks.generated.check'
+
+    service = Service(id='svc', host='10.0.0.1', ports=(Port(number=9090),))
+
+    with patch(
+        'datadog_checks.base.utils.discovery.probe.importlib.import_module', return_value=discovery_module
+    ) as import_module:
+        assert list(GeneratedDiscoveryCheck.generate_configs(service)) == [
+            {'init_config': {}, 'instances': [{'host': '10.0.0.1'}]},
+        ]
+
+    import_module.assert_called_once_with('datadog_checks.generated.config_models.discovery')
+
+
 @pytest.fixture
 def fresh_check():
     """Return an AgentCheck with no cached _package_dir."""

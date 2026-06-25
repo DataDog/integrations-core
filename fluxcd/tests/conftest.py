@@ -88,3 +88,14 @@ def mock_metrics_v2(mock_http):
 
     mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
     yield
+
+
+@pytest.fixture()
+def mock_metrics_ksm(mock_http):
+    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-ksm.txt")
+
+    with open(fixture_file, "r") as f:
+        content = f.read()
+
+    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+    yield
