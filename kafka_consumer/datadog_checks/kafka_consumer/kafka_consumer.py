@@ -67,6 +67,7 @@ class KafkaCheck(AgentCheck):
         highwater_offsets = {}
         broker_timestamps = defaultdict(dict)
         low_watermark_offsets = {}
+        topic_partitions = {}
         cluster_id = ""
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
@@ -87,9 +88,8 @@ class KafkaCheck(AgentCheck):
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
                 if self.config._cluster_monitoring_enabled:
-                    low_watermark_offsets = self.metadata_collector.fetch_earliest_offsets(
-                        self.client.get_topic_partitions()
-                    )
+                    topic_partitions = self.client.get_topic_partitions()
+                    low_watermark_offsets = self.metadata_collector.fetch_earliest_offsets(topic_partitions)
                 if self._data_streams_enabled:
                     broker_timestamps = self._load_broker_timestamps(persistent_cache_key)
                     if low_watermark_offsets:
@@ -145,7 +145,9 @@ class KafkaCheck(AgentCheck):
         if self.config._cluster_monitoring_enabled:
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
             try:
-                self.metadata_collector.collect_all_metadata(highwater_offsets, low_watermark_offsets)
+                self.metadata_collector.collect_all_metadata(
+                    highwater_offsets, low_watermark_offsets, topic_partitions
+                )
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
 
