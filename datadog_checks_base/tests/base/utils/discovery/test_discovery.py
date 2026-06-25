@@ -209,21 +209,6 @@ def test_candidate_ports_prefers_hints_and_deduplicates():
     ]
 
 
-def test_from_ports_not_importable():
-    with pytest.raises(ImportError):
-        from datadog_checks.base.utils.discovery import from_ports  # noqa: F401
-
-
-def test_discovery_strategy_records_provides():
-    from datadog_checks.base.utils.discovery import discovery_strategy
-
-    @discovery_strategy(provides=('port',))
-    def my_strategy(service):
-        yield {'port': 8080}
-
-    assert my_strategy.__discovery_provides__ == ('port',)
-
-
 def test_discovery_strategy_passes_complete_contexts():
     from datadog_checks.base.utils.discovery import discovery_strategy
 

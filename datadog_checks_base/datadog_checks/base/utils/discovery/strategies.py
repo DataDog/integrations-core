@@ -12,15 +12,12 @@ def discovery_strategy(*, provides: tuple[str, ...] = ()) -> Callable[[Callable]
     """Mark a function as a custom (``local:``) discovery strategy.
 
     ``provides`` declares the context keys each yielded mapping must contain.
-    The decorator records it on the function (introspectable as
-    ``__discovery_provides__``) and validates that each yielded context actually
-    contains those keys — turning a silent template-render failure into an
-    explicit error at the source.
+    The decorator validates that each yielded context actually contains those
+    keys — turning a silent template-render failure into an explicit error at
+    the source.
     """
 
     def decorate(func: Callable[..., Iterator[dict[str, Any]]]) -> Callable[..., Iterator[dict[str, Any]]]:
-        func.__discovery_provides__ = tuple(provides)  # type: ignore[attr-defined]
-
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Iterator[dict[str, Any]]:
             for ctx in func(*args, **kwargs):
@@ -29,7 +26,6 @@ def discovery_strategy(*, provides: tuple[str, ...] = ()) -> Callable[[Callable]
                     raise ValueError(f"discovery strategy {func.__name__!r} did not provide declared keys: {missing}")
                 yield ctx
 
-        wrapper.__discovery_provides__ = tuple(provides)  # type: ignore[attr-defined]
         return wrapper
 
     return decorate
