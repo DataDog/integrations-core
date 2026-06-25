@@ -145,9 +145,7 @@ class KafkaCheck(AgentCheck):
         if self.config._cluster_monitoring_enabled:
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id)
             try:
-                self.metadata_collector.collect_all_metadata(
-                    highwater_offsets, low_watermark_offsets, topic_partitions
-                )
+                self.metadata_collector.collect_all_metadata(highwater_offsets, low_watermark_offsets, topic_partitions)
             except Exception as e:
                 self.log.error("Error collecting cluster metadata: %s", e)
 
