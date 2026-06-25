@@ -8,7 +8,14 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
-from confluent_kafka import Consumer, KafkaError, KafkaException, Producer, TopicPartition
+from confluent_kafka import (
+    Consumer,
+    ConsumerGroupTopicPartitions,
+    KafkaError,
+    KafkaException,
+    Producer,
+    TopicPartition,
+)
 from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
 
 try:
@@ -621,13 +628,15 @@ class KafkaActionsClient:
             tp = TopicPartition(topic, partition, offset)
             topic_partitions.append(tp)
 
-        futures = admin.alter_consumer_group_offsets(consumer_group, topic_partitions)
+        futures = admin.alter_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group, topic_partitions)])
 
         for group_id, future in futures.items():
             try:
-                result_partitions = future.result()
+                result = future.result()
                 partition_errors = [
-                    f"{tp.topic}[{tp.partition}]: {tp.error}" for tp in result_partitions if tp.error is not None
+                    f"{tp.topic}[{tp.partition}]: {tp.error}"
+                    for tp in result.topic_partitions
+                    if tp.error is not None
                 ]
                 if partition_errors:
                     raise Exception(f"Per-partition errors for group '{group_id}': {'; '.join(partition_errors)}")
