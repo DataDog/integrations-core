@@ -230,11 +230,37 @@
     Labels defined in `exclude_labels` will take precedence in case of overlap.
 
     Note: Label filtering happens before `rename_labels`.
+
+    Note: When `aggregate_metrics_on_label_exclusion` is enabled, histogram and summary
+    metrics ignore this setting so their unique contexts are preserved.
   fleet_configurable: true
   value:
     type: array
     items:
       type: string
+- name: aggregate_metrics_on_label_exclusion
+  description: |
+    When enabled, gauge and counter metrics whose tag sets collide after label
+    exclusion are pre-aggregated by summing their values. Histogram and summary
+    metrics are not summed (summary quantiles are not additive, and histogram
+    bucket merging is not implemented); when this option is active, those metric
+    types skip label exclusion entirely so each source series stays a distinct
+    context.
+
+    Known limitations:
+    - Gauge samples are combined by summation. This suits additive gauges (counts)
+      but not gauges such as temperatures or ratios, where a sum is not meaningful.
+    - If a counter series disappears between scrapes (for example, due to a pod
+      restart), the aggregated sum decreases and the Agent interprets this as a
+      counter reset. Likewise, a series that first appears between scrapes adds
+      its full value to the sum, producing a one-time delta spike.
+    - A metric whose source type is gauge or counter is summed even when its
+      `type` is overridden to a non-additive transformer (for example
+      `service_check`, `time_elapsed`, or `metadata`). Avoid combining such
+      overrides with this option.
+  value:
+    type: boolean
+    example: false
 - name: include_labels
   display_priority: 0
   description: |
