@@ -27,7 +27,7 @@
                     "hour_starts": 0
                 }
             },
-            "notify_no_data": false,
+            "on_missing_data": "show_no_data",
             "silenced": {}
         },
         "priority": null,

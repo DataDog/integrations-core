@@ -20,7 +20,7 @@
 			"notify_audit": false,
 			"include_tags": true,
 			"new_group_delay": 60,
-			"notify_no_data": false,
+			"on_missing_data": "show_no_data",
 			"avalanche_window": 10,
 			"evaluation_delay": 1200
 		}
