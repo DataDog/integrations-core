@@ -1,1 +1,0 @@
-Add a `per_user` services filter criterion to select or exclude Windows per-user services (use `per_user: false` to exclude them from collection).
