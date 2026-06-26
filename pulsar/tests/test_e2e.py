@@ -4,7 +4,9 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.pulsar import PulsarCheck
 
 from .common import EXPECTED_METRICS, METRICS_URL, OPTIONAL_METRICS
 
@@ -36,3 +38,7 @@ def test_e2e_discovery(dd_agent_check_discovery):
         check_submission_type=True,
         check_symmetric_inclusion=False,
     )
+
+
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, PulsarCheck)
