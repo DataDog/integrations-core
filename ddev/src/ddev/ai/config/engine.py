@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Literal, Protocol
 
 import yaml
 from pydantic import TypeAdapter, ValidationError
@@ -16,6 +16,8 @@ from pydantic import TypeAdapter, ValidationError
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.md import parse_md_file
 from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig, ResourceEnvelope
+
+ResourceKind = Literal["agent", "phase", "flow", "prompt", "goal", "memory"]
 
 
 class ConfigStatus(StrEnum):
@@ -35,7 +37,7 @@ class RegistryEntry[C]:
 @dataclass
 class ConfigConflict:
     name: str
-    type: str
+    type: ResourceKind
     sources: list[Path]
 
 
@@ -59,6 +61,7 @@ class ConfigurationEngine:
     ) -> None:
         self._logger = logger or logging.getLogger(__name__)
         self._phase_registry = phase_registry
+        self._core_dir = core_dir
 
         resolved_user_dirs = self._resolve_user_dirs(user_dirs)
 
@@ -69,8 +72,13 @@ class ConfigurationEngine:
         self._goals: dict[str, RegistryEntry[str]] = {}
         self._memories: dict[str, RegistryEntry[str]] = {}
 
+        self._conflicts: list[ConfigConflict] = []
+        self._pending: dict[tuple[ResourceKind, str], list[RegistryEntry[Any]]] = {}
+
         for base_dir in [core_dir, *resolved_user_dirs]:
             self._scan_dir(base_dir)
+
+        self._resolve_pending()
 
     def _resolve_user_dirs(self, user_dirs: list[str | Path]) -> list[Path]:
         resolved = []
@@ -80,6 +88,40 @@ class ConfigurationEngine:
                 raise FlowConfigError(f"User config directory does not exist or is not a directory: {p}")
             resolved.append(p)
         return resolved
+
+    def _is_core(self, path: Path) -> bool:
+        return path.resolve().is_relative_to(self._core_dir.resolve())
+
+    def _accumulate(self, kind: ResourceKind, name: str, entry: RegistryEntry[Any]) -> None:
+        key = (kind, name)
+        self._pending.setdefault(key, []).append(entry)
+
+    def _resolve_bucket(
+        self, kind: ResourceKind, name: str, entries: list[RegistryEntry[Any]]
+    ) -> RegistryEntry[Any] | None:
+        core = [e for e in entries if self._is_core(e.source_file)]
+        user = [e for e in entries if not self._is_core(e.source_file)]
+        if len(core) > 1 or len(user) > 1:
+            self._conflicts.append(ConfigConflict(name=name, type=kind, sources=[e.source_file for e in entries]))
+            return None
+        winner = user[0] if user else core[0]
+        if user and core:
+            winner.overridden = [core[0].source_file]
+        return winner
+
+    def _resolve_pending(self) -> None:
+        registry_map: dict[ResourceKind, dict[str, RegistryEntry[Any]]] = {
+            "agent": self._agents,
+            "phase": self._phases,
+            "flow": self._flows,
+            "prompt": self._prompts,
+            "goal": self._goals,
+            "memory": self._memories,
+        }
+        for (kind, name), entries in self._pending.items():
+            winner = self._resolve_bucket(kind, name, entries)
+            if winner is not None:
+                registry_map[kind][name] = winner
 
     def _scan_dir(self, base_dir: Path) -> None:
         for path in sorted(base_dir.rglob("*")):
@@ -100,16 +142,22 @@ class ConfigurationEngine:
             raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         except (yaml.YAMLError, OSError) as e:
             key = path.stem
-            self._phases[key] = RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            self._accumulate(
+                "phase", key, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            )
             return
 
         if not isinstance(raw, list):
             key = path.stem
-            self._phases[key] = RegistryEntry(
-                config=None,
-                source_file=path,
-                status=ConfigStatus.BROKEN,
-                error=f"{path}: top-level YAML document must be a list",
+            self._accumulate(
+                "phase",
+                key,
+                RegistryEntry(
+                    config=None,
+                    source_file=path,
+                    status=ConfigStatus.BROKEN,
+                    error=f"{path}: top-level YAML document must be a list",
+                ),
             )
             return
 
@@ -126,32 +174,36 @@ class ConfigurationEngine:
                 config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e)
             )
             raw_type = item.get("type") if isinstance(item, dict) else None
-            if raw_type == "flow":
-                self._flows[key] = entry
-            else:
-                self._phases[key] = entry
+            kind: ResourceKind = "flow" if raw_type == "flow" else "phase"
+            self._accumulate(kind, key, entry)
             return
 
         entry_ok: RegistryEntry[Any] = RegistryEntry(config=envelope.config, source_file=path, status=ConfigStatus.OK)
         if envelope.type == "phase":
-            self._phases[envelope.config.name] = entry_ok
+            self._accumulate("phase", envelope.config.name, entry_ok)
         elif envelope.type == "flow":
-            self._flows[envelope.config.name] = entry_ok
+            self._accumulate("flow", envelope.config.name, entry_ok)
 
     def _dispatch_agent_md(self, path: Path) -> None:
         stem = path.stem
         try:
             meta, body = parse_md_file(path)
         except FlowConfigError as e:
-            self._agents[stem] = RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            self._accumulate(
+                "agent", stem, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            )
             return
 
         if meta.get("type") != "agent":
-            self._agents[stem] = RegistryEntry(
-                config=None,
-                source_file=path,
-                status=ConfigStatus.BROKEN,
-                error=f"{path}: expected type 'agent', got {meta.get('type')!r}",
+            self._accumulate(
+                "agent",
+                stem,
+                RegistryEntry(
+                    config=None,
+                    source_file=path,
+                    status=ConfigStatus.BROKEN,
+                    error=f"{path}: expected type 'agent', got {meta.get('type')!r}",
+                ),
             )
             return
 
@@ -160,33 +212,49 @@ class ConfigurationEngine:
         try:
             config = AgentConfig.model_validate(fm)
         except ValidationError as e:
-            self._agents[stem] = RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            self._accumulate(
+                "agent", stem, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            )
             return
 
-        self._agents[stem] = RegistryEntry(config=config, source_file=path, status=ConfigStatus.OK)
+        self._accumulate("agent", stem, RegistryEntry(config=config, source_file=path, status=ConfigStatus.OK))
 
     def _dispatch_prompt_md(self, path: Path) -> None:
         stem = path.stem
         try:
             meta, body = parse_md_file(path)
         except FlowConfigError as e:
-            self._prompts[stem] = RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            self._accumulate(
+                "prompt", stem, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
+            )
             return
 
         file_type = meta.get("type")
         if file_type not in PROMPT_TYPES:
-            self._prompts[stem] = RegistryEntry(
-                config=None,
-                source_file=path,
-                status=ConfigStatus.BROKEN,
-                error=f"{path}: expected type in {PROMPT_TYPES!r}, got {file_type!r}",
+            self._accumulate(
+                "prompt",
+                stem,
+                RegistryEntry(
+                    config=None,
+                    source_file=path,
+                    status=ConfigStatus.BROKEN,
+                    error=f"{path}: expected type in {PROMPT_TYPES!r}, got {file_type!r}",
+                ),
             )
             return
 
         entry: RegistryEntry[str] = RegistryEntry(config=body, source_file=path, status=ConfigStatus.OK)
         if file_type == "prompt":
-            self._prompts[stem] = entry
+            self._accumulate("prompt", stem, entry)
         elif file_type == "goal":
-            self._goals[stem] = entry
+            self._accumulate("goal", stem, entry)
         elif file_type == "memory":
-            self._memories[stem] = entry
+            self._accumulate("memory", stem, entry)
+
+    @property
+    def has_conflicts(self) -> bool:
+        return bool(self._conflicts)
+
+    @property
+    def conflicts(self) -> list[ConfigConflict]:
+        return self._conflicts
