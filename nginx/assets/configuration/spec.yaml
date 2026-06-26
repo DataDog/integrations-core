@@ -107,3 +107,11 @@ files:
     - type: file
       path: /var/log/nginx/error.log
       source: nginx
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - nginx
+  - template: auto_conf/discovery
