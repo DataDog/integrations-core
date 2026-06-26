@@ -4,7 +4,6 @@
 from typing import Any, Callable
 
 import pytest
-
 from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import assert_service_checks
 from datadog_checks.n8n import N8nCheck
