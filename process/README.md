@@ -39,7 +39,7 @@ Retrieving some process metrics requires the Datadog collector to either run as 
 dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
 ```
 
-### Process matching
+#### Process matching
 
 By default, the Process check matches processes by exact name. Set `exact_match` to `false` to match using substrings instead.
 
