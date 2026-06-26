@@ -313,7 +313,7 @@ def _make_run_command_for_base_ref(remote_branches, merge_bases):
     return run_command
 
 
-def test_find_closest_base_ref_picks_most_recent_merge_base(monkeypatch):
+def test_find_closest_base_ref_picks_most_recent_merge_base(restore_root):
     remote_branches = ['origin/master', 'origin/7.80.x', 'origin/7.81.x', 'origin/some-feature']
     merge_bases = {
         'origin/master': ('aaa', '1000'),
@@ -330,7 +330,7 @@ def test_find_closest_base_ref_picks_most_recent_merge_base(monkeypatch):
             assert _find_closest_base_ref() == 'origin/7.81.x'
 
 
-def test_find_closest_base_ref_returns_master_when_no_candidates(monkeypatch):
+def test_find_closest_base_ref_returns_master_when_no_candidates(restore_root):
     set_root('/foo/')
     with mock.patch('datadog_checks.dev.tooling.git.chdir'):
         with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
@@ -338,11 +338,21 @@ def test_find_closest_base_ref_returns_master_when_no_candidates(monkeypatch):
             assert _find_closest_base_ref() == 'origin/master'
 
 
-def test_find_closest_base_ref_returns_master_when_for_each_ref_fails(monkeypatch):
+def test_find_closest_base_ref_returns_master_when_for_each_ref_fails(restore_root):
     set_root('/foo/')
     with mock.patch('datadog_checks.dev.tooling.git.chdir'):
         with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
             run.return_value = mock.MagicMock(code=1, stdout='')
+            assert _find_closest_base_ref() == 'origin/master'
+
+
+def test_find_closest_base_ref_returns_master_when_all_merge_base_calls_fail(restore_root):
+    set_root('/foo/')
+    with mock.patch('datadog_checks.dev.tooling.git.chdir'):
+        with mock.patch(
+            'datadog_checks.dev.tooling.git.run_command',
+            side_effect=_make_run_command_for_base_ref(['origin/master', 'origin/7.80.x'], {}),
+        ):
             assert _find_closest_base_ref() == 'origin/master'
 
 
