@@ -28,7 +28,7 @@ _COPYRIGHT_PATTERN = re.compile(
 LicenseHeaderError = namedtuple("LicenseHeaderError", ["message", "path", "fixed"])
 
 
-def _get_previous(path, base_ref):
+def _get_previous(path: pathlib.Path, base_ref: str) -> str | None:
     """Returns contents of the `base_ref` version of file at `path` if it exists, and `None` otherwise."""
     # git_show_file relies on global context to compute the final path from a relative one,
     # so we need to pass it the relative path it expects
@@ -39,7 +39,7 @@ def _get_previous(path, base_ref):
         return None
 
 
-def build_get_previous():
+def build_get_previous() -> Callable[[pathlib.Path], str | None]:
     """Build a previous-version lookup that resolves the base ref at most once, lazily on first use.
 
     Reuse a single instance across many files (and across checks) so the base ref, whose local
@@ -47,7 +47,7 @@ def build_get_previous():
     """
     resolve_base_ref = functools.lru_cache(maxsize=1)(get_base_ref)
 
-    def get_previous(path):
+    def get_previous(path: pathlib.Path) -> str | None:
         return _get_previous(path, resolve_base_ref())
 
     return get_previous

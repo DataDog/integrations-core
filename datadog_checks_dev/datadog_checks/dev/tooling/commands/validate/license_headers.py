@@ -33,7 +33,7 @@ IGNORES = {
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
-def license_headers(ctx, check, fix):
+def license_headers(ctx: click.Context, check: str | None, fix: bool) -> None:
     """Validate license headers in python code files.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
