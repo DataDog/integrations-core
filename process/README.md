@@ -29,6 +29,30 @@ instances:
       - sshd
 ```
 
+**Note**: When `exact_match` is set to `false`, values in `search_string` are interpreted as Python regular expressions using `re.search()`. Regex metacharacters (`. + * ? ( ) [ ] { } ^ $ | \`) must be escaped with a backslash for literal matching.
+
+For example, to match the literal path `/usr/lib/jdk-11.0.10+9/bin/java`, escape the `.` and `+` characters:
+
+Unescaped (does not match literally):
+
+```yaml
+instances:
+  - exact_match: false
+    name: java_jdk11
+    search_string:
+      - /usr/lib/jdk-11.0.10+9/bin/java
+```
+
+Escaped (matches literally):
+
+```yaml
+instances:
+  - exact_match: false
+    name: java_jdk11
+    search_string:
+      - /usr/lib/jdk-11\.0\.10\+9/bin/java
+```
+
 **Note**: After you make configuration changes, make sure you [restart the Agent][4].
 
 Retrieving some process metrics requires the Datadog collector to either run as the monitored process user or with privileged access. For the `open_file_descriptors` metric on Unix platforms, there is an additional configuration option. Setting `try_sudo` to `true` in your `conf.yaml` file allows the Process check to try using `sudo` to collect the `open_file_descriptors` metric. Using this configuration option requires setting the appropriate sudoers rules in `/etc/sudoers`:
