@@ -52,7 +52,9 @@ def test_render_task_prompt_from_ref():
 
 
 def test_render_task_prompt_inline():
-    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), None, {"name": "Bob"})
+    from unittest.mock import MagicMock
+
+    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), MagicMock(), {"name": "Bob"})
     assert result == "Hello Bob."
 
 
@@ -66,8 +68,10 @@ def test_render_task_prompt_forwards_resolver():
 
 
 def test_render_task_prompt_raises_when_no_source():
+    from unittest.mock import MagicMock
+
     with pytest.raises(FlowConfigError, match="prompt"):
-        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_ref=None), None, {})
+        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_ref=None), MagicMock(), {})
 
 
 # ---------------------------------------------------------------------------

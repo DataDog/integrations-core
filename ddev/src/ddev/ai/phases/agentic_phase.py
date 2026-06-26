@@ -28,16 +28,13 @@ if TYPE_CHECKING:
 
 def render_task_prompt(
     task: TaskConfig,
-    resources: PhaseResources | None,
+    resources: PhaseResources,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None = None,
 ) -> str:
     """Render a task prompt — from prompt_ref lookup if set, inline otherwise."""
     if task.prompt_ref is not None:
-        if resources is None:
-            raise FlowConfigError("TaskConfig uses 'prompt_ref' but no PhaseResources was supplied")
-        body = resources.prompt(task.prompt_ref)
-        return render_inline(body, context, resolver)
+        return render_inline(resources.prompt(task.prompt_ref), context, resolver)
     if task.prompt is None:
         raise FlowConfigError("TaskConfig must set either 'prompt' or 'prompt_ref'")
     return render_inline(task.prompt, context, resolver)
