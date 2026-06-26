@@ -301,8 +301,8 @@ class TestUpdateConsumerGroupOffsetsAction:
             assert len(call_kwargs['offsets']) == 3
             assert call_kwargs['offsets'][0] == {'topic': 'orders', 'partition': 0, 'offset': 1000}
 
-    def test_update_consumer_group_offsets_with_reset_to(self, aggregator, dd_run_check):
-        """Test updating consumer group offsets with reset_to policy."""
+    def test_update_consumer_group_offsets_with_sentinels(self, aggregator, dd_run_check):
+        """Test updating consumer group offsets with sentinel values -2 (earliest) and -1 (latest)."""
         instance = {
             'remote_config_id': 'test-update-offsets-002',
             'kafka_connect_str': 'localhost:9092',
@@ -310,8 +310,8 @@ class TestUpdateConsumerGroupOffsetsAction:
                 'cluster': 'test-cluster',
                 'consumer_group': 'my-consumer-group',
                 'offsets': [
-                    {'topic': 'orders', 'partition': 0, 'reset_to': 'earliest'},
-                    {'topic': 'orders', 'partition': 1, 'reset_to': 'latest'},
+                    {'topic': 'orders', 'partition': 0, 'offset': -2},
+                    {'topic': 'orders', 'partition': 1, 'offset': -1},
                 ],
             },
         }
@@ -326,8 +326,34 @@ class TestUpdateConsumerGroupOffsetsAction:
 
             mock_update_offsets.assert_called_once()
             call_kwargs = mock_update_offsets.call_args[1]
-            assert call_kwargs['offsets'][0] == {'topic': 'orders', 'partition': 0, 'reset_to': 'earliest'}
-            assert call_kwargs['offsets'][1] == {'topic': 'orders', 'partition': 1, 'reset_to': 'latest'}
+            assert call_kwargs['offsets'][0] == {'topic': 'orders', 'partition': 0, 'offset': -2}
+            assert call_kwargs['offsets'][1] == {'topic': 'orders', 'partition': 1, 'offset': -1}
+
+    def test_update_consumer_group_offsets_with_timestamp(self, aggregator, dd_run_check):
+        """Test updating consumer group offsets with a timestamp (all partitions)."""
+        instance = {
+            'remote_config_id': 'test-update-offsets-004',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test-cluster',
+                'consumer_group': 'my-consumer-group',
+                'offsets': [
+                    {'topic': 'payments', 'timestamp': 1735689600000},
+                ],
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'update_consumer_group_offsets', return_value=True) as mock_update_offsets,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+            patch.object(check.kafka_client, 'check_consumer_group_inactive'),
+        ):
+            dd_run_check(check)
+
+            mock_update_offsets.assert_called_once()
+            call_kwargs = mock_update_offsets.call_args[1]
+            assert call_kwargs['offsets'][0] == {'topic': 'payments', 'timestamp': 1735689600000}
 
     def test_update_consumer_group_offsets_blocks_on_active_group(self, aggregator, dd_run_check):
         """Test that the check aborts when the consumer group has active members."""

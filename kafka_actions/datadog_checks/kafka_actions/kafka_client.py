@@ -584,14 +584,13 @@ class KafkaActionsClient:
                 "Stop all consumers in the group before resetting offsets."
             )
 
-    def resolve_offset(self, topic: str, partition: int, reset_to: str) -> int:
-        """Resolve 'earliest' or 'latest' to a concrete partition offset."""
+    def _resolve_sentinel_offset(self, topic: str, partition: int, offset: int) -> int:
+        """Resolve sentinel offset values -1 (latest) and -2 (earliest) to concrete offsets."""
         admin = self.get_admin_client()
         tp = TopicPartition(topic, partition)
-        spec = OffsetSpec.earliest() if reset_to == 'earliest' else OffsetSpec.latest()
+        spec = OffsetSpec.earliest() if offset == -2 else OffsetSpec.latest()
         futures = admin.list_offsets({tp: spec}, request_timeout=10)
-        result = futures[tp].result()
-        return result.offset
+        return futures[tp].result().offset
 
     def update_consumer_group_offsets(self, consumer_group: str, offsets: list[dict[str, Any]]) -> bool:
         """Update consumer group offsets for specific topic-partitions.
@@ -599,10 +598,14 @@ class KafkaActionsClient:
         Args:
             consumer_group: Consumer group ID
             offsets: List of offset specifications, each with:
-                - topic: Topic name
-                - partition: Partition number
-                - offset: Explicit offset value (mutually exclusive with reset_to)
-                - reset_to: 'earliest' or 'latest' (mutually exclusive with offset)
+                - topic: Topic name (required)
+                - partition: Partition number. Required when 'offset' is specified;
+                  optional when 'timestamp' is specified (auto-discovers all partitions).
+                - offset: Offset to commit. Use -2 for earliest, -1 for latest, or a
+                  non-negative integer for an explicit offset. Mutually exclusive with timestamp.
+                - timestamp: Milliseconds since epoch. Resets to the first offset at or after
+                  this timestamp in each matching partition. When no message exists at or after
+                  the timestamp the partition is reset to latest. Mutually exclusive with offset.
 
         Returns:
             True if successful
@@ -614,19 +617,51 @@ class KafkaActionsClient:
             topic = offset_spec.get('topic')
             partition = offset_spec.get('partition')
             offset = offset_spec.get('offset')
-            reset_to = offset_spec.get('reset_to')
+            timestamp = offset_spec.get('timestamp')
 
-            if topic is None or partition is None:
-                raise ValueError("Each offset specification must have 'topic' and 'partition'")
-            if offset is None and reset_to is None:
-                raise ValueError("Each offset specification must have 'offset' or 'reset_to'")
+            if topic is None:
+                raise ValueError("Each offset specification must have 'topic'")
 
-            if reset_to is not None:
-                offset = self.resolve_offset(topic, partition, reset_to)
-                self.log.debug("Resolved '%s' for %s[%d] to offset %d", reset_to, topic, partition, offset)
+            if timestamp is not None:
+                if partition is not None:
+                    partition_ids = [partition]
+                else:
+                    metadata = admin.list_topics(topic, timeout=10)
+                    if topic not in metadata.topics:
+                        raise ValueError(f"Topic '{topic}' not found")
+                    partition_ids = list(metadata.topics[topic].partitions.keys())
 
-            tp = TopicPartition(topic, partition, offset)
-            topic_partitions.append(tp)
+                offset_request = {TopicPartition(topic, p): OffsetSpec.for_timestamp(timestamp) for p in partition_ids}
+                futures = admin.list_offsets(offset_request, request_timeout=10)
+
+                for tp, future in futures.items():
+                    resolved = future.result().offset
+                    if resolved == -1:
+                        resolved = self._resolve_sentinel_offset(topic, tp.partition, -1)
+                        self.log.debug(
+                            "Partition %d: no message at timestamp %d, using latest offset %d",
+                            tp.partition,
+                            timestamp,
+                            resolved,
+                        )
+                    else:
+                        self.log.debug(
+                            "Partition %d: timestamp %d resolved to offset %d", tp.partition, timestamp, resolved
+                        )
+                    topic_partitions.append(TopicPartition(topic, tp.partition, resolved))
+
+            else:
+                if partition is None:
+                    raise ValueError("Each offset specification must have 'partition' when 'offset' is specified")
+
+                if offset in (-1, -2):
+                    resolved = self._resolve_sentinel_offset(topic, partition, offset)
+                    label = 'earliest' if offset == -2 else 'latest'
+                    self.log.debug("Resolved '%s' for %s[%d] to offset %d", label, topic, partition, resolved)
+                else:
+                    resolved = offset
+
+                topic_partitions.append(TopicPartition(topic, partition, resolved))
 
         futures = admin.alter_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group, topic_partitions)])
 

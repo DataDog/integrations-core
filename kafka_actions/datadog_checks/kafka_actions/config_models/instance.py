@@ -13,7 +13,6 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
-from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -208,12 +207,15 @@ class Offset(BaseModel):
     )
     offset: Optional[int] = Field(
         None,
-        description='Explicit offset to commit (non-negative). Mutually exclusive with reset_to.',
+        description="Offset to commit. Use -2 for earliest (log-start), -1 for latest\n(high-watermark), or a non-negative integer for an explicit position.\nMutually exclusive with timestamp. Requires 'partition'.\n",
     )
-    partition: int = Field(..., description='Non-negative partition number')
-    reset_to: Optional[Literal['earliest', 'latest']] = Field(
+    partition: Optional[int] = Field(
         None,
-        description="Reset policy: 'earliest' commits the log-start offset; 'latest' commits\nthe high-watermark offset. Mutually exclusive with offset.\n",
+        description="Non-negative partition number. Required when 'offset' is specified.\nOptional when 'timestamp' is specified — omit to target all partitions.\n",
+    )
+    timestamp: Optional[int] = Field(
+        None,
+        description='Milliseconds since epoch. Resets to the first offset at or after this\ntimestamp. Partitions with no message at or after the timestamp are\nreset to latest. Mutually exclusive with offset.\n',
     )
     topic: str = Field(..., description='Topic name')
 
@@ -231,11 +233,12 @@ class UpdateConsumerGroupOffsets(BaseModel):
     consumer_group: str = Field(..., description='Consumer group ID to update', examples=['order-processor'])
     offsets: tuple[Offset, ...] = Field(
         ...,
-        description="List of topic-partition offset specifications. Each entry targets one\npartition and must specify exactly one of:\n  - offset: explicit non-negative integer offset to commit\n  - reset_to: 'earliest' or 'latest' — the check resolves the actual\n    partition offset at runtime via list_offsets before committing\n",
+        description="List of offset specifications. Each entry must specify exactly one of 'offset'\nor 'timestamp'. See the action description for details.\n",
         examples=[
             [
                 {'offset': 1000, 'partition': 0, 'topic': 'orders'},
-                {'partition': 1, 'reset_to': 'earliest', 'topic': 'orders'},
+                {'offset': -2, 'partition': 1, 'topic': 'orders'},
+                {'timestamp': 1735689600000, 'topic': 'payments'},
             ]
         ],
     )

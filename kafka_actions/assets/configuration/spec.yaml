@@ -510,8 +510,13 @@ files:
           kafka-topics.sh --bootstrap-server <host>:9092 --describe | head -1
         or via the AdminClient metadata: admin.list_topics().cluster_id.
 
-        Each entry in 'offsets' must specify either an explicit 'offset' (a
-        non-negative integer) or a 'reset_to' policy ('earliest' or 'latest').
+        Each entry in 'offsets' must specify exactly one of:
+          - offset: commit a specific offset. Use -2 for earliest, -1 for latest,
+            or a non-negative integer for an explicit position. Requires 'partition'.
+          - timestamp: milliseconds since epoch. Resets every matching partition to
+            the first offset at or after this timestamp. If no message exists at or
+            after the timestamp in a partition, that partition is reset to latest.
+            'partition' is optional — omit it to target all partitions of the topic.
         Mixing both fields in the same entry is an error.
       value:
         type: object
@@ -528,7 +533,9 @@ files:
               offset: 1000
             - topic: orders
               partition: 1
-              reset_to: earliest
+              offset: -2
+            - topic: payments
+              timestamp: 1735689600000
         properties:
         - name: cluster
           type: string
@@ -545,41 +552,42 @@ files:
         - name: offsets
           type: array
           description: |
-            List of topic-partition offset specifications. Each entry targets one
-            partition and must specify exactly one of:
-              - offset: explicit non-negative integer offset to commit
-              - reset_to: 'earliest' or 'latest' — the check resolves the actual
-                partition offset at runtime via list_offsets before committing
+            List of offset specifications. Each entry must specify exactly one of 'offset'
+            or 'timestamp'. See the action description for details.
           items:
             type: object
             required:
               - topic
-              - partition
             properties:
             - name: topic
               type: string
               description: Topic name
             - name: partition
               type: integer
-              description: Non-negative partition number
+              description: |
+                Non-negative partition number. Required when 'offset' is specified.
+                Optional when 'timestamp' is specified — omit to target all partitions.
             - name: offset
               type: integer
-              description: Explicit offset to commit (non-negative). Mutually exclusive with reset_to.
-            - name: reset_to
-              type: string
               description: |
-                Reset policy: 'earliest' commits the log-start offset; 'latest' commits
-                the high-watermark offset. Mutually exclusive with offset.
-              enum:
-                - earliest
-                - latest
+                Offset to commit. Use -2 for earliest (log-start), -1 for latest
+                (high-watermark), or a non-negative integer for an explicit position.
+                Mutually exclusive with timestamp. Requires 'partition'.
+            - name: timestamp
+              type: integer
+              description: |
+                Milliseconds since epoch. Resets to the first offset at or after this
+                timestamp. Partitions with no message at or after the timestamp are
+                reset to latest. Mutually exclusive with offset.
           example:
             - topic: orders
               partition: 0
               offset: 1000
             - topic: orders
               partition: 1
-              reset_to: earliest
+              offset: -2
+            - topic: payments
+              timestamp: 1735689600000
       fleet_configurable: false
     
     # ========================================================================

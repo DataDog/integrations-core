@@ -743,10 +743,12 @@ class KafkaActionsCheck(AgentCheck):
                 offsets:
                     - topic: orders
                       partition: 0
-                      offset: 1000
+                      offset: 1000       # explicit offset
                     - topic: orders
                       partition: 1
-                      offset: 1500
+                      offset: -2         # earliest
+                    - topic: payments
+                      timestamp: 1735689600000   # all partitions at/after this timestamp
         """
         config = self.config.update_consumer_group_offsets
 

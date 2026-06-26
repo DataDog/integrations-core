@@ -310,28 +310,38 @@ class KafkaActionsConfig:
             if not offset_entry.get('topic'):
                 raise ConfigurationError(f"offsets[{i}] requires 'topic' parameter")
 
-            if 'partition' not in offset_entry:
-                raise ConfigurationError(f"offsets[{i}] requires 'partition' parameter")
-
-            if not isinstance(offset_entry.get('partition'), int) or offset_entry['partition'] < 0:
-                raise ConfigurationError(f"offsets[{i}].partition must be a non-negative integer")
-
             has_offset = 'offset' in offset_entry
-            has_reset_to = 'reset_to' in offset_entry
+            has_timestamp = 'timestamp' in offset_entry
 
-            if not has_offset and not has_reset_to:
-                raise ConfigurationError(f"offsets[{i}] requires 'offset' or 'reset_to'")
+            if not has_offset and not has_timestamp:
+                raise ConfigurationError(f"offsets[{i}] requires 'offset' or 'timestamp'")
 
-            if has_offset and has_reset_to:
-                raise ConfigurationError(f"offsets[{i}] cannot specify both 'offset' and 'reset_to'")
+            if has_offset and has_timestamp:
+                raise ConfigurationError(f"offsets[{i}] cannot specify both 'offset' and 'timestamp'")
 
             if has_offset:
-                if not isinstance(offset_entry['offset'], int) or offset_entry['offset'] < 0:
-                    raise ConfigurationError(f"offsets[{i}].offset must be a non-negative integer")
+                if 'partition' not in offset_entry:
+                    raise ConfigurationError(f"offsets[{i}] requires 'partition' when 'offset' is specified")
 
-            if has_reset_to:
-                if offset_entry['reset_to'] not in ('earliest', 'latest'):
-                    raise ConfigurationError(f"offsets[{i}].reset_to must be 'earliest' or 'latest'")
+                if not isinstance(offset_entry['partition'], int) or offset_entry['partition'] < 0:
+                    raise ConfigurationError(f"offsets[{i}].partition must be a non-negative integer")
+
+                offset_val = offset_entry['offset']
+                if not isinstance(offset_val, int) or offset_val < -2:
+                    raise ConfigurationError(
+                        f"offsets[{i}].offset must be -2 (earliest), -1 (latest), or a non-negative integer"
+                    )
+
+            if has_timestamp:
+                ts = offset_entry['timestamp']
+                if not isinstance(ts, int) or ts <= 0:
+                    raise ConfigurationError(
+                        f"offsets[{i}].timestamp must be a positive integer (milliseconds since epoch)"
+                    )
+
+                if 'partition' in offset_entry:
+                    if not isinstance(offset_entry['partition'], int) or offset_entry['partition'] < 0:
+                        raise ConfigurationError(f"offsets[{i}].partition must be a non-negative integer")
 
     def _validate_produce_message(self):
         """Validate produce_message action configuration."""

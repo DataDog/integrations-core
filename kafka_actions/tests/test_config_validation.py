@@ -248,8 +248,8 @@ class TestUpdateConsumerGroupOffsetsValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_missing_partition(self):
-        """Test that missing partition raises error."""
+    def test_missing_offset_and_timestamp(self):
+        """Test that an entry with neither offset nor timestamp raises error."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
@@ -260,57 +260,75 @@ class TestUpdateConsumerGroupOffsetsValidation:
             },
         }
 
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'partition' parameter"):
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'offset' or 'timestamp'"):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_missing_offset_and_reset_to(self):
-        """Test that an entry with neither offset nor reset_to raises error."""
+    def test_both_offset_and_timestamp(self):
+        """Test that specifying both offset and timestamp raises error."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
             'update_consumer_group_offsets': {
                 'cluster': 'test',
                 'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': 0}],
+                'offsets': [{'topic': 'test', 'partition': 0, 'offset': 100, 'timestamp': 1735689600000}],
             },
         }
 
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'offset' or 'reset_to'"):
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\] cannot specify both 'offset' and 'timestamp'"):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_both_offset_and_reset_to(self):
-        """Test that specifying both offset and reset_to raises error."""
+    def test_missing_partition_with_offset(self):
+        """Test that partition is required when offset is specified."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
             'update_consumer_group_offsets': {
                 'cluster': 'test',
                 'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': 0, 'offset': 100, 'reset_to': 'earliest'}],
+                'offsets': [{'topic': 'test', 'offset': 100}],
             },
         }
 
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\] cannot specify both 'offset' and 'reset_to'"):
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'partition' when 'offset' is specified"):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_negative_offset(self):
-        """Test that a negative offset raises error."""
+    def test_out_of_range_offset(self):
+        """Test that an offset below -2 raises error."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
             'update_consumer_group_offsets': {
                 'cluster': 'test',
                 'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': 0, 'offset': -1}],
+                'offsets': [{'topic': 'test', 'partition': 0, 'offset': -3}],
             },
         }
 
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\].offset must be a non-negative integer"):
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\].offset must be -2"):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
+
+    def test_sentinel_offsets_are_valid(self):
+        """Test that -2 (earliest) and -1 (latest) sentinel offsets pass validation."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [
+                    {'topic': 'test', 'partition': 0, 'offset': -2},
+                    {'topic': 'test', 'partition': 1, 'offset': -1},
+                ],
+            },
+        }
+
+        config = KafkaActionsConfig(instance, None)
+        config.validate_config()  # should not raise
 
     def test_negative_partition(self):
         """Test that a negative partition raises error."""
@@ -328,34 +346,46 @@ class TestUpdateConsumerGroupOffsetsValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_invalid_reset_to_value(self):
-        """Test that an unrecognised reset_to value raises error."""
+    def test_invalid_timestamp(self):
+        """Test that a non-positive timestamp raises error."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
             'update_consumer_group_offsets': {
                 'cluster': 'test',
                 'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': 0, 'reset_to': 'beginning'}],
+                'offsets': [{'topic': 'test', 'timestamp': -1}],
             },
         }
 
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\].reset_to must be 'earliest' or 'latest'"):
+        with pytest.raises(ConfigurationError, match="offsets\\[0\\].timestamp must be a positive integer"):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_valid_reset_to(self):
-        """Test that valid reset_to values pass validation."""
+    def test_valid_timestamp_all_partitions(self):
+        """Test that a timestamp entry without partition passes validation."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
             'update_consumer_group_offsets': {
                 'cluster': 'test',
                 'consumer_group': 'test',
-                'offsets': [
-                    {'topic': 'test', 'partition': 0, 'reset_to': 'earliest'},
-                    {'topic': 'test', 'partition': 1, 'reset_to': 'latest'},
-                ],
+                'offsets': [{'topic': 'test', 'timestamp': 1735689600000}],
+            },
+        }
+
+        config = KafkaActionsConfig(instance, None)
+        config.validate_config()  # should not raise
+
+    def test_valid_timestamp_specific_partition(self):
+        """Test that a timestamp entry with a partition passes validation."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test',
+                'consumer_group': 'test',
+                'offsets': [{'topic': 'test', 'partition': 2, 'timestamp': 1735689600000}],
             },
         }
 
