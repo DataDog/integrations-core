@@ -220,9 +220,7 @@ async def test_create_workflow_dispatch_success() -> None:
         )
 
     client = _make_client(httpx.MockTransport(handler))
-    result = await client.create_workflow_dispatch(
-        "owner", "repo", "my-workflow.yml", "main", return_run_details=True
-    )
+    result = await client.create_workflow_dispatch("owner", "repo", "my-workflow.yml", "main", return_run_details=True)
     assert isinstance(result, GitHubResponse)
     assert isinstance(result.data, WorkflowDispatchResult)
     assert result.data.workflow_run_id == 999
