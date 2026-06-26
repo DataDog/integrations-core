@@ -2,8 +2,6 @@ name: n8n
 files:
 - name: n8n.yaml
   discovery:
-    ad_identifiers:
-      - n8n
     strategies:
       - strategy: from_ports
         port_hints:
