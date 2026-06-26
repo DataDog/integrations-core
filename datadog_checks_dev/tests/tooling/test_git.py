@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.dev.fs import temp_dir
-from datadog_checks.dev.tooling.constants import get_root, set_root
+from datadog_checks.dev.tooling.constants import set_root
 from datadog_checks.dev.tooling.git import (
     _find_closest_base_ref,
     files_changed,
@@ -352,14 +352,6 @@ def _git(repo, *args, date=None):
         env['GIT_AUTHOR_DATE'] = date
         env['GIT_COMMITTER_DATE'] = date
     subprocess.run(['git', *args], cwd=repo, env=env, check=True, capture_output=True)
-
-
-@pytest.fixture
-def restore_root():
-    """Restore the global tooling root after a test that points it at a temp repo."""
-    original_root = get_root()
-    yield
-    set_root(original_root)
 
 
 @pytest.fixture

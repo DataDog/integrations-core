@@ -6,7 +6,7 @@ import functools
 import pathlib
 import re
 from collections import namedtuple
-from typing import Callable, Iterable, List, Optional
+from typing import Callable, Iterable
 
 from pathspec.gitignore import GitIgnoreSpec
 
@@ -42,8 +42,9 @@ def _get_previous(path: pathlib.Path, base_ref: str) -> str | None:
 def build_get_previous() -> Callable[[pathlib.Path], str | None]:
     """Build a previous-version lookup that resolves the base ref at most once, lazily on first use.
 
-    Reuse a single instance across many files (and across checks) so the base ref, whose local
-    resolution shells out to several git commands, is computed only once per run.
+    The returned callable caches the base ref, whose local resolution shells out to several git
+    commands, so reusing a single instance across many files resolves it only once. Callers that
+    validate several checks should share one instance to amortize the lookup across all of them.
     """
     resolve_base_ref = functools.lru_cache(maxsize=1)(get_base_ref)
 
@@ -55,11 +56,11 @@ def build_get_previous() -> Callable[[pathlib.Path], str | None]:
 
 def validate_license_headers(
     check_path: pathlib.Path,
-    ignore: Optional[Iterable[pathlib.Path]] = None,
+    ignore: Iterable[pathlib.Path] | None = None,
     *,
-    repo_root: Optional[pathlib.Path] = None,
-    get_previous: Optional[Callable[[pathlib.Path], Optional[str]]] = None,
-) -> List[LicenseHeaderError]:
+    repo_root: pathlib.Path | None = None,
+    get_previous: Callable[[pathlib.Path], str | None] | None = None,
+) -> list[LicenseHeaderError]:
     """
     Validate license headers under `check_path` and return a list of validation errors.
 
