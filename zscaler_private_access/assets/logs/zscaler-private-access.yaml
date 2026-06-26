@@ -2726,9 +2726,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `Connector` to `ocsf.device.name`
+              name: Map `Connector`, `ServiceEdge`, `PrivateCloudController` to `ocsf.device.name`
               sources:
                 - Connector
+                - ServiceEdge
+                - PrivateCloudController
               target: ocsf.device.name
               preserveSource: true
               overrideOnConflict: true
