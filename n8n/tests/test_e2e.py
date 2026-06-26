@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import assert_service_checks
 from datadog_checks.n8n import N8nCheck
 
@@ -49,3 +50,8 @@ def test_e2e_discovery(dd_agent_check_discovery):
         status=N8nCheck.OK,
         at_least=1,
     )
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, N8nCheck)
