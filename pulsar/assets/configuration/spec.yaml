@@ -23,3 +23,11 @@ files:
     - type: file
       path: /pulsar/logs/pulsar.log
       source: pulsar
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - pulsar
+  - template: auto_conf/discovery
