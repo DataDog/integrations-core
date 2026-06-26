@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     # execute at runtime (they live behind `TYPE_CHECKING`), so they do not
     # break the lazy-loading guarantee. The `X as X` aliases mark these as
     # explicit re-exports for linters.
+    from .check_run import CheckRun as CheckRun
     from .comment import IssueComment as IssueComment
     from .comment import PullRequestReviewComment as PullRequestReviewComment
     from .label import Label as Label
@@ -43,6 +44,7 @@ if TYPE_CHECKING:
 MODULE_BY_NAME: dict[str, str] = {
     'Artifact': 'workflow',
     'ArtifactsList': 'workflow',
+    'CheckRun': 'check_run',
     'GitHubUser': 'user',
     'IssueComment': 'comment',
     'Label': 'label',

@@ -17,7 +17,7 @@ class WorkflowRun(BaseModel):
     name: str | None = None
     status: str
     conclusion: str | None = None
-    html_url: str | None = None
+    html_url: str
     created_at: str | None = None
     updated_at: str | None = None
 

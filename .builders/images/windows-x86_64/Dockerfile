@@ -149,7 +149,11 @@ RUN Get-RemoteFile `
     Remove-Item win_flex_bison-$Env:WINFLEXBISON_VERSION.zip && `
     Add-ToPath -Append 'C:\winflexbison'
 # Meson + Ninja for building PostgreSQL 18+ on Windows
-RUN python -m pip install --no-warn-script-location meson ninja && `
+# renovate: datasource=pypi depName=meson
+ENV MESON_VERSION="1.11.1"
+# renovate: datasource=pypi depName=ninja
+ENV NINJA_VERSION="1.13.0"
+RUN python -m pip install --no-warn-script-location meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
 # libpq and pg_config as needed by psycopg
 ENV PG_VERSION="18.3"
