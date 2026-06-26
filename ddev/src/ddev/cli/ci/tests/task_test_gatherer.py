@@ -89,6 +89,9 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
             self._received_batches += 1
             is_final = self._received_batches >= self._expected_batches
 
+        # TODO: if an expected batch never yields a BatchFinished (e.g. a runner crashes), the count
+        # never completes and no final update fires. A future orchestrator on_finalize should call
+        # build_done_message as a backstop.
         if is_final:
             self.submit_message(self.build_done_message(message.id))
             self._logger.info("Final batch received, UpdatePRComment emitted", extra={"run_id": message.run_id})
