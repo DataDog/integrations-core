@@ -349,55 +349,32 @@ tests:
         PublicIP: 52.174.23.17
         ocsf:
           severity: Informational
-          activity_name: Logon
+          activity_name: Collect
           metadata:
             uid: XyZp98KlMn56
             product:
               name: Zscaler Private Access
               vendor_name: Zscaler
+              version: "20.1.0-12-g5e7d3b9"
             tenant_uid: '23459872345987'
             version: 1.5.0
-            event_code: ZPN_STATUS_AUTHENTICATED
-          category_uid: 3
-          category_name: Identity & Access Management
-          session:
-            uid: XyZp98KlMn56
-            issuer: AzureAD
-          src_endpoint:
-            owner:
-              org:
-                name: Contoso Corp
-              name: alice.w
-            hostname: LAPTOP-AW123
-            os:
-              name: windows
-              type_id: 100
-              type: Windows
-            ip: 52.174.23.17
-            location:
-              country: GB
-              city: London
+            event_code: user-status
+            logged_time: 1559538700000
+          category_uid: 5
+          category_name: Discovery
           status_detail: ZPN_STATUS_AUTHENTICATED
-          actor:
-            idp:
-              name: AzureAD
-            user:
-              uid: alice.w
-              name: alice.w
-          auth_protocol: ZPA
           status_id: 1
-          class_uid: 3002
-          activity_id: 1
-          dst_endpoint:
-            ip: 10.0.5.12
-            name: broker3.eu1
+          class_uid: 5003
+          activity_id: 2
           severity_id: 1
-          class_name: Authentication
+          class_name: User Inventory Info
           status: Success
-          time: 1756368942000
+          time: 1559538700000
           user:
             uid: alice.w
             name: alice.w
+            type: User
+            type_id: 1
         Username: alice.w
       message: |-
         {
@@ -1222,31 +1199,36 @@ tests:
             user:
               account:
                 uid: "72058050378200000"
+              email_addr: "sysadmin@example.com"
               name: "sysadmin@example.com"
+              type: "Admin"
+              type_id: 2
               uid: "72057594037900000"
-          api:
-            operation: "Update"
-          category_name: "Application Activity"
-          category_uid: 6
-          class_name: "API Activity"
-          class_uid: 6003
+          category_name: "Identity & Access Management"
+          category_uid: 3
+          class_name: "Entity Management"
+          class_uid: 3004
+          entity:
+            name: "ExampleOrg - API Client"
+            type: "Client Credentials"
+            uid: "72058050378200001"
+          entity_result:
+            name: "ExampleOrg - API Client"
+            type: "Client Credentials"
+            uid: "72058050378200001"
+          message: "Update"
           metadata:
-            event_code: "Update"
+            event_code: "audit-logs"
+            logged_time: 1756384496000
+            modified_time: 1756384496000
             original_time: "2025-08-28T12:34:56.000Z"
             product:
               name: "Zscaler Private Access"
               vendor_name: "Zscaler"
             uid: "a1b2c3d4-0000-1111-2222-aabbccddeeff"
             version: "1.5.0"
-          resources:
-          -
-            name: "ExampleOrg - API Client"
-            type: "Client Credentials"
-            uid: "72058050378200001"
           severity: "Informational"
           severity_id: 1
-          src_endpoint:
-            name: "unknown"
           status: "Success"
           status_id: 1
           time: 1756384496000
