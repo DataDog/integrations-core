@@ -10,9 +10,18 @@ from ddev.ai.config.engine import ConfigStatus, ConfigurationEngine
 from ddev.ai.config.errors import FlowConfigError
 
 
+class NoopPhase:
+    @classmethod
+    def validate_config(cls, phase_id, config, agents):
+        return None
+
+
 class StubReg:
     def contains(self, n):
         return True
+
+    def get(self, n):
+        return NoopPhase
 
 
 def write(p: Path, text: str) -> None:

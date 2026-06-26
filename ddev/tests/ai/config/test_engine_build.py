@@ -10,9 +10,18 @@ from ddev.ai.config.engine import ConfigStatus, ConfigurationEngine
 from ddev.ai.config.errors import FlowConfigError
 
 
+class NoopPhase:
+    @classmethod
+    def validate_config(cls, phase_id, config, agents):
+        return None
+
+
 class StubReg:
     def contains(self, n):
         return True
+
+    def get(self, n):
+        return NoopPhase
 
 
 class StubRegMissing:
@@ -21,6 +30,9 @@ class StubRegMissing:
 
     def contains(self, n):
         return n not in self._missing
+
+    def get(self, n):
+        return NoopPhase
 
 
 def write(p: Path, text: str) -> None:
@@ -258,3 +270,25 @@ def test_get_flow_unknown_name_raises(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     with pytest.raises(FlowConfigError):
         eng.get_flow("nope")
+
+
+def real_phase_registry():
+    from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
+    from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+
+    registry = PhaseRegistry()
+    discover_and_register_phases(registry, CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
+    return registry
+
+
+def test_agentic_phase_without_agent_fails_validate_config(tmp_path):
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: p\n    class: AgenticPhase\n"
+        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=real_phase_registry())
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("agent" in e.lower() for e in eng.flows["demo"].errors)
+    with pytest.raises(FlowConfigError):
+        eng.get_flow("demo")

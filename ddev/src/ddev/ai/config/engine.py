@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Literal, Protocol
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 import yaml
 from pydantic import TypeAdapter, ValidationError
@@ -18,11 +18,16 @@ from ddev.ai.config.md import parse_md_file
 from ddev.ai.config.models import (
     AgentConfig,
     FlowConfig,
+    FlowEnvelope,
     PhaseConfig,
+    PhaseEnvelope,
     ResolvedFlow,
     ResourceEnvelope,
     VariableDeclaration,
 )
+
+if TYPE_CHECKING:
+    from ddev.ai.phases.base import Phase
 
 ResourceKind = Literal["agent", "phase", "flow", "prompt", "goal", "memory"]
 
@@ -58,9 +63,10 @@ class FlowDiagnostics:
 
 class PhaseRegistry(Protocol):
     def contains(self, name: str) -> bool: ...
+    def get(self, name: str) -> type[Phase]: ...
 
 
-RESOURCE_ADAPTER: TypeAdapter[Any] = TypeAdapter(ResourceEnvelope)
+RESOURCE_ADAPTER: TypeAdapter[PhaseEnvelope | FlowEnvelope] = TypeAdapter(ResourceEnvelope)
 
 PROMPT_TYPES = {"prompt", "goal", "memory"}
 
@@ -283,13 +289,13 @@ class ConfigurationEngine:
         if entry.status is ConfigStatus.BROKEN:
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, [entry.error or "broken flow"])
 
+        assert entry.config is not None
         fc: FlowConfig = entry.config
         errors: list[str] = []
 
-        for conflict in self._conflicts:
-            if conflict.type == "flow" and conflict.name == flow_name:
-                sources = ", ".join(str(s) for s in conflict.sources)
-                errors.append(f"Flow {flow_name!r} has conflicting definitions: {sources}")
+        ok_agents = {
+            name: e.config for name, e in self._agents.items() if e.status is ConfigStatus.OK and e.config is not None
+        }
 
         scheduled_phases: list[PhaseConfig] = []
         for fe in fc.flow:
@@ -300,10 +306,16 @@ class ConfigurationEngine:
             if phase_entry.status is ConfigStatus.BROKEN:
                 errors.append(f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken")
                 continue
+            assert phase_entry.config is not None
             pc: PhaseConfig = phase_entry.config
             scheduled_phases.append(pc)
 
-            if not self._phase_registry.contains(pc.class_):
+            if self._phase_registry.contains(pc.class_):
+                try:
+                    self._phase_registry.get(pc.class_).validate_config(pc.name, pc, ok_agents)
+                except FlowConfigError as e:
+                    errors.append(str(e))
+            else:
                 errors.append(f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}")
 
             if pc.agent is not None:
