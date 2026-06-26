@@ -160,6 +160,7 @@ METRICS_V1_8 = COMMON_METRICS + [
     NAMESPACE + '.forward_healthcheck_broken_count',
     NAMESPACE + '.hosts.reload_timestamp',
     NAMESPACE + '.reload.failed_count',
+    NAMESPACE + '.health_request_failures_count',
 ]
 
 METRICS_V1_8_OMV2 = COMMON_METRICS_OMV2 + [
@@ -172,8 +173,64 @@ METRICS_V1_8_OMV2 = COMMON_METRICS_OMV2 + [
     NAMESPACE + '.forward_healthcheck_broken_count.count',
     NAMESPACE + '.hosts.reload_timestamp',
     NAMESPACE + '.reload.failed_count.count',
+    NAMESPACE + '.health_request_failures_count.count',
 ]
 
-METRICS = METRICS_V1_8 if COREDNS_VERSION[:2] == [1, 8] else METRICS_V1_2
+METRICS_V1_14 = METRICS_V1_8 + [
+    NAMESPACE + '.cache_evictions_count',
+    NAMESPACE + '.forward_conn_cache_hits_count',
+    NAMESPACE + '.forward_conn_cache_misses_count',
+    NAMESPACE + '.dns64.requests_translated_count',
+    NAMESPACE + '.https_response_code_count',
+    NAMESPACE + '.acl.filtered_requests',
+    NAMESPACE + '.acl.dropped_requests',
+    NAMESPACE + '.quic_response_code_count',
+    NAMESPACE + '.kubernetes.rest_client_request_duration.sum',
+    NAMESPACE + '.kubernetes.rest_client_request_duration.count',
+    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.sum',
+    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.count',
+    NAMESPACE + '.kubernetes.rest_client_requests_count',
+    NAMESPACE + '.reload.version_info',
+]
 
-METRICS_V2 = METRICS_V1_8_OMV2 if COREDNS_VERSION[:2] == [1, 8] else METRICS_V1_2_OMV2
+METRICS_V1_14_OMV2 = METRICS_V1_8_OMV2 + [
+    NAMESPACE + '.cache_evictions_count.count',
+    NAMESPACE + '.forward_conn_cache_hits_count.count',
+    NAMESPACE + '.forward_conn_cache_misses_count.count',
+    NAMESPACE + '.dns64.requests_translated_count.count',
+    NAMESPACE + '.https_response_code_count.count',
+    NAMESPACE + '.acl.filtered_requests.count',
+    NAMESPACE + '.acl.dropped_requests.count',
+    NAMESPACE + '.quic_response_code_count.count',
+    NAMESPACE + '.kubernetes.rest_client_request_duration.sum',
+    NAMESPACE + '.kubernetes.rest_client_request_duration.count',
+    NAMESPACE + '.kubernetes.rest_client_request_duration.bucket',
+    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.sum',
+    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.count',
+    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.bucket',
+    NAMESPACE + '.kubernetes.rest_client_requests_count.count',
+    NAMESPACE + '.reload.version_info',
+]
+
+
+def _select_metrics(version):
+    """Select the metrics to test based on the CoreDNS version."""
+    if version[:2] == [1, 14]:
+        return METRICS_V1_14
+    if version[:2] == [1, 8]:
+        return METRICS_V1_8
+    return METRICS_V1_2
+
+
+def _select_metrics_v2(version):
+    """Select the v2 metrics to test based on the CoreDNS version."""
+    if version[:2] == [1, 14]:
+        return METRICS_V1_14_OMV2
+    if version[:2] == [1, 8]:
+        return METRICS_V1_8_OMV2
+    return METRICS_V1_2_OMV2
+
+
+METRICS = _select_metrics(COREDNS_VERSION)
+
+METRICS_V2 = _select_metrics_v2(COREDNS_VERSION)

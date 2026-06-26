@@ -2,12 +2,13 @@
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["1.2", "1.8"]
+version = ["1.2", "1.8", "1.14"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "COREDNS_VERSION", value = "1.2.0", if = ["1.2"] },
   { key = "COREDNS_VERSION", value = "1.8.5", if = ["1.8"] },
+  { key = "COREDNS_VERSION", value = "1.14.0", if = ["1.14"] },
 ]
 
 [envs.default.env-vars]
