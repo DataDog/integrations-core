@@ -9,7 +9,7 @@ import pytest
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-from ddev.ai.phases.config import AgentConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
     GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,
@@ -68,36 +68,16 @@ def test_parse_reviewer_output_rejects(text):
 
 
 def test_render_goal_text_inline():
-    from unittest.mock import MagicMock
-
     result = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="check ${name}"),
-        MagicMock(),
         {"name": "Alice"},
     )
     assert result == "check Alice"
 
 
-def test_render_goal_text_from_ref():
-    from unittest.mock import MagicMock
-
-    resources = MagicMock()
-    resources.goal.side_effect = lambda name: f"verify ${{{name}_target}}"
-    result = render_goal_text(
-        TaskConfig(name="t", prompt_ref="t", goal_ref="mygoal"),
-        resources,
-        {"mygoal_target": "endpoint"},
-    )
-    assert result == "verify endpoint"
-    resources.goal.assert_called_once_with("mygoal")
-
-
 def test_render_goal_text_forwards_resolver():
-    from unittest.mock import MagicMock
-
     result = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="see ${draft_memory}"),
-        MagicMock(),
         {},
         resolve_key,
     )

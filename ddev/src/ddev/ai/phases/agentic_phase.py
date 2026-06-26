@@ -6,12 +6,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline
@@ -28,33 +28,18 @@ if TYPE_CHECKING:
 
 def render_task_prompt(
     task: TaskConfig,
-    resources: PhaseResources,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None = None,
 ) -> str:
-    """Render a task prompt — from prompt_ref lookup if set, inline otherwise."""
-    if task.prompt_ref is not None:
-        return render_inline(resources.prompt(task.prompt_ref), context, resolver)
-    if task.prompt is None:
-        raise FlowConfigError("TaskConfig must set either 'prompt' or 'prompt_ref'")
+    """Render a task prompt inline; prompt_ref is inlined upstream by the engine."""
     return render_inline(task.prompt, context, resolver)
 
 
 def render_memory_prompt(
     checkpoint: CheckpointConfig,
-    config_dir: Path,
     context: dict[str, Any],
 ) -> str:
-    """Render a checkpoint memory prompt — from file if memory_prompt_path is set, inline otherwise."""
-    if checkpoint.memory_prompt_path is not None:
-        path = config_dir / checkpoint.memory_prompt_path
-        try:
-            text = path.read_text(encoding="utf-8")
-        except OSError as e:
-            raise FlowConfigError(f"Cannot read memory_prompt_path {path}: {e}") from e
-        return render_inline(text, context)
-    if checkpoint.memory_prompt is None:
-        raise FlowConfigError("CheckpointConfig must set either 'memory_prompt' or 'memory_prompt_path'")
+    """Render a checkpoint memory prompt inline; memory_prompt_ref is inlined upstream by the engine."""
     return render_inline(checkpoint.memory_prompt, context)
 
 
@@ -206,7 +191,7 @@ class AgenticPhase(Phase):
         context: dict[str, Any],
         has_goal: bool,
     ) -> str:
-        prompt = render_task_prompt(task, self._resources, context, self._resolver)
+        prompt = render_task_prompt(task, context, self._resolver)
         if has_goal:
             return prompt + GOAL_TASK_SUFFIX
         return prompt
@@ -228,7 +213,7 @@ class AgenticPhase(Phase):
         prompt: str,
         result: ReActResult,
     ) -> ReActResult:
-        goal_text = render_goal_text(task, self._resources, context, self._resolver)
+        goal_text = render_goal_text(task, context, self._resolver)
         try:
             outcome: GoalLoopOutcome = await run_goal_loop(
                 task=task,
@@ -282,7 +267,7 @@ class AgenticPhase(Phase):
         """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
         user_additions = None
         if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
+            user_additions = render_memory_prompt(self._config.checkpoint, context)
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         response = await process.run_once(memory_prompt)

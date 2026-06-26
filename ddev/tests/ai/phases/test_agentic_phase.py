@@ -11,8 +11,9 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
@@ -41,37 +42,14 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
 # ---------------------------------------------------------------------------
 
 
-def test_render_task_prompt_from_ref():
-    from unittest.mock import MagicMock
-
-    resources = MagicMock()
-    resources.prompt.side_effect = lambda name: "Hello ${name}."
-    result = render_task_prompt(TaskConfig(name="t1", prompt_ref="mytask"), resources, {"name": "Alice"})
-    assert result == "Hello Alice."
-    resources.prompt.assert_called_once_with("mytask")
-
-
 def test_render_task_prompt_inline():
-    from unittest.mock import MagicMock
-
-    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), MagicMock(), {"name": "Bob"})
+    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), {"name": "Bob"})
     assert result == "Hello Bob."
 
 
 def test_render_task_prompt_forwards_resolver():
-    from unittest.mock import MagicMock
-
-    resources = MagicMock()
-    resources.prompt.side_effect = lambda name: "Memory: ${draft_memory}"
-    result = render_task_prompt(TaskConfig(name="t1", prompt_ref="mytask"), resources, {}, resolve_key)
+    result = render_task_prompt(TaskConfig(name="t1", prompt="Memory: ${draft_memory}"), {}, resolve_key)
     assert result == "Memory: resolved(draft_memory)"
-
-
-def test_render_task_prompt_raises_when_no_source():
-    from unittest.mock import MagicMock
-
-    with pytest.raises(FlowConfigError, match="prompt"):
-        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_ref=None), MagicMock(), {})
 
 
 # ---------------------------------------------------------------------------
@@ -79,24 +57,11 @@ def test_render_task_prompt_raises_when_no_source():
 # ---------------------------------------------------------------------------
 
 
-def test_render_memory_prompt_from_file(tmp_path):
-    (tmp_path / "mem.md").write_text("List files for ${phase_name}.")
-    result = render_memory_prompt(CheckpointConfig(memory_prompt_path="mem.md"), tmp_path, {"phase_name": "draft"})
-    assert result == "List files for draft."
-
-
 def test_render_memory_prompt_inline():
     result = render_memory_prompt(
-        CheckpointConfig(memory_prompt="List files for ${phase_name}."), None, {"phase_name": "draft"}
+        CheckpointConfig(memory_prompt="List files for ${phase_name}."), {"phase_name": "draft"}
     )
     assert result == "List files for draft."
-
-
-def test_render_memory_prompt_raises_when_no_source():
-    with pytest.raises(FlowConfigError, match="memory_prompt"):
-        render_memory_prompt(
-            CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), Path("/unused"), {}
-        )
 
 
 # ---------------------------------------------------------------------------
@@ -107,9 +72,9 @@ def test_render_memory_prompt_raises_when_no_source():
 @pytest.mark.parametrize(
     "config,match",
     [
-        (PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
-        (PhaseConfig(agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
-        (PhaseConfig(agent="writer"), "at least one task"),
+        (PhaseConfig(name="p1", tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
+        (PhaseConfig(name="p1", agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
+        (PhaseConfig(name="p1", agent="writer"), "at least one task"),
     ],
     ids=["missing_agent", "unknown_agent", "empty_tasks"],
 )
@@ -120,7 +85,9 @@ def test_validate_config_rejects_invalid(config, match):
 
 def test_validate_config_accepts_valid():
     AgenticPhase.validate_config(
-        "p1", PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]), {"writer": AgentConfig()}
+        "p1",
+        PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]),
+        {"writer": AgentConfig()},
     )
 
 
@@ -397,9 +364,8 @@ async def test_run_memory_step_returns_response_data(flow_dir, monkeypatch, mess
 # ---------------------------------------------------------------------------
 
 
-async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
+async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, message_queue):
     """Real runtime factory wires spawn_subagent logs under the checkpoint root."""
-    flow_dir = flow_context.config_dir
 
     def make_usage() -> TokenUsage:
         return TokenUsage(input_tokens=100, output_tokens=50, cache_read_input_tokens=0, cache_creation_input_tokens=0)
@@ -440,7 +406,7 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
     )
     phase = AgenticPhase.build(
         phase_id="p1",
-        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        config=PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
         deps=[],
         resources=resources,
         checkpoint_manager=checkpoint_manager,

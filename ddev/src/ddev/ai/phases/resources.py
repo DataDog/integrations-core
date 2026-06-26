@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.config.models import AgentConfig
     from ddev.ai.react.factory import ReActProcessFactory
 
 
@@ -19,10 +19,6 @@ class PhaseResources(Protocol):
     """Run-scoped services available to phase builders."""
 
     def agent_config(self, name: str) -> AgentConfig: ...
-
-    def prompt(self, name: str) -> str: ...
-
-    def goal(self, name: str) -> str: ...
 
     @property
     def process_factory(self) -> ReActProcessFactory: ...

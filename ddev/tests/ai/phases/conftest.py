@@ -13,9 +13,9 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
@@ -137,8 +137,6 @@ def make_mock_resources(agent_config: AgentConfig | None = None) -> MagicMock:
     """Build a minimal PhaseResources mock for tests."""
     resources = MagicMock()
     resources.agent_config.return_value = agent_config or AgentConfig(tools=[])
-    resources.prompt.side_effect = lambda name: f"prompt:{name}"
-    resources.goal.side_effect = lambda name: f"goal:{name}"
     return resources
 
 
@@ -168,6 +166,7 @@ def make_agent_phase(
     """
     effective_agent_config = agent_config or AgentConfig(tools=[])
     config = PhaseConfig(
+        name=phase_id,
         agent="writer",
         tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
         checkpoint=checkpoint,
@@ -181,7 +180,6 @@ def make_agent_phase(
     context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
-        config_dir=flow_dir,
         callbacks=effective_callbacks,
     )
 
@@ -229,7 +227,6 @@ def flow_context(flow_dir):
     return FlowContext(
         runtime_variables={},
         flow_variables={},
-        config_dir=flow_dir,
     )
 
 

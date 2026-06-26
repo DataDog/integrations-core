@@ -7,10 +7,10 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.runtime.resources import RunResources
@@ -22,7 +22,9 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 class PhaseOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
-        flow_yaml_path: Path,
+        engine: ConfigurationEngine,
+        phase_registry: PhaseRegistry,
+        flow_name: str,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
         agent_clients: dict[str, Any],
@@ -33,6 +35,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
         logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
+
+        ``engine`` is a pre-built ``ConfigurationEngine`` that has already validated every
+        flow and inlined all prompt/goal/memory references. ``phase_registry`` is the same
+        registry the engine validated against, pre-populated by the composition root.
 
         ``agent_clients`` maps provider name (e.g. ``"anthropic"``) to a constructed
         provider client. ``DefaultAgentRuntimeFactory`` resolves the right one based on each
@@ -49,87 +55,46 @@ class PhaseOrchestrator(EventBusOrchestrator):
             grace_period=grace_period,
             max_timeout=max_timeout,
         )
-        self._flow_yaml_path = flow_yaml_path
+        self._engine = engine
+        self._phase_registry = phase_registry
+        self._flow_name = flow_name
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
         self._agent_clients = agent_clients
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._agent_logger: AgentLogger | None = None
-        self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
 
     async def on_initialize(self) -> None:
-        """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
-        config_dir = self._flow_yaml_path.parent
-
-        discover_and_register_phases(
-            self._phase_registry,
-            Path(__file__).parent.parent / "phases",
-            "ddev.ai.phases",
-        )
-
-        flow_phases_dir = config_dir / "phases"
-        if flow_phases_dir.is_dir():
-            ai_root = Path(__file__).parent.parent
-            try:
-                rel = flow_phases_dir.relative_to(ai_root)
-            except ValueError as e:
-                raise FlowConfigError(
-                    f"Flow phases directory {flow_phases_dir} must be inside the ddev.ai package tree ({ai_root})"
-                ) from e
-            flow_import_prefix = "ddev.ai." + ".".join(rel.parts)
-            discover_and_register_phases(
-                self._phase_registry,
-                flow_phases_dir,
-                flow_import_prefix,
-            )
-
-        config = FlowConfig.from_yaml(self._flow_yaml_path, config_dir)
-
-        flow_phase_ids = {entry.phase for entry in config.flow}
-        for phase_id, phase_config in config.phases.items():
-            if phase_id not in flow_phase_ids:
-                self._logger.warning("Phase %r is defined but not referenced in flow — it will not run", phase_id)
-                continue
-            try:
-                phase_cls = self._phase_registry.get(phase_config.type)
-            except ValueError as e:
-                raise FlowConfigError(str(e)) from e
-            phase_cls.validate_config(phase_id, phase_config, config.agents)
+        """Resolve the flow from the engine, construct phases, submit the start PhaseTrigger."""
+        resolved = self._engine.get_flow(self._flow_name)
 
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
-        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
-
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
 
         self._resources = RunResources(
             agent_clients=self._agent_clients,
             file_access_policy=self._file_access_policy,
-            agents=config.agents,
+            agents=resolved.agents,
             callbacks=run_callbacks,
-            prompts=config.prompts,
-            goals=config.goals,
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,
-            flow_variables=config.variables,
-            config_dir=config_dir,
+            flow_variables=resolved.variables,
             callbacks=run_callbacks,
             logger=self._logger,
         )
 
-        for entry in config.flow:
-            phase_id = entry.phase
-            phase_config = config.phases[phase_id]
-            deps = dependency_map[phase_id]
-            phase_cls = self._phase_registry.get(phase_config.type)
-            phase = phase_cls.build(
-                phase_id=phase_id,
+        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in resolved.flow}
+        for entry in resolved.flow:
+            phase_config = resolved.phases[entry.phase]
+            phase = self._phase_registry.get(phase_config.class_).build(
+                phase_id=entry.phase,
                 config=phase_config,
-                deps=deps,
+                deps=dependency_map[entry.phase],
                 resources=self._resources,
                 checkpoint_manager=checkpoint_manager,
                 context=context,

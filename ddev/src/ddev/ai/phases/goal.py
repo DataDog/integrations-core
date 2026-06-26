@@ -7,19 +7,16 @@ from __future__ import annotations
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig, FlowConfigError, TaskConfig
+from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.registry import filter_read_only
-
-if TYPE_CHECKING:
-    from ddev.ai.phases.resources import PhaseResources
 
 GOAL_REVIEWER_SYSTEM_PROMPT = """\
 You are a strict, independent reviewer. Your only job is to verify whether a
@@ -112,15 +109,10 @@ class GoalLoopOutcome:
 
 def render_goal_text(
     task: TaskConfig,
-    resources: PhaseResources,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None = None,
 ) -> str:
-    """Render goal text — from goal_ref lookup if set, inline goal string otherwise."""
-    if task.goal_ref is not None:
-        return render_inline(resources.goal(task.goal_ref), context, resolver)
-    if task.goal is None:
-        raise FlowConfigError("TaskConfig must set either 'goal' or 'goal_ref' when goal checking is active")
+    """Render goal text inline; goal_ref is inlined upstream by the engine."""
     return render_inline(task.goal, context, resolver)
 
 
