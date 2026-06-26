@@ -13,9 +13,16 @@ from typing import Any, Literal, Protocol
 import yaml
 from pydantic import TypeAdapter, ValidationError
 
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import FlowConfigError, detect_cycles
 from ddev.ai.config.md import parse_md_file
-from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig, ResourceEnvelope
+from ddev.ai.config.models import (
+    AgentConfig,
+    FlowConfig,
+    PhaseConfig,
+    ResolvedFlow,
+    ResourceEnvelope,
+    VariableDeclaration,
+)
 
 ResourceKind = Literal["agent", "phase", "flow", "prompt", "goal", "memory"]
 
@@ -39,6 +46,14 @@ class ConfigConflict:
     name: str
     type: ResourceKind
     sources: list[Path]
+
+
+@dataclass
+class FlowDiagnostics:
+    name: str
+    status: ConfigStatus
+    errors: list[str]
+    resolved: ResolvedFlow | None = None
 
 
 class PhaseRegistry(Protocol):
@@ -79,6 +94,18 @@ class ConfigurationEngine:
             self._scan_dir(base_dir)
 
         self._resolve_pending()
+
+        self._flows_diag: dict[str, FlowDiagnostics] = {}
+        for flow_name in self._flows:
+            self._flows_diag[flow_name] = self._validate_flow(flow_name)
+        for conflict in self._conflicts:
+            if conflict.type == "flow" and conflict.name not in self._flows_diag:
+                sources = ", ".join(str(s) for s in conflict.sources)
+                self._flows_diag[conflict.name] = FlowDiagnostics(
+                    conflict.name,
+                    ConfigStatus.BROKEN,
+                    [f"Flow {conflict.name!r} has conflicting definitions: {sources}"],
+                )
 
     def _resolve_user_dirs(self, user_dirs: list[str | Path]) -> list[Path]:
         resolved = []
@@ -250,6 +277,161 @@ class ConfigurationEngine:
             self._accumulate("goal", stem, entry)
         elif file_type == "memory":
             self._accumulate("memory", stem, entry)
+
+    def _validate_flow(self, flow_name: str) -> FlowDiagnostics:
+        entry = self._flows[flow_name]
+        if entry.status is ConfigStatus.BROKEN:
+            return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, [entry.error or "broken flow"])
+
+        fc: FlowConfig = entry.config
+        errors: list[str] = []
+
+        for conflict in self._conflicts:
+            if conflict.type == "flow" and conflict.name == flow_name:
+                sources = ", ".join(str(s) for s in conflict.sources)
+                errors.append(f"Flow {flow_name!r} has conflicting definitions: {sources}")
+
+        scheduled_phases: list[PhaseConfig] = []
+        for fe in fc.flow:
+            phase_entry = self._phases.get(fe.phase)
+            if phase_entry is None:
+                errors.append(f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered")
+                continue
+            if phase_entry.status is ConfigStatus.BROKEN:
+                errors.append(f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken")
+                continue
+            pc: PhaseConfig = phase_entry.config
+            scheduled_phases.append(pc)
+
+            if not self._phase_registry.contains(pc.class_):
+                errors.append(f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}")
+
+            if pc.agent is not None:
+                agent_entry = self._agents.get(pc.agent)
+                if agent_entry is None:
+                    errors.append(f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered")
+                elif agent_entry.status is ConfigStatus.BROKEN:
+                    errors.append(f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken")
+
+            for task in pc.tasks:
+                if task.prompt_ref is not None:
+                    errors.extend(self._check_ref(self._prompts, task.prompt_ref, "prompt", pc.name))
+                if task.goal_ref is not None:
+                    errors.extend(self._check_ref(self._goals, task.goal_ref, "goal", pc.name))
+            if pc.checkpoint is not None and pc.checkpoint.memory_prompt_ref is not None:
+                errors.extend(self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, "memory", pc.name))
+
+        errors.extend(self._validate_dependencies(flow_name, fc))
+        resolved_variables, var_errors = self._resolve_variables(scheduled_phases, fc)
+        errors.extend(var_errors)
+
+        if errors:
+            return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
+
+        resolved = ResolvedFlow(
+            name=flow_name,
+            agents={pc.agent: self._agents[pc.agent].config for pc in scheduled_phases if pc.agent is not None},
+            phases={pc.name: self._inline(pc) for pc in scheduled_phases},
+            flow=fc.flow,
+            variables=resolved_variables,
+        )
+        return FlowDiagnostics(flow_name, ConfigStatus.OK, [], resolved=resolved)
+
+    def _check_ref(self, registry: dict[str, RegistryEntry[str]], ref: str, kind: str, phase_name: str) -> list[str]:
+        ref_entry = registry.get(ref)
+        if ref_entry is None:
+            return [f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is not registered"]
+        if ref_entry.status is ConfigStatus.BROKEN:
+            return [f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is broken"]
+        return []
+
+    def _validate_dependencies(self, flow_name: str, fc: FlowConfig) -> list[str]:
+        errors: list[str] = []
+        dependency_map: dict[str, list[str]] = {}
+        for fe in fc.flow:
+            if fe.phase in dependency_map:
+                errors.append(f"Phase {fe.phase!r} is scheduled more than once in flow {flow_name!r}")
+            dependency_map[fe.phase] = fe.dependencies
+
+        for fe in fc.flow:
+            for dep in fe.dependencies:
+                if dep not in dependency_map:
+                    errors.append(
+                        f"Phase {fe.phase!r} depends on {dep!r}, which is not scheduled in flow {flow_name!r}"
+                    )
+
+        cycles, truncated = detect_cycles(dependency_map)
+        for cycle in cycles:
+            path = " -> ".join(cycle)
+            errors.append(f"Dependency cycle detected in flow {flow_name!r}: {path}")
+        if truncated:
+            errors.append(f"Cycle detection truncated in flow {flow_name!r} (too many cycles)")
+        return errors
+
+    def _resolve_variables(
+        self, scheduled_phases: list[PhaseConfig], fc: FlowConfig
+    ) -> tuple[dict[str, str], list[str]]:
+        declarations: list[VariableDeclaration] = []
+        for pc in scheduled_phases:
+            if pc.agent is not None and pc.agent in self._agents:
+                agent_config = self._agents[pc.agent].config
+                if agent_config is not None:
+                    declarations.extend(agent_config.variables)
+            declarations.extend(pc.variables)
+
+        errors: list[str] = []
+        defaults: dict[str, str] = {}
+        seen_defaults: dict[str, str] = {}
+        declared_names: set[str] = set()
+        for decl in declarations:
+            declared_names.add(decl.name)
+            if decl.default is None:
+                continue
+            if decl.name in seen_defaults and seen_defaults[decl.name] != decl.default:
+                errors.append(
+                    f"Variable {decl.name!r} has conflicting defaults: {seen_defaults[decl.name]!r} vs {decl.default!r}"
+                )
+            else:
+                seen_defaults[decl.name] = decl.default
+                defaults[decl.name] = decl.default
+
+        for name in declared_names:
+            if name not in defaults and name not in fc.variables:
+                errors.append(f"Required variable {name!r} has no default and is not supplied by the flow")
+
+        resolved = {**defaults, **fc.variables}
+        return resolved, errors
+
+    def _inline(self, phase: PhaseConfig) -> PhaseConfig:
+        tasks = []
+        for t in phase.tasks:
+            upd: dict[str, Any] = {}
+            if t.prompt_ref is not None:
+                upd["prompt"] = self._prompts[t.prompt_ref].config
+                upd["prompt_ref"] = None
+            if t.goal_ref is not None:
+                upd["goal"] = self._goals[t.goal_ref].config
+                upd["goal_ref"] = None
+            tasks.append(t.model_copy(update=upd) if upd else t)
+        cp = phase.checkpoint
+        if cp is not None and cp.memory_prompt_ref is not None:
+            cp = cp.model_copy(
+                update={"memory_prompt": self._memories[cp.memory_prompt_ref].config, "memory_prompt_ref": None}
+            )
+        return phase.model_copy(update={"tasks": tasks, "checkpoint": cp})
+
+    def get_flow(self, name: str) -> ResolvedFlow:
+        diag = self._flows_diag.get(name)
+        if diag is None:
+            raise FlowConfigError(f"Flow {name!r} not found")
+        if diag.status is ConfigStatus.BROKEN:
+            raise FlowConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e}" for e in diag.errors))
+        assert diag.resolved is not None
+        return diag.resolved
+
+    @property
+    def flows(self) -> dict[str, FlowDiagnostics]:
+        return self._flows_diag
 
     @property
     def has_conflicts(self) -> bool:
