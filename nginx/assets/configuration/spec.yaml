@@ -3,8 +3,6 @@ fleet_configurable: true
 files:
 - name: nginx.yaml
   discovery:
-    ad_identifiers:
-      - nginx
     strategies:
       - strategy: from_ports
         port_hints:
