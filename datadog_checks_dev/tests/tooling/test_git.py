@@ -1,10 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+import subprocess
+
 import mock
 import pytest
 
-from datadog_checks.dev.tooling.constants import set_root
+from datadog_checks.dev.fs import temp_dir
+from datadog_checks.dev.tooling.constants import get_root, set_root
 from datadog_checks.dev.tooling.git import (
     _find_closest_base_ref,
     files_changed,
@@ -340,3 +344,81 @@ def test_find_closest_base_ref_returns_master_when_for_each_ref_fails(monkeypatc
         with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
             run.return_value = mock.MagicMock(code=1, stdout='')
             assert _find_closest_base_ref() == 'origin/master'
+
+
+def _git(repo, *args, date=None):
+    env = os.environ.copy()
+    if date is not None:
+        env['GIT_AUTHOR_DATE'] = date
+        env['GIT_COMMITTER_DATE'] = date
+    subprocess.run(['git', *args], cwd=repo, env=env, check=True, capture_output=True)
+
+
+@pytest.fixture
+def restore_root():
+    """Restore the global tooling root after a test that points it at a temp repo."""
+    original_root = get_root()
+    yield
+    set_root(original_root)
+
+
+@pytest.fixture
+def release_branch_repo(restore_root):
+    """A real git repo where a feature branch is cut from a release branch.
+
+    History (oldest to newest):
+        master (C1) <- 7.80.x (C2) <- 7.81.x (C3) <- feature (C4, HEAD)
+
+    Remote-tracking refs are populated since the finder inspects refs/remotes/origin/.
+    `origin/HEAD` and `origin/some-feature` are added to verify non-base refs are ignored.
+    """
+    with temp_dir() as repo:
+        _git(repo, '-c', 'init.defaultBranch=master', 'init')
+        _git(repo, 'config', 'user.email', 'test@example.com')
+        _git(repo, 'config', 'user.name', 'Test')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C1 on master', date='2020-01-01T00:00:00')
+        _git(repo, 'checkout', '-b', '7.80.x')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C2 on 7.80.x', date='2021-01-01T00:00:00')
+        _git(repo, 'checkout', '-b', '7.81.x')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C3 on 7.81.x', date='2022-01-01T00:00:00')
+        _git(repo, 'checkout', '-b', 'feature')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C4 on feature', date='2023-01-01T00:00:00')
+        _git(repo, 'update-ref', 'refs/remotes/origin/master', 'master')
+        _git(repo, 'update-ref', 'refs/remotes/origin/7.80.x', '7.80.x')
+        _git(repo, 'update-ref', 'refs/remotes/origin/7.81.x', '7.81.x')
+        _git(repo, 'update-ref', 'refs/remotes/origin/some-feature', 'feature')
+        _git(repo, 'symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/remotes/origin/master')
+        set_root(repo)
+        yield repo
+
+
+def test_find_closest_base_ref_against_real_repo(release_branch_repo):
+    # The feature branch was cut from 7.81.x, so that is the most recent merge base.
+    assert _find_closest_base_ref() == 'origin/7.81.x'
+
+
+def test_get_base_ref_against_real_repo(release_branch_repo, monkeypatch):
+    monkeypatch.delenv('GITHUB_BASE_REF', raising=False)
+    monkeypatch.delenv('GITHUB_REF_NAME', raising=False)
+    assert get_base_ref() == 'origin/7.81.x'
+
+
+def test_find_closest_base_ref_against_branch_off_master(restore_root):
+    """A feature cut from master after a release branch diverged resolves to master."""
+    with temp_dir() as repo:
+        _git(repo, '-c', 'init.defaultBranch=master', 'init')
+        _git(repo, 'config', 'user.email', 'test@example.com')
+        _git(repo, 'config', 'user.name', 'Test')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C1 on master', date='2020-01-01T00:00:00')
+        _git(repo, 'checkout', '-b', '7.80.x')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C2 on 7.80.x', date='2021-01-01T00:00:00')
+        _git(repo, 'checkout', 'master')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C3 on master', date='2022-01-01T00:00:00')
+        _git(repo, 'checkout', '-b', 'feature')
+        _git(repo, 'commit', '--allow-empty', '-m', 'C4 on feature', date='2023-01-01T00:00:00')
+        _git(repo, 'update-ref', 'refs/remotes/origin/master', 'master')
+        _git(repo, 'update-ref', 'refs/remotes/origin/7.80.x', '7.80.x')
+        set_root(repo)
+
+        # merge-base(feature, master) is C3 (2022), newer than merge-base(feature, 7.80.x) at C1 (2020).
+        assert _find_closest_base_ref() == 'origin/master'
