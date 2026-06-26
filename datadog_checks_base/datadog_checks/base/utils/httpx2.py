@@ -6,7 +6,9 @@ from __future__ import annotations
 import ipaddress
 import logging
 import os
+import re
 from collections.abc import Iterator, Mapping
+from copy import deepcopy
 from datetime import timedelta
 from typing import Any, Self
 from urllib.parse import urlparse
@@ -20,6 +22,7 @@ from httpx2._utils import get_environment_proxies
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 
 from .common import ensure_unicode
 from .headers import get_default_headers, update_headers
@@ -31,6 +34,7 @@ from .http_exceptions import (
     HTTPStatusError,
     HTTPTimeoutError,
 )
+from .time import get_timestamp
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,12 +42,16 @@ DEFAULT_TIMEOUT = 10
 # Matches the effective chunk size used by RequestsWrapper.iter_content (http.py:415 multiplies by KIBIBYTE).
 DEFAULT_CHUNK_SIZE = 16 * KIBIBYTE
 
+# Fallback token lifetime (seconds) when an OAuth response omits a usable expires_in, mirroring http.py:66.
+DEFAULT_EXPIRATION = 300
+
 # options['proxies'] sentinel stored when skip_proxy is set, for parity with RequestsWrapper.
 # trust_env=False is what actually keeps httpx2 from reading HTTP_PROXY/HTTPS_PROXY.
 PROXY_SETTINGS_DISABLED = {'http': '', 'https': ''}
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
+    'auth_token': None,
     'connect_timeout': None,
     'extra_headers': None,
     'headers': None,
@@ -467,6 +475,7 @@ class HTTPX2Wrapper:
     __slots__ = (
         '_client',
         '_log_requests',
+        'auth_token_handler',
         'logger',
         'no_proxy_uris',
         'options',
@@ -516,6 +525,10 @@ class HTTPX2Wrapper:
             'verify': verify,
             'allow_redirects': allow_redirects,
         }
+
+        self.auth_token_handler = (
+            create_auth_token_handler(config['auth_token']) if config['auth_token'] is not None else None
+        )
 
         self._log_requests = is_affirmative(config['log_requests'])
         self._client = self._build_client(transport)
@@ -616,6 +629,10 @@ class HTTPX2Wrapper:
     def options_method(self, url: str, **options: Any) -> HTTPX2ResponseAdapter:
         return self._request('OPTIONS', url, options)
 
+    def handle_auth_token(self, **request: Any) -> None:
+        if self.auth_token_handler is not None:
+            self.auth_token_handler.poll(**request)
+
     def _request(self, method: str, url: str, options: dict[str, Any]) -> HTTPX2ResponseAdapter:
         # stream=True keeps the connection open until the body is consumed (.content/.text/.iter_*)
         # or close() is called. Callers should use it as a context manager when not reading the body.
@@ -626,7 +643,39 @@ class HTTPX2Wrapper:
             bool(options['follow_redirects']) if 'follow_redirects' in options else httpx2.USE_CLIENT_DEFAULT
         )
         auth = options['auth'] if 'auth' in options else httpx2.USE_CLIENT_DEFAULT
+
+        # Poll before building kwargs so the writer's header mutation is re-read into the per-request merge.
+        self.handle_auth_token(method=method, url=url, default_options=self.options)
         request_kwargs = self._build_request_kwargs(options, method=method, url=url)
+
+        if self.auth_token_handler is None:
+            return self._send_once(method, url, request_kwargs, follow_redirects, auth)
+
+        # With a handler, send once, raise_for_status, and renew-and-retry once on any error (http.py:522-531).
+        response = None
+        try:
+            response = self._send_once(method, url, request_kwargs, follow_redirects, auth)
+            response.raise_for_status()
+            return response
+        except Exception as e:
+            self.logger.debug('Renewing auth token, as an error occurred: %s', e)
+            # Close the streamed first response (if any) before retrying, or the connection leaks.
+            if response is not None:
+                response.close()
+            # Re-poll with an error marker to force a fresh token, then rebuild kwargs so the new header
+            # reaches the wire. The retry response is returned without a second raise_for_status (http.py:529).
+            self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
+            request_kwargs = self._build_request_kwargs(options, method=method, url=url)
+            return self._send_once(method, url, request_kwargs, follow_redirects, auth)
+
+    def _send_once(
+        self,
+        method: str,
+        url: str,
+        request_kwargs: dict[str, Any],
+        follow_redirects: Any,
+        auth: Any,
+    ) -> HTTPX2ResponseAdapter:
         try:
             request = self._client.build_request(method, url, **request_kwargs)
             response = self._client.send(request, stream=True, follow_redirects=follow_redirects, auth=auth)
@@ -702,3 +751,224 @@ class HTTPX2Wrapper:
         except Exception as exc:
             # Don't propagate from __del__ (interpreter handles it). Log at debug so the swallow is observable.
             self.logger.debug('HTTPX2Wrapper.close raised during __del__: %r', exc)
+
+
+def _parse_expires_in(token_expiration: Any) -> int | float | str | None:
+    # Ported verbatim from http.py:1115. The caller relies on a non-number falling through to a
+    # `+=` TypeError, so a string like 'two minutes' is returned unchanged rather than coerced.
+    if isinstance(token_expiration, int) or isinstance(token_expiration, float):
+        return token_expiration
+    if isinstance(token_expiration, str):
+        try:
+            token_expiration = int(token_expiration)
+        except ValueError:
+            LOGGER.debug('Could not convert %s to an integer', token_expiration)
+    else:
+        LOGGER.debug('Unexpected type for `expires_in`: %s.', type(token_expiration))
+        token_expiration = None
+    return token_expiration
+
+
+def _build_oauth_client() -> httpx2.Client:
+    """Standalone client for the OAuth token fetch: default TLS, no wrapper proxy, matching RequestsWrapper parity."""
+    return httpx2.Client()
+
+
+def create_auth_token_handler(config: Any) -> AuthTokenHandler:
+    if not isinstance(config, dict):
+        raise ConfigurationError('The `auth_token` field must be a mapping')
+    elif 'reader' not in config or 'writer' not in config:
+        raise ConfigurationError('The `auth_token` field must define both `reader` and `writer` settings')
+
+    config = deepcopy(config)
+
+    reader_config = config['reader']
+    if not isinstance(reader_config, dict):
+        raise ConfigurationError('The `reader` settings of field `auth_token` must be a mapping')
+
+    writer_config = config['writer']
+    if not isinstance(writer_config, dict):
+        raise ConfigurationError('The `writer` settings of field `auth_token` must be a mapping')
+
+    reader_type = reader_config.pop('type', '')
+    if not isinstance(reader_type, str):
+        raise ConfigurationError('The reader `type` of field `auth_token` must be a string')
+    elif not reader_type:
+        raise ConfigurationError('The reader `type` of field `auth_token` is required')
+    elif reader_type in DEFERRED_AUTH_TOKEN_READERS:
+        raise ConfigurationError(
+            'The `{}` reader of field `auth_token` is not yet supported by the httpx2 client'.format(reader_type)
+        )
+    elif reader_type not in AUTH_TOKEN_READERS:
+        raise ConfigurationError(
+            'Unknown `auth_token` reader type, must be one of: {}'.format(', '.join(sorted(AUTH_TOKEN_READERS)))
+        )
+
+    writer_type = writer_config.pop('type', '')
+    if not isinstance(writer_type, str):
+        raise ConfigurationError('The writer `type` of field `auth_token` must be a string')
+    elif not writer_type:
+        raise ConfigurationError('The writer `type` of field `auth_token` is required')
+    elif writer_type not in AUTH_TOKEN_WRITERS:
+        raise ConfigurationError(
+            'Unknown `auth_token` writer type, must be one of: {}'.format(', '.join(sorted(AUTH_TOKEN_WRITERS)))
+        )
+
+    reader = AUTH_TOKEN_READERS[reader_type](reader_config)
+    writer = AUTH_TOKEN_WRITERS[writer_type](writer_config)
+
+    return AuthTokenHandler(reader, writer)
+
+
+class AuthTokenHandler:
+    def __init__(self, reader: Any, writer: Any) -> None:
+        self.reader = reader
+        self.writer = writer
+
+    def poll(self, **request: Any) -> None:
+        token = self.reader.read(**request)
+        if token is not None:
+            self.writer.write(token, **request)
+
+
+class AuthTokenFileReader:
+    def __init__(self, config: dict[str, Any]) -> None:
+        self._path = config.get('path', '')
+        if not isinstance(self._path, str):
+            raise ConfigurationError('The `path` setting of `auth_token` reader must be a string')
+        elif not self._path:
+            raise ConfigurationError('The `path` setting of `auth_token` reader is required')
+
+        pattern = config.get('pattern')
+        self._pattern: re.Pattern[str] | None = None
+        if pattern is not None:
+            if not isinstance(pattern, str):
+                raise ConfigurationError('The `pattern` setting of `auth_token` reader must be a string')
+            self._pattern = re.compile(pattern)
+            if self._pattern.groups != 1:
+                raise ValueError(
+                    'The pattern `{}` setting of `auth_token` reader must define exactly one group'.format(
+                        self._pattern.pattern
+                    )
+                )
+
+        # Cache the token between requests; re-read only on first use or when an error marker forces a refresh.
+        self._token: str | None = None
+
+    def read(self, **request: Any) -> str | None:
+        if self._token is None or 'error' in request:
+            with open(self._path, encoding='utf-8') as f:
+                content = f.read()
+
+            if self._pattern is None:
+                self._token = content.strip()
+            else:
+                match = self._pattern.search(content)
+                if not match:
+                    raise ValueError(
+                        'The pattern `{}` does not match anything in file: {}'.format(self._pattern.pattern, self._path)
+                    )
+                self._token = match.group(1)
+
+            return self._token
+        return None
+
+
+class AuthTokenOAuthReader:
+    def __init__(self, config: dict[str, Any]) -> None:
+        self._url = config.get('url', '')
+        if not isinstance(self._url, str):
+            raise ConfigurationError('The `url` setting of `auth_token` reader must be a string')
+        elif not self._url:
+            raise ConfigurationError('The `url` setting of `auth_token` reader is required')
+
+        self._client_id = config.get('client_id', '')
+        if not isinstance(self._client_id, str):
+            raise ConfigurationError('The `client_id` setting of `auth_token` reader must be a string')
+        elif not self._client_id:
+            raise ConfigurationError('The `client_id` setting of `auth_token` reader is required')
+
+        self._client_secret = config.get('client_secret', '')
+        if not isinstance(self._client_secret, str):
+            raise ConfigurationError('The `client_secret` setting of `auth_token` reader must be a string')
+        elif not self._client_secret:
+            raise ConfigurationError('The `client_secret` setting of `auth_token` reader is required')
+
+        self._basic_auth = config.get('basic_auth', False)
+        if not isinstance(self._basic_auth, bool):
+            raise ConfigurationError('The `basic_auth` setting of `auth_token` reader must be a boolean')
+
+        options = config.get('options', {})
+        self._options: dict[str, Any] = options if isinstance(options, dict) else {}
+
+        self._token: str | None = None
+        self._expiration: float = 0
+
+    def read(self, **request: Any) -> str | None:
+        if self._token is None or get_timestamp() >= self._expiration or 'error' in request:
+            data: dict[str, Any] = {'grant_type': 'client_credentials', **self._options}
+            auth = None
+            if self._basic_auth:
+                auth = httpx2.BasicAuth(self._client_id, self._client_secret)
+            else:
+                data['client_id'] = self._client_id
+                data['client_secret'] = self._client_secret
+
+            with _build_oauth_client() as client:
+                token = client.post(self._url, data=data, auth=auth).json()
+
+            # https://www.rfc-editor.org/rfc/rfc6749#section-5.2
+            if 'error' in token:
+                raise Exception('OAuth2 client credentials grant error: {}'.format(token['error']))
+
+            # https://www.rfc-editor.org/rfc/rfc6749#section-4.4.3
+            self._token = token['access_token']
+            # `expires_in` is optional per https://www.rfc-editor.org/rfc/rfc6749#section-5.1, and a
+            # non-numeric value falls back to DEFAULT_EXPIRATION (parity with http.py:981-989).
+            expires_in = _parse_expires_in(token.get('expires_in'))
+            if not isinstance(expires_in, (int, float)):
+                LOGGER.debug(
+                    'The `expires_in` field of the OAuth2 response is not a number, defaulting to %s',
+                    DEFAULT_EXPIRATION,
+                )
+                expires_in = DEFAULT_EXPIRATION
+            self._expiration = get_timestamp() + expires_in
+            return self._token
+        return None
+
+
+class AuthTokenHeaderWriter:
+    DEFAULT_PLACEHOLDER = '<TOKEN>'
+
+    def __init__(self, config: dict[str, Any]) -> None:
+        self._name = config.get('name', '')
+        if not isinstance(self._name, str):
+            raise ConfigurationError('The `name` setting of `auth_token` writer must be a string')
+        elif not self._name:
+            raise ConfigurationError('The `name` setting of `auth_token` writer is required')
+
+        self._value = config.get('value', self.DEFAULT_PLACEHOLDER)
+        if not isinstance(self._value, str):
+            raise ConfigurationError('The `value` setting of `auth_token` writer must be a string')
+
+        self._placeholder = config.get('placeholder', self.DEFAULT_PLACEHOLDER)
+        if not isinstance(self._placeholder, str):
+            raise ConfigurationError('The `placeholder` setting of `auth_token` writer must be a string')
+        elif not self._placeholder:
+            raise ConfigurationError('The `placeholder` setting of `auth_token` writer cannot be an empty string')
+        elif self._placeholder not in self._value:
+            raise ConfigurationError(
+                'The `value` setting of `auth_token` writer does not contain the placeholder string `{}`'.format(
+                    self._placeholder
+                )
+            )
+
+    def write(self, token: str, **request: Any) -> None:
+        request['default_options']['headers'][self._name] = self._value.replace(self._placeholder, token, 1)
+
+
+AUTH_TOKEN_READERS = {'file': AuthTokenFileReader, 'oauth': AuthTokenOAuthReader}
+AUTH_TOKEN_WRITERS = {'header': AuthTokenHeaderWriter}
+# Recognized but deferred long-tail readers: named here so they get a clear error instead of the
+# generic unknown-type message, which therefore lists only the supported `file, oauth`.
+DEFERRED_AUTH_TOKEN_READERS = frozenset({'dcos_auth'})
