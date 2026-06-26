@@ -4,7 +4,9 @@
 import re
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynamic_transformer
+from datadog_checks.base.utils.tagging import tagger
 
 from .config_models import ConfigMixin
 from .metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
@@ -19,6 +21,8 @@ RESOURCE_NAME_MAP = {
 }
 
 OTHER_RESOURCE_NAME = 'other'
+KUEUE_QUEUE_ENTITY_PREFIX = 'kubernetes_kueue_queue://'
+KUEUE_RESOURCE_FLAVOR_ENTITY_PREFIX = 'kueue_resource_flavor://'
 
 DEFAULT_RENAME_LABELS = {
     'cluster_queue': 'kueue_cluster_queue',
@@ -37,6 +41,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     def get_default_config(self):
         return {'metrics': [METRIC_MAP]}
+
+    def create_scraper(self, config):
+        return KueueOpenMetricsScraper(self, self.get_config_with_defaults(config))
 
     def configure_scrapers(self):
         super().configure_scrapers()
@@ -108,3 +115,33 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     @staticmethod
     def normalize_resource_name(resource_name: str) -> str:
         return resource_name.replace('/', '.').replace('-', '_')
+
+
+class KueueOpenMetricsScraper(OpenMetricsScraper):
+    def generate_sample_data(self, metric):
+        for sample, tags, hostname in super().generate_sample_data(metric):
+            tags.extend(self.get_queue_tagger_tags(metric, sample.labels))
+            yield sample, tags, hostname
+
+    @staticmethod
+    def get_queue_tagger_tags(metric, labels) -> list[str]:
+        tags = []
+
+        if cluster_queue := labels.get('cluster_queue'):
+            tags.extend(
+                tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or []
+            )
+
+        if metric.name in LOCAL_QUEUE_METRIC_MAP or RESOURCE_METRIC_MAP.get(metric.name, '').startswith('local_queue.'):
+            namespace = labels.get('namespace')
+            local_queue = labels.get('name')
+            if namespace and local_queue:
+                tags.extend(
+                    tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}localqueue/{namespace}/{local_queue}', tagger.ORCHESTRATOR)
+                    or []
+                )
+
+        if flavor := labels.get('flavor'):
+            tags.extend(tagger.tag(f'{KUEUE_RESOURCE_FLAVOR_ENTITY_PREFIX}{flavor}', tagger.ORCHESTRATOR) or [])
+
+        return tags
