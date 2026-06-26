@@ -31,7 +31,7 @@ def mock_orchestrator(mocker):
     mocker.patch('anthropic.AsyncAnthropic')
     mocker.patch('ddev.ai.tools.fs.file_access_policy.FileAccessPolicy')
     orchestrator_cls = mocker.patch('ddev.ai.runtime.orchestrator.PhaseOrchestrator')
-    orchestrator_cls.return_value._failed_phase = None
+    orchestrator_cls.return_value.failed_phase = None
     mocker.patch('ddev.cli.ai.openmetrics._incomplete_phases', return_value=[])
     return orchestrator_cls
 
@@ -208,7 +208,7 @@ def test_custom_timeout_passed_through(ddev, docker_dir, prd_file, with_api_key,
 
 def test_run_failure_aborts(ddev, docker_dir, prd_file, with_api_key, ai_repo, mock_orchestrator):
     mock_orchestrator.return_value.run.side_effect = RuntimeError('boom')
-    mock_orchestrator.return_value._failed_phase = 'inspect_endpoint'
+    mock_orchestrator.return_value.failed_phase = 'inspect_endpoint'
 
     result = invoke(ddev, 'KrakenD', docker_dir, prd_file)
 

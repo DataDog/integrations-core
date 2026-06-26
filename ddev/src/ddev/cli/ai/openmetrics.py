@@ -110,14 +110,14 @@ def openmetrics(
     force: bool,
     resume: bool,
     timeout: float,
-) -> None:
+):
     """Scaffold an OpenMetrics integration for DISPLAY_NAME using an AI agent flow.
 
     DISPLAY_NAME is the technology's display name (e.g. `KrakenD`); the agent
     derives the snake_case package name and metric prefix from it.
     """
-    import os
     import shutil
+    import warnings
     from pathlib import Path
 
     import ddev.ai
@@ -155,7 +155,11 @@ def openmetrics(
 
     repo_path = Path(app.repo.path)
     integration_dir = repo_path / integration_name
+
+    # TODO: discover the existing flow.yaml
     flow_yaml = Path(ddev.ai.__file__).resolve().parent / 'flows' / 'openmetrics' / 'flow.yaml'
+    if not flow_yaml.is_file():
+        app.abort(f'Flow definition not found: {flow_yaml}')
 
     run_dir = repo_path / '.ddev' / 'ai-runs' / integration_name
     checkpoint_path = run_dir / 'checkpoints.yaml'
@@ -196,9 +200,6 @@ def openmetrics(
     from ddev.ai.runtime.orchestrator import PhaseOrchestrator
     from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 
-    # Run from the repo root.
-    os.chdir(repo_path)
-
     orchestrator = PhaseOrchestrator(
         flow_yaml_path=flow_yaml,
         checkpoint_path=checkpoint_path,
@@ -216,11 +217,18 @@ def openmetrics(
     )
 
     try:
-        orchestrator.run()
+        # Run from the repo root.
+        with app.repo.path.as_cwd(), warnings.catch_warnings():
+            warnings.filterwarnings('ignore', message='^Pydantic serializer warnings', module=r'pydantic\.main')
+            orchestrator.run()
     except Exception as e:
         app.display_error(f'Pipeline failed: {type(e).__name__}: {e}')
-        if orchestrator._failed_phase:
-            app.display_error(f'  failed phase: {orchestrator._failed_phase}')
+        if app.verbosity > 0:
+            import traceback
+
+            app.display_error(traceback.format_exc())
+        if orchestrator.failed_phase:
+            app.display_error(f'  failed phase: {orchestrator.failed_phase}')
         app.display_warning('Re-run with `--resume` to retry from the failed phase; completed phases are skipped.')
         app.abort(f'Run artifacts saved at {run_dir}.')
 
