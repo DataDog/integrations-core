@@ -181,7 +181,7 @@ def test_agent_config_web_fetch_validates():
 
 def test_agent_config_unknown_tool_raises():
     with pytest.raises(ValidationError, match="Unknown tool names"):
-        AgentConfig(tools=["teleport"])
+        AgentConfig(tools=["read_file", "teleport"])
 
 
 def test_agent_config_system_prompt_set():
