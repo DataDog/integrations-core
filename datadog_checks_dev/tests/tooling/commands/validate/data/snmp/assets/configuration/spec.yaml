@@ -1,6 +1,6 @@
 name: My Check
 files:
-- name: tokumx.yaml
+- name: snmp.yaml
   options:
   - template: init_config
     options:
