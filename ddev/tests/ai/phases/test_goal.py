@@ -67,10 +67,12 @@ def test_parse_reviewer_output_rejects(text):
 # ---------------------------------------------------------------------------
 
 
-def test_render_goal_text_inline(tmp_path):
+def test_render_goal_text_inline():
+    from unittest.mock import MagicMock
+
     result = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="check ${name}"),
-        None,
+        MagicMock(),
         {"name": "Alice"},
     )
     assert result == "check Alice"
@@ -90,10 +92,12 @@ def test_render_goal_text_from_ref():
     resources.goal.assert_called_once_with("mygoal")
 
 
-def test_render_goal_text_forwards_resolver(tmp_path):
+def test_render_goal_text_forwards_resolver():
+    from unittest.mock import MagicMock
+
     result = render_goal_text(
         TaskConfig(name="t", prompt="x", goal="see ${draft_memory}"),
-        None,
+        MagicMock(),
         {},
         resolve_key,
     )

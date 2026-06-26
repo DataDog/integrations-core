@@ -112,16 +112,13 @@ class GoalLoopOutcome:
 
 def render_goal_text(
     task: TaskConfig,
-    resources: PhaseResources | None,
+    resources: PhaseResources,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None = None,
 ) -> str:
     """Render goal text — from goal_ref lookup if set, inline goal string otherwise."""
     if task.goal_ref is not None:
-        if resources is None:
-            raise FlowConfigError("TaskConfig uses 'goal_ref' but no PhaseResources was supplied")
-        body = resources.goal(task.goal_ref)
-        return render_inline(body, context, resolver)
+        return render_inline(resources.goal(task.goal_ref), context, resolver)
     if task.goal is None:
         raise FlowConfigError("TaskConfig must set either 'goal' or 'goal_ref' when goal checking is active")
     return render_inline(task.goal, context, resolver)

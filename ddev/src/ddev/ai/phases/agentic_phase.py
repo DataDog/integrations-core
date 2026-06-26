@@ -70,7 +70,7 @@ class AgenticPhase(Phase):
         context: FlowContext,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
-        resources: PhaseResources | None = None,
+        resources: PhaseResources,
     ) -> None:
         super().__init__(
             phase_id=phase_id,
@@ -291,8 +291,6 @@ class AgenticPhase(Phase):
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()
 
-        if self._resources is None:
-            raise FlowConfigError(f"Phase {self._phase_id!r} requires PhaseResources but none was supplied")
         system_prompt = render_inline(self._agent_config.system_prompt, context, self._resolver)
         try:
             process = self._process_factory.create(

@@ -22,10 +22,13 @@ def parse_md_file(path: Path) -> tuple[dict[str, Any], str]:
     if not text.startswith("---\n"):
         raise FlowConfigError(f"{path}: missing YAML front matter (file must start with '---')")
 
-    try:
-        raw_yaml, raw_body = text[4:].split("\n---\n", 1)
-    except ValueError as e:
-        raise FlowConfigError(f"{path}: missing YAML front matter closing '---'") from e
+    remainder = text[4:]
+    for delimiter in ("\n---\n", "\n---"):
+        if delimiter in remainder:
+            raw_yaml, raw_body = remainder.split(delimiter, 1)
+            break
+    else:
+        raise FlowConfigError(f"{path}: missing YAML front matter closing '---'")
 
     try:
         meta = yaml.safe_load(raw_yaml) or {}
