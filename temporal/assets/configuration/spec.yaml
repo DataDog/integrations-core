@@ -3,9 +3,6 @@ fleet_configurable: true
 files:
 - name: temporal.yaml
   discovery:
-    ad_identifiers:
-      - temporal
-      - temporalio/auto-setup
     strategies:
       - strategy: from_ports
         port_hints:
