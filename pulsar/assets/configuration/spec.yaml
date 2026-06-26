@@ -2,6 +2,15 @@ name: pulsar
 fleet_configurable: true
 files:
 - name: pulsar.yaml
+  discovery:
+    ad_identifiers:
+    - pulsar
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 8080
+      candidates:
+      - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:

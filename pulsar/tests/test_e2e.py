@@ -4,6 +4,8 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.pulsar import PulsarCheck
 
 from .common import EXPECTED_METRICS, METRICS_URL, OPTIONAL_METRICS
 
@@ -23,3 +25,11 @@ def test_check(dd_agent_check, instance):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=False)
+    aggregator.assert_service_check('pulsar.openmetrics.health', PulsarCheck.OK)
