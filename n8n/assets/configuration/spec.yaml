@@ -41,3 +41,11 @@ files:
     - type: docker
       source: n8n
       service: <SERVICE>
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - n8n
+  - template: auto_conf/discovery
