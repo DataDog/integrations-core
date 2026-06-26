@@ -68,32 +68,58 @@ NEW_METRICS = {
     # acl: https://github.com/coredns/coredns/blob/v1.7.0/plugin/acl/README.md
     'coredns_acl_blocked_requests_total': 'acl.blocked_requests',
     'coredns_acl_allowed_requests_total': 'acl.allowed_requests',
+    # acl: https://github.com/coredns/coredns/tree/v1.10.0/plugin/acl
+    'coredns_acl_filtered_requests_total': 'acl.filtered_requests',
+    # acl: https://github.com/coredns/coredns/tree/v1.11.0/plugin/acl
+    'coredns_acl_dropped_requests_total': 'acl.dropped_requests',
     # autopath: https://github.com/coredns/coredns/blob/v1.7.0/plugin/autopath/
     'coredns_autopath_success_total': 'autopath.success_count',
+    # cache: https://github.com/coredns/coredns/tree/v1.8.4/plugin/cache
+    'coredns_cache_evictions_total': 'cache_evictions_count',
     # cache: https://github.com/coredns/coredns/tree/v1.8.5/plugin/cache
     'coredns_cache_entries': 'cache_size.count',
     'coredns_cache_requests_total': 'cache_request_count',
     # dnssec: https://github.com/coredns/coredns/tree/v1.7.0/plugin/dnssec
     'coredns_dnssec_cache_entries': 'dnssec.cache_size',
+    # dns64: https://github.com/coredns/coredns/tree/v1.7.0/plugin/dns64
+    'coredns_dns64_requests_translated_total': 'dns64.requests_translated_count',
     # forward: https://github.com/coredns/coredns/tree/v1.7.0/plugin/forward
     'coredns_forward_requests_total': 'forward_request_count',
     'coredns_forward_responses_total': 'forward_response_rcode_count',
     'coredns_forward_healthcheck_failures_total': 'forward_healthcheck_failure_count',
     'coredns_forward_healthcheck_broken_total': 'forward_healthcheck_broken_count',
     'coredns_forward_max_concurrent_rejects_total': 'forward_max_concurrent_rejects',
+    # forward: https://github.com/coredns/coredns/tree/v1.7.1/plugin/forward
+    'coredns_forward_conn_cache_hits_total': 'forward_conn_cache_hits_count',
+    'coredns_forward_conn_cache_misses_total': 'forward_conn_cache_misses_count',
+    # forward: https://github.com/coredns/coredns/tree/v1.11.0/plugin/forward
+    'coredns_proxy_healthcheck_failures_total': 'forward_healthcheck_failure_count',
+    'coredns_proxy_conn_cache_hits_total': 'forward_conn_cache_hits_count',
+    'coredns_proxy_conn_cache_misses_total': 'forward_conn_cache_misses_count',
     # grpc: https://github.com/coredns/coredns/tree/v1.7.0/plugin/grpc
     'coredns_grpc_requests_total': 'grpc.request_count',
     'coredns_grpc_responses_total': 'grpc.response_rcode_count',
+    # health: https://github.com/coredns/coredns/tree/v1.8.4/plugin/health
+    'coredns_health_request_failures_total': 'health_request_failures_count',
     # hosts: https://github.com/coredns/coredns/tree/v1.7.0/plugin/hosts
     'coredns_hosts_entries': 'hosts.entries_count',
+    # kubernetes: https://github.com/coredns/coredns/tree/v1.11.0/plugin/kubernetes
+    'coredns_kubernetes_rest_client_request_duration_seconds': 'kubernetes.rest_client_request_duration',
+    'coredns_kubernetes_rest_client_rate_limiter_duration_seconds': 'kubernetes.rest_client_rate_limiter_duration',
+    'coredns_kubernetes_rest_client_requests_total': 'kubernetes.rest_client_requests_count',
     # metrics: https://github.com/coredns/coredns/tree/v1.7.0/plugin/metrics
     'coredns_panics_total': 'panic_count.count',
     'coredns_dns_requests_total': 'request_count',
     'coredns_dns_do_requests_total': 'do_request_count',
     'coredns_dns_responses_total': 'response_code_count',
     'coredns_plugin_enabled': 'plugin_enabled',
+    # metrics: https://github.com/coredns/coredns/tree/v1.9.1/plugin/metrics
+    'coredns_dns_https_responses_total': 'https_response_code_count',
+    # metrics: https://github.com/coredns/coredns/tree/v1.11.0/plugin/metrics
+    'coredns_dns_quic_responses_total': 'quic_response_code_count',
     # reload: https://github.com/coredns/coredns/tree/v1.7.0/plugin/reload
     'coredns_reload_failed_total': 'reload.failed_count',
+    'coredns_reload_version_info': 'reload.version_info',
 }
 
 
