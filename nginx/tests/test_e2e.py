@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
-
 from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.nginx import Nginx
 
