@@ -5,6 +5,7 @@
 from pathlib import Path
 
 import pytest
+import yaml
 
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
@@ -15,29 +16,7 @@ from ddev.ai.runtime.checkpoints import (
     SuccessCheckpoint,
 )
 
-STARTED = "2026-01-01T00:00:00+00:00"
-FINISHED = "2026-01-01T00:01:00+00:00"
-
-
-def make_success(**kwargs) -> SuccessCheckpoint:
-    return SuccessCheckpoint(
-        status=CheckpointStatus.SUCCESS,
-        started_at=STARTED,
-        finished_at=FINISHED,
-        tokens=CheckpointTokenInfo(total_input=10, total_output=20),
-        memory_path="/tmp/phase_memory.md",
-        **kwargs,
-    )
-
-
-def make_failed(**kwargs) -> FailedCheckpoint:
-    return FailedCheckpoint(
-        status=CheckpointStatus.FAILED,
-        started_at=STARTED,
-        finished_at=FINISHED,
-        error="something broke",
-        **kwargs,
-    )
+from .conftest import FINISHED, make_failed, make_success
 
 
 @pytest.fixture
@@ -207,8 +186,6 @@ def test_successful_phases_returns_only_succeeded(manager):
 
 def test_read_raises_on_invalid_checkpoint_entry(manager):
     manager.write_phase_checkpoint("a", make_success())
-    import yaml
-
     raw = yaml.safe_load(manager._path.read_text())
     raw["b"] = "not-a-dict"
     manager._path.write_text(yaml.dump(raw))

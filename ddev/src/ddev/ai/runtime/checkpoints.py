@@ -72,7 +72,9 @@ class CheckpointManager:
         self.root.mkdir(parents=True, exist_ok=True)
 
     def read(self) -> dict[str, PhaseCheckpoint]:
-        """Return validated checkpoints keyed by phase_id. Skips malformed entries. Empty dict if file absent."""
+        """Return validated checkpoints keyed by phase_id.
+        Raises CheckpointReadError if any entry fails validation.
+        Empty dict if file absent."""
         if not self._path.exists():
             return {}
         try:
@@ -89,7 +91,8 @@ class CheckpointManager:
         return result
 
     def write_phase_checkpoint(self, phase_id: str, data: PhaseCheckpoint) -> None:
-        """Write or overwrite one phase's section in checkpoints.yaml."""
+        """Write or overwrite one phase's section in checkpoints.yaml.
+        Raises CheckpointWriteError if the existing file is corrupted."""
         all_checkpoints = {pid: cp.model_dump(mode="json") for pid, cp in self.read().items()}
         all_checkpoints[phase_id] = data.model_dump(mode="json")
         self._ensure_dir()
