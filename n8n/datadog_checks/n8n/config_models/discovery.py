@@ -7,22 +7,36 @@
 #     ddev -x validate config -s <INTEGRATION_NAME>
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
+from __future__ import annotations
+
 from collections.abc import Iterator
 from typing import Any
 
-from datadog_checks.base.utils.discovery import Service, from_ports
+from datadog_checks.base.utils.discovery import Service, candidate_ports
+from datadog_checks.n8n.config_models import discovery_overrides
+from datadog_checks.n8n.config_models.instance import InstanceConfig
+from datadog_checks.n8n.config_models.shared import SharedConfig
+
+
+def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
+    shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
+        by_alias=True, mode='json', exclude_none=True
+    )
+    # discovery[0]: from_ports
+    for port in candidate_ports(service, [5678]):
+        ctx = {'port': port}
+        instance_data = {
+            'openmetrics_endpoint': 'http://{service.host}:{port.number}/metrics'.format(service=service, **ctx),
+        }
+        instance = InstanceConfig.model_validate(
+            instance_data, context={'configured_fields': frozenset(instance_data)}
+        ).model_dump(by_alias=True, mode='json', exclude_none=True)
+        yield {'init_config': shared, 'instances': [instance]}
 
 
 def candidates(service: Service) -> Iterator[dict[str, Any]]:
-    # discovery[0]: from_ports
-    for ctx in from_ports(service, port_hints=[5678]):
-        yield {
-            'init_config': {},
-            'instances': [
-                {
-                    'openmetrics_endpoint': 'http://{service.host}:{port.number}/metrics'.format(
-                        service=service, **ctx
-                    ),
-                }
-            ],
-        }
+    override = getattr(discovery_overrides, 'candidates', None)
+    if override is None:
+        yield from _generated_candidates(service)
+    else:
+        yield from override(service, default=_generated_candidates)
