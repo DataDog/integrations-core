@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.config import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -19,7 +20,6 @@ from ddev.ai.runtime.checkpoints import (
     RESERVED_SUCCESS_KEYS,
     CheckpointManager,
     CheckpointStatus,
-    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
 )
@@ -45,8 +45,7 @@ class FlowContext:
 @dataclass
 class PhaseOutcome:
     memory_text: str
-    total_input_tokens: int = 0
-    total_output_tokens: int = 0
+    tokens: Tokens = field(default_factory=Tokens)
     extra_checkpoint: dict[str, Any] = field(default_factory=dict)
 
 
@@ -158,10 +157,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             status=CheckpointStatus.SUCCESS,
             started_at=self._started_at.isoformat(),
             finished_at=datetime.now(UTC).isoformat(),
-            tokens=CheckpointTokenInfo(
-                total_input=outcome.total_input_tokens,
-                total_output=outcome.total_output_tokens,
-            ),
+            tokens=outcome.tokens,
             memory_path=str(self._checkpoint_manager.memory_path(self._phase_id)),
             **outcome.extra_checkpoint,
         )

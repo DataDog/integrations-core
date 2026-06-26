@@ -5,6 +5,7 @@
 import json
 from pathlib import Path
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import (
     AgentResponse,
@@ -35,8 +36,7 @@ def make_result(response: AgentResponse | None = None) -> ReActResult:
     return ReActResult(
         final_response=response,
         iterations=2,
-        total_input_tokens=30,
-        total_output_tokens=12,
+        tokens=Tokens(input=30, output=12),
         context_usage=None,
     )
 

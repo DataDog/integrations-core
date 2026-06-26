@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.config import AgentConfig, TaskConfig
@@ -77,10 +78,9 @@ GOAL_PARSE_RETRY_PROMPT = (
 class GoalValidationError(Exception):
     """Base class for goal-validation failures. Carries the token cost and attempt count."""
 
-    def __init__(self, message: str, input_tokens: int = 0, output_tokens: int = 0) -> None:
+    def __init__(self, message: str, tokens: Tokens | None = None) -> None:
         super().__init__(message)
-        self.input_tokens = input_tokens
-        self.output_tokens = output_tokens
+        self.tokens = tokens or Tokens()
         self.attempts: int = 0
 
 
@@ -96,16 +96,14 @@ class GoalAttemptsExhausted(GoalValidationError):
 class GoalCheckResult:
     valid: bool
     reason: str
-    input_tokens: int
-    output_tokens: int
+    tokens: Tokens
 
 
 @dataclass(frozen=True)
 class GoalLoopOutcome:
     final_result: ReActResult
     attempts: int
-    total_input_tokens: int
-    total_output_tokens: int
+    tokens: Tokens
 
 
 def render_goal_text(
@@ -165,25 +163,22 @@ async def _run_reviewer_once(
     second response still does not parse, raise GoalParseError.
     """
     result = await reviewer_process.start(user_message)
-    in_tokens = result.total_input_tokens
-    out_tokens = result.total_output_tokens
+    tokens = result.tokens
 
     parsed = parse_reviewer_output(result.final_response.text or "")
     if parsed is None:
         retry_result = await reviewer_process.start(GOAL_PARSE_RETRY_PROMPT)
-        in_tokens += retry_result.total_input_tokens
-        out_tokens += retry_result.total_output_tokens
+        tokens += retry_result.tokens
         parsed = parse_reviewer_output(retry_result.final_response.text or "")
         if parsed is None:
             raise GoalParseError(
                 "Reviewer did not return valid JSON after one parse-retry. "
                 f"Last raw output: {retry_result.final_response.text!r}",
-                input_tokens=in_tokens,
-                output_tokens=out_tokens,
+                tokens=tokens,
             )
 
     valid, reason = parsed
-    return GoalCheckResult(valid=valid, reason=reason, input_tokens=in_tokens, output_tokens=out_tokens)
+    return GoalCheckResult(valid=valid, reason=reason, tokens=tokens)
 
 
 async def _drive_goal_loop(
@@ -195,9 +190,9 @@ async def _drive_goal_loop(
     initial_result: ReActResult,
     reviewer_process: ReActProcess,
     callbacks: Callbacks,
-    compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
+    compact_if_needed: Callable[[ReActResult], Awaitable[Tokens]],
 ) -> GoalLoopOutcome:
-    total_in = total_out = 0
+    total = Tokens()
     attempts = 0
     worker_result = initial_result
 
@@ -216,8 +211,7 @@ async def _drive_goal_loop(
                 reviewer_process.reset()
 
             check = await _run_reviewer_once(reviewer_process, user_message)
-            total_in += check.input_tokens
-            total_out += check.output_tokens
+            total += check.tokens
 
             await callbacks.fire_after_goal_check(task.name, attempts, check.valid, check.reason)
 
@@ -225,8 +219,7 @@ async def _drive_goal_loop(
                 return GoalLoopOutcome(
                     final_result=worker_result,
                     attempts=attempts,
-                    total_input_tokens=total_in,
-                    total_output_tokens=total_out,
+                    tokens=total,
                 )
 
             if attempts >= task.max_goal_attempts:
@@ -235,17 +228,13 @@ async def _drive_goal_loop(
                     f"{attempts} attempts. Last reviewer reason: {check.reason}"
                 )
 
-            compact_in, compact_out = await compact_if_needed(worker_result)
-            total_in += compact_in
-            total_out += compact_out
+            total += await compact_if_needed(worker_result)
 
             retry_prompt = GOAL_RETRY_PROMPT_TEMPLATE.format(goal=goal_text, reason=check.reason)
             worker_result = await worker_process.start(retry_prompt)
-            total_in += worker_result.total_input_tokens
-            total_out += worker_result.total_output_tokens
+            total += worker_result.tokens
     except GoalValidationError as e:
-        e.input_tokens += total_in
-        e.output_tokens += total_out
+        e.tokens += total
         e.attempts = attempts
         raise
 
@@ -261,7 +250,7 @@ async def run_goal_loop(
     process_factory: ReActProcessFactory,
     callbacks: Callbacks,
     phase_id: str,
-    compact_if_needed: Callable[[ReActResult], Awaitable[tuple[int, int]]],
+    compact_if_needed: Callable[[ReActResult], Awaitable[Tokens]],
 ) -> GoalLoopOutcome:
     """Drive the reviewer + worker-retry loop for a single task with a goal.
 

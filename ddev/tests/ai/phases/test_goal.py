@@ -6,6 +6,7 @@ import json
 
 import pytest
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
@@ -150,7 +151,7 @@ def _reviewer_factory(
 
 
 async def _noop_compact(_):
-    return 0, 0
+    return Tokens()
 
 
 # ---------------------------------------------------------------------------
@@ -163,8 +164,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     initial_result = ReActResult(
         final_response=make_response("did things"),
         iterations=1,
-        total_input_tokens=100,
-        total_output_tokens=50,
+        tokens=Tokens(input=100, output=50),
         context_usage=None,
     )
     run_logger = AgentLogger(tmp_path)
@@ -187,8 +187,8 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     )
 
     assert outcome.attempts == 1
-    assert outcome.total_input_tokens == 20
-    assert outcome.total_output_tokens == 10
+    assert outcome.tokens.input == 20
+    assert outcome.tokens.output == 10
     assert outcome.final_result is initial_result
     assert worker_agent.send_calls == []
     assert builder_calls[0]["owner_id"] == "p1.goal.t1"
@@ -205,8 +205,7 @@ async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
     initial_result = ReActResult(
         final_response=make_response("did things"),
         iterations=1,
-        total_input_tokens=100,
-        total_output_tokens=50,
+        tokens=Tokens(input=100, output=50),
         context_usage=None,
     )
     factory, builder_calls, _ = _reviewer_factory([make_response('{"valid": true, "reason": ""}', 20, 10)])
@@ -244,8 +243,7 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     initial_result = ReActResult(
         final_response=make_response("initial work"),
         iterations=1,
-        total_input_tokens=100,
-        total_output_tokens=50,
+        tokens=Tokens(input=100, output=50),
         context_usage=None,
     )
     factory, _, reviewer_agent = _reviewer_factory(
@@ -274,8 +272,8 @@ async def test_run_goal_loop_one_retry_then_pass(tmp_path):
     assert "missing X" in worker_agent.send_calls[0]
     assert "g" in worker_agent.send_calls[0]
     assert len(reviewer_agent.send_calls) == 2
-    assert outcome.total_input_tokens == 20 + 25 + 30
-    assert outcome.total_output_tokens == 10 + 12 + 15
+    assert outcome.tokens.input == 20 + 25 + 30
+    assert outcome.tokens.output == 10 + 12 + 15
 
 
 async def test_run_goal_loop_exhausts_attempts(tmp_path):
@@ -283,8 +281,7 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
     initial_result = ReActResult(
         final_response=make_response("attempt 1"),
         iterations=1,
-        total_input_tokens=10,
-        total_output_tokens=5,
+        tokens=Tokens(input=10, output=5),
         context_usage=None,
     )
     factory, _, _ = _reviewer_factory(
@@ -309,8 +306,8 @@ async def test_run_goal_loop_exhausts_attempts(tmp_path):
         )
 
     err = exc_info.value
-    assert err.input_tokens == 5 + 10 + 7
-    assert err.output_tokens == 3 + 5 + 4
+    assert err.tokens.input == 5 + 10 + 7
+    assert err.tokens.output == 3 + 5 + 4
 
 
 async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
@@ -318,8 +315,7 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
     initial_result = ReActResult(
         final_response=make_response("done"),
         iterations=1,
-        total_input_tokens=0,
-        total_output_tokens=0,
+        tokens=Tokens(input=0, output=0),
         context_usage=None,
     )
     factory, _, reviewer_agent = _reviewer_factory(
@@ -343,8 +339,8 @@ async def test_run_goal_loop_parse_retry_succeeds(tmp_path):
     )
     assert outcome.attempts == 1
     assert len(reviewer_agent.send_calls) == 2
-    assert outcome.total_input_tokens == 5 + 7
-    assert outcome.total_output_tokens == 5 + 7
+    assert outcome.tokens.input == 5 + 7
+    assert outcome.tokens.output == 5 + 7
 
 
 async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
@@ -352,8 +348,7 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
     initial_result = ReActResult(
         final_response=make_response("done"),
         iterations=1,
-        total_input_tokens=0,
-        total_output_tokens=0,
+        tokens=Tokens(input=0, output=0),
         context_usage=None,
     )
     factory, _, _ = _reviewer_factory(
@@ -378,8 +373,8 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
         )
 
     err = exc_info.value
-    assert err.input_tokens == 5 + 7
-    assert err.output_tokens == 3 + 4
+    assert err.tokens.input == 5 + 7
+    assert err.tokens.output == 3 + 4
 
 
 async def test_run_goal_loop_fires_callbacks(tmp_path):
@@ -398,8 +393,7 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
     initial_result = ReActResult(
         final_response=make_response("attempt 1"),
         iterations=1,
-        total_input_tokens=0,
-        total_output_tokens=0,
+        tokens=Tokens(input=0, output=0),
         context_usage=None,
     )
     factory, _, _ = _reviewer_factory(

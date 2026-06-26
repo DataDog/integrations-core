@@ -197,8 +197,8 @@ async def test_happy_path(tmp_path: Path, name: str | None, expected_id: str) ->
 
     assert result.success is True
     assert result.data == "ok"
-    assert result.total_input_tokens == 10
-    assert result.total_output_tokens == 5
+    assert result.tokens.input == 10
+    assert result.tokens.output == 5
     assert factory.calls[0]["owner_id"] == expected_id
 
     events = read_events(subagent_log(tmp_path, expected_id))

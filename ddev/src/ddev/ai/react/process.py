@@ -4,6 +4,7 @@
 
 import asyncio
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.scope import AgentScope
@@ -47,14 +48,14 @@ class ReActProcess:
         """Clear the agent's conversation history."""
         self._agent.reset()
 
-    async def compact(self, response: AgentResponse | None = None) -> tuple[int, int]:
+    async def compact(self, response: AgentResponse | None = None) -> Tokens:
         """Compact the agent's conversation history unconditionally.
 
         Args:
             response: The last agent response. If None, compaction is unconditional.
 
-        Returns (input_tokens, output_tokens) from the compaction API call.
-        Returns (0, 0) if history was already compact and no API call was made.
+        Returns the tokens spent on the compaction API call.
+        Returns ``Tokens()`` if history was already compact and no API call was made.
         """
         await self._callbacks.fire_before_compact(self._scope)
 
@@ -66,8 +67,8 @@ class ReActProcess:
 
         await self._callbacks.fire_after_compact(self._scope)
         if compact_response is None:
-            return 0, 0
-        return compact_response.usage.input_tokens, compact_response.usage.output_tokens
+            return Tokens()
+        return compact_response.usage.to_tokens()
 
     def _is_compact_needed(self, response: AgentResponse) -> bool:
         if self._compact_threshold_pct is None:
@@ -98,8 +99,7 @@ class ReActProcess:
 
             response = await self._agent.send(prompt, allowed_tools)
             iterations = 1
-            total_input = response.usage.input_tokens
-            total_output = response.usage.output_tokens
+            total: Tokens = response.usage.to_tokens()
 
             await self._callbacks.fire_agent_response(self._scope, response, iterations)
 
@@ -116,8 +116,7 @@ class ReActProcess:
                     r if isinstance(r, ToolResult) else ToolResult(success=False, error=f"{type(r).__name__}: {r}")
                     for r in raw_results
                 ]
-                total_input += sum(result.total_input_tokens for result in tool_results)
-                total_output += sum(result.total_output_tokens for result in tool_results)
+                total += sum((result.tokens for result in tool_results), Tokens())
 
                 tool_call_results = list(zip(response.tool_calls, tool_results, strict=True))
 
@@ -130,21 +129,17 @@ class ReActProcess:
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1
-                total_input += response.usage.input_tokens
-                total_output += response.usage.output_tokens
+                total += response.usage.to_tokens()
 
                 await self._callbacks.fire_agent_response(self._scope, response, iterations)
 
                 if self._is_compact_needed(response):
-                    compact_in, compact_out = await self.compact(response)
-                    total_input += compact_in
-                    total_output += compact_out
+                    total += await self.compact(response)
 
             react_result = ReActResult(
                 final_response=response,
                 iterations=iterations,
-                total_input_tokens=total_input,
-                total_output_tokens=total_output,
+                tokens=total,
                 context_usage=response.usage.context_usage,
             )
 

@@ -6,13 +6,13 @@ from datetime import UTC, datetime
 
 import pytest
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.config import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointStatus,
-    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
 )
@@ -220,8 +220,7 @@ async def test_process_message_writes_memory_and_checkpoint(flow_context, messag
     """
     outcome = PhaseOutcome(
         memory_text="stub-memory-body",
-        total_input_tokens=123,
-        total_output_tokens=45,
+        tokens=Tokens(input=123, output=45),
         extra_checkpoint={"custom_field": "custom_value", "count": 7},
     )
     phase, mgr = _make_stub_phase(flow_context, message_queue, outcome=outcome)
@@ -233,7 +232,7 @@ async def test_process_message_writes_memory_and_checkpoint(flow_context, messag
     checkpoint = mgr.read()["p1"]
     assert isinstance(checkpoint, SuccessCheckpoint)
     assert checkpoint.status == CheckpointStatus.SUCCESS
-    assert checkpoint.tokens == CheckpointTokenInfo(total_input=123, total_output=45)
+    assert checkpoint.tokens == Tokens(input=123, output=45)
     assert checkpoint.memory_path == str(mgr.memory_path("p1"))
     assert checkpoint.custom_field == "custom_value"
     assert checkpoint.count == 7
