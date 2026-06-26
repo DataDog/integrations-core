@@ -1,1 +1,0 @@
-Add the `group_per_user_services` option to report Windows per-user service instances under their template name, reducing `windows_service` tag cardinality.
