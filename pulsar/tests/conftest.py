@@ -19,7 +19,7 @@ def dd_environment(instance):
         env_vars=env_vars,
         endpoints=instance['openmetrics_endpoint'],
         mount_logs=True,
-        sleep=10,
+        sleep=60,
     ):
         yield instance, get_e2e_discovery_metadata()
 
