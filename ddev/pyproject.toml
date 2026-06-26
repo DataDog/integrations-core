@@ -30,7 +30,7 @@ dependencies = [
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",
-    "datadog-checks-dev[cli]~=38.0",
+    "datadog-checks-dev[cli]>=39.0,<41",
     "hatch>=1.13.0",
     "httpx",
     "jsonpointer",
@@ -85,15 +85,6 @@ scripts = ["ddev"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 norecursedirs = ["src/ddev/cli/create/templates"]
-
-# Keep Black configuration to generate models through validate
-# Switch to Ruff after it provides a Python API
-[tool.black]
-include = '\.pyi?$'
-line-length = 120
-skip-string-normalization = true
-target-version = ["py313"]
-extend-exclude = "src/ddev/_version.py"
 
 [tool.ruff]
 extend = "../pyproject.toml"

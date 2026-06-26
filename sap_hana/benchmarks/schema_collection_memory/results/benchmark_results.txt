@@ -1,0 +1,11 @@
+SAP HANA Schema Collection Memory Benchmark
+============================================================
+
+Mode             Peak RSS    Tracemalloc   Payloads   Payload bytes   Duration
+---------------------------------------------------------------------------
+limited          61.5 MiB        8.6 MiB          1       1,772,208       2.2s
+unlimited        93.7 MiB       24.2 MiB         21      95,425,468      50.7s
+
+Memory reduction: 1.5x less peak RSS with limits enabled
+  limited  : max_tables=300, max_columns=50
+  unlimited: max_tables=10_000_000, max_columns=10_000_000
