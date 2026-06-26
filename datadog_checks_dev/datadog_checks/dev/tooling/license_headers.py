@@ -12,7 +12,7 @@ from pathspec.gitignore import GitIgnoreSpec
 from datadog_checks.dev.errors import SubprocessError
 
 from .constants import get_root
-from .git import git_show_file
+from .git import get_base_ref, git_show_file
 from .utils import get_license_header as get_default_license_header
 
 _COPYRIGHT_PATTERN = re.compile(
@@ -28,12 +28,12 @@ LicenseHeaderError = namedtuple("LicenseHeaderError", ["message", "path", "fixed
 
 
 def _get_previous(path):
-    """Returns contents of previous (origin/master) version of file at `path` if it exists, and `None` otherwise."""
+    """Returns contents of the base branch version of file at `path` if it exists, and `None` otherwise."""
     # git_show_file relies on global context to compute the final path from a relative one,
     # so we need to pass it the relative path it expects
     relpath = path.relative_to(get_root())
     try:
-        return git_show_file(str(relpath), "origin/master")
+        return git_show_file(str(relpath), get_base_ref())
     except SubprocessError:
         return None
 

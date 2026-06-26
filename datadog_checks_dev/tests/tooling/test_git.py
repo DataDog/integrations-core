@@ -6,7 +6,9 @@ import pytest
 
 from datadog_checks.dev.tooling.constants import set_root
 from datadog_checks.dev.tooling.git import (
+    _find_closest_base_ref,
     files_changed,
+    get_base_ref,
     get_commits_since,
     get_current_branch,
     git_commit,
@@ -219,3 +221,122 @@ def test_git_fetch(tags: bool, expected_command: list[str]):
             git_fetch(tags=tags)
             chdir.assert_called_once_with('/foo/')
             run.assert_called_once_with(expected_command, capture=True)
+
+
+@pytest.mark.parametrize(
+    'github_base_ref, expected',
+    [
+        ('master', 'origin/master'),
+        ('7.80.x', 'origin/7.80.x'),
+        ('7.81.x', 'origin/7.81.x'),
+    ],
+)
+def test_get_base_ref_uses_github_base_ref(monkeypatch, github_base_ref, expected):
+    monkeypatch.setenv('GITHUB_BASE_REF', github_base_ref)
+    monkeypatch.delenv('GITHUB_REF_NAME', raising=False)
+    assert get_base_ref() == expected
+
+
+@pytest.mark.parametrize(
+    'github_ref_name, expected',
+    [
+        ('master', 'origin/master'),
+        ('7.80.x', 'origin/7.80.x'),
+        ('7.81.x', 'origin/7.81.x'),
+    ],
+)
+def test_get_base_ref_uses_github_ref_name_for_base_branches(monkeypatch, github_ref_name, expected):
+    monkeypatch.delenv('GITHUB_BASE_REF', raising=False)
+    monkeypatch.setenv('GITHUB_REF_NAME', github_ref_name)
+    assert get_base_ref() == expected
+
+
+@pytest.mark.parametrize(
+    'github_ref_name',
+    ['aarakke/my-feature', 'feature-branch', ''],
+)
+def test_get_base_ref_falls_back_to_git_for_feature_branches(monkeypatch, github_ref_name):
+    monkeypatch.delenv('GITHUB_BASE_REF', raising=False)
+    monkeypatch.setenv('GITHUB_REF_NAME', github_ref_name)
+
+    with mock.patch('datadog_checks.dev.tooling.git._find_closest_base_ref', return_value='origin/master') as finder:
+        result = get_base_ref()
+        finder.assert_called_once()
+        assert result == 'origin/master'
+
+
+def test_get_base_ref_github_base_ref_takes_priority_over_ref_name(monkeypatch):
+    monkeypatch.setenv('GITHUB_BASE_REF', '7.80.x')
+    monkeypatch.setenv('GITHUB_REF_NAME', 'master')
+    assert get_base_ref() == 'origin/7.80.x'
+
+
+def _make_run_command_for_base_ref(remote_branches, merge_bases):
+    """Build a run_command mock for _find_closest_base_ref.
+
+    remote_branches: list of 'origin/xxx' strings returned by for-each-ref.
+    merge_bases: dict mapping ref -> (merge_base_sha, timestamp_str).
+    """
+
+    def run_command(cmd, capture=None, **kwargs):
+        result = mock.MagicMock()
+        if 'for-each-ref' in cmd:
+            result.code = 0
+            result.stdout = '\n'.join(remote_branches)
+        elif 'merge-base' in cmd:
+            # command is: git merge-base <ref> HEAD
+            ref = cmd.split()[-2]
+            if ref in merge_bases:
+                result.code = 0
+                result.stdout = merge_bases[ref][0]
+            else:
+                result.code = 1
+                result.stdout = ''
+        elif 'git show' in cmd:
+            sha = cmd.split()[-1]
+            ts = next((v[1] for v in merge_bases.values() if v[0] == sha), None)
+            if ts is not None:
+                result.code = 0
+                result.stdout = ts
+            else:
+                result.code = 1
+                result.stdout = ''
+        else:
+            result.code = 1
+            result.stdout = ''
+        return result
+
+    return run_command
+
+
+def test_find_closest_base_ref_picks_most_recent_merge_base(monkeypatch):
+    remote_branches = ['origin/master', 'origin/7.80.x', 'origin/7.81.x', 'origin/some-feature']
+    merge_bases = {
+        'origin/master': ('aaa', '1000'),
+        'origin/7.80.x': ('bbb', '2000'),
+        'origin/7.81.x': ('ccc', '3000'),
+    }
+
+    set_root('/foo/')
+    with mock.patch('datadog_checks.dev.tooling.git.chdir'):
+        with mock.patch(
+            'datadog_checks.dev.tooling.git.run_command',
+            side_effect=_make_run_command_for_base_ref(remote_branches, merge_bases),
+        ):
+            assert _find_closest_base_ref() == 'origin/7.81.x'
+
+
+def test_find_closest_base_ref_returns_master_when_no_candidates(monkeypatch):
+    set_root('/foo/')
+    with mock.patch('datadog_checks.dev.tooling.git.chdir'):
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            run.return_value = mock.MagicMock(code=0, stdout='origin/some-feature\norigin/other')
+            assert _find_closest_base_ref() == 'origin/master'
+
+
+def test_find_closest_base_ref_returns_master_when_for_each_ref_fails(monkeypatch):
+    set_root('/foo/')
+    with mock.patch('datadog_checks.dev.tooling.git.chdir'):
+        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+            run.return_value = mock.MagicMock(code=1, stdout='')
+            assert _find_closest_base_ref() == 'origin/master'
