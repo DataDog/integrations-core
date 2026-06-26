@@ -90,3 +90,15 @@ RBAC_SHADOW_METRICS = [
 ]
 
 RBAC_METRICS = RBAC_ENFORCE_METRICS + RBAC_SHADOW_METRICS
+
+ADAPTIVE_CONCURRENCY_METRICS = [
+    "envoy.http.adaptive_concurrency.gradient_controller.rq_blocked",
+    "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active",
+    "envoy.http.adaptive_concurrency.gradient_controller.concurrency_limit",
+    "envoy.http.adaptive_concurrency.gradient_controller.gradient",
+    "envoy.http.adaptive_concurrency.gradient_controller.burst_queue_size",
+    "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_msecs",
+    "envoy.http.adaptive_concurrency.gradient_controller.sample_rtt_msecs",
+]
+
+ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG = ['stat_prefix:ingress-https']

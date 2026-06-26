@@ -4092,6 +4092,69 @@ METRICS = {
         ),
         'method': 'monotonic_count',
     },
+    'http.adaptive_concurrency.gradient_controller.rq_blocked': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'monotonic_count',
+    },
+    'http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.concurrency_limit': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.gradient': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.burst_queue_size': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.min_rtt_msecs': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
+    'http.adaptive_concurrency.gradient_controller.sample_rtt_msecs': {
+        'tags': (
+            ('stat_prefix',),
+            (),
+            (),
+            (),
+        ),
+        'method': 'gauge',
+    },
 }
 # fmt: on
 
