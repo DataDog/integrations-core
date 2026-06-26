@@ -52,7 +52,6 @@ def license_headers(ctx: click.Context, check: str | None, fix: bool) -> None:
     total_errors = 0
     total_fixes = 0
 
-    # Resolve the base ref once for the whole run and reuse it across every check.
     get_previous = build_get_previous()
 
     for check_name in checks:

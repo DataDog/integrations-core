@@ -281,6 +281,7 @@ def _make_run_command_for_base_ref(remote_branches, merge_bases):
     remote_branches: list of 'origin/xxx' strings returned by for-each-ref.
     merge_bases: dict mapping ref -> (merge_base_sha, timestamp_str).
     """
+    sha_to_timestamp = dict(merge_bases.values())
 
     def run_command(cmd, capture=None, **kwargs):
         result = mock.MagicMock()
@@ -298,7 +299,7 @@ def _make_run_command_for_base_ref(remote_branches, merge_bases):
                 result.stdout = ''
         elif 'git show' in cmd:
             sha = cmd.split()[-1]
-            ts = next((v[1] for v in merge_bases.values() if v[0] == sha), None)
+            ts = sha_to_timestamp.get(sha)
             if ts is not None:
                 result.code = 0
                 result.stdout = ts
