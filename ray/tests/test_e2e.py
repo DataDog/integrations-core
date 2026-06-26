@@ -51,4 +51,4 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
 @pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check):
-    assert_all_discovery_candidates_stable(dd_agent_check, RayCheck)
+    assert_all_discovery_candidates_stable(dd_agent_check, RayCheck, compose_service='ray-head')
