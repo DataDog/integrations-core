@@ -358,6 +358,19 @@ files:
                   example: false
                 fleet_configurable: false
 
+              - name: binlog_size_metrics
+                description: |
+                  Set to `false` to disable the collection of binary log size metrics.
+
+                  When binary logging is enabled, the check runs `SHOW BINARY LOGS;` to compute the
+                  `mysql.binlog.disk_use` metric. This query relies on binary log mutexes and can be slower on
+                  high traffic MySQL databases and Aurora instances, due to the number of binary log files to
+                  load and iterate. Set this to `false` to skip that query if it impacts your database performance.
+                value:
+                  type: boolean
+                  example: true
+                fleet_configurable: false
+
               - name: schema_size_metrics
                 description: |
                   Set to `true` to collect schema size metrics.

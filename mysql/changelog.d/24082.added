@@ -1,0 +1,1 @@
+Add the `binlog_size_metrics` option to skip binary log size collection.
