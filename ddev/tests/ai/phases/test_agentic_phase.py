@@ -94,7 +94,9 @@ def test_render_memory_prompt_inline():
 
 def test_render_memory_prompt_raises_when_no_source():
     with pytest.raises(FlowConfigError, match="memory_prompt"):
-        render_memory_prompt(CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), Path("/unused"), {})
+        render_memory_prompt(
+            CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), Path("/unused"), {}
+        )
 
 
 # ---------------------------------------------------------------------------
