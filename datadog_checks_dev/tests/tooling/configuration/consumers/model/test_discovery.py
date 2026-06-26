@@ -208,3 +208,35 @@ def test_custom_files_are_stubbed():
     assert 'discovery_strategies.py' in files
     assert 'discovery_overrides.py' in files
     assert 'candidates(service, default)' in files['discovery_overrides.py'][0]
+
+
+def test_no_init_config_section():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/m
+          options:
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    assert 'SharedConfig' not in discovery_contents
+    assert 'from datadog_checks.test.config_models.shared' not in discovery_contents
+    assert '    shared = {}' in discovery_contents

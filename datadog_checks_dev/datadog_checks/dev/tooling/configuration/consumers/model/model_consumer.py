@@ -92,7 +92,11 @@ class ModelConsumer:
             model_files.update(self._build_model_files(model_info, package_info))
             if 'discovery' in spec_file:
                 pkg_name = spec_file['name'].removesuffix('.yaml')
-                model_files['discovery.py'] = (self._build_discovery_file(spec_file['discovery'], pkg_name), [])
+                has_shared = any(s['name'] == 'init_config' for s in spec_file.get('options', []))
+                model_files['discovery.py'] = (
+                    self._build_discovery_file(spec_file['discovery'], pkg_name, has_shared=has_shared),
+                    [],
+                )
                 # Custom (written once, preserved across regens; see CUSTOM_FILES)
                 model_files['discovery_strategies.py'] = (DISCOVERY_STRATEGIES_DOCUMENTATION, [])
                 model_files['discovery_overrides.py'] = (DISCOVERY_OVERRIDES_DOCUMENTATION, [])
@@ -286,7 +290,7 @@ class ModelConsumer:
             defaults_file_contents = format_with_ruff(defaults_file_contents)
         return defaults_file_contents
 
-    def _build_discovery_file(self, discovery: dict[str, Any], pkg_name: str) -> str:
+    def _build_discovery_file(self, discovery: dict[str, Any], pkg_name: str, *, has_shared: bool = True) -> str:
         import datadog_checks.dev.tooling.configuration.discovery.core_strategies  # noqa: F401
         from datadog_checks.dev.tooling.configuration.discovery.registry import REGISTRY
 
@@ -299,8 +303,9 @@ class ModelConsumer:
             'from datadog_checks.base.utils.discovery import Service',
             f'from datadog_checks.{pkg_name}.config_models import discovery_overrides',
             f'from datadog_checks.{pkg_name}.config_models.instance import InstanceConfig',
-            f'from datadog_checks.{pkg_name}.config_models.shared import SharedConfig',
         ]
+        if has_shared:
+            import_lines.append(f'from datadog_checks.{pkg_name}.config_models.shared import SharedConfig')
         for stanza in strategies:
             strategy_name = stanza['strategy']
             if strategy_name.startswith('local:'):
@@ -308,6 +313,15 @@ class ModelConsumer:
                 import_lines.append(f'from datadog_checks.{pkg_name}.config_models.discovery_strategies import {func}')
             else:
                 import_lines.extend(REGISTRY[strategy_name].runtime_imports)
+
+        if has_shared:
+            shared_line = [
+                "    shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(",
+                "        by_alias=True, mode='json', exclude_none=True",
+                "    )",
+            ]
+        else:
+            shared_line = ['    shared = {}']
 
         lines = [
             'from __future__ import annotations',
@@ -319,9 +333,7 @@ class ModelConsumer:
             '',
             '',
             'def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:',
-            "    shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(",
-            "        by_alias=True, mode='json', exclude_none=True",
-            "    )",
+            *shared_line,
         ]
 
         for index, stanza in enumerate(strategies):
