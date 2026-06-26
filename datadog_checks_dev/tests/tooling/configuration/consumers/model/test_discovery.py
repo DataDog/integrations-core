@@ -51,7 +51,7 @@ def test():
 
         def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
             shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
-                mode='json', exclude_none=True
+                by_alias=True, mode='json', exclude_none=True
             )
             # discovery[0]: from_ports
             for port in candidate_ports(service, [9090]):
@@ -61,7 +61,7 @@ def test():
                 }
                 instance = InstanceConfig.model_validate(
                     instance_data, context={'configured_fields': frozenset(instance_data)}
-                ).model_dump(mode='json', exclude_none=True)
+                ).model_dump(by_alias=True, mode='json', exclude_none=True)
                 yield {'init_config': shared, 'instances': [instance]}
 
 

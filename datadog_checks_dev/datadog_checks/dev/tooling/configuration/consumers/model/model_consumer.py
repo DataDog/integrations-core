@@ -320,7 +320,7 @@ class ModelConsumer:
             '',
             'def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:',
             "    shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(",
-            "        mode='json', exclude_none=True",
+            "        by_alias=True, mode='json', exclude_none=True",
             "    )",
         ]
 
@@ -392,6 +392,6 @@ class ModelConsumer:
         lines.append('        }')
         lines.append('        instance = InstanceConfig.model_validate(')
         lines.append("            instance_data, context={'configured_fields': frozenset(instance_data)}")
-        lines.append("        ).model_dump(mode='json', exclude_none=True)")
+        lines.append("        ).model_dump(by_alias=True, mode='json', exclude_none=True)")
         lines.append("        yield {'init_config': shared, 'instances': [instance]}")
         return lines
