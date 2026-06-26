@@ -359,7 +359,7 @@ tests:
             tenant_uid: '23459872345987'
             version: 1.5.0
             event_code: user-status
-            logged_time: 1559538700000
+            logged_time: 1559549500000
           category_uid: 5
           category_name: Discovery
           status_detail: ZPN_STATUS_AUTHENTICATED
@@ -369,7 +369,7 @@ tests:
           severity_id: 1
           class_name: User Inventory Info
           status: Success
-          time: 1559538700000
+          time: 1559549500000
           user:
             uid: alice.w
             name: alice.w

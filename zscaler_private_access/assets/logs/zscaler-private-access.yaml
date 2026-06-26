@@ -1381,42 +1381,6 @@ pipeline:
                   name: Delete
                   id: 4
                 - filter:
-                    query: "@AuditOperationType:Move"
-                  name: Move
-                  id: 5
-                - filter:
-                    query: "@AuditOperationType:Enroll"
-                  name: Enroll
-                  id: 6
-                - filter:
-                    query: "@AuditOperationType:Unenroll"
-                  name: Unenroll
-                  id: 7
-                - filter:
-                    query: "@AuditOperationType:Enable"
-                  name: Enable
-                  id: 8
-                - filter:
-                    query: "@AuditOperationType:Disable"
-                  name: Disable
-                  id: 9
-                - filter:
-                    query: "@AuditOperationType:Activate"
-                  name: Activate
-                  id: 10
-                - filter:
-                    query: "@AuditOperationType:Deactivate"
-                  name: Deactivate
-                  id: 11
-                - filter:
-                    query: "@AuditOperationType:Suspend"
-                  name: Suspend
-                  id: 12
-                - filter:
-                    query: "@AuditOperationType:Resume"
-                  name: Resume
-                  id: 13
-                - filter:
                     query: "@AuditOperationType:*"
                   name: Other
                   id: 99
@@ -3001,23 +2965,12 @@ pipeline:
               name: ocsf.activity_id
               categories:
                 - filter:
-                    query: "@ocsf.metadata.event_code:user-status"
+                    query: "*"
                   name: Collect
                   id: 2
-                - filter:
-                    query: "*"
-                  name: Other
-                  id: 99
               targets:
                 name: ocsf.activity_name
                 id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - EventType
             - type: schema-category-mapper
               name: ocsf.status_id
               categories:
