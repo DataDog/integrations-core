@@ -3,8 +3,6 @@ fleet_configurable: true
 files:
 - name: ray.yaml
   discovery:
-    ad_identifiers:
-      - ray
     strategies:
       - strategy: from_ports
         port_hints:
