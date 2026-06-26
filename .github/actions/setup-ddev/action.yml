@@ -65,7 +65,7 @@ runs:
     - name: Restore local ddev cache
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' }}
       id: restore-local-ddev-base-cache
-      uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
@@ -99,7 +99,7 @@ runs:
     - name: Restore local ddev cache without base package
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev' }}
       id: restore-local-ddev-cache
-      uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
@@ -130,7 +130,7 @@ runs:
     - name: Restore PyPI ddev cache
       if: ${{ inputs.install-mode == 'pypi' }}
       id: restore-pypi-ddev-cache
-      uses: actions/cache/restore@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: |
           ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
@@ -169,7 +169,7 @@ runs:
 
     - name: Save local ddev cache
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' && steps.restore-local-ddev-base-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       continue-on-error: true
       with:
         path: |
@@ -179,7 +179,7 @@ runs:
 
     - name: Save local ddev cache without base package
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev' && steps.restore-local-ddev-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       continue-on-error: true
       with:
         path: |
@@ -189,7 +189,7 @@ runs:
 
     - name: Save PyPI ddev cache
       if: ${{ inputs.install-mode == 'pypi' && steps.restore-pypi-ddev-cache.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
+      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       continue-on-error: true
       with:
         path: |
