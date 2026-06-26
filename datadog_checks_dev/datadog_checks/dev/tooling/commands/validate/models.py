@@ -166,7 +166,7 @@ def models(ctx, check, sync, verbose):
                 current_model_file_lines = read_file_lines(model_file_path)
 
                 if model_file in CUSTOM_FILES and (len(current_model_file_lines) + 1) > len(license_header_lines):
-                    # validators.py and deprecations.py are custom files, they should only be rendered the first time
+                    # Custom files should only be rendered the first time.
                     continue
 
             if not is_community_check:
