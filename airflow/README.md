@@ -3,8 +3,8 @@
 ## Overview
 
 <div class="alert alert-info">
-<a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/">Data Observability: Jobs Monitoring</a> provides out-of-the-box tracing for Airflow DAG runs, helping you quickly troubleshoot problematic tasks, correlate DAG runs to logs, and understand complex pipelines with data lineage across DAGs.<br/><br/>
-<strong>Note</strong>: This page covers only the documentation for collecting Airflow integration metrics and logs using the Datadog Agent.
+<a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/">Data Observability: Jobs Monitoring</a> provides out-of-the-box tracing, log correlation, and data lineage for Airflow DAG runs, helping you quickly troubleshoot problematic tasks and understand complex pipelines.<br/><br/>
+To enable Data Observability: Jobs Monitoring for this integration, see the <a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/airflow/?tab=kubernetes">setup guide</a>.
 </div>
 
 The Datadog Agent collects many metrics from Airflow, including those for:
@@ -21,6 +21,16 @@ In addition to metrics, the Datadog Agent also sends service checks related to A
 **Minimum Agent version:** 7.17.0
 
 ## Setup
+
+<div class="alert alert-info">
+<a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/">Data Observability: Jobs Monitoring</a> provides out-of-the-box tracing, log correlation, and data lineage for Airflow DAG runs, helping you quickly troubleshoot problematic tasks and understand complex pipelines.<br/><br/>
+To enable Data Observability: Jobs Monitoring for this integration, see the <a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/airflow/?tab=kubernetes">setup guide</a>.
+</div>
+
+<div class="alert alert-warning">
+If your goal is only to enable Data Observability: Jobs Monitoring, you do <strong>not</strong> need to install the Datadog Agent or follow the configuration steps below. Follow the <a href="https://docs.datadoghq.com/data_observability/jobs_monitoring/airflow/?tab=kubernetes">Data Observability: Jobs Monitoring setup guide</a> instead.<br/><br/>
+<strong>Note</strong>: This page covers only the documentation for collecting Airflow integration metrics and logs using the Datadog Agent.
+</div>
 
 ### Installation
 
