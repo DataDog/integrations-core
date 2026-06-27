@@ -4,10 +4,10 @@
 from unittest.mock import MagicMock
 
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.mesos_master import MesosMaster
 
 
@@ -99,21 +99,21 @@ def test_instance_timeout(check, instance):
         ),
         (
             'OK case with failing /state due to Timeout and fallback on /state.json',
-            [requests.exceptions.Timeout, MagicMock(status_code=200, content='{}')],
+            [HTTPTimeoutError("timeout"), MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
         ),
         (
             'OK case with failing /state due to Exception and fallback on /state.json',
-            [Exception, MagicMock(status_code=200, content='{}')],
+            [Exception("unexpected error"), MagicMock(status_code=200, content='{}')],
             AgentCheck.OK,
             ['my:tag', 'url:http://hello.com/state.json'],
             False,
         ),
         (
             'NOK case with failing /state and /state.json due to timeout',
-            [requests.exceptions.Timeout, requests.exceptions.Timeout],
+            [HTTPTimeoutError("timeout"), HTTPTimeoutError("timeout")],
             AgentCheck.CRITICAL,
             ['my:tag', 'url:http://hello.com/state.json'],
             True,
