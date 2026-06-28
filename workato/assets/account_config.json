@@ -1,0 +1,33 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "type": "password",
+      "key": "api_token",
+      "label": "API Token",
+      "help": "Workato API token for authentication",
+      "editable": true,
+      "required": true
+    },
+    {
+      "type": "text",
+      "key": "region",
+      "label": "Region",
+      "help": "Workato region (e.g., app.workato.com)",
+      "editable": true,
+      "required": true,
+      "pattern": null
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "workato-metrics",
+      "toggle": {
+        "default": true,
+        "label": "Collect Workato metrics",
+        "editable": true
+      },
+      "additional_config_fields": []
+    }
+  ]
+}
