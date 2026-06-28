@@ -9,6 +9,8 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
 from .common import (
+    ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS,
+    ADAPTIVE_CONCURRENCY_PROMETHEUS_STAT_PREFIX_TAG,
     CONNECTION_LIMIT_METRICS,
     DEFAULT_INSTANCE,
     ENVOY_VERSION,
@@ -38,7 +40,13 @@ def test_check(aggregator, dd_run_check, check):
     dd_run_check(c)
     dd_run_check(c)
 
-    for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CONNECTION_LIMIT_METRICS + TLS_INSPECTOR_METRICS:
+    for metric in (
+        PROMETHEUS_METRICS
+        + LOCAL_RATE_LIMIT_METRICS
+        + CONNECTION_LIMIT_METRICS
+        + TLS_INSPECTOR_METRICS
+        + ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS
+    ):
         formatted_metric = "envoy.{}".format(metric)
         if metric in FLAKY_METRICS:
             aggregator.assert_metric(formatted_metric, at_least=0)

@@ -398,6 +398,18 @@ CONNECTION_LIMIT_METRICS = [
 
 CONNECTION_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
 
+ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS = [
+    "http.adaptive_concurrency.gradient_controller.rq_blocked.count",
+    "http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active",
+    "http.adaptive_concurrency.gradient_controller.concurrency_limit",
+    "http.adaptive_concurrency.gradient_controller.gradient",
+    "http.adaptive_concurrency.gradient_controller.burst_queue_size",
+    "http.adaptive_concurrency.gradient_controller.min_rtt_msecs",
+    "http.adaptive_concurrency.gradient_controller.sample_rtt_msecs",
+]
+
+ADAPTIVE_CONCURRENCY_PROMETHEUS_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
+
 TLS_INSPECTOR_METRICS = [
     "tls_inspector.client_hello_too_large.count",
     "tls_inspector.tls.found.count",
