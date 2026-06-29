@@ -284,7 +284,7 @@ class KafkaActionsCheck(AgentCheck):
         start_timestamp = config.get('start_timestamp')
         n_messages_retrieved = config.get('n_messages_retrieved', 10)
         max_scanned_messages = config.get('max_scanned_messages', 1000)
-        timeout_ms = config.get('timeout_ms', 20000)
+        timeout_ms = config.get('timeout_ms', 5000)
         filter_expression = config.get('filter', '')
         consumer_group_id = config.get('consumer_group_id') or f"datadog-agent-{self.remote_config_id}"
 
