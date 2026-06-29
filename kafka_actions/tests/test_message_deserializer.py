@@ -955,5 +955,24 @@ class TestHeaderSerialization:
         assert msg.headers['empty'] is None
 
 
+class TestDeserializeMessageFailureBranches:
+    """Test the defensive failure branches in deserialize_message that return error strings."""
+
+    def test_unknown_format_returns_error_string(self):
+        """An unregistered format handler returns a '<deserialization error: unknown format ...>' string."""
+        deserializer = MessageDeserializer(MagicMock())
+        result, schema_id = deserializer.deserialize_message(b'some-bytes', format_type='no-such-format')
+        assert result.startswith("<deserialization error: unknown format")
+        assert "'no-such-format'" in result
+        assert schema_id is None
+
+    def test_decompression_failure_returns_error_string(self):
+        """Non-gzip bytes under compression='gzip' return a gzip-decompression-failure error string."""
+        deserializer = MessageDeserializer(MagicMock())
+        result, schema_id = deserializer.deserialize_message(b'not-gzip-data', format_type='raw', compression='gzip')
+        assert result.startswith("<deserialization error: gzip decompression failed")
+        assert schema_id is None
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
