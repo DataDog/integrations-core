@@ -243,11 +243,24 @@ class ConfigurationEngine:
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, [entry.error or "broken flow"])
 
         fc: FlowConfig = entry.config
-        errors: list[str] = []
-
         ok_agents = {name: e.config for name, e in self._agents.items() if isinstance(e, ValidEntry)}
 
+        scheduled_phases, errors = self._validate_scheduled_phases(fc, flow_name, ok_agents)
+        errors.extend(self._validate_dependencies(flow_name, fc))
+        resolved_variables, var_errors = self._resolve_variables(scheduled_phases, fc, ok_agents)
+        errors.extend(var_errors)
+
+        if errors:
+            return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
+
+        resolved = self._build_resolved_flow(flow_name, fc, scheduled_phases, resolved_variables, ok_agents)
+        return FlowDiagnostics(flow_name, ConfigStatus.OK, [], resolved=resolved)
+
+    def _validate_scheduled_phases(
+        self, fc: FlowConfig, flow_name: str, ok_agents: dict[str, AgentConfig]
+    ) -> tuple[list[PhaseConfig], list[str]]:
         scheduled_phases: list[PhaseConfig] = []
+        errors: list[str] = []
         for fe in fc.flow:
             phase_entry = self._phases.get(fe.phase)
             if phase_entry is None:
@@ -260,45 +273,53 @@ class ConfigurationEngine:
                 continue
             pc: PhaseConfig = phase_entry.config
             scheduled_phases.append(pc)
+            errors.extend(self._validate_phase_class(pc, ok_agents))
+            errors.extend(self._validate_phase_agent(pc))
+            errors.extend(self._validate_phase_refs(pc))
+        return scheduled_phases, errors
 
-            if self._phase_registry.contains(pc.class_):
-                try:
-                    self._phase_registry.get(pc.class_).validate_config(pc.name, pc, ok_agents)
-                except FlowConfigError as e:
-                    errors.append(str(e))
-            else:
-                errors.append(f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}")
+    def _validate_phase_class(self, pc: PhaseConfig, ok_agents: dict[str, AgentConfig]) -> list[str]:
+        if not self._phase_registry.contains(pc.class_):
+            return [f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}"]
+        try:
+            self._phase_registry.get(pc.class_).validate_config(pc.name, pc, ok_agents)
+        except FlowConfigError as e:
+            return [str(e)]
+        return []
 
-            if pc.agent is not None:
-                agent_entry = self._agents.get(pc.agent)
-                if agent_entry is None:
-                    errors.append(
-                        f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered"
-                        f"{self._file_errors_note()}"
-                    )
-                elif isinstance(agent_entry, BrokenEntry):
-                    errors.append(f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken")
+    def _validate_phase_agent(self, pc: PhaseConfig) -> list[str]:
+        if pc.agent is None:
+            return []
+        agent_entry = self._agents.get(pc.agent)
+        if agent_entry is None:
+            return [f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered{self._file_errors_note()}"]
+        if isinstance(agent_entry, BrokenEntry):
+            return [f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken"]
+        return []
 
-            for task in pc.tasks:
-                if task.prompt_ref is not None:
-                    errors.extend(self._check_ref(self._prompts, task.prompt_ref, "prompt", pc.name))
-                if task.goal_ref is not None:
-                    errors.extend(self._check_ref(self._goals, task.goal_ref, "goal", pc.name))
-            if pc.checkpoint is not None and pc.checkpoint.memory_prompt_ref is not None:
-                errors.extend(self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, "memory", pc.name))
+    def _validate_phase_refs(self, pc: PhaseConfig) -> list[str]:
+        errors: list[str] = []
+        for task in pc.tasks:
+            if task.prompt_ref is not None:
+                errors.extend(self._check_ref(self._prompts, task.prompt_ref, "prompt", pc.name))
+            if task.goal_ref is not None:
+                errors.extend(self._check_ref(self._goals, task.goal_ref, "goal", pc.name))
+        if pc.checkpoint is not None and pc.checkpoint.memory_prompt_ref is not None:
+            errors.extend(self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, "memory", pc.name))
+        return errors
 
-        errors.extend(self._validate_dependencies(flow_name, fc))
-        resolved_variables, var_errors = self._resolve_variables(scheduled_phases, fc, ok_agents)
-        errors.extend(var_errors)
-
-        if errors:
-            return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
-
+    def _build_resolved_flow(
+        self,
+        flow_name: str,
+        fc: FlowConfig,
+        scheduled_phases: list[PhaseConfig],
+        resolved_variables: dict[str, str],
+        ok_agents: dict[str, AgentConfig],
+    ) -> ResolvedFlow:
         ok_prompts = {n: e.config for n, e in self._prompts.items() if isinstance(e, ValidEntry)}
         ok_goals = {n: e.config for n, e in self._goals.items() if isinstance(e, ValidEntry)}
         ok_memories = {n: e.config for n, e in self._memories.items() if isinstance(e, ValidEntry)}
-
-        resolved = ResolvedFlow(
+        return ResolvedFlow(
             name=flow_name,
             agents={pc.agent: ok_agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
             phases={pc.name: pc for pc in scheduled_phases},  # refs preserved, no inlining
@@ -308,7 +329,6 @@ class ConfigurationEngine:
             goals=ok_goals,
             memories=ok_memories,
         )
-        return FlowDiagnostics(flow_name, ConfigStatus.OK, [], resolved=resolved)
 
     def _check_ref(self, registry: dict[str, RegistryEntry[str]], ref: str, kind: str, phase_name: str) -> list[str]:
         ref_entry = registry.get(ref)
