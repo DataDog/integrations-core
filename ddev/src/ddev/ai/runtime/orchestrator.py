@@ -80,9 +80,6 @@ class PhaseOrchestrator(EventBusOrchestrator):
             file_access_policy=self._file_access_policy,
             agents=resolved.agents,
             callbacks=run_callbacks,
-            prompts=resolved.prompts,
-            goals=resolved.goals,
-            memories=resolved.memories,
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,

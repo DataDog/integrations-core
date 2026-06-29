@@ -240,9 +240,6 @@ def test_resolved_flow_is_frozen():
         phases={},
         flow=[],
         variables={},
-        prompts={},
-        goals={},
-        memories={},
     )
     with pytest.raises((AttributeError, TypeError)):
         rf.name = "other"  # type: ignore[misc]
@@ -258,14 +255,8 @@ def test_resolved_flow_fields():
         phases={"my-phase": phase},
         flow=[entry],
         variables={"K": "V"},
-        prompts={"intro": "hello"},
-        goals={"g": "be good"},
-        memories={"m": "remember"},
     )
     assert rf.name == "test"
     assert "default" in rf.agents
     assert "my-phase" in rf.phases
     assert rf.variables["K"] == "V"
-    assert rf.prompts["intro"] == "hello"
-    assert rf.goals["g"] == "be good"
-    assert rf.memories["m"] == "remember"

@@ -335,13 +335,28 @@ class ConfigurationEngine:
         return ResolvedFlow(
             name=flow_name,
             agents={pc.agent: self._ok_agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
-            phases={pc.name: pc for pc in scheduled_phases},  # refs preserved, no inlining
+            phases={pc.name: self._inline_phase(pc) for pc in scheduled_phases},
             flow=fc.flow,
             variables=resolved_variables,
-            prompts=self._ok_prompts,
-            goals=self._ok_goals,
-            memories=self._ok_memories,
         )
+
+    def _inline_phase(self, phase: PhaseConfig) -> PhaseConfig:
+        tasks = []
+        for t in phase.tasks:
+            upd: dict[str, Any] = {}
+            if t.prompt_ref is not None:
+                upd["prompt"] = self._ok_prompts[t.prompt_ref]
+                upd["prompt_ref"] = None
+            if t.goal_ref is not None:
+                upd["goal"] = self._ok_goals[t.goal_ref]
+                upd["goal_ref"] = None
+            tasks.append(t.model_copy(update=upd) if upd else t)
+        cp = phase.checkpoint
+        if cp is not None and cp.memory_prompt_ref is not None:
+            cp = cp.model_copy(
+                update={"memory_prompt": self._ok_memories[cp.memory_prompt_ref], "memory_prompt_ref": None}
+            )
+        return phase.model_copy(update={"tasks": tasks, "checkpoint": cp})
 
     def _check_ref(self, registry: dict[str, RegistryEntry[str]], ref: str, kind: str, phase_name: str) -> list[str]:
         ref_entry = registry.get(ref)

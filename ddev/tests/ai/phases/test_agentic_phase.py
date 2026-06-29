@@ -63,32 +63,6 @@ def test_render_memory_prompt_inline():
 
 
 # ---------------------------------------------------------------------------
-# ref resolution via resources
-# ---------------------------------------------------------------------------
-
-
-class _RefResources:
-    """Stub PhaseResources that resolves refs to fixed text."""
-
-    def __init__(self, prompts: dict[str, str] | None = None) -> None:
-        self._prompts = prompts or {}
-
-    def prompt(self, name: str) -> str:
-        return self._prompts[name]
-
-
-def test_task_prompt_text_resolves_prompt_ref(flow_dir, monkeypatch, message_queue):
-    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
-    phase._resources = _RefResources(prompts={"intro": "resolved prompt body"})
-    assert phase._task_prompt_text(TaskConfig(name="t", prompt_ref="intro")) == "resolved prompt body"
-
-
-def test_task_prompt_text_uses_inline_prompt(flow_dir, monkeypatch, message_queue):
-    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
-    assert phase._task_prompt_text(TaskConfig(name="t", prompt="literal body")) == "literal body"
-
-
-# ---------------------------------------------------------------------------
 # AgenticPhase.validate_config
 # ---------------------------------------------------------------------------
 
@@ -427,9 +401,6 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
         agents={"writer": AgentConfig(tools=["spawn_subagent"])},
         callbacks=run_callbacks,
-        prompts={},
-        goals={},
-        memories={},
     )
     phase = AgenticPhase.build(
         phase_id="p1",
