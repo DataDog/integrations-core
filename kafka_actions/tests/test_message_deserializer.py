@@ -966,12 +966,11 @@ class TestDeserializeMessageFailureBranches:
         assert "'no-such-format'" in result
         assert schema_id is None
 
-    def test_decompression_failure_returns_error_string(self):
-        """Non-gzip bytes under compression='gzip' return a gzip-decompression-failure error string."""
+    def test_decompression_failure_propagates(self):
+        """A decompression failure propagates so the read action stops immediately."""
         deserializer = MessageDeserializer(MagicMock())
-        result, schema_id = deserializer.deserialize_message(b'not-gzip-data', format_type='raw', compression='gzip')
-        assert result.startswith("<deserialization error: gzip decompression failed")
-        assert schema_id is None
+        with pytest.raises(Exception):
+            deserializer.deserialize_message(b'not-gzip-data', format_type='raw', compression='gzip')
 
 
 if __name__ == '__main__':

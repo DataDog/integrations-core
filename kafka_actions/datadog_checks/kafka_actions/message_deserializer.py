@@ -146,11 +146,10 @@ class MessageDeserializer:
             codec = _get_compression_codec(compression)
             if codec is None:
                 return f"<deserialization error: unknown compression codec '{compression}'>", None
-            try:
-                raw_bytes = codec.decompress(raw_bytes)
-            except Exception as e:
-                self.log.warning("Failed to decompress %s payload: %s", compression, e)
-                return f"<deserialization error: {compression} decompression failed: {e}>", None
+            # A decompression failure means the whole payload is unreadable, so
+            # we let it propagate and stop the read action immediately rather
+            # than emitting a per-message error string and continuing.
+            raw_bytes = codec.decompress(raw_bytes)
             if not raw_bytes:
                 return None, None
 
