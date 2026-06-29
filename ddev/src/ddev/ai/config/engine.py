@@ -8,7 +8,7 @@ import logging
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Protocol
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
 from pydantic import TypeAdapter, ValidationError
@@ -27,7 +27,7 @@ from ddev.ai.config.models import (
 )
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.base import Phase
+    from ddev.ai.phases.registry import PhaseRegistry
 
 ResourceKind = Literal["agent", "phase", "flow", "prompt", "goal", "memory"]
 
@@ -65,11 +65,6 @@ class FlowDiagnostics:
     status: ConfigStatus
     errors: list[str]
     resolved: ResolvedFlow | None = None
-
-
-class PhaseRegistry(Protocol):
-    def contains(self, name: str) -> bool: ...
-    def get(self, name: str) -> type[Phase]: ...
 
 
 RESOURCE_ADAPTER: TypeAdapter[PhaseEnvelope | FlowEnvelope] = TypeAdapter(ResourceEnvelope)
