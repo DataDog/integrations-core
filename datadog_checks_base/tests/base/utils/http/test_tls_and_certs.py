@@ -427,12 +427,7 @@ class TestAIAChasing:
 
             error = None
             response = None
-            # The issuer server runs on loopback, which the SSRF guard blocks; this test targets
-            # header leakage, not the host allowlist (covered separately).
-            with (
-                run_server(service_server),
-                mock.patch('datadog_checks.base.utils.http._is_safe_aia_url', return_value=True),
-            ):
+            with run_server(service_server):
                 http = RequestsWrapper(
                     {'headers': {'Authorization': 'Bearer token'}, 'tls_ca_cert': str(root_path), 'skip_proxy': True},
                     {},
@@ -494,24 +489,17 @@ class TestAIAChasing:
         session.get.assert_not_called()
         assert certs == []
 
-    @pytest.mark.parametrize(
-        'uri',
-        [
-            'http://127.0.0.1/ca.der',
-            'http://169.254.169.254/latest/meta-data/',
-            'http://10.0.0.5/ca.der',
-        ],
-    )
-    def test_load_intermediate_certs_rejects_non_public_address(self, uri):
+    def test_load_intermediate_certs_allows_private_address(self):
         http = RequestsWrapper({}, {})
         certs = []
         session = mock.MagicMock()
+        session.get.return_value = mock.MagicMock(content=build_cert())
 
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
-            http.load_intermediate_certs(build_cert(uri), certs)
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('http://10.0.0.5/ca.der'), certs)
 
-        wrapper.assert_not_called()
-        assert certs == []
+        session.get.assert_called_once_with('http://10.0.0.5/ca.der')
+        assert len(certs) == 1
 
     def test_load_intermediate_certs_rejects_oversized_body(self):
         http = RequestsWrapper({}, {})

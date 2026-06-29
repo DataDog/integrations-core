@@ -249,37 +249,11 @@ def _get_aia_tls_config(tls_config: Mapping[str, object] | None, tls_verify: boo
 
 
 def _is_safe_aia_url(uri: str, logger: logging.Logger | logging.LoggerAdapter) -> bool:
-    parsed = urlparse(uri)
-    if parsed.scheme not in AIA_ALLOWED_SCHEMES:
+    # Restrict to http(s); private/internal hosts are allowed since AIA endpoints may live on internal PKI.
+    scheme = urlparse(uri).scheme
+    if scheme not in AIA_ALLOWED_SCHEMES:
         logger.debug('Skipping intermediate certificate URI with unsupported scheme: `%s`', uri)
         return False
-
-    host = parsed.hostname
-    if not host:
-        logger.debug('Skipping intermediate certificate URI without a host: `%s`', uri)
-        return False
-
-    try:
-        addresses = [ipaddress.ip_address(host)]
-    except ValueError:
-        try:
-            addresses = [ipaddress.ip_address(info[4][0]) for info in socket.getaddrinfo(host, parsed.port)]
-        except OSError:
-            # Let the request layer surface resolution failures rather than guessing.
-            return True
-
-    for address in addresses:
-        if (
-            address.is_private
-            or address.is_loopback
-            or address.is_link_local
-            or address.is_reserved
-            or address.is_multicast
-            or address.is_unspecified
-        ):
-            logger.debug('Skipping intermediate certificate URI resolving to non-public address `%s`', address)
-            return False
-
     return True
 
 
