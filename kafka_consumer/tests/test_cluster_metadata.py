@@ -1993,7 +1993,7 @@ def scram_ds_events(check):
 
 
 def test_scram_credentials_present(check, dd_run_check, aggregator):
-    """Credentials present: per-mechanism counts and per-user events, with no user in metric tags."""
+    """Credentials present: per-mechanism counts and per-(user, mechanism) events, with no user in metric tags."""
     from confluent_kafka.admin import ScramMechanism
 
     descriptions = {
@@ -2052,6 +2052,21 @@ def test_scram_credentials_api_unsupported_skips_gracefully(check, dd_run_check,
     from confluent_kafka import KafkaException
 
     kafka_consumer_check, _ = _make_scram_check(check, exception=KafkaException("RESOURCE_NOT_FOUND"))
+    _wire_cache(kafka_consumer_check)
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric('kafka.scram_credentials.count', count=0)
+    assert scram_ds_events(kafka_consumer_check) == []
+    # Other metadata collection is unaffected.
+    aggregator.assert_metric('kafka.broker.count', value=2)
+
+
+def test_scram_credentials_skipped_when_describe_times_out(check, dd_run_check, aggregator):
+    """A TimeoutError from the API is swallowed; other cluster metadata is still collected."""
+    import concurrent.futures
+
+    kafka_consumer_check, _ = _make_scram_check(check, exception=concurrent.futures.TimeoutError())
     _wire_cache(kafka_consumer_check)
 
     dd_run_check(kafka_consumer_check)
