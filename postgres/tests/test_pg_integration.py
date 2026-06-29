@@ -1249,8 +1249,9 @@ def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enab
     expected_count = 0 if dbm_enabled is False else 1
     check_stat_io_metrics(aggregator, expected_tags, count=expected_count)
 
+
 def test_automatic_diagnostics_tags(aggregator, integration_check, pg_instance):
-    pg_instance['enable_automatic_diagnostics'] = True
+    pg_instance['automatic_diagnostics'] = {'enabled': True}
     check = integration_check(pg_instance)
     check.run()
     # Just check we don't error out

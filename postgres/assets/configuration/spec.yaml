@@ -1591,15 +1591,31 @@ files:
       value:
         example: false
         type: boolean
-    - name: enable_automatic_diagnostics
+    - name: automatic_diagnostics
       fleet_configurable: false
-      description: |
-        Set to `true` to enable automatic diagnostics. Diagnostics will run when the integration
-        encounters an error and report the results to the Datadog platform. Diagnostics will run every 5 minutes at most.        
       hidden: true
-      value:
-        example: false
-        type: boolean
+      description: |
+        Configure automatic diagnostics. When enabled, the integration runs its setup diagnostics and
+        reports the results to the Datadog platform.
+      options:
+        - name: enabled
+          description: Set to `true` to enable automatic diagnostics.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+          hidden: true
+          fleet_configurable: false
+        - name: interval
+          description: |
+            Set the interval (in seconds) at which automatic diagnostics run. The diagnostics run at
+            most once per interval.
+          value:
+            type: number
+            example: 600
+            display_default: 600
+          hidden: true
+          fleet_configurable: false
     - template: instances/db
       overrides:
         custom_queries.value.example:

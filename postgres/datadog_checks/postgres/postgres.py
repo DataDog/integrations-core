@@ -197,6 +197,7 @@ class PostgreSql(DatabaseCheck):
         )  # type: TTLCache
 
         self.diagnosis.register(functools.partial(run_diagnostics, self))
+        self._last_automatic_diagnostics_run = 0
 
         self._cancel_lock = threading.Lock()
         self._is_running = False
@@ -1318,10 +1319,16 @@ class PostgreSql(DatabaseCheck):
             self.log.info("Reach check finally")
             # Add the warnings saved during the execution of the check
             self._report_warnings()
+            # Periodically run setup diagnostics (gated by automatic_diagnostics.interval)
+            self._run_automatic_diagnostics()
 
     def _run_automatic_diagnostics(self):
-        if not self._config.enable_automatic_diagnostics:
+        if not self._config.automatic_diagnostics.enabled:
             return
+        now = time()
+        if now - self._last_automatic_diagnostics_run < self._config.automatic_diagnostics.interval:
+            return
+        self._last_automatic_diagnostics_run = now
         try:
             self.diagnosis.clear()
             run_diagnostics(self)
