@@ -221,6 +221,24 @@ instances:
     #
     # collect_counters_with_distributions: false
 
+    ## @param histogram_percentiles - (list of number or string) - optional
+    ## A list of percentile values to estimate from histogram bucket data using linear interpolation.
+    ## Each entry must be one of: 50, 75, 90, 95, 99, 100, or "avg". Numeric values produce a gauge
+    ## named `{metric_name}.percentile` tagged with `percentile:p<value>` (e.g. `percentile:p95`).
+    ## "avg" produces the same metric tagged `percentile:avg` and is computed as sum/count.
+    ##
+    ## Example:
+    ##   histogram_percentiles:
+    ##     - 50
+    ##     - 95
+    ##     - 99
+    ##     - "avg"
+    #
+    # histogram_percentiles:
+    #   - 50
+    #   - 95
+    #   - 99
+
     ## @param use_process_start_time - boolean - optional - default: false
     ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
     ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
