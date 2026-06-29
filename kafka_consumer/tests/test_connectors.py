@@ -400,3 +400,17 @@ def test_confluent_cloud_oauth_failure_marks_endpoint_unreachable(run_connect_ch
 
     heartbeats = dsm_events(aggregator, 'heartbeat')
     assert heartbeats[-1]['connect_api_status'] == {CONFLUENT_CLOUD_KEY: False}
+
+
+def test_confluent_cloud_emits_metrics_and_config_events(run_connect_check, aggregator):
+    run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        instance_extra={'kafka_connect_url': [], **CONFLUENT_CLOUD_EXTRA},
+    )
+
+    aggregator.assert_metric('kafka.connector.count', value=2)
+
+    cc_base = 'https://api.confluent.cloud/connect/v1/environments/env-abc123/clusters/lkc-xyz789'
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 2
+    assert all(event['connect_url'].startswith(cc_base) for event in events)
