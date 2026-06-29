@@ -542,6 +542,36 @@ def test_check_compacts_timestamps_when_full(kafka_instance, check, dd_run_check
     assert "40" in timestamps  # newest endpoint preserved
 
 
+def test_check_preserves_lag_accuracy_after_compaction(kafka_instance, check, dd_run_check, aggregator):
+    # After compaction the interpolated lag must still be correct: dropped interior points must not
+    # distort the offset/timestamp curve used to estimate consumer lag.
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = 4
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 25)])]
+    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    # Collinear samples (equal spacing in both offset and time) so any interior point can be
+    # removed by VW without loss of accuracy.
+    initial_cache = {"topic1_0": {"10": 1000.0, "20": 2000.0, "30": 3000.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    with mock.patch('datadog_checks.kafka_consumer.kafka_consumer.time', return_value=4000.0):
+        dd_run_check(kafka_consumer_check)
+
+    written = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
+    assert len(written["topic1_0"]) == 2  # compacted from 4 entries to 2
+
+    # Consumer at offset 25 interpolates between {10: 1000, 40: 4000} → t=2500; lag = 4000 - 2500 = 1500.
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=1500.0, count=1)
+
+
 def test_check_prunes_timestamps_below_earliest_consumer_offset(kafka_instance, check, dd_run_check):
     # During check(), _add_broker_timestamps prunes cached entries below the earliest consumer
     # offset (keeping one anchor), so only relevant samples are retained.
