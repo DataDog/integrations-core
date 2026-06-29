@@ -345,6 +345,15 @@ files:
           type: integer
           example: 180
           display_default: 180
+      - name: collect_scram_credentials
+        description: |
+          Collect the SASL/SCRAM credential inventory (per-user mechanisms and iteration counts) when
+          enable_cluster_monitoring is set to true. Set to false to opt out of this collection.
+        fleet_configurable: true
+        value:
+          type: boolean
+          example: true
+          display_default: true
       - name: schema_registry_url
         description: |
           Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.

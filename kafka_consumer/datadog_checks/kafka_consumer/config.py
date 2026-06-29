@@ -108,6 +108,10 @@ class KafkaConfig:
 
         self._kafka_configs_refresh_interval = int(instance.get('kafka_configs_refresh_interval', 180))
 
+        self._collect_scram_credentials = self._cluster_monitoring_enabled and is_affirmative(
+            instance.get('collect_scram_credentials', True)
+        )
+
         self._collect_schema_registry = instance.get('schema_registry_url')
 
         # Schema Registry authentication
