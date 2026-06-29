@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from ddev.ai.config.engine import ConfigStatus, ConfigurationEngine
+from ddev.ai.config.engine import BrokenEntry, ConfigurationEngine, ValidEntry
 from ddev.ai.config.errors import FlowConfigError
 
 
@@ -42,7 +42,7 @@ def test_scans_agent_md(tmp_path):
     write(tmp_path / "agents" / "a.md", "---\ntype: agent\nmodel: m\n---\nyou are an agent\n")
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng._agents["a"].config.system_prompt == "you are an agent"
-    assert eng._agents["a"].status == ConfigStatus.OK
+    assert isinstance(eng._agents["a"], ValidEntry)
 
 
 def test_prompt_goal_memory_routing(tmp_path):
@@ -57,7 +57,7 @@ def test_prompt_goal_memory_routing(tmp_path):
 def test_type_folder_mismatch_is_broken(tmp_path):
     write(tmp_path / "agents" / "x.md", "---\ntype: prompt\n---\nbody\n")
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    assert eng._agents["x"].status == ConfigStatus.BROKEN
+    assert isinstance(eng._agents["x"], BrokenEntry)
 
 
 def test_missing_user_dir_raises(tmp_path):
@@ -68,7 +68,7 @@ def test_missing_user_dir_raises(tmp_path):
 def test_broken_flow_item_lands_in_flows(tmp_path):
     write(tmp_path / "f.yaml", "- type: flow\n  config:\n    name: bad\n    bogus: 1\n")
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    assert eng._flows["bad"].status == ConfigStatus.BROKEN
+    assert isinstance(eng._flows["bad"], BrokenEntry)
     assert "bad" not in eng._phases
 
 
@@ -105,7 +105,7 @@ def test_broken_file_does_not_conflict_with_real_phase(tmp_path):
     write(tmp_path / "real.yaml", "- type: phase\n  config:\n    name: p\n")
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert not eng.has_conflicts
-    assert eng._phases["p"].status == ConfigStatus.OK
+    assert isinstance(eng._phases["p"], ValidEntry)
 
 
 def test_nameless_broken_item_goes_to_file_errors_not_registry(tmp_path):
@@ -124,7 +124,7 @@ def test_unknown_type_broken_item_goes_to_file_errors(tmp_path):
 def test_named_valid_type_broken_item_still_registered(tmp_path):
     write(tmp_path / "f.yaml", "- type: flow\n  config:\n    name: bad\n    bogus: 1\n")
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    assert eng._flows["bad"].status == ConfigStatus.BROKEN  # referenceable by name
+    assert isinstance(eng._flows["bad"], BrokenEntry)  # referenceable by name
 
 
 def test_same_named_files_with_nameless_broken_items_do_not_conflict(tmp_path):

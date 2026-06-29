@@ -38,12 +38,20 @@ class ConfigStatus(StrEnum):
 
 
 @dataclass
-class RegistryEntry[C]:
-    config: C | None
+class ValidEntry[C]:
+    config: C
     source_file: Path
-    status: ConfigStatus
-    error: str | None = None
     overridden: list[Path] = field(default_factory=list)
+
+
+@dataclass
+class BrokenEntry:
+    source_file: Path
+    error: str
+    overridden: list[Path] = field(default_factory=list)
+
+
+type RegistryEntry[C] = ValidEntry[C] | BrokenEntry
 
 
 @dataclass
@@ -193,16 +201,12 @@ class ConfigurationEngine:
             raw_name = item.get("config", {}).get("name") if isinstance(item, dict) else None
             raw_type = item.get("type") if isinstance(item, dict) else None
             if raw_name and raw_type in ("phase", "flow"):
-                self._accumulate(
-                    raw_type,
-                    raw_name,
-                    RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e)),
-                )
+                self._accumulate(raw_type, raw_name, BrokenEntry(source_file=path, error=str(e)))
             else:
                 self._record_file_error(path, f"item {index}: {e}")
             return
 
-        entry_ok: RegistryEntry[Any] = RegistryEntry(config=envelope.config, source_file=path, status=ConfigStatus.OK)
+        entry_ok: RegistryEntry[Any] = ValidEntry(config=envelope.config, source_file=path)
         self._accumulate(envelope.type, envelope.config.name, entry_ok)
 
     def _dispatch_agent_md(self, path: Path) -> None:
@@ -210,21 +214,14 @@ class ConfigurationEngine:
         try:
             meta, body = parse_md_file(path)
         except FlowConfigError as e:
-            self._accumulate(
-                "agent", stem, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
-            )
+            self._accumulate("agent", stem, BrokenEntry(source_file=path, error=str(e)))
             return
 
         if meta.get("type") != "agent":
             self._accumulate(
                 "agent",
                 stem,
-                RegistryEntry(
-                    config=None,
-                    source_file=path,
-                    status=ConfigStatus.BROKEN,
-                    error=f"{path}: expected type 'agent', got {meta.get('type')!r}",
-                ),
+                BrokenEntry(source_file=path, error=f"{path}: expected type 'agent', got {meta.get('type')!r}"),
             )
             return
 
@@ -233,21 +230,17 @@ class ConfigurationEngine:
         try:
             config = AgentConfig.model_validate(fm)
         except ValidationError as e:
-            self._accumulate(
-                "agent", stem, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
-            )
+            self._accumulate("agent", stem, BrokenEntry(source_file=path, error=str(e)))
             return
 
-        self._accumulate("agent", stem, RegistryEntry(config=config, source_file=path, status=ConfigStatus.OK))
+        self._accumulate("agent", stem, ValidEntry(config=config, source_file=path))
 
     def _dispatch_prompt_md(self, path: Path) -> None:
         stem = path.stem
         try:
             meta, body = parse_md_file(path)
         except FlowConfigError as e:
-            self._accumulate(
-                "prompt", stem, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
-            )
+            self._accumulate("prompt", stem, BrokenEntry(source_file=path, error=str(e)))
             return
 
         file_type = meta.get("type")
@@ -255,16 +248,11 @@ class ConfigurationEngine:
             self._accumulate(
                 "prompt",
                 stem,
-                RegistryEntry(
-                    config=None,
-                    source_file=path,
-                    status=ConfigStatus.BROKEN,
-                    error=f"{path}: expected type in {PROMPT_TYPES!r}, got {file_type!r}",
-                ),
+                BrokenEntry(source_file=path, error=f"{path}: expected type in {PROMPT_TYPES!r}, got {file_type!r}"),
             )
             return
 
-        entry: RegistryEntry[str] = RegistryEntry(config=body, source_file=path, status=ConfigStatus.OK)
+        entry: RegistryEntry[str] = ValidEntry(config=body, source_file=path)
         if file_type == "prompt":
             self._accumulate("prompt", stem, entry)
         elif file_type == "goal":
@@ -274,16 +262,13 @@ class ConfigurationEngine:
 
     def _validate_flow(self, flow_name: str) -> FlowDiagnostics:
         entry = self._flows[flow_name]
-        if entry.status is ConfigStatus.BROKEN:
+        if isinstance(entry, BrokenEntry):
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, [entry.error or "broken flow"])
 
-        assert entry.config is not None
         fc: FlowConfig = entry.config
         errors: list[str] = []
 
-        ok_agents = {
-            name: e.config for name, e in self._agents.items() if e.status is ConfigStatus.OK and e.config is not None
-        }
+        ok_agents = {name: e.config for name, e in self._agents.items() if isinstance(e, ValidEntry)}
 
         scheduled_phases: list[PhaseConfig] = []
         for fe in fc.flow:
@@ -293,10 +278,9 @@ class ConfigurationEngine:
                     f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered{self._file_errors_note()}"
                 )
                 continue
-            if phase_entry.status is ConfigStatus.BROKEN:
+            if isinstance(phase_entry, BrokenEntry):
                 errors.append(f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken")
                 continue
-            assert phase_entry.config is not None
             pc: PhaseConfig = phase_entry.config
             scheduled_phases.append(pc)
 
@@ -315,7 +299,7 @@ class ConfigurationEngine:
                         f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered"
                         f"{self._file_errors_note()}"
                     )
-                elif agent_entry.status is ConfigStatus.BROKEN:
+                elif isinstance(agent_entry, BrokenEntry):
                     errors.append(f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken")
 
             for task in pc.tasks:
@@ -327,16 +311,20 @@ class ConfigurationEngine:
                 errors.extend(self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, "memory", pc.name))
 
         errors.extend(self._validate_dependencies(flow_name, fc))
-        resolved_variables, var_errors = self._resolve_variables(scheduled_phases, fc)
+        resolved_variables, var_errors = self._resolve_variables(scheduled_phases, fc, ok_agents)
         errors.extend(var_errors)
 
         if errors:
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
 
+        ok_prompts = {n: e.config for n, e in self._prompts.items() if isinstance(e, ValidEntry)}
+        ok_goals = {n: e.config for n, e in self._goals.items() if isinstance(e, ValidEntry)}
+        ok_memories = {n: e.config for n, e in self._memories.items() if isinstance(e, ValidEntry)}
+
         resolved = ResolvedFlow(
             name=flow_name,
-            agents={pc.agent: self._agents[pc.agent].config for pc in scheduled_phases if pc.agent is not None},
-            phases={pc.name: self._inline(pc) for pc in scheduled_phases},
+            agents={pc.agent: ok_agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
+            phases={pc.name: self._inline(pc, ok_prompts, ok_goals, ok_memories) for pc in scheduled_phases},
             flow=fc.flow,
             variables=resolved_variables,
         )
@@ -349,7 +337,7 @@ class ConfigurationEngine:
                 f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is not registered"
                 f"{self._file_errors_note()}"
             ]
-        if ref_entry.status is ConfigStatus.BROKEN:
+        if isinstance(ref_entry, BrokenEntry):
             return [f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is broken"]
         return []
 
@@ -377,14 +365,12 @@ class ConfigurationEngine:
         return errors
 
     def _resolve_variables(
-        self, scheduled_phases: list[PhaseConfig], fc: FlowConfig
+        self, scheduled_phases: list[PhaseConfig], fc: FlowConfig, ok_agents: dict[str, AgentConfig]
     ) -> tuple[dict[str, str], list[str]]:
         declarations: list[VariableDeclaration] = []
         for pc in scheduled_phases:
-            if pc.agent is not None and pc.agent in self._agents:
-                agent_config = self._agents[pc.agent].config
-                if agent_config is not None:
-                    declarations.extend(agent_config.variables)
+            if pc.agent is not None and pc.agent in ok_agents:
+                declarations.extend(ok_agents[pc.agent].variables)
             declarations.extend(pc.variables)
 
         errors: list[str] = []
@@ -410,22 +396,22 @@ class ConfigurationEngine:
         resolved = {**defaults, **fc.variables}
         return resolved, errors
 
-    def _inline(self, phase: PhaseConfig) -> PhaseConfig:
+    def _inline(
+        self, phase: PhaseConfig, prompts: dict[str, str], goals: dict[str, str], memories: dict[str, str]
+    ) -> PhaseConfig:
         tasks = []
         for t in phase.tasks:
             upd: dict[str, Any] = {}
             if t.prompt_ref is not None:
-                upd["prompt"] = self._prompts[t.prompt_ref].config
+                upd["prompt"] = prompts[t.prompt_ref]
                 upd["prompt_ref"] = None
             if t.goal_ref is not None:
-                upd["goal"] = self._goals[t.goal_ref].config
+                upd["goal"] = goals[t.goal_ref]
                 upd["goal_ref"] = None
             tasks.append(t.model_copy(update=upd) if upd else t)
         cp = phase.checkpoint
         if cp is not None and cp.memory_prompt_ref is not None:
-            cp = cp.model_copy(
-                update={"memory_prompt": self._memories[cp.memory_prompt_ref].config, "memory_prompt_ref": None}
-            )
+            cp = cp.model_copy(update={"memory_prompt": memories[cp.memory_prompt_ref], "memory_prompt_ref": None})
         return phase.model_copy(update={"tasks": tasks, "checkpoint": cp})
 
     def _record_file_error(self, path: Path, message: str) -> None:
