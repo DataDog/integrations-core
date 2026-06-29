@@ -6,8 +6,8 @@ import json
 
 import mock
 import pytest
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 from datadog_checks.rabbitmq.rabbitmq import (
@@ -25,7 +25,7 @@ pytestmark = [pytest.mark.unit, common.requires_management]
 
 
 def test__get_data(check, mock_http):
-    mock_http.get.side_effect = [requests.exceptions.HTTPError, ValueError]
+    mock_http.get.side_effect = [HTTPStatusError("error"), ValueError]
     with pytest.raises(RabbitMQException):
         check._get_data('')
     with pytest.raises(RabbitMQException):

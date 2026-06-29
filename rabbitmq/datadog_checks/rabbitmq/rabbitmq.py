@@ -10,6 +10,7 @@ from urllib.parse import quote_plus, urljoin, urlparse
 from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_native_string
+from datadog_checks.base.utils.http_exceptions import HTTPError
 
 from .const import (
     ALERT_THRESHOLD,
@@ -187,7 +188,7 @@ class RabbitMQManagement(AgentCheck):
             r = self.http.get(url)
             r.raise_for_status()
             return r.json()
-        except RequestException as e:
+        except (RequestException, HTTPError) as e:
             raise RabbitMQException('Cannot open RabbitMQ API url: {} {}'.format(url, str(e)))
         except ValueError as e:
             raise RabbitMQException('Cannot parse JSON response from API url: {} {}'.format(url, str(e)))
