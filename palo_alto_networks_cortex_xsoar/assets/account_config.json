@@ -5,10 +5,9 @@
       "text": {},
       "key": "api_url",
       "label": "API URL",
-      "help": "Palo Alto Networks Cortex XSOAR API URL.",
+      "help": "Palo Alto Networks Cortex XSOAR API URL (e.g. the tenant FQDN shown in Settings, such as https://api-<tenant>.<region>.paloaltonetworks.com).",
       "editable": true,
-      "required": true,
-      "pattern": "^https://(([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*)\\.)*paloaltonetworks\\.com(/[^?\\s]*)?$"
+      "required": true
     },
     {
       "text": {},
