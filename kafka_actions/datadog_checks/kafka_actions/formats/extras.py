@@ -149,6 +149,8 @@ def _apply_msgpack_fields(instance: Any, result_dict: dict[str, Any], msgpack_pa
                 continue
             if field_desc.message_type is None:
                 continue
+            if field_desc.message_type.GetOptions().map_entry:
+                continue
             sub_out = out.get(key)
             if sub_out is None:
                 continue
