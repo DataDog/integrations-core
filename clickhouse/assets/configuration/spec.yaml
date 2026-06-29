@@ -570,6 +570,35 @@ files:
             type: boolean
             example: false
           fleet_configurable: false
+    - name: asynchronous_insert_buffer_snapshot
+      description: Configure asynchronous insert buffer snapshot monitoring
+      options:
+        - name: enabled
+          description: |
+            Enable collection of asynchronous insert buffer snapshots from system.asynchronous_inserts.
+            Requires `dbm: true`. Emits per-table gauge metrics (clickhouse.asynchronous_inserts.buffer.*)
+            showing bytes pending, pending entry count, active buffer count, and oldest entry age,
+            for trend dashboards and alerting.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
+        - name: collection_interval
+          description: |
+            Set the buffer snapshot collection interval (in seconds). Each collection runs a single
+            query against system.asynchronous_inserts.
+          value:
+            type: number
+            example: 10
+          fleet_configurable: false
+        - name: run_sync
+          hidden: true
+          description: |
+            Run the async insert buffer snapshot collection synchronously. For testing only.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
     - template: instances/db
       overrides:
         custom_queries.value.example:
