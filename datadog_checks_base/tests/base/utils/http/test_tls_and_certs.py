@@ -493,6 +493,16 @@ class TestAIAChasing:
         session.get.assert_not_called()
         assert certs == []
 
+    def test_load_intermediate_certs_forwards_proxies(self):
+        http = RequestsWrapper({'proxy': {'https': 'http://proxy:3128'}}, {})
+        session = mock.MagicMock()
+        session.get.return_value = aia_response(build_cert())
+
+        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
+            http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
+
+        session.get.assert_called_once_with('https://issuer.test/ca.der', proxies={'https': 'http://proxy:3128'})
+
     def test_load_intermediate_certs_allows_private_address(self):
         http = RequestsWrapper({}, {})
         certs = []

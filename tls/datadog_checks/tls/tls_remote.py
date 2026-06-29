@@ -230,7 +230,9 @@ class TLSRemoteCheck(object):
             ):
                 continue
 
-            intermediate_cert = fetch_intermediate_cert(uri, self.log, self.agent_check.http.tls_config)
+            intermediate_cert = fetch_intermediate_cert(
+                uri, self.log, self.agent_check.http.tls_config, self.agent_check.http.options.get('proxies')
+            )
             if intermediate_cert is None:
                 continue
             access_time = get_timestamp()

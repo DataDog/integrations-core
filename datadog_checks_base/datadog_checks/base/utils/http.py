@@ -272,14 +272,19 @@ def _read_capped_content(
 
 
 def fetch_intermediate_cert(
-    uri: str, logger: logging.Logger | logging.LoggerAdapter, tls_config: Mapping[str, object] | None = None
+    uri: str,
+    logger: logging.Logger | logging.LoggerAdapter,
+    tls_config: Mapping[str, object] | None = None,
+    proxies: Mapping[str, str] | None = None,
 ) -> bytes | None:
     if not _is_safe_aia_url(uri, logger):
         return None
 
+    options = {} if proxies is None else {'proxies': dict(proxies)}
+
     # Verified attempt first; only retry without verification on TLS failures.
     try:
-        response = _aia_fetch_session(tls_config, True, logger).get(uri)
+        response = _aia_fetch_session(tls_config, True, logger).get(uri, **options)
         response.raise_for_status()
     except SSLError as e:
         logger.debug('Error fetching intermediate certificate from `%s` (tls_verify=True): %s', uri, e)
@@ -290,7 +295,7 @@ def fetch_intermediate_cert(
         return _read_capped_content(response, uri, logger)
 
     try:
-        response = _aia_fetch_session(tls_config, False, logger).get(uri)
+        response = _aia_fetch_session(tls_config, False, logger).get(uri, **options)
         response.raise_for_status()
     except Exception as e:
         logger.error('Error fetching intermediate certificate from `%s` after TLS fallback: %s', uri, e)
@@ -688,7 +693,7 @@ class RequestsWrapper(object):
 
             uri = access_description.access_location.value
 
-            intermediate_cert = fetch_intermediate_cert(uri, self.logger, self.tls_config)
+            intermediate_cert = fetch_intermediate_cert(uri, self.logger, self.tls_config, self.options.get('proxies'))
             if intermediate_cert is None:
                 continue
 
