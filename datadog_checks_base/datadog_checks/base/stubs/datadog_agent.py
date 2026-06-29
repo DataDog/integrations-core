@@ -173,6 +173,12 @@ class DatadogAgentStub(object):
         # Passthrough stub: obfuscation implementation is in Go code.
         return command
 
+    def scan(self, event):
+        # Sensitive Data Scanner implementation is in Go code. The stub matches
+        # the C binding contract by returning a JSON array of matches; with no
+        # scanner configured in tests, nothing matches.
+        return '[]'
+
     def emit_agent_telemetry(self, check_name, metric_name, metric_value, metric_type):
         self._sent_telemetry[(check_name, metric_name, metric_type)].append(metric_value)
 
