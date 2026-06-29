@@ -281,12 +281,8 @@ class KafkaCheck(AgentCheck):
         prune_floors = prune_floors or {}
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
-            # If the highwater offset went backwards (topic recreated,
-            # retention wipe, or offset reset) any cached pair with a larger
-            # offset points to a now-nonexistent message and would poison
-            # interpolation. Clear the entire cache: surviving low-offset entries
-            # are from the previous generation and VW always preserves the
-            # minimum endpoint, so those stale entries would never age out.
+            # Reset detected: clear the whole cache. Low-offset survivors are from the
+            # previous generation and VW pins the minimum endpoint, so they'd never age out.
             if any(o > highwater_offset for o in timestamps):
                 timestamps.clear()
             timestamps[highwater_offset] = time()
