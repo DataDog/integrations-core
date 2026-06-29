@@ -26,6 +26,20 @@ def register_codec(codec: CompressionCodec) -> None:
         _codecs[codec.name] = codec
 
 
+def _register_builtins() -> None:
+    """Direct-register built-in compression codecs.
+
+    Third-party codecs (snappy, lz4, zstd) have lazy imports inside their
+    ``decompress`` methods — they register unconditionally but raise
+    ``ImportError`` if the backing library is not installed. Imported lazily
+    here to avoid pulling the codec modules in at registry import time.
+    """
+    from .codecs import GzipCodec, Lz4Codec, Lz4DdHdrCodec, SnappyCodec, ZlibCodec, ZstdCodec
+
+    for codec in (GzipCodec(), ZlibCodec(), SnappyCodec(), Lz4Codec(), Lz4DdHdrCodec(), ZstdCodec()):
+        _codecs.setdefault(codec.name, codec)
+
+
 def _load_entry_points() -> None:
     global _loaded
     if _loaded:
@@ -33,6 +47,7 @@ def _load_entry_points() -> None:
     with _lock:
         if _loaded:
             return
+        _register_builtins()
         try:
             eps = entry_points(group=_ENTRY_POINT_GROUP)
         except TypeError:  # pragma: no cover
@@ -52,6 +67,11 @@ def _load_entry_points() -> None:
             except Exception as e:
                 _LOG.warning("Failed to load compression codec '%s': %s", ep.name, e)
         _loaded = True
+
+
+def ensure_codecs_registered() -> None:
+    """Register built-in codecs and resolve entry points (idempotent, lazy)."""
+    _load_entry_points()
 
 
 def get_codec(name: str) -> CompressionCodec | None:

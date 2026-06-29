@@ -19,9 +19,9 @@ import hashlib
 import json
 
 from .compression import get_codec as _get_compression_codec
-from .compression.registry import register_codec as _register_codec
+from .compression.registry import ensure_codecs_registered as _ensure_codecs_registered
 from .formats import get_handler as _get_format_handler
-from .formats.registry import register_handler as _register_handler
+from .formats.registry import ensure_handlers_registered as _ensure_handlers_registered
 
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
 
@@ -30,61 +30,17 @@ SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
 MISSING_SCHEMA = object()
 
 
-def _bootstrap_format_handlers():
-    """Direct-register bundled handlers.
-
-    Entry points only resolve once the wheel has been ``pip install``ed.
-    For source-mode tests and ``ddev test`` runs we register the builtins
-    directly so the check is functional without an install step. Idempotent
-    once the entry-point loader has populated the registry with the same
-    names.
-    """
-    from .formats.builtins import (
-        AvroHandler,
-        BsonHandler,
-        JsonHandler,
-        ProtobufHandler,
-        RawHandler,
-        StringHandler,
-    )
-    from .formats.extras import MsgpackHandler, ProtobufMsgpackHandler
-
-    for h in (
-        JsonHandler(),
-        StringHandler(),
-        RawHandler(),
-        BsonHandler(),
-        AvroHandler(),
-        ProtobufHandler(),
-        MsgpackHandler(),
-        ProtobufMsgpackHandler(),
-    ):
-        _register_handler(h)
-
-
-def _bootstrap_compression_codecs():
-    """Direct-register built-in compression codecs.
-
-    Third-party codecs (snappy, lz4, zstd) have lazy imports inside their
-    ``decompress`` methods — they register unconditionally but raise
-    ``ImportError`` if the backing library is not installed.
-    """
-    from .compression.codecs import GzipCodec, Lz4Codec, Lz4DdHdrCodec, SnappyCodec, ZlibCodec, ZstdCodec
-
-    for c in (GzipCodec(), ZlibCodec(), SnappyCodec(), Lz4Codec(), Lz4DdHdrCodec(), ZstdCodec()):
-        _register_codec(c)
-
-
-_bootstrap_format_handlers()
-_bootstrap_compression_codecs()
-
-
 class MessageDeserializer:
     """Deserialize Kafka messages with pluggable format + compression support."""
 
     def __init__(
         self, log, schema_registry=None, value_compression: str | None = None, key_compression: str | None = None
     ):
+        # Prime the registries on first construction. This is idempotent and
+        # lazy: the registries register their built-ins (and resolve entry
+        # points) once, on first access, rather than as an import side effect.
+        _ensure_handlers_registered()
+        _ensure_codecs_registered()
         self.log = log
         self.schema_registry = schema_registry
         self.value_compression = value_compression

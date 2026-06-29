@@ -31,6 +31,37 @@ def register_handler(handler: FormatHandler) -> None:
         _handlers[handler.name] = handler
 
 
+def _register_builtins() -> None:
+    """Direct-register bundled handlers.
+
+    Entry points only resolve once the wheel has been ``pip install``ed. For
+    source-mode tests and ``ddev test`` runs we register the builtins directly
+    so the check is functional without an install step. Imported lazily here to
+    avoid pulling the handler modules in at registry import time.
+    """
+    from .builtins import (
+        AvroHandler,
+        BsonHandler,
+        JsonHandler,
+        ProtobufHandler,
+        RawHandler,
+        StringHandler,
+    )
+    from .extras import MsgpackHandler, ProtobufMsgpackHandler
+
+    for handler in (
+        JsonHandler(),
+        StringHandler(),
+        RawHandler(),
+        BsonHandler(),
+        AvroHandler(),
+        ProtobufHandler(),
+        MsgpackHandler(),
+        ProtobufMsgpackHandler(),
+    ):
+        _handlers.setdefault(handler.name, handler)
+
+
 def _load_entry_points() -> None:
     global _loaded
     if _loaded:
@@ -38,6 +69,7 @@ def _load_entry_points() -> None:
     with _lock:
         if _loaded:
             return
+        _register_builtins()
         try:
             eps = entry_points(group=_ENTRY_POINT_GROUP)
         except TypeError:  # pragma: no cover — older importlib.metadata
@@ -57,6 +89,11 @@ def _load_entry_points() -> None:
             except Exception as e:
                 _LOG.warning("Failed to load format handler '%s': %s", ep.name, e)
         _loaded = True
+
+
+def ensure_handlers_registered() -> None:
+    """Register built-in handlers and resolve entry points (idempotent, lazy)."""
+    _load_entry_points()
 
 
 def get_handler(name: str) -> FormatHandler | None:
