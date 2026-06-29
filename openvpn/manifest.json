@@ -28,6 +28,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Log Collection",
+      "Category::Network",
       "Category::Security",
       "Category::SIEM",
       "Offering::Integration",

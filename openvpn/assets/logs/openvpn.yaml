@@ -96,6 +96,30 @@ pipeline:
         query: "@syslog.process_name:openvpnas"
       processors:
         - type: grok-parser
+          name: Parsing Authentication Failed Logs
+          enabled: true
+          source: syslog_message
+          samples:
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1010 SENT
+              CONTROL [openvpn]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1011 SENT
+              CONTROL [test-user]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1010 SENT
+              CONTROL [admin]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-02-11 12:32:18 10.10.10.10:1022 SENT
+              CONTROL [devuser]: 'AUTH_FAILED' (status=1)\""
+            - "[-] [OVPN 2] OUT: \"2025-06-12 04:21:09 10.10.10.10:8080 SENT
+              CONTROL [openvpn-user]: 'AUTH_FAILED,TOTP two-factor
+              authentication code is incorrect' (status=1)\""
+          grok:
+            supportRules: ""
+            matchRules: "rule \\[\\-\\] \\[%{regex(\"[^]]+\")}\\] OUT: \"%{notSpace}
+              %{notSpace}
+              %{ip:network.client.ip}:%{notSpace:network.client.port} SENT
+              CONTROL \\[%{regex(\"[^]]+\"):usr.name}\\]:
+              \\'%{regex(\"AUTH_FAILED\"):log_type}(,%{regex(\"[^']+\"):reason}\
+              )?\\'%{data}"
+        - type: grok-parser
           name: Parsing Authentication Success Logs
           enabled: true
           source: syslog_message
