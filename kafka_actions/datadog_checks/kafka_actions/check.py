@@ -343,6 +343,8 @@ class KafkaActionsCheck(AgentCheck):
         if scanned_count >= max_scanned_messages and sent_count < n_messages_retrieved:
             hit_scan_limit = True
 
+        hit_timeout = self.kafka_client.hit_timeout and not hit_retrieved_limit and not hit_scan_limit
+
         elapsed_time = time.time() - start_time
 
         stats = {
@@ -354,6 +356,7 @@ class KafkaActionsCheck(AgentCheck):
             'messages_filtered_out': filtered_out_count,
             'hit_scan_limit': hit_scan_limit,
             'hit_retrieved_limit': hit_retrieved_limit,
+            'hit_timeout': hit_timeout,
             'elapsed_time_seconds': round(elapsed_time, 3),
             'n_messages_retrieved': n_messages_retrieved,
             'max_scanned_messages': max_scanned_messages,
@@ -372,6 +375,14 @@ class KafkaActionsCheck(AgentCheck):
                 "Hit max_scanned_messages limit (%d) before retrieving %d messages. Only found %d matching messages.",
                 max_scanned_messages,
                 n_messages_retrieved,
+                sent_count,
+            )
+
+        if hit_timeout:
+            self.log.warning(
+                "Hit the %dms timeout after scanning %d messages and retrieving %d. Result may be incomplete.",
+                timeout_ms,
+                scanned_count,
                 sent_count,
             )
 
