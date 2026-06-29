@@ -6,8 +6,8 @@ from copy import deepcopy
 import mock
 import pytest
 import requests
-from datadog_checks.dev.utils import get_metadata_metrics
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
