@@ -240,13 +240,11 @@ def _der_to_pem(der_cert: bytes) -> str:
 
 
 def _get_aia_tls_config(tls_config: Mapping[str, object] | None, tls_verify: bool) -> dict[str, object]:
-    # Keep trust/negotiation settings, but never auth, client certs, proxies, redirects, or session state.
+    # Keep trust/negotiation settings, but never auth, client certs, or session state.
     config = {
         key: value for key, value in (tls_config or {}).items() if key in AIA_TLS_CONFIG_FIELDS and value is not None
     }
     config['tls_verify'] = tls_verify
-    config['skip_proxy'] = True
-    config['allow_redirects'] = False
     return config
 
 

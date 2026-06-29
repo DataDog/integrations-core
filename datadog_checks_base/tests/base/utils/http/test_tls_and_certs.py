@@ -476,8 +476,6 @@ class TestAIAChasing:
                 'tls_protocols_allowed': ['TLSv1.2'],
                 'tls_validate_hostname': False,
                 'tls_verify': True,
-                'skip_proxy': True,
-                'allow_redirects': False,
             },
             {},
             logger=http.logger,
@@ -565,8 +563,7 @@ class TestAIAChasing:
 
         configs = [call.args[0] for call in wrapper.call_args_list]
         assert configs[0]['tls_verify'] is True
-        assert configs[0]['skip_proxy'] is True
-        assert any(config['tls_verify'] is False and config['skip_proxy'] is True for config in configs)
+        assert any(config['tls_verify'] is False for config in configs)
         secure.get.assert_called_once_with('https://issuer.test/ca.der')
         plain.get.assert_called_once_with('https://issuer.test/ca.der')
 
