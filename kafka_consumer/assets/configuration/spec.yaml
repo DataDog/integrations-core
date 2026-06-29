@@ -588,10 +588,13 @@ files:
           Confluent Cloud environment ID (e.g. ``env-abc123``). When set together with
           ``kafka_connect_confluent_cloud_cluster_id``, connector metrics and configuration events
           are also collected from the Confluent Cloud Connect REST API.
+          Authentication uses ``kafka_connect_username`` and ``kafka_connect_password``, which must be
+          set to your Confluent Cloud API key and secret respectively.
         fleet_configurable: true
         value:
           type: string
           example: env-abc123
+          display_default: null
       - name: kafka_connect_confluent_cloud_cluster_id
         description: |
           Confluent Cloud Kafka cluster ID (e.g. ``lkc-xyz789``). Required together with
@@ -600,6 +603,7 @@ files:
         value:
           type: string
           example: lkc-xyz789
+          display_default: null
       - name: kafka_connect_confluent_cloud_url
         description: |
           Base URL for the Confluent Cloud REST API. Override only when using private networking

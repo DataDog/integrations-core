@@ -48,14 +48,6 @@ def instance_kafka_configs_refresh_interval():
     return 180
 
 
-def instance_kafka_connect_confluent_cloud_cluster_id():
-    return 'lkc-xyz789'
-
-
-def instance_kafka_connect_confluent_cloud_environment_id():
-    return 'env-abc123'
-
-
 def instance_kafka_connect_confluent_cloud_url():
     return 'https://api.confluent.cloud'
 
