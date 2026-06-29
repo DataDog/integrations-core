@@ -1255,4 +1255,4 @@ def test_automatic_diagnostics_tags(aggregator, integration_check, pg_instance):
     check = integration_check(pg_instance)
     check.run()
     # Just check we don't error out
-    check_common_metrics(aggregator)
+    check_common_metrics(aggregator, [])
