@@ -231,7 +231,7 @@ class TLSRemoteCheck(object):
                 continue
 
             intermediate_cert = fetch_intermediate_cert(
-                uri, self.log, self.agent_check.http.tls_config, self.agent_check.http.options.get('proxies')
+                uri, self.log, self.agent_check.http.tls_config, self.agent_check.http.options
             )
             if intermediate_cert is None:
                 continue

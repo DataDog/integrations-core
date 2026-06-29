@@ -245,7 +245,7 @@ def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote
             c.checker.load_intermediate_certs(b'leaf')
 
     fetch.assert_called_once_with(
-        uri, c.checker.log, {'tls_ca_cert': '/path/to/ca.pem'}, {'https': 'http://proxy:3128'}
+        uri, c.checker.log, {'tls_ca_cert': '/path/to/ca.pem'}, {'proxies': {'https': 'http://proxy:3128'}}
     )
     c.get_tls_context.return_value.load_verify_locations.assert_called_once_with(cadata=b'intermediate')
 

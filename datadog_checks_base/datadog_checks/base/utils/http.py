@@ -271,16 +271,26 @@ def _read_capped_content(
     return b''.join(chunks)
 
 
+AIA_REQUEST_OPTIONS = ('proxies', 'timeout', 'allow_redirects')
+
+
+def _get_aia_request_options(request_options: Mapping[str, object] | None) -> dict[str, object]:
+    # Carry over non-credential request behavior (proxy, timeout, redirects); never auth or client certs.
+    if not request_options:
+        return {}
+    return {key: request_options[key] for key in AIA_REQUEST_OPTIONS if key in request_options}
+
+
 def fetch_intermediate_cert(
     uri: str,
     logger: logging.Logger | logging.LoggerAdapter,
     tls_config: Mapping[str, object] | None = None,
-    proxies: Mapping[str, str] | None = None,
+    request_options: Mapping[str, object] | None = None,
 ) -> bytes | None:
     if not _is_safe_aia_url(uri, logger):
         return None
 
-    options = {} if proxies is None else {'proxies': dict(proxies)}
+    options = _get_aia_request_options(request_options)
 
     # Verified attempt first; only retry without verification on TLS failures.
     try:
@@ -693,7 +703,7 @@ class RequestsWrapper(object):
 
             uri = access_description.access_location.value
 
-            intermediate_cert = fetch_intermediate_cert(uri, self.logger, self.tls_config, self.options.get('proxies'))
+            intermediate_cert = fetch_intermediate_cert(uri, self.logger, self.tls_config, self.options)
             if intermediate_cert is None:
                 continue
 

@@ -25,6 +25,9 @@ pytestmark = [pytest.mark.unit]
 
 TEST_CIPHERS = ['AES256-GCM-SHA384', 'AES128-GCM-SHA256']
 
+# Non-credential request options forwarded to AIA fetches (defaults for a bare RequestsWrapper).
+AIA_GET_KWARGS = {'proxies': None, 'timeout': (10.0, 10.0), 'allow_redirects': True}
+
 
 def private_key():
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -493,7 +496,7 @@ class TestAIAChasing:
         session.get.assert_not_called()
         assert certs == []
 
-    def test_load_intermediate_certs_forwards_proxies(self):
+    def test_load_intermediate_certs_forwards_request_options(self):
         http = RequestsWrapper({'proxy': {'https': 'http://proxy:3128'}}, {})
         session = mock.MagicMock()
         session.get.return_value = aia_response(build_cert())
@@ -501,7 +504,9 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
 
-        session.get.assert_called_once_with('https://issuer.test/ca.der', proxies={'https': 'http://proxy:3128'})
+        session.get.assert_called_once_with(
+            'https://issuer.test/ca.der', **{**AIA_GET_KWARGS, 'proxies': {'https': 'http://proxy:3128'}}
+        )
 
     def test_load_intermediate_certs_allows_private_address(self):
         http = RequestsWrapper({}, {})
@@ -512,7 +517,7 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('http://10.0.0.5/ca.der'), certs)
 
-        session.get.assert_called_once_with('http://10.0.0.5/ca.der')
+        session.get.assert_called_once_with('http://10.0.0.5/ca.der', **AIA_GET_KWARGS)
         assert len(certs) == 1
 
     def test_load_intermediate_certs_rejects_oversized_body(self):
@@ -578,8 +583,8 @@ class TestAIAChasing:
                 mock.call(http_module._get_aia_tls_config(http.tls_config, False), {}, logger=http.logger),
             ]
         )
-        secure.get.assert_called_once_with('https://issuer.test/ca.der')
-        plain.get.assert_called_once_with('https://issuer.test/ca.der')
+        secure.get.assert_called_once_with('https://issuer.test/ca.der', **AIA_GET_KWARGS)
+        plain.get.assert_called_once_with('https://issuer.test/ca.der', **AIA_GET_KWARGS)
 
     def test_aia_fetch_session_does_not_chase(self):
         session = mock.MagicMock()
@@ -612,7 +617,7 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(cert, certs)
 
-        session.get.assert_called_once_with('http://issuer.test/ca.der')
+        session.get.assert_called_once_with('http://issuer.test/ca.der', **AIA_GET_KWARGS)
         assert len(certs) == 1
 
     def test_load_intermediate_certs_recurses(self):
@@ -628,8 +633,8 @@ class TestAIAChasing:
             http.load_intermediate_certs(build_cert('http://issuer.test/intermediate.der'), certs)
 
         assert session.get.call_args_list == [
-            mock.call('http://issuer.test/intermediate.der'),
-            mock.call('http://issuer.test/root.der'),
+            mock.call('http://issuer.test/intermediate.der', **AIA_GET_KWARGS),
+            mock.call('http://issuer.test/root.der', **AIA_GET_KWARGS),
         ]
         assert len(certs) == 2
 
