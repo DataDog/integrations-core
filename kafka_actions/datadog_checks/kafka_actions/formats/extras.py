@@ -16,6 +16,8 @@ from __future__ import annotations
 import base64
 import datetime
 import json
+import logging
+from typing import Any
 
 from .base import FormatHandler
 
@@ -40,7 +42,9 @@ class MsgpackHandler(FormatHandler):
 
     name = 'msgpack'
 
-    def deserialize(self, message: bytes, schema, *, log, uses_schema_registry: bool) -> str | None:
+    def deserialize(
+        self, message: bytes, schema: Any, *, log: logging.Logger, uses_schema_registry: bool
+    ) -> str | None:
         if not message:
             return None
         import msgpack
@@ -48,7 +52,7 @@ class MsgpackHandler(FormatHandler):
         try:
             decoded = msgpack.unpackb(message, raw=False, timestamp=3)
         except Exception as e:
-            raise ValueError(f"Failed to deserialize msgpack message: {e}")
+            raise ValueError(f"Failed to deserialize msgpack message: {e}") from e
         return json.dumps(decoded, cls=_MsgpackJSONEncoder)
 
 
@@ -85,7 +89,9 @@ class ProtobufMsgpackHandler(FormatHandler):
         proto_schema = ProtobufHandler().build_schema_from_registry(wrapper['schema'], dep_schemas)
         return (proto_schema, set(wrapper.get('msgpack_fields') or []))
 
-    def deserialize(self, message: bytes, schema, *, log, uses_schema_registry: bool) -> str | None:
+    def deserialize(
+        self, message: bytes, schema: Any, *, log: logging.Logger, uses_schema_registry: bool
+    ) -> str | None:
         from google.protobuf.json_format import MessageToDict
 
         from datadog_checks.kafka_actions.message_deserializer import (
@@ -119,7 +125,7 @@ class ProtobufMsgpackHandler(FormatHandler):
                 _apply_msgpack_fields(instance, result, msgpack_paths)
             return json.dumps(result, cls=_MsgpackJSONEncoder)
         except Exception as e:
-            raise ValueError(f"Failed to deserialize protobuf_msgpack message: {e}")
+            raise ValueError(f"Failed to deserialize protobuf_msgpack message: {e}") from e
 
 
 def _apply_msgpack_fields(instance, result_dict: dict, msgpack_paths: set) -> None:

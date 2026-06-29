@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -37,6 +38,8 @@ class FormatHandler(ABC):
         return self.build_schema(schema_str)
 
     @abstractmethod
-    def deserialize(self, message: bytes, schema: Any, *, log, uses_schema_registry: bool) -> str | None:
+    def deserialize(
+        self, message: bytes, schema: Any, *, log: logging.Logger, uses_schema_registry: bool
+    ) -> str | None:
         """Decode ``message`` and return a JSON string (or None for empty messages)."""
         raise NotImplementedError
