@@ -1316,7 +1316,6 @@ class PostgreSql(DatabaseCheck):
                 raw=True,
             )
         finally:
-            self.log.info("Reach check finally")
             # Add the warnings saved during the execution of the check
             self._report_warnings()
             # Periodically run setup diagnostics (gated by automatic_diagnostics.interval)
