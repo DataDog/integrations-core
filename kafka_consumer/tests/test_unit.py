@@ -569,18 +569,30 @@ def test_add_broker_timestamps_clears_low_offset_entries_on_partial_reset(kafka_
     assert 100 in timestamps
 
 
-def test_add_broker_timestamps_compacts_when_full(kafka_instance, check):
+def test_check_compacts_timestamps_when_full(kafka_instance, check, dd_run_check):
     # When the cache reaches capacity it is compacted down to half its size, keeping the oldest and
     # newest samples and dropping the points that least affect the offset/timestamp curve.
+    kafka_instance['data_streams_enabled'] = True
     kafka_instance['timestamp_history_size'] = 4
-    check = check(kafka_instance)
-    broker_timestamps = {"topic1_0": {10: 1.0, 20: 2.0, 30: 3.0}}
-    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 40})
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
 
-    timestamps = broker_timestamps["topic1_0"]
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 5)])]
+    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    initial_cache = {"topic1_0": {"10": 1.0, "20": 2.0, "30": 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
+    timestamps = written["topic1_0"]
     assert len(timestamps) == 2
-    assert 10 in timestamps  # oldest endpoint preserved
-    assert 40 in timestamps  # newest endpoint preserved
+    assert "10" in timestamps  # oldest endpoint preserved
+    assert "40" in timestamps  # newest endpoint preserved
 
 
 def test_check_prunes_timestamps_below_earliest_consumer_offset(kafka_instance, check, dd_run_check):
