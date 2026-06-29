@@ -86,11 +86,12 @@ class ProtobufMsgpackHandler(FormatHandler):
         return (proto_schema, set(wrapper.get('msgpack_fields') or []))
 
     def deserialize(self, message: bytes, schema, *, log, uses_schema_registry: bool) -> str | None:
+        from google.protobuf.json_format import MessageToDict
+
         from datadog_checks.kafka_actions.message_deserializer import (
             get_protobuf_message_class,
             read_protobuf_message_indices,
         )
-        from google.protobuf.json_format import MessageToDict
 
         if not message:
             return None
