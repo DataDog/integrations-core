@@ -367,34 +367,44 @@ class ConfigurationEngine:
     def _resolve_variables(
         self, scheduled_phases: list[PhaseConfig], fc: FlowConfig, ok_agents: dict[str, AgentConfig]
     ) -> tuple[dict[str, str], list[str]]:
+        declarations = self._gather_variable_declarations(scheduled_phases, ok_agents)
+        defaults, errors = self._collect_default_values(declarations)
+        errors.extend(self._find_missing_variables(declarations, defaults, fc))
+        resolved = {**defaults, **fc.variables}
+        return resolved, errors
+
+    def _gather_variable_declarations(
+        self, scheduled_phases: list[PhaseConfig], ok_agents: dict[str, AgentConfig]
+    ) -> list[VariableDeclaration]:
         declarations: list[VariableDeclaration] = []
         for pc in scheduled_phases:
             if pc.agent is not None and pc.agent in ok_agents:
                 declarations.extend(ok_agents[pc.agent].variables)
             declarations.extend(pc.variables)
+        return declarations
 
-        errors: list[str] = []
+    def _collect_default_values(self, declarations: list[VariableDeclaration]) -> tuple[dict[str, str], list[str]]:
         defaults: dict[str, str] = {}
-        seen_defaults: dict[str, str] = {}
-        declared_names: set[str] = set()
+        errors: list[str] = []
         for decl in declarations:
-            declared_names.add(decl.name)
             if decl.default is None:
                 continue
-            if decl.name in seen_defaults and seen_defaults[decl.name] != decl.default:
+            if decl.name in defaults and defaults[decl.name] != decl.default:
                 errors.append(
-                    f"Variable {decl.name!r} has conflicting defaults: {seen_defaults[decl.name]!r} vs {decl.default!r}"
+                    f"Variable {decl.name!r} has conflicting defaults: {defaults[decl.name]!r} vs {decl.default!r}"
                 )
             else:
-                seen_defaults[decl.name] = decl.default
                 defaults[decl.name] = decl.default
+        return defaults, errors
 
-        for name in declared_names:
+    def _find_missing_variables(
+        self, declarations: list[VariableDeclaration], defaults: dict[str, str], fc: FlowConfig
+    ) -> list[str]:
+        errors: list[str] = []
+        for name in {decl.name for decl in declarations}:
             if name not in defaults and name not in fc.variables:
                 errors.append(f"Required variable {name!r} has no default and is not supplied by the flow")
-
-        resolved = {**defaults, **fc.variables}
-        return resolved, errors
+        return errors
 
     def _record_file_error(self, path: Path, message: str) -> None:
         existing = self._file_errors.get(path)
