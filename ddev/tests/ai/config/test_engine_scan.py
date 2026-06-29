@@ -106,3 +106,36 @@ def test_broken_file_does_not_conflict_with_real_phase(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert not eng.has_conflicts
     assert eng._phases["p"].status == ConfigStatus.OK
+
+
+def test_nameless_broken_item_goes_to_file_errors_not_registry(tmp_path):
+    write(tmp_path / "f.yaml", "- type: phase\n  bogus: 1\n")  # no config.name
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng.file_errors and eng._phases == {}
+
+
+def test_unknown_type_broken_item_goes_to_file_errors(tmp_path):
+    write(tmp_path / "f.yaml", "- type: nonsense\n  config:\n    name: x\n")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng.file_errors
+    assert "x" not in eng._phases and "x" not in eng._flows
+
+
+def test_named_valid_type_broken_item_still_registered(tmp_path):
+    write(tmp_path / "f.yaml", "- type: flow\n  config:\n    name: bad\n    bogus: 1\n")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng._flows["bad"].status == ConfigStatus.BROKEN  # referenceable by name
+
+
+def test_same_named_files_with_nameless_broken_items_do_not_conflict(tmp_path):
+    write(tmp_path / "a" / "flow.yaml", "- type: phase\n  bogus: 1\n")
+    write(tmp_path / "b" / "flow.yaml", "- type: phase\n  bogus: 1\n")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert not eng.has_conflicts
+
+
+def test_skipped_item_is_logged(tmp_path, caplog):
+    write(tmp_path / "f.yaml", "- type: nonsense\n  config:\n    name: x\n")
+    with caplog.at_level("WARNING"):
+        ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert any("Skipping unparseable config" in r.getMessage() for r in caplog.records)

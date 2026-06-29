@@ -176,11 +176,11 @@ class ConfigurationEngine:
         try:
             raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         except (yaml.YAMLError, OSError) as e:
-            self._file_errors[path] = str(e)
+            self._record_file_error(path, str(e))
             return
 
         if not isinstance(raw, list):
-            self._file_errors[path] = f"{path}: top-level YAML document must be a list"
+            self._record_file_error(path, f"{path}: top-level YAML document must be a list")
             return
 
         for i, item in enumerate(raw):
@@ -191,20 +191,19 @@ class ConfigurationEngine:
             envelope = RESOURCE_ADAPTER.validate_python(item)
         except (ValidationError, TypeError, ValueError) as e:
             raw_name = item.get("config", {}).get("name") if isinstance(item, dict) else None
-            key = raw_name if raw_name else f"{path.stem}[{index}]"
-            entry: RegistryEntry[Any] = RegistryEntry(
-                config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e)
-            )
             raw_type = item.get("type") if isinstance(item, dict) else None
-            kind: ResourceKind = "flow" if raw_type == "flow" else "phase"
-            self._accumulate(kind, key, entry)
+            if raw_name and raw_type in ("phase", "flow"):
+                self._accumulate(
+                    raw_type,
+                    raw_name,
+                    RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e)),
+                )
+            else:
+                self._record_file_error(path, f"item {index}: {e}")
             return
 
         entry_ok: RegistryEntry[Any] = RegistryEntry(config=envelope.config, source_file=path, status=ConfigStatus.OK)
-        if envelope.type == "phase":
-            self._accumulate("phase", envelope.config.name, entry_ok)
-        elif envelope.type == "flow":
-            self._accumulate("flow", envelope.config.name, entry_ok)
+        self._accumulate(envelope.type, envelope.config.name, entry_ok)
 
     def _dispatch_agent_md(self, path: Path) -> None:
         stem = path.stem
@@ -428,6 +427,11 @@ class ConfigurationEngine:
                 update={"memory_prompt": self._memories[cp.memory_prompt_ref].config, "memory_prompt_ref": None}
             )
         return phase.model_copy(update={"tasks": tasks, "checkpoint": cp})
+
+    def _record_file_error(self, path: Path, message: str) -> None:
+        existing = self._file_errors.get(path)
+        self._file_errors[path] = f"{existing}; {message}" if existing else message
+        self._logger.warning("Skipping unparseable config in %s: %s", path, message)
 
     def _file_errors_note(self) -> str:
         if not self._file_errors:
