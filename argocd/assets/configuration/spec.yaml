@@ -51,11 +51,114 @@ files:
     - name: commit_server_endpoint
       description: |
         Endpoint exposing Commit Server's Prometheus metrics.
+      fleet_configurable: false
       value:
         display_default: null
         example: http://argocd-commit-server:8087/metrics
         type: string
+    - name: collect_genresources
+      hidden: true
       fleet_configurable: false
+      description: |
+        Enable the generic resources pilot collector that ships ArgoCD
+        Applications, Clusters, and Repositories to Datadog as generic
+        resources. Disabled by default.
+      value:
+        type: boolean
+        example: false
+    - name: genresources_endpoint
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Base URL of the ArgoCD REST API (for example, ``https://argocd.example.com``).
+        Required when ``collect_genresources`` is set to ``true``.
+      value:
+        display_default: null
+        example: https://<ARGOCD_HOST>
+        type: string
+    - name: genresources_auth_token
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Raw bearer token used to authenticate against the ArgoCD REST API.
+        When set, the collector adds ``Authorization: Bearer <token>`` to
+        each REST request. Leave unset to inherit the request authentication
+        configured on the instance (for example, the structured ``auth_token``
+        config object handled by the HTTP wrapper).
+      secret: true
+      value:
+        display_default: null
+        example: <BEARER_TOKEN>
+        type: string
+    - name: genresources_ttl_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Time-to-live in seconds applied to every emitted resource.
+        Resources expire ``ttl_seconds`` after the last observation.
+        Minimum of 1.
+      value:
+        type: integer
+        example: 21600
+        minimum: 1
+    - name: genresources_collection_interval_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Minimum number of seconds between generic resources collection cycles.
+        The collector polls the ArgoCD API at most once per interval,
+        independent of the check's metrics scrape frequency, to limit load on
+        the ArgoCD API server in large deployments. Minimum of 1.
+      value:
+        type: integer
+        example: 120
+        minimum: 1
+    - name: genresources_max_resources_per_cycle
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Maximum number of items emitted per resource type per check cycle.
+        When an ArgoCD API endpoint returns more than this, the excess is
+        dropped and a warning is logged. Applied independently to
+        Applications, Clusters, and Repositories.
+      value:
+        type: integer
+        example: 10000
+        minimum: 1
+    - name: genresources_extra_include_paths
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Additional dotted JSON paths appended to the baseline allowlist of
+        every collected resource type. Only enumerated paths are shipped;
+        anything not listed never leaves the Agent. ``[*]`` denotes array
+        iteration. A path that does not match any field for a given type is
+        silently skipped. This list is additive; it can add fields to ship but
+        cannot remove baseline fields. Each path must resolve to a value, or a
+        list of values, not a whole object: a path that lands on an object
+        causes that resource to be dropped, so enumerate leaf fields rather
+        than their parents.
+      value:
+        type: array
+        items:
+          type: string
+        example: []
+    - name: genresources_exclude_paths
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Dotted JSON paths to remove from the baseline allowlist of every
+        collected resource type, applied after ``genresources_extra_include_paths``.
+        An entry removes any allowlisted path equal to it or nested beneath it;
+        for example, ``status.history`` drops every ``status.history[*]`` field
+        while ``status.conditions[*].message`` drops only that leaf. Use this to
+        stop shipping a field without a code change. Removing fields only ever
+        ships less, never more.
+      value:
+        type: array
+        items:
+          type: string
+        example: []
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

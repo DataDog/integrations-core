@@ -96,6 +96,10 @@ def instance_sdiag_path():
     return '/usr/bin/sdiag'
 
 
+def instance_seff_path():
+    return '/usr/bin/seff'
+
+
 def instance_sinfo_collection_level():
     return 1
 

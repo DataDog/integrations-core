@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 6.7.0 / 2026-05-14
+## 7.0.0 / 2026-06-09
+
+***Changed***:
+
+* Update the list of supported ClickHouse versions and relevant metrics to the latest. ([#21294](https://github.com/DataDog/integrations-core/pull/21294))
+
+***Added***:
+
+* Add CPU time metrics (cpu_us, cpu_wait_us) to ClickHouse query metrics, query completions, and query errors. ([#23882](https://github.com/DataDog/integrations-core/pull/23882))
+* Add ClickHouse schema collection: catalog payload (databases, tables, views, columns) under collect_schemas with include/exclude regex filters for databases and tables. ([#23899](https://github.com/DataDog/integrations-core/pull/23899))
+* Add ClickHouse schema metrics: per-table size gauges and per-view refresh status gauges under schema_metrics. ([#23900](https://github.com/DataDog/integrations-core/pull/23900))
+
+***Fixed***:
+
+* Fix ClickHouse check to honor the reported_hostname config option and fall back to the agent hostname when connecting via localhost or 127.0.0.1. ([#23756](https://github.com/DataDog/integrations-core/pull/23756))
+* Store advanced-queries metric definitions as JSON loaded on first check run. ([#23829](https://github.com/DataDog/integrations-core/pull/23829))
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 6.7.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 

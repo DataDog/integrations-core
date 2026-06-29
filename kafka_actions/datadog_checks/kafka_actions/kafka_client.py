@@ -32,6 +32,8 @@ class KafkaActionsClient:
         self.consumer = None
         self.producer = None
         self.admin_client = None
+        # True when consume_messages stopped on the timeout rather than draining all partitions.
+        self.hit_timeout = False
 
     def _get_authentication_config(self) -> dict[str, Any]:
         """Build authentication configuration for librdkafka."""
@@ -134,6 +136,8 @@ class KafkaActionsClient:
                     'group.id': group_id,
                     'auto.offset.reset': 'earliest',
                     'enable.auto.commit': False,
+                    # Signal end-of-partition via a _PARTITION_EOF event so we stop once drained.
+                    'enable.partition.eof': True,
                 }
             )
             self.consumer = Consumer(config)
@@ -193,13 +197,16 @@ class KafkaActionsClient:
         start_offset: int = -2,
         start_timestamp: int | None = None,
         max_messages: int = 1000,
-        timeout_ms: int = 30000,
+        timeout_ms: int = 5000,
         group_id: str = 'kafka_actions',
     ):
-        """Consume messages from a Kafka topic, yielding them as they arrive.
+        """Consume the messages already present in a topic, yielding them as they are read.
 
-        This is a generator that yields messages in real-time as they're consumed,
-        allowing for immediate processing and sending to Datadog.
+        The per-partition high watermark is captured before consumption begins and no message
+        at or beyond it is yielded, so messages produced after the check starts are never
+        returned and the generator can't tail a live topic. A partition stops on EOF or when its
+        captured watermark is reached; the generator returns once all are drained. ``timeout_ms``
+        is only a safety net.
 
         Args:
             topic: Topic name
@@ -207,15 +214,17 @@ class KafkaActionsClient:
             start_offset: Starting offset (-1 for latest, -2 for earliest)
             start_timestamp: Starting timestamp in milliseconds since epoch. When set, start_offset is ignored.
             max_messages: Maximum messages to consume
-            timeout_ms: Global timeout in milliseconds for the entire consumption
+            timeout_ms: Safety-net timeout in milliseconds for the entire consumption
             group_id: Consumer group ID
 
         Yields:
-            Kafka messages as they arrive
+            Kafka messages that existed in the log when consumption began
         """
         consumer = self.get_consumer(group_id)
+        admin = self.get_admin_client()
         start_time = time.time()
         global_timeout_s = timeout_ms / 1000.0
+        self.hit_timeout = False
 
         try:
             if partition == -1:
@@ -227,44 +236,42 @@ class KafkaActionsClient:
             else:
                 partition_ids = [partition]
 
-            if start_timestamp is not None:
-                # Resolve timestamp to per-partition offsets using offsets_for_times.
-                timestamp_partitions = [TopicPartition(topic, p, start_timestamp) for p in partition_ids]
-                partitions = consumer.offsets_for_times(timestamp_partitions, timeout=10)
-                for tp in partitions:
-                    if tp.offset != -1:
-                        self.log.debug(
-                            "Partition %d: timestamp %d resolved to offset %d",
-                            tp.partition,
-                            start_timestamp,
-                            tp.offset,
-                        )
-            elif start_offset == -1:
-                # For "latest" offset, seek back from the high watermark to read the last N existing messages.
-                # Use AdminClient.list_offsets to fetch all high watermarks in a single batched call.
-                admin = self.get_admin_client()
-                offset_request = {TopicPartition(topic, p): OffsetSpec.latest() for p in partition_ids}
-                futures = admin.list_offsets(offset_request, request_timeout=10)
+            # Snapshot each partition's high watermark; we never read at or beyond it.
+            end_request = {TopicPartition(topic, p): OffsetSpec.latest() for p in partition_ids}
+            end_futures = admin.list_offsets(end_request, request_timeout=10)
+            end_offsets = {tp.partition: future.result().offset for tp, future in end_futures.items()}
 
-                partitions = []
-                for tp, future in futures.items():
-                    result = future.result()
-                    seek_offset = max(0, result.offset - max_messages)
-                    partitions.append(TopicPartition(topic, tp.partition, seek_offset))
-                    self.log.debug("Partition %d: high=%d, seeking to %d", tp.partition, result.offset, seek_offset)
-            else:
-                partitions = [TopicPartition(topic, p, start_offset) for p in partition_ids]
+            start_offsets = self._resolve_start_offsets(
+                consumer, admin, topic, partition_ids, start_offset, start_timestamp, max_messages, end_offsets
+            )
 
-            self.log.debug("Assigning partitions: %s", partitions)
+            # Assign only partitions that have messages in [start, high_watermark).
+            partitions = []
+            active = set()
+            for p in partition_ids:
+                start = start_offsets.get(p, 0)
+                end = end_offsets.get(p, 0)
+                if start < end:
+                    partitions.append(TopicPartition(topic, p, start))
+                    active.add(p)
+                else:
+                    self.log.debug("Partition %d: nothing to read (start=%d, high=%d)", p, start, end)
+
+            if not partitions:
+                self.log.debug("No messages to read for topic %s in [start, high-watermark)", topic)
+                return
+
+            self.log.debug("Assigning partitions: %s (high watermarks: %s)", partitions, end_offsets)
             consumer.assign(partitions)
 
             consumed = 0
 
-            while consumed < max_messages:
+            while consumed < max_messages and active:
                 elapsed = time.time() - start_time
                 remaining_timeout = global_timeout_s - elapsed
 
                 if remaining_timeout <= 0:
+                    self.hit_timeout = True
                     self.log.debug("Global timeout reached after %d messages", consumed)
                     break
 
@@ -272,18 +279,27 @@ class KafkaActionsClient:
                 msg = consumer.poll(timeout=poll_timeout)
 
                 if msg is None:
-                    self.log.debug("Poll returned None (no more messages available), stopping consumption")
-                    break
+                    # End-of-data arrives as an EOF event, not None; keep polling until drained.
+                    continue
 
                 if msg.error():
                     if msg.error().code() == KafkaError._PARTITION_EOF:
-                        self.log.debug("Reached end of partition")
+                        active.discard(msg.partition())
                         continue
                     else:
                         raise KafkaException(msg.error())
 
+                p = msg.partition()
+                # Never surface a message at or beyond the captured high watermark.
+                if p not in active or msg.offset() >= end_offsets.get(p, 0):
+                    active.discard(p)
+                    continue
+
                 yield msg
                 consumed += 1
+
+                if msg.offset() >= end_offsets[p] - 1:
+                    active.discard(p)
 
             self.log.debug("Consumed %d messages from topic %s in %.2fs", consumed, topic, time.time() - start_time)
 
@@ -291,6 +307,41 @@ class KafkaActionsClient:
             if consumer:
                 consumer.close()
                 self.consumer = None
+
+    def _resolve_start_offsets(
+        self,
+        consumer,
+        admin,
+        topic: str,
+        partition_ids: list[int],
+        start_offset: int,
+        start_timestamp: int | None,
+        max_messages: int,
+        end_offsets: dict[int, int],
+    ) -> dict[int, int]:
+        """Return a {partition: start_offset} map. A start at or beyond the high watermark
+        means there is nothing to read for that partition."""
+        if start_timestamp is not None:
+            # An offset < 0 means the timestamp is past the end of the log: nothing to read.
+            timestamp_partitions = [TopicPartition(topic, p, start_timestamp) for p in partition_ids]
+            resolved = consumer.offsets_for_times(timestamp_partitions, timeout=10)
+            start_offsets = {}
+            for tp in resolved:
+                end = end_offsets.get(tp.partition, 0)
+                start_offsets[tp.partition] = tp.offset if tp.offset is not None and tp.offset >= 0 else end
+            return start_offsets
+
+        if start_offset == -1:
+            # "latest": seek back from the high watermark to read the last N existing messages.
+            return {p: max(0, end_offsets.get(p, 0) - max_messages) for p in partition_ids}
+
+        if start_offset == -2:
+            # "earliest": use the low watermark as the numeric start.
+            low_request = {TopicPartition(topic, p): OffsetSpec.earliest() for p in partition_ids}
+            low_futures = admin.list_offsets(low_request, request_timeout=10)
+            return {tp.partition: future.result().offset for tp, future in low_futures.items()}
+
+        return dict.fromkeys(partition_ids, start_offset)
 
     def produce_message(
         self,
