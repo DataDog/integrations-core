@@ -127,14 +127,6 @@ class ConfigurationEngine:
         key = (kind, name)
         self._pending.setdefault(key, []).append(entry)
 
-    def _resolve_bucket(
-        self, kind: ResourceKind, name: str, entries: list[RegistryEntry[Any]]
-    ) -> RegistryEntry[Any] | None:
-        if len(entries) > 1:
-            self._conflicts.append(ConfigConflict(name=name, type=kind, sources=[e.source_file for e in entries]))
-            return None
-        return entries[0]
-
     def _resolve_pending(self) -> None:
         registry_map: dict[ResourceKind, dict[str, RegistryEntry[Any]]] = {
             "agent": self._agents,
@@ -145,9 +137,10 @@ class ConfigurationEngine:
             "memory": self._memories,
         }
         for (kind, name), entries in self._pending.items():
-            winner = self._resolve_bucket(kind, name, entries)
-            if winner is not None:
-                registry_map[kind][name] = winner
+            if len(entries) > 1:
+                self._conflicts.append(ConfigConflict(name=name, type=kind, sources=[e.source_file for e in entries]))
+                continue
+            registry_map[kind][name] = entries[0]
 
     def _scan_dir(self, base_dir: Path) -> None:
         for path in sorted(base_dir.rglob("*")):
