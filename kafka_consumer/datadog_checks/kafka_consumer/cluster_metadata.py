@@ -776,7 +776,8 @@ class ClusterMetadataCollector:
 
         Many clusters run without an authorizer (for example AWS MSK Serverless or a security
         protocol with no ACL support); describe_acls raises a KafkaException in that case, which
-        is logged at debug and skipped so the rest of metadata collection is unaffected.
+        is logged at debug and skipped so the rest of metadata collection is unaffected. A
+        describe_acls future that times out is likewise logged at debug and skipped.
         """
         if not self.config._collect_acls:
             return
