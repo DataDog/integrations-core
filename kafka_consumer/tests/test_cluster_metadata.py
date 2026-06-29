@@ -2084,6 +2084,23 @@ def test_collect_acls_skipped_when_authorizer_unavailable(check, dd_run_check, a
     aggregator.assert_metric('kafka.broker.count', value=2)
 
 
+def test_collect_acls_skipped_when_describe_times_out(check, dd_run_check, aggregator):
+    """A describe_acls future timing out is logged and skipped without failing the check."""
+    import concurrent.futures
+
+    kafka_consumer_check = _make_acl_check(check, [])
+    acl_future = mock.MagicMock()
+    acl_future.result.side_effect = concurrent.futures.TimeoutError("timed out")
+    kafka_consumer_check.client.kafka_client.describe_acls.return_value = acl_future
+
+    # Must not raise: an ACL describe timeout cannot break the rest of metadata collection.
+    dd_run_check(kafka_consumer_check)
+
+    assert acl_ds_events(kafka_consumer_check) == []
+    # Other cluster metadata is still collected.
+    aggregator.assert_metric('kafka.broker.count', value=2)
+
+
 def test_collect_acls_disabled_via_opt_out(check, dd_run_check, aggregator):
     """Setting collect_acls=false skips ACL collection even with cluster monitoring enabled."""
     bindings = [make_acl_binding()]

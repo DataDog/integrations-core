@@ -4,11 +4,12 @@
 
 """Kafka Cluster Metadata Collection."""
 
+import concurrent.futures
 import hashlib
 import json
 import time
 from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor, TimeoutError, as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, NotRequired, TypedDict
 from urllib.parse import quote
 
@@ -795,7 +796,7 @@ class ClusterMetadataCollector:
         try:
             future = self.client.kafka_client.describe_acls(any_filter)
             acl_bindings = future.result(timeout=self.config._request_timeout)
-        except (KafkaException, TimeoutError) as e:
+        except (KafkaException, concurrent.futures.TimeoutError) as e:
             self.log.debug("Skipping ACL collection (authorizer unavailable, unsupported, or timed out): %s", e)
             return
 
@@ -822,8 +823,12 @@ class ClusterMetadataCollector:
 
     def _emit_acl_events(self, acl_payloads: list[dict[str, str]], cluster_id: str) -> None:
         """Emit a data-streams-message config event per ACL binding, change-tracked by content."""
-        acl_contents = {self._acl_event_key(payload): json.dumps(payload, sort_keys=True) for payload in acl_payloads}
-        payloads_by_key = {self._acl_event_key(payload): payload for payload in acl_payloads}
+        acl_contents: dict[str, str] = {}
+        payloads_by_key: dict[str, dict[str, str]] = {}
+        for payload in acl_payloads:
+            key = self._acl_event_key(payload)
+            acl_contents[key] = json.dumps(payload, sort_keys=True)
+            payloads_by_key[key] = payload
 
         acls_to_emit = self.cache.get_events_to_send(
             self.ACL_CACHE_KEY, acl_contents, max_cache_size=self.ACL_CACHE_MAX_SIZE

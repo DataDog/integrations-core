@@ -375,10 +375,10 @@ instances:
     # kafka_configs_refresh_interval: 180
 
     ## @param collect_acls - boolean - optional - default: true
-    ## Collect the Kafka ACL inventory when enable_cluster_monitoring is enabled. Emits the
-    ## kafka.acl.count metric and per-binding configuration events. Set to false to disable
-    ## ACL collection while keeping cluster monitoring enabled. Clusters without an authorizer
-    ## (for example AWS MSK Serverless) skip ACL collection automatically.
+    ## Collect the Kafka ACL inventory as per-binding configuration events when
+    ## enable_cluster_monitoring is enabled. Set to false to disable ACL collection while
+    ## keeping cluster monitoring enabled. Clusters without an authorizer (for example
+    ## AWS MSK Serverless) skip ACL collection automatically.
     #
     # collect_acls: true
 
