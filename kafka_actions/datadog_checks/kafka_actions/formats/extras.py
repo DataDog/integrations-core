@@ -101,11 +101,12 @@ class ProtobufMsgpackHandler(FormatHandler):
     def deserialize(
         self, message: bytes, schema: Any, *, log: logging.Logger, uses_schema_registry: bool
     ) -> str | None:
+        from google.protobuf.json_format import MessageToDict
+
         from datadog_checks.kafka_actions.formats._helpers import (
             get_protobuf_message_class,
             read_protobuf_message_indices,
         )
-        from google.protobuf.json_format import MessageToDict
 
         if not message:
             return None
