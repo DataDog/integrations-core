@@ -2075,6 +2075,23 @@ def test_collect_acls_emits_metric_and_events(check, dd_run_check, aggregator):
     assert 'collection_timestamp' in bob
 
 
+def test_collect_acls_unchanged_not_reemitted(check, dd_run_check, aggregator):
+    """A second run with the same ACL bindings emits config events only on the first run."""
+    bindings = [
+        make_acl_binding(operation='READ', principal='User:alice'),
+        make_acl_binding(operation='WRITE', principal='User:bob', host='10.0.0.1'),
+    ]
+    kafka_consumer_check = _make_acl_check(check, bindings)
+
+    dd_run_check(kafka_consumer_check)
+    assert len(acl_ds_events(kafka_consumer_check)) == 2
+
+    # Unchanged bindings on the next run are change-tracked away: no new events.
+    events_after_first = len(acl_ds_events(kafka_consumer_check))
+    dd_run_check(kafka_consumer_check)
+    assert len(acl_ds_events(kafka_consumer_check)) == events_after_first
+
+
 def test_collect_acls_empty(check, dd_run_check, aggregator):
     """No ACLs means no acl.count metric and no acl config events, without erroring."""
     kafka_consumer_check = _make_acl_check(check, [])

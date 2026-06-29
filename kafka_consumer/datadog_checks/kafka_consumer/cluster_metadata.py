@@ -7,8 +7,9 @@
 import hashlib
 import json
 import time
+from collections import Counter
 from collections.abc import Callable
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, TimeoutError, as_completed
 from typing import Any, NotRequired, TypedDict
 from urllib.parse import quote
 
@@ -75,6 +76,7 @@ class ClusterMetadataCollector:
         self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
+        self.ACL_CACHE_MAX_SIZE = 20_000
 
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
         self.BROKER_CONFIG_FETCH_CACHE_KEY = 'kafka_broker_config_fetch_cache'
@@ -89,8 +91,6 @@ class ClusterMetadataCollector:
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
         self.GLOBAL_COMPATIBILITY_CACHE_KEY = 'kafka_schema_global_compatibility_cache'
         self.ACL_CACHE_KEY = 'kafka_acl_cache'
-
-        self.ACL_CACHE_MAX_SIZE = 20_000
 
         self._schema_registry_oauth_token: str | None = None
         self._schema_registry_oauth_token_expiry: float = 0.0
@@ -796,8 +796,8 @@ class ClusterMetadataCollector:
         try:
             future = self.client.kafka_client.describe_acls(any_filter)
             acl_bindings = future.result(timeout=self.config._request_timeout)
-        except KafkaException as e:
-            self.log.debug("Skipping ACL collection (authorizer unavailable or unsupported): %s", e)
+        except (KafkaException, TimeoutError) as e:
+            self.log.debug("Skipping ACL collection (authorizer unavailable, unsupported, or timed out): %s", e)
             return
 
         cluster_id = self.config._kafka_cluster_id_override or (
@@ -806,7 +806,7 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %d ACL bindings in cluster %s", len(acl_bindings), cluster_id)
 
-        acl_counts: dict[tuple[str, str, str, str], int] = {}
+        acl_counts: Counter[tuple[str, str, str, str]] = Counter()
         acl_payloads: list[dict[str, str]] = []
 
         for binding in acl_bindings:
@@ -816,7 +816,7 @@ class ClusterMetadataCollector:
             permission_type = self._enum_name(binding.permission_type)
 
             count_key = (resource_type, pattern_type, acl_operation, permission_type)
-            acl_counts[count_key] = acl_counts.get(count_key, 0) + 1
+            acl_counts[count_key] += 1
 
             acl_payloads.append(
                 {
@@ -868,7 +868,7 @@ class ClusterMetadataCollector:
     @staticmethod
     def _acl_event_key(payload: dict[str, str]) -> str:
         """Build a stable per-ACL change-tracking key from the binding's identifying fields."""
-        return "|".join(
+        return json.dumps(
             [
                 payload['resource_type'],
                 payload['resource_name'],
@@ -877,7 +877,8 @@ class ClusterMetadataCollector:
                 payload['host'],
                 payload['acl_operation'],
                 payload['permission_type'],
-            ]
+            ],
+            separators=(',', ':'),
         )
 
     @staticmethod
