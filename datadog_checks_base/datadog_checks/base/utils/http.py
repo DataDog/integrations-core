@@ -93,6 +93,8 @@ DEFAULT_REMAPPED_FIELDS = {
     # TODO: Remove in 6.13
     'no_proxy': {'name': 'skip_proxy'},
 }
+# `tls_intermediate_ca_certs` is included so the AIA session trusts intermediates already accumulated
+# during the ongoing chain construction, in case the issuer endpoint chains to one of them.
 AIA_TLS_CONFIG_FIELDS = frozenset(
     {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
 )
@@ -258,11 +260,15 @@ def _is_safe_aia_url(uri: str, logger: logging.Logger | logging.LoggerAdapter) -
 
 
 def _read_capped_content(response, uri: str, logger: logging.Logger | logging.LoggerAdapter) -> bytes | None:
-    content = response.content
-    if len(content) > MAX_AIA_CERT_SIZE:
-        logger.debug('Intermediate certificate from `%s` exceeds %d bytes, skipping', uri, MAX_AIA_CERT_SIZE)
-        return None
-    return content
+    chunks = []
+    total = 0
+    for chunk in response.iter_content(8192):
+        total += len(chunk)
+        if total > MAX_AIA_CERT_SIZE:
+            logger.debug('Intermediate certificate from `%s` exceeds %d bytes, skipping', uri, MAX_AIA_CERT_SIZE)
+            return None
+        chunks.append(chunk)
+    return b''.join(chunks)
 
 
 def fetch_intermediate_cert(
@@ -293,9 +299,14 @@ def fetch_intermediate_cert(
         return _read_capped_content(response, uri, logger)
 
 
-def _aia_fetch_session(tls_config, tls_verify, logger):
+def _aia_fetch_session(
+    tls_config: Mapping[str, object] | None,
+    tls_verify: bool,
+    logger: logging.Logger | logging.LoggerAdapter,
+) -> RequestsWrapper:
     session = RequestsWrapper(_get_aia_tls_config(tls_config, tls_verify), {}, logger=logger)
-    # The fetch itself must never recurse into another AIA chase.
+    # Override after construction since the constructor always sets DEFAULT_AIA_CHASING_MAX_DEPTH:
+    # the fetch itself must never recurse into another AIA chase.
     session.aia_chasing_max_depth = 0
     return session
 

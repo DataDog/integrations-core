@@ -117,6 +117,12 @@ def write_cert(path, cert):
     path.write_bytes(cert.public_bytes(serialization.Encoding.PEM))
 
 
+def aia_response(content):
+    response = mock.MagicMock()
+    response.iter_content.return_value = iter([content])
+    return response
+
+
 def write_key(path, key):
     path.write_bytes(
         key.private_bytes(
@@ -458,7 +464,7 @@ class TestAIAChasing:
             {},
         )
         session = mock.MagicMock()
-        session.get.return_value = mock.MagicMock(content=build_cert())
+        session.get.return_value = aia_response(build_cert())
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session) as wrapper:
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
@@ -493,7 +499,7 @@ class TestAIAChasing:
         http = RequestsWrapper({}, {})
         certs = []
         session = mock.MagicMock()
-        session.get.return_value = mock.MagicMock(content=build_cert())
+        session.get.return_value = aia_response(build_cert())
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('http://10.0.0.5/ca.der'), certs)
@@ -505,7 +511,7 @@ class TestAIAChasing:
         http = RequestsWrapper({}, {})
         certs = []
         session = mock.MagicMock()
-        session.get.return_value = mock.MagicMock(content=b'x' * (64 * 1024 + 1))
+        session.get.return_value = aia_response(b'x' * (64 * 1024 + 1))
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), certs)
@@ -523,7 +529,7 @@ class TestAIAChasing:
         http = RequestsWrapper({}, {})
         certs = []
         session = mock.MagicMock()
-        session.get.return_value = mock.MagicMock(content=b'not a certificate')
+        session.get.return_value = aia_response(b'not a certificate')
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('http://issuer.test/ca.der'), certs)
@@ -533,7 +539,7 @@ class TestAIAChasing:
     def test_load_intermediate_certs_skips_http_error_response(self):
         http = RequestsWrapper({}, {})
         certs = []
-        response = mock.MagicMock(content=build_cert())
+        response = aia_response(build_cert())
         response.raise_for_status.side_effect = Exception('HTTP 404')
         session = mock.MagicMock()
         session.get.return_value = response
@@ -549,7 +555,7 @@ class TestAIAChasing:
         http = RequestsWrapper({}, {})
         secure, plain = mock.MagicMock(), mock.MagicMock()
         secure.get.side_effect = SSLError('TLS handshake failed')
-        plain.get.return_value = mock.MagicMock(content=build_cert())
+        plain.get.return_value = aia_response(build_cert())
 
         def make_wrapper(instance, init_config, *args, **kwargs):
             return plain if instance['tls_verify'] is False else secure
@@ -566,7 +572,7 @@ class TestAIAChasing:
 
     def test_aia_fetch_session_does_not_chase(self):
         session = mock.MagicMock()
-        session.get.return_value = mock.MagicMock(content=build_cert())
+        session.get.return_value = aia_response(build_cert())
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http_module.fetch_intermediate_cert('https://issuer.test/ca.der', logging.getLogger())
@@ -577,9 +583,7 @@ class TestAIAChasing:
         http = RequestsWrapper({}, {})
         certs = []
         session = mock.MagicMock()
-        session.get.side_effect = [
-            mock.MagicMock(content=build_cert('http://issuer.test/{}.der'.format(i))) for i in range(10)
-        ]
+        session.get.side_effect = [aia_response(build_cert('http://issuer.test/{}.der'.format(i))) for i in range(10)]
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(build_cert('http://issuer.test/start.der'), certs)
@@ -592,7 +596,7 @@ class TestAIAChasing:
         cert = build_cert('http://issuer.test/ca.der')
         certs = []
         session = mock.MagicMock()
-        session.get.return_value = mock.MagicMock(content=cert)
+        session.get.return_value = aia_response(cert)
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
             http.load_intermediate_certs(cert, certs)
@@ -605,8 +609,8 @@ class TestAIAChasing:
         certs = []
         session = mock.MagicMock()
         session.get.side_effect = [
-            mock.MagicMock(content=build_cert('http://issuer.test/root.der')),
-            mock.MagicMock(content=build_cert()),
+            aia_response(build_cert('http://issuer.test/root.der')),
+            aia_response(build_cert()),
         ]
 
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', return_value=session):
