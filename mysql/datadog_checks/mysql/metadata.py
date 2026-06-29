@@ -10,8 +10,6 @@ import pymysql
 from datadog_checks.mysql.cursor import CommenterDictCursor
 from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
 
-from .util import ManagedAuthConnectionMixin, connect_with_session_variables
-
 try:
     import datadog_agent
 except ImportError:
@@ -40,14 +38,14 @@ FROM
 """
 
 
-class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
+class MySQLMetadata(DBMAsyncJob):
     """
     Collects database metadata. Supports:
     1. collection of performance_schema.global_variables
     2. collection of databases(schemas) data
     """
 
-    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
+    def __init__(self, check, config):
         self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._databases_data_collection_interval = config.schemas_config.get(
             "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
@@ -76,48 +74,14 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             dbms="mysql",
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             job_name="database-metadata",
-            shutdown_callback=self._close_db_conn,
+            shutdown_callback=lambda: check._connection_manager.close("database-metadata"),
         )
         self._check = check
         self._config = config
         self._version_processed = False
-        self._connection_args_provider = connection_args_provider
-        self._uses_managed_auth = uses_managed_auth
-        self._db_created_at = 0
-        self._db = None
         self._databases_data = DatabasesData(self, check, config)
         self._last_settings_collection_time = 0
         self._last_databases_collection_time = 0
-
-    def get_db_connection(self):
-        """
-        Get database connection with metadata-specific ping() logic.
-
-        Overrides the mixin's _get_db_connection() to add ping() support.
-        Metadata checks run far less frequently than other checks, and there are reports
-        that unused pymysql connections sometimes end up being closed unexpectedly.
-        """
-        if self._should_reconnect_for_managed_auth():
-            self._close_db_conn()
-
-        if not self._db:
-            conn_args = self._connection_args_provider()
-            self._db = connect_with_session_variables(**conn_args)
-            if self._uses_managed_auth:
-                self._db_created_at = time.time()
-        else:
-            # ping() will by default automatically reconnect if the connection is lost
-            self._db.ping()
-        return self._db
-
-    def _close_db_conn(self):
-        if self._db:
-            try:
-                self._db.close()
-            except Exception:
-                self._log.debug("Failed to close db connection", exc_info=1)
-            finally:
-                self._db = None
 
     def _cursor_run(self, cursor, query, params=None):
         """
@@ -170,7 +134,10 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
             else MARIADB_TABLE_NAME
         )
         query = SETTINGS_QUERY.format(table_name=table_name)
-        with closing(self.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterDictCursor)) as cursor,
+        ):
             self._cursor_run(
                 cursor,
                 query,

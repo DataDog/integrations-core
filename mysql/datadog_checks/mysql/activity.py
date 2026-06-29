@@ -18,7 +18,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, get_truncation_state, warning_with_tags
+from .util import DatabaseConfigurationError, get_truncation_state, warning_with_tags
 
 try:
     import datadog_agent
@@ -175,11 +175,11 @@ def agent_check_getter(self):
     return self._check
 
 
-class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
+class MySQLActivity(DBMAsyncJob):
     DEFAULT_COLLECTION_INTERVAL = 10
     MAX_PAYLOAD_BYTES = 19e6
 
-    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
+    def __init__(self, check, config):
         self.collection_interval = float(
             config.activity_config.get("collection_interval", MySQLActivity.DEFAULT_COLLECTION_INTERVAL)
         )
@@ -194,16 +194,12 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
             dbms="mysql",
             rate_limit=1 / float(self.collection_interval),
             job_name="query-activity",
-            shutdown_callback=self._close_db_conn,
+            shutdown_callback=lambda: check._connection_manager.close("query-activity"),
         )
         self._check = check
         self._config = config
         self._log = check.log
 
-        self._connection_args_provider = connection_args_provider
-        self._uses_managed_auth = uses_managed_auth
-        self._db_created_at = 0
-        self._db = None
         self._db_version = None
         self._obfuscator_options = to_native_string(json.dumps(self._config.obfuscator_options))
         self._activity_query = None
@@ -248,7 +244,10 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         # type: () -> None
         # do not emit any dd.internal metrics for DBM specific check code
         tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterDictCursor)) as cursor,
+        ):
             rows = self._get_activity(cursor)
             rows = self._normalize_rows(rows)
             event = self._create_activity_event(rows, tags)
@@ -413,13 +412,3 @@ class MySQLActivity(ManagedAuthConnectionMixin, DBMAsyncJob):
         if isinstance(o, datetime.timedelta):
             return int(o.total_seconds())
         raise TypeError
-
-    def _close_db_conn(self):
-        # type: () -> None
-        if self._db:
-            try:
-                self._db.close()
-            except Exception as e:
-                self._log.debug("Failed to close db connection | err=[%s]", e)
-            finally:
-                self._db = None

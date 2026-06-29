@@ -258,7 +258,10 @@ class DatabasesData:
             self._check.version.flavor,
         )
         try:
-            with closing(self._metadata.get_db_connection().cursor(CommenterDictCursor)) as cursor:
+            with (
+                self._check._connection_manager.get_connection(self._metadata._job_name) as db,
+                closing(db.cursor(CommenterDictCursor)) as cursor,
+            ):
                 db_infos = self._query_db_information(cursor)
                 self._data_submitter.store_db_infos(db_infos)
                 self._fetch_for_databases(db_infos, cursor)
