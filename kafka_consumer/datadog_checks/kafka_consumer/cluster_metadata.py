@@ -7,7 +7,6 @@
 import hashlib
 import json
 import time
-from collections import Counter
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, TimeoutError, as_completed
 from typing import Any, NotRequired, TypedDict
@@ -772,7 +771,7 @@ class ClusterMetadataCollector:
         self._save_member_hashes_cache(current_member_hashes)
 
     def _collect_acls(self, metadata) -> None:
-        """Collect the cluster ACL inventory as a low-cardinality metric and config events.
+        """Collect the cluster ACL inventory as config events.
 
         Many clusters run without an authorizer (for example AWS MSK Serverless or a security
         protocol with no ACL support); describe_acls raises a KafkaException in that case, which
@@ -806,38 +805,18 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %d ACL bindings in cluster %s", len(acl_bindings), cluster_id)
 
-        acl_counts: Counter[tuple[str, str, str, str]] = Counter()
-        acl_payloads: list[dict[str, str]] = []
-
-        for binding in acl_bindings:
-            resource_type = self._enum_name(binding.restype)
-            pattern_type = self._enum_name(binding.resource_pattern_type)
-            acl_operation = self._enum_name(binding.operation)
-            permission_type = self._enum_name(binding.permission_type)
-
-            count_key = (resource_type, pattern_type, acl_operation, permission_type)
-            acl_counts[count_key] += 1
-
-            acl_payloads.append(
-                {
-                    'resource_type': resource_type,
-                    'resource_name': binding.name,
-                    'pattern_type': pattern_type,
-                    'principal': binding.principal,
-                    'host': binding.host,
-                    'acl_operation': acl_operation,
-                    'permission_type': permission_type,
-                }
-            )
-
-        for (resource_type, pattern_type, acl_operation, permission_type), count in acl_counts.items():
-            acl_tags = self.config._get_tags(cluster_id) + [
-                f'resource_type:{resource_type}',
-                f'pattern_type:{pattern_type}',
-                f'acl_operation:{acl_operation}',
-                f'permission_type:{permission_type}',
-            ]
-            self.check.gauge('acl.count', count, tags=acl_tags)
+        acl_payloads: list[dict[str, str]] = [
+            {
+                'resource_type': self._enum_name(binding.restype),
+                'resource_name': binding.name,
+                'pattern_type': self._enum_name(binding.resource_pattern_type),
+                'principal': binding.principal,
+                'host': binding.host,
+                'acl_operation': self._enum_name(binding.operation),
+                'permission_type': self._enum_name(binding.permission_type),
+            }
+            for binding in acl_bindings
+        ]
 
         self._emit_acl_events(acl_payloads, cluster_id)
 

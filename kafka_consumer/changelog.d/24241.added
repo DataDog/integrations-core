@@ -1,1 +1,1 @@
-Collect Kafka ACL inventory metrics and configuration events when cluster monitoring is enabled.
+Collect Kafka ACL inventory as configuration events.

@@ -2016,8 +2016,8 @@ def _make_acl_check(check, acl_result, instance_overrides=None):
     return kafka_consumer_check
 
 
-def test_collect_acls_emits_metric_and_events(check, dd_run_check, aggregator):
-    """ACL bindings produce a low-cardinality count metric and one config event per binding."""
+def test_collect_acls_emits_events(check, dd_run_check, aggregator):
+    """ACL bindings produce one config event per binding, carrying the full ACL detail."""
     bindings = [
         make_acl_binding(operation='READ', principal='User:alice'),
         make_acl_binding(operation='WRITE', principal='User:bob', host='10.0.0.1'),
@@ -2026,37 +2026,6 @@ def test_collect_acls_emits_metric_and_events(check, dd_run_check, aggregator):
     kafka_consumer_check = _make_acl_check(check, bindings)
 
     dd_run_check(kafka_consumer_check)
-
-    # Two READ/ALLOW/TOPIC/LITERAL bindings collapse into a single low-cardinality context (count=2).
-    aggregator.assert_metric(
-        'kafka.acl.count',
-        value=2,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'resource_type:TOPIC',
-            'pattern_type:LITERAL',
-            'acl_operation:READ',
-            'permission_type:ALLOW',
-        ],
-    )
-    aggregator.assert_metric(
-        'kafka.acl.count',
-        value=1,
-        tags=[
-            'test_tag:test_value',
-            'kafka_cluster_id:test-cluster-id',
-            'resource_type:TOPIC',
-            'pattern_type:LITERAL',
-            'acl_operation:WRITE',
-            'permission_type:ALLOW',
-        ],
-    )
-
-    # Metric tags never carry the high-cardinality principal/host dimensions.
-    for metric in aggregator.metrics('kafka.acl.count'):
-        assert not any(tag.startswith('principal:') for tag in metric.tags)
-        assert not any(tag.startswith('host:') for tag in metric.tags)
 
     # One config event per distinct binding, carrying the full ACL detail.
     acl_events = acl_ds_events(kafka_consumer_check)
@@ -2093,12 +2062,11 @@ def test_collect_acls_unchanged_not_reemitted(check, dd_run_check, aggregator):
 
 
 def test_collect_acls_empty(check, dd_run_check, aggregator):
-    """No ACLs means no acl.count metric and no acl config events, without erroring."""
+    """No ACLs means no acl config events, without erroring."""
     kafka_consumer_check = _make_acl_check(check, [])
 
     dd_run_check(kafka_consumer_check)
 
-    assert not aggregator.metrics('kafka.acl.count')
     assert acl_ds_events(kafka_consumer_check) == []
 
 
@@ -2111,7 +2079,6 @@ def test_collect_acls_skipped_when_authorizer_unavailable(check, dd_run_check, a
     # Must not raise: ACL unavailability cannot break the rest of metadata collection.
     dd_run_check(kafka_consumer_check)
 
-    assert not aggregator.metrics('kafka.acl.count')
     assert acl_ds_events(kafka_consumer_check) == []
     # Other cluster metadata is still collected.
     aggregator.assert_metric('kafka.broker.count', value=2)
@@ -2124,7 +2091,6 @@ def test_collect_acls_disabled_via_opt_out(check, dd_run_check, aggregator):
 
     dd_run_check(kafka_consumer_check)
 
-    assert not aggregator.metrics('kafka.acl.count')
     assert acl_ds_events(kafka_consumer_check) == []
     # describe_acls must not even be called when opted out.
     kafka_consumer_check.client.kafka_client.describe_acls.assert_not_called()
