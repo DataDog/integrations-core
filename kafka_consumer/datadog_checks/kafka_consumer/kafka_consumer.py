@@ -284,10 +284,11 @@ class KafkaCheck(AgentCheck):
             # If the highwater offset went backwards (topic recreated,
             # retention wipe, or offset reset) any cached pair with a larger
             # offset points to a now-nonexistent message and would poison
-            # interpolation. Drop those entries.
-            stale = [o for o in timestamps if o > highwater_offset]
-            for o in stale:
-                del timestamps[o]
+            # interpolation. Clear the entire cache: surviving low-offset entries
+            # are from the previous generation and VW always preserves the
+            # minimum endpoint, so those stale entries would never age out.
+            if any(o > highwater_offset for o in timestamps):
+                timestamps.clear()
             timestamps[highwater_offset] = time()
             if len(timestamps) >= self._max_timestamps:
                 prune_floor = prune_floors.get((topic, partition))

@@ -545,20 +545,30 @@ def test_client_init(kafka_instance, check, dd_run_check):
     assert check.client.open_consumer.mock_calls == [mock.call("datadog-agent")]
 
 
-def test_add_broker_timestamps_purges_stale_offsets_on_reset(kafka_instance, check):
-    # When the highwater offset goes backwards (topic recreated / retention
-    # wipe / offset reset), cached (offset, timestamp) pairs with offsets
-    # above the new highwater are stale and must be purged — otherwise they
-    # poison interpolation and pin estimated_consumer_lag to a wall-clock
-    # offset equal to how long ago the reset happened.
+def test_add_broker_timestamps_clears_cache_on_reset(kafka_instance, check):
+    # When the highwater offset goes backwards (topic recreated / retention wipe / offset reset),
+    # the entire cache is cleared. Surviving low-offset entries would be from the previous
+    # generation and VW always preserves the minimum endpoint, so they would never age out and
+    # would poison lag interpolation indefinitely.
     check = check(kafka_instance)
     broker_timestamps = {"topic1_0": {1_000_000: 100.0, 999_000: 99.0}}
     check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 170})
 
     timestamps = broker_timestamps["topic1_0"]
-    assert 1_000_000 not in timestamps
-    assert 999_000 not in timestamps
+    assert len(timestamps) == 1
     assert 170 in timestamps
+
+
+def test_add_broker_timestamps_clears_low_offset_entries_on_partial_reset(kafka_instance, check):
+    # When the highwater drops but some cached offsets are still below the new highwater,
+    # those low-offset entries are from the previous generation and are also cleared.
+    check = check(kafka_instance)
+    broker_timestamps = {"topic1_0": {5: 50.0, 50: 500.0, 200: 2000.0}}
+    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 100})
+
+    timestamps = broker_timestamps["topic1_0"]
+    assert len(timestamps) == 1  # only the new highwater; old-generation entries cleared
+    assert 100 in timestamps
 
 
 def test_add_broker_timestamps_compacts_when_full(kafka_instance, check):
@@ -575,18 +585,81 @@ def test_add_broker_timestamps_compacts_when_full(kafka_instance, check):
     assert 40 in timestamps  # newest endpoint preserved
 
 
-def test_add_broker_timestamps_prunes_below_earliest_consumer_offset(kafka_instance, check):
-    # At compaction time, samples older than the earliest consumer offset are useless (no consumer
-    # will ever interpolate there), so they are pruned — keeping one anchor at/below that offset.
+def test_check_prunes_timestamps_below_earliest_consumer_offset(kafka_instance, check, dd_run_check):
+    # During check(), _add_broker_timestamps prunes cached entries below the earliest consumer
+    # offset (keeping one anchor), so only relevant samples are retained.
+    kafka_instance['data_streams_enabled'] = True
     kafka_instance['timestamp_history_size'] = 4
-    check = check(kafka_instance)
-    broker_timestamps = {"topic1_0": {10: 1.0, 20: 2.0, 30: 3.0}}
-    check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 40}, {("topic1", 0): 25})
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
 
-    timestamps = broker_timestamps["topic1_0"]
-    assert 10 not in timestamps  # useless: below the earliest consumer offset and not the anchor
-    assert 20 in timestamps  # anchor: largest sample at/below the earliest consumer offset
-    assert 40 in timestamps
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 25)])]
+    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    # Pre-seed the cache with 3 entries. Adding the new highwater at 40 fills the 4-entry
+    # budget and triggers compaction+pruning with the earliest consumer offset (25) as the floor.
+    initial_cache = {"topic1_0": {"10": 1.0, "20": 2.0, "30": 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
+    timestamps = written["topic1_0"]
+    assert "10" not in timestamps  # pruned: below the anchor; no consumer will interpolate here
+    assert "20" in timestamps      # anchor: largest sample at/below consumer floor of 25
+    assert "40" in timestamps      # new highwater sample
+
+
+def test_report_lag_in_time_interpolates_consumer_between_samples(kafka_instance, check, aggregator):
+    # A consumer whose offset falls between two cached broker samples is interpolated correctly.
+    kafka_instance['data_streams_enabled'] = True
+    check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    check.client = mock_client
+
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 25}}
+    highwater_offsets = {("topic1", 0): 40}
+    broker_timestamps = {"topic1_0": {20: 2000.0, 30: 3000.0, 40: 4000.0}}
+
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
+    )
+
+    # Consumer at 25 interpolates between offset 20 (t=2000) and offset 30 (t=3000) → t=2500.
+    # Producer at highwater=40 (t=4000); lag = 4000 - 2500 = 1500.
+    aggregator.assert_metric("kafka.estimated_consumer_lag", value=1500.0, count=1)
+
+
+def test_report_lag_in_time_no_lag_reported_immediately_after_reset(kafka_instance, check, aggregator):
+    # After a partition reset the entire cache is cleared, leaving only the new highwater entry.
+    # A single cached sample is insufficient for interpolation, so no lag is reported.
+    kafka_instance['data_streams_enabled'] = True
+    check = check(kafka_instance)
+    mock_client = seed_mock_client()
+    mock_client.get_partitions_for_topic.return_value = [0]
+    check.client = mock_client
+
+    consumer_offsets = {"consumer_group1": {("topic1", 0): 25}}
+    highwater_offsets = {("topic1", 0): 40}
+    broker_timestamps = {"topic1_0": {40: 4000.0}}  # only one entry — reset just happened
+
+    check.report_consumer_offsets_and_lag(
+        consumer_offsets,
+        highwater_offsets,
+        float('inf'),
+        broker_timestamps,
+        "cluster_id",
+    )
+
+    aggregator.assert_metric("kafka.estimated_consumer_lag", count=0)
 
 
 def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator):
