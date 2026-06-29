@@ -108,12 +108,12 @@ class GoalLoopOutcome:
 
 
 def render_goal_text(
-    task: TaskConfig,
+    text: str,
     context: dict[str, Any],
     resolver: Callable[[str], str] | None = None,
 ) -> str:
-    """Render goal text inline; goal_ref is inlined upstream by the engine."""
-    return render_inline(task.goal, context, resolver)
+    """Render already-resolved goal text; goal_ref is resolved by the caller."""
+    return render_inline(text, context, resolver)
 
 
 def build_reviewer_user_message(

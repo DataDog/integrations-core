@@ -68,19 +68,12 @@ def test_parse_reviewer_output_rejects(text):
 
 
 def test_render_goal_text_inline():
-    result = render_goal_text(
-        TaskConfig(name="t", prompt="x", goal="check ${name}"),
-        {"name": "Alice"},
-    )
+    result = render_goal_text("check ${name}", {"name": "Alice"})
     assert result == "check Alice"
 
 
 def test_render_goal_text_forwards_resolver():
-    result = render_goal_text(
-        TaskConfig(name="t", prompt="x", goal="see ${draft_memory}"),
-        {},
-        resolve_key,
-    )
+    result = render_goal_text("see ${draft_memory}", {}, resolve_key)
     assert result == "see resolved(draft_memory)"
 
 

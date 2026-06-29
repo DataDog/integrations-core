@@ -43,12 +43,12 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
 
 
 def test_render_task_prompt_inline():
-    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), {"name": "Bob"})
+    result = render_task_prompt("Hello ${name}.", {"name": "Bob"})
     assert result == "Hello Bob."
 
 
 def test_render_task_prompt_forwards_resolver():
-    result = render_task_prompt(TaskConfig(name="t1", prompt="Memory: ${draft_memory}"), {}, resolve_key)
+    result = render_task_prompt("Memory: ${draft_memory}", {}, resolve_key)
     assert result == "Memory: resolved(draft_memory)"
 
 
@@ -58,10 +58,34 @@ def test_render_task_prompt_forwards_resolver():
 
 
 def test_render_memory_prompt_inline():
-    result = render_memory_prompt(
-        CheckpointConfig(memory_prompt="List files for ${phase_name}."), {"phase_name": "draft"}
-    )
+    result = render_memory_prompt("List files for ${phase_name}.", {"phase_name": "draft"})
     assert result == "List files for draft."
+
+
+# ---------------------------------------------------------------------------
+# ref resolution via resources
+# ---------------------------------------------------------------------------
+
+
+class _RefResources:
+    """Stub PhaseResources that resolves refs to fixed text."""
+
+    def __init__(self, prompts: dict[str, str] | None = None) -> None:
+        self._prompts = prompts or {}
+
+    def prompt(self, name: str) -> str:
+        return self._prompts[name]
+
+
+def test_task_prompt_text_resolves_prompt_ref(flow_dir, monkeypatch, message_queue):
+    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
+    phase._resources = _RefResources(prompts={"intro": "resolved prompt body"})
+    assert phase._task_prompt_text(TaskConfig(name="t", prompt_ref="intro")) == "resolved prompt body"
+
+
+def test_task_prompt_text_uses_inline_prompt(flow_dir, monkeypatch, message_queue):
+    phase, _ = make_agent_phase(flow_dir, MockAgent([]), monkeypatch, message_queue)
+    assert phase._task_prompt_text(TaskConfig(name="t", prompt="literal body")) == "literal body"
 
 
 # ---------------------------------------------------------------------------
@@ -403,6 +427,9 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
         agents={"writer": AgentConfig(tools=["spawn_subagent"])},
         callbacks=run_callbacks,
+        prompts={},
+        goals={},
+        memories={},
     )
     phase = AgenticPhase.build(
         phase_id="p1",

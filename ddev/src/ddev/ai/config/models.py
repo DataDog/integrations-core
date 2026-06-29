@@ -129,3 +129,6 @@ class ResolvedFlow:
     phases: dict[str, PhaseConfig]
     flow: list[FlowEntry]
     variables: dict[str, str]
+    prompts: dict[str, str]
+    goals: dict[str, str]
+    memories: dict[str, str]

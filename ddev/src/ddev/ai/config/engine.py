@@ -313,9 +313,12 @@ class ConfigurationEngine:
         resolved = ResolvedFlow(
             name=flow_name,
             agents={pc.agent: ok_agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
-            phases={pc.name: self._inline(pc, ok_prompts, ok_goals, ok_memories) for pc in scheduled_phases},
+            phases={pc.name: pc for pc in scheduled_phases},  # refs preserved, no inlining
             flow=fc.flow,
             variables=resolved_variables,
+            prompts=ok_prompts,
+            goals=ok_goals,
+            memories=ok_memories,
         )
         return FlowDiagnostics(flow_name, ConfigStatus.OK, [], resolved=resolved)
 
@@ -384,24 +387,6 @@ class ConfigurationEngine:
 
         resolved = {**defaults, **fc.variables}
         return resolved, errors
-
-    def _inline(
-        self, phase: PhaseConfig, prompts: dict[str, str], goals: dict[str, str], memories: dict[str, str]
-    ) -> PhaseConfig:
-        tasks = []
-        for t in phase.tasks:
-            upd: dict[str, Any] = {}
-            if t.prompt_ref is not None:
-                upd["prompt"] = prompts[t.prompt_ref]
-                upd["prompt_ref"] = None
-            if t.goal_ref is not None:
-                upd["goal"] = goals[t.goal_ref]
-                upd["goal_ref"] = None
-            tasks.append(t.model_copy(update=upd) if upd else t)
-        cp = phase.checkpoint
-        if cp is not None and cp.memory_prompt_ref is not None:
-            cp = cp.model_copy(update={"memory_prompt": memories[cp.memory_prompt_ref], "memory_prompt_ref": None})
-        return phase.model_copy(update={"tasks": tasks, "checkpoint": cp})
 
     def _record_file_error(self, path: Path, message: str) -> None:
         existing = self._file_errors.get(path)
