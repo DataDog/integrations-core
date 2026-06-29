@@ -42,6 +42,30 @@ deps = [
     "protobuf==7.34.0",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
+formats = [
+    "msgpack==1.1.0",
+    "python-snappy==0.7.3",
+    "lz4==4.3.3",
+    "zstandard==0.23.0",
+]
+
+[project.entry-points."datadog_kafka_actions.formats"]
+json = "datadog_checks.kafka_actions.formats.builtins:JsonHandler"
+string = "datadog_checks.kafka_actions.formats.builtins:StringHandler"
+raw = "datadog_checks.kafka_actions.formats.builtins:RawHandler"
+bson = "datadog_checks.kafka_actions.formats.builtins:BsonHandler"
+avro = "datadog_checks.kafka_actions.formats.builtins:AvroHandler"
+protobuf = "datadog_checks.kafka_actions.formats.builtins:ProtobufHandler"
+msgpack = "datadog_checks.kafka_actions.formats.extras:MsgpackHandler"
+protobuf_msgpack = "datadog_checks.kafka_actions.formats.extras:ProtobufMsgpackHandler"
+
+[project.entry-points."datadog_kafka_actions.compressions"]
+gzip = "datadog_checks.kafka_actions.compression.codecs:GzipCodec"
+zlib = "datadog_checks.kafka_actions.compression.codecs:ZlibCodec"
+snappy = "datadog_checks.kafka_actions.compression.codecs:SnappyCodec"
+lz4 = "datadog_checks.kafka_actions.compression.codecs:Lz4Codec"
+lz4_dd_hdr = "datadog_checks.kafka_actions.compression.codecs:Lz4DdHdrCodec"
+zstd = "datadog_checks.kafka_actions.compression.codecs:ZstdCodec"
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"

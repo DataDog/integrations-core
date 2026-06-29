@@ -92,9 +92,7 @@ class ProduceMessage(BaseModel):
         examples=['MTIzNDU='],
     )
     partition: Optional[int] = Field(
-        -1,
-        description='Specific partition (-1 for automatic partitioning)',
-        examples=[-1],
+        -1, description='Specific partition (-1 for automatic partitioning)', examples=[-1]
     )
     topic: str = Field(..., description='Topic to produce to', examples=['test-topic'])
     value: str = Field(
@@ -120,10 +118,13 @@ class ReadMessages(BaseModel):
         description='jq-style expression to filter messages (optional).\nFiltering happens AFTER deserialization.\nExamples: \'.value.price > 100\', \'.value.user.country == "US"\'\n',
         examples=['.value.status == "failed"'],
     )
+    key_compression: Optional[str] = Field(
+        None,
+        description='Compression codec to apply to the message key BEFORE format\ndeserialization. See value_compression for details.\n',
+        examples=['snappy'],
+    )
     key_format: Optional[str] = Field(
-        'json',
-        description='Message key format.\n\nSupported formats:\n- string: Plain UTF-8 text (most common for keys)\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- protobuf: Protocol Buffers\n- avro: Apache Avro\n',
-        examples=['json'],
+        'json', description='Message key format. Same supported set as value_format.\n', examples=['json']
     )
     key_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro key')
     key_skip_bytes: Optional[int] = Field(
@@ -143,9 +144,7 @@ class ReadMessages(BaseModel):
         examples=[10],
     )
     partition: Optional[int] = Field(
-        -1,
-        description='Specific partition to read from (-1 for all partitions)',
-        examples=[-1],
+        -1, description='Specific partition to read from (-1 for all partitions)', examples=[-1]
     )
     start_offset: Optional[int] = Field(
         -1,
@@ -158,9 +157,14 @@ class ReadMessages(BaseModel):
         examples=[1700000000000],
     )
     topic: str = Field(..., description='Topic to read messages from', examples=['orders'])
+    value_compression: Optional[str] = Field(
+        None,
+        description='Compression codec to apply to the message value BEFORE format\ndeserialization. Empty / unset = no decompression.\n\nBuilt-in codecs (stdlib, always available): gzip, zlib.\n\nBuilt-in codecs requiring optional packages:\n- snappy: requires ``python-snappy``\n- lz4: standard LZ4 frame format, requires ``lz4``\n- lz4_dd_hdr: DataDog/golz4 framing (4-byte uncompressed-size header + raw LZ4 block),\n  requires ``lz4``\n- zstd: requires ``zstandard``\n\nAdditional codecs may be registered by a plugin wheel on the\n``datadog_kafka_actions.compressions`` entry-point group.\n',
+        examples=['gzip'],
+    )
     value_format: Optional[str] = Field(
         'json',
-        description='Message value format.\n\nSupported formats:\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- protobuf: Protocol Buffers\n- avro: Apache Avro\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
+        description='Message value format.\n\nBuilt-in formats (always available):\n- json: JSON data (strict validation, fails if not valid JSON)\n- bson: BSON (Binary JSON) data\n- string: Plain UTF-8 text (use for non-JSON text messages)\n- raw: Pass-through bytes (base64-encoded in output)\n- protobuf: Protocol Buffers (value_schema is the base64 FileDescriptorSet)\n- avro: Apache Avro (value_schema is the JSON schema)\n\nFormats requiring optional packages (install via the Agent):\n- msgpack: MessagePack data. Requires the ``msgpack`` package.\n- protobuf_msgpack: Protobuf envelope with msgpack-encoded bytes fields.\n  value_schema must be a JSON wrapper ``{"schema": "<base64 FileDescriptorSet>",\n  "msgpack_fields": ["pkg.Msg.field", ...]}``. Requires ``msgpack`` and ``protobuf``.\n\nAdditional formats may be registered by a plugin wheel on the\n``datadog_kafka_actions.formats`` entry-point group.\n\nNote: If any message fails deserialization, the read_messages action will stop immediately.\nEnsure the format matches the actual messages in your topic.\n',
         examples=['json'],
     )
     value_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro value')
@@ -221,10 +225,7 @@ class UpdateConsumerGroupOffsets(BaseModel):
         ...,
         description='List of topic-partition-offset tuples to update',
         examples=[
-            [
-                {'offset': 1000, 'partition': 0, 'topic': 'orders'},
-                {'offset': 1500, 'partition': 1, 'topic': 'orders'},
-            ]
+            [{'offset': 1000, 'partition': 0, 'topic': 'orders'}, {'offset': 1500, 'partition': 1, 'topic': 'orders'}]
         ],
     )
 
@@ -241,14 +242,10 @@ class UpdateTopicConfig(BaseModel):
         examples=[{'max.message.bytes': '2097152', 'retention.ms': '1209600000'}],
     )
     delete_configs: Optional[tuple[str, ...]] = Field(
-        None,
-        description='Configuration keys to reset to defaults',
-        examples=[['retention.bytes', 'compression.type']],
+        None, description='Configuration keys to reset to defaults', examples=[['retention.bytes', 'compression.type']]
     )
     num_partitions: Optional[int] = Field(
-        None,
-        description='New partition count (can only increase, cannot decrease)',
-        examples=[12],
+        None, description='New partition count (can only increase, cannot decrease)', examples=[12]
     )
     topic: str = Field(..., description='Topic name to update', examples=['orders'])
 

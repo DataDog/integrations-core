@@ -122,7 +122,6 @@ files:
           type: string
           example: aws_msk_iam
           display_default: oidc
-        fleet_configurable: false
       - name: aws_region
         description: |
           AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
@@ -132,7 +131,6 @@ files:
         value:
           type: string
           example: us-west-2
-        fleet_configurable: false
       - name: url
         fleet_configurable: true
         description: |
@@ -159,7 +157,6 @@ files:
           For example, a custom scope like 'kafka' or 'api://default'.
         value:
           type: string
-        fleet_configurable: false
       - name: extensions
         enabled: false
         description: |
@@ -169,7 +166,6 @@ files:
           Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
         value:
           type: string
-        fleet_configurable: false
       - name: tls_ca_cert
         enabled: false
         description: |
@@ -179,7 +175,6 @@ files:
         value:
           type: string
           example: /path/to/oauth_ca_cert.pem
-        fleet_configurable: false
 
     - template: instances/tls
 
@@ -205,10 +200,8 @@ files:
     - name: read_messages
       description: |
         Configuration for reading messages from Kafka topics.
-        Only messages already present in the log when the check starts are read; the
-        per-partition high watermark is captured up front and consumption stops once every
-        partition is drained, so messages produced after the check began are never returned.
-        A 5-second timeout bounds the entire operation as a safety net.
+        Messages are streamed in real-time and sent to Datadog as they arrive.
+        The check has a 20-second timeout for the entire operation.
         Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
         Filtering is applied after deserialization using jq-style expressions.
       fleet_configurable: true
@@ -282,12 +275,23 @@ files:
           description: |
             Message value format.
 
-            Supported formats:
+            Built-in formats (always available):
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
             - string: Plain UTF-8 text (use for non-JSON text messages)
-            - protobuf: Protocol Buffers
-            - avro: Apache Avro
+            - raw: Pass-through bytes (base64-encoded in output)
+            - protobuf: Protocol Buffers (value_schema is the base64 FileDescriptorSet)
+            - avro: Apache Avro (value_schema is the JSON schema)
+
+            Formats requiring optional packages (install via the Agent):
+            - msgpack: MessagePack data. Requires the ``msgpack`` package.
+            - protobuf_msgpack: Protobuf envelope with msgpack-encoded bytes fields.
+              value_schema must be a JSON wrapper ``{"schema": "<base64 FileDescriptorSet>",
+              "msgpack_fields": ["pkg.Msg.field", ...]}``. Requires ``msgpack`` and ``protobuf``.
+
+            Additional formats may be registered by a plugin wheel on the
+            ``datadog_kafka_actions.formats`` entry-point group.
+
             Note: If any message fails deserialization, the read_messages action will stop immediately.
             Ensure the format matches the actual messages in your topic.
           default: json
@@ -314,14 +318,7 @@ files:
         - name: key_format
           type: string
           description: |
-            Message key format.
-
-            Supported formats:
-            - string: Plain UTF-8 text (most common for keys)
-            - json: JSON data (strict validation, fails if not valid JSON)
-            - bson: BSON (Binary JSON) data
-            - protobuf: Protocol Buffers
-            - avro: Apache Avro
+            Message key format. Same supported set as value_format.
           default: json
           example: json
         - name: key_schema
@@ -338,6 +335,30 @@ files:
             deserialization. See value_skip_bytes for details. Default 0.
           default: 0
           example: 1
+        - name: value_compression
+          type: string
+          description: |
+            Compression codec to apply to the message value BEFORE format
+            deserialization. Empty / unset = no decompression.
+
+            Built-in codecs (stdlib, always available): gzip, zlib.
+
+            Built-in codecs requiring optional packages:
+            - snappy: requires ``python-snappy``
+            - lz4: standard LZ4 frame format, requires ``lz4``
+            - lz4_dd_hdr: DataDog/golz4 framing (4-byte uncompressed-size header + raw LZ4 block),
+              requires ``lz4``
+            - zstd: requires ``zstandard``
+
+            Additional codecs may be registered by a plugin wheel on the
+            ``datadog_kafka_actions.compressions`` entry-point group.
+          example: gzip
+        - name: key_compression
+          type: string
+          description: |
+            Compression codec to apply to the message key BEFORE format
+            deserialization. See value_compression for details.
+          example: snappy
         - name: consumer_group_id
           type: string
           description: |
@@ -441,7 +462,6 @@ files:
           example:
             - retention.bytes
             - compression.type
-      fleet_configurable: false
     
     # ========================================================================
     # Action #4: delete_topic
@@ -467,7 +487,6 @@ files:
           type: string
           description: Topic name to delete
           example: old-orders
-      fleet_configurable: false
     
     # ========================================================================
     # Action #5: delete_consumer_group
@@ -493,7 +512,6 @@ files:
           type: string
           description: Consumer group ID to delete
           example: old-service-v1
-      fleet_configurable: false
     
     # ========================================================================
     # Action #6: update_consumer_group_offsets
@@ -554,7 +572,6 @@ files:
             - topic: orders
               partition: 1
               offset: 1500
-      fleet_configurable: false
     
     # ========================================================================
     # Action #7: produce_message
@@ -612,7 +629,6 @@ files:
             Example: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="
           example:
             source: "ZGF0YWRvZy1hZ2VudA=="
-      fleet_configurable: false
     
     # ========================================================================
     # Schema Registry Configuration
@@ -717,7 +733,6 @@ files:
           The OAuth scope to request.
         value:
           type: string
-        fleet_configurable: false
       - name: custom_headers
         enabled: false
         description: |
@@ -731,7 +746,6 @@ files:
           type: object
           additionalProperties:
             type: string
-        fleet_configurable: false
       - name: tls_ca_cert
         enabled: false
         description: |
@@ -739,6 +753,5 @@ files:
         value:
           type: string
           example: /path/to/oauth_ca_cert.pem
-        fleet_configurable: false
 
     - template: instances/default
