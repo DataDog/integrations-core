@@ -765,9 +765,6 @@ class ClusterMetadataCollector:
 
     def _collect_scram_credentials(self, metadata) -> None:
         """Collect the SASL/SCRAM credential inventory: a per-mechanism count metric and per-credential events."""
-        if not self.config._collect_scram_credentials:
-            return
-
         self.log.debug("Collecting SCRAM credentials")
 
         try:

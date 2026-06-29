@@ -20,10 +20,6 @@ def instance_collect_consumer_group_state():
     return False
 
 
-def instance_collect_scram_credentials():
-    return True
-
-
 def instance_consumer_queued_max_messages_kbytes():
     return 1024
 

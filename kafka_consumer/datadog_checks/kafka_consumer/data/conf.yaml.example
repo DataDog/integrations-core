@@ -374,12 +374,6 @@ instances:
     #
     # kafka_configs_refresh_interval: 180
 
-    ## @param collect_scram_credentials - boolean - optional - default: true
-    ## Collect the SASL/SCRAM credential inventory (mechanisms and iteration counts for each user credential)
-    ## when enable_cluster_monitoring is set to true. Set to false to opt out of this collection.
-    #
-    # collect_scram_credentials: true
-
     ## @param schema_registry_url - string - optional - default: http://localhost:8081
     ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
     #

@@ -1963,15 +1963,13 @@ def _stub_scram_credentials(admin, descriptions=None, exception=None):
     admin.describe_user_scram_credentials.return_value = future
 
 
-def _make_scram_check(check, descriptions=None, exception=None, instance_overrides=None):
+def _make_scram_check(check, descriptions=None, exception=None):
     """Wire a cluster-monitoring check whose mock Kafka client serves the given SCRAM descriptions."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
         'enable_cluster_monitoring': True,
         'monitor_unlisted_consumer_groups': True,
     }
-    if instance_overrides:
-        instance.update(instance_overrides)
     kafka_consumer_check = check(instance)
     mock_kafka_client = seed_mock_kafka_client()
     _stub_scram_credentials(mock_kafka_client.kafka_client, descriptions=descriptions, exception=exception)
@@ -2075,20 +2073,3 @@ def test_scram_credentials_skipped_when_describe_times_out(check, dd_run_check, 
     assert scram_ds_events(kafka_consumer_check) == []
     # Other metadata collection is unaffected.
     aggregator.assert_metric('kafka.broker.count', value=2)
-
-
-def test_scram_credentials_opt_out(check, dd_run_check, aggregator):
-    """collect_scram_credentials=false: the API is never called and nothing is emitted."""
-    from confluent_kafka.admin import ScramMechanism
-
-    descriptions = {'alice': _make_scram_description('alice', [(ScramMechanism.SCRAM_SHA_256, 8192)])}
-    kafka_consumer_check, mock_kafka_client = _make_scram_check(
-        check, descriptions=descriptions, instance_overrides={'collect_scram_credentials': False}
-    )
-    _wire_cache(kafka_consumer_check)
-
-    dd_run_check(kafka_consumer_check)
-
-    mock_kafka_client.kafka_client.describe_user_scram_credentials.assert_not_called()
-    aggregator.assert_metric('kafka.scram_credentials.count', count=0)
-    assert scram_ds_events(kafka_consumer_check) == []
