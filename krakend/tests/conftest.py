@@ -10,6 +10,7 @@ import pytest
 
 from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.docker import get_e2e_process_discovery_metadata
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.krakend import KrakendCheck
 from tests.helpers import BAKEND_API_ENDPOINT, GATEWAY_ENDPOINT, OPEN_METRICS_ENDPOINT, generate_sample_traffic
@@ -60,8 +61,18 @@ def run_docker_e2e(env_vars: dict[str, str], conditions: list[LazyFunction]):
         )
 
 
+def run_docker_process_e2e(env_vars: dict[str, str], conditions: list[LazyFunction]):
+    with docker_run(
+        compose_file=str(COMPOSE_FILE_E2E),
+        env_vars=env_vars,
+        conditions=conditions,
+    ):
+        asyncio.run(generate_sample_traffic())
+        yield ({'instances': []}, get_e2e_process_discovery_metadata())
+
+
 @pytest.fixture(scope="session")
-def dd_environment(dd_save_state, is_lab):
+def dd_environment(dd_save_state, is_lab, is_process_e2e):
     """
     Integration test fixture that starts KrakenD and FastAPI services using Docker Compose.
     Waits for services to be healthy and generates sample traffic to ensure metrics are available.
@@ -81,6 +92,8 @@ def dd_environment(dd_save_state, is_lab):
 
     if is_lab:
         yield from run_docker_lab(env_vars, conditions)
+    elif is_process_e2e:
+        yield from run_docker_process_e2e(env_vars, conditions)
     else:
         yield from run_docker_e2e(env_vars, conditions)
 

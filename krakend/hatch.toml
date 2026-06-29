@@ -5,9 +5,15 @@ check-types = true
 python = ["3.13"]
 krakend = ["2.10"]
 
+[[envs.default.matrix]]
+python = ["3.13"]
+krakend = ["2.10"]
+discovery = ["process"]
+
 [envs.default.overrides]
 matrix.krakend.env-vars = "KRAKEND_VERSION"
 matrix.krakend.dependencies = ["httpx"]
+matrix.discovery.env-vars = "DDEV_E2E_PROCESS_DISCOVERY"
 
 [envs.lab]
 dependencies = ["click", "requests", "rich", "httpx", "pyyaml"]

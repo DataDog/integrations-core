@@ -8,6 +8,7 @@ import os
 import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
+from collections.abc import Collection
 from io import open
 from typing import Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
 
@@ -238,7 +239,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
 
 @pytest.fixture
-def dd_agent_check_discovery(dd_agent_check):
+def dd_agent_check_discovery(dd_agent_check, is_process_e2e):
     """Wrapper around ``dd_agent_check`` for config-discovery e2e tests.
 
     Passes the empty-instances config required to let ``auto_conf.yaml`` drive
@@ -248,7 +249,13 @@ def dd_agent_check_discovery(dd_agent_check):
     if not e2e_testing():
         pytest.skip('Not running E2E tests')
 
-    def run(*, discovery_min_instances=1, discovery_timeout=30, **kwargs):
+    # Process autodiscovery needs to wait for the agent to recognize the process
+    # as a service which happens after a minimum process age of 1 minute. This
+    # time can be reduced significantly once agent-side support for reducing the
+    # minimum age via configuration is available.
+    extra_timeout = 60 if is_process_e2e else 0
+
+    def run(*, discovery_min_instances=1, discovery_timeout=30 + extra_timeout, **kwargs):
         return dd_agent_check(
             {'init_config': {}, 'instances': []},
             discovery_min_instances=discovery_min_instances,
@@ -483,12 +490,29 @@ TEST_TYPES = (
 )
 
 
+def _is_process_e2e_env() -> bool:
+    return bool(os.getenv('DDEV_E2E_PROCESS_DISCOVERY'))
+
+
+def _should_skip_in_process_e2e(keywords: Collection[str]) -> bool:
+    """In the process-autodiscovery e2e env, only ``process_e2e`` tests run."""
+    return 'process_e2e' not in keywords
+
+
+@pytest.fixture(scope='session')
+def is_process_e2e() -> bool:
+    return _is_process_e2e_env()
+
+
 def pytest_configure(config):
     # pytest will emit warnings if these aren't registered ahead of time
     for ttype in TEST_TYPES:
         config.addinivalue_line('markers', '{}: {}'.format(ttype.name, ttype.description))
 
     config.addinivalue_line("markers", "latest_metrics: marker for verifying support of new metrics")
+    config.addinivalue_line(
+        "markers", "process_e2e: also run this e2e test in the process autodiscovery e2e environment"
+    )
 
 
 def pytest_addoption(parser):
@@ -499,14 +523,21 @@ def pytest_collection_modifyitems(config, items):
     # at test collection time, this function gets called by pytest, see:
     # https://docs.pytest.org/en/latest/example/simple.html#control-skipping-of-tests-according-to-command-line-option
     # if the particular option is not present, it will skip all tests marked `latest_metrics`
-    if config.getoption("--run-latest-metrics"):
-        # --run-check-metrics given in cli: do not skip slow tests
-        return
+    skip_latest_metrics = (
+        None
+        if config.getoption("--run-latest-metrics")
+        else pytest.mark.skip(reason="need --run-latest-metrics option to run")
+    )
+    skip_non_process_e2e = (
+        pytest.mark.skip(reason="not a process autodiscovery e2e test") if _is_process_e2e_env() else None
+    )
 
-    skip_latest_metrics = pytest.mark.skip(reason="need --run-latest-metrics option to run")
     for item in items:
-        if "latest_metrics" in item.keywords:
+        if skip_latest_metrics and "latest_metrics" in item.keywords:
             item.add_marker(skip_latest_metrics)
+
+        if skip_non_process_e2e and _should_skip_in_process_e2e(item.keywords):
+            item.add_marker(skip_non_process_e2e)
 
         item_path = item.path
         if item_path is None:

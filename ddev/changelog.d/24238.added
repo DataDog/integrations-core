@@ -1,0 +1,1 @@
+Pass capabilities from e2e metadata `cap_add` to the Agent container via `docker --cap-add`.

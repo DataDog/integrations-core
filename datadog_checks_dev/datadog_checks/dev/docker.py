@@ -229,6 +229,13 @@ def _assert_no_log_patterns(logs: str, patterns: Sequence[str], candidate_index:
             )
 
 
+def _get_auto_conf_volume(check_root: str | os.PathLike[str] | None = None) -> str:
+    check_root = os.fspath(check_root or find_check_root(depth=2))
+    check_name = os.path.basename(check_root)
+    check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
+    return f'{check_pkg}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro'
+
+
 def get_e2e_discovery_metadata(
     check_root: str | os.PathLike[str] | None = None,
 ) -> dict[str, list[str]]:
@@ -240,16 +247,52 @@ def get_e2e_discovery_metadata(
     per-env config is temporarily replaced with an empty-instances file, leaving
     ``auto_conf.yaml`` as the sole AD template driving config-discovery.
     """
-    check_root = os.fspath(check_root or find_check_root(depth=1))
-    check_name = os.path.basename(check_root)
-    check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
-    auto_conf = os.path.join(check_pkg, 'data', 'auto_conf.yaml')
-
     return {
         'docker_volumes': [
-            f'{auto_conf}:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro',
+            _get_auto_conf_volume(check_root),
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
+    }
+
+
+def get_e2e_process_discovery_metadata(
+    check_root: str | os.PathLike[str] | None = None,
+) -> dict[str, list[str] | dict[str, str]]:
+    """Return metadata for an e2e process-autodiscovery run.
+
+    Mounts the integration's ``auto_conf.yaml`` into the agent container
+    (without the Docker socket) and sets ``DD_AUTOCONFIG_EXCLUDE_FEATURES=docker``
+    so only the process listener is active.
+
+    Use ``dd_agent_check_discovery`` alongside this metadata.
+    """
+    return {
+        'docker_volumes': [
+            _get_auto_conf_volume(check_root),
+        ],
+        'env_vars': {
+            # Reduce the default service collection interval from 60s to speed
+            # up tests.
+            'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '10s',
+            # Process autodiscovery will only match processes that are not
+            # inside a container. Since our test environment actually run the
+            # services inside containers, we need to exclude the docker
+            # features, so that the agent doesn't know about the containers.
+            'DD_AUTOCONFIG_EXCLUDE_FEATURES': 'docker',
+            # The agent container has /proc:/host/proc mounted by ddev. Without this,
+            # the workloadmeta process-collector scans /proc (the container's own PID
+            # namespace) instead of /host/proc, so host processes aren't visible.
+            #
+            # This is normally automatically detected by the agent when running
+            # inside a container, but it's not in this case since we
+            # explicitly disable the agent's docker-based features.
+            'DD_PROC_ROOT': '/host/proc',
+        },
+        # system-probe(-lite) needs these capabilities to read /proc entries of
+        # other processes for service discovery. Without them it falls back to
+        # only scanning the agent's own PID namespace, which finds no host
+        # processes.
+        'cap_add': ['SYS_PTRACE', 'DAC_READ_SEARCH'],
     }
 
 

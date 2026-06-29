@@ -25,6 +25,7 @@ def test_e2e(dd_agent_check, instance: InstanceBuilder):
 
 
 @pytest.mark.e2e
+@pytest.mark.process_e2e
 def test_e2e_discovery(dd_agent_check_discovery, is_lab):
     # In the lab environment we currently do not mount auto_conf.yaml into the
     # Agent container, so the Agent has no Autodiscovery template to trigger

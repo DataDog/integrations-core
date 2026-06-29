@@ -6,6 +6,12 @@
 ad_identifiers:
   - krakend
 
+## CEL selector for autodiscovery.
+#
+cel_selector:
+  processes:
+  - process.name == 'krakend'
+
 ## Enables configuration discovery
 #
 discovery: {}
