@@ -128,7 +128,7 @@ class ProtobufMsgpackHandler(FormatHandler):
             raise ValueError(f"Failed to deserialize protobuf_msgpack message: {e}") from e
 
 
-def _apply_msgpack_fields(instance, result_dict: dict, msgpack_paths: set) -> None:
+def _apply_msgpack_fields(instance: Any, result_dict: dict[str, Any], msgpack_paths: set[str]) -> None:
     """Walk ``instance`` + ``result_dict`` in lockstep; decode msgpack bytes fields."""
     import msgpack
     from google.protobuf.descriptor import FieldDescriptor
