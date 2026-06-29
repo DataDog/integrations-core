@@ -462,6 +462,7 @@ files:
           example:
             - retention.bytes
             - compression.type
+      fleet_configurable: false
     
     # ========================================================================
     # Action #4: delete_topic
@@ -487,6 +488,7 @@ files:
           type: string
           description: Topic name to delete
           example: old-orders
+      fleet_configurable: false
     
     # ========================================================================
     # Action #5: delete_consumer_group
@@ -512,6 +514,7 @@ files:
           type: string
           description: Consumer group ID to delete
           example: old-service-v1
+      fleet_configurable: false
     
     # ========================================================================
     # Action #6: update_consumer_group_offsets
@@ -572,6 +575,7 @@ files:
             - topic: orders
               partition: 1
               offset: 1500
+      fleet_configurable: false
     
     # ========================================================================
     # Action #7: produce_message
@@ -629,6 +633,7 @@ files:
             Example: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="
           example:
             source: "ZGF0YWRvZy1hZ2VudA=="
+      fleet_configurable: false
     
     # ========================================================================
     # Schema Registry Configuration
