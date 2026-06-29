@@ -112,6 +112,30 @@ class TestReadMessagesValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
+    def test_invalid_value_compression(self):
+        """Test that an unregistered value_compression codec raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test', 'value_compression': 'not-a-codec'},
+        }
+
+        with pytest.raises(ConfigurationError, match="Invalid value_compression"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_invalid_key_compression(self):
+        """Test that an unregistered key_compression codec raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test', 'key_compression': 'not-a-codec'},
+        }
+
+        with pytest.raises(ConfigurationError, match="Invalid key_compression"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
     def test_invalid_start_timestamp(self):
         """Test that invalid start_timestamp raises error."""
         instance = {
