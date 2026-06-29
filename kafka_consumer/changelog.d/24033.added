@@ -1,0 +1,1 @@
+Add Confluent Cloud Connect support to collect connector metrics and configuration events from the Confluent Cloud Connect REST API.

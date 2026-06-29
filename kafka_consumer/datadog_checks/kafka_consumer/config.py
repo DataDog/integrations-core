@@ -128,6 +128,13 @@ class KafkaConfig:
         self._kafka_connect_tls_key = instance.get('kafka_connect_tls_key')
         self._kafka_connect_tls_ca_cert = instance.get('kafka_connect_tls_ca_cert')
         self._kafka_connect_oauth_token_provider = instance.get('kafka_connect_oauth_token_provider')
+        self._kafka_connect_confluent_cloud_environment_id = instance.get(
+            'kafka_connect_confluent_cloud_environment_id'
+        )
+        self._kafka_connect_confluent_cloud_cluster_id = instance.get('kafka_connect_confluent_cloud_cluster_id')
+        self._kafka_connect_confluent_cloud_url = instance.get(
+            'kafka_connect_confluent_cloud_url', 'https://api.confluent.cloud'
+        )
 
     def _get_tags(self, cluster_id: str | None = None) -> list[str]:
         """Build metric tags, appending cluster ID tags when provided."""

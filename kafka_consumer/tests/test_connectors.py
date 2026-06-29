@@ -314,3 +314,89 @@ def test_connector_metrics_match_metadata(run_connect_check, aggregator):
     run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+# ---------------------------------------------------------------------------
+# Confluent Cloud Connect
+# ---------------------------------------------------------------------------
+
+CONFLUENT_CLOUD_EXTRA = {
+    'kafka_connect_confluent_cloud_environment_id': 'env-abc123',
+    'kafka_connect_confluent_cloud_cluster_id': 'lkc-xyz789',
+}
+CONFLUENT_CLOUD_KEY = 'confluent_cloud:env-abc123:lkc-xyz789'
+
+
+def connect_request_urls(http):
+    """Return the URLs of all outbound Connect GET requests."""
+    return [call.args[0] for call in http.get.call_args_list]
+
+
+def test_confluent_cloud_default_endpoint_queried(run_connect_check):
+    _, http = run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        instance_extra={'kafka_connect_url': [], **CONFLUENT_CLOUD_EXTRA},
+    )
+
+    expected = 'https://api.confluent.cloud/connect/v1/environments/env-abc123/clusters/lkc-xyz789/connectors'
+    assert expected in connect_request_urls(http)
+
+
+def test_confluent_cloud_custom_base_url_queried(run_connect_check):
+    _, http = run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        instance_extra={
+            'kafka_connect_url': [],
+            'kafka_connect_confluent_cloud_url': 'https://private.confluent.example.com/',
+            **CONFLUENT_CLOUD_EXTRA,
+        },
+    )
+
+    expected = 'https://private.confluent.example.com/connect/v1/environments/env-abc123/clusters/lkc-xyz789/connectors'
+    assert expected in connect_request_urls(http)
+
+
+def test_confluent_cloud_connectivity_reported_on_success(run_connect_check, aggregator):
+    run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        instance_extra={'kafka_connect_url': [], **CONFLUENT_CLOUD_EXTRA},
+    )
+
+    heartbeats = dsm_events(aggregator, 'heartbeat')
+    assert heartbeats[-1]['connect_api_status'] == {CONFLUENT_CLOUD_KEY: True}
+
+
+def test_confluent_cloud_connectivity_false_on_failure(run_connect_check, aggregator):
+    run_connect_check(
+        get_side_effect=ConnectionError("refused"),
+        instance_extra={'kafka_connect_url': [], **CONFLUENT_CLOUD_EXTRA},
+    )
+
+    heartbeats = dsm_events(aggregator, 'heartbeat')
+    assert heartbeats[-1]['connect_api_status'] == {CONFLUENT_CLOUD_KEY: False}
+
+
+def test_confluent_cloud_not_queried_without_full_config(run_connect_check, aggregator):
+    _, http = run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        instance_extra={'kafka_connect_confluent_cloud_environment_id': 'env-abc123'},
+    )
+
+    assert all('api.confluent.cloud' not in url for url in connect_request_urls(http))
+    heartbeats = dsm_events(aggregator, 'heartbeat')
+    assert CONFLUENT_CLOUD_KEY not in heartbeats[-1]['connect_api_status']
+
+
+def test_confluent_cloud_oauth_failure_marks_endpoint_unreachable(run_connect_check, aggregator):
+    oauth = {'url': 'http://auth/token', 'client_id': 'client', 'client_secret': 'secret'}
+    run_connect_check(
+        instance_extra={
+            'kafka_connect_url': [],
+            'kafka_connect_oauth_token_provider': oauth,
+            **CONFLUENT_CLOUD_EXTRA,
+        },
+        post_side_effect=Exception("auth failed"),
+    )
+
+    heartbeats = dsm_events(aggregator, 'heartbeat')
+    assert heartbeats[-1]['connect_api_status'] == {CONFLUENT_CLOUD_KEY: False}

@@ -149,7 +149,11 @@ class KafkaConnectCollector:
                     self.log.warning("OAuth refresh failed, proceeding with existing token: %s", e)
                 else:
                     self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
-                    return dict.fromkeys(self.config._kafka_connect_urls, False)
+                    failed: dict[str, bool] = dict.fromkeys(self.config._kafka_connect_urls, False)
+                    confluent_cloud_key = self._confluent_cloud_key()
+                    if confluent_cloud_key:
+                        failed[confluent_cloud_key] = False
+                    return failed
 
         connectivity: dict[str, bool] = {}
 
@@ -161,7 +165,29 @@ class KafkaConnectCollector:
                 self.log.error("Error collecting Kafka Connect data from %s: %s (%s)", url, e, type(e).__name__)
                 connectivity[url] = False
 
+        confluent_cloud_key = self._confluent_cloud_key()
+        if confluent_cloud_key:
+            try:
+                self._collect_confluent_cloud(cluster_id)
+                connectivity[confluent_cloud_key] = True
+            except Exception as e:
+                self.log.error(
+                    "Error collecting Confluent Cloud Connect data for %s: %s (%s)",
+                    confluent_cloud_key,
+                    e,
+                    type(e).__name__,
+                )
+                connectivity[confluent_cloud_key] = False
+
         return connectivity
+
+    def _confluent_cloud_key(self) -> str | None:
+        """Return the connectivity key for Confluent Cloud, or None when not configured."""
+        env_id = self.config._kafka_connect_confluent_cloud_environment_id
+        cluster_id = self.config._kafka_connect_confluent_cloud_cluster_id
+        if env_id and cluster_id:
+            return f'confluent_cloud:{env_id}:{cluster_id}'
+        return None
 
     def _collect_rest(self, url: str, cluster_id: str) -> None:
         response = self.http.get(
@@ -302,3 +328,11 @@ class KafkaConnectCollector:
             event = json.loads(content)
             event['collection_timestamp'] = int(time.time() * 1000)
             self.check.event_platform_event(json.dumps(event), 'data-streams-message')
+
+    def _collect_confluent_cloud(self, cluster_id: str) -> None:
+        """Collect connector data from the Confluent Cloud Connect REST API."""
+        env_id = self.config._kafka_connect_confluent_cloud_environment_id
+        cc_cluster_id = self.config._kafka_connect_confluent_cloud_cluster_id
+        base = self.config._kafka_connect_confluent_cloud_url.rstrip('/')
+        url = f'{base}/connect/v1/environments/{env_id}/clusters/{cc_cluster_id}'
+        self._collect_rest(url, cluster_id)
