@@ -1,0 +1,1 @@
+Fix mypy type error in `_scaffold.py` where a `pathlib.Path` was assigned to a variable typed as `ddev.utils.fs.Path`.
