@@ -82,3 +82,27 @@ def test_yaml_inside_reserved_folders_is_skipped(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert "ghostflow" not in eng._flows
     assert eng._phases["ghost"].source_file == tmp_path / "real.yaml"
+
+
+def test_unparseable_yaml_recorded_as_file_error(tmp_path):
+    write(tmp_path / "bad.yaml", "this: : not valid: yaml: [")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert any(p.name == "bad.yaml" for p in eng.file_errors)
+    assert "bad" not in eng._phases  # no fabricated phase entry
+    assert not eng.has_conflicts
+
+
+def test_non_list_yaml_recorded_as_file_error(tmp_path):
+    write(tmp_path / "scalar.yaml", "just_a_string")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert any(p.name == "scalar.yaml" for p in eng.file_errors)
+    assert "scalar" not in eng._phases
+
+
+def test_broken_file_does_not_conflict_with_real_phase(tmp_path):
+    # file stem 'p' would previously collide with a real phase named 'p'
+    write(tmp_path / "p.yaml", "not valid: [")
+    write(tmp_path / "real.yaml", "- type: phase\n  config:\n    name: p\n")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert not eng.has_conflicts
+    assert eng._phases["p"].status == ConfigStatus.OK

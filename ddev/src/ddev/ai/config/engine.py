@@ -94,6 +94,7 @@ class ConfigurationEngine:
         self._memories: dict[str, RegistryEntry[str]] = {}
 
         self._conflicts: list[ConfigConflict] = []
+        self._file_errors: dict[Path, str] = {}
         self._pending: dict[tuple[ResourceKind, str], list[RegistryEntry[Any]]] = {}
 
         for base_dir in [core_dir, *resolved_user_dirs]:
@@ -175,24 +176,11 @@ class ConfigurationEngine:
         try:
             raw = yaml.safe_load(path.read_text(encoding="utf-8"))
         except (yaml.YAMLError, OSError) as e:
-            key = path.stem
-            self._accumulate(
-                "phase", key, RegistryEntry(config=None, source_file=path, status=ConfigStatus.BROKEN, error=str(e))
-            )
+            self._file_errors[path] = str(e)
             return
 
         if not isinstance(raw, list):
-            key = path.stem
-            self._accumulate(
-                "phase",
-                key,
-                RegistryEntry(
-                    config=None,
-                    source_file=path,
-                    status=ConfigStatus.BROKEN,
-                    error=f"{path}: top-level YAML document must be a list",
-                ),
-            )
+            self._file_errors[path] = f"{path}: top-level YAML document must be a list"
             return
 
         for i, item in enumerate(raw):
@@ -302,7 +290,9 @@ class ConfigurationEngine:
         for fe in fc.flow:
             phase_entry = self._phases.get(fe.phase)
             if phase_entry is None:
-                errors.append(f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered")
+                errors.append(
+                    f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered{self._file_errors_note()}"
+                )
                 continue
             if phase_entry.status is ConfigStatus.BROKEN:
                 errors.append(f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken")
@@ -322,7 +312,10 @@ class ConfigurationEngine:
             if pc.agent is not None:
                 agent_entry = self._agents.get(pc.agent)
                 if agent_entry is None:
-                    errors.append(f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered")
+                    errors.append(
+                        f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered"
+                        f"{self._file_errors_note()}"
+                    )
                 elif agent_entry.status is ConfigStatus.BROKEN:
                     errors.append(f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken")
 
@@ -353,7 +346,10 @@ class ConfigurationEngine:
     def _check_ref(self, registry: dict[str, RegistryEntry[str]], ref: str, kind: str, phase_name: str) -> list[str]:
         ref_entry = registry.get(ref)
         if ref_entry is None:
-            return [f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is not registered"]
+            return [
+                f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is not registered"
+                f"{self._file_errors_note()}"
+            ]
         if ref_entry.status is ConfigStatus.BROKEN:
             return [f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is broken"]
         return []
@@ -433,10 +429,16 @@ class ConfigurationEngine:
             )
         return phase.model_copy(update={"tasks": tasks, "checkpoint": cp})
 
+    def _file_errors_note(self) -> str:
+        if not self._file_errors:
+            return ""
+        listed = "\n".join(f"  {p}: {msg}" for p, msg in self._file_errors.items())
+        return f"\nNote: these files failed to parse and may contain the missing resource:\n{listed}"
+
     def get_flow(self, name: str) -> ResolvedFlow:
         diag = self._flows_diag.get(name)
         if diag is None:
-            raise FlowConfigError(f"Flow {name!r} not found")
+            raise FlowConfigError(f"Flow {name!r} not found{self._file_errors_note()}")
         if diag.status is ConfigStatus.BROKEN:
             raise FlowConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e}" for e in diag.errors))
         assert diag.resolved is not None
@@ -445,6 +447,10 @@ class ConfigurationEngine:
     @property
     def flows(self) -> dict[str, FlowDiagnostics]:
         return self._flows_diag
+
+    @property
+    def file_errors(self) -> dict[Path, str]:
+        return dict(self._file_errors)
 
     @property
     def has_conflicts(self) -> bool:
