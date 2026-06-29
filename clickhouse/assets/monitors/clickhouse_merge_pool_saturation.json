@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2026-03-23",
+  "last_updated_at": "2026-03-23",
+  "title": "ClickHouse background merge pool is saturated",
+  "tags": [
+    "integration:clickhouse"
+  ],
+  "description": "ClickHouse uses background merge operations to combine data parts in MergeTree tables. When the merge pool is saturated, new merges cannot be scheduled, leading to an accumulation of small parts that degrades query performance and increases storage overhead. This monitor tracks the number of active background merge tasks.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nThe ClickHouse background merge pool on {{host.name}} has a high number of active merge tasks. This may indicate write pressure exceeding the merge throughput, or merges being blocked by long-running operations.\n\n## How to investigate\nCheck `system.merges` for currently running merges. Consider reducing insert frequency, increasing `background_pool_size`, or investigating mutations blocking merges.\n\n{{/is_alert}}\n\n{{#is_warning}}\n\nThe ClickHouse background merge pool on {{host.name}} is becoming saturated. Monitor for further increase.\n\n{{/is_warning}}",
+    "name": "[ClickHouse] Background merge pool is saturated on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 14,
+        "warning": 10
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_5m):avg:clickhouse.background_pool.merges.task.active{*} > 14",
+    "tags": [
+      "integration:clickhouse"
+    ],
+    "type": "query alert"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "created_at": "2026-03-23",
+  "last_updated_at": "2026-03-23",
+  "title": "ClickHouse replica delay is high",
+  "tags": [
+    "integration:clickhouse"
+  ],
+  "description": "Replica delay is the lag between when data is written to the primary shard and when it is replicated to replica nodes. High replica delay can lead to stale reads and indicate replication health issues. This monitor tracks the maximum absolute replica queue delay across replicated tables.",
+  "definition": {
+    "message": "{{#is_alert}}\n\n## What's happening?\nClickHouse replica delay on {{host.name}} has exceeded the critical threshold over the last 15 minutes. Replicas may be serving stale data.\n\n## How to investigate\nCheck `system.replicas` for tables with high `absolute_delay`. Look for network issues between replicas, or high write load on the primary shard.\n\n{{/is_alert}}\n\n{{#is_warning}}\n\nClickHouse replica delay on {{host.name}} is elevated. Monitor for further increase.\n\n{{/is_warning}}",
+    "name": "[ClickHouse] Replica delay is high on {{host.name}}",
+    "options": {
+      "escalation_message": "",
+      "include_tags": true,
+      "locked": false,
+      "new_host_delay": 300,
+      "no_data_timeframe": null,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": "0",
+      "require_full_window": true,
+      "thresholds": {
+        "critical": 300000,
+        "warning": 60000
+      },
+      "timeout_h": 0
+    },
+    "priority": null,
+    "query": "avg(last_15m):avg:clickhouse.replica.delay.absolute{*} > 300000",
+    "tags": [
+      "integration:clickhouse"
+    ],
+    "type": "query alert"
+  }
+}
