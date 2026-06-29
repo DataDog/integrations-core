@@ -281,6 +281,18 @@ def test_lz4_dd_hdr_too_short_raises():
         Lz4DdHdrCodec().decompress(b'\x00\x01')
 
 
+def test_lz4_dd_hdr_oversized_header_raises():
+    pytest.importorskip('lz4.block')
+    from datadog_checks.kafka_actions.compression.codecs import (
+        LZ4_DD_HDR_MAX_UNCOMPRESSED_SIZE,
+        Lz4DdHdrCodec,
+    )
+
+    framed = struct.pack('<I', LZ4_DD_HDR_MAX_UNCOMPRESSED_SIZE + 1) + b'\x00\x00\x00\x00'
+    with pytest.raises(ValueError, match="exceeds the maximum allowed"):
+        Lz4DdHdrCodec().decompress(framed)
+
+
 def test_zstd_codec_round_trip():
     zstandard = pytest.importorskip('zstandard')
 

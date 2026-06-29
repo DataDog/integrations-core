@@ -23,6 +23,12 @@ import zlib
 
 from .base import CompressionCodec
 
+# Upper bound on the producer-supplied uncompressed-size header for lz4_dd_hdr.
+# The header is trusted internal DataDog/golz4 framing, but a corrupt or
+# malicious value could otherwise trigger a multi-GB allocation. 512 MiB is far
+# larger than any realistic single Kafka message.
+LZ4_DD_HDR_MAX_UNCOMPRESSED_SIZE = 512 * 1024 * 1024
+
 
 class GzipCodec(CompressionCodec):
     name = 'gzip'
@@ -73,6 +79,11 @@ class Lz4DdHdrCodec(CompressionCodec):
         if len(data) < 4:
             raise ValueError("lz4_dd_hdr payload too short for length header")
         (uncompressed_size,) = struct.unpack('<I', data[:4])
+        if uncompressed_size > LZ4_DD_HDR_MAX_UNCOMPRESSED_SIZE:
+            raise ValueError(
+                f"lz4_dd_hdr uncompressed size {uncompressed_size} exceeds the maximum "
+                f"allowed {LZ4_DD_HDR_MAX_UNCOMPRESSED_SIZE} bytes"
+            )
         return lz4.block.decompress(data[4:], uncompressed_size=uncompressed_size)
 
 
