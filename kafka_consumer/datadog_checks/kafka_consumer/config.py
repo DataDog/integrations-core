@@ -132,8 +132,15 @@ class KafkaConfig:
             'kafka_connect_confluent_cloud_environment_id'
         )
         self._kafka_connect_confluent_cloud_cluster_id = instance.get('kafka_connect_confluent_cloud_cluster_id')
-        self._kafka_connect_confluent_cloud_url = instance.get(
-            'kafka_connect_confluent_cloud_url', 'https://api.confluent.cloud'
+        self._kafka_connect_confluent_cloud_url = (
+            instance.get('kafka_connect_confluent_cloud_url') or 'https://api.confluent.cloud'
+        )
+
+    @property
+    def confluent_cloud_configured(self) -> bool:
+        """Whether both Confluent Cloud identifiers required for collection are set."""
+        return bool(
+            self._kafka_connect_confluent_cloud_environment_id and self._kafka_connect_confluent_cloud_cluster_id
         )
 
     def _get_tags(self, cluster_id: str | None = None) -> list[str]:

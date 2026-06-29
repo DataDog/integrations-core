@@ -183,11 +183,11 @@ class KafkaConnectCollector:
 
     def _confluent_cloud_key(self) -> str | None:
         """Return the connectivity key for Confluent Cloud, or None when not configured."""
+        if not self.config.confluent_cloud_configured:
+            return None
         env_id = self.config._kafka_connect_confluent_cloud_environment_id
         cluster_id = self.config._kafka_connect_confluent_cloud_cluster_id
-        if env_id and cluster_id:
-            return f'confluent_cloud:{env_id}:{cluster_id}'
-        return None
+        return f'confluent_cloud:{env_id}:{cluster_id}'
 
     def _collect_rest(self, url: str, cluster_id: str) -> None:
         response = self.http.get(
