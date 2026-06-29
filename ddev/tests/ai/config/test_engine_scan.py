@@ -70,3 +70,15 @@ def test_broken_flow_item_lands_in_flows(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng._flows["bad"].status == ConfigStatus.BROKEN
     assert "bad" not in eng._phases
+
+
+def test_yaml_inside_reserved_folders_is_skipped(tmp_path):
+    write(tmp_path / "agents" / "sneaky.yaml", "- type: phase\n  config:\n    name: ghost\n")
+    write(
+        tmp_path / "prompts" / "sneaky.yml",
+        "- type: flow\n  config:\n    name: ghostflow\n    flow:\n      - phase: p\n",
+    )
+    write(tmp_path / "real.yaml", "- type: phase\n  config:\n    name: ghost\n")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert "ghostflow" not in eng._flows
+    assert eng._phases["ghost"].source_file == tmp_path / "real.yaml"

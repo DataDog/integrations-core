@@ -161,14 +161,15 @@ class ConfigurationEngine:
             if not path.is_file():
                 continue
             suffix = path.suffix.lower()
-            if suffix in {".yaml", ".yml"}:
-                self._dispatch_yaml(path)
-            elif suffix == ".md":
-                parent_name = path.parent.name
-                if parent_name == "agents":
+            parent_name = path.parent.name
+            if parent_name == "agents":
+                if suffix == ".md":
                     self._dispatch_agent_md(path)
-                elif parent_name == "prompts":
+            elif parent_name == "prompts":
+                if suffix == ".md":
                     self._dispatch_prompt_md(path)
+            elif suffix in {".yaml", ".yml"}:
+                self._dispatch_yaml(path)
 
     def _dispatch_yaml(self, path: Path) -> None:
         try:
