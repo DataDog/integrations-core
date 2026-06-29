@@ -571,9 +571,13 @@ class TestAIAChasing:
         with mock.patch('datadog_checks.base.utils.http.RequestsWrapper', side_effect=make_wrapper) as wrapper:
             http.load_intermediate_certs(build_cert('https://issuer.test/ca.der'), [])
 
-        configs = [call.args[0] for call in wrapper.call_args_list]
-        assert configs[0]['tls_verify'] is True
-        assert any(config['tls_verify'] is False for config in configs)
+        # Verified attempt first, then a single no-verify fallback.
+        wrapper.assert_has_calls(
+            [
+                mock.call(http_module._get_aia_tls_config(http.tls_config, True), {}, logger=http.logger),
+                mock.call(http_module._get_aia_tls_config(http.tls_config, False), {}, logger=http.logger),
+            ]
+        )
         secure.get.assert_called_once_with('https://issuer.test/ca.der')
         plain.get.assert_called_once_with('https://issuer.test/ca.der')
 
