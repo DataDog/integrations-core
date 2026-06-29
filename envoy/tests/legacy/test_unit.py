@@ -12,6 +12,7 @@ from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
 from .common import (
+    ADAPTIVE_CONCURRENCY_METRIC_VALUES,
     ADAPTIVE_CONCURRENCY_METRICS,
     ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG,
     CONNECTION_LIMIT_METRICS,
@@ -363,17 +364,8 @@ def test_adaptive_concurrency_metrics(aggregator, fixture_path, mock_http_respon
     dd_run_check(c)
 
     # Pin the fixture values so a wrong mapping or metric type would be caught, not just a wrong name.
-    expected_values = {
-        "envoy.http.adaptive_concurrency.gradient_controller.rq_blocked": 5,
-        "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active": 1,
-        "envoy.http.adaptive_concurrency.gradient_controller.concurrency_limit": 30,
-        "envoy.http.adaptive_concurrency.gradient_controller.gradient": 1000,
-        "envoy.http.adaptive_concurrency.gradient_controller.burst_queue_size": 22,
-        "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_msecs": 100,
-        "envoy.http.adaptive_concurrency.gradient_controller.sample_rtt_msecs": 95,
-    }
     for metric in ADAPTIVE_CONCURRENCY_METRICS:
-        aggregator.assert_metric(metric, value=expected_values[metric])
+        aggregator.assert_metric(metric, value=ADAPTIVE_CONCURRENCY_METRIC_VALUES[metric])
         for tag in ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG:
             aggregator.assert_metric_has_tag(metric, tag, count=1)
 

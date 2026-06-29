@@ -84,6 +84,9 @@ def test_adaptive_concurrency_symmetric(aggregator, dd_run_check, check):
         k: v for k, v in get_metadata_metrics().items() if 'adaptive_concurrency' in k and k != legacy_only
     }
 
+    # Guard against a vacuous pass: the controller needs real traffic to emit stats.
+    assert any('adaptive_concurrency' in m for m in aggregator.metric_names)
+
     # Restrict the forward direction to adaptive concurrency metrics.
     non_adaptive = [m for m in aggregator.metric_names if 'adaptive_concurrency' not in m]
 
