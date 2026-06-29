@@ -299,8 +299,12 @@ files:
             Additional formats may be registered by a plugin wheel on the
             ``datadog_kafka_actions.formats`` entry-point group.
 
-            Note: If any message fails deserialization, the read_messages action will stop immediately.
-            Ensure the format matches the actual messages in your topic.
+            Note: Decompression failures and format-deserialization failures are handled differently.
+            A decompression failure (value_compression/key_compression) means the payload is
+            unreadable, so it aborts the read_messages action immediately. A per-message
+            format-deserialization failure does not stop the read: the error is captured and emitted
+            in the output as a "<deserialization error: ...>" string, and consumption continues with
+            the next message. Ensure the format matches the actual messages in your topic.
           default: json
           example: json
         - name: value_schema
