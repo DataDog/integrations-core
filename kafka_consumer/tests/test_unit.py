@@ -12,7 +12,6 @@ from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 from datadog_checks.kafka_consumer.kafka_consumer import (
     _get_interpolated_timestamp,
-    _prune_below_anchor,
     _visvalingam_whyatt,
 )
 
@@ -740,38 +739,57 @@ def test_earliest_consumer_offsets_takes_cross_group_min(kafka_instance, check):
     }
 
 
-@pytest.mark.parametrize(
-    'timestamps, floor, expected_offsets',
-    [
-        pytest.param(
-            {10: 1.0, 20: 2.0, 30: 3.0, 40: 4.0},
-            35,
-            {30, 40},
-            id='keeps one anchor (max below floor) and everything at/above it',
-        ),
-        pytest.param(
-            {10: 1.0, 20: 2.0, 30: 3.0},
-            30,
-            {20, 30},
-            id='offset equal to floor is retained, not pruned',
-        ),
-        pytest.param(
-            {30: 3.0, 40: 4.0},
-            10,
-            {30, 40},
-            id='no samples below floor: nothing pruned',
-        ),
-        pytest.param(
-            {20: 2.0, 30: 3.0},
-            25,
-            {20, 30},
-            id='single sample below floor is the anchor and is kept',
-        ),
-    ],
-)
-def test_prune_below_anchor(timestamps, floor, expected_offsets):
-    _prune_below_anchor(timestamps, floor)
-    assert set(timestamps) == expected_offsets
+def test_check_prunes_anchor_at_floor_boundary(kafka_instance, check, dd_run_check):
+    # The pruning floor uses strict less-than, so an entry whose offset equals the floor is not
+    # counted as "below" — the anchor is the largest entry strictly below the floor.
+    # With floor=30 and cache {10,20,30}: below={10,20}, anchor=20, entry 10 pruned.
+    # (If <= were used instead, anchor would be 30 and entry 20 would be pruned.)
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = 4
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 30)])]
+    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    initial_cache = {"topic1_0": {"10": 1.0, "20": 2.0, "30": 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
+    timestamps = written["topic1_0"]
+    assert "10" not in timestamps  # pruned: below the anchor
+    assert "20" in timestamps      # correct anchor (strict-< floor means 30 is not below 30)
+    assert "40" in timestamps      # new highwater
+
+
+def test_check_keeps_sole_entry_below_floor_as_anchor(kafka_instance, check, dd_run_check):
+    # When only one cached entry is below the floor it is the anchor and must be kept —
+    # removing it would leave the consumer with no lower bound for interpolation.
+    kafka_instance['data_streams_enabled'] = True
+    kafka_instance['timestamp_history_size'] = 3
+    kafka_instance['consumer_groups'] = {'consumer_group1': {'topic1': [0]}}
+    kafka_consumer_check = check(kafka_instance)
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 25)])]
+    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    kafka_consumer_check.client = mock_client
+
+    initial_cache = {"topic1_0": {"20": 2.0, "30": 3.0}}
+    kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(initial_cache))
+    kafka_consumer_check.write_persistent_cache = mock.Mock()
+
+    dd_run_check(kafka_consumer_check)
+
+    written = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
+    timestamps = written["topic1_0"]
+    assert "20" in timestamps  # sole entry below floor — kept as the anchor
+    assert "40" in timestamps  # new highwater
 
 
 def test_count_consumer_contexts(check, kafka_instance):
