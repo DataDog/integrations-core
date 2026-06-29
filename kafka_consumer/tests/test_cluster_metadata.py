@@ -2099,15 +2099,3 @@ def test_collect_acls_skipped_when_describe_times_out(check, dd_run_check, aggre
     assert acl_ds_events(kafka_consumer_check) == []
     # Other cluster metadata is still collected.
     aggregator.assert_metric('kafka.broker.count', value=2)
-
-
-def test_collect_acls_disabled_via_opt_out(check, dd_run_check, aggregator):
-    """Setting collect_acls=false skips ACL collection even with cluster monitoring enabled."""
-    bindings = [make_acl_binding()]
-    kafka_consumer_check = _make_acl_check(check, bindings, instance_overrides={'collect_acls': False})
-
-    dd_run_check(kafka_consumer_check)
-
-    assert acl_ds_events(kafka_consumer_check) == []
-    # describe_acls must not even be called when opted out.
-    kafka_consumer_check.client.kafka_client.describe_acls.assert_not_called()

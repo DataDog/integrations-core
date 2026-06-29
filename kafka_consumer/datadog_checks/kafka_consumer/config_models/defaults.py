@@ -16,10 +16,6 @@ def instance_close_admin_client():
     return True
 
 
-def instance_collect_acls():
-    return True
-
-
 def instance_collect_consumer_group_state():
     return False
 

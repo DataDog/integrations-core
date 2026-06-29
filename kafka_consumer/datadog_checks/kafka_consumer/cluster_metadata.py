@@ -779,9 +779,6 @@ class ClusterMetadataCollector:
         is logged at debug and skipped so the rest of metadata collection is unaffected. A
         describe_acls future that times out is likewise logged at debug and skipped.
         """
-        if not self.config._collect_acls:
-            return
-
         self.log.debug("Collecting ACLs")
 
         any_filter = AclBindingFilter(
