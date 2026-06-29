@@ -6,8 +6,10 @@
 Format handlers and compression codecs are pluggable via the
 ``datadog_kafka_actions.formats`` and ``datadog_kafka_actions.compressions``
 entry-point groups. This wheel ships built-in handlers for
-json/string/raw/bson/avro/protobuf; compression codecs are provided by
-plugin wheels (none ship in core).
+json/string/raw/bson/avro/protobuf and built-in compression codecs
+(gzip/zlib/snappy/lz4/lz4_dd_hdr/zstd). gzip and zlib work out of the box;
+snappy/lz4/lz4_dd_hdr/zstd require their optional packages to be installed.
+Additional handlers/codecs may be registered via the entry-point groups.
 """
 
 from __future__ import annotations
@@ -39,6 +41,10 @@ from .formats import get_handler as _get_format_handler
 from .formats.registry import register_handler as _register_handler
 
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
+
+# Distinct sentinel so a legitimately cached None (schemaless handlers) is not
+# treated as a cache miss and rebuilt on every message.
+MISSING_SCHEMA = object()
 
 _WELL_KNOWN_TYPE_MODULES = (
     any_pb2,
@@ -161,7 +167,7 @@ def _deserialize_bson(message):
     try:
         return bson_dumps(bson_decode(message))
     except Exception as e:
-        raise ValueError(f"Failed to deserialize BSON message: {e}")
+        raise ValueError(f"Failed to deserialize BSON message: {e}") from e
 
 
 def _deserialize_avro(message, schema):
@@ -185,7 +191,7 @@ def _deserialize_avro(message, schema):
             )
         return json.dumps(data, cls=_AvroJSONEncoder)
     except Exception as e:
-        raise ValueError(f"Failed to deserialize Avro message: {e}")
+        raise ValueError(f"Failed to deserialize Avro message: {e}") from e
 
 
 def _deserialize_protobuf(message, schema, uses_schema_registry):
@@ -213,7 +219,7 @@ def _deserialize_protobuf(message, schema, uses_schema_registry):
             )
         return MessageToJson(instance)
     except Exception as e:
-        raise ValueError(f"Failed to deserialize Protobuf message: {e}")
+        raise ValueError(f"Failed to deserialize Protobuf message: {e}") from e
 
 
 def _build_avro_schema(schema_str):
@@ -316,7 +322,9 @@ _bootstrap_compression_codecs()
 class MessageDeserializer:
     """Deserialize Kafka messages with pluggable format + compression support."""
 
-    def __init__(self, log, schema_registry=None, value_compression=None, key_compression=None):
+    def __init__(
+        self, log, schema_registry=None, value_compression: str | None = None, key_compression: str | None = None
+    ):
         self.log = log
         self.schema_registry = schema_registry
         self.value_compression = value_compression
@@ -348,9 +356,11 @@ class MessageDeserializer:
             skip_bytes: Drop this many bytes from the start of raw_bytes
                 before any other processing (custom producer prefixes).
             compression: Name of a registered compression codec to apply
-                BEFORE the format handler runs. No codecs ship in core;
-                install a plugin wheel that registers them on the
-                ``datadog_kafka_actions.compressions`` entry-point group.
+                BEFORE the format handler runs. Built-in codecs:
+                'gzip', 'zlib', 'snappy', 'lz4', 'lz4_dd_hdr', 'zstd'.
+                gzip/zlib work out of the box; the others require their
+                optional package. Additional codecs may be registered via
+                the ``datadog_kafka_actions.compressions`` entry-point group.
 
         Returns:
             Tuple of (deserialized_string, schema_id).
@@ -454,8 +464,8 @@ class MessageDeserializer:
 
         schema_hash = hashlib.sha256(schema_str.encode('utf-8')).hexdigest()
         schema_cache_key = (actual_format, schema_hash + ':registry')
-        schema = self._schema_cache.get(schema_cache_key)
-        if schema is None:
+        schema = self._schema_cache.get(schema_cache_key, MISSING_SCHEMA)
+        if schema is MISSING_SCHEMA:
             schema = handler.build_schema_from_registry(schema_str, dep_schemas or [])
             self._schema_cache[schema_cache_key] = schema
 
@@ -466,8 +476,8 @@ class MessageDeserializer:
     def _get_or_build_schema(self, handler, format_type: str, schema_str: str):
         schema_hash = hashlib.sha256(schema_str.encode('utf-8')).hexdigest()
         cache_key = (format_type, schema_hash)
-        cached = self._schema_cache.get(cache_key)
-        if cached is not None:
+        cached = self._schema_cache.get(cache_key, MISSING_SCHEMA)
+        if cached is not MISSING_SCHEMA:
             return cached
         schema = handler.build_schema(schema_str)
         self._schema_cache[cache_key] = schema

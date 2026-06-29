@@ -10,8 +10,8 @@ a pluggable codec interface so consumers can decompress those payloads
 before deserialization.
 
 Built-in codecs (gzip, zlib, snappy, lz4, lz4_dd_hdr, zstd) ship in this
-wheel. Third-party codecs (snappy, lz4, zstd) require optional packages to
-be installed; see the integration README for details.
+wheel. gzip and zlib work out of the box; snappy/lz4/lz4_dd_hdr/zstd require
+their optional packages to be installed (see the integration README).
 """
 
 from .base import CompressionCodec
