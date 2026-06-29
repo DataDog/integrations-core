@@ -1631,3 +1631,86 @@ def test_event_platform_event_delivers_byte_like_payloads_as_bytes(aggregator, p
     [received] = aggregator.get_event_platform_events("genresources", parse_json=False)
     assert received == b"\x08\x96\x01"
     assert isinstance(received, bytes)
+
+
+@pytest.fixture
+def issue_check():
+    return AgentCheck("test_check", {}, [{}])
+
+
+def test_report_issue_minimal(datadog_agent, issue_check):
+    issue_check.report_issue(id="issue-1", issue_name="connection_failed")
+
+    datadog_agent.assert_reported_issue(
+        "test_check",
+        "issue-1",
+        {
+            'id': 'issue-1',
+            'issue_name': 'connection_failed',
+            'title': None,
+            'description': None,
+            'category': None,
+            'location': 'integrations',
+            'severity': 0,
+            'source': 'test_check',
+            'extra': None,
+            'remediation': None,
+            'tags': None,
+        },
+    )
+
+
+def test_report_issue_full(datadog_agent, issue_check):
+    issue_check.report_issue(
+        id="issue-2",
+        issue_name="permission_denied",
+        title="Permission denied",
+        description="The check lacks required permissions.",
+        category="permissions",
+        severity=issue_check.IssueSeverity['HIGH'],
+        extra={'resource': 'users'},
+        remediation={
+            'summary': 'Grant the required permissions.',
+            'steps': [{'order': 1, 'text': 'Run GRANT SELECT ON users TO datadog;'}],
+        },
+        tags=['env:prod'],
+    )
+
+    datadog_agent.assert_reported_issue(
+        "test_check",
+        "issue-2",
+        {
+            'id': 'issue-2',
+            'issue_name': 'permission_denied',
+            'title': 'Permission denied',
+            'description': 'The check lacks required permissions.',
+            'category': 'permissions',
+            'location': 'integrations',
+            'severity': issue_check.IssueSeverity['HIGH'],
+            'source': 'test_check',
+            'extra': {'resource': 'users'},
+            'remediation': {
+                'summary': 'Grant the required permissions.',
+                'steps': [{'order': 1, 'text': 'Run GRANT SELECT ON users TO datadog;'}],
+            },
+            'tags': ['env:prod'],
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    'issue_id, issue_name, expected_message',
+    [
+        pytest.param('', 'connection_failed', 'Issue ID is required', id='missing id'),
+        pytest.param('issue-1', '', 'Issue Name is required', id='missing issue name'),
+    ],
+)
+def test_report_issue_requires_id_and_name(issue_check, issue_id, issue_name, expected_message):
+    with pytest.raises(ValueError, match=expected_message):
+        issue_check.report_issue(id=issue_id, issue_name=issue_name)
+
+
+def test_resolve_issue(datadog_agent, issue_check):
+    issue_check.resolve_issue('issue-1')
+
+    datadog_agent.assert_resolved_issue('issue-1')
