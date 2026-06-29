@@ -215,31 +215,26 @@ class KafkaActionsConfig:
 
         schema_registry_url = self.instance.get('schema_registry_url')
 
-        if value_format in ['protobuf', 'avro']:
-            if config.get('value_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"value_format='{value_format}' with 'value_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('value_schema'):
-                raise ConfigurationError(
-                    f"value_format='{value_format}' requires either 'value_uses_schema_registry=true' "
-                    f"or 'value_schema' to be specified"
-                )
+        self._validate_schema_requirement('value', value_format, get_handler(value_format), schema_registry_url)
+        self._validate_schema_requirement('key', key_format, get_handler(key_format), schema_registry_url)
 
-        if key_format in ['protobuf', 'avro']:
-            if config.get('key_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"key_format='{key_format}' with 'key_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('key_schema'):
+    def _validate_schema_requirement(self, side: str, fmt: str, handler, schema_registry_url) -> None:
+        """Require a schema (inline or registry) for formats whose handler sets requires_schema."""
+        if handler is None or not getattr(handler, 'requires_schema', False):
+            return
+
+        config = self.read_messages
+        if config.get(f'{side}_uses_schema_registry'):
+            if not schema_registry_url:
                 raise ConfigurationError(
-                    f"key_format='{key_format}' requires either 'key_uses_schema_registry=true' "
-                    f"or 'key_schema' to be specified"
+                    f"{side}_format='{fmt}' with '{side}_uses_schema_registry=true' "
+                    f"requires 'schema_registry_url' to be configured"
                 )
+        elif not config.get(f'{side}_schema'):
+            raise ConfigurationError(
+                f"{side}_format='{fmt}' requires either '{side}_uses_schema_registry=true' "
+                f"or '{side}_schema' to be specified"
+            )
 
     @staticmethod
     def _check_optional_dependency(plugin, field: str, name: str) -> None:

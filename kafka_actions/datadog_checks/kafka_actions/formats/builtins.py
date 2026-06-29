@@ -57,6 +57,7 @@ class BsonHandler(FormatHandler):
 
 class AvroHandler(FormatHandler):
     name = 'avro'
+    requires_schema = True
 
     def check_availability(self):
         import fastavro  # noqa: F401
@@ -70,6 +71,7 @@ class AvroHandler(FormatHandler):
 
 class ProtobufHandler(FormatHandler):
     name = 'protobuf'
+    requires_schema = True
 
     def build_schema(self, schema_str):
         return _build_protobuf_schema(schema_str)

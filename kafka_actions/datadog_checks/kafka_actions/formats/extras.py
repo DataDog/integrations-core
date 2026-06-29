@@ -82,18 +82,20 @@ class ProtobufMsgpackHandler(FormatHandler):
         import msgpack  # noqa: F401
         from google.protobuf import json_format  # noqa: F401
 
+    requires_schema = True
+
     def build_schema(self, schema_str: str):
-        from .builtins import ProtobufHandler
+        from ._helpers import _build_protobuf_schema
 
         wrapper = json.loads(schema_str)
-        proto_schema = ProtobufHandler().build_schema(wrapper['schema'])
+        proto_schema = _build_protobuf_schema(wrapper['schema'])
         return (proto_schema, set(wrapper.get('msgpack_fields') or []))
 
     def build_schema_from_registry(self, schema_str: str, dep_schemas: list):
-        from .builtins import ProtobufHandler
+        from ._helpers import _build_protobuf_schema_from_registry
 
         wrapper = json.loads(schema_str)
-        proto_schema = ProtobufHandler().build_schema_from_registry(wrapper['schema'], dep_schemas)
+        proto_schema = _build_protobuf_schema_from_registry(wrapper['schema'], dep_schemas)
         return (proto_schema, set(wrapper.get('msgpack_fields') or []))
 
     def deserialize(

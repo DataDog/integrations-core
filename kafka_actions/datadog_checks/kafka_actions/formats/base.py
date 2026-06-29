@@ -19,6 +19,13 @@ class FormatHandler(ABC):
 
     name: str = ''
 
+    requires_schema: bool = False
+    """Whether config validation must ensure a schema (inline or registry) is supplied.
+
+    Override to ``True`` in handlers that cannot deserialize without a schema
+    (e.g. Avro, Protobuf). Schemaless handlers leave the default.
+    """
+
     def check_availability(self) -> None:
         """Verify any optional backing libraries are importable.
 
