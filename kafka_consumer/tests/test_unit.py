@@ -763,8 +763,8 @@ def test_check_prunes_anchor_at_floor_boundary(kafka_instance, check, dd_run_che
     written = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
     timestamps = written["topic1_0"]
     assert "10" not in timestamps  # pruned: below the anchor
-    assert "20" in timestamps      # correct anchor (strict-< floor means 30 is not below 30)
-    assert "40" in timestamps      # new highwater
+    assert "20" in timestamps  # correct anchor (strict-< floor means 30 is not below 30)
+    assert "40" in timestamps  # new highwater
 
 
 def test_check_keeps_sole_entry_below_floor_as_anchor(kafka_instance, check, dd_run_check):
