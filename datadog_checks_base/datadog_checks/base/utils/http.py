@@ -93,8 +93,8 @@ DEFAULT_REMAPPED_FIELDS = {
     # TODO: Remove in 6.13
     'no_proxy': {'name': 'skip_proxy'},
 }
-# `tls_intermediate_ca_certs` is included so the AIA session trusts intermediates already accumulated
-# during the ongoing chain construction, in case the issuer endpoint chains to one of them.
+# `tls_intermediate_ca_certs` is forwarded so the AIA fetch session trusts any CA bundle the operator
+# pre-configured in the instance, in case the issuer endpoint is signed by one of those roots.
 AIA_TLS_CONFIG_FIELDS = frozenset(
     {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
 )
@@ -257,7 +257,9 @@ def _is_safe_aia_url(uri: str, logger: logging.Logger | logging.LoggerAdapter) -
     return True
 
 
-def _read_capped_content(response, uri: str, logger: logging.Logger | logging.LoggerAdapter) -> bytes | None:
+def _read_capped_content(
+    response: requests.Response, uri: str, logger: logging.Logger | logging.LoggerAdapter
+) -> bytes | None:
     chunks = []
     total = 0
     for chunk in response.iter_content(8192):

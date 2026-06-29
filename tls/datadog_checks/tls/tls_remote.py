@@ -237,7 +237,12 @@ class TLSRemoteCheck(object):
 
             cert_id = sha256(intermediate_cert).digest()
             if cert_id not in self.agent_check._intermediate_cert_id_cache:
-                self.agent_check.get_tls_context().load_verify_locations(cadata=intermediate_cert)
+                try:
+                    # `cadata` accepts DER bytes directly here (the base path uses PEM strings instead).
+                    self.agent_check.get_tls_context().load_verify_locations(cadata=intermediate_cert)
+                except Exception as e:
+                    self.log.error('Error loading intermediate certificate from `%s`: %s', uri, e)
+                    continue
                 self.agent_check._intermediate_cert_id_cache.add(cert_id)
 
             self.agent_check._intermediate_cert_uri_cache[uri] = access_time
