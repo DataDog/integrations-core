@@ -209,6 +209,20 @@ def test_candidate_ports_prefers_hints_and_deduplicates():
     ]
 
 
+def test_dev_placeholder_field_constants_match_models():
+    """Guard the one fact datadog_checks_dev must hand-copy from base.
+
+    The discovery tooling cannot import datadog_checks_base, so it keeps the
+    Service/Port field names as constants used to validate candidate-template
+    placeholders. This test fails if those constants drift from the real models.
+    """
+    pytest.importorskip('datadog_checks.dev.tooling.configuration.discovery.registry')
+    from datadog_checks.dev.tooling.configuration.discovery.registry import PORT_FIELDS, SERVICE_FIELDS
+
+    assert SERVICE_FIELDS == set(Service.model_fields)
+    assert PORT_FIELDS == set(Port.model_fields)
+
+
 def test_discovery_strategy_passes_complete_contexts():
     from datadog_checks.base.utils.discovery import discovery_strategy
 

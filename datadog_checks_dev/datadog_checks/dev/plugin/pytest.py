@@ -240,6 +240,28 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
 
 @pytest.fixture
+def dd_agent_check_discovery(dd_agent_check):
+    """Wrapper around ``dd_agent_check`` for config-discovery e2e tests.
+
+    Passes the empty-instances config required to let ``auto_conf.yaml`` drive
+    autodiscovery, and sets sensible defaults for ``discovery_min_instances`` and
+    ``discovery_timeout`` — all of which can be overridden per call.
+    """
+    if not e2e_testing():
+        pytest.skip('Not running E2E tests')
+
+    def run(*, discovery_min_instances=1, discovery_timeout=30, **kwargs):
+        return dd_agent_check(
+            {'init_config': {}, 'instances': []},
+            discovery_min_instances=discovery_min_instances,
+            discovery_timeout=discovery_timeout,
+            **kwargs,
+        )
+
+    return run
+
+
+@pytest.fixture
 def dd_run_check():
     checks = {}
 
