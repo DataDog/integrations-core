@@ -547,9 +547,7 @@ def test_client_init(kafka_instance, check, dd_run_check):
 
 def test_add_broker_timestamps_clears_cache_on_reset(kafka_instance, check):
     # When the highwater offset goes backwards (topic recreated / retention wipe / offset reset),
-    # the entire cache is cleared. Surviving low-offset entries would be from the previous
-    # generation and VW always preserves the minimum endpoint, so they would never age out and
-    # would poison lag interpolation indefinitely.
+    # the entire cache is cleared.
     check = check(kafka_instance)
     broker_timestamps = {"topic1_0": {1_000_000: 100.0, 999_000: 99.0}}
     check._add_broker_timestamps(broker_timestamps, {("topic1", 0): 170})
