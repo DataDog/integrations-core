@@ -6,8 +6,8 @@ from copy import deepcopy
 import mock
 import pytest
 import requests
-
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from datadog_checks.envoy import Envoy
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
@@ -362,8 +362,18 @@ def test_adaptive_concurrency_metrics(aggregator, fixture_path, mock_http_respon
     mock_http_response(file_path=fixture_path('./legacy/adaptive_concurrency.txt'))
     dd_run_check(c)
 
+    # Pin the fixture values so a wrong mapping or metric type would be caught, not just a wrong name.
+    expected_values = {
+        "envoy.http.adaptive_concurrency.gradient_controller.rq_blocked": 5,
+        "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active": 1,
+        "envoy.http.adaptive_concurrency.gradient_controller.concurrency_limit": 30,
+        "envoy.http.adaptive_concurrency.gradient_controller.gradient": 1000,
+        "envoy.http.adaptive_concurrency.gradient_controller.burst_queue_size": 22,
+        "envoy.http.adaptive_concurrency.gradient_controller.min_rtt_msecs": 100,
+        "envoy.http.adaptive_concurrency.gradient_controller.sample_rtt_msecs": 95,
+    }
     for metric in ADAPTIVE_CONCURRENCY_METRICS:
-        aggregator.assert_metric(metric)
+        aggregator.assert_metric(metric, value=expected_values[metric])
         for tag in ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG:
             aggregator.assert_metric_has_tag(metric, tag, count=1)
 

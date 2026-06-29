@@ -4,7 +4,6 @@
 import os
 
 import pytest
-
 from datadog_checks.dev import get_docker_hostname, get_here
 
 from .legacy.common import FLAVOR
@@ -409,6 +408,15 @@ ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS = [
 ]
 
 ADAPTIVE_CONCURRENCY_PROMETHEUS_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
+
+ADAPTIVE_CONCURRENCY_PROMETHEUS_GAUGE_VALUES = {
+    "http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active": 0,
+    "http.adaptive_concurrency.gradient_controller.concurrency_limit": 30,
+    "http.adaptive_concurrency.gradient_controller.gradient": 1000,
+    "http.adaptive_concurrency.gradient_controller.burst_queue_size": 22,
+    "http.adaptive_concurrency.gradient_controller.min_rtt_msecs": 100,
+    "http.adaptive_concurrency.gradient_controller.sample_rtt_msecs": 95,
+}
 
 TLS_INSPECTOR_METRICS = [
     "tls_inspector.client_hello_too_large.count",

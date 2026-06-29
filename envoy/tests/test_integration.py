@@ -3,14 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
 from .common import (
     ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS,
-    ADAPTIVE_CONCURRENCY_PROMETHEUS_STAT_PREFIX_TAG,
     CONNECTION_LIMIT_METRICS,
     DEFAULT_INSTANCE,
     ENVOY_VERSION,
@@ -70,41 +69,22 @@ def test_check(aggregator, dd_run_check, check):
 
 
 def test_adaptive_concurrency_symmetric(aggregator, dd_run_check, check):
-    """Symmetric metadata check scoped to adaptive concurrency gradient controller metrics.
+    """Verify both collection directions for adaptive concurrency metrics.
 
-    The OpenMetrics integration test scrapes /stats/prometheus only.  Enabling
-    check_symmetric_inclusion=True globally on test_check would require ~650 exclusions
-    covering legacy-only metrics, filters not configured in the test environment, and
-    error-path metrics that are never triggered in a normal E2E run.  This test narrows
-    the scope to just the seven adaptive concurrency metrics we are adding, where both
-    directions of the check are meaningful and achievable:
-
-      forward:  every collected metric must be in metadata.csv (type validated)
-      backward: every adaptive concurrency metric declared in metadata.csv must be collected
-
-    Confirmed via live Envoy 1.31.0 run: all seven metrics are emitted at
-    /stats/prometheus with label envoy_http_conn_manager_prefix="ingress_http".
+    Uses a scoped metadata subset to avoid the ~650 exclusions a global
+    check_symmetric_inclusion=True would need.
     """
     c = check(DEFAULT_INSTANCE)
     dd_run_check(c)
     dd_run_check(c)
 
-    # Build a metadata subset restricted to adaptive concurrency metrics, excluding
-    # the legacy counter name (without .count suffix).  The legacy check emits
-    # 'rq_blocked' directly; the OpenMetrics check emits 'rq_blocked.count' because
-    # Prometheus counters always get the .count suffix appended by the base check.
-    # Both names live in metadata.csv, but this test scrapes /stats/prometheus only.
-    LEGACY_ONLY_ADAPTIVE = {
-        'envoy.http.adaptive_concurrency.gradient_controller.rq_blocked',
-    }
+    # The legacy check emits 'rq_blocked'; OpenMetrics emits 'rq_blocked.count'. This test scrapes /stats/prometheus.
+    legacy_only = 'envoy.http.adaptive_concurrency.gradient_controller.rq_blocked'
     adaptive_metadata = {
-        k: v
-        for k, v in get_metadata_metrics().items()
-        if 'adaptive_concurrency' in k and k not in LEGACY_ONLY_ADAPTIVE
+        k: v for k, v in get_metadata_metrics().items() if 'adaptive_concurrency' in k and k != legacy_only
     }
 
-    # Exclude all collected non-adaptive metrics from the forward direction so the
-    # assertion focuses only on what we care about here.
+    # Restrict the forward direction to adaptive concurrency metrics.
     non_adaptive = [m for m in aggregator.metric_names if 'adaptive_concurrency' not in m]
 
     aggregator.assert_metrics_using_metadata(
