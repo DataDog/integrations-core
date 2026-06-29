@@ -92,7 +92,9 @@ class ProduceMessage(BaseModel):
         examples=['MTIzNDU='],
     )
     partition: Optional[int] = Field(
-        -1, description='Specific partition (-1 for automatic partitioning)', examples=[-1]
+        -1,
+        description='Specific partition (-1 for automatic partitioning)',
+        examples=[-1],
     )
     topic: str = Field(..., description='Topic to produce to', examples=['test-topic'])
     value: str = Field(
@@ -124,7 +126,9 @@ class ReadMessages(BaseModel):
         examples=['snappy'],
     )
     key_format: Optional[str] = Field(
-        'json', description='Message key format. Same supported set as value_format.\n', examples=['json']
+        'json',
+        description='Message key format. Same supported set as value_format.\n',
+        examples=['json'],
     )
     key_schema: Optional[str] = Field(None, description='Schema definition for protobuf/avro key')
     key_skip_bytes: Optional[int] = Field(
@@ -144,7 +148,9 @@ class ReadMessages(BaseModel):
         examples=[10],
     )
     partition: Optional[int] = Field(
-        -1, description='Specific partition to read from (-1 for all partitions)', examples=[-1]
+        -1,
+        description='Specific partition to read from (-1 for all partitions)',
+        examples=[-1],
     )
     start_offset: Optional[int] = Field(
         -1,
@@ -225,7 +231,10 @@ class UpdateConsumerGroupOffsets(BaseModel):
         ...,
         description='List of topic-partition-offset tuples to update',
         examples=[
-            [{'offset': 1000, 'partition': 0, 'topic': 'orders'}, {'offset': 1500, 'partition': 1, 'topic': 'orders'}]
+            [
+                {'offset': 1000, 'partition': 0, 'topic': 'orders'},
+                {'offset': 1500, 'partition': 1, 'topic': 'orders'},
+            ]
         ],
     )
 
@@ -242,10 +251,14 @@ class UpdateTopicConfig(BaseModel):
         examples=[{'max.message.bytes': '2097152', 'retention.ms': '1209600000'}],
     )
     delete_configs: Optional[tuple[str, ...]] = Field(
-        None, description='Configuration keys to reset to defaults', examples=[['retention.bytes', 'compression.type']]
+        None,
+        description='Configuration keys to reset to defaults',
+        examples=[['retention.bytes', 'compression.type']],
     )
     num_partitions: Optional[int] = Field(
-        None, description='New partition count (can only increase, cannot decrease)', examples=[12]
+        None,
+        description='New partition count (can only increase, cannot decrease)',
+        examples=[12],
     )
     topic: str = Field(..., description='Topic name to update', examples=['orders'])
 

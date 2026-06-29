@@ -42,12 +42,6 @@ deps = [
     "protobuf==7.34.0",
     "pymongo[srv]==4.8.0; python_version >= '3.9'",
 ]
-formats = [
-    "msgpack==1.1.0",
-    "python-snappy==0.7.3",
-    "lz4==4.3.3",
-    "zstandard==0.23.0",
-]
 
 [project.entry-points."datadog_kafka_actions.formats"]
 json = "datadog_checks.kafka_actions.formats.builtins:JsonHandler"
