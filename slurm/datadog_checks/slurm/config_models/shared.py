@@ -33,14 +33,18 @@ class SharedConfig(BaseModel):
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
-        return validation.core.initialize_config(getattr(validators, 'initialize_shared', identity)(values))
+        return validation.core.initialize_config(
+            getattr(validators, 'initialize_shared', identity)(values)
+        )
 
     @field_validator('*', mode='before')
     def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            value = getattr(validators, f'shared_{info.field_name}', identity)(value, field=field)
+            value = getattr(validators, f'shared_{info.field_name}', identity)(
+                value, field=field
+            )
 
             if info.field_name in SECURE_FIELD_NAMES:
                 validation.security.check_field_trusted_provider(
@@ -53,4 +57,6 @@ class SharedConfig(BaseModel):
 
     @model_validator(mode='after')
     def _final_validation(cls, model):
-        return validation.core.check_model(getattr(validators, 'check_shared', identity)(model))
+        return validation.core.check_model(
+            getattr(validators, 'check_shared', identity)(model)
+        )
