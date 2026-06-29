@@ -26,15 +26,16 @@ def write(p: Path, text: str) -> None:
     p.write_text(text)
 
 
-def test_user_overrides_core(tmp_path):
+def test_core_and_user_same_name_conflict(tmp_path):
     core = tmp_path / "core"
     u = tmp_path / "u"
     write(core / "agents" / "a.md", "---\ntype: agent\n---\ncore body\n")
     write(u / "agents" / "a.md", "---\ntype: agent\n---\nuser body\n")
     eng = ConfigurationEngine(core_dir=core, user_dirs=[str(u)], phase_registry=StubReg())
-    assert eng._agents["a"].config.system_prompt == "user body"
-    assert (core / "agents" / "a.md").resolve() in [p.resolve() for p in eng._agents["a"].overridden]
-    assert not eng.has_conflicts
+    assert eng.has_conflicts
+    c = [c for c in eng.conflicts if c.name == "a"][0]
+    assert c.type == "agent" and len(c.sources) == 2
+    assert "a" not in eng._agents  # conflicting resource is dropped, not picked
 
 
 def test_two_user_dirs_conflict(tmp_path):

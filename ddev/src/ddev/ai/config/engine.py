@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol
@@ -41,14 +41,12 @@ class ConfigStatus(StrEnum):
 class ValidEntry[C]:
     config: C
     source_file: Path
-    overridden: list[Path] = field(default_factory=list)
 
 
 @dataclass
 class BrokenEntry:
     source_file: Path
     error: str
-    overridden: list[Path] = field(default_factory=list)
 
 
 type RegistryEntry[C] = ValidEntry[C] | BrokenEntry
@@ -90,7 +88,6 @@ class ConfigurationEngine:
     ) -> None:
         self._logger = logger or logging.getLogger(__name__)
         self._phase_registry = phase_registry
-        self._core_dir = core_dir
 
         resolved_user_dirs = self._resolve_user_dirs(user_dirs)
 
@@ -131,9 +128,6 @@ class ConfigurationEngine:
             resolved.append(p)
         return resolved
 
-    def _is_core(self, path: Path) -> bool:
-        return path.resolve().is_relative_to(self._core_dir.resolve())
-
     def _accumulate(self, kind: ResourceKind, name: str, entry: RegistryEntry[Any]) -> None:
         key = (kind, name)
         self._pending.setdefault(key, []).append(entry)
@@ -141,15 +135,10 @@ class ConfigurationEngine:
     def _resolve_bucket(
         self, kind: ResourceKind, name: str, entries: list[RegistryEntry[Any]]
     ) -> RegistryEntry[Any] | None:
-        core = [e for e in entries if self._is_core(e.source_file)]
-        user = [e for e in entries if not self._is_core(e.source_file)]
-        if len(core) > 1 or len(user) > 1:
+        if len(entries) > 1:
             self._conflicts.append(ConfigConflict(name=name, type=kind, sources=[e.source_file for e in entries]))
             return None
-        winner = user[0] if user else core[0]
-        if user and core:
-            winner.overridden = [core[0].source_file]
-        return winner
+        return entries[0]
 
     def _resolve_pending(self) -> None:
         registry_map: dict[ResourceKind, dict[str, RegistryEntry[Any]]] = {
