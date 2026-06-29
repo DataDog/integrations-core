@@ -11,6 +11,7 @@ from unittest import mock
 import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
 
@@ -2031,6 +2032,8 @@ def test_scram_credentials_present(check, dd_run_check, aggregator):
         assert event['kafka_cluster_id'] == 'test-cluster-id'
     assert by_user['alice'] == [('scram_sha_256', 8192)]
     assert sorted(by_user['bob']) == [('scram_sha_256', 4096), ('scram_sha_512', 16384)]
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_scram_credentials_empty(check, dd_run_check, aggregator):
