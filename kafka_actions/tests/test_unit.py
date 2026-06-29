@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from confluent_kafka import KafkaError
-
+from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_actions import KafkaActionsCheck
 from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
 
@@ -619,7 +619,7 @@ class TestCheckInitFailure:
             },
         }
 
-        with pytest.raises(Exception):
+        with pytest.raises(ConfigurationError):
             KafkaActionsCheck('kafka_actions', {}, [instance])
 
         failure_events = aggregator.get_event_platform_events("data-streams-message")

@@ -4,11 +4,11 @@
 """Tests for message deserialization."""
 
 import base64
+import gzip
 import json
 from unittest.mock import MagicMock
 
 import pytest
-
 from datadog_checks.kafka_actions.message_deserializer import DeserializedMessage, MessageDeserializer
 
 pytestmark = [pytest.mark.unit]
@@ -969,7 +969,7 @@ class TestDeserializeMessageFailureBranches:
     def test_decompression_failure_propagates(self):
         """A decompression failure propagates so the read action stops immediately."""
         deserializer = MessageDeserializer(MagicMock())
-        with pytest.raises(Exception):
+        with pytest.raises(gzip.BadGzipFile):
             deserializer.deserialize_message(b'not-gzip-data', format_type='raw', compression='gzip')
 
 
