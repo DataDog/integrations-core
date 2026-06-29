@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from enum import StrEnum
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -237,28 +238,44 @@ class ConfigurationEngine:
         elif file_type == "memory":
             self._accumulate("memory", stem, entry)
 
+    def _ok_view[C](self, registry: dict[str, RegistryEntry[C]]) -> dict[str, C]:
+        return {name: e.config for name, e in registry.items() if isinstance(e, ValidEntry)}
+
+    @cached_property
+    def _ok_agents(self) -> dict[str, AgentConfig]:
+        return self._ok_view(self._agents)
+
+    @cached_property
+    def _ok_prompts(self) -> dict[str, str]:
+        return self._ok_view(self._prompts)
+
+    @cached_property
+    def _ok_goals(self) -> dict[str, str]:
+        return self._ok_view(self._goals)
+
+    @cached_property
+    def _ok_memories(self) -> dict[str, str]:
+        return self._ok_view(self._memories)
+
     def _validate_flow(self, flow_name: str) -> FlowDiagnostics:
         entry = self._flows[flow_name]
         if isinstance(entry, BrokenEntry):
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, [entry.error or "broken flow"])
 
         fc: FlowConfig = entry.config
-        ok_agents = {name: e.config for name, e in self._agents.items() if isinstance(e, ValidEntry)}
 
-        scheduled_phases, errors = self._validate_scheduled_phases(fc, flow_name, ok_agents)
+        scheduled_phases, errors = self._validate_scheduled_phases(fc, flow_name)
         errors.extend(self._validate_dependencies(flow_name, fc))
-        resolved_variables, var_errors = self._resolve_variables(scheduled_phases, fc, ok_agents)
+        resolved_variables, var_errors = self._resolve_variables(scheduled_phases, fc)
         errors.extend(var_errors)
 
         if errors:
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
 
-        resolved = self._build_resolved_flow(flow_name, fc, scheduled_phases, resolved_variables, ok_agents)
+        resolved = self._build_resolved_flow(flow_name, fc, scheduled_phases, resolved_variables)
         return FlowDiagnostics(flow_name, ConfigStatus.OK, [], resolved=resolved)
 
-    def _validate_scheduled_phases(
-        self, fc: FlowConfig, flow_name: str, ok_agents: dict[str, AgentConfig]
-    ) -> tuple[list[PhaseConfig], list[str]]:
+    def _validate_scheduled_phases(self, fc: FlowConfig, flow_name: str) -> tuple[list[PhaseConfig], list[str]]:
         scheduled_phases: list[PhaseConfig] = []
         errors: list[str] = []
         for fe in fc.flow:
@@ -273,16 +290,16 @@ class ConfigurationEngine:
                 continue
             pc: PhaseConfig = phase_entry.config
             scheduled_phases.append(pc)
-            errors.extend(self._validate_phase_class(pc, ok_agents))
+            errors.extend(self._validate_phase_class(pc))
             errors.extend(self._validate_phase_agent(pc))
             errors.extend(self._validate_phase_refs(pc))
         return scheduled_phases, errors
 
-    def _validate_phase_class(self, pc: PhaseConfig, ok_agents: dict[str, AgentConfig]) -> list[str]:
+    def _validate_phase_class(self, pc: PhaseConfig) -> list[str]:
         if not self._phase_registry.contains(pc.class_):
             return [f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}"]
         try:
-            self._phase_registry.get(pc.class_).validate_config(pc.name, pc, ok_agents)
+            self._phase_registry.get(pc.class_).validate_config(pc.name, pc, self._ok_agents)
         except FlowConfigError as e:
             return [str(e)]
         return []
@@ -314,20 +331,16 @@ class ConfigurationEngine:
         fc: FlowConfig,
         scheduled_phases: list[PhaseConfig],
         resolved_variables: dict[str, str],
-        ok_agents: dict[str, AgentConfig],
     ) -> ResolvedFlow:
-        ok_prompts = {n: e.config for n, e in self._prompts.items() if isinstance(e, ValidEntry)}
-        ok_goals = {n: e.config for n, e in self._goals.items() if isinstance(e, ValidEntry)}
-        ok_memories = {n: e.config for n, e in self._memories.items() if isinstance(e, ValidEntry)}
         return ResolvedFlow(
             name=flow_name,
-            agents={pc.agent: ok_agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
+            agents={pc.agent: self._ok_agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
             phases={pc.name: pc for pc in scheduled_phases},  # refs preserved, no inlining
             flow=fc.flow,
             variables=resolved_variables,
-            prompts=ok_prompts,
-            goals=ok_goals,
-            memories=ok_memories,
+            prompts=self._ok_prompts,
+            goals=self._ok_goals,
+            memories=self._ok_memories,
         )
 
     def _check_ref(self, registry: dict[str, RegistryEntry[str]], ref: str, kind: str, phase_name: str) -> list[str]:
@@ -365,21 +378,19 @@ class ConfigurationEngine:
         return errors
 
     def _resolve_variables(
-        self, scheduled_phases: list[PhaseConfig], fc: FlowConfig, ok_agents: dict[str, AgentConfig]
+        self, scheduled_phases: list[PhaseConfig], fc: FlowConfig
     ) -> tuple[dict[str, str], list[str]]:
-        declarations = self._gather_variable_declarations(scheduled_phases, ok_agents)
+        declarations = self._gather_variable_declarations(scheduled_phases)
         defaults, errors = self._collect_default_values(declarations)
         errors.extend(self._find_missing_variables(declarations, defaults, fc))
         resolved = {**defaults, **fc.variables}
         return resolved, errors
 
-    def _gather_variable_declarations(
-        self, scheduled_phases: list[PhaseConfig], ok_agents: dict[str, AgentConfig]
-    ) -> list[VariableDeclaration]:
+    def _gather_variable_declarations(self, scheduled_phases: list[PhaseConfig]) -> list[VariableDeclaration]:
         declarations: list[VariableDeclaration] = []
         for pc in scheduled_phases:
-            if pc.agent is not None and pc.agent in ok_agents:
-                declarations.extend(ok_agents[pc.agent].variables)
+            if pc.agent is not None and pc.agent in self._ok_agents:
+                declarations.extend(self._ok_agents[pc.agent].variables)
             declarations.extend(pc.variables)
         return declarations
 
