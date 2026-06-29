@@ -42,6 +42,9 @@ class MsgpackHandler(FormatHandler):
 
     name = 'msgpack'
 
+    def check_availability(self) -> None:
+        import msgpack  # noqa: F401
+
     def deserialize(
         self, message: bytes, schema: Any, *, log: logging.Logger, uses_schema_registry: bool
     ) -> str | None:
@@ -74,6 +77,10 @@ class ProtobufMsgpackHandler(FormatHandler):
     """
 
     name = 'protobuf_msgpack'
+
+    def check_availability(self) -> None:
+        import msgpack  # noqa: F401
+        from google.protobuf import json_format  # noqa: F401
 
     def build_schema(self, schema_str: str):
         from .builtins import ProtobufHandler

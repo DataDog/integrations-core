@@ -19,6 +19,16 @@ class FormatHandler(ABC):
 
     name: str = ''
 
+    def check_availability(self) -> None:
+        """Verify any optional backing libraries are importable.
+
+        Override in handlers with optional dependencies so config validation
+        can surface an actionable ``install X`` error up front instead of a
+        per-message deserialization failure. Raise ``ImportError`` if a
+        required package is missing.
+        """
+        return None
+
     def build_schema(self, schema_str: str) -> Any:
         """Build a schema object from an inline (config-supplied) schema string.
 

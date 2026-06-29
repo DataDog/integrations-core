@@ -48,12 +48,18 @@ class RawHandler(FormatHandler):
 class BsonHandler(FormatHandler):
     name = 'bson'
 
+    def check_availability(self):
+        import bson  # noqa: F401
+
     def deserialize(self, message, schema, *, log, uses_schema_registry):
         return _deserialize_bson(message)
 
 
 class AvroHandler(FormatHandler):
     name = 'avro'
+
+    def check_availability(self):
+        import fastavro  # noqa: F401
 
     def build_schema(self, schema_str):
         return _build_avro_schema(schema_str)

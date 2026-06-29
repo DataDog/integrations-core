@@ -47,6 +47,9 @@ class ZlibCodec(CompressionCodec):
 class SnappyCodec(CompressionCodec):
     name = 'snappy'
 
+    def check_availability(self) -> None:
+        import snappy  # noqa: F401
+
     def decompress(self, data: bytes) -> bytes:
         import snappy
 
@@ -57,6 +60,9 @@ class Lz4Codec(CompressionCodec):
     """Standard LZ4 frame format."""
 
     name = 'lz4'
+
+    def check_availability(self) -> None:
+        import lz4.frame  # noqa: F401
 
     def decompress(self, data: bytes) -> bytes:
         import lz4.frame
@@ -72,6 +78,9 @@ class Lz4DdHdrCodec(CompressionCodec):
     """
 
     name = 'lz4_dd_hdr'
+
+    def check_availability(self) -> None:
+        import lz4.block  # noqa: F401
 
     def decompress(self, data: bytes) -> bytes:
         import lz4.block
@@ -89,6 +98,9 @@ class Lz4DdHdrCodec(CompressionCodec):
 
 class ZstdCodec(CompressionCodec):
     name = 'zstd'
+
+    def check_availability(self) -> None:
+        import zstandard  # noqa: F401
 
     def decompress(self, data: bytes) -> bytes:
         import zstandard

@@ -180,8 +180,8 @@ class KafkaActionsConfig:
 
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
-        from .compression import list_codecs
-        from .formats import list_handlers
+        from .compression import get_codec, list_codecs
+        from .formats import get_handler, list_handlers
 
         valid_formats = list_handlers()
         value_format = config.get('value_format', 'json')
@@ -200,6 +200,13 @@ class KafkaActionsConfig:
             if codec and codec not in valid_codecs:
                 supported = ', '.join(valid_codecs) if valid_codecs else '(no codec plugin installed)'
                 raise ConfigurationError(f"Invalid {field}: {codec}. Supported codecs: {supported}")
+
+        for field, fmt in (('value_format', value_format), ('key_format', key_format)):
+            self._check_optional_dependency(get_handler(fmt), field, fmt)
+        for field in ('value_compression', 'key_compression'):
+            codec_name = config.get(field)
+            if codec_name:
+                self._check_optional_dependency(get_codec(codec_name), field, codec_name)
 
         start_timestamp = config.get('start_timestamp')
         if start_timestamp is not None:
@@ -233,6 +240,19 @@ class KafkaActionsConfig:
                     f"key_format='{key_format}' requires either 'key_uses_schema_registry=true' "
                     f"or 'key_schema' to be specified"
                 )
+
+    @staticmethod
+    def _check_optional_dependency(plugin, field: str, name: str) -> None:
+        """Fail config validation if a selected format/codec is missing its optional package."""
+        if plugin is None:
+            return
+        try:
+            plugin.check_availability()
+        except ImportError as e:
+            raise ConfigurationError(
+                f"{field}='{name}' requires an optional package that is not installed: {e}. "
+                f"Install it into the Agent's embedded Python to use this {field}."
+            ) from e
 
     def _validate_create_topic(self):
         """Validate create_topic action configuration."""
