@@ -34,7 +34,7 @@ def msgpack_handler():
 
 
 def test_msgpack_simple_dict(msgpack_handler, log):
-    import msgpack
+    msgpack = pytest.importorskip('msgpack')
 
     payload = msgpack.packb({'a': 1, 'b': 'two', 'c': [1, 2, 3]})
     out = msgpack_handler.deserialize(payload, None, log=log, uses_schema_registry=False)
@@ -42,7 +42,7 @@ def test_msgpack_simple_dict(msgpack_handler, log):
 
 
 def test_msgpack_nested(msgpack_handler, log):
-    import msgpack
+    msgpack = pytest.importorskip('msgpack')
 
     payload = msgpack.packb({'outer': {'inner': [None, True, False]}})
     out = msgpack_handler.deserialize(payload, None, log=log, uses_schema_registry=False)
@@ -50,7 +50,7 @@ def test_msgpack_nested(msgpack_handler, log):
 
 
 def test_msgpack_bytes_field_base64_encoded(msgpack_handler, log):
-    import msgpack
+    msgpack = pytest.importorskip('msgpack')
 
     payload = msgpack.packb({'data': b'\x00\x01\x02'})
     out = msgpack_handler.deserialize(payload, None, log=log, uses_schema_registry=False)
@@ -58,7 +58,7 @@ def test_msgpack_bytes_field_base64_encoded(msgpack_handler, log):
 
 
 def test_msgpack_datetime_isoformat(msgpack_handler, log):
-    import msgpack
+    msgpack = pytest.importorskip('msgpack')
 
     payload = msgpack.packb(
         {'when': datetime.datetime(2025, 1, 2, 3, 4, 5, tzinfo=datetime.timezone.utc)},
@@ -74,13 +74,14 @@ def test_msgpack_empty_returns_none(msgpack_handler, log):
 
 
 def test_msgpack_invalid_raises(msgpack_handler, log):
+    pytest.importorskip('msgpack')
     with pytest.raises(ValueError, match="Failed to deserialize msgpack"):
         msgpack_handler.deserialize(b'\xff\xff\xff\xff', None, log=log, uses_schema_registry=False)
 
 
 def test_msgpack_via_message_deserializer(log):
     """MsgpackHandler is reachable through the MessageDeserializer API."""
-    import msgpack
+    msgpack = pytest.importorskip('msgpack')
 
     from datadog_checks.kafka_actions.message_deserializer import MessageDeserializer
 
@@ -143,7 +144,8 @@ def proto_msgpack_handler():
 
 
 def test_protobuf_msgpack_decodes_inner_field(proto_msgpack_handler, log):
-    import msgpack
+    pytest.importorskip('google.protobuf')
+    msgpack = pytest.importorskip('msgpack')
 
     schema_b64 = _build_envelope_descriptor_b64()
     inner = {'service': 'orders', 'env': 'prod', 'count': 3}
@@ -159,6 +161,7 @@ def test_protobuf_msgpack_decodes_inner_field(proto_msgpack_handler, log):
 
 
 def test_protobuf_msgpack_empty_returns_none(proto_msgpack_handler, log):
+    pytest.importorskip('google.protobuf')
     schema_b64 = _build_envelope_descriptor_b64()
     schema_str = json.dumps({'schema': schema_b64, 'msgpack_fields': []})
     schema = proto_msgpack_handler.build_schema(schema_str)
@@ -166,7 +169,8 @@ def test_protobuf_msgpack_empty_returns_none(proto_msgpack_handler, log):
 
 
 def test_protobuf_msgpack_non_bytes_field_raises(proto_msgpack_handler, log):
-    import msgpack
+    pytest.importorskip('google.protobuf')
+    msgpack = pytest.importorskip('msgpack')
 
     schema_b64 = _build_envelope_descriptor_b64()
     payload = _encode_envelope(msgpack.packb({'a': 1}, use_bin_type=True), org_id=99)
@@ -177,6 +181,7 @@ def test_protobuf_msgpack_non_bytes_field_raises(proto_msgpack_handler, log):
 
 
 def test_protobuf_msgpack_invalid_inner_raises(proto_msgpack_handler, log):
+    pytest.importorskip('google.protobuf')
     schema_b64 = _build_envelope_descriptor_b64()
     payload = _encode_envelope(b'\xff\xff\xff', org_id=1)
     schema_str = json.dumps({'schema': schema_b64, 'msgpack_fields': ['test.Envelope.message']})
@@ -186,7 +191,8 @@ def test_protobuf_msgpack_invalid_inner_raises(proto_msgpack_handler, log):
 
 
 def test_protobuf_msgpack_uses_schema_registry_path(proto_msgpack_handler, log):
-    import msgpack
+    pytest.importorskip('google.protobuf')
+    msgpack = pytest.importorskip('msgpack')
 
     schema_b64 = _build_envelope_descriptor_b64()
     inner = {'k': 'v'}
@@ -202,6 +208,7 @@ def test_protobuf_msgpack_uses_schema_registry_path(proto_msgpack_handler, log):
 
 
 def test_protobuf_msgpack_build_schema_from_registry(proto_msgpack_handler):
+    pytest.importorskip('google.protobuf')
     fd_b64 = _build_envelope_descriptor_b64()
     schema_str = json.dumps({'schema': fd_b64, 'msgpack_fields': ['test.Envelope.message']})
     schema = proto_msgpack_handler.build_schema_from_registry(schema_str, [])
@@ -236,7 +243,7 @@ def test_zlib_codec_round_trip():
 
 
 def test_snappy_codec_round_trip():
-    import snappy
+    snappy = pytest.importorskip('snappy')
 
     from datadog_checks.kafka_actions.compression.codecs import SnappyCodec
 
@@ -246,27 +253,28 @@ def test_snappy_codec_round_trip():
 
 
 def test_lz4_codec_round_trip():
-    import lz4.frame
+    lz4_frame = pytest.importorskip('lz4.frame')
 
     from datadog_checks.kafka_actions.compression.codecs import Lz4Codec
 
     data = b'hello lz4 world'
-    compressed = lz4.frame.compress(data)
+    compressed = lz4_frame.compress(data)
     assert Lz4Codec().decompress(compressed) == data
 
 
 def test_lz4_dd_hdr_codec_round_trip():
-    import lz4.block
+    lz4_block = pytest.importorskip('lz4.block')
 
     from datadog_checks.kafka_actions.compression.codecs import Lz4DdHdrCodec
 
     data = b'hello lz4_dd_hdr world'
-    raw_block = lz4.block.compress(data, store_size=False)
+    raw_block = lz4_block.compress(data, store_size=False)
     framed = struct.pack('<I', len(data)) + raw_block
     assert Lz4DdHdrCodec().decompress(framed) == data
 
 
 def test_lz4_dd_hdr_too_short_raises():
+    pytest.importorskip('lz4.block')
     from datadog_checks.kafka_actions.compression.codecs import Lz4DdHdrCodec
 
     with pytest.raises(ValueError, match="too short"):
@@ -274,7 +282,7 @@ def test_lz4_dd_hdr_too_short_raises():
 
 
 def test_zstd_codec_round_trip():
-    import zstandard
+    zstandard = pytest.importorskip('zstandard')
 
     from datadog_checks.kafka_actions.compression.codecs import ZstdCodec
 
