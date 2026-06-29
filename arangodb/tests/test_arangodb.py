@@ -6,9 +6,9 @@ import os
 
 import mock
 import pytest
-from requests import HTTPError
 
 from datadog_checks.arangodb import ArangodbCheck
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
@@ -78,7 +78,9 @@ def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags, moc
     'side_effect, log_message',
     [
         pytest.param(
-            HTTPError, "Unable to get server foo, skipping `server_foo` tag.", id="HTTPError getting server tag"
+            HTTPStatusError("error"),
+            "Unable to get server foo, skipping `server_foo` tag.",
+            id="HTTPStatusError getting server tag",
         ),
         pytest.param(
             Exception,
@@ -87,12 +89,12 @@ def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags, moc
         ),
     ],
 )
-def test_get_server_tag(instance, caplog, side_effect, log_message):
+def test_get_server_tag(instance, caplog, side_effect, log_message, mock_http):
     caplog.clear()
     check = ArangodbCheck('arangodb', {}, [instance])
-    with mock.patch("datadog_checks.base.utils.http.RequestsWrapper.get", side_effect=side_effect):
-        caplog.set_level(logging.DEBUG)
-        check.get_server_tag('foo', '/test_endpoint/foo')
+    mock_http.get.side_effect = side_effect
+    caplog.set_level(logging.DEBUG)
+    check.get_server_tag('foo', '/test_endpoint/foo')
 
     assert log_message in caplog.text
 

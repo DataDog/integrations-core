@@ -119,6 +119,13 @@ files:
         type: string
         require_trusted_provider: true
         example: /usr/bin/scontrol
+    - name: seff_path
+      description: Full path to the seff binary.
+      fleet_configurable: true
+      value:
+        type: string
+        require_trusted_provider: true
+        example: /usr/bin/seff
     - name: debug_sinfo_stats
       description: |
         Whether or not to enable debug logging for the sinfo command. This logs the output of the sinfo command

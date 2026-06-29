@@ -1799,3 +1799,74 @@ class AgentCheck(object):
             raise ValueError(f'Failed to load config: {stderr.decode("utf-8", errors="replace")}')
 
         return _parse_ast_config(stdout.strip().decode('utf-8'))
+
+    # Issue is defined here: https://github.com/DataDog/agent-payload/blob/master/healthplatform/healthplatform.pb.go#L131
+    # Types are copied here for convenience and should be relatively stable
+    # // ID is the unique identifier for the issue
+    # Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+    # // IssueName is the human-readable name for the issue
+    # IssueName string `protobuf:"bytes,2,opt,name=issue_name,json=issueName,proto3" json:"issue_name,omitempty"`
+    # // Title is the short title/headline of the issue
+    # Title string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+    # // Description is the detailed description of the issue
+    # Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+    # // Category indicates the category of the issue (e.g., permissions, connectivity, etc.)
+    # Category string `protobuf:"bytes,5,opt,name=category,proto3" json:"category,omitempty"`
+    # // Location indicates where the issue occurred (e.g., core agent, log agent, etc.)
+    # Location string `protobuf:"bytes,6,opt,name=location,proto3" json:"location,omitempty"`
+    # // Severity indicates the impact level of the issue
+    # Severity IssueSeverity `protobuf:"varint,7,opt,name=severity,proto3,enum=datadog.healthplatform.IssueSeverity"
+    #  json:"severity,omitempty"`
+    # // Source is the sub-agent or product that reported the issue
+    # // (e.g., "logs", "apm", "error-tracking", "network-monitoring")
+    # Source string `protobuf:"bytes,9,opt,name=source,proto3" json:"source,omitempty"`
+    # // Extra is optional complementary structured information
+    # Extra *structpb.Struct `protobuf:"bytes,10,opt,name=extra,proto3" json:"extra,omitempty"`
+    # // Remediation provides steps to fix the issue
+    # Remediation *Remediation `protobuf:"bytes,11,opt,name=remediation,proto3" json:"remediation,omitempty"`
+    # // Tags are additional labels for the issue
+    # Tags []string `protobuf:"bytes,12,rep,name=tags,proto3" json:"tags,omitempty"`
+
+    # Remediation should be a dict with the following keys:
+    # - summary: str
+    # - steps: list[step]
+    # Step should be a dict with the following keys:
+    # - order: int
+    # - text: str
+
+    IssueSeverity = {'UNSPECIFIED': 0, 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3}
+
+    def report_issue(
+        self,
+        id: str,
+        issue_name: str,
+        title: str = None,
+        description: str = None,
+        category: str = None,
+        severity: int = 0,
+        extra: dict = None,
+        remediation: dict = None,
+        tags: list = None,
+    ):
+        # Issue ID and Name are required
+        if not id:
+            raise ValueError("Issue ID is required")
+        if not issue_name:
+            raise ValueError("Issue Name is required")
+        issue = {
+            'id': id,
+            'issue_name': issue_name,
+            'title': title,
+            'description': description,
+            'category': category,
+            'location': "integrations",
+            'severity': severity,
+            'source': self.name,
+            'extra': extra,
+            'remediation': remediation,
+            'tags': tags,
+        }
+        datadog_agent.report_issue(self.name, json.encode(issue))
+
+    def resolve_issue(self, issue_id):
+        datadog_agent.resolve_issue(issue_id)
