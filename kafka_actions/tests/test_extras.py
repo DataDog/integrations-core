@@ -80,9 +80,9 @@ def test_msgpack_invalid_raises(msgpack_handler, log):
 
 def test_msgpack_via_message_deserializer(log):
     """MsgpackHandler is reachable through the MessageDeserializer API."""
-    from datadog_checks.kafka_actions.message_deserializer import MessageDeserializer
-
     import msgpack
+
+    from datadog_checks.kafka_actions.message_deserializer import MessageDeserializer
 
     payload = msgpack.packb({'x': 42})
     deserializer = MessageDeserializer(log)
