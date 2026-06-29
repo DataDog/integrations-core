@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+kafka.acl.count,gauge,,item,,Number of ACL bindings grouped by resource type pattern type operation and permission type. (DSM only),0,kafka_consumer,acl count,,
 kafka.broker.config.default_replication_factor,gauge,,item,,Broker configuration for default replication factor. (DSM only),0,kafka_consumer,replication factor,,
 kafka.broker.config.log_retention_bytes,gauge,,byte,,Broker configuration for log retention in bytes. (DSM only),0,kafka_consumer,log retention bytes,,
 kafka.broker.config.log_retention_ms,gauge,,millisecond,,Broker configuration for log retention in milliseconds. (DSM only),0,kafka_consumer,log retention ms,,
