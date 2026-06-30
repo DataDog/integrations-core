@@ -74,10 +74,10 @@ def make_orchestrator(file_access_policy, tmp_path):
             user_dirs=[],
             phase_registry=registry,
         )
+        resolved = engine.get_flow(flow_name)
         kwargs: dict[str, Any] = {
-            "engine": engine,
+            "resolved_flow": resolved,
             "phase_registry": registry,
-            "flow_name": flow_name,
             "checkpoint_path": tmp_path / "checkpoints.yaml",
             "runtime_variables": {},
             "agent_clients": {"anthropic": MagicMock()},
@@ -94,16 +94,16 @@ def make_orchestrator(file_access_policy, tmp_path):
 # ---------------------------------------------------------------------------
 
 
-def test_orchestrator_uses_injected_registry(make_orchestrator):
+def test_orchestrator_uses_injected_registry(core_dir, make_orchestrator):
     """The orchestrator does not build its own registry; it stores the injected one."""
-    orchestrator, registry, _ = make_orchestrator()
+    orchestrator, registry, _ = make_orchestrator(core_dir)
     assert orchestrator._phase_registry is registry
 
 
-def test_injected_registries_are_independent(make_orchestrator):
+def test_injected_registries_are_independent(core_dir, make_orchestrator):
     """Two composition roots build independent registries."""
-    _, registry1, _ = make_orchestrator()
-    _, registry2, _ = make_orchestrator()
+    _, registry1, _ = make_orchestrator(core_dir)
+    _, registry2, _ = make_orchestrator(core_dir)
 
     class ExclusivePhase(Phase):
         pass
@@ -118,16 +118,16 @@ def test_injected_registries_are_independent(make_orchestrator):
 # ---------------------------------------------------------------------------
 
 
-async def test_on_message_received_fatal_on_phase_failed(make_orchestrator):
-    orchestrator, _, _ = make_orchestrator()
+async def test_on_message_received_fatal_on_phase_failed(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
     msg = PhaseFailedMessage(id="f1", phase_id="p1", error="something broke")
 
     with pytest.raises(FatalProcessingError, match="Phase 'p1' failed"):
         await orchestrator.on_message_received(msg)
 
 
-async def test_on_message_received_ignores_other_messages(make_orchestrator):
-    orchestrator, _, _ = make_orchestrator()
+async def test_on_message_received_ignores_other_messages(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
     await orchestrator.on_message_received(PhaseTrigger(id="start", phase_id=None))
     await orchestrator.on_message_received(PhaseTrigger(id="f1", phase_id="p1"))
 
@@ -165,23 +165,21 @@ async def test_on_initialize_submits_initial_phase_trigger(core_dir, make_orches
     assert msg.phase_id is None
 
 
-async def test_on_initialize_unknown_flow_raises(core_dir, make_orchestrator):
-    """A flow name the engine doesn't know about surfaces as FlowConfigError via get_flow."""
-    orchestrator, _, _ = make_orchestrator(core_dir, flow_name="ghost")
+def test_unknown_flow_raises_at_resolve_time(core_dir, make_orchestrator):
+    """A flow name the engine doesn't know about surfaces as FlowConfigError at engine.get_flow."""
     with pytest.raises(FlowConfigError, match="not found"):
-        await orchestrator.on_initialize()
+        make_orchestrator(core_dir, flow_name="ghost")
 
 
-async def test_on_initialize_broken_flow_raises(tmp_path, make_orchestrator):
-    """A flow with an unresolved phase reference is broken and raises on get_flow."""
+def test_broken_flow_raises_at_resolve_time(tmp_path, make_orchestrator):
+    """A flow with an unresolved phase reference raises FlowConfigError at engine.get_flow."""
     broken_core = tmp_path / "broken"
     write(
         broken_core / "f.yaml",
         "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: missing\n",
     )
-    orchestrator, _, _ = make_orchestrator(broken_core)
     with pytest.raises(FlowConfigError, match="invalid"):
-        await orchestrator.on_initialize()
+        make_orchestrator(broken_core)
 
 
 async def test_file_registry_getter_is_idempotent(core_dir, make_orchestrator):
@@ -207,13 +205,13 @@ def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
 # ---------------------------------------------------------------------------
 
 
-async def test_on_finalize_no_failure_is_noop(make_orchestrator):
-    orchestrator, _, _ = make_orchestrator()
+async def test_on_finalize_no_failure_is_noop(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
     await orchestrator.on_finalize(None)  # must not raise
 
 
-async def test_on_finalize_after_phase_failed_logs(make_orchestrator, caplog):
-    orchestrator, _, _ = make_orchestrator()
+async def test_on_finalize_after_phase_failed_logs(core_dir, make_orchestrator, caplog):
+    orchestrator, _, _ = make_orchestrator(core_dir)
     msg = PhaseFailedMessage(id="f1", phase_id="p1", error="boom")
     exc = FatalProcessingError("Phase 'p1' failed: boom")
     with pytest.raises(FatalProcessingError):
@@ -225,8 +223,8 @@ async def test_on_finalize_after_phase_failed_logs(make_orchestrator, caplog):
     assert any("Pipeline aborted" in r.message and "p1" in r.message and "boom" in r.message for r in caplog.records)
 
 
-async def test_on_finalize_no_exception_no_log(make_orchestrator, caplog):
-    orchestrator, _, _ = make_orchestrator()
+async def test_on_finalize_no_exception_no_log(core_dir, make_orchestrator, caplog):
+    orchestrator, _, _ = make_orchestrator(core_dir)
     msg = PhaseFailedMessage(id="f1", phase_id="p1", error="boom")
     with pytest.raises(FatalProcessingError):
         await orchestrator.on_message_received(msg)

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.engine import ConfigurationEngine
+from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
@@ -22,9 +22,8 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 class PhaseOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
-        engine: ConfigurationEngine,
+        resolved_flow: ResolvedFlow,
         phase_registry: PhaseRegistry,
-        flow_name: str,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
         agent_clients: dict[str, Any],
@@ -36,9 +35,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
     ) -> None:
         """Initialize the orchestrator.
 
-        ``engine`` is a pre-built ``ConfigurationEngine`` that has already validated every
-        flow and inlined all prompt/goal/memory references. ``phase_registry`` is the same
-        registry the engine validated against, pre-populated by the composition root.
+        ``resolved_flow`` is a fully validated, reference-inlined flow obtained from
+        ``engine.get_flow(name)``. ``phase_registry`` is the same registry the engine
+        validated against, used to instantiate phase classes.
 
         ``agent_clients`` maps provider name (e.g. ``"anthropic"``) to a constructed
         provider client. ``DefaultAgentRuntimeFactory`` resolves the right one based on each
@@ -55,9 +54,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
             grace_period=grace_period,
             max_timeout=max_timeout,
         )
-        self._engine = engine
+        self._resolved_flow = resolved_flow
         self._phase_registry = phase_registry
-        self._flow_name = flow_name
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
         self._agent_clients = agent_clients
@@ -68,8 +66,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._failed_error: str | None = None
 
     async def on_initialize(self) -> None:
-        """Resolve the flow from the engine, construct phases, submit the start PhaseTrigger."""
-        resolved = self._engine.get_flow(self._flow_name)
+        """Construct phases from the resolved flow and submit the start PhaseTrigger."""
+        resolved = self._resolved_flow
 
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
         self._agent_logger = AgentLogger(checkpoint_manager.root)
