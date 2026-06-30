@@ -196,7 +196,7 @@ pipeline:
       sources:
         - payload.level
     - type: pipeline
-      name: PingOne AIC OCSF pre transformations
+      name: OCSF pre transformations
       enabled: true
       ocsf:
         isOcsf: true
@@ -325,7 +325,7 @@ pipeline:
           preserveSource: false
           overrideOnConflict: false
     - type: pipeline
-      name: PingOne AIC OCSF sub pipeline for class Account Change [3001]
+      name: OCSF sub pipeline for class Account Change [3001]
       enabled: true
       ocsf:
         isOcsf: true
@@ -451,7 +451,7 @@ pipeline:
               name: Delete
           target: ocsf.activity_name
     - type: pipeline
-      name: PingOne AIC OCSF sub pipeline for class Authentication [3002]
+      name: OCSF sub pipeline for class Authentication [3002]
       enabled: true
       ocsf:
         isOcsf: true
@@ -604,7 +604,7 @@ pipeline:
               name: Logoff
           target: ocsf.activity_name
     - type: pipeline
-      name: PingOne AIC OCSF sub pipeline for class Entity Management [3004]
+      name: OCSF sub pipeline for class Entity Management [3004]
       enabled: true
       ocsf:
         isOcsf: true
