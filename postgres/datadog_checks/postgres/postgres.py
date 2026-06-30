@@ -132,6 +132,7 @@ class PostgreSql(DatabaseCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
+        self._last_automatic_diagnostics_run = 0
 
         config, validation_result = build_config(self)
         self._config = config
@@ -179,6 +180,7 @@ class PostgreSql(DatabaseCheck):
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self._run_automatic_diagnostics)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
@@ -1303,6 +1305,7 @@ class PostgreSql(DatabaseCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+
             raise e
         else:
             self.service_check(
@@ -1315,6 +1318,24 @@ class PostgreSql(DatabaseCheck):
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
+            # Periodically run setup diagnostics (gated by automatic_diagnostics.interval)
+            self._run_automatic_diagnostics()
+
+    def _run_automatic_diagnostics(self):
+        if not self._config.automatic_diagnostics.enabled:
+            return
+        now = time()
+        if now - self._last_automatic_diagnostics_run < self._config.automatic_diagnostics.interval:
+            return
+        self._last_automatic_diagnostics_run = now
+        try:
+            self.diagnosis.clear()
+            run_diagnostics(self)
+            self.health.submit_diagnoses()
+        except Exception as e:
+            self.log.exception("Error during automatic diagnostics: %s", e)
+        finally:
+            self.log.info("Automatic diagnostics completed")
 
     def _update_tag_sets(self, tags):
         self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))

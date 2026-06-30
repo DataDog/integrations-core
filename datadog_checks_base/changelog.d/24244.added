@@ -1,1 +1,0 @@
-Implement the `DatabaseCheck.tags` property backed by a shared `TagManager` so DBM integrations can consolidate tag handling.
