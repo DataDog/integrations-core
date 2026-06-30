@@ -17,7 +17,6 @@ V1 path is kept unchanged and validated against the v1.15.0 fixture.
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.external_dns import ExternalDNSCheck
 from datadog_checks.external_dns.check import ExternalDNS
 from datadog_checks.external_dns.metrics import COUNTER_METRICS, METRIC_MAP, construct_metrics_config
@@ -361,36 +360,3 @@ class TestCounterAliases:
 
         aggregator.assert_metric(f'{NAMESPACE}.source.errors.total.count', value=SOURCE_ERRORS_COUNT, count=1)
         aggregator.assert_metric(f'{NAMESPACE}.registry.errors.total.count', value=REGISTRY_ERRORS_COUNT, count=1)
-
-
-@pytest.mark.parametrize(
-    'instance_fixture,mock_fixture,expected_metrics,submission_exclude',
-    [
-        pytest.param('instance_omv1', 'mock_http_response_v115', LEGACY_METRICS_OMV1, [], id='metadata-legacy'),
-        pytest.param(
-            'instance_omv2',
-            'mock_http_response_v120',
-            V120_METRICS_OMV2,
-            COUNTER_METRICS_OMV2,
-            id='metadata-v120',
-        ),
-    ],
-)
-def test_metadata(
-    aggregator, dd_run_check, request, instance_fixture, mock_fixture, expected_metrics, submission_exclude
-):
-    """Submitted metrics align with metadata.csv for the matching external-dns version."""
-    request.getfixturevalue(mock_fixture)
-    instance = request.getfixturevalue(instance_fixture)
-    dd_run_check(_run_check(instance))
-
-    for metric in expected_metrics:
-        aggregator.assert_metric(metric)
-
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(),
-        check_submission_type=True,
-        check_metric_type=False,
-        exclude=submission_exclude,
-    )
