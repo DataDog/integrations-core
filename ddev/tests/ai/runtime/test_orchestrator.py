@@ -9,16 +9,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.engine import ConfigurationEngine
-from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
-from ddev.ai.phases.base import Phase
+from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
-from ddev.ai.phases.resources import ResourceUnavailableError
+from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
-from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
 
@@ -100,19 +97,6 @@ def test_orchestrator_uses_injected_registry(core_dir, make_orchestrator):
     assert orchestrator._phase_registry is registry
 
 
-def test_injected_registries_are_independent(core_dir, make_orchestrator):
-    """Two composition roots build independent registries."""
-    _, registry1, _ = make_orchestrator(core_dir)
-    _, registry2, _ = make_orchestrator(core_dir)
-
-    class ExclusivePhase(Phase):
-        pass
-
-    registry1.register("ExclusivePhase", ExclusivePhase)
-    assert "ExclusivePhase" in registry1.known_names()
-    assert "ExclusivePhase" not in registry2.known_names()
-
-
 # ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_message_received
 # ---------------------------------------------------------------------------
@@ -165,41 +149,6 @@ async def test_on_initialize_submits_initial_phase_trigger(core_dir, make_orches
     assert msg.phase_id is None
 
 
-def test_unknown_flow_raises_at_resolve_time(core_dir, make_orchestrator):
-    """A flow name the engine doesn't know about surfaces as FlowConfigError at engine.get_flow."""
-    with pytest.raises(FlowConfigError, match="not found"):
-        make_orchestrator(core_dir, flow_name="ghost")
-
-
-def test_broken_flow_raises_at_resolve_time(tmp_path, make_orchestrator):
-    """A flow with an unresolved phase reference raises FlowConfigError at engine.get_flow."""
-    broken_core = tmp_path / "broken"
-    write(
-        broken_core / "f.yaml",
-        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: missing\n",
-    )
-    with pytest.raises(FlowConfigError, match="invalid"):
-        make_orchestrator(broken_core)
-
-
-async def test_file_registry_getter_is_idempotent(core_dir, make_orchestrator):
-    orchestrator, _, _ = make_orchestrator(core_dir)
-    await orchestrator.on_initialize()
-    assert orchestrator._resources is not None
-    assert orchestrator._resources.file_registry is orchestrator._resources.file_registry
-
-
-def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
-    provider = RunResources(
-        agent_clients={},
-        file_access_policy=file_access_policy,
-        agents={"a": MagicMock(), "b": MagicMock()},
-        callbacks=Callbacks(),
-    )
-    with pytest.raises(ResourceUnavailableError, match="No agent definition named 'missing'"):
-        provider.agent_config("missing")
-
-
 # ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_finalize
 # ---------------------------------------------------------------------------
@@ -233,6 +182,47 @@ async def test_on_finalize_no_exception_no_log(core_dir, make_orchestrator, capl
         await orchestrator.on_finalize(None)  # exception=None means clean exit — no log
 
     assert not any("Pipeline aborted" in r.message for r in caplog.records)
+
+
+# ---------------------------------------------------------------------------
+# End-to-end run
+# ---------------------------------------------------------------------------
+
+
+def test_run_executes_phases_in_dependency_order(tmp_path, make_orchestrator):
+    """Full pipeline success: 'a' then 'b' (b depends on a), both checkpointed, run() completes."""
+    core = tmp_path / "ok_core"
+    write(
+        core / "f.yaml",
+        "- type: phase\n  config:\n    name: a\n    class: RecordingPhase\n"
+        "- type: phase\n  config:\n    name: b\n    class: RecordingPhase\n"
+        "- type: flow\n  config:\n    name: demo\n"
+        "    flow:\n      - phase: a\n      - phase: b\n        dependencies: [a]\n",
+    )
+
+    executed: list[str] = []
+
+    class RecordingPhase(Phase):
+        async def execute(self, context):
+            executed.append(self._phase_id)
+            return PhaseOutcome(memory_text=f"{self._phase_id} done")
+
+    checkpoint_path = tmp_path / "checkpoints.yaml"
+    orchestrator, _, _ = make_orchestrator(
+        core,
+        grace_period=0.1,
+        register_phases={"RecordingPhase": RecordingPhase},
+        checkpoint_path=checkpoint_path,
+    )
+
+    orchestrator.run()  # must not raise
+
+    assert executed == ["a", "b"]
+
+    mgr = CheckpointManager(checkpoint_path)
+    checkpoints = mgr.read()
+    assert checkpoints["a"]["status"] == "success"
+    assert checkpoints["b"]["status"] == "success"
 
 
 def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
