@@ -7,7 +7,7 @@ import pytest
 from ddev.ai.config.engine import BrokenEntry, ConfigurationEngine, ValidEntry
 from ddev.ai.config.errors import FlowConfigError
 
-from .conftest import StubReg, write
+from .utils import StubReg, write
 
 
 def test_scans_yaml_phase_and_flow(tmp_path):

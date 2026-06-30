@@ -7,7 +7,7 @@ import pytest
 from ddev.ai.config.engine import ConfigStatus, ConfigurationEngine
 from ddev.ai.config.errors import FlowConfigError
 
-from .conftest import StubReg, StubRegMissing, write
+from .utils import StubReg, StubRegMissing, write
 
 
 def test_get_flow_resolves_all_refs_and_variables(tmp_path):

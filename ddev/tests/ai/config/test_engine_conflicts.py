@@ -4,7 +4,7 @@
 
 from ddev.ai.config.engine import ConfigurationEngine
 
-from .conftest import StubReg, write
+from .utils import StubReg, write
 
 
 def test_core_and_user_same_name_conflict(tmp_path):
