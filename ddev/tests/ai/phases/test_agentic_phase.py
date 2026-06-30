@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
@@ -19,7 +20,6 @@ from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointStatus,
-    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
 )
@@ -133,7 +133,7 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
     checkpoint = mgr.read()["p1"]
     assert isinstance(checkpoint, SuccessCheckpoint)
     assert checkpoint.status == CheckpointStatus.SUCCESS
-    assert checkpoint.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
+    assert checkpoint.tokens == Tokens(input=110, output=55)
     assert mock_agent.send_calls[0] == "Do the work."
     assert "Write a brief summary" in mock_agent.send_calls[1]
     # checkpoint memory_path points to the written file
@@ -161,7 +161,7 @@ async def test_happy_path_two_tasks_accumulates_tokens(flow_dir, monkeypatch, me
 
     checkpoint = mgr.read()["p1"]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    assert checkpoint.tokens == CheckpointTokenInfo(total_input=310, total_output=135)
+    assert checkpoint.tokens == Tokens(input=310, output=135)
 
 
 # ---------------------------------------------------------------------------
@@ -386,7 +386,7 @@ async def test_run_memory_step_returns_response_data(flow_dir, monkeypatch, mess
 
     result = await phase._run_memory_step(_memory_process(mock_agent), {})
 
-    assert result == ("summary text", 7, 3)
+    assert result == ("summary text", Tokens(input=7, output=3))
 
 
 # ---------------------------------------------------------------------------
@@ -495,7 +495,7 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
     assert cp.goal_validations == [{"task": "t1", "attempts": 1, "final_valid": True}]
     assert worker.send_calls[0].startswith("Do it.")
     assert "independent reviewer" in worker.send_calls[0]
-    assert cp.tokens == CheckpointTokenInfo(total_input=100 + 7 + 10, total_output=50 + 3 + 5)
+    assert cp.tokens == Tokens(input=100 + 7 + 10, output=50 + 3 + 5)
     assert captured_builder_calls == ["p1.goal.t1"]
 
     log_file = mgr.root / "goal_reviewer" / "p1.goal.t1.jsonl"
@@ -628,8 +628,8 @@ async def test_goal_exhaustion_tokens_captured_on_phase(flow_dir, monkeypatch, m
     with pytest.raises(GoalAttemptsExhausted):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert phase._total_input_tokens == 10 + 8 + 10 + 8
-    assert phase._total_output_tokens == 5 + 4 + 5 + 4
+    assert phase._tokens.input == 10 + 8 + 10 + 8
+    assert phase._tokens.output == 5 + 4 + 5 + 4
 
 
 async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_dir, monkeypatch, message_queue):
@@ -640,8 +640,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     worker = MockAgent([make_response("done", 0, 0)])
     phase, mgr = make_agent_phase(flow_dir, worker, monkeypatch, message_queue)
 
-    phase._total_input_tokens = 42
-    phase._total_output_tokens = 17
+    phase._tokens = Tokens(input=42, output=17)
     phase._goal_attempt_log = [{"task": "t1", "attempts": 2, "final_valid": False}]
     phase._started_at = None
 
@@ -655,7 +654,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     cp = mgr.read()["p1"]
     assert isinstance(cp, FailedCheckpoint)
     assert cp.status == CheckpointStatus.FAILED
-    assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
+    assert cp.tokens == Tokens(input=42, output=17)
     assert cp.goal_validations == [{"task": "t1", "attempts": 2, "final_valid": False}]
     assert cp.error == "something went wrong"
 
@@ -807,7 +806,7 @@ async def test_compact_context_before_on_first_task_is_noop(flow_dir, monkeypatc
     cp = mgr.read()["p1"]
     assert isinstance(cp, SuccessCheckpoint)
     assert cp.status == CheckpointStatus.SUCCESS
-    assert cp.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
+    assert cp.tokens == Tokens(input=110, output=55)
     assert mock_agent.compact_call_count == 1
 
 
@@ -863,8 +862,8 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert phase._goal_attempt_log == [{"task": "t1", "attempts": 1, "final_valid": False}]
-    assert phase._total_input_tokens == 10 + 8 + 6
-    assert phase._total_output_tokens == 5 + 4 + 3
+    assert phase._tokens.input == 10 + 8 + 6
+    assert phase._tokens.output == 5 + 4 + 3
 
 
 # ---------------------------------------------------------------------------

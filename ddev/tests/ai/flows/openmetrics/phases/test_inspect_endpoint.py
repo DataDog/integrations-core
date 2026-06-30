@@ -11,6 +11,7 @@ import pytest
 from prometheus_client import Metric
 from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.flows.openmetrics.phases import inspect_endpoint as inspect_endpoint_module
 from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
     EndpointInspectionError,
@@ -25,7 +26,6 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointStatus,
-    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
 )
@@ -192,7 +192,7 @@ async def test_success_with_prometheus_body(flow_dir, message_queue, monkeypatch
     assert "sample_metric_names" not in checkpoint.model_extra
     assert checkpoint.status_code == 200
     assert checkpoint.endpoint_url == ENDPOINT_URL
-    assert checkpoint.tokens == CheckpointTokenInfo(total_input=0, total_output=0)
+    assert checkpoint.tokens == Tokens(input=0, output=0)
 
 
 async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatch):

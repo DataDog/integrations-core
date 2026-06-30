@@ -7,11 +7,11 @@ from pathlib import Path
 import pytest
 import yaml
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointReadError,
     CheckpointStatus,
-    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
 )
@@ -67,8 +67,8 @@ def test_write_and_read_back(manager):
     manager.write_phase_checkpoint("phase1", make_success())
     data = manager.read()
     assert data["phase1"].status == CheckpointStatus.SUCCESS
-    assert data["phase1"].tokens.total_input == 10
-    assert data["phase1"].tokens.total_output == 20
+    assert data["phase1"].tokens.input == 10
+    assert data["phase1"].tokens.output == 20
 
 
 def test_write_preserves_extra_fields(manager):
@@ -199,12 +199,12 @@ def test_read_raises_on_invalid_checkpoint_entry(manager):
 
 
 def test_failed_checkpoint_with_tokens(manager):
-    cp = make_failed(tokens=CheckpointTokenInfo(total_input=5, total_output=15))
+    cp = make_failed(tokens=Tokens(input=5, output=15))
     manager.write_phase_checkpoint("phase1", cp)
     data = manager.read()
     assert isinstance(data["phase1"], FailedCheckpoint)
     assert data["phase1"].tokens is not None
-    assert data["phase1"].tokens.total_input == 5
+    assert data["phase1"].tokens.input == 5
 
 
 def test_failed_checkpoint_with_goal_validations(manager):

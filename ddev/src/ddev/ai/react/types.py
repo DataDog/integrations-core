@@ -4,6 +4,7 @@
 
 from dataclasses import dataclass
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.types import AgentResponse, ContextUsage
 
 
@@ -13,6 +14,5 @@ class ReActResult:
 
     final_response: AgentResponse
     iterations: int
-    total_input_tokens: int  # sum across all iterations
-    total_output_tokens: int  # sum across all iterations
+    tokens: Tokens  # sum across all iterations
     context_usage: ContextUsage | None  # promoted from final_response.usage.context_usage

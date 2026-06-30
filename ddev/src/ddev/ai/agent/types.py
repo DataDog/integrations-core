@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.tools.core.types import ToolResult
 
 
@@ -100,6 +101,15 @@ class TokenUsage:
     context_usage: ContextUsage | None = None  # None only for agents that don't provide context tracking
     web_search_requests: int = 0  # number of web search requests (billed separately from tokens)
     web_fetch_requests: int = 0  # number of web fetch requests (billed separately from tokens)
+
+    def to_tokens(self) -> Tokens:
+        """Project this per-call usage into accumulable token totals."""
+        return Tokens(
+            input=self.input_tokens,
+            output=self.output_tokens,
+            cache_read=self.cache_read_input_tokens,
+            cache_creation=self.cache_creation_input_tokens,
+        )
 
 
 @dataclass(frozen=True)

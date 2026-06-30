@@ -5,6 +5,7 @@
 import json
 from pathlib import Path
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import (
     AgentResponse,
@@ -35,8 +36,7 @@ def make_result(response: AgentResponse | None = None) -> ReActResult:
     return ReActResult(
         final_response=response,
         iterations=2,
-        total_input_tokens=30,
-        total_output_tokens=12,
+        tokens=Tokens(input=30, output=12),
         context_usage=None,
     )
 
@@ -80,6 +80,25 @@ async def test_full_sequence_writes_start_and_finish_with_timestamps(tmp_path):
     assert all("ts" in e for e in events)
     assert events[-1]["success"] is True
     assert events[-1]["iterations"] == 2
+
+
+async def test_finish_event_carries_all_four_token_fields(tmp_path):
+    logger = AgentLogger(tmp_path)
+    cb = logger.as_callback_set()
+
+    result = ReActResult(
+        final_response=make_response(),
+        iterations=2,
+        tokens=Tokens(input=30, output=12, cache_read=7, cache_creation=3),
+        context_usage=None,
+    )
+    await cb.fire_agent_finish(PHASE, result)
+
+    finish = read_events(tmp_path / "phase" / "p1.jsonl")[-1]
+    assert finish["total_input_tokens"] == 30
+    assert finish["total_output_tokens"] == 12
+    assert finish["total_cache_read_tokens"] == 7
+    assert finish["total_cache_creation_tokens"] == 3
 
 
 async def test_error_emits_error_then_failed_finish(tmp_path):

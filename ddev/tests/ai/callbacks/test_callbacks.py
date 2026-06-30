@@ -4,6 +4,7 @@
 
 import pytest
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
@@ -40,8 +41,7 @@ def react_result(response: AgentResponse) -> ReActResult:
     return ReActResult(
         final_response=response,
         iterations=1,
-        total_input_tokens=10,
-        total_output_tokens=5,
+        tokens=Tokens(input=10, output=5),
         context_usage=None,
     )
 

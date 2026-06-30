@@ -4,9 +4,9 @@
 
 from typing import Any
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.runtime.checkpoints import (
     CheckpointStatus,
-    CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
 )
@@ -20,7 +20,7 @@ def make_success(**kwargs: Any) -> SuccessCheckpoint:
         status=CheckpointStatus.SUCCESS,
         started_at=STARTED,
         finished_at=FINISHED,
-        tokens=CheckpointTokenInfo(total_input=10, total_output=20),
+        tokens=Tokens(input=10, output=20),
         memory_path="/tmp/phase_memory.md",
         **kwargs,
     )
@@ -45,7 +45,7 @@ def make_checkpoint(data: dict) -> SuccessCheckpoint | FailedCheckpoint:
                 status=CheckpointStatus.SUCCESS,
                 started_at=ts,
                 finished_at=ts,
-                tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+                tokens=Tokens(),
                 memory_path="/tmp/mem.md",
             )
         case "failed":

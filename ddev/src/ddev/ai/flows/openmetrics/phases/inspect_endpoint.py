@@ -236,8 +236,6 @@ class InspectEndpointPhase(Phase):
 
         return PhaseOutcome(
             memory_text=memory_text,
-            total_input_tokens=0,
-            total_output_tokens=0,
             extra_checkpoint={
                 "endpoint_url": endpoint_url,
                 "status_code": response.status_code,

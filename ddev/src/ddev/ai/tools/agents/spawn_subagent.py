@@ -124,6 +124,5 @@ class SpawnSubagentTool(BaseTool[SpawnSubagentInput]):
         return ToolResult(
             success=True,
             data=data,
-            total_input_tokens=result.total_input_tokens,
-            total_output_tokens=result.total_output_tokens,
+            tokens=result.tokens,
         )

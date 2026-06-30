@@ -11,6 +11,8 @@ from typing import Annotated, Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
+from ddev.ai.accounting.tokens import Tokens
+
 
 class CheckpointReadError(Exception):
     """Raised when checkpoints.yaml exists but cannot be read or parsed."""
@@ -21,11 +23,6 @@ class CheckpointStatus(StrEnum):
     FAILED = "failed"
 
 
-class CheckpointTokenInfo(BaseModel):
-    total_input: int
-    total_output: int
-
-
 class SuccessCheckpoint(BaseModel):
     """Checkpoint written at the end of a successful phase execution."""
 
@@ -34,7 +31,7 @@ class SuccessCheckpoint(BaseModel):
     status: Literal[CheckpointStatus.SUCCESS]
     started_at: str
     finished_at: str
-    tokens: CheckpointTokenInfo
+    tokens: Tokens
     memory_path: str
 
 
@@ -45,7 +42,7 @@ class FailedCheckpoint(BaseModel):
     started_at: str | None
     finished_at: str
     error: str
-    tokens: CheckpointTokenInfo | None = None
+    tokens: Tokens | None = None
     goal_validations: list[dict[str, Any]] | None = None
 
 

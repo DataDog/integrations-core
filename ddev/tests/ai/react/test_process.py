@@ -7,6 +7,7 @@ from typing import Any
 
 import pytest
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentConnectionError
@@ -569,8 +570,8 @@ async def test_total_tokens_summed_across_iterations() -> None:
 
     result = await make_process(agent).start("Task")
 
-    assert result.total_input_tokens == 300
-    assert result.total_output_tokens == 130
+    assert result.tokens.input == 300
+    assert result.tokens.output == 130
     assert result.iterations == 2
 
 
@@ -580,12 +581,12 @@ async def test_tool_result_tokens_included_in_total_tokens() -> None:
         make_response(StopReason.END_TURN, input_tokens=200, output_tokens=80),
     ]
     agent = MockAgent(responses)
-    registry = MockToolRegistry(ToolResult(success=True, data="ok", total_input_tokens=30, total_output_tokens=10))
+    registry = MockToolRegistry(ToolResult(success=True, data="ok", tokens=Tokens(input=30, output=10)))
 
     result = await make_process(agent, registry=registry).start("Task")
 
-    assert result.total_input_tokens == 330
-    assert result.total_output_tokens == 140
+    assert result.tokens.input == 330
+    assert result.tokens.output == 140
 
 
 # ---------------------------------------------------------------------------
@@ -623,18 +624,17 @@ async def test_reset_delegates_to_agent() -> None:
 
 async def test_compact_delegates_to_agent_returns_zero_when_no_op() -> None:
     agent = MockAgent([])  # compact_response is None — no compaction occurred
-    compact_in, compact_out = await make_process(agent).compact()
+    compact_tokens = await make_process(agent).compact()
     assert agent.compact_calls == 1
-    assert compact_in == 0
-    assert compact_out == 0
+    assert compact_tokens == Tokens()
 
 
 async def test_compact_returns_tokens_when_compaction_occurs() -> None:
     agent = MockAgent([])
     agent.compact_response = make_response(StopReason.END_TURN, input_tokens=40, output_tokens=15)
-    compact_in, compact_out = await make_process(agent).compact()
-    assert compact_in == 40
-    assert compact_out == 15
+    compact_tokens = await make_process(agent).compact()
+    assert compact_tokens.input == 40
+    assert compact_tokens.output == 15
 
 
 async def test_compact_fires_before_and_after_callbacks() -> None:
@@ -722,5 +722,5 @@ async def test_auto_compact_tokens_included_in_result() -> None:
 
     result = await make_process(agent, compact_threshold_pct=75.0).start("task")
 
-    assert result.total_input_tokens == 100 + 200 + 30
-    assert result.total_output_tokens == 50 + 80 + 10
+    assert result.tokens.input == 100 + 200 + 30
+    assert result.tokens.output == 50 + 80 + 10

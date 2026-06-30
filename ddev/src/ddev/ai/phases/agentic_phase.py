@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
+from ddev.ai.accounting.tokens import Tokens
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
@@ -16,7 +17,7 @@ from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_go
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline, render_prompt
 from ddev.ai.react.process import ReActProcess
-from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus, CheckpointTokenInfo, FailedCheckpoint
+from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus, FailedCheckpoint
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
@@ -107,8 +108,7 @@ class AgenticPhase(Phase):
         self._process_factory = process_factory
         self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE)
         self._goal_attempt_log: list[dict[str, Any]] = []
-        self._total_input_tokens: int = 0
-        self._total_output_tokens: int = 0
+        self._tokens: Tokens = Tokens()
 
     @classmethod
     def validate_config(
@@ -160,7 +160,7 @@ class AgenticPhase(Phase):
         process: ReActProcess,
         context: dict[str, Any],
     ) -> None:
-        """Run the task loop, accumulating tokens into self._total_input/output_tokens.
+        """Run the task loop, accumulating tokens into self._tokens.
 
         Override to customize task execution — e.g. add retries, change ordering, etc.
         Default implementation iterates through config.tasks sequentially.
@@ -200,22 +200,20 @@ class AgenticPhase(Phase):
             return
 
         if task.compact_context_before:
-            input_tokens, output_tokens = await process.compact()
-            self._add_tokens(input_tokens, output_tokens)
+            self._tokens += await process.compact()
             return
 
-        input_tokens, output_tokens = await self._compact_if_needed(process, last_result)
-        self._add_tokens(input_tokens, output_tokens)
+        self._tokens += await self._compact_if_needed(process, last_result)
 
     async def _compact_if_needed(
         self,
         process: ReActProcess,
         last_result: ReActResult | None,
-    ) -> tuple[int, int]:
+    ) -> Tokens:
         if last_result is None or last_result.context_usage is None:
-            return 0, 0
+            return Tokens()
         if last_result.context_usage.context_pct < self._config.context_compact_threshold_pct:
-            return 0, 0
+            return Tokens()
         return await process.compact()
 
     def _task_has_goal(self, task: TaskConfig) -> bool:
@@ -238,7 +236,7 @@ class AgenticPhase(Phase):
         prompt: str,
     ) -> ReActResult:
         result = await process.start(prompt)
-        self._add_tokens(result.total_input_tokens, result.total_output_tokens)
+        self._tokens += result.tokens
         return result
 
     async def _run_goal_validation(
@@ -265,11 +263,11 @@ class AgenticPhase(Phase):
             )
         except GoalValidationError as e:
             self._record_goal_attempt(task, e.attempts, final_valid=False)
-            self._add_tokens(e.input_tokens, e.output_tokens)
+            self._tokens += e.tokens
             raise
 
         self._record_goal_attempt(task, outcome.attempts, final_valid=True)
-        self._add_tokens(outcome.total_input_tokens, outcome.total_output_tokens)
+        self._tokens += outcome.tokens
         return outcome.final_result
 
     def _record_goal_attempt(
@@ -287,27 +285,19 @@ class AgenticPhase(Phase):
             }
         )
 
-    def _add_tokens(
-        self,
-        input_tokens: int,
-        output_tokens: int,
-    ) -> None:
-        self._total_input_tokens += input_tokens
-        self._total_output_tokens += output_tokens
-
     async def _run_memory_step(
         self,
         process: ReActProcess,
         context: dict[str, Any],
-    ) -> tuple[str, int, int]:
-        """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
+    ) -> tuple[str, Tokens]:
+        """Run the final summary turn. Returns (memory_text, tokens)."""
         user_additions = None
         if self._config.checkpoint is not None:
             user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         response = await process.run_once(memory_prompt)
-        return response.text, response.usage.input_tokens, response.usage.output_tokens
+        return response.text, response.usage.to_tokens()
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         self.before_react()
@@ -334,7 +324,7 @@ class AgenticPhase(Phase):
 
         self.after_react()
 
-        memory_text, mem_in, mem_out = await self._run_memory_step(process, context)
+        memory_text, mem_tokens = await self._run_memory_step(process, context)
 
         extra: dict[str, Any] = {}
         if self._goal_attempt_log:
@@ -342,8 +332,7 @@ class AgenticPhase(Phase):
 
         return PhaseOutcome(
             memory_text=memory_text,
-            total_input_tokens=self._total_input_tokens + mem_in,
-            total_output_tokens=self._total_output_tokens + mem_out,
+            tokens=self._tokens + mem_tokens,
             extra_checkpoint=extra,
         )
 
@@ -356,10 +345,7 @@ class AgenticPhase(Phase):
                     started_at=self._started_at.isoformat() if self._started_at else None,
                     finished_at=datetime.now(UTC).isoformat(),
                     error=str(error.original_exception),
-                    tokens=CheckpointTokenInfo(
-                        total_input=self._total_input_tokens,
-                        total_output=self._total_output_tokens,
-                    ),
+                    tokens=self._tokens,
                     goal_validations=self._goal_attempt_log or None,
                 ),
             )

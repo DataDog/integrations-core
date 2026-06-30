@@ -134,8 +134,10 @@ class AgentLogger:
                     "event": "finish",
                     "success": True,
                     "iterations": result.iterations,
-                    "total_input_tokens": result.total_input_tokens,
-                    "total_output_tokens": result.total_output_tokens,
+                    "total_input_tokens": result.tokens.input,
+                    "total_output_tokens": result.tokens.output,
+                    "total_cache_read_tokens": result.tokens.cache_read,
+                    "total_cache_creation_tokens": result.tokens.cache_creation,
                     "stop_reason": str(result.final_response.stop_reason),
                 },
             )
