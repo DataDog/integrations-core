@@ -48,10 +48,6 @@ def instance_kafka_configs_refresh_interval():
     return 180
 
 
-def instance_kafka_connect_confluent_cloud_url():
-    return 'https://api.confluent.cloud'
-
-
 def instance_kafka_connect_tls_verify():
     return True
 

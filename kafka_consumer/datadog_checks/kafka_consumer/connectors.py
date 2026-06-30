@@ -138,8 +138,7 @@ class KafkaConnectCollector:
     def collect(self, cluster_id: str) -> dict[str, bool]:
         """Collect connector data and return connectivity status per endpoint.
 
-        Returns a mapping of endpoint identifier to connection success (True/False).
-        REST URL endpoints use the URL as key; Confluent Cloud uses 'confluent_cloud:<env>:<cluster>'.
+        Returns a mapping of endpoint URL to connection success (True/False).
         """
         if self.config._kafka_connect_oauth_token_provider:
             try:
@@ -149,11 +148,7 @@ class KafkaConnectCollector:
                     self.log.warning("OAuth refresh failed, proceeding with existing token: %s", e)
                 else:
                     self.log.error("Failed to refresh Kafka Connect OAuth token: %s", e)
-                    failed: dict[str, bool] = dict.fromkeys(self.config._kafka_connect_urls, False)
-                    confluent_cloud_key = self._confluent_cloud_key()
-                    if confluent_cloud_key:
-                        failed[confluent_cloud_key] = False
-                    return failed
+                    return dict.fromkeys(self.config._kafka_connect_urls, False)
 
         connectivity: dict[str, bool] = {}
 
@@ -165,39 +160,22 @@ class KafkaConnectCollector:
                 self.log.error("Error collecting Kafka Connect data from %s: %s (%s)", url, e, type(e).__name__)
                 connectivity[url] = False
 
-        confluent_cloud_key = self._confluent_cloud_key()
-        if confluent_cloud_key:
-            try:
-                self._collect_confluent_cloud(cluster_id)
-                connectivity[confluent_cloud_key] = True
-            except Exception as e:
-                self.log.error(
-                    "Error collecting Confluent Cloud Connect data for %s: %s (%s)",
-                    confluent_cloud_key,
-                    e,
-                    type(e).__name__,
-                )
-                connectivity[confluent_cloud_key] = False
-
         return connectivity
 
-    def _confluent_cloud_key(self) -> str | None:
-        """Return the connectivity key for Confluent Cloud, or None when not configured."""
-        if not self.config.confluent_cloud_configured:
-            return None
-        env_id = self.config._kafka_connect_confluent_cloud_environment_id
-        cluster_id = self.config._kafka_connect_confluent_cloud_cluster_id
-        return f'confluent_cloud:{env_id}:{cluster_id}'
-
     def _collect_rest(self, url: str, cluster_id: str) -> None:
-        response = self.http.get(
-            f'{url.rstrip("/")}/connectors',
-            params={'expand': ['info', 'status']},
-            timeout=self.config._request_timeout,
-            **self._get_request_kwargs(),
-        )
-        response.raise_for_status()
-        connectors_data = response.json()
+        endpoint = f'{url.rstrip("/")}/connectors'
+
+        def _fetch(expand):
+            response = self.http.get(
+                endpoint,
+                params={'expand': expand},
+                timeout=self.config._request_timeout,
+                **self._get_request_kwargs(),
+            )
+            response.raise_for_status()
+            return response.json()
+
+        connectors_data = _fetch(['info', 'status'])
 
         if not isinstance(connectors_data, dict):
             # Older Connect workers (pre-Kafka 2.3 / CP 5.3) ignore the expand parameter
@@ -210,17 +188,34 @@ class KafkaConnectCollector:
             )
             return
 
+        # Some Connect REST implementations (notably Confluent Cloud) honor only one `expand`
+        # value per request, returning the other section as null. When a section is missing,
+        # fetch it explicitly and merge so info- and status-based metrics stay complete.
+        if any((entry or {}).get('info') is None for entry in connectors_data.values()):
+            self._merge_expand(connectors_data, _fetch('info'), 'info')
+        if any((entry or {}).get('status') is None for entry in connectors_data.values()):
+            self._merge_expand(connectors_data, _fetch('status'), 'status')
+
         tags_base = self.config._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
-
         self._emit_connector_metrics(connectors_data, tags_base)
         self._emit_connector_config_events(connectors_data, cluster_id, url)
         self._collect_plugins(url, cluster_id)
 
+    @staticmethod
+    def _merge_expand(connectors_data, expanded, section):
+        if not isinstance(expanded, dict):
+            return
+        for name, entry in connectors_data.items():
+            if entry is None:
+                continue
+            if entry.get(section) is None and isinstance(expanded.get(name), dict):
+                entry[section] = expanded[name].get(section)
+
     def _emit_connector_metrics(self, connectors_data: dict[str, Any], tags_base: list[str]) -> None:
         for name, data in connectors_data.items():
-            info = data.get('info', {})
-            status = data.get('status', {})
+            info = data.get('info') or {}
+            status = data.get('status') or {}
 
             connector_type = info.get('type', 'unknown')
             full_class = (info.get('config') or {}).get('connector.class', '')
@@ -256,8 +251,8 @@ class KafkaConnectCollector:
         connector_contents: dict[str, str] = {}
 
         for name, data in connectors_data.items():
-            info = data.get('info', {})
-            status = data.get('status', {})
+            info = data.get('info') or {}
+            status = data.get('status') or {}
 
             connector_type = info.get('type', 'unknown')
             connector_state = (status.get('connector') or {}).get('state', 'UNKNOWN')
@@ -328,11 +323,3 @@ class KafkaConnectCollector:
             event = json.loads(content)
             event['collection_timestamp'] = int(time.time() * 1000)
             self.check.event_platform_event(json.dumps(event), 'data-streams-message')
-
-    def _collect_confluent_cloud(self, cluster_id: str) -> None:
-        """Collect connector data from the Confluent Cloud Connect REST API."""
-        env_id = self.config._kafka_connect_confluent_cloud_environment_id
-        cc_cluster_id = self.config._kafka_connect_confluent_cloud_cluster_id
-        base = self.config._kafka_connect_confluent_cloud_url.rstrip('/')
-        url = f'{base}/connect/v1/environments/{env_id}/clusters/{cc_cluster_id}'
-        self._collect_rest(url, cluster_id)

@@ -1,1 +1,1 @@
-Add Confluent Cloud Connect support to collect connector metrics and configuration events from the Confluent Cloud Connect REST API.
+Support monitoring Confluent Cloud managed connectors by pointing kafka_connect_url at the Confluent Cloud Connect REST API.

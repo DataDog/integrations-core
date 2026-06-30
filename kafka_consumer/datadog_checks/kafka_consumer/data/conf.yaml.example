@@ -460,6 +460,9 @@ instances:
     ## Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
     ## collects connector metrics and configuration events from the Kafka Connect REST API.
     ## Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
+    ## For Confluent Cloud, set this to
+    ## ``https://api.confluent.cloud/connect/v1/environments/<env>/clusters/<cluster>`` and use a
+    ## Cloud API key as ``kafka_connect_username`` and ``kafka_connect_password``.
     #
     # kafka_connect_url: http://localhost:8083
 
@@ -534,24 +537,3 @@ instances:
         ## Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
         #
         # tls_ca_cert: /path/to/oauth_ca_cert.pem
-
-    ## @param kafka_connect_confluent_cloud_environment_id - string - optional
-    ## Confluent Cloud environment ID (e.g. ``env-abc123``). When set together with
-    ## ``kafka_connect_confluent_cloud_cluster_id``, connector metrics and configuration events
-    ## are also collected from the Confluent Cloud Connect REST API.
-    ## Authentication uses ``kafka_connect_username`` and ``kafka_connect_password``, which must be
-    ## set to your Confluent Cloud API key and secret respectively.
-    #
-    # kafka_connect_confluent_cloud_environment_id: env-abc123
-
-    ## @param kafka_connect_confluent_cloud_cluster_id - string - optional
-    ## Confluent Cloud Kafka cluster ID (e.g. ``lkc-xyz789``). Required together with
-    ## ``kafka_connect_confluent_cloud_environment_id`` to enable Confluent Cloud Connect collection.
-    #
-    # kafka_connect_confluent_cloud_cluster_id: lkc-xyz789
-
-    ## @param kafka_connect_confluent_cloud_url - string - optional - default: https://api.confluent.cloud
-    ## Base URL for the Confluent Cloud REST API. Override only when using private networking
-    ## or a custom domain; the default covers the standard Confluent Cloud endpoint.
-    #
-    # kafka_connect_confluent_cloud_url: https://api.confluent.cloud

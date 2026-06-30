@@ -470,6 +470,9 @@ files:
           Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
           collects connector metrics and configuration events from the Kafka Connect REST API.
           Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
+          For Confluent Cloud, set this to
+          ``https://api.confluent.cloud/connect/v1/environments/<env>/clusters/<cluster>`` and use a
+          Cloud API key as ``kafka_connect_username`` and ``kafka_connect_password``.
         fleet_configurable: true
         formats:
           - url
@@ -583,33 +586,3 @@ files:
             type: string
             example: /path/to/oauth_ca_cert.pem
           fleet_configurable: false
-      - name: kafka_connect_confluent_cloud_environment_id
-        description: |
-          Confluent Cloud environment ID (e.g. ``env-abc123``). When set together with
-          ``kafka_connect_confluent_cloud_cluster_id``, connector metrics and configuration events
-          are also collected from the Confluent Cloud Connect REST API.
-          Authentication uses ``kafka_connect_username`` and ``kafka_connect_password``, which must be
-          set to your Confluent Cloud API key and secret respectively.
-        fleet_configurable: true
-        value:
-          type: string
-          example: env-abc123
-          display_default: null
-      - name: kafka_connect_confluent_cloud_cluster_id
-        description: |
-          Confluent Cloud Kafka cluster ID (e.g. ``lkc-xyz789``). Required together with
-          ``kafka_connect_confluent_cloud_environment_id`` to enable Confluent Cloud Connect collection.
-        fleet_configurable: true
-        value:
-          type: string
-          example: lkc-xyz789
-          display_default: null
-      - name: kafka_connect_confluent_cloud_url
-        description: |
-          Base URL for the Confluent Cloud REST API. Override only when using private networking
-          or a custom domain; the default covers the standard Confluent Cloud endpoint.
-        fleet_configurable: true
-        value:
-          type: string
-          example: https://api.confluent.cloud
-          display_default: https://api.confluent.cloud
