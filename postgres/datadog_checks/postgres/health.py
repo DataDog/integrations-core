@@ -69,7 +69,7 @@ class PostgresHealth(Health):
 
     def submit_diagnoses(self):
         """
-        Run the diagnostics for the Postgres check.
+        Submit the recorded diagnoses for the Postgres check.
         """
         for diagnosis in self.check.diagnosis.diagnoses:
             self.check.log.info("Submitting diagnosis: %s", diagnosis._asdict())
