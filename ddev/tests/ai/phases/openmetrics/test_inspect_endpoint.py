@@ -13,16 +13,16 @@ from prometheus_client.parser import text_string_to_metric_families as parse_pro
 
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
-from ddev.ai.phases import inspect_endpoint as inspect_endpoint_module
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.inspect_endpoint import (
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.openmetrics import inspect_endpoint as inspect_endpoint_module
+from ddev.ai.phases.openmetrics.inspect_endpoint import (
     EndpointInspectionError,
     InspectEndpointPhase,
     _build_jsonl_rows,
     _build_memory_text,
     _parse_exposition,
 )
-from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError
 
