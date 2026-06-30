@@ -39,8 +39,26 @@ from .conftest import MockAgent, make_response, resolve_key
         ('  {"valid": true, "reason": "ok"}  ', (True, "ok")),
         ('```json\n{"valid": true, "reason": ""}\n```', (True, "")),
         ('```\n{"valid": false, "reason": "no"}\n```', (False, "no")),
+        (
+            'I read every file and verified the prefix.\nEverything checks out.\n{"valid": true, "reason": ""}',
+            (True, ""),
+        ),
+        (
+            'Detailed reasoning across\nseveral lines of prose.\n{"valid": false, "reason": "missing metric x"}\n',
+            (False, "missing metric x"),
+        ),
+        ('{\n  "valid": true,\n  "reason": "ok"\n}', (True, "ok")),
     ],
-    ids=["plain_true", "plain_false", "whitespace", "fenced_json", "fenced_plain"],
+    ids=[
+        "plain_true",
+        "plain_false",
+        "whitespace",
+        "fenced_json",
+        "fenced_plain",
+        "prose_then_verdict_line",
+        "multiline_prose_then_verdict_line",
+        "pretty_printed_pure_json",
+    ],
 )
 def test_parse_reviewer_output_accepts(text, expected):
     assert parse_reviewer_output(text) == expected
