@@ -183,6 +183,37 @@ def test_legacy_worker_list_response_skipped(run_connect_check, aggregator):
     assert dsm_events(aggregator, 'connector') == []
 
 
+def test_null_info_or_status_sections_do_not_crash_collection(run_connect_check, aggregator):
+    # Some Connect REST implementations (e.g. connectors mid-provisioning or the Confluent Cloud
+    # managed Connect API) return an explicit null for the info or status section. dict.get with a
+    # default only fills missing keys, not keys set to null, so these must be handled gracefully.
+    connectors = {
+        'null-info': {
+            'info': None,
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        },
+        'null-status': {
+            'info': {'type': 'sink', 'config': {'connector.class': 'io.confluent.SomeSink'}},
+            'status': None,
+        },
+    }
+    run_connect_check(connectors_response=connectors)
+
+    aggregator.assert_metric('kafka.connector.count', value=2)
+
+    null_info = metrics_with_tag(aggregator, 'kafka.connector.task.count', 'connector:null-info')
+    assert null_info, "connector with null info section should still be reported"
+    assert 'connector_type:unknown' in null_info[0].tags
+
+    null_status = metrics_with_tag(aggregator, 'kafka.connector.task.count', 'connector:null-status')
+    assert null_status, "connector with null status section should still be reported"
+    assert 'connector_state:unknown' in null_status[0].tags
+
+    events = dsm_events(aggregator, 'connector')
+    null_status_event = next(event for event in events if event['connector'] == 'null-status')
+    assert null_status_event['connector_state'] == 'UNKNOWN'
+
+
 def test_collection_survives_corrupt_cache(run_connect_check, aggregator):
     def corrupt(key):
         return 'not-valid-json' if 'connector' in key else ''

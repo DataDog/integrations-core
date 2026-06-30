@@ -193,8 +193,8 @@ class KafkaConnectCollector:
 
     def _emit_connector_metrics(self, connectors_data: dict[str, Any], tags_base: list[str]) -> None:
         for name, data in connectors_data.items():
-            info = data.get('info', {})
-            status = data.get('status', {})
+            info = data.get('info') or {}
+            status = data.get('status') or {}
 
             connector_type = info.get('type', 'unknown')
             full_class = (info.get('config') or {}).get('connector.class', '')
@@ -230,8 +230,8 @@ class KafkaConnectCollector:
         connector_contents: dict[str, str] = {}
 
         for name, data in connectors_data.items():
-            info = data.get('info', {})
-            status = data.get('status', {})
+            info = data.get('info') or {}
+            status = data.get('status') or {}
 
             connector_type = info.get('type', 'unknown')
             connector_state = (status.get('connector') or {}).get('state', 'UNKNOWN')
