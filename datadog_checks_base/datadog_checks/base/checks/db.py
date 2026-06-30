@@ -4,10 +4,16 @@
 
 from abc import abstractmethod
 
+from datadog_checks.base.utils.db.utils import TagManager
+
 from . import AgentCheck
 
 
 class DatabaseCheck(AgentCheck):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tag_manager = TagManager()
+
     def database_monitoring_query_sample(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-samples")
 
@@ -43,9 +49,8 @@ class DatabaseCheck(AgentCheck):
         pass
 
     @property
-    @abstractmethod
     def tags(self) -> list[str]:
-        pass
+        return self.tag_manager.get_tags()
 
     @property
     @abstractmethod

@@ -1,0 +1,4 @@
+strategy: from_ports
+port_hints: []
+candidates:
+- openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"

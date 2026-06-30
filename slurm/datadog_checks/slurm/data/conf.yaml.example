@@ -99,6 +99,11 @@ instances:
     #
     # scontrol_path: /usr/bin/scontrol
 
+    ## @param seff_path - string - optional - default: /usr/bin/seff
+    ## Full path to the seff binary.
+    #
+    # seff_path: /usr/bin/seff
+
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.
     ##
