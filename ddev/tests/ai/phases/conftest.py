@@ -97,6 +97,9 @@ class MockAgent:
         self.compact_call_count += 1
         return None
 
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
+
 
 class MockProcessFactory:
     """Minimal ReActProcessFactory that wraps a MockAgent in a ReActProcess.
