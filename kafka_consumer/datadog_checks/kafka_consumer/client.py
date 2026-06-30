@@ -153,10 +153,25 @@ class KafkaClient:
             TopicPartition(topic=topic, partition=partition, offset=offset)
             for topic, partition in partitions
         ]
+        try:
+            resolved = self._consumer.offsets_for_times(
+                partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
+            )
+        except KafkaException as e:
+            # A single unresolvable partition (e.g. a leaderless/offline topic) fails the whole
+            # batch call. Fall back to per-partition lookups so healthy partitions are still
+            # collected and the check is not aborted.
+            self.log.warning("Batched offset lookup failed (%s); retrying partitions individually", e)
+            resolved = []
+            for tp in topicpartitions_for_querying:
+                try:
+                    resolved.extend(
+                        self._consumer.offsets_for_times(partitions=[tp], timeout=self.config._request_timeout)
+                    )
+                except KafkaException as inner:
+                    self.log.debug("Skipping offsets for topic %s partition %s: %s", tp.topic, tp.partition, inner)
         results = []
-        for tp in self._consumer.offsets_for_times(
-            partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
-        ):
+        for tp in resolved:
             if tp.error:
                 self.log.debug(
                     "Failed to get offset for topic %s partition %s: %s",

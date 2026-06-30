@@ -1054,3 +1054,70 @@ def test_connection_error_sink_failure_does_not_mask_broker_error(check, kafka_i
     kafka_consumer_check.event_platform_event = mock.Mock(side_effect=Exception('intake unavailable'))
     with pytest.raises(Exception, match="Unable to connect to the AdminClient"):
         dd_run_check(kafka_consumer_check)
+
+
+def test_consumer_offsets_for_times_falls_back_per_partition_on_batch_failure():
+    """When the batched offsets_for_times call fails for one bad partition, healthy partitions are still collected."""
+    from confluent_kafka import KafkaException, TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    healthy_result = mock.MagicMock(spec=TopicPartition)
+    healthy_result.topic = "healthy_topic"
+    healthy_result.partition = 0
+    healthy_result.offset = 100
+    healthy_result.error = None
+
+    def offsets_for_times(partitions, timeout=None):
+        # The batched call (more than one partition) fails entirely, as librdkafka does when a
+        # single partition is unresolvable (e.g. UNKNOWN_TOPIC_OR_PART for a leaderless topic).
+        if len(partitions) > 1:
+            raise KafkaException("Failed to get offsets")
+        # Per-partition fallback: the healthy partition resolves, the bad one keeps raising.
+        tp = partitions[0]
+        if tp.topic == "healthy_topic":
+            return [healthy_result]
+        raise KafkaException("UNKNOWN_TOPIC_OR_PART")
+
+    client._consumer = mock.MagicMock()
+    client._consumer.offsets_for_times.side_effect = offsets_for_times
+
+    results = client.consumer_offsets_for_times([("healthy_topic", 0), ("bad_topic", 0)])
+
+    # (a) no exception escaped, (b) the healthy partition's offset is returned,
+    # (c) the bad partition is skipped.
+    assert results == [("healthy_topic", 0, 100)]
+
+
+def test_consumer_offsets_for_times_skips_per_partition_errors():
+    """Per-partition errors returned in the batched result are skipped, healthy ones are kept."""
+    from confluent_kafka import TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    healthy_result = mock.MagicMock(spec=TopicPartition)
+    healthy_result.topic = "healthy_topic"
+    healthy_result.partition = 0
+    healthy_result.offset = 42
+    healthy_result.error = None
+
+    errored_result = mock.MagicMock(spec=TopicPartition)
+    errored_result.topic = "bad_topic"
+    errored_result.partition = 0
+    errored_result.offset = -1
+    errored_result.error = "some error"
+
+    client._consumer = mock.MagicMock()
+    client._consumer.offsets_for_times.return_value = [healthy_result, errored_result]
+
+    results = client.consumer_offsets_for_times([("healthy_topic", 0), ("bad_topic", 0)])
+
+    assert results == [("healthy_topic", 0, 42)]
+    # The batched call succeeded, so no per-partition fallback should occur.
+    assert client._consumer.offsets_for_times.call_count == 1
