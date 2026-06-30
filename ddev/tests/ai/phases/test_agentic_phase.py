@@ -492,7 +492,7 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
     cp = mgr.read()["p1"]
     assert isinstance(cp, SuccessCheckpoint)
     assert cp.status == CheckpointStatus.SUCCESS
-    assert cp.goal_validations == [{"task": "t1", "attempts": 1, "final_valid": True}]
+    assert cp.phase_data["goal_validations"] == [{"task": "t1", "attempts": 1, "final_valid": True}]
     assert worker.send_calls[0].startswith("Do it.")
     assert "independent reviewer" in worker.send_calls[0]
     assert cp.tokens == CheckpointTokenInfo(total_input=100 + 7 + 10, total_output=50 + 3 + 5)

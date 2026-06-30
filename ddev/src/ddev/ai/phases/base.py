@@ -16,7 +16,6 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.config import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
-    RESERVED_SUCCESS_KEYS,
     CheckpointManager,
     CheckpointStatus,
     CheckpointTokenInfo,
@@ -47,7 +46,7 @@ class PhaseOutcome:
     memory_text: str
     total_input_tokens: int = 0
     total_output_tokens: int = 0
-    extra_checkpoint: dict[str, Any] = field(default_factory=dict)
+    checkpoint_data: dict[str, Any] = field(default_factory=dict)
 
 
 class Phase(AsyncProcessor[PhaseTrigger]):
@@ -149,11 +148,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
         outcome = await self.execute(context)
 
-        conflicts = RESERVED_SUCCESS_KEYS & set(outcome.extra_checkpoint)
-        if conflicts:
-            raise ValueError(
-                f"Phase {self._phase_id!r}: extra_checkpoint cannot override reserved keys: {sorted(conflicts)}"
-            )
         checkpoint = SuccessCheckpoint(
             status=CheckpointStatus.SUCCESS,
             started_at=self._started_at.isoformat(),
@@ -163,7 +157,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 total_output=outcome.total_output_tokens,
             ),
             memory_path=str(self._checkpoint_manager.memory_path(self._phase_id)),
-            **outcome.extra_checkpoint,
+            phase_data=outcome.checkpoint_data,
         )
 
         self._checkpoint_manager.write_memory(self._phase_id, outcome.memory_text)

@@ -336,15 +336,15 @@ class AgenticPhase(Phase):
 
         memory_text, mem_in, mem_out = await self._run_memory_step(process, context)
 
-        extra: dict[str, Any] = {}
+        checkpoint_data: dict[str, Any] = {}
         if self._goal_attempt_log:
-            extra["goal_validations"] = self._goal_attempt_log
+            checkpoint_data["goal_validations"] = self._goal_attempt_log
 
         return PhaseOutcome(
             memory_text=memory_text,
             total_input_tokens=self._total_input_tokens + mem_in,
             total_output_tokens=self._total_output_tokens + mem_out,
-            extra_checkpoint=extra,
+            checkpoint_data=checkpoint_data,
         )
 
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:

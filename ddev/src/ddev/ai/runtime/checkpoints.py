@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Annotated, Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
 
 class CheckpointReadError(Exception):
@@ -29,13 +29,12 @@ class CheckpointTokenInfo(BaseModel):
 class SuccessCheckpoint(BaseModel):
     """Checkpoint written at the end of a successful phase execution."""
 
-    model_config = ConfigDict(extra="allow")
-
     status: Literal[CheckpointStatus.SUCCESS]
     started_at: str
     finished_at: str
     tokens: CheckpointTokenInfo
     memory_path: str
+    phase_data: dict[str, Any] = {}
 
 
 class FailedCheckpoint(BaseModel):
@@ -53,8 +52,6 @@ PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discrimi
 
 # TypeAdapter provides model_validate() for annotated union types that aren't BaseModel subclasses.
 CheckpointAdapter: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)
-
-RESERVED_SUCCESS_KEYS: frozenset[str] = frozenset(SuccessCheckpoint.model_fields)
 
 
 class CheckpointManager:

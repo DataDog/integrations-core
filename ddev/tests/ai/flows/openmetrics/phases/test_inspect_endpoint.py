@@ -187,11 +187,11 @@ async def test_success_with_prometheus_body(flow_dir, message_queue, monkeypatch
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     assert checkpoint.status == CheckpointStatus.SUCCESS
-    assert checkpoint.exposition_format == "prometheus"
-    assert checkpoint.metric_count == len(expected_families)
-    assert "sample_metric_names" not in checkpoint.model_extra
-    assert checkpoint.status_code == 200
-    assert checkpoint.endpoint_url == ENDPOINT_URL
+    assert checkpoint.phase_data["exposition_format"] == "prometheus"
+    assert checkpoint.phase_data["metric_count"] == len(expected_families)
+    assert "sample_metric_names" not in checkpoint.phase_data
+    assert checkpoint.phase_data["status_code"] == 200
+    assert checkpoint.phase_data["endpoint_url"] == ENDPOINT_URL
     assert checkpoint.tokens == CheckpointTokenInfo(total_input=0, total_output=0)
 
 
@@ -205,9 +205,9 @@ async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatc
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     assert checkpoint.status == CheckpointStatus.SUCCESS
-    assert checkpoint.exposition_format == "openmetrics"
-    assert checkpoint.content_type == content_type
-    assert checkpoint.metric_count >= 1
+    assert checkpoint.phase_data["exposition_format"] == "openmetrics"
+    assert checkpoint.phase_data["content_type"] == content_type
+    assert checkpoint.phase_data["metric_count"] >= 1
 
 
 # ---------------------------------------------------------------------------
@@ -402,7 +402,7 @@ async def test_jsonl_path_in_checkpoint(flow_dir, message_queue, monkeypatch):
 
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    path_str = checkpoint.metrics_jsonl_path
+    path_str = checkpoint.phase_data["metrics_jsonl_path"]
     assert isinstance(path_str, str)
     assert os.path.isabs(path_str)
     assert os.path.exists(path_str)
@@ -418,7 +418,7 @@ async def test_jsonl_one_row_per_family(flow_dir, message_queue, monkeypatch):
     assert isinstance(checkpoint, SuccessCheckpoint)
     rows = _read_jsonl(flow_dir / f"{PHASE_ID}_metrics.jsonl")
     expected_families = list(parse_prometheus(PROMETHEUS_BODY))
-    assert len(rows) == checkpoint.metric_count == len(expected_families)
+    assert len(rows) == checkpoint.phase_data["metric_count"] == len(expected_families)
 
 
 async def test_jsonl_row_schema(flow_dir, message_queue, monkeypatch):
@@ -578,7 +578,7 @@ async def test_memory_text_includes_jsonl_path(flow_dir, message_queue, monkeypa
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     memory = mgr.memory_content(PHASE_ID)
-    assert checkpoint.metrics_jsonl_path in memory
+    assert checkpoint.phase_data["metrics_jsonl_path"] in memory
 
 
 async def test_jsonl_sidecar_atomic_on_os_replace_failure(flow_dir, message_queue, monkeypatch):
@@ -620,7 +620,7 @@ async def test_exposition_path_in_checkpoint(flow_dir, message_queue, monkeypatc
 
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    path_str = checkpoint.exposition_path
+    path_str = checkpoint.phase_data["exposition_path"]
     assert isinstance(path_str, str)
     assert os.path.isabs(path_str)
     assert os.path.exists(path_str)
@@ -644,7 +644,7 @@ async def test_memory_text_includes_exposition_path(flow_dir, message_queue, mon
 
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    assert checkpoint.exposition_path in mgr.memory_content(PHASE_ID)
+    assert checkpoint.phase_data["exposition_path"] in mgr.memory_content(PHASE_ID)
 
 
 async def test_exposition_failure_propagates_as_phase_failure(flow_dir, message_queue, monkeypatch):

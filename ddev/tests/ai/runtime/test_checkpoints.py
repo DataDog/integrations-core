@@ -71,11 +71,11 @@ def test_write_and_read_back(manager):
     assert data["phase1"].tokens.total_output == 20
 
 
-def test_write_preserves_extra_fields(manager):
-    manager.write_phase_checkpoint("phase1", make_success(endpoint_url="http://localhost:8080"))
+def test_write_preserves_phase_data(manager):
+    manager.write_phase_checkpoint("phase1", make_success(phase_data={"endpoint_url": "http://localhost:8080"}))
     data = manager.read()
     assert isinstance(data["phase1"], SuccessCheckpoint)
-    assert data["phase1"].model_extra["endpoint_url"] == "http://localhost:8080"
+    assert data["phase1"].phase_data["endpoint_url"] == "http://localhost:8080"
 
 
 def test_write_creates_parent_dirs(tmp_path):
