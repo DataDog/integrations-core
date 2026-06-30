@@ -205,8 +205,10 @@ files:
     - name: read_messages
       description: |
         Configuration for reading messages from Kafka topics.
-        Messages are streamed in real-time and sent to Datadog as they arrive.
-        The check has a 20-second timeout for the entire operation.
+        Only messages already present in the log when the check starts are read; the
+        per-partition high watermark is captured up front and consumption stops once every
+        partition is drained, so messages produced after the check began are never returned.
+        A 5-second timeout bounds the entire operation as a safety net.
         Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
         Filtering is applied after deserialization using jq-style expressions.
       fleet_configurable: true
