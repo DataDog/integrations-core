@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, cast
 
@@ -12,7 +11,7 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
-from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, render_goal_text, run_goal_loop
+from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, run_goal_loop
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
@@ -24,23 +23,6 @@ if TYPE_CHECKING:
     from ddev.ai.phases.resources import PhaseResources
     from ddev.ai.react.factory import ReActProcessFactory
     from ddev.ai.react.types import ReActResult
-
-
-def render_task_prompt(
-    text: str,
-    context: dict[str, Any],
-    resolver: Callable[[str], str] | None = None,
-) -> str:
-    """Render already-resolved task prompt text; refs are resolved by the caller."""
-    return render_inline(text, context, resolver)
-
-
-def render_memory_prompt(
-    text: str,
-    context: dict[str, Any],
-) -> str:
-    """Render already-resolved memory prompt text; refs are resolved by the caller."""
-    return render_inline(text, context)
 
 
 class AgenticPhase(Phase):
@@ -191,7 +173,7 @@ class AgenticPhase(Phase):
         context: dict[str, Any],
         has_goal: bool,
     ) -> str:
-        prompt = render_task_prompt(cast(str, task.prompt), context, self._resolver)
+        prompt = render_inline(cast(str, task.prompt), context, self._resolver)
         if has_goal:
             return prompt + GOAL_TASK_SUFFIX
         return prompt
@@ -213,7 +195,7 @@ class AgenticPhase(Phase):
         prompt: str,
         result: ReActResult,
     ) -> ReActResult:
-        goal_text = render_goal_text(cast(str, task.goal), context, self._resolver)
+        goal_text = render_inline(cast(str, task.goal), context, self._resolver)
         try:
             outcome: GoalLoopOutcome = await run_goal_loop(
                 task=task,
@@ -267,7 +249,7 @@ class AgenticPhase(Phase):
         """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
         user_additions = None
         if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(cast(str, self._config.checkpoint.memory_prompt), context)
+            user_additions = render_inline(cast(str, self._config.checkpoint.memory_prompt), context)
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         response = await process.run_once(memory_prompt)

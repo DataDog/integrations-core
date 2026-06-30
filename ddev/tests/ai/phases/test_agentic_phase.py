@@ -13,7 +13,7 @@ from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
-from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
+from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
@@ -21,7 +21,7 @@ from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 
-from .conftest import MockAgent, make_agent_phase, make_response, resolve_key
+from .conftest import MockAgent, make_agent_phase, make_response
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -35,31 +35,6 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
         callbacks=callbacks,
         scope=AgentScope(owner_id="p1", role=AgentRole.PHASE),
     )
-
-
-# ---------------------------------------------------------------------------
-# render_task_prompt
-# ---------------------------------------------------------------------------
-
-
-def test_render_task_prompt_inline():
-    result = render_task_prompt("Hello ${name}.", {"name": "Bob"})
-    assert result == "Hello Bob."
-
-
-def test_render_task_prompt_forwards_resolver():
-    result = render_task_prompt("Memory: ${draft_memory}", {}, resolve_key)
-    assert result == "Memory: resolved(draft_memory)"
-
-
-# ---------------------------------------------------------------------------
-# render_memory_prompt
-# ---------------------------------------------------------------------------
-
-
-def test_render_memory_prompt_inline():
-    result = render_memory_prompt("List files for ${phase_name}.", {"phase_name": "draft"})
-    assert result == "List files for draft."
 
 
 # ---------------------------------------------------------------------------
@@ -273,22 +248,20 @@ async def test_memory_api_failure_fails_phase(flow_dir, monkeypatch, message_que
 
 
 async def test_memory_template_render_failure_fails_phase(flow_dir, monkeypatch, message_queue):
-    phase, mgr = make_agent_phase(
+    phase, _ = make_agent_phase(
         flow_dir,
-        MockAgent([make_response("task done", 100, 50)]),
+        MockAgent([make_response("ok", 0, 0)]),
         monkeypatch,
         message_queue,
         checkpoint=CheckpointConfig(memory_prompt="Summarize."),
     )
     monkeypatch.setattr(
-        "ddev.ai.phases.agentic_phase.render_memory_prompt",
+        "ddev.ai.phases.agentic_phase.render_inline",
         lambda *a, **kw: (_ for _ in ()).throw(ValueError("bad template")),
     )
 
     with pytest.raises(ValueError, match="bad template"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-    assert mgr.read() == {}
+        await phase._run_memory_step(_memory_process(MockAgent([make_response("ok", 0, 0)])), {})
 
 
 async def test_disk_failure_on_write_memory_fails_phase(flow_dir, monkeypatch, message_queue):
@@ -320,7 +293,7 @@ async def test_run_memory_step_passes_user_additions_to_build(
 ):
     mock_agent = MockAgent([make_response("ok", 0, 0)])
     phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, checkpoint=checkpoint)
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_memory_prompt", lambda *a, **kw: "USER_ADDITIONS")
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_inline", lambda *a, **kw: "USER_ADDITIONS")
     build_calls: list = []
     monkeypatch.setattr(
         mgr, "build_memory_prompt", lambda user_additions: build_calls.append(user_additions) or "PROMPT"

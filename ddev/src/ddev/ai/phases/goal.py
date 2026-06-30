@@ -7,12 +7,10 @@ from __future__ import annotations
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig, TaskConfig
-from ddev.ai.phases.template import render_inline
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
@@ -105,15 +103,6 @@ class GoalLoopOutcome:
     attempts: int
     total_input_tokens: int
     total_output_tokens: int
-
-
-def render_goal_text(
-    text: str,
-    context: dict[str, Any],
-    resolver: Callable[[str], str] | None = None,
-) -> str:
-    """Render already-resolved goal text; goal_ref is resolved by the caller."""
-    return render_inline(text, context, resolver)
 
 
 def build_reviewer_user_message(

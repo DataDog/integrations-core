@@ -16,7 +16,6 @@ from ddev.ai.phases.goal import (
     GoalParseError,
     build_reviewer_user_message,
     parse_reviewer_output,
-    render_goal_text,
     run_goal_loop,
 )
 from ddev.ai.react.process import ReActProcess
@@ -24,7 +23,7 @@ from ddev.ai.react.types import ReActResult
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry
 
-from .conftest import MockAgent, make_response, resolve_key
+from .conftest import MockAgent, make_response
 
 # ---------------------------------------------------------------------------
 # parse_reviewer_output
@@ -60,21 +59,6 @@ def test_parse_reviewer_output_accepts(text, expected):
 )
 def test_parse_reviewer_output_rejects(text):
     assert parse_reviewer_output(text) is None
-
-
-# ---------------------------------------------------------------------------
-# render_goal_text
-# ---------------------------------------------------------------------------
-
-
-def test_render_goal_text_inline():
-    result = render_goal_text("check ${name}", {"name": "Alice"})
-    assert result == "check Alice"
-
-
-def test_render_goal_text_forwards_resolver():
-    result = render_goal_text("see ${draft_memory}", {}, resolve_key)
-    assert result == "see resolved(draft_memory)"
 
 
 # ---------------------------------------------------------------------------
