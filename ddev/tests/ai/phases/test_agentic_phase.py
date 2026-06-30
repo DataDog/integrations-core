@@ -15,6 +15,7 @@ from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
@@ -248,20 +249,27 @@ async def test_memory_api_failure_fails_phase(flow_dir, monkeypatch, message_que
 
 
 async def test_memory_template_render_failure_fails_phase(flow_dir, monkeypatch, message_queue):
-    phase, _ = make_agent_phase(
+    phase, mgr = make_agent_phase(
         flow_dir,
-        MockAgent([make_response("ok", 0, 0)]),
+        MockAgent([make_response("task done", 100, 50)]),
         monkeypatch,
         message_queue,
         checkpoint=CheckpointConfig(memory_prompt="Summarize."),
     )
-    monkeypatch.setattr(
-        "ddev.ai.phases.agentic_phase.render_inline",
-        lambda *a, **kw: (_ for _ in ()).throw(ValueError("bad template")),
-    )
+
+    real_render = render_inline
+
+    def fail_only_memory(text, *args, **kwargs):
+        if text == "Summarize.":
+            raise ValueError("bad template")
+        return real_render(text, *args, **kwargs)
+
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_inline", fail_only_memory)
 
     with pytest.raises(ValueError, match="bad template"):
-        await phase._run_memory_step(_memory_process(MockAgent([make_response("ok", 0, 0)])), {})
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert mgr.read() == {}
 
 
 async def test_disk_failure_on_write_memory_fails_phase(flow_dir, monkeypatch, message_queue):
