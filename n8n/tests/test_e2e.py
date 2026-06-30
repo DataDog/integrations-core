@@ -33,6 +33,9 @@ def test_check_n8n_e2e(
 
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
+    if common.IS_LAB:
+        pytest.skip('lab does not currently support configuration discovery')
+
     aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=2)
 
     aggregator.assert_metrics_using_metadata(
