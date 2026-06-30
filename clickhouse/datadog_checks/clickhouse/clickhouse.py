@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from string import Template
 from time import time
 
@@ -34,6 +35,13 @@ except ImportError:
 
 # Database instance collection interval in seconds (not user-configurable)
 DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
+
+# Tag added to per-node metrics when collecting from all replicas in single endpoint mode.
+CLUSTER_NODE_TAG = 'clickhouse_node'
+
+# Matches the FROM clause of the standard system-table metric queries so they can be retargeted at
+# clusterAllReplicas() and tagged per node in single endpoint mode.
+SYSTEM_TABLE_FROM_CLAUSE = re.compile(r'\bFROM\s+system\.(?P<table>\w+)', re.IGNORECASE)
 
 
 class ClickhouseCheck(DatabaseCheck):
@@ -293,10 +301,10 @@ class ClickhouseCheck(DatabaseCheck):
         if self._config.use_legacy_queries:
             query_list.extend(
                 [
-                    queries.SystemMetrics,
-                    queries.SystemEventsToDeprecate,
-                    queries.SystemEvents,
-                    queries.SystemAsynchronousMetrics,
+                    self.make_cluster_aware(queries.SystemMetrics),
+                    self.make_cluster_aware(queries.SystemEventsToDeprecate),
+                    self.make_cluster_aware(queries.SystemEvents),
+                    self.make_cluster_aware(queries.SystemAsynchronousMetrics),
                     queries.SystemParts,
                     queries.SystemReplicas,
                     queries.SystemDictionaries,
@@ -306,13 +314,13 @@ class ClickhouseCheck(DatabaseCheck):
         if self._config.use_advanced_queries:
             query_list.extend(
                 [
-                    advanced_queries.SystemMetrics,
-                    advanced_queries.SystemEvents,
-                    advanced_queries.SystemAsynchronousMetrics,
+                    self.make_cluster_aware(advanced_queries.SystemMetrics),
+                    self.make_cluster_aware(advanced_queries.SystemEvents),
+                    self.make_cluster_aware(advanced_queries.SystemAsynchronousMetrics),
                 ]
             )
             if self.version_ge('21.3'):
-                query_list.append(advanced_queries.SystemErrors)
+                query_list.append(self.make_cluster_aware(advanced_queries.SystemErrors))
 
         return query_list
 
@@ -447,6 +455,36 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             # Direct connection: Query the local system table directly
             return f"system.{table_name}"
+
+    def make_cluster_aware(self, query: dict) -> dict:
+        """Collect a standard system-table metric query from all replicas in single endpoint mode.
+
+        In single endpoint mode the agent reaches a multi-node cluster through one load balancer, so
+        consecutive scrapes of a per-node ``system`` table land on different nodes. For the cumulative
+        counters in ``system.events``/``system.errors`` this makes the value jump up and down, which the
+        backend reads as phantom ``monotonic_count`` spikes such as the false ``query.failed`` counts in
+        SDBM-2746; gauges from ``system.metrics``/``system.asynchronous_metrics`` simply flap between nodes.
+
+        Retargeting the query at ``clusterAllReplicas`` and tagging each row with its ``hostName()`` gives
+        every node its own metric series, so counters increment monotonically per node (no sawtooth) and
+        gauges stay per node instead of flapping. Returns the query unchanged for direct connections and
+        for queries whose shape isn't a single ``FROM system.<table>`` select.
+        """
+        if not self._config.single_endpoint_mode:
+            return query
+
+        match = SYSTEM_TABLE_FROM_CLAUSE.search(query['query'])
+        if match is None:
+            return query
+
+        cluster_table = self.get_system_table(match.group('table'))
+        select_list = query['query'][: match.start()].rstrip()
+        after_table = query['query'][match.end() :]
+        return {
+            **query,
+            'query': f'{select_list}, hostName() AS {CLUSTER_NODE_TAG} FROM {cluster_table}{after_table}',
+            'columns': [*query['columns'], {'name': CLUSTER_NODE_TAG, 'type': 'tag'}],
+        }
 
     def ping_clickhouse(self):
         return self._client.ping()

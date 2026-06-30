@@ -6,7 +6,7 @@ import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries
+from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
@@ -253,9 +253,9 @@ def test_connect_no_password_uses_empty_string():
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test-no-password'
 
-    assert check._config.password == '', (
-        "password must default to '' — None causes auth error 194 in clickhouse_connect"
-    )
+    assert (
+        check._config.password == ''
+    ), "password must default to '' — None causes auth error 194 in clickhouse_connect"
 
     with mock.patch('clickhouse_connect.get_client') as m:
         mock_client = mock.MagicMock()
@@ -381,3 +381,65 @@ def test_database_hostname_ignores_reported_hostname_override(reported_hostname,
         # reported_hostname honors the override when configured, otherwise the resolved host
         assert check.reported_hostname == expected_reported_hostname
         mock_resolve.assert_called_with(BASE_INSTANCE['server'])
+
+
+def test_make_cluster_aware_direct_connection_unchanged(instance):
+    """Direct connections keep the bare per-node query (SDBM-2746)."""
+    instance = {**instance, 'single_endpoint_mode': False}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    assert check.make_cluster_aware(advanced_queries.SystemEvents) is advanced_queries.SystemEvents
+
+
+def test_make_cluster_aware_bulk_match_query(instance):
+    """Single endpoint mode tags system.events per node so counters don't flap across the LB (SDBM-2746)."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    rewritten = check.make_cluster_aware(advanced_queries.SystemEvents)
+
+    assert rewritten['query'] == (
+        "SELECT value, event, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.events)"
+    )
+    assert rewritten['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+    # The original cached query dict must not be mutated.
+    assert advanced_queries.SystemEvents['query'] == 'SELECT value, event FROM system.events'
+    assert all(column['name'] != 'clickhouse_node' for column in advanced_queries.SystemEvents['columns'])
+
+
+def test_make_cluster_aware_preserves_where_clause(instance):
+    """system.errors carries a WHERE clause that must survive the rewrite."""
+    instance = {**instance, 'single_endpoint_mode': True}
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+
+    rewritten = check.make_cluster_aware(advanced_queries.SystemErrors)
+
+    assert rewritten['query'] == (
+        "SELECT value, name, code, remote, hostName() AS clickhouse_node "
+        "FROM clusterAllReplicas('default', system.errors) WHERE value > 0"
+    )
+    assert rewritten['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+
+
+@pytest.mark.parametrize('use_advanced_queries', [True, False])
+def test_get_queries_tags_system_tables_per_node_in_single_endpoint_mode(instance, use_advanced_queries):
+    instance = {
+        **instance,
+        'single_endpoint_mode': True,
+        'use_advanced_queries': use_advanced_queries,
+        'use_legacy_queries': not use_advanced_queries,
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+
+    cluster_aware = [q for q in check.get_queries() if 'clusterAllReplicas' in q['query']]
+
+    # system.events, system.metrics, system.asynchronous_metrics (+ system.errors / events-to-deprecate)
+    assert cluster_aware
+    for query in cluster_aware:
+        assert 'hostName() AS clickhouse_node' in query['query']
+        assert query['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+
+    # system.parts/replicas/dictionaries use GROUP BY and are intentionally left untouched here.
+    if not use_advanced_queries:
+        assert any(q is queries.SystemParts for q in check.get_queries())
