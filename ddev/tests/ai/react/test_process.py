@@ -37,6 +37,11 @@ class MockAgent(BaseAgent[Any]):
         self.compact_response: AgentResponse | None = None
         self.compact_token_response: AgentResponse | None = None
         self.reset_calls: int = 0
+        self.reconcile_calls: int = 0
+
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        self.reconcile_calls += 1
+        return 0
 
     async def send(
         self,
@@ -480,6 +485,9 @@ class ErrorAgent(BaseAgent[Any]):
     def __init__(self) -> None:
         super().__init__(name="error", system_prompt="", tools=ToolRegistry([]))
 
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
+
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
@@ -507,6 +515,9 @@ class InterruptAgent(BaseAgent[Any]):
     def __init__(self) -> None:
         super().__init__(name="interrupt", system_prompt="", tools=ToolRegistry([]))
 
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
+
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:
@@ -532,6 +543,9 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
 class CancelledAgent(BaseAgent[Any]):
     def __init__(self) -> None:
         super().__init__(name="cancelled", system_prompt="", tools=ToolRegistry([]))
+
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
 
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
@@ -724,3 +738,30 @@ async def test_auto_compact_tokens_included_in_result() -> None:
 
     assert result.total_input_tokens == 100 + 200 + 30
     assert result.total_output_tokens == 50 + 80 + 10
+
+
+# ---------------------------------------------------------------------------
+# reconcile_pending_tool_calls
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "responses",
+    [
+        pytest.param([make_response(StopReason.END_TURN)], id="end_turn"),
+        pytest.param([make_response(StopReason.MAX_TOKENS)], id="max_tokens_text_only"),
+        pytest.param(
+            [make_response(StopReason.MAX_TOKENS, tool_calls=[make_tool_call("tc_01", "spawn_subagent")])],
+            id="max_tokens_with_tool_calls",
+        ),
+        pytest.param(
+            [make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call()]), make_response(StopReason.END_TURN)],
+            id="successful_tool_loop",
+        ),
+    ],
+)
+async def test_reconcile_called_after_loop_exits(responses: list[AgentResponse]) -> None:
+    """reconcile_pending_tool_calls is called unconditionally after the ReAct loop exits."""
+    agent = MockAgent(responses)
+    await make_process(agent).start("task")
+    assert agent.reconcile_calls == 1

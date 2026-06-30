@@ -99,6 +99,14 @@ class BaseAgent[TMessage](ABC):
         return response
 
     @abstractmethod
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        """Append a synthetic error tool_result for each unanswered tool_use in the last assistant turn.
+
+        No-op if the last turn is not an assistant message or has no tool_use blocks.
+        Returns the number of tool calls reconciled. Performs no API call.
+        """
+
+    @abstractmethod
     async def send(
         self,
         content: str | list[ToolResultMessage],

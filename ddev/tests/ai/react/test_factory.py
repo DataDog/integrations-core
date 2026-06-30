@@ -19,6 +19,9 @@ class _StubAgent(BaseAgent[Any]):
     def __init__(self, name: str) -> None:
         super().__init__(name=name, system_prompt="", tools=ToolRegistry([]))
 
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
+
     async def send(
         self, content: str | list[ToolResultMessage], allowed_tools: list[str] | None = None
     ) -> AgentResponse:

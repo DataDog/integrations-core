@@ -140,6 +140,10 @@ class ReActProcess:
                     total_input += compact_in
                     total_output += compact_out
 
+            self._agent.reconcile_pending_tool_calls(
+                "Not executed: the assistant turn was truncated by the token limit before this tool call could run."
+            )
+
             react_result = ReActResult(
                 final_response=response,
                 iterations=iterations,

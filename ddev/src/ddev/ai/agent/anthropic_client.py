@@ -107,6 +107,29 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         self._max_tokens = max_tokens
         self._context_window: int | None = None
 
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        if not self._history or self._history[-1]["role"] != "assistant":
+            return 0
+
+        content = self._history[-1]["content"]
+        tool_use_ids: list[str] = []
+        for block in content:
+            if isinstance(block, dict):
+                if block.get("type") == "tool_use":
+                    tool_use_ids.append(block["id"])
+            elif getattr(block, "type", None) == "tool_use":
+                tool_use_ids.append(block.id)
+
+        if not tool_use_ids:
+            return 0
+
+        synthetic_results = [
+            {"type": "tool_result", "tool_use_id": id_, "is_error": True, "content": placeholder_error}
+            for id_ in tool_use_ids
+        ]
+        self._history.append({"role": "user", "content": synthetic_results})
+        return len(tool_use_ids)
+
     async def _get_context_window(self) -> int:
         if self._context_window is None:
             try:

@@ -25,6 +25,9 @@ class ConcreteAgent(BaseAgent[dict]):
         self._idx = 0
         self.send_calls: list[dict] = []
 
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
+
     async def send(
         self,
         content: str | list[ToolResultMessage],

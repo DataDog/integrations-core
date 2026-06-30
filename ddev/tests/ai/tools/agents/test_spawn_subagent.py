@@ -34,6 +34,9 @@ class MockAgent(BaseAgent[Any]):
         self._responses = list(responses)
         self._index = 0
 
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
+
     async def send(
         self,
         content: str | list[ToolResultMessage],
@@ -59,6 +62,9 @@ class _RaisingAgent(BaseAgent[Any]):
     def __init__(self, exc: BaseException) -> None:
         super().__init__("raising", "", ToolRegistry([]))
         self._exc = exc
+
+    def reconcile_pending_tool_calls(self, placeholder_error: str) -> int:
+        return 0
 
     async def send(
         self,

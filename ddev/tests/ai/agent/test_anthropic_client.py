@@ -1116,3 +1116,120 @@ async def test_pause_turn_raises_after_max_continuations() -> None:
         await agent.send("Hi")
 
     assert client.messages.create.await_count == MAX_CONTINUATIONS
+
+
+# ---------------------------------------------------------------------------
+# reconcile_pending_tool_calls
+# ---------------------------------------------------------------------------
+
+
+def test_reconcile_noop_on_empty_history() -> None:
+    agent, _ = make_agent()
+    count = agent.reconcile_pending_tool_calls("err")
+    assert count == 0
+    assert agent.history == []
+
+
+async def test_reconcile_noop_when_last_message_is_not_assistant() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, _ = make_agent(mock_response=resp)
+    await agent.send("Hi")
+    agent._history.append({"role": "user", "content": "extra"})
+
+    count = agent.reconcile_pending_tool_calls("err")
+
+    assert count == 0
+    assert agent.history[-1] == {"role": "user", "content": "extra"}
+
+
+async def test_reconcile_noop_when_no_tool_use_blocks() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, _ = make_agent(mock_response=resp)
+    await agent.send("Hi")
+    history_before = agent.history[:]
+
+    count = agent.reconcile_pending_tool_calls("err")
+
+    assert count == 0
+    assert agent.history == history_before
+
+
+@pytest.mark.parametrize(
+    "tool_names, expected_count",
+    [
+        (["read_file"], 1),
+        (["a", "b"], 2),
+    ],
+)
+async def test_reconcile_pending_tool_calls(tool_names: list[str], expected_count: int) -> None:
+    """Pending tool calls are correctly reconciled with error messages when the model stops."""
+    blocks = [make_tool_use_block(id=f"toolu_{i:02d}", name=name) for i, name in enumerate(tool_names, 1)]
+    resp = make_response("max_tokens", blocks)
+    agent, _ = make_agent(mock_response=resp)
+    await agent.send("Do something")
+
+    count = agent.reconcile_pending_tool_calls("placeholder error")
+
+    assert count == expected_count
+    assert len(agent.history) == 3
+    last = agent.history[-1]
+    assert last["role"] == "user"
+
+    last_content = last["content"]
+    assert len(last_content) == expected_count
+
+    expected_ids = {f"toolu_{i:02d}" for i in range(1, expected_count + 1)}
+    assert {b["tool_use_id"] for b in last_content} == expected_ids
+    assert all(b["type"] == "tool_result" for b in last_content)
+    assert all(b["is_error"] is True for b in last_content)
+    assert all(b["content"] == "placeholder error" for b in last_content)
+
+
+def test_reconcile_handles_dict_shaped_blocks() -> None:
+    """History blocks stored as dicts (not SDK objects) are also covered."""
+    agent, _ = make_agent()
+    agent._history.append(
+        {"role": "assistant", "content": [{"type": "tool_use", "id": "toolu_99", "name": "foo", "input": {}}]}
+    )
+
+    count = agent.reconcile_pending_tool_calls("err")
+
+    assert count == 1
+    assert agent.history[-1]["role"] == "user"
+    assert agent.history[-1]["content"][0]["tool_use_id"] == "toolu_99"
+
+
+async def test_reconcile_subsequent_send_has_no_dangling_tool_use() -> None:
+    """After reconcile, the messages sent on the next send() have every tool_use answered."""
+    block = make_tool_use_block(id="toolu_01")
+    resp1 = make_response("max_tokens", [block])
+    resp2 = make_response("end_turn", [make_text_block("done")])
+
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.create = AsyncMock(side_effect=[resp1, resp2])
+    client.models = MagicMock()
+    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+
+    await agent.send("Do something")
+    agent.reconcile_pending_tool_calls("truncated")
+
+    result = await agent.send("continue")
+    assert result.stop_reason is StopReason.END_TURN
+
+    second_call_messages = client.messages.create.call_args_list[1].kwargs["messages"]
+    tool_use_ids: set[str] = set()
+    tool_result_ids: set[str] = set()
+    for msg in second_call_messages:
+        content = msg.get("content", [])
+        if isinstance(content, list):
+            for blk in content:
+                if isinstance(blk, dict):
+                    if blk.get("type") == "tool_use":
+                        tool_use_ids.add(blk["id"])
+                    elif blk.get("type") == "tool_result":
+                        tool_result_ids.add(blk["tool_use_id"])
+                elif getattr(blk, "type", None) == "tool_use":
+                    tool_use_ids.add(blk.id)
+    assert tool_use_ids == tool_result_ids
