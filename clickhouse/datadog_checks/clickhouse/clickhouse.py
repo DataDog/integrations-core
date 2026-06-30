@@ -40,8 +40,9 @@ DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 CLUSTER_NODE_TAG = 'clickhouse_node'
 
 # Matches the FROM clause of the standard system-table metric queries so they can be retargeted at
-# clusterAllReplicas() and tagged per node in single endpoint mode.
-SYSTEM_TABLE_FROM_CLAUSE = re.compile(r'\bFROM\s+system\.(?P<table>\w+)', re.IGNORECASE)
+# clusterAllReplicas() and tagged per node in single endpoint mode. The leading whitespace is part of
+# the match so the per-node projection can be spliced in without leaving a gap before the comma.
+SYSTEM_TABLE_FROM_CLAUSE = re.compile(r'\s+FROM\s+system\.(?P<table>\w+)', re.IGNORECASE)
 
 
 class ClickhouseCheck(DatabaseCheck):
@@ -473,16 +474,17 @@ class ClickhouseCheck(DatabaseCheck):
         if not self._config.single_endpoint_mode:
             return query
 
-        match = SYSTEM_TABLE_FROM_CLAUSE.search(query['query'])
-        if match is None:
+        def rewrite(match):
+            cluster_table = self.get_system_table(match.group('table'))
+            return f', hostName() AS {CLUSTER_NODE_TAG} FROM {cluster_table}'
+
+        new_query, replaced = SYSTEM_TABLE_FROM_CLAUSE.subn(rewrite, query['query'], count=1)
+        if not replaced:
             return query
 
-        cluster_table = self.get_system_table(match.group('table'))
-        select_list = query['query'][: match.start()].rstrip()
-        after_table = query['query'][match.end() :]
         return {
             **query,
-            'query': f'{select_list}, hostName() AS {CLUSTER_NODE_TAG} FROM {cluster_table}{after_table}',
+            'query': new_query,
             'columns': [*query['columns'], {'name': CLUSTER_NODE_TAG, 'type': 'tag'}],
         }
 
