@@ -9,7 +9,7 @@ import pytest
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.build import AgentRuntime
-from ddev.ai.agent.exceptions import AgentConnectionError
+from ddev.ai.agent.exceptions import AgentConnectionError, AgentError
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
@@ -366,6 +366,95 @@ async def test_partial_batch_failure_only_affects_raising_tool() -> None:
     assert results["tc_01"].data == "contents"
     assert results["tc_02"].success is False
     assert "RuntimeError" in (results["tc_02"].error or "")
+
+
+# ---------------------------------------------------------------------------
+# MAX_TOKENS truncation while a tool call is pending
+# ---------------------------------------------------------------------------
+
+
+async def test_truncated_tool_call_is_not_executed_but_answered() -> None:
+    """A MAX_TOKENS turn with a pending tool call must NOT run the tool, but must still send a
+    failure tool_result back so the conversation stays valid."""
+    tc = make_tool_call("tc_01", "edit_file")
+    responses = [
+        make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
+        make_response(StopReason.END_TURN),
+    ]
+    registry = MockToolRegistry()
+    agent = MockAgent(responses)
+
+    result = await make_process(agent, registry=registry).start("Rewrite the file")
+
+    assert result.final_response.stop_reason == StopReason.END_TURN
+    assert result.iterations == 2
+    # Tool was never executed because the call was truncated.
+    assert registry.run_calls == []
+    # A failure tool_result was still sent back for the dangling tool_use.
+    sent_back = agent.send_calls[1]
+    assert isinstance(sent_back, list)
+    assert len(sent_back) == 1
+    assert sent_back[0].tool_call_id == "tc_01"
+    assert sent_back[0].result.success is False
+
+
+async def test_truncated_tool_call_fires_tool_call_callback() -> None:
+    tc = make_tool_call("tc_01", "edit_file")
+    agent = MockAgent(
+        [
+            make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
+            make_response(StopReason.END_TURN),
+        ]
+    )
+    recorder = CallbackRecorder()
+
+    await make_process(agent, callbacks=Callbacks([recorder.callback_set])).start("x")
+
+    assert len(recorder.tool_calls_seen) == 1
+    _, seen_call, seen_result, _ = recorder.tool_calls_seen[0]
+    assert seen_call is tc
+    assert seen_result.success is False
+
+
+async def test_truncation_then_recovery_continues_loop() -> None:
+    """After a truncated turn the model can retry; once it stops requesting tools, the loop ends."""
+    tc = make_tool_call("tc_01", "edit_file")
+    responses = [
+        make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
+        make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call("tc_02", "edit_file")]),
+        make_response(StopReason.END_TURN),
+    ]
+    registry = MockToolRegistry()
+    agent = MockAgent(responses)
+
+    result = await make_process(agent, registry=registry).start("Rewrite the file")
+
+    assert result.final_response.stop_reason == StopReason.END_TURN
+    assert result.iterations == 3
+    # Only the second, non-truncated tool call was executed.
+    assert len(registry.run_calls) == 1
+
+
+async def test_repeated_truncation_aborts_with_agent_error() -> None:
+    """If the model keeps truncating on a pending tool call, the loop aborts instead of looping forever."""
+    truncated = [
+        make_response(StopReason.MAX_TOKENS, tool_calls=[make_tool_call(f"tc_{i:02d}", "edit_file")]) for i in range(10)
+    ]
+    agent = MockAgent(truncated)
+
+    with pytest.raises(AgentError, match="truncated by the output token limit"):
+        await make_process(agent).start("Rewrite the file")
+
+
+async def test_max_tokens_without_tool_calls_returns_immediately() -> None:
+    """A truncated text-only turn is valid on its own and must not trigger the repair path."""
+    agent = MockAgent([make_response(StopReason.MAX_TOKENS)])
+
+    result = await make_process(agent).start("Write a long essay")
+
+    assert result.final_response.stop_reason == StopReason.MAX_TOKENS
+    assert result.iterations == 1
+    assert len(agent.send_calls) == 1
 
 
 # ---------------------------------------------------------------------------

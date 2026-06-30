@@ -12,6 +12,23 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
+# A turn that stops on MAX_TOKENS while a tool call is pending was truncated mid-call: the
+# tool_use block is incomplete and was never executed. We must still answer every tool_use
+# with a tool_result, otherwise the next send() replays a dangling tool_use and the provider
+# rejects the request. This synthetic result repairs the conversation and nudges the model
+# toward a smaller follow-up.
+TRUNCATED_TOOL_CALL_ERROR = (
+    "This tool call was NOT executed: your previous response was truncated after reaching the "
+    "maximum output token limit, so the tool call is incomplete. Retry with a smaller, more "
+    "targeted change — edit a single small unique region instead of rewriting a whole file, or "
+    "split the work across several sequential tool calls. For a full-file rewrite prefer "
+    "create_file over one huge edit_file."
+)
+
+# Upper bound on back-to-back truncated turns before we give up, to avoid an unrecoverable loop
+# where the model keeps emitting an oversized tool call that never fits in the output budget.
+MAX_CONSECUTIVE_TRUNCATIONS = 2
+
 
 class ReActProcess:
     """
@@ -77,6 +94,22 @@ class ReActProcess:
             return False
         return True
 
+    async def _execute_tool_calls(self, tool_calls: list) -> list[ToolResult]:
+        """Run all tool calls in parallel, converting any raised exception into a failure result."""
+        raw_results = await asyncio.gather(
+            *[self._tool_registry.run(tc.name, tc.input) for tc in tool_calls],
+            return_exceptions=True,
+        )
+        return [
+            r if isinstance(r, ToolResult) else ToolResult(success=False, error=f"{type(r).__name__}: {r}")
+            for r in raw_results
+        ]
+
+    @staticmethod
+    def _truncated_tool_results(tool_calls: list) -> list[ToolResult]:
+        """Synthetic failure results for a turn truncated by the output token limit."""
+        return [ToolResult(success=False, error=TRUNCATED_TOOL_CALL_ERROR) for _ in tool_calls]
+
     async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
         """
         Run the ReAct loop for a single task.
@@ -104,18 +137,24 @@ class ReActProcess:
             await self._callbacks.fire_agent_response(self._scope, response, iterations)
 
             # No iteration cap — this is an interactive CLI tool; the user can Ctrl+C to stop.
-            while response.stop_reason == StopReason.TOOL_USE:
-                if not response.tool_calls:
-                    raise AgentError("Agent returned stop_reason=TOOL_USE with no tool calls")
-
-                raw_results = await asyncio.gather(
-                    *[self._tool_registry.run(tc.name, tc.input) for tc in response.tool_calls],
-                    return_exceptions=True,
-                )
-                tool_results: list[ToolResult] = [
-                    r if isinstance(r, ToolResult) else ToolResult(success=False, error=f"{type(r).__name__}: {r}")
-                    for r in raw_results
-                ]
+            # Loop while a tool call is pending. A MAX_TOKENS turn can also carry a (truncated)
+            # tool_use that must be answered, so we key off tool_calls rather than the stop reason.
+            consecutive_truncations = 0
+            while response.tool_calls:
+                truncated = response.stop_reason == StopReason.MAX_TOKENS
+                if truncated:
+                    consecutive_truncations += 1
+                    if consecutive_truncations > MAX_CONSECUTIVE_TRUNCATIONS:
+                        raise AgentError(
+                            "Agent response was truncated by the output token limit on "
+                            f"{consecutive_truncations} consecutive turns while a tool call was "
+                            "pending; aborting to avoid an unrecoverable loop. Reduce the amount "
+                            "of work attempted in a single tool call."
+                        )
+                    tool_results: list[ToolResult] = self._truncated_tool_results(response.tool_calls)
+                else:
+                    consecutive_truncations = 0
+                    tool_results = await self._execute_tool_calls(response.tool_calls)
                 total_input += sum(result.total_input_tokens for result in tool_results)
                 total_output += sum(result.total_output_tokens for result in tool_results)
 
@@ -139,6 +178,9 @@ class ReActProcess:
                     compact_in, compact_out = await self.compact(response)
                     total_input += compact_in
                     total_output += compact_out
+
+            if response.stop_reason == StopReason.TOOL_USE:
+                raise AgentError("Agent returned stop_reason=TOOL_USE with no tool calls")
 
             react_result = ReActResult(
                 final_response=response,

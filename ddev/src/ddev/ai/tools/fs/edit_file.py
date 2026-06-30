@@ -19,7 +19,9 @@ class EditFileInput(BaseToolInput):
         Field(
             description=(
                 "Exact non-empty text to replace. Must appear exactly once in the file "
-                "(hint: include surrounding context if needed)."
+                "(hint: include surrounding context if needed). Keep this to the smallest "
+                "unique region that needs changing — do not paste the whole file. To rewrite "
+                "a file extensively, apply several small edits rather than one huge one."
             ),
             min_length=1,
         ),
@@ -30,7 +32,9 @@ class EditFileInput(BaseToolInput):
 class EditFileTool(FileRegistryTool[EditFileInput]):
     """Edits a file by replacing an exact string with a new one.
     Fails if the file was modified since the last read.
-    old_string must appear exactly once in the file — if it appears multiple times, the call fails."""
+    old_string must appear exactly once in the file — if it appears multiple times, the call fails.
+    Prefer small, targeted edits over large ones: a single edit that spans most of the file can
+    exceed the response token limit and be truncated. Break big rewrites into several edits."""
 
     @property
     def name(self) -> str:
