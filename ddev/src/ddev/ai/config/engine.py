@@ -37,6 +37,17 @@ class ConfigStatus(StrEnum):
     BROKEN = "broken"
 
 
+class ErrorKind(StrEnum):
+    FLOW = "flow"
+    PHASE = "phase"
+    AGENT = "agent"
+    PROMPT = "prompt"
+    GOAL = "goal"
+    MEMORY = "memory"
+    DEPENDENCY = "dependency"
+    VARIABLE = "variable"
+
+
 @dataclass
 class ValidEntry[C]:
     config: C
@@ -66,11 +77,19 @@ class _DeclaredVar:
     origin: str  # e.g. "agent 'writer' (/…/agents/writer.md)" or "phase 'p' (/…/f.yaml)"
 
 
+@dataclass(frozen=True)
+class FlowError:
+    kind: ErrorKind
+    message: str
+    subject: str | None = None  # the named entity the error is about (phase/agent/ref/variable name)
+    phase: str | None = None  # the phase context, when the error occurs inside one
+
+
 @dataclass
 class FlowDiagnostics:
     name: str
     status: ConfigStatus
-    errors: list[str]
+    errors: list[FlowError]
     resolved: ResolvedFlow | None = None
 
 
@@ -121,7 +140,13 @@ class ConfigurationEngine:
                 self._flows_diag[conflict.name] = FlowDiagnostics(
                     conflict.name,
                     ConfigStatus.BROKEN,
-                    [f"Flow {conflict.name!r} has conflicting definitions: {sources}"],
+                    [
+                        FlowError(
+                            ErrorKind.FLOW,
+                            f"Flow {conflict.name!r} has conflicting definitions: {sources}",
+                            subject=conflict.name,
+                        )
+                    ],
                 )
 
     def _resolve_user_dirs(self, user_dirs: list[str | Path]) -> list[Path]:
@@ -269,7 +294,11 @@ class ConfigurationEngine:
     def _validate_flow(self, flow_name: str) -> FlowDiagnostics:
         entry = self._flows[flow_name]
         if isinstance(entry, BrokenEntry):
-            return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, [entry.error or "broken flow"])
+            return FlowDiagnostics(
+                flow_name,
+                ConfigStatus.BROKEN,
+                [FlowError(ErrorKind.FLOW, entry.error or "broken flow", subject=flow_name)],
+            )
 
         fc: FlowConfig = entry.config
 
@@ -284,18 +313,31 @@ class ConfigurationEngine:
         resolved = self._build_resolved_flow(flow_name, fc, scheduled_phases, resolved_variables)
         return FlowDiagnostics(flow_name, ConfigStatus.OK, [], resolved=resolved)
 
-    def _validate_scheduled_phases(self, fc: FlowConfig, flow_name: str) -> tuple[list[PhaseConfig], list[str]]:
+    def _validate_scheduled_phases(self, fc: FlowConfig, flow_name: str) -> tuple[list[PhaseConfig], list[FlowError]]:
         scheduled_phases: list[PhaseConfig] = []
-        errors: list[str] = []
+        errors: list[FlowError] = []
         for fe in fc.flow:
             phase_entry = self._phases.get(fe.phase)
             if phase_entry is None:
                 errors.append(
-                    f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered{self._file_errors_note()}"
+                    FlowError(
+                        ErrorKind.PHASE,
+                        f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered"
+                        f"{self._file_errors_note()}",
+                        subject=fe.phase,
+                        phase=fe.phase,
+                    )
                 )
                 continue
             if isinstance(phase_entry, BrokenEntry):
-                errors.append(f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken")
+                errors.append(
+                    FlowError(
+                        ErrorKind.PHASE,
+                        f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken",
+                        subject=fe.phase,
+                        phase=fe.phase,
+                    )
+                )
                 continue
             pc: PhaseConfig = phase_entry.config
             scheduled_phases.append(pc)
@@ -304,36 +346,64 @@ class ConfigurationEngine:
             errors.extend(self._validate_phase_refs(pc))
         return scheduled_phases, errors
 
-    def _validate_phase_class(self, pc: PhaseConfig) -> list[str]:
+    def _validate_phase_class(self, pc: PhaseConfig) -> list[FlowError]:
         if not self._phase_registry.contains(pc.class_):
-            return [f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}"]
+            return [
+                FlowError(
+                    ErrorKind.PHASE,
+                    f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}",
+                    subject=pc.class_,
+                    phase=pc.name,
+                )
+            ]
         try:
             self._phase_registry.get(pc.class_).validate_config(pc.name, pc, self._ok_agents)
         except FlowConfigError as e:
-            return [str(e)]
+            return [FlowError(ErrorKind.PHASE, str(e), subject=pc.name, phase=pc.name)]
         except Exception as e:
-            return [f"Phase {pc.name!r} class {pc.class_!r} raised during validation: {e!r}"]
+            return [
+                FlowError(
+                    ErrorKind.PHASE,
+                    f"Phase {pc.name!r} class {pc.class_!r} raised during validation: {e!r}",
+                    subject=pc.name,
+                    phase=pc.name,
+                )
+            ]
         return []
 
-    def _validate_phase_agent(self, pc: PhaseConfig) -> list[str]:
+    def _validate_phase_agent(self, pc: PhaseConfig) -> list[FlowError]:
         if pc.agent is None:
             return []
         agent_entry = self._agents.get(pc.agent)
         if agent_entry is None:
-            return [f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered{self._file_errors_note()}"]
+            return [
+                FlowError(
+                    ErrorKind.AGENT,
+                    f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered{self._file_errors_note()}",
+                    subject=pc.agent,
+                    phase=pc.name,
+                )
+            ]
         if isinstance(agent_entry, BrokenEntry):
-            return [f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken"]
+            return [
+                FlowError(
+                    ErrorKind.AGENT,
+                    f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken",
+                    subject=pc.agent,
+                    phase=pc.name,
+                )
+            ]
         return []
 
-    def _validate_phase_refs(self, pc: PhaseConfig) -> list[str]:
-        errors: list[str] = []
+    def _validate_phase_refs(self, pc: PhaseConfig) -> list[FlowError]:
+        errors: list[FlowError] = []
         for task in pc.tasks:
             if task.prompt_ref is not None:
-                errors.extend(self._check_ref(self._prompts, task.prompt_ref, "prompt", pc.name))
+                errors.extend(self._check_ref(self._prompts, task.prompt_ref, ErrorKind.PROMPT, pc.name))
             if task.goal_ref is not None:
-                errors.extend(self._check_ref(self._goals, task.goal_ref, "goal", pc.name))
+                errors.extend(self._check_ref(self._goals, task.goal_ref, ErrorKind.GOAL, pc.name))
         if pc.checkpoint is not None and pc.checkpoint.memory_prompt_ref is not None:
-            errors.extend(self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, "memory", pc.name))
+            errors.extend(self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, ErrorKind.MEMORY, pc.name))
         return errors
 
     def _build_resolved_flow(
@@ -369,43 +439,71 @@ class ConfigurationEngine:
             )
         return phase.model_copy(update={"tasks": tasks, "checkpoint": cp})
 
-    def _check_ref(self, registry: dict[str, RegistryEntry[str]], ref: str, kind: str, phase_name: str) -> list[str]:
+    def _check_ref(
+        self, registry: dict[str, RegistryEntry[str]], ref: str, kind: ErrorKind, phase_name: str
+    ) -> list[FlowError]:
         ref_entry = registry.get(ref)
+        label = kind.value.capitalize()
         if ref_entry is None:
             return [
-                f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is not registered"
-                f"{self._file_errors_note()}"
+                FlowError(
+                    kind,
+                    f"{label} {ref!r} referenced by phase {phase_name!r} is not registered{self._file_errors_note()}",
+                    subject=ref,
+                    phase=phase_name,
+                )
             ]
         if isinstance(ref_entry, BrokenEntry):
-            return [f"{kind.capitalize()} {ref!r} referenced by phase {phase_name!r} is broken"]
+            return [
+                FlowError(
+                    kind,
+                    f"{label} {ref!r} referenced by phase {phase_name!r} is broken",
+                    subject=ref,
+                    phase=phase_name,
+                )
+            ]
         return []
 
-    def _validate_dependencies(self, flow_name: str, fc: FlowConfig) -> list[str]:
-        errors: list[str] = []
+    def _validate_dependencies(self, flow_name: str, fc: FlowConfig) -> list[FlowError]:
+        errors: list[FlowError] = []
         dependency_map: dict[str, list[str]] = {}
         for fe in fc.flow:
             if fe.phase in dependency_map:
-                errors.append(f"Phase {fe.phase!r} is scheduled more than once in flow {flow_name!r}")
+                errors.append(
+                    FlowError(
+                        ErrorKind.DEPENDENCY,
+                        f"Phase {fe.phase!r} is scheduled more than once in flow {flow_name!r}",
+                        subject=fe.phase,
+                        phase=fe.phase,
+                    )
+                )
             dependency_map[fe.phase] = fe.dependencies
 
         for fe in fc.flow:
             for dep in fe.dependencies:
                 if dep not in dependency_map:
                     errors.append(
-                        f"Phase {fe.phase!r} depends on {dep!r}, which is not scheduled in flow {flow_name!r}"
+                        FlowError(
+                            ErrorKind.DEPENDENCY,
+                            f"Phase {fe.phase!r} depends on {dep!r}, which is not scheduled in flow {flow_name!r}",
+                            subject=dep,
+                            phase=fe.phase,
+                        )
                     )
 
         cycles, truncated = detect_cycles(dependency_map)
         for cycle in cycles:
             path = " -> ".join(cycle)
-            errors.append(f"Dependency cycle detected in flow {flow_name!r}: {path}")
+            errors.append(FlowError(ErrorKind.DEPENDENCY, f"Dependency cycle detected in flow {flow_name!r}: {path}"))
         if truncated:
-            errors.append(f"Cycle detection truncated in flow {flow_name!r} (too many cycles)")
+            errors.append(
+                FlowError(ErrorKind.DEPENDENCY, f"Cycle detection truncated in flow {flow_name!r} (too many cycles)")
+            )
         return errors
 
     def _resolve_variables(
         self, scheduled_phases: list[PhaseConfig], fc: FlowConfig
-    ) -> tuple[dict[str, str], list[str]]:
+    ) -> tuple[dict[str, str], list[FlowError]]:
         declared = self._gather_variable_declarations(scheduled_phases)
         defaults, errors = self._collect_default_values(declared)
         errors.extend(self._find_missing_variables(declared, fc))
@@ -424,35 +522,41 @@ class ConfigurationEngine:
                 declared.append(_DeclaredVar(v.name, v.default, f"phase {pc.name!r} ({phase_src})"))
         return declared
 
-    def _collect_default_values(self, declared: list[_DeclaredVar]) -> tuple[dict[str, str], list[str]]:
+    def _collect_default_values(self, declared: list[_DeclaredVar]) -> tuple[dict[str, str], list[FlowError]]:
         by_name: dict[str, dict[str, list[str]]] = {}
         for d in declared:
             if d.default is None:
                 continue
             by_name.setdefault(d.name, {}).setdefault(d.default, []).append(d.origin)
         defaults: dict[str, str] = {}
-        errors: list[str] = []
+        errors: list[FlowError] = []
         for name, value_origins in by_name.items():
             if len(value_origins) > 1:
                 detail = "; ".join(f"{value!r} from {', '.join(origins)}" for value, origins in value_origins.items())
-                errors.append(f"Variable {name!r} has conflicting defaults: {detail}")
+                errors.append(
+                    FlowError(ErrorKind.VARIABLE, f"Variable {name!r} has conflicting defaults: {detail}", subject=name)
+                )
             else:
                 defaults[name] = next(iter(value_origins))
         return defaults, errors
 
-    def _find_missing_variables(self, declared: list[_DeclaredVar], fc: FlowConfig) -> list[str]:
+    def _find_missing_variables(self, declared: list[_DeclaredVar], fc: FlowConfig) -> list[FlowError]:
         has_default = {d.name for d in declared if d.default is not None}
         origins_by_name: dict[str, list[str]] = {}
         for d in declared:
             origins = origins_by_name.setdefault(d.name, [])
             if d.origin not in origins:
                 origins.append(d.origin)
-        errors: list[str] = []
+        errors: list[FlowError] = []
         for name, origins in origins_by_name.items():
             if name not in has_default and name not in fc.variables:
                 errors.append(
-                    f"Required variable {name!r} has no default and is not supplied by the flow "
-                    f"(declared in {', '.join(origins)})"
+                    FlowError(
+                        ErrorKind.VARIABLE,
+                        f"Required variable {name!r} has no default and is not supplied by the flow "
+                        f"(declared in {', '.join(origins)})",
+                        subject=name,
+                    )
                 )
         return errors
 
@@ -472,7 +576,7 @@ class ConfigurationEngine:
         if diag is None:
             raise FlowConfigError(f"Flow {name!r} not found{self._file_errors_note()}")
         if diag.status is ConfigStatus.BROKEN:
-            raise FlowConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e}" for e in diag.errors))
+            raise FlowConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e.message}" for e in diag.errors))
         if diag.resolved is None:
             raise FlowConfigError(f"Flow {name!r} passed validation but produced no resolved flow (engine bug)")
         return diag.resolved

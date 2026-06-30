@@ -4,7 +4,7 @@
 
 import pytest
 
-from ddev.ai.config.engine import ConfigStatus, ConfigurationEngine
+from ddev.ai.config.engine import ConfigStatus, ConfigurationEngine, ErrorKind
 from ddev.ai.config.errors import FlowConfigError
 
 from .utils import StubReg, StubRegMissing, write
@@ -50,7 +50,7 @@ def test_unknown_phase_ref_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status.value == "broken"
-    assert any("missing" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PHASE and e.subject == "missing" for e in eng.flows["demo"].errors)
     with pytest.raises(FlowConfigError):
         eng.get_flow("demo")
 
@@ -63,7 +63,7 @@ def test_unknown_class_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubRegMissing({"Bogus"}))
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("Bogus" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PHASE and e.subject == "Bogus" for e in eng.flows["demo"].errors)
 
 
 def test_missing_agent_accumulates(tmp_path):
@@ -74,7 +74,7 @@ def test_missing_agent_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("nope" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.AGENT and e.subject == "nope" for e in eng.flows["demo"].errors)
 
 
 def test_missing_prompt_ref_accumulates(tmp_path):
@@ -86,7 +86,7 @@ def test_missing_prompt_ref_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("nope" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PROMPT and e.subject == "nope" for e in eng.flows["demo"].errors)
 
 
 def test_missing_goal_ref_accumulates(tmp_path):
@@ -99,7 +99,7 @@ def test_missing_goal_ref_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("nope" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.GOAL and e.subject == "nope" for e in eng.flows["demo"].errors)
 
 
 def test_missing_memory_prompt_ref_accumulates(tmp_path):
@@ -111,7 +111,7 @@ def test_missing_memory_prompt_ref_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("nope" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.MEMORY and e.subject == "nope" for e in eng.flows["demo"].errors)
 
 
 def test_dependency_not_scheduled_accumulates(tmp_path):
@@ -123,7 +123,7 @@ def test_dependency_not_scheduled_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("ghost" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.DEPENDENCY and e.subject == "ghost" for e in eng.flows["demo"].errors)
 
 
 def test_duplicate_phase_in_flow_accumulates(tmp_path):
@@ -135,7 +135,7 @@ def test_duplicate_phase_in_flow_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("p" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.DEPENDENCY and e.subject == "p" for e in eng.flows["demo"].errors)
 
 
 def test_cycle_accumulates(tmp_path):
@@ -149,7 +149,7 @@ def test_cycle_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("cycle" in e.lower() for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.DEPENDENCY and "cycle" in e.message.lower() for e in eng.flows["demo"].errors)
 
 
 def test_conflict_touching_flow_surfaces(tmp_path):
@@ -168,6 +168,7 @@ def test_conflict_touching_flow_surfaces(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path / "core", user_dirs=[str(user_dir)], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any(e.kind is ErrorKind.FLOW and e.subject == "demo" for e in eng.flows["demo"].errors)
     with pytest.raises(FlowConfigError):
         eng.get_flow("demo")
 
@@ -181,8 +182,8 @@ def test_missing_required_variable_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    err = next(e for e in eng.flows["demo"].errors if "Required variable" in e and "x" in e)
-    assert "phase 'p'" in err and "f.yaml" in err
+    err = next(e for e in eng.flows["demo"].errors if e.kind is ErrorKind.VARIABLE and e.subject == "x")
+    assert "Required variable" in err.message and "phase 'p'" in err.message and "f.yaml" in err.message
 
 
 def test_conflicting_default_accumulates(tmp_path):
@@ -195,10 +196,11 @@ def test_conflicting_default_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    err = next(e for e in eng.flows["demo"].errors if "conflicting defaults" in e)
-    assert "agent 'ag'" in err and "phase 'p'" in err
-    assert "ag.md" in err and "f.yaml" in err
-    assert not any("Required variable" in e for e in eng.flows["demo"].errors)
+    err = next(e for e in eng.flows["demo"].errors if e.kind is ErrorKind.VARIABLE and e.subject == "x")
+    assert "conflicting defaults" in err.message
+    assert "agent 'ag'" in err.message and "phase 'p'" in err.message
+    assert "ag.md" in err.message and "f.yaml" in err.message
+    assert not any("Required variable" in e.message for e in eng.flows["demo"].errors)
 
 
 def test_flow_value_overrides_default(tmp_path):
@@ -276,7 +278,7 @@ def test_phase_class_validate_config_non_flowconfig_error_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=ExplodingReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("kaboom" in e for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PHASE and "kaboom" in e.message for e in eng.flows["demo"].errors)
 
 
 def test_three_conflicting_defaults_report_once(tmp_path):
@@ -291,7 +293,7 @@ def test_three_conflicting_defaults_report_once(tmp_path):
         "      - phase: p\n      - phase: q\n        dependencies: [p]\n",
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    conflict_errors = [e for e in eng.flows["demo"].errors if "conflicting defaults" in e]
+    conflict_errors = [e for e in eng.flows["demo"].errors if "conflicting defaults" in e.message]
     assert len(conflict_errors) == 1
 
 
@@ -308,9 +310,8 @@ def test_multiple_errors_accumulate(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     errors = eng.flows["demo"].errors
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("nope" in e for e in errors)
-    assert any("ghost" in e for e in errors)
-    assert any("missingdep" in e for e in errors)
+    assert {ErrorKind.AGENT, ErrorKind.PROMPT, ErrorKind.DEPENDENCY} <= {e.kind for e in errors}
+    assert {"nope", "ghost", "missingdep"} <= {e.subject for e in errors}
     assert len(errors) >= 3
 
 
@@ -322,7 +323,7 @@ def test_broken_phase_referenced(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("broken" in e.lower() for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PHASE and e.subject == "p" for e in eng.flows["demo"].errors)
 
 
 def test_broken_agent_referenced(tmp_path):
@@ -334,7 +335,7 @@ def test_broken_agent_referenced(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("ag" in e and "broken" in e.lower() for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.AGENT and e.subject == "ag" for e in eng.flows["demo"].errors)
 
 
 def test_broken_prompt_ref_referenced(tmp_path):
@@ -347,7 +348,7 @@ def test_broken_prompt_ref_referenced(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("broken" in e.lower() for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PROMPT and e.subject == "x" for e in eng.flows["demo"].errors)
 
 
 def test_flows_validated_independently(tmp_path):
@@ -374,6 +375,6 @@ def test_agentic_phase_without_agent_fails_validate_config(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=real_phase_registry())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("agent" in e.lower() for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PHASE and "agent" in e.message.lower() for e in eng.flows["demo"].errors)
     with pytest.raises(FlowConfigError):
         eng.get_flow("demo")
