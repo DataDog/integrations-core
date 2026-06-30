@@ -165,7 +165,7 @@ class KafkaConnectCollector:
     def _collect_rest(self, url: str, cluster_id: str) -> None:
         endpoint = f'{url.rstrip("/")}/connectors'
 
-        def _fetch(expand):
+        def _fetch(expand: str | list[str]) -> Any:
             response = self.http.get(
                 endpoint,
                 params={'expand': expand},
@@ -191,10 +191,17 @@ class KafkaConnectCollector:
         # Some Connect REST implementations (notably Confluent Cloud) honor only one `expand`
         # value per request, returning the other section as null. When a section is missing,
         # fetch it explicitly and merge so info- and status-based metrics stay complete.
-        if any((entry or {}).get('info') is None for entry in connectors_data.values()):
-            self._merge_expand(connectors_data, _fetch('info'), 'info')
-        if any((entry or {}).get('status') is None for entry in connectors_data.values()):
-            self._merge_expand(connectors_data, _fetch('status'), 'status')
+        for section in ('info', 'status'):
+            if any((entry or {}).get(section) is None for entry in connectors_data.values()):
+                try:
+                    self._merge_expand(connectors_data, _fetch(section), section)
+                except Exception as e:
+                    self.log.warning(
+                        "Failed to fetch supplementary '%s' section from %s/connectors, emitting partial data: %s",
+                        section,
+                        url,
+                        e,
+                    )
 
         tags_base = self.config._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
@@ -203,17 +210,21 @@ class KafkaConnectCollector:
         self._collect_plugins(url, cluster_id)
 
     @staticmethod
-    def _merge_expand(connectors_data, expanded, section):
+    def _merge_expand(connectors_data: dict[str, Any], expanded: Any, section: str) -> None:
         if not isinstance(expanded, dict):
             return
         for name, entry in connectors_data.items():
             if entry is None:
                 continue
             if entry.get(section) is None and isinstance(expanded.get(name), dict):
-                entry[section] = expanded[name].get(section)
+                val = expanded[name].get(section)
+                if val is not None:
+                    entry[section] = val
 
     def _emit_connector_metrics(self, connectors_data: dict[str, Any], tags_base: list[str]) -> None:
         for name, data in connectors_data.items():
+            if data is None:
+                continue
             info = data.get('info') or {}
             status = data.get('status') or {}
 
@@ -251,6 +262,8 @@ class KafkaConnectCollector:
         connector_contents: dict[str, str] = {}
 
         for name, data in connectors_data.items():
+            if data is None:
+                continue
             info = data.get('info') or {}
             status = data.get('status') or {}
 
