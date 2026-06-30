@@ -94,6 +94,67 @@ files:
           example: false
           type: boolean
       - template: instances/tls
+      - name: collect_schemas
+        hidden: true
+        description: |
+          Configure collection of SAP HANA catalog metadata (schemas, tables,
+          views, and columns) for Data Quality features in Data Observability.
+        options:
+          - name: enabled
+            description: |
+              Enable collection of catalog metadata. When enabled, the Agent
+              queries `SYS.M_TABLES`, `SYS.VIEWS`, `SYS.TABLE_COLUMNS`, and
+              `SYS.VIEW_COLUMNS` and emits schema metadata payloads.
+            value:
+              type: boolean
+              example: false
+          - name: collection_interval
+            description: |
+              Set the schema collection interval (in seconds). Catalog data
+              changes slowly; 600s (10 min) is a reasonable default.
+            value:
+              type: number
+              example: 600
+          - name: max_tables
+            description: |
+              Maximum number of tables to collect per cycle across all schemas.
+            value:
+              type: integer
+              example: 2000
+          - name: max_columns
+            description: |
+              Maximum number of columns to collect per table.
+            value:
+              type: integer
+              example: 500
+          - name: max_views
+            description: |
+              Maximum number of views to collect per cycle across all schemas.
+            value:
+              type: integer
+              example: 2000
+          - name: include_schemas
+            description: |
+              A list of schema names to include. Any schema whose name is in
+              this list is included. If empty, all schemas (other than
+              those excluded) are included.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "MY_SCHEMA"
+          - name: exclude_schemas
+            description: |
+              A list of schema names to exclude. Any schema whose name is in
+              this list is excluded. SAP HANA system schemas are always
+              excluded regardless of this setting.
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - "TMP_SCHEMA"
       - template: instances/default
   - template: logs
     example:

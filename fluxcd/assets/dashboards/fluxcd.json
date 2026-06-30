@@ -117,7 +117,7 @@
                             "title_size": "16",
                             "title_align": "left",
                             "type": "check_status",
-                            "check": "cilium.prometheus.health",
+                            "check": "fluxcd.openmetrics.health",
                             "grouping": "cluster",
                             "group_by": [],
                             "tags": []
@@ -176,7 +176,7 @@
                         "id": 7877152359004176,
                         "definition": {
                             "type": "note",
-                            "content": "This section provides an overview of how many fluxcd objects are present and how many of them are failing. It also shows a high-level view of how long reconciliation takes. Objects are divided into two groups: source manifests (for example a git repository) and cluster reconcilers (for instance a Helm chart).",
+                            "content": "This section provides an overview of how many fluxcd objects are present and how many of them are failing. It also shows a high-level view of how long reconciliation takes. Objects are divided into two groups: source manifests (for example a git repository) and cluster reconcilers (for instance a Helm chart).\n\nCounts use the **maximum** of legacy controller totals (`fluxcd.gotk.reconcile.condition`, still emitted on older Flux) and kube-state-metrics (`fluxcd.gotk.resource.info`, Flux 2.1+; set `kube_state_metrics_endpoint` on the check instance to collect these metrics). This lets either path populate the widget without double-counting. Reconciliation duration uses controller metrics (`fluxcd.gotk.reconcile.duration.seconds`). The readiness tables below pair **kube-state-metrics** with the **legacy** `reconcile.condition` and `suspend.status` metrics.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -204,7 +204,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "max(default_zero(query1), default_zero(query2))"
                                         }
                                     ],
                                     "queries": [
@@ -213,6 +213,12 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:fluxcd.gotk.reconcile.condition{(kind IN (helmchart,kustomization,helmrelease)) AND $kube_cluster_name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -255,7 +261,7 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "max(default_zero(query1), default_zero(query2))"
                                         }
                                     ],
                                     "queries": [
@@ -264,6 +270,12 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:fluxcd.gotk.reconcile.condition{kind IN (helmchart,kustomization,helmrelease) AND status:false AND $kube_cluster_name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND ready:false AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -294,7 +306,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "max(default_zero(query1), default_zero(query2))"
                                         }
                                     ],
                                     "queries": [
@@ -303,6 +315,12 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:fluxcd.gotk.reconcile.condition{(kind IN (helmrepository,gitrepository,ocirepository)) AND $kube_cluster_name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -344,7 +362,7 @@
                                     ],
                                     "formulas": [
                                         {
-                                            "formula": "query1"
+                                            "formula": "max(default_zero(query1), default_zero(query2))"
                                         }
                                     ],
                                     "queries": [
@@ -353,6 +371,12 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:fluxcd.gotk.reconcile.condition{kind IN (helmrepository,gitrepository,ocirepository) AND status:false AND $kube_cluster_name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND ready:false AND $kube_cluster_name}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -503,7 +527,7 @@
                         "id": 7839169684041304,
                         "definition": {
                             "type": "note",
-                            "content": "This section shows whether manifest sources and cluster reconcilers are ready or suspended. ",
+                            "content": "This section shows whether manifest sources and cluster reconcilers are ready or suspended. **Kube-state-metrics** tables use `fluxcd.gotk.resource.info`; **legacy** tables use controller `reconcile.condition` and `suspend.status` when still emitted.",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -524,6 +548,180 @@
                         "id": 3600789162924586,
                         "definition": {
                             "title": "Cluster Reconciliation",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query0",
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND ready:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (helmchart,helmrelease,kustomization) AND suspended:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Ready",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "default_zero(query1) + (0 * default_zero(query0))"
+                                        },
+                                        {
+                                            "alias": "Suspended",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_red",
+                                                    "value": 0
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "default_zero(query2) + (0 * default_zero(query0))"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 343510221773686,
+                        "definition": {
+                            "title": "Source Acquisition",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "type": "query_table",
+                            "requests": [
+                                {
+                                    "queries": [
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query0",
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND ready:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                        },
+                                        {
+                                            "aggregator": "last",
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "avg:fluxcd.gotk.resource.info{customresource_kind IN (gitrepository,helmrepository,ocirepository) AND suspended:true AND $kube_cluster_name} by {customresource_kind,exported_namespace,name}"
+                                        }
+                                    ],
+                                    "response_format": "scalar",
+                                    "sort": {
+                                        "count": 500,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    },
+                                    "formulas": [
+                                        {
+                                            "alias": "Ready",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                },
+                                                {
+                                                    "comparator": "<",
+                                                    "palette": "white_on_red",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "default_zero(query1) + (0 * default_zero(query0))"
+                                        },
+                                        {
+                                            "alias": "Suspended",
+                                            "cell_display_mode": "number",
+                                            "conditional_formats": [
+                                                {
+                                                    "comparator": ">",
+                                                    "palette": "white_on_red",
+                                                    "value": 0
+                                                },
+                                                {
+                                                    "comparator": "<=",
+                                                    "palette": "white_on_green",
+                                                    "value": 1
+                                                }
+                                            ],
+                                            "formula": "default_zero(query2) + (0 * default_zero(query0))"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "has_search_bar": "auto"
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 1,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 4800789162924586,
+                        "definition": {
+                            "title": "Cluster reconciliation (controllers, legacy)",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -570,7 +768,7 @@
                                                     "value": 1
                                                 }
                                             ],
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         },
                                         {
                                             "alias": "Suspended",
@@ -587,7 +785,7 @@
                                                     "value": 1
                                                 }
                                             ],
-                                            "formula": "query2"
+                                            "formula": "default_zero(query2)"
                                         }
                                     ]
                                 }
@@ -596,15 +794,15 @@
                         },
                         "layout": {
                             "x": 0,
-                            "y": 1,
+                            "y": 4,
                             "width": 6,
                             "height": 3
                         }
                     },
                     {
-                        "id": 343510221773686,
+                        "id": 4800789162924587,
                         "definition": {
-                            "title": "Source Acquisition",
+                            "title": "Source acquisition (controllers, legacy)",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -651,7 +849,7 @@
                                                     "value": 1
                                                 }
                                             ],
-                                            "formula": "query1"
+                                            "formula": "default_zero(query1)"
                                         },
                                         {
                                             "alias": "Suspended",
@@ -668,7 +866,7 @@
                                                     "value": 1
                                                 }
                                             ],
-                                            "formula": "query2"
+                                            "formula": "default_zero(query2)"
                                         }
                                     ]
                                 }
@@ -677,7 +875,7 @@
                         },
                         "layout": {
                             "x": 6,
-                            "y": 1,
+                            "y": 4,
                             "width": 6,
                             "height": 3
                         }
@@ -688,7 +886,7 @@
                 "x": 0,
                 "y": 10,
                 "width": 12,
-                "height": 5
+                "height": 8
             }
         },
         {
@@ -843,7 +1041,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 15,
+                "y": 18,
                 "width": 12,
                 "height": 5,
                 "is_column_break": true
@@ -852,7 +1050,7 @@
         {
             "id": 851940491562172,
             "definition": {
-                "title": "Controller Runtimes ",
+                "title": "Controller Runtimes",
                 "background_color": "vivid_blue",
                 "show_title": true,
                 "type": "group",
@@ -1169,7 +1367,7 @@
             },
             "layout": {
                 "x": 0,
-                "y": 20,
+                "y": 23,
                 "width": 12,
                 "height": 11
             }

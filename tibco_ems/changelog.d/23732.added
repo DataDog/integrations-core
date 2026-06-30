@@ -1,1 +1,0 @@
-Add new config ``use_ssl`` to connect via SSL instead of TCP.
