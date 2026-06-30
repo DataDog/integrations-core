@@ -1,0 +1,1 @@
+Implement the ``agent_hostname`` property on the ``DatabaseCheck`` base class.
