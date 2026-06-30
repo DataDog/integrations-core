@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from string import Template
 from time import time
 
 import clickhouse_connect
@@ -58,7 +57,6 @@ class ClickhouseCheck(DatabaseCheck):
         # DBM-related properties (computed lazily)
         self._resolved_hostname = None
         self._database_hostname = None
-        self._database_identifier = None
         self._dbms_version = None
 
         # Track last emission time for database instance metadata (rate limiting)
@@ -360,30 +358,16 @@ class ClickhouseCheck(DatabaseCheck):
         return self._database_hostname
 
     @property
-    def database_identifier(self) -> str:
-        """
-        Get a unique identifier for this database instance.
-        Uses the database_identifier template from config, defaulting to "$server:$port:$db".
-        """
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.template)
-            tag_dict = {}
-            tags = self.tags.copy()
-            # Sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            # Add connection parameters to the template variables
-            tag_dict['server'] = str(self._config.server)
-            tag_dict['port'] = str(self._config.port)
-            tag_dict['db'] = str(self._config.db)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.template
+
+    @property
+    def database_identifier_params(self) -> dict:
+        return {
+            "server": str(self._config.server),
+            "port": str(self._config.port),
+            "db": str(self._config.db),
+        }
 
     @property
     def dbms(self) -> str:
