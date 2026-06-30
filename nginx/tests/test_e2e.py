@@ -9,6 +9,14 @@ from datadog_checks.nginx import Nginx
 from . import common
 
 
+def _assert_nginx_metrics(aggregator):
+    for m in ('nginx.net.conn_dropped_per_s', 'nginx.net.conn_opened_per_s', 'nginx.net.request_per_s'):
+        aggregator.assert_metric(m, at_least=1)
+    for m in ('nginx.net.writing', 'nginx.net.reading', 'nginx.net.waiting', 'nginx.net.connections'):
+        aggregator.assert_metric(m, at_least=1)
+    aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK)
+
+
 @pytest.mark.e2e
 @pytest.mark.skipif(common.USING_VTS, reason="Non-VTS test")
 def test_e2e(dd_agent_check, instance):
@@ -26,13 +34,7 @@ def test_e2e(dd_agent_check, instance):
 @pytest.mark.skipif(common.USING_VTS, reason="Non-VTS test")
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(check_rate=True)
-
-    for m in ('nginx.net.conn_dropped_per_s', 'nginx.net.conn_opened_per_s', 'nginx.net.request_per_s'):
-        aggregator.assert_metric(m, at_least=1)
-    for m in ('nginx.net.writing', 'nginx.net.reading', 'nginx.net.waiting', 'nginx.net.connections'):
-        aggregator.assert_metric(m, at_least=1)
-
-    aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK)
+    _assert_nginx_metrics(aggregator)
 
 
 @pytest.mark.e2e
