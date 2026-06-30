@@ -1093,9 +1093,58 @@ def test_get_partition_offsets_skips_unqueryable_partitions():
     assert results == [("healthy_topic", 0, 100)]
 
 
+def test_get_partition_offsets_skips_partition_on_non_kafka_error():
+    """A non-Kafka error on one partition's future is skipped, not propagated, so the loop survives."""
+    from confluent_kafka import TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="healthy_topic", partition=0): _offset_future(100),
+        TopicPartition(topic="bad_topic", partition=0): _raising_future(RuntimeError("unexpected")),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("healthy_topic", 0), ("bad_topic", 0)])
+
+    assert results == [("healthy_topic", 0, 100)]
+
+
+def test_get_partition_offsets_degrades_when_list_offsets_request_fails():
+    """A request/broker-level list_offsets failure degrades to [] instead of aborting collection."""
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.side_effect = RuntimeError("connection dropped")
+
+    results = client.get_partition_offsets([("topic_a", 0)])
+
+    assert results == []
+
+
+def test_get_partition_offsets_empty_partitions_returns_empty_without_request():
+    """No partitions means no list_offsets request is issued and an empty result is returned."""
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = mock.MagicMock()
+
+    results = client.get_partition_offsets([])
+
+    assert results == []
+    assert client._kafka_client.list_offsets.call_count == 0
+
+
 def test_get_partition_offsets_returns_all_healthy_partitions():
     """When every list_offsets future succeeds, all partition offsets are returned."""
-    from confluent_kafka import TopicPartition
+    from confluent_kafka import IsolationLevel, TopicPartition
 
     config = mock.MagicMock()
     config._request_timeout = 5
@@ -1113,3 +1162,6 @@ def test_get_partition_offsets_returns_all_healthy_partitions():
 
     assert sorted(results) == [("topic_a", 0, 42), ("topic_b", 1, 7)]
     assert client._kafka_client.list_offsets.call_count == 1
+    # READ_UNCOMMITTED is load-bearing: READ_COMMITTED would return the LSO, not the true high watermark.
+    assert client._kafka_client.list_offsets.call_args.kwargs["isolation_level"] == IsolationLevel.READ_UNCOMMITTED
+    assert client._kafka_client.list_offsets.call_args.kwargs["request_timeout"] == 5

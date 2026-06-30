@@ -159,16 +159,21 @@ class KafkaClient:
         if not request:
             return []
 
-        futures = self.kafka_client.list_offsets(
-            request,
-            isolation_level=IsolationLevel.READ_UNCOMMITTED,
-            request_timeout=self.config._request_timeout,
-        )
+        try:
+            futures = self.kafka_client.list_offsets(
+                request,
+                isolation_level=IsolationLevel.READ_UNCOMMITTED,
+                request_timeout=self.config._request_timeout,
+            )
+        except Exception as e:
+            self.log.warning("Failed to issue list_offsets request; highwater offsets will be skipped this run: %s", e)
+            return []
+
         results = []
         for tp, future in futures.items():
             try:
                 results.append((tp.topic, tp.partition, future.result().offset))
-            except KafkaException as e:
+            except Exception as e:
                 self.log.debug("Skipping offsets for %s/%s: %s", tp.topic, tp.partition, e)
         return results
 
