@@ -333,7 +333,7 @@ class ConfigurationEngine:
                 errors.append(
                     FlowError(
                         ErrorKind.PHASE,
-                        f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken",
+                        f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken: {phase_entry.error}",
                         subject=fe.phase,
                         phase=fe.phase,
                     )
@@ -388,7 +388,7 @@ class ConfigurationEngine:
             return [
                 FlowError(
                     ErrorKind.AGENT,
-                    f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken",
+                    f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken: {agent_entry.error}",
                     subject=pc.agent,
                     phase=pc.name,
                 )
@@ -457,7 +457,7 @@ class ConfigurationEngine:
             return [
                 FlowError(
                     kind,
-                    f"{label} {ref!r} referenced by phase {phase_name!r} is broken",
+                    f"{label} {ref!r} referenced by phase {phase_name!r} is broken: {ref_entry.error}",
                     subject=ref,
                     phase=phase_name,
                 )
