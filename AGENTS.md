@@ -165,6 +165,12 @@ echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/cha
 echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
 ```
 
+## Review Guidelines
+
+These guidelines apply to automated code review (the Codex review bot). They do not relax any requirement above for code you author.
+
+- Do not raise findings for a missing changelog entry. Changelog files are named `<INTEGRATION>/changelog.d/<PR_NUMBER>.<TYPE>`, so they can only be created after the PR number is assigned; their absence when a PR is first opened is expected rather than a defect. The requirement is already enforced by the `check_changelog` job in `.github/workflows/pr-quick-check.yml`.
+
 ## Pull Requests
 
 - Open PRs in draft mode unless explicitly asked otherwise; mark them ready for review once the work is complete and CI passes.
