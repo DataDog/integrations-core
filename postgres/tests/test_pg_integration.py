@@ -1250,3 +1250,17 @@ def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enab
     expected_tags = _get_expected_tags(check, pg_instance)
     expected_count = 0 if dbm_enabled is False else 1
     check_stat_io_metrics(aggregator, expected_tags, count=expected_count)
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [True, False],
+)
+def test_automatic_diagnostics_tags(aggregator, integration_check, pg_instance, dbm_enabled):
+    pg_instance['automatic_diagnostics'] = {'enabled': True}
+    pg_instance['dbm'] = dbm_enabled
+    check = integration_check(pg_instance)
+    run_one_check(check)
+    # Just check we don't error out and get basic metrics
+    expected_tags = _get_expected_tags(check, pg_instance)
+    check_common_metrics(aggregator, expected_tags)
