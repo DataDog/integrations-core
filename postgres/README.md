@@ -78,7 +78,7 @@ To configure this check for an Agent running on a host:
 
 ##### Metric collection
 
-1. Change to the [`conf.d` directory][31] on your system. Edit the `postgres.d/conf.yaml` file to point to your `host` / `port` and set the masters to monitor. See the [sample postgres.d/conf.yaml][3] for all available configuration options.
+1. In the [`conf.d` directory][31] on your system, edit the `postgres.d/conf.yaml` file to point to your `host` / `port` and set the masters to monitor. See the [sample postgres.d/conf.yaml][3] for all available configuration options.
 
     ```yaml
     init_config:
