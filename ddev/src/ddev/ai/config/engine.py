@@ -24,7 +24,6 @@ from ddev.ai.config.models import (
     PhaseEnvelope,
     ResolvedFlow,
     ResourceEnvelope,
-    VariableDeclaration,
 )
 
 if TYPE_CHECKING:
@@ -58,6 +57,13 @@ class ConfigConflict:
     name: str
     type: ResourceKind
     sources: list[Path]
+
+
+@dataclass(frozen=True)
+class _DeclaredVar:
+    name: str
+    default: str | None
+    origin: str  # e.g. "agent 'writer' (/…/agents/writer.md)" or "phase 'p' (/…/f.yaml)"
 
 
 @dataclass
@@ -400,44 +406,54 @@ class ConfigurationEngine:
     def _resolve_variables(
         self, scheduled_phases: list[PhaseConfig], fc: FlowConfig
     ) -> tuple[dict[str, str], list[str]]:
-        declarations = self._gather_variable_declarations(scheduled_phases)
-        defaults, errors = self._collect_default_values(declarations)
-        errors.extend(self._find_missing_variables(declarations, defaults, fc))
+        declared = self._gather_variable_declarations(scheduled_phases)
+        defaults, errors = self._collect_default_values(declared)
+        errors.extend(self._find_missing_variables(declared, fc))
         resolved = {**defaults, **fc.variables}
         return resolved, errors
 
-    def _gather_variable_declarations(self, scheduled_phases: list[PhaseConfig]) -> list[VariableDeclaration]:
-        declarations: list[VariableDeclaration] = []
+    def _gather_variable_declarations(self, scheduled_phases: list[PhaseConfig]) -> list[_DeclaredVar]:
+        declared: list[_DeclaredVar] = []
         for pc in scheduled_phases:
+            phase_src = self._phases[pc.name].source_file
             if pc.agent is not None and pc.agent in self._ok_agents:
-                declarations.extend(self._ok_agents[pc.agent].variables)
-            declarations.extend(pc.variables)
-        return declarations
+                agent_src = self._agents[pc.agent].source_file
+                for v in self._ok_agents[pc.agent].variables:
+                    declared.append(_DeclaredVar(v.name, v.default, f"agent {pc.agent!r} ({agent_src})"))
+            for v in pc.variables:
+                declared.append(_DeclaredVar(v.name, v.default, f"phase {pc.name!r} ({phase_src})"))
+        return declared
 
-    def _collect_default_values(self, declarations: list[VariableDeclaration]) -> tuple[dict[str, str], list[str]]:
-        seen: dict[str, list[str]] = {}
-        for decl in declarations:
-            if decl.default is None:
+    def _collect_default_values(self, declared: list[_DeclaredVar]) -> tuple[dict[str, str], list[str]]:
+        by_name: dict[str, dict[str, list[str]]] = {}
+        for d in declared:
+            if d.default is None:
                 continue
-            values = seen.setdefault(decl.name, [])
-            if decl.default not in values:
-                values.append(decl.default)
+            by_name.setdefault(d.name, {}).setdefault(d.default, []).append(d.origin)
         defaults: dict[str, str] = {}
         errors: list[str] = []
-        for name, values in seen.items():
-            if len(values) > 1:
-                errors.append(f"Variable {name!r} has conflicting defaults: {values}")
+        for name, value_origins in by_name.items():
+            if len(value_origins) > 1:
+                detail = "; ".join(f"{value!r} from {', '.join(origins)}" for value, origins in value_origins.items())
+                errors.append(f"Variable {name!r} has conflicting defaults: {detail}")
             else:
-                defaults[name] = values[0]
+                defaults[name] = next(iter(value_origins))
         return defaults, errors
 
-    def _find_missing_variables(
-        self, declarations: list[VariableDeclaration], defaults: dict[str, str], fc: FlowConfig
-    ) -> list[str]:
+    def _find_missing_variables(self, declared: list[_DeclaredVar], fc: FlowConfig) -> list[str]:
+        has_default = {d.name for d in declared if d.default is not None}
+        origins_by_name: dict[str, list[str]] = {}
+        for d in declared:
+            origins = origins_by_name.setdefault(d.name, [])
+            if d.origin not in origins:
+                origins.append(d.origin)
         errors: list[str] = []
-        for name in {decl.name for decl in declarations}:
-            if name not in defaults and name not in fc.variables:
-                errors.append(f"Required variable {name!r} has no default and is not supplied by the flow")
+        for name, origins in origins_by_name.items():
+            if name not in has_default and name not in fc.variables:
+                errors.append(
+                    f"Required variable {name!r} has no default and is not supplied by the flow "
+                    f"(declared in {', '.join(origins)})"
+                )
         return errors
 
     def _record_file_error(self, path: Path, message: str) -> None:
