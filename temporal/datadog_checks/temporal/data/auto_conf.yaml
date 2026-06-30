@@ -5,6 +5,7 @@
 #
 ad_identifiers:
   - temporal
+  - temporalio/server
   - temporalio/auto-setup
 
 ## Enables configuration discovery

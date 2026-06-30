@@ -35,5 +35,6 @@ files:
     overrides:
       value.example:
       - temporal
+      - temporalio/server
       - temporalio/auto-setup
   - template: auto_conf/discovery
