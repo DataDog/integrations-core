@@ -69,6 +69,9 @@ def test_get_flow_resolves_all_refs_and_variables(tmp_path):
 
     assert rf.variables == {"x": "hi"}
 
+    assert "ag" in rf.agents
+    assert rf.agents["ag"].system_prompt == "sys"
+
 
 def test_unknown_phase_ref_accumulates(tmp_path):
     write(
@@ -273,6 +276,77 @@ def real_phase_registry():
     registry = PhaseRegistry()
     registry.register_from(CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
     return registry
+
+
+def test_multiple_errors_accumulate(tmp_path):
+    """A flow with several independent problems reports all of them (no raise-on-first)."""
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: a\n    agent: nope\n"
+        "    tasks:\n      - name: t\n        prompt_ref: ghost\n"
+        "- type: phase\n  config:\n    name: b\n"
+        "- type: flow\n  config:\n    name: demo\n"
+        "    flow:\n      - phase: a\n      - phase: b\n        dependencies:\n          - missingdep\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    errors = eng.flows["demo"].errors
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("nope" in e for e in errors)
+    assert any("ghost" in e for e in errors)
+    assert any("missingdep" in e for e in errors)
+    assert len(errors) >= 3
+
+
+def test_broken_phase_referenced(tmp_path):
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: p\n    bogus: 1\n"
+        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("broken" in e.lower() for e in eng.flows["demo"].errors)
+
+
+def test_broken_agent_referenced(tmp_path):
+    write(tmp_path / "agents" / "ag.md", "---\ntype: agent\ntools:\n  - nonexistent_tool\n---\nsys\n")
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: p\n    agent: ag\n"
+        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("ag" in e and "broken" in e.lower() for e in eng.flows["demo"].errors)
+
+
+def test_broken_prompt_ref_referenced(tmp_path):
+    write(tmp_path / "prompts" / "x.md", "---\ntype: nonsense\n---\nbody\n")
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: p\n"
+        "    tasks:\n      - name: t\n        prompt_ref: x\n"
+        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("broken" in e.lower() for e in eng.flows["demo"].errors)
+
+
+def test_flows_validated_independently(tmp_path):
+    """A broken flow doesn't poison a sibling; the overview reports each independently."""
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: p\n"
+        "- type: flow\n  config:\n    name: good\n    flow:\n      - phase: p\n"
+        "- type: flow\n  config:\n    name: bad\n    flow:\n      - phase: missing\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng.flows["good"].status == ConfigStatus.OK
+    assert eng.flows["bad"].status == ConfigStatus.BROKEN
+    eng.get_flow("good")
+    with pytest.raises(FlowConfigError):
+        eng.get_flow("bad")
 
 
 def test_agentic_phase_without_agent_fails_validate_config(tmp_path):
