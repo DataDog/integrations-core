@@ -2,28 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from pathlib import Path
-
 from ddev.ai.config.engine import ConfigurationEngine
 
-
-class NoopPhase:
-    @classmethod
-    def validate_config(cls, phase_id, config, agents):
-        return None
-
-
-class StubReg:
-    def contains(self, n):
-        return True
-
-    def get(self, n):
-        return NoopPhase
-
-
-def write(p: Path, text: str) -> None:
-    p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text(text)
+from .conftest import StubReg, write
 
 
 def test_core_and_user_same_name_conflict(tmp_path):
