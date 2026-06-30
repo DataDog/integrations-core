@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures import as_completed
 
-from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
-from confluent_kafka.admin import AdminClient
+from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, IsolationLevel, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient, OffsetSpec
 
 # AWS MSK IAM authentication support
 try:
@@ -147,40 +147,29 @@ class KafkaClient:
             return "", []
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
-    def consumer_offsets_for_times(self, partitions, offset=-1):
-        topicpartitions_for_querying = [
-            # -1: latest; 0: earliest (timestamp 0)
-            TopicPartition(topic=topic, partition=partition, offset=offset)
-            for topic, partition in partitions
-        ]
-        try:
-            resolved = self._consumer.offsets_for_times(
-                partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
-            )
-        except KafkaException as e:
-            # A single unresolvable partition (e.g. a leaderless/offline topic) fails the whole
-            # batch call. Fall back to per-partition lookups so healthy partitions are still
-            # collected and the check is not aborted.
-            self.log.warning("Batched offset lookup failed (%s); retrying partitions individually", e)
-            resolved = []
-            for tp in topicpartitions_for_querying:
-                try:
-                    resolved.extend(
-                        self._consumer.offsets_for_times(partitions=[tp], timeout=self.config._request_timeout)
-                    )
-                except KafkaException as inner:
-                    self.log.debug("Skipping offsets for topic %s partition %s: %s", tp.topic, tp.partition, inner)
+    def get_partition_offsets(self, partitions, offset=-1):
+        """Fetch latest (offset=-1) or earliest (offset=0) offsets for the given (topic, partition) pairs.
+
+        Uses AdminClient.list_offsets, which returns a future per partition, so a single
+        unresolvable partition (e.g. a leaderless/offline topic that raises UNKNOWN_TOPIC_OR_PART)
+        is skipped individually instead of failing the whole call.
+        """
+        offset_spec = OffsetSpec.earliest() if offset == 0 else OffsetSpec.latest()
+        request = {TopicPartition(topic=topic, partition=partition): offset_spec for topic, partition in partitions}
+        if not request:
+            return []
+
+        futures = self.kafka_client.list_offsets(
+            request,
+            isolation_level=IsolationLevel.READ_UNCOMMITTED,
+            request_timeout=self.config._request_timeout,
+        )
         results = []
-        for tp in resolved:
-            if tp.error:
-                self.log.debug(
-                    "Failed to get offset for topic %s partition %s: %s",
-                    tp.topic,
-                    tp.partition,
-                    tp.error,
-                )
-                continue
-            results.append((tp.topic, tp.partition, tp.offset))
+        for tp, future in futures.items():
+            try:
+                results.append((tp.topic, tp.partition, future.result().offset))
+            except KafkaException as e:
+                self.log.debug("Skipping offsets for %s/%s: %s", tp.topic, tp.partition, e)
         return results
 
     def _list_topics(self):
