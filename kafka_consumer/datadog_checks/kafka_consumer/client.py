@@ -148,12 +148,7 @@ class KafkaClient:
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
     def get_partition_offsets(self, partitions, offset=-1):
-        """Fetch latest (offset=-1) or earliest (offset=0) offsets for the given (topic, partition) pairs.
-
-        Uses AdminClient.list_offsets, which returns a future per partition, so a single
-        unresolvable partition (e.g. a leaderless/offline topic that raises UNKNOWN_TOPIC_OR_PART)
-        is skipped individually instead of failing the whole call.
-        """
+        """Return (topic, partition, offset) tuples, skipping partitions that can't be queried."""
         offset_spec = OffsetSpec.earliest() if offset == 0 else OffsetSpec.latest()
         request = {TopicPartition(topic=topic, partition=partition): offset_spec for topic, partition in partitions}
         if not request:
