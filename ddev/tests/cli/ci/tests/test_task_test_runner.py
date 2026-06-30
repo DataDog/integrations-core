@@ -19,6 +19,8 @@ from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import (
     Artifact,
     ArtifactsList,
+    WorkflowJob,
+    WorkflowJobsList,
     WorkflowRun,
 )
 from tests.helpers.github_async import FakeAsyncGitHubClient
@@ -75,6 +77,20 @@ def _artifacts_page(artifacts: list[Artifact]) -> GitHubResponse[ArtifactsList]:
 
 def _mock_artifacts(fake: FakeAsyncGitHubClient, artifacts: list[Artifact]) -> None:
     fake.mock_response("list_workflow_run_artifacts", _artifacts_page(artifacts))
+
+
+def _artifact_for(idx: int, job: BatchJob) -> Artifact:
+    """Artifact whose name matches a job's deterministic artifact name (the upload/download contract)."""
+    artifact = _artifact(idx)
+    return artifact.model_copy(update={"name": job.artifact_name()})
+
+
+def _workflow_job(name: str, conclusion: str = "success") -> WorkflowJob:
+    return WorkflowJob(id=1, run_id=123, name=name, status="completed", conclusion=conclusion)
+
+
+def _mock_jobs(fake: FakeAsyncGitHubClient, jobs: list[WorkflowJob]) -> None:
+    fake.mock_response("list_workflow_jobs", _wrap(WorkflowJobsList(total_count=len(jobs), jobs=list(jobs))))
 
 
 def _make_runner(client: FakeAsyncGitHubClient, tmp_path: Path) -> TaskTestRunner:
@@ -215,6 +231,11 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     assert finished.workflow_url == "https://github.com/o/r/actions/runs/123"
     assert finished.artifacts_path == str(tmp_path / "123")
 
+    # One well-formed batch_jobs entry per job; no jobs API match and artifact names don't
+    # match these generic artifacts, so both correlated facets are None.
+    assert [r.job.name for r in finished.batch_jobs] == ["j1", "j2"]
+    assert all(r.workflow_job is None and r.artifacts_path is None for r in finished.batch_jobs)
+
     # Check run closed with the GitHub conclusion.
     update_calls = fake.calls_to("update_check_run")
     assert len(update_calls) == 1
@@ -222,6 +243,73 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     assert upd["check_run_id"] == 999
     assert upd["status"] == "completed"
     assert upd["conclusion"] == "success"
+
+
+@pytest.mark.asyncio
+async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
+    # A failed multi-job run where j1 passed and j2 failed: each batch_jobs entry must carry its
+    # own true per-job status and its artifact directory, resolved by the job's artifact name.
+    j1, j2 = _job("j1"), _job("j2")
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "failure"))
+    _mock_artifacts(fake, [_artifact_for(1, j1), _artifact_for(2, j2)])
+    _mock_jobs(fake, [_workflow_job("j1", "success"), _workflow_job("j2", "failure")])
+    runner = _make_runner(fake, tmp_path)
+
+    await runner.process_message(TestBatch(id="batch-c", job_list=[j1, j2], jobs_count=2, integrations=["ntp"]))
+
+    finished = _drain_queue(runner.queue)[0]
+    assert isinstance(finished, BatchFinished)
+    assert finished.status == "failure"
+
+    results = {r.job.name: r for r in finished.batch_jobs}
+    assert set(results) == {"j1", "j2"}
+    # Passing job is not marked failed; each carries its true workflow-run conclusion.
+    assert results["j1"].workflow_job is not None and results["j1"].workflow_job.conclusion == "success"
+    assert results["j2"].workflow_job is not None and results["j2"].workflow_job.conclusion == "failure"
+    # Artifact directories resolved by artifact name (no heuristic matching).
+    assert results["j1"].artifacts_path == str(tmp_path / "123" / f"1-{j1.artifact_name()}")
+    assert results["j2"].artifacts_path == str(tmp_path / "123" / f"2-{j2.artifact_name()}")
+
+
+@pytest.mark.asyncio
+async def test_process_message_batch_job_without_workflow_match(tmp_path: Path) -> None:
+    # A job present in the batch but absent from the workflow-run API response still yields a
+    # well-formed entry: its artifact is located but workflow_job is None.
+    job = _job("j1")
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [_artifact_for(1, job)])
+    # list_workflow_jobs defaults to an empty page.
+    runner = _make_runner(fake, tmp_path)
+
+    await runner.process_message(TestBatch(id="batch-d", job_list=[job], jobs_count=1, integrations=["ntp"]))
+
+    finished = _drain_queue(runner.queue)[0]
+    assert isinstance(finished, BatchFinished)
+    [result] = finished.batch_jobs
+    assert result.job == job
+    assert result.workflow_job is None
+    assert result.artifacts_path == str(tmp_path / "123" / f"1-{job.artifact_name()}")
+
+
+@pytest.mark.asyncio
+async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> None:
+    # A job with no artifacts on disk still yields a well-formed entry with artifacts_path None.
+    job = _job("j1")
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
+    _mock_artifacts(fake, [])
+    _mock_jobs(fake, [_workflow_job("j1", "success")])
+    runner = _make_runner(fake, tmp_path)
+
+    await runner.process_message(TestBatch(id="batch-e", job_list=[job], jobs_count=1, integrations=["ntp"]))
+
+    finished = _drain_queue(runner.queue)[0]
+    assert isinstance(finished, BatchFinished)
+    [result] = finished.batch_jobs
+    assert result.workflow_job is not None and result.workflow_job.conclusion == "success"
+    assert result.artifacts_path is None
 
 
 @pytest.mark.asyncio

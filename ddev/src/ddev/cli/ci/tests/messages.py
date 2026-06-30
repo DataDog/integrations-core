@@ -3,10 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Literal
+import hashlib
+import re
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Literal
 
 from ddev.event_bus.orchestrator import BaseMessage
+
+if TYPE_CHECKING:
+    from ddev.utils.github_async.models import WorkflowJob
+
+# GitHub caps artifact names at 255 characters and disallows these characters (plus CR/LF).
+ARTIFACT_NAME_MAX_LENGTH = 255
+ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
 
 
 @dataclass
@@ -21,6 +30,27 @@ class BatchJob:
     unit_tests: bool
     e2e_tests: bool
 
+    def artifact_name(self) -> str:
+        """Deterministic, collision-free artifact name derived solely from this job's frozen fields.
+
+        Pure function: same job always yields the same name, and two distinct jobs never collide.
+        A short digest of the raw fields guarantees uniqueness even when the readable prefix is
+        truncated or two jobs sanitize to the same prefix.
+        """
+        raw_fields = (
+            self.name,
+            self.target,
+            self.runner,
+            self.environment,
+            self.platform,
+            str(self.unit_tests),
+            str(self.e2e_tests),
+        )
+        digest = hashlib.sha256("\x00".join(raw_fields).encode()).hexdigest()[:12]
+        readable = ARTIFACT_NAME_DISALLOWED.sub("_", "-".join(raw_fields))
+        prefix = readable[: ARTIFACT_NAME_MAX_LENGTH - len(digest) - 1]
+        return f"{prefix}-{digest}"
+
 
 @dataclass
 class FailedCheck:
@@ -28,6 +58,15 @@ class FailedCheck:
 
     name: str
     url: str
+
+
+@dataclass
+class BatchJobResult:
+    """Everything known about a single job in a finished batch, correlated by the producer."""
+
+    job: BatchJob
+    workflow_job: WorkflowJob | None
+    artifacts_path: str | None
 
 
 @dataclass
@@ -58,6 +97,8 @@ class BatchFinished(BaseMessage):
     run_id: int
     workflow_url: str
     artifacts_path: str
+    timed_out: bool = False
+    batch_jobs: list[BatchJobResult] = field(default_factory=list)
 
 
 @dataclass
