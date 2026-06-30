@@ -181,7 +181,8 @@ def test_missing_required_variable_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("x" in e for e in eng.flows["demo"].errors)
+    err = next(e for e in eng.flows["demo"].errors if "Required variable" in e and "x" in e)
+    assert "phase 'p'" in err and "f.yaml" in err
 
 
 def test_conflicting_default_accumulates(tmp_path):
@@ -194,7 +195,10 @@ def test_conflicting_default_accumulates(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("x" in e for e in eng.flows["demo"].errors)
+    err = next(e for e in eng.flows["demo"].errors if "conflicting defaults" in e)
+    assert "agent 'ag'" in err and "phase 'p'" in err
+    assert "ag.md" in err and "f.yaml" in err
+    assert not any("Required variable" in e for e in eng.flows["demo"].errors)
 
 
 def test_flow_value_overrides_default(tmp_path):
