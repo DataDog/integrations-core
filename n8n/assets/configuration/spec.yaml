@@ -3,11 +3,10 @@ files:
 - name: n8n.yaml
   discovery:
     strategies:
-      - strategy: from_ports
+    - template: discovery/openmetrics_from_ports
+      overrides:
         port_hints:
-          - 5678
-        candidates:
-          - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
+        - 5678
   options:
   - template: init_config
     options:
