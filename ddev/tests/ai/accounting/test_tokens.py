@@ -27,6 +27,14 @@ def test_addition_is_commutative_and_associative():
     assert (a + b) + c == a + (b + c)
 
 
+def test_sum_without_start_value():
+    parts = [
+        Tokens(input=1, output=2, cache_read=3, cache_creation=4),
+        Tokens(input=10, output=20, cache_read=30, cache_creation=40),
+    ]
+    assert sum(parts) == Tokens(input=11, output=22, cache_read=33, cache_creation=44)
+
+
 def test_is_frozen():
     a = Tokens(input=1)
     with pytest.raises(ValidationError):

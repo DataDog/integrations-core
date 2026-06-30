@@ -24,3 +24,8 @@ class Tokens(BaseModel):
             cache_read=self.cache_read + other.cache_read,
             cache_creation=self.cache_creation + other.cache_creation,
         )
+
+    def __radd__(self, other: Tokens | int) -> Tokens:
+        if other == 0:
+            return self
+        return NotImplemented
