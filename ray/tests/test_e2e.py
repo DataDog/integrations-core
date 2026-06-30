@@ -37,15 +37,8 @@ def test_check(dd_agent_check, instance, metrics):
 
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
-    aggregator = dd_agent_check_discovery(check_rate=True)
-
-    aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(),
-        check_submission_type=True,
-        # check_symmetric_inclusion=False: head and worker nodes emit different metric
-        # subsets; the full set isn't reliably reproducible in the discovery env.
-        check_symmetric_inclusion=False,
-    )
+    aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=4)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=False)
     aggregator.assert_service_check("ray.openmetrics.health", status=AgentCheck.OK)
 
 
