@@ -40,8 +40,6 @@ tests:
       package_manager: "pip"
       service: "scfw"
       source: "scfw"
-      targets:
-       - "urllib3"
       usr:
         name: "root"
       verified: true
