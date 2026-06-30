@@ -23,6 +23,7 @@ class PostgresHealthEvent(Enum):
     EXPLAIN_PLAN_ERROR = 'explain_plan_error'
     COLUMN_STATISTICS_FUNCTION_NOT_FOUND = 'column_statistics_function_not_found'
     COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE = 'column_statistics_insufficient_privilege'
+    DIAGNOSIS = 'diagnosis'
 
 
 class PostgresHealth(Health):
@@ -74,7 +75,7 @@ class PostgresHealth(Health):
         for diagnosis in self.check.diagnosis.diagnoses:
             self.check.log.info("Submitting diagnosis: %s", diagnosis._asdict())
             self.submit_health_event(
-                name=diagnosis.name,
+                name=PostgresHealthEvent.DIAGNOSIS,
                 status=HealthStatus.WARNING
                 if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
                 else HealthStatus.ERROR

@@ -132,6 +132,7 @@ class PostgreSql(DatabaseCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
+        self._last_automatic_diagnostics_run = 0
 
         config, validation_result = build_config(self)
         self._config = config
@@ -197,7 +198,6 @@ class PostgreSql(DatabaseCheck):
         )  # type: TTLCache
 
         self.diagnosis.register(functools.partial(run_diagnostics, self))
-        self._last_automatic_diagnostics_run = 0
 
         self._cancel_lock = threading.Lock()
         self._is_running = False
