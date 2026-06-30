@@ -275,10 +275,10 @@ def test_get_flow_unknown_name_raises(tmp_path):
 
 def real_phase_registry():
     from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
-    from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+    from ddev.ai.phases.registry import PhaseRegistry
 
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
+    registry.register_from(CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
     return registry
 
 

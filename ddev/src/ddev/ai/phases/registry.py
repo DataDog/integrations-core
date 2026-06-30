@@ -28,25 +28,21 @@ class PhaseRegistry:
             raise ValueError(f"Unknown phase type: {name!r}. Known: {self.known_names()}")
         return self._registry[name]
 
+    def register_from(self, phases_dir: Path, import_prefix: str) -> None:
+        """Import every non-private *.py in phases_dir and register Phase subclasses.
 
-def discover_and_register_phases(
-    registry: PhaseRegistry,
-    phases_dir: Path,
-    import_prefix: str,
-) -> None:
-    """Import every non-private *.py in phases_dir and register Phase subclasses.
-
-    Modules are imported by dotted path: ``{import_prefix}.{file_stem}``. The
-    caller is responsible for choosing the right pair (dir, prefix). Import
-    errors are fatal — a syntax error in any discovered module aborts startup.
-    """
-    for py_file in phases_dir.glob("*.py"):
-        if py_file.stem.startswith("_"):
-            continue
-        try:
-            module = importlib.import_module(f"{import_prefix}.{py_file.stem}")
-        except Exception as e:
-            raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
-        for _, obj in inspect.getmembers(module, inspect.isclass):
-            if issubclass(obj, Phase) and not inspect.isabstract(obj) and obj.__module__ == module.__name__:
-                registry.register(obj.__name__, obj)
+        Modules are imported by dotted path: ``{import_prefix}.{file_stem}``. The
+        caller chooses the right (dir, prefix) pair. Import errors are fatal — a
+        syntax error in any discovered module aborts startup. Safe to call more
+        than once to accumulate from multiple directories.
+        """
+        for py_file in phases_dir.glob("*.py"):
+            if py_file.stem.startswith("_"):
+                continue
+            try:
+                module = importlib.import_module(f"{import_prefix}.{py_file.stem}")
+            except Exception as e:
+                raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
+            for _, obj in inspect.getmembers(module, inspect.isclass):
+                if issubclass(obj, Phase) and not inspect.isabstract(obj) and obj.__module__ == module.__name__:
+                    self.register(obj.__name__, obj)

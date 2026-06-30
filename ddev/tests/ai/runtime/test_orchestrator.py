@@ -15,7 +15,7 @@ from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.base import Phase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.runtime.resources import RunResources
@@ -66,7 +66,7 @@ def make_orchestrator(file_access_policy, tmp_path):
         **overrides: Any,
     ) -> tuple[PhaseOrchestrator, PhaseRegistry, ConfigurationEngine]:
         registry = PhaseRegistry()
-        discover_and_register_phases(registry, CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
+        registry.register_from(CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
         for name, cls in (register_phases or {}).items():
             registry.register(name, cls)
         engine = ConfigurationEngine(
