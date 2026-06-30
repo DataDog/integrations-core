@@ -40,41 +40,34 @@ def write(p: Path, text: str) -> None:
     p.write_text(text)
 
 
-def test_get_flow_inlines_refs(tmp_path):
-    write(tmp_path / "prompts" / "intro.md", "---\ntype: prompt\n---\nDo the thing {{x}}\n")
-    write(tmp_path / "prompts" / "mem.md", "---\ntype: memory\n---\nRemember {{x}}\n")
+def test_get_flow_resolves_all_refs_and_variables(tmp_path):
     write(tmp_path / "agents" / "ag.md", "---\ntype: agent\n---\nsys\n")
+    write(tmp_path / "prompts" / "intro.md", "---\ntype: prompt\n---\nDo the thing {{x}}\n")
+    write(tmp_path / "prompts" / "g.md", "---\ntype: goal\n---\ngoal body\n")
+    write(tmp_path / "prompts" / "mem.md", "---\ntype: memory\n---\nRemember {{x}}\n")
     write(
         tmp_path / "f.yaml",
         "- type: phase\n  config:\n    name: p\n    agent: ag\n"
-        "    tasks:\n      - name: t\n        prompt_ref: intro\n"
+        "    tasks:\n      - name: t\n        prompt_ref: intro\n        goal_ref: g\n"
         "    checkpoint:\n      memory_prompt_ref: mem\n"
         "- type: flow\n  config:\n    name: demo\n    variables:\n      x: hi\n"
         "    flow:\n      - phase: p\n",
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     rf = eng.get_flow("demo")
-    t = rf.phases["p"].tasks[0]
-    assert t.prompt == "Do the thing {{x}}" and t.prompt_ref is None
-    assert rf.phases["p"].checkpoint.memory_prompt == "Remember {{x}}"
-    assert rf.phases["p"].checkpoint.memory_prompt_ref is None
+
+    task = rf.phases["p"].tasks[0]
+    # prompt and goal both inlined on the same task; refs cleared; {{x}} left literal
+    assert task.prompt == "Do the thing {{x}}"
+    assert task.prompt_ref is None
+    assert task.goal == "goal body"
+    assert task.goal_ref is None
+
+    checkpoint = rf.phases["p"].checkpoint
+    assert checkpoint.memory_prompt == "Remember {{x}}"
+    assert checkpoint.memory_prompt_ref is None
+
     assert rf.variables == {"x": "hi"}
-
-
-def test_inlines_both_prompt_and_goal_refs(tmp_path):
-    write(tmp_path / "prompts" / "intro.md", "---\ntype: prompt\n---\nprompt body\n")
-    write(tmp_path / "prompts" / "g.md", "---\ntype: goal\n---\ngoal body\n")
-    write(
-        tmp_path / "f.yaml",
-        "- type: phase\n  config:\n    name: p\n"
-        "    tasks:\n      - name: t\n        prompt_ref: intro\n        goal_ref: g\n"
-        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
-    )
-    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    rf = eng.get_flow("demo")
-    t = rf.phases["p"].tasks[0]
-    assert t.prompt == "prompt body" and t.prompt_ref is None
-    assert t.goal == "goal body" and t.goal_ref is None
 
 
 def test_unknown_phase_ref_accumulates(tmp_path):
