@@ -11,7 +11,7 @@ tests:
       "env" : "dev",
       "version" : "3.0.0",
       "log_version" : 1,
-      "install_targets" : [ { "ecosystem" : "PyPI", "name" : "urllib3", "version" : "2.0.2", "source" : null } ],
+      "install_targets" : [ { "ecosystem" : "PyPI", "name" : "urllib3", "version" : "2.0.2" } ],
       "executable" : "/home/devuser/.venv/bin/python",
       "hostname" : "test10-10-1-10",
       "package_manager" : "pip",
@@ -36,7 +36,6 @@ tests:
        - ecosystem: "PyPI"
          name: "urllib3"
          version: "2.0.2"
-         source: null
       log_version: 1
       package_manager: "pip"
       service: "scfw"
