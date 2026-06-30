@@ -28,6 +28,11 @@ else
   VERBOSE_FLAG="-v"
 fi
 
+# Temporary experiment: collect one JSON line per assert_metrics_using_metadata call.
+mkdir -p "$TEST_RESULTS_DIR"
+export DD_INTEGRATION_METRIC_COVERAGE="1"
+export DD_INTEGRATION_METRIC_COVERAGE_FILE="$TEST_RESULTS_DIR/metric-metadata-coverage-${DD_TEST_SESSION_NAME}.jsonl"
+
 # Parse INPUT_PYTEST_ARGS with proper quote handling using eval
 # This allows passing args like '-m "not flaky"' correctly
 if [[ -n "$INPUT_PYTEST_ARGS" ]]; then
