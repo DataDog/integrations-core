@@ -62,6 +62,16 @@ pipeline:
       targetType: attribute
       preserveSource: false
       overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `install_targets.name` to `targets` (v3 normalization)
+      enabled: true
+      sources:
+        - install_targets.name
+      sourceType: attribute
+      target: targets
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
     - type: message-remapper
       name: Define `msg` as the official message of the log
       enabled: true
