@@ -121,7 +121,6 @@ class PostgreSql(DatabaseCheck):
         self.health = PostgresHealth(self)
         self._resolved_hostname = None
         self._database_identifier = None
-        self._agent_hostname = None
         self._database_hostname = None
         self._db = None
         self._cloud_metadata: dict[str, dict] = None
@@ -736,13 +735,6 @@ class PostgreSql(DatabaseCheck):
         sets the check_id after initialization has completed.
         """
         self.set_metadata('resolved_hostname', self._resolved_hostname)
-
-    @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
 
     @property
     def database_hostname(self):
