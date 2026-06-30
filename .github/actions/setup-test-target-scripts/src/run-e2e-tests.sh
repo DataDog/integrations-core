@@ -30,6 +30,11 @@ else
   E2E_FLAGS="--dev"
 fi
 
+# Temporary experiment: collect one JSON line per assert_metrics_using_metadata call.
+mkdir -p "$TEST_RESULTS_DIR"
+export DD_INTEGRATION_METRIC_COVERAGE="1"
+export DD_INTEGRATION_METRIC_COVERAGE_FILE="$TEST_RESULTS_DIR/metric-metadata-coverage-${DD_TEST_SESSION_NAME}.jsonl"
+
 # Build target arguments
 # For latest: INPUT_TARGET already contains "target:latest", no separate env
 # For regular: INPUT_TARGET is just the target, INPUT_TARGET_ENV is the env
