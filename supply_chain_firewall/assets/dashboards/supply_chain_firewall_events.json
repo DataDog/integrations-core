@@ -1646,7 +1646,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@install_targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1796,7 +1796,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@install_targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2795,7 +2795,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@install_targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2945,7 +2945,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@install_targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3943,7 +3943,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@install_targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -4093,7 +4093,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@install_targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
