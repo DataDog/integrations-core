@@ -7,7 +7,9 @@ import json
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.agent.exceptions import IncompleteResponseError
 from ddev.ai.agent.scope import AgentRole, AgentScope
+from ddev.ai.agent.types import StopReason
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.phases.config import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
@@ -380,6 +382,68 @@ async def test_run_goal_loop_parse_retry_fails_raises(tmp_path):
     err = exc_info.value
     assert err.input_tokens == 5 + 7
     assert err.output_tokens == 3 + 4
+
+
+async def test_run_goal_loop_reviewer_max_tokens_raises(tmp_path):
+    worker_process, _ = _make_worker_process([])
+    initial_result = ReActResult(
+        final_response=make_response("done"),
+        iterations=1,
+        total_input_tokens=0,
+        total_output_tokens=0,
+        context_usage=None,
+    )
+    factory, _, _ = _reviewer_factory(
+        [make_response("partial", stop_reason=StopReason.MAX_TOKENS, input_tokens=5, output_tokens=3)]
+    )
+
+    with pytest.raises(IncompleteResponseError) as exc_info:
+        await run_goal_loop(
+            task=TaskConfig(name="t1", prompt="x", goal="g"),
+            goal_text="g",
+            rendered_task_prompt="TASK",
+            worker_process=worker_process,
+            initial_result=initial_result,
+            parent_agent_config=AgentConfig(tools=[]),
+            process_factory=factory,
+            callbacks=Callbacks(),
+            phase_id="p1",
+            compact_if_needed=_noop_compact,
+        )
+
+    assert exc_info.value.stop_reason == StopReason.MAX_TOKENS
+
+
+async def test_run_goal_loop_worker_retry_max_tokens_raises(tmp_path):
+    worker_process, _ = _make_worker_process(
+        [make_response("truncated retry", stop_reason=StopReason.MAX_TOKENS, input_tokens=10, output_tokens=5)]
+    )
+    initial_result = ReActResult(
+        final_response=make_response("initial work"),
+        iterations=1,
+        total_input_tokens=0,
+        total_output_tokens=0,
+        context_usage=None,
+    )
+    factory, _, _ = _reviewer_factory(
+        [make_response('{"valid": false, "reason": "fix something"}', input_tokens=5, output_tokens=3)]
+    )
+
+    with pytest.raises(IncompleteResponseError) as exc_info:
+        await run_goal_loop(
+            task=TaskConfig(name="t1", prompt="x", goal="g"),
+            goal_text="g",
+            rendered_task_prompt="TASK",
+            worker_process=worker_process,
+            initial_result=initial_result,
+            parent_agent_config=AgentConfig(tools=[]),
+            process_factory=factory,
+            callbacks=Callbacks(),
+            phase_id="p1",
+            compact_if_needed=_noop_compact,
+        )
+
+    assert exc_info.value.stop_reason == StopReason.MAX_TOKENS
 
 
 async def test_run_goal_loop_fires_callbacks(tmp_path):

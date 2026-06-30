@@ -2,9 +2,25 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ddev.ai.agent.types import StopReason
+
 
 class AgentError(Exception):
     """Base class for all errors raised by an agent."""
+
+
+class IncompleteResponseError(AgentError):
+    """A turn that was required to complete ended without END_TURN
+    (e.g. truncated by max_tokens, or an abnormal stop reason)."""
+
+    def __init__(self, message: str, *, stop_reason: StopReason):
+        super().__init__(message)
+        self.stop_reason = stop_reason
 
 
 class AgentConnectionError(AgentError):

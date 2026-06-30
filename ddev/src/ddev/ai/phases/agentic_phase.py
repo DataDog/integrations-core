@@ -208,7 +208,7 @@ class AgenticPhase(Phase):
         process: ReActProcess,
         prompt: str,
     ) -> ReActResult:
-        result = await process.start(prompt)
+        result = await process.start(prompt, require_complete=True)
         self._add_tokens(result.total_input_tokens, result.total_output_tokens)
         return result
 

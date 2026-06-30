@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from ddev.ai.agent.build import AgentRuntime
+from ddev.ai.agent.exceptions import IncompleteResponseError
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
@@ -852,3 +853,36 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
     assert phase._goal_attempt_log == [{"task": "t1", "attempts": 1, "final_valid": False}]
     assert phase._total_input_tokens == 10 + 8 + 6
     assert phase._total_output_tokens == 5 + 4 + 3
+
+
+# ---------------------------------------------------------------------------
+# Incomplete turn — worker initial turn raises before goal validation
+# ---------------------------------------------------------------------------
+
+
+async def test_worker_initial_max_tokens_raises_before_goal_validation(flow_dir, monkeypatch, message_queue):
+    """A worker turn truncated by MAX_TOKENS raises IncompleteResponseError; goal validation is never entered."""
+    goal_builder_calls: list = []
+
+    def goal_builder(owner_id: str) -> AgentRuntime:
+        goal_builder_calls.append(owner_id)
+        return AgentRuntime(agent=MockAgent([]), tool_registry=ToolRegistry([]))
+
+    worker = MockAgent(
+        [make_response("partial work", stop_reason=StopReason.MAX_TOKENS, input_tokens=10, output_tokens=5)]
+    )
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        worker,
+        monkeypatch,
+        message_queue,
+        tasks=[TaskConfig(name="t1", prompt="Do it.", goal="verify it")],
+        goal_runtime_builder=goal_builder,
+    )
+
+    with pytest.raises(IncompleteResponseError) as exc_info:
+        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert exc_info.value.stop_reason == StopReason.MAX_TOKENS
+    assert goal_builder_calls == [], "goal validation must not be entered after an incomplete worker turn"
+    assert mgr.read() == {}

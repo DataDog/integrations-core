@@ -5,7 +5,7 @@
 import asyncio
 
 from ddev.ai.agent.build import AgentRuntime
-from ddev.ai.agent.exceptions import AgentError
+from ddev.ai.agent.exceptions import AgentError, IncompleteResponseError
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
@@ -77,18 +77,27 @@ class ReActProcess:
             return False
         return True
 
-    async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
+    async def start(
+        self,
+        prompt: str,
+        allowed_tools: list[str] | None = None,
+        *,
+        require_complete: bool = False,
+    ) -> ReActResult:
         """
         Run the ReAct loop for a single task.
 
         Args:
             prompt: The initial user prompt to send to the agent.
             allowed_tools: Optional subset of tools the agent may call in this run. None means all.
+            require_complete: If True, raise IncompleteResponseError when the terminal stop reason
+                is not END_TURN.
 
         Returns:
             A ReActResult summarising the final response, token counts, and iteration count.
 
         Raises:
+            IncompleteResponseError: If require_complete is True and the turn did not end cleanly.
             Every exception is forwarded after notifying callbacks.
         """
         try:
@@ -139,6 +148,13 @@ class ReActProcess:
                     compact_in, compact_out = await self.compact(response)
                     total_input += compact_in
                     total_output += compact_out
+
+            if require_complete and response.stop_reason != StopReason.END_TURN:
+                raise IncompleteResponseError(
+                    f"{self._scope.owner_id} finished with stop_reason="
+                    f"{response.stop_reason.value!r} (expected END_TURN); the turn is incomplete.",
+                    stop_reason=response.stop_reason,
+                )
 
             react_result = ReActResult(
                 final_response=response,

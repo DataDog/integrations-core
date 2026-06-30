@@ -164,13 +164,13 @@ async def _run_reviewer_once(
     On parse failure, ask the reviewer once more for valid JSON. If that
     second response still does not parse, raise GoalParseError.
     """
-    result = await reviewer_process.start(user_message)
+    result = await reviewer_process.start(user_message, require_complete=True)
     in_tokens = result.total_input_tokens
     out_tokens = result.total_output_tokens
 
     parsed = parse_reviewer_output(result.final_response.text or "")
     if parsed is None:
-        retry_result = await reviewer_process.start(GOAL_PARSE_RETRY_PROMPT)
+        retry_result = await reviewer_process.start(GOAL_PARSE_RETRY_PROMPT, require_complete=True)
         in_tokens += retry_result.total_input_tokens
         out_tokens += retry_result.total_output_tokens
         parsed = parse_reviewer_output(retry_result.final_response.text or "")
@@ -240,7 +240,7 @@ async def _drive_goal_loop(
             total_out += compact_out
 
             retry_prompt = GOAL_RETRY_PROMPT_TEMPLATE.format(goal=goal_text, reason=check.reason)
-            worker_result = await worker_process.start(retry_prompt)
+            worker_result = await worker_process.start(retry_prompt, require_complete=True)
             total_in += worker_result.total_input_tokens
             total_out += worker_result.total_output_tokens
     except GoalValidationError as e:

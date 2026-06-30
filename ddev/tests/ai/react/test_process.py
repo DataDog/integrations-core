@@ -9,7 +9,7 @@ import pytest
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.build import AgentRuntime
-from ddev.ai.agent.exceptions import AgentConnectionError
+from ddev.ai.agent.exceptions import AgentConnectionError, IncompleteResponseError
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
@@ -724,3 +724,40 @@ async def test_auto_compact_tokens_included_in_result() -> None:
 
     assert result.total_input_tokens == 100 + 200 + 30
     assert result.total_output_tokens == 50 + 80 + 10
+
+
+# ---------------------------------------------------------------------------
+# require_complete flag
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("stop_reason", [StopReason.MAX_TOKENS, StopReason.OTHER])
+async def test_require_complete_raises_on_incomplete_stop_reason(stop_reason: StopReason) -> None:
+    agent = MockAgent([make_response(stop_reason)])
+    recorder = CallbackRecorder()
+
+    with pytest.raises(IncompleteResponseError) as exc_info:
+        await make_process(agent, callbacks=Callbacks([recorder.callback_set])).start("Hi", require_complete=True)
+
+    assert exc_info.value.stop_reason == stop_reason
+    assert stop_reason.value in str(exc_info.value)
+    assert len(recorder.errors) == 1
+    assert isinstance(recorder.errors[0], IncompleteResponseError)
+    assert len(recorder.complete_results) == 0
+
+
+async def test_require_complete_returns_normally_on_end_turn() -> None:
+    agent = MockAgent([make_response(StopReason.END_TURN)])
+
+    result = await make_process(agent).start("Hi", require_complete=True)
+
+    assert result.final_response.stop_reason == StopReason.END_TURN
+    assert result.iterations == 1
+
+
+async def test_require_complete_false_does_not_raise_on_max_tokens() -> None:
+    agent = MockAgent([make_response(StopReason.MAX_TOKENS)])
+
+    result = await make_process(agent).start("Hi", require_complete=False)
+
+    assert result.final_response.stop_reason == StopReason.MAX_TOKENS
