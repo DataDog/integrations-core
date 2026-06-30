@@ -18,7 +18,6 @@ from datadog_checks.base.utils.db import QueryExecutor
 from datadog_checks.base.utils.db.core import QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
-    TagManager,
     default_json_event_encoding,
     tracked_query,
 )
@@ -143,7 +142,6 @@ class PostgreSql(DatabaseCheck):
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self.add_core_tags()
 
@@ -243,10 +241,6 @@ class PostgreSql(DatabaseCheck):
             self._config.idle_connection_timeout,
         )
         return discovery
-
-    @property
-    def tags(self):
-        return self.tag_manager.get_tags()
 
     @property
     def tags_without_db(self):
