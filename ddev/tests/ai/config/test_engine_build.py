@@ -168,7 +168,8 @@ def test_conflict_touching_flow_surfaces(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path / "core", user_dirs=[str(user_dir)], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any(e.kind is ErrorKind.FLOW and e.subject == "demo" for e in eng.flows["demo"].errors)
+    err = next(e for e in eng.flows["demo"].errors if e.kind is ErrorKind.FLOW and e.subject == "demo")
+    assert {p.name for p in err.sources} == {"f1.yaml", "a.yaml", "b.yaml"}  # every conflicting flow file
     with pytest.raises(FlowConfigError):
         eng.get_flow("demo")
 
@@ -200,6 +201,7 @@ def test_conflicting_default_accumulates(tmp_path):
     assert "conflicting defaults" in err.message
     assert "agent 'ag'" in err.message and "phase 'p'" in err.message
     assert "ag.md" in err.message and "f.yaml" in err.message
+    assert {p.name for p in err.sources} == {"ag.md", "f.yaml"}  # both declaring files, not just one
     assert not any("Required variable" in e.message for e in eng.flows["demo"].errors)
 
 
@@ -335,7 +337,8 @@ def test_broken_agent_referenced(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any(e.kind is ErrorKind.AGENT and e.subject == "ag" for e in eng.flows["demo"].errors)
+    err = next(e for e in eng.flows["demo"].errors if e.kind is ErrorKind.AGENT and e.subject == "ag")
+    assert any(p.suffix == ".md" for p in err.sources)
 
 
 def test_broken_prompt_ref_referenced(tmp_path):

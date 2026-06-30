@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 from functools import cached_property
 from pathlib import Path
@@ -74,7 +74,8 @@ class ConfigConflict:
 class _DeclaredVar:
     name: str
     default: str | None
-    origin: str  # e.g. "agent 'writer' (/…/agents/writer.md)" or "phase 'p' (/…/f.yaml)"
+    origin: str  # human label incl. path, for the message
+    source: Path  # the declaring file, for FlowError.sources
 
 
 @dataclass(frozen=True)
@@ -83,6 +84,7 @@ class FlowError:
     message: str
     subject: str | None = None  # the named entity the error is about (phase/agent/ref/variable name)
     phase: str | None = None  # the phase context, when the error occurs inside one
+    sources: list[Path] = field(default_factory=list)  # every file relevant to fixing it
 
 
 @dataclass
@@ -145,6 +147,7 @@ class ConfigurationEngine:
                             ErrorKind.FLOW,
                             f"Flow {conflict.name!r} has conflicting definitions: {sources}",
                             subject=conflict.name,
+                            sources=list(conflict.sources),
                         )
                     ],
                 )
@@ -297,7 +300,11 @@ class ConfigurationEngine:
             return FlowDiagnostics(
                 flow_name,
                 ConfigStatus.BROKEN,
-                [FlowError(ErrorKind.FLOW, entry.error or "broken flow", subject=flow_name)],
+                [
+                    FlowError(
+                        ErrorKind.FLOW, entry.error or "broken flow", subject=flow_name, sources=[entry.source_file]
+                    )
+                ],
             )
 
         fc: FlowConfig = entry.config
@@ -326,6 +333,7 @@ class ConfigurationEngine:
                         f"{self._file_errors_note()}",
                         subject=fe.phase,
                         phase=fe.phase,
+                        sources=[self._flows[flow_name].source_file],
                     )
                 )
                 continue
@@ -336,6 +344,7 @@ class ConfigurationEngine:
                         f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken: {phase_entry.error}",
                         subject=fe.phase,
                         phase=fe.phase,
+                        sources=[phase_entry.source_file],
                     )
                 )
                 continue
@@ -347,6 +356,7 @@ class ConfigurationEngine:
         return scheduled_phases, errors
 
     def _validate_phase_class(self, pc: PhaseConfig) -> list[FlowError]:
+        phase_src = self._phases[pc.name].source_file
         if not self._phase_registry.contains(pc.class_):
             return [
                 FlowError(
@@ -354,12 +364,13 @@ class ConfigurationEngine:
                     f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}",
                     subject=pc.class_,
                     phase=pc.name,
+                    sources=[phase_src],
                 )
             ]
         try:
             self._phase_registry.get(pc.class_).validate_config(pc.name, pc, self._ok_agents)
         except FlowConfigError as e:
-            return [FlowError(ErrorKind.PHASE, str(e), subject=pc.name, phase=pc.name)]
+            return [FlowError(ErrorKind.PHASE, str(e), subject=pc.name, phase=pc.name, sources=[phase_src])]
         except Exception as e:
             return [
                 FlowError(
@@ -367,6 +378,7 @@ class ConfigurationEngine:
                     f"Phase {pc.name!r} class {pc.class_!r} raised during validation: {e!r}",
                     subject=pc.name,
                     phase=pc.name,
+                    sources=[phase_src],
                 )
             ]
         return []
@@ -382,6 +394,7 @@ class ConfigurationEngine:
                     f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered{self._file_errors_note()}",
                     subject=pc.agent,
                     phase=pc.name,
+                    sources=[self._phases[pc.name].source_file],
                 )
             ]
         if isinstance(agent_entry, BrokenEntry):
@@ -391,6 +404,7 @@ class ConfigurationEngine:
                     f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken: {agent_entry.error}",
                     subject=pc.agent,
                     phase=pc.name,
+                    sources=[agent_entry.source_file],
                 )
             ]
         return []
@@ -451,6 +465,7 @@ class ConfigurationEngine:
                     f"{label} {ref!r} referenced by phase {phase_name!r} is not registered{self._file_errors_note()}",
                     subject=ref,
                     phase=phase_name,
+                    sources=[self._phases[phase_name].source_file],
                 )
             ]
         if isinstance(ref_entry, BrokenEntry):
@@ -460,12 +475,14 @@ class ConfigurationEngine:
                     f"{label} {ref!r} referenced by phase {phase_name!r} is broken: {ref_entry.error}",
                     subject=ref,
                     phase=phase_name,
+                    sources=[ref_entry.source_file],
                 )
             ]
         return []
 
     def _validate_dependencies(self, flow_name: str, fc: FlowConfig) -> list[FlowError]:
         errors: list[FlowError] = []
+        flow_src = self._flows[flow_name].source_file
         dependency_map: dict[str, list[str]] = {}
         for fe in fc.flow:
             if fe.phase in dependency_map:
@@ -475,6 +492,7 @@ class ConfigurationEngine:
                         f"Phase {fe.phase!r} is scheduled more than once in flow {flow_name!r}",
                         subject=fe.phase,
                         phase=fe.phase,
+                        sources=[flow_src],
                     )
                 )
             dependency_map[fe.phase] = fe.dependencies
@@ -488,16 +506,25 @@ class ConfigurationEngine:
                             f"Phase {fe.phase!r} depends on {dep!r}, which is not scheduled in flow {flow_name!r}",
                             subject=dep,
                             phase=fe.phase,
+                            sources=[flow_src],
                         )
                     )
 
         cycles, truncated = detect_cycles(dependency_map)
         for cycle in cycles:
             path = " -> ".join(cycle)
-            errors.append(FlowError(ErrorKind.DEPENDENCY, f"Dependency cycle detected in flow {flow_name!r}: {path}"))
+            errors.append(
+                FlowError(
+                    ErrorKind.DEPENDENCY, f"Dependency cycle detected in flow {flow_name!r}: {path}", sources=[flow_src]
+                )
+            )
         if truncated:
             errors.append(
-                FlowError(ErrorKind.DEPENDENCY, f"Cycle detection truncated in flow {flow_name!r} (too many cycles)")
+                FlowError(
+                    ErrorKind.DEPENDENCY,
+                    f"Cycle detection truncated in flow {flow_name!r} (too many cycles)",
+                    sources=[flow_src],
+                )
             )
         return errors
 
@@ -517,24 +544,33 @@ class ConfigurationEngine:
             if pc.agent is not None and pc.agent in self._ok_agents:
                 agent_src = self._agents[pc.agent].source_file
                 for v in self._ok_agents[pc.agent].variables:
-                    declared.append(_DeclaredVar(v.name, v.default, f"agent {pc.agent!r} ({agent_src})"))
+                    declared.append(_DeclaredVar(v.name, v.default, f"agent {pc.agent!r} ({agent_src})", agent_src))
             for v in pc.variables:
-                declared.append(_DeclaredVar(v.name, v.default, f"phase {pc.name!r} ({phase_src})"))
+                declared.append(_DeclaredVar(v.name, v.default, f"phase {pc.name!r} ({phase_src})", phase_src))
         return declared
 
     def _collect_default_values(self, declared: list[_DeclaredVar]) -> tuple[dict[str, str], list[FlowError]]:
         by_name: dict[str, dict[str, list[str]]] = {}
+        sources_by_name: dict[str, list[Path]] = {}
         for d in declared:
             if d.default is None:
                 continue
             by_name.setdefault(d.name, {}).setdefault(d.default, []).append(d.origin)
+            srcs = sources_by_name.setdefault(d.name, [])
+            if d.source not in srcs:
+                srcs.append(d.source)
         defaults: dict[str, str] = {}
         errors: list[FlowError] = []
         for name, value_origins in by_name.items():
             if len(value_origins) > 1:
                 detail = "; ".join(f"{value!r} from {', '.join(origins)}" for value, origins in value_origins.items())
                 errors.append(
-                    FlowError(ErrorKind.VARIABLE, f"Variable {name!r} has conflicting defaults: {detail}", subject=name)
+                    FlowError(
+                        ErrorKind.VARIABLE,
+                        f"Variable {name!r} has conflicting defaults: {detail}",
+                        subject=name,
+                        sources=sources_by_name[name],
+                    )
                 )
             else:
                 defaults[name] = next(iter(value_origins))
@@ -543,10 +579,14 @@ class ConfigurationEngine:
     def _find_missing_variables(self, declared: list[_DeclaredVar], fc: FlowConfig) -> list[FlowError]:
         has_default = {d.name for d in declared if d.default is not None}
         origins_by_name: dict[str, list[str]] = {}
+        sources_by_name: dict[str, list[Path]] = {}
         for d in declared:
             origins = origins_by_name.setdefault(d.name, [])
             if d.origin not in origins:
                 origins.append(d.origin)
+            srcs = sources_by_name.setdefault(d.name, [])
+            if d.source not in srcs:
+                srcs.append(d.source)
         errors: list[FlowError] = []
         for name, origins in origins_by_name.items():
             if name not in has_default and name not in fc.variables:
@@ -556,6 +596,7 @@ class ConfigurationEngine:
                         f"Required variable {name!r} has no default and is not supplied by the flow "
                         f"(declared in {', '.join(origins)})",
                         subject=name,
+                        sources=sources_by_name[name],
                     )
                 )
         return errors
