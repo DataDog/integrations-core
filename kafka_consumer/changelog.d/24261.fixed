@@ -1,0 +1,1 @@
+Fix a crash in Kafka Connect collection when a connector returns a null info or status section.
