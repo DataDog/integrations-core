@@ -323,11 +323,11 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
             f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
-    if safefloat(args['automatic_diagnostics']['collection_interval']) <= 0:
+    if safefloat(args['automatic_diagnostics']['interval']) <= 0:
         default_value = dict_defaults.instance_automatic_diagnostics().collection_interval
-        args['automatic_diagnostics']['collection_interval'] = default_value
+        args['automatic_diagnostics']['interval'] = default_value
         validation_result.add_warning(
-            f"automatic_diagnostics.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+            f"automatic_diagnostics.interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
     if args.get('collect_default_database'):
