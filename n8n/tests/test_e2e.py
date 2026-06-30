@@ -33,16 +33,12 @@ def test_check_n8n_e2e(
 
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
-    aggregator = dd_agent_check_discovery(check_rate=True)
+    aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=2)
 
-    # Discovery only scrapes the main n8n node; many metrics (worker, queue, workflow
-    # execution) are only available from the worker process. Check only that what IS
-    # submitted matches metadata.csv — not that all metadata metrics are submitted.
-    # exclude covers rare metrics that may or may not fire on the main node.
     aggregator.assert_metrics_using_metadata(
         common.get_metadata_metrics_for_version(exclude_rare=True),
         check_submission_type=True,
-        check_symmetric_inclusion=False,
+        check_symmetric_inclusion=True,
         exclude=list(common.RARE_EVENT_METRIC_NAMES),
     )
     aggregator.assert_service_check(
