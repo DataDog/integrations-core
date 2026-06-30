@@ -258,7 +258,7 @@ def test_available_tool_names_includes_web_fetch():
 def test_from_names_multiple_native(tmp_path):
     registry = from_names(["web_search", "web_fetch"], tmp_path)
     assert registry.definitions == []
-    assert registry.native_tool_names == ["web_search", "web_fetch"]
+    assert registry.native_tool_names == ("web_search", "web_fetch")
 
 
 def test_from_names_native_only(tmp_path):
