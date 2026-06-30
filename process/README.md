@@ -18,7 +18,7 @@ The Process check is included in the [Datadog Agent][2] package, so you don't ne
 
 Unlike many checks, the Process check doesn't monitor anything useful by default. You must configure which processes you want to monitor.
 
-While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
+While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][3] for all available configuration options. For regex-based process matching, see [Process matching](#process-matching).
 
 ```yaml
 init_config:
@@ -28,8 +28,6 @@ instances:
       - ssh
       - sshd
 ```
-
-**Note**: When `exact_match` is set to `false`, values in `search_string` are treated as Python regular expressions. See [Process matching](#process-matching) for details.
 
 **Note**: After you make configuration changes, make sure you [restart the Agent][4].
 
