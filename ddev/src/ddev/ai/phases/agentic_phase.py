@@ -319,7 +319,7 @@ class AgenticPhase(Phase):
         )
         if self._is_resume_frontier:
             prior = (context.get("checkpoints") or {}).get(self._phase_id)
-            error = prior.error if isinstance(prior, FailedCheckpoint) else None
+            error = prior.error if prior is not None and prior.status == CheckpointStatus.FAILED else None
             system_prompt += build_resume_notice(error)
         try:
             process = self._process_factory.create(

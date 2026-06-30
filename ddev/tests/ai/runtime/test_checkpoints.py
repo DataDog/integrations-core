@@ -16,7 +16,7 @@ from ddev.ai.runtime.checkpoints import (
     SuccessCheckpoint,
 )
 
-from .conftest import FINISHED, make_failed, make_success
+from .helpers import FINISHED, make_failed, make_success
 
 
 @pytest.fixture

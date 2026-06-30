@@ -52,7 +52,7 @@ class FailedCheckpoint(BaseModel):
 PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discriminator="status")]
 
 # TypeAdapter provides model_validate() for annotated union types that aren't BaseModel subclasses.
-_CHECKPOINT_ADAPTER: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)
+CheckpointAdapter: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)
 
 RESERVED_SUCCESS_KEYS: frozenset[str] = frozenset(SuccessCheckpoint.model_fields)
 
@@ -85,7 +85,7 @@ class CheckpointManager:
         result: dict[str, PhaseCheckpoint] = {}
         for phase_id, data in raw.items():
             try:
-                result[phase_id] = _CHECKPOINT_ADAPTER.validate_python(data)
+                result[phase_id] = CheckpointAdapter.validate_python(data)
             except ValidationError as e:
                 raise CheckpointReadError(f"Checkpoint for phase {phase_id!r} in {self._path} is invalid: {e}") from e
         return result
