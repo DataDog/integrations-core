@@ -67,8 +67,6 @@ class PhaseOrchestrator(EventBusOrchestrator):
 
     async def on_initialize(self) -> None:
         """Construct phases from the resolved flow and submit the start PhaseTrigger."""
-        resolved = self._resolved_flow
-
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
@@ -76,19 +74,19 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._resources = RunResources(
             agent_clients=self._agent_clients,
             file_access_policy=self._file_access_policy,
-            agents=resolved.agents,
+            agents=self._resolved_flow.agents,
             callbacks=run_callbacks,
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,
-            flow_variables=resolved.variables,
+            flow_variables=self._resolved_flow.variables,
             callbacks=run_callbacks,
             logger=self._logger,
         )
 
-        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in resolved.flow}
-        for entry in resolved.flow:
-            phase_config = resolved.phases[entry.phase]
+        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
+        for entry in self._resolved_flow.flow:
+            phase_config = self._resolved_flow.phases[entry.phase]
             phase = self._phase_registry.get(phase_config.class_).build(
                 phase_id=entry.phase,
                 config=phase_config,
