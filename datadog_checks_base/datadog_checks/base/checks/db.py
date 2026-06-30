@@ -4,6 +4,7 @@
 
 from abc import abstractmethod
 
+from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.utils.db.utils import TagManager
 
 from . import AgentCheck
@@ -12,6 +13,7 @@ from . import AgentCheck
 class DatabaseCheck(AgentCheck):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._agent_hostname = None
         self.tag_manager = TagManager()
 
     def database_monitoring_query_sample(self, raw_event: str):
@@ -38,6 +40,12 @@ class DatabaseCheck(AgentCheck):
     @abstractmethod
     def database_identifier(self) -> str:
         pass
+
+    @property
+    def agent_hostname(self) -> str:
+        if self._agent_hostname is None:
+            self._agent_hostname = datadog_agent.get_hostname()
+        return self._agent_hostname
 
     @property
     def dbms(self) -> str:
