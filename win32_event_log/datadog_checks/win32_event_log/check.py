@@ -186,7 +186,7 @@ class Win32EventLogCheck(AgentCheck, ConfigMixin):
 
     def collect_fqdn(self, event_payload, rendered_event, event_object):
         value, variant = rendered_event[win32evtlog.EvtSystemComputer]
-        if variant == win32evtlog.EvtVarTypeNull or self._session is None:
+        if variant == win32evtlog.EvtVarTypeNull:
             event_payload['host'] = self.hostname
             return
 
