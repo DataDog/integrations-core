@@ -278,6 +278,49 @@ def real_phase_registry():
     return registry
 
 
+def test_missing_core_dir_raises(tmp_path):
+    with pytest.raises(FlowConfigError, match="Core config directory"):
+        ConfigurationEngine(core_dir=tmp_path / "nope", user_dirs=[], phase_registry=StubReg())
+
+
+def test_phase_class_validate_config_non_flowconfig_error_accumulates(tmp_path):
+    class ExplodingReg:
+        def contains(self, n):
+            return True
+
+        def get(self, n):
+            class Boom:
+                @classmethod
+                def validate_config(cls, phase_id, config, agents):
+                    raise ValueError("kaboom")
+
+            return Boom
+
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: p\n- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=ExplodingReg())
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("kaboom" in e for e in eng.flows["demo"].errors)
+
+
+def test_three_conflicting_defaults_report_once(tmp_path):
+    write(tmp_path / "agents" / "ag.md", "---\ntype: agent\nvariables:\n  - name: x\n    default: A\n---\nsys\n")
+    write(
+        tmp_path / "f.yaml",
+        "- type: phase\n  config:\n    name: p\n    agent: ag\n"
+        "    variables:\n      - name: x\n        default: B\n"
+        "- type: phase\n  config:\n    name: q\n    agent: ag\n"
+        "    variables:\n      - name: x\n        default: B\n"
+        "- type: flow\n  config:\n    name: demo\n    flow:\n"
+        "      - phase: p\n      - phase: q\n        dependencies: [p]\n",
+    )
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    conflict_errors = [e for e in eng.flows["demo"].errors if "conflicting defaults" in e]
+    assert len(conflict_errors) == 1
+
+
 def test_multiple_errors_accumulate(tmp_path):
     """A flow with several independent problems reports all of them (no raise-on-first)."""
     write(

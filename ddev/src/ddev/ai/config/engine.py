@@ -87,6 +87,9 @@ class ConfigurationEngine:
 
         resolved_user_dirs = self._resolve_user_dirs(user_dirs)
 
+        if not core_dir.is_dir():
+            raise FlowConfigError(f"Core config directory does not exist or is not a directory: {core_dir}")
+
         self._agents: dict[str, RegistryEntry[AgentConfig]] = {}
         self._phases: dict[str, RegistryEntry[PhaseConfig]] = {}
         self._flows: dict[str, RegistryEntry[FlowConfig]] = {}
@@ -302,6 +305,8 @@ class ConfigurationEngine:
             self._phase_registry.get(pc.class_).validate_config(pc.name, pc, self._ok_agents)
         except FlowConfigError as e:
             return [str(e)]
+        except Exception as e:
+            return [f"Phase {pc.name!r} class {pc.class_!r} raised during validation: {e!r}"]
         return []
 
     def _validate_phase_agent(self, pc: PhaseConfig) -> list[str]:
@@ -410,17 +415,20 @@ class ConfigurationEngine:
         return declarations
 
     def _collect_default_values(self, declarations: list[VariableDeclaration]) -> tuple[dict[str, str], list[str]]:
-        defaults: dict[str, str] = {}
-        errors: list[str] = []
+        seen: dict[str, list[str]] = {}
         for decl in declarations:
             if decl.default is None:
                 continue
-            if decl.name in defaults and defaults[decl.name] != decl.default:
-                errors.append(
-                    f"Variable {decl.name!r} has conflicting defaults: {defaults[decl.name]!r} vs {decl.default!r}"
-                )
+            values = seen.setdefault(decl.name, [])
+            if decl.default not in values:
+                values.append(decl.default)
+        defaults: dict[str, str] = {}
+        errors: list[str] = []
+        for name, values in seen.items():
+            if len(values) > 1:
+                errors.append(f"Variable {name!r} has conflicting defaults: {values}")
             else:
-                defaults[decl.name] = decl.default
+                defaults[name] = values[0]
         return defaults, errors
 
     def _find_missing_variables(
@@ -449,7 +457,8 @@ class ConfigurationEngine:
             raise FlowConfigError(f"Flow {name!r} not found{self._file_errors_note()}")
         if diag.status is ConfigStatus.BROKEN:
             raise FlowConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e}" for e in diag.errors))
-        assert diag.resolved is not None
+        if diag.resolved is None:
+            raise FlowConfigError(f"Flow {name!r} passed validation but produced no resolved flow (engine bug)")
         return diag.resolved
 
     @property
