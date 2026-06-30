@@ -178,8 +178,7 @@ class KafkaConnectCollector:
         connectors_data = _fetch(['info', 'status'])
 
         if not isinstance(connectors_data, dict):
-            # Older Connect workers (pre-Kafka 2.3 / CP 5.3) ignore the expand parameter
-            # and return a plain list of connector names instead of the expanded dict.
+            # Pre-2.3 Connect workers ignore expand and return a plain name list, not the expanded dict.
             self.log.warning(
                 "Unexpected response shape from %s/connectors (got %s, expected dict). "
                 "The Connect worker may not support the expand parameter — Kafka 2.3+ / CP 5.3+ is required.",
@@ -188,9 +187,7 @@ class KafkaConnectCollector:
             )
             return
 
-        # Some Connect REST implementations (notably Confluent Cloud) honor only one `expand`
-        # value per request, returning the other section as null. When a section is missing,
-        # fetch it explicitly and merge so info- and status-based metrics stay complete.
+        # Confluent Cloud honors only one expand value per request; fetch any missing section separately and merge.
         for section in ('info', 'status'):
             if any((entry or {}).get(section) is None for entry in connectors_data.values()):
                 try:
