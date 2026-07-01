@@ -229,15 +229,6 @@ jobs:
         DD_GITHUB_USER: ${{ github.actor }}
         DD_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Tag job for CI Visibility
-      # Skip on fork PRs and non-core repos since secrets won't be available
-      if: env.INPUT_IS_FORK != 'true' && env.INPUT_REPO == 'core'
-      uses: ./.github/actions/tag-job
-      with:
-        tags: ${{ env.DD_TAGS }}
-        dd_api_key: ${{ secrets.DD_API_KEY }}
-        dd_site: ${{ env.DD_SITE }}
-
     - name: Set up Python 2.7
       if: inputs.test-py2
       run: |
@@ -365,3 +356,17 @@ jobs:
         name: "${{ env.MINIMUM_BASE_PACKAGE_PREFIX }}coverage-${{ inputs.target }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}-${{ inputs.platform }}"
         path: "${{ inputs.target }}/coverage.xml"
         if-no-files-found: ignore
+
+    - name: Tag job for CI Visibility
+      # Runs AFTER the tests and result/coverage uploads. Tagging is best-effort
+      # observability (it decorates the CI Visibility job entity); it must never be able
+      # to skip the test run, so it is placed last. continue-on-error keeps a flaky npm
+      # install or Datadog API call from reddening a job whose tests already ran, and
+      # !cancelled() ensures failed test jobs are still tagged (skipping only cancelled ones).
+      if: ${{ !cancelled() && env.INPUT_IS_FORK != 'true' && env.INPUT_REPO == 'core' }}
+      continue-on-error: true
+      uses: ./.github/actions/tag-job
+      with:
+        tags: ${{ env.DD_TAGS }}
+        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_site: ${{ env.DD_SITE }}
