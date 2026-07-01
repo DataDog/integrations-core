@@ -7,6 +7,13 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, SSLError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPInvalidURLError,
+    HTTPSSLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 
 # Default settings
 DEFAULT_RM_URI = 'http://localhost:8088'
@@ -472,7 +479,7 @@ class YarnCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
 
-        except Timeout as e:
+        except (Timeout, HTTPTimeoutError) as e:
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -481,7 +488,16 @@ class YarnCheck(AgentCheck):
             )
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError, SSLError) as e:
+        except (
+            HTTPError,
+            InvalidURL,
+            ConnectionError,
+            SSLError,
+            HTTPStatusError,
+            HTTPInvalidURLError,
+            HTTPConnectionError,
+            HTTPSSLError,
+        ) as e:
             self.service_check(
                 SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
