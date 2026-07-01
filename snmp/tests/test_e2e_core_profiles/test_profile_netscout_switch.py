@@ -62,6 +62,7 @@ def test_e2e_profile_netscout_switch(dd_agent_check):
         tags=common_tags + tag_row,
         value=6682660 * 1024,
     )
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
 
     # --- TEST METADATA ---
     device = {
