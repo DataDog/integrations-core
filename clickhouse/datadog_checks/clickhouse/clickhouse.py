@@ -57,8 +57,8 @@ class ClickhouseCheck(DatabaseCheck):
 
         # DBM-related properties (computed lazily)
         self._resolved_hostname = None
+        self._database_hostname = None
         self._database_identifier = None
-        self._agent_hostname = None
         self._dbms_version = None
 
         # Track last emission time for database instance metadata (rate limiting)
@@ -155,7 +155,7 @@ class ClickhouseCheck(DatabaseCheck):
         self.tag_manager.set_tag("server", self._config.server, replace=True)
         self.tag_manager.set_tag("port", str(self._config.port), replace=True)
         self.tag_manager.set_tag("db", self._config.db, replace=True)
-        self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
+        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def validate_config(self):
@@ -227,7 +227,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "host": self.reported_hostname,
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
-                "database_hostname": self.reported_hostname,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
                 "dbms": "clickhouse",
@@ -354,11 +354,10 @@ class ClickhouseCheck(DatabaseCheck):
         return self._resolved_hostname
 
     @property
-    def agent_hostname(self):
-        """Get the agent hostname."""
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
+    def database_hostname(self) -> str:
+        if self._database_hostname is None:
+            self._database_hostname = resolve_db_host(self._config.server)
+        return self._database_hostname
 
     @property
     def database_identifier(self) -> str:
