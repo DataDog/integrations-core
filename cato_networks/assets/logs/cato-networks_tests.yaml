@@ -40,9 +40,41 @@ tests:
         model_name: "IpsConfiguration"
         model_type: "IPS Configuration"
         module: "IPS Configuration"
+        admin_id: '400000123'
+        admin: 'CATO-IN1-APAC-PTNR-ITPL User #123'
       usr:
         id: "400000123"
         name: "CATO-IN1-APAC-PTNR-ITPL User #123"
+      ocsf:
+        severity: Informational
+        activity_name: Log
+        metadata:
+          uid: '20123123'
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          version: 1.5.0
+        category_uid: 5
+        category_name: Discovery
+        status_detail: CREATED
+        actor:
+          user:
+            uid: '400000123'
+            name: 'CATO-IN1-APAC-PTNR-ITPL User #123'
+        status_id: 1
+        class_uid: 5019
+        activity_id: 1
+        state: Enabled
+        state_id: 2
+        severity_id: 1
+        class_name: Device Config State Change
+        device:
+          name: IpsConfiguration
+          desc: IPS Configuration
+          type_id: 14
+          type: IPS
+        status: Success
+        time: 1763455623000
     message: |-
       {
         "fieldsMap" : {
@@ -67,7 +99,7 @@ tests:
       }
     service: "audit-logs"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1763455630734
  -
   sample: |-
@@ -111,9 +143,41 @@ tests:
         model_name: "WAN Traffic"
         model_type: "Antivirus Rule"
         module: "Threat Protection Rule"
+        admin_id: '400000123'
+        admin: 'CATO-IN1-APAC-PTNR-ITPL User #123'
       usr:
         id: "400000123"
         name: "CATO-IN1-APAC-PTNR-ITPL User #123"
+      ocsf:
+        severity: Informational
+        activity_name: Log
+        metadata:
+          uid: '20000232'
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          version: 1.5.0
+        category_uid: 5
+        category_name: Discovery
+        status_detail: CREATED
+        actor:
+          user:
+            uid: '400000123'
+            name: 'CATO-IN1-APAC-PTNR-ITPL User #123'
+        status_id: 1
+        class_uid: 5019
+        activity_id: 1
+        state: Enabled
+        state_id: 2
+        severity_id: 1
+        class_name: Device Config State Change
+        device:
+          name: WAN Traffic
+          desc: Threat Protection Rule
+          type_id: 99
+          type: Threat Protection Rule
+        status: Success
+        time: 1763455623000
     message: |-
       {
         "fieldsMap" : {
@@ -139,7 +203,7 @@ tests:
       }
     service: "audit-logs"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1763455630734
  -
   sample: |-
@@ -195,6 +259,39 @@ tests:
       src_is_site_or_vpn: "API"
       time: 1763478148991
       time_str: "2025-11-18T15:02:28Z"
+      src_ip: 10.10.10.10
+      event_type: Connectivity
+      ocsf:
+        metadata:
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Connectivity
+          uid: c8d2456ef8b48123
+          version: 1.5.0
+        time: 1763478148991
+        severity: Informational
+        activity_name: Logon
+        category_uid: 3
+        category_name: Identity & Access Management
+        src_endpoint:
+          ip: 10.10.10.10
+        message: ApiKey login successfully
+        actor:
+          user:
+            name: demo-key
+        status_id: 1
+        auth_protocol: APIKEY
+        service:
+          name: eventsFeed
+        auth_protocol_id: 99
+        class_uid: 3002
+        activity_id: 1
+        severity_id: 1
+        class_name: Authentication
+        user:
+          name: demo-key
+        status: Success
     message: |-
       {
         "internal_id" : "c8d2456ef8b48123",
@@ -222,7 +319,7 @@ tests:
     service: "events"
     status: "info"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1763478148991
  -
   sample: |-
@@ -295,6 +392,49 @@ tests:
         email: "test@example.com"
         id: 2
       vendor: "Cato"
+      src_ip: 10.10.10.10
+      event_type: Detection and Response
+      ocsf:
+        severity: Medium
+        activity_name: Create
+        metadata:
+          uid: c14b9006b130b123
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Detection and Response
+          version: 1.5.0
+        category_uid: 2
+        category_name: Findings
+        confidence: Medium
+        message: Cybersquatting Malicious Activity
+        status_id: 1
+        finding_info:
+          uid: 691dea630a267b749814b123
+          product:
+            name: Threat Prevention
+          title: Cybersquatting Malicious Activity
+          analytic:
+            uid: 691d9f390a267b749814b123
+            name: Test
+            type_id: 1
+            type: Rule
+          desc: Cybersquatting Malicious Activity
+        class_uid: 2004
+        activity_id: 1
+        severity_id: 3
+        class_name: Detection Finding
+        device:
+          hostname: DESKTOP-ENI0ABC
+          ip: 10.10.10.10
+          name: DESKTOP-ENI0ABC
+          type_id: 0
+          type: Unknown
+        confidence_id: 2
+        status: New
+        time: 1763568228849
+      vpn_user_email: test@example.com
+      user_id: 2
     message: |-
       {
         "event_count" : 1,
@@ -330,7 +470,7 @@ tests:
     service: "events"
     status: "info"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1763568228849
  -
   sample: |-
@@ -398,22 +538,22 @@ tests:
       action: "Block"
       ad_name: "John Doe"
       app_stack:
-       - "UDP"
-       - "QUIC"
-       - "Google Applications"
+        - "UDP"
+        - "QUIC"
+        - "Google Applications"
       application_id: "googleApps"
       application_name: "Google Applications"
       application_risk: 3
       categories:
-       - "General"
-       - "Network Utilities"
-       - "Search Engines and Portals"
+        - "General"
+        - "Network Utilities"
+        - "Search Engines and Portals"
       cato_app: "googleApps"
       client_version: "5.18.1.1234"
       configured_host_name: "AssetTag-EID"
       connection_origin: "Cato Client"
       custom_category_id:
-       - 400000307
+        - 400000307
       dest_country: "India"
       dest_country_code: "IN"
       device_name: "AssetTag-EID"
@@ -464,6 +604,58 @@ tests:
         id: 0
         name: "John Doe"
       visible_device_id: "ab-b1-83-20-65-de"
+      domain_name: signaler-pa.clients6.google.com
+      event_type: Security
+      ocsf:
+        severity: Medium
+        activity_name: Close
+        metadata:
+          uid: e278205a1f4c73
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Security
+          profiles:
+            - security_control
+          version: 1.5.0
+        category_uid: 4
+        category_name: Network Activity
+        src_endpoint:
+          owner:
+            email_addr: test@example.com
+            name: John Doe
+          hostname: AssetTag-EID
+          port: 65222
+          ip: 10.10.10.10
+        message: Block QUIC services
+        app_name: Google Applications
+        status_id: 2
+        connection_info:
+          direction_id: 2
+          direction: Outbound
+          protocol_name: UDP
+        class_uid: 4001
+        activity_id: 2
+        severity_id: 3
+        dst_endpoint:
+          port: 443
+          ip: 10.10.10.10
+          domain: signaler-pa.clients6.google.com
+        class_name: Network Activity
+        status: Failure
+        policy:
+          uid: '3145367409754000885'
+          name: Block QUIC services
+        time: 1763473282069
+        action_id: 2
+        action: Denied
+      vpn_user_email: test@example.com
+      dest_port: 443
+      user_id: 0
+      dest_ip: 10.10.10.10
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      src_port: 65222
     message: |-
       {
         "ISP_name" : "Bharti Airtel Ltd.",
@@ -524,7 +716,7 @@ tests:
     service: "events"
     status: "info"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1763473282069
  -
   sample: |-
@@ -559,6 +751,26 @@ tests:
       service: "events"
       time: 1763531560065
       time_str: "2025-11-19T05:52:40Z"
+      event_type: System
+      ocsf:
+        severity: Informational
+        activity_name: Sdp license
+        metadata:
+          uid: a7cc4c4bb7feda4e
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: System
+          version: 1.5.0
+        category_uid: 0
+        status_id: 1
+        class_uid: 0
+        activity_id: 99
+        severity_id: 1
+        message: License job applied 1 and revoked 0 licenses
+        class_name: Base Event
+        status: Success
+        time: 1763531560065
     message: |-
       {
         "internalId" : "a7cc4c4bb7fe123a",
@@ -577,5 +789,1286 @@ tests:
     service: "events"
     status: "info"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1763531560065
+ -
+  sample: |-
+    {
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "ISP_name" : "Example ISP Ltd.",
+      "time_str" : "2025-11-18T15:10:30Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "a1b2c3d4e5f60001",
+      "device_name" : "DESKTOP-ABC0123",
+      "event_type" : "Connectivity",
+      "src_country_code" : "IN",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "action" : "Succeeded",
+      "src_site_id" : 1000001,
+      "client_version" : "6.4.6.8830",
+      "pop_name" : "Mumbai",
+      "tunnel_protocol" : "DTLS",
+      "internal_id" : "a1b2c3d4e5f60001",
+      "event_sub_type" : "Connected",
+      "os_version" : "11",
+      "link_type" : "Cato",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "a1b2c3d4e5f60001",
+      "user_id" : 1000001,
+      "src_country" : "India",
+      "src_site_name" : "John Doe",
+      "os_type" : "OS_WINDOWS",
+      "time" : 1763478630001
+    }
+  result:
+    custom:
+      event_status: "info"
+      service: "events"
+      ocsf:
+        metadata:
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          uid: a1b2c3d4e5f60001
+          event_code: Connectivity
+          version: 1.5.0
+        severity: Informational
+        activity_name: Logon
+        category_uid: 3
+        category_name: Identity & Access Management
+        src_endpoint:
+          hostname: DESKTOP-ABC0123
+          ip: 10.10.10.10
+        actor:
+          user:
+            email_addr: test@example.com
+            name: John Doe
+        status_id: 1
+        service:
+          name: Cato VPN
+        class_uid: 3002
+        activity_id: 1
+        time: 1763478630001
+        severity_id: 1
+        class_name: Authentication
+        user:
+          uid: '1000001'
+          email_addr: test@example.com
+          name: John Doe
+        status: Success
+      event_count: 1
+      user_name: John Doe
+      ISP_name: Example ISP Ltd.
+      time_str: '2025-11-18T15:10:30Z'
+      network:
+        client:
+          geoip: {}
+          ip: 10.10.10.10
+      src_ip: 10.10.10.10
+      internalId: a1b2c3d4e5f60001
+      device_name: DESKTOP-ABC0123
+      event_type: Connectivity
+      usr:
+        name: John Doe
+        id: 1000001
+        email: test@example.com
+      src_country_code: IN
+      account_name: test-account
+      vpn_user_email: test@example.com
+      action: Succeeded
+      src_site_id: 1000001
+      client_version: 6.4.6.8830
+      pop_name: Mumbai
+      tunnel_protocol: DTLS
+      evt:
+        name: Connectivity
+      internal_id: a1b2c3d4e5f60001
+      event_sub_type: Connected
+      os_version: '11'
+      link_type: Cato
+      src_is_site_or_vpn: SDP User
+      account_id: 20000232
+      event_id: a1b2c3d4e5f60001
+      user_id: 1000001
+      src_country: India
+      src_site_name: John Doe
+      os_type: OS_WINDOWS
+      time: 1763478630001
+    message: |-
+      {
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "ISP_name" : "Example ISP Ltd.",
+        "time_str" : "2025-11-18T15:10:30Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "a1b2c3d4e5f60001",
+        "device_name" : "DESKTOP-ABC0123",
+        "event_type" : "Connectivity",
+        "src_country_code" : "IN",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "action" : "Succeeded",
+        "src_site_id" : 1000001,
+        "client_version" : "6.4.6.8830",
+        "pop_name" : "Mumbai",
+        "tunnel_protocol" : "DTLS",
+        "internal_id" : "a1b2c3d4e5f60001",
+        "event_sub_type" : "Connected",
+        "os_version" : "11",
+        "link_type" : "Cato",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "a1b2c3d4e5f60001",
+        "user_id" : 1000001,
+        "src_country" : "India",
+        "src_site_name" : "John Doe",
+        "os_type" : "OS_WINDOWS",
+        "time" : 1763478630001
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763478630001
+ -
+  sample: |-
+    {
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "ISP_name" : "Example Telecom Oy",
+      "time_str" : "2025-11-19T10:15:39Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "b2c3d4e5f6a70002",
+      "device_name" : "Johns-MacBook-Pro",
+      "event_type" : "Connectivity",
+      "src_country_code" : "FI",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "src_site_id" : 1000002,
+      "client_version" : "5.13.0.10503",
+      "pop_name" : "Helsinki",
+      "tunnel_protocol" : "DTLS",
+      "internal_id" : "b2c3d4e5f6a70002",
+      "event_sub_type" : "Disconnected",
+      "os_version" : "15.7.3",
+      "link_type" : "Cato",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "b2c3d4e5f6a70002",
+      "user_id" : 1000002,
+      "src_country" : "Finland",
+      "src_site_name" : "John Doe",
+      "os_type" : "OS_MAC",
+      "time" : 1763547339002
+    }
+  result:
+    custom:
+      ISP_name: "Example Telecom Oy"
+      account_id: 20000232
+      account_name: "test-account"
+      client_version: "5.13.0.10503"
+      device_name: "Johns-MacBook-Pro"
+      event_count: 1
+      event_id: "b2c3d4e5f6a70002"
+      event_status: "info"
+      event_sub_type: "Disconnected"
+      evt:
+        name: "Connectivity"
+      internalId: "b2c3d4e5f6a70002"
+      internal_id: "b2c3d4e5f6a70002"
+      link_type: "Cato"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      os_type: "OS_MAC"
+      os_version: "15.7.3"
+      pop_name: "Helsinki"
+      service: "events"
+      src_country: "Finland"
+      src_country_code: "FI"
+      src_is_site_or_vpn: "SDP User"
+      src_site_id: 1000002
+      src_site_name: "John Doe"
+      time: 1763547339002
+      time_str: "2025-11-19T10:15:39Z"
+      tunnel_protocol: "DTLS"
+      usr:
+        email: "test@example.com"
+        id: 1000002
+        name: "John Doe"
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      event_type: Connectivity
+      ocsf:
+        severity: Informational
+        activity_name: Logoff
+        metadata:
+          uid: b2c3d4e5f6a70002
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Connectivity
+          version: 1.5.0
+        category_uid: 3
+        category_name: Identity & Access Management
+        src_endpoint:
+          hostname: Johns-MacBook-Pro
+          ip: 10.10.10.10
+        actor:
+          user:
+            email_addr: test@example.com
+            name: John Doe
+        status_id: 1
+        class_uid: 3002
+        activity_id: 2
+        severity_id: 1
+        class_name: Authentication
+        status: Success
+        time: 1763547339002
+        user:
+          uid: '1000002'
+          email_addr: test@example.com
+          name: John Doe
+        service:
+          name: Cato VPN
+      vpn_user_email: test@example.com
+      user_id: 1000002
+    message: |-
+      {
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "ISP_name" : "Example Telecom Oy",
+        "time_str" : "2025-11-19T10:15:39Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "b2c3d4e5f6a70002",
+        "device_name" : "Johns-MacBook-Pro",
+        "event_type" : "Connectivity",
+        "src_country_code" : "FI",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "src_site_id" : 1000002,
+        "client_version" : "5.13.0.10503",
+        "pop_name" : "Helsinki",
+        "tunnel_protocol" : "DTLS",
+        "internal_id" : "b2c3d4e5f6a70002",
+        "event_sub_type" : "Disconnected",
+        "os_version" : "15.7.3",
+        "link_type" : "Cato",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "b2c3d4e5f6a70002",
+        "user_id" : 1000002,
+        "src_country" : "Finland",
+        "src_site_name" : "John Doe",
+        "os_type" : "OS_MAC",
+        "time" : 1763547339002
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763547339002
+ -
+  sample: |-
+    {
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "ISP_name" : "Example Telecom Oy",
+      "time_str" : "2025-11-19T10:12:48Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "c3d4e5f6a7b80003",
+      "device_name" : "Johns-MacBook-Pro",
+      "event_type" : "Connectivity",
+      "src_country_code" : "FI",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "action" : "Allow",
+      "src_site_id" : 1000002,
+      "client_version" : "5.13.0.10503",
+      "pop_name" : "Helsinki",
+      "internal_id" : "c3d4e5f6a7b80003",
+      "rule_name" : "authenticated-unmanaged-device",
+      "event_sub_type" : "Client Connectivity Policy",
+      "os_version" : "15.7.3",
+      "rule_id" : "7648",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "c3d4e5f6a7b80003",
+      "user_id" : 1000002,
+      "src_country" : "Finland",
+      "src_site_name" : "John Doe",
+      "os_type" : "OS_MAC",
+      "event_message" : "OS_MAC, OS version (), oesis 4.3.5002.0, no relevant software identified. Private and Internet access granted by policy rule authenticated-unmanaged-device",
+      "time" : 1763547168003
+    }
+  result:
+    custom:
+      ISP_name: "Example Telecom Oy"
+      account_id: 20000232
+      account_name: "test-account"
+      action: "Allow"
+      client_version: "5.13.0.10503"
+      device_name: "Johns-MacBook-Pro"
+      event_count: 1
+      event_id: "c3d4e5f6a7b80003"
+      event_message: "OS_MAC, OS version (), oesis 4.3.5002.0, no relevant software identified. Private and Internet access granted by policy rule authenticated-unmanaged-device"
+      event_status: "info"
+      event_sub_type: "Client Connectivity Policy"
+      evt:
+        name: "Connectivity"
+      internalId: "c3d4e5f6a7b80003"
+      internal_id: "c3d4e5f6a7b80003"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      os_type: "OS_MAC"
+      os_version: "15.7.3"
+      pop_name: "Helsinki"
+      rule_id: "7648"
+      rule_name: "authenticated-unmanaged-device"
+      service: "events"
+      src_country: "Finland"
+      src_country_code: "FI"
+      src_is_site_or_vpn: "SDP User"
+      src_site_id: 1000002
+      src_site_name: "John Doe"
+      time: 1763547168003
+      time_str: "2025-11-19T10:12:48Z"
+      usr:
+        email: "test@example.com"
+        id: 1000002
+        name: "John Doe"
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      event_type: Connectivity
+      ocsf:
+        metadata:
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Connectivity
+          uid: c3d4e5f6a7b80003
+          version: 1.5.0
+          profiles:
+            - security_control
+        time: 1763547168003
+        severity: Informational
+        activity_name: Logon
+        category_uid: 3
+        category_name: Identity & Access Management
+        src_endpoint:
+          hostname: Johns-MacBook-Pro
+          ip: 10.10.10.10
+        message: OS_MAC, OS version (), oesis 4.3.5002.0, no relevant software identified. Private and Internet access granted by policy rule authenticated-unmanaged-device
+        actor:
+          user:
+            email_addr: test@example.com
+            name: John Doe
+        status_id: 1
+        class_uid: 3002
+        activity_id: 1
+        severity_id: 1
+        class_name: Authentication
+        user:
+          uid: '1000002'
+          email_addr: test@example.com
+          name: John Doe
+        status: Success
+        service:
+          name: Cato VPN
+        action_id: 1
+        action: Allowed
+      vpn_user_email: test@example.com
+      user_id: 1000002
+    message: |-
+      {
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "ISP_name" : "Example Telecom Oy",
+        "time_str" : "2025-11-19T10:12:48Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "c3d4e5f6a7b80003",
+        "device_name" : "Johns-MacBook-Pro",
+        "event_type" : "Connectivity",
+        "src_country_code" : "FI",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "action" : "Allow",
+        "src_site_id" : 1000002,
+        "client_version" : "5.13.0.10503",
+        "pop_name" : "Helsinki",
+        "internal_id" : "c3d4e5f6a7b80003",
+        "rule_name" : "authenticated-unmanaged-device",
+        "event_sub_type" : "Client Connectivity Policy",
+        "os_version" : "15.7.3",
+        "rule_id" : "7648",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "c3d4e5f6a7b80003",
+        "user_id" : 1000002,
+        "src_country" : "Finland",
+        "src_site_name" : "John Doe",
+        "os_type" : "OS_MAC",
+        "event_message" : "OS_MAC, OS version (), oesis 4.3.5002.0, no relevant software identified. Private and Internet access granted by policy rule authenticated-unmanaged-device",
+        "time" : 1763547168003
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763547168003
+ -
+  sample: |-
+    {
+      "dns_record_type" : "A",
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "dns_query" : "host.example.com",
+      "time_str" : "2025-11-18T12:18:51Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "d4e5f6a7b8c90004",
+      "device_name" : "DESKTOP-DNS0123",
+      "domain_name" : "dns1.example.com",
+      "event_type" : "Security",
+      "application_name" : "DNS",
+      "src_country_code" : "FI",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "action" : "Block",
+      "src_site_id" : 1000003,
+      "pop_name" : "Helsinki",
+      "dest_port" : 53,
+      "internal_id" : "d4e5f6a7b8c90004",
+      "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "dns_answer" : "1.2.3.4",
+      "ip_protocol" : "UDP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 50323,
+      "rule_id" : "253668",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "d4e5f6a7b8c90004",
+      "user_id" : 1000003,
+      "src_site_name" : "John Doe",
+      "src_country" : "Finland",
+      "dest_ip" : "10.10.10.11",
+      "time" : 1763473131004
+    }
+  result:
+    custom:
+      account_id: 20000232
+      account_name: "test-account"
+      action: "Block"
+      application_name: "DNS"
+      device_name: "DESKTOP-DNS0123"
+      dns:
+        question:
+          name: "dns1.example.com"
+      dns_query: "host.example.com"
+      dns_record_type: "A"
+      event_count: 1
+      event_id: "d4e5f6a7b8c90004"
+      event_status: "info"
+      event_sub_type: "WAN Firewall"
+      evt:
+        name: "Security"
+      internalId: "d4e5f6a7b8c90004"
+      internal_id: "d4e5f6a7b8c90004"
+      ip_protocol: "UDP"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 50323
+        destination:
+          geoip: {}
+          ip: "10.10.10.11"
+          port: 53
+      pop_name: "Helsinki"
+      rule_id: "253668"
+      rule_name: "Default WAN Firewall Rule"
+      service: "events"
+      src_country: "Finland"
+      src_country_code: "FI"
+      src_is_site_or_vpn: "SDP User"
+      src_site_id: 1000003
+      src_site_name: "John Doe"
+      time: 1763473131004
+      time_str: "2025-11-18T12:18:51Z"
+      traffic_direction: "WANBOUND"
+      usr:
+        email: "test@example.com"
+        id: 1000003
+        name: "John Doe"
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      domain_name: dns1.example.com
+      event_type: Security
+      ocsf:
+        severity: Medium
+        activity_name: Traffic
+        metadata:
+          uid: d4e5f6a7b8c90004
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Security
+          profiles:
+            - security_control
+          version: 1.5.0
+        category_uid: 4
+        category_name: Network Activity
+        query:
+          hostname: host.example.com
+          type: A
+        src_endpoint:
+          owner:
+            email_addr: test@example.com
+            name: John Doe
+          hostname: DESKTOP-DNS0123
+          port: 50323
+          ip: 10.10.10.10
+        message: Default WAN Firewall Rule
+        app_name: DNS
+        status_id: 2
+        connection_info:
+          direction_id: 99
+          direction: WANBOUND
+          protocol_name: UDP
+        class_uid: 4003
+        activity_id: 6
+        severity_id: 3
+        dst_endpoint:
+          port: 53
+          ip: 10.10.10.11
+          domain: dns1.example.com
+        class_name: DNS Activity
+        status: Failure
+        policy:
+          uid: '253668'
+          name: Default WAN Firewall Rule
+        time: 1763473131004
+        answers:
+          - rdata: 1.2.3.4
+        action_id: 2
+        action: Denied
+      vpn_user_email: test@example.com
+      dest_port: 53
+      src_port: 50323
+      user_id: 1000003
+      dest_ip: 10.10.10.11
+      dns_answer: 1.2.3.4
+    message: |-
+      {
+        "dns_record_type" : "A",
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "dns_query" : "host.example.com",
+        "time_str" : "2025-11-18T12:18:51Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "d4e5f6a7b8c90004",
+        "device_name" : "DESKTOP-DNS0123",
+        "domain_name" : "dns1.example.com",
+        "event_type" : "Security",
+        "application_name" : "DNS",
+        "src_country_code" : "FI",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "action" : "Block",
+        "src_site_id" : 1000003,
+        "pop_name" : "Helsinki",
+        "dest_port" : 53,
+        "internal_id" : "d4e5f6a7b8c90004",
+        "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "dns_answer" : "1.2.3.4",
+        "ip_protocol" : "UDP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 50323,
+        "rule_id" : "253668",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "d4e5f6a7b8c90004",
+        "user_id" : 1000003,
+        "src_site_name" : "John Doe",
+        "src_country" : "Finland",
+        "dest_ip" : "10.10.10.11",
+        "time" : 1763473131004
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763473131004
+ -
+  sample: |-
+    {
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "time_str" : "2025-11-18T19:23:50Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "e5f6a7b8c9d00005",
+      "device_name" : "LAPTOP-HTTP0123",
+      "domain_name" : "app.example.com",
+      "event_type" : "Security",
+      "application_name" : "HTTP(S)",
+      "src_country_code" : "EE",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "action" : "Monitor",
+      "src_site_id" : 1000004,
+      "pop_name" : "Helsinki",
+      "dest_port" : 443,
+      "internal_id" : "e5f6a7b8c9d00005",
+      "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "TCP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 49914,
+      "rule_id" : "6422041642034481894",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "e5f6a7b8c9d00005",
+      "user_id" : 1000004,
+      "src_site_name" : "John Doe",
+      "src_country" : "Estonia",
+      "dest_ip" : "10.10.10.11",
+      "time" : 1763498630005
+    }
+  result:
+    custom:
+      account_id: 20000232
+      account_name: "test-account"
+      action: "Monitor"
+      application_name: "HTTP(S)"
+      device_name: "LAPTOP-HTTP0123"
+      dns:
+        question:
+          name: "app.example.com"
+      event_count: 1
+      event_id: "e5f6a7b8c9d00005"
+      event_status: "info"
+      event_sub_type: "WAN Firewall"
+      evt:
+        name: "Security"
+      internalId: "e5f6a7b8c9d00005"
+      internal_id: "e5f6a7b8c9d00005"
+      ip_protocol: "TCP"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 49914
+        destination:
+          geoip: {}
+          ip: "10.10.10.11"
+          port: 443
+      pop_name: "Helsinki"
+      rule_id: "6422041642034481894"
+      rule_name: "Default WAN Firewall Rule"
+      service: "events"
+      src_country: "Estonia"
+      src_country_code: "EE"
+      src_is_site_or_vpn: "SDP User"
+      src_site_id: 1000004
+      src_site_name: "John Doe"
+      time: 1763498630005
+      time_str: "2025-11-18T19:23:50Z"
+      traffic_direction: "WANBOUND"
+      usr:
+        email: "test@example.com"
+        id: 1000004
+        name: "John Doe"
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      domain_name: app.example.com
+      event_type: Security
+      ocsf:
+        severity: Informational
+        activity_name: Traffic
+        metadata:
+          uid: e5f6a7b8c9d00005
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Security
+          profiles:
+            - security_control
+          version: 1.5.0
+        category_uid: 4
+        category_name: Network Activity
+        src_endpoint:
+          owner:
+            email_addr: test@example.com
+            name: John Doe
+          hostname: LAPTOP-HTTP0123
+          port: 49914
+          ip: 10.10.10.10
+        message: Default WAN Firewall Rule
+        app_name: HTTP(S)
+        status_id: 1
+        connection_info:
+          direction_id: 99
+          direction: WANBOUND
+          protocol_name: TCP
+        class_uid: 4001
+        activity_id: 6
+        severity_id: 1
+        dst_endpoint:
+          port: 443
+          ip: 10.10.10.11
+          domain: app.example.com
+        class_name: Network Activity
+        status: Success
+        policy:
+          uid: '6422041642034481894'
+          name: Default WAN Firewall Rule
+        time: 1763498630005
+        action_id: 3
+        action: Observed
+      vpn_user_email: test@example.com
+      dest_port: 443
+      src_port: 49914
+      user_id: 1000004
+      dest_ip: 10.10.10.11
+    message: |-
+      {
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "time_str" : "2025-11-18T19:23:50Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "e5f6a7b8c9d00005",
+        "device_name" : "LAPTOP-HTTP0123",
+        "domain_name" : "app.example.com",
+        "event_type" : "Security",
+        "application_name" : "HTTP(S)",
+        "src_country_code" : "EE",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "action" : "Monitor",
+        "src_site_id" : 1000004,
+        "pop_name" : "Helsinki",
+        "dest_port" : 443,
+        "internal_id" : "e5f6a7b8c9d00005",
+        "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "TCP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 49914,
+        "rule_id" : "6422041642034481894",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "e5f6a7b8c9d00005",
+        "user_id" : 1000004,
+        "src_site_name" : "John Doe",
+        "src_country" : "Estonia",
+        "dest_ip" : "10.10.10.11",
+        "time" : 1763498630005
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763498630005
+ -
+  sample: |-
+    {
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "time_str" : "2025-11-18T13:39:30Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "f6a7b8c9d0e10006",
+      "device_name" : "DESKTOP-SSH0123",
+      "domain_name" : "ssh.example.com",
+      "event_type" : "Security",
+      "application_name" : "SSH-V2",
+      "src_country_code" : "SE",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "action" : "Monitor",
+      "src_site_id" : 1000005,
+      "pop_name" : "Stockholm",
+      "dest_port" : 22,
+      "internal_id" : "f6a7b8c9d0e10006",
+      "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "TCP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 47938,
+      "rule_id" : "1234810669101761930",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "f6a7b8c9d0e10006",
+      "user_id" : 1000005,
+      "src_site_name" : "John Doe",
+      "src_country" : "Sweden",
+      "dest_ip" : "10.10.10.11",
+      "time" : 1763477970006
+    }
+  result:
+    custom:
+      account_id: 20000232
+      account_name: "test-account"
+      action: "Monitor"
+      application_name: "SSH-V2"
+      device_name: "DESKTOP-SSH0123"
+      dns:
+        question:
+          name: "ssh.example.com"
+      event_count: 1
+      event_id: "f6a7b8c9d0e10006"
+      event_status: "info"
+      event_sub_type: "WAN Firewall"
+      evt:
+        name: "Security"
+      internalId: "f6a7b8c9d0e10006"
+      internal_id: "f6a7b8c9d0e10006"
+      ip_protocol: "TCP"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 47938
+        destination:
+          geoip: {}
+          ip: "10.10.10.11"
+          port: 22
+      pop_name: "Stockholm"
+      rule_id: "1234810669101761930"
+      rule_name: "Default WAN Firewall Rule"
+      service: "events"
+      src_country: "Sweden"
+      src_country_code: "SE"
+      src_is_site_or_vpn: "SDP User"
+      src_site_id: 1000005
+      src_site_name: "John Doe"
+      time: 1763477970006
+      time_str: "2025-11-18T13:39:30Z"
+      traffic_direction: "WANBOUND"
+      usr:
+        email: "test@example.com"
+        id: 1000005
+        name: "John Doe"
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      domain_name: ssh.example.com
+      event_type: Security
+      ocsf:
+        severity: Informational
+        activity_name: Traffic
+        metadata:
+          uid: f6a7b8c9d0e10006
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Security
+          profiles:
+            - security_control
+          version: 1.5.0
+        category_uid: 4
+        category_name: Network Activity
+        src_endpoint:
+          owner:
+            email_addr: test@example.com
+            name: John Doe
+          hostname: DESKTOP-SSH0123
+          port: 47938
+          ip: 10.10.10.10
+        message: Default WAN Firewall Rule
+        app_name: SSH-V2
+        status_id: 1
+        connection_info:
+          direction_id: 99
+          direction: WANBOUND
+          protocol_name: TCP
+        class_uid: 4007
+        activity_id: 6
+        severity_id: 1
+        dst_endpoint:
+          port: 22
+          ip: 10.10.10.11
+          domain: ssh.example.com
+        class_name: SSH Activity
+        status: Success
+        policy:
+          uid: '1234810669101761930'
+          name: Default WAN Firewall Rule
+        time: 1763477970006
+        action_id: 3
+        action: Observed
+      vpn_user_email: test@example.com
+      dest_port: 22
+      src_port: 47938
+      user_id: 1000005
+      dest_ip: 10.10.10.11
+    message: |-
+      {
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "time_str" : "2025-11-18T13:39:30Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "f6a7b8c9d0e10006",
+        "device_name" : "DESKTOP-SSH0123",
+        "domain_name" : "ssh.example.com",
+        "event_type" : "Security",
+        "application_name" : "SSH-V2",
+        "src_country_code" : "SE",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "action" : "Monitor",
+        "src_site_id" : 1000005,
+        "pop_name" : "Stockholm",
+        "dest_port" : 22,
+        "internal_id" : "f6a7b8c9d0e10006",
+        "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "TCP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 47938,
+        "rule_id" : "1234810669101761930",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "f6a7b8c9d0e10006",
+        "user_id" : 1000005,
+        "src_site_name" : "John Doe",
+        "src_country" : "Sweden",
+        "dest_ip" : "10.10.10.11",
+        "time" : 1763477970006
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763477970006
+ -
+  sample: |-
+    {
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "time_str" : "2025-11-18T15:50:24Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "a7b8c9d0e1f20007",
+      "device_name" : "DESKTOP-RDP0123",
+      "event_type" : "Security",
+      "application_name" : "RDP",
+      "src_country_code" : "IN",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "action" : "Monitor",
+      "src_site_id" : 1000006,
+      "pop_name" : "Mumbai",
+      "dest_port" : 3389,
+      "internal_id" : "a7b8c9d0e1f20007",
+      "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "UDP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 51234,
+      "rule_id" : "4600855063782837704",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "a7b8c9d0e1f20007",
+      "user_id" : 1000006,
+      "src_site_name" : "John Doe",
+      "src_country" : "India",
+      "dest_ip" : "10.10.10.11",
+      "time" : 1763485824007
+    }
+  result:
+    custom:
+      account_id: 20000232
+      account_name: "test-account"
+      action: "Monitor"
+      application_name: "RDP"
+      device_name: "DESKTOP-RDP0123"
+      event_count: 1
+      event_id: "a7b8c9d0e1f20007"
+      event_status: "info"
+      event_sub_type: "WAN Firewall"
+      evt:
+        name: "Security"
+      internalId: "a7b8c9d0e1f20007"
+      internal_id: "a7b8c9d0e1f20007"
+      ip_protocol: "UDP"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 51234
+        destination:
+          geoip: {}
+          ip: "10.10.10.11"
+          port: 3389
+      pop_name: "Mumbai"
+      rule_id: "4600855063782837704"
+      rule_name: "Default WAN Firewall Rule"
+      service: "events"
+      src_country: "India"
+      src_country_code: "IN"
+      src_is_site_or_vpn: "SDP User"
+      src_site_id: 1000006
+      src_site_name: "John Doe"
+      time: 1763485824007
+      time_str: "2025-11-18T15:50:24Z"
+      traffic_direction: "WANBOUND"
+      usr:
+        email: "test@example.com"
+        id: 1000006
+        name: "John Doe"
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      event_type: Security
+      ocsf:
+        severity: Informational
+        activity_name: Traffic
+        metadata:
+          uid: a7b8c9d0e1f20007
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Security
+          profiles:
+            - security_control
+          version: 1.5.0
+        category_uid: 4
+        category_name: Network Activity
+        src_endpoint:
+          owner:
+            email_addr: test@example.com
+            name: John Doe
+          hostname: DESKTOP-RDP0123
+          port: 51234
+          ip: 10.10.10.10
+        message: Default WAN Firewall Rule
+        app_name: RDP
+        status_id: 1
+        connection_info:
+          direction_id: 99
+          direction: WANBOUND
+          protocol_name: UDP
+        class_uid: 4005
+        activity_id: 6
+        severity_id: 1
+        dst_endpoint:
+          port: 3389
+          ip: 10.10.10.11
+        class_name: RDP Activity
+        status: Success
+        policy:
+          uid: '4600855063782837704'
+          name: Default WAN Firewall Rule
+        time: 1763485824007
+        action_id: 3
+        action: Observed
+      vpn_user_email: test@example.com
+      dest_port: 3389
+      src_port: 51234
+      user_id: 1000006
+      dest_ip: 10.10.10.11
+    message: |-
+      {
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "time_str" : "2025-11-18T15:50:24Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "a7b8c9d0e1f20007",
+        "device_name" : "DESKTOP-RDP0123",
+        "event_type" : "Security",
+        "application_name" : "RDP",
+        "src_country_code" : "IN",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "action" : "Monitor",
+        "src_site_id" : 1000006,
+        "pop_name" : "Mumbai",
+        "dest_port" : 3389,
+        "internal_id" : "a7b8c9d0e1f20007",
+        "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "UDP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 51234,
+        "rule_id" : "4600855063782837704",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "a7b8c9d0e1f20007",
+        "user_id" : 1000006,
+        "src_site_name" : "John Doe",
+        "src_country" : "India",
+        "dest_ip" : "10.10.10.11",
+        "time" : 1763485824007
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763485824007
+ -
+  sample: |-
+    {
+      "event_count" : 1,
+      "user_name" : "John Doe",
+      "time_str" : "2025-11-19T16:03:59Z",
+      "src_ip" : "10.10.10.10",
+      "internalId" : "b8c9d0e1f2a30008",
+      "device_name" : "DESKTOP-SMB0123",
+      "event_type" : "Security",
+      "application_name" : "Netbios General (Parent of all Netbios apps)",
+      "src_country_code" : "IN",
+      "account_name" : "test-account",
+      "vpn_user_email" : "test@example.com",
+      "action" : "Monitor",
+      "src_site_id" : 1000007,
+      "pop_name" : "New Delhi",
+      "dest_port" : 445,
+      "internal_id" : "b8c9d0e1f2a30008",
+      "rule_name" : "Default WAN Firewall Rule",
+      "event_sub_type" : "WAN Firewall",
+      "ip_protocol" : "UDP",
+      "traffic_direction" : "WANBOUND",
+      "src_port" : 49152,
+      "rule_id" : "2963872298229056376",
+      "src_is_site_or_vpn" : "SDP User",
+      "account_id" : 20000232,
+      "event_id" : "b8c9d0e1f2a30008",
+      "user_id" : 1000007,
+      "src_site_name" : "John Doe",
+      "src_country" : "India",
+      "dest_ip" : "10.10.10.11",
+      "time" : 1763568239008
+    }
+  result:
+    custom:
+      account_id: 20000232
+      account_name: "test-account"
+      action: "Monitor"
+      application_name: "Netbios General (Parent of all Netbios apps)"
+      device_name: "DESKTOP-SMB0123"
+      event_count: 1
+      event_id: "b8c9d0e1f2a30008"
+      event_status: "info"
+      event_sub_type: "WAN Firewall"
+      evt:
+        name: "Security"
+      internalId: "b8c9d0e1f2a30008"
+      internal_id: "b8c9d0e1f2a30008"
+      ip_protocol: "UDP"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+          port: 49152
+        destination:
+          geoip: {}
+          ip: "10.10.10.11"
+          port: 445
+      pop_name: "New Delhi"
+      rule_id: "2963872298229056376"
+      rule_name: "Default WAN Firewall Rule"
+      service: "events"
+      src_country: "India"
+      src_country_code: "IN"
+      src_is_site_or_vpn: "SDP User"
+      src_site_id: 1000007
+      src_site_name: "John Doe"
+      time: 1763568239008
+      time_str: "2025-11-19T16:03:59Z"
+      traffic_direction: "WANBOUND"
+      usr:
+        email: "test@example.com"
+        id: 1000007
+        name: "John Doe"
+      user_name: John Doe
+      src_ip: 10.10.10.10
+      event_type: Security
+      ocsf:
+        severity: Informational
+        activity_name: Unknown
+        metadata:
+          uid: b8c9d0e1f2a30008
+          product:
+            name: Cato Networks SASE Platform
+            vendor_name: Cato Networks
+          event_code: Security
+          profiles:
+            - security_control
+          version: 1.5.0
+        category_uid: 4
+        category_name: Network Activity
+        src_endpoint:
+          owner:
+            email_addr: test@example.com
+            name: John Doe
+          hostname: DESKTOP-SMB0123
+          port: 49152
+          ip: 10.10.10.10
+        message: Default WAN Firewall Rule
+        app_name: Netbios General (Parent of all Netbios apps)
+        status_id: 1
+        connection_info:
+          direction_id: 99
+          direction: WANBOUND
+          protocol_name: UDP
+        class_uid: 4006
+        activity_id: 0
+        severity_id: 1
+        dst_endpoint:
+          port: 445
+          ip: 10.10.10.11
+        class_name: SMB Activity
+        status: Success
+        policy:
+          uid: '2963872298229056376'
+          name: Default WAN Firewall Rule
+        time: 1763568239008
+        action_id: 3
+        action: Observed
+      vpn_user_email: test@example.com
+      dest_port: 445
+      src_port: 49152
+      user_id: 1000007
+      dest_ip: 10.10.10.11
+    message: |-
+      {
+        "event_count" : 1,
+        "user_name" : "John Doe",
+        "time_str" : "2025-11-19T16:03:59Z",
+        "src_ip" : "10.10.10.10",
+        "internalId" : "b8c9d0e1f2a30008",
+        "device_name" : "DESKTOP-SMB0123",
+        "event_type" : "Security",
+        "application_name" : "Netbios General (Parent of all Netbios apps)",
+        "src_country_code" : "IN",
+        "account_name" : "test-account",
+        "vpn_user_email" : "test@example.com",
+        "action" : "Monitor",
+        "src_site_id" : 1000007,
+        "pop_name" : "New Delhi",
+        "dest_port" : 445,
+        "internal_id" : "b8c9d0e1f2a30008",
+        "rule_name" : "Default WAN Firewall Rule",
+        "event_sub_type" : "WAN Firewall",
+        "ip_protocol" : "UDP",
+        "traffic_direction" : "WANBOUND",
+        "src_port" : 49152,
+        "rule_id" : "2963872298229056376",
+        "src_is_site_or_vpn" : "SDP User",
+        "account_id" : 20000232,
+        "event_id" : "b8c9d0e1f2a30008",
+        "user_id" : 1000007,
+        "src_site_name" : "John Doe",
+        "src_country" : "India",
+        "dest_ip" : "10.10.10.11",
+        "time" : 1763568239008
+      }
+    service: "events"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1763568239008
