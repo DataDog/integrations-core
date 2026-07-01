@@ -10,10 +10,6 @@ from pydantic import ValidationError
 from ddev.ai.config.models import (
     AgentConfig,
     CheckpointConfig,
-    FlowEnvelope,
-    PhaseConfig,
-    PhaseEnvelope,
-    ResourceEnvelope,
     TaskConfig,
 )
 
@@ -93,38 +89,3 @@ def test_checkpoint_memory_source_validation_accepts_exactly_one():
 def test_agent_rejects_unknown_tools():
     with pytest.raises(ValidationError):
         AgentConfig(tools=["nonexistent_tool"])
-
-
-# ---------------------------------------------------------------------------
-# PhaseConfig
-# ---------------------------------------------------------------------------
-
-
-def test_phase_class_alias():
-    p = PhaseConfig.model_validate({"name": "p", "class": "InspectEndpointPhase"})
-    assert p.class_ == "InspectEndpointPhase"
-
-
-def test_phase_defaults_class_to_agentic():
-    assert PhaseConfig(name="p").class_ == "AgenticPhase"
-
-
-# ---------------------------------------------------------------------------
-# PhaseEnvelope / FlowEnvelope / ResourceEnvelope discriminated union
-# ---------------------------------------------------------------------------
-
-
-def test_resource_envelope_phase():
-    from pydantic import TypeAdapter
-
-    ta = TypeAdapter(ResourceEnvelope)
-    env = ta.validate_python({"type": "phase", "config": {"name": "p"}})
-    assert isinstance(env, PhaseEnvelope)
-
-
-def test_resource_envelope_flow():
-    from pydantic import TypeAdapter
-
-    ta = TypeAdapter(ResourceEnvelope)
-    env = ta.validate_python({"type": "flow", "config": {"name": "f", "flow": [{"phase": "x"}]}})
-    assert isinstance(env, FlowEnvelope)
