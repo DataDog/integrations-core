@@ -26,6 +26,12 @@ class CheckpointTokenInfo(BaseModel):
     total_output: int
 
 
+class GoalValidationRecord(BaseModel):
+    task: str
+    attempts: int
+    final_valid: bool
+
+
 class SuccessCheckpoint(BaseModel):
     """Checkpoint written at the end of a successful phase execution."""
 
@@ -34,6 +40,7 @@ class SuccessCheckpoint(BaseModel):
     finished_at: str
     tokens: CheckpointTokenInfo
     memory_path: str
+    goal_validations: list[GoalValidationRecord] | None = None
     phase_data: dict[str, Any] = {}
 
 
@@ -45,6 +52,7 @@ class FailedCheckpoint(BaseModel):
     finished_at: str
     error: str
     tokens: CheckpointTokenInfo
+    goal_validations: list[GoalValidationRecord] | None = None
     phase_data: dict[str, Any] = {}
 
 

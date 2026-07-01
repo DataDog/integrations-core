@@ -21,6 +21,7 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
+    GoalValidationRecord,
     SuccessCheckpoint,
 )
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -492,7 +493,7 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
     cp = mgr.read()["p1"]
     assert isinstance(cp, SuccessCheckpoint)
     assert cp.status == CheckpointStatus.SUCCESS
-    assert cp.phase_data["goal_validations"] == [{"task": "t1", "attempts": 1, "final_valid": True}]
+    assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
     assert worker.send_calls[0].startswith("Do it.")
     assert "independent reviewer" in worker.send_calls[0]
     assert cp.tokens == CheckpointTokenInfo(total_input=100 + 7 + 10, total_output=50 + 3 + 5)
@@ -642,7 +643,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
 
     phase._total_input_tokens = 42
     phase._total_output_tokens = 17
-    phase._goal_attempt_log = [{"task": "t1", "attempts": 2, "final_valid": False}]
+    phase._goal_attempt_log = [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
     phase._started_at = None
 
     err = MessageProcessingError(
@@ -656,7 +657,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     assert isinstance(cp, FailedCheckpoint)
     assert cp.status == CheckpointStatus.FAILED
     assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
-    assert cp.phase_data["goal_validations"] == [{"task": "t1", "attempts": 2, "final_valid": False}]
+    assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
     assert cp.error == "something went wrong"
 
 

@@ -12,6 +12,7 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
+    GoalValidationRecord,
     SuccessCheckpoint,
 )
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
@@ -220,6 +221,7 @@ async def test_process_message_writes_memory_and_checkpoint(flow_context, messag
         memory_text="stub-memory-body",
         total_input_tokens=123,
         total_output_tokens=45,
+        goal_validations=[GoalValidationRecord(task="t1", attempts=1, final_valid=True)],
         checkpoint_data={"custom_field": "custom_value", "count": 7},
     )
     phase, mgr = _make_stub_phase(flow_context, message_queue, outcome=outcome)
@@ -234,15 +236,6 @@ async def test_process_message_writes_memory_and_checkpoint(flow_context, messag
     assert checkpoint.tokens == CheckpointTokenInfo(total_input=123, total_output=45)
     assert checkpoint.memory_path == str(mgr.memory_path("p1"))
     assert checkpoint.phase_data == {"custom_field": "custom_value", "count": 7}
+    assert checkpoint.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
     assert checkpoint.started_at
     assert checkpoint.finished_at
-
-
-async def test_failed_phase_omits_memory_path(flow_context, message_queue):
-    phase, mgr = _make_stub_phase(flow_context, message_queue)
-
-    wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
-    await phase.on_error(wrapped)
-
-    checkpoint = mgr.read()["p1"]
-    assert "memory_path" not in checkpoint

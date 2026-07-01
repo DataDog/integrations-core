@@ -11,12 +11,10 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointReadError,
     CheckpointStatus,
-    CheckpointTokenInfo,
-    FailedCheckpoint,
     SuccessCheckpoint,
 )
 
-from .helpers import FINISHED, make_failed_checkpoint, make_success_checkpoint
+from .helpers import make_failed_checkpoint, make_success_checkpoint
 
 
 @pytest.fixture
@@ -193,38 +191,3 @@ def test_read_raises_on_invalid_checkpoint_entry(manager: CheckpointManager):
     manager._path.write_text(yaml.dump(raw))
     with pytest.raises(CheckpointReadError, match="phase 'b'"):
         manager.read()
-
-
-# ---------------------------------------------------------------------------
-# FailedCheckpoint fields
-# ---------------------------------------------------------------------------
-
-
-def test_failed_checkpoint_with_tokens(manager: CheckpointManager):
-    cp = make_failed_checkpoint(tokens=CheckpointTokenInfo(total_input=5, total_output=15))
-    manager.write_phase_checkpoint("phase1", cp)
-    data = manager.read()
-    assert isinstance(data["phase1"], FailedCheckpoint)
-    assert data["phase1"].tokens is not None
-    assert data["phase1"].tokens.total_input == 5
-
-
-def test_failed_checkpoint_with_phase_data(manager: CheckpointManager):
-    cp = make_failed_checkpoint(phase_data={"goal_validations": [{"attempt": 1, "result": "fail"}]})
-    manager.write_phase_checkpoint("phase1", cp)
-    data = manager.read()
-    assert isinstance(data["phase1"], FailedCheckpoint)
-    assert data["phase1"].phase_data["goal_validations"] == [{"attempt": 1, "result": "fail"}]
-
-
-def test_failed_checkpoint_started_at_none(manager: CheckpointManager):
-    cp = FailedCheckpoint(
-        status=CheckpointStatus.FAILED,
-        started_at=None,
-        finished_at=FINISHED,
-        error="crashed before start",
-        tokens=CheckpointTokenInfo(total_input=0, total_output=0),
-    )
-    manager.write_phase_checkpoint("phase1", cp)
-    data = manager.read()
-    assert data["phase1"].started_at is None

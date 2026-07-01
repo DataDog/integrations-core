@@ -20,6 +20,7 @@ from ddev.ai.runtime.checkpoints import (
     CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
+    GoalValidationRecord,
     SuccessCheckpoint,
 )
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
@@ -46,6 +47,7 @@ class PhaseOutcome:
     memory_text: str
     total_input_tokens: int = 0
     total_output_tokens: int = 0
+    goal_validations: list[GoalValidationRecord] | None = None
     checkpoint_data: dict[str, Any] = field(default_factory=dict)
 
 
@@ -157,6 +159,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                 total_output=outcome.total_output_tokens,
             ),
             memory_path=str(self._checkpoint_manager.memory_path(self._phase_id)),
+            goal_validations=outcome.goal_validations,
             phase_data=outcome.checkpoint_data,
         )
 
