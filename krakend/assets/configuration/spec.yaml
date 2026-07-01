@@ -84,5 +84,5 @@ files:
     overrides:
       cel_selector.example:
         processes:
-          - "process.name == 'krakend'"
+          - "process.name == 'krakend-this-will-never-match'"
   - template: auto_conf/discovery

@@ -10,7 +10,7 @@ ad_identifiers:
 #
 cel_selector:
   processes:
-  - process.name == 'krakend'
+  - process.name == 'krakend-this-will-never-match'
 
 ## Enables configuration discovery
 #
