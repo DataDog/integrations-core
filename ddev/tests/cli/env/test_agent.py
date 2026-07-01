@@ -35,7 +35,7 @@ def test_not_trigger_run(ddev, data_dir, mocker):
     assert result.exit_code == 0, result.output
     assert not result.output
 
-    invoke.assert_called_once_with(['status'])
+    invoke.assert_called_once_with(['status'], env_vars=None)
 
 
 def test_trigger_run(ddev, data_dir, mocker):
@@ -51,7 +51,7 @@ def test_trigger_run(ddev, data_dir, mocker):
     assert result.exit_code == 0, result.output
     assert not result.output
 
-    invoke.assert_called_once_with(['check', integration, '-l', 'debug'])
+    invoke.assert_called_once_with(['check', integration, '-l', 'debug'], env_vars=None)
 
 
 def test_trigger_run_inject_integration(ddev, data_dir, mocker):
@@ -67,4 +67,4 @@ def test_trigger_run_inject_integration(ddev, data_dir, mocker):
     assert result.exit_code == 0, result.output
     assert not result.output
 
-    invoke.assert_called_once_with(['check', integration, '-l', 'debug'])
+    invoke.assert_called_once_with(['check', integration, '-l', 'debug'], env_vars=None)
