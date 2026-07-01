@@ -15,7 +15,14 @@ from typing import TYPE_CHECKING, Any
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.phases.config import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointStatus,
+    CheckpointTokenInfo,
+    FailedCheckpoint,
+    GoalValidationRecord,
+    SuccessCheckpoint,
+)
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage
 
@@ -40,7 +47,8 @@ class PhaseOutcome:
     memory_text: str
     total_input_tokens: int = 0
     total_output_tokens: int = 0
-    extra_checkpoint: dict[str, Any] = field(default_factory=dict)
+    goal_validations: list[GoalValidationRecord] | None = None
+    checkpoint_data: dict[str, Any] = field(default_factory=dict)
 
 
 class Phase(AsyncProcessor[PhaseTrigger]):
@@ -142,25 +150,21 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
         outcome = await self.execute(context)
 
-        checkpoint_payload: dict[str, Any] = {
-            "status": "success",
-            "started_at": self._started_at.isoformat(),
-            "finished_at": datetime.now(UTC).isoformat(),
-            "tokens": {
-                "total_input": outcome.total_input_tokens,
-                "total_output": outcome.total_output_tokens,
-            },
-            "memory_path": str(self._checkpoint_manager.memory_path(self._phase_id)),
-        }
-        reserved = set(checkpoint_payload) & set(outcome.extra_checkpoint)
-        if reserved:
-            raise ValueError(
-                f"Phase {self._phase_id!r}: extra_checkpoint cannot override reserved keys: {sorted(reserved)}"
-            )
-        checkpoint_payload.update(outcome.extra_checkpoint)
+        checkpoint = SuccessCheckpoint(
+            status=CheckpointStatus.SUCCESS,
+            started_at=self._started_at.isoformat(),
+            finished_at=datetime.now(UTC).isoformat(),
+            tokens=CheckpointTokenInfo(
+                total_input=outcome.total_input_tokens,
+                total_output=outcome.total_output_tokens,
+            ),
+            memory_path=str(self._checkpoint_manager.memory_path(self._phase_id)),
+            goal_validations=outcome.goal_validations,
+            phase_data=outcome.checkpoint_data,
+        )
 
         self._checkpoint_manager.write_memory(self._phase_id, outcome.memory_text)
-        self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint_payload)
+        self._checkpoint_manager.write_phase_checkpoint(self._phase_id, checkpoint)
         await self._callbacks.fire_phase_finish(self._phase_id)
 
     async def on_success(self, message: PhaseTrigger) -> None:
@@ -177,12 +181,13 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         try:
             self._checkpoint_manager.write_phase_checkpoint(
                 self._phase_id,
-                {
-                    "status": "failed",
-                    "started_at": self._started_at.isoformat() if self._started_at else None,
-                    "finished_at": datetime.now(UTC).isoformat(),
-                    "error": str(error.original_exception),
-                },
+                FailedCheckpoint(
+                    status=CheckpointStatus.FAILED,
+                    started_at=self._started_at.isoformat() if self._started_at else None,
+                    finished_at=datetime.now(UTC).isoformat(),
+                    error=str(error.original_exception),
+                    tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+                ),
             )
         except Exception:
             self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)

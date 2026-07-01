@@ -15,11 +15,13 @@ from ddev.ai.phases.base import Phase
 from ddev.ai.phases.config import FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.resources import ResourceUnavailableError
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
+
+from .helpers import make_checkpoint
 
 
 @pytest.fixture
@@ -499,7 +501,7 @@ def linear_flow(tmp_path):
 def _write_checkpoints(flow_dir: Path, statuses: dict[str, dict]) -> None:
     manager = CheckpointManager(flow_dir / "checkpoints.yaml")
     for phase_id, data in statuses.items():
-        manager.write_phase_checkpoint(phase_id, data)
+        manager.write_phase_checkpoint(phase_id, make_checkpoint(CheckpointStatus(data["status"]), data))
 
 
 def _drain_trigger_phase_ids(orchestrator) -> list:
