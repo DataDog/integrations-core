@@ -752,28 +752,6 @@ async def test_compact_context_before_on_first_task_is_noop(flow_dir, monkeypatc
     assert mock_agent.compact_call_count == 1
 
 
-# ---------------------------------------------------------------------------
-# TaskConfig — context flag validation
-# ---------------------------------------------------------------------------
-
-
-def test_task_config_rejects_both_context_flags():
-    with pytest.raises(ValueError, match="mutually exclusive"):
-        TaskConfig(name="t1", prompt="x", clear_context_before=True, compact_context_before=True)
-
-
-def test_task_config_accepts_clear_context_alone():
-    t = TaskConfig(name="t1", prompt="x", clear_context_before=True)
-    assert t.clear_context_before is True
-    assert t.compact_context_before is False
-
-
-def test_task_config_accepts_compact_context_alone():
-    t = TaskConfig(name="t1", prompt="x", compact_context_before=True)
-    assert t.compact_context_before is True
-    assert t.clear_context_before is False
-
-
 async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch, message_queue):
     """GoalParseError is treated the same as GoalAttemptsExhausted: logged with final_valid=False."""
     from ddev.ai.phases.goal import GoalParseError

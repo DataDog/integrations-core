@@ -37,6 +37,14 @@ def test_task_context_flags_mutually_exclusive():
         TaskConfig(name="t", prompt="p", clear_context_before=True, compact_context_before=True)
 
 
+@pytest.mark.parametrize("flag", ["clear_context_before", "compact_context_before"], ids=["clear", "compact"])
+def test_task_accepts_single_context_flag(flag):
+    t = TaskConfig(name="t", prompt="p", **{flag: True})
+    other = "compact_context_before" if flag == "clear_context_before" else "clear_context_before"
+    assert getattr(t, flag) is True
+    assert getattr(t, other) is False
+
+
 def test_task_goal_consistency_both_set():
     with pytest.raises(ValidationError):
         TaskConfig(name="t", prompt="p", goal="g", goal_ref="r")

@@ -49,7 +49,7 @@ def test_unknown_phase_ref_accumulates(tmp_path):
         "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: missing\n",
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    assert eng.flows["demo"].status.value == "broken"
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
     assert any(e.kind is ErrorKind.PHASE and e.subject == "missing" for e in eng.flows["demo"].errors)
     with pytest.raises(FlowConfigError):
         eng.get_flow("demo")
@@ -77,16 +77,23 @@ def test_missing_agent_accumulates(tmp_path):
     assert any(e.kind is ErrorKind.AGENT and e.subject == "nope" for e in eng.flows["demo"].errors)
 
 
-def test_missing_prompt_ref_accumulates(tmp_path):
+@pytest.mark.parametrize(
+    "phase_body,kind",
+    [
+        ("    tasks:\n      - name: t\n        prompt_ref: nope\n", ErrorKind.PROMPT),
+        ("    checkpoint:\n      memory_prompt_ref: nope\n", ErrorKind.MEMORY),
+    ],
+    ids=["prompt_ref", "memory_prompt_ref"],
+)
+def test_missing_ref_accumulates(tmp_path, phase_body, kind):
     write(
         tmp_path / "f.yaml",
-        "- type: phase\n  config:\n    name: p\n"
-        "    tasks:\n      - name: t\n        prompt_ref: nope\n"
-        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
+        "- type: phase\n  config:\n    name: p\n" + phase_body + "- type: flow\n  config:\n"
+        "    name: demo\n    flow:\n      - phase: p\n",
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any(e.kind is ErrorKind.PROMPT and e.subject == "nope" for e in eng.flows["demo"].errors)
+    assert any(e.kind is kind and e.subject == "nope" for e in eng.flows["demo"].errors)
 
 
 def test_missing_goal_ref_accumulates(tmp_path):
@@ -100,18 +107,6 @@ def test_missing_goal_ref_accumulates(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
     assert any(e.kind is ErrorKind.GOAL and e.subject == "nope" for e in eng.flows["demo"].errors)
-
-
-def test_missing_memory_prompt_ref_accumulates(tmp_path):
-    write(
-        tmp_path / "f.yaml",
-        "- type: phase\n  config:\n    name: p\n"
-        "    checkpoint:\n      memory_prompt_ref: nope\n"
-        "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n",
-    )
-    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any(e.kind is ErrorKind.MEMORY and e.subject == "nope" for e in eng.flows["demo"].errors)
 
 
 def test_dependency_not_scheduled_accumulates(tmp_path):
@@ -245,6 +240,13 @@ def test_get_flow_unknown_name_raises(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     with pytest.raises(FlowConfigError):
         eng.get_flow("nope")
+
+
+def test_get_flow_missing_surfaces_file_error_note(tmp_path):
+    write(tmp_path / "bad.yaml", "not valid: [")
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    with pytest.raises(FlowConfigError, match="failed to parse"):
+        eng.get_flow("anything")
 
 
 def real_phase_registry():

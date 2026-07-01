@@ -52,6 +52,13 @@ def test_parse_md_file_invalid_yaml_raises(tmp_path):
         parse_md_file(f)
 
 
+def test_parse_md_file_non_mapping_front_matter(tmp_path):
+    f = tmp_path / "a.md"
+    f.write_text("---\n- a\n- b\n---\nBody.")
+    with pytest.raises(FlowConfigError, match="must be a mapping"):
+        parse_md_file(f)
+
+
 def test_parse_md_file_missing_file_raises(tmp_path):
     with pytest.raises(FlowConfigError, match="Cannot read"):
         parse_md_file(tmp_path / "nonexistent.md")

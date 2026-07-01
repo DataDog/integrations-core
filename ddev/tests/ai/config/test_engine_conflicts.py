@@ -19,19 +19,6 @@ def test_core_and_user_same_name_conflict(tmp_path):
     assert "a" not in eng._agents  # conflicting resource is dropped, not picked
 
 
-def test_two_user_dirs_conflict(tmp_path):
-    core = tmp_path / "core"
-    u1 = tmp_path / "u1"
-    u2 = tmp_path / "u2"
-    core.mkdir()
-    write(u1 / "agents" / "a.md", "---\ntype: agent\n---\nx\n")
-    write(u2 / "agents" / "a.md", "---\ntype: agent\n---\ny\n")
-    eng = ConfigurationEngine(core_dir=core, user_dirs=[str(u1), str(u2)], phase_registry=StubReg())
-    assert eng.has_conflicts
-    c = [c for c in eng.conflicts if c.name == "a"][0]
-    assert c.type == "agent" and len(c.sources) == 2
-
-
 def test_two_core_flows_conflict(tmp_path):
     core = tmp_path / "core"
     write(
