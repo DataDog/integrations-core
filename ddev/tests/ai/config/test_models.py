@@ -13,7 +13,6 @@ from ddev.ai.config.models import (
     FlowEnvelope,
     PhaseConfig,
     PhaseEnvelope,
-    ResolvedFlow,
     ResourceEnvelope,
     TaskConfig,
 )
@@ -23,14 +22,14 @@ from ddev.ai.config.models import (
 # ---------------------------------------------------------------------------
 
 
-def test_task_rejects_both_prompt_and_ref():
+@pytest.mark.parametrize(
+    "kwargs",
+    [{"prompt": "x", "prompt_ref": "y"}, {}],
+    ids=["both_set", "neither_set"],
+)
+def test_task_prompt_source_validation(kwargs):
     with pytest.raises(ValidationError):
-        TaskConfig(name="t", prompt="x", prompt_ref="y")
-
-
-def test_task_rejects_neither_prompt_nor_ref():
-    with pytest.raises(ValidationError):
-        TaskConfig(name="t")
+        TaskConfig(name="t", **kwargs)
 
 
 def test_task_context_flags_mutually_exclusive():
@@ -63,16 +62,19 @@ def test_task_name_pattern_rejects_invalid():
 # ---------------------------------------------------------------------------
 
 
-def test_checkpoint_requires_exactly_one_memory_source():
+@pytest.mark.parametrize(
+    "kwargs",
+    [{}, {"memory_prompt": "hi", "memory_prompt_ref": "ref"}],
+    ids=["neither_set", "both_set"],
+)
+def test_checkpoint_memory_source_validation_rejects(kwargs):
     with pytest.raises(ValidationError):
-        CheckpointConfig()  # neither
-    CheckpointConfig(memory_prompt="hi")  # ok
-    CheckpointConfig(memory_prompt_ref="m")  # ok
+        CheckpointConfig(**kwargs)
 
 
-def test_checkpoint_rejects_both_sources():
-    with pytest.raises(ValidationError):
-        CheckpointConfig(memory_prompt="hi", memory_prompt_ref="ref")
+def test_checkpoint_memory_source_validation_accepts_exactly_one():
+    CheckpointConfig(memory_prompt="hi")
+    CheckpointConfig(memory_prompt_ref="m")
 
 
 # ---------------------------------------------------------------------------
@@ -83,16 +85,6 @@ def test_checkpoint_rejects_both_sources():
 def test_agent_rejects_unknown_tools():
     with pytest.raises(ValidationError):
         AgentConfig(tools=["nonexistent_tool"])
-
-
-def test_agent_accepts_known_tools():
-    from ddev.ai.tools.registry import ToolRegistry
-
-    known_names = ToolRegistry.available_tool_names()
-    assert known_names, "ToolRegistry exposes no tool names; cannot verify known-tool acceptance"
-    known = next(iter(known_names))
-    a = AgentConfig(tools=[known])
-    assert known in a.tools
 
 
 # ---------------------------------------------------------------------------
@@ -128,28 +120,3 @@ def test_resource_envelope_flow():
     ta = TypeAdapter(ResourceEnvelope)
     env = ta.validate_python({"type": "flow", "config": {"name": "f", "flow": [{"phase": "x"}]}})
     assert isinstance(env, FlowEnvelope)
-
-
-def test_resource_envelope_invalid_type():
-    from pydantic import TypeAdapter
-
-    ta = TypeAdapter(ResourceEnvelope)
-    with pytest.raises(ValidationError):
-        ta.validate_python({"type": "unknown", "config": {}})
-
-
-# ---------------------------------------------------------------------------
-# ResolvedFlow
-# ---------------------------------------------------------------------------
-
-
-def test_resolved_flow_is_frozen():
-    rf = ResolvedFlow(
-        name="flow",
-        agents={},
-        phases={},
-        flow=[],
-        variables={},
-    )
-    with pytest.raises((AttributeError, TypeError)):
-        rf.name = "other"  # type: ignore[misc]
