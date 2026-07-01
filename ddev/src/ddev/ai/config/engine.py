@@ -380,7 +380,7 @@ class ConfigurationEngine:
                 )
             ]
         try:
-            self._phase_registry.get(pc.class_).validate_config(pc.name, pc, self._ok_agents)
+            self._phase_registry.get(pc.class_).validate_config(pc.name, pc)
         except FlowConfigError as e:
             return [FlowError(ErrorKind.PHASE, str(e), subject=pc.name, phase=pc.name, sources=[phase_src])]
         except Exception as e:

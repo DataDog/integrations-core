@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.models import AgentConfig, PhaseConfig
+from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
@@ -87,12 +87,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         return True
 
     @classmethod
-    def validate_config(
-        cls,
-        phase_id: str,
-        config: PhaseConfig,
-        agents: dict[str, AgentConfig],
-    ) -> None:
+    def validate_config(cls, phase_id: str, config: PhaseConfig) -> None:
         """Override to enforce per-subclass config invariants. Raise FlowConfigError on mismatch."""
         return None
 

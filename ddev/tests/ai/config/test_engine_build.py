@@ -269,7 +269,7 @@ def test_phase_class_validate_config_non_flowconfig_error_accumulates(tmp_path):
         def get(self, n):
             class Boom:
                 @classmethod
-                def validate_config(cls, phase_id, config, agents):
+                def validate_config(cls, phase_id, config):
                     raise ValueError("kaboom")
 
             return Boom

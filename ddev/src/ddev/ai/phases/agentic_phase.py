@@ -56,16 +56,9 @@ class AgenticPhase(Phase):
         self._total_output_tokens: int = 0
 
     @classmethod
-    def validate_config(
-        cls,
-        phase_id: str,
-        config: PhaseConfig,
-        agents: dict[str, AgentConfig],
-    ) -> None:
+    def validate_config(cls, phase_id: str, config: PhaseConfig) -> None:
         if config.agent is None:
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
-        if config.agent not in agents:
-            raise FlowConfigError(f"Phase {phase_id!r} references unknown agent: {config.agent!r}")
         if not config.tasks:
             raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
 

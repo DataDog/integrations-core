@@ -13,7 +13,7 @@ from prometheus_client.openmetrics.parser import text_string_to_metric_families 
 from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
 from ddev.ai.config.errors import FlowConfigError
-from ddev.ai.config.models import AgentConfig, PhaseConfig
+from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.base import Phase, PhaseOutcome
 
 REQUEST_TIMEOUT_SECONDS = 10.0
@@ -163,12 +163,7 @@ class InspectEndpointPhase(Phase):
     """
 
     @classmethod
-    def validate_config(
-        cls,
-        phase_id: str,
-        config: PhaseConfig,
-        agents: dict[str, AgentConfig],
-    ) -> None:
+    def validate_config(cls, phase_id: str, config: PhaseConfig) -> None:
         if config.agent is not None:
             raise FlowConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'agent'")
         if config.tasks:

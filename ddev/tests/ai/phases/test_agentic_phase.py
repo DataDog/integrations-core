@@ -47,21 +47,18 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
     "config,match",
     [
         (PhaseConfig(name="p1", tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
-        (PhaseConfig(name="p1", agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
         (PhaseConfig(name="p1", agent="writer"), "at least one task"),
     ],
-    ids=["missing_agent", "unknown_agent", "empty_tasks"],
+    ids=["missing_agent", "empty_tasks"],
 )
 def test_validate_config_rejects_invalid(config, match):
     with pytest.raises(FlowConfigError, match=match):
-        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
+        AgenticPhase.validate_config("p1", config)
 
 
 def test_validate_config_accepts_valid():
     AgenticPhase.validate_config(
-        "p1",
-        PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]),
-        {"writer": AgentConfig()},
+        "p1", PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")])
     )
 
 

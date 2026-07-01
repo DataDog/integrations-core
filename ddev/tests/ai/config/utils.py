@@ -12,7 +12,7 @@ def write(p: Path, text: str) -> None:
 
 class NoopPhase:
     @classmethod
-    def validate_config(cls, phase_id, config, agents):
+    def validate_config(cls, phase_id, config):
         return None
 
 
