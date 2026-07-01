@@ -101,7 +101,7 @@ ADAPTIVE_CONCURRENCY_METRICS = [
     "envoy.http.adaptive_concurrency.gradient_controller.sample_rtt_msecs",
 ]
 
-ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG = ['stat_prefix:ingress-https']
+ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG = ['stat_prefix:ingress_http']
 
 ADAPTIVE_CONCURRENCY_METRIC_VALUES = {
     "envoy.http.adaptive_concurrency.gradient_controller.rq_blocked": 5,
