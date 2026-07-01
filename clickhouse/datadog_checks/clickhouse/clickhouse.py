@@ -10,7 +10,7 @@ from clickhouse_connect.driver import httputil
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
 from . import advanced_queries, queries, utils
@@ -64,8 +64,6 @@ class ClickhouseCheck(DatabaseCheck):
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
 
-        # Initialize TagManager for tag management (similar to MySQL)
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self._add_core_tags()
 
@@ -141,11 +139,6 @@ class ClickhouseCheck(DatabaseCheck):
             self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
         else:
             self.parts_and_merges = None
-
-    @property
-    def tags(self) -> list[str]:
-        """Return the current list of tags from the TagManager."""
-        return list(self.tag_manager.get_tags())
 
     def _add_core_tags(self):
         """
