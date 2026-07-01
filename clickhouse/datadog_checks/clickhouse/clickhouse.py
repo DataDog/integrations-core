@@ -15,6 +15,7 @@ from datadog_checks.base.utils.serialization import json
 
 from . import advanced_queries, queries, utils
 from .__about__ import __version__
+from .asynchronous_inserts import ClickhouseAsynchronousInserts
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
 from .metadata import ClickhouseMetadata
@@ -141,6 +142,14 @@ class ClickhouseCheck(DatabaseCheck):
             self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
         else:
             self.parts_and_merges = None
+
+        # Initialize asynchronous insert buffer snapshot monitoring (from system.asynchronous_inserts)
+        if self._config.dbm and self._config.asynchronous_insert_buffer_snapshot.enabled:
+            self.asynchronous_insert_buffer_snapshot = ClickhouseAsynchronousInserts(
+                self, self._config.asynchronous_insert_buffer_snapshot
+            )
+        else:
+            self.asynchronous_insert_buffer_snapshot = None
 
     @property
     def tags(self) -> list[str]:
@@ -285,6 +294,10 @@ class ClickhouseCheck(DatabaseCheck):
         # Run parts and merges monitoring if enabled
         if self.parts_and_merges:
             self.parts_and_merges.run_job_loop(self.tags)
+
+        # Run asynchronous inserts monitoring if enabled
+        if self.asynchronous_insert_buffer_snapshot:
+            self.asynchronous_insert_buffer_snapshot.run_job_loop(self.tags)
 
     def get_queries(self) -> list[dict]:
         query_list = []
@@ -557,6 +570,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.metadata.cancel()
         if self.parts_and_merges:
             self.parts_and_merges.cancel()
+        if self.asynchronous_insert_buffer_snapshot:
+            self.asynchronous_insert_buffer_snapshot.cancel()
 
         # Wait for job loops to finish
         if self.statement_metrics and self.statement_metrics._job_loop_future:
@@ -573,6 +588,8 @@ class ClickhouseCheck(DatabaseCheck):
             self.metadata._job_loop_future.result()
         if self.parts_and_merges and self.parts_and_merges._job_loop_future:
             self.parts_and_merges._job_loop_future.result()
+        if self.asynchronous_insert_buffer_snapshot and self.asynchronous_insert_buffer_snapshot._job_loop_future:
+            self.asynchronous_insert_buffer_snapshot._job_loop_future.result()
 
         # Close main client
         if self._client:
