@@ -18,17 +18,52 @@ import string
 import prometheus_client.parser as _prom_parser
 
 
+def _is_char_escaped(text, pos):
+    """Return True if the character at pos is preceded by an odd number of backslashes."""
+    num_bslashes = 0
+    while pos > num_bslashes and text[pos - 1 - num_bslashes] == '\\':
+        num_bslashes += 1
+    return num_bslashes % 2 == 1
+
+
 def _next_unquoted_char(text, chs, startidx=0):
-    """Find the next occurrence of any character in chs."""
+    """Find the next unquoted occurrence of any character in chs.
+
+    Uses str.find() to jump to candidate characters, skipping over quoted regions.
+    """
     if chs is None:
         chs = string.whitespace
 
-    best = -1
-    for ch in chs:
-        p = text.find(ch, startidx)
-        if p != -1 and (best == -1 or p < best):
-            best = p
-    return best
+    i = startidx
+    n = len(text)
+
+    while i < n:
+        best = -1
+        for ch in chs:
+            p = text.find(ch, i)
+            if p != -1 and (best == -1 or p < best):
+                best = p
+
+        # Find the next unescaped opening quote
+        q = text.find('"', i)
+        while q != -1 and _is_char_escaped(text, q):
+            q = text.find('"', q + 1)
+
+        # If no quote comes before the best candidate, return it directly
+        if q == -1 or (best != -1 and best < q):
+            return best
+
+        # A quoted region starts before the candidate; skip over it
+        close = text.find('"', q + 1)
+        while close != -1 and _is_char_escaped(text, close):
+            close = text.find('"', close + 1)
+
+        if close == -1:
+            return -1
+
+        i = close + 1
+
+    return -1
 
 
 def apply():
