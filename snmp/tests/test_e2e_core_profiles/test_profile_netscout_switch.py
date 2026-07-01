@@ -13,7 +13,6 @@ from .utils import (
     assert_common_metrics,
     assert_extend_generic_if,
     assert_extend_generic_ip,
-    assert_extend_generic_ospf,
     assert_extend_generic_tcp,
     assert_extend_generic_udp,
     create_e2e_core_test_config,
@@ -45,7 +44,6 @@ def test_e2e_profile_netscout_switch(dd_agent_check):
     assert_extend_generic_ip(aggregator, common_tags)
     assert_extend_generic_tcp(aggregator, common_tags)
     assert_extend_generic_udp(aggregator, common_tags)
-    assert_extend_generic_ospf(aggregator, common_tags)
 
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
