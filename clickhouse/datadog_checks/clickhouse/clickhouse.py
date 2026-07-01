@@ -59,7 +59,6 @@ class ClickhouseCheck(DatabaseCheck):
         self._resolved_hostname = None
         self._database_hostname = None
         self._database_identifier = None
-        self._agent_hostname = None
         self._dbms_version = None
 
         # Track last emission time for database instance metadata (rate limiting)
@@ -359,13 +358,6 @@ class ClickhouseCheck(DatabaseCheck):
         if self._database_hostname is None:
             self._database_hostname = resolve_db_host(self._config.server)
         return self._database_hostname
-
-    @property
-    def agent_hostname(self):
-        """Get the agent hostname."""
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
 
     @property
     def database_identifier(self) -> str:

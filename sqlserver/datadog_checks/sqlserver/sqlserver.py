@@ -146,7 +146,6 @@ class SQLServer(DatabaseCheck):
         )
 
         self._resolved_hostname = None
-        self._agent_hostname = None
         self._database_hostname = None
         self._database_identifier = None
         self._connection = None
@@ -503,13 +502,6 @@ class SQLServer(DatabaseCheck):
             "hostname": self.reported_hostname,
             "raw": True,
         }
-
-    @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
 
     @property
     def connection(self):

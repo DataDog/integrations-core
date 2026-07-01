@@ -121,7 +121,6 @@ class MySql(DatabaseCheck):
         self.cluster_uuid = None
         self._resolved_hostname = None
         self._database_identifier = None
-        self._agent_hostname = None
         self._database_hostname = None
         self._events_wait_current_enabled = None
         self._group_replication_active = None
@@ -246,13 +245,6 @@ class MySql(DatabaseCheck):
             tag_dict['mysql_sock'] = str(self._config.mysql_sock)
             self._database_identifier = template.safe_substitute(**tag_dict)
         return self._database_identifier
-
-    @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
 
     @property
     def database_hostname(self):
