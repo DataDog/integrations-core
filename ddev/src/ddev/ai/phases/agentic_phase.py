@@ -72,7 +72,9 @@ class AgenticPhase(Phase):
         checkpoint_manager: CheckpointManager,
         context: FlowContext,
     ) -> AgenticPhase:
-        # config.agent is guaranteed set & known by validate_config.
+        # config.agent is guaranteed non-None by validate_config; the engine's
+        # _validate_phase_agent guarantees it names a registered, non-broken agent
+        # before this flow can ever reach a resolved, runnable state.
         agent_name = cast(str, config.agent)
         agent_config = resources.agent_config(agent_name)
         process_factory = resources.process_factory
