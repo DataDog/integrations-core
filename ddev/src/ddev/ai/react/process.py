@@ -7,7 +7,7 @@ import asyncio
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.scope import AgentScope
-from ddev.ai.agent.types import AgentResponse, StopReason, ToolResultMessage
+from ddev.ai.agent.types import AgentResponse, StopReason, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
@@ -16,14 +16,13 @@ from ddev.ai.tools.core.types import ToolResult
 # tool_use block is incomplete and was never executed. We must still answer every tool_use
 # with a tool_result, otherwise the next send() replays a dangling tool_use and the provider
 # rejects the request. This synthetic result repairs the conversation and nudges the model
-# toward a smaller follow-up.
-TRUNCATED_TOOL_CALL_ERROR = (
+# toward a smaller follow-up. Each tool owns the specifics of that nudge via
+# BaseTool.truncated_call_hint; this is only the shared, mechanical part of the message.
+TRUNCATED_TOOL_CALL_PREFIX = (
     "This tool call was NOT executed: your previous response was truncated after reaching the "
-    "maximum output token limit, so the tool call is incomplete. Retry with a smaller, more "
-    "targeted change — edit a single small unique region instead of rewriting a whole file, or "
-    "split the work across several sequential tool calls. For a full-file rewrite prefer "
-    "create_file over one huge edit_file."
+    "maximum output token limit, so the tool call is incomplete. "
 )
+GENERIC_TRUNCATED_TOOL_CALL_HINT = "Retry with a smaller, more targeted change."
 
 # Upper bound on back-to-back truncated turns before we give up, to avoid an unrecoverable loop
 # where the model keeps emitting an oversized tool call that never fits in the output budget.
@@ -76,7 +75,7 @@ class ReActProcess:
         await self._callbacks.fire_before_compact(self._scope)
 
         compact_response = None
-        if response is None or response.stop_reason != StopReason.TOOL_USE:
+        if response is None or not response.tool_calls:
             compact_response = await self._agent.compact()
         else:
             compact_response = await self._agent.compact_preserving_last_turn()
@@ -94,7 +93,7 @@ class ReActProcess:
             return False
         return True
 
-    async def _execute_tool_calls(self, tool_calls: list) -> list[ToolResult]:
+    async def _execute_tool_calls(self, tool_calls: list[ToolCall]) -> list[ToolResult]:
         """Run all tool calls in parallel, converting any raised exception into a failure result."""
         raw_results = await asyncio.gather(
             *[self._tool_registry.run(tc.name, tc.input) for tc in tool_calls],
@@ -105,10 +104,19 @@ class ReActProcess:
             for r in raw_results
         ]
 
-    @staticmethod
-    def _truncated_tool_results(tool_calls: list) -> list[ToolResult]:
-        """Synthetic failure results for a turn truncated by the output token limit."""
-        return [ToolResult(success=False, error=TRUNCATED_TOOL_CALL_ERROR) for _ in tool_calls]
+    def _truncated_tool_results(self, tool_calls: list[ToolCall]) -> list[ToolResult]:
+        """Synthetic failure results for a turn truncated by the output token limit.
+
+        Each result carries the specific tool's own recovery hint (BaseTool.truncated_call_hint)
+        so the guidance matches what actually broke — e.g. a truncated edit_file and a truncated
+        create_file need different follow-ups. Falls back to a generic hint for unknown tools.
+        """
+        results = []
+        for tc in tool_calls:
+            tool = self._tool_registry.get(tc.name)
+            hint = (tool.truncated_call_hint if tool else None) or GENERIC_TRUNCATED_TOOL_CALL_HINT
+            results.append(ToolResult(success=False, error=TRUNCATED_TOOL_CALL_PREFIX + hint))
+        return results
 
     async def start(self, prompt: str, allowed_tools: list[str] | None = None) -> ReActResult:
         """

@@ -59,11 +59,19 @@ class MockAgent(BaseAgent[Any]):
         self.reset_calls += 1
 
 
+class FakeTool:
+    """Minimal stand-in for a registered tool, only exposing what _truncated_tool_results needs."""
+
+    def __init__(self, truncated_call_hint: str | None) -> None:
+        self.truncated_call_hint = truncated_call_hint
+
+
 class MockToolRegistry:
     """Minimal tool registry that always returns a configurable ToolResult."""
 
-    def __init__(self, result: ToolResult | None = None) -> None:
+    def __init__(self, result: ToolResult | None = None, tools: dict[str, FakeTool] | None = None) -> None:
         self._result = result or ToolResult(success=True, data=_TOOL_RESULT_DATA)
+        self._tools = tools or {}
         self.run_calls: list[tuple[str, dict]] = []
 
     @property
@@ -73,6 +81,9 @@ class MockToolRegistry:
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         self.run_calls.append((name, raw))
         return self._result
+
+    def get(self, name: str) -> FakeTool | None:
+        return self._tools.get(name)
 
 
 class RaisingToolRegistry:
@@ -89,6 +100,9 @@ class RaisingToolRegistry:
     async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
         self.run_calls.append((name, raw))
         raise self._exc
+
+    def get(self, name: str) -> None:
+        return None
 
 
 class PerToolRegistry:
@@ -108,6 +122,9 @@ class PerToolRegistry:
         if isinstance(behavior, BaseException):
             raise behavior
         return behavior
+
+    def get(self, name: str) -> None:
+        return None
 
 
 class CallbackRecorder:
@@ -457,6 +474,65 @@ async def test_max_tokens_without_tool_calls_returns_immediately() -> None:
     assert len(agent.send_calls) == 1
 
 
+async def test_truncated_tool_call_uses_tool_specific_hint() -> None:
+    """The synthetic failure message must use the failing tool's own truncated_call_hint."""
+    tc = make_tool_call("tc_01", "edit_file")
+    registry = MockToolRegistry(tools={"edit_file": FakeTool("use append_file instead")})
+    agent = MockAgent(
+        [
+            make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
+            make_response(StopReason.END_TURN),
+        ]
+    )
+
+    await make_process(agent, registry=registry).start("Rewrite the file")
+
+    sent_back: list[ToolResultMessage] = agent.send_calls[1]
+    assert "use append_file instead" in (sent_back[0].result.error or "")
+
+
+async def test_truncated_tool_call_falls_back_to_generic_hint_for_unknown_tool() -> None:
+    """A tool with no truncated_call_hint (or not found in the registry) gets the generic hint."""
+    tc = make_tool_call("tc_01", "mystery_tool")
+    registry = MockToolRegistry()
+    agent = MockAgent(
+        [
+            make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
+            make_response(StopReason.END_TURN),
+        ]
+    )
+
+    await make_process(agent, registry=registry).start("x")
+
+    sent_back: list[ToolResultMessage] = agent.send_calls[1]
+    assert "Retry with a smaller, more targeted change." in (sent_back[0].result.error or "")
+
+
+async def test_truncated_tool_calls_get_independent_hints_per_call() -> None:
+    """Multiple pending tool_calls in one truncated turn each get their own tool's hint."""
+    tc_edit = make_tool_call("tc_01", "edit_file")
+    tc_create = make_tool_call("tc_02", "create_file")
+    registry = MockToolRegistry(
+        tools={
+            "edit_file": FakeTool("edit hint"),
+            "create_file": FakeTool("create hint"),
+        }
+    )
+    agent = MockAgent(
+        [
+            make_response(StopReason.MAX_TOKENS, tool_calls=[tc_edit, tc_create]),
+            make_response(StopReason.END_TURN),
+        ]
+    )
+
+    await make_process(agent, registry=registry).start("x")
+
+    sent_back: list[ToolResultMessage] = agent.send_calls[1]
+    results = {msg.tool_call_id: msg.result for msg in sent_back}
+    assert "edit hint" in (results["tc_01"].error or "")
+    assert "create hint" in (results["tc_02"].error or "")
+
+
 # ---------------------------------------------------------------------------
 # Callbacks fired correctly
 # ---------------------------------------------------------------------------
@@ -798,6 +874,44 @@ async def test_auto_compact_skipped_when_context_usage_is_none() -> None:
     agent = MockAgent(responses)
     await make_process(agent, compact_threshold_pct=75.0).start("task")
     assert agent.compact_preserving_turn_calls == 0
+
+
+async def test_auto_compact_preserves_last_turn_when_tool_use_pending() -> None:
+    """A plain TOOL_USE response with a pending tool_call must use compact_preserving_last_turn,
+    keeping the unresolved tool_use intact through compaction."""
+    tc1 = make_tool_call("tc_01")
+    tc2 = make_tool_call("tc_02")
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc1]),
+        make_response(StopReason.TOOL_USE, tool_calls=[tc2], context_usage=make_context_usage(80.0)),
+        make_response(StopReason.END_TURN),
+    ]
+    agent = MockAgent(responses)
+
+    await make_process(agent, compact_threshold_pct=75.0).start("task")
+
+    assert agent.compact_preserving_turn_calls == 1
+    assert agent.compact_calls == 0
+
+
+async def test_auto_compact_preserves_last_turn_for_truncated_pending_tool_call() -> None:
+    """A MAX_TOKENS response with a pending tool_call must also use compact_preserving_last_turn,
+    not the plain compact() — that would replay the still-unanswered dangling tool_use and
+    reproduce the provider 400 this whole recovery path exists to avoid."""
+    tc1 = make_tool_call("tc_01", "edit_file")
+    tc2 = make_tool_call("tc_02", "edit_file")
+    responses = [
+        make_response(StopReason.TOOL_USE, tool_calls=[tc1]),
+        make_response(StopReason.MAX_TOKENS, tool_calls=[tc2], context_usage=make_context_usage(80.0)),
+        make_response(StopReason.END_TURN),
+    ]
+    agent = MockAgent(responses)
+
+    result = await make_process(agent, compact_threshold_pct=75.0).start("task")
+
+    assert agent.compact_preserving_turn_calls == 1
+    assert agent.compact_calls == 0
+    assert result.iterations == 3
 
 
 async def test_auto_compact_tokens_included_in_result() -> None:

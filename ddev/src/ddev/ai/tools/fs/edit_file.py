@@ -40,6 +40,13 @@ class EditFileTool(FileRegistryTool[EditFileInput]):
     def name(self) -> str:
         return "edit_file"
 
+    @property
+    def truncated_call_hint(self) -> str:
+        return (
+            "Edit a single small unique region instead of rewriting a whole file. For a full "
+            "rewrite, use create_file with a smaller initial chunk, then append_file for the rest."
+        )
+
     async def __call__(self, tool_input: EditFileInput) -> ToolResult:
         try:
             path = self._assert_writable(tool_input.path)
