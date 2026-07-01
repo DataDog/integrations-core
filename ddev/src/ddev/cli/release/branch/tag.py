@@ -8,7 +8,8 @@ import click
 from httpx import HTTPStatusError
 from packaging.version import Version
 
-from .create import BRANCH_NAME_REGEX, BUILD_AGENT_YAML_PATH, find_build_agent_template_main_branch_matches
+from .build_agent import BUILD_AGENT_YAML_PATH, find_build_agent_template_main_branch_matches
+from .create import BRANCH_NAME_REGEX
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application

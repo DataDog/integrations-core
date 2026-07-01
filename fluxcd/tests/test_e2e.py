@@ -24,6 +24,8 @@ def test_source_controller_metrics(dd_agent_check):
         'fluxcd.gotk.reconcile.duration.seconds.bucket',
         'fluxcd.gotk.reconcile.duration.seconds.count',
         'fluxcd.gotk.reconcile.duration.seconds.sum',
+        # Emitted by kube-state-metrics (Flux 2.1+), not Flux controller /metrics endpoints.
+        'fluxcd.gotk.resource.info',
         'fluxcd.gotk.suspend.status',
         'fluxcd.process.cpu_seconds.count',
         'fluxcd.workqueue.adds.count',

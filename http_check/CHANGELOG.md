@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 12.7.1 / 2026-06-18
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 12.7.0 / 2026-06-09
+
+***Added***:
+
+* Add http_status_code tag to http metrics. ([#23731](https://github.com/DataDog/integrations-core/pull/23731))
+
 ## 12.6.2 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:

@@ -2470,6 +2470,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `id.orig_h_name.vals.0` to `ocsf.src_endpoint.hostname`
+              sources:
+                - id.orig_h_name.vals.0
+              target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `orig_l2_addr` to `ocsf.src_endpoint.mac`
               sources:
                 - orig_l2_addr
@@ -2489,6 +2496,13 @@ pipeline:
               sources:
                 - resp_l2_addr
               target: ocsf.dst_endpoint.mac
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `id.resp_h_name.vals.0` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - id.resp_h_name.vals.0
+              target: ocsf.dst_endpoint.hostname
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper

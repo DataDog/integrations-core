@@ -1,0 +1,1 @@
+Parameterize SQL Server Agent job history collection to avoid plan cache churn.

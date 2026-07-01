@@ -214,6 +214,25 @@ instances:
         #
         # samples_per_hour_per_query: 60
 
+    ## Configure per-table size and per-view refresh gauges derived from
+    ## `system.tables` and `system.view_refreshes`. Independent of
+    ## `collect_schemas` (which controls catalog structure collection)
+    ## so users can dashboard table sizes without enabling Schema Explorer.
+    ## Requires `dbm: true`.
+    #
+    # schema_metrics:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of per-table size and per-view refresh gauges.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 60
+        ## Set the schema metrics collection interval (in seconds). These
+        ## gauges change continuously, so 60s is a reasonable default.
+        #
+        # collection_interval: 60
+
     ## Configure collection of ClickHouse catalog metadata (databases,
     ## tables, views, columns) for Database Monitoring's Schema Explorer.
     ## Requires `dbm: true`.
