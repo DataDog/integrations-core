@@ -74,7 +74,7 @@ class ConfigConflict:
 class _DeclaredVar:
     name: str
     default: str | None
-    origin: str  # human label incl. path, for the message
+    origin: str  # name of the resource that declared the variable e.g. "agent 'writer'
     source: Path  # the declaring file, for FlowError.sources
 
 
@@ -326,16 +326,28 @@ class ConfigurationEngine:
         for fe in fc.flow:
             phase_entry = self._phases.get(fe.phase)
             if phase_entry is None:
-                errors.append(
-                    FlowError(
-                        ErrorKind.PHASE,
-                        f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered"
-                        f"{self._file_errors_note()}",
-                        subject=fe.phase,
-                        phase=fe.phase,
-                        sources=[self._flows[flow_name].source_file],
+                conflict = next((c for c in self._conflicts if c.type == "phase" and c.name == fe.phase), None)
+                if conflict is not None:
+                    errors.append(
+                        FlowError(
+                            ErrorKind.PHASE,
+                            f"Phase {fe.phase!r} referenced by flow {flow_name!r} is defined in multiple sources; "
+                            "resolve the conflict",
+                            subject=fe.phase,
+                            phase=fe.phase,
+                            sources=list(conflict.sources),
+                        )
                     )
-                )
+                else:
+                    errors.append(
+                        FlowError(
+                            ErrorKind.PHASE,
+                            f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered",
+                            subject=fe.phase,
+                            phase=fe.phase,
+                            sources=[self._flows[flow_name].source_file],
+                        )
+                    )
                 continue
             if isinstance(phase_entry, BrokenEntry):
                 errors.append(
@@ -391,7 +403,7 @@ class ConfigurationEngine:
             return [
                 FlowError(
                     ErrorKind.AGENT,
-                    f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered{self._file_errors_note()}",
+                    f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered",
                     subject=pc.agent,
                     phase=pc.name,
                     sources=[self._phases[pc.name].source_file],
@@ -462,7 +474,7 @@ class ConfigurationEngine:
             return [
                 FlowError(
                     kind,
-                    f"{label} {ref!r} referenced by phase {phase_name!r} is not registered{self._file_errors_note()}",
+                    f"{label} {ref!r} referenced by phase {phase_name!r} is not registered",
                     subject=ref,
                     phase=phase_name,
                     sources=[self._phases[phase_name].source_file],
@@ -544,9 +556,9 @@ class ConfigurationEngine:
             if pc.agent is not None and pc.agent in self._ok_agents:
                 agent_src = self._agents[pc.agent].source_file
                 for v in self._ok_agents[pc.agent].variables:
-                    declared.append(_DeclaredVar(v.name, v.default, f"agent {pc.agent!r} ({agent_src})", agent_src))
+                    declared.append(_DeclaredVar(v.name, v.default, f"agent {pc.agent!r}", agent_src))
             for v in pc.variables:
-                declared.append(_DeclaredVar(v.name, v.default, f"phase {pc.name!r} ({phase_src})", phase_src))
+                declared.append(_DeclaredVar(v.name, v.default, f"phase {pc.name!r}", phase_src))
         return declared
 
     def _collect_default_values(self, declared: list[_DeclaredVar]) -> tuple[dict[str, str], list[FlowError]]:

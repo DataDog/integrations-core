@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ddev.ai.config.engine import ConfigurationEngine
+from ddev.ai.config.engine import ConfigStatus, ConfigurationEngine
 
 from .utils import StubReg, write
 
@@ -63,3 +63,16 @@ def test_conflicts_expose_name_type_sources(tmp_path):
     assert len(conflict.sources) == 2
     source_names = {p.name for p in conflict.sources}
     assert source_names == {"bot.md"}
+
+
+def test_flow_referencing_conflicted_phase_reports_conflict(tmp_path):
+    core = tmp_path / "core"
+    write(core / "a.yaml", "- type: phase\n  config:\n    name: p\n")
+    write(core / "b.yaml", "- type: phase\n  config:\n    name: p\n")
+    write(core / "flow.yaml", "- type: flow\n  config:\n    name: demo\n    flow:\n      - phase: p\n")
+    eng = ConfigurationEngine(core_dir=core, user_dirs=[], phase_registry=StubReg())
+    diag = eng.flows["demo"]
+    assert diag.status == ConfigStatus.BROKEN
+    err = next(e for e in diag.errors if e.subject == "p")
+    assert "conflict" in err.message.lower() and "not registered" not in err.message
+    assert len(err.sources) == 2

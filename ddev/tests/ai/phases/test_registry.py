@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.registry import PhaseRegistry
 
@@ -105,6 +106,14 @@ def test_imported_class_not_registered():
     registry.register_from(FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     # BaseMessage is imported in messages.py but defined in event_bus — it should NOT be registered
     assert "BaseMessage" not in registry.known_names()
+
+
+def test_register_from_discovers_subpackage_phases():
+    registry = PhaseRegistry()
+    registry.register_from(CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
+    names = registry.known_names()
+    assert "AgenticPhase" in names
+    assert "InspectEndpointPhase" in names
 
 
 def test_discover_does_not_mutate_global_state():

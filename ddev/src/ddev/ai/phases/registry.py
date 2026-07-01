@@ -29,20 +29,21 @@ class PhaseRegistry:
         return self._registry[name]
 
     def register_from(self, phases_dir: Path, import_prefix: str) -> None:
-        """Import every non-private *.py in phases_dir and register Phase subclasses.
+        """Import every non-private *.py under phases_dir (recursively) and register Phase subclasses.
 
-        Modules are imported by dotted path: ``{import_prefix}.{file_stem}``. The
-        caller chooses the right (dir, prefix) pair. Import errors are fatal — a
-        syntax error in any discovered module aborts startup. Safe to call more
-        than once to accumulate from multiple directories.
+        Modules are imported by dotted path derived from their path relative to phases_dir, e.g.
+        ``openmetrics/inspect_endpoint.py`` -> ``{import_prefix}.openmetrics.inspect_endpoint``.
+        Import errors are fatal. Safe to call more than once to accumulate from multiple directories.
         """
-        for py_file in phases_dir.glob("*.py"):
-            if py_file.stem.startswith("_"):
+        for py_file in sorted(phases_dir.rglob("*.py")):
+            rel_parts = py_file.relative_to(phases_dir).with_suffix("").parts
+            if any(part.startswith("_") for part in rel_parts):  # skip __init__, _private.py, _private/…
                 continue
+            module_name = ".".join((import_prefix, *rel_parts))
             try:
-                module = importlib.import_module(f"{import_prefix}.{py_file.stem}")
+                module = importlib.import_module(module_name)
             except Exception as e:
-                raise FlowConfigError(f"Failed to import phase module '{py_file.stem}': {e}") from e
+                raise FlowConfigError(f"Failed to import phase module {module_name!r}: {e}") from e
             for _, obj in inspect.getmembers(module, inspect.isclass):
                 if issubclass(obj, Phase) and not inspect.isabstract(obj) and obj.__module__ == module.__name__:
                     self.register(obj.__name__, obj)

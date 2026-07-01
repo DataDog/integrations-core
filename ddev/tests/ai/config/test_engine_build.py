@@ -184,7 +184,8 @@ def test_missing_required_variable_accumulates(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
     err = next(e for e in eng.flows["demo"].errors if e.kind is ErrorKind.VARIABLE and e.subject == "x")
-    assert "Required variable" in err.message and "phase 'p'" in err.message and "f.yaml" in err.message
+    assert "Required variable" in err.message and "phase 'p'" in err.message
+    assert {p.name for p in err.sources} == {"f.yaml"}
 
 
 def test_conflicting_default_accumulates(tmp_path):
@@ -200,7 +201,6 @@ def test_conflicting_default_accumulates(tmp_path):
     err = next(e for e in eng.flows["demo"].errors if e.kind is ErrorKind.VARIABLE and e.subject == "x")
     assert "conflicting defaults" in err.message
     assert "agent 'ag'" in err.message and "phase 'p'" in err.message
-    assert "ag.md" in err.message and "f.yaml" in err.message
     assert {p.name for p in err.sources} == {"ag.md", "f.yaml"}  # both declaring files, not just one
     assert not any("Required variable" in e.message for e in eng.flows["demo"].errors)
 

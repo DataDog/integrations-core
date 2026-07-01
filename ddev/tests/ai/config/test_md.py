@@ -19,11 +19,8 @@ def test_parse_md_file_splits_front_matter_and_body(tmp_path):
 def test_parse_md_file_missing_front_matter(tmp_path):
     f = tmp_path / "a.md"
     f.write_text("no front matter")
-    try:
+    with pytest.raises(FlowConfigError, match="front matter"):
         parse_md_file(f)
-        raise AssertionError("expected FlowConfigError")
-    except FlowConfigError:
-        pass
 
 
 def test_parse_md_file_strips_body_whitespace(tmp_path):
