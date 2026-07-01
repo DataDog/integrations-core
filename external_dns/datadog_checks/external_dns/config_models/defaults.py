@@ -28,6 +28,22 @@ def instance_bearer_token_refresh_interval():
     return 60
 
 
+def instance_cache_metric_wildcards():
+    return True
+
+
+def instance_cache_shared_labels():
+    return True
+
+
+def instance_collect_counters_with_distributions():
+    return False
+
+
+def instance_collect_histogram_buckets():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 
@@ -36,12 +52,24 @@ def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_health_service_check():
+    return True
+
+
 def instance_enable_legacy_tags_normalization():
     return True
 
 
 def instance_health_service_check():
     return True
+
+
+def instance_histogram_buckets_as_distributions():
+    return False
+
+
+def instance_ignore_connection_errors():
+    return False
 
 
 def instance_kerberos_auth():
@@ -64,8 +92,12 @@ def instance_min_collection_interval():
     return 15
 
 
-def instance_namespace():
-    return 'service'
+def instance_non_cumulative_histogram_buckets():
+    return False
+
+
+def instance_openmetrics_endpoint():
+    return 'http://%%host%%:7979/metrics'
 
 
 def instance_persist_connections():
@@ -73,7 +105,7 @@ def instance_persist_connections():
 
 
 def instance_request_size():
-    return 10
+    return 16
 
 
 def instance_send_distribution_buckets():
@@ -104,6 +136,14 @@ def instance_skip_proxy():
     return False
 
 
+def instance_tag_by_endpoint():
+    return True
+
+
+def instance_telemetry():
+    return False
+
+
 def instance_timeout():
     return 10
 
@@ -118,6 +158,10 @@ def instance_tls_use_host_header():
 
 def instance_tls_verify():
     return True
+
+
+def instance_use_latest_spec():
+    return False
 
 
 def instance_use_legacy_auth_encoding():
