@@ -60,6 +60,10 @@ class AuthenticationError(requests.exceptions.HTTPError):
     """Authentication Error, unable to reach server"""
 
 
+class RequestError(requests.exceptions.HTTPError):
+    """Request Error, unable to get data from server"""
+
+
 def get_dynamic_tags(columns):
     dynamic_tags = []  # This is a list of (path to tag, name of tag)
     for column in columns:
@@ -270,7 +274,7 @@ class ESCheck(AgentCheck):
             tags = base_tags + ['index_name:' + idx['index']]
             for metric, desc in index_stats_for_version(version).items():
                 self._process_metric(index_data, metric, *desc, tags=tags)
-        self._get_index_search_stats(admin_forwarder, base_tags)
+        self._get_index_search_stats(admin_forwarder, version, base_tags)
 
     def _get_template_metrics(self, admin_forwarder, base_tags):
         try:
@@ -284,7 +288,7 @@ class ESCheck(AgentCheck):
         for metric, desc in TEMPLATE_METRICS.items():
             self._process_metric({'templates': filtered_templates}, metric, *desc, tags=base_tags)
 
-    def _get_index_search_stats(self, admin_forwarder, base_tags):
+    def _get_index_search_stats(self, admin_forwarder, version, base_tags):
         """
         Stats for searches in every index.
         """
@@ -292,7 +296,16 @@ class ESCheck(AgentCheck):
         # This endpoint can return more data, all of what the /_cat/indices endpoint returns except index health.
         # The health we can get from /_cluster/health if we pass level=indices query param. Reference:
         # https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html#cluster-health-api-query-params # noqa: E501
-        indices = self._get_data(self._join_url('/_stats/search', admin_forwarder))['indices']
+        index_stats_url = "/_stats/search"
+        if version >= [7, 2, 0]:
+            index_stats_url += "?forbid_closed_indices=false"
+
+        try:
+            indices = self._get_data(self._join_url(index_stats_url, admin_forwarder))['indices']
+        except RequestError as e:
+            self.log.debug("Error reading index search stats from servers (%s) - index search stats will be missing", e)
+            return
+
         for (idx_name, data), (m_name, path) in product(indices.items(), INDEX_SEARCH_STATS):
             tags = base_tags + ['index_name:' + idx_name]
             self._process_metric(data, m_name, 'gauge', path, tags=tags)
@@ -336,9 +349,14 @@ class ESCheck(AgentCheck):
                 resp = self.http.get(url)
             resp.raise_for_status()
         except Exception as e:
-            # this means we've hit a particular kind of auth error that means the config is broken
             if isinstance(resp, requests.Response) and resp.status_code == 400:
-                raise AuthenticationError("The ElasticSearch credentials are incorrect")
+                # A request was made with an invalid argument
+                if 'illegal_argument_exception' in resp.text:
+                    raise RequestError("The ElasticSearch request returned an illegal argument exception")
+
+                # this means we've hit a particular kind of auth error that means the config is broken
+                else:
+                    raise AuthenticationError("The ElasticSearch credentials are incorrect")
 
             if send_sc:
                 self.service_check(
