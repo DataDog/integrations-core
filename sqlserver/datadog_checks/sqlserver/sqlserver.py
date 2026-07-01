@@ -337,10 +337,6 @@ class SQLServer(DatabaseCheck):
         return agent_host_resolver(self.host)
 
     @property
-    def tags(self):
-        return self.tag_manager.get_tags()
-
-    @property
     def cloud_metadata(self):
         return self._cloud_metadata
 
