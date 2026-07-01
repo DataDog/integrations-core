@@ -18,7 +18,6 @@ from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
-    CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
     GoalValidationRecord,
@@ -133,7 +132,6 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
     assert mgr.memory_content("p1") == "summary"
     checkpoint = mgr.read()["p1"]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    assert checkpoint.status == CheckpointStatus.SUCCESS
     assert checkpoint.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
     assert mock_agent.send_calls[0] == "Do the work."
     assert "Write a brief summary" in mock_agent.send_calls[1]
@@ -492,7 +490,6 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
 
     cp = mgr.read()["p1"]
     assert isinstance(cp, SuccessCheckpoint)
-    assert cp.status == CheckpointStatus.SUCCESS
     assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
     assert worker.send_calls[0].startswith("Do it.")
     assert "independent reviewer" in worker.send_calls[0]
@@ -655,7 +652,6 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
 
     cp = mgr.read()["p1"]
     assert isinstance(cp, FailedCheckpoint)
-    assert cp.status == CheckpointStatus.FAILED
     assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
     assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
     assert cp.error == "something went wrong"
@@ -784,7 +780,7 @@ async def test_clear_context_before_on_first_task_is_harmless(flow_dir, monkeypa
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert mgr.read()["p1"].status == CheckpointStatus.SUCCESS
+    assert isinstance(mgr.read()["p1"], SuccessCheckpoint)
     assert mock_agent.reset_call_count == 1
 
 
@@ -807,7 +803,6 @@ async def test_compact_context_before_on_first_task_is_noop(flow_dir, monkeypatc
 
     cp = mgr.read()["p1"]
     assert isinstance(cp, SuccessCheckpoint)
-    assert cp.status == CheckpointStatus.SUCCESS
     assert cp.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
     assert mock_agent.compact_call_count == 1
 

@@ -10,7 +10,7 @@ import yaml
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
     CheckpointReadError,
-    CheckpointStatus,
+    FailedCheckpoint,
     SuccessCheckpoint,
 )
 
@@ -53,7 +53,6 @@ def test_read_returns_validated_checkpoint(manager: CheckpointManager):
     manager.write_phase_checkpoint("phase1", make_success_checkpoint())
     data = manager.read()
     assert isinstance(data["phase1"], SuccessCheckpoint)
-    assert data["phase1"].status == CheckpointStatus.SUCCESS
 
 
 # ---------------------------------------------------------------------------
@@ -64,7 +63,7 @@ def test_read_returns_validated_checkpoint(manager: CheckpointManager):
 def test_write_and_read_back(manager: CheckpointManager):
     manager.write_phase_checkpoint("phase1", make_success_checkpoint())
     data = manager.read()
-    assert data["phase1"].status == CheckpointStatus.SUCCESS
+    assert isinstance(data["phase1"], SuccessCheckpoint)
     assert data["phase1"].tokens.total_input == 10
     assert data["phase1"].tokens.total_output == 20
 
@@ -81,21 +80,21 @@ def test_write_preserves_phase_data(manager: CheckpointManager):
 def test_write_creates_parent_dirs(tmp_path: Path):
     manager = CheckpointManager(tmp_path / "nested" / "dir" / "checkpoints.yaml")
     manager.write_phase_checkpoint("p", make_success_checkpoint())
-    assert manager.read()["p"].status == CheckpointStatus.SUCCESS
+    assert isinstance(manager.read()["p"], SuccessCheckpoint)
 
 
 def test_write_multiple_phases(manager: CheckpointManager):
     manager.write_phase_checkpoint("phase1", make_success_checkpoint())
     manager.write_phase_checkpoint("phase2", make_failed_checkpoint())
     data = manager.read()
-    assert data["phase1"].status == CheckpointStatus.SUCCESS
-    assert data["phase2"].status == CheckpointStatus.FAILED
+    assert isinstance(data["phase1"], SuccessCheckpoint)
+    assert isinstance(data["phase2"], FailedCheckpoint)
 
 
 def test_write_overwrites_existing_phase(manager: CheckpointManager):
     manager.write_phase_checkpoint("phase1", make_failed_checkpoint())
     manager.write_phase_checkpoint("phase1", make_success_checkpoint())
-    assert manager.read()["phase1"].status == CheckpointStatus.SUCCESS
+    assert isinstance(manager.read()["phase1"], SuccessCheckpoint)
 
 
 # ---------------------------------------------------------------------------

@@ -24,7 +24,6 @@ from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
-    CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
     SuccessCheckpoint,
@@ -186,7 +185,6 @@ async def test_success_with_prometheus_body(flow_dir, message_queue, monkeypatch
 
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    assert checkpoint.status == CheckpointStatus.SUCCESS
     assert checkpoint.phase_data["exposition_format"] == "prometheus"
     assert checkpoint.phase_data["metric_count"] == len(expected_families)
     assert "sample_metric_names" not in checkpoint.phase_data
@@ -204,7 +202,6 @@ async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatc
 
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    assert checkpoint.status == CheckpointStatus.SUCCESS
     assert checkpoint.phase_data["exposition_format"] == "openmetrics"
     assert checkpoint.phase_data["content_type"] == content_type
     assert checkpoint.phase_data["metric_count"] >= 1
@@ -225,7 +222,6 @@ async def _assert_phase_fails(phase, mgr, message_queue, *, error_contains: str)
         await phase.on_error(wrapped)
         checkpoint = mgr.read()[phase._phase_id]
         assert isinstance(checkpoint, FailedCheckpoint)
-        assert checkpoint.status == CheckpointStatus.FAILED
         assert error_contains.lower() in checkpoint.error.lower()
         msg = message_queue.get_nowait()
         assert isinstance(msg, PhaseFailedMessage)
@@ -299,7 +295,6 @@ async def test_failure_missing_endpoint_url(flow_dir, message_queue):
 
     checkpoint = mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, FailedCheckpoint)
-    assert checkpoint.status == CheckpointStatus.FAILED
     msg = message_queue.get_nowait()
     assert isinstance(msg, PhaseFailedMessage)
 
