@@ -19,7 +19,6 @@ from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
-    TagManager,
     default_json_event_encoding,
     tracked_query,
 )
@@ -127,7 +126,6 @@ class MySql(DatabaseCheck):
         self._replication_role = None
         self._initialized_at = int(time.time() * 1000)
         self._config = MySQLConfig(self.instance, init_config)
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
         self._cloud_metadata = self._config.cloud_metadata
@@ -197,10 +195,6 @@ class MySql(DatabaseCheck):
         self.set_metadata('version', self.version.version + '+' + self.version.build)
         self.set_metadata('flavor', self.version.flavor)
         self.set_metadata('resolved_hostname', self.resolved_hostname)
-
-    @property
-    def tags(self):
-        return self.tag_manager.get_tags()
 
     @property
     def reported_hostname(self):
