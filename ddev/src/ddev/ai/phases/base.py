@@ -17,7 +17,6 @@ from ddev.ai.phases.config import AgentConfig, PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
-    CheckpointStatus,
     CheckpointTokenInfo,
     FailedCheckpoint,
     GoalValidationRecord,
@@ -151,7 +150,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         outcome = await self.execute(context)
 
         checkpoint = SuccessCheckpoint(
-            status=CheckpointStatus.SUCCESS,
             started_at=self._started_at.isoformat(),
             finished_at=datetime.now(UTC).isoformat(),
             tokens=CheckpointTokenInfo(
@@ -182,7 +180,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             self._checkpoint_manager.write_phase_checkpoint(
                 self._phase_id,
                 FailedCheckpoint(
-                    status=CheckpointStatus.FAILED,
                     started_at=self._started_at.isoformat() if self._started_at else None,
                     finished_at=datetime.now(UTC).isoformat(),
                     error=str(error.original_exception),

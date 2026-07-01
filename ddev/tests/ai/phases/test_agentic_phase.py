@@ -888,7 +888,6 @@ async def test_resume_frontier_phase_injects_notice_with_error(flow_dir, monkeyp
     mgr.write_phase_checkpoint(
         "p1",
         FailedCheckpoint(
-            status=CheckpointStatus.FAILED,
             started_at=None,
             finished_at="2026-01-01T00:00:00+00:00",
             error="Error code: 500 - boom",
@@ -936,7 +935,6 @@ async def test_non_frontier_phase_gets_no_resume_notice(flow_dir, monkeypatch, m
     mgr.write_phase_checkpoint(
         "p1",
         FailedCheckpoint(
-            status=CheckpointStatus.FAILED,
             started_at=None,
             finished_at="2026-01-01T00:00:00+00:00",
             error="stale",

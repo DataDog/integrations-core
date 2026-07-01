@@ -35,7 +35,7 @@ class GoalValidationRecord(BaseModel):
 class SuccessCheckpoint(BaseModel):
     """Checkpoint written at the end of a successful phase execution."""
 
-    status: Literal[CheckpointStatus.SUCCESS]
+    status: Literal[CheckpointStatus.SUCCESS] = CheckpointStatus.SUCCESS
     started_at: str
     finished_at: str
     tokens: CheckpointTokenInfo
@@ -47,7 +47,7 @@ class SuccessCheckpoint(BaseModel):
 class FailedCheckpoint(BaseModel):
     """Checkpoint written when a phase terminates with an error."""
 
-    status: Literal[CheckpointStatus.FAILED]
+    status: Literal[CheckpointStatus.FAILED] = CheckpointStatus.FAILED
     started_at: str | None
     finished_at: str
     error: str
@@ -96,7 +96,7 @@ class CheckpointManager:
 
     def write_phase_checkpoint(self, phase_id: str, data: PhaseCheckpoint) -> None:
         """Write or overwrite one phase's section in checkpoints.yaml.
-        Raises CheckpointWriteError if the existing file is corrupted."""
+        Raises CheckpointReadError if the existing file is corrupted."""
         all_checkpoints = {pid: cp.model_dump(mode="json") for pid, cp in self.read().items()}
         all_checkpoints[phase_id] = data.model_dump(mode="json")
         self._ensure_dir()

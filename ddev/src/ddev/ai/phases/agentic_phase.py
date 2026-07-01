@@ -354,7 +354,6 @@ class AgenticPhase(Phase):
             self._checkpoint_manager.write_phase_checkpoint(
                 self._phase_id,
                 FailedCheckpoint(
-                    status=CheckpointStatus.FAILED,
                     started_at=self._started_at.isoformat() if self._started_at else None,
                     finished_at=datetime.now(UTC).isoformat(),
                     error=str(error.original_exception),
