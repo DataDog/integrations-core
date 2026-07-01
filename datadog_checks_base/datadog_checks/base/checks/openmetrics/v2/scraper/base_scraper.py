@@ -364,6 +364,7 @@ class OpenMetricsScraper:
         Yield a sample of processed data.
         """
         label_normalizer = get_label_normalizer(metric.type)
+        populate = self.label_aggregator.populate if self.label_aggregator.configured else None
 
         for sample in metric.samples:
             value = sample.value
@@ -374,8 +375,10 @@ class OpenMetricsScraper:
             tags = []
             skip_sample = False
             labels = sample.labels
-            self.label_aggregator.populate(labels)
-            label_normalizer(labels)
+            if populate is not None:
+                populate(labels)
+            if label_normalizer is not None:
+                label_normalizer(labels)
 
             for label_name, label_value in labels.items():
                 sample_excluder = self.exclude_metrics_by_labels.get(label_name)
