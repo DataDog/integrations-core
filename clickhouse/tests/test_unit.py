@@ -384,7 +384,7 @@ def test_database_hostname_ignores_reported_hostname_override(reported_hostname,
 
 
 def test_cluster_aware_variant_bulk_match_query():
-    """The cluster-aware variant reads all replicas and tags system.events per node (SDBM-2746)."""
+    """The cluster-aware variant reads all replicas and tags system.events per node."""
     variant = advanced_queries.SystemEventsClusterAware
 
     assert variant['query'] == (
