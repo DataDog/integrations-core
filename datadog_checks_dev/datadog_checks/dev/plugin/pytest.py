@@ -203,6 +203,9 @@ def dd_agent_check(request, aggregator, datadog_agent):
         if 'times' in kwargs:
             kwargs['check_times'] = kwargs.pop('times')
 
+        for env_key, env_value in (kwargs.pop('env_vars', None) or {}).items():
+            check_command.extend(['--env', '{}={}'.format(env_key, env_value)])
+
         for key, value in kwargs.items():
             if value is not False:
                 check_command.append('--{}'.format(key.replace('_', '-')))
@@ -244,11 +247,30 @@ def dd_agent_check_discovery(dd_agent_check):
     Passes the empty-instances config required to let ``auto_conf.yaml`` drive
     autodiscovery, and sets sensible defaults for ``discovery_min_instances`` and
     ``discovery_timeout`` — all of which can be overridden per call.
+
+    Pass ``process=True`` to exercise process-based (rather than container-based)
+    autodiscovery for a process that is otherwise container-bound: this excludes
+    the ``docker`` feature for this invocation only (so this run's autodiscovery
+    never learns about any containers) and, unless overridden, extends the
+    default timeout to account for the minimum process age that process-based
+    autodiscovery requires before it recognizes a process as a service.
     """
     if not e2e_testing():
         pytest.skip('Not running E2E tests')
 
-    def run(*, discovery_min_instances=1, discovery_timeout=30, **kwargs):
+    def run(*, discovery_min_instances=1, discovery_timeout=None, process=False, **kwargs):
+        if discovery_timeout is None:
+            # Process autodiscovery needs to wait for the agent to recognize the
+            # process as a service which happens after a minimum process age of 1
+            # minute. This time can be reduced significantly once agent-side
+            # support for reducing the minimum age via configuration is available.
+            discovery_timeout = 90 if process else 30
+
+        if process:
+            env_vars = kwargs.pop('env_vars', None) or {}
+            env_vars.setdefault('DD_AUTOCONFIG_EXCLUDE_FEATURES', 'docker')
+            kwargs['env_vars'] = env_vars
+
         return dd_agent_check(
             {'init_config': {}, 'instances': []},
             discovery_min_instances=discovery_min_instances,
