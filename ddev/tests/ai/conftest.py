@@ -2,16 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-"""Shared fixtures for ddev.ai tests: a fake tool double and a real ToolRegistry factory.
+"""Shared fixtures for ddev.ai tests: a fake tool double for building real ToolRegistry instances.
 
-Not meant to be imported directly by test modules — use the `fake_tool` and `tool_registry`
-fixtures instead of reaching into this file.
+Not meant to be imported directly by test modules — use the `fake_tool` fixture instead of
+reaching into this file. Importing FakeTool/FakeToolFactory under `if TYPE_CHECKING:` purely
+for parameter annotations is fine; nothing here should be imported at runtime.
 """
+
+from typing import Protocol
 
 import pytest
 
 from ddev.ai.tools.core.types import ToolResult
-from ddev.ai.tools.registry import ToolRegistry
 
 
 class FakeTool:
@@ -50,17 +52,32 @@ class FakeTool:
         return self._result
 
 
-@pytest.fixture
-def fake_tool():
-    """Factory fixture: fake_tool(name, result=None, error=None, truncated_call_hint=None) -> FakeTool."""
-    return FakeTool
+class FakeToolFactory(Protocol):
+    """Callable signature of the `fake_tool` fixture."""
+
+    def __call__(
+        self,
+        name: str = "fake_tool",
+        result: ToolResult | None = None,
+        error: BaseException | None = None,
+        truncated_call_hint: str | None = None,
+    ) -> FakeTool: ...
 
 
 @pytest.fixture
-def tool_registry():
-    """Factory fixture: tool_registry(*tools) -> a real ToolRegistry built from the given tools."""
+def fake_tool() -> FakeToolFactory:
+    """Factory fixture: fake_tool(name="fake_tool", result=None, error=None, truncated_call_hint=None).
 
-    def _make(*tools: object) -> ToolRegistry:
-        return ToolRegistry(list(tools))
+    All arguments are optional, so `fake_tool()` alone produces a usable, successful tool double.
+    Build a real ToolRegistry directly from one or more of these: ToolRegistry([fake_tool("x")]).
+    """
+
+    def _make(
+        name: str = "fake_tool",
+        result: ToolResult | None = None,
+        error: BaseException | None = None,
+        truncated_call_hint: str | None = None,
+    ) -> FakeTool:
+        return FakeTool(name, result=result, error=error, truncated_call_hint=truncated_call_hint)
 
     return _make

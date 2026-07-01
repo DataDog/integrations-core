@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
@@ -23,7 +24,7 @@ from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry
 
 if TYPE_CHECKING:
-    from tests.ai.conftest import FakeTool
+    from tests.ai.conftest import FakeToolFactory
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -193,7 +194,7 @@ async def test_max_tokens_is_not_an_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_allowed_tools_filters_to_subset(fake_tool: type[FakeTool]) -> None:
+async def test_allowed_tools_filters_to_subset(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool(n) for n in ["read_file", "grep", "mkdir"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
@@ -204,7 +205,7 @@ async def test_allowed_tools_filters_to_subset(fake_tool: type[FakeTool]) -> Non
     assert sent_names == ["read_file"]
 
 
-async def test_allowed_tools_none_passes_all(fake_tool: type[FakeTool]) -> None:
+async def test_allowed_tools_none_passes_all(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool(n) for n in ["a", "b"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
@@ -461,7 +462,7 @@ async def test_web_fetch_injected_with_citations_enabled() -> None:
     assert web_fetch["max_uses"] == MAX_CONTINUATIONS - 1
 
 
-async def test_both_native_tools_injected_together(fake_tool: type[FakeTool]) -> None:
+async def test_both_native_tools_injected_together(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search", "web_fetch"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
@@ -488,7 +489,7 @@ async def test_create_until_complete_returns_completion_result() -> None:
     assert result.all_responses == [final]
 
 
-async def test_native_tool_appended_after_client_tools(fake_tool: type[FakeTool]) -> None:
+async def test_native_tool_appended_after_client_tools(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
@@ -503,7 +504,7 @@ async def test_native_tool_appended_after_client_tools(fake_tool: type[FakeTool]
     assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
 
 
-async def test_allowed_tools_gates_native_tool(fake_tool: type[FakeTool]) -> None:
+async def test_allowed_tools_gates_native_tool(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
@@ -515,7 +516,7 @@ async def test_allowed_tools_gates_native_tool(fake_tool: type[FakeTool]) -> Non
     assert "read_file" in sent_names
 
 
-async def test_allowed_tools_none_passes_all_including_native(fake_tool: type[FakeTool]) -> None:
+async def test_allowed_tools_none_passes_all_including_native(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
@@ -527,8 +528,8 @@ async def test_allowed_tools_none_passes_all_including_native(fake_tool: type[Fa
     assert "web_search" in sent_names
 
 
-async def test_no_native_tools_request_unchanged() -> None:
-    registry = ToolRegistry([FakeTool("read_file")])
+async def test_no_native_tools_request_unchanged(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool("read_file")])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -958,8 +959,8 @@ async def test_system_prompt_sent_as_block_with_static_cache_control() -> None:
     [["only"], ["a", "b"], ["a", "b", "c", "d"]],
     ids=["single_tool", "two_tools", "four_tools"],
 )
-async def test_only_last_tool_carries_static_cache_control(tool_names: list[str]) -> None:
-    registry = ToolRegistry([FakeTool(n) for n in tool_names])
+async def test_only_last_tool_carries_static_cache_control(tool_names: list[str], fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in tool_names])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -970,8 +971,8 @@ async def test_only_last_tool_carries_static_cache_control(tool_names: list[str]
     assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
 
 
-async def test_allowed_tools_subset_places_cache_control_on_last_of_subset() -> None:
-    registry = ToolRegistry([FakeTool(n) for n in ["a", "b", "c"]])
+async def test_allowed_tools_subset_places_cache_control_on_last_of_subset(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in ["a", "b", "c"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 

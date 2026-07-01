@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
@@ -14,7 +15,7 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry, filter_read_only
 
 if TYPE_CHECKING:
-    from tests.ai.conftest import FakeTool
+    from tests.ai.conftest import FakeToolFactory
 
 # ---------------------------------------------------------------------------
 # ToolRegistry.__init__
@@ -29,12 +30,12 @@ if TYPE_CHECKING:
         (["a", "b", "c"], {"a", "b", "c"}),
     ],
 )
-def test_registry_registers_tools(names: list[str], expected_names: set[str], fake_tool: type[FakeTool]) -> None:
+def test_registry_registers_tools(names: list[str], expected_names: set[str], fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool(n) for n in names])
     assert set(registry._tools.keys()) == expected_names
 
 
-def test_duplicate_name_last_one_wins(fake_tool: type[FakeTool]) -> None:
+def test_duplicate_name_last_one_wins(fake_tool: FakeToolFactory) -> None:
     # This design is intentional to allow for tool overrides.
     first = fake_tool("dup")
     second = fake_tool("dup")
@@ -51,12 +52,12 @@ def test_empty_registry_returns_empty_list():
     assert ToolRegistry([]).definitions == []
 
 
-def test_tool_registry_definitions_returns_all_tool_definitions(fake_tool: type[FakeTool]) -> None:
+def test_tool_registry_definitions_returns_all_tool_definitions(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("a"), fake_tool("b")])
     assert len(registry.definitions) == 2
 
 
-def test_definition_contains_tool_name(fake_tool: type[FakeTool]) -> None:
+def test_definition_contains_tool_name(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("mytool")])
     assert registry.definitions[0]["name"] == "mytool"
 
@@ -66,7 +67,7 @@ def test_definition_contains_tool_name(fake_tool: type[FakeTool]) -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_run_dispatches_to_correct_tool(fake_tool: type[FakeTool]) -> None:
+async def test_run_dispatches_to_correct_tool(fake_tool: FakeToolFactory) -> None:
     tool_a = fake_tool("a", ToolResult(success=True, data="from a"))
     tool_b = fake_tool("b", ToolResult(success=True, data="from b"))
     registry = ToolRegistry([tool_a, tool_b])
@@ -76,7 +77,7 @@ async def test_run_dispatches_to_correct_tool(fake_tool: type[FakeTool]) -> None
     assert result.data == "from b"
 
 
-async def test_passes_raw_dict_to_tool_unchanged(fake_tool: type[FakeTool]) -> None:
+async def test_passes_raw_dict_to_tool_unchanged(fake_tool: FakeToolFactory) -> None:
     tool = fake_tool("t")
     registry = ToolRegistry([tool])
     raw = {"key": "value", "num": 42}
@@ -85,14 +86,14 @@ async def test_passes_raw_dict_to_tool_unchanged(fake_tool: type[FakeTool]) -> N
     assert tool.calls == [raw]
 
 
-async def test_returns_tool_result_on_tool_failure(fake_tool: type[FakeTool]) -> None:
+async def test_returns_tool_result_on_tool_failure(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("t", ToolResult(success=False, error="bad input"))])
     result = await registry.run("t", {})
     assert result.success is False
     assert result.error == "bad input"
 
 
-async def test_unknown_tool_returns_failure(fake_tool: type[FakeTool]) -> None:
+async def test_unknown_tool_returns_failure(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("known_tool")])
     result = await registry.run("unknown_tool", {})
     assert result.success is False
@@ -111,7 +112,7 @@ async def test_empty_registry_always_returns_unknown_error():
 # ---------------------------------------------------------------------------
 
 
-def test_get_returns_registered_tool_by_name(fake_tool: type[FakeTool]) -> None:
+def test_get_returns_registered_tool_by_name(fake_tool: FakeToolFactory) -> None:
     tool = fake_tool("edit_file", truncated_call_hint="shrink the edit")
     registry = ToolRegistry([tool])
 
@@ -121,7 +122,7 @@ def test_get_returns_registered_tool_by_name(fake_tool: type[FakeTool]) -> None:
     assert found.truncated_call_hint == "shrink the edit"
 
 
-def test_get_returns_none_for_unknown_tool(fake_tool: type[FakeTool]) -> None:
+def test_get_returns_none_for_unknown_tool(fake_tool: FakeToolFactory) -> None:
     registry = ToolRegistry([fake_tool("edit_file")])
     assert registry.get("unknown_tool") is None
 

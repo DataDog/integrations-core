@@ -1,10 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 import asyncio
 import json
-from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -24,7 +24,7 @@ from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import ToolRegistry
 
 if TYPE_CHECKING:
-    from tests.ai.conftest import FakeTool
+    from tests.ai.conftest import FakeToolFactory
 
 # ---------------------------------------------------------------------------
 # Mock helpers
@@ -197,9 +197,7 @@ async def test_happy_path(tmp_path: Path, name: str | None, expected_id: str) ->
     assert events[-1]["success"] is True
 
 
-async def test_multi_iteration_wires_callbacks(
-    tmp_path, fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
-) -> None:
+async def test_multi_iteration_wires_callbacks(tmp_path: Path, fake_tool: FakeToolFactory) -> None:
     """A subagent tool call produces a tool_call log event via the run-wide callbacks."""
     tool_call = ToolCall(id="tc1", name="read_file", input={"path": "/f"})
     factory = FakeProcessFactory(
@@ -207,7 +205,7 @@ async def test_multi_iteration_wires_callbacks(
         lambda: MockAgent(
             [make_response(stop_reason=StopReason.TOOL_USE, tool_calls=[tool_call]), make_response(text="done")]
         ),
-        tool_registry=tool_registry(fake_tool("read_file", result=ToolResult(success=True, data="content"))),
+        tool_registry=ToolRegistry([fake_tool("read_file", result=ToolResult(success=True, data="content"))]),
     )
     tool = make_tool(factory, parent_tools=["read_file"])
 
