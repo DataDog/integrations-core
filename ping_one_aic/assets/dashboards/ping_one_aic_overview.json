@@ -1,0 +1,2175 @@
+{
+  "title": "PingOne Advanced Identity Cloud",
+  "description": "This is an overview of your PingOne Advanced Identity Cloud tenant security events. From here you can discover insights on event types, trends over time, region info, and more.\n\nFor further information, see:\n\n- [Monitoring Activity with PingOne Advanced Identity Cloud](https://www.datadoghq.com/blog/monitor-activity-with-okta/)\n\n- [PingOne Advanced Identity Cloud Integration Documentation](https://docs.datadoghq.com/integrations/okta/)\n\n- [PingOne Advanced Identity Cloud Event Type API Documentation](https://developer.okta.com/docs/reference/api/event-types/) (cloned)",
+  "widgets": [
+    {
+      "id": 7607829837331299,
+      "definition": {
+        "type": "image",
+        "url": "https://cdn-docs.pingidentity.com/site-nav/ping-logo-horizontal.svg",
+        "url_dark_theme": "/api/v2/images/45a39970-d7c1-40bf-8b27-e201466ac525",
+        "sizing": "contain",
+        "margin": "md",
+        "has_background": true,
+        "has_border": true,
+        "vertical_align": "center",
+        "horizontal_align": "center"
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 6,
+        "height": 1
+      }
+    },
+    {
+      "id": 8694280567870332,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4415186906368536,
+            "definition": {
+              "title": "Log Count by Source ",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@evt.category"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6146885096084392,
+            "definition": {
+              "title": "Top Journey Failure Reasons",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-TREE-LOGIN-COMPLETED @evt.outcome:FAILED @payload.entries.info.nodeExtraLogging.failureReason:* $client_ip $realm $principal_name $env $jouney"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.entries.info.nodeExtraLogging.failureReason"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "style": {
+                    "palette": "datadog16"
+                  },
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "sunburst",
+              "legend": {
+                "type": "automatic"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 0,
+        "width": 6,
+        "height": 8
+      }
+    },
+    {
+      "id": 2482104961109205,
+      "definition": {
+        "type": "free_text",
+        "text": "PingOne Advanced Identity Cloud",
+        "color": "#999",
+        "font_size": "auto",
+        "text_align": "left"
+      },
+      "layout": {
+        "x": 0,
+        "y": 1,
+        "width": 6,
+        "height": 1
+      }
+    },
+    {
+      "id": 8208293367094565,
+      "definition": {
+        "type": "note",
+        "content": "Use this dashboard to monitor your PingOne Advanced Identity Cloud environments, giving you greater visibility into security-related events from all of your journeys, applications and users. With PingOne Advanced Identity Cloud and Datadog, you can proactively detect threats to your applications, track user and administrator activity, debug authentication and authorization issues, and create an audit trail for regulatory compliance.\n\nThe PingOne Advanced Identity Cloud integration pulls the following log sources for each configured environment: _am-authentication_, _am-config_, _am_activity_,  _idm-activity_, and _idm-config_. The log source name is available in the log's `@evt.category` attribute.\n\nFilters are available to search on specific realms, journeys, client IP addresses, principal names, and event outcomes.\n\nFor further reading, see:\n\n-   [Advanced Identity Cloud Log Sources](https://docs.pingidentity.com/pingoneaic/tenants/audit-debug-log-sources.html#log-source-descriptions)",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "top",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 0,
+        "y": 2,
+        "width": 6,
+        "height": 6
+      }
+    },
+    {
+      "id": 1293337257504016,
+      "definition": {
+        "title": "Datadog Cloud SIEM",
+        "title_align": "center",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5996232744860254,
+            "definition": {
+              "type": "note",
+              "content": "\nDatadog Cloud SIEM analyzes and correlates PingOne Advanced Identity Cloud logs to detect threats to your environment in real time. If you don't see signals please make sure you're signed up for [Datadog Cloud SIEM](https://app.datadoghq.com/security). ",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8553649088064130,
+            "definition": {
+              "title": "CRITICALs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#bc303c",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "search": {
+                        "query": "status:critical source:ping-one-aic $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security/signals?query=source%3Aping-one-aic%20status%3Acritical"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 7066021750433186,
+            "definition": {
+              "title": "HIGHs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#d33043",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [],
+                      "search": {
+                        "query": "status:high source:ping-one-aic $client_ip $realm $principal_name $env $evt_outcome"
+                      }
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security/signals?query=source%3Aping-one-aic%20status%3Ahigh"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8471573661110118,
+            "definition": {
+              "title": "Security Signals",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-one-aic $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": [
+                        {
+                          "facet": "@workflow.rule.name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 332852656456888,
+            "definition": {
+              "title": "Security Signals by User",
+              "time": {},
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "security_signals",
+                      "search": {
+                        "query": "source:ping-one-aic $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@usr.id",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          }
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security/signals?query=@usr.email%3A{{@usr.email.value}}%20@network.client.ip%3A{{$ClientIP.value}}%20@evt.outcome%3A{{$EvtOutcome.value}}&column=time&order=desc&view=signal&start={{timestamp_widget_start}}&end={{timestamp_widget_end}}&paused=false"
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 657061189253054,
+            "definition": {
+              "title": "MEDIUMs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#e5a21c",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "search": {
+                        "query": "status:medium source:ping-one-aic $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security/signals?source%3Aping-one-aic%20status%3Amedium="
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3113634677519158,
+            "definition": {
+              "title": "LOWs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#ffb52b",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "search": {
+                        "query": "source:ping-one-aic status:low $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security/signals?query=source%3Aping-one-aic%20status%3Alow"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 3,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 2616044181127946,
+            "definition": {
+              "title": "INFOs",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "custom_bg_color": "#84c1e0",
+                      "comparator": ">",
+                      "palette": "custom_bg",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "security_signals",
+                      "name": "query1",
+                      "search": {
+                        "query": "status:info source:ping-one-aic $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "group_by": []
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "custom_links": [
+                {
+                  "label": "View related Security Signals",
+                  "link": "/security/signals?query=source%3Aping-one-aic%20status%3Ainfo"
+                }
+              ],
+              "precision": 2
+            },
+            "layout": {
+              "x": 2,
+              "y": 4,
+              "width": 2,
+              "height": 1
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 6
+      }
+    },
+    {
+      "id": 125274716612678,
+      "definition": {
+        "title": "Identity Management Activity",
+        "title_align": "center",
+        "background_color": "vivid_pink",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8873517566426058,
+            "definition": {
+              "type": "note",
+              "content": "\nThe PingOne Advanced Identity Cloud log source _idm-activity_ reports changes made to users and objects such as applications.   ",
+              "background_color": "pink",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 953049615886304,
+            "definition": {
+              "title": "Identity Changes",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "warm"
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.category:idm-activity $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.operation"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 7,
+              "height": 3
+            }
+          },
+          {
+            "id": 4068198673199826,
+            "definition": {
+              "title": "Top IDs Making Changes",
+              "type": "toplist",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.category:idm-activity $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.userId"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [],
+              "style": {}
+            },
+            "layout": {
+              "x": 7,
+              "y": 1,
+              "width": 5,
+              "height": 3
+            }
+          },
+          {
+            "id": 6049151630381002,
+            "definition": {
+              "title": "Top Changed Objects",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.category:idm-activity $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.objectId",
+                          "@payload.operation"
+                        ],
+                        "limit": 100,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 14,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 2183234143219026,
+      "definition": {
+        "title": "",
+        "title_align": "center",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7132313924803478,
+            "definition": {
+              "title": "All Logs",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:ping-one-aic $client_ip $realm $principal_name $env $jouney $evt_outcome",
+                    "indexes": [],
+                    "storage": "flex_tier"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 22,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 3958154600598616,
+      "definition": {
+        "title": "User Activity",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1314216916586706,
+            "definition": {
+              "title": "Login Activity",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "style": {
+                        "palette": "cool"
+                      },
+                      "alias": "Successful",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Unique Users",
+                      "style": {
+                        "palette": "gray",
+                        "palette_index": 4
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Unsuccessful",
+                      "style": {
+                        "palette": "red"
+                      },
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Failed OTP Verification",
+                      "formula": "query4"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-TREE-LOGIN-COMPLETED @evt.outcome:SUCCESSFUL @payload.entries.info.treeName:(Login OR \"Login Public\") $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@evt.outcome"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-TREE-LOGIN-COMPLETED @payload.entries.info.treeName:(Login OR \"Login Public\") $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "cardinality",
+                        "metric": "@usr.id"
+                      },
+                      "storage": "flex_tier"
+                    },
+                    {
+                      "name": "query3",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-TREE-LOGIN-COMPLETED !@evt.outcome:SUCCESSFUL @payload.entries.info.treeName:(Login OR \"Login Public\") $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@evt.outcome"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    },
+                    {
+                      "name": "query4",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-NODE-LOGIN-COMPLETED @payload.entries.info.nodeOutcome:false @payload.entries.info.nodeType:OneTimePasswordCollectorDecisionNode $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3388570786665407,
+            "definition": {
+              "type": "note",
+              "content": "\nUser Login activity is defined as any interaction with the _Login_ journey or any other authentication-related journey defined in the PingOne Advanced Identity Cloud environment. Note, you should clone this dashboard and update the query for the Login Activity timeseries to add any journey references other than _Login_. See the query segment `@payload.entries.info.treeName:(Login OR \"Login Public\")` as an example of adding a journey named _Login Public_ to the query.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "top",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7115696365415877,
+            "definition": {
+              "title": "Registrations",
+              "show_legend": false,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-TREE-LOGIN-COMPLETED @payload.entries.info.treeName:Registration $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 6,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 7261209570751062,
+            "definition": {
+              "title": "Journey Activity",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-TREE-LOGIN-COMPLETED @payload.entries.info.treeName:* $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.entries.info.treeName"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "custom_links": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 8,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1841397243918198,
+            "definition": {
+              "title": "Node Activity",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-NODE-LOGIN-COMPLETED @payload.entries.info.treeName:* $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.entries.info.displayName",
+                          "@payload.entries.info.nodeType"
+                        ],
+                        "limit": 100,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 8251569900335238,
+            "definition": {
+              "title": "Password Changes and Resets",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.name:AM-TREE-LOGIN-COMPLETED @payload.entries.info.treeName:(ResetPassword OR UpdatePassword) $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@evt.outcome",
+                          "@payload.entries.info.treeName"
+                        ],
+                        "limit": 100,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        }
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 15,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3076531017573708,
+            "definition": {
+              "title": "Account LOCKED Attempts",
+              "type": "toplist",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @payload.entries.info.nodeOutcome:LOCKED $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@usr.id"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "custom_links": [
+                {
+                  "link": "/security/signals?query=@workflow.rule.name:{{@workflow.rule.name.value}}",
+                  "label": "View related Security Signals"
+                }
+              ],
+              "style": {}
+            },
+            "layout": {
+              "x": 0,
+              "y": 18,
+              "width": 6,
+              "height": 4
+            }
+          },
+          {
+            "id": 4370704495509032,
+            "definition": {
+              "title": "Journey Access by Country",
+              "type": "geomap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic !@payload.realm:/ @evt.name:AM-TREE-LOGIN-COMPLETED $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 50,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 50,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 22,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 27,
+        "width": 6,
+        "height": 30,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 8250412844006165,
+      "definition": {
+        "title": "Application Activity",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": []
+      },
+      "layout": {
+        "x": 6,
+        "y": 27,
+        "width": 6,
+        "height": 1
+      }
+    },
+    {
+      "id": 4199568763725276,
+      "definition": {
+        "type": "note",
+        "content": "\nApplications include PingOne Advanced Identity Cloud internal components, such as _org-filter-client_, and customer defined applications/OAuth2 clients.\n\nApplication activity is evident in the AM-LOGIN-MODULE-COMPLETED and AM-LOGIN-COMPLETED events.",
+        "background_color": "purple",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "bottom",
+        "has_padding": true
+      },
+      "layout": {
+        "x": 6,
+        "y": 28,
+        "width": 6,
+        "height": 2
+      }
+    },
+    {
+      "id": 7224734581219174,
+      "definition": {
+        "title": "Application Activity by Principal and Outcome",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:ping-one-aic @evt.name:(AM-LOGIN-COMPLETED OR AM-LOGIN-MODULE-COMPLETED) $client_ip $realm $principal_name $env $jouney $evt_outcome"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": {
+                  "fields": [
+                    "@evt.outcome",
+                    "@usr.id"
+                  ],
+                  "limit": 100,
+                  "sort": {
+                    "aggregation": "count",
+                    "metric": "count",
+                    "order": "desc"
+                  },
+                  "should_exclude_missing": true
+                },
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "flex_tier"
+              }
+            ],
+            "response_format": "timeseries",
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "bars"
+          }
+        ],
+        "custom_links": []
+      },
+      "layout": {
+        "x": 6,
+        "y": 30,
+        "width": 6,
+        "height": 4
+      }
+    },
+    {
+      "id": 8763040584586611,
+      "definition": {
+        "title": "Most Active Applications",
+        "type": "toplist",
+        "requests": [
+          {
+            "response_format": "scalar",
+            "queries": [
+              {
+                "name": "query1",
+                "data_source": "logs",
+                "search": {
+                  "query": "source:ping-one-aic @evt.name:(AM-LOGIN-COMPLETED OR AM-LOGIN-MODULE-COMPLETED) $client_ip $realm $principal_name $env $evt_outcome"
+                },
+                "indexes": [
+                  "*"
+                ],
+                "group_by": {
+                  "fields": [
+                    "@usr.id"
+                  ],
+                  "limit": 15,
+                  "sort": {
+                    "aggregation": "count",
+                    "metric": "count",
+                    "order": "desc"
+                  },
+                  "should_exclude_missing": true
+                },
+                "compute": {
+                  "aggregation": "count"
+                },
+                "storage": "flex_tier"
+              }
+            ],
+            "conditional_formats": [
+              {
+                "comparator": ">",
+                "value": 0,
+                "palette": "white_on_yellow"
+              }
+            ],
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "sort": {
+              "count": 15,
+              "order_by": [
+                {
+                  "type": "formula",
+                  "index": 0,
+                  "order": "desc"
+                }
+              ]
+            }
+          }
+        ],
+        "style": {}
+      },
+      "layout": {
+        "x": 6,
+        "y": 34,
+        "width": 6,
+        "height": 3
+      }
+    },
+    {
+      "id": 5005589647383544,
+      "definition": {
+        "title": "Administrator Activity",
+        "background_color": "vivid_purple",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8582095500313670,
+            "definition": {
+              "type": "note",
+              "content": "\nAdministrator activity is gathered from the _am-config_ log source as well as authentication journey activity on the `/` realm.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": true,
+              "tick_pos": "50%",
+              "tick_edge": "bottom",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 2357905018943987,
+            "definition": {
+              "title": "AM Config Changes",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.category:am-config $client_ip $realm $principal_name $env"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.realm"
+                        ],
+                        "limit": 10,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 551924386954635,
+            "definition": {
+              "title": "AM Config Objects Changed",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @evt.category:am-config $client_ip $realm $principal_name $env"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.realm",
+                          "@payload.operation",
+                          "@payload.objectId"
+                        ],
+                        "limit": 1000,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 1000,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7228971229764007,
+            "definition": {
+              "title": "Administrator Logins",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @payload.realm:/ @evt.name:AM-TREE-LOGIN-COMPLETED @evt.outcome:SUCCESSFUL $client_ip $realm $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.userId",
+                          "@usr.id"
+                        ],
+                        "limit": 100,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 1208437977483882,
+            "definition": {
+              "title": "Failed Administrator Logins",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @payload.realm:/ @evt.name:AM-TREE-LOGIN-COMPLETED !@evt.outcome:SUCCESSFUL $client_ip $realm $principal_name $env"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "fields": [
+                          "@payload.userId",
+                          "@usr.id"
+                        ],
+                        "limit": 100,
+                        "sort": {
+                          "aggregation": "count",
+                          "metric": "count",
+                          "order": "desc"
+                        },
+                        "should_exclude_missing": true
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "cell_display_mode": "bar",
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 9,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 5164653443102779,
+            "definition": {
+              "title": "Access to the Administrative Console Grouped by Country",
+              "type": "geomap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:ping-one-aic @payload.realm:/ @evt.name:AM-TREE-LOGIN-COMPLETED $client_ip $principal_name $env $evt_outcome"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "@network.client.geoip.country.iso_code",
+                          "limit": 50,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "flex_tier"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 50,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "palette": "hostmap_blues",
+                "palette_flip": false
+              },
+              "view": {
+                "focus": "WORLD"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 11,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 37,
+        "width": 6,
+        "height": 17
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "env",
+      "prefix": "env",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "realm",
+      "prefix": "@payload.realm",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "jouney",
+      "prefix": "@payload.entries.info.treeName",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "client_ip",
+      "prefix": "@network.client.ip",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "principal_name",
+      "prefix": "@usr.id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "evt_outcome",
+      "prefix": "@evt.outcome",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
