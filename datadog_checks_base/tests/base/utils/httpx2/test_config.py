@@ -118,9 +118,78 @@ def test_per_request_timeout_value_construction(capturing_transport, captured_re
     assert captured_requests[0].extensions['timeout'] == expected
 
 
-def test_verify_defaults_to_true(capturing_transport):
+def test_verify_defaults_to_true(capturing_transport, clean_ca_env):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     assert http.options['verify'] is True
+
+
+def test_verify_uses_requests_ca_bundle_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/requests.pem'
+
+
+def test_verify_falls_back_to_curl_ca_bundle_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('CURL_CA_BUNDLE', '/env/curl.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/curl.pem'
+
+
+def test_verify_requests_ca_bundle_wins_over_curl(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    clean_ca_env.setenv('CURL_CA_BUNDLE', '/env/curl.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/requests.pem'
+
+
+def test_explicit_tls_ca_cert_wins_over_env_ca_bundle(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    http = HTTPX2Wrapper({'tls_ca_cert': '/etc/ssl/ca.pem'}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/etc/ssl/ca.pem'
+
+
+def test_verify_off_ignores_env_ca_bundle(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    http = HTTPX2Wrapper({'tls_verify': False}, {}, transport=capturing_transport)
+    assert http.options['verify'] is False
+
+
+def test_verify_uses_ssl_cert_file_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/ssl_cert_file.pem'
+
+
+def test_verify_falls_back_to_ssl_cert_dir_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_DIR', '/env/certs')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/certs'
+
+
+def test_verify_ssl_cert_file_wins_over_ssl_cert_dir(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    clean_ca_env.setenv('SSL_CERT_DIR', '/env/certs')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/ssl_cert_file.pem'
+
+
+def test_verify_requests_ca_bundle_wins_over_ssl_cert_file(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('REQUESTS_CA_BUNDLE', '/env/requests.pem')
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/env/requests.pem'
+
+
+def test_explicit_tls_ca_cert_wins_over_ssl_cert_file(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({'tls_ca_cert': '/etc/ssl/ca.pem'}, {}, transport=capturing_transport)
+    assert http.options['verify'] == '/etc/ssl/ca.pem'
+
+
+def test_verify_off_ignores_ssl_cert_file_env(capturing_transport, clean_ca_env):
+    clean_ca_env.setenv('SSL_CERT_FILE', '/env/ssl_cert_file.pem')
+    http = HTTPX2Wrapper({'tls_verify': False}, {}, transport=capturing_transport)
+    assert http.options['verify'] is False
 
 
 def test_verify_false_when_tls_verify_off(capturing_transport):
@@ -150,11 +219,6 @@ def test_tls_client_cert_with_key(capturing_transport):
 def test_tls_no_cert_when_not_configured(capturing_transport):
     http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
     assert http.options['cert'] is None
-
-
-def test_options_proxies_is_none(capturing_transport):
-    http = HTTPX2Wrapper({}, {}, transport=capturing_transport)
-    assert http.options['proxies'] is None
 
 
 @pytest.mark.parametrize(
@@ -205,7 +269,7 @@ def test_remapper_invert_flips_value(capturing_transport):
     assert http.options['verify'] is False
 
 
-def test_remapper_invert_with_explicit_default(capturing_transport):
+def test_remapper_invert_with_explicit_default(capturing_transport, clean_ca_env):
     # Remapped field absent from instance, explicit default takes effect, then invert flips it.
     remapper = {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False}}
     http = HTTPX2Wrapper({}, {}, remapper=remapper, transport=capturing_transport)
@@ -213,7 +277,7 @@ def test_remapper_invert_with_explicit_default(capturing_transport):
     assert http.options['verify'] is True
 
 
-def test_remapper_instance_wins_over_remapped_field(capturing_transport):
+def test_remapper_instance_wins_over_remapped_field(capturing_transport, clean_ca_env):
     # If the standard field is present in instance, the remapped alternative is ignored.
     remapper = {'ssl_validation': {'name': 'tls_verify'}}
     http = HTTPX2Wrapper(

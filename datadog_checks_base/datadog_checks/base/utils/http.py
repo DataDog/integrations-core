@@ -727,6 +727,8 @@ def handle_kerberos_cache(cache_file_path):
 
 
 def should_bypass_proxy(url, no_proxy_uris):
+    # NOTE: copied verbatim into httpx2.py (should_bypass_proxy) for the httpx migration.
+    # Keep both copies in sync until the requests path is removed.
     # Accepts a URL and a list of no_proxy URIs
     # Returns True if URL should bypass the proxy.
     parsed_uri_parts = urlparse(url)

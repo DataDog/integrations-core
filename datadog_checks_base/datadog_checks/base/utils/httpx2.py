@@ -3,16 +3,25 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import ipaddress
 import logging
+import os
 from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from typing import Any, Self
+from urllib.parse import urlparse
+from urllib.request import getproxies
 
 import httpx2
 from binary import KIBIBYTE
 
+# Private httpx2 API (pinned httpx2==2.2.0). _env_proxies hard-codes its return shape, so re-verify on any bump.
+from httpx2._utils import get_environment_proxies
+
+from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
 
+from .common import ensure_unicode
 from .headers import get_default_headers, update_headers
 from .http_exceptions import (
     HTTPConnectionError,
@@ -29,6 +38,10 @@ DEFAULT_TIMEOUT = 10
 # Matches the effective chunk size used by RequestsWrapper.iter_content (http.py:415 multiplies by KIBIBYTE).
 DEFAULT_CHUNK_SIZE = 16 * KIBIBYTE
 
+# options['proxies'] sentinel stored when skip_proxy is set, for parity with RequestsWrapper.
+# trust_env=False is what actually keeps httpx2 from reading HTTP_PROXY/HTTPS_PROXY.
+PROXY_SETTINGS_DISABLED = {'http': '', 'https': ''}
+
 STANDARD_FIELDS = {
     'allow_redirects': True,
     'connect_timeout': None,
@@ -36,13 +49,23 @@ STANDARD_FIELDS = {
     'headers': None,
     'log_requests': False,
     'password': None,
+    'proxy': None,
     'read_timeout': None,
+    'skip_proxy': False,
     'timeout': DEFAULT_TIMEOUT,
     'tls_ca_cert': None,
     'tls_cert': None,
     'tls_private_key': None,
     'tls_verify': True,
     'username': None,
+}
+
+# Known legacy field aliases, mirrored from RequestsWrapper (http.py:103-107) for parity.
+DEFAULT_REMAPPED_FIELDS = {
+    # Forward-parity placeholder: inert until kerberos_auth is added to STANDARD_FIELDS.
+    'kerberos': {'name': 'kerberos_auth'},
+    # TODO: Remove in 6.13
+    'no_proxy': {'name': 'skip_proxy'},
 }
 
 REQUEST_KWARGS = frozenset(
@@ -70,7 +93,7 @@ UNKNOWN_KWARG_HINTS: dict[str, str] = {
     'verify': "configure 'tls_verify' in instance config, or drop the per-call kwarg",
     'persist': 'drop the kwarg, httpx2 pools connections by default',
     'cert': "configure 'tls_cert' and 'tls_private_key' in instance config",
-    'proxies': 'proxy support is not yet wired through to httpx2, see TODO in httpx2.py',
+    'proxies': "configure 'proxy' in instance config; per-request proxy support is unavailable",
 }
 
 
@@ -90,7 +113,13 @@ def _build_verify(config: dict[str, Any]) -> bool | str:
         return config['tls_ca_cert']
     if not is_affirmative(config['tls_verify']):
         return False
-    return True
+    return (
+        os.environ.get('REQUESTS_CA_BUNDLE')
+        or os.environ.get('CURL_CA_BUNDLE')
+        or os.environ.get('SSL_CERT_FILE')
+        or os.environ.get('SSL_CERT_DIR')
+        or True
+    )
 
 
 def _build_cert(config: dict[str, Any]) -> str | tuple[str, str] | None:
@@ -129,6 +158,178 @@ def _map_httpx2_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPErro
     if isinstance(exc, httpx2.RequestError):
         return HTTPRequestError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     return HTTPError(str(exc) or exc.__class__.__name__)
+
+
+def should_bypass_proxy(url: str, no_proxy_uris: list[str]) -> bool:
+    # Copied from RequestsWrapper (http.py) so no_proxy matching stays identical after the httpx migration.
+    # Accepts a URL and a list of no_proxy URIs
+    # Returns True if URL should bypass the proxy.
+    parsed_uri_parts = urlparse(url)
+    parsed_uri = parsed_uri_parts.hostname
+
+    if '*' in no_proxy_uris:
+        # A single * character is supported, which matches all hosts, and effectively disables the proxy.
+        # See: https://curl.haxx.se/libcurl/c/CURLOPT_NOPROXY.html
+        return True
+
+    if parsed_uri_parts.scheme == "unix":
+        # Unix domain sockets semantically do not make sense to proxy
+        return True
+
+    for no_proxy_uri in no_proxy_uris:
+        try:
+            # If no_proxy_uri is an IP or IP CIDR.
+            # A ValueError is raised if address does not represent a valid IPv4 or IPv6 address.
+            ip_network = ipaddress.ip_network(ensure_unicode(no_proxy_uri))
+            ip_address = ipaddress.ip_address(ensure_unicode(parsed_uri))
+            if ip_address in ip_network:
+                return True
+        except ValueError:
+            # Treat no_proxy_uri as a domain name
+            # A domain name matches that name and all subdomains.
+            #   e.g. "foo.com" matches "foo.com" and "bar.foo.com"
+            # A domain name with a leading "." matches subdomains only.
+            #   e.g. ".y.com" matches "x.y.com" but not "y.com".
+            if no_proxy_uri.startswith((".", "*.")):
+                # Support wildcard subdomain; treat as leading dot "."
+                # e.g. "*.example.domain" as ".example.domain"
+                dot_no_proxy_uri = no_proxy_uri.lstrip("*")
+            else:
+                # Used for matching subdomains.
+                dot_no_proxy_uri = ".{}".format(no_proxy_uri)
+            if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
+                return True
+    return False
+
+
+def _resolve_proxy(
+    config: dict[str, Any], init_config: dict[str, Any]
+) -> tuple[dict[str, str] | None, list[str] | None]:
+    """Resolve proxy settings with the RequestsWrapper precedence: instance, then init_config, then Agent config."""
+    if is_affirmative(config['skip_proxy']):
+        return PROXY_SETTINGS_DISABLED.copy(), None
+    proxies = config['proxy'] or init_config.get('proxy')
+    if not proxies and is_affirmative(init_config.get('use_agent_proxy', True)):
+        proxies = datadog_agent.get_config('proxy')
+    if not proxies:
+        return None, None
+    proxies = proxies.copy()
+    no_proxy = proxies.pop('no_proxy', None)
+    if isinstance(no_proxy, str):
+        no_proxy = [host.strip() for host in no_proxy.replace(';', ',').split(',') if host.strip()]
+    # A proxy block carrying only no_proxy has no explicit proxy URL to route through, but the
+    # no_proxy list is retained so it can be applied against an environment proxy (HTTP_PROXY etc.).
+    if not proxies:
+        return None, no_proxy
+    return proxies, no_proxy
+
+
+class _ProxyRoutingTransport(httpx2.BaseTransport):
+    """Pick a proxied or direct transport per request, mirroring RequestsWrapper's per-request no_proxy check."""
+
+    def __init__(
+        self,
+        scheme_transports: dict[str, httpx2.BaseTransport],
+        direct: httpx2.BaseTransport,
+        no_proxy_uris: list[str] | None,
+        env_schemes: set[str] | None = None,
+        env_no_proxy: list[str] | None = None,
+    ) -> None:
+        self._scheme_transports = scheme_transports
+        self._direct = direct
+        self._no_proxy_uris = no_proxy_uris
+        # Schemes whose proxy was filled from the environment, and the env NO_PROXY that governs only them.
+        self._env_schemes = env_schemes or set()
+        self._env_no_proxy = env_no_proxy or []
+
+    def handle_request(self, request: httpx2.Request) -> httpx2.Response:
+        url = str(request.url)
+        scheme = request.url.scheme
+        # Tier 1: an explicit no_proxy bypasses every proxy, mirroring RequestsWrapper's own per-request check.
+        if self._no_proxy_uris and should_bypass_proxy(url, self._no_proxy_uris):
+            return self._direct.handle_request(request)
+        transport = self._scheme_transports.get(scheme)
+        if transport is None:
+            return self._direct.handle_request(request)
+        # Tier 2: env NO_PROXY only diverts schemes filled from the environment, never an explicit proxy.
+        # Matching mirrors RequestsWrapper's should_bypass_proxy (host/CIDR), not httpx's URL-pattern mounts.
+        if scheme in self._env_schemes and self._env_no_proxy and should_bypass_proxy(url, self._env_no_proxy):
+            return self._direct.handle_request(request)
+        return transport.handle_request(request)
+
+    def close(self) -> None:
+        seen = {id(self._direct): self._direct}
+        seen.update({id(t): t for t in self._scheme_transports.values()})
+        for transport in seen.values():
+            transport.close()
+
+
+def _build_proxy_transport(
+    proxies: dict[str, str] | None,
+    no_proxy: list[str] | None,
+    verify: bool | str,
+    cert: str | tuple[str, str] | None,
+    *,
+    env_schemes: set[str] | None = None,
+    env_no_proxy: list[str] | None = None,
+) -> _ProxyRoutingTransport | None:
+    """Build the per-request routing transport, or None when no real proxy is configured.
+
+    env_schemes/env_no_proxy carry the two-tier NO_PROXY contract and are supplied only by
+    _build_env_proxy_transport; direct callers leave them unset.
+    """
+    # None => no custom transport; the client builds its default and trust_env decides env proxies.
+    if not proxies or proxies == PROXY_SETTINGS_DISABLED:
+        return None
+    cache: dict[str, httpx2.BaseTransport] = {}
+    scheme_transports: dict[str, httpx2.BaseTransport] = {}
+    for scheme in ('http', 'https'):
+        url = proxies.get(scheme)
+        if not url:
+            continue
+        if url not in cache:
+            cache[url] = httpx2.HTTPTransport(proxy=httpx2.Proxy(url), verify=verify, cert=cert)
+        scheme_transports[scheme] = cache[url]
+    if not scheme_transports:
+        return None
+    direct = httpx2.HTTPTransport(verify=verify, cert=cert)
+    return _ProxyRoutingTransport(scheme_transports, direct, no_proxy, env_schemes, env_no_proxy)
+
+
+def _env_proxies() -> dict[str, str]:
+    """Read http/https proxy URLs from the environment, via httpx2's own resolver for name/case parity."""
+    mounts = get_environment_proxies()
+    fallback = mounts.get('all://')
+    proxies: dict[str, str] = {}
+    for scheme in ('http', 'https'):
+        url = mounts.get(f'{scheme}://') or fallback
+        if url:
+            proxies[scheme] = url
+    return proxies
+
+
+def _env_no_proxy() -> list[str]:
+    """Return the environment NO_PROXY hosts as bypass patterns for should_bypass_proxy."""
+    # Raw NO_PROXY from stdlib getproxies(), not get_environment_proxies, so CIDR survives for should_bypass_proxy.
+    raw = getproxies().get('no', '')
+    return [host.strip() for host in raw.replace(';', ',').split(',') if host.strip()]
+
+
+def _build_env_proxy_transport(
+    instance_proxies: dict[str, str] | None,
+    no_proxy: list[str] | None,
+    verify: bool | str,
+    cert: str | tuple[str, str] | None,
+) -> _ProxyRoutingTransport | None:
+    """Fill the schemes the instance left unset from the environment; instance entries win per scheme."""
+    env = _env_proxies()
+    instance_proxies = instance_proxies or {}
+    merged = {**env, **instance_proxies}
+    if not merged:
+        return None
+    env_schemes = {scheme for scheme in env if not instance_proxies.get(scheme)}
+    env_no_proxy = _env_no_proxy() if env_schemes else []
+    return _build_proxy_transport(merged, no_proxy, verify, cert, env_schemes=env_schemes, env_no_proxy=env_no_proxy)
 
 
 class HTTPX2ResponseAdapter:
@@ -267,6 +468,7 @@ class HTTPX2Wrapper:
         '_client',
         '_log_requests',
         'logger',
+        'no_proxy_uris',
         'options',
     )
 
@@ -298,9 +500,10 @@ class HTTPX2Wrapper:
         cert = _build_cert(config)
         timeout = _build_timeout(config)
         allow_redirects = is_affirmative(config['allow_redirects'])
+        proxies, no_proxy = _resolve_proxy(config, init_config)
+        # Exposed for parity with RequestsWrapper, which http_check reads as self.http.no_proxy_uris.
+        self.no_proxy_uris = no_proxy or None
 
-        # proxies=None mirrors RequestsWrapper.options for consumers (e.g. http_check).
-        # TODO: wire proxies through to httpx2 as part of the ongoing httpx migration.
         # options['headers'] is the per-request source of truth and is re-read in _build_request_kwargs,
         # so direct mutation (__setitem__, update(), whole-dict replacement) reaches the wire.
         # set_header mutates options['headers'] in place; the per-request merge above re-reads it.
@@ -308,7 +511,7 @@ class HTTPX2Wrapper:
             'auth': auth,
             'cert': cert,
             'headers': headers,
-            'proxies': None,
+            'proxies': proxies,
             'timeout': timeout,
             'verify': verify,
             'allow_redirects': allow_redirects,
@@ -325,11 +528,14 @@ class HTTPX2Wrapper:
     ) -> dict[str, Any]:
         default_fields = dict(STANDARD_FIELDS)
         default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
+        default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
         default_fields['timeout'] = init_config.get('timeout', default_fields['timeout'])
 
         config = {field: instance.get(field, value) for field, value in default_fields.items()}
 
         remapper = dict(remapper) if remapper else {}
+        # DEFAULT_REMAPPED_FIELDS intentionally wins over caller entries, matching http.py:282.
+        remapper.update(DEFAULT_REMAPPED_FIELDS)
 
         for remapped_field, data in remapper.items():
             field = data.get('name')
@@ -350,11 +556,23 @@ class HTTPX2Wrapper:
         return config
 
     def _build_client(self, transport: httpx2.BaseTransport | None) -> httpx2.Client:
+        proxies = self.options['proxies']
+        # An injected transport (e.g. tests) wins; otherwise build one router that owns all proxy resolution:
+        # instance schemes, env-filled schemes, and the no_proxy bypass. skip_proxy installs no router.
+        router = None
+        if transport is None and proxies != PROXY_SETTINGS_DISABLED and (proxies or self.no_proxy_uris):
+            router = _build_env_proxy_transport(
+                proxies, self.no_proxy_uris, self.options['verify'], self.options['cert']
+            )
+            transport = router
+        # trust_env is off only when our router owns proxy resolution or skip_proxy is set.
+        trust_env = router is None and proxies != PROXY_SETTINGS_DISABLED
         kwargs: dict[str, Any] = {
             'headers': self.options['headers'],
             'timeout': _make_timeout(self.options['timeout'][0], self.options['timeout'][1]),
             'follow_redirects': self.options['allow_redirects'],
             'verify': self.options['verify'],
+            'trust_env': trust_env,
         }
         if self.options['cert'] is not None:
             kwargs['cert'] = self.options['cert']

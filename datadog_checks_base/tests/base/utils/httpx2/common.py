@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import base64
 
+AGENT_GET_CONFIG = 'datadog_checks.base.utils.httpx2.datadog_agent.get_config'
+
 
 def parse_basic_auth(header_value: str) -> tuple[str, str]:
     scheme, _, b64 = header_value.partition(' ')
