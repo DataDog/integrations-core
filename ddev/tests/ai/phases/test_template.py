@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ddev.ai.phases.template import _SafeMapping, render_inline, render_prompt
+from ddev.ai.phases.template import _SafeMapping, render_inline
 
 from .conftest import resolve_key
 
@@ -37,45 +37,6 @@ def test_safe_mapping_context_takes_precedence_over_resolver():
 def test_safe_mapping_non_string_value_converted():
     mapping = _SafeMapping({"count": 42})
     assert mapping["count"] == "42"
-
-
-# ---------------------------------------------------------------------------
-# render_prompt
-# ---------------------------------------------------------------------------
-
-
-def test_render_prompt_substitutes_variables(tmp_path):
-    template = tmp_path / "prompt.md"
-    template.write_text("Hello ${name}, you are ${role}.")
-    result = render_prompt(template, {"name": "Alice", "role": "writer"})
-    assert result == "Hello Alice, you are writer."
-
-
-def test_render_prompt_missing_variable_shows_placeholder(tmp_path):
-    template = tmp_path / "prompt.md"
-    template.write_text("Hello ${name}.")
-    result = render_prompt(template, {})
-    assert result == "Hello <VARIABLE UNDEFINED: name>."
-
-
-def test_render_prompt_uses_resolver(tmp_path):
-    template = tmp_path / "prompt.md"
-    template.write_text("Memory: ${draft_memory}")
-    result = render_prompt(template, {}, resolve_key)
-    assert result == "Memory: resolved(draft_memory)"
-
-
-def test_render_prompt_resolver_not_called_when_key_in_context(tmp_path):
-    called = []
-    template = tmp_path / "prompt.md"
-    template.write_text("Value: ${key}")
-
-    def resolver(k):
-        called.append(k)
-        return "nope"
-
-    render_prompt(template, {"key": "from_context"}, resolver)
-    assert called == []
 
 
 # ---------------------------------------------------------------------------

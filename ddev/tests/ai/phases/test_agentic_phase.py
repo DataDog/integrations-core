@@ -41,27 +41,37 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
 # ---------------------------------------------------------------------------
 
 
-def test_render_task_prompt_from_file(tmp_path):
-    prompt_file = tmp_path / "task.md"
-    prompt_file.write_text("Hello ${name}.")
-    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {"name": "Alice"})
+def test_render_task_prompt_from_ref():
+    from unittest.mock import MagicMock
+
+    resources = MagicMock()
+    resources.prompt.side_effect = lambda name: "Hello ${name}."
+    result = render_task_prompt(TaskConfig(name="t1", prompt_ref="mytask"), resources, {"name": "Alice"})
     assert result == "Hello Alice."
+    resources.prompt.assert_called_once_with("mytask")
 
 
 def test_render_task_prompt_inline():
-    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), None, {"name": "Bob"})
+    from unittest.mock import MagicMock
+
+    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), MagicMock(), {"name": "Bob"})
     assert result == "Hello Bob."
 
 
-def test_render_task_prompt_forwards_resolver(tmp_path):
-    (tmp_path / "task.md").write_text("Memory: ${draft_memory}")
-    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {}, resolve_key)
+def test_render_task_prompt_forwards_resolver():
+    from unittest.mock import MagicMock
+
+    resources = MagicMock()
+    resources.prompt.side_effect = lambda name: "Memory: ${draft_memory}"
+    result = render_task_prompt(TaskConfig(name="t1", prompt_ref="mytask"), resources, {}, resolve_key)
     assert result == "Memory: resolved(draft_memory)"
 
 
 def test_render_task_prompt_raises_when_no_source():
+    from unittest.mock import MagicMock
+
     with pytest.raises(FlowConfigError, match="prompt"):
-        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_path=None), None, {})
+        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_ref=None), MagicMock(), {})
 
 
 # ---------------------------------------------------------------------------
@@ -69,10 +79,14 @@ def test_render_task_prompt_raises_when_no_source():
 # ---------------------------------------------------------------------------
 
 
-def test_render_memory_prompt_from_file(tmp_path):
-    (tmp_path / "mem.md").write_text("List files for ${phase_name}.")
-    result = render_memory_prompt(CheckpointConfig(memory_prompt_path="mem.md"), tmp_path, {"phase_name": "draft"})
+def test_render_memory_prompt_from_ref():
+    from unittest.mock import MagicMock
+
+    resources = MagicMock()
+    resources.memory_prompt.side_effect = lambda name: "List files for ${phase_name}."
+    result = render_memory_prompt(CheckpointConfig(memory_prompt_ref="mem"), resources, {"phase_name": "draft"})
     assert result == "List files for draft."
+    resources.memory_prompt.assert_called_once_with("mem")
 
 
 def test_render_memory_prompt_inline():
@@ -83,8 +97,12 @@ def test_render_memory_prompt_inline():
 
 
 def test_render_memory_prompt_raises_when_no_source():
+    from unittest.mock import MagicMock
+
     with pytest.raises(FlowConfigError, match="memory_prompt"):
-        render_memory_prompt(CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), None, {})
+        render_memory_prompt(
+            CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_ref=None), MagicMock(), {}
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -205,7 +223,6 @@ async def test_react_hook_failure_fails_phase(flow_dir, monkeypatch, message_que
 
 
 async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, _ = make_agent_phase(
@@ -215,17 +232,17 @@ async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatc
         message_queue,
         flow_variables={"project": "myproj"},
         captured_worker_kwargs=captured,
+        agent_config=AgentConfig(tools=[], system_prompt="Project: ${project}"),
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert captured["owner_id"] == "p1"
     assert captured["system_prompt"] == "Project: myproj"
-    assert captured["agent_config"] == AgentConfig(tools=[])
+    assert captured["agent_config"] == AgentConfig(tools=[], system_prompt="Project: ${project}")
 
 
 async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, _ = make_agent_phase(
@@ -236,6 +253,7 @@ async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, m
         flow_variables={"project": "flow"},
         runtime_variables={"project": "runtime"},
         captured_worker_kwargs=captured,
+        agent_config=AgentConfig(tools=[], system_prompt="Project: ${project}"),
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -244,7 +262,6 @@ async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, m
 
 
 async def test_build_runtime_receives_memory_resolver(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Memory: ${draft_memory}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, mgr = make_agent_phase(
@@ -253,6 +270,7 @@ async def test_build_runtime_receives_memory_resolver(flow_dir, monkeypatch, mes
         monkeypatch,
         message_queue,
         captured_worker_kwargs=captured,
+        agent_config=AgentConfig(tools=[], system_prompt="Memory: ${draft_memory}"),
     )
     mgr.write_memory("draft", "Created file.py")
 

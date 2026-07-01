@@ -23,11 +23,17 @@ class RunResources:
         file_access_policy: FileAccessPolicy,
         agents: dict[str, AgentConfig],
         callbacks: Callbacks,
+        prompts: dict[str, str] | None = None,
+        goals: dict[str, str] | None = None,
+        memories: dict[str, str] | None = None,
     ) -> None:
         self._agent_clients = agent_clients
         self._file_access_policy = file_access_policy
         self._agents = agents
         self._callbacks = callbacks
+        self._prompts = prompts or {}
+        self._goals = goals or {}
+        self._memories = memories or {}
 
     @cached_property
     def file_registry(self) -> FileRegistry:
@@ -40,6 +46,27 @@ class RunResources:
             return self._agents[name]
         except KeyError as e:
             raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
+
+    def prompt(self, name: str) -> str:
+        """Resolve a named prompt by name; typed error if absent."""
+        try:
+            return self._prompts[name]
+        except KeyError as e:
+            raise ResourceUnavailableError(f"No prompt named {name!r}. Known: {sorted(self._prompts)}") from e
+
+    def goal(self, name: str) -> str:
+        """Resolve a named goal by name; typed error if absent."""
+        try:
+            return self._goals[name]
+        except KeyError as e:
+            raise ResourceUnavailableError(f"No goal named {name!r}. Known: {sorted(self._goals)}") from e
+
+    def memory_prompt(self, name: str) -> str:
+        """Resolve a named memory prompt by name; typed error if absent."""
+        try:
+            return self._memories[name]
+        except KeyError as e:
+            raise ResourceUnavailableError(f"No memory prompt named {name!r}. Known: {sorted(self._memories)}") from e
 
     @cached_property
     def agent_runtime_factory(self) -> AgentRuntimeFactory:

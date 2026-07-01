@@ -95,13 +95,10 @@ async def test_on_message_received_ignores_other_messages(make_orchestrator):
 @pytest.fixture
 def minimal_flow(tmp_path):
     """Two-phase flow: 'a' is root, 'b' depends on 'a'."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           a:
             agent: writer
@@ -152,13 +149,10 @@ async def test_on_initialize_submits_initial_phase_trigger(minimal_flow, make_or
 
 
 async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_path, make_orchestrator):
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           a:
             type: NotARealPhase
@@ -178,13 +172,10 @@ async def test_on_initialize_unknown_phase_type_raises_flow_config_error(tmp_pat
 async def test_on_initialize_flow_phases_dir_outside_ai_root_raises(tmp_path, make_orchestrator):
     """phases/ directory outside the ddev.ai package tree raises FlowConfigError."""
     (tmp_path / "phases").mkdir()
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           a:
             agent: writer
@@ -201,12 +192,8 @@ async def test_on_initialize_flow_phases_dir_outside_ai_root_raises(tmp_path, ma
 
 
 async def test_on_initialize_missing_agent_raises(tmp_path, make_orchestrator):
-    (tmp_path / "prompts").mkdir()
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           a:
             agent: nonexistent_agent
@@ -247,13 +234,10 @@ def test_resource_provider_agent_config_unknown_name_raises(file_access_policy):
 
 async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make_orchestrator):
     """A phase defined in phases: but absent from flow: may have an unknown type — no error."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           real:
             agent: writer
@@ -279,13 +263,10 @@ async def test_orphan_phase_with_unknown_type_does_not_block_init(tmp_path, make
 
 async def test_phase_in_flow_with_unknown_type_raises(tmp_path, make_orchestrator):
     """A phase referenced from flow: with an unknown type must still raise FlowConfigError."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           a:
             type: NotARealPhase
@@ -304,13 +285,10 @@ async def test_phase_in_flow_with_unknown_type_raises(tmp_path, make_orchestrato
 
 async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
     """An orphan phase must emit a warning containing its phase id."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           real:
             agent: writer
@@ -340,13 +318,10 @@ async def test_orphan_phase_logs_warning(tmp_path, make_orchestrator, caplog):
 
 async def test_on_initialize_invokes_validate_config(tmp_path, make_orchestrator):
     """validate_config is called for each scheduled phase; raising propagates as FlowConfigError."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           a:
             agent: writer
@@ -362,13 +337,10 @@ async def test_on_initialize_invokes_validate_config(tmp_path, make_orchestrator
 
 async def test_on_initialize_skips_validate_config_for_orphan(tmp_path, make_orchestrator):
     """A phase defined but not in flow must not trigger its validate_config."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           real:
             agent: writer
@@ -423,13 +395,10 @@ async def test_on_finalize_no_exception_no_log(tmp_path, make_orchestrator, capl
 
 def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
     """Full pipeline: a failing phase must cause run() to raise RuntimeError."""
-    (tmp_path / "prompts").mkdir()
-    (tmp_path / "prompts" / "writer.md").write_text("system prompt")
+    (tmp_path / "agents").mkdir(exist_ok=True)
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: agent\n---\n\nsystem prompt")
     (tmp_path / "flow.yaml").write_text(
         dedent("""\
-        agents:
-          writer:
-            tools: []
         phases:
           failing:
             type: FailingPhase

@@ -5,11 +5,40 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, ValidationError, field_validator, model_validator
 
 from ddev.ai.tools.registry import ToolRegistry
+
+
+def parse_md_file(path: Path) -> tuple[dict[str, Any], str]:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as e:
+        raise FlowConfigError(f"Cannot read {path}: {e}") from e
+
+    if not text.startswith("---\n"):
+        raise FlowConfigError(f"{path}: missing YAML front matter (file must start with '---')")
+
+    remainder = text[4:]
+    for delimiter in ("\n---\n", "\n---"):
+        if delimiter in remainder:
+            raw_yaml, raw_body = remainder.split(delimiter, 1)
+            break
+    else:
+        raise FlowConfigError(f"{path}: missing YAML front matter closing '---'")
+
+    try:
+        meta = yaml.safe_load(raw_yaml) or {}
+    except yaml.YAMLError as e:
+        raise FlowConfigError(f"{path}: Invalid YAML in front matter: {e}") from e
+
+    if not isinstance(meta, dict):
+        raise FlowConfigError(f"{path}: YAML front matter must be a mapping")
+
+    return meta, raw_body.strip()
 
 
 class FlowConfigError(Exception):
@@ -54,18 +83,18 @@ def _detect_cycles(
 class TaskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")
-    prompt_path: Path | None = None
     prompt: str | None = None
+    prompt_ref: str | None = None
     goal: str | None = None
-    goal_path: Path | None = None
+    goal_ref: str | None = None
     max_goal_attempts: int = 5
     clear_context_before: bool = False
     compact_context_before: bool = False
 
     @model_validator(mode="after")
     def exactly_one_prompt_source(self) -> TaskConfig:
-        if (self.prompt_path is None) == (self.prompt is None):
-            raise ValueError("Exactly one of 'prompt_path' or 'prompt' must be set")
+        if (self.prompt is None) == (self.prompt_ref is None):
+            raise ValueError("Exactly one of 'prompt' or 'prompt_ref' must be set")
         return self
 
     @model_validator(mode="after")
@@ -76,11 +105,11 @@ class TaskConfig(BaseModel):
 
     @model_validator(mode="after")
     def goal_consistency(self) -> TaskConfig:
-        if self.goal is not None and self.goal_path is not None:
-            raise ValueError("At most one of 'goal' or 'goal_path' may be set")
-        has_goal = self.goal is not None or self.goal_path is not None
+        if self.goal is not None and self.goal_ref is not None:
+            raise ValueError("At most one of 'goal' or 'goal_ref' may be set")
+        has_goal = self.goal is not None or self.goal_ref is not None
         if not has_goal and "max_goal_attempts" in self.model_fields_set:
-            raise ValueError("'max_goal_attempts' may only be set when 'goal' or 'goal_path' is set")
+            raise ValueError("'max_goal_attempts' may only be set when 'goal' or 'goal_ref' is set")
         if has_goal and self.max_goal_attempts < 1:
             raise ValueError("'max_goal_attempts' must be at least 1")
         return self
@@ -91,12 +120,12 @@ class CheckpointConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     memory_prompt: str | None = None
-    memory_prompt_path: Path | None = None
+    memory_prompt_ref: str | None = None
 
     @model_validator(mode="after")
     def exactly_one_source(self) -> CheckpointConfig:
-        if (self.memory_prompt is None) == (self.memory_prompt_path is None):
-            raise ValueError("Exactly one of 'memory_prompt' or 'memory_prompt_path' must be set")
+        if (self.memory_prompt is None) == (self.memory_prompt_ref is None):
+            raise ValueError("Exactly one of 'memory_prompt' or 'memory_prompt_ref' must be set")
         return self
 
 
@@ -106,6 +135,7 @@ class AgentConfig(BaseModel):
     model: str | None = None
     max_tokens: int | None = None
     tools: list[str] = []
+    system_prompt: str = ""
 
     @field_validator("tools", mode="after")
     @classmethod
@@ -134,13 +164,33 @@ class FlowEntry(BaseModel):
 class FlowConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     variables: dict[str, str] = {}
-    agents: dict[str, AgentConfig]
     phases: dict[str, PhaseConfig]
     flow: list[FlowEntry]
 
+    _agents: dict[str, AgentConfig] = PrivateAttr(default_factory=dict)
+    _prompts: dict[str, str] = PrivateAttr(default_factory=dict)
+    _goals: dict[str, str] = PrivateAttr(default_factory=dict)
+    _memories: dict[str, str] = PrivateAttr(default_factory=dict)
+
+    @property
+    def agents(self) -> dict[str, AgentConfig]:
+        return self._agents
+
+    @property
+    def prompts(self) -> dict[str, str]:
+        return self._prompts
+
+    @property
+    def goals(self) -> dict[str, str]:
+        return self._goals
+
+    @property
+    def memories(self) -> dict[str, str]:
+        return self._memories
+
     @model_validator(mode="after")
     def cross_references(self) -> FlowConfig:
-        """Validate all cross-references between agents, phases, and dependencies."""
+        """Validate all cross-references between phases and dependencies."""
         scheduled = {entry.phase for entry in self.flow}
         seen: set[str] = set()
         for entry in self.flow:
@@ -155,10 +205,6 @@ class FlowConfig(BaseModel):
                 if dep not in scheduled:
                     raise ValueError(f"Phase {entry.phase!r} depends on {dep!r} which is not scheduled in flow")
 
-        for phase_id, phase in self.phases.items():
-            if phase.agent is not None and phase.agent not in self.agents:
-                raise ValueError(f"Phase {phase_id!r} references unknown agent: {phase.agent!r}")
-
         dependency_map = {entry.phase: entry.dependencies for entry in self.flow}
         cycles, truncated = _detect_cycles(dependency_map)
         if cycles:
@@ -167,6 +213,66 @@ class FlowConfig(BaseModel):
             raise ValueError(f"Cycle(s) detected in flow:\n  {formatted}{suffix}")
 
         return self
+
+    @staticmethod
+    def _load_agents(agents_dir: Path) -> dict[str, AgentConfig]:
+        agents: dict[str, AgentConfig] = {}
+        if not agents_dir.is_dir():
+            return agents
+        for md_file in sorted(agents_dir.glob("*.md")):
+            meta, body = parse_md_file(md_file)
+            if meta.get("type") != "agent":
+                continue
+            fm = {k: v for k, v in meta.items() if k != "type"}
+            fm["system_prompt"] = body
+            try:
+                agents[md_file.stem] = AgentConfig.model_validate(fm)
+            except ValidationError as e:
+                raise FlowConfigError(f"Invalid agent config in {md_file}:\n{e}") from e
+        return agents
+
+    @staticmethod
+    def _load_prompt_files(prompts_dir: Path) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
+        prompts: dict[str, str] = {}
+        goals: dict[str, str] = {}
+        memories: dict[str, str] = {}
+        if not prompts_dir.is_dir():
+            return prompts, goals, memories
+        for md_file in sorted(prompts_dir.glob("*.md")):
+            meta, body = parse_md_file(md_file)
+            file_type = meta.get("type")
+            if file_type == "prompt":
+                prompts[md_file.stem] = body
+            elif file_type == "goal":
+                goals[md_file.stem] = body
+            elif file_type == "memory_prompt":
+                memories[md_file.stem] = body
+        return prompts, goals, memories
+
+    def _validate_phase_references(self) -> None:
+        for phase_id, phase in self.phases.items():
+            if phase.agent is not None and phase.agent not in self._agents:
+                raise FlowConfigError(
+                    f"Phase {phase_id!r} references unknown agent: {phase.agent!r} "
+                    f"(No agent file found for {phase.agent!r})"
+                )
+            for i, task in enumerate(phase.tasks):
+                if task.prompt_ref is not None and task.prompt_ref not in self._prompts:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
+                        f"No prompt file found for prompt_ref {task.prompt_ref!r}"
+                    )
+                if task.goal_ref is not None and task.goal_ref not in self._goals:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} task {i} ({task.name!r}): "
+                        f"No goal file found for goal_ref {task.goal_ref!r}"
+                    )
+            if phase.checkpoint is not None and phase.checkpoint.memory_prompt_ref is not None:
+                if phase.checkpoint.memory_prompt_ref not in self._memories:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} checkpoint: "
+                        f"No memory prompt file found for memory_prompt_ref {phase.checkpoint.memory_prompt_ref!r}"
+                    )
 
     @classmethod
     def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
@@ -181,32 +287,8 @@ class FlowConfig(BaseModel):
         except ValidationError as e:
             raise FlowConfigError(f"Invalid flow config:\n{e}") from e
 
-        config._validate_files(config_dir)
+        config._agents = cls._load_agents(config_dir / "agents")
+        config._prompts, config._goals, config._memories = cls._load_prompt_files(config_dir / "prompts")
+        config._validate_phase_references()
+
         return config
-
-    def _validate_files(self, config_dir: Path) -> None:
-        """Check all referenced files exist."""
-        for agent_name in self.agents:
-            system_prompt = config_dir / "prompts" / f"{agent_name}.md"
-            if not system_prompt.exists():
-                raise FlowConfigError(f"System prompt not found for agent {agent_name!r}: {system_prompt}")
-
-        for phase_id, phase in self.phases.items():
-            for i, task in enumerate(phase.tasks):
-                if task.prompt_path is not None:
-                    resolved = config_dir / task.prompt_path
-                    if not resolved.exists():
-                        raise FlowConfigError(
-                            f"Phase {phase_id!r} task {i} ({task.name!r}): prompt_path not found: {resolved}"
-                        )
-                if task.goal_path is not None:
-                    resolved = config_dir / task.goal_path
-                    if not resolved.exists():
-                        raise FlowConfigError(
-                            f"Phase {phase_id!r} task {i} ({task.name!r}): goal_path not found: {resolved}"
-                        )
-
-            if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
-                resolved = config_dir / phase.checkpoint.memory_prompt_path
-                if not resolved.exists():
-                    raise FlowConfigError(f"Phase {phase_id!r} checkpoint memory_prompt_path not found: {resolved}")

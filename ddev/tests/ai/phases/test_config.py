@@ -12,7 +12,62 @@ from ddev.ai.phases.config import (
     FlowConfigError,
     PhaseConfig,
     TaskConfig,
+    parse_md_file,
 )
+
+# ---------------------------------------------------------------------------
+# parse_md_file
+# ---------------------------------------------------------------------------
+
+
+def test_parse_md_file_returns_front_matter_and_body(tmp_path):
+    f = tmp_path / "agent.md"
+    f.write_text("---\ntype: agent\nmodel: claude-3\n---\n\nYou are a writer.")
+    meta, body = parse_md_file(f)
+    assert meta == {"type": "agent", "model": "claude-3"}
+    assert body == "You are a writer."
+
+
+def test_parse_md_file_strips_body_whitespace(tmp_path):
+    f = tmp_path / "agent.md"
+    f.write_text("---\ntype: agent\n---\n\n\nBody text.\n\n")
+    _, body = parse_md_file(f)
+    assert body == "Body text."
+
+
+def test_parse_md_file_empty_body(tmp_path):
+    f = tmp_path / "agent.md"
+    f.write_text("---\ntype: agent\n---\n")
+    _, body = parse_md_file(f)
+    assert body == ""
+
+
+def test_parse_md_file_closing_delimiter_without_trailing_newline(tmp_path):
+    f = tmp_path / "agent.md"
+    f.write_text("---\ntype: agent\n---")
+    meta, body = parse_md_file(f)
+    assert meta == {"type": "agent"}
+    assert body == ""
+
+
+def test_parse_md_file_missing_front_matter_raises(tmp_path):
+    f = tmp_path / "agent.md"
+    f.write_text("No front matter here.")
+    with pytest.raises(FlowConfigError, match="missing YAML front matter"):
+        parse_md_file(f)
+
+
+def test_parse_md_file_invalid_yaml_raises(tmp_path):
+    f = tmp_path / "agent.md"
+    f.write_text("---\n: bad: [yaml\n---\nBody.")
+    with pytest.raises(FlowConfigError, match="Invalid YAML"):
+        parse_md_file(f)
+
+
+def test_parse_md_file_missing_file_raises(tmp_path):
+    with pytest.raises(FlowConfigError, match="Cannot read"):
+        parse_md_file(tmp_path / "nonexistent.md")
+
 
 # ---------------------------------------------------------------------------
 # TaskConfig
@@ -22,18 +77,18 @@ from ddev.ai.phases.config import (
 def test_task_config_with_prompt():
     tc = TaskConfig(name="t1", prompt="Do it.")
     assert tc.prompt == "Do it."
-    assert tc.prompt_path is None
+    assert tc.prompt_ref is None
 
 
-def test_task_config_with_prompt_path():
-    tc = TaskConfig(name="t1", prompt_path="prompts/task.md")
+def test_task_config_with_prompt_ref():
+    tc = TaskConfig(name="t1", prompt_ref="my_prompt")
+    assert tc.prompt_ref == "my_prompt"
     assert tc.prompt is None
-    assert tc.prompt_path is not None
 
 
-def test_task_config_both_set_raises():
+def test_task_config_both_prompt_and_ref_raises():
     with pytest.raises(ValidationError, match="Exactly one"):
-        TaskConfig(name="t1", prompt="Do it.", prompt_path="prompts/task.md")
+        TaskConfig(name="t1", prompt="Do it.", prompt_ref="my_prompt")
 
 
 def test_task_config_neither_set_raises():
@@ -49,7 +104,7 @@ def test_task_config_extra_field_raises():
 @pytest.mark.parametrize(
     "kwargs,match",
     [
-        ({"name": "t", "prompt": "x", "goal": "g", "goal_path": "g.md"}, "At most one of 'goal' or 'goal_path'"),
+        ({"name": "t", "prompt": "x", "goal": "g", "goal_ref": "g_ref"}, "At most one of 'goal' or 'goal_ref'"),
         ({"name": "t", "prompt": "x", "max_goal_attempts": 3}, "'max_goal_attempts' may only be set"),
         ({"name": "t", "prompt": "x", "goal": "g", "max_goal_attempts": 0}, "must be at least 1"),
     ],
@@ -64,14 +119,14 @@ def test_task_config_goal_validation_rejects(kwargs, match):
     "kwargs",
     [
         {"name": "t", "prompt": "x", "goal": "verify it"},
-        {"name": "t", "prompt": "x", "goal_path": "g.md"},
+        {"name": "t", "prompt": "x", "goal_ref": "my_goal"},
         {"name": "t", "prompt": "x", "goal": "verify it", "max_goal_attempts": 7},
     ],
-    ids=["goal", "goal_path", "goal_with_custom_attempts"],
+    ids=["goal", "goal_ref", "goal_with_custom_attempts"],
 )
 def test_task_config_goal_accepts_valid(kwargs):
     tc = TaskConfig(**kwargs)
-    assert (tc.goal is not None) ^ (tc.goal_path is not None)
+    assert (tc.goal is not None) ^ (tc.goal_ref is not None)
     assert tc.max_goal_attempts == kwargs.get("max_goal_attempts", 5)
 
 
@@ -85,14 +140,14 @@ def test_checkpoint_config_with_memory_prompt():
     assert cc.memory_prompt == "List files."
 
 
-def test_checkpoint_config_with_memory_prompt_path():
-    cc = CheckpointConfig(memory_prompt_path="prompts/mem.md")
-    assert cc.memory_prompt_path is not None
+def test_checkpoint_config_with_memory_prompt_ref():
+    cc = CheckpointConfig(memory_prompt_ref="mem")
+    assert cc.memory_prompt_ref == "mem"
 
 
 def test_checkpoint_config_both_set_raises():
     with pytest.raises(ValidationError, match="Exactly one"):
-        CheckpointConfig(memory_prompt="List files.", memory_prompt_path="prompts/mem.md")
+        CheckpointConfig(memory_prompt="List files.", memory_prompt_ref="mem")
 
 
 def test_checkpoint_config_neither_set_raises():
@@ -105,9 +160,13 @@ def test_checkpoint_config_neither_set_raises():
 # ---------------------------------------------------------------------------
 
 
-def test_agent_config_valid_tools():
-    ac = AgentConfig(tools=["read_file", "grep"])
-    assert ac.tools == ["read_file", "grep"]
+def test_agent_config_defaults():
+    ac = AgentConfig()
+    assert ac.tools == []
+    assert ac.provider == "anthropic"
+    assert ac.model is None
+    assert ac.max_tokens is None
+    assert ac.system_prompt == ""
 
 
 def test_agent_config_web_search_validates():
@@ -125,15 +184,9 @@ def test_agent_config_unknown_tool_raises():
         AgentConfig(tools=["read_file", "teleport"])
 
 
-def test_agent_config_empty_tools():
-    ac = AgentConfig()
-    assert ac.tools == []
-
-
-def test_agent_config_optional_fields():
-    ac = AgentConfig(model="claude-opus-4-5", max_tokens=4096)
-    assert ac.model == "claude-opus-4-5"
-    assert ac.max_tokens == 4096
+def test_agent_config_system_prompt_set():
+    ac = AgentConfig(system_prompt="You are a writer.")
+    assert ac.system_prompt == "You are a writer."
 
 
 # ---------------------------------------------------------------------------
@@ -164,7 +217,6 @@ def test_phase_config_with_checkpoint():
 
 def _minimal_config(**overrides) -> dict:
     base = {
-        "agents": {"writer": {"tools": []}},
         "phases": {"p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]}},
         "flow": [{"phase": "p1"}],
     }
@@ -193,7 +245,6 @@ def test_flow_config_unknown_dependency():
 
 def test_flow_config_dependency_not_scheduled_in_flow():
     raw = {
-        "agents": {"writer": {"tools": []}},
         "phases": {
             "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
             "p2": {"agent": "writer", "tasks": [{"name": "t2", "prompt": "Review it."}]},
@@ -211,16 +262,8 @@ def test_flow_config_duplicate_phase_raises():
         FlowConfig.model_validate(raw)
 
 
-def test_flow_config_unknown_agent_in_phase():
-    raw = _minimal_config()
-    raw["phases"]["p1"]["agent"] = "nonexistent"
-    with pytest.raises(ValidationError, match="unknown agent"):
-        FlowConfig.model_validate(raw)
-
-
 def test_flow_config_phase_without_agent_validates():
     raw = {
-        "agents": {"writer": {"tools": []}},
         "phases": {
             "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
             "noop": {"type": "SomeCustomPhase"},
@@ -243,7 +286,6 @@ def test_flow_config_with_variables():
 
 def test_flow_config_multiple_phases_and_deps():
     raw = {
-        "agents": {"writer": {"tools": []}},
         "phases": {
             "p1": {"agent": "writer", "tasks": [{"name": "t1", "prompt": "Do it."}]},
             "p2": {"agent": "writer", "tasks": [{"name": "t2", "prompt": "Review it."}]},
@@ -265,22 +307,52 @@ def test_flow_config_extra_field_raises():
         FlowConfig.model_validate(raw)
 
 
+def test_flow_config_extra_agents_key_raises():
+    raw = _minimal_config()
+    raw["agents"] = {"writer": {"tools": []}}
+    with pytest.raises(ValidationError, match="extra"):
+        FlowConfig.model_validate(raw)
+
+
+# ---------------------------------------------------------------------------
+# FlowConfig.from_yaml helpers
+# ---------------------------------------------------------------------------
+
+
+def _write_agent_file(config_dir, name: str, body: str = "You are an agent.", **kwargs) -> None:
+    agents_dir = config_dir / "agents"
+    agents_dir.mkdir(exist_ok=True)
+    front_matter = {"type": "agent", **kwargs}
+    import yaml as _yaml
+
+    content = f"---\n{_yaml.dump(front_matter)}---\n\n{body}"
+    (agents_dir / f"{name}.md").write_text(content)
+
+
+def _write_prompt_file(config_dir, name: str, body: str = "Do it.") -> None:
+    prompts_dir = config_dir / "prompts"
+    prompts_dir.mkdir(exist_ok=True)
+    content = f"---\ntype: prompt\n---\n\n{body}"
+    (prompts_dir / f"{name}.md").write_text(content)
+
+
+def _write_goal_file(config_dir, name: str, body: str = "Verify output.") -> None:
+    prompts_dir = config_dir / "prompts"
+    prompts_dir.mkdir(exist_ok=True)
+    content = f"---\ntype: goal\n---\n\n{body}"
+    (prompts_dir / f"{name}.md").write_text(content)
+
+
 # ---------------------------------------------------------------------------
 # FlowConfig.from_yaml
 # ---------------------------------------------------------------------------
 
 
 def test_from_yaml_valid(tmp_path):
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("system prompt")
-
+    _write_agent_file(tmp_path, "writer")
     flow_yaml = tmp_path / "flow.yaml"
     flow_yaml.write_text(
         """\
-agents:
-  writer:
-    tools: []
 phases:
   p1:
     agent: writer
@@ -293,17 +365,14 @@ flow:
     )
     config = FlowConfig.from_yaml(flow_yaml, tmp_path)
     assert "p1" in config.phases
+    assert config.agents["writer"].system_prompt == "You are an agent."
 
 
-def test_from_yaml_missing_system_prompt(tmp_path):
-    (tmp_path / "prompts").mkdir()
-
+def test_from_yaml_missing_agent_file(tmp_path):
+    (tmp_path / "agents").mkdir()
     flow_yaml = tmp_path / "flow.yaml"
     flow_yaml.write_text(
         """\
-agents:
-  writer:
-    tools: []
 phases:
   p1:
     agent: writer
@@ -314,32 +383,7 @@ flow:
   - phase: p1
 """
     )
-    with pytest.raises(FlowConfigError, match="System prompt not found"):
-        FlowConfig.from_yaml(flow_yaml, tmp_path)
-
-
-def test_from_yaml_missing_task_prompt_path(tmp_path):
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("system prompt")
-
-    flow_yaml = tmp_path / "flow.yaml"
-    flow_yaml.write_text(
-        """\
-agents:
-  writer:
-    tools: []
-phases:
-  p1:
-    agent: writer
-    tasks:
-      - name: t1
-        prompt_path: prompts/nonexistent.md
-flow:
-  - phase: p1
-"""
-    )
-    with pytest.raises(FlowConfigError, match="prompt_path not found"):
+    with pytest.raises(FlowConfigError, match="No agent file found for"):
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 
@@ -355,28 +399,107 @@ def test_from_yaml_missing_file(tmp_path):
         FlowConfig.from_yaml(tmp_path / "nonexistent.yaml", tmp_path)
 
 
-def test_from_yaml_missing_task_goal_path(tmp_path):
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("system prompt")
+def test_from_yaml_agent_file_wrong_type_is_skipped(tmp_path):
+    (tmp_path / "agents").mkdir()
+    (tmp_path / "agents" / "writer.md").write_text("---\ntype: prompt\n---\n\nYou are an agent.")
     flow_yaml = tmp_path / "flow.yaml"
     flow_yaml.write_text(
         """\
-agents:
-  writer:
-    tools: []
 phases:
   p1:
     agent: writer
     tasks:
       - name: t1
         prompt: "Do it."
-        goal_path: prompts/goal.md
 flow:
   - phase: p1
 """
     )
-    with pytest.raises(FlowConfigError, match="goal_path not found"):
+    with pytest.raises(FlowConfigError, match="No agent file found for"):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
+def test_from_yaml_prompt_file_wrong_type_is_skipped(tmp_path):
+    _write_agent_file(tmp_path, "writer")
+    (tmp_path / "prompts").mkdir()
+    (tmp_path / "prompts" / "task1.md").write_text("---\ntype: agent\n---\n\nBody.")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(
+        """\
+phases:
+  p1:
+    agent: writer
+    tasks:
+      - name: t1
+        prompt_ref: task1
+flow:
+  - phase: p1
+"""
+    )
+    with pytest.raises(FlowConfigError, match="No prompt file found for prompt_ref"):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
+@pytest.mark.parametrize(
+    "phase_body,match",
+    [
+        (
+            """\
+    agent: writer
+    tasks:
+      - name: t1
+        prompt_ref: nonexistent
+""",
+            "No prompt file found for",
+        ),
+        (
+            """\
+    agent: writer
+    tasks:
+      - name: t1
+        prompt: "Do it."
+        goal_ref: nonexistent
+""",
+            "No goal file found for",
+        ),
+        (
+            """\
+    agent: writer
+    tasks:
+      - name: t1
+        prompt: "Do it."
+    checkpoint:
+      memory_prompt_ref: nonexistent
+""",
+            "No memory prompt file found for",
+        ),
+    ],
+    ids=["prompt_ref", "goal_ref", "memory_prompt_ref"],
+)
+def test_from_yaml_missing_ref_file(tmp_path, phase_body, match):
+    _write_agent_file(tmp_path, "writer")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(f"phases:\n  p1:\n{phase_body}flow:\n  - phase: p1\n")
+    with pytest.raises(FlowConfigError, match=match):
+        FlowConfig.from_yaml(flow_yaml, tmp_path)
+
+
+def test_from_yaml_unknown_agent_in_phase(tmp_path):
+    _write_agent_file(tmp_path, "writer")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(
+        """\
+phases:
+  p1:
+    agent: nonexistent
+    tasks:
+      - name: t1
+        prompt: "Do it."
+flow:
+  - phase: p1
+"""
+    )
+    with pytest.raises(FlowConfigError, match="unknown agent"):
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 
@@ -386,10 +509,8 @@ flow:
 
 
 def _three_phase_config() -> dict:
-    agent = {"tools": []}
     task = {"name": "t", "prompt": "Do it."}
     return {
-        "agents": {"writer": agent},
         "phases": {
             "p1": {"agent": "writer", "tasks": [task]},
             "p2": {"agent": "writer", "tasks": [task]},
@@ -431,10 +552,8 @@ def test_flow_config_acyclic_chain_ok():
 
 
 def test_flow_disjoined_graphs_ok():
-    agent = {"tools": []}
     task = {"name": "t", "prompt": "Do it."}
     raw = {
-        "agents": {"writer": agent},
         "phases": {
             "p1": {"agent": "writer", "tasks": [task]},
             "p2": {"agent": "writer", "tasks": [task]},
@@ -460,10 +579,8 @@ def test_flow_config_self_dependency_raises():
 
 
 def test_flow_config_two_independent_cycles_reports_both():
-    agent = {"tools": []}
     task = {"name": "t", "prompt": "Do it."}
     raw = {
-        "agents": {"writer": agent},
         "phases": {
             "p1": {"agent": "writer", "tasks": [task]},
             "p2": {"agent": "writer", "tasks": [task]},
