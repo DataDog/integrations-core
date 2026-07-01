@@ -24,7 +24,7 @@ from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
 from .table_metrics import ClickhouseTableMetrics
-from .utils import ErrorSanitizer
+from .utils import ErrorSanitizer, cluster_aware_query
 
 try:
     import datadog_agent
@@ -289,16 +289,19 @@ class ClickhouseCheck(DatabaseCheck):
 
     def get_queries(self) -> list[dict]:
         query_list = []
-
         single = self._config.single_endpoint_mode
+
+        def pick(query: dict) -> dict:
+            """In single endpoint mode, read all replicas and tag each row per node."""
+            return cluster_aware_query(query) if single else query
 
         if self._config.use_legacy_queries:
             query_list.extend(
                 [
-                    queries.SystemMetricsClusterAware if single else queries.SystemMetrics,
-                    queries.SystemEventsToDeprecateClusterAware if single else queries.SystemEventsToDeprecate,
-                    queries.SystemEventsClusterAware if single else queries.SystemEvents,
-                    queries.SystemAsynchronousMetricsClusterAware if single else queries.SystemAsynchronousMetrics,
+                    pick(queries.SystemMetrics),
+                    pick(queries.SystemEventsToDeprecate),
+                    pick(queries.SystemEvents),
+                    pick(queries.SystemAsynchronousMetrics),
                     queries.SystemParts,
                     queries.SystemReplicas,
                     queries.SystemDictionaries,
@@ -308,17 +311,13 @@ class ClickhouseCheck(DatabaseCheck):
         if self._config.use_advanced_queries:
             query_list.extend(
                 [
-                    advanced_queries.SystemMetricsClusterAware if single else advanced_queries.SystemMetrics,
-                    advanced_queries.SystemEventsClusterAware if single else advanced_queries.SystemEvents,
-                    advanced_queries.SystemAsynchronousMetricsClusterAware
-                    if single
-                    else advanced_queries.SystemAsynchronousMetrics,
+                    pick(advanced_queries.SystemMetrics),
+                    pick(advanced_queries.SystemEvents),
+                    pick(advanced_queries.SystemAsynchronousMetrics),
                 ]
             )
             if self.version_ge('21.3'):
-                query_list.append(
-                    advanced_queries.SystemErrorsClusterAware if single else advanced_queries.SystemErrors
-                )
+                query_list.append(pick(advanced_queries.SystemErrors))
 
         return query_list
 

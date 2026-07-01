@@ -59,18 +59,7 @@ import json
 import os
 from typing import Any
 
-from datadog_checks.clickhouse.utils import cluster_aware_query
-
-__all__ = [
-    'SystemAsynchronousMetrics',
-    'SystemAsynchronousMetricsClusterAware',
-    'SystemErrors',
-    'SystemErrorsClusterAware',
-    'SystemEvents',
-    'SystemEventsClusterAware',
-    'SystemMetrics',
-    'SystemMetricsClusterAware',
-]
+__all__ = ['SystemAsynchronousMetrics', 'SystemErrors', 'SystemEvents', 'SystemMetrics']
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 
@@ -79,10 +68,6 @@ MATCH_QUERIES = {
     'SystemMetrics': 'system_metrics',
     'SystemAsynchronousMetrics': 'system_async_metrics',
 }
-
-# Suffix that selects the single-endpoint-mode variant of a bulk match query (e.g.
-# 'SystemEventsClusterAware') through __getattr__.
-CLUSTER_AWARE_SUFFIX = 'ClusterAware'
 
 _match_query_cache: dict[str, dict[str, Any]] = {}
 
@@ -96,8 +81,6 @@ SystemErrors: dict[str, Any] = {
         {'name': 'remote', 'type': 'tag', 'boolean': True},
     ],
 }
-
-SystemErrorsClusterAware: dict[str, Any] = cluster_aware_query(SystemErrors)
 
 
 def load_match_query(name: str) -> dict[str, Any]:
@@ -146,11 +129,8 @@ def warm_cache() -> None:
 
 
 def __getattr__(name: str) -> dict[str, Any]:
-    cluster_aware = name.endswith(CLUSTER_AWARE_SUFFIX)
-    base_name = name[: -len(CLUSTER_AWARE_SUFFIX)] if cluster_aware else name
-    if base_name not in MATCH_QUERIES:
+    if name not in MATCH_QUERIES:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     if name not in _match_query_cache:
-        query = load_match_query(MATCH_QUERIES[base_name])
-        _match_query_cache[name] = cluster_aware_query(query) if cluster_aware else query
+        _match_query_cache[name] = load_match_query(MATCH_QUERIES[name])
     return _match_query_cache[name]

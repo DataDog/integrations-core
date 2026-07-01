@@ -7,6 +7,7 @@ from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
+from datadog_checks.clickhouse.utils import cluster_aware_query
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
@@ -383,9 +384,9 @@ def test_database_hostname_ignores_reported_hostname_override(reported_hostname,
         mock_resolve.assert_called_with(BASE_INSTANCE['server'])
 
 
-def test_cluster_aware_variant_bulk_match_query():
+def test_cluster_aware_query_bulk_match_query():
     """The cluster-aware variant reads all replicas and tags system.events per node."""
-    variant = advanced_queries.SystemEventsClusterAware
+    variant = cluster_aware_query(advanced_queries.SystemEvents)
 
     assert variant['query'] == (
         "SELECT value, event, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.events)"
@@ -396,9 +397,9 @@ def test_cluster_aware_variant_bulk_match_query():
     assert all(column['name'] != 'clickhouse_node' for column in advanced_queries.SystemEvents['columns'])
 
 
-def test_cluster_aware_variant_preserves_where_clause():
+def test_cluster_aware_query_preserves_where_clause():
     """system.errors carries a WHERE clause that must survive in the cluster-aware variant."""
-    variant = advanced_queries.SystemErrorsClusterAware
+    variant = cluster_aware_query(advanced_queries.SystemErrors)
 
     assert variant['query'] == (
         "SELECT value, name, code, remote, hostName() AS clickhouse_node "
@@ -407,9 +408,9 @@ def test_cluster_aware_variant_preserves_where_clause():
     assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
 
 
-def test_cluster_aware_variant_legacy_query():
-    """Legacy queries.py exposes matching static cluster-aware variants."""
-    variant = queries.SystemMetricsClusterAware
+def test_cluster_aware_query_legacy_query():
+    """The helper builds a cluster-aware variant for a legacy query too."""
+    variant = cluster_aware_query(queries.SystemMetrics)
 
     assert variant['query'] == (
         "SELECT value, metric, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.metrics)"
