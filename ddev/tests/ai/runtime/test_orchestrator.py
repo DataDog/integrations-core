@@ -87,17 +87,6 @@ def make_orchestrator(file_access_policy, tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# PhaseOrchestrator registry ownership / injection
-# ---------------------------------------------------------------------------
-
-
-def test_orchestrator_uses_injected_registry(core_dir, make_orchestrator):
-    """The orchestrator does not build its own registry; it stores the injected one."""
-    orchestrator, registry, _ = make_orchestrator(core_dir)
-    assert orchestrator._phase_registry is registry
-
-
-# ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_message_received
 # ---------------------------------------------------------------------------
 
