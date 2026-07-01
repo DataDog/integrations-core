@@ -71,7 +71,8 @@ files:
       fleet_configurable: true
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
-        If enabled, `dbname` should be specified to collect database-specific relations metrics.
+        Use `dbname` to collect relation metrics for a single database — by default, `dbname` is `postgres` —
+        or enable `database_autodiscovery` to collect relation metrics across all databases on the instance.
         You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
         from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
         Each relation generates many metrics (dozens per relation, plus several more for each index).
