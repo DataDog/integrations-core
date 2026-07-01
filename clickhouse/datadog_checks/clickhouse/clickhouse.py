@@ -458,19 +458,7 @@ class ClickhouseCheck(DatabaseCheck):
             return f"system.{table_name}"
 
     def make_cluster_aware(self, query: dict) -> dict:
-        """Collect a standard system-table metric query from all replicas in single endpoint mode.
-
-        In single endpoint mode the agent reaches a multi-node cluster through one load balancer, so
-        consecutive scrapes of a per-node ``system`` table land on different nodes. For the cumulative
-        counters in ``system.events``/``system.errors`` this makes the value jump up and down, which the
-        backend reads as phantom ``monotonic_count`` spikes such as the false ``query.failed`` counts in
-        SDBM-2746; gauges from ``system.metrics``/``system.asynchronous_metrics`` simply flap between nodes.
-
-        Retargeting the query at ``clusterAllReplicas`` and tagging each row with its ``hostName()`` gives
-        every node its own metric series, so counters increment monotonically per node (no sawtooth) and
-        gauges stay per node instead of flapping. Returns the query unchanged for direct connections and
-        for queries whose shape isn't a single ``FROM system.<table>`` select.
-        """
+        """Retarget a system-table query at clusterAllReplicas and tag each row per node."""
         if not self._config.single_endpoint_mode:
             return query
 
