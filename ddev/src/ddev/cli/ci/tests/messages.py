@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import hashlib
 import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
@@ -13,9 +12,11 @@ from ddev.event_bus.orchestrator import BaseMessage
 if TYPE_CHECKING:
     from ddev.utils.github_async.models import WorkflowJob
 
-# GitHub caps artifact names at 255 characters and disallows these characters (plus CR/LF).
-ARTIFACT_NAME_MAX_LENGTH = 255
+# Characters GitHub disallows in an artifact name (plus CR/LF).
 ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
+# Reserved separator between the artifact name's fields. Chosen so it never appears in a field
+# value (target/environment/platform), which keeps the name reversible via a plain split.
+ARTIFACT_NAME_SEPARATOR = "~"
 
 
 @dataclass
@@ -31,25 +32,25 @@ class BatchJob:
     e2e_tests: bool
 
     def artifact_name(self) -> str:
-        """Deterministic, collision-free artifact name derived solely from this job's frozen fields.
+        """Reversible artifact name built from the job's target, environment, and platform.
 
-        Pure function: same job always yields the same name, and two distinct jobs never collide.
-        A short digest of the raw fields guarantees uniqueness even when the readable prefix is
-        truncated or two jobs sanitize to the same prefix.
+        Pure and deterministic. Each field is sanitized to GitHub's artifact-name constraints and
+        joined by a reserved separator absent from the values, so the name can be split back into
+        ``(target, environment, platform)``. Uniqueness within a batch relies on those three fields
+        being distinct per job.
         """
-        raw_fields = (
-            self.name,
-            self.target,
-            self.runner,
-            self.environment,
-            self.platform,
-            str(self.unit_tests),
-            str(self.e2e_tests),
-        )
-        digest = hashlib.sha256("\x00".join(raw_fields).encode()).hexdigest()[:12]
-        readable = ARTIFACT_NAME_DISALLOWED.sub("_", "-".join(raw_fields))
-        prefix = readable[: ARTIFACT_NAME_MAX_LENGTH - len(digest) - 1]
-        return f"{prefix}-{digest}"
+        fields = (self.target, self.environment, self.platform)
+        return ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields)
+
+
+def split_artifact_name(artifact_name: str) -> tuple[str, str, str]:
+    """Reverse ``BatchJob.artifact_name`` into ``(target, environment, platform)``.
+
+    Raises ``ValueError`` when ``artifact_name`` is not the expected three-field shape, so callers
+    can skip artifacts that are not per-job test artifacts.
+    """
+    target, environment, platform = artifact_name.split(ARTIFACT_NAME_SEPARATOR)
+    return target, environment, platform
 
 
 @dataclass
@@ -62,11 +63,19 @@ class FailedCheck:
 
 @dataclass
 class BatchJobResult:
-    """Everything known about a single job in a finished batch, correlated by the producer."""
+    """Everything known about a single job in a finished batch, correlated by the producer.
+
+    ``artifacts_path`` is the single downloaded folder for the job (named after the job's
+    ``artifact_name``); the three ``*_artifact_name`` fields are the expected per-facet file names
+    inside that folder.
+    """
 
     job: BatchJob
     workflow_job: WorkflowJob | None
     artifacts_path: str | None
+    unit_artifact_name: str
+    e2e_artifact_name: str
+    coverage_artifact_name: str
 
 
 @dataclass

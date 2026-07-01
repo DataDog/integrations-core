@@ -34,12 +34,12 @@ def _wrap(data: Any) -> GitHubResponse[Any]:
     return GitHubResponse(data=data, headers={})
 
 
-def _job(name: str = "job-1") -> BatchJob:
+def _job(name: str = "job-1", environment: str = "py3.13") -> BatchJob:
     return BatchJob(
         name=name,
         target="ntp",
         runner="ubuntu-latest",
-        environment="py3.13",
+        environment=environment,
         platform="linux",
         unit_tests=True,
         e2e_tests=False,
@@ -184,6 +184,7 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
                         "platform": "linux",
                         "unit_tests": True,
                         "e2e_tests": False,
+                        "artifact_name": "ntp~py3.13~linux",
                     },
                     {
                         "name": "j2",
@@ -193,6 +194,7 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
                         "platform": "linux",
                         "unit_tests": True,
                         "e2e_tests": False,
+                        "artifact_name": "ntp~py3.13~linux",
                     },
                 ]
             ),
@@ -235,6 +237,14 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     # match these generic artifacts, so both correlated facets are None.
     assert [r.job.name for r in finished.batch_jobs] == ["j1", "j2"]
     assert all(r.workflow_job is None and r.artifacts_path is None for r in finished.batch_jobs)
+    # The per-facet file names are recorded from the job's base artifact name.
+    first = finished.batch_jobs[0]
+    base = batch.job_list[0].artifact_name()
+    assert (first.unit_artifact_name, first.e2e_artifact_name, first.coverage_artifact_name) == (
+        f"unit-{base}",
+        f"e2e-{base}",
+        f"coverage-{base}",
+    )
 
     # Check run closed with the GitHub conclusion.
     update_calls = fake.calls_to("update_check_run")
@@ -249,7 +259,8 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
 async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
     # A failed multi-job run where j1 passed and j2 failed: each batch_jobs entry must carry its
     # own true per-job status and its artifact directory, resolved by the job's artifact name.
-    j1, j2 = _job("j1"), _job("j2")
+    # The two jobs differ in an artifact-relevant field (environment) so their base names differ.
+    j1, j2 = _job("j1", environment="py3.13"), _job("j2", environment="py3.12")
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", _workflow_run("completed", "failure"))
     _mock_artifacts(fake, [_artifact_for(1, j1), _artifact_for(2, j2)])
@@ -267,9 +278,12 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
     # Passing job is not marked failed; each carries its true workflow-run conclusion.
     assert results["j1"].workflow_job is not None and results["j1"].workflow_job.conclusion == "success"
     assert results["j2"].workflow_job is not None and results["j2"].workflow_job.conclusion == "failure"
-    # Artifact directories resolved by artifact name (no heuristic matching).
+    # Each job's single artifact folder is resolved by its base artifact name (no heuristic matching).
     assert results["j1"].artifacts_path == str(tmp_path / "123" / f"1-{j1.artifact_name()}")
     assert results["j2"].artifacts_path == str(tmp_path / "123" / f"2-{j2.artifact_name()}")
+    # The per-facet file names inside each folder are recorded from the base artifact name.
+    assert results["j1"].unit_artifact_name == f"unit-{j1.artifact_name()}"
+    assert results["j2"].coverage_artifact_name == f"coverage-{j2.artifact_name()}"
 
 
 @pytest.mark.asyncio
