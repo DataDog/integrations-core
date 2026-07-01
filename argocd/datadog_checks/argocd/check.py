@@ -53,6 +53,11 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 self.log.exception("genresources: collection cycle failed")
         super().check(instance)
 
+    def cancel(self):
+        if self._resource_collector is not None:
+            self._resource_collector.stop()
+        super().cancel()
+
     def parse_config(self):
         endpoint_configs = [
             ("app_controller_endpoint", APP_CONTROLLER_NAMESPACE, APPLICATION_CONTROLLER_METRICS),

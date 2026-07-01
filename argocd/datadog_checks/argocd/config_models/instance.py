@@ -120,6 +120,9 @@ class InstanceConfig(BaseModel):
     genresources_exclude_paths: Optional[tuple[str, ...]] = None
     genresources_extra_include_paths: Optional[tuple[str, ...]] = None
     genresources_max_resources_per_cycle: Optional[int] = Field(None, ge=1)
+    genresources_rescrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_stream_applications_enabled: Optional[bool] = None
+    genresources_stream_backoff_max_seconds: Optional[int] = Field(None, ge=1)
     genresources_ttl_seconds: Optional[int] = Field(None, ge=1)
     headers: Optional[MappingProxyType[str, Any]] = None
     histogram_buckets_as_distributions: Optional[bool] = None

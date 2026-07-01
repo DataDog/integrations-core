@@ -159,6 +159,39 @@ files:
         items:
           type: string
         example: []
+    - name: genresources_stream_applications_enabled
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Opt-in. When true, maintain a persistent stream to the Argo CD
+        ``/api/v1/stream/applications`` endpoint and emit Application changes in
+        near-real-time. Clusters and Repositories are still collected by the
+        periodic rescrape. Default false (polling only, the previous behavior).
+      value:
+        type: boolean
+        example: false
+    - name: genresources_rescrape_interval_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Seconds between full rescrapes of all resource types when streaming is
+        enabled. The rescrape refreshes TTLs, detects deletions, and backfills
+        anything the stream missed. Minimum of 1.
+      value:
+        type: integer
+        example: 1200
+        minimum: 1
+    - name: genresources_stream_backoff_max_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Maximum backoff, in seconds, between application stream reconnection
+        attempts. Backoff starts at 1 second and doubles up to this cap,
+        resetting on a successful connection. Minimum of 1.
+      value:
+        type: integer
+        example: 30
+        minimum: 1
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

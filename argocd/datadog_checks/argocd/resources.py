@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -28,6 +29,7 @@ from .resources_constants import (
     REPOSITORY_INCLUDE,
     URL_CREDENTIALS_PATTERN,
 )
+from .stream_listener import ArgocdApplicationStreamListener
 
 if TYPE_CHECKING:
     from .check import ArgocdCheck
@@ -181,6 +183,8 @@ RESOURCE_TYPE_SPECS: tuple[ResourceTypeSpec, ...] = (
     ),
 )
 
+APPLICATION_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_application")
+
 
 def _is_excluded(path: str, exclude_paths: tuple[str, ...]) -> bool:
     """True if a path equals an exclude entry or is nested beneath one (subtree match)."""
@@ -217,6 +221,12 @@ class ArgocdResourceCollector:
         self._resubmit_interval: int = max(1, self._ttl_seconds // 2)
         self._collection_interval: int = config.genresources_collection_interval_seconds
         self._last_collect: float = 0.0
+        self._stream_enabled: bool = bool(config.genresources_stream_applications_enabled)
+        self._rescrape_interval: int = config.genresources_rescrape_interval_seconds
+        self._backoff_max: int = config.genresources_stream_backoff_max_seconds
+        self._last_rescrape: float = 0.0
+        self._submitted_lock = threading.RLock()
+        self._listener: ArgocdApplicationStreamListener | None = None
         self._includes: dict[str, dict[str, list[str]]] = {
             spec.resource_type: _build_include(spec.include, self._extra_paths, self._exclude_paths)
             for spec in RESOURCE_TYPE_SPECS
@@ -238,16 +248,21 @@ class ArgocdResourceCollector:
             )
 
     def collect(self) -> None:
-        seen_at = int(time.time())
-        if seen_at - self._last_collect < self._collection_interval:
-            return
-        self._last_collect = seen_at
-
         if not self._endpoint:
             self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
             for spec in RESOURCE_TYPE_SPECS:
                 self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=[f"resource_type:{spec.resource_type}"])
             return
+        if self._stream_enabled:
+            self._collect_with_stream()
+        else:
+            self._collect_polling()
+
+    def _collect_polling(self) -> None:
+        seen_at = int(time.time())
+        if seen_at - self._last_collect < self._collection_interval:
+            return
+        self._last_collect = seen_at
 
         expire_at = seen_at + self._ttl_seconds
         force_full = (seen_at - self._last_full_submit) >= self._resubmit_interval
@@ -256,6 +271,54 @@ class ArgocdResourceCollector:
 
         for spec in RESOURCE_TYPE_SPECS:
             self._collect_type(spec, seen_at=seen_at, expire_at=expire_at, force_full=force_full)
+
+    def _collect_with_stream(self) -> None:
+        """Supervise the application stream listener and run a periodic full rescrape of every type."""
+        self._ensure_listener()
+        seen_at = int(time.time())
+        if seen_at - self._last_rescrape < self._rescrape_interval:
+            return
+        self._last_rescrape = seen_at
+        expire_at = seen_at + self._ttl_seconds
+        for spec in RESOURCE_TYPE_SPECS:
+            self._collect_type(spec, seen_at=seen_at, expire_at=expire_at, force_full=True)
+
+    def _ensure_listener(self) -> None:
+        if self._listener is None:
+            self._listener = ArgocdApplicationStreamListener(
+                self.check,
+                self,
+                endpoint=self._endpoint,
+                auth_token=self._auth_token,
+                backoff_max_seconds=self._backoff_max,
+            )
+        if not self._listener.is_alive():
+            self._listener.start()
+
+    def stop(self) -> None:
+        """Stop the stream listener cleanly; called from the check's cancel()."""
+        if self._listener is not None:
+            self._listener.cancel()
+            self._listener.join(timeout=10)
+
+    def emit_stream_application(self, application: dict) -> None:
+        """Emit a single application received from the stream (ADDED/MODIFIED) through the shared pipeline."""
+        seen_at = int(time.time())
+        self._emit_item(
+            application, APPLICATION_SPEC, seen_at=seen_at, expire_at=seen_at + self._ttl_seconds, force_full=False
+        )
+
+    def forget_application(self, application: dict) -> None:
+        """Drop a deleted application from the dedup cache so it stops refreshing and expires via TTL."""
+        try:
+            key = _application_key(application)
+        except Exception:
+            return
+        if self._instance_prefix:
+            key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
+        cache_key = f"argocd_application{KEY_SEPARATOR}{key}"
+        with self._submitted_lock:
+            self._submitted.pop(cache_key, None)
 
     def _collect_type(self, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int, force_full: bool) -> None:
         tags = [f"resource_type:{spec.resource_type}"]
@@ -284,7 +347,8 @@ class ArgocdResourceCollector:
             if cache_key is not None:
                 seen.add(cache_key)
         namespace = f"{spec.resource_type}{KEY_SEPARATOR}"
-        self._submitted = {k: v for k, v in self._submitted.items() if not k.startswith(namespace) or k in seen}
+        with self._submitted_lock:
+            self._submitted = {k: v for k, v in self._submitted.items() if not k.startswith(namespace) or k in seen}
 
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
@@ -314,17 +378,18 @@ class ArgocdResourceCollector:
             key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
         include = self._includes[spec.resource_type]
         cache_key = f"{spec.resource_type}{KEY_SEPARATOR}{key}"
-        if force_full or self._submitted.get(cache_key) != token:
-            try:
-                self.check.submit_generic_resource(
-                    type=spec.resource_type,
-                    key=key,
-                    fields=item,
-                    include=include,
-                    seen_at=seen_at,
-                    expire_at=expire_at,
-                )
-                self._submitted[cache_key] = token
-            except Exception:
-                self.check.log.exception("genresources: failed to submit %s (key=%s)", spec.resource_type, key)
+        with self._submitted_lock:
+            if force_full or self._submitted.get(cache_key) != token:
+                try:
+                    self.check.submit_generic_resource(
+                        type=spec.resource_type,
+                        key=key,
+                        fields=item,
+                        include=include,
+                        seen_at=seen_at,
+                        expire_at=expire_at,
+                    )
+                    self._submitted[cache_key] = token
+                except Exception:
+                    self.check.log.exception("genresources: failed to submit %s (key=%s)", spec.resource_type, key)
         return cache_key
