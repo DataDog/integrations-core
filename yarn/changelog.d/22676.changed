@@ -1,0 +1,1 @@
+Catch the backend-agnostic HTTP error types when querying the YARN ResourceManager API so the check stays correct after the httpx migration.

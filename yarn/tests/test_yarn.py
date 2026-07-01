@@ -267,11 +267,11 @@ def test_auth(aggregator, mocked_auth_request):
 
 
 def test_ssl_verification(aggregator, mock_http):
-    from requests.exceptions import SSLError
+    from datadog_checks.base.utils.http_exceptions import HTTPSSLError
 
     from .conftest import requests_get_mock
 
-    mock_http.get.side_effect = SSLError("certificate verification failed")
+    mock_http.get.side_effect = HTTPSSLError("certificate verification failed")
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
 
     # Instantiate YarnCheck
@@ -280,7 +280,7 @@ def test_ssl_verification(aggregator, mock_http):
     # Run the check on a config with a badly configured SSL certificate
     try:
         yarn.check(instance)
-    except SSLError:
+    except HTTPSSLError:
         aggregator.assert_service_check(
             SERVICE_CHECK_NAME,
             status=YarnCheck.CRITICAL,
