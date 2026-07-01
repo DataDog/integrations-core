@@ -237,4 +237,4 @@ def get_label_normalizer(metric_type):
     elif metric_type == 'summary':
         return normalize_labels_summary
     else:
-        return no_op
+        return None
