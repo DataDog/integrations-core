@@ -97,18 +97,16 @@ SystemErrors: dict[str, Any] = {
     ],
 }
 
-SystemErrorsClusterAware: dict[str, Any] = cluster_aware_query(
-    SystemErrors, 'value, name, code, remote', 'errors', where='WHERE value > 0'
-)
+SystemErrorsClusterAware: dict[str, Any] = cluster_aware_query(SystemErrors)
 
 
-def load_match_query(name: str, cluster_aware: bool = False) -> dict[str, Any]:
+def load_match_query(name: str) -> dict[str, Any]:
     """Read ``data/<name>.json`` and reconstitute the QueryManager-shaped dict."""
     try:
         with open(os.path.join(DATA_DIR, f'{name}.json'), encoding='utf-8') as f:
             spec = json.load(f)
         items = _expand_match_items(spec['items'], spec['prefix'])
-        base = {
+        return {
             'name': spec['name'],
             'query': spec['query'],
             'columns': [
@@ -121,18 +119,13 @@ def load_match_query(name: str, cluster_aware: bool = False) -> dict[str, Any]:
                 },
             ],
         }
-        if cluster_aware:
-            # value_column/match_column are logical labels, not SQL identifiers, so derive the
-            # real SELECT list and table from the (fixed-shape) generated query string.
-            select, _, tail = spec['query'].partition(' FROM system.')
-            table, _, where = tail.partition(' ')
-            return cluster_aware_query(base, select.removeprefix('SELECT '), table, where=where)
-        return base
     except (OSError, json.JSONDecodeError, KeyError, TypeError, AttributeError) as exc:
         raise RuntimeError(f'failed to load advanced query {name!r}') from exc
 
 
-def _expand_match_items(compact: dict[str, list[str] | dict[str, str]], prefix: str) -> dict[str, dict[str, Any]]:
+def _expand_match_items(
+    compact: dict[str, list[str] | dict[str, str]], prefix: str
+) -> dict[str, dict[str, Any]]:
     """Expand the compact ``{type: keys | {key: scale}}`` map to the per-entry dict shape."""
     merged: dict[str, dict[str, Any]] = {}
     for type_name, group in compact.items():
@@ -158,5 +151,6 @@ def __getattr__(name: str) -> dict[str, Any]:
     if base_name not in MATCH_QUERIES:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     if name not in _match_query_cache:
-        _match_query_cache[name] = load_match_query(MATCH_QUERIES[base_name], cluster_aware=cluster_aware)
+        query = load_match_query(MATCH_QUERIES[base_name])
+        _match_query_cache[name] = cluster_aware_query(query) if cluster_aware else query
     return _match_query_cache[name]

@@ -2064,9 +2064,7 @@ SystemDictionaries = {
 # Cluster-aware variants used in single endpoint mode: they read all replicas via
 # clusterAllReplicas() and tag each row per node so per-node counters stay distinct.
 # SystemParts/SystemReplicas/SystemDictionaries use GROUP BY and are intentionally excluded.
-SystemMetricsClusterAware = cluster_aware_query(SystemMetrics, 'value, metric', 'metrics')
-SystemEventsToDeprecateClusterAware = cluster_aware_query(SystemEventsToDeprecate, 'value, event', 'events')
-SystemEventsClusterAware = cluster_aware_query(SystemEvents, 'value, event', 'events')
-SystemAsynchronousMetricsClusterAware = cluster_aware_query(
-    SystemAsynchronousMetrics, 'value, metric', 'asynchronous_metrics'
-)
+SystemMetricsClusterAware = cluster_aware_query(SystemMetrics)
+SystemEventsToDeprecateClusterAware = cluster_aware_query(SystemEventsToDeprecate)
+SystemEventsClusterAware = cluster_aware_query(SystemEvents)
+SystemAsynchronousMetricsClusterAware = cluster_aware_query(SystemAsynchronousMetrics)
