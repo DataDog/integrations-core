@@ -656,7 +656,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     assert isinstance(cp, FailedCheckpoint)
     assert cp.status == CheckpointStatus.FAILED
     assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
-    assert cp.goal_validations == [{"task": "t1", "attempts": 2, "final_valid": False}]
+    assert cp.phase_data["goal_validations"] == [{"task": "t1", "attempts": 2, "final_valid": False}]
     assert cp.error == "something went wrong"
 
 
@@ -891,6 +891,7 @@ async def test_resume_frontier_phase_injects_notice_with_error(flow_dir, monkeyp
             started_at=None,
             finished_at="2026-01-01T00:00:00+00:00",
             error="Error code: 500 - boom",
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
         ),
     )
 
@@ -934,7 +935,11 @@ async def test_non_frontier_phase_gets_no_resume_notice(flow_dir, monkeypatch, m
     mgr.write_phase_checkpoint(
         "p1",
         FailedCheckpoint(
-            status=CheckpointStatus.FAILED, started_at=None, finished_at="2026-01-01T00:00:00+00:00", error="stale"
+            status=CheckpointStatus.FAILED,
+            started_at=None,
+            finished_at="2026-01-01T00:00:00+00:00",
+            error="stale",
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
         ),
     )
 

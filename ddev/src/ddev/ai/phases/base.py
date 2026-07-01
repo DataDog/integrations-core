@@ -183,6 +183,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
                     started_at=self._started_at.isoformat() if self._started_at else None,
                     finished_at=datetime.now(UTC).isoformat(),
                     error=str(error.original_exception),
+                    tokens=CheckpointTokenInfo(total_input=0, total_output=0),
                 ),
             )
         except Exception:

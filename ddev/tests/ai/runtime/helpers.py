@@ -32,9 +32,9 @@ def make_checkpoint(status: CheckpointStatus, data: dict[str, Any] | None = None
     return CheckpointAdapter.validate_python(payload)
 
 
-def make_success(**kwargs: Any) -> SuccessCheckpoint:
+def make_success_checkpoint(**kwargs: Any) -> SuccessCheckpoint:
     return make_checkpoint(CheckpointStatus.SUCCESS, kwargs)
 
 
-def make_failed(**kwargs: Any) -> FailedCheckpoint:
+def make_failed_checkpoint(**kwargs: Any) -> FailedCheckpoint:
     return make_checkpoint(CheckpointStatus.FAILED, kwargs)

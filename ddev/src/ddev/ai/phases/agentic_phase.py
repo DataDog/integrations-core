@@ -348,6 +348,9 @@ class AgenticPhase(Phase):
         )
 
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
+        checkpoint_data: dict[str, Any] = {}
+        if self._goal_attempt_log:
+            checkpoint_data["goal_validations"] = self._goal_attempt_log
         try:
             self._checkpoint_manager.write_phase_checkpoint(
                 self._phase_id,
@@ -360,7 +363,7 @@ class AgenticPhase(Phase):
                         total_input=self._total_input_tokens,
                         total_output=self._total_output_tokens,
                     ),
-                    goal_validations=self._goal_attempt_log or None,
+                    phase_data=checkpoint_data,
                 ),
             )
         except Exception:

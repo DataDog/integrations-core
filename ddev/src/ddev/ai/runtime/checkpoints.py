@@ -44,8 +44,8 @@ class FailedCheckpoint(BaseModel):
     started_at: str | None
     finished_at: str
     error: str
-    tokens: CheckpointTokenInfo | None = None
-    goal_validations: list[dict[str, Any]] | None = None
+    tokens: CheckpointTokenInfo
+    phase_data: dict[str, Any] = {}
 
 
 PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discriminator="status")]
