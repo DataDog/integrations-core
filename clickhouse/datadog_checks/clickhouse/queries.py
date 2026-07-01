@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from .utils import compact_query
+from .utils import cluster_aware_query, compact_query
 
 # https://clickhouse.com/docs/operations/system-tables/metrics
 SystemMetrics = {
@@ -2059,3 +2059,14 @@ SystemDictionaries = {
         {'name': 'dictionary.load', 'type': 'gauge'},
     ],
 }
+
+
+# Cluster-aware variants used in single endpoint mode: they read all replicas via
+# clusterAllReplicas() and tag each row per node so per-node counters stay distinct.
+# SystemParts/SystemReplicas/SystemDictionaries use GROUP BY and are intentionally excluded.
+SystemMetricsClusterAware = cluster_aware_query(SystemMetrics, 'value, metric', 'metrics')
+SystemEventsToDeprecateClusterAware = cluster_aware_query(SystemEventsToDeprecate, 'value, event', 'events')
+SystemEventsClusterAware = cluster_aware_query(SystemEvents, 'value, event', 'events')
+SystemAsynchronousMetricsClusterAware = cluster_aware_query(
+    SystemAsynchronousMetrics, 'value, metric', 'asynchronous_metrics'
+)

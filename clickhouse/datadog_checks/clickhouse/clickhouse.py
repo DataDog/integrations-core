@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import re
 from string import Template
 from time import time
 
@@ -35,14 +34,6 @@ except ImportError:
 
 # Database instance collection interval in seconds (not user-configurable)
 DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
-
-# Tag added to per-node metrics when collecting from all replicas in single endpoint mode.
-CLUSTER_NODE_TAG = 'clickhouse_node'
-
-# Matches the FROM clause of the standard system-table metric queries so they can be retargeted at
-# clusterAllReplicas() and tagged per node in single endpoint mode. The leading whitespace is part of
-# the match so the per-node projection can be spliced in without leaving a gap before the comma.
-SYSTEM_TABLE_FROM_CLAUSE = re.compile(r'\s+FROM\s+system\.(?P<table>\w+)', re.IGNORECASE)
 
 
 class ClickhouseCheck(DatabaseCheck):
@@ -299,13 +290,15 @@ class ClickhouseCheck(DatabaseCheck):
     def get_queries(self) -> list[dict]:
         query_list = []
 
+        single = self._config.single_endpoint_mode
+
         if self._config.use_legacy_queries:
             query_list.extend(
                 [
-                    self.make_cluster_aware(queries.SystemMetrics),
-                    self.make_cluster_aware(queries.SystemEventsToDeprecate),
-                    self.make_cluster_aware(queries.SystemEvents),
-                    self.make_cluster_aware(queries.SystemAsynchronousMetrics),
+                    queries.SystemMetricsClusterAware if single else queries.SystemMetrics,
+                    queries.SystemEventsToDeprecateClusterAware if single else queries.SystemEventsToDeprecate,
+                    queries.SystemEventsClusterAware if single else queries.SystemEvents,
+                    queries.SystemAsynchronousMetricsClusterAware if single else queries.SystemAsynchronousMetrics,
                     queries.SystemParts,
                     queries.SystemReplicas,
                     queries.SystemDictionaries,
@@ -315,13 +308,17 @@ class ClickhouseCheck(DatabaseCheck):
         if self._config.use_advanced_queries:
             query_list.extend(
                 [
-                    self.make_cluster_aware(advanced_queries.SystemMetrics),
-                    self.make_cluster_aware(advanced_queries.SystemEvents),
-                    self.make_cluster_aware(advanced_queries.SystemAsynchronousMetrics),
+                    advanced_queries.SystemMetricsClusterAware if single else advanced_queries.SystemMetrics,
+                    advanced_queries.SystemEventsClusterAware if single else advanced_queries.SystemEvents,
+                    advanced_queries.SystemAsynchronousMetricsClusterAware
+                    if single
+                    else advanced_queries.SystemAsynchronousMetrics,
                 ]
             )
             if self.version_ge('21.3'):
-                query_list.append(self.make_cluster_aware(advanced_queries.SystemErrors))
+                query_list.append(
+                    advanced_queries.SystemErrorsClusterAware if single else advanced_queries.SystemErrors
+                )
 
         return query_list
 
@@ -456,25 +453,6 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             # Direct connection: Query the local system table directly
             return f"system.{table_name}"
-
-    def make_cluster_aware(self, query: dict) -> dict:
-        """Retarget a system-table query at clusterAllReplicas and tag each row per node."""
-        if not self._config.single_endpoint_mode:
-            return query
-
-        def rewrite(match):
-            cluster_table = self.get_system_table(match.group('table'))
-            return f', hostName() AS {CLUSTER_NODE_TAG} FROM {cluster_table}'
-
-        new_query, replaced = SYSTEM_TABLE_FROM_CLAUSE.subn(rewrite, query['query'], count=1)
-        if not replaced:
-            return query
-
-        return {
-            **query,
-            'query': new_query,
-            'columns': [*query['columns'], {'name': CLUSTER_NODE_TAG, 'type': 'tag'}],
-        }
 
     def ping_clickhouse(self):
         return self._client.ping()

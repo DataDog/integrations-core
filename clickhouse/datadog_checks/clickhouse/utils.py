@@ -27,5 +27,22 @@ def compact_query(query):
     return re.sub(r'\n\s+', ' ', query.strip())
 
 
+# Tag added to per-node metrics when collecting from all replicas in single endpoint mode.
+CLUSTER_NODE_TAG = 'clickhouse_node'
+
+
+def cluster_aware_query(base: dict, select: str, table: str, where: str = '') -> dict:
+    """Build a cluster-aware variant that reads all replicas and tags each row per node."""
+    tail = f' {where}' if where else ''
+    return {
+        'name': base['name'],
+        'query': (
+            f"SELECT {select}, hostName() AS {CLUSTER_NODE_TAG} "
+            f"FROM clusterAllReplicas('default', system.{table}){tail}"
+        ),
+        'columns': [*base['columns'], {'name': CLUSTER_NODE_TAG, 'type': 'tag'}],
+    }
+
+
 def parse_version(version: str) -> list[int]:
     return [int(v) for v in version.split('.')]

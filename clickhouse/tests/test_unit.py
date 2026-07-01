@@ -383,42 +383,39 @@ def test_database_hostname_ignores_reported_hostname_override(reported_hostname,
         mock_resolve.assert_called_with(BASE_INSTANCE['server'])
 
 
-def test_make_cluster_aware_direct_connection_unchanged(instance):
-    """Direct connections keep the bare per-node query (SDBM-2746)."""
-    instance = {**instance, 'single_endpoint_mode': False}
-    check = ClickhouseCheck('clickhouse', {}, [instance])
+def test_cluster_aware_variant_bulk_match_query():
+    """The cluster-aware variant reads all replicas and tags system.events per node (SDBM-2746)."""
+    variant = advanced_queries.SystemEventsClusterAware
 
-    assert check.make_cluster_aware(advanced_queries.SystemEvents) is advanced_queries.SystemEvents
-
-
-def test_make_cluster_aware_bulk_match_query(instance):
-    """Single endpoint mode tags system.events per node so counters don't flap across the LB (SDBM-2746)."""
-    instance = {**instance, 'single_endpoint_mode': True}
-    check = ClickhouseCheck('clickhouse', {}, [instance])
-
-    rewritten = check.make_cluster_aware(advanced_queries.SystemEvents)
-
-    assert rewritten['query'] == (
+    assert variant['query'] == (
         "SELECT value, event, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.events)"
     )
-    assert rewritten['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
-    # The original cached query dict must not be mutated.
+    assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+    # The base query dict must not be mutated by building the variant.
     assert advanced_queries.SystemEvents['query'] == 'SELECT value, event FROM system.events'
     assert all(column['name'] != 'clickhouse_node' for column in advanced_queries.SystemEvents['columns'])
 
 
-def test_make_cluster_aware_preserves_where_clause(instance):
-    """system.errors carries a WHERE clause that must survive the rewrite."""
-    instance = {**instance, 'single_endpoint_mode': True}
-    check = ClickhouseCheck('clickhouse', {}, [instance])
+def test_cluster_aware_variant_preserves_where_clause():
+    """system.errors carries a WHERE clause that must survive in the cluster-aware variant."""
+    variant = advanced_queries.SystemErrorsClusterAware
 
-    rewritten = check.make_cluster_aware(advanced_queries.SystemErrors)
-
-    assert rewritten['query'] == (
+    assert variant['query'] == (
         "SELECT value, name, code, remote, hostName() AS clickhouse_node "
         "FROM clusterAllReplicas('default', system.errors) WHERE value > 0"
     )
-    assert rewritten['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+    assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+
+
+def test_cluster_aware_variant_legacy_query():
+    """Legacy queries.py exposes matching static cluster-aware variants."""
+    variant = queries.SystemMetricsClusterAware
+
+    assert variant['query'] == (
+        "SELECT value, metric, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.metrics)"
+    )
+    assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+    assert queries.SystemMetrics['query'] == 'SELECT value, metric FROM system.metrics'
 
 
 @pytest.mark.parametrize('use_advanced_queries', [True, False])
@@ -443,3 +440,17 @@ def test_get_queries_tags_system_tables_per_node_in_single_endpoint_mode(instanc
     # system.parts/replicas/dictionaries use GROUP BY and are intentionally left untouched here.
     if not use_advanced_queries:
         assert any(q is queries.SystemParts for q in check.get_queries())
+
+
+@pytest.mark.parametrize('use_advanced_queries', [True, False])
+def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advanced_queries):
+    instance = {
+        **instance,
+        'single_endpoint_mode': False,
+        'use_advanced_queries': use_advanced_queries,
+        'use_legacy_queries': not use_advanced_queries,
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+
+    assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())
