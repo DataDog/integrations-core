@@ -13,10 +13,9 @@ from typing import List  # noqa: F401
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
-
-import datadog_checks.base.checks.openmetrics.parser_optimizations  # noqa: F401
 from requests.exceptions import ConnectionError
 
+import datadog_checks.base.checks.openmetrics.parser_optimizations  # noqa: F401
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
 from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer

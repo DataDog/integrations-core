@@ -7,8 +7,6 @@ Verifies that the optimized version produces the same results as the
 original prometheus_client implementation across representative inputs.
 """
 
-import pytest
-
 from datadog_checks.base.checks.openmetrics.parser_optimizations import (
     _next_unquoted_char,
 )
@@ -71,6 +69,20 @@ class TestNextUnquotedChar:
     def test_multiple_occurrences_returns_first(self):
         assert _next_unquoted_char('a{b{c', '{') == 1
 
+    def test_skip_target_char_inside_quotes(self):
+        # comma inside quoted value must not be returned
+        assert _next_unquoted_char('a="apn,gw",b', ',') == 10
+
+    def test_skip_brace_inside_quotes(self):
+        assert _next_unquoted_char('label="val}ue"}', '}') == 14
+
+    def test_skip_equals_inside_quotes(self):
+        assert _next_unquoted_char('label="a=b"} 1', '}') == 11
+
+    def test_escaped_quote_not_treated_as_delimiter(self):
+        # backslash-escaped quote does not close the quoted region
+        assert _next_unquoted_char(r'label="val\"still,inside",next', ',') == 25
+
 
 class TestNextUnquotedCharWithRealMetrics:
     """Tests using real Prometheus metric line patterns."""
@@ -113,11 +125,7 @@ class TestParseFullMetricText:
     def test_parse_simple_metrics(self):
         from prometheus_client.parser import text_string_to_metric_families
 
-        text = (
-            '# HELP test_gauge A test gauge.\n'
-            '# TYPE test_gauge gauge\n'
-            'test_gauge 42\n'
-        )
+        text = '# HELP test_gauge A test gauge.\n# TYPE test_gauge gauge\ntest_gauge 42\n'
         families = list(text_string_to_metric_families(text))
         assert len(families) == 1
         assert families[0].name == 'test_gauge'
@@ -159,11 +167,7 @@ class TestParseFullMetricText:
     def test_parse_escaped_label_value(self):
         from prometheus_client.parser import text_string_to_metric_families
 
-        text = (
-            '# HELP test_metric A test.\n'
-            '# TYPE test_metric gauge\n'
-            'test_metric{label="value with \\"quotes\\""} 1\n'
-        )
+        text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="value with \\"quotes\\""} 1\n'
         families = list(text_string_to_metric_families(text))
         assert len(families) == 1
         assert families[0].samples[0].labels == {'label': 'value with "quotes"'}
@@ -187,21 +191,26 @@ class TestParseFullMetricText:
     def test_parse_empty_label_value(self):
         from prometheus_client.parser import text_string_to_metric_families
 
-        text = (
-            '# HELP test_metric A test.\n'
-            '# TYPE test_metric gauge\n'
-            'test_metric{label=""} 1\n'
-        )
+        text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label=""} 1\n'
         families = list(text_string_to_metric_families(text))
         assert families[0].samples[0].labels == {'label': ''}
 
     def test_parse_newline_in_label_value(self):
         from prometheus_client.parser import text_string_to_metric_families
 
-        text = (
-            '# HELP test_metric A test.\n'
-            '# TYPE test_metric gauge\n'
-            'test_metric{label="line1\\nline2"} 1\n'
-        )
+        text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="line1\\nline2"} 1\n'
         families = list(text_string_to_metric_families(text))
         assert families[0].samples[0].labels == {'label': 'line1\nline2'}
+
+    def test_parse_comma_in_label_value(self):
+        from prometheus_client.parser import text_string_to_metric_families
+
+        text = (
+            '# HELP apn_active_connections Active connections.\n'
+            '# TYPE apn_active_connections gauge\n'
+            'apn_active_connections{func="apn,gw",proto="tcp"} 8\n'
+        )
+        families = list(text_string_to_metric_families(text))
+        assert len(families) == 1
+        assert families[0].samples[0].labels == {'func': 'apn,gw', 'proto': 'tcp'}
+        assert families[0].samples[0].value == 8
