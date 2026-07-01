@@ -53,8 +53,6 @@ REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
 REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
 USING_LATEST = False
 
-print(f"POSTGRES_IMAGE_TAG: {POSTGRES_IMAGE_TAG}")
-print(f"POSTGRES_VERSION: {POSTGRES_VERSION}")
 if POSTGRES_IMAGE_TAG is not None:
     POSTGRES_IMAGE = POSTGRES_IMAGE_TAG + "-alpine"
 elif POSTGRES_VERSION is not None:
