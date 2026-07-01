@@ -6,7 +6,6 @@ import copy
 import functools
 import os
 import threading
-from string import Template
 from time import time
 
 import psycopg
@@ -120,7 +119,6 @@ class PostgreSql(DatabaseCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.health = PostgresHealth(self)
         self._resolved_hostname = None
-        self._database_identifier = None
         self._database_hostname = None
         self._db = None
         self._cloud_metadata: dict[str, dict] = None
@@ -696,26 +694,16 @@ class PostgreSql(DatabaseCheck):
         return self._resolved_hostname
 
     @property
-    def database_identifier(self):
-        # type: () -> str
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.template)
-            tag_dict = {}
-            tags = self.tags.copy()
-            # sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            tag_dict['resolved_hostname'] = self.resolved_hostname
-            tag_dict['host'] = str(self._config.host)
-            tag_dict['port'] = str(self._config.port)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.template
+
+    @property
+    def database_identifier_params(self) -> dict:
+        return {
+            'resolved_hostname': self.resolved_hostname,
+            'host': str(self._config.host),
+            'port': str(self._config.port),
+        }
 
     @property
     def cloud_metadata(self):
