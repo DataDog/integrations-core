@@ -29,6 +29,7 @@ def test_check_n8n_e2e(
     aggregator = dd_agent_check(rate=True)
 
     aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200', 'n8n_process:main'], at_least=1)
+    # Worker also exposes /healthz/readiness via QUEUE_HEALTH_CHECK_ACTIVE on its own port.
     aggregator.assert_metric('n8n.readiness.check', value=1, tags=['status_code:200', 'n8n_process:worker'], at_least=1)
     _assert_metrics(aggregator)
 
@@ -39,6 +40,7 @@ def test_e2e_discovery(dd_agent_check_discovery):
         pytest.skip('lab does not currently support configuration discovery')
 
     aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=2)
+    # n8n_process:main/worker tags come from instance config; the autodiscovery template only sets openmetrics_endpoint.
     _assert_metrics(aggregator)
 
 
