@@ -14,7 +14,7 @@ def test_get_flow_resolves_all_refs_and_variables(tmp_path):
     write(tmp_path / "agents" / "ag.md", "---\ntype: agent\n---\nsys\n")
     write(tmp_path / "prompts" / "intro.md", "---\ntype: prompt\n---\nDo the thing {{x}}\n")
     write(tmp_path / "prompts" / "g.md", "---\ntype: goal\n---\ngoal body\n")
-    write(tmp_path / "prompts" / "mem.md", "---\ntype: memory\n---\nRemember {{x}}\n")
+    write(tmp_path / "prompts" / "mem.md", "---\ntype: memory_prompt\n---\nRemember {{x}}\n")
     write(
         tmp_path / "f.yaml",
         "- type: phase\n  config:\n    name: p\n    agent: ag\n"
@@ -81,7 +81,7 @@ def test_missing_agent_accumulates(tmp_path):
     "phase_body,kind",
     [
         ("    tasks:\n      - name: t\n        prompt_ref: nope\n", ErrorKind.PROMPT),
-        ("    checkpoint:\n      memory_prompt_ref: nope\n", ErrorKind.MEMORY),
+        ("    checkpoint:\n      memory_prompt_ref: nope\n", ErrorKind.MEMORY_PROMPT),
     ],
     ids=["prompt_ref", "memory_prompt_ref"],
 )

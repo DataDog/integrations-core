@@ -27,7 +27,7 @@ def test_scans_agent_md(tmp_path):
 
 
 def test_prompt_goal_memory_routing(tmp_path):
-    for name, typ in [("intro", "prompt"), ("g", "goal"), ("mem", "memory")]:
+    for name, typ in [("intro", "prompt"), ("g", "goal"), ("mem", "memory_prompt")]:
         write(tmp_path / "prompts" / f"{name}.md", f"---\ntype: {typ}\n---\nbody-{name}\n")
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
     assert eng._prompts["intro"].config == "body-intro"

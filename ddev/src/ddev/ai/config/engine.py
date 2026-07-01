@@ -29,7 +29,7 @@ from ddev.ai.config.models import (
 if TYPE_CHECKING:
     from ddev.ai.phases.registry import PhaseRegistry
 
-ResourceKind = Literal["agent", "phase", "flow", "prompt", "goal", "memory"]
+ResourceKind = Literal["agent", "phase", "flow", "prompt", "goal", "memory_prompt"]
 
 
 class ConfigStatus(StrEnum):
@@ -43,7 +43,7 @@ class ErrorKind(StrEnum):
     AGENT = "agent"
     PROMPT = "prompt"
     GOAL = "goal"
-    MEMORY = "memory"
+    MEMORY_PROMPT = "memory_prompt"
     DEPENDENCY = "dependency"
     VARIABLE = "variable"
 
@@ -97,7 +97,7 @@ class FlowDiagnostics:
 
 RESOURCE_ADAPTER: TypeAdapter[PhaseEnvelope | FlowEnvelope] = TypeAdapter(ResourceEnvelope)
 
-PROMPT_TYPES = {"prompt", "goal", "memory"}
+PROMPT_TYPES = {"prompt", "goal", "memory_prompt"}
 
 
 class ConfigurationEngine:
@@ -172,7 +172,7 @@ class ConfigurationEngine:
             "flow": self._flows,
             "prompt": self._prompts,
             "goal": self._goals,
-            "memory": self._memories,
+            "memory_prompt": self._memories,
         }
         for (kind, name), entries in self._pending.items():
             if len(entries) > 1:
@@ -272,8 +272,8 @@ class ConfigurationEngine:
             self._accumulate("prompt", stem, entry)
         elif file_type == "goal":
             self._accumulate("goal", stem, entry)
-        elif file_type == "memory":
-            self._accumulate("memory", stem, entry)
+        elif file_type == "memory_prompt":
+            self._accumulate("memory_prompt", stem, entry)
 
     def _ok_view[C](self, registry: dict[str, RegistryEntry[C]]) -> dict[str, C]:
         return {name: e.config for name, e in registry.items() if isinstance(e, ValidEntry)}
@@ -429,7 +429,9 @@ class ConfigurationEngine:
             if task.goal_ref is not None:
                 errors.extend(self._check_ref(self._goals, task.goal_ref, ErrorKind.GOAL, pc.name))
         if pc.checkpoint is not None and pc.checkpoint.memory_prompt_ref is not None:
-            errors.extend(self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, ErrorKind.MEMORY, pc.name))
+            errors.extend(
+                self._check_ref(self._memories, pc.checkpoint.memory_prompt_ref, ErrorKind.MEMORY_PROMPT, pc.name)
+            )
         return errors
 
     def _build_resolved_flow(
@@ -469,7 +471,7 @@ class ConfigurationEngine:
         self, registry: dict[str, RegistryEntry[str]], ref: str, kind: ErrorKind, phase_name: str
     ) -> list[FlowError]:
         ref_entry = registry.get(ref)
-        label = kind.value.capitalize()
+        label = kind.value.replace("_", " ").capitalize()
         if ref_entry is None:
             return [
                 FlowError(
