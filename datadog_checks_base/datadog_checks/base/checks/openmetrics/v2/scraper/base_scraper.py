@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import fnmatch
 import inspect
+import json
 import re
 from collections.abc import Generator
 from copy import copy, deepcopy
@@ -24,6 +25,32 @@ from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
+
+
+class _GoSample:
+    """Duck type for prometheus_client.metrics_core.Sample, populated from Go bridge JSON output."""
+
+    __slots__ = ('labels', 'value', 'timestamp')
+
+    def __init__(self, data):
+        labels = dict(data['labels'])
+        labels.pop('__name__', None)
+        self.labels = labels
+        self.value = data['value']
+        ts = data.get('timestamp')
+        self.timestamp = ts if ts else None
+
+
+class _GoMetric:
+    """Duck type for prometheus_client.Metric, populated from Go bridge JSON output."""
+
+    __slots__ = ('name', 'type', 'samples')
+
+    def __init__(self, data):
+        self.name = data['name']
+        # get_label_normalizer expects lowercase type strings ('histogram', 'summary', etc.)
+        self.type = data['type'].lower()
+        self.samples = [_GoSample(s) for s in data['samples']]
 
 
 class OpenMetricsScraper:
@@ -331,10 +358,40 @@ class OpenMetricsScraper:
         # side effect inside the `line_streamer` generator, we need to consume the first line in order to
         # trigger that side effect.
         try:
-            line_streamer = chain([next(line_streamer)], line_streamer)
+            first_line = next(line_streamer)
         except StopIteration:
             # If line_streamer is an empty iterator, next(line_streamer) fails.
             return
+
+        # Use Go bridge for Prometheus text format when available (faster native parsing).
+        # Only applies to regular Prometheus exposition format, not OpenMetrics.
+        _go_parse = getattr(datadog_agent, 'parse_prometheus_metrics', None)
+        use_bridge = (
+            _go_parse is not None
+            and not self._use_latest_spec
+            and self._content_type.split(';')[0] != 'application/openmetrics-text'
+        )
+
+        if use_bridge:
+            all_lines = [first_line] + list(line_streamer)
+            raw_text = '\n'.join(all_lines)
+            try:
+                for family_data in json.loads(_go_parse(raw_text, self._content_type)):
+                    metric = _GoMetric(family_data)
+                    self.submit_telemetry_number_of_total_metric_samples(metric)
+
+                    # It is critical that the prefix is removed immediately so that
+                    # all other configuration may reference the trimmed metric name
+                    if self.raw_metric_prefix and metric.name.startswith(self.raw_metric_prefix):
+                        metric.name = metric.name[len(self.raw_metric_prefix) :]
+
+                    yield metric
+                return
+            except Exception as e:
+                self.log.warning('Go Prometheus bridge failed, falling back to Python parser: %s', e)
+                line_streamer = iter(all_lines)
+        else:
+            line_streamer = chain([first_line], line_streamer)
 
         for metric in self.parse_metric_families(line_streamer):
             self.submit_telemetry_number_of_total_metric_samples(metric)
