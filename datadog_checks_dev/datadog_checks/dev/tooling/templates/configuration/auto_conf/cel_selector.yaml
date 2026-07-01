@@ -1,0 +1,4 @@
+- name: cel_selector
+  description: CEL selector for autodiscovery.
+  enabled: true
+  example: {}

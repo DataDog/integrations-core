@@ -67,6 +67,10 @@ def test_get_e2e_discovery_metadata(tmp_path):
             f'{check_package_root}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/test_check.d/auto_conf.yaml:ro',
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
+        'env_vars': {
+            'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '10s',
+        },
+        'cap_add': ['SYS_PTRACE', 'DAC_READ_SEARCH'],
     }
 
 
