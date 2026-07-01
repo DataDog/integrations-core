@@ -16,6 +16,12 @@ def test_tool_name(registry: FileRegistry) -> None:
     assert AppendFileTool(registry, OWNER_ID).name == "append_file"
 
 
+def test_truncated_call_hint_suggests_smaller_chunks(registry: FileRegistry) -> None:
+    hint = AppendFileTool(registry, OWNER_ID).truncated_call_hint
+    assert hint is not None
+    assert "append_file" in hint
+
+
 @pytest.mark.parametrize(
     "content,expected_in,expected_not_in",
     [

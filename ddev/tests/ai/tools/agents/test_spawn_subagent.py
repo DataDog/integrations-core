@@ -4,11 +4,11 @@
 
 import asyncio
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
-from anthropic.types import ToolParam
 
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.build import AgentRuntime
@@ -22,6 +22,9 @@ from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentInput, SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import ToolRegistry
+
+if TYPE_CHECKING:
+    from tests.ai.conftest import FakeTool
 
 # ---------------------------------------------------------------------------
 # Mock helpers
@@ -77,19 +80,6 @@ class _RaisingAgent(BaseAgent[Any]):
         return None
 
 
-class MockToolRegistry(ToolRegistry):
-    def __init__(self, result: ToolResult | None = None) -> None:
-        super().__init__([])
-        self._result = result or ToolResult(success=True, data="ok")
-
-    @property
-    def definitions(self) -> list[ToolParam]:
-        return []
-
-    async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
-        return self._result
-
-
 def make_response(
     text: str = "",
     stop_reason: StopReason = StopReason.END_TURN,
@@ -111,12 +101,12 @@ class FakeProcessFactory:
         self,
         root: Path,
         agent_factory=None,
-        tool_result: ToolResult | None = None,
+        tool_registry: ToolRegistry | None = None,
         build_error: BaseException | None = None,
     ) -> None:
         self._root = root
         self._agent_factory = agent_factory or (lambda: MockAgent([make_response()]))
-        self._tool_result = tool_result
+        self._tool_registry = tool_registry or ToolRegistry([])
         self._build_error = build_error
         self.callbacks = Callbacks([AgentLogger(root).as_callback_set()])
         self.calls: list[dict[str, Any]] = []
@@ -125,7 +115,7 @@ class FakeProcessFactory:
         self.calls.append({"owner_id": scope.owner_id, "agent_config": agent_config, "system_prompt": system_prompt})
         if self._build_error is not None:
             raise self._build_error
-        runtime = AgentRuntime(agent=self._agent_factory(), tool_registry=MockToolRegistry(self._tool_result))
+        runtime = AgentRuntime(agent=self._agent_factory(), tool_registry=self._tool_registry)
         return ReActProcess(runtime, callbacks=self.callbacks, scope=scope)
 
 
@@ -207,7 +197,9 @@ async def test_happy_path(tmp_path: Path, name: str | None, expected_id: str) ->
     assert events[-1]["success"] is True
 
 
-async def test_multi_iteration_wires_callbacks(tmp_path):
+async def test_multi_iteration_wires_callbacks(
+    tmp_path, fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     """A subagent tool call produces a tool_call log event via the run-wide callbacks."""
     tool_call = ToolCall(id="tc1", name="read_file", input={"path": "/f"})
     factory = FakeProcessFactory(
@@ -215,7 +207,7 @@ async def test_multi_iteration_wires_callbacks(tmp_path):
         lambda: MockAgent(
             [make_response(stop_reason=StopReason.TOOL_USE, tool_calls=[tool_call]), make_response(text="done")]
         ),
-        tool_result=ToolResult(success=True, data="content"),
+        tool_registry=tool_registry(fake_tool("read_file", result=ToolResult(success=True, data="content"))),
     )
     tool = make_tool(factory, parent_tools=["read_file"])
 

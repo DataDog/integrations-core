@@ -3,7 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import asyncio
-from typing import Any
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -16,9 +17,14 @@ from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
+from ddev.ai.tools.fs.create_file import CreateFileTool
+from ddev.ai.tools.fs.edit_file import EditFileTool
+from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
+from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
-_TOOL_RESULT_DATA: str = "ok"
+if TYPE_CHECKING:
+    from tests.ai.conftest import FakeTool
 
 # ---------------------------------------------------------------------------
 # Mock helpers
@@ -59,72 +65,13 @@ class MockAgent(BaseAgent[Any]):
         self.reset_calls += 1
 
 
-class FakeTool:
-    """Minimal stand-in for a registered tool, only exposing what _truncated_tool_results needs."""
-
-    def __init__(self, truncated_call_hint: str | None) -> None:
-        self.truncated_call_hint = truncated_call_hint
-
-
-class MockToolRegistry:
-    """Minimal tool registry that always returns a configurable ToolResult."""
-
-    def __init__(self, result: ToolResult | None = None, tools: dict[str, FakeTool] | None = None) -> None:
-        self._result = result or ToolResult(success=True, data=_TOOL_RESULT_DATA)
-        self._tools = tools or {}
-        self.run_calls: list[tuple[str, dict]] = []
-
-    @property
-    def definitions(self) -> list[dict]:
-        return []
-
-    async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
-        self.run_calls.append((name, raw))
-        return self._result
-
-    def get(self, name: str) -> FakeTool | None:
-        return self._tools.get(name)
-
-
-class RaisingToolRegistry:
-    """Registry that always raises a given exception from run()."""
-
-    def __init__(self, exc: BaseException) -> None:
-        self._exc = exc
-        self.run_calls: list[tuple[str, dict]] = []
-
-    @property
-    def definitions(self) -> list[dict]:
-        return []
-
-    async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
-        self.run_calls.append((name, raw))
-        raise self._exc
-
-    def get(self, name: str) -> None:
-        return None
-
-
-class PerToolRegistry:
-    """Registry that dispatches per tool name, raising or returning per configured behavior."""
-
-    def __init__(self, behaviors: dict[str, ToolResult | BaseException]) -> None:
-        self._behaviors = behaviors
-        self.run_calls: list[tuple[str, dict]] = []
-
-    @property
-    def definitions(self) -> list[dict]:
-        return []
-
-    async def run(self, name: str, raw: dict[str, object]) -> ToolResult:
-        self.run_calls.append((name, raw))
-        behavior = self._behaviors[name]
-        if isinstance(behavior, BaseException):
-            raise behavior
-        return behavior
-
-    def get(self, name: str) -> None:
-        return None
+def real_fs_tool_registry(tmp_path) -> ToolRegistry:
+    """A real ToolRegistry wired with the actual EditFileTool/CreateFileTool, so truncation-hint
+    tests exercise the real ToolRegistry.get() and each tool's real truncated_call_hint, not a
+    stand-in."""
+    file_registry = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, deny_patterns=()))
+    owner_id = "test-agent"
+    return ToolRegistry([EditFileTool(file_registry, owner_id), CreateFileTool(file_registry, owner_id)])
 
 
 class CallbackRecorder:
@@ -204,13 +151,13 @@ def make_tool_call(
 
 def make_process(
     agent: MockAgent,
-    registry: MockToolRegistry | None = None,
+    registry: ToolRegistry | None = None,
     callbacks: Callbacks | None = None,
     compact_threshold_pct: float | None = None,
     scope: AgentScope | None = None,
 ) -> ReActProcess:
     return ReActProcess(
-        AgentRuntime(agent=agent, tool_registry=registry or MockToolRegistry()),
+        AgentRuntime(agent=agent, tool_registry=registry or ToolRegistry([])),
         callbacks=callbacks,
         scope=scope or AgentScope(owner_id="test", role=AgentRole.PHASE),
         compact_threshold_pct=compact_threshold_pct,
@@ -239,26 +186,27 @@ async def test_stop_reason_single_response(stop_reason: StopReason) -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_single_tool_call_executes_tool_and_returns() -> None:
+async def test_single_tool_call_executes_tool_and_returns(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     tc = make_tool_call("tc_01", "read_file")
     responses = [
         make_response(StopReason.TOOL_USE, tool_calls=[tc]),
         make_response(StopReason.END_TURN),
     ]
-    registry = MockToolRegistry()
+    read_file = fake_tool("read_file")
     agent = MockAgent(responses)
 
-    result = await make_process(agent, registry=registry).start("Do something")
+    result = await make_process(agent, registry=tool_registry(read_file)).start("Do something")
 
     assert result.final_response.stop_reason == StopReason.END_TURN
     assert result.iterations == 2
-    assert len(registry.run_calls) == 1
-    assert registry.run_calls[0][0] == "read_file"
+    assert len(read_file.calls) == 1
     assert len(agent.send_calls) == 2
     assert agent.send_calls[0] == "Do something"
     assert isinstance(agent.send_calls[1], list)
     assert agent.send_calls[1][0].tool_call_id == "tc_01"
-    assert agent.send_calls[1][0].result.data == _TOOL_RESULT_DATA
+    assert agent.send_calls[1][0].result.data == "read_file ok"
 
 
 # ---------------------------------------------------------------------------
@@ -266,7 +214,9 @@ async def test_single_tool_call_executes_tool_and_returns() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_multi_tool_parallel_dispatches_all() -> None:
+async def test_multi_tool_parallel_dispatches_all(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     tool_calls = [
         make_tool_call("tc_01", "a"),
         make_tool_call("tc_02", "b"),
@@ -276,13 +226,14 @@ async def test_multi_tool_parallel_dispatches_all() -> None:
         make_response(StopReason.TOOL_USE, tool_calls=tool_calls),
         make_response(StopReason.END_TURN),
     ]
-    registry = MockToolRegistry()
+    tool_a, tool_b, tool_c = fake_tool("a"), fake_tool("b"), fake_tool("c")
     agent = MockAgent(responses)
 
-    await make_process(agent, registry=registry).start("Do three things")
+    await make_process(agent, registry=tool_registry(tool_a, tool_b, tool_c)).start("Do three things")
 
-    assert len(registry.run_calls) == 3
-    assert {name for name, _ in registry.run_calls} == {"a", "b", "c"}
+    assert len(tool_a.calls) == 1
+    assert len(tool_b.calls) == 1
+    assert len(tool_c.calls) == 1
     assert len(agent.send_calls[1]) == 3
 
 
@@ -291,7 +242,9 @@ async def test_multi_tool_parallel_dispatches_all() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_tool_exception_loop_continues_with_failure_result() -> None:
+async def test_tool_exception_loop_continues_with_failure_result(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     """(a) A raising tool must not abort the loop. (b) Its ToolResultMessage must have success=False."""
     tc = make_tool_call("tc_01", "read_file")
     agent = MockAgent(
@@ -300,8 +253,9 @@ async def test_tool_exception_loop_continues_with_failure_result() -> None:
             make_response(StopReason.END_TURN),
         ]
     )
+    registry = tool_registry(fake_tool("read_file", error=RuntimeError("disk error")))
 
-    result = await make_process(agent, registry=RaisingToolRegistry(RuntimeError("disk error"))).start("Do something")
+    result = await make_process(agent, registry=registry).start("Do something")
 
     assert result.iterations == 2
     assert result.final_response.stop_reason == StopReason.END_TURN
@@ -310,7 +264,9 @@ async def test_tool_exception_loop_continues_with_failure_result() -> None:
     assert sent_back[0].result.success is False
 
 
-async def test_tool_exception_on_tool_call_callback_fires_with_error_result() -> None:
+async def test_tool_exception_on_tool_call_callback_fires_with_error_result(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     """(c) on_tool_call must fire even when the tool raised, carrying the failure ToolResult."""
     tc = make_tool_call("tc_01", "read_file")
     agent = MockAgent(
@@ -320,10 +276,11 @@ async def test_tool_exception_on_tool_call_callback_fires_with_error_result() ->
         ]
     )
     recorder = CallbackRecorder()
+    registry = tool_registry(fake_tool("read_file", error=ValueError("oops")))
 
     await make_process(
         agent,
-        registry=RaisingToolRegistry(ValueError("oops")),
+        registry=registry,
         callbacks=Callbacks([recorder.callback_set]),
     ).start("x")
 
@@ -340,7 +297,12 @@ async def test_tool_exception_on_tool_call_callback_fires_with_error_result() ->
         (OSError("file not found"), "OSError: file not found"),
     ],
 )
-async def test_tool_exception_error_message_format(exc: BaseException, expected_error: str) -> None:
+async def test_tool_exception_error_message_format(
+    exc: BaseException,
+    expected_error: str,
+    fake_tool: type[FakeTool],
+    tool_registry: Callable[..., ToolRegistry],
+) -> None:
     """Error string in the failure result must be formatted as 'ExceptionType: message'."""
     tc = make_tool_call()
     agent = MockAgent(
@@ -349,14 +311,17 @@ async def test_tool_exception_error_message_format(exc: BaseException, expected_
             make_response(StopReason.END_TURN),
         ]
     )
+    registry = tool_registry(fake_tool("read_file", error=exc))
 
-    await make_process(agent, registry=RaisingToolRegistry(exc)).start("x")
+    await make_process(agent, registry=registry).start("x")
 
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
     assert sent_back[0].result.error == expected_error
 
 
-async def test_partial_batch_failure_only_affects_raising_tool() -> None:
+async def test_partial_batch_failure_only_affects_raising_tool(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     """In a multi-tool batch, only the raising tool gets success=False; successful tools are unaffected."""
     tc_ok = make_tool_call("tc_01", "read_file")
     tc_bad = make_tool_call("tc_02", "write_file")
@@ -366,11 +331,9 @@ async def test_partial_batch_failure_only_affects_raising_tool() -> None:
             make_response(StopReason.END_TURN),
         ]
     )
-    registry = PerToolRegistry(
-        {
-            "read_file": ToolResult(success=True, data="contents"),
-            "write_file": RuntimeError("permission denied"),
-        }
+    registry = tool_registry(
+        fake_tool("read_file", result=ToolResult(success=True, data="contents")),
+        fake_tool("write_file", error=RuntimeError("permission denied")),
     )
 
     result = await make_process(agent, registry=registry).start("Do both")
@@ -390,7 +353,9 @@ async def test_partial_batch_failure_only_affects_raising_tool() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_truncated_tool_call_is_not_executed_but_answered() -> None:
+async def test_truncated_tool_call_is_not_executed_but_answered(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     """A MAX_TOKENS turn with a pending tool call must NOT run the tool, but must still send a
     failure tool_result back so the conversation stays valid."""
     tc = make_tool_call("tc_01", "edit_file")
@@ -398,15 +363,15 @@ async def test_truncated_tool_call_is_not_executed_but_answered() -> None:
         make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
         make_response(StopReason.END_TURN),
     ]
-    registry = MockToolRegistry()
+    edit_file = fake_tool("edit_file")
     agent = MockAgent(responses)
 
-    result = await make_process(agent, registry=registry).start("Rewrite the file")
+    result = await make_process(agent, registry=tool_registry(edit_file)).start("Rewrite the file")
 
     assert result.final_response.stop_reason == StopReason.END_TURN
     assert result.iterations == 2
     # Tool was never executed because the call was truncated.
-    assert registry.run_calls == []
+    assert edit_file.calls == []
     # A failure tool_result was still sent back for the dangling tool_use.
     sent_back = agent.send_calls[1]
     assert isinstance(sent_back, list)
@@ -433,7 +398,9 @@ async def test_truncated_tool_call_fires_tool_call_callback() -> None:
     assert seen_result.success is False
 
 
-async def test_truncation_then_recovery_continues_loop() -> None:
+async def test_truncation_then_recovery_continues_loop(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     """After a truncated turn the model can retry; once it stops requesting tools, the loop ends."""
     tc = make_tool_call("tc_01", "edit_file")
     responses = [
@@ -441,15 +408,15 @@ async def test_truncation_then_recovery_continues_loop() -> None:
         make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call("tc_02", "edit_file")]),
         make_response(StopReason.END_TURN),
     ]
-    registry = MockToolRegistry()
+    edit_file = fake_tool("edit_file")
     agent = MockAgent(responses)
 
-    result = await make_process(agent, registry=registry).start("Rewrite the file")
+    result = await make_process(agent, registry=tool_registry(edit_file)).start("Rewrite the file")
 
     assert result.final_response.stop_reason == StopReason.END_TURN
     assert result.iterations == 3
     # Only the second, non-truncated tool call was executed.
-    assert len(registry.run_calls) == 1
+    assert len(edit_file.calls) == 1
 
 
 async def test_repeated_truncation_aborts_with_agent_error() -> None:
@@ -474,10 +441,11 @@ async def test_max_tokens_without_tool_calls_returns_immediately() -> None:
     assert len(agent.send_calls) == 1
 
 
-async def test_truncated_tool_call_uses_tool_specific_hint() -> None:
-    """The synthetic failure message must use the failing tool's own truncated_call_hint."""
+async def test_truncated_tool_call_uses_tool_specific_hint(tmp_path) -> None:
+    """The synthetic failure message must use the failing tool's own real truncated_call_hint,
+    looked up through a real ToolRegistry — not a stand-in."""
     tc = make_tool_call("tc_01", "edit_file")
-    registry = MockToolRegistry(tools={"edit_file": FakeTool("use append_file instead")})
+    registry = real_fs_tool_registry(tmp_path)
     agent = MockAgent(
         [
             make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
@@ -488,13 +456,15 @@ async def test_truncated_tool_call_uses_tool_specific_hint() -> None:
     await make_process(agent, registry=registry).start("Rewrite the file")
 
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
-    assert "use append_file instead" in (sent_back[0].result.error or "")
+    error = sent_back[0].result.error or ""
+    real_hint = registry.get("edit_file").truncated_call_hint
+    assert real_hint is not None
+    assert real_hint in error
 
 
 async def test_truncated_tool_call_falls_back_to_generic_hint_for_unknown_tool() -> None:
     """A tool with no truncated_call_hint (or not found in the registry) gets the generic hint."""
     tc = make_tool_call("tc_01", "mystery_tool")
-    registry = MockToolRegistry()
     agent = MockAgent(
         [
             make_response(StopReason.MAX_TOKENS, tool_calls=[tc]),
@@ -502,22 +472,17 @@ async def test_truncated_tool_call_falls_back_to_generic_hint_for_unknown_tool()
         ]
     )
 
-    await make_process(agent, registry=registry).start("x")
+    await make_process(agent).start("x")
 
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
     assert "Retry with a smaller, more targeted change." in (sent_back[0].result.error or "")
 
 
-async def test_truncated_tool_calls_get_independent_hints_per_call() -> None:
-    """Multiple pending tool_calls in one truncated turn each get their own tool's hint."""
+async def test_truncated_tool_calls_get_independent_hints_per_call(tmp_path) -> None:
+    """Multiple pending tool_calls in one truncated turn each get their own tool's real hint."""
     tc_edit = make_tool_call("tc_01", "edit_file")
     tc_create = make_tool_call("tc_02", "create_file")
-    registry = MockToolRegistry(
-        tools={
-            "edit_file": FakeTool("edit hint"),
-            "create_file": FakeTool("create hint"),
-        }
-    )
+    registry = real_fs_tool_registry(tmp_path)
     agent = MockAgent(
         [
             make_response(StopReason.MAX_TOKENS, tool_calls=[tc_edit, tc_create]),
@@ -529,8 +494,11 @@ async def test_truncated_tool_calls_get_independent_hints_per_call() -> None:
 
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
     results = {msg.tool_call_id: msg.result for msg in sent_back}
-    assert "edit hint" in (results["tc_01"].error or "")
-    assert "create hint" in (results["tc_02"].error or "")
+    edit_hint = registry.get("edit_file").truncated_call_hint
+    create_hint = registry.get("create_file").truncated_call_hint
+    assert edit_hint in (results["tc_01"].error or "")
+    assert create_hint in (results["tc_02"].error or "")
+    assert edit_hint != create_hint
 
 
 # ---------------------------------------------------------------------------
@@ -538,14 +506,19 @@ async def test_truncated_tool_calls_get_independent_hints_per_call() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def test_callbacks_invoked_correct_counts() -> None:
+async def test_callbacks_invoked_correct_counts(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     tool_calls = [make_tool_call("tc_01"), make_tool_call("tc_02", "grep")]
     responses = [
         make_response(StopReason.TOOL_USE, tool_calls=tool_calls),
         make_response(StopReason.END_TURN),
     ]
     expected_result = ToolResult(success=True, data="ok")
-    registry = MockToolRegistry(result=expected_result)
+    registry = tool_registry(
+        fake_tool("read_file", result=expected_result),
+        fake_tool("grep", result=expected_result),
+    )
     recorder = CallbackRecorder()
     agent = MockAgent(responses)
     scope = AgentScope(owner_id="owner-loop", role=AgentRole.SUBAGENT)
@@ -621,7 +594,7 @@ async def test_run_once_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE)
     process = ReActProcess(
-        AgentRuntime(agent=ErrorAgent(), tool_registry=MockToolRegistry()),
+        AgentRuntime(agent=ErrorAgent(), tool_registry=ToolRegistry([])),
         scope=scope,
         callbacks=Callbacks([recorder.callback_set]),
     )
@@ -654,7 +627,7 @@ class ErrorAgent(BaseAgent[Any]):
 async def test_agent_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
-        AgentRuntime(agent=ErrorAgent(), tool_registry=MockToolRegistry()),
+        AgentRuntime(agent=ErrorAgent(), tool_registry=ToolRegistry([])),
         scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
         callbacks=Callbacks([recorder.callback_set]),
     )
@@ -681,7 +654,7 @@ class InterruptAgent(BaseAgent[Any]):
 async def test_keyboard_interrupt_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
-        AgentRuntime(agent=InterruptAgent(), tool_registry=MockToolRegistry()),
+        AgentRuntime(agent=InterruptAgent(), tool_registry=ToolRegistry([])),
         scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
         callbacks=Callbacks([recorder.callback_set]),
     )
@@ -707,7 +680,7 @@ class CancelledAgent(BaseAgent[Any]):
 async def test_cancelled_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
-        AgentRuntime(agent=CancelledAgent(), tool_registry=MockToolRegistry()),
+        AgentRuntime(agent=CancelledAgent(), tool_registry=ToolRegistry([])),
         scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
         callbacks=Callbacks([recorder.callback_set]),
     )
@@ -739,13 +712,19 @@ async def test_total_tokens_summed_across_iterations() -> None:
     assert result.iterations == 2
 
 
-async def test_tool_result_tokens_included_in_total_tokens() -> None:
+async def test_tool_result_tokens_included_in_total_tokens(
+    fake_tool: type[FakeTool], tool_registry: Callable[..., ToolRegistry]
+) -> None:
     responses = [
         make_response(StopReason.TOOL_USE, tool_calls=[make_tool_call()], input_tokens=100, output_tokens=50),
         make_response(StopReason.END_TURN, input_tokens=200, output_tokens=80),
     ]
     agent = MockAgent(responses)
-    registry = MockToolRegistry(ToolResult(success=True, data="ok", total_input_tokens=30, total_output_tokens=10))
+    registry = tool_registry(
+        fake_tool(
+            "read_file", result=ToolResult(success=True, data="ok", total_input_tokens=30, total_output_tokens=10)
+        )
+    )
 
     result = await make_process(agent, registry=registry).start("Task")
 

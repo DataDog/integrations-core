@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from types import SimpleNamespace
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
 import anthropic
@@ -20,6 +21,9 @@ from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentE
 from ddev.ai.agent.types import StopReason, ToolResultMessage
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry
+
+if TYPE_CHECKING:
+    from tests.ai.conftest import FakeTool
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -189,28 +193,8 @@ async def test_max_tokens_is_not_an_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-class FakeTool:
-    def __init__(self, name: str) -> None:
-        self._name = name
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def description(self) -> str:
-        return ""
-
-    @property
-    def definition(self) -> dict:
-        return {"name": self._name, "description": "", "input_schema": {}}
-
-    async def run(self, raw: dict) -> ToolResult:
-        pass
-
-
-async def test_allowed_tools_filters_to_subset() -> None:
-    registry = ToolRegistry([FakeTool(n) for n in ["read_file", "grep", "mkdir"]])
+async def test_allowed_tools_filters_to_subset(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in ["read_file", "grep", "mkdir"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -220,8 +204,8 @@ async def test_allowed_tools_filters_to_subset() -> None:
     assert sent_names == ["read_file"]
 
 
-async def test_allowed_tools_none_passes_all() -> None:
-    registry = ToolRegistry([FakeTool(n) for n in ["a", "b"]])
+async def test_allowed_tools_none_passes_all(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in ["a", "b"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -477,8 +461,8 @@ async def test_web_fetch_injected_with_citations_enabled() -> None:
     assert web_fetch["max_uses"] == MAX_CONTINUATIONS - 1
 
 
-async def test_both_native_tools_injected_together() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search", "web_fetch"])
+async def test_both_native_tools_injected_together(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search", "web_fetch"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -504,8 +488,8 @@ async def test_create_until_complete_returns_completion_result() -> None:
     assert result.all_responses == [final]
 
 
-async def test_native_tool_appended_after_client_tools() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+async def test_native_tool_appended_after_client_tools(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -519,8 +503,8 @@ async def test_native_tool_appended_after_client_tools() -> None:
     assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
 
 
-async def test_allowed_tools_gates_native_tool() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+async def test_allowed_tools_gates_native_tool(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -531,8 +515,8 @@ async def test_allowed_tools_gates_native_tool() -> None:
     assert "read_file" in sent_names
 
 
-async def test_allowed_tools_none_passes_all_including_native() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+async def test_allowed_tools_none_passes_all_including_native(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 

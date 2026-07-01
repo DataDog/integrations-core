@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from ddev.ai.phases.config import AgentConfig
@@ -11,35 +13,8 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry, filter_read_only
 
-# ---------------------------------------------------------------------------
-# Fake tools — implement ToolProtocol without depending on BaseTool
-# ---------------------------------------------------------------------------
-
-
-class FakeTool:
-    """Minimal ToolProtocol implementation for registry tests."""
-
-    def __init__(self, name: str, result: ToolResult | None = None) -> None:
-        self._name = name
-        self._result = result or ToolResult(success=True, data=f"{name} ok")
-        self.last_raw: dict[str, object] | None = None
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def description(self) -> str:
-        return f"Fake tool {self._name}"
-
-    @property
-    def definition(self) -> dict:
-        return {"name": self._name, "description": self.description, "input_schema": {}}
-
-    async def run(self, raw: dict[str, object]) -> ToolResult:
-        self.last_raw = raw
-        return self._result
-
+if TYPE_CHECKING:
+    from tests.ai.conftest import FakeTool
 
 # ---------------------------------------------------------------------------
 # ToolRegistry.__init__
@@ -47,22 +22,22 @@ class FakeTool:
 
 
 @pytest.mark.parametrize(
-    "tools,expected_names",
+    "names,expected_names",
     [
-        ([FakeTool("alpha")], {"alpha"}),
+        (["alpha"], {"alpha"}),
         ([], set()),
-        ([FakeTool("a"), FakeTool("b"), FakeTool("c")], {"a", "b", "c"}),
+        (["a", "b", "c"], {"a", "b", "c"}),
     ],
 )
-def test_registry_registers_tools(tools, expected_names):
-    registry = ToolRegistry(tools)
+def test_registry_registers_tools(names: list[str], expected_names: set[str], fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in names])
     assert set(registry._tools.keys()) == expected_names
 
 
-def test_duplicate_name_last_one_wins():
+def test_duplicate_name_last_one_wins(fake_tool: type[FakeTool]) -> None:
     # This design is intentional to allow for tool overrides.
-    first = FakeTool("dup")
-    second = FakeTool("dup")
+    first = fake_tool("dup")
+    second = fake_tool("dup")
     registry = ToolRegistry([first, second])
     assert registry._tools["dup"] is second
 
@@ -76,13 +51,13 @@ def test_empty_registry_returns_empty_list():
     assert ToolRegistry([]).definitions == []
 
 
-def test_tool_registry_definitions_returns_all_tool_definitions():
-    registry = ToolRegistry([FakeTool("a"), FakeTool("b")])
+def test_tool_registry_definitions_returns_all_tool_definitions(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("a"), fake_tool("b")])
     assert len(registry.definitions) == 2
 
 
-def test_definition_contains_tool_name():
-    registry = ToolRegistry([FakeTool("mytool")])
+def test_definition_contains_tool_name(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("mytool")])
     assert registry.definitions[0]["name"] == "mytool"
 
 
@@ -91,9 +66,9 @@ def test_definition_contains_tool_name():
 # ---------------------------------------------------------------------------
 
 
-async def test_run_dispatches_to_correct_tool():
-    tool_a = FakeTool("a", ToolResult(success=True, data="from a"))
-    tool_b = FakeTool("b", ToolResult(success=True, data="from b"))
+async def test_run_dispatches_to_correct_tool(fake_tool: type[FakeTool]) -> None:
+    tool_a = fake_tool("a", ToolResult(success=True, data="from a"))
+    tool_b = fake_tool("b", ToolResult(success=True, data="from b"))
     registry = ToolRegistry([tool_a, tool_b])
 
     result = await registry.run("b", {})
@@ -101,24 +76,24 @@ async def test_run_dispatches_to_correct_tool():
     assert result.data == "from b"
 
 
-async def test_passes_raw_dict_to_tool_unchanged():
-    tool = FakeTool("t")
+async def test_passes_raw_dict_to_tool_unchanged(fake_tool: type[FakeTool]) -> None:
+    tool = fake_tool("t")
     registry = ToolRegistry([tool])
     raw = {"key": "value", "num": 42}
 
     await registry.run("t", raw)
-    assert tool.last_raw == raw
+    assert tool.calls == [raw]
 
 
-async def test_returns_tool_result_on_tool_failure():
-    registry = ToolRegistry([FakeTool("t", ToolResult(success=False, error="bad input"))])
+async def test_returns_tool_result_on_tool_failure(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("t", ToolResult(success=False, error="bad input"))])
     result = await registry.run("t", {})
     assert result.success is False
     assert result.error == "bad input"
 
 
-async def test_unknown_tool_returns_failure():
-    registry = ToolRegistry([FakeTool("known_tool")])
+async def test_unknown_tool_returns_failure(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("known_tool")])
     result = await registry.run("unknown_tool", {})
     assert result.success is False
     assert "Unknown tool: 'unknown_tool'" in result.error
@@ -129,6 +104,26 @@ async def test_empty_registry_always_returns_unknown_error():
     result = await registry.run("anything", {})
     assert result.success is False
     assert result.error is not None
+
+
+# ---------------------------------------------------------------------------
+# ToolRegistry.get
+# ---------------------------------------------------------------------------
+
+
+def test_get_returns_registered_tool_by_name(fake_tool: type[FakeTool]) -> None:
+    tool = fake_tool("edit_file", truncated_call_hint="shrink the edit")
+    registry = ToolRegistry([tool])
+
+    found = registry.get("edit_file")
+
+    assert found is tool
+    assert found.truncated_call_hint == "shrink the edit"
+
+
+def test_get_returns_none_for_unknown_tool(fake_tool: type[FakeTool]) -> None:
+    registry = ToolRegistry([fake_tool("edit_file")])
+    assert registry.get("unknown_tool") is None
 
 
 # ---------------------------------------------------------------------------

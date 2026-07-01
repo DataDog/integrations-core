@@ -13,6 +13,12 @@ def test_tool_name(registry: FileRegistry) -> None:
     assert CreateFileTool(registry, OWNER_ID).name == "create_file"
 
 
+def test_truncated_call_hint_points_to_append_file(registry: FileRegistry) -> None:
+    hint = CreateFileTool(registry, OWNER_ID).truncated_call_hint
+    assert hint is not None
+    assert "append_file" in hint
+
+
 async def test_create_file_success(create_tool: CreateFileTool, tmp_path) -> None:
     f = tmp_path / "new.txt"
 
