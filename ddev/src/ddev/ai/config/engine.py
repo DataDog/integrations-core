@@ -324,48 +324,58 @@ class ConfigurationEngine:
         scheduled_phases: list[PhaseConfig] = []
         errors: list[FlowError] = []
         for fe in fc.flow:
-            phase_entry = self._phases.get(fe.phase)
-            if phase_entry is None:
-                conflict = next((c for c in self._conflicts if c.type == "phase" and c.name == fe.phase), None)
-                if conflict is not None:
-                    errors.append(
-                        FlowError(
-                            ErrorKind.PHASE,
-                            f"Phase {fe.phase!r} referenced by flow {flow_name!r} is defined in multiple sources; "
-                            "resolve the conflict",
-                            subject=fe.phase,
-                            phase=fe.phase,
-                            sources=list(conflict.sources),
-                        )
-                    )
-                else:
-                    errors.append(
-                        FlowError(
-                            ErrorKind.PHASE,
-                            f"Phase {fe.phase!r} referenced by flow {flow_name!r} is not registered",
-                            subject=fe.phase,
-                            phase=fe.phase,
-                            sources=[self._flows[flow_name].source_file],
-                        )
-                    )
+            pc, phase_errors = self._resolve_scheduled_phase(fe.phase, flow_name)
+            errors.extend(phase_errors)
+            if pc is None:
                 continue
-            if isinstance(phase_entry, BrokenEntry):
-                errors.append(
-                    FlowError(
-                        ErrorKind.PHASE,
-                        f"Phase {fe.phase!r} referenced by flow {flow_name!r} is broken: {phase_entry.error}",
-                        subject=fe.phase,
-                        phase=fe.phase,
-                        sources=[phase_entry.source_file],
-                    )
-                )
-                continue
-            pc: PhaseConfig = phase_entry.config
             scheduled_phases.append(pc)
-            errors.extend(self._validate_phase_class(pc))
-            errors.extend(self._validate_phase_agent(pc))
-            errors.extend(self._validate_phase_refs(pc))
+            errors.extend(self._validate_phase(pc))
         return scheduled_phases, errors
+
+    def _resolve_scheduled_phase(self, phase_name: str, flow_name: str) -> tuple[PhaseConfig | None, list[FlowError]]:
+        """Resolve a flow's scheduled phase to its config, or the errors explaining why it can't be used."""
+        phase_entry = self._phases.get(phase_name)
+        if phase_entry is None:
+            return None, [self._unregistered_phase_error(phase_name, flow_name)]
+        if isinstance(phase_entry, BrokenEntry):
+            return None, [
+                FlowError(
+                    ErrorKind.PHASE,
+                    f"Phase {phase_name!r} referenced by flow {flow_name!r} is broken: {phase_entry.error}",
+                    subject=phase_name,
+                    phase=phase_name,
+                    sources=[phase_entry.source_file],
+                )
+            ]
+        return phase_entry.config, []
+
+    def _unregistered_phase_error(self, phase_name: str, flow_name: str) -> FlowError:
+        """Explain an unresolved phase: a conflict between sources, or simply not registered."""
+        conflict = next((c for c in self._conflicts if c.type == "phase" and c.name == phase_name), None)
+        if conflict is not None:
+            return FlowError(
+                ErrorKind.PHASE,
+                f"Phase {phase_name!r} referenced by flow {flow_name!r} is defined in multiple sources; "
+                "resolve the conflict",
+                subject=phase_name,
+                phase=phase_name,
+                sources=list(conflict.sources),
+            )
+        return FlowError(
+            ErrorKind.PHASE,
+            f"Phase {phase_name!r} referenced by flow {flow_name!r} is not registered",
+            subject=phase_name,
+            phase=phase_name,
+            sources=[self._flows[flow_name].source_file],
+        )
+
+    def _validate_phase(self, pc: PhaseConfig) -> list[FlowError]:
+        """Run all per-phase checks (class, agent, references)."""
+        errors: list[FlowError] = []
+        errors.extend(self._validate_phase_class(pc))
+        errors.extend(self._validate_phase_agent(pc))
+        errors.extend(self._validate_phase_refs(pc))
+        return errors
 
     def _validate_phase_class(self, pc: PhaseConfig) -> list[FlowError]:
         phase_src = self._phases[pc.name].source_file
@@ -495,11 +505,19 @@ class ConfigurationEngine:
         return []
 
     def _validate_dependencies(self, flow_name: str, fc: FlowConfig) -> list[FlowError]:
-        errors: list[FlowError] = []
         flow_src = self._flows[flow_name].source_file
-        dependency_map: dict[str, list[str]] = {}
+        dependency_map: dict[str, list[str]] = {fe.phase: fe.dependencies for fe in fc.flow}
+        errors: list[FlowError] = []
+        errors.extend(self._check_duplicate_schedule(fc, flow_name, flow_src))
+        errors.extend(self._check_unscheduled_dependencies(fc, dependency_map, flow_name, flow_src))
+        errors.extend(self._check_dependency_cycles(dependency_map, flow_name, flow_src))
+        return errors
+
+    def _check_duplicate_schedule(self, fc: FlowConfig, flow_name: str, flow_src: Path) -> list[FlowError]:
+        errors: list[FlowError] = []
+        seen: set[str] = set()
         for fe in fc.flow:
-            if fe.phase in dependency_map:
+            if fe.phase in seen:
                 errors.append(
                     FlowError(
                         ErrorKind.DEPENDENCY,
@@ -509,8 +527,13 @@ class ConfigurationEngine:
                         sources=[flow_src],
                     )
                 )
-            dependency_map[fe.phase] = fe.dependencies
+            seen.add(fe.phase)
+        return errors
 
+    def _check_unscheduled_dependencies(
+        self, fc: FlowConfig, dependency_map: dict[str, list[str]], flow_name: str, flow_src: Path
+    ) -> list[FlowError]:
+        errors: list[FlowError] = []
         for fe in fc.flow:
             for dep in fe.dependencies:
                 if dep not in dependency_map:
@@ -523,7 +546,12 @@ class ConfigurationEngine:
                             sources=[flow_src],
                         )
                     )
+        return errors
 
+    def _check_dependency_cycles(
+        self, dependency_map: dict[str, list[str]], flow_name: str, flow_src: Path
+    ) -> list[FlowError]:
+        errors: list[FlowError] = []
         cycles, truncated = detect_cycles(dependency_map)
         for cycle in cycles:
             path = " -> ".join(cycle)
