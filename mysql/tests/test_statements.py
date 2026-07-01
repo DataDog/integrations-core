@@ -281,6 +281,53 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
     assert row['count_star'] == 2
 
 
+@pytest.mark.unit
+def test_statement_metrics_baselines_new_digest_before_merging_query_signature(dbm_instance, datadog_agent):
+    normalized_query = 'SELECT * FROM `employees` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def row(digest, digest_text, count_star):
+        return {
+            '_dd_statement_source': statements.DIGEST_STATEMENT_SOURCE,
+            '_dd_statement_id': None,
+            'schema_name': 'personio',
+            'digest': digest,
+            'digest_text': digest_text,
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [row('digest-a', 'SELECT * FROM employees WHERE id = ?', 100)],
+            [
+                row('digest-a', 'SELECT * FROM employees WHERE id = ?', 110),
+                row('digest-b', 'SELECT * FROM employees WHERE id IN (?)', 5000),
+            ],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+
+    assert len(rows) == 1
+    assert rows[0]['query_signature'] == query_signature
+    assert rows[0]['count_star'] == 10
+    assert '_dd_statement_id' not in rows[0]
+    assert '_dd_statement_source' not in rows[0]
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
