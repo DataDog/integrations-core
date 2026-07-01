@@ -140,14 +140,14 @@ def test_checkpoint_config_with_memory_prompt():
     assert cc.memory_prompt == "List files."
 
 
-def test_checkpoint_config_with_memory_prompt_path():
-    cc = CheckpointConfig(memory_prompt_path="prompts/mem.md")
-    assert cc.memory_prompt_path is not None
+def test_checkpoint_config_with_memory_prompt_ref():
+    cc = CheckpointConfig(memory_prompt_ref="mem")
+    assert cc.memory_prompt_ref == "mem"
 
 
 def test_checkpoint_config_both_set_raises():
     with pytest.raises(ValidationError, match="Exactly one"):
-        CheckpointConfig(memory_prompt="List files.", memory_prompt_path="prompts/mem.md")
+        CheckpointConfig(memory_prompt="List files.", memory_prompt_ref="mem")
 
 
 def test_checkpoint_config_neither_set_raises():
@@ -440,42 +440,47 @@ flow:
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 
-def test_from_yaml_missing_goal_ref_file(tmp_path):
-    _write_agent_file(tmp_path, "writer")
-    flow_yaml = tmp_path / "flow.yaml"
-    flow_yaml.write_text(
-        """\
-phases:
-  p1:
+@pytest.mark.parametrize(
+    "phase_body,match",
+    [
+        (
+            """\
+    agent: writer
+    tasks:
+      - name: t1
+        prompt_ref: nonexistent
+""",
+            "No prompt file found for",
+        ),
+        (
+            """\
     agent: writer
     tasks:
       - name: t1
         prompt: "Do it."
         goal_ref: nonexistent
-flow:
-  - phase: p1
-"""
-    )
-    with pytest.raises(FlowConfigError, match="No goal file found for"):
-        FlowConfig.from_yaml(flow_yaml, tmp_path)
-
-
-def test_from_yaml_missing_prompt_ref_file(tmp_path):
-    _write_agent_file(tmp_path, "writer")
-    flow_yaml = tmp_path / "flow.yaml"
-    flow_yaml.write_text(
-        """\
-phases:
-  p1:
+""",
+            "No goal file found for",
+        ),
+        (
+            """\
     agent: writer
     tasks:
       - name: t1
-        prompt_ref: nonexistent
-flow:
-  - phase: p1
-"""
-    )
-    with pytest.raises(FlowConfigError, match="No prompt file found for"):
+        prompt: "Do it."
+    checkpoint:
+      memory_prompt_ref: nonexistent
+""",
+            "No memory prompt file found for",
+        ),
+    ],
+    ids=["prompt_ref", "goal_ref", "memory_prompt_ref"],
+)
+def test_from_yaml_missing_ref_file(tmp_path, phase_body, match):
+    _write_agent_file(tmp_path, "writer")
+    flow_yaml = tmp_path / "flow.yaml"
+    flow_yaml.write_text(f"phases:\n  p1:\n{phase_body}flow:\n  - phase: p1\n")
+    with pytest.raises(FlowConfigError, match=match):
         FlowConfig.from_yaml(flow_yaml, tmp_path)
 
 

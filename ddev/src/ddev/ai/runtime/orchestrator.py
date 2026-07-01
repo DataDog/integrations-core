@@ -112,6 +112,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             callbacks=run_callbacks,
             prompts=config.prompts,
             goals=config.goals,
+            memories=config.memories,
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,

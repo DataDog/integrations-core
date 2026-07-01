@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -42,20 +41,16 @@ def render_task_prompt(
 
 def render_memory_prompt(
     checkpoint: CheckpointConfig,
-    config_dir: Path,
+    resources: PhaseResources,
     context: dict[str, Any],
+    resolver: Callable[[str], str] | None = None,
 ) -> str:
-    """Render a checkpoint memory prompt — from file if memory_prompt_path is set, inline otherwise."""
-    if checkpoint.memory_prompt_path is not None:
-        path = config_dir / checkpoint.memory_prompt_path
-        try:
-            text = path.read_text(encoding="utf-8")
-        except OSError as e:
-            raise FlowConfigError(f"Cannot read memory_prompt_path {path}: {e}") from e
-        return render_inline(text, context)
+    """Render a checkpoint memory prompt — from memory_prompt_ref lookup if set, inline otherwise."""
+    if checkpoint.memory_prompt_ref is not None:
+        return render_inline(resources.memory_prompt(checkpoint.memory_prompt_ref), context, resolver)
     if checkpoint.memory_prompt is None:
-        raise FlowConfigError("CheckpointConfig must set either 'memory_prompt' or 'memory_prompt_path'")
-    return render_inline(checkpoint.memory_prompt, context)
+        raise FlowConfigError("CheckpointConfig must set either 'memory_prompt' or 'memory_prompt_ref'")
+    return render_inline(checkpoint.memory_prompt, context, resolver)
 
 
 class AgenticPhase(Phase):
@@ -282,7 +277,7 @@ class AgenticPhase(Phase):
         """Run the final summary turn. Returns (memory_text, input_tokens, output_tokens)."""
         user_additions = None
         if self._config.checkpoint is not None:
-            user_additions = render_memory_prompt(self._config.checkpoint, self._config_dir, context)
+            user_additions = render_memory_prompt(self._config.checkpoint, self._resources, context, self._resolver)
         memory_prompt = self._checkpoint_manager.build_memory_prompt(user_additions)
 
         response = await process.run_once(memory_prompt)

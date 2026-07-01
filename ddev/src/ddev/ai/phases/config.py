@@ -120,12 +120,12 @@ class CheckpointConfig(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     memory_prompt: str | None = None
-    memory_prompt_path: Path | None = None
+    memory_prompt_ref: str | None = None
 
     @model_validator(mode="after")
     def exactly_one_source(self) -> CheckpointConfig:
-        if (self.memory_prompt is None) == (self.memory_prompt_path is None):
-            raise ValueError("Exactly one of 'memory_prompt' or 'memory_prompt_path' must be set")
+        if (self.memory_prompt is None) == (self.memory_prompt_ref is None):
+            raise ValueError("Exactly one of 'memory_prompt' or 'memory_prompt_ref' must be set")
         return self
 
 
@@ -170,6 +170,7 @@ class FlowConfig(BaseModel):
     _agents: dict[str, AgentConfig] = PrivateAttr(default_factory=dict)
     _prompts: dict[str, str] = PrivateAttr(default_factory=dict)
     _goals: dict[str, str] = PrivateAttr(default_factory=dict)
+    _memories: dict[str, str] = PrivateAttr(default_factory=dict)
 
     @property
     def agents(self) -> dict[str, AgentConfig]:
@@ -182,6 +183,10 @@ class FlowConfig(BaseModel):
     @property
     def goals(self) -> dict[str, str]:
         return self._goals
+
+    @property
+    def memories(self) -> dict[str, str]:
+        return self._memories
 
     @model_validator(mode="after")
     def cross_references(self) -> FlowConfig:
@@ -227,11 +232,12 @@ class FlowConfig(BaseModel):
         return agents
 
     @staticmethod
-    def _load_prompts_and_goals(prompts_dir: Path) -> tuple[dict[str, str], dict[str, str]]:
+    def _load_prompt_files(prompts_dir: Path) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
         prompts: dict[str, str] = {}
         goals: dict[str, str] = {}
+        memories: dict[str, str] = {}
         if not prompts_dir.is_dir():
-            return prompts, goals
+            return prompts, goals, memories
         for md_file in sorted(prompts_dir.glob("*.md")):
             meta, body = parse_md_file(md_file)
             file_type = meta.get("type")
@@ -239,9 +245,11 @@ class FlowConfig(BaseModel):
                 prompts[md_file.stem] = body
             elif file_type == "goal":
                 goals[md_file.stem] = body
-        return prompts, goals
+            elif file_type == "memory_prompt":
+                memories[md_file.stem] = body
+        return prompts, goals, memories
 
-    def _validate_phase_references(self, config_dir: Path) -> None:
+    def _validate_phase_references(self) -> None:
         for phase_id, phase in self.phases.items():
             if phase.agent is not None and phase.agent not in self._agents:
                 raise FlowConfigError(
@@ -259,10 +267,12 @@ class FlowConfig(BaseModel):
                         f"Phase {phase_id!r} task {i} ({task.name!r}): "
                         f"No goal file found for goal_ref {task.goal_ref!r}"
                     )
-            if phase.checkpoint is not None and phase.checkpoint.memory_prompt_path is not None:
-                resolved = config_dir / phase.checkpoint.memory_prompt_path
-                if not resolved.exists():
-                    raise FlowConfigError(f"Phase {phase_id!r} checkpoint memory_prompt_path not found: {resolved}")
+            if phase.checkpoint is not None and phase.checkpoint.memory_prompt_ref is not None:
+                if phase.checkpoint.memory_prompt_ref not in self._memories:
+                    raise FlowConfigError(
+                        f"Phase {phase_id!r} checkpoint: "
+                        f"No memory prompt file found for memory_prompt_ref {phase.checkpoint.memory_prompt_ref!r}"
+                    )
 
     @classmethod
     def from_yaml(cls, path: Path, config_dir: Path) -> FlowConfig:
@@ -278,7 +288,7 @@ class FlowConfig(BaseModel):
             raise FlowConfigError(f"Invalid flow config:\n{e}") from e
 
         config._agents = cls._load_agents(config_dir / "agents")
-        config._prompts, config._goals = cls._load_prompts_and_goals(config_dir / "prompts")
-        config._validate_phase_references(config_dir)
+        config._prompts, config._goals, config._memories = cls._load_prompt_files(config_dir / "prompts")
+        config._validate_phase_references()
 
         return config

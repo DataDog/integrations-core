@@ -79,10 +79,14 @@ def test_render_task_prompt_raises_when_no_source():
 # ---------------------------------------------------------------------------
 
 
-def test_render_memory_prompt_from_file(tmp_path):
-    (tmp_path / "mem.md").write_text("List files for ${phase_name}.")
-    result = render_memory_prompt(CheckpointConfig(memory_prompt_path="mem.md"), tmp_path, {"phase_name": "draft"})
+def test_render_memory_prompt_from_ref():
+    from unittest.mock import MagicMock
+
+    resources = MagicMock()
+    resources.memory_prompt.side_effect = lambda name: "List files for ${phase_name}."
+    result = render_memory_prompt(CheckpointConfig(memory_prompt_ref="mem"), resources, {"phase_name": "draft"})
     assert result == "List files for draft."
+    resources.memory_prompt.assert_called_once_with("mem")
 
 
 def test_render_memory_prompt_inline():
@@ -93,9 +97,11 @@ def test_render_memory_prompt_inline():
 
 
 def test_render_memory_prompt_raises_when_no_source():
+    from unittest.mock import MagicMock
+
     with pytest.raises(FlowConfigError, match="memory_prompt"):
         render_memory_prompt(
-            CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), Path("/unused"), {}
+            CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_ref=None), MagicMock(), {}
         )
 
 
