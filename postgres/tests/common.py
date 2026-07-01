@@ -46,13 +46,18 @@ DB_NAME = 'datadog_test'
 POSTGRES_VERSION = os.environ.get('POSTGRES_VERSION', None)
 POSTGRES_IMAGE = "alpine"
 POSTGRES_LOCALE = os.environ.get('POSTGRES_LOCALE', "UTF8")
+POSTGRES_IMAGE_TAG = os.environ.get('POSTGRES_IMAGE_TAG', None)
 
 REPLICA_CONTAINER_1_NAME = 'compose-postgres_replica-1'
 REPLICA_CONTAINER_2_NAME = 'compose-postgres_replica2-1'
 REPLICA_LOGICAL_1_NAME = 'compose-postgres_logical_replica-1'
 USING_LATEST = False
 
-if POSTGRES_VERSION is not None:
+print(f"POSTGRES_IMAGE_TAG: {POSTGRES_IMAGE_TAG}")
+print(f"POSTGRES_VERSION: {POSTGRES_VERSION}")
+if POSTGRES_IMAGE_TAG is not None:
+    POSTGRES_IMAGE = POSTGRES_IMAGE_TAG + "-alpine"
+elif POSTGRES_VERSION is not None:
     USING_LATEST = POSTGRES_VERSION.endswith('latest')
     POSTGRES_IMAGE = POSTGRES_VERSION + "-alpine"
 
