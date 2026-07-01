@@ -53,7 +53,6 @@ class FailedCheckpoint(BaseModel):
     error: str
     tokens: CheckpointTokenInfo
     goal_validations: list[GoalValidationRecord] | None = None
-    phase_data: dict[str, Any] = {}
 
 
 PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discriminator="status")]

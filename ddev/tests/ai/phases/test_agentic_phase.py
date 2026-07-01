@@ -537,7 +537,7 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.read() == {}
-    assert phase._goal_attempt_log == [{"task": "t1", "attempts": 2, "final_valid": False}]
+    assert phase._goal_attempt_log == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
 
     # The reviewer ran (and succeeded as an agent) on each attempt; its per-run
     # log exists. The goal-loop verdict itself lives in the phase checkpoint.
@@ -590,8 +590,8 @@ async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, mon
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert phase._goal_attempt_log == [
-        {"task": "t1", "attempts": 1, "final_valid": True},
-        {"task": "t2", "attempts": 2, "final_valid": False},
+        GoalValidationRecord(task="t1", attempts=1, final_valid=True),
+        GoalValidationRecord(task="t2", attempts=2, final_valid=False),
     ]
 
 
@@ -863,7 +863,7 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
     with pytest.raises(GoalParseError):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert phase._goal_attempt_log == [{"task": "t1", "attempts": 1, "final_valid": False}]
+    assert phase._goal_attempt_log == [GoalValidationRecord(task="t1", attempts=1, final_valid=False)]
     assert phase._total_input_tokens == 10 + 8 + 6
     assert phase._total_output_tokens == 5 + 4 + 3
 
