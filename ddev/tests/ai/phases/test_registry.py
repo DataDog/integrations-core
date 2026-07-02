@@ -114,6 +114,50 @@ def test_register_from_discovers_subpackage_phases():
     names = registry.known_names()
     assert "AgenticPhase" in names
     assert "InspectEndpointPhase" in names
+    assert registry.import_errors == {}
+
+
+def test_inspect_endpoint_module_imports_without_runtime_parser_use():
+    """Module import must not require the prometheus_client parser (only used inside execute())."""
+    import ddev.ai.phases.openmetrics.inspect_endpoint  # noqa: F401
+
+
+def test_register_from_records_missing_optional_dependency_and_continues(tmp_path, monkeypatch):
+    fake_dir = tmp_path / "missing_dep_pkg"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "bad_dep.py").write_text("import definitely_missing_pkg_xyz\n")
+    (fake_dir / "sibling.py").write_text(
+        "from ddev.ai.phases.agentic_phase import AgenticPhase\nclass SiblingPhase(AgenticPhase):\n    pass\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    registry = PhaseRegistry()
+    registry.register_from(phases_dir=fake_dir, import_prefix="missing_dep_pkg")
+
+    module_name = "missing_dep_pkg.bad_dep"
+    assert module_name in registry.import_errors
+    assert "optional dependency missing" in registry.import_errors[module_name]
+    assert "SiblingPhase" in registry.known_names()
+
+
+def test_register_from_records_broken_module_and_continues(tmp_path, monkeypatch):
+    fake_dir = tmp_path / "broken_pkg"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "broken.py").write_text("def (:\n")
+    (fake_dir / "sibling.py").write_text(
+        "from ddev.ai.phases.agentic_phase import AgenticPhase\nclass SiblingPhase(AgenticPhase):\n    pass\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    registry = PhaseRegistry()
+    registry.register_from(phases_dir=fake_dir, import_prefix="broken_pkg")
+
+    module_name = "broken_pkg.broken"
+    assert module_name in registry.import_errors
+    assert "failed to import" in registry.import_errors[module_name]
+    assert "SiblingPhase" in registry.known_names()
 
 
 def test_discover_does_not_mutate_global_state():

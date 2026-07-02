@@ -265,6 +265,8 @@ def test_missing_core_dir_raises(tmp_path):
 
 def test_phase_class_validate_config_non_flowconfig_error_accumulates(tmp_path):
     class ExplodingReg:
+        import_errors: dict = {}
+
         def contains(self, n):
             return True
 

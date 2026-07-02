@@ -383,7 +383,7 @@ class ConfigurationEngine:
             return [
                 FlowError(
                     ErrorKind.PHASE,
-                    f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}",
+                    f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}{self._import_errors_note()}",
                     subject=pc.class_,
                     phase=pc.name,
                     sources=[phase_src],
@@ -653,6 +653,13 @@ class ConfigurationEngine:
             return ""
         listed = "\n".join(f"  {p}: {msg}" for p, msg in self._file_errors.items())
         return f"\nNote: these files failed to parse and may contain the missing resource:\n{listed}"
+
+    def _import_errors_note(self) -> str:
+        errors = self._phase_registry.import_errors
+        if not errors:
+            return ""
+        listed = "\n".join(f"  {module}: {msg}" for module, msg in errors.items())
+        return f"\n\nPhase modules that failed to import:\n{listed}"
 
     def get_flow(self, name: str) -> ResolvedFlow:
         diag = self._flows_diag.get(name)

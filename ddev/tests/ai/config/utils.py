@@ -17,6 +17,9 @@ class NoopPhase:
 
 
 class StubReg:
+    def __init__(self, import_errors: dict[str, str] | None = None) -> None:
+        self.import_errors = import_errors or {}
+
     def contains(self, n):
         return True
 
@@ -27,6 +30,7 @@ class StubReg:
 class StubRegMissing:
     def __init__(self, missing: set[str]) -> None:
         self._missing = missing
+        self.import_errors: dict[str, str] = {}
 
     def contains(self, n):
         return n not in self._missing

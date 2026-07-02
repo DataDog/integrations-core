@@ -2,19 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import httpx
-from prometheus_client import Metric
-from prometheus_client.openmetrics.parser import text_string_to_metric_families as parse_openmetrics
-from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
 from ddev.ai.config.errors import FlowConfigError
 from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.base import Phase, PhaseOutcome
+
+if TYPE_CHECKING:
+    from prometheus_client import Metric
 
 REQUEST_TIMEOUT_SECONDS = 10.0
 RESPONSE_BODY_LIMIT_BYTES = 10 * 1024 * 1024  # 10 MB
@@ -40,6 +42,14 @@ def _parse_exposition(body: str, content_type: str) -> tuple[list[Metric], str]:
     "openmetrics" or "prometheus". Raises EndpointInspectionError if parsing
     fails or yields zero metric families.
     """
+    try:
+        from prometheus_client.openmetrics.parser import text_string_to_metric_families as parse_openmetrics
+        from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
+    except ModuleNotFoundError as e:
+        raise FlowConfigError(
+            "InspectEndpointPhase requires the 'ai' extra (prometheus-client); install with `pip install ddev[ai]`"
+        ) from e
+
     if content_type.startswith("application/openmetrics-text"):
         parser = parse_openmetrics
         exposition_format = "openmetrics"
