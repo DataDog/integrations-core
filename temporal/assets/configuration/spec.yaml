@@ -4,11 +4,10 @@ files:
 - name: temporal.yaml
   discovery:
     strategies:
-      - strategy: from_ports
-        port_hints:
-          - 8000
-        candidates:
-          - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
+      - template: discovery/openmetrics_from_ports
+        overrides:
+          port_hints:
+            - 8000
   options:
   - template: init_config
     options:
