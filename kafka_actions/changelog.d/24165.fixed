@@ -1,1 +1,0 @@
-Hardened the ``update_consumer_group_offsets`` action to enforce an inactive-group check before altering offsets and to surface per-partition errors.
