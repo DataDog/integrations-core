@@ -41,7 +41,6 @@ from .common import (
     POSTGRES_LOCALE,
     POSTGRES_VERSION,
     USER_ADMIN,
-    USING_LATEST,
     _get_expected_replication_tags,
     _get_expected_tags,
 )
@@ -646,12 +645,10 @@ def test_failed_explain_handling(
 
 
 # PG19 stopped appending the "No function matches the given name..." type-cast hint when the
-# function name does not exist at all, so the undefined-explain-function warning omits it. The
-# `latest` tag is coerced to a sentinel version but currently resolves to a pre-19 server, so it
-# still gets the hint.
+# function name does not exist at all, so the undefined-explain-function warning omits it.
 EXPLAIN_UNDEFINED_FUNCTION_HINT = (
     ""
-    if not USING_LATEST and POSTGRES_VERSION is not None and float(POSTGRES_VERSION) >= 19
+    if POSTGRES_VERSION is not None and float(POSTGRES_VERSION) >= 19
     else "HINT:  No function matches the given name and argument types. You might need to add explicit type casts.\n"
 )
 
