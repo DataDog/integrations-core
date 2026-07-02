@@ -57,7 +57,9 @@ version = [
 matrix.version.env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.18", "8.0.36"] },
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
-  { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["9"] },
+  # MySQL 9 uses the official `mysql` image (bitnamilegacy is deprecated), which needs
+  # its own compose with initdb-based replication.
+  { key = "COMPOSE_FILE", value = "mysql-official.yaml", if = ["9"] },
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
