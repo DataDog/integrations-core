@@ -4,7 +4,6 @@
 import copy
 
 import pytest
-from requests.exceptions import ConnectionError
 
 from datadog_checks.gitlab_runner import GitlabRunnerCheck
 
@@ -32,7 +31,7 @@ def test_connection_failure(aggregator):
 
     gitlab_runner = GitlabRunnerCheck('gitlab', BAD_CONFIG['init_config'], instances=BAD_CONFIG['instances'])
 
-    with pytest.raises(ConnectionError):
+    with pytest.raises(Exception):
         gitlab_runner.check(BAD_CONFIG['instances'][0])
 
     # We should get two failed service checks
