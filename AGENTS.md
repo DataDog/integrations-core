@@ -168,11 +168,15 @@ Changelog entries are required for any change to a file that is shipped with the
 The valid types are defined in `ddev/src/ddev/release/constants.py` (`ENTRY_TYPES`):
 
 - `added` - New features. Bumps the **minor** version (e.g., 1.0.0 → 1.1.0).
-- `changed` - Breaking changes or significant modifications. Bumps the **major** version (e.g., 1.0.0 → 2.0.0).
+- `changed` - Backward-incompatible changes only (e.g. removing or renaming a metric or service check, removing/renaming/retyping a config option, or changing default behavior in a way that alters emitted data). Bumps the **major** version (e.g., 1.0.0 → 2.0.0). Do **not** use for non-breaking improvements — those are `added` or `fixed`.
 - `deprecated` - Marks functionality as deprecated. Bumps the **minor** version.
 - `removed` - Removes functionality. Bumps the **major** version.
 - `fixed` - Bug fixes. Bumps the **patch** version (e.g., 1.0.0 → 1.0.1).
 - `security` - Security-related fixes. Bumps the **minor** version.
+
+### Choosing `.changed`
+
+Before writing a `.changed` entry, stop and confirm the change is genuinely breaking for an existing user — something that would break their current configuration, dashboards, monitors, or ingested data. If you cannot name specifically what breaks, it is **not** a `.changed` entry: use `added` for new capability or `fixed` for a bug fix. When in doubt, prefer the non-breaking type or ask the reviewer rather than defaulting to `.changed`.
 
 ### Examples
 
@@ -183,6 +187,12 @@ echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/cha
 # Bug fix for sqlserver in PR #23701
 echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
 ```
+
+## Review Guidelines
+
+These guidelines apply to automated code review (the Codex review bot). They do not relax any requirement above for code you author.
+
+- Do not raise findings for a missing changelog entry. Changelog files are named `<INTEGRATION>/changelog.d/<PR_NUMBER>.<TYPE>`, so they can only be created after the PR number is assigned; their absence when a PR is first opened is expected rather than a defect. The requirement is already enforced by the `check_changelog` job in `.github/workflows/pr-quick-check.yml`.
 
 ## Pull Requests
 
