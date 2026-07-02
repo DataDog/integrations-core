@@ -309,7 +309,8 @@ def instance_hybrid_traditional_replica():
 def version_metadata():
     parts = MYSQL_VERSION.split('-')
     version = parts[0].split('.')
-    major, minor = version[:2]
+    major = version[0]
+    minor = version[1] if len(version) > 1 else mock.ANY
     patch = version[2] if len(version) > 2 else mock.ANY
 
     if MYSQL_FLAVOR == 'percona':
@@ -493,9 +494,7 @@ def _create_enable_consumers_procedure(conn):
 
 def init_master():
     logger.debug("initializing master")
-    conn = pymysql.connect(
-        host=common.HOST, port=common.PORT, user='root', password='mypass' if MYSQL_FLAVOR == 'percona' else None
-    )
+    conn = pymysql.connect(host=common.HOST, port=common.PORT, user='root', password=common.mysql_root_password())
     _add_dog_user(conn)
     _add_bob_user(conn)
     _add_fred_user(conn)
@@ -508,7 +507,7 @@ def _get_root_connection():
         host=common.HOST,
         port=common.PORT,
         user='root',
-        password='mypass' if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION in ('group', 'hybrid') else None,
+        password=common.mysql_root_password(),
     )
 
 
@@ -583,7 +582,7 @@ def populate_database():
         host=common.HOST,
         port=common.PORT,
         user='root',
-        password='mypass' if MYSQL_REPLICATION in ('group', 'hybrid') or MYSQL_FLAVOR == 'percona' else None,
+        password=common.mysql_root_password(),
     )
 
     cur = conn.cursor()
