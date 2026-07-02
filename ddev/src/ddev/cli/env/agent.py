@@ -38,6 +38,14 @@ def _invoke_check_with_retry(
             time.sleep(backoff)
 
 
+def _validate_env_vars(ctx: click.Context, param: click.Parameter, value: tuple[str, ...]) -> tuple[str, ...]:
+    for entry in value:
+        if '=' not in entry:
+            raise click.BadParameter(f'`{entry}` is not in KEY=VALUE format', ctx=ctx, param=param)
+
+    return value
+
+
 @click.command(
     short_help='Invoke the Agent', context_settings={'help_option_names': [], 'ignore_unknown_options': True}
 )
@@ -50,6 +58,7 @@ def _invoke_check_with_retry(
     'env_vars',
     multiple=True,
     metavar='KEY=VALUE',
+    callback=_validate_env_vars,
     help='Set an environment variable for this invocation only (may be repeated)',
 )
 @click.pass_obj
