@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
+# Explicit image tag override (e.g. a prerelease "13.0-rc"); falls back to the version.
+MYSQL_IMAGE_TAG = os.getenv('MYSQL_IMAGE_TAG') or MYSQL_VERSION
 
 
 @pytest.fixture(scope='session')
@@ -62,6 +64,7 @@ def dd_environment(config_e2e):
             os.path.join(common.HERE, 'compose', COMPOSE_FILE),
             env_vars={
                 'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
+                'MYSQL_IMAGE_TAG': MYSQL_IMAGE_TAG,
                 'MYSQL_PORT': str(common.PORT),
                 'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
                 'MYSQL_CONF_PATH': _mysql_conf_path(),

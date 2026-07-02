@@ -7,7 +7,7 @@
 # confirmed on a real run. See DBMON-6806.
 services:
   mysql-master:
-    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_IMAGE_TAG}"
     environment:
       - MYSQL_ROOT_PASSWORD=mypass
     healthcheck:
@@ -24,7 +24,7 @@ services:
 
   mysql-slave:
     container_name: mysql-slave
-    image: "${MYSQL_DOCKER_REPO}:${MYSQL_VERSION}"
+    image: "${MYSQL_DOCKER_REPO}:${MYSQL_IMAGE_TAG}"
     environment:
       - MYSQL_ROOT_PASSWORD=mypass
     healthcheck:
