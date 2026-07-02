@@ -5,7 +5,7 @@ base-package-features = ["deps", "db"]
 # https://github.com/ClickHouse/ClickHouse/blob/master/SECURITY.md
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["18", "19", "20", "21.8", "22.7", "23.2", "23.8", "24.8", "25.3", "25.8"]
+version = ["18", "19", "20", "21.8", "22.7", "23.2", "23.8", "24.8", "25.3", "25.8", "26.3"]
 
 [envs.default.env-vars]
 CLICKHOUSE_REPOSITORY = "clickhouse/clickhouse-server"
@@ -27,7 +27,7 @@ dependencies = [
 
 [envs.metrics.env-vars]
 # keep in sync with default version matrix
-VERSIONS = "24.8,25.3,25.8"
+VERSIONS = "24.8,25.3,25.8,26.3"
 
 [envs.metrics.scripts]
 generate = "python scripts/generate_metrics.py"
