@@ -288,11 +288,7 @@ def dd_agent_check_discovery(dd_agent_check):
     ``discovery_timeout`` — all of which can be overridden per call.
 
     Pass ``process=True`` to exercise process-based (rather than container-based)
-    autodiscovery for a process that is otherwise container-bound: this excludes
-    the ``docker`` feature for this invocation only (so this run's autodiscovery
-    never learns about any containers) and, unless overridden, extends the
-    default timeout to account for the minimum process age that process-based
-    autodiscovery requires before it recognizes a process as a service.
+    autodiscovery for a process that is otherwise container-bound.
     """
     if not e2e_testing():
         pytest.skip('Not running E2E tests')
@@ -307,6 +303,10 @@ def dd_agent_check_discovery(dd_agent_check):
 
         if process:
             env_vars = kwargs.pop('env_vars', None) or {}
+            # Exclude the `docker` feature so this run's autodiscovery never
+            # learns about any containers. This is because process-based
+            # autodiscovery normally ignores processes if it knows that they are
+            # inside containers, and we need to override this behavior.
             env_vars.setdefault('DD_AUTOCONFIG_EXCLUDE_FEATURES', 'docker')
             kwargs['env_vars'] = env_vars
 
