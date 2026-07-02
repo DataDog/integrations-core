@@ -256,11 +256,12 @@ def get_e2e_discovery_metadata(
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
         'env_vars': {
-            # Reduce the default service collection interval from 60s to speed
-            # up tests. This needs to be set on the container instead of being
-            # passed in to `agent check` since it's read by the
+            # Reduce the default service collection interval and minimum process
+            # age to speed up tests. This needs to be set on the container
+            # instead of being passed in to `agent check` since it's read by the
             # system-probe(-lite) daemon.
-            'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '10s',
+            'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '5s',
+            'DD_DISCOVERY_SERVICE_COLLECTION_MIN_PROCESS_AGE': '1s',
         },
         # system-probe(-lite) needs these capabilities to read /proc entries of
         # other processes for service discovery. Without them it falls back to

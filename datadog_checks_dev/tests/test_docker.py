@@ -69,6 +69,7 @@ def test_get_e2e_discovery_metadata(tmp_path):
         ],
         'env_vars': {
             'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '10s',
+            'DD_DISCOVERY_SERVICE_COLLECTION_MIN_PROCESS_AGE': '1s',
         },
         'cap_add': ['SYS_PTRACE', 'DAC_READ_SEARCH'],
     }
