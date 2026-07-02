@@ -62,6 +62,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
 
+    @property
+    def failed_phase(self) -> str | None:
+        return self._failed_phase
+
     async def on_initialize(self) -> None:
         """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
         config_dir = self._flow_yaml_path.parent

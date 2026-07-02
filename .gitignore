@@ -130,6 +130,9 @@ benchmark_*.svg
 ## Local overrides for ddev
 .ddev.toml
 
+## AI flow run artifacts (ddev ai)
+.ddev/ai-runs/
+
 ## Size metrics
 size-uncompressed.txt
 size-compressed.txt
