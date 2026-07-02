@@ -1,0 +1,1 @@
+Refactor the ``pg_class`` and ``pg_stat_wal`` queries onto a shared version-aware query builder. No metric is added or changed.
