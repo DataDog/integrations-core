@@ -591,7 +591,9 @@ class KafkaActionsClient:
                 "Stop all consumers in the group before resetting offsets."
             )
 
-    def _resolve_sentinel_offsets(self, admin, requests: list[tuple[str, int, int]]) -> dict[tuple[str, int], int]:
+    def _resolve_sentinel_offsets(
+        self, admin: AdminClient, requests: list[tuple[str, int, int]]
+    ) -> dict[tuple[str, int], int]:
         """Resolve a batch of sentinel offset values (-1 latest, -2 earliest) to concrete offsets.
 
         requests is a list of (topic, partition, offset) tuples; returns a dict keyed by
@@ -616,12 +618,12 @@ class KafkaActionsClient:
                 raise
         return resolved
 
-    def _resolve_sentinel_offset(self, admin, topic: str, partition: int, offset: int) -> int:
+    def _resolve_sentinel_offset(self, admin: AdminClient, topic: str, partition: int, offset: int) -> int:
         """Resolve a single sentinel offset value (-1 latest, -2 earliest) to a concrete offset."""
         return self._resolve_sentinel_offsets(admin, [(topic, partition, offset)])[(topic, partition)]
 
     def _resolve_timestamp_targets(
-        self, admin, topic: str, partition: int | None, timestamp: int
+        self, admin: AdminClient, topic: str, partition: int | None, timestamp: int
     ) -> list[TopicPartition]:
         """Resolve a timestamp offset spec to concrete TopicPartitions for one or all partitions of a topic."""
         partition_ids = [partition] if partition is not None else self._discover_partition_ids(admin, topic)
@@ -656,7 +658,7 @@ class KafkaActionsClient:
             resolved_partitions.append(TopicPartition(topic, partition_id, resolved))
         return resolved_partitions
 
-    def _resolve_explicit_target(self, admin, topic: str, partition: int, offset: int) -> TopicPartition:
+    def _resolve_explicit_target(self, admin: AdminClient, topic: str, partition: int, offset: int) -> TopicPartition:
         """Resolve an explicit or sentinel offset spec to a concrete TopicPartition."""
         if offset in (-1, -2):
             resolved = self._resolve_sentinel_offset(admin, topic, partition, offset)

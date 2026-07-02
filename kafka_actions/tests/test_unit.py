@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from confluent_kafka import KafkaError, KafkaException, TopicPartition
-
+from confluent_kafka.admin import OffsetSpec
 from datadog_checks.kafka_actions import KafkaActionsCheck
 from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
 
@@ -517,7 +517,8 @@ class TestUpdateConsumerGroupOffsetsClient:
         latest_offsets = {1: 30}
 
         def list_offsets_side_effect(request, **kwargs):
-            offsets = latest_offsets if len(request) == 1 else timestamp_offsets
+            is_latest_batch = all(spec == OffsetSpec.latest() for spec in request.values())
+            offsets = latest_offsets if is_latest_batch else timestamp_offsets
             return {tp: _offset_future(offsets[tp.partition]) for tp in request}
 
         mock_admin = MagicMock()
