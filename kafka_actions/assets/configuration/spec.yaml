@@ -505,11 +505,6 @@ files:
         The consumer group must have no active members before this action runs;
         the check enforces this and will fail with a clear error if members are found.
 
-        The 'cluster' value must be the Kafka-internal cluster UUID (e.g.
-        "MkU3OEVBNTcwNTJENDM2Qg"), not a human-readable name. Retrieve it with:
-          kafka-topics.sh --bootstrap-server <host>:9092 --describe | head -1
-        or via the AdminClient metadata: admin.list_topics().cluster_id.
-
         Each entry in 'offsets' must specify exactly one of:
           - offset: commit a specific offset. Use -2 for earliest, -1 for latest,
             or a non-negative integer for an explicit position. Requires 'partition'.
@@ -525,7 +520,7 @@ files:
           - consumer_group
           - offsets
         example:
-          cluster: MkU3OEVBNTcwNTJENDM2Qg
+          cluster: prod-kafka-1
           consumer_group: order-processor
           offsets:
             - topic: orders
@@ -539,12 +534,8 @@ files:
         properties:
         - name: cluster
           type: string
-          description: |
-            Kafka cluster UUID as returned by the broker metadata (AdminClient.list_topics().cluster_id).
-            This is NOT a human-readable name — it is the internal UUID assigned when the cluster was
-            created (e.g. "MkU3OEVBNTcwNTJENDM2Qg"). The check compares this against the live
-            cluster ID and aborts if they differ, preventing accidental execution on the wrong cluster.
-          example: MkU3OEVBNTcwNTJENDM2Qg
+          description: Kafka cluster identifier
+          example: prod-kafka-1
         - name: consumer_group
           type: string
           description: Consumer group ID to update
