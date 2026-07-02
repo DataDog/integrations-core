@@ -178,7 +178,13 @@ class KafkaConnectCollector:
         connectors_data = _fetch(['info', 'status'])
 
         if not isinstance(connectors_data, dict):
-            # Pre-2.3 Connect workers ignore expand and return a plain name list, not the expanded dict.
+            # A combined expand list is serialized as repeated query params (expand=info&expand=status),
+            # which Confluent Cloud's expansions endpoint doesn't honor — it returns the unexpanded
+            # connector-name list instead. Retry with a single expand value before concluding the
+            # worker predates Kafka 2.3 / CP 5.3 and doesn't support expand at all.
+            connectors_data = _fetch('info')
+
+        if not isinstance(connectors_data, dict):
             self.log.warning(
                 "Unexpected response shape from %s/connectors (got %s, expected dict). "
                 "The Connect worker may not support the expand parameter — Kafka 2.3+ / CP 5.3+ is required.",
