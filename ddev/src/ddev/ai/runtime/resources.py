@@ -7,7 +7,7 @@ from typing import Any
 
 from ddev.ai.agent.build import AgentRuntimeFactory, DefaultAgentRuntimeFactory
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.phases.resources import ResourceUnavailableError
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy

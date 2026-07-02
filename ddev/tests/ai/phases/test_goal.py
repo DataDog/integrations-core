@@ -9,14 +9,13 @@ import pytest
 from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-from ddev.ai.phases.config import AgentConfig, TaskConfig
+from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.phases.goal import (
     GOAL_REVIEWER_SYSTEM_PROMPT,
     GoalAttemptsExhausted,
     GoalParseError,
     build_reviewer_user_message,
     parse_reviewer_output,
-    render_goal_text,
     run_goal_loop,
 )
 from ddev.ai.react.process import ReActProcess
@@ -24,7 +23,7 @@ from ddev.ai.react.types import ReActResult
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry
 
-from .conftest import MockAgent, make_response, resolve_key
+from .conftest import MockAgent, make_response
 
 # ---------------------------------------------------------------------------
 # parse_reviewer_output
@@ -60,40 +59,6 @@ def test_parse_reviewer_output_accepts(text, expected):
 )
 def test_parse_reviewer_output_rejects(text):
     assert parse_reviewer_output(text) is None
-
-
-# ---------------------------------------------------------------------------
-# render_goal_text
-# ---------------------------------------------------------------------------
-
-
-def test_render_goal_text_inline_and_path(tmp_path):
-    inline = render_goal_text(
-        TaskConfig(name="t", prompt="x", goal="check ${name}"),
-        tmp_path,
-        {"name": "Alice"},
-        None,
-    )
-    assert inline == "check Alice"
-
-    (tmp_path / "goal.md").write_text("verify ${target}")
-    from_file = render_goal_text(
-        TaskConfig(name="t", prompt="x", goal_path="goal.md"),
-        tmp_path,
-        {"target": "endpoint"},
-        None,
-    )
-    assert from_file == "verify endpoint"
-
-
-def test_render_goal_text_forwards_resolver(tmp_path):
-    result = render_goal_text(
-        TaskConfig(name="t", prompt="x", goal="see ${draft_memory}"),
-        tmp_path,
-        {},
-        resolve_key,
-    )
-    assert result == "see resolved(draft_memory)"
 
 
 # ---------------------------------------------------------------------------

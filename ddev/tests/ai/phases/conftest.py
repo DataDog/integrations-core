@@ -5,6 +5,7 @@
 import asyncio
 from collections.abc import Callable
 from typing import Any
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -12,9 +13,9 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
@@ -132,6 +133,13 @@ class MockProcessFactory:
         return ReActProcess(runtime, callbacks=self._callbacks, scope=scope)
 
 
+def make_mock_resources(agent_config: AgentConfig | None = None) -> MagicMock:
+    """Build a minimal PhaseResources mock for tests."""
+    resources = MagicMock()
+    resources.agent_config.return_value = agent_config or AgentConfig(tools=[])
+    return resources
+
+
 def make_agent_phase(
     flow_dir,
     mock_agent: MockAgent,
@@ -157,7 +165,9 @@ def make_agent_phase(
     ``captured_worker_kwargs`` (a dict) to record the worker create() inputs.
     Pass ``goal_runtime_builder`` as a callable (owner_id: str) -> AgentRuntime for goal tests.
     """
+    effective_agent_config = agent_config or AgentConfig(tools=[])
     config = PhaseConfig(
+        name=phase_id,
         agent="writer",
         tasks=tasks or [TaskConfig(name="t1", prompt="Do the work.")],
         checkpoint=checkpoint,
@@ -171,7 +181,6 @@ def make_agent_phase(
     context = FlowContext(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
-        config_dir=flow_dir,
         callbacks=effective_callbacks,
         resume_frontier=resume_frontier,
     )
@@ -188,8 +197,9 @@ def make_agent_phase(
         config=config,
         checkpoint_manager=checkpoint_manager,
         context=context,
-        agent_config=agent_config or AgentConfig(tools=[]),
+        agent_config=effective_agent_config,
         process_factory=process_factory,
+        resources=make_mock_resources(effective_agent_config),
     )
     phase.queue = message_queue
     return phase, checkpoint_manager
@@ -207,10 +217,10 @@ def resolve_key(key: str) -> str:
 
 @pytest.fixture
 def flow_dir(tmp_path):
-    """Create a minimal flow directory with a system prompt."""
-    prompts_dir = tmp_path / "prompts"
-    prompts_dir.mkdir()
-    (prompts_dir / "writer.md").write_text("You are a writer for ${phase_name}.")
+    """Create a minimal flow directory with an agent definition."""
+    agents_dir = tmp_path / "agents"
+    agents_dir.mkdir()
+    (agents_dir / "writer.md").write_text("---\ntype: agent\n---\n\nYou are a writer for ${phase_name}.")
     return tmp_path
 
 
@@ -219,7 +229,6 @@ def flow_context(flow_dir):
     return FlowContext(
         runtime_variables={},
         flow_variables={},
-        config_dir=flow_dir,
     )
 
 

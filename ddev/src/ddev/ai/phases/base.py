@@ -9,11 +9,10 @@ from abc import abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig, PhaseConfig
+from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
@@ -35,7 +34,6 @@ class FlowContext:
 
     runtime_variables: dict[str, str]
     flow_variables: dict[str, str]
-    config_dir: Path
     callbacks: Callbacks = field(default_factory=Callbacks)
     logger: logging.Logger = field(default_factory=lambda: logging.getLogger(__name__))
     resume_frontier: frozenset[str] = frozenset()
@@ -72,7 +70,6 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         self._checkpoint_manager = checkpoint_manager
         self._runtime_variables = context.runtime_variables
         self._flow_variables = context.flow_variables
-        self._config_dir = context.config_dir
         self._callbacks = context.callbacks
         self._logger = context.logger
         self._is_resume_frontier = phase_id in context.resume_frontier
@@ -99,12 +96,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
         return True
 
     @classmethod
-    def validate_config(
-        cls,
-        phase_id: str,
-        config: PhaseConfig,
-        agents: dict[str, AgentConfig],
-    ) -> None:
+    def validate_config(cls, phase_id: str, config: PhaseConfig) -> None:
         """Override to enforce per-subclass config invariants. Raise FlowConfigError on mismatch."""
         return None
 

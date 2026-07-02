@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from collections.abc import Callable, Iterator, Mapping
-from pathlib import Path
 from string import Template
 from typing import Any
 
@@ -27,11 +26,6 @@ class _SafeMapping(Mapping[str, str]):
 
     def __len__(self) -> int:
         return len(self._context)
-
-
-def render_prompt(template_path: Path, context: dict[str, Any], resolver: Callable[[str], str] | None = None) -> str:
-    """Render a template file with the given context."""
-    return Template(template_path.read_text()).substitute(_SafeMapping(context, resolver))
 
 
 def render_inline(prompt: str, context: dict[str, Any], resolver: Callable[[str], str] | None = None) -> str:

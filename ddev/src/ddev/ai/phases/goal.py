@@ -7,13 +7,10 @@ from __future__ import annotations
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig, TaskConfig
-from ddev.ai.phases.template import render_inline, render_prompt
+from ddev.ai.config.models import AgentConfig, TaskConfig
 from ddev.ai.react.factory import ReActProcessFactory
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.react.types import ReActResult
@@ -106,19 +103,6 @@ class GoalLoopOutcome:
     attempts: int
     total_input_tokens: int
     total_output_tokens: int
-
-
-def render_goal_text(
-    task: TaskConfig,
-    config_dir: Path,
-    context: dict[str, Any],
-    resolver: Callable[[str], str] | None,
-) -> str:
-    """Render the goal — from file if goal_path is set, inline otherwise."""
-    if task.goal_path is not None:
-        return render_prompt(config_dir / task.goal_path, context, resolver)
-    assert task.goal is not None  # caller checks
-    return render_inline(task.goal, context, resolver)
 
 
 def build_reviewer_user_message(
