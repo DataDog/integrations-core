@@ -22,6 +22,8 @@ logger = logging.getLogger(__name__)
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR')
 MYSQL_VERSION = os.getenv('MYSQL_VERSION')
 COMPOSE_FILE = os.getenv('COMPOSE_FILE')
+# Explicit image tag override (e.g. a prerelease "13.0-rc"); falls back to the version.
+MYSQL_IMAGE_TAG = os.getenv('MYSQL_IMAGE_TAG') or MYSQL_VERSION
 
 
 @pytest.fixture(scope='session')
@@ -62,6 +64,7 @@ def dd_environment(config_e2e):
             os.path.join(common.HERE, 'compose', COMPOSE_FILE),
             env_vars={
                 'MYSQL_DOCKER_REPO': _mysql_docker_repo(),
+                'MYSQL_IMAGE_TAG': MYSQL_IMAGE_TAG,
                 'MYSQL_PORT': str(common.PORT),
                 'MYSQL_SLAVE_PORT': str(common.SLAVE_PORT),
                 'MYSQL_CONF_PATH': _mysql_conf_path(),
@@ -723,6 +726,10 @@ def _mysql_logs_path():
         else:
             return '/var/log/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
+        # The official mariadb image (used for 12.1+/13 RC) logs under /var/log/mysql;
+        # the bitnamilegacy image (<= 12.0) uses its own path.
+        if MYSQL_VERSION_PARSED > parse_version('12.0'):
+            return '/var/log/mysql'
         return '/opt/bitnami/mariadb/logs'
     elif MYSQL_FLAVOR == 'percona':
         return '/var/log/mysql'
@@ -740,6 +747,12 @@ def _mysql_docker_repo():
         elif MYSQL_VERSION.startswith('8') or MYSQL_VERSION == 'latest':
             return 'bitnamilegacy/mysql'
     elif MYSQL_FLAVOR == 'mariadb':
+        # bitnamilegacy/mariadb only publishes up to 12.0 (and Bitnami's legacy images
+        # are deprecated). For newer majors (12.1+, 13 RC) fall back to the official
+        # `mariadb` image, pinned via MYSQL_IMAGE_TAG. NOTE: the official image uses
+        # different env/replication conventions — see compose/mariadb-official.yaml.
+        if MYSQL_VERSION_PARSED > parse_version('12.0'):
+            return 'mariadb'
         return 'bitnamilegacy/mariadb'
     elif MYSQL_FLAVOR == 'percona':
         return 'percona/percona-server'
