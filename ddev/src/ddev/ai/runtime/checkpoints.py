@@ -2,14 +2,68 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from __future__ import annotations
+
+from enum import StrEnum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 import yaml
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError
+
+from ddev.ai.phases.config import FlowConfigError
+
+if TYPE_CHECKING:
+    from ddev.ai.phases.config import FlowConfig
 
 
 class CheckpointReadError(Exception):
     """Raised when checkpoints.yaml exists but cannot be read or parsed."""
+
+
+class CheckpointStatus(StrEnum):
+    SUCCESS = "success"
+    FAILED = "failed"
+
+
+class CheckpointTokenInfo(BaseModel):
+    total_input: int
+    total_output: int
+
+
+class GoalValidationRecord(BaseModel):
+    task: str
+    attempts: int
+    final_valid: bool
+
+
+class SuccessCheckpoint(BaseModel):
+    """Checkpoint written at the end of a successful phase execution."""
+
+    status: Literal[CheckpointStatus.SUCCESS] = CheckpointStatus.SUCCESS
+    started_at: str
+    finished_at: str
+    tokens: CheckpointTokenInfo
+    memory_path: str
+    goal_validations: list[GoalValidationRecord] | None = None
+    phase_data: dict[str, Any] = {}
+
+
+class FailedCheckpoint(BaseModel):
+    """Checkpoint written when a phase terminates with an error."""
+
+    status: Literal[CheckpointStatus.FAILED] = CheckpointStatus.FAILED
+    started_at: str | None
+    finished_at: str
+    error: str
+    tokens: CheckpointTokenInfo
+    goal_validations: list[GoalValidationRecord] | None = None
+
+
+PhaseCheckpoint = Annotated[SuccessCheckpoint | FailedCheckpoint, Field(discriminator="status")]
+
+# TypeAdapter provides model_validate() for annotated union types that aren't BaseModel subclasses.
+CheckpointAdapter: TypeAdapter[PhaseCheckpoint] = TypeAdapter(PhaseCheckpoint)
 
 
 class CheckpointManager:
@@ -26,21 +80,36 @@ class CheckpointManager:
     def _ensure_dir(self) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
 
-    def read(self) -> dict[str, Any]:
-        """Return full checkpoint data, keyed by phase_id. Empty dict if file absent."""
+    def read(self) -> dict[str, PhaseCheckpoint]:
+        """Return validated checkpoints keyed by phase_id.
+        Raises CheckpointReadError if any entry fails validation.
+        Empty dict if file absent."""
         if not self._path.exists():
             return {}
         try:
-            return yaml.safe_load(self._path.read_text(encoding="utf-8")) or {}
+            raw = yaml.safe_load(self._path.read_text(encoding="utf-8")) or {}
         except (OSError, yaml.YAMLError) as e:
             raise CheckpointReadError(f"Failed to load checkpoints from {self._path}: {e}") from e
 
-    def write_phase_checkpoint(self, phase_id: str, data: dict[str, Any]) -> None:
-        """Write or overwrite one phase's section in checkpoints.yaml."""
-        checkpoints = self.read()
-        checkpoints[phase_id] = data
+        result: dict[str, PhaseCheckpoint] = {}
+        for phase_id, data in raw.items():
+            try:
+                result[phase_id] = CheckpointAdapter.validate_python(data)
+            except ValidationError as e:
+                raise CheckpointReadError(f"Checkpoint for phase {phase_id!r} in {self._path} is invalid: {e}") from e
+        return result
+
+    def write_phase_checkpoint(self, phase_id: str, data: PhaseCheckpoint) -> None:
+        """Write or overwrite one phase's section in checkpoints.yaml.
+        Raises CheckpointReadError if the existing file is corrupted."""
+        all_checkpoints = {pid: cp.model_dump(mode="json") for pid, cp in self.read().items()}
+        all_checkpoints[phase_id] = data.model_dump(mode="json")
         self._ensure_dir()
-        self._path.write_text(yaml.dump(checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
+        self._path.write_text(yaml.dump(all_checkpoints, default_flow_style=False, sort_keys=False), encoding="utf-8")
+
+    def successful_phases(self) -> set[str]:
+        """Phase ids whose last recorded checkpoint reached 'success'."""
+        return {pid for pid, data in self.read().items() if data.status == CheckpointStatus.SUCCESS}
 
     def build_memory_prompt(self, user_additions: str | None) -> str:
         """Build the memory prompt to send to the agent at the end of a phase."""
@@ -71,3 +140,29 @@ class CheckpointManager:
         if key.endswith("_memory"):
             return self.memory_content(key.removesuffix("_memory"))
         return f"<VARIABLE UNDEFINED: {key}>"
+
+
+def resolve_resume_state(config: FlowConfig, checkpoint_manager: CheckpointManager) -> tuple[set[str], set[str]]:
+    """Compute (completed, frontier) for resuming a flow from its checkpoints.
+
+    ``completed`` is the dependency-closed set of phases that succeeded and whose every
+    transitive dependency also succeeded. ``frontier`` is the phases that will run first
+    on resume (not completed, but all their dependencies are).
+
+    The single-pass closure relies on ``config.flow`` being topologically sorted.
+    """
+    try:
+        succeeded = checkpoint_manager.successful_phases()
+    except CheckpointReadError as e:
+        raise FlowConfigError(
+            f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
+        ) from e
+    completed: set[str] = set()
+    frontier: set[str] = set()
+    for entry in config.flow:
+        deps_done = all(dep in completed for dep in entry.dependencies)
+        if entry.phase in succeeded and deps_done:
+            completed.add(entry.phase)
+        elif deps_done:
+            frontier.add(entry.phase)
+    return completed, frontier

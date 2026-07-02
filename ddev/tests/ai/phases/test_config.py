@@ -430,6 +430,31 @@ def test_flow_config_acyclic_chain_ok():
     assert len(config.flow) == 3
 
 
+def test_flow_config_sorts_dependencies_before_dependents():
+    """A dependent declared before its dependency is reordered so deps come first."""
+    raw = _three_phase_config()
+    raw["flow"] = [
+        {"phase": "p3", "dependencies": ["p2"]},
+        {"phase": "p2", "dependencies": ["p1"]},
+        {"phase": "p1"},
+    ]
+    config = FlowConfig.model_validate(raw)
+    assert [entry.phase for entry in config.flow] == ["p1", "p2", "p3"]
+
+
+def test_flow_config_topological_sort_is_stable():
+    """Independent phases keep their original declaration order; deps still come first."""
+    raw = _three_phase_config()
+    raw["flow"] = [
+        {"phase": "p2", "dependencies": ["p1"]},
+        {"phase": "p3"},
+        {"phase": "p1"},
+    ]
+    config = FlowConfig.model_validate(raw)
+    # p1 must precede p2; p3 has no constraints so it stays as early as its declaration allows.
+    assert [entry.phase for entry in config.flow] == ["p3", "p1", "p2"]
+
+
 def test_flow_disjoined_graphs_ok():
     agent = {"tools": []}
     task = {"name": "t", "prompt": "Do it."}
