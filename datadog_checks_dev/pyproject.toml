@@ -66,7 +66,7 @@ cli = [
     "pip-tools",
     "pathspec>=0.10.0",
     "platformdirs>=2.0.0a3",
-    "pydantic>=2.0.2",
+    "pydantic>=2.13.4",
     "pysmi==1.6.2",
     # ruff is invoked as a subprocess by the model generator to format
     # auto-generated config_models files (see datadog_checks/dev/tooling/
@@ -90,7 +90,7 @@ cli = [
     # https://github.com/twisted/towncrier/issues/641
     "towncrier==23.11.0",
     "twine>=1.11.0",
-    "virtualenv>=20.26.1",
+    "virtualenv>=20.39.1",
     # TODO: Remove once every check has a pyproject.toml
 ]
 
