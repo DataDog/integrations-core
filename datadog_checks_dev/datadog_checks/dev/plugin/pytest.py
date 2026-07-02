@@ -293,14 +293,7 @@ def dd_agent_check_discovery(dd_agent_check):
     if not e2e_testing():
         pytest.skip('Not running E2E tests')
 
-    def run(*, discovery_min_instances=1, discovery_timeout=None, process=False, **kwargs):
-        if discovery_timeout is None:
-            # Process autodiscovery needs to wait for the agent to recognize the
-            # process as a service which happens after a minimum process age of 1
-            # minute. This time can be reduced significantly once agent-side
-            # support for reducing the minimum age via configuration is available.
-            discovery_timeout = 90 if process else 30
-
+    def run(*, discovery_min_instances=1, discovery_timeout=30, process=False, **kwargs):
         if process:
             env_vars = kwargs.pop('env_vars', None) or {}
             # Exclude the `docker` feature so this run's autodiscovery never
