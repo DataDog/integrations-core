@@ -1,4 +1,5 @@
 - name: min_collection_interval
+  display_priority: 0
   value:
     example: 15
     type: number
@@ -7,6 +8,7 @@
     https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
   fleet_configurable: true
 - name: empty_default_hostname
+  display_priority: 0
   value:
     example: false
     type: boolean

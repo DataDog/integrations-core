@@ -1,14 +1,12 @@
 # CHANGELOG - tokumx
 
-<!-- towncrier release notes start -->
-
-## 3.6.1 / 2026-04-15
+## 3.6.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 
 * Improve descriptions ([#23047](https://github.com/DataDog/integrations-core/pull/23047))
 
-## 3.6.0 / 2026-04-01
+## 3.6.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

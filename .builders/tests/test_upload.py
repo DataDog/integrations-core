@@ -4,6 +4,8 @@ from unittest import mock
 from zipfile import ZipFile
 
 import pytest
+
+import inputs_hash
 import upload
 
 
@@ -79,10 +81,10 @@ def test_upload_external(setup_targets_dir, setup_fake_hash):
 
     def blob_exists(path):
         # existing_version already exists with same hash
-        return path == 'external/existing-version/existing_version-5.14.2-py3-none-any.whl'
+        return path == 'dev/external/existing-version/existing_version-5.14.2-py3-none-any.whl'
 
     def get_blob_metadata(path):
-        if path == 'external/existing-version/existing_version-5.14.2-py3-none-any.whl':
+        if path == 'dev/external/existing-version/existing_version-5.14.2-py3-none-any.whl':
             return {'sha256': 'hash_existing'}
         return {}
 
@@ -98,9 +100,9 @@ def test_upload_external(setup_targets_dir, setup_fake_hash):
 
     upload.upload(targets_dir, bucket=mock_bucket)
 
-    assert 'external/all-new/all_new-2.31.0-py3-none-any.whl' in uploaded_files
-    assert 'external/updated-version/updated_version-3.14.1-cp311-cp311-manylinux1_x86_64.whl' in uploaded_files
-    assert 'external/existing-version/existing_version-5.14.2-py3-none-any.whl' not in uploaded_files
+    assert 'dev/external/all-new/all_new-2.31.0-py3-none-any.whl' in uploaded_files
+    assert 'dev/external/updated-version/updated_version-3.14.1-cp311-cp311-manylinux1_x86_64.whl' in uploaded_files
+    assert 'dev/external/existing-version/existing_version-5.14.2-py3-none-any.whl' not in uploaded_files
 
 
 def test_upload_external_existing_returns_full_url_with_hash(setup_targets_dir, setup_fake_hash):
@@ -122,10 +124,10 @@ def test_upload_external_existing_returns_full_url_with_hash(setup_targets_dir, 
     uploaded_files = []
 
     def blob_exists(path):
-        return path == 'external/existing-pkg/existing_pkg-1.0.0-py3-none-any.whl'
+        return path == 'dev/external/existing-pkg/existing_pkg-1.0.0-py3-none-any.whl'
 
     def get_blob_metadata(path):
-        if path == 'external/existing-pkg/existing_pkg-1.0.0-py3-none-any.whl':
+        if path == 'dev/external/existing-pkg/existing_pkg-1.0.0-py3-none-any.whl':
             return {'sha256': existing_hash}
         return {}
 
@@ -140,7 +142,7 @@ def test_upload_external_existing_returns_full_url_with_hash(setup_targets_dir, 
 
     assert not uploaded_files
     assert lockfiles == {'linux-x86_64': [
-        f'existing-pkg @ https://agent-int-packages.datadoghq.com/external/existing-pkg/'
+        f'existing-pkg @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/external/existing-pkg/'
         f'existing_pkg-1.0.0-py3-none-any.whl#sha256={existing_hash}',
         '',
     ]}
@@ -170,7 +172,7 @@ def test_upload_built_no_conflict(setup_targets_dir, setup_fake_hash, frozen_tim
     upload.upload(targets_dir, bucket=mock_bucket)
 
     assert (
-        f'built/without-collision/without_collision-3.14.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl'
+        f'dev/built/without-collision/without_collision-3.14.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl'
         in uploaded_files
     )
 
@@ -196,7 +198,7 @@ def test_upload_built_existing_sha_match_does_not_upload(
     uploaded_files = []
 
     existing_wheel = {
-        'name': 'built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl',
+        'name': 'dev/built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl',
         'metadata': {'sha256': whl_hash}
     }
 
@@ -233,7 +235,7 @@ def test_upload_built_existing_sha_match_returns_full_url_with_hash(
     uploaded_files = []
 
     existing_wheel = {
-        'name': 'built/existing/existing-1.1.1-20241201000000-cp311-cp311-manylinux2010_x86_64.whl',
+        'name': 'dev/built/existing/existing-1.1.1-20241201000000-cp311-cp311-manylinux2010_x86_64.whl',
         'metadata': {'sha256': whl_hash}
     }
 
@@ -247,7 +249,7 @@ def test_upload_built_existing_sha_match_returns_full_url_with_hash(
 
     assert not uploaded_files
     assert lockfiles == {'linux-x86_64': [
-        f'existing @ https://agent-int-packages.datadoghq.com/built/existing/'
+        f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/'
         f'existing-1.1.1-20241201000000-cp311-cp311-manylinux2010_x86_64.whl#sha256={whl_hash}',
         '',
     ]}
@@ -276,7 +278,7 @@ def test_upload_built_existing_different_sha_does_upload(
     uploaded_files = []
 
     existing_wheel = {
-        'name': 'built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl',
+        'name': 'dev/built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl',
         'metadata': {'sha256': original_hash}
     }
 
@@ -288,7 +290,7 @@ def test_upload_built_existing_different_sha_does_upload(
 
     upload.upload(targets_dir, bucket=mock_bucket)
 
-    assert f'built/existing/existing-1.1.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in uploaded_files
+    assert f'dev/built/existing/existing-1.1.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in uploaded_files
 
 
 def test_upload_built_existing_sha_match_does_not_upload_multiple_existing_builds(
@@ -313,11 +315,11 @@ def test_upload_built_existing_sha_match_does_not_upload_multiple_existing_build
     uploaded_files = []
 
     existing_wheels = [
-        {'name': 'built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl',
+        {'name': 'dev/built/existing/existing-1.1.1-cp311-cp311-manylinux2010_x86_64.whl',
          'metadata': {'sha256': non_matching_hash}},
-        {'name': 'built/existing/existing-1.1.1-20241326000000-cp311-cp311-manylinux2010_x86_64.whl',
+        {'name': 'dev/built/existing/existing-1.1.1-20241326000000-cp311-cp311-manylinux2010_x86_64.whl',
          'metadata': {'sha256': non_matching_hash}},
-        {'name': 'built/existing/existing-1.1.1-20241327000000-cp311-cp311-manylinux2010_x86_64.whl',
+        {'name': 'dev/built/existing/existing-1.1.1-20241327000000-cp311-cp311-manylinux2010_x86_64.whl',
          'metadata': {'sha256': matching_hash}},
     ]
 
@@ -355,9 +357,9 @@ def test_upload_built_existing_different_sha_does_upload_multiple_existing_build
     uploaded_files = []
 
     existing_wheels = [
-        {'name': 'built/existing/existing-1.1.1-2024132600000-cp311-cp311-manylinux2010_x86_64.whl',
+        {'name': 'dev/built/existing/existing-1.1.1-2024132600000-cp311-cp311-manylinux2010_x86_64.whl',
          'metadata': {'sha256': 'b'}},
-        {'name': 'built/existing/existing-1.1.1-2024132700000-cp311-cp311-manylinux2010_x86_64.whl',
+        {'name': 'dev/built/existing/existing-1.1.1-2024132700000-cp311-cp311-manylinux2010_x86_64.whl',
          'metadata': {'sha256': original_hash}},
     ]
 
@@ -369,7 +371,7 @@ def test_upload_built_existing_different_sha_does_upload_multiple_existing_build
 
     upload.upload(targets_dir, bucket=mock_bucket)
 
-    assert f'built/existing/existing-1.1.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in uploaded_files
+    assert f'dev/built/existing/existing-1.1.1-{frozen_timestamp}-cp311-cp311-manylinux2010_x86_64.whl' in uploaded_files
 
 
 def test_external_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash):
@@ -392,10 +394,10 @@ def test_external_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash):
     uploaded_files = []
 
     def blob_exists(path):
-        return path == 'external/existing/existing-1.1.0-cp312-cp312-manylinux2010_x86_64.whl'
+        return path == 'dev/external/existing/existing-1.1.0-cp312-cp312-manylinux2010_x86_64.whl'
 
     def get_blob_metadata(path):
-        if path == 'external/existing/existing-1.1.0-cp312-cp312-manylinux2010_x86_64.whl':
+        if path == 'dev/external/existing/existing-1.1.0-cp312-cp312-manylinux2010_x86_64.whl':
             return {'sha256': external_hash}
         return {}
 
@@ -408,7 +410,7 @@ def test_external_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash):
 
     targets = upload.upload(targets_dir, bucket=mock_bucket)
     assert targets ==  {'linux-x86_64': [
-        f'existing @ https://agent-int-packages.datadoghq.com/external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl#sha256={external_hash}',
+        f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/external/existing/existing-1.1.1-cp312-cp312-manylinux2010_x86_64.whl#sha256={external_hash}',
           '']}
 
 def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash, frozen_timestamp):
@@ -432,7 +434,7 @@ def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash, froz
     uploaded_files = []
 
     existing_wheels = [
-        {'name': 'built/existing/existing-1.1.1-20241326000000-cp312-cp312-manylinux2010_x86_64.whl',
+        {'name': 'dev/built/existing/existing-1.1.1-20241326000000-cp312-cp312-manylinux2010_x86_64.whl',
          'metadata': {'sha256': original_hash}},
     ]
 
@@ -444,17 +446,17 @@ def test_built_wheel_priority(tmp_path, setup_targets_dir, setup_fake_hash, froz
 
     targets = upload.upload(targets_dir, bucket=mock_bucket)
     assert targets ==  {'linux-x86_64': [
-        f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256={built_hash}',
+        f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256={built_hash}',
           '']}
 
 
-def test_lockfile_generation(tmp_path, setup_targets_dir):
+def test_lockfile_generation(tmp_path, setup_targets_dir, frozen_timestamp):
 
     lockfile = {
         'linux-x86_64': [
-            f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash', ''], # noqa: E501
+            f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash', ''], # noqa: E501
         'linux-aarch64': [
-            f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash', ''], # noqa: E501
+            f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash', ''], # noqa: E501
     }
     # We don't need to upload anything, we just need to generate the lockfile
     targets_dir = setup_targets_dir({})
@@ -466,15 +468,41 @@ def test_lockfile_generation(tmp_path, setup_targets_dir):
     with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
 
-        upload.generate_lockfiles(targets_dir, lockfile)
+        upload.generate_lockfiles(targets_dir, lockfile, 'dummy_hash')
         lock_files = list(fake_resolved_dir.glob("*.txt"))
         assert lock_files, "No lock files generated"
         lockfile_map = {lock_file.name: lock_file.read_text().strip() for lock_file in lock_files}
         linux_x86_64_lockfile = lockfile_map[f"linux-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"]
-        assert linux_x86_64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash'
+        assert linux_x86_64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_x86_64.whl#sha256=built-hash'
         linux_aarch64_lockfile = lockfile_map[f"linux-aarch64_{upload.CURRENT_PYTHON_VERSION}.txt"]
-        assert linux_aarch64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash'
+        assert linux_aarch64_lockfile == f'existing @ https://agent-int-packages.datadoghq.com/${{INTEGRATIONS_WHEELS_STORAGE}}/built/existing/existing-1.1.1-{frozen_timestamp}-cp312-cp312-manylinux2010_aarch64.whl#sha256=built-hash'
         assert len(lock_files) == 2
+
+
+def test_generate_lockfiles_skips_targets_with_no_wheels(tmp_path):
+    """An empty target (no wheels uploaded) should not produce a lockfile, and any existing stale lockfile should be removed."""
+    lockfile = {
+        'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', ''],
+        'windows-x86_64': [''],
+        'macos-aarch64': [],
+    }
+
+    fake_deps_dir = tmp_path / ".deps"
+    fake_resolved_dir = fake_deps_dir / "resolved"
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+    (tmp_path / "targets").mkdir()
+
+    stale_lockfile = fake_resolved_dir / f"windows-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"
+    stale_lockfile.write_text("stale @ https://example.com/stale.whl#sha256=old\n", encoding="utf-8")
+
+    with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
+         mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
+        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile, 'dummy_hash')
+
+    lock_files = {f.name for f in fake_resolved_dir.glob("*.txt")}
+    assert lock_files == {f"linux-x86_64_{upload.CURRENT_PYTHON_VERSION}.txt"}
+    assert not stale_lockfile.exists()
 
 
 def test_generate_lockfiles_accepts_string_path(tmp_path):
@@ -490,7 +518,48 @@ def test_generate_lockfiles_accepts_string_path(tmp_path):
     with mock.patch.object(upload, "RESOLUTION_DIR", fake_deps_dir), \
          mock.patch.object(upload, "LOCK_FILE_DIR", fake_resolved_dir):
         # Should not raise TypeError: unsupported operand type(s) for /: 'str' and 'str'
-        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile)
+        upload.generate_lockfiles(str(tmp_path / "targets"), lockfile, 'dummy_hash')
+
+
+def test_generate_lockfiles_writes_resolution_pin_and_target_inputs(tmp_path):
+    """generate_lockfiles writes the gate-passed resolution_hash plus per-target inputs_sha256 into builder_inputs.toml.
+
+    Pins the four-hop contract (gate output → workflow env → CLI flag →
+    write call) so a refactor that drops resolution_hash anywhere along the
+    way fails here rather than producing a stale or empty [resolution]
+    section in the bot commit.
+    """
+    import tomllib
+
+    lockfile = {
+        'linux-x86_64': ['dep @ https://example.com/dep.whl#sha256=abc', ''],
+        'macos-x86_64': ['dep @ https://example.com/dep-macos.whl#sha256=def', ''],
+    }
+
+    fake_deps_dir = tmp_path / '.deps'
+    fake_resolved_dir = fake_deps_dir / 'resolved'
+    fake_deps_dir.mkdir()
+    fake_resolved_dir.mkdir()
+    targets_dir = tmp_path / 'targets'
+    (targets_dir / 'linux-x86_64').mkdir(parents=True)
+    (targets_dir / 'linux-x86_64' / 'inputs_sha256').write_text('linux-hash', encoding='utf-8')
+    (targets_dir / 'linux-x86_64' / 'image_digest').write_text('sha256:linux-digest', encoding='utf-8')
+    (targets_dir / 'macos-x86_64').mkdir(parents=True)
+    (targets_dir / 'macos-x86_64' / 'inputs_sha256').write_text('macos-hash', encoding='utf-8')
+
+    with mock.patch.object(upload, 'RESOLUTION_DIR', fake_deps_dir), \
+         mock.patch.object(upload, 'LOCK_FILE_DIR', fake_resolved_dir):
+        upload.generate_lockfiles(targets_dir, lockfile, 'gate-passed-hash')
+
+    pin_path = fake_deps_dir / 'builder_inputs.toml'
+    with pin_path.open('rb') as f:
+        pin = tomllib.load(f)
+
+    assert pin[inputs_hash.SECTION_RESOLUTION][inputs_hash.HASH_KEY] == 'gate-passed-hash'
+    assert pin[inputs_hash.SECTION_IMAGES] == {
+        'linux-x86_64': 'linux-hash',
+        'macos-x86_64': 'macos-hash',
+    }
 
 
 def test_collect_and_validate_wheels(tmp_path):
@@ -542,7 +611,7 @@ def test_process_wheel_for_upload_external_new(setup_fake_hash):
     )
 
     assert artifact_name == "test.whl"
-    assert "test-pkg @ https://agent-int-packages.datadoghq.com/external/test-pkg/test.whl#sha256=abc123" == lockfile_entry
+    assert "test-pkg @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/test-pkg/test.whl#sha256=abc123" == lockfile_entry
 
 
 def test_process_wheel_for_upload_external_existing(setup_fake_hash):
@@ -563,7 +632,7 @@ def test_process_wheel_for_upload_external_existing(setup_fake_hash):
     )
 
     assert artifact_name is None
-    assert "test-pkg @ https://agent-int-packages.datadoghq.com/external/test-pkg/test.whl#sha256=existing123" == lockfile_entry
+    assert "test-pkg @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/test-pkg/test.whl#sha256=existing123" == lockfile_entry
 
 
 def test_generate_artifact_listings():
@@ -571,13 +640,13 @@ def test_generate_artifact_listings():
     mock_bucket = mock.Mock(spec=upload.Bucket)
 
     wheel1 = {
-        'name': "external/package1/package1-1.0.0.whl",
+        'name': "dev/external/package1/package1-1.0.0.whl",
         'project': 'package1',
         'metadata': {"requires-python": ">=3.6", "sha256": "hash1"}
     }
 
     wheel2 = {
-        'name': "external/package2/package2-2.0.0.whl",
+        'name': "dev/external/package2/package2-2.0.0.whl",
         'project': 'package2',
         'metadata': {"requires-python": ">=3.7", "sha256": "hash2"}
     }
@@ -592,11 +661,11 @@ def test_generate_artifact_listings():
 
     upload.generate_artifact_listings({"external"}, mock_bucket)
 
-    assert "external/" in created_content
-    assert "external/package1/" in created_content
-    assert "external/package2/" in created_content
+    assert "dev/external/" in created_content
+    assert "dev/external/package1/" in created_content
+    assert "dev/external/package2/" in created_content
 
-    root_html = created_content["external/"]
+    root_html = created_content["dev/external/"]
     assert "<h1>Agent integrations dependencies</h1>" in root_html
     assert 'href="package1/"' in root_html
     assert 'href="package2/"' in root_html
@@ -629,5 +698,5 @@ def test_upload(setup_targets_dir, setup_fake_hash):
 
     lockfiles = upload.upload(targets_dir, bucket=mock_bucket)
 
-    assert 'external/test-pkg/test_pkg-1.0.0-py3-none-any.whl' in uploaded_files
-    assert 'test-pkg @ https://agent-int-packages.datadoghq.com/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl#sha256=abc123' in lockfiles['linux-x86_64'][0]
+    assert 'dev/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl' in uploaded_files
+    assert 'test-pkg @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl#sha256=abc123' in lockfiles['linux-x86_64'][0]

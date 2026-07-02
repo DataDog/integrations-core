@@ -219,17 +219,7 @@ class Api:
         return self._parse_response(response)
 
     def get_tenant_stats(self, tenant):
-        path = "/api/mo/uni/tn-{}.json?rsp-subtree-include=stats,no-scoped".format(tenant)
-        response = self.make_request(path)
-        # return only the list of stats
-        return self._parse_response(response)
-
-    def get_tenant_events(self, tenant, page=0, page_size=15):
-        query1 = 'rsp-subtree-include=event-logs,no-scoped,subtree'
-        query2 = 'order-by=eventRecord.created|desc'
-        query3 = 'page={}&page-size={}'.format(page, page_size)
-        query = '{}&{}&{}'.format(query1, query2, query3)
-        path = "/api/node/mo/uni/tn-{}.json?{}".format(tenant, query)
+        path = "/api/mo/uni/tn-{}.json?rsp-subtree-include=stats,health,no-scoped".format(tenant)
         response = self.make_request(path)
         # return only the list of stats
         return self._parse_response(response)

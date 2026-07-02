@@ -11,9 +11,7 @@
 [azp-templates-linux]: https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/test-single-linux.yml
 [azp-templates-setup]: https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/set-up-integrations.yml
 [azp-templates-windows]: https://github.com/DataDog/integrations-core/blob/master/.azure-pipelines/templates/test-single-windows.yml
-[black-github]: https://github.com/psf/black
 [click-github]: https://github.com/pallets/click
-[codecov-home]: https://codecov.io
 [config-spec-example-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/consumers/example.py
 [config-spec-model-consumer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/consumers/model.py
 [config-spec-producer]: https://github.com/DataDog/integrations-core/blob/master/datadog_checks_dev/datadog_checks/dev/tooling/configuration/core.py
@@ -117,6 +115,7 @@
 [python-markdown-extensions]: https://github.com/Python-Markdown/markdown/wiki/Third-Party-Extensions
 [python-pdb]: https://docs.python.org/3/library/pdb.html
 [requests-github]: https://github.com/psf/requests
+[ruff-github]: https://github.com/astral-sh/ruff
 [requests-unixsocket-pypi]: https://pypi.org/project/requests-unixsocket/
 [release-base.yml]: https://github.com/DataDog/integrations-core/blob/master/.github/workflows/release-base.yml
 [release-dev.yml]: https://github.com/DataDog/integrations-core/blob/master/.github/workflows/release-dev.yml

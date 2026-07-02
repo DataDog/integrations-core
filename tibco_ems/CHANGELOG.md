@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.5.0 / 2026-04-01
+## 2.6.0 / 2026-06-09
+
+***Added***:
+
+* Add new config ``use_ssl`` to connect via SSL instead of TCP. ([#23732](https://github.com/DataDog/integrations-core/pull/23732))
+
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

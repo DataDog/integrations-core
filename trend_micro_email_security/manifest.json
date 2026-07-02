@@ -36,6 +36,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
+      "Category::SIEM",
       "Submitted Data Type::Logs",
       "Offering::Integration"
     ]
@@ -53,8 +54,8 @@
       }
     },
     "dashboards": {
-      "TrendAI Email Security - Mail Tracking": "assets/dashboards/trend_micro_email_security_mail_tracking.json",
-      "TrendAI Email Security - Policy Events": "assets/dashboards/trend_micro_email_security_policy_events.json"
+      "Trend Micro Email Security - Mail Tracking": "assets/dashboards/trend_micro_email_security_mail_tracking.json",
+      "Trend Micro Email Security - Policy Events": "assets/dashboards/trend_micro_email_security_policy_events.json"
     },
     "logs": {
       "source": "trend-micro-email-security"

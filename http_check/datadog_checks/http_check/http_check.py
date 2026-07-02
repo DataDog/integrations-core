@@ -183,6 +183,9 @@ class HTTPCheck(AgentCheck):
             raise
 
         else:
+            if r is not None:
+                http_status = r.status_code
+                tags_list.append("http_status_code:{}".format(http_status))
             if use_cert_from_response:
                 peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
 

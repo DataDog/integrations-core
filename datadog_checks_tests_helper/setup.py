@@ -27,7 +27,7 @@ def get_requirements(fpath):
 setup(
     # Version should always match one from an agent release
     version=ABOUT["__version__"],
-    name='datadog_checks_tests_helper',
+    name='datadog-checks-tests-helper',
     description='The Datadog Check Tests Helpers',
     long_description=LONG_DESC,
     long_description_content_type='text/markdown',
