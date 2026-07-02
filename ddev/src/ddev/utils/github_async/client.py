@@ -17,6 +17,8 @@ from typing import Any, Literal, Self
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
+from ddev.utils.rate_limiting import InstrumentedAsyncLimiter
+
 from .models import (
     ArtifactsList,
     CheckRun,
@@ -84,12 +86,14 @@ class AsyncGitHubClient:
     def __init__(
         self,
         token: str,
+        rate_limiter: InstrumentedAsyncLimiter | None = None,
         default_timeout: float = 30.0,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         if not token:
             raise ValueError("GitHub token must not be empty.")
 
+        self._rate_limiter = rate_limiter
         self._default_timeout = default_timeout
         self._headers = {
             "Authorization": f"Bearer {token}",
@@ -114,6 +118,20 @@ class AsyncGitHubClient:
     def _effective_timeout(self, timeout: float | None) -> float:
         return timeout if timeout is not None else self._default_timeout
 
+    async def _execute_request(
+        self,
+        method: str,
+        endpoint: str,
+        timeout: float,
+        **kwargs: Any,
+    ) -> httpx.Response:
+        try:
+            response = await self._client.request(method, endpoint, timeout=timeout, **kwargs)
+        except httpx.TransportError as exc:
+            raise type(exc)(f"{method} {endpoint}: {exc}") from exc
+        response.raise_for_status()
+        return response
+
     async def _request(
         self,
         method: str,
@@ -122,12 +140,10 @@ class AsyncGitHubClient:
         **kwargs: Any,
     ) -> httpx.Response:
         effective_timeout = self._effective_timeout(timeout)
-        try:
-            response = await self._client.request(method, endpoint, timeout=effective_timeout, **kwargs)
-        except httpx.TransportError as exc:
-            raise type(exc)(f"{method} {endpoint}: {exc}") from exc
-        response.raise_for_status()
-        return response
+        if self._rate_limiter:
+            async with self._rate_limiter:
+                return await self._execute_request(method, endpoint, effective_timeout, **kwargs)
+        return await self._execute_request(method, endpoint, effective_timeout, **kwargs)
 
     async def _paginated_request(
         self,
@@ -611,6 +627,7 @@ class AsyncGitHubClient:
 @asynccontextmanager
 async def async_github_client(
     token: str,
+    rate_limiter: InstrumentedAsyncLimiter | None = None,
     default_timeout: float = 30.0,
     transport: httpx.AsyncBaseTransport | None = None,
 ) -> AsyncIterator[AsyncGitHubClient]:
@@ -619,13 +636,20 @@ async def async_github_client(
 
     Args:
         token: GitHub personal access token or app token.
+        rate_limiter: Optional rate limiter applied to every request. When provided, each
+            request acquires a token before proceeding. Create one via RateLimiterFactory.
         default_timeout: Default request timeout in seconds.
         transport: Optional custom HTTPX transport (useful for testing with MockTransport).
 
     Yields:
         AsyncGitHubClient: A ready-to-use async GitHub client.
     """
-    client = AsyncGitHubClient(token=token, default_timeout=default_timeout, transport=transport)
+    client = AsyncGitHubClient(
+        token=token,
+        rate_limiter=rate_limiter,
+        default_timeout=default_timeout,
+        transport=transport,
+    )
     try:
         yield client
     finally:
