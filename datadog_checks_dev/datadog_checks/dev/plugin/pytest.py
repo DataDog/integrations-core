@@ -9,7 +9,7 @@ import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
-from typing import Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
+from typing import Any, Dict, List, Literal, Optional, Tuple, overload  # noqa: F401
 
 import pytest
 
@@ -240,6 +240,45 @@ def dd_agent_check(request, aggregator, datadog_agent):
         yield run_check
 
 
+CONTAINER_ORIGIN_TAG_PREFIXES = ('docker_image:', 'image_id:', 'image_name:', 'image_tag:', 'short_image:')
+
+
+def _assert_discovery_used_expected_mechanism(aggregator: Any, *, process: bool) -> None:
+    """Assert that a ``dd_agent_check_discovery`` run actually used the mechanism it claims to.
+
+    Container-based Autodiscovery has its instances tagged by the Agent's tagger with container-origin
+    tags (``docker_image``, ``image_name``, etc.); process-based Autodiscovery does not. Without this
+    check, a bug that fails to exclude the ``docker`` feature during a ``process=True`` run can go
+    unnoticed: the container-based path silently produces a working instance, leaving the process CEL
+    selector completely untested even though the test still passes.
+    """
+    tags = set()
+    has_metrics = False
+    for name in aggregator.metric_names:
+        for metric in aggregator.metrics(name):
+            has_metrics = True
+            tags.update(metric.tags)
+
+    # If no data was submitted, don't assert anything here, let the test fail
+    # due to other assertions in the main test function.
+    if not has_metrics:
+        return
+
+    discovered_via_container = any(tag.startswith(prefix) for tag in tags for prefix in CONTAINER_ORIGIN_TAG_PREFIXES)
+
+    if process:
+        assert not discovered_via_container, (
+            'Process-based discovery was requested, but the submitted metrics carry container-origin '
+            'tags. Autodiscovery actually matched the container instead of the process, so the process '
+            'CEL selector was never exercised.'
+        )
+    else:
+        assert discovered_via_container, (
+            'Container-based discovery was requested, but the submitted metrics carry no container-origin '
+            'tags, so it is unclear that Autodiscovery actually matched via the container path.'
+        )
+
+
 @pytest.fixture
 def dd_agent_check_discovery(dd_agent_check):
     """Wrapper around ``dd_agent_check`` for config-discovery e2e tests.
@@ -271,12 +310,16 @@ def dd_agent_check_discovery(dd_agent_check):
             env_vars.setdefault('DD_AUTOCONFIG_EXCLUDE_FEATURES', 'docker')
             kwargs['env_vars'] = env_vars
 
-        return dd_agent_check(
+        aggregator = dd_agent_check(
             {'init_config': {}, 'instances': []},
             discovery_min_instances=discovery_min_instances,
             discovery_timeout=discovery_timeout,
             **kwargs,
         )
+
+        _assert_discovery_used_expected_mechanism(aggregator, process=process)
+
+        return aggregator
 
     return run
 
