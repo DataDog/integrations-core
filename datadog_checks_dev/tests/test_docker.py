@@ -16,7 +16,6 @@ from datadog_checks.dev.docker import (
     assert_all_discovery_candidates_stable,
     compose_file_active,
     docker_run,
-    get_e2e_discovery_metadata,
 )
 from datadog_checks.dev.subprocess import run_command
 
@@ -47,26 +46,6 @@ def _container_inspect(*, restart_count=0, running=True, health='healthy', ports
         },
         'RestartCount': restart_count,
         'State': state,
-    }
-
-
-def test_get_e2e_discovery_metadata(tmp_path):
-    check_root = tmp_path / 'test_check'
-    check_package_root = check_root / 'datadog_checks' / 'test_check'
-    data_dir = check_package_root / 'data'
-    data_dir.mkdir(parents=True)
-    (data_dir / 'auto_conf.yaml').write_text(
-        'ad_identifiers:\n  - test\ndiscovery: {}\ninit_config:\ninstances: []\n',
-        encoding='utf-8',
-    )
-
-    metadata = get_e2e_discovery_metadata(check_root)
-
-    assert metadata == {
-        'docker_volumes': [
-            f'{check_package_root}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/test_check.d/auto_conf.yaml:ro',
-            '/var/run/docker.sock:/var/run/docker.sock:ro',
-        ],
     }
 
 

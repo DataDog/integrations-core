@@ -277,6 +277,9 @@ class DockerAgent(AgentInterface):
         for key, value in sorted(env_vars.items()):
             command.extend(['-e', f'{key}={value}'])
 
+        for cap in self.metadata.get('cap_add', []):
+            command.extend(['--cap-add', cap])
+
         # The docker `--add-host` command will reliably create entries in the `/etc/hosts` file,
         # otherwise, edits to that file will be overwritten on container restarts
         for host, ip in self.metadata.get('custom_hosts', []):
