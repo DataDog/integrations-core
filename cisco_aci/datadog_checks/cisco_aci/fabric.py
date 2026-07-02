@@ -71,9 +71,11 @@ class Fabric:
             tags = self.tagger.get_fabric_tags(p, 'fabricPod')
             try:
                 stats = self.api.get_pod_stats(pod_id)
+                if not stats:
+                    self.log.debug("No stats returned from APIC for pod %s", pod_id)
                 self.submit_fabric_metric(stats, tags, 'fabricPod')
-            except (exceptions.APIConnectionException, exceptions.APIParsingException):
-                pass
+            except (exceptions.APIConnectionException, exceptions.APIParsingException) as e:
+                self.log.warning("Failed to collect stats for pod %s: %s", pod_id, e)
             self.log.info("finished processing pod %s", pod_id)
 
         return pods_dict
@@ -107,17 +109,19 @@ class Fabric:
                     tags.append('{}:{}'.format(DEVICE_TAGS_PREFIX, device_id))
 
                 self.submit_process_metric(n, tags + self.check_tags + user_tags, hostname=hostname)
-            except (exceptions.APIConnectionException, exceptions.APIParsingException):
-                pass
+            except (exceptions.APIConnectionException, exceptions.APIParsingException) as e:
+                self.log.warning("Failed to collect process metrics for node %s pod %s: %s", node_id, pod_id, e)
             if node_attrs.get('role') != "controller":
                 try:
                     stats = self.api.get_node_stats(pod_id, node_id)
+                    if not stats:
+                        self.log.warning("No node stats returned from APIC for node %s pod %s", node_id, pod_id)
                     self.submit_fabric_metric(stats, tags, 'fabricNode', hostname=hostname)
                     eth_metadata = self.process_eth(node_attrs)
                     if self.ndm_enabled():
                         interface_metadata.extend(eth_metadata)
-                except (exceptions.APIConnectionException, exceptions.APIParsingException):
-                    pass
+                except (exceptions.APIConnectionException, exceptions.APIParsingException) as e:
+                    self.log.warning("Failed to collect fabric metrics for node %s pod %s: %s", node_id, pod_id, e)
             self.log.info("finished processing node %s", node_id)
         return device_metadata, interface_metadata
 
@@ -127,10 +131,13 @@ class Fabric:
         device_hostname = node.get('name', '')
         pod_id = helpers.get_pod_from_dn(node['dn'])
         common_tags = ndm.common_tags(node.get('address', ''), device_hostname, self.namespace)
+        eth_list_and_stats = []
         try:
             eth_list_and_stats = self.api.get_eth_list_and_stats(pod_id, node['id'])
-        except (exceptions.APIConnectionException, exceptions.APIParsingException):
-            pass
+            if not eth_list_and_stats:
+                self.log.warning("No ethernet interfaces returned from APIC for node %s", node.get('id'))
+        except (exceptions.APIConnectionException, exceptions.APIParsingException) as e:
+            self.log.warning("Failed to collect ethernet interfaces for node %s: %s", node.get('id'), e)
         interfaces = []
         for e in eth_list_and_stats:
             tags = self.tagger.get_fabric_tags(e, 'l1PhysIf')
@@ -190,6 +197,9 @@ class Fabric:
             metrics = self.api.get_controller_proc_metrics(pod_id, node_id)
         else:
             metrics = self.api.get_spine_proc_metrics(pod_id, node_id)
+
+        if not metrics:
+            self.log.warning("No process metrics returned from APIC for node %s pod %s", node_id, pod_id)
 
         for d in metrics:
             if d.get("procCPUHist5min", {}).get('attributes'):
