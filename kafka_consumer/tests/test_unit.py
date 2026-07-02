@@ -1114,8 +1114,8 @@ def test_get_partition_offsets_skips_partition_on_non_kafka_error():
     assert results == [("healthy_topic", 0, 100)]
 
 
-def test_get_partition_offsets_degrades_when_list_offsets_request_fails():
-    """A request/broker-level list_offsets failure degrades to [] instead of aborting collection."""
+def test_get_partition_offsets_raises_when_list_offsets_request_fails():
+    """A request/broker-level list_offsets failure propagates, aborting highwater collection."""
     config = mock.MagicMock()
     config._request_timeout = 5
 
@@ -1123,9 +1123,8 @@ def test_get_partition_offsets_degrades_when_list_offsets_request_fails():
     client._kafka_client = mock.MagicMock()
     client._kafka_client.list_offsets.side_effect = RuntimeError("connection dropped")
 
-    results = client.get_partition_offsets([("topic_a", 0)])
-
-    assert results == []
+    with pytest.raises(RuntimeError):
+        client.get_partition_offsets([("topic_a", 0)])
 
 
 def test_get_partition_offsets_empty_partitions_returns_empty_without_request():

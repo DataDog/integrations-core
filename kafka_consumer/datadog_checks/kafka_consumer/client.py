@@ -148,21 +148,22 @@ class KafkaClient:
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
     def get_partition_offsets(self, partitions, offset=-1):
-        """Return (topic, partition, offset) tuples, skipping partitions that can't be queried."""
+        """Return (topic, partition, offset) tuples, skipping partitions that can't be queried.
+
+        A request-level failure (the batched list_offsets call itself raising, as opposed to an
+        individual partition's future) is not swallowed here: it propagates so the caller aborts
+        highwater collection instead of silently treating every partition as missing.
+        """
         offset_spec = OffsetSpec.earliest() if offset == 0 else OffsetSpec.latest()
         request = {TopicPartition(topic=topic, partition=partition): offset_spec for topic, partition in partitions}
         if not request:
             return []
 
-        try:
-            futures = self.kafka_client.list_offsets(
-                request,
-                isolation_level=IsolationLevel.READ_UNCOMMITTED,
-                request_timeout=self.config._request_timeout,
-            )
-        except Exception as e:
-            self.log.warning("Failed to issue list_offsets request; highwater offsets will be skipped this run: %s", e)
-            return []
+        futures = self.kafka_client.list_offsets(
+            request,
+            isolation_level=IsolationLevel.READ_UNCOMMITTED,
+            request_timeout=self.config._request_timeout,
+        )
 
         results = []
         for tp, future in futures.items():
