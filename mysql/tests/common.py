@@ -25,6 +25,11 @@ CHECK_NAME = 'mysql'
 # adding flavor to differentiate mariadb from mysql
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', '')
 
+# When set, pins an explicit image tag (e.g. a prerelease like "13.0-rc") instead of
+# deriving it from MYSQL_VERSION. Mirrors postgres' POSTGRES_IMAGE_TAG; used for a major
+# only published under a non-GA tag on the official image (e.g. MariaDB 13's RC).
+MYSQL_IMAGE_TAG = os.getenv('MYSQL_IMAGE_TAG', None)
+
 HOST = get_docker_hostname()
 PORT = 13306
 SLAVE_PORT = 13307
