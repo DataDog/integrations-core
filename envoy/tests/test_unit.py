@@ -60,7 +60,7 @@ def test_check(aggregator, dd_run_check, check, mock_http_response):
         aggregator.assert_metric('envoy.{}'.format(metric))
         aggregator.assert_metric_has_tag('envoy.{}'.format(metric), ADAPTIVE_CONCURRENCY_PROMETHEUS_STAT_PREFIX_TAG)
 
-    # Pin the gauge fixture values so a wrong mapping (e.g. the x1000-scaled gradient) would be caught.
+    # Pin the gauge fixture values so a wrong mapping (e.g. a x1000-scaled gradient) would be caught.
     for metric, value in ADAPTIVE_CONCURRENCY_PROMETHEUS_GAUGE_VALUES.items():
         aggregator.assert_metric('envoy.{}'.format(metric), value=value)
 
