@@ -6,7 +6,6 @@ import os
 import socket
 
 from confluent_kafka.admin import AdminClient
-
 from datadog_checks.dev import get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))

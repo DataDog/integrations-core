@@ -259,7 +259,17 @@ instances:
     ## @param update_consumer_group_offsets - mapping - optional
     ## Configuration for updating consumer group offsets.
     ## WARNING: Can cause duplicate processing or data loss.
-    ## Consumer group should be stopped (no active members).
+    ## The consumer group must have no active members before this action runs;
+    ## the check enforces this and will fail with a clear error if members are found.
+    ##
+    ## Each entry in 'offsets' must specify exactly one of:
+    ##   - offset: commit a specific offset. Use -2 for earliest, -1 for latest,
+    ##     or a non-negative integer for an explicit position. Requires 'partition'.
+    ##   - timestamp: milliseconds since epoch. Resets every matching partition to
+    ##     the first offset at or after this timestamp. If no message exists at or
+    ##     after the timestamp in a partition, that partition is reset to latest.
+    ##     'partition' is optional — omit it to target all partitions of the topic.
+    ## Mixing both fields in the same entry is an error.
     #
     # update_consumer_group_offsets:
     #   cluster: prod-kafka-1
@@ -270,7 +280,9 @@ instances:
     #     offset: 1000
     #   - topic: orders
     #     partition: 1
-    #     offset: 1500
+    #     offset: -2
+    #   - topic: payments
+    #     timestamp: 1735689600000
 
     ## @param produce_message - mapping - optional
     ## Configuration for producing a message to a Kafka topic.

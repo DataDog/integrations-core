@@ -502,7 +502,17 @@ files:
       description: |
         Configuration for updating consumer group offsets.
         WARNING: Can cause duplicate processing or data loss.
-        Consumer group should be stopped (no active members).
+        The consumer group must have no active members before this action runs;
+        the check enforces this and will fail with a clear error if members are found.
+
+        Each entry in 'offsets' must specify exactly one of:
+          - offset: commit a specific offset. Use -2 for earliest, -1 for latest,
+            or a non-negative integer for an explicit position. Requires 'partition'.
+          - timestamp: milliseconds since epoch. Resets every matching partition to
+            the first offset at or after this timestamp. If no message exists at or
+            after the timestamp in a partition, that partition is reset to latest.
+            'partition' is optional — omit it to target all partitions of the topic.
+        Mixing both fields in the same entry is an error.
       value:
         type: object
         required:
@@ -518,7 +528,9 @@ files:
               offset: 1000
             - topic: orders
               partition: 1
-              offset: 1500
+              offset: -2
+            - topic: payments
+              timestamp: 1735689600000
         properties:
         - name: cluster
           type: string
@@ -530,30 +542,43 @@ files:
           example: order-processor
         - name: offsets
           type: array
-          description: List of topic-partition-offset tuples to update
+          description: |
+            List of offset specifications. Each entry must specify exactly one of 'offset'
+            or 'timestamp'. See the action description for details.
           items:
             type: object
             required:
               - topic
-              - partition
-              - offset
             properties:
             - name: topic
               type: string
               description: Topic name
             - name: partition
               type: integer
-              description: Partition number
+              description: |
+                Non-negative partition number. Required when 'offset' is specified.
+                Optional when 'timestamp' is specified — omit to target all partitions.
             - name: offset
               type: integer
-              description: New offset value
+              description: |
+                Offset to commit. Use -2 for earliest (log-start), -1 for latest
+                (high-watermark), or a non-negative integer for an explicit position.
+                Mutually exclusive with timestamp. Requires 'partition'.
+            - name: timestamp
+              type: integer
+              description: |
+                Milliseconds since epoch. Resets to the first offset at or after this
+                timestamp. Partitions with no message at or after the timestamp are
+                reset to latest. Mutually exclusive with offset.
           example:
             - topic: orders
               partition: 0
               offset: 1000
             - topic: orders
               partition: 1
-              offset: 1500
+              offset: -2
+            - topic: payments
+              timestamp: 1735689600000
       fleet_configurable: false
     
     # ========================================================================

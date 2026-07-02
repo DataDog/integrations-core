@@ -1,0 +1,1 @@
+Harden the ``update_consumer_group_offsets`` action: enforce an inactive-group check before altering offsets, surface per-partition errors, support sentinel (earliest/latest) and timestamp-based offset resets, and validate non-negative offsets.
