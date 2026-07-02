@@ -104,6 +104,8 @@ def agent(
                 agent.invoke(full_args, env_vars=invoke_env_vars)
         except subprocess.CalledProcessError as e:
             app.abort(code=e.returncode)
+        except NotImplementedError as e:
+            app.abort(str(e))
 
         return
 
@@ -115,6 +117,8 @@ def agent(
         try:
             env_data.write_config(config)
             _invoke_check_with_retry(agent, full_args, env_vars=invoke_env_vars)
+        except NotImplementedError as e:
+            app.abort(str(e))
         finally:
             env_data.config_file.unlink()
     else:
@@ -123,5 +127,7 @@ def agent(
         try:
             env_data.write_config(config)
             _invoke_check_with_retry(agent, full_args, env_vars=invoke_env_vars)
+        except NotImplementedError as e:
+            app.abort(str(e))
         finally:
             temp_config_file.replace(env_data.config_file)
