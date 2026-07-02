@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from ddev.ai.config.errors import detect_cycles
+from ddev.ai.config.dependency_graph import detect_cycles
 
 
 def test_detect_cycles_finds_simple_cycle():
