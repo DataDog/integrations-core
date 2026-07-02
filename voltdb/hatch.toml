@@ -12,6 +12,7 @@ DDEV_SKIP_GENERIC_TAGS_CHECK = "true"
 python = ["3.13"]
 version = ["8.4", "10.0"]
 tls = ["with-tls", "without-tls"]
+transport = ["native", "http"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
@@ -23,4 +24,8 @@ matrix.version.env-vars = [
 matrix.tls.env-vars = [
     { key = "TLS_ENABLED", value = "true", if = ["with-tls"] },
     { key = "TLS_ENABLED", value = "false", if = ["without-tls"] }
+]
+matrix.transport.env-vars = [
+    { key = "VOLTDB_TRANSPORT", value = "native", if = ["native"] },
+    { key = "VOLTDB_TRANSPORT", value = "http", if = ["http"] }
 ]

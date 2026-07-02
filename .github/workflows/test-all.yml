@@ -4321,9 +4321,22 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
+      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    strategy:
+      matrix:
+        target-env:
+        - py3.13-8.4-with-tls-native
+        - py3.13-8.4-with-tls-http
+        - py3.13-8.4-without-tls-native
+        - py3.13-8.4-without-tls-http
+        - py3.13-10.0-with-tls-native
+        - py3.13-10.0-with-tls-http
+        - py3.13-10.0-without-tls-native
+        - py3.13-10.0-without-tls-http
+      fail-fast: false
   j269c8a5:
     uses: ./.github/workflows/test-target.yml
     with:

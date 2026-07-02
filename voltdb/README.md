@@ -30,55 +30,81 @@ No additional installation is needed on your server.
 
 2. Edit the `voltdb.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your VoltDB performance data. See the [sample voltdb.d/conf.yaml][4] for all available configuration options.
 
+    The integration supports two transports. Pick the one that matches your network topology:
+
+    **Native binary client** - direct connection to a database node on the VoltDB client port (default `21212`), using the [VoltDB Python client][12]. Recommended when the Agent host can reach the database nodes directly:
+
     ```yaml
     init_config:
 
     instances:
-      - url: http://localhost:8080
+      - host: localhost
+        port: 21212
         username: datadog-agent
         password: "<PASSWORD>"
     ```
+
+    For failover across cluster members, use `hosts` instead of `host`. The Agent connects to the first reachable entry and silently fails over to the others if the active node becomes unavailable:
+
+    ```yaml
+    instances:
+      - hosts:
+          - voltdb-1.example:21212
+          - voltdb-2.example:21212
+          - voltdb-3.example:21212
+        username: datadog-agent
+        password: "<PASSWORD>"
+    ```
+
+    **HTTP/JSON via the VoltDB Management Center (VMC)** - useful when database nodes aren't directly reachable but the VMC endpoint is, or when you prefer to keep the existing HTTP/JSON wire format. Set `url` to the VMC endpoint:
+
+    ```yaml
+    instances:
+      - url: http://vmc.example.com:8080
+        username: datadog-agent
+        password: "<PASSWORD>"
+    ```
+
+    The check picks the transport based on which option is set: `url` selects HTTP mode, `host`/`hosts` selects native mode. HTTP mode keeps all the options earlier releases supported (`password_hashed`, `tls_cert`, `tls_ca_cert`, `tls_verify`, `proxy`, `headers`, etc.) - see the [sample config][4] for the full list.
+
+    **Backwards compatibility**: existing configurations that point `url` at the legacy HTTP endpoint continue to work without changes. This release adds the native binary transport as an option; it does not remove the HTTP one. The `url`-style config still emits the same metrics and service checks against the same VMC or HTTP-enabled database node it always pointed at.
 
 3. [Restart the Agent][5].
 
 #### TLS support
 
-If [TLS/SSL][6] is enabled on the client HTTP port:
+If [TLS/SSL][6] is enabled on the VoltDB client port, set `use_ssl: true` and point `ssl_config_file` at a VoltDB SSL properties file that describes how to locate the truststore (and optionally a client keystore for mutual TLS):
 
-1. Export your certificate CA file in PEM format:
+```yaml
+instances:
+  - host: localhost
+    port: 21212
+    username: datadog-agent
+    password: "<PASSWORD>"
+    use_ssl: true
+    ssl_config_file: /etc/voltdb/ssl.properties
+```
 
-    ```bash
-    keytool -exportcert -file /path/to/voltdb-ca.pem -keystore <KEYSTORE> -storepass <PASSWORD> -alias voltdb -rfc
-    ```
+The properties file is the same format VoltDB's own tools (`sqlcmd`, `voltadmin`) consume. The native Python client supports Java keystores (`.jks`), PKCS12 (`.p12`/`.pfx`), and PEM. A minimal one-way TLS configuration looks like:
 
-1. Export your certificate in PEM format:
+```properties
+# /etc/voltdb/ssl.properties
+truststore=/etc/voltdb/certs/truststore.jks
+truststorepassword=<TRUSTSTORE_PASSWORD>
+```
 
-    ```bash
-    openssl pkcs12 -nodes -in <KEYSTORE> -out /path/to/voltdb.pem -password pass:<PASSWORD>
-    ```
+For mutual TLS, also add a keystore that identifies the Agent to the server:
 
-    The resulting file should contain the _unencrypted_ private key and the certificate:
+```properties
+truststore=/etc/voltdb/certs/truststore.jks
+truststorepassword=<TRUSTSTORE_PASSWORD>
+keystore=/etc/voltdb/certs/agent-keystore.jks
+keystorepassword=<KEYSTORE_PASSWORD>
+```
 
-    ```
-    -----BEGIN PRIVATE KEY-----
-    <Private key contents...>
-    -----END PRIVATE KEY-----
-    -----BEGIN CERTIFICATE-----
-    <Certificate contents...>
-    -----END CERTIFICATE-----
-    ```
+If you have a PEM CA bundle instead of a Java keystore, you can either point `ssl_config_file` directly at the PEM file (it is treated as the truststore), or reference it explicitly with `cacerts=<PATH>` inside the properties file.
 
-2. In your instance configuration, point `url` to the TLS-enabled client endpoint, and set the `tls_cert` and `tls_ca_cert` options. For example:
-
-    ```yaml
-    instances:
-    - # ...
-      url: https://localhost:8443
-      tls_cert: /path/to/voltdb.pem
-      tls_ca_cert: /path/to/voltdb-ca.pem
-    ```
-
-3. [Restart the Agent][5].
+When the Agent runs in a container, make sure the properties file and every path it references are mounted into the container. See the [VoltDB TLS/SSL documentation][6] for details on generating keystores with `keytool` and rotating certificates.
 
 #### Log collection
 
@@ -140,3 +166,5 @@ Need help? Contact [Datadog support][11].
 [9]: https://github.com/DataDog/integrations-core/blob/master/voltdb/metadata.csv
 [10]: https://github.com/DataDog/integrations-core/blob/master/voltdb/assets/service_checks.json
 [11]: https://docs.datadoghq.com/help/
+[12]: https://pypi.org/project/voltdbclient/
+[13]: https://docs.datadoghq.com/agent/configuration/secrets-management/

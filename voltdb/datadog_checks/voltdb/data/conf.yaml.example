@@ -57,25 +57,81 @@ init_config:
 #
 instances:
 
-    ## @param url - string - required
-    ## URL to a VoltDB client endpoint.
+  -
+    ## @param host - string - optional - default: localhost
+    ## Host of the VoltDB cluster member to connect to via the native binary
+    ## protocol. Use this (with `port`) for direct connections to a database
+    ## node. Set `url` instead to talk to the VoltDB Management Center (VMC)
+    ## over HTTP/JSON. For failover across multiple cluster members, use
+    ## `hosts` instead.
     #
-  - url: http://localhost:8080
+    # host: localhost
 
-    ## @param username - string - required
+    ## @param hosts - list of strings - optional
+    ## List of VoltDB cluster members to try when connecting via the native
+    ## binary protocol. Each entry is either `hostname` (uses the global
+    ## `port`) or `hostname:port`. The Agent connects to the first
+    ## reachable entry and silently fails over to subsequent entries if
+    ## the active node becomes unavailable. Takes precedence over `host`.
+    #
+    # hosts:
+    #   - voltdb-1.example:21212
+    #   - voltdb-2.example:21212
+    #   - voltdb-3.example:21212
+
+    ## @param url - string - optional - default: http://localhost:8080
+    ## URL of a VoltDB HTTP/JSON endpoint, typically served by the
+    ## VoltDB Management Center (VMC). When set, the integration uses the
+    ## HTTP/JSON transport instead of the native binary client. The
+    ## `username` and `password` options are required in this mode.
+    ##
+    ## For direct connections to a database node, prefer `host` (and
+    ## optionally `port`), which uses the native Python client.
+    #
+    # url: http://localhost:8080
+
+    ## @param port - integer - optional - default: 21212
+    ## Native client port of the VoltDB cluster member.
+    ##
+    ## See: https://docs.voltdb.com/UsingVoltDB/HostConfigPortOpts.php
+    #
+    # port: 21212
+
+    ## @param username - string - optional
     ## The username to use to authenticate with VoltDB.
     #
-    username: <USERNAME>
+    # username: <USERNAME>
 
-    ## @param password - string - required
+    ## @param password - string - optional
     ## The password to use to authenticate with VoltDB.
     #
-    password: <PASSWORD>
+    # password: <PASSWORD>
 
-    ## @param password_hashed - boolean - optional - default: false
-    ## Set to true if the `password` value refers to a hashed version of the password.
+    ## @param use_ssl - boolean - optional - default: false
+    ## Set to `true` to connect to VoltDB using TLS.
+    ##
+    ## See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
     #
-    # password_hashed: false
+    # use_ssl: false
+
+    ## @param ssl_config_file - string - optional
+    ## Path to a VoltDB SSL configuration file that defines the Java keystore
+    ## and truststore files used by the native Python client.
+    ##
+    ## See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
+    #
+    # ssl_config_file: <SSL_CONFIG_FILE_PATH>
+
+    ## @param connect_timeout - number - optional - default: 8
+    ## Connection timeout (in seconds) when establishing the native client connection.
+    #
+    # connect_timeout: 8
+
+    ## @param procedure_timeout - number - optional - default: 60
+    ## Timeout (in seconds) for individual stored procedure calls. Set to
+    ## `0` to wait indefinitely for a response.
+    #
+    # procedure_timeout: 60
 
     ## @param statistics_components - list of strings - optional
     ## List VoltDB components to collect metrics. A subset of components are collected by default.
@@ -110,6 +166,14 @@ instances:
     #   - PROCEDURE
     #   - SNAPSHOTSTATUS
     #   - TABLE
+
+    ## @param password_hashed - boolean - optional - default: false
+    ## Only applicable to the HTTP/VMC transport (`url` is set). Set to
+    ## `true` if the `password` value is the SHA-256 hex digest of the
+    ## password instead of the cleartext. The native binary client does
+    ## not support pre-hashed passwords.
+    #
+    # password_hashed: false
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.
@@ -232,11 +296,6 @@ instances:
     ## This overrides the `timeout` setting in `init_config`.
     #
     # timeout: 10
-
-    ## @param connect_timeout - number - optional
-    ## The connect timeout for accessing services. Defaults to `timeout`.
-    #
-    # connect_timeout: <CONNECT_TIMEOUT>
 
     ## @param read_timeout - number - optional
     ## The read timeout for accessing services. Defaults to `timeout`.
