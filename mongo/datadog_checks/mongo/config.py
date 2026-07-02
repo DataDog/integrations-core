@@ -3,12 +3,36 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import certifi
+from urllib.parse import urlparse
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
 from datadog_checks.mongo.common import DEFAULT_TIMEOUT
 from datadog_checks.mongo.utils import build_connection_string, parse_mongo_uri
+
+_ATLAS_SUFFIX = '.mongodb.net'
+
+
+def _is_atlas_host(host):
+    """Return True if the host is a MongoDB Atlas endpoint (ends with .mongodb.net).
+
+    Accepts either a bare host[:port] string or a full MongoDB URI. A substring
+    check ('mongodb.net' in host) would match attacker-controlled hostnames like
+    'evil.mongodb.net.attacker.com', so we anchor to the domain suffix.
+    """
+    host_str = str(host).lower()
+    if '://' in host_str:
+        try:
+            netloc = urlparse(host_str).netloc
+            if '@' in netloc:
+                netloc = netloc.split('@', 1)[1]
+            hostnames = [h.split(':')[0] for h in netloc.split(',')]
+        except Exception:
+            return False
+    else:
+        hostnames = [host_str.split(':')[0].rstrip('/')]
+    return any(h == 'mongodb.net' or h.endswith(_ATLAS_SUFFIX) for h in hostnames)
 
 
 class MongoConfig(object):
@@ -18,15 +42,28 @@ class MongoConfig(object):
 
         # x.509 authentication
 
+        # Auto-enable TLS for MongoDB Atlas: Atlas mandates TLS and the driver surfaces a
+        # misleading "connection closed" error when tls is omitted rather than a TLS error.
+        tls = instance.get('tls')
+        if tls is None:
+            raw_hosts = instance.get('hosts', [])
+            if isinstance(raw_hosts, str):
+                raw_hosts = [raw_hosts]
+            server = instance.get('server', '') or ''
+            all_hosts = list(raw_hosts) + ([server] if server else [])
+            if any(_is_atlas_host(h) for h in all_hosts):
+                tls = True
+                log.debug('Auto-enabling TLS: detected MongoDB Atlas host (mongodb.net)')
+
         cacert_cert_dir = instance.get('tls_ca_file')
         if cacert_cert_dir is None and (
-            is_affirmative(instance.get('options', {}).get("tls")) or is_affirmative(instance.get('tls'))
+            is_affirmative(instance.get('options', {}).get("tls")) or is_affirmative(tls)
         ):
             cacert_cert_dir = certifi.where()
 
         self.tls_params = exclude_undefined_keys(
             {
-                'tls': instance.get('tls'),
+                'tls': tls,
                 'tlsCertificateKeyFile': instance.get('tls_certificate_key_file'),
                 'tlsCAFile': cacert_cert_dir,
                 'tlsAllowInvalidHostnames': instance.get('tls_allow_invalid_hostnames'),
