@@ -3,11 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import mock
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockResponse
 
 from . import common
 
@@ -38,17 +37,17 @@ def mock_requests_get(url, *args, **kwargs):
     print(url_parts)
 
     if url_parts[0] == 'wrong':
-        return MockResponse(status_code=404)
+        return MockHTTPResponse(status_code=404)
 
     json_file = f"rrd_updates_{url_parts[0]}.json" if url_parts[1] == "rrd_updates" else f"{url_parts[1]}.json"
     path = os.path.join(common.HERE, 'fixtures', 'standalone', json_file)
     if not os.path.exists(path):
-        return MockResponse(status_code=404)
+        return MockHTTPResponse(status_code=404)
 
-    return MockResponse(file_path=path)
+    return MockHTTPResponse(file_path=path)
 
 
 @pytest.fixture
-def mock_responses():
-    with mock.patch('requests.Session.get', side_effect=mock_requests_get):
-        yield
+def mock_responses(mock_http):
+    mock_http.get.side_effect = mock_requests_get
+    yield

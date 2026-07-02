@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
-import mock
 import pytest
 
 from datadog_checks.kube_proxy import KubeProxyCheck
+
+from .common import make_mock_metrics
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
@@ -17,36 +16,16 @@ NAMESPACE = 'kubeproxy'
 
 
 @pytest.fixture()
-def mock_iptables():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_iptables_1.21.1.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_iptables = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    )
-    yield mock_iptables.start()
-    mock_iptables.stop()
+def mock_iptables(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_iptables_1.21.1.txt')
 
 
 @pytest.fixture()
-def mock_userspace():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_userspace_1.21.1.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_userspace = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    )
-    yield mock_userspace.start()
-    mock_userspace.stop()
+def mock_userspace(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_userspace_1.21.1.txt')
 
 
-def test_check_iptables(aggregator, mock_iptables):
+def test_check_iptables(aggregator, mock_iptables, mock_healthcheck_wrapper):
     """
     Testing Kube_proxy in iptables mode.
     """
@@ -78,7 +57,7 @@ def test_check_iptables(aggregator, mock_iptables):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_userspace(aggregator, mock_userspace):
+def test_check_userspace(aggregator, mock_userspace, mock_healthcheck_wrapper):
     """
     Testing Kube_proxy in userspace mode.
     """

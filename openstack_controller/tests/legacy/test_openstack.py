@@ -38,16 +38,13 @@ def test_parse_uptime_string(aggregator):
     assert uptime_parsed == [0.04, 0.14, 0.19]
 
 
-def test_api_error_log_no_password(check, instance, caplog):
+def test_api_error_log_no_password(check, instance, caplog, mock_http):
+    mock_http.post.side_effect = HTTPError(mock.Mock(status=404), 'not found')
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(KeystoneUnreachable):
-            with mock.patch('datadog_checks.base.utils.http.requests.Session.post') as req:
-                req.side_effect = HTTPError(mock.Mock(status=404), 'not found')
-                check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)
-                identity = Authenticator._get_user_identity(instance.get("user"))
-                Authenticator._post_auth_token(
-                    check._api.logger, instance.get("keystone_server_url"), identity, check.http
-                )
+            check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)
+            identity = Authenticator._get_user_identity(instance.get("user"))
+            Authenticator._post_auth_token(check._api.logger, instance.get("keystone_server_url"), identity, check.http)
 
     expected_pass = "'password': '********'"
 

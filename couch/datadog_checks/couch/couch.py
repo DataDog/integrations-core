@@ -12,6 +12,7 @@ import requests
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException, ConfigurationError
 from datadog_checks.base.utils.headers import headers
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.couch import errors
 
 
@@ -43,7 +44,7 @@ class CouchDb(AgentCheck):
                     AgentCheck.OK,
                     tags=service_check_tags,
                 )
-        except requests.exceptions.Timeout as e:
+        except (requests.exceptions.Timeout, HTTPTimeoutError) as e:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,

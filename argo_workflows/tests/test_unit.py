@@ -135,6 +135,6 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_respo
 def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(status_code=404)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
-    with pytest.raises(Exception, match='requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match='HTTPStatusError'):
         dd_run_check(check)
     aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.CRITICAL)

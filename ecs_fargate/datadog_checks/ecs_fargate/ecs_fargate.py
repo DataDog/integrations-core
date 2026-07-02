@@ -10,6 +10,7 @@ from dateutil import parser
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 try:
     from tagger import get_tags
@@ -116,7 +117,7 @@ class FargateCheck(AgentCheck):
 
         try:
             request = self.http.get(metadata_endpoint)
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(
                 metadata_endpoint, self.http.options['timeout']
             )
@@ -202,7 +203,7 @@ class FargateCheck(AgentCheck):
 
         try:
             request = self.http.get(stats_endpoint)
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, self.http.options['timeout'])
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)

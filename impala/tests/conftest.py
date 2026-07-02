@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import ExitStack, contextmanager
-from unittest import mock
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -92,22 +92,15 @@ def catalog_check(catalog_instance):
 
 
 @pytest.fixture()
-def mock_metrics(request):
+def mock_metrics(request, mock_http):
     metrics_file = request.node.get_closest_marker("metrics_file")
     with open(
         os.path.join(os.path.dirname(__file__), "fixtures", metrics_file.args[0], metrics_file.args[1]), "r"
     ) as fixture_file:
         content = fixture_file.read()
 
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+    yield
 
 
 @contextmanager

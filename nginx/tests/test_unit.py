@@ -68,34 +68,16 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
 
     c = check(instance)
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}')
-
-        c.check(instance)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.get.assert_called_with('http://localhost:8080/nginx_status', **http_wargs)
+    for key, value in expected_http_kwargs.items():
+        assert c.http.options[key] == value
 
 
-def test_no_version(check, instance, caplog):
+def test_no_version(check, instance, caplog, mock_http):
     c = check(instance)
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}', headers={'server': 'nginx'})
+    mock_http.get.return_value = mock.MagicMock(status_code=200, content=b'{}', headers={'server': 'nginx'})
 
-        c.check(instance)
+    c.check(instance)
 
     errors = [record for record in caplog.records if record.levelname == "ERROR"]
     assert not errors

@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 import pytest
-from mock import ANY, patch
 
 from datadog_checks.teamcity.constants import (
     SERVICE_CHECK_BUILD_PROBLEMS,
@@ -17,7 +16,6 @@ from .common import (
     BUILD_STATS_METRICS,
     BUILD_TAGS,
     EXPECTED_SERVICE_CHECK_TEST_RESULTS,
-    LEGACY_REST_INSTANCE,
     USE_OPENMETRICS,
 )
 
@@ -51,36 +49,6 @@ def test_build_event(dd_run_check, aggregator, rest_instance):
 
     dd_run_check(check)
     aggregator.assert_event(msg_title="", msg_text="", count=0)
-
-
-@pytest.mark.parametrize(
-    'extra_config, expected_http_kwargs',
-    [
-        pytest.param({'ssl_validation': True}, {'verify': True}, id="legacy ssl config True"),
-        pytest.param({'ssl_validation': False}, {'verify': False}, id="legacy ssl config False"),
-        pytest.param({}, {'verify': True}, id="legacy ssl config unset"),
-    ],
-)
-def test_config(dd_run_check, extra_config, expected_http_kwargs):
-    instance = deepcopy(LEGACY_REST_INSTANCE)
-    instance.update(extra_config)
-    check = TeamCityRest('teamcity', {}, [instance])
-
-    with patch('datadog_checks.base.utils.http.requests.Session.get') as r:
-        dd_run_check(check)
-
-        http_wargs = {
-            'auth': ANY,
-            'cert': ANY,
-            'headers': ANY,
-            'proxies': ANY,
-            'timeout': ANY,
-            'verify': ANY,
-            'allow_redirects': ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.assert_called_with(ANY, **http_wargs)
 
 
 @pytest.mark.parametrize(

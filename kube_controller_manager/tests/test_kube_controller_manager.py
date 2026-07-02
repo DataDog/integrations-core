@@ -2,15 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import mock
 import pytest
 import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
+
+from .common import make_mock_metrics
 
 instance = {
     'prometheus_url': 'http://localhost:10252/metrics',
@@ -32,17 +33,8 @@ NAMESPACE = 'kube_controller_manager'
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics.txt')
 
 
 @pytest.fixture()
@@ -59,14 +51,14 @@ def mock_leader():
         yield
 
 
-def test_check_metrics_with_deprecated(aggregator, mock_metrics, mock_leader):
+def test_check_metrics_with_deprecated(aggregator, mock_metrics, mock_leader, mock_healthcheck_wrapper):
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
     generic_check_metrics(aggregator, True)
 
 
-def test_check_metrics_without_deprecated(aggregator, mock_metrics, mock_leader):
+def test_check_metrics_without_deprecated(aggregator, mock_metrics, mock_leader, mock_healthcheck_wrapper):
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     c.check(instance2)
 
@@ -132,27 +124,33 @@ def generic_check_metrics(aggregator, check_deprecated):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check_ok(monkeypatch):
+@pytest.mark.parametrize(
+    'side_effect, expected_status, expected_message',
+    [
+        (None, AgentCheck.OK, None),
+        (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+    ],
+    ids=['ok', 'http_error'],
+)
+def test_service_check(monkeypatch, mock_openmetrics_http, side_effect, expected_status, expected_message):
     instance = {'prometheus_url': 'http://localhost:10252/metrics'}
-    instance_tags = []
+    # mock_openmetrics_http satisfies detect_sli_endpoint during __init__
+    # the service-check path under test is driven by the seeded _http_handlers below
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
 
     check = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-    calls = [
-        mock.call('kube_controller_manager.up', AgentCheck.OK, tags=instance_tags),
-        mock.call('kube_controller_manager.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
-    ]
+    healthcheck_url = 'http://localhost:10252/healthz'
+    handler = mock.MagicMock()
+    handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
+    check._http_handlers[healthcheck_url] = handler
 
-    # successful health check
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
-        check._perform_service_check(instance)
+    check._perform_service_check(instance)
 
-    # failed health check
-    raise_error = mock.Mock()
-    raise_error.side_effect = requests.HTTPError('health check failed')
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
-        check._perform_service_check(instance)
-
-    check.service_check.assert_has_calls(calls)
+    if expected_message is None:
+        check.service_check.assert_called_with('kube_controller_manager.up', expected_status, tags=[])
+    else:
+        check.service_check.assert_called_with(
+            'kube_controller_manager.up', expected_status, tags=[], message=expected_message
+        )

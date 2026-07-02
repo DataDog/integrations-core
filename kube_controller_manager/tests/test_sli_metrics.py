@@ -2,36 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
-import mock
 import pytest
-import requests_mock
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
 
-from .common import HERE
+from .common import make_mock_metrics
 
 # Constants
 CHECK_NAME = 'kube_controller_manager'
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(HERE, 'fixtures', 'metrics_slis_1.27.3.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_slis_1.27.3.txt')
 
 
-def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10257/metrics/slis', status_code=200)
+def test_check_metrics_slis(aggregator, mock_metrics, instance, mock_healthcheck_wrapper):
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -157,8 +144,7 @@ def test_check_metrics_slis(aggregator, mock_metrics, mock_request, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10257/metrics/slis', status_code=200)
+def test_check_metrics_slis_transform(aggregator, mock_metrics, instance, mock_healthcheck_wrapper):
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -176,8 +162,7 @@ def test_check_metrics_slis_transform(aggregator, mock_metrics, mock_request, in
     )
 
 
-def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_request, instance):
-    mock_request.get('http://localhost:10257/metrics/slis', status_code=200)
+def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, instance, mock_healthcheck_wrapper):
     c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 
@@ -198,31 +183,12 @@ def test_check_metrics_slis_filter_by_type(aggregator, mock_metrics, mock_reques
     )
 
 
-@pytest.fixture()
-def mock_request():
-    with requests_mock.Mocker() as m:
-        yield m
-
-
-def test_detect_sli_endpoint(mock_metrics, instance):
-    with mock.patch('requests.Session.get') as mock_request:
-        mock_request.return_value.status_code = 200
-        c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert instance["slis_available"] is True
-
-
-def test_detect_sli_endpoint_404(mock_metrics, instance):
-    with mock.patch('requests.Session.get') as mock_request:
-        mock_request.return_value.status_code = 404
-        c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert instance["slis_available"] is False
-
-
-def test_detect_sli_endpoint_403(mock_metrics, mock_request, instance):
-    with mock.patch('requests.Session.get') as mock_request:
-        mock_request.return_value.status_code = 403
-        c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-        c.check(instance)
-        assert instance["slis_available"] is False
+@pytest.mark.parametrize(
+    'status_code, expected_available',
+    [(200, True), (404, False), (403, False)],
+    ids=['200_available', '404_unavailable', '403_unavailable'],
+)
+def test_detect_sli_endpoint(mock_openmetrics_http, instance, status_code, expected_available):
+    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=status_code)
+    KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
+    assert instance["slis_available"] is expected_available

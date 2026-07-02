@@ -11,6 +11,14 @@ from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.discovery.discovery import Discovery
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError as AgentHTTPConnectionError,
+)
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPInvalidURLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 from datadog_checks.base.utils.time import get_current_datetime, get_timestamp
 from datadog_checks.octopus_deploy.config_models.instance import ProjectGroups, Projects
 
@@ -74,7 +82,16 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             if report_service_check:
                 self.gauge('api.can_connect', 1, tags=self._base_tags)
             return response.json()
-        except (Timeout, HTTPError, InvalidURL, ConnectionError) as e:
+        except (
+            Timeout,
+            HTTPError,
+            InvalidURL,
+            ConnectionError,
+            HTTPTimeoutError,
+            HTTPStatusError,
+            HTTPInvalidURLError,
+            AgentHTTPConnectionError,
+        ) as e:
             if report_service_check:
                 self.gauge('api.can_connect', 0, tags=self._base_tags)
                 raise CheckException(

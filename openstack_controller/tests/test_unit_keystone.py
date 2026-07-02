@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
@@ -409,12 +409,12 @@ def test_region_id_in_tags(aggregator, dd_run_check, instance, openstack_control
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/identity': MockResponse(status_code=500)}},
+            {'http_error': {'/identity': MockHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/identity': MockResponse(status_code=500)}},
+            {'http_error': {'/identity': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -500,7 +500,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/regions': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/regions': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -508,7 +508,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         ),
         pytest.param(
             None,
-            {'http_error': {'regions': MockResponse(status_code=500)}},
+            {'http_error': {'regions': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -575,7 +575,7 @@ def test_regions_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/domains': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/domains': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -583,7 +583,7 @@ def test_regions_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'domains': MockResponse(status_code=500)}},
+            {'http_error': {'domains': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -670,7 +670,7 @@ def test_domains_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/projects': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/projects': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -678,7 +678,7 @@ def test_domains_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'projects': MockResponse(status_code=500)}},
+            {'http_error': {'projects': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -829,7 +829,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/users': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/users': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -837,7 +837,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'users': MockResponse(status_code=500)}},
+            {'http_error': {'users': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1024,7 +1024,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/groups': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/groups': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1032,7 +1032,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'groups': MockResponse(status_code=500)}},
+            {'http_error': {'groups': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1063,7 +1063,7 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
         pytest.param(
             {
                 'http_error': {
-                    '/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users': MockResponse(status_code=500)
+                    '/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users': MockHTTPResponse(status_code=500)
                 }
             },
             None,
@@ -1073,7 +1073,7 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
         ),
         pytest.param(
             None,
-            {'http_error': {'group_users': {'89b36a4c32c44b0ea8856b6357f101ea': MockResponse(status_code=500)}}},
+            {'http_error': {'group_users': {'89b36a4c32c44b0ea8856b6357f101ea': MockHTTPResponse(status_code=500)}}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1199,7 +1199,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/services': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/services': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1207,7 +1207,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'services': MockResponse(status_code=500)}},
+            {'http_error': {'services': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1344,7 +1344,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/registered_limits': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/registered_limits': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1352,7 +1352,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'registered_limits': MockResponse(status_code=500)}},
+            {'http_error': {'registered_limits': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1388,7 +1388,7 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/limits': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/limits': MockHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1396,7 +1396,7 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
         ),
         pytest.param(
             None,
-            {'http_error': {'limits': MockResponse(status_code=500)}},
+            {'http_error': {'limits': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',

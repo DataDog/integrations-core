@@ -11,6 +11,7 @@ import warnings
 from collections import ChainMap
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
+from typing import TYPE_CHECKING
 from urllib.parse import quote, urlparse, urlunparse
 
 import lazy_loader
@@ -28,8 +29,21 @@ from datadog_checks.base.utils import _http_utils
 
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+
+# Re-export HTTP exceptions for single import location
+from .http_exceptions import (  # noqa: F401
+    HTTPConnectionError,
+    HTTPError,
+    HTTPRequestError,
+    HTTPSSLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
+
+if TYPE_CHECKING:
+    from .http_protocol import HTTPClientProtocol, HTTPResponseProtocol  # noqa: F401
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -433,6 +447,20 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Look up a request header by name. Lookup is case-insensitive."""
+        for key, value in self.options['headers'].items():
+            if key.lower() == name.lower():
+                return value
+        return default
+
+    def set_header(self, name: str, value: str) -> None:
+        for key in self.options['headers']:
+            if key.lower() == name.lower():
+                self.options['headers'][key] = value
+                return
+        self.options['headers'][name] = value
 
     def get(self, url, **options):
         return self._request('get', url, options)

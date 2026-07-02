@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import mock
 import pytest
 
 from datadog_checks.etcd import Etcd
@@ -61,41 +60,6 @@ def test_service_check(aggregator, instance, dd_run_check):
     tags = ['endpoint:{}'.format(instance['prometheus_url'])]
 
     aggregator.assert_service_check('etcd.prometheus.health', Etcd.OK, tags=tags, count=1)
-
-
-@pytest.mark.parametrize(
-    'test_case, extra_config, expected_http_kwargs',
-    [
-        ("new auth config", {'username': 'new_foo', 'password': 'new_bar'}, {'auth': ('new_foo', 'new_bar')}),
-        ("legacy ssl config True", {'ssl_verify': True}, {'verify': True}),
-        ("legacy ssl config False", {'ssl_verify': False}, {'verify': False}),
-        ("legacy ssl config unset", {}, {'verify': False}),
-        ("timeout", {'prometheus_timeout': 100}, {'timeout': (100.0, 100.0)}),
-    ],
-)
-@pytest.mark.integration
-def test_config(instance, test_case, extra_config, expected_http_kwargs, dd_run_check):
-    instance.update(extra_config)
-    check = Etcd(CHECK_NAME, {}, [instance])
-
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_kwargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'data': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_kwargs.update(expected_http_kwargs)
-        r.post.assert_called_with(URL + '/v3/maintenance/status', **http_kwargs)
 
 
 @pytest.mark.integration

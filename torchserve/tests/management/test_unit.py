@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from ..conftest import mock_http_responses
@@ -39,7 +39,7 @@ def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_manage
             'http://torchserve:8081/models/linear_regression_1_1/all',
             'http://torchserve:8081/models/linear_regression_2_2/all',
         ):
-            return MockResponse(status_code=500)
+            return MockHTTPResponse(status_code=500)
 
         return mock_http_responses()(url)
 

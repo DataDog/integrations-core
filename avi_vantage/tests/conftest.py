@@ -4,14 +4,14 @@
 import json
 import os
 from typing import Any, AnyStr
+from unittest.mock import MagicMock
 from urllib.parse import urlparse
 
-import mock
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
@@ -57,7 +57,7 @@ def get_expected_metrics():
 
 
 @pytest.fixture
-def mock_client():
+def mock_client(mock_http):
     def mock_get(url: AnyStr, *__: Any, **___: Any):
         parsed = urlparse(url)
         resource = [part for part in parsed.path.split('/') if len(part) > 0][-1]
@@ -69,20 +69,21 @@ def mock_client():
         path['tenant=admin%2Ctenant_a%2Ctenant_b'] = MULTIPLE_TENANTS_METRICS_FOLDER
 
         if query_params:
-            return MockResponse(
+            return MockHTTPResponse(
                 file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
             )
 
-        return MockResponse(
+        return MockHTTPResponse(
             file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
         )
 
     def mock_post(url: AnyStr, *__: Any, **___: Any):
-        return mock.MagicMock(status_code=200, content=b'{"results": []}')
+        return MockHTTPResponse(json_data={"results": []})
 
-    with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.get', side_effect=mock_get):
-        with mock.patch('datadog_checks.base.utils.http.RequestsWrapper.post', new=mock_post):
-            yield
+    mock_http.session = MagicMock(cookies={})
+    mock_http.get.side_effect = mock_get
+    mock_http.post.side_effect = mock_post
+    yield
 
 
 @pytest.fixture(scope='session')

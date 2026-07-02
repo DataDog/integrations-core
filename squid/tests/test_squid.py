@@ -2,8 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
-import mock
 import pytest
+
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
 from . import common
 
@@ -78,12 +79,11 @@ def test_check_ok(aggregator, check, instance):
     ],
 )
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(check, instance, datadog_agent, raw_version, version_metadata, count):
-    with mock.patch('datadog_checks.base.utils.http.requests.Session.get') as g:
-        g.return_value.headers = {'Server': raw_version}
+def test_version_metadata(check, instance, datadog_agent, mock_http, raw_version, version_metadata, count):
+    mock_http.get.return_value = MockHTTPResponse(headers={'Server': raw_version})
 
-        check.check_id = 'test:123'
-        check.check(instance)
+    check.check_id = 'test:123'
+    check.check(instance)
 
-        datadog_agent.assert_metadata('test:123', version_metadata)
-        datadog_agent.assert_metadata_count(count)
+    datadog_agent.assert_metadata('test:123', version_metadata)
+    datadog_agent.assert_metadata_count(count)

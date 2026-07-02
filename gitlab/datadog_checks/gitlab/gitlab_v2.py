@@ -8,6 +8,7 @@ import requests
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 from datadog_checks.gitlab.config_models import ConfigMixin
 
 from .common import get_gitlab_version, get_tags
@@ -102,7 +103,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             else:
                 self.service_check(service_check_name, OpenMetricsBaseCheckV2.OK, self._tags)
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             self.service_check(
                 service_check_name,
                 OpenMetricsBaseCheckV2.CRITICAL,

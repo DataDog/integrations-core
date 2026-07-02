@@ -6,8 +6,8 @@ from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
 HERE = get_here()
@@ -83,38 +83,38 @@ EXTRA_NETWORK_METRICS = [
 def mocked_requests_get_linux(*args, **kwargs):
     # v2
     if args[0].endswith("/metadata"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
     elif args[0].endswith("/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE))
     else:
-        return MockResponse(status_code=404)
+        return MockHTTPResponse(status_code=404)
 
 
 def mocked_requests_get_linux_v4(*args, **kwargs):
     if args[0].endswith("/task"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata_v4.json'))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata_v4.json'))
     elif args[0].endswith("/task/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE_V4))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE_V4))
     else:
-        return MockResponse(status_code=404)
+        return MockHTTPResponse(status_code=404)
 
 
 def mocked_requests_get_windows(*args, **kwargs):
     if args[0].endswith("/metadata"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
     elif args[0].endswith("/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', WINDOWS_STATS_FIXTURE))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', WINDOWS_STATS_FIXTURE))
     else:
-        return MockResponse(status_code=404)
+        return MockHTTPResponse(status_code=404)
 
 
 def mocked_requests_get_sys_delta(*args, **kwargs):
     if args[0].endswith("/metadata"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
     elif args[0].endswith("/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'stats_wrong_system_delta.json'))
+        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'stats_wrong_system_delta.json'))
     else:
-        return MockResponse(status_code=404)
+        return MockHTTPResponse(status_code=404)
 
 
 def mocked_get_tags(entity, _):

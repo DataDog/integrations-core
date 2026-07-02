@@ -9,7 +9,7 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
@@ -33,7 +33,7 @@ from .constants import (
         pytest.param(
             {
                 'http_error': {
-                    '/api/spaces': MockResponse(status_code=500),
+                    '/api/spaces': MockHTTPResponse(status_code=500),
                 }
             },
             pytest.raises(Exception, match=r'Could not connect to octopus API.*'),
@@ -1038,10 +1038,10 @@ def test_empty_include(get_current_datetime, dd_run_check, aggregator):
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/tasks': MockResponse(status_code=500),
+                    '/api/Spaces-1/tasks': MockHTTPResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/tasks: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/tasks: 500 Server Error',
             id='http error',
         ),
     ],
@@ -1101,10 +1101,10 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator, ins
         pytest.param(
             {
                 'http_error': {
-                    '/api/octopusservernodes': MockResponse(status_code=500),
+                    '/api/octopusservernodes': MockHTTPResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/octopusservernodes: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/octopusservernodes: 500 Server Error',
             id='http error',
         ),
     ],
@@ -1545,10 +1545,10 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/environments': MockResponse(status_code=500),
+                    '/api/Spaces-1/environments': MockHTTPResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error',
             id='http error',
         ),
     ],
@@ -1651,10 +1651,10 @@ def test_environments_metrics_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/releases/Releases-3': MockResponse(status_code=500),
+                    '/api/Spaces-1/releases/Releases-3': MockHTTPResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/releases/Releases-3: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/releases/Releases-3: 500 Server Error',
             id='http error',
         ),
     ],
@@ -1879,10 +1879,10 @@ def test_deployment_metrics_releases_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/deployments/Deployments-18': MockResponse(status_code=500),
+                    '/api/Spaces-1/deployments/Deployments-18': MockHTTPResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/deployments/Deployments-18: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/deployments/Deployments-18: 500 Server Error',
             id='http error',
         ),
     ],
@@ -2111,10 +2111,10 @@ def test_deployment_metrics_deployments_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/environments': MockResponse(status_code=500),
+                    '/api/Spaces-1/environments': MockHTTPResponse(status_code=500),
                 }
             },
-            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error: None for url: None',
+            'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error',
             id='http error',
         ),
     ],

@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.tekton import TektonCheck
 
 HERE = get_here()
@@ -152,4 +152,4 @@ def mock_http_responses(url, **_params):
         raise Exception(f"url `{url}` not registered")
 
     with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockResponse(content=f.read())
+        return MockHTTPResponse(content=f.read())

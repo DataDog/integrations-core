@@ -8,6 +8,7 @@ from urllib.parse import urljoin
 import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 from .check import EnvoyCheckV2
 from .errors import UnknownMetric, UnknownTags
@@ -90,7 +91,7 @@ class Envoy(AgentCheck):
 
         try:
             response = self.http.get(self.stats_url)
-        except requests.exceptions.Timeout:
+        except (requests.exceptions.Timeout, HTTPTimeoutError):
             timeout = self.http.options['timeout']
             msg = 'Envoy endpoint `{}` timed out after {} seconds'.format(self.stats_url, timeout)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, message=msg, tags=self.custom_tags)

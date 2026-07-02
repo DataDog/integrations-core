@@ -5,10 +5,10 @@ import copy
 import os
 import time
 from contextlib import contextmanager
-from unittest import mock
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here, run_command
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
@@ -82,14 +82,9 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics():
+def mock_metrics(mock_http):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+    mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    yield

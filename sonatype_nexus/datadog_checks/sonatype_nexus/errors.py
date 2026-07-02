@@ -6,6 +6,8 @@ from typing import Any
 
 import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
+
 
 class APIError(Exception):
     default_message = "An unknown API error occurred."
@@ -80,7 +82,7 @@ def handle_errors(method: Callable) -> Callable:
 
             return response
 
-        except requests.exceptions.Timeout as ex:
+        except (requests.exceptions.Timeout, HTTPTimeoutError) as ex:
             self.log.error("TimeoutError: Timeout while requesting data from the API.")
             raise APIError("Timeout while requesting data from the API.") from ex
 

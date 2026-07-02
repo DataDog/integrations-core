@@ -10,7 +10,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
@@ -496,12 +496,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/load-balancer': MockResponse(status_code=500)}},
+            {'http_error': {'/load-balancer': MockHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/load-balancer': MockResponse(status_code=500)}},
+            {'http_error': {'/load-balancer': MockHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -579,7 +579,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/lbaas/loadbalancers': MockResponse(status_code=500),
+                    '/load-balancer/v2/lbaas/loadbalancers': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -592,8 +592,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             {
                 'http_error': {
                     'load_balancers': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -859,7 +859,7 @@ def test_loadbalancers_pagination(
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/lbaas/listeners': MockResponse(status_code=500),
+                    '/load-balancer/v2/lbaas/listeners': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -872,8 +872,8 @@ def test_loadbalancers_pagination(
             {
                 'http_error': {
                     'listeners': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -1523,7 +1523,7 @@ def test_listeners_pagination(
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/lbaas/pools': MockResponse(status_code=500),
+                    '/load-balancer/v2/lbaas/pools': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -1536,8 +1536,8 @@ def test_listeners_pagination(
             {
                 'http_error': {
                     'pools': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -1707,7 +1707,7 @@ def test_pools_pagination(
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3/members': MockResponse(
+                    '/load-balancer/v2/lbaas/pools/d0335b34-3115-4b3b-9a1a-7e2363ebfee3/members': MockHTTPResponse(
                         status_code=500
                     ),
                 }
@@ -1722,7 +1722,7 @@ def test_pools_pagination(
             {
                 'http_error': {
                     'pool_members': {
-                        'd0335b34-3115-4b3b-9a1a-7e2363ebfee3': MockResponse(status_code=500),
+                        'd0335b34-3115-4b3b-9a1a-7e2363ebfee3': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -1882,7 +1882,7 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/lbaas/healthmonitors': MockResponse(status_code=500),
+                    '/load-balancer/v2/lbaas/healthmonitors': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -1895,8 +1895,8 @@ def test_pool_members_metrics(aggregator, check, dd_run_check):
             {
                 'http_error': {
                     'health_monitors': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2052,7 +2052,7 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/lbaas/quotas': MockResponse(status_code=500),
+                    '/load-balancer/v2/lbaas/quotas': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -2065,8 +2065,8 @@ def test_healthmonitors_metrics(aggregator, check, dd_run_check):
             {
                 'http_error': {
                     'quotas': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2343,7 +2343,7 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
         pytest.param(
             {
                 'http_error': {
-                    '/load-balancer/v2/octavia/amphorae': MockResponse(status_code=500),
+                    '/load-balancer/v2/octavia/amphorae': MockHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -2356,8 +2356,8 @@ def test_quotas_metrics(aggregator, check, dd_run_check):
             {
                 'http_error': {
                     'amphorae': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
                     }
                 }
             },

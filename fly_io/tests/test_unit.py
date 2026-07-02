@@ -8,7 +8,7 @@ import logging
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.fly_io import FlyIoCheck
 
@@ -94,11 +94,11 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps': MockResponse(status_code=500)}},
+            {'http_error': {'/v1/apps': MockHTTPResponse(status_code=500)}},
             id='500',
         ),
         pytest.param(
-            {'http_error': {'/v1/apps': MockResponse(status_code=404)}},
+            {'http_error': {'/v1/apps': MockHTTPResponse(status_code=404)}},
             id='404',
         ),
     ],
@@ -107,7 +107,7 @@ def test_rest_api_app_metrics(dd_run_check, aggregator, instance, caplog):
 @pytest.mark.usefixtures('mock_http_get')
 def test_rest_api_exception(dd_run_check, instance, aggregator):
     check = FlyIoCheck('fly_io', {}, [instance])
-    with pytest.raises(Exception, match=r'requests.exceptions.HTTPError'):
+    with pytest.raises(Exception, match=r'HTTPStatusError'):
         dd_run_check(check)
 
     aggregator.assert_metric("fly_io.machines_api.up", value=0)
@@ -124,7 +124,9 @@ def test_rest_api_exception(dd_run_check, instance, aggregator):
         pytest.param(
             {
                 'http_error': {
-                    '/v1/apps/example-app-1/machines': MockResponse(json_data=[{'state': 'started', 'config': None}])
+                    '/v1/apps/example-app-1/machines': MockHTTPResponse(
+                        json_data=[{'state': 'started', 'config': None}]
+                    )
                 }
             },
             id='malformed response',
@@ -156,7 +158,7 @@ def test_bad_response_exception(dd_run_check, instance, aggregator, caplog):
     ('mock_http_get'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-1/volumes': MockResponse(status_code=404)}},
+            {'http_error': {'/v1/apps/example-app-1/volumes': MockHTTPResponse(status_code=404)}},
             id='http error',
         ),
     ],
@@ -169,8 +171,9 @@ def test_http_error_exception(dd_run_check, instance, aggregator, caplog):
     dd_run_check(check)
 
     assert (
-        "Encountered a RequestException in '_collect_volumes_for_app' [<class 'requests.exceptions.HTTPError'>]: "
-        "404 Client Error: None for url: None" in caplog.text
+        "Encountered a RequestException in '_collect_volumes_for_app'"
+        " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]: "
+        "404 Client Error" in caplog.text
     )
 
     for metric in MOCKED_PROMETHEUS_METRICS:
@@ -218,20 +221,28 @@ def test_external_host_tags(instance, datadog_agent, dd_run_check):
     ('mock_http_get, log_lines'),
     [
         pytest.param(
-            {'http_error': {'/v1/apps/example-app-2': MockResponse(status_code=404)}},
-            ['RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404'],
+            {'http_error': {'/v1/apps/example-app-2': MockHTTPResponse(status_code=404)}},
+            [
+                "RequestException in '_get_app_status'"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
+                " 404 Client Error"
+            ],
             id='one app',
         ),
         pytest.param(
             {
                 'http_error': {
-                    '/v1/apps/example-app-1': MockResponse(status_code=404),
-                    '/v1/apps/example-app-2': MockResponse(status_code=500),
+                    '/v1/apps/example-app-1': MockHTTPResponse(status_code=404),
+                    '/v1/apps/example-app-2': MockHTTPResponse(status_code=500),
                 }
             },
             [
-                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 404',
-                'RequestException in \'_get_app_status\' [<class \'requests.exceptions.HTTPError\'>]: 500',
+                "RequestException in '_get_app_status'"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
+                " 404 Client Error",
+                "RequestException in '_get_app_status'"
+                " [<class 'datadog_checks.base.utils.http_exceptions.HTTPStatusError'>]:"
+                " 500 Server Error",
             ],
             id='two apps',
         ),

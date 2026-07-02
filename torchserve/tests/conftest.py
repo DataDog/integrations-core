@@ -7,10 +7,10 @@ from contextlib import contextmanager
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.torchserve import TorchserveCheck
 
 from .common import (
@@ -135,7 +135,7 @@ def mock_http_responses(all_models_file='management/models.json'):
             pytest.fail(f"url `{url}` not registered")
 
         with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-            return MockResponse(content=f.read())
+            return MockHTTPResponse(content=f.read())
 
     return _mock_http_responses
 

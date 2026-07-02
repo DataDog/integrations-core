@@ -2,34 +2,21 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
 from collections import namedtuple
 
-import mock
 import pytest
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
-from .common import HERE
+from .common import make_mock_metrics
 
 # Constants
 CHECK_NAME = "kube_apiserver"
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(HERE, "fixtures", "metrics_slis_1.27.3.txt")
-    with open(f_name, "r") as f:
-        text_data = f.read()
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+def mock_metrics(mock_openmetrics_http):
+    return make_mock_metrics(mock_openmetrics_http, 'metrics_slis_1.27.3.txt')
 
 
 def test_check_metrics_slis(aggregator, mock_metrics, instance):

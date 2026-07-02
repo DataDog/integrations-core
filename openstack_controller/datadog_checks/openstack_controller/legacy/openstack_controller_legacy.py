@@ -13,6 +13,7 @@ from openstack.config.loader import OpenStackConfig
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 from .api import ApiFactory
 from .exceptions import (
@@ -764,7 +765,12 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         except AuthenticationNeeded:
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()
-        except (requests.exceptions.HTTPError, requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ) as e:
             if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code < 500:
                 self.warning("Error reaching Nova API: %s", e)
             else:

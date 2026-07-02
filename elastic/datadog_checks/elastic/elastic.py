@@ -11,6 +11,8 @@ from urllib.parse import urljoin, urlparse
 import requests
 
 from datadog_checks.base import AgentCheck, is_affirmative, to_string
+from datadog_checks.base.utils.http_exceptions import HTTPError as AgentHTTPError
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 from .config import from_instance
 from .metrics import (
@@ -164,7 +166,7 @@ class ESCheck(AgentCheck):
             try:
                 pshard_stats_data = self._get_data(pshard_stats_url, send_sc=send_sc)
                 self._process_pshard_stats_data(pshard_stats_data, pshard_stats_metrics, base_tags)
-            except requests.ReadTimeout as e:
+            except (requests.ReadTimeout, HTTPTimeoutError) as e:
                 if bubble_ex:
                     raise
                 self.log.warning("Timed out reading pshard-stats from servers (%s) - stats will be missing", e)
@@ -189,7 +191,7 @@ class ESCheck(AgentCheck):
         if self._config.index_stats and version >= [1, 0, 0]:
             try:
                 self._get_index_metrics(admin_forwarder, version, base_tags)
-            except requests.ReadTimeout as e:
+            except (requests.ReadTimeout, HTTPTimeoutError) as e:
                 self.log.warning("Timed out reading index stats from servers (%s) - stats will be missing", e)
 
         # Load the cat allocation data.
@@ -275,7 +277,7 @@ class ESCheck(AgentCheck):
     def _get_template_metrics(self, admin_forwarder, base_tags):
         try:
             template_resp = self._get_data(self._join_url('/_cat/templates?format=json', admin_forwarder))
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, AgentHTTPError) as e:
             self.log.debug("Error reading templates info from servers (%s) - template metrics will be missing", e)
             return
 
@@ -337,7 +339,7 @@ class ESCheck(AgentCheck):
             resp.raise_for_status()
         except Exception as e:
             # this means we've hit a particular kind of auth error that means the config is broken
-            if isinstance(resp, requests.Response) and resp.status_code == 400:
+            if resp is not None and resp.status_code == 400:
                 raise AuthenticationError("The ElasticSearch credentials are incorrect")
 
             if send_sc:
@@ -492,7 +494,7 @@ class ESCheck(AgentCheck):
         cat_allocation_url = self._join_url(self.CAT_ALLOC_PATH, admin_forwarder)
         try:
             cat_allocation_data = self._get_data(cat_allocation_url)
-        except requests.ReadTimeout as e:
+        except (requests.ReadTimeout, HTTPTimeoutError) as e:
             self.log.error("Timed out reading cat allocation stats from servers (%s) - stats will be missing", e)
             return
 
@@ -521,7 +523,7 @@ class ESCheck(AgentCheck):
             cat_shards_url = self._join_url(self.CAT_SHARDS_PATH, admin_forwarder)
             try:
                 cat_shards_data = self._get_data(cat_shards_url)
-            except requests.ReadTimeout as e:
+            except (requests.ReadTimeout, HTTPTimeoutError) as e:
                 self.log.error("Timed out reading cat shards stats from servers (%s) - stats will be missing", e)
                 return
 

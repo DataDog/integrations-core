@@ -8,8 +8,8 @@ from contextlib import ExitStack
 
 import pytest
 
+from datadog_checks.base.utils.http_testing import MockHTTPResponse  # noqa: F401
 from datadog_checks.dev import run_command
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.strimzi import StrimziCheck
@@ -103,4 +103,4 @@ def mock_http_responses(url, **_params):
         pytest.fail(f"url `{url}` not registered")
 
     with open(os.path.join(HERE, 'fixtures', STRIMZI_VERSION, metrics_file)) as f:
-        return MockResponse(content=f.read())
+        return MockHTTPResponse(content=f.read())

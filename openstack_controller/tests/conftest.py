@@ -14,10 +14,10 @@ import requests
 import yaml
 
 import tests.configs as configs
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 from .endpoints import IRONIC_ENDPOINTS, NOVA_ENDPOINTS
@@ -1000,7 +1000,7 @@ def mock_http_get(request, monkeypatch, mock_http_call):
         if http_error and url in http_error:
             return http_error[url]
         if data and url in data:
-            return MockResponse(json_data=data[url], status_code=200)
+            return MockHTTPResponse(json_data=data[url], status_code=200)
         headers = kwargs.get('headers')
         params = kwargs.get('params')
         mock_elapsed = mock.MagicMock(total_seconds=mock.MagicMock(return_value=elapsed_total_seconds.get(url, 0.0)))
@@ -1024,6 +1024,7 @@ def mock_http_post(request, monkeypatch, mock_http_call):
         url = get_url_path(url)
         if http_error and url in http_error:
             return http_error[url]
+        headers = None
         if url == '/identity/v3/auth/tokens':
             data = kwargs['json']
             file = data.get('auth', {}).get('scope', 'unscoped')
@@ -1038,7 +1039,7 @@ def mock_http_post(request, monkeypatch, mock_http_call):
             json_data = mock_http_call(method, url)
         if replace and url in replace:
             json_data = replace[url](json_data)
-        return MockResponse(json_data=json_data, status_code=200, headers=headers)
+        return MockHTTPResponse(json_data=json_data, status_code=200, headers=headers)
 
     mock_post = mock.MagicMock(side_effect=post)
     monkeypatch.setattr('requests.Session.post', mock_post)
