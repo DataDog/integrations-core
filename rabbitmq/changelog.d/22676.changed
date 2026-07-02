@@ -1,0 +1,1 @@
+Catch the backend-agnostic ``HTTPError`` base when fetching from the RabbitMQ API so the check keeps working after the httpx migration.
