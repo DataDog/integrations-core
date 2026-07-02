@@ -207,11 +207,11 @@ class Offset(BaseModel):
     )
     offset: Optional[int] = Field(
         None,
-        description="Offset to commit. Use -2 for earliest (log-start), -1 for latest\n(high-watermark), or a non-negative integer for an explicit position.\nMutually exclusive with timestamp. Requires 'partition'.\n",
+        description='Offset to commit. Use -2 for earliest (log-start), -1 for latest\n(high-watermark), or a non-negative integer for an explicit position.\nMutually exclusive with timestamp. Requires `partition`.\n',
     )
     partition: Optional[int] = Field(
         None,
-        description="Non-negative partition number. Required when 'offset' is specified.\nOptional when 'timestamp' is specified — omit to target all partitions.\n",
+        description='Non-negative partition number. Required when `offset` is specified.\nOptional when `timestamp` is specified. Omit to target all partitions.\n',
     )
     timestamp: Optional[int] = Field(
         None,
@@ -229,7 +229,7 @@ class UpdateConsumerGroupOffsets(BaseModel):
     consumer_group: str = Field(..., description='Consumer group ID to update', examples=['order-processor'])
     offsets: tuple[Offset, ...] = Field(
         ...,
-        description="List of offset specifications. Each entry must specify exactly one of 'offset'\nor 'timestamp'. See the action description for details.\n",
+        description='List of offset specifications. Each entry must specify exactly one of `offset`\nor `timestamp`. See the action description for details.\n',
         examples=[
             [
                 {'offset': 1000, 'partition': 0, 'topic': 'orders'},

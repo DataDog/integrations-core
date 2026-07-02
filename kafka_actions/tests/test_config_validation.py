@@ -3,12 +3,25 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import base64
+from contextlib import nullcontext
 
 import pytest
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_actions.config import KafkaActionsConfig
 
 pytestmark = [pytest.mark.unit]
+
+
+def _update_consumer_group_offsets_instance(offsets=None):
+    """Build an instance dict for the update_consumer_group_offsets action, omitting 'offsets' when None."""
+    action_config = {'cluster': 'test', 'consumer_group': 'test'}
+    if offsets is not None:
+        action_config['offsets'] = offsets
+    return {
+        'remote_config_id': 'test-id',
+        'kafka_connect_str': 'localhost:9092',
+        'update_consumer_group_offsets': action_config,
+    }
 
 
 class TestConfigValidation:
@@ -236,161 +249,64 @@ class TestDeleteTopicValidation:
 class TestUpdateConsumerGroupOffsetsValidation:
     """Test update_consumer_group_offsets action validation."""
 
-    def test_missing_offsets(self):
-        """Test that missing offsets raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {'cluster': 'test', 'consumer_group': 'test'},
-        }
-
-        with pytest.raises(ConfigurationError, match="update_consumer_group_offsets action requires 'offsets' list"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_missing_offset_and_timestamp(self):
-        """Test that an entry with neither offset nor timestamp raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test'}],
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'offset' or 'timestamp'"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_both_offset_and_timestamp(self):
-        """Test that specifying both offset and timestamp raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': 0, 'offset': 100, 'timestamp': 1735689600000}],
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\] cannot specify both 'offset' and 'timestamp'"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_missing_partition_with_offset(self):
-        """Test that partition is required when offset is specified."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'offset': 100}],
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\] requires 'partition' when 'offset' is specified"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_out_of_range_offset(self):
-        """Test that an offset below -2 raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': 0, 'offset': -3}],
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\].offset must be -2"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_sentinel_offsets_are_valid(self):
-        """Test that -2 (earliest) and -1 (latest) sentinel offsets pass validation."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [
+    @pytest.mark.parametrize(
+        ('offsets', 'expected_error'),
+        [
+            pytest.param(None, "update_consumer_group_offsets action requires 'offsets' list", id='missing_offsets'),
+            pytest.param(
+                [{'topic': 'test'}],
+                r"offsets\[0\] requires 'offset' or 'timestamp'",
+                id='missing_offset_and_timestamp',
+            ),
+            pytest.param(
+                [{'topic': 'test', 'partition': 0, 'offset': 100, 'timestamp': 1735689600000}],
+                r"offsets\[0\] cannot specify both 'offset' and 'timestamp'",
+                id='both_offset_and_timestamp',
+            ),
+            pytest.param(
+                [{'topic': 'test', 'offset': 100}],
+                r"offsets\[0\] requires 'partition' when 'offset' is specified",
+                id='missing_partition_with_offset',
+            ),
+            pytest.param(
+                [{'topic': 'test', 'partition': 0, 'offset': -3}],
+                r"offsets\[0\].offset must be -2",
+                id='out_of_range_offset',
+            ),
+            pytest.param(
+                [
                     {'topic': 'test', 'partition': 0, 'offset': -2},
                     {'topic': 'test', 'partition': 1, 'offset': -1},
                 ],
-            },
-        }
+                None,
+                id='sentinel_offsets_are_valid',
+            ),
+            pytest.param(
+                [{'topic': 'test', 'partition': -1, 'offset': 0}],
+                r"offsets\[0\].partition must be a non-negative integer",
+                id='negative_partition',
+            ),
+            pytest.param(
+                [{'topic': 'test', 'timestamp': -1}],
+                r"offsets\[0\].timestamp must be a positive integer",
+                id='invalid_timestamp',
+            ),
+            pytest.param([{'topic': 'test', 'timestamp': 1735689600000}], None, id='valid_timestamp_all_partitions'),
+            pytest.param(
+                [{'topic': 'test', 'partition': 2, 'timestamp': 1735689600000}],
+                None,
+                id='valid_timestamp_specific_partition',
+            ),
+        ],
+    )
+    def test_offsets_validation(self, offsets, expected_error):
+        """Test update_consumer_group_offsets offsets validation across valid and invalid entries."""
+        instance = _update_consumer_group_offsets_instance(offsets)
+        expectation = pytest.raises(ConfigurationError, match=expected_error) if expected_error else nullcontext()
 
-        config = KafkaActionsConfig(instance, None)
-        config.validate_config()  # should not raise
-
-    def test_negative_partition(self):
-        """Test that a negative partition raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': -1, 'offset': 0}],
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\].partition must be a non-negative integer"):
+        with expectation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
-
-    def test_invalid_timestamp(self):
-        """Test that a non-positive timestamp raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'timestamp': -1}],
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="offsets\\[0\\].timestamp must be a positive integer"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_valid_timestamp_all_partitions(self):
-        """Test that a timestamp entry without partition passes validation."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'timestamp': 1735689600000}],
-            },
-        }
-
-        config = KafkaActionsConfig(instance, None)
-        config.validate_config()  # should not raise
-
-    def test_valid_timestamp_specific_partition(self):
-        """Test that a timestamp entry with a partition passes validation."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'update_consumer_group_offsets': {
-                'cluster': 'test',
-                'consumer_group': 'test',
-                'offsets': [{'topic': 'test', 'partition': 2, 'timestamp': 1735689600000}],
-            },
-        }
-
-        config = KafkaActionsConfig(instance, None)
-        config.validate_config()  # should not raise
 
 
 class TestProduceMessageValidation:

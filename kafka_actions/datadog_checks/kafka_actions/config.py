@@ -289,6 +289,11 @@ class KafkaActionsConfig:
         if not config.get('consumer_group'):
             raise ConfigurationError("delete_consumer_group action requires 'consumer_group' parameter")
 
+    def _validate_offset_entry_partition(self, offset_entry: dict, index: int) -> None:
+        """Validate that offsets[index].partition, if present, is a non-negative integer."""
+        if not isinstance(offset_entry['partition'], int) or offset_entry['partition'] < 0:
+            raise ConfigurationError(f"offsets[{index}].partition must be a non-negative integer")
+
     def _validate_update_consumer_group_offsets(self):
         """Validate update_consumer_group_offsets action configuration."""
         config = self.update_consumer_group_offsets
@@ -323,8 +328,7 @@ class KafkaActionsConfig:
                 if 'partition' not in offset_entry:
                     raise ConfigurationError(f"offsets[{i}] requires 'partition' when 'offset' is specified")
 
-                if not isinstance(offset_entry['partition'], int) or offset_entry['partition'] < 0:
-                    raise ConfigurationError(f"offsets[{i}].partition must be a non-negative integer")
+                self._validate_offset_entry_partition(offset_entry, i)
 
                 offset_val = offset_entry['offset']
                 if not isinstance(offset_val, int) or offset_val < -2:
@@ -340,8 +344,7 @@ class KafkaActionsConfig:
                     )
 
                 if 'partition' in offset_entry:
-                    if not isinstance(offset_entry['partition'], int) or offset_entry['partition'] < 0:
-                        raise ConfigurationError(f"offsets[{i}].partition must be a non-negative integer")
+                    self._validate_offset_entry_partition(offset_entry, i)
 
     def _validate_produce_message(self):
         """Validate produce_message action configuration."""

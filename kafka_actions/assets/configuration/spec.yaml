@@ -502,16 +502,16 @@ files:
       description: |
         Configuration for updating consumer group offsets.
         WARNING: Can cause duplicate processing or data loss.
-        The consumer group must have no active members before this action runs;
-        the check enforces this and will fail with a clear error if members are found.
+        The consumer group must have no active members before this action runs.
+        The check enforces this and will fail with a clear error if members are found.
 
-        Each entry in 'offsets' must specify exactly one of:
+        Each entry in `offsets` must specify exactly one of:
           - offset: commit a specific offset. Use -2 for earliest, -1 for latest,
-            or a non-negative integer for an explicit position. Requires 'partition'.
+            or a non-negative integer for an explicit position. Requires `partition`.
           - timestamp: milliseconds since epoch. Resets every matching partition to
             the first offset at or after this timestamp. If no message exists at or
             after the timestamp in a partition, that partition is reset to latest.
-            'partition' is optional — omit it to target all partitions of the topic.
+            `partition` is optional. Omit it to target all partitions of the topic.
         Mixing both fields in the same entry is an error.
       value:
         type: object
@@ -543,8 +543,8 @@ files:
         - name: offsets
           type: array
           description: |
-            List of offset specifications. Each entry must specify exactly one of 'offset'
-            or 'timestamp'. See the action description for details.
+            List of offset specifications. Each entry must specify exactly one of `offset`
+            or `timestamp`. See the action description for details.
           items:
             type: object
             required:
@@ -556,14 +556,14 @@ files:
             - name: partition
               type: integer
               description: |
-                Non-negative partition number. Required when 'offset' is specified.
-                Optional when 'timestamp' is specified — omit to target all partitions.
+                Non-negative partition number. Required when `offset` is specified.
+                Optional when `timestamp` is specified. Omit to target all partitions.
             - name: offset
               type: integer
               description: |
                 Offset to commit. Use -2 for earliest (log-start), -1 for latest
                 (high-watermark), or a non-negative integer for an explicit position.
-                Mutually exclusive with timestamp. Requires 'partition'.
+                Mutually exclusive with timestamp. Requires `partition`.
             - name: timestamp
               type: integer
               description: |
