@@ -61,6 +61,11 @@ jobs:
       python-version: "${{ inputs.python-version }}"
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    permissions:
+      # needed for compute-matrix in test-target.yml
+      contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
 
   test-minimum-base-package:
     needs:
@@ -93,6 +98,11 @@ jobs:
       pytest-args: ${{ inputs.pytest-args }}
       context: "pr"
     secrets: inherit
+    permissions:
+      # needed for compute-matrix in test-target.yml
+      contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
 
   save-event:
     needs:
