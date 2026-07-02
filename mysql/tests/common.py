@@ -27,12 +27,14 @@ MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', '')
 
 
 def mysql_root_password():
-    """Root password for the current image. The official mysql image (used for MySQL 9) and
-    percona set one, as do the group/hybrid replication composes; the bitnami images used for
-    older versions (and the ``latest`` tag) allow an empty root password."""
+    """Root password for the current image. The official mysql (MySQL 9) and mariadb (12.1+/13 RC)
+    images and percona set one, as do the group/hybrid replication composes; the bitnami images used
+    for older versions (and the ``latest`` tag) allow an empty root password."""
     if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION in ('group', 'hybrid'):
         return 'mypass'
     if MYSQL_FLAVOR == 'mysql' and os.getenv('MYSQL_VERSION', '').startswith('9'):
+        return 'mypass'
+    if MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION_PARSED > parse_version('12.0'):
         return 'mypass'
     return None
 
