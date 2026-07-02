@@ -1029,6 +1029,41 @@ async def test_empty_tool_results_produces_empty_content_block() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Failed tool results reach the API as is_error blocks
+#
+# This is what the ReAct loop's truncation-recovery path (ddev.ai.react.process) actually
+# depends on: it hands AnthropicAgent.send() a failed ToolResult carrying a recovery hint as
+# `error`, and the model can only see that hint if it's serialized into the request. Process-level
+# tests only assert the hint reaches agent.send() as a ToolResultMessage; this is the layer that
+# turns it into the bytes the model actually receives on retry.
+# ---------------------------------------------------------------------------
+
+
+async def test_failed_tool_result_serialized_as_error_block_with_error_text() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+    hint = "Retry with a smaller, more targeted change."
+
+    await agent.send([ToolResultMessage(tool_call_id="tc_01", result=ToolResult(success=False, error=hint))])
+
+    block = create_mock.call_args.kwargs["messages"][-1]["content"][0]
+    assert block["tool_use_id"] == "tc_01"
+    assert block["is_error"] is True
+    assert block["content"] == hint
+
+
+async def test_failed_tool_result_without_error_text_falls_back_to_placeholder() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+
+    await agent.send([ToolResultMessage(tool_call_id="tc_01", result=ToolResult(success=False))])
+
+    block = create_mock.call_args.kwargs["messages"][-1]["content"][0]
+    assert block["is_error"] is True
+    assert block["content"] == "(unknown error)"
+
+
+# ---------------------------------------------------------------------------
 # Prompt caching: history must not retain cache_control markers
 # (otherwise multi-turn requests would exceed the 4-marker limit)
 # ---------------------------------------------------------------------------
