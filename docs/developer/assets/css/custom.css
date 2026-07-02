@@ -5,6 +5,26 @@
 
   /* https://github.com/squidfunk/mkdocs-material/blob/9.1.2/src/assets/stylesheets/palette/_primary.scss#L34 */
   --md-primary-fg-color--light: #9574CD;
+
+  --md-primary-bg-color: #fff;
+  --md-primary-bg-color--light: #ffffffb3;
+}
+
+/*
+ * Restore the Material-style purple header. Zensical's default header uses the
+ * page background color; we want the Datadog purple instead.
+ */
+.md-header,
+.md-tabs {
+  background-color: var(--md-primary-fg-color);
+  color: var(--md-primary-bg-color);
+}
+
+.md-search__form {
+  background-color: #00000042;
+}
+.md-search__form:hover {
+  background-color: #ffffff1f;
 }
 
 /* Brighter links for dark mode */

@@ -1,21 +1,16 @@
 [envs.docs]
 dependencies = [
-  "mkdocs~=1.6",
-  "mkdocs-material~=9.5",
+  "zensical>=0.0.36",
   # Plugins
-  "mkdocs-minify-plugin~=0.8",
   "mkdocs-git-revision-date-localized-plugin~=1.2.0",
   "mkdocstrings-python~=1.18.2",
   "mkdocs-redirects~=1.2.1",
   "mkdocs-glightbox~=0.3.4",
-  "mkdocs-pdf-export-plugin~=0.5.10",
-  "weasyprint~=56.1.0",
   # Extensions
   "mkdocs-click~=0.8.0",
-  "pymdown-extensions~=10.3.0",
-  "mkpatcher~=1.0.2",
+  "pymdown-extensions>=10.21.2",
   # Necessary for syntax highlighting in code blocks
-  "pygments~=2.19.2",
+  "pygments>=2.20",
   # Validation
   "linkchecker~=10.6.0",
 ]
@@ -29,11 +24,18 @@ post-install-commands = [
 # https://reproducible-builds.org/specs/source-date-epoch/
 SOURCE_DATE_EPOCH = "1580601600"
 [envs.docs.scripts]
-build = "mkdocs build --clean --strict {args}"
-serve = "mkdocs serve --dev-addr localhost:8000 {args}"
+prepare = "python docs/developer/.scripts/prepare_docs.py"
+build = [
+  "prepare",
+  "zensical build --clean --strict {args}",
+]
+serve = [
+  "prepare",
+  "zensical serve --dev-addr localhost:8000 {args}",
+]
 validate = "linkchecker --config .linkcheckerrc site"
 # https://github.com/linkchecker/linkchecker/issues/678
 build-check = [
-  "build --no-directory-urls",
+  "build",
   "validate",
 ]
