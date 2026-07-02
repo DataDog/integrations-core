@@ -185,7 +185,7 @@ class KafkaCheck(AgentCheck):
         )
 
     def _collect_connect_status(self, cluster_id: str) -> dict[str, bool] | None:
-        """Collect connector status for all configured Connect URLs, or None if unconfigured."""
+        """Collect connector status for all configured Connect endpoints, or None if unconfigured."""
         if not self.config._kafka_connect_urls:
             return None
         try:
