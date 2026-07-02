@@ -13,7 +13,7 @@ from datadog_checks.base.utils.timeout import TimeoutException
 from datadog_checks.dev.testing import requires_linux, requires_windows
 from datadog_checks.dev.utils import ON_WINDOWS, get_metadata_metrics, mock_context_manager
 from datadog_checks.disk import Disk
-from datadog_checks.disk.disk import IGNORE_CASE
+from datadog_checks.disk.disk import IGNORE_CASE, _base_device_name
 
 if ON_WINDOWS:
     DEFAULT_DEVICE_NAME = 'c:'
@@ -656,6 +656,49 @@ def test_device_include_exclude():
     assert c.exclude_disk(MockPart(device='/dev/sda2')) is False
     assert c.exclude_disk(MockPart(device='/dev/sda3')) is True
     assert c.exclude_disk(MockPart(device='/dev/sda4')) is True
+
+
+def test_latency_metrics_respect_device_include(aggregator):
+    """
+    collect_latency_metrics must only emit metrics for devices in included_devices.
+
+    On Linux, disk_io_counters() returns bare names (e.g. sda1) while
+    disk_partitions() returns full paths (e.g. /dev/sda1). The included_devices
+    set is built from _base_device_name values, which normalises both formats to
+    the same bare name so matching works cross-platform.
+    """
+    if ON_WINDOWS:
+        included_io_key = 'C:'
+        excluded_io_key = 'D:'
+    else:
+        included_io_key = 'sda1'
+        excluded_io_key = 'sdb1'
+
+    io_counters = {included_io_key: MockDiskMetrics(), excluded_io_key: MockDiskMetrics()}
+    included_devices = {_base_device_name(included_io_key)}
+
+    c = Disk('disk', {}, [{'tag_by_label': False}])
+
+    with mock.patch('psutil.disk_io_counters', return_value=io_counters):
+        c.collect_latency_metrics(included_devices)
+
+    latency_metrics = [
+        'system.disk.read_time',
+        'system.disk.write_time',
+        'system.disk.read_time_pct',
+        'system.disk.write_time_pct',
+    ]
+    for metric in latency_metrics:
+        aggregator.assert_metric(
+            metric,
+            tags=['device:{}'.format(included_io_key), 'device_name:{}'.format(_base_device_name(included_io_key))],
+            count=1,
+        )
+        aggregator.assert_metric(
+            metric,
+            tags=['device:{}'.format(excluded_io_key), 'device_name:{}'.format(_base_device_name(excluded_io_key))],
+            count=0,
+        )
 
 
 def test_mount_point_include():
