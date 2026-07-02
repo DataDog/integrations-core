@@ -55,8 +55,13 @@ def dd_environment(config_e2e):
     logs_path = _mysql_logs_path()
 
     with TempDir('logs') as logs_host_path:
-        # for Ubuntu
-        os.chmod(logs_host_path, 0o770)
+        # for Ubuntu, make the shared logs dir writable by the container's user. In E2E runs
+        # TempDir reuses the same host dir across env start/test; when it is no longer owned by
+        # the current user the re-chmod is not permitted, but it was already set on creation.
+        try:
+            os.chmod(logs_host_path, 0o770)
+        except PermissionError:
+            pass
 
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(logs_host_path, logs_path)]}
 
