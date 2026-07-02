@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch, split_artifact_name
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import WorkflowJob, WorkflowRun
@@ -154,30 +154,24 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     ) -> list[BatchJobResult]:
         """Correlate each job's spec, its workflow-run result, and its artifact directory.
 
-        The workflow-job join is by name (tolerant of misses). Each downloaded artifact folder is
-        identified by reversing its name into ``(target, environment, platform)``, which is matched
-        to the batch job. That single folder holds the three per-facet files, whose names
-        (``unit-``/``e2e-``/``coverage-`` prefixed on the base name) are recorded for the gatherer.
-        A job missing from the API or from disk still yields a well-formed result.
+        The workflow-job join is by name (tolerant of misses). Each job's artifact folder is matched
+        by reconstructing its name from the job's fields (``artifact_name``) and looking it up among
+        the downloaded folders; the path is recorded only when it exists on disk. That single folder
+        holds the three per-facet files, whose names (``unit-``/``e2e-``/``coverage-`` prefixed on
+        the base name) are recorded for the gatherer. A job missing from the API or from disk still
+        yields a well-formed result.
         """
         jobs_by_name = {job.name: job for job in jobs}
-        # Reverse each downloaded artifact's name to identify which target/env/platform it belongs to.
-        dirs_by_fields: dict[tuple[str, str, str], Path] = {}
-        for artifact_name, path in artifact_dirs.items():
-            try:
-                dirs_by_fields[split_artifact_name(artifact_name)] = path
-            except ValueError:
-                continue
 
         results: list[BatchJobResult] = []
         for batch_job in job_list:
             base = batch_job.artifact_name()
-            artifact_dir = dirs_by_fields.get(split_artifact_name(base))
+            artifact_dir = artifact_dirs.get(base)
             results.append(
                 BatchJobResult(
                     job=batch_job,
                     workflow_job=jobs_by_name.get(batch_job.name),
-                    artifacts_path=str(artifact_dir) if artifact_dir is not None else None,
+                    artifacts_path=str(artifact_dir) if artifact_dir is not None and artifact_dir.exists() else None,
                     unit_artifact_name=f"unit-{base}",
                     e2e_artifact_name=f"e2e-{base}",
                     coverage_artifact_name=f"coverage-{base}",
@@ -196,7 +190,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
     @staticmethod
     def _job_input(job: BatchJob) -> dict[str, Any]:
         """Serialize a job for the workflow, carrying the artifact name so all its files upload under
-        a single folder/zip named after it (splittable later via ``split_artifact_name``)."""
+        a single folder/zip named after it (matched later via ``BatchJob.artifact_name``)."""
         return {**dataclasses.asdict(job), "artifact_name": job.artifact_name()}
 
     async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> tuple[Path, dict[str, Path]]:

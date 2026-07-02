@@ -184,7 +184,7 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
                         "platform": "linux",
                         "unit_tests": True,
                         "e2e_tests": False,
-                        "artifact_name": "ntp~py3.13~linux",
+                        "artifact_name": "ntp_py3.13_linux",
                     },
                     {
                         "name": "j2",
@@ -194,7 +194,7 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
                         "platform": "linux",
                         "unit_tests": True,
                         "e2e_tests": False,
-                        "artifact_name": "ntp~py3.13~linux",
+                        "artifact_name": "ntp_py3.13_linux",
                     },
                 ]
             ),

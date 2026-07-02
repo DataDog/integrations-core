@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.cli.ci.tests.messages import ARTIFACT_NAME_DISALLOWED, BatchJob, split_artifact_name
+from ddev.cli.ci.tests.messages import ARTIFACT_NAME_DISALLOWED, BatchJob
 
 
 def _job(**overrides: object) -> BatchJob:
@@ -29,18 +29,7 @@ def test_artifact_name_is_deterministic() -> None:
 
 
 def test_artifact_name_built_from_target_env_platform() -> None:
-    assert _job().artifact_name() == "ntp~py3.13~linux"
-
-
-def test_artifact_name_is_reversible() -> None:
-    # split_artifact_name recovers (target, environment, platform) even when fields contain hyphens.
-    job = _job(target="datadog_checks_base", environment="py3.13-18", platform="linux")
-    assert split_artifact_name(job.artifact_name()) == ("datadog_checks_base", "py3.13-18", "linux")
-
-
-def test_split_artifact_name_rejects_unexpected_shape() -> None:
-    with pytest.raises(ValueError):
-        split_artifact_name("not-a-valid-artifact-name")
+    assert _job().artifact_name() == "ntp_py3.13_linux"
 
 
 @pytest.mark.parametrize("field", ["name", "runner", "unit_tests", "e2e_tests"])

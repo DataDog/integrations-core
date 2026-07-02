@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 
 # Characters GitHub disallows in an artifact name (plus CR/LF).
 ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
-# Reserved separator between the artifact name's fields. Chosen so it never appears in a field
-# value (target/environment/platform), which keeps the name reversible via a plain split.
-ARTIFACT_NAME_SEPARATOR = "~"
+# Separator between the artifact name's fields. Names are matched by reconstruction, not by
+# splitting, so the separator does not need to be absent from the field values.
+ARTIFACT_NAME_SEPARATOR = "_"
 
 
 @dataclass
@@ -32,25 +32,14 @@ class BatchJob:
     e2e_tests: bool
 
     def artifact_name(self) -> str:
-        """Reversible artifact name built from the job's target, environment, and platform.
+        """Deterministic artifact name built from the job's target, environment, and platform.
 
         Pure and deterministic. Each field is sanitized to GitHub's artifact-name constraints and
-        joined by a reserved separator absent from the values, so the name can be split back into
-        ``(target, environment, platform)``. Uniqueness within a batch relies on those three fields
-        being distinct per job.
+        joined by the separator. Uniqueness within a batch relies on those three fields being
+        distinct per job.
         """
         fields = (self.target, self.environment, self.platform)
         return ARTIFACT_NAME_SEPARATOR.join(ARTIFACT_NAME_DISALLOWED.sub("_", field) for field in fields)
-
-
-def split_artifact_name(artifact_name: str) -> tuple[str, str, str]:
-    """Reverse ``BatchJob.artifact_name`` into ``(target, environment, platform)``.
-
-    Raises ``ValueError`` when ``artifact_name`` is not the expected three-field shape, so callers
-    can skip artifacts that are not per-job test artifacts.
-    """
-    target, environment, platform = artifact_name.split(ARTIFACT_NAME_SEPARATOR)
-    return target, environment, platform
 
 
 @dataclass

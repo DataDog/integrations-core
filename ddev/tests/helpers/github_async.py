@@ -37,6 +37,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -412,6 +413,7 @@ class FakeAsyncGitHubClient:
         )
         if isinstance(response, BaseException):
             raise response
+        Path(dest_path).mkdir(parents=True, exist_ok=True)
         return None
 
     async def aclose(self) -> None:
