@@ -33,15 +33,11 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
     aggregator.assert_metric('pulsar.topics_count', at_least=1)
     aggregator.assert_service_check('pulsar.openmetrics.health', ServiceCheck.OK, at_least=1)
-    # Cannot replicate test_check's assertion style here because:
-    # - The discovered endpoint URL is the container's IP at runtime, not a fixed value,
-    #   so we can't assert the `endpoint:` tag on each metric as test_check does.
-    # - check_symmetric_inclusion=False because pulsar.broker_lookup.quantile is a summary
-    #   quantile only emitted when broker lookup operations have occurred. In the test
-    #   environment with no active clients no lookups happen, so the metric is absent.
+    # No per-metric endpoint: tag assertion, unlike test_check — the discovered endpoint is a runtime container IP.
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
         check_submission_type=True,
+        # broker_lookup.quantile only emits after a lookup; the test environment has no clients triggering one.
         check_symmetric_inclusion=False,
     )
 
