@@ -4,6 +4,7 @@
 import json
 
 import pytest
+
 from datadog_checks.dev._env import e2e_testing
 
 from . import common
