@@ -13,10 +13,14 @@ from typing import TYPE_CHECKING
 from .resources_constants import (
     GENRESOURCES_STREAM_EVENTS_METRIC,
     GENRESOURCES_STREAM_RECONNECTS_METRIC,
-    GENRESOURCES_STREAM_UP_METRIC,
+    auth_headers,
 )
 
 if TYPE_CHECKING:
+    from requests import Response
+
+    from datadog_checks.base.utils.http import RequestsWrapper
+
     from .check import ArgocdCheck
     from .resources import ArgocdResourceCollector
 
@@ -31,9 +35,10 @@ class ArgocdApplicationStreamListener:
 
     Each watch event arrives as a line ``{"result": {"type": "ADDED|MODIFIED|DELETED", "application": {...}}}``;
     the embedded application is the same shape as a polled one, so it flows through the collector's existing
-    sanitize/allow-list/dedup/submit pipeline unchanged. Runs on a single dedicated daemon thread: the clean
-    shutdown path is ``cancel()`` (signal + close the socket) followed by ``join()``; ``daemon=True`` is only a
-    backstop for a hard interpreter exit that never calls ``cancel()``.
+    sanitize/allow-list/dedup/submit pipeline unchanged. Runs on a single dedicated daemon thread. The clean
+    shutdown path is ``cancel()`` (signal the loop and close the socket to unblock ``iter_lines``); it does not
+    block, and callers may ``join()`` afterwards to wait. ``daemon=True`` is only a backstop for a hard
+    interpreter exit that never calls ``cancel()``.
     """
 
     def __init__(
@@ -44,15 +49,18 @@ class ArgocdApplicationStreamListener:
         endpoint: str,
         auth_token: str | None,
         backoff_max_seconds: int,
+        http: "RequestsWrapper",
     ) -> None:
         self.check = check
         self._collector = collector
+        self._http = http
         self._endpoint = endpoint.rstrip("/")
         self._auth_token = auth_token
         self._backoff_max = max(1, backoff_max_seconds)
         self._stop = threading.Event()
+        self._connected = threading.Event()
         self._thread: threading.Thread | None = None
-        self._response = None
+        self._response: Response | None = None
 
     def start(self) -> None:
         if self.is_alive():
@@ -64,8 +72,12 @@ class ArgocdApplicationStreamListener:
     def is_alive(self) -> bool:
         return self._thread is not None and self._thread.is_alive()
 
+    def is_connected(self) -> bool:
+        """True while the watch stream is open; read from the check thread to emit the stream.up gauge."""
+        return self._connected.is_set()
+
     def cancel(self) -> None:
-        """Signal the loop to stop and close the active connection to unblock ``iter_lines``. Does not join."""
+        """Signal the loop to stop and close the active connection to unblock ``iter_lines``. Does not block."""
         self._stop.set()
         response = self._response
         if response is not None:
@@ -85,46 +97,58 @@ class ArgocdApplicationStreamListener:
     def _run(self) -> None:
         backoff = INITIAL_BACKOFF_SECONDS
         while not self._stop.is_set():
-            got_data = False
-            try:
-                got_data = self._stream_once()
-            except Exception as exc:
-                if not self._stop.is_set():
-                    self.check.log.warning("genresources: application stream error: %s", exc)
+            got_data = self._stream_once()  # never raises; it reports connection errors as a False return
             if self._stop.is_set():
                 break
             # Back off on every disconnect (clean or error); reset only after a connection that
             # actually delivered data, so a server that closes on connect can't become a hot loop.
-            self.check.gauge(GENRESOURCES_STREAM_UP_METRIC, 0)
             self.check.count(GENRESOURCES_STREAM_RECONNECTS_METRIC, 1)
             if got_data:
                 backoff = INITIAL_BACKOFF_SECONDS
             self._sleep(backoff)
             if not got_data:
                 backoff = min(backoff * 2, self._backoff_max)
-        self.check.gauge(GENRESOURCES_STREAM_UP_METRIC, 0)
 
     def _stream_once(self) -> bool:
-        """Open the stream and process events until it ends or stop is signaled; return True if any line arrived."""
+        """Open the stream and process events until it ends, errors, or stop is signaled.
+
+        Catches connection errors internally (the supervisor loop never sees them) and returns whether any
+        line arrived before the connection ended -- including when it ended by raising -- so a connection
+        that actually delivered data resets the backoff regardless of how it dropped.
+        """
         url = self._endpoint + STREAM_PATH
-        kwargs: dict = {"stream": True, "timeout": (CONNECT_TIMEOUT_SECONDS, READ_TIMEOUT_SECONDS)}
-        if self._auth_token:
-            kwargs["headers"] = {"Authorization": f"Bearer {self._auth_token}"}
-        response = self.check.http.get(url, **kwargs)
-        self._response = response
+        kwargs: dict = {
+            "stream": True,
+            "timeout": (CONNECT_TIMEOUT_SECONDS, READ_TIMEOUT_SECONDS),
+            "headers": auth_headers(self._auth_token),
+        }
         got_data = False
+        response = None
         try:
+            response = self._http.get(url, **kwargs)
+            self._response = response
             response.raise_for_status()
-            self.check.gauge(GENRESOURCES_STREAM_UP_METRIC, 1)
+            self._connected.set()
             for line in response.iter_lines():
                 if self._stop.is_set():
                     break
                 if line:
                     got_data = True
-                    self._handle_line(line)
+                    try:
+                        self._handle_line(line)
+                    except Exception:
+                        self.check.log.warning("genresources: failed to handle stream line", exc_info=True)
+        except Exception as exc:
+            if not self._stop.is_set():
+                self.check.log.warning("genresources: application stream error: %s", exc)
         finally:
+            self._connected.clear()
             self._response = None
-            response.close()
+            if response is not None:
+                try:
+                    response.close()
+                except Exception:
+                    pass
         return got_data
 
     def _handle_line(self, line: bytes) -> None:
@@ -139,7 +163,8 @@ class ArgocdApplicationStreamListener:
         if not isinstance(application, dict):
             return
         self.check.count(GENRESOURCES_STREAM_EVENTS_METRIC, 1)
-        if result.get("type") == "DELETED":
+        event_type = result.get("type")
+        if event_type == "DELETED":
             self._collector.forget_application(application)
-        else:
+        elif event_type in ("ADDED", "MODIFIED"):
             self._collector.emit_stream_application(application)

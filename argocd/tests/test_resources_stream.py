@@ -6,22 +6,23 @@ from __future__ import annotations
 
 import json
 import threading
+import time
 from unittest.mock import Mock, patch
 
-from datadog_checks.argocd import ArgocdCheck
-from datadog_checks.argocd.resources import ArgocdResourceCollector
+import pytest
+
+from datadog_checks.argocd.resources_constants import (
+    GENRESOURCES_API_UP_METRIC,
+    GENRESOURCES_STREAM_EVENTS_METRIC,
+    GENRESOURCES_STREAM_RECONNECTS_METRIC,
+    GENRESOURCES_STREAM_UP_METRIC,
+)
 from datadog_checks.argocd.stream_listener import ArgocdApplicationStreamListener
+from datadog_checks.dev.utils import get_metadata_metrics
 
+from .common import GENRESOURCES_ENDPOINT, _check
 
-def _instance(**overrides) -> dict:
-    instance = {
-        "app_controller_endpoint": "http://app_controller:8082",
-        "collect_genresources": True,
-        "genresources_endpoint": "https://argocd.example.com",
-        "genresources_auth_token": "test-token",
-    }
-    instance.update(overrides)
-    return instance
+pytestmark = pytest.mark.unit
 
 
 def _application(name: str, *, namespace: str = "argocd", resource_version: str = "100") -> dict:
@@ -32,9 +33,14 @@ def _application(name: str, *, namespace: str = "argocd", resource_version: str 
     }
 
 
-def _listener(collector) -> ArgocdApplicationStreamListener:
+def _listener(collector, *, check=None) -> ArgocdApplicationStreamListener:
     return ArgocdApplicationStreamListener(
-        Mock(), collector, endpoint="https://argocd.example.com", auth_token=None, backoff_max_seconds=10
+        check or Mock(),
+        collector,
+        endpoint=GENRESOURCES_ENDPOINT,
+        auth_token=None,
+        backoff_max_seconds=10,
+        http=Mock(),
     )
 
 
@@ -42,17 +48,28 @@ def _event(event_type: str, application: dict) -> bytes:
     return json.dumps({"result": {"type": event_type, "application": application}}).encode()
 
 
-def _check(**overrides) -> ArgocdCheck:
-    """Build an ArgocdCheck with config models loaded and the genresources collector attached.
+def _run_stream_and_record_waits(listener, outcomes, stop_after: int) -> list[float]:
+    """Drive listener._run() over a scripted sequence of _stream_once() return values, recording each wait.
 
-    Production builds the collector lazily on the first ``check()`` once
-    ``check_initializations`` has populated ``self.config``; tests reach into
-    ``check._resource_collector`` directly, so we mirror that bootstrap here.
+    Each outcome is a bool: True = the connection received data, False = it disconnected with none.
+    _stream_once catches connection errors internally, so an error is reported as a False return (never
+    raised). The listener stops itself once ``stop_after`` waits have been recorded.
     """
-    check = ArgocdCheck("argocd", {}, [_instance(**overrides)])
-    check.load_configuration_models()
-    check._resource_collector = ArgocdResourceCollector(check)
-    return check
+    waits: list[float] = []
+    results = iter(outcomes)
+
+    def fake_stream_once():
+        return next(results)
+
+    def fake_sleep(seconds):
+        waits.append(seconds)
+        if len(waits) >= stop_after:
+            listener._stop.set()
+
+    listener._stream_once = fake_stream_once
+    listener._sleep = fake_sleep
+    listener._run()
+    return waits
 
 
 def test_handle_line_routes_added_and_deleted_to_the_collector():
@@ -82,6 +99,18 @@ def test_handle_line_ignores_malformed_and_non_application_frames():
     collector.forget_application.assert_not_called()
 
 
+def test_handle_line_ignores_bookmark_and_unknown_event_types():
+    collector = Mock()
+    listener = _listener(collector)
+    app = _application("web")
+
+    listener._handle_line(_event("BOOKMARK", app))
+    listener._handle_line(_event("SOMETHING_ELSE", app))
+
+    collector.emit_stream_application.assert_not_called()  # only ADDED/MODIFIED emit
+    collector.forget_application.assert_not_called()  # only DELETED forgets
+
+
 def test_emit_stream_application_dedupes_unchanged_app():
     check = _check(genresources_stream_applications_enabled=True)
     app = _application("web", resource_version="100")
@@ -107,7 +136,7 @@ def test_forget_application_lets_a_readded_app_resubmit():
 
 
 def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener():
-    check = _check()  # streaming defaults off
+    check = _check(genresources_stream_applications_enabled=False)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
@@ -132,63 +161,178 @@ def test_collect_with_streaming_on_starts_listener_and_rescrapes_all_types():
     assert collect_type.call_count == 3  # the first full rescrape covers all three types
 
 
+def test_ensure_listener_gives_the_listener_its_own_http_session():
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+
+    with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
+        listener_cls.return_value.is_alive.return_value = False
+        collector._ensure_listener()
+
+    http = listener_cls.call_args.kwargs["http"]
+    assert http is not None
+    assert http is not check.http  # a dedicated RequestsWrapper, not the check's shared session
+
+
+def test_collect_with_stream_emits_stream_up_one_when_the_listener_is_connected(aggregator):
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+
+    with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
+        listener_cls.return_value.is_alive.return_value = True
+        listener_cls.return_value.is_connected.return_value = True
+        with patch.object(collector, "_collect_type"):
+            collector.collect()
+
+    aggregator.assert_metric(GENRESOURCES_STREAM_UP_METRIC, value=1)
+
+
+def test_collect_with_stream_emits_stream_up_zero_even_when_scrapes_are_throttled(aggregator):
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+    now = time.time()
+    collector._last_app_full = now  # within every scrape interval -> nothing is fetched this cycle
+    collector._last_cluster_scrape = now
+    collector._last_repository_scrape = now
+
+    with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
+        listener_cls.return_value.is_alive.return_value = True
+        listener_cls.return_value.is_connected.return_value = False
+        with patch.object(collector, "_collect_type") as collect_type:
+            collector.collect()
+
+    collect_type.assert_not_called()  # every per-type scrape was throttled...
+    aggregator.assert_metric(GENRESOURCES_STREAM_UP_METRIC, value=0)  # ...but stream.up is still emitted every cycle
+
+
+def test_stop_signals_cancel_without_joining():
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+    listener = Mock()
+    collector._listener = listener
+
+    collector.stop()
+
+    listener.cancel.assert_called_once()
+    listener.join.assert_not_called()  # cancel() must not block the unschedule on a join
+
+
+def test_ensure_listener_does_not_start_a_listener_after_stop():
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+    collector.stop()  # cancel arrived before the first collection cycle created a listener
+
+    with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
+        with patch.object(collector, "_collect_type"):
+            collector.collect()
+
+    listener_cls.assert_not_called()
+    assert collector._listener is None
+
+
+def test_collect_throttles_the_missing_endpoint_warning_but_still_emits_api_up(aggregator, caplog):
+    check = _check(genresources_endpoint=None)
+    collector = check._resource_collector
+
+    collector.collect()
+    collector.collect()  # second call within the collection interval
+
+    warnings = [r for r in caplog.records if "genresources_endpoint is not set" in r.message]
+    assert len(warnings) == 1  # the warning is throttled to once per collection interval
+    # api.up=0 is still emitted every cycle for all three types (no metric gaps): 3 types x 2 cycles
+    aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=0, count=6)
+
+
+def test_stream_once_survives_a_frame_that_raises_and_keeps_the_connection():
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+    bad = json.dumps({"result": {"type": "ADDED", "application": {"metadata": "not-a-dict"}}}).encode()
+    good = _event("ADDED", _application("web"))
+
+    class _Resp:
+        def raise_for_status(self):
+            pass
+
+        def iter_lines(self):
+            yield bad  # _change_token raises AttributeError on the non-dict metadata
+            yield good
+
+        def close(self):
+            pass
+
+    http = Mock()
+    http.get.return_value = _Resp()
+    listener = ArgocdApplicationStreamListener(
+        check, collector, endpoint=GENRESOURCES_ENDPOINT, auth_token=None, backoff_max_seconds=10, http=http
+    )
+
+    with patch.object(check, "submit_generic_resource") as submit:
+        got_data = listener._stream_once()
+
+    assert got_data is True  # the bad frame did not tear down the connection
+    assert submit.call_count == 1  # the following good frame was still processed
+
+
+def test_stream_once_reports_data_received_even_when_the_connection_then_errors():
+    # A connection that delivers a line and THEN drops (read timeout / reset) must still report got_data=True,
+    # so the supervisor resets backoff instead of treating a healthy stream as a dead one.
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+
+    class _Resp:
+        def raise_for_status(self):
+            pass
+
+        def iter_lines(self):
+            yield _event("ADDED", _application("web"))
+            raise ConnectionError("stream dropped after delivering data")
+
+        def close(self):
+            pass
+
+    http = Mock()
+    http.get.return_value = _Resp()
+    listener = ArgocdApplicationStreamListener(
+        check, collector, endpoint=GENRESOURCES_ENDPOINT, auth_token=None, backoff_max_seconds=10, http=http
+    )
+
+    with patch.object(check, "submit_generic_resource"):
+        got_data = listener._stream_once()
+
+    assert got_data is True  # data arrived before the drop; _stream_once caught the error and reported it
+
+
+def test_handle_line_emits_events_received_metric_matching_metadata(aggregator):
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+    listener = _listener(collector, check=check)
+
+    with patch.object(check, "submit_generic_resource"):
+        listener._handle_line(_event("ADDED", _application("web")))
+
+    aggregator.assert_metric(GENRESOURCES_STREAM_EVENTS_METRIC, value=1, count=1)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_run_counts_a_reconnect_on_disconnect(aggregator):
+    check = _check(genresources_stream_applications_enabled=True)
+    listener = _listener(check._resource_collector, check=check)
+
+    _run_stream_and_record_waits(listener, [False], stop_after=1)  # one clean disconnect, then stop
+
+    aggregator.assert_metric(GENRESOURCES_STREAM_RECONNECTS_METRIC, value=1, count=1)
+
+
 def test_stream_run_backs_off_exponentially_and_caps():
-    listener = _listener(Mock())  # backoff_max_seconds=10
-    waits: list[float] = []
-
-    def fake_stream_once():
-        raise ConnectionError("boom")
-
-    def fake_sleep(seconds):
-        waits.append(seconds)
-        if len(waits) >= 5:
-            listener._stop.set()
-
-    listener._stream_once = fake_stream_once
-    listener._sleep = fake_sleep
-    listener._run()
-
+    # A data-less disconnect -- a clean 200-then-close or a connection error (which _stream_once reports as
+    # a False return) -- backs off exponentially and must NOT become a hot reconnect loop.
+    waits = _run_stream_and_record_waits(_listener(Mock()), [False] * 5, stop_after=5)
     assert waits == [1, 2, 4, 8, 10]  # doubles each reconnect, then caps at backoff_max_seconds
 
 
-def test_stream_run_backs_off_on_clean_disconnect_without_data():
-    # A server that returns 200 then immediately closes (no data) must NOT become a hot reconnect loop.
-    listener = _listener(Mock())
-    waits: list[float] = []
-
-    def fake_stream_once():
-        return False  # clean return, no data delivered
-
-    def fake_sleep(seconds):
-        waits.append(seconds)
-        if len(waits) >= 3:
-            listener._stop.set()
-
-    listener._stream_once = fake_stream_once
-    listener._sleep = fake_sleep
-    listener._run()
-
-    assert waits == [1, 2, 4]  # still backs off on a clean, data-less disconnect
-
-
 def test_stream_run_resets_backoff_after_a_connection_that_received_data():
-    listener = _listener(Mock())
-    waits: list[float] = []
-    results = iter([False, False, True, False])  # two empty connects, one with data, then empty
-
-    def fake_stream_once():
-        return next(results)
-
-    def fake_sleep(seconds):
-        waits.append(seconds)
-        if len(waits) >= 4:
-            listener._stop.set()
-
-    listener._stream_once = fake_stream_once
-    listener._sleep = fake_sleep
-    listener._run()
-
-    assert waits == [1, 2, 1, 1]  # grows while empty, resets to 1 after the connection that got data
+    waits = _run_stream_and_record_waits(_listener(Mock()), [False, False, True, False], stop_after=4)
+    assert waits == [1, 2, 1, 1]  # grows while empty, resets to 1 after the connection that received data
 
 
 def test_listener_thread_routes_a_line_then_shuts_down_cleanly_on_cancel():
@@ -210,9 +354,10 @@ def test_listener_thread_routes_a_line_then_shuts_down_cleanly_on_cancel():
             block.set()
 
     check = Mock()
-    check.http.get.return_value = _Resp()
+    http = Mock()
+    http.get.return_value = _Resp()
     listener = ArgocdApplicationStreamListener(
-        check, collector, endpoint="https://argocd.example.com", auth_token=None, backoff_max_seconds=1
+        check, collector, endpoint=GENRESOURCES_ENDPOINT, auth_token=None, backoff_max_seconds=1, http=http
     )
 
     listener.start()

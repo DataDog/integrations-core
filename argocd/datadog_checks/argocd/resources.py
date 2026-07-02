@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse, urlunparse
 
+from datadog_checks.base.utils.http import RequestsWrapper
+
 try:
     import datadog_agent
 except ImportError:
@@ -25,9 +27,11 @@ from .resources_constants import (
     APPLICATION_INCLUDE,
     CLUSTER_INCLUDE,
     GENRESOURCES_API_UP_METRIC,
+    GENRESOURCES_STREAM_UP_METRIC,
     KEY_SEPARATOR,
     REPOSITORY_INCLUDE,
     URL_CREDENTIALS_PATTERN,
+    auth_headers,
 )
 from .stream_listener import ArgocdApplicationStreamListener
 
@@ -184,6 +188,8 @@ RESOURCE_TYPE_SPECS: tuple[ResourceTypeSpec, ...] = (
 )
 
 APPLICATION_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_application")
+CLUSTER_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_cluster")
+REPOSITORY_SPEC = next(spec for spec in RESOURCE_TYPE_SPECS if spec.resource_type == "argocd_repository")
 
 
 def _is_excluded(path: str, exclude_paths: tuple[str, ...]) -> bool:
@@ -217,15 +223,20 @@ class ArgocdResourceCollector:
         self._auth_token: str | None = config.genresources_auth_token
         self._instance_prefix: str = _instance_prefix(self._endpoint)
         self._submitted: dict[str, str] = {}
-        self._last_full_submit: float = 0.0
-        self._resubmit_interval: int = max(1, self._ttl_seconds // 2)
-        self._collection_interval: int = config.genresources_collection_interval_seconds
-        self._last_collect: float = 0.0
         self._stream_enabled: bool = bool(config.genresources_stream_applications_enabled)
-        self._rescrape_interval: int = config.genresources_rescrape_interval_seconds
         self._backoff_max: int = config.genresources_stream_backoff_max_seconds
-        self._last_rescrape: float = 0.0
+        self._app_poll_interval: int = config.genresources_application_poll_interval_seconds
+        self._app_full_scrape_interval: int = config.genresources_application_full_scrape_interval_seconds
+        self._cluster_scrape_interval: int = config.genresources_cluster_scrape_interval_seconds
+        self._repository_scrape_interval: int = config.genresources_repository_scrape_interval_seconds
+        self._last_app_poll: float = 0.0
+        self._last_app_full: float = 0.0
+        self._last_cluster_scrape: float = 0.0
+        self._last_repository_scrape: float = 0.0
+        self._last_endpoint_warn: float = 0.0
         self._submitted_lock = threading.RLock()
+        self._listener_lock = threading.Lock()
+        self._stopped: bool = False
         self._listener: ArgocdApplicationStreamListener | None = None
         self._includes: dict[str, dict[str, list[str]]] = {
             spec.resource_type: _build_include(spec.include, self._extra_paths, self._exclude_paths)
@@ -238,68 +249,84 @@ class ArgocdResourceCollector:
                     "nothing will be collected for it",
                     resource_type,
                 )
-        if self._ttl_seconds < self._collection_interval:
+        longest_scrape_interval = max(
+            self._app_full_scrape_interval, self._cluster_scrape_interval, self._repository_scrape_interval
+        )
+        if self._ttl_seconds < longest_scrape_interval:
             self.check.log.warning(
-                "genresources: genresources_ttl_seconds (%d) is shorter than "
-                "genresources_collection_interval_seconds (%d); resources will expire "
-                "before the next refresh and cause entity churn",
+                "genresources: genresources_ttl_seconds (%d) is shorter than the longest scrape "
+                "interval (%d); resources will expire before their next refresh and cause entity churn",
                 self._ttl_seconds,
-                self._collection_interval,
+                longest_scrape_interval,
             )
 
     def collect(self) -> None:
         if not self._endpoint:
-            self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
-            for spec in RESOURCE_TYPE_SPECS:
-                self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=[f"resource_type:{spec.resource_type}"])
+            self._warn_missing_endpoint()
             return
+        now = int(time.time())
         if self._stream_enabled:
-            self._collect_with_stream()
-        else:
-            self._collect_polling()
+            self._ensure_listener()
+            connected = self._listener is not None and self._listener.is_connected()
+            self.check.gauge(GENRESOURCES_STREAM_UP_METRIC, 1 if connected else 0)
+        self._collect_due_types(now)
 
-    def _collect_polling(self) -> None:
-        seen_at = int(time.time())
-        if seen_at - self._last_collect < self._collection_interval:
-            return
-        self._last_collect = seen_at
-
-        expire_at = seen_at + self._ttl_seconds
-        force_full = (seen_at - self._last_full_submit) >= self._resubmit_interval
-        if force_full:
-            self._last_full_submit = seen_at
-
+    def _warn_missing_endpoint(self) -> None:
+        now = int(time.time())
+        if now - self._last_endpoint_warn >= self._app_poll_interval:
+            self._last_endpoint_warn = now
+            self.check.log.warning("collect_genresources is enabled but genresources_endpoint is not set; skipping")
         for spec in RESOURCE_TYPE_SPECS:
-            self._collect_type(spec, seen_at=seen_at, expire_at=expire_at, force_full=force_full)
+            self.check.gauge(GENRESOURCES_API_UP_METRIC, 0, tags=[f"resource_type:{spec.resource_type}"])
 
-    def _collect_with_stream(self) -> None:
-        """Supervise the application stream listener and run a periodic full rescrape of every type."""
-        self._ensure_listener()
-        seen_at = int(time.time())
-        if seen_at - self._last_rescrape < self._rescrape_interval:
-            return
-        self._last_rescrape = seen_at
-        expire_at = seen_at + self._ttl_seconds
-        for spec in RESOURCE_TYPE_SPECS:
-            self._collect_type(spec, seen_at=seen_at, expire_at=expire_at, force_full=True)
+    def _collect_due_types(self, now: int) -> None:
+        """Fetch each resource type when its own interval has elapsed (per-type cadences)."""
+        expire_at = now + self._ttl_seconds
+        # Applications: a full scrape (force_full) refreshes TTL and backfills; between full scrapes a
+        # dedup poll catches changes when streaming is off (the stream covers that when it is on).
+        if now - self._last_app_full >= self._app_full_scrape_interval:
+            self._last_app_full = now
+            self._last_app_poll = now
+            self._collect_type(APPLICATION_SPEC, seen_at=now, expire_at=expire_at, force_full=True)
+        elif not self._stream_enabled and now - self._last_app_poll >= self._app_poll_interval:
+            self._last_app_poll = now
+            self._collect_type(APPLICATION_SPEC, seen_at=now, expire_at=expire_at, force_full=False)
+        # Clusters and Repositories are always polled (never streamed); each scrape is a full re-submit.
+        if now - self._last_cluster_scrape >= self._cluster_scrape_interval:
+            self._last_cluster_scrape = now
+            self._collect_type(CLUSTER_SPEC, seen_at=now, expire_at=expire_at, force_full=True)
+        if now - self._last_repository_scrape >= self._repository_scrape_interval:
+            self._last_repository_scrape = now
+            self._collect_type(REPOSITORY_SPEC, seen_at=now, expire_at=expire_at, force_full=True)
 
     def _ensure_listener(self) -> None:
-        if self._listener is None:
-            self._listener = ArgocdApplicationStreamListener(
-                self.check,
-                self,
-                endpoint=self._endpoint,
-                auth_token=self._auth_token,
-                backoff_max_seconds=self._backoff_max,
-            )
-        if not self._listener.is_alive():
-            self._listener.start()
+        with self._listener_lock:
+            if self._stopped:
+                return
+            if self._listener is None:
+                self._listener = ArgocdApplicationStreamListener(
+                    self.check,
+                    self,
+                    endpoint=self._endpoint,
+                    auth_token=self._auth_token,
+                    backoff_max_seconds=self._backoff_max,
+                    http=RequestsWrapper(
+                        self.check.instance,
+                        self.check.init_config,
+                        self.check.HTTP_CONFIG_REMAPPER,
+                        self.check.log,
+                    ),
+                )
+            if not self._listener.is_alive():
+                self._listener.start()
 
     def stop(self) -> None:
-        """Stop the stream listener cleanly; called from the check's cancel()."""
-        if self._listener is not None:
-            self._listener.cancel()
-            self._listener.join(timeout=10)
+        """Signal the stream listener to stop; must not block, per AgentCheck.cancel()'s contract."""
+        with self._listener_lock:
+            self._stopped = True
+            listener = self._listener
+        if listener is not None:
+            listener.cancel()
 
     def emit_stream_application(self, application: dict) -> None:
         """Emit a single application received from the stream (ADDED/MODIFIED) through the shared pipeline."""
@@ -312,13 +339,22 @@ class ArgocdResourceCollector:
         """Drop a deleted application from the dedup cache so it stops refreshing and expires via TTL."""
         try:
             key = _application_key(application)
-        except Exception:
+        except (ValueError, AttributeError):
+            self.check.log.debug("genresources: skipping malformed DELETED application", exc_info=True)
             return
-        if self._instance_prefix:
-            key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
-        cache_key = f"argocd_application{KEY_SEPARATOR}{key}"
+        cache_key = self._submitted_cache_key(APPLICATION_SPEC.resource_type, key)
         with self._submitted_lock:
             self._submitted.pop(cache_key, None)
+
+    def _prefixed(self, resource_key: str) -> str:
+        """Prefix a resource key with the instance prefix (cluster|env) when one is configured."""
+        if self._instance_prefix:
+            return f"{self._instance_prefix}{KEY_SEPARATOR}{resource_key}"
+        return resource_key
+
+    def _submitted_cache_key(self, resource_type: str, resource_key: str) -> str:
+        """Dedup-cache key for a resource: resource_type joined with the instance-prefixed key."""
+        return f"{resource_type}{KEY_SEPARATOR}{self._prefixed(resource_key)}"
 
     def _collect_type(self, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int, force_full: bool) -> None:
         tags = [f"resource_type:{spec.resource_type}"]
@@ -352,10 +388,7 @@ class ArgocdResourceCollector:
 
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
-        kwargs: dict = {}
-        if self._auth_token:
-            kwargs["headers"] = {"Authorization": f"Bearer {self._auth_token}"}
-        response = self.check.http.get(url, **kwargs)
+        response = self.check.http.get(url, headers=auth_headers(self._auth_token))
         response.raise_for_status()
         payload = response.json()
         return list(payload.get("items") or [])
@@ -370,14 +403,13 @@ class ArgocdResourceCollector:
             self.check.log.exception("genresources: sanitize failed for %s", spec.resource_type)
             return None
         try:
-            key = spec.key_builder(item)
+            raw_key = spec.key_builder(item)
         except Exception:
             self.check.log.warning("genresources: skipping malformed %s", spec.resource_type, exc_info=True)
             return None
-        if self._instance_prefix:
-            key = f"{self._instance_prefix}{KEY_SEPARATOR}{key}"
+        key = self._prefixed(raw_key)
         include = self._includes[spec.resource_type]
-        cache_key = f"{spec.resource_type}{KEY_SEPARATOR}{key}"
+        cache_key = self._submitted_cache_key(spec.resource_type, raw_key)
         with self._submitted_lock:
             if force_full or self._submitted.get(cache_key) != token:
                 try:

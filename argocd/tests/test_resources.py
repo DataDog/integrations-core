@@ -8,8 +8,6 @@ from unittest.mock import patch
 
 import pytest
 
-from datadog_checks.argocd import ArgocdCheck
-from datadog_checks.argocd.resources import ArgocdResourceCollector
 from datadog_checks.argocd.resources_constants import (
     APPLICATION_INCLUDE,
     CLUSTER_INCLUDE,
@@ -17,6 +15,8 @@ from datadog_checks.argocd.resources_constants import (
     REPOSITORY_INCLUDE,
 )
 from datadog_checks.dev.http import MockResponse
+
+from .common import _check as _make_check
 
 pytestmark = pytest.mark.unit
 
@@ -52,32 +52,14 @@ def _repository(repo: str, *, username: str = "", password: str = "", ssh_key: s
     return {"repo": repo, "username": username, "password": password, "sshPrivateKey": ssh_key, "type": "git"}
 
 
-def _instance(**overrides) -> dict:
-    instance = {
-        "app_controller_endpoint": "http://app_controller:8082",
-        "collect_genresources": True,
-        "genresources_endpoint": ARGOCD_ENDPOINT,
-        "genresources_auth_token": "test-token",
-    }
-    instance.update(overrides)
-    return instance
-
-
 def _items_response(items: list[dict], status_code: int = 200) -> MockResponse:
     return MockResponse(json_data={"items": items}, status_code=status_code)
 
 
-def _check(**instance_overrides) -> ArgocdCheck:
-    """Build an ArgocdCheck with config models loaded and the genresources collector attached.
-
-    Production builds the collector lazily on the first ``check()`` call once
-    ``check_initializations`` has populated ``self.config``. Tests reach into
-    ``check._resource_collector`` directly, so we mirror that bootstrap here.
-    """
-    check = ArgocdCheck("argocd", {}, [_instance(**instance_overrides)])
-    check.load_configuration_models()
-    check._resource_collector = ArgocdResourceCollector(check)
-    return check
+def _check(**overrides):
+    # These tests drive the REST/polling path; disable streaming so collect() never spawns a listener thread.
+    overrides.setdefault("genresources_stream_applications_enabled", False)
+    return _make_check(**overrides)
 
 
 def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_http_response_per_endpoint):
@@ -457,7 +439,7 @@ def test_collect_skips_unchanged_resources_on_second_cycle(mock_http_response_pe
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
         after_first = submit.call_count
-        check._resource_collector._last_collect = 0.0  # simulate the collection interval elapsing
+        check._resource_collector._last_app_poll = 0.0  # simulate the application poll interval elapsing
         check._resource_collector.collect()
         after_second = submit.call_count
 
@@ -482,7 +464,7 @@ def test_collect_resubmits_application_when_resource_version_changes(mock_http_r
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
         after_first = submit.call_count
-        check._resource_collector._last_collect = 0.0  # simulate the collection interval elapsing
+        check._resource_collector._last_app_poll = 0.0  # simulate the application poll interval elapsing
         check._resource_collector.collect()
         after_second = submit.call_count
 
@@ -506,16 +488,15 @@ def test_collect_resubmits_unchanged_resources_on_ttl_sweep(mock_http_response_p
     with patch.object(check, "submit_generic_resource") as submit:
         collector.collect()
         after_first = submit.call_count
-        collector._last_full_submit = 0.0  # force the next cycle to be a full TTL-refresh sweep
-        collector._last_collect = 0.0
+        collector._last_app_full = 0.0  # force the next cycle to be a full TTL-refresh scrape
         collector.collect()
         after_second = submit.call_count
 
     assert after_first == 1
-    assert after_second == 2  # the sweep re-submits even unchanged resources to refresh their TTL
+    assert after_second == 2  # the full scrape re-submits even unchanged resources to refresh their TTL
 
 
-def test_collect_respects_collection_interval(mock_http_response_per_endpoint):
+def test_collect_respects_application_poll_interval(mock_http_response_per_endpoint):
     app_v1 = _application("checkout")
     app_v1["metadata"]["resourceVersion"] = "100"
     app_v2 = _application("checkout")
@@ -527,7 +508,7 @@ def test_collect_respects_collection_interval(mock_http_response_per_endpoint):
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()  # default 120s collection interval
+    check = _check()  # streaming off; default 120s application poll, 600s full scrape
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -536,7 +517,7 @@ def test_collect_respects_collection_interval(mock_http_response_per_endpoint):
         after_second = submit.call_count
 
     assert after_first == 1
-    assert after_second == 1  # second call is within the interval -> skipped, the changed v2 is never fetched
+    assert after_second == 1  # second call is within both intervals -> app not re-fetched, changed v2 never seen
 
 
 def _application_include(submit) -> dict:
@@ -650,3 +631,8 @@ def test_collector_warns_when_exclude_empties_a_type(caplog):
     nuke = list(CLUSTER_INCLUDE["paths"]) + list(CLUSTER_INCLUDE["map_paths"])
     _check(genresources_exclude_paths=nuke)
     assert any("emptied the allow-list for argocd_cluster" in rec.message for rec in caplog.records)
+
+
+def test_collector_warns_when_ttl_shorter_than_longest_scrape_interval(caplog):
+    _check(genresources_ttl_seconds=100, genresources_application_full_scrape_interval_seconds=600)
+    assert any("shorter than the longest scrape interval" in rec.message for rec in caplog.records)

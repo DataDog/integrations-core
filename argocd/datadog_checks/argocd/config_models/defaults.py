@@ -44,6 +44,10 @@ def instance_collect_histogram_buckets():
     return True
 
 
+def instance_collect_openmetrics():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 
@@ -60,20 +64,28 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
-def instance_genresources_collection_interval_seconds():
+def instance_genresources_application_full_scrape_interval_seconds():
+    return 600
+
+
+def instance_genresources_application_poll_interval_seconds():
     return 120
+
+
+def instance_genresources_cluster_scrape_interval_seconds():
+    return 300
 
 
 def instance_genresources_max_resources_per_cycle():
     return 10000
 
 
-def instance_genresources_rescrape_interval_seconds():
-    return 1200
+def instance_genresources_repository_scrape_interval_seconds():
+    return 300
 
 
 def instance_genresources_stream_applications_enabled():
-    return False
+    return True
 
 
 def instance_genresources_stream_backoff_max_seconds():
@@ -81,7 +93,7 @@ def instance_genresources_stream_backoff_max_seconds():
 
 
 def instance_genresources_ttl_seconds():
-    return 21600
+    return 1800
 
 
 def instance_histogram_buckets_as_distributions():
