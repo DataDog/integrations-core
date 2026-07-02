@@ -33,7 +33,9 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
     aggregator.assert_metric('pulsar.topics_count', at_least=1)
     aggregator.assert_service_check('pulsar.openmetrics.health', ServiceCheck.OK, at_least=1)
-    # No per-metric endpoint: tag assertion, unlike test_check — the discovered endpoint is a runtime container IP.
+    # In discovery mode, the endpoint tag is derived from the runtime-discovered
+    # service host, not from the static host-mapped METRICS_URL used by test_check.
+    # Validate discovered metrics via metadata instead of asserting a fixed endpoint tag.
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
