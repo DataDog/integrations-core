@@ -71,6 +71,23 @@ ddev -x validate config -s <INTEGRATION_NAME>
 ddev -x validate models -s <INTEGRATION_NAME>
 ```
 
+## Worktrees
+
+When working in a git worktree (anything other than the primary checkout), run `ddev config override` as the first step after entering the directory. This writes a gitignored `.ddev.toml` that points the `core` repo at the current worktree.
+
+Without this override, `ddev` resolves `core` to whatever the global configuration points at, which is usually a different worktree. Every `ddev test`, `ddev test --lint`, and `ddev env` command would then run against the wrong checkout and produce misleading results.
+
+Verify the override took effect with `ddev config show`: the `[repos]` `core` entry should point at the current directory and be marked as an override.
+
+If `ddev config override` cannot write the file in your environment, create `.ddev.toml` by hand at the worktree root:
+
+```toml
+repo = "core"
+
+[repos]
+core = "<absolute-path-to-this-worktree>"
+```
+
 ## Testing
 
 Run unit and integration tests with `ddev --no-interactive test <INTEGRATION>`. For example, for the pgbouncer integration, run `ddev --no-interactive test pgbouncer`.
@@ -128,6 +145,8 @@ For E2E tests, `--recreate` performs `docker compose down --volumes` followed by
 ## Code Formatting
 
 Format code with `ddev test -fs <INTEGRATION>`. For example, for the pgbouncer integration, run `ddev test -fs pgbouncer`.
+
+Always run linting and formatting through `ddev`: use `ddev test -fs <INTEGRATION>` to fix issues and `ddev test --lint <INTEGRATION>` (or `-s`) to check them. Do not invoke `ruff`, `black`, or `mypy` directly. CI runs them inside `ddev`'s pinned hatch lint environment, and a different locally installed version can report different results, passing locally while failing CI or the other way around.
 
 ## Changelog Management
 
