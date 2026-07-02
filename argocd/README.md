@@ -69,7 +69,7 @@ kind: Pod
 metadata:
   name: '<POD_NAME>'
   annotations:
-    ad.datadoghq.com/argocd-server.checks: |
+    ad.datadoghq.com/server.checks: |
       {
         "argocd": {
           "init_config": {},
