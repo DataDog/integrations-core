@@ -3,10 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Literal
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Literal
 
 from ddev.event_bus.orchestrator import BaseMessage
+
+if TYPE_CHECKING:
+    from ddev.utils.github_async.models import WorkflowJob
 
 
 @dataclass
@@ -23,11 +26,15 @@ class BatchJob:
 
 
 @dataclass
-class FailedCheck:
-    """A single failed test check within a workflow."""
+class WorkflowResult:
+    """In-memory result for a single test job within a finished batch."""
 
-    name: str
-    url: str
+    integration: str
+    environment: str
+    platform: Literal["linux", "windows", "macos"]
+    status: Literal["success", "failure", "skipped"]
+    failed_step: str | None = None
+    failed_tests: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -38,7 +45,7 @@ class WorkflowStatus:
     id: int
     success_count: int | None
     failed_count: int | None
-    failed_checks: list[FailedCheck]
+    failed_checks: list[WorkflowResult]
 
 
 @dataclass
@@ -58,6 +65,9 @@ class BatchFinished(BaseMessage):
     run_id: int
     workflow_url: str
     artifacts_path: str
+    timed_out: bool = False
+    job_list: list[BatchJob] = field(default_factory=list)
+    workflow_jobs: list[WorkflowJob] | None = None
 
 
 @dataclass
