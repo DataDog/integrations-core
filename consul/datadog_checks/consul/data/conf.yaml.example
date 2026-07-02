@@ -131,6 +131,16 @@ instances:
     #   - <SERVICE_1>
     #   - <SERVICE_2>
 
+    ## @param allowed_service_tags - list of strings - optional
+    ## If set, only tags with keys matching this list will be sent to Datadog.
+    ## This is helpful if you have a lot of tags on services that are not
+    ## relevant to Datadog (ingress routing tags, etc). Tags should be specified
+    ## here in lowercase. Otherwise, the check will downcase tags from Consul before comparing.
+    #
+    # allowed_service_tags:
+    #   - <TAG_1>
+    #   - <TAG_2>
+
     ## @param max_services - number - optional - default: 50
     ## Increase the maximum number of queried services.
     #
