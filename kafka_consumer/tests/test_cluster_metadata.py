@@ -166,7 +166,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
         else:
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
-    client.consumer_offsets_for_times = mock_offsets_for_times
+    client.get_partition_offsets = mock_offsets_for_times
 
     def mock_list_offsets(requests, **_kwargs):
         result = {}
@@ -656,7 +656,7 @@ def test_throughput_with_offset_decrease(check, dd_run_check, aggregator):
         else:
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
-    mock_kafka_client.consumer_offsets_for_times = mock_offsets
+    mock_kafka_client.get_partition_offsets = mock_offsets
 
     # Mock cache with previous offsets
     baseline_cache = {
@@ -721,7 +721,7 @@ def test_throughput_with_partition_unavailable(check, dd_run_check, aggregator):
         else:
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
-    mock_kafka_client.consumer_offsets_for_times = mock_offsets_run2
+    mock_kafka_client.get_partition_offsets = mock_offsets_run2
 
     prev_cache = json.dumps(baseline_cache)
     kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=prev_cache)

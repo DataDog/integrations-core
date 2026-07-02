@@ -482,7 +482,7 @@ class KafkaCheck(AgentCheck):
             self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
             result = {}
-            for topic, partition, offset in self.client.consumer_offsets_for_times(
+            for topic, partition, offset in self.client.get_partition_offsets(
                 partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
             ):
                 result[(topic, partition)] = offset
