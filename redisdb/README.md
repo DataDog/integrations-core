@@ -149,6 +149,8 @@ To configure this check for an Agent running on Kubernetes:
 
 To collect metrics, set the following parameters and values in an [Autodiscovery template][14]. You can do this with Kubernetes Annotations (shown below) on your Redis pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][15].
 
+For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: redisdb`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][27].
+
 | Parameter            | Value                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |
 | `<INTEGRATION_NAME>` | `["redisdb"]`                                                              |
@@ -404,3 +406,4 @@ Additional helpful documentation, links, and articles:
 [23]: https://github.com/DataDog/integrations-core/blob/master/redisdb/metadata.csv
 [24]: https://github.com/DataDog/integrations-core/blob/master/redisdb/assets/service_checks.json
 [26]: https://www.datadoghq.com/blog/how-to-monitor-redis-performance-metrics
+[27]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

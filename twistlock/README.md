@@ -69,6 +69,8 @@ spec:
         name: twistlock-console
 ```
 
+If you deploy Twistlock Console on a supported Kubernetes workload, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: twistlock`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
+
 ##### Log collection
 
 <!-- partial
@@ -167,3 +169,4 @@ Need help? Contact [Datadog support][13].
 [11]: https://github.com/DataDog/integrations-core/blob/master/twistlock/metadata.csv
 [12]: https://github.com/DataDog/integrations-core/blob/master/twistlock/assets/service_checks.json
 [13]: https://docs.datadoghq.com/help/
+[14]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/
