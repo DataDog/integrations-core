@@ -207,7 +207,7 @@ class Offset(BaseModel):
     )
     offset: Optional[int] = Field(
         None,
-        description='Offset to commit. Use -2 for earliest (log-start), -1 for latest\n(high-watermark), or a non-negative integer for an explicit position.\nMutually exclusive with timestamp. Requires `partition`.\n',
+        description='Offset to commit. Use -2 for earliest (log-start), -1 for latest\n(high-watermark), or a non-negative integer for an explicit position.\nMutually exclusive with `timestamp`. Requires `partition`.\n',
     )
     partition: Optional[int] = Field(
         None,
@@ -215,7 +215,7 @@ class Offset(BaseModel):
     )
     timestamp: Optional[int] = Field(
         None,
-        description='Milliseconds since epoch. Resets to the first offset at or after this\ntimestamp. Partitions with no message at or after the timestamp are\nreset to latest. Mutually exclusive with offset.\n',
+        description='Milliseconds since epoch. Resets to the first offset at or after this\ntimestamp. Partitions with no message at or after the timestamp are\nreset to latest. Mutually exclusive with `offset`.\n',
     )
     topic: str = Field(..., description='Topic name')
 

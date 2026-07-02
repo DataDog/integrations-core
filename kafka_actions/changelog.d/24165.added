@@ -1,1 +1,1 @@
-Added sentinel (earliest and latest) and timestamp-based offset support to the ``update_consumer_group_offsets`` action.
+Added earliest, latest, and timestamp-based offset support to the ``update_consumer_group_offsets`` action.

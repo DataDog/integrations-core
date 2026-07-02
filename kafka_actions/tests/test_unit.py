@@ -438,23 +438,20 @@ class TestResolveSentinelOffset:
         mock_admin.list_offsets.side_effect = _list_offsets_stub({0: 42})
 
         client = _client()
-        with patch.object(client, 'get_admin_client', return_value=mock_admin):
-            assert client._resolve_sentinel_offset('t', 0, -2) == 42
+        assert client._resolve_sentinel_offset(mock_admin, 't', 0, -2) == 42
 
     def test_resolves_latest(self):
         mock_admin = MagicMock()
         mock_admin.list_offsets.side_effect = _list_offsets_stub({0: 99})
 
         client = _client()
-        with patch.object(client, 'get_admin_client', return_value=mock_admin):
-            assert client._resolve_sentinel_offset('t', 0, -1) == 99
+        assert client._resolve_sentinel_offset(mock_admin, 't', 0, -1) == 99
 
     def test_rejects_non_sentinel_offset_without_calling_admin(self):
         mock_admin = MagicMock()
         client = _client()
-        with patch.object(client, 'get_admin_client', return_value=mock_admin):
-            with pytest.raises(ValueError, match="Sentinel offset"):
-                client._resolve_sentinel_offset('t', 0, 5)
+        with pytest.raises(ValueError, match="Sentinel offset"):
+            client._resolve_sentinel_offset(mock_admin, 't', 0, 5)
 
         mock_admin.list_offsets.assert_not_called()
 
@@ -466,9 +463,8 @@ class TestResolveSentinelOffset:
         mock_admin.list_offsets.return_value = {tp: future}
 
         client = _client()
-        with patch.object(client, 'get_admin_client', return_value=mock_admin):
-            with pytest.raises(KafkaException):
-                client._resolve_sentinel_offset('t', 0, -1)
+        with pytest.raises(KafkaException):
+            client._resolve_sentinel_offset(mock_admin, 't', 0, -1)
 
 
 class TestUpdateConsumerGroupOffsetsClient:
@@ -509,6 +505,33 @@ class TestUpdateConsumerGroupOffsetsClient:
         committed = mock_admin.alter_consumer_group_offsets.call_args[0][0][0].topic_partitions
         by_partition = {tp.partition: tp.offset for tp in committed}
         assert by_partition == {0: 10, 1: 20}
+
+    def test_resolves_timestamp_falls_back_to_latest_when_no_message_after(self):
+        admin_metadata = MagicMock()
+        admin_metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+
+        # Partition 0 has a message at/after the timestamp; partition 1 doesn't (-1) and
+        # must fall back to a separate batched `latest` lookup.
+        timestamp_offsets = {0: 10, 1: -1}
+        latest_offsets = {1: 30}
+
+        def list_offsets_side_effect(request, **kwargs):
+            offsets = latest_offsets if len(request) == 1 else timestamp_offsets
+            return {tp: _offset_future(offsets[tp.partition]) for tp in request}
+
+        mock_admin = MagicMock()
+        mock_admin.list_topics.return_value = admin_metadata
+        mock_admin.list_offsets.side_effect = list_offsets_side_effect
+        mock_admin.alter_consumer_group_offsets.return_value = {'g': _offset_future_with_topic_partitions([])}
+
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            assert client.update_consumer_group_offsets('g', [{'topic': 't', 'timestamp': 1700000000000}])
+
+        committed = mock_admin.alter_consumer_group_offsets.call_args[0][0][0].topic_partitions
+        by_partition = {tp.partition: tp.offset for tp in committed}
+        assert by_partition == {0: 10, 1: 30}
+        assert mock_admin.list_offsets.call_count == 2
 
     def test_rejects_both_offset_and_timestamp(self):
         client = _client()

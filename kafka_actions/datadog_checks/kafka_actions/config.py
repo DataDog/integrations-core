@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Any
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -289,7 +290,7 @@ class KafkaActionsConfig:
         if not config.get('consumer_group'):
             raise ConfigurationError("delete_consumer_group action requires 'consumer_group' parameter")
 
-    def _validate_offset_entry_partition(self, offset_entry: dict, index: int) -> None:
+    def _validate_offset_entry_partition(self, offset_entry: dict[str, Any], index: int) -> None:
         """Validate that offsets[index].partition, if present, is a non-negative integer."""
         if not isinstance(offset_entry['partition'], int) or offset_entry['partition'] < 0:
             raise ConfigurationError(f"offsets[{index}].partition must be a non-negative integer")

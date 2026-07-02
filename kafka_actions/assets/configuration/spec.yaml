@@ -506,9 +506,9 @@ files:
         The check enforces this and will fail with a clear error if members are found.
 
         Each entry in `offsets` must specify exactly one of:
-          - offset: commit a specific offset. Use -2 for earliest, -1 for latest,
+          - `offset`: commit a specific offset. Use -2 for earliest, -1 for latest,
             or a non-negative integer for an explicit position. Requires `partition`.
-          - timestamp: milliseconds since epoch. Resets every matching partition to
+          - `timestamp`: milliseconds since epoch. Resets every matching partition to
             the first offset at or after this timestamp. If no message exists at or
             after the timestamp in a partition, that partition is reset to latest.
             `partition` is optional. Omit it to target all partitions of the topic.
@@ -563,13 +563,13 @@ files:
               description: |
                 Offset to commit. Use -2 for earliest (log-start), -1 for latest
                 (high-watermark), or a non-negative integer for an explicit position.
-                Mutually exclusive with timestamp. Requires `partition`.
+                Mutually exclusive with `timestamp`. Requires `partition`.
             - name: timestamp
               type: integer
               description: |
                 Milliseconds since epoch. Resets to the first offset at or after this
                 timestamp. Partitions with no message at or after the timestamp are
-                reset to latest. Mutually exclusive with offset.
+                reset to latest. Mutually exclusive with `offset`.
           example:
             - topic: orders
               partition: 0

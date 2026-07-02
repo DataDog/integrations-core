@@ -287,6 +287,11 @@ class TestUpdateConsumerGroupOffsetsValidation:
                 id='negative_partition',
             ),
             pytest.param(
+                [{'topic': 'test', 'partition': -1, 'timestamp': 1735689600000}],
+                r"offsets\[0\].partition must be a non-negative integer",
+                id='negative_partition_with_timestamp',
+            ),
+            pytest.param(
                 [{'topic': 'test', 'timestamp': -1}],
                 r"offsets\[0\].timestamp must be a positive integer",
                 id='invalid_timestamp',
