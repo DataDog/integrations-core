@@ -19,18 +19,17 @@ from .common import (
 
 @pytest.fixture(scope='session')
 def dd_environment(rest_instance, openmetrics_instance):
-    compose_file = COMPOSE_FILE.format('mockserver')
-    instance = rest_instance
-    endpoints = None
-    conditions = None
     if USE_OPENMETRICS:
         compose_file = COMPOSE_FILE.format('teamcity_server')
-        instance = openmetrics_instance
-        endpoints = [METRIC_ENDPOINT]
         conditions = [CheckDockerLogs('teamcity-server', ['TeamCity initialized'], attempts=100, wait=3)]
+        with docker_run(compose_file, endpoints=[METRIC_ENDPOINT], conditions=conditions, sleep=10):
+            yield openmetrics_instance
+        return
 
-    with docker_run(compose_file, endpoints=endpoints, conditions=conditions, sleep=10):
-        yield instance
+    compose_file = COMPOSE_FILE.format('mockserver')
+    conditions = [CheckDockerLogs(compose_file, ['started on port: 8111'], attempts=60, wait=2)]
+    with docker_run(compose_file, conditions=conditions, wait_for_health=False, sleep=2):
+        yield rest_instance
 
 
 @pytest.fixture(scope='session')
