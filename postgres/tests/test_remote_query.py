@@ -347,6 +347,23 @@ def test_copy_stream_fixture_table_query_emits_copy_bytes():
     assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
 
 
+def test_copy_stream_remote_query_identity_query_emits_copy_bytes():
+    pool = FakePool(copy_blocks=[b'postgres_a1_db1,rq-proof-agent-a,localhost,15432,postgres_a1_db1,rq-proof-agent-a\n'])
+    request = valid_copy_request(
+        query=(
+            'SELECT current_database() AS current_db, expected_agent_hostname, expected_postgres_host, '
+            'expected_postgres_port, expected_dbname, marker FROM remote_query_identity'
+        ),
+        limits={'chunkBytes': 1024, 'maxBytes': 4096, 'maxRowBytes': 4096, 'timeoutMs': 5000},
+    )
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    data = b''.join(event_payload(event) for event in events if event.event_type == 'data')
+    assert b'postgres_a1_db1,rq-proof-agent-a,localhost,15432,postgres_a1_db1,rq-proof-agent-a\n' in data
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+
+
 def test_copy_stream_binary_format_preserves_arbitrary_bytes():
     arbitrary_bytes = b'PGCOPY\n\xff\r\n\x00\x00\xff\x80abc\n'
     pool = FakePool(copy_blocks=[arbitrary_bytes])

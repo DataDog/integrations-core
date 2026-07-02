@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, Validat
 RemoteQueryCopySql = Literal[
     'SELECT 1 AS value',
     'SELECT city, country FROM cities ORDER BY city',
+    'SELECT current_database() AS current_db, expected_agent_hostname, expected_postgres_host, expected_postgres_port, expected_dbname, marker FROM remote_query_identity',
     "SELECT decode('00ff80', 'hex') AS payload",
     "SELECT repeat('x', 1048576) AS payload",
     "SELECT repeat('x', 2097152) AS payload",
