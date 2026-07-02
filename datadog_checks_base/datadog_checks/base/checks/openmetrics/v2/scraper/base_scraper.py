@@ -30,11 +30,11 @@ from datadog_checks.base.utils.http import RequestsWrapper
 class _GoSample:
     """Duck type for prometheus_client.metrics_core.Sample, populated from Go bridge JSON output."""
 
-    __slots__ = ('labels', 'value', 'timestamp')
+    __slots__ = ('name', 'labels', 'value', 'timestamp')
 
     def __init__(self, data):
         labels = dict(data['labels'])
-        labels.pop('__name__', None)
+        self.name = labels.pop('__name__', '')
         self.labels = labels
         self.value = data['value']
         ts = data.get('timestamp')
