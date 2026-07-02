@@ -655,11 +655,7 @@ class ConfigurationEngine:
         return f"\nNote: these files failed to parse and may contain the missing resource:\n{listed}"
 
     def _import_errors_note(self) -> str:
-        errors = self._phase_registry.import_errors
-        if not errors:
-            return ""
-        listed = "\n".join(f"  {module}: {msg}" for module, msg in errors.items())
-        return f"\n\nPhase modules that failed to import:\n{listed}"
+        return self._phase_registry.format_import_errors()
 
     def get_flow(self, name: str) -> ResolvedFlow:
         diag = self._flows_diag.get(name)

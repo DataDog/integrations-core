@@ -26,6 +26,9 @@ class StubReg:
     def get(self, n):
         return NoopPhase
 
+    def format_import_errors(self):
+        return "".join(f"\n{module}: {msg}" for module, msg in self.import_errors.items())
+
 
 class StubRegMissing:
     def __init__(self, missing: set[str]) -> None:
@@ -37,3 +40,6 @@ class StubRegMissing:
 
     def get(self, n):
         return NoopPhase
+
+    def format_import_errors(self):
+        return ""
