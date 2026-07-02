@@ -102,6 +102,12 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
         factory=_spawn_subagent_factory,
         read_only=False,
     ),
+    "spawn_identical_subagents": ToolSpec(
+        "agents.spawn_identical_subagents",
+        "SpawnIdenticalSubagentsTool",
+        factory=_spawn_subagent_factory,
+        read_only=False,
+    ),
 }
 
 
