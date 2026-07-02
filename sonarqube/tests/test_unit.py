@@ -4,8 +4,8 @@
 import os
 
 import mock
-import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPError
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 
 from .common import HERE
@@ -14,7 +14,7 @@ from .metrics import WEB_METRICS
 
 def test_service_check_critical(aggregator, dd_run_check, sonarqube_check, web_instance):
     with mock.patch('datadog_checks.sonarqube.check.SonarqubeCheck.http') as mock_http:
-        mock_http.get.side_effect = requests.exceptions.RequestException('Req Exception')
+        mock_http.get.side_effect = HTTPError('HTTP error')
         check = sonarqube_check(web_instance)
         global_tags = ['endpoint:{}'.format(web_instance['web_endpoint'])]
         global_tags.extend(web_instance['tags'])
