@@ -1,0 +1,10 @@
+name: ad_identifiers
+required: true
+value:
+  type: array
+  items:
+    type: string
+description: |
+  A list of container identifiers that are used by Autodiscovery to identify
+  which container the check should be run against. For more information, see:
+  https://docs.datadoghq.com/agent/guide/ad_identifiers/

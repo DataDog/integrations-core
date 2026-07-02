@@ -1,0 +1,5 @@
+- template: instances/openmetrics_legacy_base
+- template: instances/http
+  overrides:
+    request_size.value.example: 10
+- template: instances/default
