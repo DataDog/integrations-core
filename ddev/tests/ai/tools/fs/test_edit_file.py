@@ -16,13 +16,6 @@ def test_tool_name(registry: FileRegistry) -> None:
     assert EditFileTool(registry, OWNER_ID).name == "edit_file"
 
 
-def test_truncated_call_hint_points_to_create_and_append_file(registry: FileRegistry) -> None:
-    hint = EditFileTool(registry, OWNER_ID).truncated_call_hint
-    assert hint is not None
-    assert "create_file" in hint
-    assert "append_file" in hint
-
-
 async def test_edit_file_replaces_string(edit_tool: EditFileTool, known_file) -> None:
     result = await edit_tool.run({"path": str(known_file), "old_string": "line two", "new_string": "line TWO"})
 

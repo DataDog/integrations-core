@@ -14,7 +14,7 @@ from ddev.ai.agent.exceptions import AgentConnectionError, AgentError
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, ContextUsage, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
-from ddev.ai.react.process import ReActProcess
+from ddev.ai.react.process import GENERIC_TRUNCATED_TOOL_CALL_HINT, ReActProcess
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.create_file import CreateFileTool
@@ -462,7 +462,7 @@ async def test_truncated_tool_call_falls_back_to_generic_hint_for_unknown_tool()
     await make_process(agent).start("x")
 
     sent_back: list[ToolResultMessage] = agent.send_calls[1]
-    assert "Retry with a smaller, more targeted change." in (sent_back[0].result.error or "")
+    assert GENERIC_TRUNCATED_TOOL_CALL_HINT in (sent_back[0].result.error or "")
 
 
 async def test_truncated_tool_calls_get_independent_hints_per_call(tmp_path) -> None:
