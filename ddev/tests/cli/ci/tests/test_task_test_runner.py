@@ -154,6 +154,7 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
         "workflow_id": "test-batch.yaml",
         "ref": "master",
         "timeout": None,
+        "return_run_details": True,
         "inputs": {
             "batch_id": "batch-1",
             "checkout_sha": "merge-sha-bbb",

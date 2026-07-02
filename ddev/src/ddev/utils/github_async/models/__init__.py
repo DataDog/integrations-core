@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from .workflow import Artifact as Artifact
     from .workflow import ArtifactsList as ArtifactsList
     from .workflow import WorkflowDispatchResult as WorkflowDispatchResult
+    from .workflow import WorkflowJob as WorkflowJob
+    from .workflow import WorkflowJobsList as WorkflowJobsList
     from .workflow import WorkflowRun as WorkflowRun
 
 # Map of exported attribute name -> submodule (relative to this package) that
@@ -50,6 +52,8 @@ MODULE_BY_NAME: dict[str, str] = {
     'PullRequestRef': 'pull_request',
     'PullRequestReviewComment': 'comment',
     'WorkflowDispatchResult': 'workflow',
+    'WorkflowJob': 'workflow',
+    'WorkflowJobsList': 'workflow',
     'WorkflowRun': 'workflow',
 }
 

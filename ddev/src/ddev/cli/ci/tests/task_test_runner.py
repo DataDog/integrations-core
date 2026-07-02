@@ -63,7 +63,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         log_extra: dict[str, Any] = {"batch_id": message.id}
 
         dispatch = await self._client.create_workflow_dispatch(
-            self._options.owner, self._options.repo, self._options.workflow_id, ref=self._options.ref, inputs=inputs
+            self._options.owner,
+            self._options.repo,
+            self._options.workflow_id,
+            ref=self._options.ref,
+            inputs=inputs,
+            return_run_details=True,
         )
         run_id = dispatch.data.workflow_run_id
         log_extra["run_id"] = run_id

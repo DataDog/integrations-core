@@ -48,8 +48,13 @@ from ddev.utils.github_async.models import (
     Label,
     PullRequest,
     WorkflowDispatchResult,
+    WorkflowJobsList,
     WorkflowRun,
 )
+
+# Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
+# that assert on the URL can reference the helper rather than duplicating the literal.
+DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
 
 
 @dataclass
@@ -86,7 +91,11 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             response=httpx.Response(404),
         ),
         'create_workflow_dispatch': lambda: GitHubResponse(
-            data=WorkflowDispatchResult(workflow_run_id=123),
+            data=WorkflowDispatchResult(
+                workflow_run_id=123,
+                run_url='https://api.github.com/repos/test/repo/actions/runs/123',
+                html_url=DEFAULT_DISPATCH_HTML_URL,
+            ),
             headers={},
         ),
         # Default to a completed/successful run so happy-path tests don't have to register one.
@@ -98,6 +107,10 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
                 conclusion='success',
                 html_url='https://github.com/o/r/actions/runs/123',
             ),
+            headers={},
+        ),
+        'list_workflow_run_jobs': lambda: GitHubResponse(
+            data=WorkflowJobsList(total_count=0, jobs=[]),
             headers={},
         ),
         'create_check_run': lambda: GitHubResponse(
@@ -253,7 +266,9 @@ class FakeAsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-    ) -> GitHubResponse[WorkflowDispatchResult]:
+        *,
+        return_run_details: bool = False,
+    ) -> GitHubResponse[Any]:
         return self._call(
             'create_workflow_dispatch',
             owner=owner,
@@ -262,6 +277,7 @@ class FakeAsyncGitHubClient:
             ref=ref,
             inputs=inputs,
             timeout=timeout,
+            return_run_details=return_run_details,
         )
 
     async def get_workflow_run(
@@ -276,6 +292,23 @@ class FakeAsyncGitHubClient:
             owner=owner,
             repo=repo,
             run_id=run_id,
+            timeout=timeout,
+        )
+
+    async def list_workflow_run_jobs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[Any]]:
+        yield self._call(
+            'list_workflow_run_jobs',
+            owner=owner,
+            repo=repo,
+            run_id=run_id,
+            per_page=per_page,
             timeout=timeout,
         )
 

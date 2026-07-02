@@ -22,12 +22,37 @@ class WorkflowRun(BaseModel):
     updated_at: str | None = None
 
 
+class WorkflowJob(BaseModel):
+    """A GitHub Actions workflow job."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    id: int
+    name: str
+    status: str
+    conclusion: str | None = None
+    html_url: str | None = None
+    started_at: str | None = None
+    completed_at: str | None = None
+
+
+class WorkflowJobsList(BaseModel):
+    """A list of workflow jobs with a total count."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    total_count: int
+    jobs: list[WorkflowJob]
+
+
 class WorkflowDispatchResult(BaseModel):
-    """Response payload from a successful workflow dispatch."""
+    """Run metadata returned by `POST /actions/workflows/{id}/dispatches` when `return_run_details=True`."""
 
     model_config = ConfigDict(extra="ignore")
 
     workflow_run_id: int
+    run_url: str
+    html_url: str
 
 
 class Artifact(BaseModel):
