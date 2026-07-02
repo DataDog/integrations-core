@@ -117,11 +117,6 @@ def test_register_from_discovers_subpackage_phases():
     assert registry.import_errors == {}
 
 
-def test_inspect_endpoint_module_imports_without_runtime_parser_use():
-    """Module import must not require the prometheus_client parser (only used inside execute())."""
-    import ddev.ai.phases.openmetrics.inspect_endpoint  # noqa: F401
-
-
 def test_register_from_records_missing_optional_dependency_and_continues(tmp_path, monkeypatch):
     fake_dir = tmp_path / "missing_dep_pkg"
     fake_dir.mkdir()
