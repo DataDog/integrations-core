@@ -41,6 +41,7 @@ from .common import (
     POSTGRES_LOCALE,
     POSTGRES_VERSION,
     USER_ADMIN,
+    USING_LATEST,
     _get_expected_replication_tags,
     _get_expected_tags,
 )
@@ -644,6 +645,17 @@ def test_failed_explain_handling(
     )
 
 
+# PG19 stopped appending the "No function matches the given name..." type-cast hint when the
+# function name does not exist at all, so the undefined-explain-function warning omits it. The
+# `latest` tag is coerced to a sentinel version but currently resolves to a pre-19 server, so it
+# still gets the hint.
+EXPLAIN_UNDEFINED_FUNCTION_HINT = (
+    ""
+    if not USING_LATEST and POSTGRES_VERSION is not None and float(POSTGRES_VERSION) >= 19
+    else "HINT:  No function matches the given name and argument types. You might need to add explicit type casts.\n"
+)
+
+
 @pytest.mark.parametrize("pg_stat_activity_view", ["pg_stat_activity", "datadog.pg_stat_activity()"])
 @pytest.mark.parametrize(
     "user,password,dbname,query,arg,expected_error_tag,expected_collection_errors,expected_statement_truncated,"
@@ -697,8 +709,9 @@ def test_failed_explain_handling(
                 "https://docs.datadoghq.com/database_monitoring/setup_postgres/troubleshooting#undefined-explain-function"
                 " for more details: function datadog.explain_statement(unknown) does not exist\nLINE 1: "
                 "... DDIGNORE */ /* service='datadog-agent' */ SELECT datadog.ex...\n"
-                "                                                             ^\nHINT:  No function matches the given "
-                "name and argument types. You might need to add explicit type casts.\ncode=undefined-explain-function"
+                "                                                             ^\n"
+                + EXPLAIN_UNDEFINED_FUNCTION_HINT
+                + "code=undefined-explain-function"
                 " dbname=dogs_nofunc host=stubbed.hostname",
             ],
         ),

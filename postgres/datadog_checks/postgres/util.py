@@ -1334,6 +1334,23 @@ FROM pg_stat_subscription_stats
     ],
 }
 
+# PG19 split sync_error_count into sync_seq_error_count and sync_table_error_count.
+# https://www.postgresql.org/docs/19/monitoring-stats.html#MONITORING-PG-STAT-SUBSCRIPTION-STATS
+STAT_SUBSCRIPTION_STATS_METRICS_V19 = {
+    'name': 'stat_subscription_stats_metrics',
+    'query': """
+SELECT subname,
+       apply_error_count,
+       sync_seq_error_count + sync_table_error_count
+FROM pg_stat_subscription_stats
+""",
+    'columns': [
+        {'name': 'subscription_name', 'type': 'tag'},
+        {'name': 'subscription.apply_error', 'type': 'monotonic_count'},
+        {'name': 'subscription.sync_error', 'type': 'monotonic_count'},
+    ],
+}
+
 # Requires PG16+
 # Capping at 200 rows for caution. This should always return less data points than that. Adjust if needed
 STAT_IO_METRICS = {
