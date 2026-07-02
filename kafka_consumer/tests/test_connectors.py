@@ -116,6 +116,62 @@ def test_sensitive_keys_redacted_in_config_event(run_connect_check, aggregator):
     assert cfg['tasks.max'] == '2'
 
 
+def test_failed_connector_and_task_trace_included_in_config_event(run_connect_check, aggregator):
+    connectors = {
+        'my-sink': {
+            'info': {
+                'type': 'sink',
+                'config': {'connector.class': 'io.confluent.SomeSink'},
+            },
+            'status': {
+                'connector': {'state': 'FAILED', 'trace': 'org.apache.kafka.connect.errors.ConnectException'},
+                'tasks': [
+                    {'id': 0, 'state': 'FAILED', 'trace': 'java.lang.NullPointerException'},
+                    {'id': 1, 'state': 'FAILED'},
+                    {'id': 2, 'state': 'RUNNING'},
+                ],
+            },
+        }
+    }
+    run_connect_check(connectors_response=connectors)
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    event = events[0]
+    assert event['connector_trace'] == 'org.apache.kafka.connect.errors.ConnectException'
+    assert event['task_traces'] == [{'task_id': 0, 'trace': 'java.lang.NullPointerException'}]
+
+
+def test_connector_trace_absent_when_running(run_connect_check, aggregator):
+    run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+
+    events = dsm_events(aggregator, 'connector')
+    assert events
+    assert all(event['connector_trace'] is None for event in events)
+    assert all(event['task_traces'] == [] for event in events)
+
+
+def test_connector_topics_included_in_config_event(run_connect_check, aggregator):
+    run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        topics_response={'demo-source': ['demo-orders'], 'demo-heartbeat': []},
+    )
+
+    events = dsm_events(aggregator, 'connector')
+    source_event = next(event for event in events if event['connector'] == 'demo-source')
+    heartbeat_event = next(event for event in events if event['connector'] == 'demo-heartbeat')
+    assert source_event['topics'] == ['demo-orders']
+    assert heartbeat_event['topics'] == []
+
+
+def test_connector_topics_requested_per_connector(run_connect_check):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+
+    requested_urls = [call.args[0] for call in http.get.call_args_list]
+    assert any(url.endswith('/connectors/demo-source/topics') for url in requested_urls)
+    assert any(url.endswith('/connectors/demo-heartbeat/topics') for url in requested_urls)
+
+
 def test_config_event_not_reemitted_when_unchanged(run_connect_check, aggregator):
     run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, runs=2)
 

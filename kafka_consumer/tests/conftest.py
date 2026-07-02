@@ -75,6 +75,7 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
         connectors_response=None,
         connectors_per_run=None,
         plugins_response=None,
+        topics_response=None,
         instance_extra=None,
         get_side_effect=None,
         post_response=None,
@@ -96,6 +97,10 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
             response = mock.MagicMock()
             if 'connector-plugins' in url:
                 response.json.return_value = [] if plugins_response is None else plugins_response
+            elif '/topics' in url:
+                name = url.rstrip('/').rsplit('/', 2)[-2]
+                topics = (topics_response or {}).get(name, [])
+                response.json.return_value = {name: {'topics': topics}}
             else:
                 current = responses[min(state['run'], len(responses) - 1)]
                 response.json.return_value = {} if current is None else current

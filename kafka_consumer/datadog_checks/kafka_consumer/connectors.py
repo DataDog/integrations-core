@@ -48,6 +48,8 @@ def _build_http_kwargs(
 CONNECTOR_CONFIG_CACHE_KEY = 'kafka_connector_config_cache'
 CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
 CONNECTOR_PLUGINS_EVENT_CACHE_KEY = 'kafka_connector_plugins_event_cache'
+CONNECTOR_TOPICS_FETCH_CACHE_KEY = 'kafka_connector_topics_fetch_cache'
+CONNECTOR_TOPICS_DATA_CACHE_KEY = 'kafka_connector_topics_data_cache'
 CONNECTOR_CONFIG_CACHE_MAX_SIZE = 5_000
 
 
@@ -261,8 +263,49 @@ class KafkaConnectCollector:
             for state_name, count in task_state_counts.items():
                 self.check.gauge('connector.tasks', count, tags=connector_tags + [f'task_state:{state_name}'])
 
+    def _get_connector_topics(self, url: str, connector_names: list[str]) -> dict[str, list[str]]:
+        """Return each connector's tracked topics, refreshing entries whose TTL has expired.
+
+        Kafka Connect's topic-tracking API only reports topics that pass through the
+        Connect-managed producer/consumer, so a source connector's own upstream topic
+        (e.g. an external database) isn't included, only what it publishes into Kafka.
+        """
+        safe_url = quote(url, safe='')
+        fetch_cache_key = f'{CONNECTOR_TOPICS_FETCH_CACHE_KEY}:{safe_url}'
+        data_cache_key = f'{CONNECTOR_TOPICS_DATA_CACHE_KEY}:{safe_url}'
+
+        try:
+            cached_str = self.check.read_persistent_cache(data_cache_key)
+            topics_by_connector: dict[str, list[str]] = json.loads(cached_str) if cached_str else {}
+        except Exception as e:
+            self.log.debug("Could not read connector topics cache %s: %s", data_cache_key, e)
+            topics_by_connector = {}
+
+        names_to_refresh = self.cache.get_items_to_fetch(fetch_cache_key, connector_names)
+        for name in names_to_refresh:
+            try:
+                response = self.http.get(
+                    f'{url.rstrip("/")}/connectors/{quote(name, safe="")}/topics',
+                    timeout=self.config._request_timeout,
+                    **self._get_request_kwargs(),
+                )
+                response.raise_for_status()
+                topics_by_connector[name] = sorted((response.json().get(name) or {}).get('topics', []))
+            except Exception as e:
+                self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
+
+        if names_to_refresh:
+            self.cache.mark_items_fetched(fetch_cache_key, names_to_refresh)
+            try:
+                self.check.write_persistent_cache(data_cache_key, json.dumps(topics_by_connector))
+            except Exception as e:
+                self.log.debug("Could not write connector topics cache %s: %s", data_cache_key, e)
+
+        return {name: topics_by_connector.get(name, []) for name in connector_names}
+
     def _emit_connector_config_events(self, connectors_data: dict[str, Any], cluster_id: str, url: str) -> None:
         connector_contents: dict[str, str] = {}
+        connector_topics = self._get_connector_topics(url, list(connectors_data.keys()))
 
         for name, data in connectors_data.items():
             if data is None:
@@ -270,12 +313,20 @@ class KafkaConnectCollector:
             info = data.get('info') or {}
             status = data.get('status') or {}
 
+            connector_status = status.get('connector') or {}
             connector_type = info.get('type', 'unknown')
-            connector_state = (status.get('connector') or {}).get('state', 'UNKNOWN')
+            connector_state = connector_status.get('state', 'UNKNOWN')
+            connector_trace = connector_status.get('trace')
             tasks = status.get('tasks') or []
             raw_config = info.get('config') or {}
 
             redacted_config = {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in raw_config.items()}
+
+            task_traces = [
+                {'task_id': task.get('id'), 'trace': task.get('trace')}
+                for task in tasks
+                if task.get('state') == 'FAILED' and task.get('trace')
+            ]
 
             content = {
                 'kafka_cluster_id': cluster_id,
@@ -283,7 +334,10 @@ class KafkaConnectCollector:
                 'connector': name,
                 'connector_type': connector_type,
                 'connector_state': connector_state,
+                'connector_trace': connector_trace,
                 'task_count': len(tasks),
+                'task_traces': task_traces,
+                'topics': connector_topics.get(name, []),
                 'connect_url': url,
                 'config_type': 'connector',
                 'config': redacted_config,
