@@ -121,7 +121,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Device IP Address
+    name: Device IP
     path: ocsf.device.ip
     source: log
   - groups:
@@ -154,11 +154,13 @@ facets:
     name: Destination Endpoint Name
     path: ocsf.dst_endpoint.name
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: File Extension
@@ -244,11 +246,13 @@ facets:
     name: Process Unique ID
     path: ocsf.process.uid
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Event Time
     path: ocsf.time
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Target Name
@@ -1641,6 +1645,15 @@ pipeline:
                 - ocsf.process.cmd_line
               sourceType: attribute
               target: ocsf.process.cmd_line
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.actor.app_name` to `ocsf.actor.app_name`
+              sources:
+                - ocsf.actor.app_name
+              sourceType: attribute
+              target: ocsf.actor.app_name
               targetFormat: string
               preserveSource: false
               overrideOnConflict: true
