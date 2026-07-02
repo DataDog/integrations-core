@@ -147,18 +147,9 @@ class MetricTransformer:
 
 def get_native_transformer(check, metric_name, modifiers, global_options):
     """
-    Uses whatever the endpoint describes as the metric type in the first occurrence.
+    Uses whatever the endpoint describes as the metric type.
     """
-    transformer = None
-
-    def native(metric, sample_data, runtime_data):
-        nonlocal transformer
-        if transformer is None:
-            transformer = NATIVE_TRANSFORMERS[metric.type](check, metric_name, modifiers, global_options)
-
-        transformer(metric, sample_data, runtime_data)
-
-    return native
+    return get_native_dynamic_transformer(check, metric_name, modifiers, global_options)
 
 
 def get_native_dynamic_transformer(check, metric_name, modifiers, global_options):
