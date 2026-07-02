@@ -12,7 +12,7 @@ from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
 from ddev.ai.runtime.agent_log import AgentLogger
-from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointReadError
+from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
@@ -104,7 +104,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
         dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
 
-        completed, frontier = self._resolve_resume_state(config, checkpoint_manager)
+        completed, frontier = resolve_resume_state(config, checkpoint_manager) if self._resume else (set(), set())
         if self._resume:
             self._logger.info(
                 "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
@@ -150,38 +150,6 @@ class PhaseOrchestrator(EventBusOrchestrator):
         for entry in config.flow:
             if entry.phase in completed:
                 self.submit_message(PhaseTrigger(id=f"{entry.phase}_resumed", phase_id=entry.phase))
-
-    def _resolve_resume_state(
-        self,
-        config: FlowConfig,
-        checkpoint_manager: CheckpointManager,
-    ) -> tuple[set[str], set[str]]:
-        """Compute (completed, frontier) for a resumed run; both empty when not resuming.
-
-        ``completed`` is the dependency-closed set of phases that succeeded and whose every
-        transitive dependency also succeeded. ``frontier`` is the phases that will run first
-        on resume (not completed, but all their dependencies are).
-
-        The single-pass closure relies on ``config.flow`` being topologically sorted.
-        """
-        if not self._resume:
-            return set(), set()
-
-        try:
-            succeeded = checkpoint_manager.successful_phases()
-        except CheckpointReadError as e:
-            raise FlowConfigError(
-                f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
-            ) from e
-        completed: set[str] = set()
-        frontier: set[str] = set()
-        for entry in config.flow:
-            deps_done = all(dep in completed for dep in entry.dependencies)
-            if entry.phase in succeeded and deps_done:
-                completed.add(entry.phase)
-            elif deps_done:
-                frontier.add(entry.phase)
-        return completed, frontier
 
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""

@@ -6,10 +6,15 @@ from __future__ import annotations
 
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
+
+from ddev.ai.phases.config import FlowConfigError
+
+if TYPE_CHECKING:
+    from ddev.ai.phases.config import FlowConfig
 
 
 class CheckpointReadError(Exception):
@@ -135,3 +140,29 @@ class CheckpointManager:
         if key.endswith("_memory"):
             return self.memory_content(key.removesuffix("_memory"))
         return f"<VARIABLE UNDEFINED: {key}>"
+
+
+def resolve_resume_state(config: FlowConfig, checkpoint_manager: CheckpointManager) -> tuple[set[str], set[str]]:
+    """Compute (completed, frontier) for resuming a flow from its checkpoints.
+
+    ``completed`` is the dependency-closed set of phases that succeeded and whose every
+    transitive dependency also succeeded. ``frontier`` is the phases that will run first
+    on resume (not completed, but all their dependencies are).
+
+    The single-pass closure relies on ``config.flow`` being topologically sorted.
+    """
+    try:
+        succeeded = checkpoint_manager.successful_phases()
+    except CheckpointReadError as e:
+        raise FlowConfigError(
+            f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
+        ) from e
+    completed: set[str] = set()
+    frontier: set[str] = set()
+    for entry in config.flow:
+        deps_done = all(dep in completed for dep in entry.dependencies)
+        if entry.phase in succeeded and deps_done:
+            completed.add(entry.phase)
+        elif deps_done:
+            frontier.add(entry.phase)
+    return completed, frontier
