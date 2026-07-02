@@ -1,0 +1,47 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "185e4205-b486-463f-a33b-55af8d4ffd3a",
+  "app_id": "datadog-dogstatsd",
+  "owner": "agent-metric-pipelines",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor DogStatsD client telemetry for metric submission health and dropped payloads.",
+    "title": "Datadog DogStatsD",
+    "media": [],
+    "classifier_tags": [
+      "Category::Metrics",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "dashboards": {
+      "Datadog DogStatsD Overview": "assets/dashboards/dogstatsd_overview.json"
+    },
+    "integration": {
+      "source_type_name": "Datadog DogStatsD",
+      "metrics": {
+        "prefix": "datadog.dogstatsd.client.",
+        "check": "datadog.dogstatsd.client.metrics",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 56116106,
+      "auto_install": true
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
