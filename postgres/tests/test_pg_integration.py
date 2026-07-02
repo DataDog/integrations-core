@@ -19,6 +19,7 @@ from .common import (
     DBM_MIGRATED_METRICS,
     HOST,
     PASSWORD_ADMIN,
+    POSTGRES_IMAGE_TAG,
     POSTGRES_VERSION,
     USER_ADMIN,
     _get_expected_tags,
@@ -665,7 +666,9 @@ def test_version_metadata(integration_check, pg_instance, datadog_agent):
         version_metadata['version.minor'] = version[1]
 
     datadog_agent.assert_metadata('test:123', version_metadata)
-    datadog_agent.assert_metadata_count(5)  # for raw and patch
+    # Prerelease builds (e.g. a beta or rc image tag) also emit version.release.
+    is_prerelease = POSTGRES_IMAGE_TAG is not None and ('beta' in POSTGRES_IMAGE_TAG or 'rc' in POSTGRES_IMAGE_TAG)
+    datadog_agent.assert_metadata_count(6 if is_prerelease else 5)  # for raw and patch
 
 
 def test_state_clears_on_connection_error(integration_check, pg_instance):
