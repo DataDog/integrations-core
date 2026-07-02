@@ -51,9 +51,6 @@ AGENT_METRICS = {
     "cilium_process_virtual_memory_max_bytes": "process.virtual_memory.max.bytes",
     "cilium_services_events_total": "services.events.total",
     "cilium_subprocess_start_total": "subprocess.start.total",
-    "cilium_triggers_policy_update_call_duration_seconds": "triggers_policy.update_call_duration.seconds",
-    "cilium_triggers_policy_update_folds": "triggers_policy.update_folds",
-    "cilium_triggers_policy_update_total": "triggers_policy.update.total",
     "cilium_unreachable_health_endpoints": "unreachable.health_endpoints",
     "cilium_unreachable_nodes": "unreachable.nodes",
     "cilium_event_ts": "event_timestamp",
@@ -92,6 +89,7 @@ AGENT_METRICS = {
     "cilium_bpf_progs_virtual_memory_max_bytes": "bpf.progs.virtual_memory.max.bytes",
     "cilium_datapath_conntrack_dump_resets_total": "datapath.conntrack_dump.resets.total",
     "cilium_ipcache_errors_total": "ipcache.errors.total",
+    "cilium_ipcache_events_total": "ipcache.events.total",
     "cilium_k8s_event_lag_seconds": "k8s_event.lag.seconds",
     "cilium_k8s_terminating_endpoints_events_total": "k8s_terminating.endpoints_events.total",
     "cilium_proxy_datapath_update_timeout_total": "proxy.datapath.update_timeout.total",
@@ -101,10 +99,10 @@ AGENT_METRICS = {
     "cilium_fqdn_alive_zombie_connections": "fqdn.alive_zombie_connections",
     # Cilium 1.14+
     "cilium_endpoint": "endpoint.count",
-    "cilium_endpoint_max_ifindex": "endpoint.max_ifindex",
     "cilium_cidrgroup_policies": "cidrgroup.policies",
     "cilium_kvstore_sync_queue_size": "kvstore.sync_queue_size",
     "cilium_kvstore_initial_sync_completed": "kvstore.initial_sync_completed",
+    "cilium_kvstore_sync_errors_total": "kvstore.sync_errors.total",
     "cilium_k8s_client_rate_limiter_duration_seconds": "k8s_client.rate_limiter_duration.seconds",
     "cilium_policy_change_total": "policy.change.total",
     # Cilium 1.15+
@@ -112,17 +110,138 @@ AGENT_METRICS = {
     "cilium_hive_status": "hive.status",
     "cilium_ipam_capacity": "ipam.capacity",
     "cilium_cidrgroups_referenced": "cidrgroups.referenced",
-    "cilium_cidrgroup_translation_time_stats_seconds": "cidrgroup.translation.time.stats.seconds",
     "cilium_k8s_workqueue_adds_total": "k8s.workqueue.adds.total",
     "cilium_k8s_workqueue_depth": "k8s.workqueue.depth",
     "cilium_k8s_workqueue_longest_running_processor_seconds": "k8s.workqueue.longest.running.processor.seconds",
     "cilium_k8s_workqueue_queue_duration_seconds": "k8s.workqueue.queue.duration.seconds",
     "cilium_k8s_workqueue_retries_total": "k8s.workqueue.retries.total",
     "cilium_k8s_workqueue_unfinished_work_seconds": "k8s.workqueue.unfinished.work.seconds",
-    "cilium_version": "version",
+    "cilium_k8s_workqueue_work_duration_seconds": "k8s.workqueue.work_duration.seconds",
+    # cilium_version is intentionally excluded from the metrics mapper so that
+    # the metadata transformer fires and sets version.major/minor/patch via set_metadata.
+    #
     # Cilium 1.16+
     "cilium_fqdn_selectors": "fqdn.selectors",
     "cilium_identity_label_sources": "identity.label_sources",
+    # Cilium 1.14-1.18, removed in 1.19
+    "cilium_endpoint_max_ifindex": "endpoint.max_ifindex",
+    # Cilium 1.15-1.16, removed in 1.17
+    "cilium_cidrgroup_translation_time_stats_seconds": "cidrgroup.translation.time.stats.seconds",
+    # Cilium <= 1.16, removed in 1.17
+    "cilium_triggers_policy_update_call_duration_seconds": "triggers_policy.update_call_duration.seconds",
+    "cilium_triggers_policy_update_folds": "triggers_policy.update_folds",
+    "cilium_triggers_policy_update_total": "triggers_policy.update.total",
+    # ClusterMesh agent metrics
+    "cilium_clustermesh_remote_cluster_services": "clustermesh.remote_cluster_services",
+    "cilium_clustermesh_remote_cluster_nodes": "clustermesh.remote_cluster_nodes",
+    "cilium_clustermesh_remote_clusters": "clustermesh.remote_clusters",
+    "cilium_clustermesh_remote_cluster_failures": "clustermesh.remote_cluster_failures",
+    "cilium_clustermesh_remote_cluster_last_failure_ts": "clustermesh.remote_cluster_last_failure_ts",
+    "cilium_clustermesh_remote_cluster_readiness_status": "clustermesh.remote_cluster_readiness_status",
+    "cilium_clustermesh_remote_cluster_cache_revocations": "clustermesh.remote_cluster_cache_revocations",
+    # IPsec
+    "cilium_ipsec_xfrm_error": "ipsec.xfrm_error",
+    "cilium_ipsec_keys": "ipsec.keys",
+    "cilium_ipsec_xfrm_states": "ipsec.xfrm_states",
+    "cilium_ipsec_xfrm_policies": "ipsec.xfrm_policies",
+    # eBPF additions
+    "cilium_bpf_syscall_duration_seconds": "bpf.syscall_duration.seconds",
+    "cilium_bpf_ratelimit_dropped_total": "bpf.ratelimit_dropped.total",
+    # Drop/Forward additions
+    "cilium_mtu_error_message_total": "mtu_error_message.total",
+    "cilium_fragmented_count_total": "fragmented_count.total",
+    # Services
+    "cilium_service_implementation_delay": "service.implementation_delay",
+    # API limiter
+    "cilium_api_limiter_wait_history_duration_seconds": "api_limiter.wait_history_duration.seconds",
+    # Policy
+    "cilium_policy_incremental_update_duration": "policy.incremental_update_duration",
+    # Identity
+    "cilium_identity_gc_entries": "identity.gc_entries",
+    "cilium_identity_gc_runs": "identity.gc_runs",
+    "cilium_identity_gc_latency": "identity.gc_latency",
+    # Kubernetes
+    "cilium_k8s_cnp_status_completion_seconds": "k8s.cnp_status_completion.seconds",
+    # Controllers
+    "cilium_controllers_group_runs_total": "controllers.group_runs.total",
+    # Endpoint
+    "cilium_endpoint_restoration_endpoints": "endpoint.restoration_endpoints",
+    "cilium_endpoint_restoration_duration_seconds": "endpoint.restoration_duration.seconds",
+    # NAT
+    "cilium_nat_endpoint_max_connection": "nat.endpoint_max_connection",
+    # Hive Jobs (Cilium 1.17+)
+    "cilium_hive_jobs_runs_total": "hive.jobs_runs.total",
+    "cilium_hive_jobs_runs_failed": "hive.jobs_runs_failed",
+    "cilium_hive_jobs_oneshot_last_run_duration_seconds": "hive.jobs.oneshot.last_run_duration.seconds",
+    "cilium_hive_jobs_observer_last_run_duration_seconds": "hive.jobs.observer.last_run_duration.seconds",
+    "cilium_hive_jobs_observer_run_duration_seconds": "hive.jobs.observer.run_duration.seconds",
+    "cilium_hive_jobs_timer_last_run_duration_seconds": "hive.jobs.timer.last_run_duration.seconds",
+    "cilium_hive_jobs_timer_run_duration_seconds": "hive.jobs.timer.run_duration.seconds",
+    # Cilium 1.17+
+    "cilium_node_health_connectivity_status": "node_health.connectivity.status",
+    "cilium_node_health_connectivity_latency_seconds": "node_health.connectivity.latency.seconds",
+    "cilium_policy_selector_match_count_max": "policy.selector_match_count_max",
+    "cilium_identity_cache_timer_duration": "identity.cache_timer.duration",
+    "cilium_identity_cache_timer_trigger_latency": "identity.cache_timer_trigger.latency",
+    "cilium_identity_cache_timer_trigger_folds": "identity.cache_timer_trigger.folds",
+    # Cilium 1.19+
+    "cilium_clustermesh_remote_cluster_endpoints": "clustermesh.remote_cluster_endpoints",
+    # BGP Control Plane (enabled only when BGP is active)
+    "cilium_bgp_session_state": "bgp.session_state",
+    "cilium_bgp_advertised_routes": "bgp.advertised_routes",
+    "cilium_bgp_received_routes": "bgp.received_routes",
+    "cilium_bgp_reconcile_errors_total": "bgp.reconcile_errors.total",
+    "cilium_bgp_reconcile_run_duration_seconds": "bgp.reconcile_run_duration.seconds",
+    # Feature metrics - adv_connect_and_lb
+    "cilium_feature_adv_connect_and_lb_bandwidth_manager_enabled": "feature.adv_connect_and_lb.bandwidth_manager_enabled",  # noqa: E501
+    "cilium_feature_adv_connect_and_lb_bgp_enabled": "feature.adv_connect_and_lb.bgp_enabled",
+    "cilium_feature_adv_connect_and_lb_big_tcp_enabled": "feature.adv_connect_and_lb.big_tcp_enabled",
+    "cilium_feature_adv_connect_and_lb_cilium_envoy_config_enabled": "feature.adv_connect_and_lb.cilium_envoy_config_enabled",  # noqa: E501
+    "cilium_feature_adv_connect_and_lb_cilium_node_config_enabled": "feature.adv_connect_and_lb.cilium_node_config_enabled",  # noqa: E501
+    "cilium_feature_adv_connect_and_lb_clustermesh_enabled": "feature.adv_connect_and_lb.clustermesh_enabled",
+    "cilium_feature_adv_connect_and_lb_egress_gateway_enabled": "feature.adv_connect_and_lb.egress_gateway_enabled",
+    "cilium_feature_adv_connect_and_lb_envoy_proxy_enabled": "feature.adv_connect_and_lb.envoy_proxy_enabled",
+    "cilium_feature_adv_connect_and_lb_kube_proxy_replacement_enabled": "feature.adv_connect_and_lb.kube_proxy_replacement_enabled",  # noqa: E501
+    "cilium_feature_adv_connect_and_lb_l2_lb_enabled": "feature.adv_connect_and_lb.l2_lb_enabled",
+    "cilium_feature_adv_connect_and_lb_l2_pod_announcement_enabled": "feature.adv_connect_and_lb.l2_pod_announcement_enabled",  # noqa: E501
+    "cilium_feature_adv_connect_and_lb_node_port_configuration": "feature.adv_connect_and_lb.node_port_configuration",
+    "cilium_feature_adv_connect_and_lb_sctp_enabled": "feature.adv_connect_and_lb.sctp_enabled",
+    "cilium_feature_adv_connect_and_lb_transparent_encryption": "feature.adv_connect_and_lb.transparent_encryption",
+    "cilium_feature_adv_connect_and_lb_vtep_enabled": "feature.adv_connect_and_lb.vtep_enabled",
+    # Feature metrics - controlplane
+    "cilium_feature_controlplane_cilium_endpoint_slices_enabled": "feature.controlplane.cilium_endpoint_slices_enabled",
+    "cilium_feature_controlplane_identity_allocation": "feature.controlplane.identity_allocation",
+    "cilium_feature_controlplane_ipam": "feature.controlplane.ipam",
+    # Feature metrics - datapath
+    "cilium_feature_datapath_chaining_enabled": "feature.datapath.chaining_enabled",
+    "cilium_feature_datapath_config": "feature.datapath.config",
+    "cilium_feature_datapath_internet_protocol": "feature.datapath.internet_protocol",
+    "cilium_feature_datapath_network": "feature.datapath.network",
+    # Feature metrics - network_policies
+    "cilium_feature_network_policies_cidr_policies": "feature.network_policies.cidr_policies",
+    "cilium_feature_network_policies_cilium_clusterwide_envoy_config_total": "feature.network_policies.cilium_clusterwide_envoy_config.total",  # noqa: E501
+    "cilium_feature_network_policies_cilium_clusterwide_network_policies_total": "feature.network_policies.cilium_clusterwide_network_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_cilium_envoy_config_total": "feature.network_policies.cilium_envoy_config.total",
+    "cilium_feature_network_policies_cilium_network_policies_total": "feature.network_policies.cilium_network_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_deny_policies_total": "feature.network_policies.deny_policies.total",
+    "cilium_feature_network_policies_dns_policies_total": "feature.network_policies.dns_policies.total",
+    "cilium_feature_network_policies_fqdn_policies_total": "feature.network_policies.fqdn_policies.total",
+    "cilium_feature_network_policies_host_firewall_enabled": "feature.network_policies.host_firewall_enabled",
+    "cilium_feature_network_policies_host_network_policies_total": "feature.network_policies.host_network_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_http_header_matches_policies_total": "feature.network_policies.http_header_matches_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_http_policies_total": "feature.network_policies.http_policies.total",
+    "cilium_feature_network_policies_ingress_cidr_group_policies_total": "feature.network_policies.ingress_cidr_group_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_internal_traffic_policy_services_total": "feature.network_policies.internal_traffic_policy_services.total",  # noqa: E501
+    "cilium_feature_network_policies_l3_policies_total": "feature.network_policies.l3_policies.total",
+    "cilium_feature_network_policies_local_redirect_policies_total": "feature.network_policies.local_redirect_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_local_redirect_policy_enabled": "feature.network_policies.local_redirect_policy_enabled",  # noqa: E501
+    "cilium_feature_network_policies_mutual_auth_enabled": "feature.network_policies.mutual_auth_enabled",
+    "cilium_feature_network_policies_mutual_auth_policies_total": "feature.network_policies.mutual_auth_policies.total",
+    "cilium_feature_network_policies_non_defaultdeny_policies_enabled": "feature.network_policies.non_defaultdeny_policies_enabled",  # noqa: E501
+    "cilium_feature_network_policies_non_defaultdeny_policies_total": "feature.network_policies.non_defaultdeny_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_other_l7_policies_total": "feature.network_policies.other_l7_policies.total",
+    "cilium_feature_network_policies_sni_allow_list_policies_total": "feature.network_policies.sni_allow_list_policies.total",  # noqa: E501
+    "cilium_feature_network_policies_tls_inspection_policies_total": "feature.network_policies.tls_inspection_policies.total",  # noqa: E501
 }
 
 OPERATOR_V2_OVERRIDES = {
@@ -208,6 +327,8 @@ OPERATOR_METRICS = {
     "cilium_operator_ipam_release_duration_seconds": "operator.ipam.release.duration.seconds",
     "cilium_operator_ipam_used_ips": "operator.ipam.used_ips",
     # Cilium 1.15+
+    # Note: lbipam metrics had _total suffix in 1.15-1.16; the _total is stripped by construct_metrics_config
+    # so the same entries match both old (counter) and new (gauge, renamed without _total in 1.17+) metric names.
     "cilium_hive_status": "operator.hive.status",
     "cilium_operator_errors_warnings_total": "operator.errors.warnings.total",
     "cilium_operator_lbipam_ips_available_total": "operator.lbipam.ips.available.total",
@@ -215,6 +336,49 @@ OPERATOR_METRICS = {
     "cilium_operator_lbipam_conflicting_pools_total": "operator.lbipam.conflicting.pools.total",
     "cilium_operator_lbipam_services_matching_total": "operator.lbipam.services.matching.total",
     "cilium_operator_lbipam_services_unsatisfied_total": "operator.lbipam.services.unsatisfied.total",
+    # Missing from earlier integrations
+    "cilium_operator_controllers_group_runs_total": "operator.controllers.group_runs.total",
+    "cilium_operator_number_of_cep_changes_per_ces": "operator.num_cep_changes_per_ces",
+    # ClusterMesh operator
+    "cilium_operator_clustermesh_remote_clusters": "operator.clustermesh.remote_clusters",
+    "cilium_operator_clustermesh_remote_cluster_failures": "operator.clustermesh.remote_cluster_failures",
+    "cilium_operator_clustermesh_remote_cluster_last_failure_ts": "operator.clustermesh.remote_cluster_last_failure_ts",
+    "cilium_operator_clustermesh_remote_cluster_readiness_status": "operator.clustermesh.remote_cluster_readiness_status",  # noqa: E501
+    "cilium_operator_clustermesh_remote_cluster_cache_revocations": "operator.clustermesh.remote_cluster_cache_revocations",  # noqa: E501
+    "cilium_operator_clustermesh_remote_cluster_services": "operator.clustermesh.remote_cluster_services",
+    "cilium_operator_clustermesh_remote_cluster_service_exports": "operator.clustermesh.remote_cluster_service_exports",
+    # MCS-API
+    "cilium_operator_mcsapi_serviceexport_info": "operator.mcsapi.serviceexport_info",
+    "cilium_operator_mcsapi_serviceexport_status_condition": "operator.mcsapi.serviceexport_status_condition",
+    "cilium_operator_mcsapi_serviceimport_info": "operator.mcsapi.serviceimport_info",
+    "cilium_operator_mcsapi_serviceimport_status_condition": "operator.mcsapi.serviceimport_status_condition",
+    "cilium_operator_mcsapi_serviceimport_status_clusters": "operator.mcsapi.serviceimport_status_clusters",
+    # CID controller
+    "cilium_operator_cid_controller_work_queue_event_count": "operator.cid_controller.work_queue_event_count",
+    "cilium_operator_cid_controller_work_queue_latency": "operator.cid_controller.work_queue_latency",
+    # Cilium 1.17+
+    "cilium_operator_unmanaged_pods": "operator.unmanaged_pods",
+    "cilium_operator_doublewrite_crd_identities": "operator.doublewrite.crd_identities",
+    "cilium_operator_doublewrite_kvstore_identities": "operator.doublewrite.kvstore_identities",
+    "cilium_operator_doublewrite_crd_only_identities": "operator.doublewrite.crd_only_identities",
+    "cilium_operator_doublewrite_kvstore_only_identities": "operator.doublewrite.kvstore_only_identities",
+    # Cilium 1.19+ (operator workqueue metrics with cilium_operator_ prefix, replacing bare workqueue_* names)
+    "cilium_operator_k8s_workqueue_depth": "operator.k8s.workqueue.depth",
+    "cilium_operator_k8s_workqueue_adds_total": "operator.k8s.workqueue.adds.total",
+    "cilium_operator_k8s_workqueue_queue_duration_seconds": "operator.k8s.workqueue.queue_duration.seconds",
+    "cilium_operator_k8s_workqueue_work_duration_seconds": "operator.k8s.workqueue.work_duration.seconds",
+    "cilium_operator_k8s_workqueue_unfinished_work_seconds": "operator.k8s.workqueue.unfinished_work.seconds",
+    "cilium_operator_k8s_workqueue_longest_running_processor_seconds": "operator.k8s.workqueue.longest_running_processor.seconds",  # noqa: E501
+    "cilium_operator_k8s_workqueue_retries_total": "operator.k8s.workqueue.retries.total",
+    # BGP Control Plane Operator (enabled only when BGP is active)
+    "cilium_operator_bgp_reconcile_errors_total": "operator.bgp.reconcile_errors.total",
+    "cilium_operator_bgp_reconcile_run_duration_seconds": "operator.bgp.reconcile_run_duration.seconds",
+    # Feature metrics - adv_connect_and_lb
+    "cilium_operator_feature_adv_connect_and_lb_gateway_api_enabled": "operator.feature.adv_connect_and_lb.gateway_api_enabled",  # noqa: E501
+    "cilium_operator_feature_adv_connect_and_lb_ingress_controller_enabled": "operator.feature.adv_connect_and_lb.ingress_controller_enabled",  # noqa: E501
+    "cilium_operator_feature_adv_connect_and_lb_l7_aware_traffic_management_enabled": "operator.feature.adv_connect_and_lb.l7_aware_traffic_management_enabled",  # noqa: E501
+    "cilium_operator_feature_adv_connect_and_lb_lb_ipam_enabled": "operator.feature.adv_connect_and_lb.lb_ipam_enabled",
+    "cilium_operator_feature_adv_connect_and_lb_node_ipam_enabled": "operator.feature.adv_connect_and_lb.node_ipam_enabled",  # noqa: E501
 }
 
 AGENT_V2_METRICS = deepcopy(AGENT_METRICS)
