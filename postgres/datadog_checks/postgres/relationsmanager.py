@@ -111,6 +111,30 @@ FROM (SELECT
     ],
 }
 
+QUERY_PG_CONSTRAINT = {
+    'name': 'pg_constraint',
+    'query': """
+SELECT current_database(),
+  pn.nspname,
+  pc.relname,
+  contype::text,
+  conname,
+  1
+FROM pg_constraint c
+JOIN pg_namespace pn ON (c.connamespace = pn.oid)
+LEFT JOIN pg_class pc ON (c.conrelid = pc.oid)
+WHERE   c.convalidated IS false
+    AND {relations} {limits}
+    """.strip(),
+    'columns': [
+        {'name': 'db', 'type': 'tag'},
+        {'name': 'schema', 'type': 'tag'},
+        {'name': 'table', 'type': 'tag'},
+        {'name': 'contype', 'type': 'tag'},
+        {'name': 'conname', 'type': 'tag'},
+        {'name': 'constraint.invalid', 'type': 'gauge'},
+    ],
+}
 
 # The catalog pg_class catalogs tables and most everything else that has columns or is otherwise similar to a table.
 # For this integration we are restricting the query to ordinary tables.
@@ -419,7 +443,7 @@ INDEX_BLOAT = {
 }
 
 RELATION_METRICS = [STATIO_METRICS]
-DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS]
+DYNAMIC_RELATION_QUERIES = [QUERY_PG_CLASS, QUERY_PG_CLASS_SIZE, IDX_METRICS, LOCK_METRICS, QUERY_PG_CONSTRAINT]
 
 
 class RelationsManager(object):
