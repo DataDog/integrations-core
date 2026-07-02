@@ -28,6 +28,13 @@ class CreateFileTool(FileRegistryTool[CreateFileInput]):
     def name(self) -> str:
         return "create_file"
 
+    @property
+    def truncated_call_hint(self) -> str:
+        return (
+            "Write a smaller initial chunk of the file now, then use append_file to add the "
+            "remaining content across one or more follow-up calls."
+        )
+
     async def __call__(self, tool_input: CreateFileInput) -> ToolResult:
         try:
             path = self._assert_writable(tool_input.path)

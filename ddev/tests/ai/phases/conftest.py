@@ -157,6 +157,7 @@ def make_agent_phase(
     captured_worker_kwargs: dict[str, Any] | None = None,
     goal_runtime_builder: Callable[[str], AgentRuntime] | None = None,
     agent_config: AgentConfig | None = None,
+    resume_frontier: frozenset[str] = frozenset(),
 ) -> tuple[AgenticPhase, CheckpointManager]:
     """Build an AgenticPhase ready for process_message-driven tests.
 
@@ -181,6 +182,7 @@ def make_agent_phase(
         runtime_variables=runtime_variables or {},
         flow_variables=flow_variables or {},
         callbacks=effective_callbacks,
+        resume_frontier=resume_frontier,
     )
 
     process_factory = MockProcessFactory(

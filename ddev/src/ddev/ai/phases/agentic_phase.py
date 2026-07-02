@@ -15,7 +15,13 @@ from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, run_goal_
 from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointStatus,
+    CheckpointTokenInfo,
+    FailedCheckpoint,
+    GoalValidationRecord,
+)
 from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
@@ -23,6 +29,35 @@ if TYPE_CHECKING:
     from ddev.ai.phases.resources import PhaseResources
     from ddev.ai.react.factory import ReActProcessFactory
     from ddev.ai.react.types import ReActResult
+
+
+RESUME_NOTICE = """
+
+---
+
+NOTE FROM THE HARNESS — RESUMED RUN
+
+This phase is being re-run because a previous execution of this flow failed or was
+interrupted while this phase was the one in progress. You are picking up from where it stopped.
+
+Some of this phase's work may already be partially on disk from that earlier attempt — files
+created or half-edited, assets generated, commands partially applied. Before doing new work,
+inspect the current state of the files this phase is responsible for, reconcile anything that is
+incomplete or inconsistent, and avoid blindly duplicating steps that were already finished.
+Treat the on-disk state as the source of truth and bring it to a correct, complete result."""
+
+RESUME_NOTICE_ERROR = """
+
+The previous attempt recorded this error:
+
+{error}"""
+
+
+def build_resume_notice(error: str | None) -> str:
+    notice = RESUME_NOTICE
+    if error:
+        notice += RESUME_NOTICE_ERROR.format(error=error)
+    return notice
 
 
 class AgenticPhase(Phase):
@@ -51,7 +86,7 @@ class AgenticPhase(Phase):
         self._process_factory = process_factory
         self._resources = resources
         self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE)
-        self._goal_attempt_log: list[dict[str, Any]] = []
+        self._goal_attempt_log: list[GoalValidationRecord] = []
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0
 
@@ -221,11 +256,11 @@ class AgenticPhase(Phase):
         final_valid: bool,
     ) -> None:
         self._goal_attempt_log.append(
-            {
-                "task": task.name,
-                "attempts": attempts,
-                "final_valid": final_valid,
-            }
+            GoalValidationRecord(
+                task=task.name,
+                attempts=attempts,
+                final_valid=final_valid,
+            )
         )
 
     def _add_tokens(
@@ -254,6 +289,10 @@ class AgenticPhase(Phase):
         self.before_react()
 
         system_prompt = render_inline(self._agent_config.system_prompt, context, self._resolver)
+        if self._is_resume_frontier:
+            prior = (context.get("checkpoints") or {}).get(self._phase_id)
+            error = prior.error if prior is not None and prior.status == CheckpointStatus.FAILED else None
+            system_prompt += build_resume_notice(error)
         try:
             process = self._process_factory.create(
                 scope=self._scope,
@@ -269,32 +308,28 @@ class AgenticPhase(Phase):
 
         memory_text, mem_in, mem_out = await self._run_memory_step(process, context)
 
-        extra: dict[str, Any] = {}
-        if self._goal_attempt_log:
-            extra["goal_validations"] = self._goal_attempt_log
-
         return PhaseOutcome(
             memory_text=memory_text,
             total_input_tokens=self._total_input_tokens + mem_in,
             total_output_tokens=self._total_output_tokens + mem_out,
-            extra_checkpoint=extra,
+            goal_validations=self._goal_attempt_log or None,
         )
 
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
-        payload: dict[str, Any] = {
-            "status": "failed",
-            "started_at": self._started_at.isoformat() if self._started_at else None,
-            "finished_at": datetime.now(UTC).isoformat(),
-            "error": str(error.original_exception),
-            "tokens": {
-                "total_input": self._total_input_tokens,
-                "total_output": self._total_output_tokens,
-            },
-        }
-        if self._goal_attempt_log:
-            payload["goal_validations"] = self._goal_attempt_log
         try:
-            self._checkpoint_manager.write_phase_checkpoint(self._phase_id, payload)
+            self._checkpoint_manager.write_phase_checkpoint(
+                self._phase_id,
+                FailedCheckpoint(
+                    started_at=self._started_at.isoformat() if self._started_at else None,
+                    finished_at=datetime.now(UTC).isoformat(),
+                    error=str(error.original_exception),
+                    tokens=CheckpointTokenInfo(
+                        total_input=self._total_input_tokens,
+                        total_output=self._total_output_tokens,
+                    ),
+                    goal_validations=self._goal_attempt_log or None,
+                ),
+            )
         except Exception:
             self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)
         finally:

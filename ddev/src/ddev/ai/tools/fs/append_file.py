@@ -25,6 +25,10 @@ class AppendFileTool(FileRegistryTool[AppendFileInput]):
     def name(self) -> str:
         return "append_file"
 
+    @property
+    def truncated_call_hint(self) -> str:
+        return "Append a smaller chunk instead — split the remaining content across multiple append_file calls."
+
     async def __call__(self, tool_input: AppendFileInput) -> ToolResult:
         try:
             path = self._assert_writable(tool_input.path)

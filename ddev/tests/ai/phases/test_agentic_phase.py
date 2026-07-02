@@ -18,7 +18,13 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointTokenInfo,
+    FailedCheckpoint,
+    GoalValidationRecord,
+    SuccessCheckpoint,
+)
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -75,12 +81,12 @@ async def test_happy_path_single_task(flow_dir, monkeypatch, message_queue):
 
     assert mgr.memory_content("p1") == "summary"
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "success"
-    assert checkpoint["tokens"] == {"total_input": 110, "total_output": 55}
+    assert isinstance(checkpoint, SuccessCheckpoint)
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
     assert mock_agent.send_calls[0] == "Do the work."
     assert "Write a brief summary" in mock_agent.send_calls[1]
     # checkpoint memory_path points to the written file
-    memory_path = Path(checkpoint["memory_path"])
+    memory_path = Path(checkpoint.memory_path)
     assert memory_path.is_absolute() and memory_path.exists() and memory_path.name == "p1_memory.md"
 
 
@@ -102,7 +108,9 @@ async def test_happy_path_two_tasks_accumulates_tokens(flow_dir, monkeypatch, me
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert mgr.read()["p1"]["tokens"] == {"total_input": 310, "total_output": 135}
+    checkpoint = mgr.read()["p1"]
+    assert isinstance(checkpoint, SuccessCheckpoint)
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=310, total_output=135)
 
 
 # ---------------------------------------------------------------------------
@@ -435,11 +443,11 @@ async def test_phase_with_goal_passes_first_attempt(flow_dir, monkeypatch, messa
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     cp = mgr.read()["p1"]
-    assert cp["status"] == "success"
-    assert cp["goal_validations"] == [{"task": "t1", "attempts": 1, "final_valid": True}]
+    assert isinstance(cp, SuccessCheckpoint)
+    assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
     assert worker.send_calls[0].startswith("Do it.")
     assert "independent reviewer" in worker.send_calls[0]
-    assert cp["tokens"] == {"total_input": 100 + 7 + 10, "total_output": 50 + 3 + 5}
+    assert cp.tokens == CheckpointTokenInfo(total_input=100 + 7 + 10, total_output=50 + 3 + 5)
     assert captured_builder_calls == ["p1.goal.t1"]
 
     log_file = mgr.root / "goal_reviewer" / "p1.goal.t1.jsonl"
@@ -480,7 +488,7 @@ async def test_phase_with_goal_exhausts_attempts_fails_phase(flow_dir, monkeypat
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert mgr.read() == {}
-    assert phase._goal_attempt_log == [{"task": "t1", "attempts": 2, "final_valid": False}]
+    assert phase._goal_attempt_log == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
 
     # The reviewer ran (and succeeded as an agent) on each attempt; its per-run
     # log exists. The goal-loop verdict itself lives in the phase checkpoint.
@@ -533,8 +541,8 @@ async def test_phase_goal_partial_progress_preserved_on_exhaustion(flow_dir, mon
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert phase._goal_attempt_log == [
-        {"task": "t1", "attempts": 1, "final_valid": True},
-        {"task": "t2", "attempts": 2, "final_valid": False},
+        GoalValidationRecord(task="t1", attempts=1, final_valid=True),
+        GoalValidationRecord(task="t2", attempts=2, final_valid=False),
     ]
 
 
@@ -586,7 +594,7 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
 
     phase._total_input_tokens = 42
     phase._total_output_tokens = 17
-    phase._goal_attempt_log = [{"task": "t1", "attempts": 2, "final_valid": False}]
+    phase._goal_attempt_log = [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
     phase._started_at = None
 
     err = MessageProcessingError(
@@ -597,10 +605,10 @@ async def test_on_error_writes_tokens_and_goal_validations_to_checkpoint(flow_di
     await phase.on_error(err)
 
     cp = mgr.read()["p1"]
-    assert cp["status"] == "failed"
-    assert cp["tokens"] == {"total_input": 42, "total_output": 17}
-    assert cp["goal_validations"] == [{"task": "t1", "attempts": 2, "final_valid": False}]
-    assert cp["error"] == "something went wrong"
+    assert isinstance(cp, FailedCheckpoint)
+    assert cp.tokens == CheckpointTokenInfo(total_input=42, total_output=17)
+    assert cp.goal_validations == [GoalValidationRecord(task="t1", attempts=2, final_valid=False)]
+    assert cp.error == "something went wrong"
 
 
 # ---------------------------------------------------------------------------
@@ -726,7 +734,7 @@ async def test_clear_context_before_on_first_task_is_harmless(flow_dir, monkeypa
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert mgr.read()["p1"]["status"] == "success"
+    assert isinstance(mgr.read()["p1"], SuccessCheckpoint)
     assert mock_agent.reset_call_count == 1
 
 
@@ -747,8 +755,9 @@ async def test_compact_context_before_on_first_task_is_noop(flow_dir, monkeypatc
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert mgr.read()["p1"]["status"] == "success"
-    assert mgr.read()["p1"]["tokens"] == {"total_input": 110, "total_output": 55}
+    cp = mgr.read()["p1"]
+    assert isinstance(cp, SuccessCheckpoint)
+    assert cp.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
     assert mock_agent.compact_call_count == 1
 
 
@@ -781,6 +790,86 @@ async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch
     with pytest.raises(GoalParseError):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    assert phase._goal_attempt_log == [{"task": "t1", "attempts": 1, "final_valid": False}]
+    assert phase._goal_attempt_log == [GoalValidationRecord(task="t1", attempts=1, final_valid=False)]
     assert phase._total_input_tokens == 10 + 8 + 6
     assert phase._total_output_tokens == 5 + 4 + 3
+
+
+# ---------------------------------------------------------------------------
+# process_message — resumed-run system-prompt injection
+# ---------------------------------------------------------------------------
+
+
+async def test_resume_frontier_phase_injects_notice_with_error(flow_dir, monkeypatch, message_queue):
+    """A frontier phase with a prior failed checkpoint gets the resume notice plus the error."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset({"p1"}),
+        captured_worker_kwargs=captured,
+    )
+    mgr.write_phase_checkpoint(
+        "p1",
+        FailedCheckpoint(
+            started_at=None,
+            finished_at="2026-01-01T00:00:00+00:00",
+            error="Error code: 500 - boom",
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+        ),
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" in captured["system_prompt"]
+    assert "Error code: 500 - boom" in captured["system_prompt"]
+
+
+async def test_resume_frontier_phase_injects_notice_without_error(flow_dir, monkeypatch, message_queue):
+    """A frontier phase with no prior checkpoint (e.g. Ctrl+C) gets the notice but no error line."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, _ = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset({"p1"}),
+        captured_worker_kwargs=captured,
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" in captured["system_prompt"]
+    assert "previous attempt recorded this error" not in captured["system_prompt"]
+
+
+async def test_non_frontier_phase_gets_no_resume_notice(flow_dir, monkeypatch, message_queue):
+    """A phase outside the frontier never gets the notice, even with a stale failed checkpoint."""
+    mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
+    captured: dict = {}
+    phase, mgr = make_agent_phase(
+        flow_dir,
+        mock_agent,
+        monkeypatch,
+        message_queue,
+        resume_frontier=frozenset(),
+        captured_worker_kwargs=captured,
+    )
+    mgr.write_phase_checkpoint(
+        "p1",
+        FailedCheckpoint(
+            started_at=None,
+            finished_at="2026-01-01T00:00:00+00:00",
+            error="stale",
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+        ),
+    )
+
+    await phase.process_message(PhaseTrigger(id="start", phase_id=None))
+
+    assert "RESUMED RUN" not in captured["system_prompt"]
+    assert "stale" not in captured["system_prompt"]

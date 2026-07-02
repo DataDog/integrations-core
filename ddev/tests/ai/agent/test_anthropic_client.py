@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
 import anthropic
@@ -20,6 +22,9 @@ from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentE
 from ddev.ai.agent.types import StopReason, ToolResultMessage
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry
+
+if TYPE_CHECKING:
+    from tests.ai.conftest import FakeToolFactory
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -189,28 +194,8 @@ async def test_max_tokens_is_not_an_error() -> None:
 # ---------------------------------------------------------------------------
 
 
-class FakeTool:
-    def __init__(self, name: str) -> None:
-        self._name = name
-
-    @property
-    def name(self) -> str:
-        return self._name
-
-    @property
-    def description(self) -> str:
-        return ""
-
-    @property
-    def definition(self) -> dict:
-        return {"name": self._name, "description": "", "input_schema": {}}
-
-    async def run(self, raw: dict) -> ToolResult:
-        pass
-
-
-async def test_allowed_tools_filters_to_subset() -> None:
-    registry = ToolRegistry([FakeTool(n) for n in ["read_file", "grep", "mkdir"]])
+async def test_allowed_tools_filters_to_subset(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in ["read_file", "grep", "mkdir"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -220,8 +205,8 @@ async def test_allowed_tools_filters_to_subset() -> None:
     assert sent_names == ["read_file"]
 
 
-async def test_allowed_tools_none_passes_all() -> None:
-    registry = ToolRegistry([FakeTool(n) for n in ["a", "b"]])
+async def test_allowed_tools_none_passes_all(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in ["a", "b"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -477,8 +462,8 @@ async def test_web_fetch_injected_with_citations_enabled() -> None:
     assert web_fetch["max_uses"] == MAX_CONTINUATIONS - 1
 
 
-async def test_both_native_tools_injected_together() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search", "web_fetch"])
+async def test_both_native_tools_injected_together(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search", "web_fetch"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -504,8 +489,8 @@ async def test_create_until_complete_returns_completion_result() -> None:
     assert result.all_responses == [final]
 
 
-async def test_native_tool_appended_after_client_tools() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+async def test_native_tool_appended_after_client_tools(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -519,8 +504,8 @@ async def test_native_tool_appended_after_client_tools() -> None:
     assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
 
 
-async def test_allowed_tools_gates_native_tool() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+async def test_allowed_tools_gates_native_tool(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -531,8 +516,8 @@ async def test_allowed_tools_gates_native_tool() -> None:
     assert "read_file" in sent_names
 
 
-async def test_allowed_tools_none_passes_all_including_native() -> None:
-    registry = ToolRegistry([FakeTool("read_file")], native_tool_names=["web_search"])
+async def test_allowed_tools_none_passes_all_including_native(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool("read_file")], native_tool_names=["web_search"])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -543,8 +528,8 @@ async def test_allowed_tools_none_passes_all_including_native() -> None:
     assert "web_search" in sent_names
 
 
-async def test_no_native_tools_request_unchanged() -> None:
-    registry = ToolRegistry([FakeTool("read_file")])
+async def test_no_native_tools_request_unchanged(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool("read_file")])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -974,8 +959,8 @@ async def test_system_prompt_sent_as_block_with_static_cache_control() -> None:
     [["only"], ["a", "b"], ["a", "b", "c", "d"]],
     ids=["single_tool", "two_tools", "four_tools"],
 )
-async def test_only_last_tool_carries_static_cache_control(tool_names: list[str]) -> None:
-    registry = ToolRegistry([FakeTool(n) for n in tool_names])
+async def test_only_last_tool_carries_static_cache_control(tool_names: list[str], fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in tool_names])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -986,8 +971,8 @@ async def test_only_last_tool_carries_static_cache_control(tool_names: list[str]
     assert sent_tools[-1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
 
 
-async def test_allowed_tools_subset_places_cache_control_on_last_of_subset() -> None:
-    registry = ToolRegistry([FakeTool(n) for n in ["a", "b", "c"]])
+async def test_allowed_tools_subset_places_cache_control_on_last_of_subset(fake_tool: FakeToolFactory) -> None:
+    registry = ToolRegistry([fake_tool(n) for n in ["a", "b", "c"]])
     resp = make_response("end_turn", [make_text_block("ok")])
     agent, create_mock = make_agent(tools=registry, mock_response=resp)
 
@@ -1041,6 +1026,41 @@ async def test_empty_tool_results_produces_empty_content_block() -> None:
 
     blocks = create_mock.call_args.kwargs["messages"][-1]["content"]
     assert blocks == []
+
+
+# ---------------------------------------------------------------------------
+# Failed tool results reach the API as is_error blocks
+#
+# This is what the ReAct loop's truncation-recovery path (ddev.ai.react.process) actually
+# depends on: it hands AnthropicAgent.send() a failed ToolResult carrying a recovery hint as
+# `error`, and the model can only see that hint if it's serialized into the request. Process-level
+# tests only assert the hint reaches agent.send() as a ToolResultMessage; this is the layer that
+# turns it into the bytes the model actually receives on retry.
+# ---------------------------------------------------------------------------
+
+
+async def test_failed_tool_result_serialized_as_error_block_with_error_text() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+    hint = "Retry with a smaller, more targeted change."
+
+    await agent.send([ToolResultMessage(tool_call_id="tc_01", result=ToolResult(success=False, error=hint))])
+
+    block = create_mock.call_args.kwargs["messages"][-1]["content"][0]
+    assert block["tool_use_id"] == "tc_01"
+    assert block["is_error"] is True
+    assert block["content"] == hint
+
+
+async def test_failed_tool_result_without_error_text_falls_back_to_placeholder() -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+
+    await agent.send([ToolResultMessage(tool_call_id="tc_01", result=ToolResult(success=False))])
+
+    block = create_mock.call_args.kwargs["messages"][-1]["content"][0]
+    assert block["is_error"] is True
+    assert block["content"] == "(unknown error)"
 
 
 # ---------------------------------------------------------------------------

@@ -4,12 +4,16 @@
 
 from datetime import UTC, datetime
 
-import pytest
-
 from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import (
+    CheckpointManager,
+    CheckpointTokenInfo,
+    FailedCheckpoint,
+    GoalValidationRecord,
+    SuccessCheckpoint,
+)
 from ddev.event_bus.exceptions import HookName, MessageProcessingError, ProcessorHookError
 
 
@@ -108,9 +112,9 @@ async def test_on_error_writes_failed_checkpoint(flow_dir, flow_context, message
     await phase.on_error(wrapped)
 
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "failed"
-    assert checkpoint["error"] == "boom"
-    assert checkpoint["started_at"] is None  # not started yet
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.error == "boom"
+    assert checkpoint.started_at is None  # not started yet
 
 
 async def test_on_error_emits_failed_message(flow_dir, flow_context, message_queue):
@@ -135,8 +139,8 @@ async def test_on_error_writes_failed_checkpoint_after_start(flow_dir, flow_cont
     await phase.on_error(wrapped)
 
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "failed"
-    assert checkpoint["started_at"] is not None
+    assert isinstance(checkpoint, FailedCheckpoint)
+    assert checkpoint.started_at is not None
 
 
 # ---------------------------------------------------------------------------
@@ -206,14 +210,15 @@ def test_should_process_returns_false_after_already_executed(flow_dir, flow_cont
 
 
 async def test_process_message_writes_memory_and_checkpoint(flow_dir, flow_context, message_queue):
-    """End-to-end Phase contract: memory_text is persisted, extra_checkpoint merges,
+    """End-to-end Phase contract: memory_text is persisted, phase_data is recorded,
     token totals land in the checkpoint, and the success metadata is recorded.
     """
     outcome = PhaseOutcome(
         memory_text="stub-memory-body",
         total_input_tokens=123,
         total_output_tokens=45,
-        extra_checkpoint={"custom_field": "custom_value", "count": 7},
+        goal_validations=[GoalValidationRecord(task="t1", attempts=1, final_valid=True)],
+        checkpoint_data={"custom_field": "custom_value", "count": 7},
     )
     phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue, outcome=outcome)
 
@@ -222,35 +227,10 @@ async def test_process_message_writes_memory_and_checkpoint(flow_dir, flow_conte
     assert mgr.memory_content("p1") == "stub-memory-body"
 
     checkpoint = mgr.read()["p1"]
-    assert checkpoint["status"] == "success"
-    assert checkpoint["tokens"] == {"total_input": 123, "total_output": 45}
-    assert checkpoint["memory_path"] == str(mgr.memory_path("p1"))
-    assert checkpoint["custom_field"] == "custom_value"
-    assert checkpoint["count"] == 7
-    assert checkpoint["started_at"]
-    assert checkpoint["finished_at"]
-
-
-@pytest.mark.parametrize(
-    "reserved_key",
-    ["status", "started_at", "finished_at", "tokens", "memory_path"],
-)
-async def test_extra_checkpoint_cannot_override_reserved_keys(flow_dir, flow_context, message_queue, reserved_key):
-    outcome = PhaseOutcome(memory_text="m", extra_checkpoint={reserved_key: "evil"})
-    phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue, outcome=outcome)
-
-    with pytest.raises(ValueError, match=f"reserved keys.*{reserved_key}"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-    assert mgr.read() == {}
-    assert not mgr.memory_path("p1").exists()
-
-
-async def test_failed_phase_omits_memory_path(flow_dir, flow_context, message_queue):
-    phase, mgr = _make_stub_phase(flow_dir, flow_context, message_queue)
-
-    wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), RuntimeError("boom"))
-    await phase.on_error(wrapped)
-
-    checkpoint = mgr.read()["p1"]
-    assert "memory_path" not in checkpoint
+    assert isinstance(checkpoint, SuccessCheckpoint)
+    assert checkpoint.tokens == CheckpointTokenInfo(total_input=123, total_output=45)
+    assert checkpoint.memory_path == str(mgr.memory_path("p1"))
+    assert checkpoint.phase_data == {"custom_field": "custom_value", "count": 7}
+    assert checkpoint.goal_validations == [GoalValidationRecord(task="t1", attempts=1, final_valid=True)]
+    assert checkpoint.started_at
+    assert checkpoint.finished_at

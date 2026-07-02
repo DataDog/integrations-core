@@ -244,7 +244,7 @@ class InspectEndpointPhase(Phase):
             memory_text=memory_text,
             total_input_tokens=0,
             total_output_tokens=0,
-            extra_checkpoint={
+            checkpoint_data={
                 "endpoint_url": endpoint_url,
                 "status_code": response.status_code,
                 "content_type": content_type,

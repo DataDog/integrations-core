@@ -176,6 +176,10 @@ class ToolRegistry:
             return ToolResult(success=False, error=f"Unknown tool: {name!r}")
         return await tool.run(raw)
 
+    def get(self, name: str) -> ToolProtocol | None:
+        """Look up a registered tool instance by name, or None if not registered."""
+        return self._tools.get(name)
+
 
 def filter_read_only(tool_names: list[str]) -> list[str]:
     """Return only the read-only names. Unknown names raise."""

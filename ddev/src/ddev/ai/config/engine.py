@@ -19,6 +19,7 @@ from ddev.ai.config.md import parse_md_file
 from ddev.ai.config.models import (
     AgentConfig,
     FlowConfig,
+    FlowEntry,
     FlowEnvelope,
     PhaseConfig,
     PhaseEnvelope,
@@ -98,6 +99,23 @@ class FlowDiagnostics:
 RESOURCE_ADAPTER: TypeAdapter[PhaseEnvelope | FlowEnvelope] = TypeAdapter(ResourceEnvelope)
 
 PROMPT_TYPES = {"prompt", "goal", "memory_prompt"}
+
+
+def _topological_sort(flow: list[FlowEntry]) -> list[FlowEntry]:
+    """Stable topological sort of an acyclic flow: dependencies before dependents.
+
+    Phases with no ordering constraint between them keep their original
+    declaration order. The caller must guarantee the graph is acyclic.
+    """
+    remaining_deps = {entry.phase: set(entry.dependencies) for entry in flow}
+
+    ordered: list[FlowEntry] = []
+    emitted: set[str] = set()
+    while len(ordered) < len(flow):
+        nxt = next(entry for entry in flow if entry.phase not in emitted and remaining_deps[entry.phase] <= emitted)
+        ordered.append(nxt)
+        emitted.add(nxt.phase)
+    return ordered
 
 
 class ConfigurationEngine:
@@ -455,7 +473,7 @@ class ConfigurationEngine:
             name=flow_name,
             agents={pc.agent: self._ok_agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
             phases={pc.name: self._inline_phase(pc) for pc in scheduled_phases},
-            flow=fc.flow,
+            flow=_topological_sort(fc.flow),
             variables=resolved_variables,
         )
 

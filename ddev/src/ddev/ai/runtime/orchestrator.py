@@ -12,7 +12,7 @@ from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
-from ddev.ai.runtime.checkpoints import CheckpointManager
+from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
@@ -29,6 +29,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         agent_clients: dict[str, Any],
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
+        resume: bool = False,
         grace_period: float = 10,
         max_timeout: float = 600,
         logger: logging.Logger | None = None,
@@ -61,6 +62,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._agent_clients = agent_clients
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
+        self._resume = resume
         self._agent_logger: AgentLogger | None = None
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
@@ -68,6 +70,16 @@ class PhaseOrchestrator(EventBusOrchestrator):
     async def on_initialize(self) -> None:
         """Construct phases from the resolved flow and submit the start PhaseTrigger."""
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
+        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
+
+        completed, frontier = (
+            resolve_resume_state(self._resolved_flow, checkpoint_manager) if self._resume else (set(), set())
+        )
+        if self._resume:
+            self._logger.info(
+                "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
+            )
+
         self._agent_logger = AgentLogger(checkpoint_manager.root)
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
 
@@ -82,10 +94,13 @@ class PhaseOrchestrator(EventBusOrchestrator):
             flow_variables=self._resolved_flow.variables,
             callbacks=run_callbacks,
             logger=self._logger,
+            resume_frontier=frozenset(frontier),
         )
 
-        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
         for entry in self._resolved_flow.flow:
+            if entry.phase in completed:
+                self._logger.info("Resuming: skipping already-completed phase %r", entry.phase)
+                continue
             phase_config = self._resolved_flow.phases[entry.phase]
             phase = self._phase_registry.get(phase_config.class_).build(
                 phase_id=entry.phase,
@@ -98,6 +113,9 @@ class PhaseOrchestrator(EventBusOrchestrator):
             self.register_processor(phase, [PhaseTrigger])
 
         self.submit_message(PhaseTrigger(id="start", phase_id=None))
+        for entry in self._resolved_flow.flow:
+            if entry.phase in completed:
+                self.submit_message(PhaseTrigger(id=f"{entry.phase}_resumed", phase_id=entry.phase))
 
     async def on_message_received(self, message: BaseMessage) -> None:
         """Stop the entire pipeline immediately when any phase fails."""
