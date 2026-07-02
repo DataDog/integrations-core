@@ -4,11 +4,9 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import timedelta
-from typing import Any, Iterator, Protocol, runtime_checkable
+from typing import Any, Iterator, Protocol
 
 
-@runtime_checkable
 class HTTPResponseProtocol(Protocol):
     status_code: int
     content: bytes
@@ -19,16 +17,6 @@ class HTTPResponseProtocol(Protocol):
     def ok(self) -> bool: ...
     @property
     def reason(self) -> str: ...
-    @property
-    def encoding(self) -> str | None: ...
-    @encoding.setter
-    def encoding(self, value: str | None) -> None: ...
-    @property
-    def url(self) -> str: ...
-    @property
-    def cookies(self) -> Mapping[str, str]: ...
-    @property
-    def elapsed(self) -> timedelta: ...
 
     def json(self, **kwargs: Any) -> Any: ...
     def raise_for_status(self) -> None: ...
