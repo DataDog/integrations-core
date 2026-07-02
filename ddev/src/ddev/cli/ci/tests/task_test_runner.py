@@ -200,12 +200,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         return {**dataclasses.asdict(job), "artifact_name": job.artifact_name()}
 
     async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> tuple[Path, dict[str, Path]]:
-        """Download the run's artifacts and return the run directory plus an artifact-name -> path map.
+        """Download the run's artifacts and return the base artifacts path plus an artifact-name -> path map.
 
         The map keys on the GitHub artifact name (the contract a ``BatchJob`` reproduces via
         ``artifact_name``), letting the producer resolve each job's directory deterministically.
         """
-        run_path = self._options.artifacts_base_path / str(run_id)
+        base_path = self._options.artifacts_base_path
         artifact_dirs: dict[str, Path] = {}
         failures: list[tuple[int, str]] = []
         try:
@@ -227,7 +227,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                             extra=log_extra,
                         )
                         continue
-                    target = run_path / f"{artifact.id}-{artifact.name}"
+                    target = base_path / artifact.name
                     try:
                         await self._client.download_artifact(artifact.archive_download_url, target)
                         artifact_dirs[artifact.name] = target
@@ -250,4 +250,4 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 failures,
                 extra=log_extra,
             )
-        return run_path, artifact_dirs
+        return base_path, artifact_dirs

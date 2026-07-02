@@ -210,16 +210,16 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     assert cr["name"] == "test-batch/batch-1"
     assert cr["details_url"] == "https://github.com/o/r/actions/runs/123"
 
-    # Both artifacts downloaded under <base>/<run_id>/<id>-<name> (collision-safe path).
+    # Both artifacts downloaded under <base>/<artifact_name>.
     download_calls = fake.calls_to("download_artifact")
     assert len(download_calls) == 2
     assert (download_calls[0].kwargs["archive_download_url"], download_calls[0].kwargs["dest_path"]) == (
         "https://api.github.com/artifact/1/zip",
-        tmp_path / "123" / "1-artifact-1",
+        tmp_path / "artifact-1",
     )
     assert (download_calls[1].kwargs["archive_download_url"], download_calls[1].kwargs["dest_path"]) == (
         "https://api.github.com/artifact/2/zip",
-        tmp_path / "123" / "2-artifact-2",
+        tmp_path / "artifact-2",
     )
 
     # Exactly one BatchFinished message submitted with the right fields.
@@ -231,7 +231,7 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     assert finished.status == "success"
     assert finished.run_id == 123
     assert finished.workflow_url == "https://github.com/o/r/actions/runs/123"
-    assert finished.artifacts_path == str(tmp_path / "123")
+    assert finished.artifacts_path == str(tmp_path)
 
     # One well-formed batch_jobs entry per job; no jobs API match and artifact names don't
     # match these generic artifacts, so both correlated facets are None.
@@ -279,8 +279,8 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
     assert results["j1"].workflow_job is not None and results["j1"].workflow_job.conclusion == "success"
     assert results["j2"].workflow_job is not None and results["j2"].workflow_job.conclusion == "failure"
     # Each job's single artifact folder is resolved by its base artifact name (no heuristic matching).
-    assert results["j1"].artifacts_path == str(tmp_path / "123" / f"1-{j1.artifact_name()}")
-    assert results["j2"].artifacts_path == str(tmp_path / "123" / f"2-{j2.artifact_name()}")
+    assert results["j1"].artifacts_path == str(tmp_path / j1.artifact_name())
+    assert results["j2"].artifacts_path == str(tmp_path / j2.artifact_name())
     # The per-facet file names inside each folder are recorded from the base artifact name.
     assert results["j1"].unit_artifact_name == f"unit-{j1.artifact_name()}"
     assert results["j2"].coverage_artifact_name == f"coverage-{j2.artifact_name()}"
@@ -304,7 +304,7 @@ async def test_process_message_batch_job_without_workflow_match(tmp_path: Path) 
     [result] = finished.batch_jobs
     assert result.job == job
     assert result.workflow_job is None
-    assert result.artifacts_path == str(tmp_path / "123" / f"1-{job.artifact_name()}")
+    assert result.artifacts_path == str(tmp_path / job.artifact_name())
 
 
 @pytest.mark.asyncio
