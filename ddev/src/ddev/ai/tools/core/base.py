@@ -82,6 +82,12 @@ class BaseTool[TInput: BaseToolInput](ABC):
         return inspect.cleandoc(self.__class__.__doc__) if self.__class__.__doc__ else ""
 
     @property
+    def truncated_call_hint(self) -> str | None:
+        """Tool-specific guidance appended to the synthetic failure result when a call to
+        this tool is truncated by the output token limit. None falls back to a generic hint."""
+        return None
+
+    @property
     def input_schema(self) -> dict[str, object]:
         return _get_input_type(type(self)).to_input_schema()
 
