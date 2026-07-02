@@ -1,0 +1,1 @@
+Add MarkCacheBytes to SystemMetrics query mapping for ClickHouse 25.x+ compatibility, where the metric was moved from system.asynchronous_metrics to system.metrics.
