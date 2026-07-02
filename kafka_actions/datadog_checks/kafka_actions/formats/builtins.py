@@ -1,0 +1,83 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Built-in format handlers.
+
+Thin wrappers over the standalone helpers in :mod:`._helpers` so the
+deserialization logic lives in one place and the dependency flows one way
+(``message_deserializer`` -> ``formats``).
+"""
+
+from __future__ import annotations
+
+from datadog_checks.kafka_actions.formats._helpers import (
+    _build_avro_schema,
+    _build_protobuf_schema,
+    _build_protobuf_schema_from_registry,
+    _deserialize_avro,
+    _deserialize_bson,
+    _deserialize_json,
+    _deserialize_protobuf,
+    _deserialize_raw,
+    _deserialize_string,
+)
+from datadog_checks.kafka_actions.formats.base import FormatHandler
+
+
+class JsonHandler(FormatHandler):
+    name = 'json'
+
+    def deserialize(self, message, schema, *, log, uses_schema_registry):
+        return _deserialize_json(message)
+
+
+class StringHandler(FormatHandler):
+    name = 'string'
+
+    def deserialize(self, message, schema, *, log, uses_schema_registry):
+        return _deserialize_string(message)
+
+
+class RawHandler(FormatHandler):
+    name = 'raw'
+
+    def deserialize(self, message, schema, *, log, uses_schema_registry):
+        return _deserialize_raw(message)
+
+
+class BsonHandler(FormatHandler):
+    name = 'bson'
+
+    def check_availability(self):
+        import bson  # noqa: F401
+
+    def deserialize(self, message, schema, *, log, uses_schema_registry):
+        return _deserialize_bson(message)
+
+
+class AvroHandler(FormatHandler):
+    name = 'avro'
+    requires_schema = True
+
+    def check_availability(self):
+        import fastavro  # noqa: F401
+
+    def build_schema(self, schema_str):
+        return _build_avro_schema(schema_str)
+
+    def deserialize(self, message, schema, *, log, uses_schema_registry):
+        return _deserialize_avro(message, schema)
+
+
+class ProtobufHandler(FormatHandler):
+    name = 'protobuf'
+    requires_schema = True
+
+    def build_schema(self, schema_str):
+        return _build_protobuf_schema(schema_str)
+
+    def build_schema_from_registry(self, schema_str, dep_schemas):
+        return _build_protobuf_schema_from_registry(schema_str, dep_schemas)
+
+    def deserialize(self, message, schema, *, log, uses_schema_registry):
+        return _deserialize_protobuf(message, schema, uses_schema_registry)

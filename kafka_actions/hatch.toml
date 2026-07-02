@@ -1,5 +1,13 @@
 [env.collectors.datadog-checks]
 
+[envs.default]
+dependencies = [
+    "msgpack==1.1.0",
+    "python-snappy==0.7.3",
+    "lz4==4.3.3",
+    "zstandard==0.23.0",
+]
+
 [[envs.default.matrix]]
 python = ["3.12"]
 

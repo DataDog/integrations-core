@@ -180,17 +180,33 @@ class KafkaActionsConfig:
 
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
+        from .compression import get_codec, list_codecs
+        from .formats import get_handler, list_handlers
+
+        valid_formats = list_handlers()
         value_format = config.get('value_format', 'json')
-        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
+        if value_format not in valid_formats:
             raise ConfigurationError(
-                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro, raw"
+                f"Invalid value_format: {value_format}. Supported formats: {', '.join(valid_formats)}"
             )
 
         key_format = config.get('key_format', 'json')
-        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
-            raise ConfigurationError(
-                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro, raw"
-            )
+        if key_format not in valid_formats:
+            raise ConfigurationError(f"Invalid key_format: {key_format}. Supported formats: {', '.join(valid_formats)}")
+
+        valid_codecs = list_codecs()
+        for field in ('value_compression', 'key_compression'):
+            codec = config.get(field)
+            if codec and codec not in valid_codecs:
+                supported = ', '.join(valid_codecs) if valid_codecs else '(no codec plugin installed)'
+                raise ConfigurationError(f"Invalid {field}: {codec}. Supported codecs: {supported}")
+
+        for field, fmt in (('value_format', value_format), ('key_format', key_format)):
+            self._check_optional_dependency(get_handler(fmt), field, fmt)
+        for field in ('value_compression', 'key_compression'):
+            codec_name = config.get(field)
+            if codec_name:
+                self._check_optional_dependency(get_codec(codec_name), field, codec_name)
 
         start_timestamp = config.get('start_timestamp')
         if start_timestamp is not None:
@@ -199,31 +215,39 @@ class KafkaActionsConfig:
 
         schema_registry_url = self.instance.get('schema_registry_url')
 
-        if value_format in ['protobuf', 'avro']:
-            if config.get('value_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"value_format='{value_format}' with 'value_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('value_schema'):
-                raise ConfigurationError(
-                    f"value_format='{value_format}' requires either 'value_uses_schema_registry=true' "
-                    f"or 'value_schema' to be specified"
-                )
+        self._validate_schema_requirement('value', value_format, get_handler(value_format), schema_registry_url)
+        self._validate_schema_requirement('key', key_format, get_handler(key_format), schema_registry_url)
 
-        if key_format in ['protobuf', 'avro']:
-            if config.get('key_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"key_format='{key_format}' with 'key_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('key_schema'):
+    def _validate_schema_requirement(self, side: str, fmt: str, handler, schema_registry_url) -> None:
+        """Require a schema (inline or registry) for formats whose handler sets requires_schema."""
+        if handler is None or not getattr(handler, 'requires_schema', False):
+            return
+
+        config = self.read_messages
+        if config.get(f'{side}_uses_schema_registry'):
+            if not schema_registry_url:
                 raise ConfigurationError(
-                    f"key_format='{key_format}' requires either 'key_uses_schema_registry=true' "
-                    f"or 'key_schema' to be specified"
+                    f"{side}_format='{fmt}' with '{side}_uses_schema_registry=true' "
+                    f"requires 'schema_registry_url' to be configured"
                 )
+        elif not config.get(f'{side}_schema'):
+            raise ConfigurationError(
+                f"{side}_format='{fmt}' requires either '{side}_uses_schema_registry=true' "
+                f"or '{side}_schema' to be specified"
+            )
+
+    @staticmethod
+    def _check_optional_dependency(plugin, field: str, name: str) -> None:
+        """Fail config validation if a selected format/codec is missing its optional package."""
+        if plugin is None:
+            return
+        try:
+            plugin.check_availability()
+        except ImportError as e:
+            raise ConfigurationError(
+                f"{field}='{name}' requires an optional package that is not installed: {e}. "
+                f"Install it into the Agent's embedded Python to use this {field}."
+            ) from e
 
     def _validate_create_topic(self):
         """Validate create_topic action configuration."""

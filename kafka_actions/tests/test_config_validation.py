@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import base64
+from unittest import mock
 
 import pytest
 
@@ -111,6 +112,62 @@ class TestReadMessagesValidation:
         with pytest.raises(ConfigurationError, match="Invalid value_format"):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
+
+    def test_invalid_value_compression(self):
+        """Test that an unregistered value_compression codec raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test', 'value_compression': 'not-a-codec'},
+        }
+
+        with pytest.raises(ConfigurationError, match="Invalid value_compression"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_invalid_key_compression(self):
+        """Test that an unregistered key_compression codec raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test', 'key_compression': 'not-a-codec'},
+        }
+
+        with pytest.raises(ConfigurationError, match="Invalid key_compression"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_missing_optional_codec_dependency_fails_at_config_time(self):
+        """A selected codec whose optional package is missing raises a ConfigurationError up front."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test', 'value_compression': 'zstd'},
+        }
+
+        with mock.patch(
+            'datadog_checks.kafka_actions.compression.codecs.ZstdCodec.check_availability',
+            side_effect=ImportError("No module named 'zstandard'"),
+        ):
+            with pytest.raises(ConfigurationError, match="value_compression='zstd' requires an optional package"):
+                config = KafkaActionsConfig(instance, None)
+                config.validate_config()
+
+    def test_missing_optional_format_dependency_fails_at_config_time(self):
+        """A selected format whose optional package is missing raises a ConfigurationError up front."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {'cluster': 'test', 'topic': 'test', 'value_format': 'bson'},
+        }
+
+        with mock.patch(
+            'datadog_checks.kafka_actions.formats.builtins.BsonHandler.check_availability',
+            side_effect=ImportError("No module named 'bson'"),
+        ):
+            with pytest.raises(ConfigurationError, match="value_format='bson' requires an optional package"):
+                config = KafkaActionsConfig(instance, None)
+                config.validate_config()
 
     def test_invalid_start_timestamp(self):
         """Test that invalid start_timestamp raises error."""

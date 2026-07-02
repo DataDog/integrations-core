@@ -282,14 +282,29 @@ files:
           description: |
             Message value format.
 
-            Supported formats:
+            Built-in formats (always available):
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
             - string: Plain UTF-8 text (use for non-JSON text messages)
-            - protobuf: Protocol Buffers
-            - avro: Apache Avro
-            Note: If any message fails deserialization, the read_messages action will stop immediately.
-            Ensure the format matches the actual messages in your topic.
+            - raw: Pass-through bytes (base64-encoded in output)
+            - protobuf: Protocol Buffers (value_schema is the base64 FileDescriptorSet)
+            - avro: Apache Avro (value_schema is the JSON schema)
+
+            Formats requiring optional packages (install via the Agent):
+            - msgpack: MessagePack data. Requires the ``msgpack`` package.
+            - protobuf_msgpack: Protobuf envelope with msgpack-encoded bytes fields.
+              value_schema must be a JSON wrapper ``{"schema": "<base64 FileDescriptorSet>",
+              "msgpack_fields": ["pkg.Msg.field", ...]}``. Requires ``msgpack`` and ``protobuf``.
+
+            Additional formats may be registered by a plugin wheel on the
+            ``datadog_kafka_actions.formats`` entry-point group.
+
+            Note: Decompression failures and format-deserialization failures are handled differently.
+            A decompression failure (value_compression/key_compression) means the payload is
+            unreadable, so it aborts the read_messages action immediately. A per-message
+            format-deserialization failure does not stop the read: the error is captured and emitted
+            in the output as a "<deserialization error: ...>" string, and consumption continues with
+            the next message. Ensure the format matches the actual messages in your topic.
           default: json
           example: json
         - name: value_schema
@@ -314,14 +329,7 @@ files:
         - name: key_format
           type: string
           description: |
-            Message key format.
-
-            Supported formats:
-            - string: Plain UTF-8 text (most common for keys)
-            - json: JSON data (strict validation, fails if not valid JSON)
-            - bson: BSON (Binary JSON) data
-            - protobuf: Protocol Buffers
-            - avro: Apache Avro
+            Message key format. Same supported set as value_format.
           default: json
           example: json
         - name: key_schema
@@ -338,6 +346,30 @@ files:
             deserialization. See value_skip_bytes for details. Default 0.
           default: 0
           example: 1
+        - name: value_compression
+          type: string
+          description: |
+            Compression codec to apply to the message value BEFORE format
+            deserialization. Empty / unset = no decompression.
+
+            Built-in codecs (stdlib, always available): gzip, zlib.
+
+            Built-in codecs requiring optional packages:
+            - snappy: requires ``python-snappy``
+            - lz4: standard LZ4 frame format, requires ``lz4``
+            - lz4_dd_hdr: DataDog/golz4 framing (4-byte uncompressed-size header + raw LZ4 block),
+              requires ``lz4``
+            - zstd: requires ``zstandard``
+
+            Additional codecs may be registered by a plugin wheel on the
+            ``datadog_kafka_actions.compressions`` entry-point group.
+          example: gzip
+        - name: key_compression
+          type: string
+          description: |
+            Compression codec to apply to the message key BEFORE format
+            deserialization. See value_compression for details.
+          example: snappy
         - name: consumer_group_id
           type: string
           description: |

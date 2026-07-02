@@ -4,6 +4,7 @@
 """Tests for message deserialization."""
 
 import base64
+import gzip
 import json
 from unittest.mock import MagicMock
 
@@ -953,6 +954,24 @@ class TestHeaderSerialization:
         config = {'key_format': 'string', 'value_format': 'json', 'value_uses_schema_registry': False}
         msg = DeserializedMessage(kafka_msg, deserializer, config)
         assert msg.headers['empty'] is None
+
+
+class TestDeserializeMessageFailureBranches:
+    """Test the defensive failure branches in deserialize_message that return error strings."""
+
+    def test_unknown_format_returns_error_string(self):
+        """An unregistered format handler returns a '<deserialization error: unknown format ...>' string."""
+        deserializer = MessageDeserializer(MagicMock())
+        result, schema_id = deserializer.deserialize_message(b'some-bytes', format_type='no-such-format')
+        assert result.startswith("<deserialization error: unknown format")
+        assert "'no-such-format'" in result
+        assert schema_id is None
+
+    def test_decompression_failure_propagates(self):
+        """A decompression failure propagates so the read action stops immediately."""
+        deserializer = MessageDeserializer(MagicMock())
+        with pytest.raises(gzip.BadGzipFile):
+            deserializer.deserialize_message(b'not-gzip-data', format_type='raw', compression='gzip')
 
 
 if __name__ == '__main__':

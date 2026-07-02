@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from confluent_kafka import KafkaError
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_actions import KafkaActionsCheck
 from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
 
@@ -603,6 +604,29 @@ class TestConsumeMessagesEarlyReturn:
         assert result == []
         consumer.assign.assert_not_called()
         consumer.poll.assert_not_called()
+
+
+class TestCheckInitFailure:
+    """Test that a check whose initialization fails emits a failure event and re-raises."""
+
+    def test_init_failure_emits_event_and_raises(self, aggregator):
+        instance = {
+            'remote_config_id': 'test-init-failure-001',
+            'kafka_connect_str': 'localhost:9092',
+            'read_messages': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+                'value_compression': 'not-a-codec',
+            },
+        }
+
+        with pytest.raises(ConfigurationError):
+            KafkaActionsCheck('kafka_actions', {}, [instance])
+
+        failure_events = aggregator.get_event_platform_events("data-streams-message")
+        assert any(e.get('status') == 'failure' for e in failure_events), (
+            f"Expected a failure action event, got {failure_events}"
+        )
 
 
 if __name__ == '__main__':
