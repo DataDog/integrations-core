@@ -35,8 +35,8 @@ class TailFile(object):
         # Compute CRC of the beginning of the file
         crc = None
         if size >= self.CRC_SIZE:
-            tmp_file = open(self._path, 'r')
-            data = ensure_bytes(tmp_file.read(self.CRC_SIZE))
+            with open(self._path, 'r') as tmp_file:
+                data = ensure_bytes(tmp_file.read(self.CRC_SIZE))
             crc = binascii.crc32(data)
 
         self._log.debug(
