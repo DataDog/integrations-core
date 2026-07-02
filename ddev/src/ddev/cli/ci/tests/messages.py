@@ -54,14 +54,14 @@ class FailedCheck:
 class BatchJobResult:
     """Everything known about a single job in a finished batch, correlated by the producer.
 
-    ``artifacts_path`` is the single downloaded folder for the job (named after the job's
+    ``artifact_name_path`` is the single downloaded folder for the job (named after the job's
     ``artifact_name``); the three ``*_artifact_name`` fields are the expected per-facet file names
     inside that folder.
     """
 
     job: BatchJob
     workflow_job: WorkflowJob | None
-    artifacts_path: str | None
+    artifact_name_path: str | None
     unit_artifact_name: str
     e2e_artifact_name: str
     coverage_artifact_name: str

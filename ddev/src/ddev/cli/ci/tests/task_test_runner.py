@@ -167,11 +167,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         for batch_job in job_list:
             base = batch_job.artifact_name()
             artifact_dir = artifact_dirs.get(base)
+            artifact_name_path = str(artifact_dir) if artifact_dir is not None and artifact_dir.exists() else None
             results.append(
                 BatchJobResult(
                     job=batch_job,
                     workflow_job=jobs_by_name.get(batch_job.name),
-                    artifacts_path=str(artifact_dir) if artifact_dir is not None and artifact_dir.exists() else None,
+                    artifact_name_path=artifact_name_path,
                     unit_artifact_name=f"unit-{base}",
                     e2e_artifact_name=f"e2e-{base}",
                     coverage_artifact_name=f"coverage-{base}",

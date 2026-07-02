@@ -236,7 +236,7 @@ async def test_process_message_happy_path(tmp_path: Path) -> None:
     # One well-formed batch_jobs entry per job; no jobs API match and artifact names don't
     # match these generic artifacts, so both correlated facets are None.
     assert [r.job.name for r in finished.batch_jobs] == ["j1", "j2"]
-    assert all(r.workflow_job is None and r.artifacts_path is None for r in finished.batch_jobs)
+    assert all(r.workflow_job is None and r.artifact_name_path is None for r in finished.batch_jobs)
     # The per-facet file names are recorded from the job's base artifact name.
     first = finished.batch_jobs[0]
     base = batch.job_list[0].artifact_name()
@@ -279,8 +279,8 @@ async def test_process_message_correlates_batch_jobs(tmp_path: Path) -> None:
     assert results["j1"].workflow_job is not None and results["j1"].workflow_job.conclusion == "success"
     assert results["j2"].workflow_job is not None and results["j2"].workflow_job.conclusion == "failure"
     # Each job's single artifact folder is resolved by its base artifact name (no heuristic matching).
-    assert results["j1"].artifacts_path == str(tmp_path / j1.artifact_name())
-    assert results["j2"].artifacts_path == str(tmp_path / j2.artifact_name())
+    assert results["j1"].artifact_name_path == str(tmp_path / j1.artifact_name())
+    assert results["j2"].artifact_name_path == str(tmp_path / j2.artifact_name())
     # The per-facet file names inside each folder are recorded from the base artifact name.
     assert results["j1"].unit_artifact_name == f"unit-{j1.artifact_name()}"
     assert results["j2"].coverage_artifact_name == f"coverage-{j2.artifact_name()}"
@@ -304,12 +304,12 @@ async def test_process_message_batch_job_without_workflow_match(tmp_path: Path) 
     [result] = finished.batch_jobs
     assert result.job == job
     assert result.workflow_job is None
-    assert result.artifacts_path == str(tmp_path / job.artifact_name())
+    assert result.artifact_name_path == str(tmp_path / job.artifact_name())
 
 
 @pytest.mark.asyncio
 async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> None:
-    # A job with no artifacts on disk still yields a well-formed entry with artifacts_path None.
+    # A job with no artifacts on disk still yields a well-formed entry with artifact_name_path None.
     job = _job("j1")
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", _workflow_run("completed", "success"))
@@ -323,7 +323,7 @@ async def test_process_message_batch_job_without_artifacts(tmp_path: Path) -> No
     assert isinstance(finished, BatchFinished)
     [result] = finished.batch_jobs
     assert result.workflow_job is not None and result.workflow_job.conclusion == "success"
-    assert result.artifacts_path is None
+    assert result.artifact_name_path is None
 
 
 @pytest.mark.asyncio
