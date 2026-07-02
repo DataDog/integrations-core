@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING, Literal
 from ddev.event_bus.orchestrator import BaseMessage
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from ddev.utils.github_async.models import WorkflowJob
 
 # Characters GitHub disallows in an artifact name (plus CR/LF).
@@ -65,6 +67,40 @@ class BatchJobResult:
     unit_artifact_name: str
     e2e_artifact_name: str
     coverage_artifact_name: str
+
+    @staticmethod
+    def correlate(
+        job_list: list[BatchJob],
+        jobs: list[WorkflowJob],
+        artifact_dirs: dict[str, Path],
+    ) -> list[BatchJobResult]:
+        """Correlate each job's spec, its workflow-run result, and its artifact directory.
+
+        The workflow-job join is by name (tolerant of misses). Each job's artifact folder is matched
+        by reconstructing its name from the job's fields (``artifact_name``) and looking it up among
+        the downloaded folders; the path is recorded only when it exists on disk. That single folder
+        holds the three per-facet files, whose names (``unit-``/``e2e-``/``coverage-`` prefixed on
+        the base name) are recorded for the gatherer. A job missing from the API or from disk still
+        yields a well-formed result.
+        """
+        jobs_by_name = {job.name: job for job in jobs}
+
+        results: list[BatchJobResult] = []
+        for batch_job in job_list:
+            base = batch_job.artifact_name()
+            artifact_dir = artifact_dirs.get(base)
+            artifact_name_path = str(artifact_dir) if artifact_dir is not None and artifact_dir.exists() else None
+            results.append(
+                BatchJobResult(
+                    job=batch_job,
+                    workflow_job=jobs_by_name.get(batch_job.name),
+                    artifact_name_path=artifact_name_path,
+                    unit_artifact_name=f"unit-{base}",
+                    e2e_artifact_name=f"e2e-{base}",
+                    coverage_artifact_name=f"coverage-{base}",
+                )
+            )
+        return results
 
 
 @dataclass

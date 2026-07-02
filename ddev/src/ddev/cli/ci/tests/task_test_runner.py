@@ -98,18 +98,18 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
             final_conclusion = raw or "neutral"
 
-            artifacts_path, artifact_dirs = await self._download_artifacts(run_id, log_extra)
+            artifact_dirs = await self._download_artifacts(run_id, log_extra)
             self._logger.info("Artifacts downloaded", extra=log_extra)
 
             jobs = await self._list_jobs(run_id, log_extra)
-            batch_jobs = self._build_batch_jobs(message.job_list, jobs, artifact_dirs)
+            batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
 
             finished = BatchFinished(
                 id=message.id,
                 status=_conclusion_to_status(raw),
                 run_id=run_id,
                 workflow_url=workflow_url,
-                artifacts_path=str(artifacts_path),
+                artifacts_path=str(self._options.artifacts_base_path),
                 batch_jobs=batch_jobs,
             )
         finally:
@@ -148,38 +148,6 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             self._logger.warning("Failed to list workflow jobs", extra=log_extra, exc_info=True)
         return jobs
 
-    @staticmethod
-    def _build_batch_jobs(
-        job_list: list[BatchJob], jobs: list[WorkflowJob], artifact_dirs: dict[str, Path]
-    ) -> list[BatchJobResult]:
-        """Correlate each job's spec, its workflow-run result, and its artifact directory.
-
-        The workflow-job join is by name (tolerant of misses). Each job's artifact folder is matched
-        by reconstructing its name from the job's fields (``artifact_name``) and looking it up among
-        the downloaded folders; the path is recorded only when it exists on disk. That single folder
-        holds the three per-facet files, whose names (``unit-``/``e2e-``/``coverage-`` prefixed on
-        the base name) are recorded for the gatherer. A job missing from the API or from disk still
-        yields a well-formed result.
-        """
-        jobs_by_name = {job.name: job for job in jobs}
-
-        results: list[BatchJobResult] = []
-        for batch_job in job_list:
-            base = batch_job.artifact_name()
-            artifact_dir = artifact_dirs.get(base)
-            artifact_name_path = str(artifact_dir) if artifact_dir is not None and artifact_dir.exists() else None
-            results.append(
-                BatchJobResult(
-                    job=batch_job,
-                    workflow_job=jobs_by_name.get(batch_job.name),
-                    artifact_name_path=artifact_name_path,
-                    unit_artifact_name=f"unit-{base}",
-                    e2e_artifact_name=f"e2e-{base}",
-                    coverage_artifact_name=f"coverage-{base}",
-                )
-            )
-        return results
-
     def _build_inputs(self, message: TestBatch) -> dict[str, str]:
         return {
             "batch_id": message.id,
@@ -194,8 +162,8 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         a single folder/zip named after it (matched later via ``BatchJob.artifact_name``)."""
         return {**dataclasses.asdict(job), "artifact_name": job.artifact_name()}
 
-    async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> tuple[Path, dict[str, Path]]:
-        """Download the run's artifacts and return the base artifacts path plus an artifact-name -> path map.
+    async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> dict[str, Path]:
+        """Download the run's artifacts and return an artifact-name -> path map.
 
         The map keys on the GitHub artifact name (the contract a ``BatchJob`` reproduces via
         ``artifact_name``), letting the producer resolve each job's directory deterministically.
@@ -245,4 +213,4 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 failures,
                 extra=log_extra,
             )
-        return base_path, artifact_dirs
+        return artifact_dirs
