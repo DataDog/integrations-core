@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from datadog_checks.cisco_aci.models import (
+    CnwPhysIf,
     DeviceMetadata,
     InterfaceMetadata,
     LldpAdjEp,
@@ -71,6 +72,26 @@ def create_interface_metadata(phys_if, address, namespace):
         interface.oper_status = eth.ethpm_phys_if.attributes.oper_st
 
     return interface
+
+
+def create_controller_interface_metadata(cphys_if, address, namespace):
+    """
+    Create an InterfaceMetadata object from an APIC controller's physical interface (cnwPhysIf)
+    """
+    eth = CnwPhysIf(**cphys_if.get('cnwPhysIf', {}))
+    return InterfaceMetadata(
+        device_id='{}:{}'.format(namespace, address),
+        raw_id=eth.attributes.name,
+        id_tags=['interface:{}'.format(eth.attributes.name)],
+        index=eth.attributes.id,
+        name=eth.attributes.name,
+        alias=eth.attributes.id,
+        description=eth.attributes.descr,
+        mac_address=eth.attributes.router_mac,
+        admin_status=eth.attributes.admin_st,
+        oper_status=eth.attributes.oper_st,
+        is_physical=True,
+    )
 
 
 def create_topology_link_metadata(logger, lldp_adj_eps, cdp_adj_eps, device_map, namespace):
