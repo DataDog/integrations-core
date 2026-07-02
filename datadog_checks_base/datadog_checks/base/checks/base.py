@@ -429,6 +429,16 @@ class AgentCheck(object):
 
         return limit
 
+    def _build_http_client(self, instance: dict[str, Any]) -> HTTPClientProtocol:
+        if is_affirmative(instance.get('use_httpx2', False)):
+            from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
+
+            return HTTPX2Wrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+        # See Performance Optimizations in this package's README.md.
+        from datadog_checks.base.utils.http import RequestsWrapper
+
+        return RequestsWrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+
     @property
     def http(self) -> HTTPClientProtocol:
         """
@@ -437,10 +447,7 @@ class AgentCheck(object):
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
-
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = self._build_http_client(self.instance or {})
 
         return self._http
 
