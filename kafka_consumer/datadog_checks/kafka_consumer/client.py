@@ -153,12 +153,20 @@ class KafkaClient:
             TopicPartition(topic=topic, partition=partition, offset=offset)
             for topic, partition in partitions
         ]
-        return [
-            (tp.topic, tp.partition, tp.offset)
-            for tp in self._consumer.offsets_for_times(
-                partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
-            )
-        ]
+        results = []
+        for tp in self._consumer.offsets_for_times(
+            partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
+        ):
+            if tp.error:
+                self.log.debug(
+                    "Failed to get offset for topic %s partition %s: %s",
+                    tp.topic,
+                    tp.partition,
+                    tp.error,
+                )
+                continue
+            results.append((tp.topic, tp.partition, tp.offset))
+        return results
 
     def _list_topics(self):
         if self._cluster_metadata:
@@ -261,22 +269,6 @@ class KafkaClient:
                 tpo.append((tp.topic, tp.partition, tp.offset))
             offsets.append((response_offset_info.group_id, tpo))
         return offsets
-
-    def start_collecting_messages(self, start_offsets, consumer_group):
-        self.open_consumer(consumer_group)
-        self._consumer.assign(start_offsets)
-
-    def get_next_message(self):
-        return self._consumer.poll(timeout=1)
-
-    def delete_consumer_group(self, consumer_group):
-        """Delete a consumer group using the AdminClient."""
-        try:
-            future = self.kafka_client.delete_consumer_groups([consumer_group])
-            future[consumer_group].result(timeout=self.config._request_timeout)
-            self.log.debug("Successfully deleted consumer group: %s", consumer_group)
-        except Exception as e:
-            self.log.warning("Failed to delete consumer group %s: %s", consumer_group, e)
 
     def describe_consumer_group(self, consumer_group):
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()

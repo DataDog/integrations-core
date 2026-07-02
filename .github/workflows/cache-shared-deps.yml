@@ -27,14 +27,21 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
+    - name: Install uv
+      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      with:
+        enable-cache: false
+
     - name: Check cache
       uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       id: cache
       with:
-        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: >-
           ${{ format(
-            'v01-python-{0}-{1}-{2}-{3}',
+            'v02-uv-{0}-{1}-{2}-{3}',
             env.pythonLocation,
             hashFiles('datadog_checks_base/pyproject.toml'),
             hashFiles('datadog_checks_dev/pyproject.toml'),
@@ -45,9 +52,7 @@ jobs:
     - name: Install dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       run: |-
-        pip install ./ddev
-        pip install ./datadog_checks_dev[cli]
-        pip install ./datadog_checks_base[deps]
+        uv pip install --system ./ddev ./datadog_checks_dev[cli] ./datadog_checks_base[deps]
 
     - name: Set up Python 2.7
       if: steps.cache.outputs.cache-hit != 'true'
@@ -71,5 +76,7 @@ jobs:
       uses: actions/cache/save@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
       if: steps.cache.outputs.cache-hit != 'true'
       with:
-        path: ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
+        path: |
+          ${{ runner.os == 'Windows' && '~\AppData\Local\uv\cache' || runner.os == 'macOS' && '~/Library/Caches/uv' || '~/.cache/uv' }}
+          ${{ runner.os == 'Windows' && '~\AppData\Local\pip\Cache' || runner.os == 'macOS' && '~/Library/Caches/pip' || '~/.cache/pip' }}
         key: ${{ steps.cache.outputs.cache-primary-key }}

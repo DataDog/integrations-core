@@ -75,8 +75,45 @@ class ConfigTemplates:
 
         return data
 
-    @staticmethod
-    def apply_overrides(template, overrides):
+    def _expand_and_find(self, items: list, name: str, visited: set | None = None) -> dict | None:
+        """Find a named item in a list, expanding nested template refs in-place as needed.
+
+        When the named item lives inside a nested ``- template:`` reference, that reference
+        is loaded and spliced into ``items`` in-place so that subsequent spec.py processing
+        sees the already-expanded data with any overrides applied.
+        """
+        if visited is None:
+            visited = set()
+
+        for item in items:
+            if isinstance(item, dict) and item.get('name') == name:
+                return item
+
+        for idx, item in enumerate(items):
+            if not isinstance(item, dict) or 'name' in item or 'template' not in item:
+                continue
+            tmpl_name = item['template']
+            if tmpl_name in visited:
+                continue
+            visited.add(tmpl_name)
+            try:
+                nested = self.load(tmpl_name)
+            except Exception:
+                continue
+
+            if isinstance(nested, dict):
+                if nested.get('name') == name:
+                    items[idx] = nested
+                    return nested
+            elif isinstance(nested, list):
+                found = self._expand_and_find(nested, name, visited)
+                if found is not None:
+                    items[idx : idx + 1] = nested
+                    return found
+
+        return None
+
+    def apply_overrides(self, template, overrides):
         errors = []
 
         for override, value in sorted(overrides.items()):
@@ -100,10 +137,9 @@ class ConfigTemplates:
                         )
                         break
                 elif isinstance(root, list):
-                    for item in root:
-                        if isinstance(item, dict) and item.get('name') == key:
-                            root = item
-                            break
+                    found = self._expand_and_find(root, key)
+                    if found is not None:
+                        root = found
                     else:
                         intermediate_error = (
                             f"Template override `{'.'.join(override_keys[:i])}` has no named mapping `{key}`"
@@ -123,10 +159,12 @@ class ConfigTemplates:
             if isinstance(root, dict):
                 root[final_key] = value
             elif isinstance(root, list):
-                for i, item in enumerate(root):
-                    if isinstance(item, dict) and item.get('name') == final_key:
-                        root[i] = value
-                        break
+                found = self._expand_and_find(root, final_key)
+                if found is not None:
+                    for i, item in enumerate(root):
+                        if item is found:
+                            root[i] = value
+                            break
                 else:
                     intermediate_error = 'Template override has no named mapping `{}`'.format(
                         '.'.join(override_keys) if override_keys else override

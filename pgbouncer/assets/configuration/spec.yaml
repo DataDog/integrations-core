@@ -18,6 +18,7 @@ files:
         value:
           example: postgresql://<USERNAME>:<PASSWORD>@<HOSTNAME>:<PORT>/<DATABASE_URL>?sslmode=require
           type: string
+        fleet_configurable: false
       - name: database_filter_regex
         description: |
           Collect metrics only for PgBouncer database names matching this regular expression.

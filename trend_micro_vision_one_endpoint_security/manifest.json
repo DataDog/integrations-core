@@ -56,6 +56,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]
@@ -73,10 +74,10 @@
       }
     },
     "dashboards": {
-      "TrendAI Vision One Endpoint Security - Overview": "assets/dashboards/trend_micro_vision_one_endpoint_security_overview.json",
-      "TrendAI Vision One Endpoint Security - System Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_system_events.json",
-      "TrendAI Vision One Endpoint Security - Network Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_network_events.json",
-      "TrendAI Vision One Endpoint Security - Data Loss Prevention": "assets/dashboards/trend_micro_vision_one_endpoint_security_data_loss_prevention.json"
+      "Trend Micro Vision One Endpoint Security - Overview": "assets/dashboards/trend_micro_vision_one_endpoint_security_overview.json",
+      "Trend Micro Vision One Endpoint Security - System Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_system_events.json",
+      "Trend Micro Vision One Endpoint Security - Network Events": "assets/dashboards/trend_micro_vision_one_endpoint_security_network_events.json",
+      "Trend Micro Vision One Endpoint Security - Data Loss Prevention": "assets/dashboards/trend_micro_vision_one_endpoint_security_data_loss_prevention.json"
     },
     "logs": {
       "source": "trend-micro-vision-one-endpoint-security"

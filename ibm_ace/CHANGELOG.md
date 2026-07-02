@@ -2,13 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.5.1 / 2026-04-15
+## 4.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 
 * Fix intermittent `MQRC_TRUNCATED_MSG_FAILED` errors by increasing the MQ subscription message buffer ([#23029](https://github.com/DataDog/integrations-core/pull/23029))
 
-## 4.5.0 / 2026-03-18
+## 4.5.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:
 

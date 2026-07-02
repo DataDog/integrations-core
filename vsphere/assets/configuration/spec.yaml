@@ -294,6 +294,7 @@ files:
               type: array
               items:
                 type: string
+        fleet_configurable: false
       - name: collect_per_instance_filters
         description: |
           Some vSphere metrics can be tagged with instance values.
@@ -332,6 +333,7 @@ files:
               type: array
               items:
                 type: string
+        fleet_configurable: false
       - name: event_resource_filters
         fleet_configurable: true
         description: |

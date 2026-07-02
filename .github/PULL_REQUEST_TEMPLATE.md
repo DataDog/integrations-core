@@ -7,5 +7,5 @@
 ### Review checklist (to be filled by reviewers)
 
 - [ ] Feature or bugfix MUST have appropriate tests (unit, integration, e2e)
-- [ ] Add the `qa/skip-qa` label if the PR doesn't need to be tested during QA.
+- [ ] Add `qa/required` if this PR needs QA validation, or `qa/skip-qa` if it does not. Exactly one of the two is required.
 - [ ] If you need to backport this PR to another branch, you can add the `backport/<branch-name>` label to the PR and it will automatically open a backport PR once this one is merged

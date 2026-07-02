@@ -60,9 +60,11 @@ def integrations(app):
 
 
 def update_ci_files(app: Application, new_version: str, old_version: str, tracker: ValidationTracker):
+    workflows_dir = app.repo.path / ".github" / "workflows"
     files_to_update = [
-        *(app.repo.path / ".github" / "workflows").glob("*.yml"),
-        *(app.repo.path / ".github" / "workflows" / "scripts").glob("*.sh"),
+        *workflows_dir.glob("*.yml"),
+        *workflows_dir.glob("*.yaml"),
+        *(workflows_dir / "scripts").glob("*.sh"),
     ]
 
     # Patterns to match:
@@ -128,16 +130,6 @@ def update_ddev_pyproject_file(app: Application, new_version: str, old_version: 
     changed = False
     new_version = f"py{new_version.replace('.', '')}"
     old_version = f"py{old_version.replace('.', '')}"
-
-    if black_config := config.get('tool', {}).get('black', {}):
-        target_version = black_config.get('target-version', [])
-
-        for index, version in enumerate(target_version):
-            if version == old_version:
-                target_version[index] = new_version
-                tracker.success()
-                changed = True
-                break
 
     if ruff_config := config.get('tool', {}).get('ruff', {}):
         if ruff_config.get('target-version') == old_version:

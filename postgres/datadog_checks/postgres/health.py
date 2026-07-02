@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from datadog_checks.base.utils.diagnose import Diagnosis
+
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
@@ -19,6 +21,9 @@ class PostgresHealthEvent(Enum):
     """
 
     EXPLAIN_PLAN_ERROR = 'explain_plan_error'
+    COLUMN_STATISTICS_FUNCTION_NOT_FOUND = 'column_statistics_function_not_found'
+    COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE = 'column_statistics_insufficient_privilege'
+    DIAGNOSIS = 'diagnosis'
 
 
 class PostgresHealth(Health):
@@ -62,3 +67,34 @@ class PostgresHealth(Health):
             },
             **kwargs,
         )
+
+    def submit_diagnoses(self):
+        """
+        Submit the recorded diagnoses for the Postgres check.
+        """
+        for diagnosis in self.check.diagnosis.diagnoses:
+            self.check.log.info("Submitting diagnosis: %s", diagnosis._asdict())
+            self.submit_health_event(
+                name=PostgresHealthEvent.DIAGNOSIS,
+                status=HealthStatus.WARNING
+                if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
+                else HealthStatus.ERROR
+                if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL
+                or diagnosis.result == Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR
+                else HealthStatus.OK,
+                data={
+                    # Diagnoses are namedtuples and need to be converted to a dictionary to be JSON serializable
+                    # We manually map the result from an enum to a human-readable string
+                    "diagnosis": {
+                        **diagnosis._asdict(),
+                        "result": "ok"
+                        if diagnosis.result == Diagnosis.DIAGNOSIS_SUCCESS
+                        else "error"
+                        if diagnosis.result == Diagnosis.DIAGNOSIS_FAIL
+                        or diagnosis.result == Diagnosis.DIAGNOSIS_UNEXPECTED_ERROR
+                        else "warning"
+                        if diagnosis.result == Diagnosis.DIAGNOSIS_WARNING
+                        else "unknown",
+                    },
+                },
+            )

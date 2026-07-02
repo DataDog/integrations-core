@@ -2,7 +2,30 @@
 
 <!-- towncrier release notes start -->
 
-## 2.6.0 / 2026-04-15
+## 2.7.2 / 2026-06-24
+
+***Fixed***:
+
+* Fix `read_messages` hanging until the global timeout when a filter matched fewer messages than `n_messages_retrieved`. Consumption is now bounded to a snapshot of the log taken when the check starts (per-partition high watermark + `enable.partition.eof`), the default timeout is reduced from 20s to 5s, and a `hit_timeout` stat distinguishes a truncated read from a complete one. ([#24162](https://github.com/DataDog/integrations-core/pull/24162))
+
+## 2.7.1 / 2026-06-09
+
+***Fixed***:
+
+* Fall back to string deserialization when schema registry magic byte is absent. ([#23951](https://github.com/DataDog/integrations-core/pull/23951))
+
+## 2.7.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Support skipping a fixed number of bytes before deserialization through `value_skip_bytes` and `key_skip_bytes` for stripping producer-side prefixes. ([#23556](https://github.com/DataDog/integrations-core/pull/23556))
+
+***Fixed***:
+
+* Remove unused MessageFilter class ([#23430](https://github.com/DataDog/integrations-core/pull/23430))
+* Preload protobuf well-known types (such as `google/protobuf/timestamp.proto`) into the descriptor pool so schemas that reference them deserialize correctly. ([#23431](https://github.com/DataDog/integrations-core/pull/23431))
+
+## 2.6.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 
@@ -16,7 +39,7 @@
 * Fix filter type coercion for numeric comparisons on protobuf int64 fields ([#23162](https://github.com/DataDog/integrations-core/pull/23162))
 * Fix Avro deserialization for schemas with logical types (decimal, uuid, date, time, timestamp) that caused "Object of type ... is not JSON serializable" errors. ([#23224](https://github.com/DataDog/integrations-core/pull/23224))
 
-## 2.5.0 / 2026-04-01
+## 2.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:
 

@@ -115,6 +115,7 @@ fi
   echo "INPUT_MINIMUM_BASE_PACKAGE=${INPUT_MINIMUM_BASE_PACKAGE:-false}"
   echo "INPUT_PYTEST_ARGS=${INPUT_PYTEST_ARGS:-}"
   echo "INPUT_IS_FORK=${INPUT_IS_FORK:-false}"
+  echo "INPUT_CONTEXT=${INPUT_CONTEXT:-standard}"
 } >> "$GITHUB_ENV"
 
 # Override with custom vars if provided

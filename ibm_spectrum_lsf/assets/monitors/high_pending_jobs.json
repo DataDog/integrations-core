@@ -10,7 +10,7 @@
 		"type": "query alert",
 		"query": "avg(last_1d):anomalies(sum:ibm_spectrum_lsf.queue.pending{*} by {queue_name,lsf_cluster_name}, 'basic', 2, direction='above', interval=300, alert_window='last_1h', count_default_zero='true') >= 1",
 		"message": "{{#is_alert}}\nNumber of Pending Jobs in IBM Spectrum LSF cluster {{lsf_cluster_name.name}} is higher than normal. \n{{/is_alert}}\n\n{{#is_warning}}\nNumber of Pending Jobs in IBM Spectrum LSF cluster {{lsf_cluster_name.name}} is higher than normal.\n{{/is_warning}}\n\n{{#is_recovery}}\nNumber of Pending Jobs in IBM Spectrum LSF cluster {{lsf_cluster_name.name}} is back to normal.\n{{/is_recovery}}",
-		"tags": [],
+		"tags": ["integration:ibm-spectrum-lsf"],
 		"options": {
 			"thresholds": {
 				"critical": 1,
