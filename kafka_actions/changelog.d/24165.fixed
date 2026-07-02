@@ -1,1 +1,1 @@
-Harden reset-consumer-offsets action: enforce inactive group check, surface per-partition errors, add reset_to earliest/latest support, validate non-negative offsets, and document that cluster must be the Kafka cluster UUID.
+Harden the ``update_consumer_group_offsets`` action: enforce an inactive-group check before altering offsets, surface per-partition errors, support sentinel (earliest/latest) and timestamp-based offset resets, and validate non-negative offsets.
