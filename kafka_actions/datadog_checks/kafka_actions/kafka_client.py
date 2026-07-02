@@ -669,9 +669,7 @@ class KafkaActionsClient:
             try:
                 result = future.result()
                 partition_errors = [
-                    f"{tp.topic}[{tp.partition}]: {tp.error}"
-                    for tp in result.topic_partitions
-                    if tp.error is not None
+                    f"{tp.topic}[{tp.partition}]: {tp.error}" for tp in result.topic_partitions if tp.error is not None
                 ]
                 if partition_errors:
                     raise Exception(f"Per-partition errors for group '{group_id}': {'; '.join(partition_errors)}")
