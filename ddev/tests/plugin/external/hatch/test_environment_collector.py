@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import shlex
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
@@ -42,20 +42,24 @@ def fake_checkout(tmp_path):
         pytest.param(
             ['deps'],
             '',
-            Path('/repo/integrations-core/datadog_checks_base'),
-            f"{Path('/repo/integrations-core/datadog_checks_base')}[deps]",
+            PurePosixPath('/repo') / 'integrations-core' / 'datadog_checks_base',
+            f"{PurePosixPath('/repo') / 'integrations-core' / 'datadog_checks_base'}[deps]",
             id='local_path_with_deps',
         ),
         pytest.param(
             ['deps', 'http'],
             '',
-            Path('/repo/integrations-core/datadog_checks_base'),
-            f"{Path('/repo/integrations-core/datadog_checks_base')}[deps,http]",
+            PurePosixPath('/repo') / 'integrations-core' / 'datadog_checks_base',
+            f"{PurePosixPath('/repo') / 'integrations-core' / 'datadog_checks_base'}[deps,http]",
             id='local_path_multi_features',
         ),
     ],
 )
-def test_format_base_package(features, version, local_path, expected):
+def test_format_base_package(monkeypatch, features, version, local_path, expected):
+    # Pin to a POSIX target: a native `Path` would render backslashes on a Windows host,
+    # which `shlex.quote` treats as unsafe and wraps in quotes, breaking the raw string comparison.
+    monkeypatch.setattr(sys, 'platform', 'linux')
+
     assert DatadogChecksEnvironmentCollector.format_base_package(features, version=version, local_path=local_path) == (
         expected
     )
@@ -171,10 +175,13 @@ def test_lint_commands_survive_whitespace_checkout(fake_checkout, monkeypatch, t
     collector = DatadogChecksEnvironmentCollector(integration_root, {'check-types': True})
     scripts = collector.get_initial_config()['lint']['scripts']
 
-    config_path = str(integrations_core / 'pyproject.toml')
     for command in scripts[script_name]:
         tokens = tokenize(command)
         if config_flag == '--config-file':
+            # mypy's config path is built with `Path.__truediv__`, which uses the native separator.
+            config_path = str(integrations_core / 'pyproject.toml')
             assert f'--config-file={config_path}' in tokens
         else:
+            # ruff's config path is always joined with `/`, regardless of platform.
+            config_path = f'{integrations_core}/pyproject.toml'
             assert config_path == tokens[tokens.index('--config') + 1]
