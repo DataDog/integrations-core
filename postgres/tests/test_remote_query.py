@@ -84,11 +84,16 @@ class FakeCopy:
         return iter(self.blocks)
 
 
-def make_check(host='localhost', port=5432, dbname='datadog_test', pool=None, **metadata):
-    return SimpleNamespace(
+def make_check(
+    host='localhost', port=5432, dbname='datadog_test', pool=None, check_database_identifier=None, **metadata
+):
+    check = SimpleNamespace(
         _config=SimpleNamespace(host=host, port=port, dbname=dbname, **metadata),
         db_pool=pool or FakePool(),
     )
+    if check_database_identifier is not None:
+        check.database_identifier = check_database_identifier
+    return check
 
 
 def block_existing_query_helpers(check):
@@ -107,6 +112,12 @@ def valid_copy_request(host='LOCALHOST.', port=5432, dbname='datadog_test', **ex
         'limits': {'chunkBytes': 8, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 5000},
     }
     request.update(extra)
+    return request
+
+
+def valid_database_instance_copy_request(database_instance='postgres-dbi', **extra):
+    request = valid_copy_request(**extra)
+    request['target'] = {'database_instance': database_instance}
     return request
 
 
@@ -148,6 +159,14 @@ def test_normalize_target_defaults_missing_port_to_5432():
     assert target.port == 5432
 
 
+def test_normalize_target_accepts_database_instance_without_normalization():
+    target = normalize_target({'database_instance': 'Postgres/Primary-A'})
+
+    assert target.database_instance == 'Postgres/Primary-A'
+    assert target.host is None
+    assert target.dbname is None
+
+
 @pytest.mark.parametrize('port', [True, '5432', 'abc', '0', 0, -1, 65536, None])
 def test_normalize_target_rejects_invalid_port_values(port):
     with pytest.raises(ValueError):
@@ -164,6 +183,28 @@ def test_normalize_target_rejects_invalid_port_values(port):
     ],
 )
 def test_normalize_target_rejects_empty_host_or_dbname(target):
+    with pytest.raises(ValueError):
+        normalize_target(target)
+
+
+@pytest.mark.parametrize(
+    'target',
+    [
+        {},
+        {'host': 'localhost'},
+        {'port': 5432},
+        {'dbname': 'postgres'},
+        {'host': 'localhost', 'port': 5432},
+        {'port': 5432, 'dbname': 'postgres'},
+        {'host': 'localhost', 'dbname': 'postgres', 'database_instance': 'postgres-dbi'},
+        {'database_instance': 'postgres-dbi', 'host': 'localhost'},
+        {'database_instance': 'postgres-dbi', 'port': 5432},
+        {'database_instance': 'postgres-dbi', 'dbname': 'postgres'},
+        {'database_instance': ''},
+        {'database_instance': ' postgres-dbi '},
+    ],
+)
+def test_normalize_target_rejects_missing_partial_mixed_or_invalid_database_instance_target(target):
     with pytest.raises(ValueError):
         normalize_target(target)
 
@@ -302,6 +343,115 @@ def test_copy_stream_resolves_exact_host_port_dbname_from_check_config():
     assert pool.requested_dbnames == ['datadog_test']
 
 
+def test_copy_stream_host_port_dbname_target_still_succeeds_when_check_has_database_identifier():
+    pool = FakePool(copy_blocks=[b'1\n'])
+    check = make_check(
+        host='localhost',
+        port=5432,
+        dbname='datadog_test',
+        pool=pool,
+        check_database_identifier='postgres-dbi',
+    )
+
+    events = collect_copy_events(valid_copy_request(host='LOCALHOST.', port=5432), check)
+
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert pool.requested_dbnames == ['datadog_test']
+
+
+def test_copy_stream_resolves_unique_database_instance_from_check_identifier():
+    matching_pool = FakePool(copy_blocks=[b'1\n'])
+    non_matching_pool = FakePool(copy_blocks=[b'1\n'])
+    checks = [
+        make_check(dbname='analytics', pool=matching_pool, check_database_identifier='Postgres/Primary-A'),
+        make_check(dbname='postgres', pool=non_matching_pool, check_database_identifier='Postgres/Primary-B'),
+    ]
+
+    events = list(
+        iter_agent_rpc_stream_copy_events(
+            valid_database_instance_copy_request('Postgres/Primary-A'), StaticPostgresCheckRegistry(checks)
+        )
+    )
+
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert matching_pool.requested_dbnames == ['analytics']
+    assert non_matching_pool.requested_dbnames == []
+
+
+def test_copy_stream_database_instance_miss_fails_without_pool_access():
+    pool = FakePool(copy_blocks=[b'1\n'])
+    check = make_check(pool=pool, check_database_identifier='Postgres/Primary-A')
+
+    events = collect_copy_events(valid_database_instance_copy_request('Postgres/Primary-B'), check)
+
+    assert_failed_event(events, 'target_not_found')
+    assert pool.requested_dbnames == []
+
+
+def test_copy_stream_database_instance_ambiguous_fails_without_pool_access():
+    first_pool = FakePool(copy_blocks=[b'1\n'])
+    second_pool = FakePool(copy_blocks=[b'1\n'])
+    checks = [
+        make_check(dbname='postgres_a', pool=first_pool, check_database_identifier='Postgres/Primary-A'),
+        make_check(dbname='postgres_b', pool=second_pool, check_database_identifier='Postgres/Primary-A'),
+    ]
+
+    events = list(
+        iter_agent_rpc_stream_copy_events(
+            valid_database_instance_copy_request('Postgres/Primary-A'), StaticPostgresCheckRegistry(checks)
+        )
+    )
+
+    assert_failed_event(events, 'target_ambiguous')
+    assert first_pool.requested_dbnames == []
+    assert second_pool.requested_dbnames == []
+
+
+def test_copy_stream_default_template_database_instance_collapse_is_ambiguous():
+    first_pool = FakePool(copy_blocks=[b'1\n'])
+    second_pool = FakePool(copy_blocks=[b'1\n'])
+    checks = [
+        make_check(dbname='postgres_a', pool=first_pool, check_database_identifier='resolved-hostname'),
+        make_check(dbname='postgres_b', pool=second_pool, check_database_identifier='resolved-hostname'),
+    ]
+
+    events = list(
+        iter_agent_rpc_stream_copy_events(
+            valid_database_instance_copy_request('resolved-hostname'), StaticPostgresCheckRegistry(checks)
+        )
+    )
+
+    assert_failed_event(events, 'target_ambiguous')
+    assert first_pool.requested_dbnames == []
+    assert second_pool.requested_dbnames == []
+
+
+def test_copy_stream_rejects_mixed_database_instance_and_host_selector_before_resolution():
+    request = valid_database_instance_copy_request('postgres-dbi')
+    request['target']['host'] = 'localhost'
+
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+
+    assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
+
+
+def test_copy_stream_rejects_database_instance_with_partial_host_selector_before_resolution():
+    request = valid_database_instance_copy_request('postgres-dbi')
+    request['target']['port'] = 5432
+
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+
+    assert_failed_event(events, 'invalid_request', 'exactly one selector mode')
+
+
+def test_copy_stream_rejects_empty_database_instance_before_resolution():
+    request = valid_database_instance_copy_request(' postgres-dbi ')
+
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+
+    assert_failed_event(events, 'invalid_request', 'database_instance')
+
+
 def test_copy_stream_uses_only_supplied_live_check_for_target_matching():
     matching_pool = FakePool(copy_blocks=[b'1\n'])
     non_matching_pool = FakePool(copy_blocks=[b'1\n'])
@@ -328,7 +478,7 @@ def test_copy_stream_requires_dbname_match_even_when_host_and_port_match():
     assert pool.requested_dbnames == []
 
 
-def test_copy_stream_ignores_metadata_identity_matches():
+def test_copy_stream_host_port_dbname_target_ignores_database_instance_matches():
     pool = FakePool(copy_blocks=[b'1\n'])
     check = make_check(
         host='configured.internal',
@@ -336,7 +486,7 @@ def test_copy_stream_ignores_metadata_identity_matches():
         dbname='datadog_test',
         pool=pool,
         reported_hostname='reported.internal',
-        database_identifier='reported.internal',
+        check_database_identifier='reported.internal',
     )
 
     events = collect_copy_events(valid_copy_request(host='reported.internal'), check)

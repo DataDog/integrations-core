@@ -11,7 +11,16 @@ from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, ValidationError, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictInt,
+    StrictStr,
+    ValidationError,
+    field_validator,
+    model_validator,
+)
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
@@ -47,13 +56,16 @@ LOGGER = logging.getLogger(__name__)
 class RemoteQueryTarget(BaseModel):
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    host: StrictStr = Field(min_length=1)
+    host: StrictStr | None = Field(default=None, min_length=1)
     port: StrictInt = Field(default=5432, ge=1, le=65535)
-    dbname: StrictStr = Field(min_length=1)
+    dbname: StrictStr | None = Field(default=None, min_length=1)
+    database_instance: StrictStr | None = Field(default=None, min_length=1)
 
     @field_validator('host')
     @classmethod
-    def normalize_host(cls, value: str) -> str:
+    def normalize_host(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         host = value.strip().lower()
         if host.endswith('.'):
             host = host[:-1]
@@ -63,12 +75,45 @@ class RemoteQueryTarget(BaseModel):
 
     @field_validator('dbname')
     @classmethod
-    def validate_dbname(cls, value: str) -> str:
+    def validate_dbname(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
         if not value:
             raise ValueError('dbname must be a non-empty string')
         if value != value.strip():
             raise ValueError('dbname must not contain surrounding whitespace')
         return value
+
+    @field_validator('database_instance')
+    @classmethod
+    def validate_database_instance(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        if not value.strip():
+            raise ValueError('database_instance must be a non-empty string')
+        if value != value.strip():
+            raise ValueError('database_instance must not contain surrounding whitespace')
+        return value
+
+    @model_validator(mode='after')
+    def validate_selector_mode(self) -> 'RemoteQueryTarget':
+        null_fields = [
+            field
+            for field in ('host', 'dbname', 'database_instance')
+            if field in self.model_fields_set and getattr(self, field) is None
+        ]
+        if null_fields:
+            raise ValueError('{} must not be null'.format(', '.join(null_fields)))
+
+        host_fields = self.model_fields_set & {'host', 'port', 'dbname'}
+        if self.database_instance is not None:
+            if host_fields:
+                raise ValueError('target must use exactly one selector mode: database_instance or host/port/dbname')
+            return self
+
+        if self.host is None or self.dbname is None:
+            raise ValueError('host/port/dbname target requires host and dbname')
+        return self
 
 
 class RemoteQueryCopyLimits(BaseModel):
@@ -196,7 +241,16 @@ def iter_agent_rpc_stream_copy_events(request: Any, registry: PostgresCheckRegis
         )
         return
 
-    yield from _iter_copy_stream_events(matches[0], parsed_request, started_at)
+    execution_dbname = _dbname_from_check(matches[0])
+    if execution_dbname is None:
+        yield _stream_failed_event(
+            'target_unavailable',
+            'Matched Postgres check does not expose a configured database name.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
+        return
+
+    yield from _iter_copy_stream_events(matches[0], parsed_request, execution_dbname, started_at)
 
 
 def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
@@ -207,6 +261,8 @@ def normalize_target(target: Mapping[str, Any]) -> RemoteQueryTarget:
 
 
 def _resolve_matches(target: RemoteQueryTarget, checks: Iterable['PostgreSql']) -> list['PostgreSql']:
+    if target.database_instance is not None:
+        return [check for check in checks if getattr(check, 'database_identifier', None) == target.database_instance]
     return [check for check in checks if _target_from_check(check) == target]
 
 
@@ -221,8 +277,13 @@ def _target_from_check(check: 'PostgreSql') -> RemoteQueryTarget | None:
         return None
 
 
+def _dbname_from_check(check: 'PostgreSql') -> str | None:
+    config = getattr(check, '_config', None)
+    return getattr(config, 'dbname', None)
+
+
 def _iter_copy_stream_events(
-    check: 'PostgreSql', request: RemoteQueryCopyRequest, started_at: float
+    check: 'PostgreSql', request: RemoteQueryCopyRequest, execution_dbname: str, started_at: float
 ) -> Iterator[CopyStreamEvent]:
     db_pool = getattr(check, 'db_pool', None)
     if db_pool is None:
@@ -256,7 +317,7 @@ def _iter_copy_stream_events(
     state = _CopyStreamState()
     error: _CopyStreamFailure | None = None
     try:
-        for event, next_state in _copy_stream_data_events(check, request, state, started_at):
+        for event, next_state in _copy_stream_data_events(check, request, execution_dbname, state, started_at):
             state = next_state
             yield event
     except _CopyStreamFailure as e:
@@ -285,14 +346,18 @@ def _iter_copy_stream_events(
 
 
 def _copy_stream_data_events(
-    check: 'PostgreSql', request: RemoteQueryCopyRequest, state: _CopyStreamState, started_at: float
+    check: 'PostgreSql',
+    request: RemoteQueryCopyRequest,
+    execution_dbname: str,
+    state: _CopyStreamState,
+    started_at: float,
 ) -> Iterator[tuple[CopyStreamEvent, _CopyStreamState]]:
     limits = request.limits
     deadline = started_at + (limits.timeout_ms / 1000)
     copy_sql = _copy_stdout_sql(request.query, request.format)
     pending = bytearray()
 
-    with check.db_pool.get_connection(request.target.dbname) as conn:
+    with check.db_pool.get_connection(execution_dbname) as conn:
         with conn.cursor() as cursor:
             in_transaction = False
             try:
