@@ -154,7 +154,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             if self.kube_client is None:
                 self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
 
-            workloads = self.kube_client.list_workloads()
+            workloads = self.list_workloads()
         except Exception as e:
             self.log.warning('Cannot collect Kueue Workload events from the Kubernetes API: %s', e)
             return
@@ -163,8 +163,6 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         for workload in workloads:
             metadata = workload.get('metadata', {})
             namespace = metadata.get('namespace')
-            if self.workload_events_namespaces and namespace not in self.workload_events_namespaces:
-                continue
 
             uid = metadata.get('uid')
             if not uid:
@@ -192,6 +190,15 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                     self.submit_workload_event(transition, workload, condition)
 
         self._workload_state = current_state
+
+    def list_workloads(self) -> list[dict]:
+        if not self.workload_events_namespaces:
+            return self.kube_client.list_workloads()
+
+        workloads = []
+        for namespace in sorted(self.workload_events_namespaces):
+            workloads.extend(self.kube_client.list_workloads(namespace=namespace))
+        return workloads
 
     @staticmethod
     def get_workload_state(workload: dict) -> dict:

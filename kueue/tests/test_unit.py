@@ -145,8 +145,10 @@ def test_empty_instance(dd_run_check):
 class FakeKubernetesAPIClient:
     def __init__(self, *workload_snapshots):
         self.workload_snapshots = list(workload_snapshots)
+        self.list_workloads_namespaces = []
 
-    def list_workloads(self):
+    def list_workloads(self, namespace=None):
+        self.list_workloads_namespaces.append(namespace)
         return self.workload_snapshots.pop(0)
 
 
@@ -281,6 +283,7 @@ def test_workload_events_namespace_filter(dd_run_check, aggregator, instance, mo
     dd_run_check(check)
 
     aggregator.assert_event('Workload team-a/training-job', count=0)
+    assert check.kube_client.list_workloads_namespaces == ['default', 'default']
 
 
 def _get_metric_tags(aggregator, metric_name):

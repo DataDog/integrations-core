@@ -18,7 +18,15 @@ class KubernetesAPIClient:
             config.load_incluster_config()
             self.custom_obj_client = client.CustomObjectsApi()
 
-    def list_workloads(self) -> list[dict]:
+    def list_workloads(self, namespace: str | None = None) -> list[dict]:
+        if namespace:
+            return self.custom_obj_client.list_namespaced_custom_object(
+                group='kueue.x-k8s.io',
+                version='v1beta1',
+                namespace=namespace,
+                plural='workloads',
+            )['items']
+
         return self.custom_obj_client.list_cluster_custom_object(
             group='kueue.x-k8s.io',
             version='v1beta1',
