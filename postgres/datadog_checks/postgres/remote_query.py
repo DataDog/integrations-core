@@ -13,19 +13,26 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, ValidationError, field_validator
 
-RemoteQueryCopySql = Literal[
-    'SELECT 1 AS value',
-    'SELECT city, country FROM cities ORDER BY city',
-    'SELECT current_database() AS current_db, expected_agent_hostname, expected_postgres_host, expected_postgres_port, expected_dbname, marker FROM remote_query_identity',
-    "SELECT decode('00ff80', 'hex') AS payload",
-    "SELECT repeat('x', 1048576) AS payload",
-    "SELECT repeat('x', 2097152) AS payload",
-    "SELECT repeat('x', 4194304) AS payload",
-    "SELECT repeat('x', 8388608) AS payload",
-    "SELECT repeat('x', 16777216) AS payload",
-    "SELECT repeat('x', 33554432) AS payload",
-    "SELECT i, repeat('x', 1000) AS payload FROM generate_series(1, 3000) AS i",
-]
+from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.config import is_affirmative
+
+REMOTE_QUERY_DISABLE_ALLOWLIST_CONFIG_KEY = 'remote_queries.execute.disable_query_allowlist'
+REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
+    (
+        'SELECT 1 AS value',
+        'SELECT city, country FROM cities ORDER BY city',
+        'SELECT current_database() AS current_db, expected_agent_hostname, expected_postgres_host, '
+        'expected_postgres_port, expected_dbname, marker FROM remote_query_identity',
+        "SELECT decode('00ff80', 'hex') AS payload",
+        "SELECT repeat('x', 1048576) AS payload",
+        "SELECT repeat('x', 2097152) AS payload",
+        "SELECT repeat('x', 4194304) AS payload",
+        "SELECT repeat('x', 8388608) AS payload",
+        "SELECT repeat('x', 16777216) AS payload",
+        "SELECT repeat('x', 33554432) AS payload",
+        "SELECT i, repeat('x', 1000) AS payload FROM generate_series(1, 3000) AS i",
+    )
+)
 
 CopyStreamFormat = Literal['csv', 'binary']
 CopyStreamEmit = Callable[[str, str, bytes], None]
@@ -81,7 +88,7 @@ class RemoteQueryCopyRequest(BaseModel):
 
     operation: Literal['copy_stream'] = Field(alias='operation')
     target: RemoteQueryTarget
-    query: RemoteQueryCopySql
+    query: StrictStr = Field(min_length=1)
     format: CopyStreamFormat = 'csv'
     limits: RemoteQueryCopyLimits = Field(default_factory=RemoteQueryCopyLimits)
 
@@ -160,6 +167,14 @@ def iter_agent_rpc_stream_copy_events(request: Any, registry: PostgresCheckRegis
         parsed_request = RemoteQueryCopyRequest.model_validate(request)
     except ValidationError as e:
         yield _stream_failed_event('invalid_request', _validation_message(e), elapsed_ms=_elapsed_ms(started_at))
+        return
+
+    if not _is_query_allowed(parsed_request.query):
+        yield _stream_failed_event(
+            'invalid_request',
+            'Invalid remote query request: query is not allowlisted.',
+            elapsed_ms=_elapsed_ms(started_at),
+        )
         return
 
     target = parsed_request.target
@@ -278,8 +293,11 @@ def _copy_stream_data_events(
 
     with check.db_pool.get_connection(request.target.dbname) as conn:
         with conn.cursor() as cursor:
-            previous_statement_timeout = _set_statement_timeout(cursor, limits.timeout_ms)
+            in_transaction = False
             try:
+                cursor.execute('BEGIN READ ONLY')
+                in_transaction = True
+                cursor.execute('SET LOCAL statement_timeout = %s', (limits.timeout_ms,))
                 with cursor.copy(copy_sql) as copy:
                     for block in copy:
                         _raise_if_timed_out(deadline)
@@ -319,7 +337,11 @@ def _copy_stream_data_events(
                         pending.clear()
                         yield event, state
             finally:
-                _restore_statement_timeout(cursor, previous_statement_timeout)
+                if in_transaction:
+                    try:
+                        cursor.execute('ROLLBACK')
+                    except Exception:
+                        LOGGER.debug('Unable to roll back remote query read-only transaction', exc_info=True)
 
 
 def _copy_stdout_sql(query: str, stream_format: CopyStreamFormat) -> str:
@@ -330,25 +352,16 @@ def _copy_stdout_sql(query: str, stream_format: CopyStreamFormat) -> str:
     raise _CopyStreamFailure('invalid_request', 'Unsupported COPY stream format.')
 
 
-def _set_statement_timeout(cursor: Any, timeout_ms: int) -> str | None:
-    previous_statement_timeout = None
-    try:
-        cursor.execute('SHOW statement_timeout')
-        row = cursor.fetchone()
-        previous_statement_timeout = row[0] if row else None
-        cursor.execute('SET statement_timeout = %s', (timeout_ms,))
-    except Exception:
-        LOGGER.debug('Unable to scope statement_timeout for remote query COPY stream', exc_info=True)
-    return previous_statement_timeout
+def _is_query_allowed(query: str) -> bool:
+    return _is_query_allowlist_disabled() or query in REMOTE_QUERY_COPY_SQL_ALLOWLIST
 
 
-def _restore_statement_timeout(cursor: Any, previous_statement_timeout: str | None) -> None:
-    if previous_statement_timeout is None:
-        return
+def _is_query_allowlist_disabled() -> bool:
     try:
-        cursor.execute('SET statement_timeout = %s', (previous_statement_timeout,))
+        return is_affirmative(datadog_agent.get_config(REMOTE_QUERY_DISABLE_ALLOWLIST_CONFIG_KEY))
     except Exception:
-        LOGGER.debug('Unable to restore statement_timeout after remote query COPY stream', exc_info=True)
+        LOGGER.debug('Unable to read remote query allowlist configuration', exc_info=True)
+        return False
 
 
 def _raise_if_timed_out(deadline: float) -> None:

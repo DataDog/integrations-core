@@ -8,6 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from datadog_checks.postgres import remote_query
 from datadog_checks.postgres.remote_query import (
     StaticPostgresCheckRegistry,
     execute_agent_rpc_stream_copy,
@@ -24,6 +25,7 @@ class FakePool:
         self.copy_blocks = copy_blocks or []
         self.requested_dbnames = []
         self.closed_copies = 0
+        self.cursors = []
 
     def is_closed(self):
         return self.closed
@@ -43,7 +45,9 @@ class FakeConnection:
 
     @contextmanager
     def cursor(self):
-        yield FakeCursor(self.rows, self.description, self.copy_blocks, self.pool)
+        cursor = FakeCursor(self.rows, self.description, self.copy_blocks, self.pool)
+        self.pool.cursors.append(cursor)
+        yield cursor
 
 
 class FakeCursor:
@@ -58,7 +62,7 @@ class FakeCursor:
         self.executed.append((query, params))
 
     def fetchone(self):
-        return ('0',)
+        pytest.fail('statement_timeout should not be read outside transaction-local settings')
 
     def copy(self, query):
         self.executed.append((query, None))
@@ -237,6 +241,18 @@ def test_copy_stream_rejects_non_copy_allowlisted_queries_before_pool_access():
     assert pool.requested_dbnames == []
 
 
+def test_copy_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(monkeypatch):
+    monkeypatch.setattr(remote_query, '_is_query_allowlist_disabled', lambda: True)
+    pool = FakePool(copy_blocks=[b'datadog_test\n'])
+    request = valid_copy_request(query='SELECT current_database()')
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert pool.requested_dbnames == ['datadog_test']
+    assert ('COPY (SELECT current_database()) TO STDOUT WITH (FORMAT CSV)', None) in pool.cursors[0].executed
+
+
 @pytest.mark.parametrize('size', [1048576, 2097152, 4194304, 8388608, 16777216, 33554432])
 def test_copy_stream_accepts_large_payload_proof_queries(size):
     pool = FakePool(copy_blocks=[b'x' * 8])
@@ -335,6 +351,46 @@ def test_copy_stream_uses_connection_pool_and_emits_chunked_copy_bytes():
     assert pool.closed_copies == 1
 
 
+def test_copy_stream_starts_read_only_transaction_sets_local_timeout_and_rolls_back_on_success():
+    pool = FakePool(copy_blocks=[b'1\n'])
+    request = valid_copy_request(limits={'chunkBytes': 8, 'maxBytes': 64, 'maxRowBytes': 32, 'timeoutMs': 1234})
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert pool.cursors[0].executed == [
+        ('BEGIN READ ONLY', None),
+        ('SET LOCAL statement_timeout = %s', (1234,)),
+        ('COPY (SELECT 1 AS value) TO STDOUT WITH (FORMAT CSV)', None),
+        ('ROLLBACK', None),
+    ]
+
+
+def test_copy_stream_rolls_back_read_only_transaction_on_failure():
+    pool = FakePool(copy_blocks=[b'abcdefgh', b'ijklmnop'])
+    request = valid_copy_request(limits={'chunkBytes': 8, 'maxBytes': 10, 'maxRowBytes': 32, 'timeoutMs': 5000})
+
+    events = collect_copy_events(request, make_check(pool=pool))
+
+    assert_failed_event(events, 'max_bytes_exceeded')
+    assert pool.cursors[0].executed[-1] == ('ROLLBACK', None)
+
+
+def test_copy_stream_rolls_back_read_only_transaction_when_callback_raises():
+    pool = FakePool(copy_blocks=[b'12345678', b'abcdef'])
+    events = []
+
+    def emit(event_type, metadata_json, payload):
+        events.append((event_type, metadata_json, payload))
+        if event_type == 'data':
+            raise RuntimeError('stop streaming')
+
+    with pytest.raises(RuntimeError, match='stop streaming'):
+        execute_agent_rpc_stream_copy(json.dumps(valid_copy_request()), make_check(pool=pool), emit)
+
+    assert pool.cursors[0].executed[-1] == ('ROLLBACK', None)
+
+
 def test_copy_stream_fixture_table_query_emits_copy_bytes():
     pool = FakePool(copy_blocks=[b'Beautiful city of lights,France\n', b'New York,USA\n'])
     request = valid_copy_request(query='SELECT city, country FROM cities ORDER BY city')
@@ -348,7 +404,9 @@ def test_copy_stream_fixture_table_query_emits_copy_bytes():
 
 
 def test_copy_stream_remote_query_identity_query_emits_copy_bytes():
-    pool = FakePool(copy_blocks=[b'postgres_a1_db1,rq-proof-agent-a,localhost,15432,postgres_a1_db1,rq-proof-agent-a\n'])
+    pool = FakePool(
+        copy_blocks=[b'postgres_a1_db1,rq-proof-agent-a,localhost,15432,postgres_a1_db1,rq-proof-agent-a\n']
+    )
     request = valid_copy_request(
         query=(
             'SELECT current_database() AS current_db, expected_agent_hostname, expected_postgres_host, '
@@ -478,3 +536,4 @@ def test_agent_rpc_stream_copy_closes_copy_when_callback_raises():
 
     assert [event[0] for event in events] == ['metadata', 'data']
     assert pool.closed_copies == 1
+    assert pool.cursors[0].executed[-1] == ('ROLLBACK', None)
