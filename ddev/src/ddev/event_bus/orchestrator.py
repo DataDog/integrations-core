@@ -25,6 +25,15 @@ from .exceptions import (
 type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 
 
+class _OrchestratorTimeout(Exception):
+    """Internal signal raised when ``max_timeout`` is exceeded.
+
+    Caught by :meth:`EventBusOrchestrator.process_messages` so the timeout reason can be
+    handed to the single cancellation loop in its ``finally`` block, instead of cancelling
+    tasks from two places.
+    """
+
+
 @dataclass
 class BaseMessage:
     """
@@ -294,6 +303,7 @@ class EventBusOrchestrator(ABC):
         get_task = asyncio.create_task(self._queue.get())
 
         start_time = asyncio.get_running_loop().time()
+        cancel_reason: str | None = None
 
         try:
             while not await self.__should_stop(start_time, running_tasks, get_task):
@@ -309,17 +319,17 @@ class EventBusOrchestrator(ABC):
                         break
 
                 self.__process_finished_tasks(done, current_get_task, running_tasks)
+        except _OrchestratorTimeout as timeout:
+            cancel_reason = str(timeout)
         finally:
             # If we exit the loop and tasks are still running (e.g. timeout or forced break),
             # we must clean them up before returning to ensure finalize() runs in a safe state.
+            # This is the single place that cancels ``running_tasks``, so every remaining task
+            # is cancelled exactly once, with the reason (if any) attached.
             if running_tasks:
                 self._logger.info("Cancelling %s remaining tasks...", len(running_tasks))
                 for task in running_tasks:
-                    # A task already has a cancellation request pending if __should_stop cancelled
-                    # it directly (e.g. on max_timeout) with a reason; don't clobber that message
-                    # with a bare, reason-less cancel() here.
-                    if not task.cancelling():
-                        task.cancel()
+                    task.cancel(cancel_reason)
 
                 # Wait for them to actually finish cancelling
                 await asyncio.wait(running_tasks)
@@ -343,11 +353,8 @@ class EventBusOrchestrator(ABC):
                 self._max_timeout,
                 len(running_tasks),
             )
-            timeout_msg = f"Orchestrator exceeded max_timeout of {self._max_timeout}s"
-            for task in running_tasks:
-                task.cancel(timeout_msg)
             get_task.cancel()
-            return True
+            raise _OrchestratorTimeout(f"Orchestrator exceeded max_timeout of {self._max_timeout}s")
 
         # Check exit condition: empty queue (implied by get_task not done) and no running processors
         if not running_tasks and not get_task.done() and self._queue.empty():
