@@ -2,7 +2,7 @@
 
 These are the binding conventions for any change made in this repository, whether by a human or an AI agent. When one of these rules conflicts with your own default instincts (for example, general Python style conventions you'd normally apply), follow the rule below instead — it exists because the default produced a problem here before. Where a rule doesn't cover your situation, prefer the narrowest, most focused change that accomplishes the task.
 
-Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory-specific guidance (for example `clickhouse/AGENTS.md`, which covers the ClickHouse `advanced_queries` pipeline). Those files *supplement* this one — read both; nothing here is overridden by a nested file unless that file says so explicitly.
+Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory-specific guidance (for example `clickhouse/AGENTS.md`, which covers the ClickHouse `advanced_queries` pipeline, or `ddev/src/ddev/utils/github_async/AGENTS.md`). Those files *supplement* this one — read both. Where a nested file's guidance conflicts with this one, the narrower, more specific file takes precedence for the code it covers.
 
 ## Contents
 
