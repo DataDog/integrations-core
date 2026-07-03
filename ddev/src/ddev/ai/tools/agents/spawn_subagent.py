@@ -4,13 +4,17 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from pydantic import Field
 
 from ddev.ai.tools.agents.base import SPAWN_SUBAGENT_NAME, BaseSpawnTool
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
+
+if TYPE_CHECKING:
+    from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.react.process import ReActProcessFactory
 
 
 class SpawnSubagentInput(BaseToolInput):
@@ -49,7 +53,12 @@ class SpawnSubagentTool(BaseSpawnTool[SpawnSubagentInput]):
     to put anything you need in its final message. Include every piece of context the subagent needs
     inside the system prompt and the user prompt."""
 
-    def __init__(self, owner_id, agent_config, process_factory) -> None:
+    def __init__(
+        self,
+        owner_id: str,
+        agent_config: AgentConfig,
+        process_factory: ReActProcessFactory,
+    ) -> None:
         super().__init__(owner_id, agent_config, process_factory)
         self._counter = 0
 
