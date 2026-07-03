@@ -39,7 +39,7 @@ def assignments(*names: str) -> list[Assignment]:
     return [Assignment(name=n, prompt=f"do {n}") for n in names]
 
 
-async def test_duplicate_names_rejected(process_factory: ProcessFactoryBuilder) -> None:
+async def test_duplicate_names_rejected(process_factory: ProcessFactoryBuilder):
     factory = process_factory()
     result = await make_tool(factory)(
         SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments("a", "a"))
@@ -49,7 +49,7 @@ async def test_duplicate_names_rejected(process_factory: ProcessFactoryBuilder) 
     assert factory.calls == []
 
 
-async def test_over_cap_rejected(process_factory: ProcessFactoryBuilder) -> None:
+async def test_over_cap_rejected(process_factory: ProcessFactoryBuilder):
     factory = process_factory()
     result = await make_tool(factory)(
         SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments(*[f"a{i}" for i in range(33)]))
@@ -61,7 +61,7 @@ async def test_over_cap_rejected(process_factory: ProcessFactoryBuilder) -> None
 
 async def test_happy_path(
     process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent], make_response: ResponseFactory
-) -> None:
+):
     factory = process_factory(lambda: mock_agent([make_response(text="done")]))
     result = await make_tool(factory)(
         SpawnIdenticalSubagentsInput(system_prompt="sys", tools=["read_file"], assignments=assignments("a", "b", "c"))
@@ -74,11 +74,25 @@ async def test_happy_path(
     )
     assert all(c["agent_config"].tools == ["read_file"] for c in factory.calls)
     assert [c["owner_id"] for c in factory.calls] == [
-        "parent.par.000-a",
-        "parent.par.001-b",
-        "parent.par.002-c",
+        "parent.par.001.000-a",
+        "parent.par.001.001-b",
+        "parent.par.001.002-c",
     ]
     assert result.data.index("## a") < result.data.index("## b") < result.data.index("## c")
+
+
+async def test_repeated_calls_produce_distinct_owner_ids(
+    process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent], make_response: ResponseFactory
+):
+    factory = process_factory(lambda: mock_agent([make_response(text="done")]))
+    tool = make_tool(factory)
+    tool_input = SpawnIdenticalSubagentsInput(system_prompt="sys", assignments=assignments("a"))
+
+    await tool(tool_input)
+    await tool(tool_input)
+
+    owner_ids = [c["owner_id"] for c in factory.calls]
+    assert owner_ids == ["parent.par.001.000-a", "parent.par.002.000-a"]
 
 
 async def test_partial_failure(
@@ -86,7 +100,7 @@ async def test_partial_failure(
     mock_agent: type[MockAgent],
     raising_agent: type[RaisingAgent],
     make_response: ResponseFactory,
-) -> None:
+):
     def agent_factory():
         agent_factory.n += 1
         if agent_factory.n == 2:
@@ -102,7 +116,7 @@ async def test_partial_failure(
     assert result.data.count("— ok") == 2
 
 
-async def test_all_fail(process_factory: ProcessFactoryBuilder, raising_agent: type[RaisingAgent]) -> None:
+async def test_all_fail(process_factory: ProcessFactoryBuilder, raising_agent: type[RaisingAgent]):
     factory = process_factory(lambda: raising_agent(RuntimeError("boom")))
     result = await make_tool(factory)(
         SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments("a", "b"))
@@ -113,7 +127,7 @@ async def test_all_fail(process_factory: ProcessFactoryBuilder, raising_agent: t
 
 async def test_max_tokens_notice(
     process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent], make_response: ResponseFactory
-) -> None:
+):
     factory = process_factory(lambda: mock_agent([make_response(text="partial", stop_reason=StopReason.MAX_TOKENS)]))
     result = await make_tool(factory)(SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments("a")))
     assert result.success is True
@@ -123,7 +137,7 @@ async def test_max_tokens_notice(
 
 async def test_max_parallel_respected(
     process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent], make_response: ResponseFactory
-) -> None:
+):
     active = 0
     peak = 0
 

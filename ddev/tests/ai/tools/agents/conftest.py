@@ -31,7 +31,7 @@ from ddev.ai.tools.registry import ToolRegistry
 class MockAgent(BaseAgent[Any]):
     """Replays a fixed list of responses, one per send()."""
 
-    def __init__(self, responses: list[AgentResponse]) -> None:
+    def __init__(self, responses: list[AgentResponse]):
         super().__init__("mock", "", ToolRegistry([]))
         self._responses = list(responses)
         self._index = 0
@@ -43,7 +43,7 @@ class MockAgent(BaseAgent[Any]):
         self._index += 1
         return response
 
-    def reset(self) -> None:
+    def reset(self):
         self._history = []
 
     async def compact(self) -> AgentResponse | None:
@@ -56,7 +56,7 @@ class MockAgent(BaseAgent[Any]):
 class RaisingAgent(MockAgent):
     """Raises a fixed exception on every send() call."""
 
-    def __init__(self, exc: BaseException) -> None:
+    def __init__(self, exc: BaseException):
         super().__init__([])
         self._exc = exc
 
@@ -89,7 +89,7 @@ class FakeProcessFactory:
         agent_factory=None,
         tool_registry: ToolRegistry | None = None,
         build_error: BaseException | None = None,
-    ) -> None:
+    ):
         self._agent_factory = agent_factory or (lambda: MockAgent([_make_response()]))
         self._tool_registry = tool_registry or ToolRegistry([])
         self._build_error = build_error

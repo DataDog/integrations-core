@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 from pydantic import Field
 
@@ -13,6 +13,10 @@ from ddev.ai.agent.types import StopReason
 from ddev.ai.tools.agents.base import SPAWN_IDENTICAL_NAME, BaseSpawnTool, ChildOutcome
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
+
+if TYPE_CHECKING:
+    from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.react.factory import ReActProcessFactory
 
 DEFAULT_PARALLEL = 8
 MAX_ASSIGNMENTS = 32
@@ -66,6 +70,15 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
     batch of metric families. Children run in parallel; results come back in assignment order and one
     failing child never affects its siblings."""
 
+    def __init__(
+        self,
+        owner_id: str,
+        agent_config: AgentConfig,
+        process_factory: ReActProcessFactory,
+    ) -> None:
+        super().__init__(owner_id, agent_config, process_factory)
+        self._call_counter = 0
+
     @property
     def name(self) -> str:
         return SPAWN_IDENTICAL_NAME
@@ -85,9 +98,12 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
         semaphore = asyncio.Semaphore(limit)
         system_prompt = f"{tool_input.system_prompt}\n\n{CONCISE_DIRECTIVE}"
 
+        self._call_counter += 1
+        call_id = self._call_counter
+
         async def run(index: int, assignment: Assignment) -> ChildOutcome:
             async with semaphore:
-                subagent_id = f"{self._owner_id}.par.{index:03d}-{assignment.name}"
+                subagent_id = f"{self._owner_id}.par.{call_id:03d}.{index:03d}-{assignment.name}"
                 return await self._run_child(
                     subagent_id, assignment.name, system_prompt, assignment.prompt, tool_input.tools
                 )
@@ -114,6 +130,6 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
 
     def _format(self, outcome: ChildOutcome) -> str:
         if outcome.error is not None:
-            return f"## {outcome.name} — FAILED: {outcome.error}"
+            return f"## {outcome.name} - {outcome.error}"
         status = "TRUNCATED (max_tokens)" if outcome.stop_reason == StopReason.MAX_TOKENS else "ok"
         return f"## {outcome.name} — {status}\n{outcome.text}"

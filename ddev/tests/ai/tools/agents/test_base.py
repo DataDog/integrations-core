@@ -24,7 +24,7 @@ def make_tool(tools: list[str]) -> _ConcreteSpawnTool:
     return _ConcreteSpawnTool(owner_id="p", agent_config=AgentConfig(tools=tools), process_factory=None)
 
 
-def test_allowed_tools_excludes_both_spawn_tools() -> None:
+def test_allowed_tools_excludes_both_spawn_tools():
     tool = make_tool(["read_file", "edit_file", SPAWN_SUBAGENT_NAME, SPAWN_IDENTICAL_NAME])
     assert tool._allowed_tools == {"read_file", "edit_file"}
 
@@ -38,7 +38,7 @@ def test_allowed_tools_excludes_both_spawn_tools() -> None:
         (["read_file"], None),
     ],
 )
-def test_validate_tools(requested: list[str], fragment: str | None) -> None:
+def test_validate_tools(requested: list[str], fragment: str | None):
     error = make_tool(["read_file"])._validate_tools(requested, "child")
     if fragment is None:
         assert error is None

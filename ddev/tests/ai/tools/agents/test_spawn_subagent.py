@@ -65,7 +65,7 @@ async def test_happy_path(
     read_events: ReadEvents,
     name: str | None,
     expected_id: str,
-) -> None:
+):
     factory = process_factory(lambda: mock_agent([make_response(text="ok")]))
     result = await make_tool(factory)(SpawnSubagentInput(system_prompt="sys", prompt="do it", tools=[], name=name))
 
@@ -88,7 +88,7 @@ async def test_multi_iteration_wires_callbacks(
     subagent_log: SubagentLog,
     read_events: ReadEvents,
     fake_tool: FakeToolFactory,
-) -> None:
+):
     """A subagent tool call produces a tool_call log event via the run-wide callbacks."""
     tool_call = ToolCall(id="tc1", name="read_file", input={"path": "/f"})
     factory = process_factory(
@@ -109,7 +109,7 @@ async def test_multi_iteration_wires_callbacks(
 
 async def test_child_runtime_config_inherits_parent_settings_and_requested_tools(
     process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent], make_response: ResponseFactory
-) -> None:
+):
     parent_config = AgentConfig(
         provider="anthropic",
         tools=["read_file", "edit_file", "spawn_subagent"],
@@ -138,7 +138,7 @@ async def test_max_tokens_response_prefixed(
     make_response: ResponseFactory,
     subagent_log: SubagentLog,
     read_events: ReadEvents,
-) -> None:
+):
     factory = process_factory(lambda: mock_agent([make_response(text="partial", stop_reason=StopReason.MAX_TOKENS)]))
     result = await make_tool(factory)(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="mt"))
 
@@ -155,9 +155,7 @@ async def test_max_tokens_response_prefixed(
 # ---------------------------------------------------------------------------
 
 
-async def test_build_failure_returns_tool_result(
-    process_factory: ProcessFactoryBuilder, subagent_log: SubagentLog
-) -> None:
+async def test_build_failure_returns_tool_result(process_factory: ProcessFactoryBuilder, subagent_log: SubagentLog):
     factory = process_factory(build_error=ValueError("boom"))
     result = await make_tool(factory)(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="fail"))
 
@@ -172,7 +170,7 @@ async def test_react_process_failure(
     raising_agent: type[RaisingAgent],
     subagent_log: SubagentLog,
     read_events: ReadEvents,
-) -> None:
+):
     factory = process_factory(lambda: raising_agent(AgentError("rate limit")))
     result = await make_tool(factory)(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="rl"))
 
@@ -196,7 +194,7 @@ async def test_counter_increments_per_invocation(
     mock_agent: type[MockAgent],
     make_response: ResponseFactory,
     subagent_log: SubagentLog,
-) -> None:
+):
     tool = make_tool(process_factory(lambda: mock_agent([make_response(text="r")])))
 
     await tool(SpawnSubagentInput(system_prompt="s", prompt="p", tools=[], name="a"))
@@ -211,7 +209,7 @@ async def test_parallel_spawns_get_distinct_counters(
     process_factory: ProcessFactoryBuilder,
     mock_agent: type[MockAgent],
     make_response: ResponseFactory,
-) -> None:
+):
     factory = process_factory(lambda: mock_agent([make_response(text="ok")]))
     tool = make_tool(factory)
     results = await asyncio.gather(
