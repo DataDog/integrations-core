@@ -145,9 +145,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return resource_name.replace('/', '.').replace('-', '_')
 
     def _parse_workload_events_config(self):
-        self.collect_workload_events = self.instance.get('collect_workload_events', True)
-        self.kube_config_dict = self.instance.get('kube_config_dict')
-        self.workload_events_namespaces = set(self.instance.get('workload_events_namespaces') or [])
+        self.collect_workload_events = self.config.collect_workload_events
+        self.kube_config_dict = self.config.kube_config_dict
+        self.workload_events_namespaces = set(self.config.workload_events_namespaces or [])
 
     def collect_workload_events_from_api(self):
         try:
@@ -161,37 +161,52 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         current_state = {}
         for workload in workloads:
-            metadata = workload.get('metadata', {})
-            namespace = metadata.get('namespace')
-
-            uid = metadata.get('uid')
-            if not uid:
-                self.log.debug('Skipping Kueue Workload without uid: %s/%s', namespace, metadata.get('name'))
-                continue
-
-            workload_state = self.get_workload_state(workload)
-            current_state[uid] = workload_state
-
-            if self._workload_state is None:
-                continue
-
-            previous_state = self._workload_state.get(uid)
-            if previous_state is None:
-                self.submit_workload_event('created', workload)
-                previous_state = {}
-
-            for condition_type, (transition, _, _) in WORKLOAD_TRANSITIONS.items():
-                condition = workload_state.get(condition_type)
-                if not condition or condition.get('status') != 'True':
-                    continue
-
-                previous_condition = previous_state.get(condition_type)
-                if self.condition_changed(condition, previous_condition):
-                    self.submit_workload_event(transition, workload, condition)
+            try:
+                self.process_workload_events(workload, current_state)
+            except Exception as e:
+                metadata = workload.get('metadata', {})
+                self.log.warning(
+                    'Cannot process Kueue Workload event for %s/%s: %s',
+                    metadata.get('namespace'),
+                    metadata.get('name'),
+                    e,
+                )
 
         self._workload_state = current_state
 
+    def process_workload_events(self, workload: dict, current_state: dict) -> None:
+        metadata = workload.get('metadata', {})
+        namespace = metadata.get('namespace')
+
+        uid = metadata.get('uid')
+        if not uid:
+            self.log.debug('Skipping Kueue Workload without uid: %s/%s', namespace, metadata.get('name'))
+            return
+
+        workload_state = self.get_workload_state(workload)
+        current_state[uid] = workload_state
+
+        if self._workload_state is None:
+            return
+
+        previous_state = self._workload_state.get(uid)
+        if previous_state is None:
+            self.submit_workload_event('created', workload)
+            previous_state = {}
+
+        for condition_type, (transition, _, _) in WORKLOAD_TRANSITIONS.items():
+            condition = workload_state.get('conditions', {}).get(condition_type)
+            if not condition or condition.get('status') != 'True':
+                continue
+
+            previous_condition = previous_state.get('conditions', {}).get(condition_type)
+            if self.condition_changed(condition, previous_condition):
+                self.submit_workload_event(transition, workload, condition, previous_state)
+
     def list_workloads(self) -> list[dict]:
+        if self.kube_client is None:
+            return []
+
         if not self.workload_events_namespaces:
             return self.kube_client.list_workloads()
 
@@ -203,14 +218,17 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     @staticmethod
     def get_workload_state(workload: dict) -> dict:
         return {
-            condition.get('type'): {
-                'status': condition.get('status'),
-                'reason': condition.get('reason'),
-                'last_transition_time': condition.get('lastTransitionTime'),
-                'message': condition.get('message'),
-            }
-            for condition in workload.get('status', {}).get('conditions', [])
-            if condition.get('type')
+            'admission': workload.get('status', {}).get('admission', {}),
+            'conditions': {
+                condition.get('type'): {
+                    'status': condition.get('status'),
+                    'reason': condition.get('reason'),
+                    'last_transition_time': condition.get('lastTransitionTime'),
+                    'message': condition.get('message'),
+                }
+                for condition in workload.get('status', {}).get('conditions', [])
+                if condition.get('type')
+            },
         }
 
     @staticmethod
@@ -225,7 +243,13 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             previous_condition.get('last_transition_time'),
         )
 
-    def submit_workload_event(self, transition: str, workload: dict, condition: dict | None = None):
+    def submit_workload_event(
+        self,
+        transition: str,
+        workload: dict,
+        condition: dict | None = None,
+        previous_state: dict | None = None,
+    ):
         metadata = workload.get('metadata', {})
         name = metadata.get('name', 'unknown')
         namespace = metadata.get('namespace', 'unknown')
@@ -240,7 +264,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 'msg_text': self.workload_event_text(transition, workload, condition),
                 'aggregation_key': metadata.get('uid', f'{namespace}/{name}'),
                 'alert_type': alert_type,
-                'tags': self.workload_event_tags(transition, workload, condition),
+                'tags': self.workload_event_tags(transition, workload, condition, previous_state),
             }
         )
 
@@ -280,7 +304,13 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         return ' '.join(parts)
 
-    def workload_event_tags(self, transition: str, workload: dict, condition: dict | None) -> list[str]:
+    def workload_event_tags(
+        self,
+        transition: str,
+        workload: dict,
+        condition: dict | None,
+        previous_state: dict | None = None,
+    ) -> list[str]:
         metadata = workload.get('metadata', {})
         spec = workload.get('spec', {})
         status = workload.get('status', {})
@@ -304,7 +334,11 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         if priority_class := spec.get('priorityClassName'):
             tags.append(f'kueue_workload_priority_class:{priority_class}')
 
-        if cluster_queue := status.get('admission', {}).get('clusterQueue'):
+        admission = status.get('admission', {})
+        if transition == 'evicted' and not admission and previous_state:
+            admission = previous_state.get('admission') or {}
+
+        if cluster_queue := admission.get('clusterQueue'):
             tags.append(f'kueue_cluster_queue:{cluster_queue}')
             tags.extend(
                 tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or []

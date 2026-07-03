@@ -2,11 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from collections.abc import Mapping
+from typing import Any
+
 from kubernetes import client, config
 
 
 class KubernetesAPIClient:
-    def __init__(self, log=None, kube_config_dict: dict | None = None):
+    def __init__(self, log=None, kube_config_dict: Mapping[str, Any] | None = None):
         self.log = log
 
         if kube_config_dict:
