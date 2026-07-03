@@ -289,7 +289,7 @@ class AsyncGitHubClient:
         async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
             yield self._parse_response(response, ArtifactsList)
 
-    async def list_workflow_run_jobs(
+    async def list_workflow_jobs(
         self,
         owner: str,
         repo: str,

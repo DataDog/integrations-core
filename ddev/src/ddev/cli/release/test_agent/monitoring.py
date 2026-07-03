@@ -102,7 +102,7 @@ async def collect_workflow_state(client: AsyncGitHubClient, workflow: Dispatched
     run = run_response.data
     jobs: list[JobState] = []
 
-    async for page in client.list_workflow_run_jobs(REPO_OWNER, REPO_NAME, workflow.run_id, per_page=100):
+    async for page in client.list_workflow_jobs(REPO_OWNER, REPO_NAME, workflow.run_id, per_page=100):
         jobs.extend(
             JobState(
                 name=job.name,

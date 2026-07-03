@@ -77,12 +77,11 @@ def _workflow_run_payload() -> dict[str, Any]:
 def _workflow_job(idx: int, *, status: str = "completed", conclusion: str | None = "success") -> dict[str, Any]:
     return {
         "id": idx,
+        "run_id": 42,
         "name": f"job-{idx}",
         "status": status,
         "conclusion": conclusion,
         "html_url": f"https://github.com/owner/repo/actions/runs/42/job/{idx}",
-        "started_at": "2024-01-01T00:00:00Z",
-        "completed_at": "2024-01-01T01:00:00Z" if status == "completed" else None,
     }
 
 
@@ -394,11 +393,11 @@ async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
 
 
 # ---------------------------------------------------------------------------
-# list_workflow_run_jobs (pagination)
+# list_workflow_jobs (pagination)
 # ---------------------------------------------------------------------------
 
 
-async def test_list_workflow_run_jobs_single_page() -> None:
+async def test_list_workflow_jobs_single_page() -> None:
     jobs = [_workflow_job(1), _workflow_job(2, status="in_progress", conclusion=None)]
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -408,7 +407,7 @@ async def test_list_workflow_run_jobs_single_page() -> None:
 
     client = _make_client(httpx.MockTransport(handler))
     pages = []
-    async for page in client.list_workflow_run_jobs("owner", "repo", 42):
+    async for page in client.list_workflow_jobs("owner", "repo", 42):
         pages.append(page)
 
     assert len(pages) == 1
@@ -418,7 +417,7 @@ async def test_list_workflow_run_jobs_single_page() -> None:
     assert pages[0].data.jobs[1].html_url == "https://github.com/owner/repo/actions/runs/42/job/2"
 
 
-async def test_list_workflow_run_jobs_two_pages() -> None:
+async def test_list_workflow_jobs_two_pages() -> None:
     call_count = 0
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -431,7 +430,7 @@ async def test_list_workflow_run_jobs_two_pages() -> None:
 
     client = _make_client(httpx.MockTransport(handler))
     pages = []
-    async for page in client.list_workflow_run_jobs("owner", "repo", 42):
+    async for page in client.list_workflow_jobs("owner", "repo", 42):
         pages.append(page)
 
     assert len(pages) == 2
@@ -439,13 +438,13 @@ async def test_list_workflow_run_jobs_two_pages() -> None:
     assert pages[1].data.jobs[0].id == 2
 
 
-async def test_list_workflow_run_jobs_per_page_forwarded() -> None:
+async def test_list_workflow_jobs_per_page_forwarded() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params["per_page"] == "100"
         return _json_response({"total_count": 0, "jobs": []})
 
     client = _make_client(httpx.MockTransport(handler))
-    async for _ in client.list_workflow_run_jobs("owner", "repo", 42, per_page=100):
+    async for _ in client.list_workflow_jobs("owner", "repo", 42, per_page=100):
         pass
 
 

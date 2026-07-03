@@ -1,0 +1,1 @@
+Continue collecting high-watermark offsets for healthy partitions when an individual partition's offset lookup fails, instead of aborting the check.
