@@ -45,16 +45,16 @@ class BaseSpawnTool[TInput: BaseToolInput](BaseTool[TInput]):
         # Parent may itself have a spawn tool; never offer either to children.
         self._allowed_tools = set(agent_config.tools) - {SPAWN_SUBAGENT_NAME, SPAWN_IDENTICAL_NAME}
 
-    def _validate_tools(self, tools: list[str], label: str) -> str | None:
+    def _validate_tools(self, tools: list[str], label: str = "Subagent") -> str | None:
         if SPAWN_SUBAGENT_NAME in tools or SPAWN_IDENTICAL_NAME in tools:
             return (
-                f"Subagent {label!r} not spawned: subagents cannot spawn further subagents "
+                f"{label!r} not spawned: subagents cannot spawn further subagents "
                 f"('{SPAWN_SUBAGENT_NAME}'/'{SPAWN_IDENTICAL_NAME}' are not allowed in 'tools')."
             )
         disallowed = sorted(set(tools) - self._allowed_tools)
         if disallowed:
             return (
-                f"Subagent {label!r} not spawned: disallowed tools requested: {disallowed}. "
+                f"{label!r} not spawned: disallowed tools requested: {disallowed}. "
                 f"Allowed subset: {sorted(self._allowed_tools)}."
             )
         return None

@@ -78,7 +78,7 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
             return ToolResult(
                 success=False, error=f"Too many assignments: {len(tool_input.assignments)} > {MAX_ASSIGNMENTS}."
             )
-        if error := self._validate_tools(tool_input.tools, "parallel"):
+        if error := self._validate_tools(tool_input.tools, "Parallel subagents"):
             return ToolResult(success=False, error=error)
 
         limit = tool_input.max_parallel or min(len(tool_input.assignments), DEFAULT_PARALLEL)

@@ -69,7 +69,7 @@ class SpawnSubagentTool(BaseSpawnTool[SpawnSubagentInput]):
     async def __call__(self, tool_input: SpawnSubagentInput) -> ToolResult:
         label = tool_input.name or "unnamed"
 
-        if error := self._validate_tools(tool_input.tools, label):
+        if error := self._validate_tools(tool_input.tools, f"Subagent {label!r}"):
             return ToolResult(success=False, error=error)
 
         self._counter += 1
