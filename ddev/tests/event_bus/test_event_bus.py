@@ -366,7 +366,7 @@ def test_omitted_max_timeout_resolves_to_default():
     assert orchestrator._max_timeout == DEFAULT_ORCHESTRATOR_MAX_TIMEOUT
 
 
-def test_unbounded_without_max_timeout_has_no_max_timeout(caplog: pytest.LogCaptureFixture):
+def test_unbounded_without_max_timeout_has_no_max_timeout():
     """unbounded=True with no explicit max_timeout runs with no overall time limit."""
     logger = logging.getLogger("test")
     orchestrator = MockOrchestrator(logger, grace_period=0.1, unbounded=True)

@@ -144,16 +144,16 @@ class EventBusOrchestrator(ABC):
 
         Returns None when the orchestrator should run with no overall time limit.
         """
-        if max_timeout is not None and unbounded:
+        if unbounded:
+            if max_timeout is None:
+                return None
             logger.warning(
-                "unbounded=True was set together with an explicit max_timeout=%s; ignoring unbounded "
-                "and enforcing max_timeout=%s",
+                "unbounded=True was set together with an explicit max_timeout=%s; "
+                "ignoring unbounded and enforcing max_timeout=%s",
                 max_timeout,
                 max_timeout,
             )
             return max_timeout
-        if max_timeout is None and unbounded:
-            return None
         return max_timeout if max_timeout is not None else DEFAULT_ORCHESTRATOR_MAX_TIMEOUT
 
     def __validate_parameters(self, max_timeout: float | None, grace_period: float):
