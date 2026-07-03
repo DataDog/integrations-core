@@ -4,6 +4,7 @@
 
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.impala import ImpalaCheck
 
@@ -39,3 +40,21 @@ def test_daemon_check_e2e_assert_service_check(dd_agent_check, daemon_instance):
 def test_daemon_check_e2e_assert_metrics_using_metadata(dd_agent_check, daemon_instance):
     aggregator = dd_agent_check(daemon_instance, rate=True)
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(rate=True)
+
+    # Discovery resolves the container's own IP for the `endpoint` tag, unlike the fixed
+    # `localhost` value baked into TAGS/METRICS above, so those exact-tag assertions aren't reused here.
+    aggregator.assert_service_check(
+        "impala.daemon.openmetrics.health",
+        status=ImpalaCheck.OK,
+    )
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, ImpalaCheck, compose_service='impalad')

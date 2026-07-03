@@ -7,7 +7,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.impala import ImpalaCheck
@@ -34,22 +34,25 @@ def dd_environment():
         wrappers=[create_log_volumes()],
         sleep=10,
     ):
-        yield {
-            'instances': [
-                {
-                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25000/metrics_prometheus",
-                    "service_type": "daemon",
-                },
-                {
-                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25010/metrics_prometheus",
-                    "service_type": "statestore",
-                },
-                {
-                    "openmetrics_endpoint": f"http://{get_docker_hostname()}:25020/metrics_prometheus",
-                    "service_type": "catalog",
-                },
-            ]
-        }
+        yield (
+            {
+                'instances': [
+                    {
+                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25000/metrics_prometheus",
+                        "service_type": "daemon",
+                    },
+                    {
+                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25010/metrics_prometheus",
+                        "service_type": "statestore",
+                    },
+                    {
+                        "openmetrics_endpoint": f"http://{get_docker_hostname()}:25020/metrics_prometheus",
+                        "service_type": "catalog",
+                    },
+                ]
+            },
+            get_e2e_discovery_metadata(),
+        )
 
 
 @pytest.fixture

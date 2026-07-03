@@ -2,6 +2,14 @@ name: Impala
 fleet_configurable: true
 files:
   - name: impala.yaml
+    discovery:
+      strategies:
+      - strategy: from_ports
+        port_hints:
+        - 25000
+        candidates:
+        - service_type: daemon
+          openmetrics_endpoint: "http://{service.host}:{port.number}/metrics_prometheus"
     options:
       - template: init_config
         options:
@@ -141,3 +149,10 @@ files:
               - type: multi_line
                 pattern: ^[IWEF]\d{4} (\d{2}:){2}\d{2}
                 name: new_log_start_with_log_level_and_date
+  - name: auto_conf.yaml
+    options:
+      - template: ad_identifiers
+        overrides:
+          value.example:
+            - impala
+      - template: auto_conf/discovery
