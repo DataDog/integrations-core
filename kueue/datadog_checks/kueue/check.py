@@ -145,7 +145,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return resource_name.replace('/', '.').replace('-', '_')
 
     def _parse_workload_events_config(self):
-        self.collect_workload_events = self.instance.get('collect_workload_events', False)
+        self.collect_workload_events = self.instance.get('collect_workload_events', True)
         self.kube_config_dict = self.instance.get('kube_config_dict')
         self.workload_events_namespaces = set(self.instance.get('workload_events_namespaces') or [])
 
@@ -299,7 +299,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         if cluster_queue := status.get('admission', {}).get('clusterQueue'):
             tags.append(f'kueue_cluster_queue:{cluster_queue}')
-            tags.extend(tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or [])
+            tags.extend(
+                tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or []
+            )
 
         namespace = metadata.get('namespace')
         name = metadata.get('name')
@@ -309,7 +311,8 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         local_queue = spec.get('queueName')
         if namespace and local_queue:
             tags.extend(
-                tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}localqueue/{namespace}/{local_queue}', tagger.ORCHESTRATOR) or []
+                tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}localqueue/{namespace}/{local_queue}', tagger.ORCHESTRATOR)
+                or []
             )
 
         if transition == 'evicted' and condition:

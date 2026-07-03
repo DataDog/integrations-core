@@ -50,7 +50,7 @@ def _base_metric_name(metric_name):
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     for metric in UNIT_METRICS:
@@ -77,7 +77,7 @@ def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_respons
         }
     )
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     aggregator.assert_metric_has_tag('kueue.pending_workloads', 'cluster_queue_tag:value')
@@ -100,7 +100,7 @@ def test_queue_tagger_tags_are_scoped(dd_run_check, aggregator, instance, mock_h
         }
     )
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     go_goroutines_tags = _get_metric_tags(aggregator, 'kueue.go.goroutines')
@@ -119,7 +119,7 @@ def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_respons
         },
     }
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     aggregator.assert_metric('kueue.cluster_queue.resource_usage.cpu')
@@ -157,7 +157,7 @@ def load_workloads(name):
 
 def test_workload_events_suppress_first_poll(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
-    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check = KueueCheck('kueue', {}, [instance])
     check.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'))
 
     dd_run_check(check)
@@ -175,7 +175,7 @@ def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_ht
             'kueue_workload://team-a/training-job': ['workload_tag:value'],
         }
     )
-    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check = KueueCheck('kueue', {}, [instance])
     check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
 
     dd_run_check(check)
@@ -213,7 +213,7 @@ def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_ht
 
 def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
-    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check = KueueCheck('kueue', {}, [instance])
     check.kube_client = FakeKubernetesAPIClient(
         load_workloads('pending'),
         load_workloads('admitted'),
@@ -230,7 +230,7 @@ def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_
 def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     tagger.reset()
-    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': True}])
+    check = KueueCheck('kueue', {}, [instance])
     check.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'), load_workloads('evicted'))
 
     dd_run_check(check)
@@ -271,7 +271,6 @@ def test_workload_events_namespace_filter(dd_run_check, aggregator, instance, mo
         [
             {
                 **instance,
-                'collect_workload_events': True,
                 'workload_events_namespaces': ['default'],
             }
         ],

@@ -646,12 +646,12 @@ instances:
     #
     # cluster_check: true
 
-    ## @param collect_workload_events - boolean - optional - default: false
+    ## @param collect_workload_events - boolean - optional - default: true
     ## Collect Kueue Workload lifecycle events by polling Workload custom resources from the Kubernetes API.
     ##
     ## This requires `get` and `list` RBAC permissions on `workloads.kueue.x-k8s.io`.
     #
-    # collect_workload_events: false
+    # collect_workload_events: true
 
     ## @param kube_config_dict - mapping - optional
     ## Optional kubeconfig dictionary used to configure the Kubernetes API client.

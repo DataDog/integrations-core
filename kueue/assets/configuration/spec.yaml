@@ -26,8 +26,8 @@ files:
         This requires `get` and `list` RBAC permissions on `workloads.kueue.x-k8s.io`.
       value:
         type: boolean
-        example: false
-        default: false
+        example: true
+        default: true
     - name: kube_config_dict
       description: |
         Optional kubeconfig dictionary used to configure the Kubernetes API client.
