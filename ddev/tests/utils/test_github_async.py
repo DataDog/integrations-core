@@ -10,6 +10,7 @@ from typing import Any
 
 import httpx
 import pytest
+from pydantic import ValidationError
 
 from ddev.utils.github_async import (
     GITHUB_API_VERSION,
@@ -20,13 +21,22 @@ from ddev.utils.github_async import (
 )
 from ddev.utils.github_async.models import (
     ArtifactsList,
+    CheckRun,
+    CheckRunConclusion,
+    CheckRunStatus,
     GitHubUser,
     IssueComment,
+    JobStep,
+    JobStepStatus,
     Label,
     PullRequest,
     PullRequestRef,
     PullRequestReviewComment,
+    PullRequestState,
     WorkflowDispatchResult,
+    WorkflowJob,
+    WorkflowJobConclusion,
+    WorkflowJobStatus,
     WorkflowRun,
 )
 
@@ -883,3 +893,89 @@ async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+# ---------------------------------------------------------------------------
+# StrEnum modeling of declared-enum fields
+# ---------------------------------------------------------------------------
+
+
+def test_pull_request_state_is_enum() -> None:
+    pr = PullRequest.model_validate(_full_pull_request_payload(number=1))
+    assert pr.state is PullRequestState.OPEN
+    assert pr.state == "open"
+
+
+def test_pull_request_state_rejects_unknown_value() -> None:
+    with pytest.raises(ValidationError):
+        PullRequest.model_validate({**_pull_request_payload(), "state": "merged"})
+
+
+def test_check_run_status_and_conclusion_are_enums() -> None:
+    check = CheckRun.model_validate(_check_run_payload(status="completed", conclusion="success"))
+    assert check.status is CheckRunStatus.COMPLETED
+    assert check.conclusion is CheckRunConclusion.SUCCESS
+
+
+def test_check_run_conclusion_stays_nullable() -> None:
+    check = CheckRun.model_validate(_check_run_payload(status="in_progress", conclusion=None))
+    assert check.conclusion is None
+
+
+def test_check_run_status_rejects_unknown_value() -> None:
+    with pytest.raises(ValidationError):
+        CheckRun.model_validate(_check_run_payload(status="bogus"))
+
+
+def _workflow_job_payload(**overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "id": 1,
+        "run_id": 2,
+        "name": "unit (py3.12)",
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/o/r/actions/jobs/1",
+        "steps": [{"name": "Run tests", "status": "completed", "conclusion": "failure", "number": 1}],
+    }
+    payload.update(overrides)
+    return payload
+
+
+def test_workflow_job_and_step_enums() -> None:
+    job = WorkflowJob.model_validate(_workflow_job_payload())
+    assert job.status is WorkflowJobStatus.COMPLETED
+    assert job.conclusion is WorkflowJobConclusion.SUCCESS
+
+    step = job.steps[0]
+    assert isinstance(step, JobStep)
+    assert step.status is JobStepStatus.COMPLETED
+    # A step's conclusion has no declared enum, so it stays a plain string.
+    assert step.conclusion == "failure"
+
+
+def test_workflow_job_conclusion_stays_nullable() -> None:
+    job = WorkflowJob.model_validate(_workflow_job_payload(status="in_progress", conclusion=None))
+    assert job.conclusion is None
+
+
+def test_workflow_job_status_rejects_unknown_value() -> None:
+    with pytest.raises(ValidationError):
+        WorkflowJob.model_validate(_workflow_job_payload(status="bogus"))
+
+
+def test_workflow_run_status_and_conclusion_stay_free_form() -> None:
+    """`workflow-run` declares no enum for these, so arbitrary strings must validate."""
+    run = WorkflowRun.model_validate(
+        {**_workflow_run_payload(), "status": "some_future_status", "conclusion": "some_future_conclusion"}
+    )
+    assert run.status == "some_future_status"
+    assert run.conclusion == "some_future_conclusion"
+
+
+@pytest.mark.parametrize(
+    ("status", "expected"),
+    [("completed", True), ("in_progress", False), ("queued", False)],
+)
+def test_workflow_run_is_completed(status: str, expected: bool) -> None:
+    run = WorkflowRun.model_validate({**_workflow_run_payload(), "status": status})
+    assert run.is_completed is expected

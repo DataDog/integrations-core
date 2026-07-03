@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .models import (
     ArtifactsList,
     CheckRun,
+    CheckRunConclusion,
     IssueComment,
     Label,
     PullRequest,
@@ -511,7 +512,7 @@ class AsyncGitHubClient:
         repo: str,
         check_run_id: int,
         status: Literal["queued", "in_progress", "completed"] | None = None,
-        conclusion: str | None = None,
+        conclusion: CheckRunConclusion | None = None,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
