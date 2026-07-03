@@ -16,7 +16,8 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr, Validat
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
 
-REMOTE_QUERY_DISABLE_ALLOWLIST_CONFIG_KEY = 'remote_queries.execute.disable_query_allowlist'
+REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY = 'remote_queries.execute.enable_query_allowlist'
+REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES = frozenset(('false', 'no', '0', 'n', 'off'))
 REMOTE_QUERY_COPY_SQL_ALLOWLIST = frozenset(
     (
         'SELECT 1 AS value',
@@ -353,15 +354,23 @@ def _copy_stdout_sql(query: str, stream_format: CopyStreamFormat) -> str:
 
 
 def _is_query_allowed(query: str) -> bool:
-    return _is_query_allowlist_disabled() or query in REMOTE_QUERY_COPY_SQL_ALLOWLIST
+    return not _is_query_allowlist_enabled() or query in REMOTE_QUERY_COPY_SQL_ALLOWLIST
 
 
-def _is_query_allowlist_disabled() -> bool:
+def _is_query_allowlist_enabled() -> bool:
     try:
-        return is_affirmative(datadog_agent.get_config(REMOTE_QUERY_DISABLE_ALLOWLIST_CONFIG_KEY))
+        config_value = datadog_agent.get_config(REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY)
     except Exception:
         LOGGER.debug('Unable to read remote query allowlist configuration', exc_info=True)
-        return False
+        return True
+
+    if config_value is None:
+        return True
+    if isinstance(config_value, str):
+        normalized_value = config_value.strip().lower()
+        return normalized_value not in REMOTE_QUERY_DISABLE_ALLOWLIST_VALUES
+
+    return is_affirmative(config_value)
 
 
 def _raise_if_timed_out(deadline: float) -> None:

@@ -242,7 +242,10 @@ def test_copy_stream_rejects_non_copy_allowlisted_queries_before_pool_access():
 
 
 def test_copy_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(monkeypatch):
-    monkeypatch.setattr(remote_query, '_is_query_allowlist_disabled', lambda: True)
+    def is_query_allowlist_enabled() -> bool:
+        return False
+
+    monkeypatch.setattr(remote_query, '_is_query_allowlist_enabled', is_query_allowlist_enabled)
     pool = FakePool(copy_blocks=[b'datadog_test\n'])
     request = valid_copy_request(query='SELECT current_database()')
 
@@ -251,6 +254,31 @@ def test_copy_stream_accepts_non_allowlisted_query_when_allowlist_is_disabled(mo
     assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
     assert pool.requested_dbnames == ['datadog_test']
     assert ('COPY (SELECT current_database()) TO STDOUT WITH (FORMAT CSV)', None) in pool.cursors[0].executed
+
+
+@pytest.mark.parametrize('config_value', ['', None, True, 1, 'true', 'yes', 'on', '1', 'TRUE', ' Yes '])
+def test_query_allowlist_enabled_by_default_and_affirmative_values(monkeypatch, config_value):
+    requested_keys: list[str] = []
+
+    def get_config(key: str) -> object:
+        requested_keys.append(key)
+        return config_value
+
+    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
+
+    assert remote_query._is_query_allowlist_enabled() is True
+    assert requested_keys == [remote_query.REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY]
+
+
+@pytest.mark.parametrize('config_value', [False, 0, 'false', 'no', 'off', '0', 'FALSE', ' No '])
+def test_query_allowlist_disabled_by_explicit_negative_values(monkeypatch, config_value):
+    def get_config(key: str) -> object:
+        assert key == remote_query.REMOTE_QUERY_ENABLE_ALLOWLIST_CONFIG_KEY
+        return config_value
+
+    monkeypatch.setattr(remote_query.datadog_agent, 'get_config', get_config)
+
+    assert remote_query._is_query_allowlist_enabled() is False
 
 
 @pytest.mark.parametrize('size', [1048576, 2097152, 4194304, 8388608, 16777216, 33554432])
