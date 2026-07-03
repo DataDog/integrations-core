@@ -137,6 +137,7 @@ jobs:
       CARGO_BUILD_TARGET: ${{ matrix.job.target }}
       PYAPP_REPO: pyapp
       PYAPP_VERSION: "0.24.0"
+      PYAPP_SHA256: "10cd152500685ddea610a8e280f3ca5502c4cff072bfb344cb9abd88a0c40928"
       PYAPP_PIP_EXTERNAL: "1"
 
     steps:
@@ -159,11 +160,19 @@ jobs:
         dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Fetch PyApp
-      run: >-
-        mkdir $PYAPP_REPO && curl -L
-        https://github.com/ofek/pyapp/releases/download/v$PYAPP_VERSION/source.tar.gz
-        |
-        tar --strip-components=1 -xzf - -C $PYAPP_REPO
+      run: |-
+        set -euo pipefail
+        mkdir "$PYAPP_REPO"
+        curl -fsSL -o pyapp.tar.gz \
+          "https://github.com/ofek/pyapp/releases/download/v$PYAPP_VERSION/source.tar.gz"
+        # sha256sum on Linux/Windows-bash; shasum on macOS (Git-for-Windows bash lacks shasum)
+        if command -v sha256sum >/dev/null 2>&1; then
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | sha256sum -c -
+        else
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | shasum -a 256 -c -
+        fi
+        tar --strip-components=1 -xzf pyapp.tar.gz -C "$PYAPP_REPO"
+        rm pyapp.tar.gz
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -578,11 +587,14 @@ jobs:
     - name: Install rcodesign
       env:
         ARCHIVE_NAME: "apple-codesign-0.27.0-x86_64-apple-darwin"
-      run: >-
-        curl -L
-        "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
-        |
-        tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+        RCODESIGN_SHA256: "bca6e648afaddd48f1c3d5dd25aa516659992cbbd2ba7131ba6add739aa895d3"
+      run: |-
+        set -euo pipefail
+        curl -fsSL -o rcodesign.tar.gz \
+          "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
+        echo "$RCODESIGN_SHA256 *rcodesign.tar.gz" | shasum -a 256 -c -
+        tar --strip-components=1 -xzf rcodesign.tar.gz -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+        rm rcodesign.tar.gz
 
     - name: Write credentials
       env:

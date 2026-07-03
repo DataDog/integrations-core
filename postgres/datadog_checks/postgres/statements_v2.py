@@ -356,17 +356,20 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
 
         if misses:
             raw_texts = self._fetch_query_texts(misses)
-            filtered = {
-                pgss_key: text
-                for pgss_key, text in raw_texts.items()
-                if text and text != '<insufficient privilege>' and not text.startswith('/* DDIGNORE */')
-            }
-            self._log.debug(
-                "resolve: fetched=%d filtered=%d for %d misses",
-                len(raw_texts),
-                len(filtered),
-                len(misses),
-            )
+            filtered = {}
+            ignorable: set[PgssKey] = set()
+            for pgss_key, text in raw_texts.items():
+                if not text:
+                    continue
+                if text.startswith('/* DDIGNORE */'):
+                    # We want to ignore tracking query metrics for queries with the /* DDIGNORE */ comment.
+                    ignorable.add(pgss_key)
+                    continue
+                if text == '<insufficient privilege>':
+                    continue
+                filtered[pgss_key] = text
+            if ignorable:
+                self._obfuscation_lookup.mark_ignored(ignorable)
             populated = self._populate_obfuscation_lookup(filtered)
             hits.update(populated)
 

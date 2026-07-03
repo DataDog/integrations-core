@@ -14,7 +14,11 @@ import pytest
 from tuf.api.exceptions import DownloadError
 
 from datadog_checks.downloader import cli
-from datadog_checks.downloader.download_v2 import TUFPointerDownloader
+from datadog_checks.downloader.download_v2 import (
+    V2_POINTER_TARGET_DELEGATION,
+    V2_POINTER_TARGET_PREFIX,
+    TUFPointerDownloader,
+)
 from datadog_checks.downloader.exceptions import (
     DigestMismatch,
     LengthMismatch,
@@ -25,6 +29,8 @@ from datadog_checks.downloader.exceptions import (
     TargetNotFoundError,
 )
 
+from ._v2_synth_repo import build_delegated_repo, serve_directory
+
 pytestmark = pytest.mark.offline
 
 PROJECT = 'datadog-postgres'
@@ -33,7 +39,7 @@ WHEEL_NAME = f'datadog_postgres-{VERSION}-py3-none-any.whl'
 WHEEL_CONTENT = b'fake wheel bytes for testing'
 WHEEL_DIGEST = hashlib.sha256(WHEEL_CONTENT).hexdigest()
 WHEEL_LENGTH = len(WHEEL_CONTENT)
-REPO_URL = 'https://agent-integration-wheels-staging.s3.amazonaws.com'
+REPO_URL = 'https://agent-integration-wheels.datadoghq.com'
 
 POINTER = {
     'digest': WHEEL_DIGEST,
@@ -46,7 +52,10 @@ POINTER = {
 
 
 def _mock_tuf_updater(pointer: dict) -> MagicMock:
-    pointer_bytes = json.dumps(pointer).encode()
+    return _mock_tuf_updater_with_pointer_bytes(json.dumps(pointer).encode())
+
+
+def _mock_tuf_updater_with_pointer_bytes(pointer_bytes: bytes) -> MagicMock:
     mock_updater = MagicMock()
     mock_updater.get_targetinfo.return_value = MagicMock()
 
@@ -84,8 +93,8 @@ class TestTargetResolution:
     @pytest.mark.parametrize(
         'version,expected_target',
         [
-            pytest.param(VERSION, f'{PROJECT}/{VERSION}.json', id='explicit-version'),
-            pytest.param(None, f'{PROJECT}/latest.json', id='missing-version'),
+            pytest.param(VERSION, f'wheelsmith/v1/{PROJECT}/{VERSION}.json', id='explicit-version'),
+            pytest.param(None, f'wheelsmith/v1/{PROJECT}/latest.json', id='missing-version'),
         ],
     )
     def test_get_pointer_requests_expected_target(self, mock_urlopen, mock_updater_cls, version, expected_target):
@@ -172,6 +181,96 @@ class TestMalformedPointer:
             downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
         mock_urlopen.assert_not_called()
 
+    @pytest.mark.parametrize(
+        'pointer_bytes',
+        [
+            pytest.param(b'["digest", "length", "wheel_path"]', id='list'),
+            pytest.param(b'"not an object"', id='string'),
+        ],
+    )
+    def test_raises_when_pointer_payload_is_not_object(self, mock_urlopen, mock_updater_cls, tmp_path, pointer_bytes):
+        mock_updater_cls.return_value = _mock_tuf_updater_with_pointer_bytes(pointer_bytes)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(MalformedPointerError, match='pointer'):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        mock_urlopen.assert_not_called()
+
+    @pytest.mark.parametrize(
+        'wheel_path',
+        [
+            pytest.param(f'//evil.example.com/wheels/{PROJECT}/{WHEEL_NAME}', id='scheme-bypass-double-slash'),
+            pytest.param(f'/wheels/../{PROJECT}/{WHEEL_NAME}', id='parent-dir-segment'),
+            pytest.param(f'/wheels/{PROJECT}/../{WHEEL_NAME}', id='parent-dir-segment-trailing'),
+            pytest.param(f'/wheels//{PROJECT}/{WHEEL_NAME}', id='empty-segment'),
+        ],
+    )
+    def test_rejects_path_traversal_or_scheme_bypass_in_wheel_path(
+        self, mock_urlopen, mock_updater_cls, tmp_path, wheel_path
+    ):
+        bad_pointer = {**POINTER, 'wheel_path': wheel_path}
+        mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(MalformedPointerError, match='wheel_path'):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        mock_urlopen.assert_not_called()
+
+    @pytest.mark.parametrize(
+        'pointer_digest',
+        [
+            pytest.param(123, id='non-string'),
+            pytest.param('not-hex!' * 8, id='non-hex'),
+            pytest.param('a' * 63, id='too-short'),
+            pytest.param('a' * 65, id='too-long'),
+            pytest.param(WHEEL_DIGEST.upper(), id='uppercase'),
+        ],
+    )
+    def test_rejects_invalid_digest(self, mock_urlopen, mock_updater_cls, tmp_path, pointer_digest):
+        bad_pointer = {**POINTER, 'digest': pointer_digest}
+        mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(MalformedPointerError, match='digest'):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        mock_urlopen.assert_not_called()
+
+    @pytest.mark.parametrize(
+        'pointer_length',
+        [
+            pytest.param('27', id='string'),
+            pytest.param(-1, id='negative'),
+            pytest.param(True, id='bool-true'),
+            pytest.param(None, id='none'),
+        ],
+    )
+    def test_rejects_invalid_length(self, mock_urlopen, mock_updater_cls, tmp_path, pointer_length):
+        bad_pointer = {**POINTER, 'length': pointer_length}
+        mock_updater_cls.return_value = _mock_tuf_updater(bad_pointer)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        with pytest.raises(MalformedPointerError, match='length'):
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        mock_urlopen.assert_not_called()
+
+    def test_extra_unknown_keys_are_forward_compatible(self, mock_urlopen, mock_updater_cls, tmp_path):
+        forward_compat = {**POINTER, 'future_feature': {'enabled': True}, 'signing_metadata_url': '/x'}
+        mock_updater_cls.return_value = _mock_tuf_updater(forward_compat)
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        assert wheel_path.read_bytes() == WHEEL_CONTENT
+
+    def test_zero_length_wheel_is_allowed(self, mock_urlopen, mock_updater_cls, tmp_path):
+        empty_digest = hashlib.sha256(b'').hexdigest()
+        empty_pointer = {**POINTER, 'digest': empty_digest, 'length': 0}
+        mock_updater_cls.return_value = _mock_tuf_updater(empty_pointer)
+        mock_urlopen.return_value = _mock_response(b'')
+
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        wheel_path = downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        assert wheel_path.read_bytes() == b''
+
 
 class TestNetworkErrorMidDownload:
     def test_http_error_propagates(self, mock_urlopen, mock_updater_cls, tmp_path):
@@ -211,6 +310,109 @@ class TestDisableVerification:
         downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
         with pytest.raises(MissingVersion, match='requires an explicit --version'):
             downloader.download(PROJECT, dest_dir=tmp_path)
+
+
+class TestUpdaterContract:
+    """Lock in the v2 target-path storage contract."""
+
+    def test_get_targetinfo_called_with_prefixed_path_only(self, mock_urlopen, mock_updater_cls):
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        downloader.get_pointer(PROJECT, version=VERSION)
+
+        mock_updater = mock_updater_cls.return_value
+        call = mock_updater.get_targetinfo.call_args
+        assert call.args == (f'wheelsmith/v1/{PROJECT}/{VERSION}.json',)
+        assert call.kwargs == {}
+
+    def test_target_path_uses_stable_wheelsmith_namespace(self, mock_urlopen, mock_updater_cls):
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+        downloader.get_pointer(PROJECT, version=VERSION)
+
+        target_path = mock_updater_cls.return_value.get_targetinfo.call_args.args[0]
+        assert target_path.startswith('wheelsmith/v1/')
+        assert not target_path.startswith('targets/')
+        assert not target_path.startswith('wheels-signer-')
+
+
+def _patch_bootstrap_to_use(repo_root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make TUFPointerDownloader trust the synthetic repo's root.json instead of the bundled one."""
+
+    def fake_bootstrap(self, metadata_dir: Path) -> None:
+        (metadata_dir / 'root.json').write_bytes((repo_root / 'metadata' / 'root.json').read_bytes())
+
+    monkeypatch.setattr(TUFPointerDownloader, '_bootstrap_metadata_dir', fake_bootstrap)
+
+
+class TestDelegationTraversal:
+    """Test v2 target resolution through delegated TUF metadata."""
+
+    @staticmethod
+    def _make_pointer_target(project: str, version: str) -> tuple[str, bytes, dict]:
+        wheel = b'synthetic wheel for delegation test'
+        wheel_name = f'{project.replace("-", "_")}-{version}-py3-none-any.whl'
+        pointer = {
+            'digest': hashlib.sha256(wheel).hexdigest(),
+            'length': len(wheel),
+            'version': version,
+            'repository': REPO_URL,
+            'wheel_path': f'/wheels/{project}/{wheel_name}',
+        }
+        return wheel_name, wheel, pointer
+
+    def test_resolves_through_paths_delegation_without_naming_role(self, monkeypatch, tmp_path):
+        project, version = 'datadog-postgres', '14.0.0'
+        _, _, pointer = self._make_pointer_target(project, version)
+
+        repo = tmp_path / 'repo'
+        build_delegated_repo(
+            repo,
+            delegated_targets={f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            paths=[f'{V2_POINTER_TARGET_PREFIX}/{project}/*'],
+        )
+        _patch_bootstrap_to_use(repo, monkeypatch)
+
+        with serve_directory(repo) as url:
+            downloader = TUFPointerDownloader(repository_url=url)
+            assert downloader.get_pointer(project, version=version) == pointer
+
+    def test_resolves_through_hash_prefix_delegation(self, monkeypatch, tmp_path):
+        project, version = 'datadog-postgres', '14.0.0'
+        target_path = f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json'
+        _, _, pointer = self._make_pointer_target(project, version)
+
+        prefix = hashlib.sha256(target_path.encode()).hexdigest()[:2]
+
+        repo = tmp_path / 'repo'
+        build_delegated_repo(
+            repo,
+            delegated_targets={target_path: json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            path_hash_prefixes=[prefix],
+        )
+        _patch_bootstrap_to_use(repo, monkeypatch)
+
+        with serve_directory(repo) as url:
+            downloader = TUFPointerDownloader(repository_url=url)
+            assert downloader.get_pointer(project, version=version) == pointer
+
+    def test_unmatched_target_path_raises_not_found(self, monkeypatch, tmp_path):
+        project, version = 'datadog-postgres', '14.0.0'
+        _, _, pointer = self._make_pointer_target(project, version)
+
+        repo = tmp_path / 'repo'
+        build_delegated_repo(
+            repo,
+            delegated_targets={f'{V2_POINTER_TARGET_PREFIX}/{project}/{version}.json': json.dumps(pointer).encode()},
+            delegated_role_name=V2_POINTER_TARGET_DELEGATION,
+            paths=[f'{V2_POINTER_TARGET_PREFIX}/datadog-postgres/*'],
+        )
+        _patch_bootstrap_to_use(repo, monkeypatch)
+
+        with serve_directory(repo) as url:
+            downloader = TUFPointerDownloader(repository_url=url)
+            with pytest.raises(TargetNotFoundError, match='datadog-redis'):
+                downloader.get_pointer('datadog-redis', version=version)
 
 
 class TestInstantiateV2Downloader:

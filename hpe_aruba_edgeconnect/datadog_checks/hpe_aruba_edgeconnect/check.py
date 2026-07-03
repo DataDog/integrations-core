@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import ipaddress
 import json
 import threading
 from collections.abc import Callable
@@ -111,13 +112,29 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                 "network-devices-metadata",
             )
 
+    def _parse_appliances(self, raw_appliances: list[dict]) -> list[Appliance]:
+        appliances = []
+        for raw in raw_appliances:
+            raw_ip = raw.get('ip', '')
+            try:
+                ipaddress.ip_address(raw_ip)
+            except ValueError:
+                self.log.warning(
+                    "Skipping appliance with non-IP address %r from orchestrator %s",
+                    raw_ip,
+                    self.config.orchestrator_ip,
+                )
+                continue
+            appliances.append(Appliance(raw))
+        return appliances
+
     def _collect_appliances_from_orch(self, client: OrchestratorClient) -> Appliances:
         raw_appliances = client.get_appliances()
         if not raw_appliances:
             self.log.warning("No appliances returned from orchestrator %s", self.config.orchestrator_ip)
             return Appliances([], self.log)
         self.log.debug("Found %d appliances from orchestrator before filtering", len(raw_appliances))
-        all_appliances = [Appliance(a) for a in raw_appliances]
+        all_appliances = self._parse_appliances(raw_appliances)
         self._peer_lookup = {ap.host_name: (ap.ip, ap.site or 'unknown') for ap in all_appliances if ap.host_name}
         appliances = Appliances(all_appliances, self.log)
         appliances.filter(self.config.appliance_ips)

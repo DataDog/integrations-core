@@ -8,7 +8,7 @@
 
 * Add new config `health_check_warning_events` to emit an event when a Consul health check transitions to `warning`. ([#23779](https://github.com/DataDog/integrations-core/pull/23779))
 
-## 5.5.0 / 2026-05-14
+## 5.5.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 

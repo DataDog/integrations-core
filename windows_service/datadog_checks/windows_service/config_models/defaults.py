@@ -28,6 +28,10 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
+def instance_group_per_user_services():
+    return False
+
+
 def instance_min_collection_interval():
     return 15
 
