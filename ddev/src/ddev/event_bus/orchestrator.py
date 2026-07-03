@@ -25,7 +25,7 @@ from .exceptions import (
 type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 
 
-class _OrchestratorTimeout(Exception):
+class OrchestratorTimeout(Exception):
     """Internal signal raised when ``max_timeout`` is exceeded.
 
     Caught by :meth:`EventBusOrchestrator.process_messages` so the timeout reason can be
@@ -319,7 +319,7 @@ class EventBusOrchestrator(ABC):
                         break
 
                 self.__process_finished_tasks(done, current_get_task, running_tasks)
-        except _OrchestratorTimeout as timeout:
+        except OrchestratorTimeout as timeout:
             cancel_reason = str(timeout)
         finally:
             # If we exit the loop and tasks are still running (e.g. timeout or forced break),
@@ -354,7 +354,7 @@ class EventBusOrchestrator(ABC):
                 len(running_tasks),
             )
             get_task.cancel()
-            raise _OrchestratorTimeout(f"Orchestrator exceeded max_timeout of {self._max_timeout}s")
+            raise OrchestratorTimeout(f"Orchestrator exceeded max_timeout of {self._max_timeout}s")
 
         # Check exit condition: empty queue (implied by get_task not done) and no running processors
         if not running_tasks and not get_task.done() and self._queue.empty():
