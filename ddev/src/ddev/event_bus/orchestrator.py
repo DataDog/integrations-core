@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import math
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, ThreadPoolExecutor
@@ -23,6 +24,8 @@ from .exceptions import (
 )
 
 type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
+
+DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
 
 
 @dataclass
@@ -93,15 +96,17 @@ class EventBusOrchestrator(ABC):
     def __init__(
         self,
         logger: logging.Logger,
-        max_timeout: float = 300,
+        max_timeout: float | None = None,
         grace_period: float = 10,
         executor: Executor | None = None,
         fail_fast: bool = False,
+        unbounded: bool = False,
     ):
         """
         Args:
             logger: The logger to use for the orchestrator.
             max_timeout: The maximum time in seconds to wait for the orchestrator to complete.
+                Defaults to 300 seconds unless ``unbounded`` is True and no value is given here.
             grace_period: The timeout in seconds to wait for a new message to be submitted after all
                 messages have been processed.
             executor: The executor to use for running sync processors.
@@ -110,10 +115,20 @@ class EventBusOrchestrator(ABC):
                        the orchestrator. If False (default), such exceptions are logged
                        and processing continues. ``FatalProcessingError`` always stops the
                        orchestrator regardless of this flag.
+            unbounded: If True and ``max_timeout`` is not explicitly provided, the orchestrator
+                       runs with no overall time limit; only the idle ``grace_period`` check can
+                       stop it. If ``max_timeout`` is explicitly provided together with
+                       ``unbounded=True``, a warning is logged and ``max_timeout`` is enforced
+                       instead, for safety.
+
+                       Running unbounded removes the only safety net against a hung or
+                       deadlocked processor and only external cancellation (e.g. Ctrl+C
+                       or killing the process) will stop it.
         """
-        self.__validate_parameters(max_timeout, grace_period)
+        resolved_max_timeout = self.__resolve_max_timeout(max_timeout, unbounded, logger)
+        self.__validate_parameters(resolved_max_timeout, grace_period)
         self._logger = logger
-        self._max_timeout = max_timeout
+        self._max_timeout = resolved_max_timeout
         self._grace_period = grace_period
         self._executor = executor or ThreadPoolExecutor(max_workers=4)
         self._fail_fast = fail_fast
@@ -122,16 +137,36 @@ class EventBusOrchestrator(ABC):
         self._queue = asyncio.Queue[BaseMessage]()
         self._running = False
 
-    def __validate_parameters(self, max_timeout: float, grace_period: float):
+    @staticmethod
+    def __resolve_max_timeout(max_timeout: float | None, unbounded: bool, logger: logging.Logger) -> float | None:
+        """
+        Resolves the effective max_timeout from the given max_timeout/unbounded combination.
+
+        Returns None when the orchestrator should run with no overall time limit.
+        """
+        if max_timeout is not None and unbounded:
+            logger.warning(
+                "unbounded=True was set together with an explicit max_timeout=%s; ignoring unbounded "
+                "and enforcing max_timeout=%s",
+                max_timeout,
+                max_timeout,
+            )
+            return max_timeout
+        if max_timeout is None and unbounded:
+            return None
+        return max_timeout if max_timeout is not None else DEFAULT_ORCHESTRATOR_MAX_TIMEOUT
+
+    def __validate_parameters(self, max_timeout: float | None, grace_period: float):
         """
         Validates the parameters passed to the orchestrator.
         """
-        if max_timeout <= 0:
-            raise ValueError("max_timeout must be greater than 0")
         if grace_period < 0:
             raise ValueError("grace_period must be greater than or equal to 0")
-        if max_timeout <= grace_period:
-            raise ValueError("max_timeout must be greater than grace_period")
+        if max_timeout is not None:
+            if max_timeout <= 0:
+                raise ValueError("max_timeout must be greater than 0")
+            if max_timeout <= grace_period:
+                raise ValueError("max_timeout must be greater than grace_period")
 
     def register_processor[T: BaseMessage](self, processor: Processor[T], message_types: list[type[T]]):
         """Registers a processor to receive specific message types."""
@@ -276,7 +311,11 @@ class EventBusOrchestrator(ABC):
     def _remaining_time(self, start_time: float) -> float:
         """
         Calculates the remaining time until the max timeout is reached.
+
+        Returns ``math.inf`` when running unbounded (no max_timeout set).
         """
+        if self._max_timeout is None:
+            return math.inf
         elapsed = asyncio.get_running_loop().time() - start_time
         return self._max_timeout - elapsed
 

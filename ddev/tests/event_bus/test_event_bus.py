@@ -24,7 +24,13 @@ from ddev.event_bus.exceptions import (
     ProcessorQueueError,
     SkipMessageError,
 )
-from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage, EventBusOrchestrator, SyncProcessor
+from ddev.event_bus.orchestrator import (
+    DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
+    AsyncProcessor,
+    BaseMessage,
+    EventBusOrchestrator,
+    SyncProcessor,
+)
 
 # Test Structure Documentation
 # --------------------------
@@ -139,15 +145,17 @@ class MockOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
         logger: logging.Logger,
-        max_timeout: float = 300,
+        max_timeout: float | None = None,
         grace_period: float = 10,
         fail_fast: bool = False,
+        unbounded: bool = False,
     ):
         super().__init__(
             logger=logger,
             max_timeout=max_timeout,
             grace_period=grace_period,
             fail_fast=fail_fast,
+            unbounded=unbounded,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -348,6 +356,45 @@ def test_validate_parameters(max_timeout: float, grace_period: float, expectatio
     logger = logging.getLogger("test")
     with expectation:
         MockOrchestrator(logger, max_timeout=max_timeout, grace_period=grace_period)
+
+
+def test_omitted_max_timeout_resolves_to_default():
+    """Not passing max_timeout still resolves to default."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=1)
+
+    assert orchestrator._max_timeout == DEFAULT_ORCHESTRATOR_MAX_TIMEOUT
+
+
+def test_unbounded_without_max_timeout_has_no_max_timeout(caplog: pytest.LogCaptureFixture):
+    """unbounded=True with no explicit max_timeout runs with no overall time limit."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, unbounded=True)
+
+    assert orchestrator._max_timeout is None
+
+
+def test_unbounded_with_explicit_max_timeout_warns_and_falls_back(caplog: pytest.LogCaptureFixture):
+    """unbounded=True together with an explicit max_timeout falls back to enforcing max_timeout."""
+    logger = logging.getLogger("test")
+    with caplog.at_level(logging.WARNING):
+        orchestrator = MockOrchestrator(logger, max_timeout=5, grace_period=1, unbounded=True)
+
+    assert orchestrator._max_timeout == 5
+    assert "unbounded=True" in caplog.text
+    assert "max_timeout=5" in caplog.text
+
+
+def test_unbounded_still_stops_via_grace_period():
+    """Unbounded mode still exits when the queue is empty and the grace period elapses."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, grace_period=0.1, unbounded=True)
+
+    with assert_time(0.0, 1.0):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is None
 
 
 def test_default_on_error_with_default_policy_logs_and_continues(
