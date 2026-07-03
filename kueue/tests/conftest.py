@@ -174,6 +174,7 @@ def dd_environment():
                 'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
                 'collect_workload_events': True,
                 'kube_config_dict': kubeconfig_content,
+                'min_collection_interval': 3600,
             }
         ]
 

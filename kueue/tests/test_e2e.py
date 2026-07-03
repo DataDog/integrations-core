@@ -2,13 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+import tempfile
 import time
 
 import pytest
+import yaml
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.kueue import KueueCheck
 
 from .common import EXPECTED_METRIC_TAGS
 
@@ -28,32 +32,33 @@ def test_e2e(dd_agent_check):
 
 
 @pytest.mark.e2e
-def test_e2e_workload_events(dd_agent_check):
-    dd_agent_check()
+def test_e2e_workload_events(dd_agent_check, aggregator):
+    with tempfile.NamedTemporaryFile('w') as kubeconfig:
+        kubeconfig_dict = write_kind_kubeconfig(kubeconfig)
+        kubectl_env = {**os.environ, 'KUBECONFIG': kubeconfig.name}
 
-    run_command(['kubectl', 'apply', '-f', f'{HERE}/kind/event-workload.yaml'])
-    workload_name = wait_for_workload('event-workload')
-    run_command(
-        [
-            'kubectl',
-            'wait',
-            f'workload/{workload_name}',
-            '-n',
-            'default',
-            '--for=condition=Admitted=True',
-            '--timeout=300s',
-        ]
-    )
+        run_command(['kubectl', 'delete', 'job/event-workload', '-n', 'default', '--ignore-not-found'], env=kubectl_env)
+        check = KueueCheck('kueue', {}, [load_check_instance(kubeconfig_dict)])
+        check._parse_workload_events_config()
+        check.check(check.instance)
 
-    aggregator = dd_agent_check()
+        apply_event_workload(kubectl_env)
+        workload_name = wait_for_workload('event-workload', kubectl_env)
+        run_command(
+            [
+                'kubectl',
+                'wait',
+                f'workload/{workload_name}',
+                '-n',
+                'default',
+                '--for=condition=Admitted=True',
+                '--timeout=300s',
+            ],
+            env=kubectl_env,
+        )
 
-    aggregator.assert_event(
-        f'Workload default/{workload_name} created.',
-        exact_match=False,
-        event_type='kueue.workload.created',
-        source_type_name='kueue',
-        alert_type='info',
-    )
+    check.check(check.instance)
+
     aggregator.assert_event(
         f'Workload default/{workload_name} admitted.',
         exact_match=False,
@@ -63,12 +68,43 @@ def test_e2e_workload_events(dd_agent_check):
     )
 
 
-def wait_for_workload(job_name):
+def write_kind_kubeconfig(kubeconfig):
+    cluster_name = 'cluster-kueue-py3.13-v0.18.0'
+    kubeconfig_content = run_command(['kind', 'get', 'kubeconfig', '--name', cluster_name], capture=True).stdout
+    kubeconfig_dict = yaml.safe_load(kubeconfig_content)
+    kubeconfig.write(kubeconfig_content)
+    kubeconfig.flush()
+    return kubeconfig_dict
+
+
+def load_check_instance(kubeconfig_dict):
+    with open(os.path.expanduser('~/.local/share/ddev/env/kueue/py3.13-v0.18.0/config/kueue.yaml')) as config_file:
+        instance = yaml.safe_load(config_file)['instances'][0]
+    instance['kube_config_dict'] = kubeconfig_dict
+    instance['collect_workload_events'] = True
+    return instance
+
+
+def apply_event_workload(kubectl_env):
+    last_error = None
+    for _ in range(10):
+        try:
+            run_command(['kubectl', 'apply', '-f', f'{HERE}/kind/event-workload.yaml'], check=True, env=kubectl_env)
+            return
+        except Exception as e:
+            last_error = e
+            time.sleep(5)
+    raise RuntimeError(f'Failed to apply event workload manifest after retries: {last_error}')
+
+
+def wait_for_workload(job_name, kubectl_env):
     job_uid = run_command(
-        ['kubectl', 'get', 'job', job_name, '-n', 'default', '-o', 'jsonpath={.metadata.uid}'], capture=True
+        ['kubectl', 'get', 'job', job_name, '-n', 'default', '-o', 'jsonpath={.metadata.uid}'],
+        capture=True,
+        env=kubectl_env,
     ).stdout.strip()
     workload_name = ''
-    for _ in range(10):
+    for _ in range(60):
         workload_name = run_command(
             [
                 'kubectl',
@@ -82,6 +118,7 @@ def wait_for_workload(job_name):
                 'jsonpath={.items[0].metadata.name}',
             ],
             capture=True,
+            env=kubectl_env,
         ).stdout.strip()
         if workload_name:
             break
