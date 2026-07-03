@@ -1,3 +1,8 @@
+## Datadog Agent version [7.80.4](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7804)
+
+### Integration Updates
+* Windows Service [6.7.2](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
+
 ## Datadog Agent version [7.80.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7803)
 
 * There were no integration updates for this version of the Agent.

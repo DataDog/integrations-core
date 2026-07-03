@@ -377,36 +377,16 @@ def test_unsupported_replication(aggregator, integration_check, pg_instance):
 
 
 def test_can_connect_service_check(aggregator, integration_check, pg_instance):
-    # First: check run with a valid postgres instance
     check = integration_check(pg_instance)
-
-    check.run()
-    expected_tags = _get_expected_tags(check, pg_instance, with_db=True)
-    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
-    aggregator.reset()
-
-    # Second: keep the connection open but an unexpected error happens during check run
     orig_db = check.db
 
-    # Second: keep the connection open but an unexpected error happens during check run
-    with pytest.raises(AttributeError):
-        check.db = mock.MagicMock(side_effect=AttributeError('foo'))
-        check.check(pg_instance)
-
-    # Since we can't connect to the host, we can't gather the replication role
+    # Before we ever connect successfully, none of the dynamically retrieved tags
+    # (version, replication role, system identifier, cluster name) have been cached.
     tags_without_role = _get_expected_tags(
         check, pg_instance, with_db=True, with_version=False, with_sys_id=False, with_cluster_name=False, role=None
     )
-    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
-    aggregator.reset()
 
-    # Third: connection still open but this time no error
-    check.db = orig_db
-    check.check(pg_instance)
-    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
-
-    # Forth: connection health check failed
-    with pytest.raises(DatabaseHealthCheckError):
+    def broken_connection():
         db = mock.MagicMock()
         db.cursor().__enter__().execute.side_effect = psycopg.OperationalError('foo')
 
@@ -414,10 +394,43 @@ def test_can_connect_service_check(aggregator, integration_check, pg_instance):
         def mock_db():
             yield db
 
-        check.db = mock_db
-        check.check(pg_instance)
+        return mock_db
 
+    # First: the very first check run fails to connect. Since there has never been a
+    # successful run, the dynamically retrieved tags are not available yet.
+    with pytest.raises(DatabaseHealthCheckError):
+        check.db = broken_connection()
+        check.check(pg_instance)
     aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=tags_without_role)
+    aggregator.reset()
+
+    # Second: a successful run populates and caches the dynamically retrieved tags.
+    check.db = orig_db
+    check.run()
+    expected_tags = _get_expected_tags(check, pg_instance, with_db=True)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
+    aggregator.reset()
+
+    # Third: the connection fails again, but the tags cached from the previous
+    # successful run are retained on the critical service check.
+    with pytest.raises(DatabaseHealthCheckError):
+        check.db = broken_connection()
+        check.check(pg_instance)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
+    aggregator.reset()
+
+    # Fourth: another successful run, the tags are still present.
+    check.db = orig_db
+    check.run()
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.OK, tags=expected_tags)
+    aggregator.reset()
+
+    # Fifth: the connection health check fails, but all the previously cached tags
+    # are still reported on the critical service check.
+    with pytest.raises(DatabaseHealthCheckError):
+        check.db = broken_connection()
+        check.check(pg_instance)
+    aggregator.assert_service_check('postgres.can_connect', count=1, status=PostgreSql.CRITICAL, tags=expected_tags)
     aggregator.reset()
 
 
@@ -1120,12 +1133,13 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     check.run()
 
     # Verify the role tag reflects master
-    replication_tags = [t for t in check._non_internal_tags if t.startswith('replication_role:')]
+    non_internal_tags = check.tag_manager.get_tags(include_internal=False)
+    replication_tags = [t for t in non_internal_tags if t.startswith('replication_role:')]
     assert replication_tags == ['replication_role:master'], f"Expected master role tag, got: {replication_tags}"
 
-    # Verify dd.internal tags are not in _non_internal_tags
-    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
-    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
+    # Verify dd.internal tags are not in the non-internal tags
+    internal_tags = [t for t in non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in non-internal tags: {internal_tags}"
 
     # Verify the metadata event has the correct role
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
@@ -1146,7 +1160,8 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     check.run()
 
     # After role change, only the current role should be present
-    replication_tags = [t for t in check._non_internal_tags if t.startswith('replication_role:')]
+    non_internal_tags = check.tag_manager.get_tags(include_internal=False)
+    replication_tags = [t for t in non_internal_tags if t.startswith('replication_role:')]
     assert len(replication_tags) == 1, (
         f"Expected exactly 1 replication_role tag, got {len(replication_tags)}: {replication_tags}"
     )
@@ -1155,8 +1170,8 @@ def test_replication_role_tag_reflects_current_role_after_promotion(aggregator, 
     )
 
     # Verify dd.internal tags are still excluded after role change
-    internal_tags = [t for t in check._non_internal_tags if t.startswith('dd.internal')]
-    assert internal_tags == [], f"dd.internal tags should not be in _non_internal_tags: {internal_tags}"
+    internal_tags = [t for t in non_internal_tags if t.startswith('dd.internal')]
+    assert internal_tags == [], f"dd.internal tags should not be in non-internal tags: {internal_tags}"
 
     # Verify the metadata event reflects the new role only
     dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
@@ -1248,3 +1263,17 @@ def test_pg_stat_io_metrics(aggregator, integration_check, pg_instance, dbm_enab
     expected_tags = _get_expected_tags(check, pg_instance)
     expected_count = 0 if dbm_enabled is False else 1
     check_stat_io_metrics(aggregator, expected_tags, count=expected_count)
+
+
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [True, False],
+)
+def test_automatic_diagnostics_tags(aggregator, integration_check, pg_instance, dbm_enabled):
+    pg_instance['automatic_diagnostics'] = {'enabled': True}
+    pg_instance['dbm'] = dbm_enabled
+    check = integration_check(pg_instance)
+    run_one_check(check)
+    # Just check we don't error out and get basic metrics
+    expected_tags = _get_expected_tags(check, pg_instance)
+    check_common_metrics(aggregator, expected_tags)
