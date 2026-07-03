@@ -1020,6 +1020,43 @@ Resources:
 {{< /site-region >}}
 partial -->
 <!-- partial
+{{< site-region region="uk1" >}}
+```yaml
+Resources:
+  ECSTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+          - FARGATE
+      Cpu: 256
+      Memory: 1GB
+      ContainerDefinitions:
+        - Name: tomcat-test
+          Image: 'tomcat:jdk8-adoptopenjdk-openj9'
+          LogConfiguration:
+            LogDriver: awsfirelens
+            Options:
+              Name: datadog
+              apikey: <DATADOG_API_KEY>
+              Host: http-intake.logs.uk1.datadoghq.com
+              dd_service: test-service
+              dd_source: test-source
+              TLS: 'on'
+              provider: ecs
+          MemoryReservation: 500
+        - Name: log_router
+          Image: 'amazon/aws-for-fluent-bit:stable'
+          Essential: true
+          FirelensConfiguration:
+            Type: fluentbit
+            Options:
+              enable-ecs-log-metadata: true
+          MemoryReservation: 50
+```
+{{< /site-region >}}
+partial -->
+<!-- partial
 {{< site-region region="gov" >}}
 ```yaml
 Resources:
