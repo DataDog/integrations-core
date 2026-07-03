@@ -57,7 +57,7 @@ class RemoteQueryTarget(BaseModel):
     model_config = ConfigDict(extra='forbid', frozen=True)
 
     host: StrictStr | None = Field(default=None, min_length=1)
-    port: StrictInt = Field(default=5432, ge=1, le=65535)
+    port: StrictInt | None = Field(default=None, ge=1, le=65535)
     dbname: StrictStr | None = Field(default=None, min_length=1)
     database_instance: StrictStr | None = Field(default=None, min_length=1)
 
@@ -99,7 +99,7 @@ class RemoteQueryTarget(BaseModel):
     def validate_selector_mode(self) -> 'RemoteQueryTarget':
         null_fields = [
             field
-            for field in ('host', 'dbname', 'database_instance')
+            for field in ('host', 'port', 'dbname', 'database_instance')
             if field in self.model_fields_set and getattr(self, field) is None
         ]
         if null_fields:
@@ -111,8 +111,8 @@ class RemoteQueryTarget(BaseModel):
                 raise ValueError('target must use exactly one selector mode: database_instance or host/port/dbname')
             return self
 
-        if self.host is None or self.dbname is None:
-            raise ValueError('host/port/dbname target requires host and dbname')
+        if self.host is None or self.port is None or self.dbname is None:
+            raise ValueError('host/port/dbname target requires host, port, and dbname')
         return self
 
 

@@ -153,10 +153,9 @@ def test_normalize_target_trims_lowercases_host_and_removes_one_trailing_dot():
     assert target.dbname == 'postgres'
 
 
-def test_normalize_target_defaults_missing_port_to_5432():
-    target = normalize_target({'host': 'localhost', 'dbname': 'postgres'})
-
-    assert target.port == 5432
+def test_normalize_target_rejects_missing_port():
+    with pytest.raises(ValueError):
+        normalize_target({'host': 'localhost', 'dbname': 'postgres'})
 
 
 def test_normalize_target_accepts_database_instance_without_normalization():
@@ -195,11 +194,13 @@ def test_normalize_target_rejects_empty_host_or_dbname(target):
         {'port': 5432},
         {'dbname': 'postgres'},
         {'host': 'localhost', 'port': 5432},
+        {'host': 'localhost', 'dbname': 'postgres'},
         {'port': 5432, 'dbname': 'postgres'},
         {'host': 'localhost', 'dbname': 'postgres', 'database_instance': 'postgres-dbi'},
         {'database_instance': 'postgres-dbi', 'host': 'localhost'},
         {'database_instance': 'postgres-dbi', 'port': 5432},
         {'database_instance': 'postgres-dbi', 'dbname': 'postgres'},
+        {'database_instance': 'postgres-dbi', 'host': ''},
         {'database_instance': ''},
         {'database_instance': ' postgres-dbi '},
     ],
@@ -228,6 +229,24 @@ def test_copy_stream_rejects_unknown_target_fields_before_resolution():
 
     assert_failed_event(events, 'invalid_request', 'password')
     assert 'SECRET_DO_NOT_LOG' not in str(events)
+
+
+@pytest.mark.parametrize(
+    'target',
+    [
+        {'host': 'localhost', 'dbname': 'postgres'},
+        {'host': 'localhost'},
+        {'port': 5432},
+        {'database_instance': 'x', 'host': ''},
+    ],
+)
+def test_copy_stream_rejects_partial_target_selectors_before_resolution(target):
+    request = valid_copy_request()
+    request['target'] = target
+
+    events = list(iter_agent_rpc_stream_copy_events(request, ExplodingRegistry()))
+
+    assert_failed_event(events, 'invalid_request')
 
 
 def test_copy_stream_rejects_unknown_limits_fields_before_resolution():
