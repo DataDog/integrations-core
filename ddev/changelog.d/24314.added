@@ -1,1 +1,1 @@
-Add unbounded option to EventBusOrchestrator
+Support running EventBusOrchestrator unbounded by passing `max_timeout=None`.

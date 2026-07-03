@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import time
 from collections.abc import Generator
 from contextlib import AbstractContextManager, contextmanager
@@ -145,17 +146,15 @@ class MockOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
         logger: logging.Logger,
-        max_timeout: float | None = None,
+        max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
         fail_fast: bool = False,
-        unbounded: bool = False,
     ):
         super().__init__(
             logger=logger,
             max_timeout=max_timeout,
             grace_period=grace_period,
             fail_fast=fail_fast,
-            unbounded=unbounded,
         )
         self.events: list[str] = []
         self.received_messages: list[BaseMessage] = []
@@ -366,29 +365,18 @@ def test_omitted_max_timeout_resolves_to_default():
     assert orchestrator._max_timeout == DEFAULT_ORCHESTRATOR_MAX_TIMEOUT
 
 
-def test_unbounded_without_max_timeout_has_no_max_timeout():
-    """unbounded=True with no explicit max_timeout runs with no overall time limit."""
+def test_none_max_timeout_runs_unbounded():
+    """max_timeout=None runs with no overall time limit."""
     logger = logging.getLogger("test")
-    orchestrator = MockOrchestrator(logger, grace_period=0.1, unbounded=True)
+    orchestrator = MockOrchestrator(logger, max_timeout=None, grace_period=0.1)
 
-    assert orchestrator._max_timeout is None
-
-
-def test_unbounded_with_explicit_max_timeout_warns_and_falls_back(caplog: pytest.LogCaptureFixture):
-    """unbounded=True together with an explicit max_timeout falls back to enforcing max_timeout."""
-    logger = logging.getLogger("test")
-    with caplog.at_level(logging.WARNING):
-        orchestrator = MockOrchestrator(logger, max_timeout=5, grace_period=1, unbounded=True)
-
-    assert orchestrator._max_timeout == 5
-    assert "unbounded=True" in caplog.text
-    assert "max_timeout=5" in caplog.text
+    assert orchestrator._max_timeout == math.inf
 
 
 def test_unbounded_still_stops_via_grace_period():
     """Unbounded mode still exits when the queue is empty and the grace period elapses."""
     logger = logging.getLogger("test")
-    orchestrator = MockOrchestrator(logger, grace_period=0.1, unbounded=True)
+    orchestrator = MockOrchestrator(logger, max_timeout=None, grace_period=0.1)
 
     with assert_time(0.0, 1.0):
         orchestrator.run()
