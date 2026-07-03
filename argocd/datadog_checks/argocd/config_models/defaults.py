@@ -92,6 +92,10 @@ def instance_genresources_stream_backoff_max_seconds():
     return 30
 
 
+def instance_genresources_stream_read_timeout_seconds():
+    return 300
+
+
 def instance_genresources_ttl_seconds():
     return 1800
 

@@ -26,7 +26,6 @@ if TYPE_CHECKING:
 
 STREAM_PATH = "/api/v1/stream/applications"
 CONNECT_TIMEOUT_SECONDS = 10
-READ_TIMEOUT_SECONDS = 60
 INITIAL_BACKOFF_SECONDS = 1
 
 
@@ -39,6 +38,10 @@ class ArgocdApplicationStreamListener:
     shutdown path is ``cancel()`` (signal the loop and close the socket to unblock ``iter_lines``); it does not
     block, and callers may ``join()`` afterwards to wait. ``daemon=True`` is only a backstop for a hard
     interpreter exit that never calls ``cancel()``.
+
+    Metrics (``count``) and generic resources (``submit_generic_resource`` via the collector) are submitted
+    directly from this thread; the Datadog aggregator tolerates concurrent submission (same pattern as
+    ``DBMAsyncJob``), and submitting inline is what makes stream updates near-real-time.
     """
 
     def __init__(
@@ -49,6 +52,7 @@ class ArgocdApplicationStreamListener:
         endpoint: str,
         auth_token: str | None,
         backoff_max_seconds: int,
+        read_timeout_seconds: int,
         http: "RequestsWrapper",
     ) -> None:
         self.check = check
@@ -57,6 +61,7 @@ class ArgocdApplicationStreamListener:
         self._endpoint = endpoint.rstrip("/")
         self._auth_token = auth_token
         self._backoff_max = max(1, backoff_max_seconds)
+        self._read_timeout = max(1, read_timeout_seconds)
         self._stop = threading.Event()
         self._connected = threading.Event()
         self._thread: threading.Thread | None = None
@@ -79,6 +84,9 @@ class ArgocdApplicationStreamListener:
     def cancel(self) -> None:
         """Signal the loop to stop and close the active connection to unblock ``iter_lines``. Does not block."""
         self._stop.set()
+        # If cancel lands in the narrow window between _stream_once's get() returning and its
+        # ``self._response = response``, we see None and skip close(); the thread still exits on its next
+        # _stop check, at worst after the read timeout. Bounded shutdown latency on a daemon thread, not a leak.
         response = self._response
         if response is not None:
             try:
@@ -119,8 +127,10 @@ class ArgocdApplicationStreamListener:
         url = self._endpoint + STREAM_PATH
         kwargs: dict = {
             "stream": True,
-            "timeout": (CONNECT_TIMEOUT_SECONDS, READ_TIMEOUT_SECONDS),
-            "headers": auth_headers(self._auth_token),
+            "timeout": (CONNECT_TIMEOUT_SECONDS, self._read_timeout),
+            # extra_headers (not headers): merge the token into the wrapper's configured headers rather than
+            # shadowing them, so inherited auth survives when genresources_auth_token is unset.
+            "extra_headers": auth_headers(self._auth_token),
         }
         got_data = False
         response = None

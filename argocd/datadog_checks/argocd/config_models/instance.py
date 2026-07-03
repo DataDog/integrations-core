@@ -126,6 +126,7 @@ class InstanceConfig(BaseModel):
     genresources_repository_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
     genresources_stream_applications_enabled: Optional[bool] = None
     genresources_stream_backoff_max_seconds: Optional[int] = Field(None, ge=1)
+    genresources_stream_read_timeout_seconds: Optional[int] = Field(None, ge=1)
     genresources_ttl_seconds: Optional[int] = Field(None, ge=1)
     headers: Optional[MappingProxyType[str, Any]] = None
     histogram_buckets_as_distributions: Optional[bool] = None

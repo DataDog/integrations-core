@@ -14,6 +14,7 @@ from datadog_checks.argocd.resources_constants import (
     GENRESOURCES_API_UP_METRIC,
     REPOSITORY_INCLUDE,
 )
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.http import MockResponse
 
 from .common import _check as _make_check
@@ -636,3 +637,23 @@ def test_collector_warns_when_exclude_empties_a_type(caplog):
 def test_collector_warns_when_ttl_shorter_than_longest_scrape_interval(caplog):
     _check(genresources_ttl_seconds=100, genresources_application_full_scrape_interval_seconds=600)
     assert any("shorter than the longest scrape interval" in rec.message for rec in caplog.records)
+
+
+def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved():
+    check = _check(genresources_auth_token="tok")
+    with patch.object(RequestsWrapper, "get", return_value=MockResponse(json_data={"items": []})) as get:
+        check._resource_collector._fetch("/api/v1/applications")
+
+    kwargs = get.call_args.kwargs
+    assert kwargs.get("extra_headers") == {"Authorization": "Bearer tok"}  # merged into the wrapper's headers
+    assert "headers" not in kwargs  # never pass `headers`; it would shadow the wrapper's configured auth
+
+
+def test_fetch_inherits_wrapper_auth_when_no_genresources_token():
+    check = _check(genresources_auth_token=None)  # rely on the instance's HTTP auth (headers / auth_token)
+    with patch.object(RequestsWrapper, "get", return_value=MockResponse(json_data={"items": []})) as get:
+        check._resource_collector._fetch("/api/v1/applications")
+
+    kwargs = get.call_args.kwargs
+    assert "headers" not in kwargs  # must not clobber the wrapper's configured headers
+    assert not kwargs.get("extra_headers")  # nothing added -> the inherited auth headers survive

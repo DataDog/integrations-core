@@ -225,6 +225,7 @@ class ArgocdResourceCollector:
         self._submitted: dict[str, str] = {}
         self._stream_enabled: bool = bool(config.genresources_stream_applications_enabled)
         self._backoff_max: int = config.genresources_stream_backoff_max_seconds
+        self._stream_read_timeout: int = config.genresources_stream_read_timeout_seconds
         self._app_poll_interval: int = config.genresources_application_poll_interval_seconds
         self._app_full_scrape_interval: int = config.genresources_application_full_scrape_interval_seconds
         self._cluster_scrape_interval: int = config.genresources_cluster_scrape_interval_seconds
@@ -266,8 +267,8 @@ class ArgocdResourceCollector:
             return
         now = int(time.time())
         if self._stream_enabled:
-            self._ensure_listener()
-            connected = self._listener is not None and self._listener.is_connected()
+            listener = self._ensure_listener()
+            connected = listener is not None and listener.is_connected()
             self.check.gauge(GENRESOURCES_STREAM_UP_METRIC, 1 if connected else 0)
         self._collect_due_types(now)
 
@@ -299,10 +300,10 @@ class ArgocdResourceCollector:
             self._last_repository_scrape = now
             self._collect_type(REPOSITORY_SPEC, seen_at=now, expire_at=expire_at, force_full=True)
 
-    def _ensure_listener(self) -> None:
+    def _ensure_listener(self) -> ArgocdApplicationStreamListener | None:
         with self._listener_lock:
             if self._stopped:
-                return
+                return None
             if self._listener is None:
                 self._listener = ArgocdApplicationStreamListener(
                     self.check,
@@ -310,6 +311,7 @@ class ArgocdResourceCollector:
                     endpoint=self._endpoint,
                     auth_token=self._auth_token,
                     backoff_max_seconds=self._backoff_max,
+                    read_timeout_seconds=self._stream_read_timeout,
                     http=RequestsWrapper(
                         self.check.instance,
                         self.check.init_config,
@@ -319,6 +321,7 @@ class ArgocdResourceCollector:
                 )
             if not self._listener.is_alive():
                 self._listener.start()
+            return self._listener
 
     def stop(self) -> None:
         """Signal the stream listener to stop; must not block, per AgentCheck.cancel()'s contract."""
@@ -329,7 +332,10 @@ class ArgocdResourceCollector:
             listener.cancel()
 
     def emit_stream_application(self, application: dict) -> None:
-        """Emit a single application received from the stream (ADDED/MODIFIED) through the shared pipeline."""
+        """Emit a single application received from the stream (ADDED/MODIFIED) through the shared pipeline.
+
+        Mutates ``application`` in place (credential sanitization); the caller must not reuse the dict after.
+        """
         seen_at = int(time.time())
         self._emit_item(
             application, APPLICATION_SPEC, seen_at=seen_at, expire_at=seen_at + self._ttl_seconds, force_full=False
@@ -382,13 +388,18 @@ class ArgocdResourceCollector:
             cache_key = self._emit_item(item, spec, seen_at=seen_at, expire_at=expire_at, force_full=force_full)
             if cache_key is not None:
                 seen.add(cache_key)
+        # A stream frame that lands between _fetch above and this prune isn't in `seen`, so its fresh cache
+        # entry is dropped here. Harmless: the app was already submitted; it just gets one redundant re-submit
+        # on its next stream frame. Holding the lock across the fetch would stall real-time emits instead.
         namespace = f"{spec.resource_type}{KEY_SEPARATOR}"
         with self._submitted_lock:
             self._submitted = {k: v for k, v in self._submitted.items() if not k.startswith(namespace) or k in seen}
 
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
-        response = self.check.http.get(url, headers=auth_headers(self._auth_token))
+        # extra_headers (not headers) so a dedicated token is *merged* into the wrapper's configured headers;
+        # passing headers= would shadow them and drop inherited auth when genresources_auth_token is unset.
+        response = self.check.http.get(url, extra_headers=auth_headers(self._auth_token))
         response.raise_for_status()
         payload = response.json()
         return list(payload.get("items") or [])

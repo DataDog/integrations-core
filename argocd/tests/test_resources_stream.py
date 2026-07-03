@@ -40,6 +40,7 @@ def _listener(collector, *, check=None) -> ArgocdApplicationStreamListener:
         endpoint=GENRESOURCES_ENDPOINT,
         auth_token=None,
         backoff_max_seconds=10,
+        read_timeout_seconds=60,
         http=Mock(),
     )
 
@@ -174,6 +175,17 @@ def test_ensure_listener_gives_the_listener_its_own_http_session():
     assert http is not check.http  # a dedicated RequestsWrapper, not the check's shared session
 
 
+def test_ensure_listener_passes_the_configured_read_timeout():
+    check = _check(genresources_stream_applications_enabled=True, genresources_stream_read_timeout_seconds=123)
+    collector = check._resource_collector
+
+    with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
+        listener_cls.return_value.is_alive.return_value = False
+        collector._ensure_listener()
+
+    assert listener_cls.call_args.kwargs["read_timeout_seconds"] == 123
+
+
 def test_collect_with_stream_emits_stream_up_one_when_the_listener_is_connected(aggregator):
     check = _check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
@@ -263,7 +275,13 @@ def test_stream_once_survives_a_frame_that_raises_and_keeps_the_connection():
     http = Mock()
     http.get.return_value = _Resp()
     listener = ArgocdApplicationStreamListener(
-        check, collector, endpoint=GENRESOURCES_ENDPOINT, auth_token=None, backoff_max_seconds=10, http=http
+        check,
+        collector,
+        endpoint=GENRESOURCES_ENDPOINT,
+        auth_token=None,
+        backoff_max_seconds=10,
+        read_timeout_seconds=60,
+        http=http,
     )
 
     with patch.object(check, "submit_generic_resource") as submit:
@@ -293,13 +311,52 @@ def test_stream_once_reports_data_received_even_when_the_connection_then_errors(
     http = Mock()
     http.get.return_value = _Resp()
     listener = ArgocdApplicationStreamListener(
-        check, collector, endpoint=GENRESOURCES_ENDPOINT, auth_token=None, backoff_max_seconds=10, http=http
+        check,
+        collector,
+        endpoint=GENRESOURCES_ENDPOINT,
+        auth_token=None,
+        backoff_max_seconds=10,
+        read_timeout_seconds=60,
+        http=http,
     )
 
     with patch.object(check, "submit_generic_resource"):
         got_data = listener._stream_once()
 
     assert got_data is True  # data arrived before the drop; _stream_once caught the error and reported it
+
+
+def test_stream_once_inherits_wrapper_auth_when_no_token():
+    check = _check(genresources_stream_applications_enabled=True, genresources_auth_token=None)
+    collector = check._resource_collector
+
+    class _Resp:
+        def raise_for_status(self):
+            pass
+
+        def iter_lines(self):
+            return iter(())
+
+        def close(self):
+            pass
+
+    http = Mock()
+    http.get.return_value = _Resp()
+    listener = ArgocdApplicationStreamListener(
+        check,
+        collector,
+        endpoint=GENRESOURCES_ENDPOINT,
+        auth_token=None,
+        backoff_max_seconds=10,
+        read_timeout_seconds=60,
+        http=http,
+    )
+
+    listener._stream_once()
+
+    kwargs = http.get.call_args.kwargs
+    assert "headers" not in kwargs  # must not clobber the wrapper's configured auth
+    assert not kwargs.get("extra_headers")  # no token -> nothing added, inherited auth survives
 
 
 def test_handle_line_emits_events_received_metric_matching_metadata(aggregator):
@@ -357,7 +414,13 @@ def test_listener_thread_routes_a_line_then_shuts_down_cleanly_on_cancel():
     http = Mock()
     http.get.return_value = _Resp()
     listener = ArgocdApplicationStreamListener(
-        check, collector, endpoint=GENRESOURCES_ENDPOINT, auth_token=None, backoff_max_seconds=1, http=http
+        check,
+        collector,
+        endpoint=GENRESOURCES_ENDPOINT,
+        auth_token=None,
+        backoff_max_seconds=1,
+        read_timeout_seconds=60,
+        http=http,
     )
 
     listener.start()

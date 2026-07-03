@@ -105,8 +105,8 @@ def test_app_controller_service_check(dd_run_check, aggregator, mock_http_respon
 
 
 def test_both_collectors_disabled_raises(dd_run_check):
+    check = ArgocdCheck('argocd', {}, [{"collect_openmetrics": False, "collect_genresources": False}])
     with pytest.raises(Exception, match="Enable at least one of"):
-        check = ArgocdCheck('argocd', {}, [{"collect_openmetrics": False, "collect_genresources": False}])
         dd_run_check(check)
 
 

@@ -60,7 +60,7 @@ files:
       hidden: true
       fleet_configurable: false
       description: |
-        Collect the Argo CD Prometheus/OpenMetrics endpoints, the check's
+        Collect the Argo CD Prometheus (OpenMetrics) endpoints, the check's
         default metrics. Enabled by default. Set to false to run only the
         generic resources collector (``collect_genresources``) without scraping
         metrics; in that mode the ``*_endpoint`` options are not required.
@@ -134,7 +134,10 @@ files:
       description: |
         Seconds between full Application scrapes, in both streaming and polling
         modes. A full scrape re-submits every Application to refresh its
-        time-to-live (TTL) and backfill anything the stream missed. Minimum of 1.
+        time-to-live (TTL) and backfill anything the stream missed. While
+        streaming, the dedup poll is disabled, so during a stream outage a newly
+        created Application is not collected until the next full scrape -- this
+        value is the worst-case discovery lag. Minimum of 1.
       value:
         type: integer
         example: 600
@@ -231,6 +234,19 @@ files:
       value:
         type: integer
         example: 30
+        minimum: 1
+    - name: genresources_stream_read_timeout_seconds
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Socket read timeout, in seconds, for the application watch stream. Argo CD
+        does not send keepalives on an idle stream, so this is effectively how long
+        an idle but healthy connection is held before it is treated as dead and
+        reconnected. Larger values reduce reconnect churn on low-traffic instances;
+        smaller values detect a silently dropped connection sooner. Minimum of 1.
+      value:
+        type: integer
+        example: 300
         minimum: 1
     - template: instances/openmetrics
       overrides:
