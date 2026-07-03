@@ -606,6 +606,36 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator):
     assert slow_processor.cancelled
 
 
+def test_max_timeout_interruption_preserves_cancellation_reason(orchestrator: MockOrchestrator):
+    # A timed-out task's CancelledError should carry the timeout reason, not be
+    # silently re-cancelled without a message by the generic shutdown cleanup.
+    orchestrator._max_timeout = 0.5
+    orchestrator._grace_period = 5.0
+
+    class SlowProcessor(AsyncProcessor[Memo]):
+        def __init__(self, name: str):
+            super().__init__(name)
+            self.cancellation_message: str | None = None
+
+        async def process_message(self, message: Memo):
+            try:
+                await asyncio.sleep(2.0)
+            except asyncio.CancelledError as e:
+                self.cancellation_message = str(e)
+                raise
+
+    slow_processor = SlowProcessor("slow_processor")
+    orchestrator.register_processor(slow_processor, [Memo])
+
+    orchestrator.submit_message(Memo("slow_memo"))
+
+    with assert_time(0.5, 1.5):
+        orchestrator.run()
+
+    assert slow_processor.cancellation_message
+    assert "max_timeout" in slow_processor.cancellation_message
+
+
 def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secretary: Secretary):
     import threading
 
