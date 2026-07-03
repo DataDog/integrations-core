@@ -23,11 +23,13 @@ class WorkflowRun(BaseModel):
 
 
 class WorkflowDispatchResult(BaseModel):
-    """Response payload from a successful workflow dispatch."""
+    """Run metadata returned by `POST /actions/workflows/{id}/dispatches` when `return_run_details=True`."""
 
     model_config = ConfigDict(extra="ignore")
 
     workflow_run_id: int
+    run_url: str
+    html_url: str
 
 
 class Artifact(BaseModel):
