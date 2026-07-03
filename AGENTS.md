@@ -6,11 +6,22 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 
 ## Contents
 
+- [Maintaining This File](#maintaining-this-file)
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
+
+## Maintaining This File
+
+- Before adding a rule, check whether it fits under an existing section. Only create a new top-level section when the rule doesn't belong anywhere else — most additions should extend an existing section, not spawn a new one.
+- Keep the [Contents](#contents) list in sync with the section headings.
+- Scope rules with an explicit **Applicable to:** line when they don't apply to the whole repository (see [Python Code Style](#python-code-style) or [Configuration Models](#configuration-models) for the pattern).
+- Prefer directory-specific guidance in a nested `AGENTS.md`/`CLAUDE.md` over adding it here. This file is for conventions that apply repo-wide; narrow, single-directory guidance belongs next to the code it governs and should link back to this file, the way `clickhouse/AGENTS.md` does.
+- State each rule once. If a rule already exists here or in a nested file, extend or correct it in place rather than restating it elsewhere.
+- Justify non-obvious rules with the failure mode they prevent, but keep it to a sentence or two — this file is read by agents on every task, so verbosity has a real, recurring cost.
+- When a rule becomes obsolete (the tooling changed, the pitfall no longer applies), remove it instead of leaving it to accumulate.
 
 ## Python Code Style
 
