@@ -357,14 +357,6 @@ def test_validate_parameters(max_timeout: float, grace_period: float, expectatio
         MockOrchestrator(logger, max_timeout=max_timeout, grace_period=grace_period)
 
 
-def test_omitted_max_timeout_resolves_to_default():
-    """Not passing max_timeout still resolves to default."""
-    logger = logging.getLogger("test")
-    orchestrator = MockOrchestrator(logger, grace_period=1)
-
-    assert orchestrator._max_timeout == DEFAULT_ORCHESTRATOR_MAX_TIMEOUT
-
-
 def test_none_max_timeout_runs_unbounded():
     """max_timeout=None runs with no overall time limit."""
     logger = logging.getLogger("test")

@@ -136,10 +136,10 @@ class EventBusOrchestrator(ABC):
         """
         Validates the parameters passed to the orchestrator.
         """
-        if grace_period < 0:
-            raise ValueError("grace_period must be greater than or equal to 0")
         if max_timeout <= 0:
             raise ValueError("max_timeout must be greater than 0")
+        if grace_period < 0:
+            raise ValueError("grace_period must be greater than or equal to 0")
         if max_timeout <= grace_period:
             raise ValueError("max_timeout must be greater than grace_period")
 
