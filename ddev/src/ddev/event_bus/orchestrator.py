@@ -315,7 +315,11 @@ class EventBusOrchestrator(ABC):
             if running_tasks:
                 self._logger.info("Cancelling %s remaining tasks...", len(running_tasks))
                 for task in running_tasks:
-                    task.cancel()
+                    # A task already has a cancellation request pending if __should_stop cancelled
+                    # it directly (e.g. on max_timeout) with a reason; don't clobber that message
+                    # with a bare, reason-less cancel() here.
+                    if not task.cancelling():
+                        task.cancel()
 
                 # Wait for them to actually finish cancelling
                 await asyncio.wait(running_tasks)
@@ -339,6 +343,9 @@ class EventBusOrchestrator(ABC):
                 self._max_timeout,
                 len(running_tasks),
             )
+            timeout_msg = f"Orchestrator exceeded max_timeout of {self._max_timeout}s"
+            for task in running_tasks:
+                task.cancel(timeout_msg)
             get_task.cancel()
             return True
 
