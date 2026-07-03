@@ -59,6 +59,8 @@ This way, `a` and `b` can each be `str` or `bytes`, but can't be mixed with each
 
 Most code in this repository is not published as a public library API — it lives behind package boundaries, in integrations, in test suites, or in scripts nobody imports. "Not part of the public API" is the *default* state of almost everything here, so a leading underscore is not how we signal it. **Do not add a leading underscore to a method or variable name unless it matches one of the narrow exceptions below.** This applies everywhere, including test files, fixtures, internal tooling, and one-off scripts — not just files intended for external/public consumption.
 
+This rule is about the single-leading-underscore privacy convention; it does not apply to dunder methods (`__init__`, `__repr__`, `__enter__`, `__exit__`, `__iter__`, and similar). Those are Python protocol hooks, not a privacy signal — implement them with their required names whenever the protocol calls for them.
+
 **Methods** — a leading underscore is allowed only:
 
 1. On instance methods of a class, to flag that the method is not part of that class's public API.
