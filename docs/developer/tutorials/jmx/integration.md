@@ -5,7 +5,7 @@ Tutorial for starting a JMX integration
 ## Step 1: Create a JMX integration scaffolding
 
 ```bash
-ddev create --type jmx MyJMXIntegration
+ddev create jmx MyJMXIntegration --display-name="MyJMXIntegration" --metrics-prefix=myjmxintegration. --platforms=linux,windows,mac_os
 ```
 
 JMX integration contains specific init configs and instance configs:

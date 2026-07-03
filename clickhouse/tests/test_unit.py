@@ -329,6 +329,21 @@ def test_query_completions_zero_samples_per_hour_defaults(bad_value):
     assert any('query_completions.samples_per_hour_per_query' in w for w in check._validation_result.warnings)
 
 
+@pytest.mark.parametrize("bad_value", [0, -1, -100])
+def test_collect_schemas_zero_collection_interval_defaults(bad_value):
+    """Zero or negative collection_interval must not crash the constructor via ZeroDivisionError."""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'dbm': True,
+        'collect_schemas': {'enabled': True, 'collection_interval': bad_value},
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    assert check._config.collect_schemas.collection_interval > 0
+    assert any('collect_schemas.collection_interval' in w for w in check._validation_result.warnings)
+
+
 BASE_INSTANCE = {'server': 'myhost.example.com', 'port': 8123, 'username': 'default'}
 
 
@@ -346,10 +361,23 @@ def test_reported_hostname_loopback_substitutes_agent_hostname(loopback):
         assert check.reported_hostname == 'my-agent-host'
 
 
-def test_reported_hostname_non_loopback():
+@pytest.mark.parametrize(
+    'reported_hostname, expected_reported_hostname',
+    [
+        pytest.param(None, 'resolved-host', id='no-override'),
+        pytest.param('custom-host', 'custom-host', id='with-override'),
+    ],
+)
+def test_database_hostname_ignores_reported_hostname_override(reported_hostname, expected_reported_hostname):
+    instance = {**BASE_INSTANCE}
+    if reported_hostname:
+        instance['reported_hostname'] = reported_hostname
     with mock.patch(
-        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value=BASE_INSTANCE['server']
+        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value='resolved-host'
     ) as mock_resolve:
-        check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
-        assert check.reported_hostname == BASE_INSTANCE['server']
-        mock_resolve.assert_called_once_with(BASE_INSTANCE['server'])
+        check = ClickhouseCheck('clickhouse', {}, [instance])
+        # database_hostname always resolves the real host, regardless of the override
+        assert check.database_hostname == 'resolved-host'
+        # reported_hostname honors the override when configured, otherwise the resolved host
+        assert check.reported_hostname == expected_reported_hostname
+        mock_resolve.assert_called_with(BASE_INSTANCE['server'])

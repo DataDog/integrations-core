@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from string import Template
 from time import time
 
 import clickhouse_connect
@@ -10,18 +9,20 @@ from clickhouse_connect.driver import httputil
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
 from . import advanced_queries, queries, utils
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .health import ClickhouseHealth, HealthEvent, HealthStatus
+from .metadata import ClickhouseMetadata
 from .parts_and_merges import ClickhousePartsAndMerges
 from .query_completions import ClickhouseQueryCompletions
 from .query_errors import ClickhouseQueryErrors
 from .statement_samples import ClickhouseStatementSamples
 from .statements import ClickhouseStatementMetrics
+from .table_metrics import ClickhouseTableMetrics
 from .utils import ErrorSanitizer
 
 try:
@@ -55,20 +56,18 @@ class ClickhouseCheck(DatabaseCheck):
 
         # DBM-related properties (computed lazily)
         self._resolved_hostname = None
-        self._database_identifier = None
-        self._agent_hostname = None
+        self._database_hostname = None
         self._dbms_version = None
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
 
-        # Initialize TagManager for tag management (similar to MySQL)
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self._add_core_tags()
 
         self._error_sanitizer = ErrorSanitizer(self._config.password)
         self.check_initializations.append(self.validate_config)
+        self.check_initializations.append(advanced_queries.warm_cache)
 
         # Submit health event with config validation result
         # Tags are now available so health events will include them
@@ -121,16 +120,23 @@ class ClickhouseCheck(DatabaseCheck):
         else:
             self.query_errors = None
 
+        # Initialize schema metrics (per-table size and per-view refresh gauges)
+        if self._config.dbm and self._config.schema_metrics.enabled:
+            self.table_metrics = ClickhouseTableMetrics(self, self._config.schema_metrics)
+        else:
+            self.table_metrics = None
+
+        # Initialize schema collection (catalog metadata for Schema Explorer)
+        if self._config.dbm and self._config.collect_schemas.enabled:
+            self.metadata = ClickhouseMetadata(self)
+        else:
+            self.metadata = None
+
         # Initialize parts and merges monitoring (from system.parts, merges, mutations, replication_queue)
         if self._config.dbm and self._config.parts_and_merges.enabled:
             self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
         else:
             self.parts_and_merges = None
-
-    @property
-    def tags(self) -> list[str]:
-        """Return the current list of tags from the TagManager."""
-        return list(self.tag_manager.get_tags())
 
     def _add_core_tags(self):
         """
@@ -140,7 +146,7 @@ class ClickhouseCheck(DatabaseCheck):
         self.tag_manager.set_tag("server", self._config.server, replace=True)
         self.tag_manager.set_tag("port", str(self._config.port), replace=True)
         self.tag_manager.set_tag("db", self._config.db, replace=True)
-        self.tag_manager.set_tag("database_hostname", self.reported_hostname, replace=True)
+        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
         self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def validate_config(self):
@@ -212,7 +218,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "host": self.reported_hostname,
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
-                "database_hostname": self.reported_hostname,
+                "database_hostname": self.database_hostname,
                 "agent_version": datadog_agent.get_version(),
                 "ddagenthostname": self.agent_hostname,
                 "dbms": "clickhouse",
@@ -258,6 +264,14 @@ class ClickhouseCheck(DatabaseCheck):
         # Run query errors if DBM is enabled (from system.query_log - failed queries)
         if self.query_errors:
             self.query_errors.run_job_loop(self.tags)
+
+        # Run schema metrics (per-table size and per-view refresh gauges) if enabled
+        if self.table_metrics:
+            self.table_metrics.run_job_loop(self.tags)
+
+        # Run schema collection if enabled
+        if self.metadata:
+            self.metadata.run_job_loop(self.tags)
 
         # Run parts and merges monitoring if enabled
         if self.parts_and_merges:
@@ -331,37 +345,26 @@ class ClickhouseCheck(DatabaseCheck):
         return self._resolved_hostname
 
     @property
-    def agent_hostname(self):
-        """Get the agent hostname."""
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
+    def database_hostname(self) -> str:
+        if self._database_hostname is None:
+            self._database_hostname = resolve_db_host(self._config.server)
+        return self._database_hostname
 
     @property
-    def database_identifier(self) -> str:
-        """
-        Get a unique identifier for this database instance.
-        Uses the database_identifier template from config, defaulting to "$server:$port:$db".
-        """
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.template)
-            tag_dict = {}
-            tags = self.tags.copy()
-            # Sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            # Add connection parameters to the template variables
-            tag_dict['server'] = str(self._config.server)
-            tag_dict['port'] = str(self._config.port)
-            tag_dict['db'] = str(self._config.db)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.template
+
+    @property
+    def database_identifier_params(self) -> dict:
+        return {
+            "server": str(self._config.server),
+            "port": str(self._config.port),
+            "db": str(self._config.db),
+        }
+
+    @property
+    def dbms(self) -> str:
+        return "clickhouse"
 
     @property
     def dbms_version(self) -> str:
@@ -524,6 +527,10 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions.cancel()
         if self.query_errors:
             self.query_errors.cancel()
+        if self.table_metrics:
+            self.table_metrics.cancel()
+        if self.metadata:
+            self.metadata.cancel()
         if self.parts_and_merges:
             self.parts_and_merges.cancel()
 
@@ -536,6 +543,10 @@ class ClickhouseCheck(DatabaseCheck):
             self.query_completions._job_loop_future.result()
         if self.query_errors and self.query_errors._job_loop_future:
             self.query_errors._job_loop_future.result()
+        if self.table_metrics and self.table_metrics._job_loop_future:
+            self.table_metrics._job_loop_future.result()
+        if self.metadata and self.metadata._job_loop_future:
+            self.metadata._job_loop_future.result()
         if self.parts_and_merges and self.parts_and_merges._job_loop_future:
             self.parts_and_merges._job_loop_future.result()
 

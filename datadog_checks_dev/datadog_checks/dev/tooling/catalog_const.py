@@ -67,7 +67,6 @@ INTEGRATION_LOGS_NOT_POSSIBLE = {
     'system_swap',  # system
     'tcp_check',  # remote connection
     'tls',  # remote connection
-    'tokumx',  # eoled, only available in py2
     'windows_service',  # OS
     'wmi_check',  # base class
 }

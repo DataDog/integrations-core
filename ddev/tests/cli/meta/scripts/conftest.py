@@ -123,10 +123,7 @@ jobs:
     write_file(
         repo_path / 'ddev',
         'pyproject.toml',
-        f"""[tool.black]
-target-version = ["py{OLD_PYTHON_VERSION.replace('.', '')}"]
-
-[tool.ruff]
+        f"""[tool.ruff]
 target-version = "py{OLD_PYTHON_VERSION.replace('.', '')}"
 """,
     )
@@ -204,8 +201,18 @@ RUN Get-RemoteFile `
 """,
     )
 
-    # Create fake macOS workflow file for Python upgrade tests
-    # Uses Python Build Standalone (PBS) format
+    write_file(
+        repo_path / '.builders' / 'images' / 'macos',
+        'pbs.env',
+        """# test fixture
+PYTHON_PATCH=7
+PBS_RELEASE=20251202
+PBS_SHA256__aarch64=799a3b76240496e4472dd60ed0cd5197e04637bea7fa16af68caeb989fadcb3a
+PBS_SHA256__x86_64=705b39dd74490c3e9b4beb1c4f40bf802b50ba40fe085bdca635506a944d5e74
+""",
+    )
+
+    # Minimal workflow stub (upgrade script updates macOS PBS via pbs.env only)
     write_file(
         repo_path / '.github' / 'workflows',
         'resolve-build-deps.yaml',
@@ -215,14 +222,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-      - name: Set up Python
-        env:
-          PYTHON_PATCH: 7
-          PBS_RELEASE: 20251202
-          PBS_SHA256__aarch64: 799a3b76240496e4472dd60ed0cd5197e04637bea7fa16af68caeb989fadcb3a
-          PBS_SHA256__x86_64: 705b39dd74490c3e9b4beb1c4f40bf802b50ba40fe085bdca635506a944d5e74
-        run: |
-          curl -fsSL -o pbs.tgz "https://github.com/astral-sh/python-build-standalone/releases/download/$PBS_RELEASE/cpython-$PYTHON_VERSION.$PYTHON_PATCH+$PBS_RELEASE-aarch64-apple-darwin-install_only_stripped.tar.gz"
+      - run: echo stub
 """,
     )
 

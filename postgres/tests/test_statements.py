@@ -233,6 +233,7 @@ def test_statement_metrics(
     # don't need samples for this test
     dbm_instance['query_samples'] = {'enabled': False}
     dbm_instance['query_activity'] = {'enabled': False}
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     dbm_instance['collect_schemas'] = {'enabled': False}
     connections = {}
 
@@ -399,7 +400,7 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
                 mock_agent.side_effect = obfuscate_sql
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
-                check.check(dbm_instance)
+                run_one_check(check, cancel=False)
 
                 cursor.execute(query, (['app1', 'app2'],))
                 cursor.execute(query, (['app1', 'app2', 'app3'],))
@@ -413,6 +414,38 @@ def test_statement_metrics_with_duplicates(aggregator, integration_check, dbm_in
     assert len(matching) == 1
     row = matching[0]
     assert row['calls'] == 2
+
+
+def test_obfuscate_sql_options(aggregator, integration_check, dbm_instance, datadog_agent):
+    """Verify obfuscate_sql is called with dbms=postgresql for both metrics and samples."""
+    dbm_instance['collect_schemas'] = {'enabled': False}
+
+    check = integration_check(dbm_instance)
+    check._connect()
+
+    # Unconditionally verify both classes have the correct options set at init time,
+    # independent of whether the DB produces any queries to obfuscate.
+    for name, obj in [('statement_metrics', check.statement_metrics), ('statement_samples', check.statement_samples)]:
+        opts = json.loads(obj._obfuscate_options)
+        assert opts.get('dbms') == 'postgresql', f"{name}: missing dbms=postgresql in obfuscation options"
+        assert opts.get('return_json_metadata') is True, (
+            f"{name}: missing return_json_metadata=True in obfuscation options"
+        )
+
+    captured_options = []
+
+    def obfuscate_sql(query, options=None):
+        if options is not None:
+            captured_options.append(json.loads(options))
+        return json.dumps({'query': query, 'metadata': {}})
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        run_one_check(check, cancel=False)
+
+    assert captured_options, "obfuscate_sql was never called with options"
+    for opts in captured_options:
+        assert opts.get('dbms') == 'postgresql', f"missing dbms=postgresql in obfuscation options: {opts}"
 
 
 @pytest.fixture
@@ -839,6 +872,7 @@ def test_statement_metadata(
     """Tests for metadata in both samples and metrics"""
     dbm_instance['pg_stat_statements_view'] = pg_stat_statements_view
     dbm_instance['query_metrics']['run_sync'] = True
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     dbm_instance['collect_schemas'] = {'enabled': False}
 
     # If query or normalized_query changes, the query_signatures for both will need to be updated as well.
@@ -1037,6 +1071,7 @@ def test_activity_snapshot_collection(
     dbm_instance['pg_stat_activity_view'] = pg_stat_activity_view
     # No need for query metrics here
     dbm_instance['query_metrics']['enabled'] = False
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     dbm_instance['query_samples']['enabled'] = False
     check = integration_check(dbm_instance)
     check._connect()
@@ -1775,6 +1810,7 @@ def test_statement_metrics_database_errors(
     # don't need samples for this test
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
+    dbm_instance['query_metrics']['incremental_query_metrics'] = False
     check = integration_check(dbm_instance)
 
     with mock.patch(
@@ -1850,6 +1886,7 @@ def test_statement_metrics_attributes_undefined_table_to_not_loaded_when_spl_mis
     that fails until SPL is fixed and the server restarted)."""
     dbm_instance['query_samples']['enabled'] = False
     dbm_instance['query_activity']['enabled'] = False
+    dbm_instance.setdefault('query_metrics', {})['incremental_query_metrics'] = False
     check = integration_check(dbm_instance)
 
     # Override _load_pg_settings so the test-postgres (which has pg_stat_statements in SPL) doesn't
@@ -1923,6 +1960,7 @@ def test_pg_stat_statements_max_warning(
 def test_pg_stat_statements_dealloc(aggregator, integration_check, dbm_instance_replica2):
     dbm_instance_replica2['query_samples'] = {'enabled': False}
     dbm_instance_replica2['query_activity'] = {'enabled': False}
+    dbm_instance_replica2['collect_schemas'] = {'enabled': False}
     with _get_superconn(dbm_instance_replica2) as superconn:
         with superconn.cursor() as cur:
             cur.execute("select pg_stat_statements_reset();")
