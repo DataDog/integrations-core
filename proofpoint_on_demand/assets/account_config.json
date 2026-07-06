@@ -1,0 +1,20 @@
+{
+  "additional_config_fields": [
+    {
+      "key": "cluster_id",
+      "label": "Cluster ID",
+      "help": "The Cluster ID of your Proofpoint On-Demand instance.",
+      "editable": true,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "api_key",
+      "label": "API Key",
+      "help": "The API key of your Proofpoint On-Demand instance.",
+      "editable": true,
+      "required": true,
+      "password": {}
+    }
+  ]
+}
