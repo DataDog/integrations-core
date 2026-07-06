@@ -5,6 +5,42 @@ metadata:
   namespace: default
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kueue-integration-reader
+rules:
+- apiGroups:
+  - ''
+  resources:
+  - nodes
+  - pods
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - kueue.x-k8s.io
+  resources:
+  - resourceflavors
+  - topologies
+  - workloads
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kueue-integration-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kueue-integration-reader
+subjects:
+- kind: ServiceAccount
+  name: kueue-metrics-reader
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kueue-metrics-reader
