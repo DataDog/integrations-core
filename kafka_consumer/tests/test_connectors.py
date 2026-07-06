@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.connectors import TOPICS_FETCH_MAX_PER_RUN
 
 from .common import CONNECT_URL
 from .conftest import SAMPLE_CONNECTORS_RESPONSE
@@ -239,6 +240,22 @@ def test_topics_not_refetched_within_refresh_interval(run_connect_check):
 
     topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
     assert len(topic_fetches) == 2, "topics should only be fetched once per connector across both runs"
+
+
+def test_connector_topics_fetch_capped_per_run(run_connect_check):
+    connector_count = TOPICS_FETCH_MAX_PER_RUN + 50
+    connectors = {
+        f'conn-{i}': {
+            'info': {'type': 'source', 'config': {'connector.class': 'org.example.Connector'}},
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        }
+        for i in range(connector_count)
+    }
+
+    _, http = run_connect_check(connectors_response=connectors, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
+    assert len(topic_fetches) == connector_count, "leftover connectors should be fetched on a later run"
 
 
 def test_config_event_survives_topics_fetch_failure(run_connect_check, aggregator):

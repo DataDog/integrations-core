@@ -213,7 +213,7 @@ SENSITIVE_KEY_SUBSTRINGS = (
 )
 
 
-def _is_allowed_config_key(key: str) -> bool:
+def is_allowed_config_key(key: str) -> bool:
     key_lower = key.lower()
     if any(substring in key_lower for substring in SENSITIVE_KEY_SUBSTRINGS):
         return False
@@ -254,6 +254,7 @@ CONNECTOR_TOPICS_FETCH_CACHE_KEY = 'kafka_connector_topics_fetch_cache'
 CONNECTOR_TOPICS_DATA_CACHE_KEY = 'kafka_connector_topics_data_cache'
 CONNECTOR_CACHE_MAX_SIZE = 5_000
 TOPICS_FETCH_CONCURRENCY = 10
+TOPICS_FETCH_MAX_PER_RUN = 100
 
 
 def _short_class_name(full_class: str) -> str:
@@ -486,14 +487,17 @@ class KafkaConnectCollector:
 
         A connector is backed off on the same TTL whether its fetch succeeds or fails,
         so a connector with topic tracking permanently unavailable doesn't get re-requested
-        on every check run.
+        on every check run. Refreshes are capped per run so a Connect worker with many expired
+        connectors (or a slow/unsupported topics endpoint) can't stall config/plugin event
+        emission for the rest of the run; any leftover names are picked up on a later run since
+        they remain expired and get_items_to_fetch returns oldest-expiry-first.
         """
         fetch_cache_key = self._url_cache_key(CONNECTOR_TOPICS_FETCH_CACHE_KEY, url)
         data_cache_key = self._url_cache_key(CONNECTOR_TOPICS_DATA_CACHE_KEY, url)
 
         topics_by_connector: dict[str, list[str]] = self.cache.get_cached_json(data_cache_key)
 
-        names_to_refresh = self.cache.get_items_to_fetch(fetch_cache_key, connector_names)
+        names_to_refresh = self.cache.get_items_to_fetch(fetch_cache_key, connector_names)[:TOPICS_FETCH_MAX_PER_RUN]
         if names_to_refresh:
             with ThreadPoolExecutor(max_workers=TOPICS_FETCH_CONCURRENCY) as executor:
                 future_to_name = {
@@ -527,7 +531,7 @@ class KafkaConnectCollector:
         tasks = status.get('tasks') or []
         raw_config = info.get('config') or {}
 
-        redacted_config = {k: v if _is_allowed_config_key(k) else '[hidden]' for k, v in raw_config.items()}
+        redacted_config = {k: v if is_allowed_config_key(k) else '[hidden]' for k, v in raw_config.items()}
 
         task_traces = sorted(
             (
