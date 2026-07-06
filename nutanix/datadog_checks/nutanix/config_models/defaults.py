@@ -32,6 +32,10 @@ def instance_collect_events():
     return True
 
 
+def instance_collect_resource_ids_as_tags():
+    return False
+
+
 def instance_collect_subtasks():
     return False
 

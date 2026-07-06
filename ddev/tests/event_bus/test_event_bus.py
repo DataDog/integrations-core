@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import time
 from collections.abc import Generator
 from contextlib import AbstractContextManager, contextmanager
@@ -24,7 +25,13 @@ from ddev.event_bus.exceptions import (
     ProcessorQueueError,
     SkipMessageError,
 )
-from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage, EventBusOrchestrator, SyncProcessor
+from ddev.event_bus.orchestrator import (
+    DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
+    AsyncProcessor,
+    BaseMessage,
+    EventBusOrchestrator,
+    SyncProcessor,
+)
 
 # Test Structure Documentation
 # --------------------------
@@ -139,7 +146,7 @@ class MockOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
         logger: logging.Logger,
-        max_timeout: float = 300,
+        max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
         fail_fast: bool = False,
     ):
@@ -348,6 +355,26 @@ def test_validate_parameters(max_timeout: float, grace_period: float, expectatio
     logger = logging.getLogger("test")
     with expectation:
         MockOrchestrator(logger, max_timeout=max_timeout, grace_period=grace_period)
+
+
+def test_none_max_timeout_runs_unbounded():
+    """max_timeout=None runs with no overall time limit."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, max_timeout=None, grace_period=0.1)
+
+    assert orchestrator._max_timeout == math.inf
+
+
+def test_unbounded_still_stops_via_grace_period():
+    """Unbounded mode still exits when the queue is empty and the grace period elapses."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, max_timeout=None, grace_period=0.1)
+
+    with assert_time(0.0, 1.0):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is None
 
 
 def test_default_on_error_with_default_policy_logs_and_continues(
