@@ -7,7 +7,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic import Field, field_validator
+from pydantic import AfterValidator, Field
 
 from ddev.ai.tools.agents.base import SPAWN_IDENTICAL_NAME, BaseSpawnTool, ChildOutcome
 from ddev.ai.tools.core.base import BaseToolInput
@@ -37,6 +37,13 @@ class Assignment(BaseToolInput):
     ]
 
 
+def names_must_be_unique(assignments: list[Assignment]) -> list[Assignment]:
+    names = [a.name for a in assignments]
+    if len(set(names)) != len(names):
+        raise ValueError("Assignment names must be unique.")
+    return assignments
+
+
 class SpawnIdenticalSubagentsInput(BaseToolInput):
     system_prompt: Annotated[
         str,
@@ -55,19 +62,12 @@ class SpawnIdenticalSubagentsInput(BaseToolInput):
             min_length=1,
             max_length=MAX_ASSIGNMENTS,
         ),
+        AfterValidator(names_must_be_unique),
     ]
     max_parallel: Annotated[
         int,
         Field(description="Cap on concurrent children.", ge=1),
     ] = DEFAULT_PARALLEL
-
-    @field_validator("assignments")
-    @classmethod
-    def names_must_be_unique(cls, assignments: list[Assignment]) -> list[Assignment]:
-        names = [a.name for a in assignments]
-        if len(set(names)) != len(names):
-            raise ValueError("Assignment names must be unique.")
-        return assignments
 
 
 class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):

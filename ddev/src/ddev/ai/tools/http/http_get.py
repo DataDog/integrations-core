@@ -4,23 +4,26 @@
 from typing import Annotated
 
 import httpx
-from pydantic import Field, field_validator
+from pydantic import AfterValidator, Field
 
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
 
 
-class HttpGetInput(BaseToolInput):
-    url: Annotated[str, Field(description="Full URL to probe (must start with http:// or https://)")]
-    timeout: Annotated[float, Field(description="Request timeout in seconds (default: 10)", gt=0)] = 10.0
+def requires_http_scheme(url: str) -> str:
+    if not url.startswith(("http://", "https://")):
+        raise ValueError("URL must start with http:// or https://")
+    return url
 
-    @field_validator("url")
-    @classmethod
-    def url_must_have_http_scheme(cls, url: str) -> str:
-        if not url.startswith(("http://", "https://")):
-            raise ValueError("URL must start with http:// or https://")
-        return url
+
+class HttpGetInput(BaseToolInput):
+    url: Annotated[
+        str,
+        Field(description="Full URL to probe (must start with http:// or https://)"),
+        AfterValidator(requires_http_scheme),
+    ]
+    timeout: Annotated[float, Field(description="Request timeout in seconds (default: 10)", gt=0)] = 10.0
 
 
 class HttpGetTool(BaseTool[HttpGetInput]):
