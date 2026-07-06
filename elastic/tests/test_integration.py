@@ -50,6 +50,28 @@ def test_custom_queries_valid_metrics(dd_environment, dd_run_check, instance, ag
     aggregator.assert_metric('elasticsearch.custom.metric', metric_type=aggregator.GAUGE)
 
 
+def test_custom_queries_root_data_path(dd_environment, dd_run_check, instance, aggregator):
+    # A flat endpoint such as `/_count` returns `{"count": N, "_shards": {...}}`, so the metric
+    # lives at the root of the response. Omitting `data_path` must resolve `value_path` against it.
+    custom_queries = [
+        {
+            'endpoint': '/_count',
+            'columns': [
+                {
+                    'value_path': 'count',
+                    'name': 'elasticsearch.custom.doc_count',
+                },
+            ],
+        },
+    ]
+
+    instance['custom_queries'] = custom_queries
+    check = ESCheck('elastic', {}, instances=[instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('elasticsearch.custom.doc_count', metric_type=aggregator.GAUGE)
+
+
 def test_custom_queries_one_invalid(dd_environment, dd_run_check, instance, aggregator):
     custom_queries = [
         {
