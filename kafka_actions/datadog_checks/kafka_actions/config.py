@@ -6,6 +6,9 @@ from typing import Any
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
+VALID_MESSAGE_FORMATS = ('json', 'bson', 'string', 'protobuf', 'avro', 'raw')
+SCHEMA_MESSAGE_FORMATS = ('protobuf', 'avro')
+
 
 class KafkaActionsConfig:
     """Configuration validator for Kafka Actions integration."""
@@ -169,6 +172,43 @@ class KafkaActionsConfig:
                     f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
                 )
 
+    def _validate_message_format(self, format_type: str, field_name: str) -> None:
+        """Validate that a value_format/key_format is one of the supported message formats."""
+        if format_type not in VALID_MESSAGE_FORMATS:
+            raise ConfigurationError(
+                f"Invalid {field_name}: {format_type}. Supported formats: {', '.join(VALID_MESSAGE_FORMATS)}"
+            )
+
+    def _validate_schema_requirement(
+        self,
+        config: dict[str, Any],
+        side: str,
+        format_type: str,
+        schema_registry_url: str | None,
+        require_schema_id: bool = False,
+    ) -> None:
+        """Validate that avro/protobuf formats have a schema, either inline or via the Schema Registry."""
+        if format_type not in SCHEMA_MESSAGE_FORMATS:
+            return
+
+        if config.get(f'{side}_uses_schema_registry'):
+            if not schema_registry_url:
+                raise ConfigurationError(
+                    f"{side}_format='{format_type}' with '{side}_uses_schema_registry=true' "
+                    f"requires 'schema_registry_url' to be configured"
+                )
+
+            schema_id = config.get(f'{side}_schema_id')
+            if require_schema_id and not isinstance(schema_id, int):
+                raise ConfigurationError(f"{side}_uses_schema_registry=true requires an integer '{side}_schema_id'")
+            elif schema_id is not None and not isinstance(schema_id, int):
+                raise ConfigurationError(f"{side}_schema_id must be an integer")
+        elif not config.get(f'{side}_schema'):
+            raise ConfigurationError(
+                f"{side}_format='{format_type}' requires either '{side}_uses_schema_registry=true' "
+                f"or '{side}_schema' to be specified"
+            )
+
     def _validate_read_messages(self):
         """Validate read_messages action configuration."""
         config = self.read_messages
@@ -182,16 +222,10 @@ class KafkaActionsConfig:
         # Note: n_messages_retrieved and max_scanned_messages are validated in the Datadog backend
 
         value_format = config.get('value_format', 'json')
-        if value_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
-            raise ConfigurationError(
-                f"Invalid value_format: {value_format}. Supported formats: json, bson, string, protobuf, avro, raw"
-            )
+        self._validate_message_format(value_format, 'value_format')
 
         key_format = config.get('key_format', 'json')
-        if key_format not in ['json', 'bson', 'string', 'protobuf', 'avro', 'raw']:
-            raise ConfigurationError(
-                f"Invalid key_format: {key_format}. Supported formats: json, bson, string, protobuf, avro, raw"
-            )
+        self._validate_message_format(key_format, 'key_format')
 
         start_timestamp = config.get('start_timestamp')
         if start_timestamp is not None:
@@ -200,31 +234,8 @@ class KafkaActionsConfig:
 
         schema_registry_url = self.instance.get('schema_registry_url')
 
-        if value_format in ['protobuf', 'avro']:
-            if config.get('value_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"value_format='{value_format}' with 'value_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('value_schema'):
-                raise ConfigurationError(
-                    f"value_format='{value_format}' requires either 'value_uses_schema_registry=true' "
-                    f"or 'value_schema' to be specified"
-                )
-
-        if key_format in ['protobuf', 'avro']:
-            if config.get('key_uses_schema_registry'):
-                if not schema_registry_url:
-                    raise ConfigurationError(
-                        f"key_format='{key_format}' with 'key_uses_schema_registry=true' "
-                        f"requires 'schema_registry_url' to be configured"
-                    )
-            elif not config.get('key_schema'):
-                raise ConfigurationError(
-                    f"key_format='{key_format}' requires either 'key_uses_schema_registry=true' "
-                    f"or 'key_schema' to be specified"
-                )
+        self._validate_schema_requirement(config, 'value', value_format, schema_registry_url)
+        self._validate_schema_requirement(config, 'key', key_format, schema_registry_url)
 
     def _validate_create_topic(self):
         """Validate create_topic action configuration."""
@@ -359,3 +370,14 @@ class KafkaActionsConfig:
 
         if not config.get('value'):
             raise ConfigurationError("produce_message action requires 'value' parameter")
+
+        value_format = config.get('value_format', 'raw')
+        self._validate_message_format(value_format, 'value_format')
+
+        key_format = config.get('key_format', 'raw')
+        self._validate_message_format(key_format, 'key_format')
+
+        schema_registry_url = self.instance.get('schema_registry_url')
+
+        self._validate_schema_requirement(config, 'value', value_format, schema_registry_url, require_schema_id=True)
+        self._validate_schema_requirement(config, 'key', key_format, schema_registry_url, require_schema_id=True)

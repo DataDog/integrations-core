@@ -612,6 +612,120 @@ class TestProduceMessageAction:
             assert call_kwargs['headers']['version'] == header_version
             assert call_kwargs['partition'] == -1
 
+    def test_produce_message_string_and_json_formats(self, aggregator, dd_run_check):
+        """Test producing a message with schemaless string key / json value formats."""
+        instance = {
+            'remote_config_id': 'test-produce-message-002',
+            'kafka_connect_str': 'localhost:9092',
+            'produce_message': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+                'key': 'order-12345',
+                'key_format': 'string',
+                'value': json.dumps({"order_id": "12345", "status": "pending"}),
+                'value_format': 'json',
+                'partition': -1,
+            },
+        }
+
+        def mock_produce(*args, **kwargs):
+            return {'delivered': True, 'partition': 0, 'offset': 1}
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'produce_message', side_effect=mock_produce) as mock_prod,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            dd_run_check(check)
+
+            mock_prod.assert_called_once()
+            call_kwargs = mock_prod.call_args[1]
+            assert call_kwargs['key'] == b'order-12345'
+            assert json.loads(call_kwargs['value']) == {"order_id": "12345", "status": "pending"}
+
+    def test_produce_message_avro_inline_schema(self, aggregator, dd_run_check):
+        """Test producing an Avro value with an inline schema."""
+        avro_schema = (
+            '{"type": "record", "name": "Book", "namespace": "com.book", '
+            '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+            '{"name": "author", "type": "string"}]}'
+        )
+        book = {"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}
+
+        instance = {
+            'remote_config_id': 'test-produce-message-003',
+            'kafka_connect_str': 'localhost:9092',
+            'produce_message': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+                'value': json.dumps(book),
+                'value_format': 'avro',
+                'value_schema': avro_schema,
+                'partition': -1,
+            },
+        }
+
+        def mock_produce(*args, **kwargs):
+            return {'delivered': True, 'partition': 0, 'offset': 1}
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'produce_message', side_effect=mock_produce) as mock_prod,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            dd_run_check(check)
+
+            mock_prod.assert_called_once()
+            value_bytes = mock_prod.call_args[1]['value']
+
+            decoded, schema_id = check.deserializer.deserialize_message(value_bytes, 'avro', avro_schema, False)
+            assert json.loads(decoded) == book
+            assert schema_id is None
+
+    def test_produce_message_avro_schema_registry(self, aggregator, dd_run_check):
+        """Test producing an Avro value using an explicit Schema Registry schema_id."""
+        avro_schema = (
+            '{"type": "record", "name": "Book", "namespace": "com.book", '
+            '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+            '{"name": "author", "type": "string"}]}'
+        )
+        book = {"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}
+
+        instance = {
+            'remote_config_id': 'test-produce-message-004',
+            'kafka_connect_str': 'localhost:9092',
+            'schema_registry_url': 'http://localhost:8081',
+            'produce_message': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+                'value': json.dumps(book),
+                'value_format': 'avro',
+                'value_uses_schema_registry': True,
+                'value_schema_id': 350,
+                'partition': -1,
+            },
+        }
+
+        def mock_produce(*args, **kwargs):
+            return {'delivered': True, 'partition': 0, 'offset': 1}
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        check.serializer.schema_registry.get_schema = MagicMock(return_value=(avro_schema, 'AVRO', []))
+
+        with (
+            patch.object(check.kafka_client, 'produce_message', side_effect=mock_produce) as mock_prod,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            dd_run_check(check)
+
+            mock_prod.assert_called_once()
+            value_bytes = mock_prod.call_args[1]['value']
+            assert value_bytes[:5] == b'\x00\x00\x00\x01\x5e'
+
+            decoded, schema_id = check.deserializer.deserialize_message(value_bytes, 'avro', avro_schema, True)
+            assert json.loads(decoded) == book
+            assert schema_id == 350
+
 
 class TestReadMessagesAdvancedFiltering:
     """Test read_messages with more complex filtering scenarios."""

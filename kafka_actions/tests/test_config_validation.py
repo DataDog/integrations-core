@@ -348,3 +348,95 @@ class TestProduceMessageValidation:
         assert config.action == 'produce_message'
         assert config.remote_config_id == 'test-id'
         assert config.kafka_connect_str == 'localhost:9092'
+
+    def test_invalid_value_format(self):
+        """Test that invalid value_format raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'produce_message': {
+                'cluster': 'test',
+                'topic': 'test',
+                'value': 'test',
+                'value_format': 'invalid',
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="Invalid value_format"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_avro_without_schema(self):
+        """Test that avro format without an inline schema or schema registry raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'produce_message': {
+                'cluster': 'test',
+                'topic': 'test',
+                'value': 'test',
+                'value_format': 'avro',
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="value_format='avro' requires"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_schema_registry_without_url(self):
+        """Test that value_uses_schema_registry without schema_registry_url raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'produce_message': {
+                'cluster': 'test',
+                'topic': 'test',
+                'value': 'test',
+                'value_format': 'avro',
+                'value_uses_schema_registry': True,
+                'value_schema_id': 1,
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="requires 'schema_registry_url' to be configured"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_schema_registry_without_schema_id(self):
+        """Test that value_uses_schema_registry without an integer value_schema_id raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'schema_registry_url': 'http://localhost:8081',
+            'produce_message': {
+                'cluster': 'test',
+                'topic': 'test',
+                'value': 'test',
+                'value_format': 'avro',
+                'value_uses_schema_registry': True,
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="requires an integer 'value_schema_id'"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
+
+    def test_schema_registry_non_integer_schema_id(self):
+        """Test that a non-integer value_schema_id raises error."""
+        instance = {
+            'remote_config_id': 'test-id',
+            'kafka_connect_str': 'localhost:9092',
+            'schema_registry_url': 'http://localhost:8081',
+            'produce_message': {
+                'cluster': 'test',
+                'topic': 'test',
+                'value': 'test',
+                'value_format': 'avro',
+                'value_uses_schema_registry': True,
+                'value_schema_id': 'not-an-int',
+            },
+        }
+
+        with pytest.raises(ConfigurationError, match="requires an integer 'value_schema_id'"):
+            config = KafkaActionsConfig(instance, None)
+            config.validate_config()
