@@ -4,7 +4,6 @@
 
 import json
 import logging
-import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
@@ -15,10 +14,47 @@ from datadog_checks.kafka_consumer.cache import CacheHelper
 if TYPE_CHECKING:
     from datadog_checks.kafka_consumer.config import KafkaConfig
 
-SENSITIVE_KEY_PATTERN = re.compile(
-    r'(?i)(password|secret|\.key$|_key$|sasl\.jaas\.config|api\.key|api\.secret'
-    r'|\btoken\b|passphrase|keyfile|connection\.url|basic\.auth\.user\.info|private\.key)'
+# Kafka Connect framework-level settings that are safe to surface as-is. Everything else —
+# including any plugin-specific config key we don't recognize — is hidden by default, since
+# connector plugins are free to define arbitrary keys (including credentials) that we have
+# no way to enumerate ahead of time.
+ALLOWED_CONFIG_KEYS = frozenset(
+    {
+        'connector.class',
+        'name',
+        'tasks.max',
+        'topics',
+        'topics.regex',
+        'key.converter',
+        'value.converter',
+        'key.converter.schemas.enable',
+        'value.converter.schemas.enable',
+        'header.converter',
+        'transforms',
+        'predicates',
+        'errors.tolerance',
+        'errors.log.enable',
+        'errors.log.include.messages',
+        'errors.retry.timeout',
+        'errors.retry.delay.max.ms',
+        'errors.deadletterqueue.topic.name',
+        'errors.deadletterqueue.topic.replication.factor',
+        'errors.deadletterqueue.context.headers.enable',
+        'config.action.reload',
+    }
 )
+
+
+def _is_allowed_config_key(key: str) -> bool:
+    """Return whether a connector config key is known-safe to expose unmasked.
+
+    Only the ``.type`` component of a named transform/predicate is allowed — other
+    per-transform settings (e.g. a replacement pattern) aren't framework-defined and
+    could hold arbitrary plugin-specific data.
+    """
+    if key in ALLOWED_CONFIG_KEYS:
+        return True
+    return (key.startswith('transforms.') or key.startswith('predicates.')) and key.endswith('.type')
 
 
 def _build_http_kwargs(
@@ -328,7 +364,7 @@ class KafkaConnectCollector:
         tasks = status.get('tasks') or []
         raw_config = info.get('config') or {}
 
-        redacted_config = {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in raw_config.items()}
+        redacted_config = {k: v if _is_allowed_config_key(k) else '[hidden]' for k, v in raw_config.items()}
 
         task_traces = sorted(
             (

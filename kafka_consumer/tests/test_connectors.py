@@ -88,7 +88,7 @@ def test_cluster_id_override_recorded_in_events(run_connect_check, aggregator):
     assert all('original_kafka_cluster_id' in event for event in events)
 
 
-def test_sensitive_keys_redacted_in_config_event(run_connect_check, aggregator):
+def test_config_only_allowlisted_keys_left_unredacted(run_connect_check, aggregator):
     connectors = {
         'my-sink': {
             'info': {
@@ -97,6 +97,10 @@ def test_sensitive_keys_redacted_in_config_event(run_connect_check, aggregator):
                     'connector.class': 'io.confluent.SomeSink',
                     'connection.password': 'secret123',
                     'sasl.jaas.config': 'org.apache.kafka.common.security.plain.PlainLoginModule ...',
+                    'db.host': 'db.internal.example.com',
+                    'transforms': 'insertField',
+                    'transforms.insertField.type': 'org.apache.kafka.connect.transforms.InsertField$Value',
+                    'transforms.insertField.static.value': 'not-framework-defined',
                     'tasks.max': '2',
                     'topics': 'orders',
                 },
@@ -111,7 +115,13 @@ def test_sensitive_keys_redacted_in_config_event(run_connect_check, aggregator):
     cfg = events[0]['config']
     assert cfg['connection.password'] == '[hidden]'
     assert cfg['sasl.jaas.config'] == '[hidden]'
+    assert cfg['db.host'] == '[hidden]'
+    assert cfg['transforms.insertField.static.value'] == '[hidden]'
     assert cfg['connector.class'] == 'io.confluent.SomeSink'
+    assert cfg['tasks.max'] == '2'
+    assert cfg['topics'] == 'orders'
+    assert cfg['transforms'] == 'insertField'
+    assert cfg['transforms.insertField.type'] == 'org.apache.kafka.connect.transforms.InsertField$Value'
     assert cfg['topics'] == 'orders'
     assert cfg['tasks.max'] == '2'
 
