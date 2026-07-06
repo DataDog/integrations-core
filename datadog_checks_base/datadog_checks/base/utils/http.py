@@ -214,12 +214,14 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
-def _translate_requests_exception(exc):
+def _translate_requests_exception(exc) -> HTTPError:
     """Translate a requests exception into the library-agnostic equivalent.
 
     Order is significant. Several requests types subclass others, so the most
     specific must be tested first (see the Step 0.1 subpage mapping table).
     """
+    message = str(exc) or exc.__class__.__name__
+    request = getattr(exc, 'request', None)
     if isinstance(
         exc,
         (
@@ -229,24 +231,29 @@ def _translate_requests_exception(exc):
             requests_exceptions.URLRequired,
         ),
     ):
-        return HTTPInvalidURLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
+        return HTTPInvalidURLError(message, request=request)
     if isinstance(exc, requests_exceptions.SSLError):
-        return HTTPSSLError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
+        return HTTPSSLError(message, request=request)
     if isinstance(exc, requests_exceptions.Timeout):
-        return HTTPTimeoutError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
+        return HTTPTimeoutError(message, request=request)
     if isinstance(exc, requests_exceptions.ConnectionError):
-        return HTTPConnectionError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
+        return HTTPConnectionError(message, request=request)
     if isinstance(exc, requests_exceptions.ContentDecodingError):
-        return HTTPRequestError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
+        return HTTPRequestError(message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):
-        return HTTPStatusError(
-            str(exc) or exc.__class__.__name__,
-            request=getattr(exc, 'request', None),
-            response=getattr(exc, 'response', None),
-        )
+        return HTTPStatusError(message, request=request, response=getattr(exc, 'response', None))
     if isinstance(exc, requests_exceptions.RequestException):
-        return HTTPRequestError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
-    return HTTPError(str(exc) or exc.__class__.__name__)
+        return HTTPRequestError(message, request=request)
+    return HTTPError(message)
+
+
+@contextmanager
+def _translate_http_errors():
+    """Re-raise requests exceptions as their library-agnostic equivalents."""
+    try:
+        yield
+    except requests_exceptions.RequestException as exc:
+        raise _translate_requests_exception(exc) from exc
 
 
 class ResponseWrapper(ObjectProxy):
@@ -257,52 +264,41 @@ class ResponseWrapper(ObjectProxy):
         self.__default_chunk_size = default_chunk_size
 
     def raise_for_status(self):
-        try:
+        with _translate_http_errors():
             self.__wrapped__.raise_for_status()
-        except requests_exceptions.HTTPError as exc:
-            raise _translate_requests_exception(exc) from exc
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        try:
+        with _translate_http_errors():
             yield from self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
-        except requests_exceptions.RequestException as exc:
-            raise _translate_requests_exception(exc) from exc
 
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        try:
+        with _translate_http_errors():
             yield from self.__wrapped__.iter_lines(
                 chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
             )
-        except requests_exceptions.RequestException as exc:
-            raise _translate_requests_exception(exc) from exc
 
     @property
     def content(self):
-        try:
+        with _translate_http_errors():
             return self.__wrapped__.content
-        except requests_exceptions.RequestException as exc:
-            raise _translate_requests_exception(exc) from exc
 
     @property
     def text(self):
-        try:
+        with _translate_http_errors():
             return self.__wrapped__.text
-        except requests_exceptions.RequestException as exc:
-            raise _translate_requests_exception(exc) from exc
 
     def json(self, **kwargs):
-        try:
-            return self.__wrapped__.json(**kwargs)
-        except requests_exceptions.JSONDecodeError as exc:
-            raise json.JSONDecodeError(exc.msg, exc.doc, exc.pos) from exc
-        except requests_exceptions.RequestException as exc:
-            raise _translate_requests_exception(exc) from exc
+        with _translate_http_errors():
+            try:
+                return self.__wrapped__.json(**kwargs)
+            except requests_exceptions.JSONDecodeError as exc:
+                raise json.JSONDecodeError(exc.msg, exc.doc, exc.pos) from exc
 
     def __enter__(self):
         return self
@@ -607,7 +603,7 @@ class RequestsWrapper(object):
             return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
-        try:
+        with _translate_http_errors():
             try:
                 response = request_method(url, **new_options)
             except SSLError as e:
@@ -624,8 +620,6 @@ class RequestsWrapper(object):
                 request_method = getattr(session, method)
                 response = request_method(url, **new_options)
             return response
-        except requests_exceptions.RequestException as exc:
-            raise _translate_requests_exception(exc) from exc
 
     def fetch_intermediate_certs(self, hostname, port=443):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617

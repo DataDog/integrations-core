@@ -545,7 +545,7 @@ class PrometheusScraperMixin(object):
         the PrometheusFormat class.
         Custom headers can be added to the default headers.
 
-        Returns a valid requests.Response, raise requests.HTTPError if the status code of the requests.Response
+        Returns a valid requests.Response, raise HTTPStatusError if the status code of the requests.Response
         isn't valid - see response.raise_for_status()
 
         The caller needs to close the requests.Response
