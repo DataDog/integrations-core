@@ -186,6 +186,7 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path) -> None
         "workflow_id": "test-batch.yaml",
         "ref": "master",
         "timeout": None,
+        "return_run_details": True,
         "inputs": {
             "batch_id": "batch-1",
             "checkout_sha": "merge-sha-bbb",
