@@ -241,7 +241,8 @@ def _translate_requests_exception(exc) -> HTTPError:
     if isinstance(exc, requests_exceptions.ContentDecodingError):
         return HTTPRequestError(message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):
-        return HTTPStatusError(message, request=request, response=getattr(exc, 'response', None))
+        # response is attached at the raise_for_status seam (the agnostic wrapper), never the raw one here
+        return HTTPStatusError(message, request=request)
     if isinstance(exc, requests_exceptions.RequestException):
         return HTTPRequestError(message, request=request)
     return HTTPError(message)
@@ -264,8 +265,14 @@ class ResponseWrapper(ObjectProxy):
         self.__default_chunk_size = default_chunk_size
 
     def raise_for_status(self):
-        with _translate_http_errors():
+        try:
             self.__wrapped__.raise_for_status()
+        except requests_exceptions.HTTPError as exc:
+            raise HTTPStatusError(
+                str(exc) or exc.__class__.__name__,
+                request=getattr(exc, 'request', None),
+                response=self,
+            ) from exc
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:

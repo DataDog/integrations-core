@@ -51,8 +51,10 @@ def test_raise_for_status_maps_to_status_error():
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', return_value=response):
         wrapped = http.get('http://example.test/')
-        with pytest.raises(HTTPStatusError):
+        with pytest.raises(HTTPStatusError) as exc_info:
             wrapped.raise_for_status()
+    # .response carries the agnostic wrapper, never the raw backend response
+    assert exc_info.value.response is wrapped
 
 
 # Group A: the translator as a pure function, over the full mapping table.
@@ -78,13 +80,13 @@ def test_translate_maps_requests_to_agnostic(raised, expected):
     assert type(result) is expected, f"{type(raised).__name__} -> {type(result).__name__}, expected {expected.__name__}"
 
 
-def test_translate_status_error_carries_response():
-    sentinel = object()
+def test_translate_does_not_leak_raw_response():
+    # The translator never carries a raw backend response; the agnostic wrapper is attached at raise_for_status.
     err = requests.exceptions.HTTPError('500 Server Error')
-    err.response = sentinel
+    err.response = object()
     result = _translate_requests_exception(err)
     assert isinstance(result, HTTPStatusError)
-    assert result.response is sentinel
+    assert result.response is None
 
 
 # Group B: the streaming seam. The failure surfaces only when the generator is consumed.
