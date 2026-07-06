@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import dataclasses
+import io
 import json
+import zipfile
 from typing import Any
 
 import httpx
@@ -24,6 +26,9 @@ from ddev.utils.github_async.models import (
     PullRequest,
     PullRequestRef,
     PullRequestReviewComment,
+    WorkflowDispatchResult,
+    WorkflowJob,
+    WorkflowJobsList,
     WorkflowRun,
 )
 
@@ -66,6 +71,17 @@ def _workflow_run_payload() -> dict[str, Any]:
         "html_url": "https://github.com/owner/repo/actions/runs/42",
         "created_at": "2024-01-01T00:00:00Z",
         "updated_at": "2024-01-01T01:00:00Z",
+    }
+
+
+def _workflow_job(idx: int, *, status: str = "completed", conclusion: str | None = "success") -> dict[str, Any]:
+    return {
+        "id": idx,
+        "run_id": 42,
+        "name": f"job-{idx}",
+        "status": status,
+        "conclusion": conclusion,
+        "html_url": f"https://github.com/owner/repo/actions/runs/42/job/{idx}",
     }
 
 
@@ -191,13 +207,22 @@ async def test_create_workflow_dispatch_success() -> None:
         assert "/actions/workflows/my-workflow.yml/dispatches" in request.url.path
         body = json.loads(request.content)
         assert body["ref"] == "main"
+        assert body["return_run_details"] is True
         assert "inputs" not in body
-        return httpx.Response(204, headers={"x-ratelimit-remaining": "59"})
+        return _json_response(
+            {
+                "workflow_run_id": 999,
+                "run_url": "https://api.github.com/repos/owner/repo/actions/runs/999",
+                "html_url": "https://github.com/owner/repo/actions/runs/999",
+            },
+            headers={"x-ratelimit-remaining": "59"},
+        )
 
     client = _make_client(httpx.MockTransport(handler))
-    result = await client.create_workflow_dispatch("owner", "repo", "my-workflow.yml", "main")
+    result = await client.create_workflow_dispatch("owner", "repo", "my-workflow.yml", "main", return_run_details=True)
     assert isinstance(result, GitHubResponse)
-    assert result.data is None
+    assert isinstance(result.data, WorkflowDispatchResult)
+    assert result.data.workflow_run_id == 999
     assert result.headers.get("x-ratelimit-remaining") == "59"
 
 
@@ -205,10 +230,20 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["inputs"] == {"env": "prod"}
-        return httpx.Response(204)
+        assert body["return_run_details"] is True
+        return _json_response(
+            {
+                "workflow_run_id": 1,
+                "run_url": "https://api.github.com/repos/o/r/actions/runs/1",
+                "html_url": "https://github.com/o/r/actions/runs/1",
+            }
+        )
 
     client = _make_client(httpx.MockTransport(handler))
-    await client.create_workflow_dispatch("o", "r", 123, "main", inputs={"env": "prod"})
+    result = await client.create_workflow_dispatch(
+        "o", "r", 123, "main", inputs={"env": "prod"}, return_run_details=True
+    )
+    assert result.data.workflow_run_id == 1
 
 
 async def test_create_workflow_dispatch_http_error_raises() -> None:
@@ -216,6 +251,34 @@ async def test_create_workflow_dispatch_http_error_raises() -> None:
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
     assert exc_info.value.response.status_code == 422
+
+
+async def test_create_workflow_dispatch_return_run_details_parses_response() -> None:
+    payload = {
+        "workflow_run_id": 987,
+        "run_url": "https://api.github.com/repos/o/r/actions/runs/987",
+        "html_url": "https://github.com/o/r/actions/runs/987",
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert body["return_run_details"] is True
+        return _json_response(payload)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_workflow_dispatch("o", "r", "wf.yml", "main", return_run_details=True)
+    assert result.data.workflow_run_id == 987
+    assert result.data.html_url == "https://github.com/o/r/actions/runs/987"
+
+
+async def test_create_workflow_dispatch_omits_return_run_details_when_false() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert "return_run_details" not in body
+        return httpx.Response(204)
+
+    client = _make_client(httpx.MockTransport(handler))
+    await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
 
 
 # ---------------------------------------------------------------------------
@@ -326,6 +389,62 @@ async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
 
     client = _make_client(httpx.MockTransport(handler))
     async for _ in client.list_workflow_run_artifacts("owner", "repo", 1, per_page=100):
+        pass
+
+
+# ---------------------------------------------------------------------------
+# list_workflow_jobs (pagination)
+# ---------------------------------------------------------------------------
+
+
+async def test_list_workflow_jobs_single_page() -> None:
+    jobs = [_workflow_job(1), _workflow_job(2, status="in_progress", conclusion=None)]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert "/actions/runs/42/jobs" in request.url.path
+        return _json_response({"total_count": 2, "jobs": jobs})
+
+    client = _make_client(httpx.MockTransport(handler))
+    pages = []
+    async for page in client.list_workflow_jobs("owner", "repo", 42):
+        pages.append(page)
+
+    assert len(pages) == 1
+    assert isinstance(pages[0].data, WorkflowJobsList)
+    assert pages[0].data.total_count == 2
+    assert isinstance(pages[0].data.jobs[0], WorkflowJob)
+    assert pages[0].data.jobs[1].html_url == "https://github.com/owner/repo/actions/runs/42/job/2"
+
+
+async def test_list_workflow_jobs_two_pages() -> None:
+    call_count = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            link = f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'
+            return _json_response({"total_count": 2, "jobs": [_workflow_job(1)]}, headers={"link": link})
+        return _json_response({"total_count": 2, "jobs": [_workflow_job(2)]})
+
+    client = _make_client(httpx.MockTransport(handler))
+    pages = []
+    async for page in client.list_workflow_jobs("owner", "repo", 42):
+        pages.append(page)
+
+    assert len(pages) == 2
+    assert pages[0].data.jobs[0].id == 1
+    assert pages[1].data.jobs[0].id == 2
+
+
+async def test_list_workflow_jobs_per_page_forwarded() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params["per_page"] == "100"
+        return _json_response({"total_count": 0, "jobs": []})
+
+    client = _make_client(httpx.MockTransport(handler))
+    async for _ in client.list_workflow_jobs("owner", "repo", 42, per_page=100):
         pass
 
 
@@ -633,3 +752,246 @@ async def test_per_request_timeout_forwarded() -> None:
     client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
     result = await client.get_workflow_run("o", "r", 42, timeout=2.0)
     assert result.data.id == 42
+
+
+# ---------------------------------------------------------------------------
+# create_check_run / update_check_run
+# ---------------------------------------------------------------------------
+
+
+def _check_run_payload(**overrides: Any) -> dict[str, Any]:
+    payload = {
+        "id": 1,
+        "name": "ck",
+        "status": "in_progress",
+        "head_sha": "abc",
+        "conclusion": None,
+        "html_url": "https://github.com/o/r/check-runs/1",
+    }
+    payload.update(overrides)
+    return payload
+
+
+@pytest.mark.asyncio
+async def test_create_check_run_success() -> None:
+    captured: dict[str, Any] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert "/repos/o/r/check-runs" in request.url.path
+        captured.update(json.loads(request.content))
+        return _json_response(_check_run_payload(name=captured["name"], head_sha=captured["head_sha"]))
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_check_run("o", "r", name="ck", head_sha="abc", status="in_progress")
+    assert result.data.id == 1
+    assert captured == {"name": "ck", "head_sha": "abc", "status": "in_progress"}
+
+
+@pytest.mark.asyncio
+async def test_create_check_run_with_optional_fields() -> None:
+    captured: dict[str, Any] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.update(json.loads(request.content))
+        return _json_response(_check_run_payload())
+
+    client = _make_client(httpx.MockTransport(handler))
+    await client.create_check_run(
+        "o",
+        "r",
+        name="ck",
+        head_sha="abc",
+        status="in_progress",
+        details_url="https://x",
+        output={"title": "t", "summary": "s"},
+    )
+    assert captured["details_url"] == "https://x"
+    assert captured["output"] == {"title": "t", "summary": "s"}
+
+
+@pytest.mark.asyncio
+async def test_update_check_run_success() -> None:
+    captured: dict[str, Any] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "PATCH"
+        assert "/repos/o/r/check-runs/77" in request.url.path
+        captured.update(json.loads(request.content))
+        return _json_response(_check_run_payload(id=77, status="completed", conclusion="success"))
+
+    client = _make_client(httpx.MockTransport(handler))
+    await client.update_check_run("o", "r", 77, status="completed", conclusion="success")
+    assert captured == {"status": "completed", "conclusion": "success"}
+
+
+@pytest.mark.asyncio
+async def test_update_check_run_omits_unset_fields() -> None:
+    captured: dict[str, Any] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured.update(json.loads(request.content))
+        return _json_response(_check_run_payload(id=77))
+
+    client = _make_client(httpx.MockTransport(handler))
+    await client.update_check_run("o", "r", 77, conclusion="failure")
+    assert captured == {"conclusion": "failure"}
+
+
+@pytest.mark.asyncio
+async def test_update_check_run_requires_conclusion_when_completed() -> None:
+    requested = False
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal requested
+        requested = True
+        return _json_response(_check_run_payload())
+
+    client = _make_client(httpx.MockTransport(handler))
+    with pytest.raises(ValueError, match="conclusion is required"):
+        await client.update_check_run("o", "r", 77, status="completed")
+    assert requested is False
+
+
+# ---------------------------------------------------------------------------
+# download_artifact
+# ---------------------------------------------------------------------------
+
+
+def _make_zip(members: dict[str, bytes]) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        for name, content in members.items():
+            zf.writestr(name, content)
+    return buf.getvalue()
+
+
+@pytest.mark.asyncio
+async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch, tmp_path) -> None:
+    captured_signed_headers: dict[str, str] = {}
+
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers["authorization"].startswith("Bearer ")
+        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        captured_signed_headers.update({k.lower(): v for k, v in request.headers.items()})
+        return httpx.Response(200, content=_make_zip({"hello.txt": b"hi"}))
+
+    real_async_client = httpx.AsyncClient
+
+    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
+        if kwargs.get("transport") is None:
+            kwargs["transport"] = httpx.MockTransport(signed_handler)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+    await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    assert "authorization" not in captured_signed_headers
+    assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
+
+
+@pytest.mark.asyncio
+async def test_download_artifact_non_302_raises(tmp_path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=b"not a redirect")
+
+    client = _make_client(httpx.MockTransport(handler))
+    with pytest.raises(httpx.HTTPError, match="Expected 302"):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+@pytest.mark.asyncio
+async def test_download_artifact_signed_url_error_raises(monkeypatch, tmp_path) -> None:
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(403, content=b"expired")
+
+    real_async_client = httpx.AsyncClient
+
+    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
+        if kwargs.get("transport") is None:
+            kwargs["transport"] = httpx.MockTransport(signed_handler)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+    with pytest.raises(httpx.HTTPStatusError):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+@pytest.mark.asyncio
+async def test_download_artifact_missing_location_header_raises(tmp_path) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(302)
+
+    client = _make_client(httpx.MockTransport(handler))
+    with pytest.raises(httpx.HTTPError, match="Missing Location"):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+@pytest.mark.parametrize(
+    "malicious_member",
+    [
+        pytest.param("../escape.txt", id="parent-traversal"),
+        pytest.param("/etc/passwd", id="absolute-path"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malicious_member: str) -> None:
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=_make_zip({malicious_member: b"pwn"}))
+
+    real_async_client = httpx.AsyncClient
+
+    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
+        if kwargs.get("transport") is None:
+            kwargs["transport"] = httpx.MockTransport(signed_handler)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+    dest = tmp_path / "out"
+    with pytest.raises(ValueError, match="(?i)zip-slip"):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", dest)
+
+    # Nothing was extracted before the guard fired.
+    assert list(dest.rglob("*")) == []
+
+
+def _patch_signed_download(monkeypatch, handler: Any) -> None:
+    """Route the anonymous signed-URL download through a mock transport."""
+    real_async_client = httpx.AsyncClient
+
+    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
+        if kwargs.get("transport") is None:
+            kwargs["transport"] = httpx.MockTransport(handler)
+        return real_async_client(*args, **kwargs)
+
+    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+
+
+@pytest.mark.asyncio
+async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) -> None:
+    """A failed signed-URL download propagates as httpx.HTTPStatusError (no retries)."""
+
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503, content=b"unavailable")
+
+    _patch_signed_download(monkeypatch, signed_handler)
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+    with pytest.raises(httpx.HTTPStatusError):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
