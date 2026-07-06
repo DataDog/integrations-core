@@ -451,7 +451,11 @@ def test_single_expand_sections_merged(run_connect_check, aggregator):
     assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
 
     # A supplementary /connectors fetch is issued because the combined call returns a null section.
-    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
     assert len(connectors_fetches) == 2
 
 
@@ -459,7 +463,11 @@ def test_oss_combined_response_makes_single_connectors_request(run_connect_check
     """When the combined call returns both sections, no supplementary fetch is issued."""
     _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
-    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
     assert len(connectors_fetches) == 1
 
 
@@ -505,5 +513,9 @@ def test_combined_expand_list_ignored_falls_back_to_single_expand(run_connect_ch
     assert events[0]['connector'] == 'my-conn'
     assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
 
-    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    connectors_fetches = [
+        call
+        for call in http.get.call_args_list
+        if 'connector-plugins' not in call.args[0] and '/topics' not in call.args[0]
+    ]
     assert len(connectors_fetches) == 3
