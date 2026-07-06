@@ -1,5 +1,5 @@
-id: cyberark-endpoint-privilege-manager
-metric_id: cyberark-endpoint-privilege-manager
+id: idira-endpoint-privilege-manager
+metric_id: idira-endpoint-privilege-manager
 backend_only: false
 facets:
   - groups:
@@ -54,10 +54,10 @@ facets:
     source: log
 pipeline:
   type: pipeline
-  name: CyberArk Endpoint Privilege Manager
+  name: Idira Endpoint Privilege Manager
   enabled: true
   filter:
-    query: source:cyberark-endpoint-privilege-manager
+    query: source:idira-endpoint-privilege-manager
   processors:
     - type: date-remapper
       name: Define `lastEventDate` and `EventTime` as the official date of the log
