@@ -223,6 +223,7 @@ class ArgocdResourceCollector:
         self._auth_token: str | None = config.genresources_auth_token
         self._instance_prefix: str = _instance_prefix(self._endpoint)
         self._submitted: dict[str, str] = {}
+        self._forgotten: dict[str, int] = {}
         self._stream_enabled: bool = bool(config.genresources_stream_applications_enabled)
         self._backoff_max: int = config.genresources_stream_backoff_max_seconds
         self._stream_read_timeout: int = config.genresources_stream_read_timeout_seconds
@@ -267,7 +268,11 @@ class ArgocdResourceCollector:
             return
         now = int(time.time())
         if self._stream_enabled:
-            listener = self._ensure_listener()
+            try:
+                listener = self._ensure_listener()
+            except Exception:
+                self.check.log.exception("genresources: failed to start the application stream listener")
+                listener = None
             connected = listener is not None and listener.is_connected()
             self.check.gauge(GENRESOURCES_STREAM_UP_METRIC, 1 if connected else 0)
         self._collect_due_types(now)
@@ -351,6 +356,7 @@ class ArgocdResourceCollector:
         cache_key = self._submitted_cache_key(APPLICATION_SPEC.resource_type, key)
         with self._submitted_lock:
             self._submitted.pop(cache_key, None)
+            self._forgotten[cache_key] = int(time.time())
 
     def _prefixed(self, resource_key: str) -> str:
         """Prefix a resource key with the instance prefix (cluster|env) when one is configured."""
@@ -394,6 +400,9 @@ class ArgocdResourceCollector:
         namespace = f"{spec.resource_type}{KEY_SEPARATOR}"
         with self._submitted_lock:
             self._submitted = {k: v for k, v in self._submitted.items() if not k.startswith(namespace) or k in seen}
+            # A tombstone only needs to outlive fetches that started before it; this scrape's seen_at is
+            # older than any future scrape's, so a tombstone already <= it can't protect a later one.
+            self._forgotten = {k: v for k, v in self._forgotten.items() if not k.startswith(namespace) or v > seen_at}
 
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
@@ -412,7 +421,11 @@ class ArgocdResourceCollector:
     def _emit_item(
         self, item: dict, spec: ResourceTypeSpec, *, seen_at: int, expire_at: int, force_full: bool
     ) -> str | None:
-        token = _change_token(item)
+        try:
+            token = _change_token(item)
+        except Exception:
+            self.check.log.warning("genresources: skipping malformed %s", spec.resource_type, exc_info=True)
+            return None
         try:
             _sanitize_item(item, spec.resource_type)
         except Exception:
@@ -427,6 +440,10 @@ class ArgocdResourceCollector:
         include = self._includes[spec.resource_type]
         cache_key = self._submitted_cache_key(spec.resource_type, raw_key)
         with self._submitted_lock:
+            if force_full and self._forgotten.get(cache_key, 0) >= seen_at:
+                # This snapshot may predate a DELETED frame the listener already processed; don't let a
+                # stale full-scrape resurrect what the stream correctly forgot.
+                return None
             if force_full or self._submitted.get(cache_key) != token:
                 try:
                     self.check.submit_generic_resource(

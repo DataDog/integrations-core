@@ -11,6 +11,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from datadog_checks.argocd.resources import APPLICATION_SPEC
 from datadog_checks.argocd.resources_constants import (
     GENRESOURCES_API_UP_METRIC,
     GENRESOURCES_STREAM_EVENTS_METRIC,
@@ -134,6 +135,22 @@ def test_forget_application_lets_a_readded_app_resubmit():
         collector.emit_stream_application(app)  # re-added -> submit #2
 
     assert submit.call_count == 2
+
+
+def test_forget_application_during_a_concurrent_full_scrape_is_not_resurrected():
+    check = _check(genresources_stream_applications_enabled=True)
+    collector = check._resource_collector
+    app = _application("web", resource_version="100")
+
+    with (
+        patch.object(check, "submit_generic_resource") as submit,
+        patch.object(collector, "_fetch", return_value=[app]),
+    ):
+        seen_at = int(time.time())  # the full scrape's snapshot is treated as taken at-or-before this instant
+        collector.forget_application(app)  # DELETED frame processed after the snapshot was taken
+        collector._collect_type(APPLICATION_SPEC, seen_at=seen_at, expire_at=seen_at + 1800, force_full=True)
+
+    submit.assert_not_called()  # the stale, pre-delete snapshot must not resurrect it
 
 
 def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener():
