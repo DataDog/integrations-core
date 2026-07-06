@@ -6,6 +6,7 @@ import json
 import logging
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
@@ -51,6 +52,7 @@ CONNECTOR_PLUGINS_EVENT_CACHE_KEY = 'kafka_connector_plugins_event_cache'
 CONNECTOR_TOPICS_FETCH_CACHE_KEY = 'kafka_connector_topics_fetch_cache'
 CONNECTOR_TOPICS_DATA_CACHE_KEY = 'kafka_connector_topics_data_cache'
 CONNECTOR_CACHE_MAX_SIZE = 5_000
+TOPICS_FETCH_CONCURRENCY = 10
 
 
 def _short_class_name(full_class: str) -> str:
@@ -269,12 +271,17 @@ class KafkaConnectCollector:
         """Namespace a cache key by Connect URL."""
         return f'{prefix}:{quote(url, safe="")}'
 
+    def _fetch_topics_for_connector(self, url: str, name: str) -> list[str]:
+        response = self.http.get(
+            f'{url.rstrip("/")}/connectors/{quote(name, safe="")}/topics',
+            timeout=self.config._request_timeout,
+            **self._get_request_kwargs(),
+        )
+        response.raise_for_status()
+        return sorted((response.json().get(name) or {}).get('topics', []))
+
     def _fetch_connector_topics(self, url: str, connector_names: list[str]) -> dict[str, list[str]]:
         """Return each connector's tracked topics, refreshing entries whose TTL has expired.
-
-        Kafka Connect's topic-tracking API only reports topics that pass through the
-        Connect-managed producer/consumer, so a source connector's own upstream topic
-        (e.g. an external database) isn't included, only what it publishes into Kafka.
 
         A connector is backed off on the same TTL whether its fetch succeeds or fails,
         so a connector with topic tracking permanently unavailable doesn't get re-requested
@@ -286,21 +293,20 @@ class KafkaConnectCollector:
         topics_by_connector: dict[str, list[str]] = self.cache.get_cached_json(data_cache_key)
 
         names_to_refresh = self.cache.get_items_to_fetch(fetch_cache_key, connector_names)
-        for name in names_to_refresh:
-            try:
-                response = self.http.get(
-                    f'{url.rstrip("/")}/connectors/{quote(name, safe="")}/topics',
-                    timeout=self.config._request_timeout,
-                    **self._get_request_kwargs(),
-                )
-                response.raise_for_status()
-                topics_by_connector[name] = sorted((response.json().get(name) or {}).get('topics', []))
-            except Exception as e:
-                # Broad by design: a malformed or unreachable response for one connector
-                # shouldn't block topic tracking for the others.
-                self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
-
         if names_to_refresh:
+            with ThreadPoolExecutor(max_workers=TOPICS_FETCH_CONCURRENCY) as executor:
+                future_to_name = {
+                    executor.submit(self._fetch_topics_for_connector, url, name): name for name in names_to_refresh
+                }
+                for future in as_completed(future_to_name):
+                    name = future_to_name[future]
+                    try:
+                        topics_by_connector[name] = future.result()
+                    except Exception as e:
+                        # Broad by design: a malformed or unreachable response for one connector
+                        # shouldn't block topic tracking for the others.
+                        self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
+
             self.cache.mark_items_fetched(fetch_cache_key, names_to_refresh, max_cache_size=CONNECTOR_CACHE_MAX_SIZE)
 
         pruned_topics = {name: topics_by_connector[name] for name in connector_names if name in topics_by_connector}
