@@ -28,6 +28,15 @@ type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
 DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
 
 
+class OrchestratorTimeout(Exception):
+    """Internal signal raised when ``max_timeout`` is exceeded.
+
+    Caught by :meth:`EventBusOrchestrator.process_messages` so the timeout reason can be
+    handed to the single cancellation loop in its ``finally`` block, instead of cancelling
+    tasks from two places.
+    """
+
+
 @dataclass
 class BaseMessage:
     """
@@ -306,6 +315,7 @@ class EventBusOrchestrator(ABC):
         get_task = asyncio.create_task(self._queue.get())
 
         start_time = asyncio.get_running_loop().time()
+        cancel_reason: str | None = None
 
         try:
             while not await self.__should_stop(start_time, running_tasks, get_task):
@@ -321,13 +331,17 @@ class EventBusOrchestrator(ABC):
                         break
 
                 self.__process_finished_tasks(done, current_get_task, running_tasks)
+        except OrchestratorTimeout as timeout:
+            cancel_reason = str(timeout)
         finally:
             # If we exit the loop and tasks are still running (e.g. timeout or forced break),
             # we must clean them up before returning to ensure finalize() runs in a safe state.
+            # This is the single place that cancels ``running_tasks``, so every remaining task
+            # is cancelled exactly once, with the reason (if any) attached.
             if running_tasks:
                 self._logger.info("Cancelling %s remaining tasks...", len(running_tasks))
                 for task in running_tasks:
-                    task.cancel()
+                    task.cancel(cancel_reason)
 
                 # Wait for them to actually finish cancelling
                 await asyncio.wait(running_tasks)
@@ -352,7 +366,7 @@ class EventBusOrchestrator(ABC):
                 len(running_tasks),
             )
             get_task.cancel()
-            return True
+            raise OrchestratorTimeout(f"Orchestrator exceeded max_timeout of {self._max_timeout}s")
 
         # Check exit condition: empty queue (implied by get_task not done) and no running processors
         if not running_tasks and not get_task.done() and self._queue.empty():
