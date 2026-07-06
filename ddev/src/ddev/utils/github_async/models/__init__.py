@@ -42,8 +42,8 @@ if TYPE_CHECKING:
     from .workflow import WorkflowDispatchResult as WorkflowDispatchResult
     from .workflow import WorkflowJob as WorkflowJob
     from .workflow import WorkflowJobConclusion as WorkflowJobConclusion
-    from .workflow import WorkflowJobStatus as WorkflowJobStatus
     from .workflow import WorkflowJobsList as WorkflowJobsList
+    from .workflow import WorkflowJobStatus as WorkflowJobStatus
     from .workflow import WorkflowRun as WorkflowRun
 
 # Map of exported attribute name -> submodule (relative to this package) that
