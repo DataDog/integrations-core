@@ -28,17 +28,6 @@ files:
         type: boolean
         example: true
         default: true
-    - name: collect_topology_domain_metrics
-      description: |
-        Collect topology-aware-scheduling domain metrics by polling Nodes, Pods, ResourceFlavors, and Topologies from
-        the Kubernetes API.
-
-        This requires `get` and `list` RBAC permissions on `nodes`, `pods`, `resourceflavors.kueue.x-k8s.io`, and
-        `topologies.kueue.x-k8s.io`.
-      value:
-        type: boolean
-        example: true
-        default: true
     - name: kube_config_dict
       description: |
         Optional kubeconfig dictionary used to configure the Kubernetes API client.

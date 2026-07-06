@@ -653,15 +653,6 @@ instances:
     #
     # collect_workload_events: true
 
-    ## @param collect_topology_domain_metrics - boolean - optional - default: true
-    ## Collect topology-aware-scheduling domain metrics by polling Nodes, Pods, ResourceFlavors, and Topologies from
-    ## the Kubernetes API.
-    ##
-    ## This requires `get` and `list` RBAC permissions on `nodes`, `pods`, `resourceflavors.kueue.x-k8s.io`, and
-    ## `topologies.kueue.x-k8s.io`.
-    #
-    # collect_topology_domain_metrics: true
-
     ## @param kube_config_dict - mapping - optional
     ## Optional kubeconfig dictionary used to configure the Kubernetes API client.
     ##

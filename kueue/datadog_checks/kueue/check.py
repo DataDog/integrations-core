@@ -12,7 +12,6 @@ from datadog_checks.base.utils.tagging import tagger
 from .config_models import ConfigMixin
 from .kube_client import KubernetesAPIClient
 from .metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
-from .topology import iter_domain_stats
 
 RESOURCE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in RESOURCE_METRIC_MAP) + ')$'
 LOCAL_QUEUE_METRIC_PATTERN = '^(' + '|'.join(re.escape(k) for k in LOCAL_QUEUE_METRIC_MAP) + ')$'
@@ -70,8 +69,6 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         if self.collect_workload_events:
             self.collect_workload_events_from_api()
-        if self.collect_topology_domain_metrics:
-            self.collect_topology_domain_metrics_from_api()
 
     def create_scraper(self, config):
         return KueueOpenMetricsScraper(self, self.get_config_with_defaults(config))
@@ -152,38 +149,8 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.load_configuration_models()
 
         self.collect_workload_events = self.config.collect_workload_events
-        self.collect_topology_domain_metrics = self.config.collect_topology_domain_metrics
         self.kube_config_dict = self.config.kube_config_dict
         self.workload_events_namespaces = set(self.config.workload_events_namespaces or [])
-
-    def collect_topology_domain_metrics_from_api(self):
-        try:
-            if self.kube_client is None:
-                self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
-
-            nodes = self.kube_client.list_nodes()
-            pods = self.kube_client.list_pods()
-            resource_flavors = self.kube_client.list_resource_flavors()
-            topologies = self.kube_client.list_topologies()
-        except Exception as e:
-            self.log.warning('Cannot collect Kueue topology domain metrics from the Kubernetes API: %s', e)
-            return
-
-        for domain_stat in iter_domain_stats(nodes, pods, resource_flavors, topologies):
-            tags = self.topology_domain_tags(domain_stat.flavor, domain_stat.level)
-            self.gauge('topology_domains.total', domain_stat.total, tags=tags)
-            self.gauge('topology_domains.available', domain_stat.available, tags=tags)
-            self.gauge('topology_domains.fully_used', domain_stat.fully_used, tags=tags)
-            self.gauge('topology_domains.partially_used', domain_stat.partially_used, tags=tags)
-
-    def topology_domain_tags(self, flavor: str, domain: str) -> list[str]:
-        return [
-            *self.instance.get('tags', []),
-            f'kueue_resource_flavor:{flavor}',
-            f'domain:{domain}',
-            f'domain_short:{domain.rsplit("/", 1)[-1]}',
-            *(tagger.tag(f'{KUEUE_RESOURCE_FLAVOR_ENTITY_PREFIX}{flavor}', tagger.ORCHESTRATOR) or []),
-        ]
 
     def collect_workload_events_from_api(self):
         try:

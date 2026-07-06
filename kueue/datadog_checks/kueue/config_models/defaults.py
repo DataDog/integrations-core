@@ -44,10 +44,6 @@ def instance_collect_histogram_buckets():
     return True
 
 
-def instance_collect_topology_domain_metrics():
-    return True
-
-
 def instance_collect_workload_events():
     return True
 

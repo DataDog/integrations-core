@@ -100,7 +100,6 @@ class InstanceConfig(BaseModel):
     cluster_check: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
-    collect_topology_domain_metrics: Optional[bool] = None
     collect_workload_events: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None

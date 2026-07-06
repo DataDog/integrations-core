@@ -50,26 +50,6 @@ EXPECTED_METRIC_TAGS = {
     'kueue.local_queue.resource_usage.memory': _local_queue_flavor_tags,
     'kueue.controller.runtime.active_workers': [],
     'kueue.process.uptime.seconds': [],
-    'kueue.topology_domains.available': [
-        'kueue_resource_flavor:tas-flavor',
-        'domain:kubernetes.io/hostname',
-        'domain_short:hostname',
-    ],
-    'kueue.topology_domains.fully_used': [
-        'kueue_resource_flavor:tas-flavor',
-        'domain:kubernetes.io/hostname',
-        'domain_short:hostname',
-    ],
-    'kueue.topology_domains.partially_used': [
-        'kueue_resource_flavor:tas-flavor',
-        'domain:kubernetes.io/hostname',
-        'domain_short:hostname',
-    ],
-    'kueue.topology_domains.total': [
-        'kueue_resource_flavor:tas-flavor',
-        'domain:kubernetes.io/hostname',
-        'domain_short:hostname',
-    ],
     'kueue.workqueue.depth': [],
 }
 
