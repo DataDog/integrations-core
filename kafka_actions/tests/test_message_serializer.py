@@ -8,9 +8,10 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
+from google.protobuf import descriptor_pb2
+
 from datadog_checks.kafka_actions.message_deserializer import MessageDeserializer
 from datadog_checks.kafka_actions.message_serializer import MessageSerializer
-from google.protobuf import descriptor_pb2
 
 from . import common
 

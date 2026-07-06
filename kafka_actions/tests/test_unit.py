@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from confluent_kafka import KafkaError, KafkaException, TopicPartition
 from confluent_kafka.admin import OffsetSpec
+
 from datadog_checks.kafka_actions import KafkaActionsCheck
 from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
 
