@@ -172,6 +172,28 @@ def test_connector_topics_requested_per_connector(run_connect_check):
     assert any(url.endswith('/connectors/demo-heartbeat/topics') for url in requested_urls)
 
 
+def test_topics_not_refetched_within_refresh_interval(run_connect_check):
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, runs=2)
+
+    topic_fetches = [call for call in http.get.call_args_list if call.args[0].endswith('/topics')]
+    assert len(topic_fetches) == 2, "topics should only be fetched once per connector across both runs"
+
+
+def test_config_event_survives_topics_fetch_failure(run_connect_check, aggregator):
+    def get(url, **kwargs):
+        if url.endswith('/topics'):
+            raise ConnectionError("refused")
+        response = mock.MagicMock()
+        response.json.return_value = {} if 'connector-plugins' in url else SAMPLE_CONNECTORS_RESPONSE
+        return response
+
+    run_connect_check(get_side_effect=get)
+
+    events = dsm_events(aggregator, 'connector')
+    assert events
+    assert all(event['topics'] == [] for event in events)
+
+
 def test_config_event_not_reemitted_when_unchanged(run_connect_check, aggregator):
     run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE, runs=2)
 

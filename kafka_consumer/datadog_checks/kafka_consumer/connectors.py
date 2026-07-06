@@ -211,7 +211,8 @@ class KafkaConnectCollector:
         tags_base = self.config._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
         self._emit_connector_metrics(connectors_data, tags_base)
-        self._emit_connector_config_events(connectors_data, cluster_id, url)
+        connector_topics = self._get_connector_topics(url, list(connectors_data.keys()))
+        self._emit_connector_config_events(connectors_data, cluster_id, url, connector_topics)
         self._collect_plugins(url, cluster_id)
 
     @staticmethod
@@ -274,14 +275,10 @@ class KafkaConnectCollector:
         fetch_cache_key = f'{CONNECTOR_TOPICS_FETCH_CACHE_KEY}:{safe_url}'
         data_cache_key = f'{CONNECTOR_TOPICS_DATA_CACHE_KEY}:{safe_url}'
 
-        try:
-            cached_str = self.check.read_persistent_cache(data_cache_key)
-            topics_by_connector: dict[str, list[str]] = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self.log.debug("Could not read connector topics cache %s: %s", data_cache_key, e)
-            topics_by_connector = {}
+        topics_by_connector: dict[str, list[str]] = self.cache.get_cached_json(data_cache_key)
 
         names_to_refresh = self.cache.get_items_to_fetch(fetch_cache_key, connector_names)
+        names_fetched = []
         for name in names_to_refresh:
             try:
                 response = self.http.get(
@@ -291,21 +288,21 @@ class KafkaConnectCollector:
                 )
                 response.raise_for_status()
                 topics_by_connector[name] = sorted((response.json().get(name) or {}).get('topics', []))
+                names_fetched.append(name)
             except Exception as e:
                 self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
 
-        if names_to_refresh:
-            self.cache.mark_items_fetched(fetch_cache_key, names_to_refresh)
-            try:
-                self.check.write_persistent_cache(data_cache_key, json.dumps(topics_by_connector))
-            except Exception as e:
-                self.log.debug("Could not write connector topics cache %s: %s", data_cache_key, e)
+        if names_fetched:
+            self.cache.mark_items_fetched(fetch_cache_key, names_fetched, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE)
+            pruned_topics = {name: topics_by_connector[name] for name in connector_names if name in topics_by_connector}
+            self.cache.set_cached_json(data_cache_key, pruned_topics)
 
         return {name: topics_by_connector.get(name, []) for name in connector_names}
 
-    def _emit_connector_config_events(self, connectors_data: dict[str, Any], cluster_id: str, url: str) -> None:
+    def _emit_connector_config_events(
+        self, connectors_data: dict[str, Any], cluster_id: str, url: str, connector_topics: dict[str, list[str]]
+    ) -> None:
         connector_contents: dict[str, str] = {}
-        connector_topics = self._get_connector_topics(url, list(connectors_data.keys()))
 
         for name, data in connectors_data.items():
             if data is None:
@@ -316,7 +313,7 @@ class KafkaConnectCollector:
             connector_status = status.get('connector') or {}
             connector_type = info.get('type', 'unknown')
             connector_state = connector_status.get('state', 'UNKNOWN')
-            connector_trace = connector_status.get('trace')
+            connector_trace = connector_status.get('trace') if connector_state == 'FAILED' else None
             tasks = status.get('tasks') or []
             raw_config = info.get('config') or {}
 
