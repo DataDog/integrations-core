@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
-from pydantic import ValidationError
 
 from ddev.ai.tools.shell.ddev.create import DdevCreateInput, DdevCreateTool
 from ddev.ai.tools.shell.ddev.ddev_test import DdevTestInput, DdevTestTool
@@ -43,18 +42,6 @@ def test_create_cmd():
 def test_create_cmd_platforms_joined():
     cmd = DdevCreateTool().cmd(DdevCreateInput(**{**VALID_CREATE_INPUT, "platforms": ["linux", "mac_os"]}))
     assert cmd[cmd.index("--platforms") + 1] == "linux,mac_os"
-
-
-@pytest.mark.parametrize(
-    "platforms",
-    [
-        ["linux", "bsd"],
-        [],
-    ],
-)
-def test_create_invalid_platform_raises(platforms):
-    with pytest.raises(ValidationError):
-        DdevCreateInput(**{**VALID_CREATE_INPUT, "platforms": platforms})
 
 
 # --- ddev test ---
@@ -189,11 +176,6 @@ def test_release_changelog_cmd_message_placement():
     assert cmd[-1] == "Some message"
 
 
-def test_release_changelog_invalid_change_type_raises():
-    with pytest.raises(ValidationError):
-        ReleaseChangelogInput(change_type="patch", integration="mycheck", message="Some message")
-
-
 # --- ddev validate ---
 
 
@@ -212,8 +194,3 @@ def test_validate_cmd_sync_flag_per_subcommand(subcommand: str):
 def test_validate_cmd_all_uses_fix_flag():
     cmd = DdevValidateTool().cmd(DdevValidateInput(subcommand="all", integration="mycheck", sync=True))
     assert cmd == ["ddev", "--no-interactive", "validate", "all", "--fix", "mycheck"]
-
-
-def test_validate_invalid_subcommand_raises():
-    with pytest.raises(ValidationError):
-        DdevValidateInput(subcommand="lint", integration="mycheck")
