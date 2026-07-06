@@ -640,11 +640,12 @@ files:
             Message value format.
 
             Supported formats:
-            - raw: base64-encoded bytes, produced as-is (default)
+            - raw: Base64-encoded bytes, produced as-is (default)
             - string: Plain UTF-8 text
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
-            - protobuf: Protocol Buffers
+            - protobuf: Protocol Buffers. Only the first top-level message type
+              defined in the schema is used.
             - avro: Apache Avro
           default: raw
           example: raw
@@ -671,11 +672,12 @@ files:
             Message key format.
 
             Supported formats:
-            - raw: base64-encoded bytes, produced as-is (default)
+            - raw: Base64-encoded bytes, produced as-is (default)
             - string: Plain UTF-8 text
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
-            - protobuf: Protocol Buffers
+            - protobuf: Protocol Buffers. Only the first top-level message type
+              defined in the schema is used.
             - avro: Apache Avro
           default: raw
           example: raw

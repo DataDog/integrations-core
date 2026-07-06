@@ -17,6 +17,7 @@ from fastavro import schemaless_reader
 from google.protobuf.json_format import MessageToJson
 
 from .schema_helpers import (
+    REGISTRY_TYPE_MAP,
     SCHEMA_REGISTRY_MAGIC_BYTE,
     build_avro_schema,
     build_protobuf_schema,
@@ -296,14 +297,7 @@ class MessageDeserializer:
             return cached
 
         schema_str, schema_type, dep_schemas = self.schema_registry.get_schema(schema_id)
-
-        # Map Schema Registry type names to our format names
-        registry_type_map = {
-            'AVRO': 'avro',
-            'PROTOBUF': 'protobuf',
-            'JSON': 'json',
-        }
-        actual_format = registry_type_map.get(schema_type, message_format)
+        actual_format = REGISTRY_TYPE_MAP.get(schema_type, message_format)
 
         schema = self._get_or_build_schema(actual_format, schema_str, from_registry=True, dep_schemas=dep_schemas)
         result = (schema, actual_format)

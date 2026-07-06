@@ -42,45 +42,40 @@ BOOK_DICT_AFTER_PROTOBUF_ROUND_TRIP = {
 }
 
 
+@pytest.fixture
+def log():
+    return MagicMock()
+
+
+@pytest.fixture
+def serializer(log):
+    return MessageSerializer(log)
+
+
 class TestMessageSerializer:
     """Test MessageSerializer class."""
 
-    def test_serialize_raw_format(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_raw_format(self, serializer):
         original = b'hello world'
         encoded = base64.b64encode(original).decode('ascii')
 
         result = serializer.serialize_message(encoded, 'raw')
         assert result == original
 
-    def test_serialize_string_format(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_string_format(self, serializer):
         result = serializer.serialize_message('hello world', 'string')
         assert result == b'hello world'
 
-    def test_serialize_json_format(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_json_format(self, serializer):
         value = json.dumps({"order_id": "12345", "status": "pending"})
         result = serializer.serialize_message(value, 'json')
         assert json.loads(result.decode('utf-8')) == json.loads(value)
 
-    def test_serialize_json_format_invalid_json_raises(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_json_format_invalid_json_raises(self, serializer):
         with pytest.raises(ValueError, match="Failed to serialize json message"):
             serializer.serialize_message('not valid json', 'json')
 
-    def test_serialize_bson_format(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_bson_format(self, log, serializer):
         value = json.dumps({"order_id": "12345", "status": "pending"})
         result = serializer.serialize_message(value, 'bson')
         assert isinstance(result, bytes)
@@ -90,10 +85,7 @@ class TestMessageSerializer:
         assert json.loads(decoded) == {"order_id": "12345", "status": "pending"}
         assert schema_id is None
 
-    def test_serialize_avro_inline_schema_round_trip(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_avro_inline_schema_round_trip(self, log, serializer):
         result = serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
         assert isinstance(result, bytes)
 
@@ -102,17 +94,7 @@ class TestMessageSerializer:
         assert json.loads(decoded) == json.loads(BOOK_JSON)
         assert schema_id is None
 
-    def test_serialize_avro_missing_schema_raises(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
-        with pytest.raises(ValueError, match="Failed to serialize avro message"):
-            serializer.serialize_message(BOOK_JSON, 'avro')
-
-    def test_serialize_protobuf_inline_schema_round_trip(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_protobuf_inline_schema_round_trip(self, log, serializer):
         result = serializer.serialize_message(BOOK_JSON, 'protobuf', schema_str=PROTOBUF_SCHEMA)
         assert isinstance(result, bytes)
 
@@ -121,18 +103,15 @@ class TestMessageSerializer:
         assert json.loads(decoded) == BOOK_DICT_AFTER_PROTOBUF_ROUND_TRIP
         assert schema_id is None
 
-    def test_serialize_protobuf_missing_schema_raises(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
+    @pytest.mark.parametrize("fmt", ["avro", "protobuf"])
+    def test_serialize_schema_format_without_schema_raises(self, serializer, fmt):
+        with pytest.raises(ValueError, match=f"Failed to serialize {fmt} message"):
+            serializer.serialize_message(BOOK_JSON, fmt)
 
-        with pytest.raises(ValueError, match="Failed to serialize protobuf message"):
-            serializer.serialize_message(BOOK_JSON, 'protobuf')
-
-    def test_serialize_avro_schema_registry_round_trip(self):
-        log = MagicMock()
+    def test_serialize_avro_schema_registry_round_trip(self, log, serializer):
         schema_registry = MagicMock()
         schema_registry.get_schema.return_value = (AVRO_SCHEMA, 'AVRO', [])
-        serializer = MessageSerializer(log, schema_registry=schema_registry)
+        serializer.schema_registry = schema_registry
 
         result = serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
 
@@ -144,11 +123,10 @@ class TestMessageSerializer:
         assert json.loads(decoded) == json.loads(BOOK_JSON)
         assert schema_id == 350
 
-    def test_serialize_protobuf_schema_registry_round_trip(self):
-        log = MagicMock()
+    def test_serialize_protobuf_schema_registry_round_trip(self, log, serializer):
         schema_registry = MagicMock()
         schema_registry.get_schema.return_value = (PROTOBUF_SCHEMA_REGISTRY, 'PROTOBUF', [])
-        serializer = MessageSerializer(log, schema_registry=schema_registry)
+        serializer.schema_registry = schema_registry
 
         result = serializer.serialize_message(BOOK_JSON, 'protobuf', uses_schema_registry=True, schema_id=350)
 
@@ -160,17 +138,12 @@ class TestMessageSerializer:
         assert json.loads(decoded) == BOOK_DICT_AFTER_PROTOBUF_ROUND_TRIP
         assert schema_id == 350
 
-    def test_serialize_schema_registry_without_registry_raises(self):
-        log = MagicMock()
-        serializer = MessageSerializer(log)
-
+    def test_serialize_schema_registry_without_registry_raises(self, serializer):
         with pytest.raises(ValueError, match="no Schema Registry is configured"):
             serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
 
-    def test_serialize_schema_registry_without_schema_id_raises(self):
-        log = MagicMock()
-        schema_registry = MagicMock()
-        serializer = MessageSerializer(log, schema_registry=schema_registry)
+    def test_serialize_schema_registry_without_schema_id_raises(self, serializer):
+        serializer.schema_registry = MagicMock()
 
         with pytest.raises(ValueError, match="requires a schema_id"):
             serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True)

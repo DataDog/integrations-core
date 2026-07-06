@@ -21,6 +21,8 @@ from fastavro import schemaless_writer
 from google.protobuf import json_format as protobuf_json_format
 
 from .schema_helpers import (
+    REGISTRY_TYPE_MAP,
+    SCHEMA_FORMATS,
     SCHEMA_REGISTRY_MAGIC_BYTE,
     build_avro_schema,
     build_protobuf_schema,
@@ -28,16 +30,6 @@ from .schema_helpers import (
     get_protobuf_message_class,
     write_protobuf_message_indices,
 )
-
-VALID_FORMATS = frozenset({'raw', 'string', 'json', 'bson', 'avro', 'protobuf'})
-SCHEMA_FORMATS = frozenset({'avro', 'protobuf'})
-
-# Maps the Schema Registry's schemaType field to our format names.
-_REGISTRY_TYPE_MAP = {
-    'AVRO': 'avro',
-    'PROTOBUF': 'protobuf',
-    'JSON': 'json',
-}
 
 
 class MessageSerializer:
@@ -150,7 +142,7 @@ class MessageSerializer:
             the format reported by the registry (may differ from format_type).
         """
         schema_str, schema_type, dep_schemas = self.schema_registry.get_schema(schema_id)
-        actual_format = _REGISTRY_TYPE_MAP.get(schema_type, format_type)
+        actual_format = REGISTRY_TYPE_MAP.get(schema_type, format_type)
 
         if actual_format == 'protobuf':
             schema = build_protobuf_schema_from_registry(schema_str, dep_schemas)

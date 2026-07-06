@@ -25,6 +25,16 @@ from google.protobuf import (
 
 SCHEMA_REGISTRY_MAGIC_BYTE = 0x00
 
+VALID_FORMATS = frozenset({'raw', 'string', 'json', 'bson', 'avro', 'protobuf'})
+SCHEMA_FORMATS = frozenset({'avro', 'protobuf'})
+
+# Maps the Schema Registry's schemaType field to our format names.
+REGISTRY_TYPE_MAP = {
+    'AVRO': 'avro',
+    'PROTOBUF': 'protobuf',
+    'JSON': 'json',
+}
+
 _WELL_KNOWN_TYPE_MODULES = (
     any_pb2,
     duration_pb2,
