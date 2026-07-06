@@ -192,9 +192,6 @@ ALLOWED_CONFIG_KEYS = frozenset(
     }
 )
 
-# Substrings that mark a config value as credential-shaped. Checked even against allowlisted
-# keys, so a plugin that overloads a common name (or a mistake in ALLOWED_CONFIG_KEYS) can't
-# leak a secret.
 SENSITIVE_KEY_SUBSTRINGS = (
     'password',
     'passwd',
@@ -217,12 +214,6 @@ SENSITIVE_KEY_SUBSTRINGS = (
 
 
 def _is_allowed_config_key(key: str) -> bool:
-    """Return whether a connector config key is known-safe to expose unmasked.
-
-    Only the ``.type`` component of a named transform/predicate is allowed — other
-    per-transform settings (e.g. a replacement pattern) aren't framework-defined and
-    could hold arbitrary plugin-specific data.
-    """
     key_lower = key.lower()
     if any(substring in key_lower for substring in SENSITIVE_KEY_SUBSTRINGS):
         return False
@@ -513,8 +504,6 @@ class KafkaConnectCollector:
                     try:
                         topics_by_connector[name] = future.result()
                     except Exception as e:
-                        # Broad by design: a malformed or unreachable response for one connector
-                        # shouldn't block topic tracking for the others.
                         self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
 
             self.cache.mark_items_fetched(fetch_cache_key, names_to_refresh, max_cache_size=CONNECTOR_CACHE_MAX_SIZE)
