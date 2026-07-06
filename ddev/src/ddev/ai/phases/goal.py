@@ -38,11 +38,15 @@ How to work:
 - Be specific in your reasoning. Vague rejections are useless to the worker.
 
 Output contract:
-- Reply with ONLY a JSON object as your final response, with no surrounding prose
-  and no markdown code fences.
+- End your reply with the verdict as a single-line JSON object on the LAST line,
+  with nothing after it.
+- That final line must be valid JSON on one line, with no markdown code fences
+  and not split across multiple lines.
 - Schema: {"valid": <bool>, "reason": <string>}.
 - "reason" must be specific and actionable when "valid" is false.
 - "reason" may be an empty string when "valid" is true.
+- You may write your reasoning as prose before that final line; only the last
+  line is read as the verdict.
 """
 
 GOAL_TASK_SUFFIX = """
@@ -68,9 +72,9 @@ why clearly in your final summary (do not silently ignore it).
 """
 
 GOAL_PARSE_RETRY_PROMPT = (
-    "Your previous reply was not a valid JSON object matching the schema "
-    '{"valid": <bool>, "reason": <string>}. Reply with only that JSON object, '
-    "with no surrounding prose and no markdown code fences."
+    "Your previous reply did not end with a valid JSON verdict. End your reply with a "
+    'single-line JSON object as the LAST line: {"valid": <bool>, "reason": <string>}, '
+    "with no markdown code fences and nothing after it."
 )
 
 
@@ -134,9 +138,9 @@ def build_reviewer_user_message(
     )
 
 
-def parse_reviewer_output(text: str) -> tuple[bool, str] | None:
-    """Return (valid, reason) if text parses; None if it does not."""
-    stripped = text.strip()
+def _parse_verdict(candidate: str) -> tuple[bool, str] | None:
+    """Parse a single candidate string into (valid, reason); None if it does not match the schema."""
+    stripped = candidate.strip()
     if stripped.startswith("```"):
         stripped = stripped.strip("`")
         if stripped.lower().startswith("json"):
@@ -153,6 +157,28 @@ def parse_reviewer_output(text: str) -> tuple[bool, str] | None:
     if not isinstance(valid, bool) or not isinstance(reason, str):
         return None
     return valid, reason
+
+
+def parse_reviewer_output(text: str) -> tuple[bool, str] | None:
+    """Return (valid, reason) from the reviewer's verdict; None if it does not parse.
+
+    The reviewer is instructed to emit the verdict as a single-line JSON object on the
+    last line of its reply, so we parse that last non-empty line first and ignore any
+    preceding prose. As a fallback we also try the whole reply, which covers a reviewer
+    that returns only the JSON object (possibly pretty-printed across several lines).
+    """
+    candidates: list[str] = []
+    non_empty_lines = [line for line in text.splitlines() if line.strip()]
+    if non_empty_lines:
+        candidates.append(non_empty_lines[-1])
+    whole = text.strip()
+    if whole and whole not in candidates:
+        candidates.append(whole)
+    for candidate in candidates:
+        parsed = _parse_verdict(candidate)
+        if parsed is not None:
+            return parsed
+    return None
 
 
 async def _run_reviewer_once(
