@@ -1,0 +1,1 @@
+Fix collisions between gauge and counter metrics that share a name after the OpenMetrics V2 parser strips the ``_total`` suffix. ``istio.go.memstats.alloc_bytes`` (gauge) and ``istio.go.memstats.alloc_bytes.count`` (counter), and their ``istio.mesh.agent.go.memstats.alloc_bytes`` counterparts, are now both collected.
