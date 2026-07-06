@@ -10,7 +10,7 @@ from types import get_original_bases
 from typing import Any
 
 from anthropic.types import ToolParam
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, ValidationError
 
 from .types import ToolResult
 
@@ -105,7 +105,7 @@ class BaseTool[TInput: BaseToolInput](ABC):
         try:
             input_cls = _get_input_type(type(self))
             validated: TInput = input_cls.model_validate(raw)  # type: ignore[assignment]
-        except (TypeError, ValueError) as e:
+        except (ValidationError, TypeError, ValueError) as e:
             return ToolResult(success=False, error=str(e))
         try:
             return await self(validated)
