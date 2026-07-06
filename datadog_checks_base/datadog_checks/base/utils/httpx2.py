@@ -121,10 +121,10 @@ def _map_httpx2_exception(exc: httpx2.HTTPError | httpx2.InvalidURL) -> HTTPErro
     if isinstance(exc, httpx2.NetworkError):
         return HTTPConnectionError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
     if isinstance(exc, httpx2.HTTPStatusError):
+        # response is attached at the raise_for_status seam (the agnostic adapter), never the raw one here
         return HTTPStatusError(
             str(exc) or exc.__class__.__name__,
             request=getattr(exc, 'request', None),
-            response=getattr(exc, 'response', None),
         )
     if isinstance(exc, httpx2.RequestError):
         return HTTPRequestError(str(exc) or exc.__class__.__name__, request=getattr(exc, 'request', None))
@@ -212,7 +212,11 @@ class HTTPX2ResponseAdapter:
         try:
             self._response.raise_for_status()
         except httpx2.HTTPStatusError as exc:
-            raise _map_httpx2_exception(exc) from exc
+            raise HTTPStatusError(
+                str(exc) or exc.__class__.__name__,
+                request=getattr(exc, 'request', None),
+                response=self,
+            ) from exc
 
     def close(self) -> None:
         self._response.close()
