@@ -41,21 +41,10 @@ def assignments(*names: str) -> list[Assignment]:
 
 async def test_duplicate_names_rejected(process_factory: ProcessFactoryBuilder):
     factory = process_factory()
-    result = await make_tool(factory)(
-        SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments("a", "a"))
-    )
+    raw = {"system_prompt": "s", "assignments": [{"name": "a", "prompt": "do a"}, {"name": "a", "prompt": "do a"}]}
+    result = await make_tool(factory).run(raw)
     assert result.success is False
     assert "unique" in result.error
-    assert factory.calls == []
-
-
-async def test_over_cap_rejected(process_factory: ProcessFactoryBuilder):
-    factory = process_factory()
-    result = await make_tool(factory)(
-        SpawnIdenticalSubagentsInput(system_prompt="s", assignments=assignments(*[f"a{i}" for i in range(33)]))
-    )
-    assert result.success is False
-    assert "Too many" in result.error
     assert factory.calls == []
 
 

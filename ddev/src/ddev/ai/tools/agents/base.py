@@ -31,6 +31,13 @@ class ChildOutcome:
     output_tokens: int = 0
     error: str | None = None
 
+    def as_md_section(self) -> str:
+        """Render this outcome as a labeled markdown section for aggregated multi-child output."""
+        if self.error is not None:
+            return f"## {self.name} - {self.error}"
+        status = "TRUNCATED (max_tokens)" if self.stop_reason == StopReason.MAX_TOKENS else "ok"
+        return f"## {self.name} — {status}\n{self.text}"
+
 
 class BaseSpawnTool[TInput: BaseToolInput](BaseTool[TInput]):
     def __init__(

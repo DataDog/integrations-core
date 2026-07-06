@@ -7,9 +7,8 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
-from ddev.ai.agent.types import StopReason
 from ddev.ai.tools.agents.base import SPAWN_IDENTICAL_NAME, BaseSpawnTool, ChildOutcome
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
@@ -52,13 +51,23 @@ class SpawnIdenticalSubagentsInput(BaseToolInput):
     assignments: Annotated[
         list[Assignment],
         Field(
-            description="One entry per child. Keep each prompt small — only the assignment-specific part.", min_length=1
+            description="One entry per child. Keep each prompt small — only the assignment-specific part.",
+            min_length=1,
+            max_length=MAX_ASSIGNMENTS,
         ),
     ]
     max_parallel: Annotated[
-        int | None,
-        Field(description="Optional cap on concurrent children.", ge=1),
-    ] = None
+        int,
+        Field(description="Cap on concurrent children.", ge=1),
+    ] = DEFAULT_PARALLEL
+
+    @field_validator("assignments")
+    @classmethod
+    def names_must_be_unique(cls, assignments: list[Assignment]) -> list[Assignment]:
+        names = [a.name for a in assignments]
+        if len(set(names)) != len(names):
+            raise ValueError("Assignment names must be unique.")
+        return assignments
 
 
 class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
@@ -84,18 +93,10 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
         return SPAWN_IDENTICAL_NAME
 
     async def __call__(self, tool_input: SpawnIdenticalSubagentsInput) -> ToolResult:
-        names = [a.name for a in tool_input.assignments]
-        if len(set(names)) != len(names):
-            return ToolResult(success=False, error="Assignment names must be unique.")
-        if len(tool_input.assignments) > MAX_ASSIGNMENTS:
-            return ToolResult(
-                success=False, error=f"Too many assignments: {len(tool_input.assignments)} > {MAX_ASSIGNMENTS}."
-            )
         if error := self._validate_tools(tool_input.tools, "Parallel subagents"):
             return ToolResult(success=False, error=error)
 
-        limit = tool_input.max_parallel or min(len(tool_input.assignments), DEFAULT_PARALLEL)
-        semaphore = asyncio.Semaphore(limit)
+        semaphore = asyncio.Semaphore(tool_input.max_parallel)
         system_prompt = f"{tool_input.system_prompt}\n\n{CONCISE_DIRECTIVE}"
 
         self._call_counter += 1
@@ -119,7 +120,7 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
             else:
                 outcomes.append(result)
 
-        sections = "\n\n".join(self._format(o) for o in outcomes)
+        sections = "\n\n".join(o.as_md_section() for o in outcomes)
         return ToolResult(
             success=any(o.error is None for o in outcomes),
             data=sections,
@@ -127,9 +128,3 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
             total_input_tokens=sum(o.input_tokens for o in outcomes),
             total_output_tokens=sum(o.output_tokens for o in outcomes),
         )
-
-    def _format(self, outcome: ChildOutcome) -> str:
-        if outcome.error is not None:
-            return f"## {outcome.name} - {outcome.error}"
-        status = "TRUNCATED (max_tokens)" if outcome.stop_reason == StopReason.MAX_TOKENS else "ok"
-        return f"## {outcome.name} — {status}\n{outcome.text}"
