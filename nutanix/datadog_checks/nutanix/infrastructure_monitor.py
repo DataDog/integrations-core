@@ -512,6 +512,7 @@ class InfrastructureMonitor:
 
     def _extract_host_tags(self, host: dict) -> list[str]:
         """Extract tags from a host object."""
+        host_id = host.get("extId")
         host_name = host.get("hostName")
         host_type = _normalize_tag_value(host.get("hostType"))
         maintenance_state = _normalize_tag_value(host.get("maintenanceState"))
@@ -521,6 +522,8 @@ class InfrastructureMonitor:
 
         tags = []
         tags.append("ntnx_type:host")
+        if self.check.config.collect_resource_ids_as_tags and host_id:
+            tags.append(f"ntnx_host_id:{host_id}")
         if host_name:
             tags.append(f"ntnx_host_name:{host_name}")
         tags.append(f"ntnx_host_type:{host_type}")
@@ -535,10 +538,13 @@ class InfrastructureMonitor:
 
     def _extract_cluster_tags(self, cluster: dict) -> list[str]:
         """Extract tags from a cluster object."""
+        cluster_id = cluster.get("extId")
         cluster_name = cluster.get("name")
         operation_mode = _normalize_tag_value(get_nested(cluster, "config/operationMode"))
 
         tags = []
+        if self.check.config.collect_resource_ids_as_tags and cluster_id:
+            tags.append(f"ntnx_cluster_id:{cluster_id}")
         if cluster_name:
             tags.append(f"ntnx_cluster_name:{cluster_name}")
         tags.append(f"ntnx_operation_mode:{operation_mode}")
@@ -554,13 +560,21 @@ class InfrastructureMonitor:
         is_agent_vm = is_affirmative(vm.get("isAgentVm"))
         power_state = _normalize_tag_value(vm.get("powerState"))
 
+        collect_ids = self.check.config.collect_resource_ids_as_tags
+
         tags = []
         tags.append("ntnx_type:vm")
+        if collect_ids and (vm_id := vm.get("extId")):
+            tags.append(f"ntnx_vm_id:{vm_id}")
         if vm_name:
             tags.append(f"ntnx_vm_name:{vm_name}")
         tags.extend(self.check.extract_category_tags(vm))
+        if collect_ids and host_id:
+            tags.append(f"ntnx_host_id:{host_id}")
         if host_id and host_id in self.host_names:
             tags.append(f"ntnx_host_name:{self.host_names[host_id]}")
+        if collect_ids and cluster_id:
+            tags.append(f"ntnx_cluster_id:{cluster_id}")
         if cluster_id and cluster_id in self.cluster_names:
             tags.append(f"ntnx_cluster_name:{self.cluster_names[cluster_id]}")
         tags.append(f"ntnx_is_agent_vm:{is_agent_vm}")
