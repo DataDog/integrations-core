@@ -24,7 +24,7 @@ services:
     command: ["-v=1"]
     volumes:
       - ./conf:/opt/impala/conf:ro
-      - ${STATESTORED_LOG_FOLDER}:/opt/impala/logs
+      - ${STATESTORED_LOG_FOLDER:-/tmp/impala-logs/statestored}:/opt/impala/logs
     networks:
       - impala-network
   catalogd:
@@ -42,7 +42,7 @@ services:
       # shared volume.
       - impala-warehouse:/user/hive/warehouse
       - ./conf:/opt/impala/conf:ro
-      - ${CATALOGD_LOG_FOLDER}:/opt/impala/logs
+      - ${CATALOGD_LOG_FOLDER:-/tmp/impala-logs/catalogd}:/opt/impala/logs
     networks:
       - impala-network
   impalad:
@@ -67,7 +67,7 @@ services:
     volumes:
       - impala-warehouse:/user/hive/warehouse
       - ./conf:/opt/impala/conf:ro
-      - ${IMPALAD_LOG_FOLDER}:/opt/impala/logs
+      - ${IMPALAD_LOG_FOLDER:-/tmp/impala-logs/impalad}:/opt/impala/logs
     networks:
       - impala-network
 
