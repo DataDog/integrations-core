@@ -35,7 +35,6 @@ COMMON_METRICS = [
     NAMESPACE + '.go.memstats.heap_objects',
     NAMESPACE + '.go.memstats.heap_sys_bytes',
     NAMESPACE + '.go.memstats.last_gc_time_seconds',
-    NAMESPACE + '.go.memstats.lookups_total',
     NAMESPACE + '.go.memstats.mallocs_total',
     NAMESPACE + '.go.memstats.mcache_inuse_bytes',
     NAMESPACE + '.go.memstats.mcache_sys_bytes',
@@ -65,10 +64,6 @@ COMMON_METRICS = [
     NAMESPACE + '.request_size.bytes.count',
     NAMESPACE + '.request_duration.seconds.sum',
     NAMESPACE + '.request_duration.seconds.count',
-    NAMESPACE + '.forward_request_count',
-    NAMESPACE + '.forward_request_duration.seconds.sum',
-    NAMESPACE + '.forward_request_duration.seconds.count',
-    NAMESPACE + '.forward_response_rcode_count',
 ]
 
 COMMON_METRICS_OMV2 = [
@@ -87,7 +82,6 @@ COMMON_METRICS_OMV2 = [
     NAMESPACE + '.go.memstats.heap_objects',
     NAMESPACE + '.go.memstats.heap_sys_bytes',
     NAMESPACE + '.go.memstats.last_gc_time_seconds',
-    NAMESPACE + '.go.memstats.lookups_total.count',
     NAMESPACE + '.go.memstats.mallocs_total.count',
     NAMESPACE + '.go.memstats.mcache_inuse_bytes',
     NAMESPACE + '.go.memstats.mcache_sys_bytes',
@@ -121,14 +115,11 @@ COMMON_METRICS_OMV2 = [
     NAMESPACE + '.request_duration.seconds.sum',
     NAMESPACE + '.request_duration.seconds.count',
     NAMESPACE + '.request_duration.seconds.bucket',
-    NAMESPACE + '.forward_request_count.count',
-    NAMESPACE + '.forward_request_duration.seconds.sum',
-    NAMESPACE + '.forward_request_duration.seconds.count',
-    NAMESPACE + '.forward_request_duration.seconds.bucket',
-    NAMESPACE + '.forward_response_rcode_count.count',
+    
 ]
 
 METRICS_V1_2 = COMMON_METRICS + [
+    NAMESPACE + '.go.memstats.lookups_total',
     # Has been removed from v1.7.0
     NAMESPACE + '.request_type_count',
     # The proxy plugin has been deprecated
@@ -136,9 +127,14 @@ METRICS_V1_2 = COMMON_METRICS + [
     NAMESPACE + '.proxy_request_duration.seconds.sum',
     NAMESPACE + '.proxy_request_duration.seconds.count',
     NAMESPACE + '.forward_sockets_open',
+    NAMESPACE + '.forward_request_count',
+    NAMESPACE + '.forward_request_duration.seconds.sum',
+    NAMESPACE + '.forward_request_duration.seconds.count',
+    NAMESPACE + '.forward_response_rcode_count',
 ]
 
 METRICS_V1_2_OMV2 = COMMON_METRICS_OMV2 + [
+    NAMESPACE + '.go.memstats.lookups_total.count',
     # Has been removed from v1.7.0
     NAMESPACE + '.request_type_count.count',
     NAMESPACE + '.proxy_request_count.count',
@@ -147,6 +143,11 @@ METRICS_V1_2_OMV2 = COMMON_METRICS_OMV2 + [
     NAMESPACE + '.proxy_request_duration.seconds.sum',
     NAMESPACE + '.proxy_request_duration.seconds.count',
     NAMESPACE + '.forward_sockets_open',
+    NAMESPACE + '.forward_request_count.count',
+    NAMESPACE + '.forward_request_duration.seconds.sum',
+    NAMESPACE + '.forward_request_duration.seconds.count',
+    NAMESPACE + '.forward_request_duration.seconds.bucket',
+    NAMESPACE + '.forward_response_rcode_count.count',
     NAMESPACE + '.go.memstats.heap_released_bytes.count',
 ]
 
@@ -155,9 +156,15 @@ METRICS_V1_8 = COMMON_METRICS + [
     NAMESPACE + '.go.info',
     NAMESPACE + '.go.memstats.gc_cpu_fraction',
     NAMESPACE + '.go.memstats.heap_released_bytes',
+    NAMESPACE + '.go.memstats.lookups_total',
     NAMESPACE + '.cache_request_count',
     NAMESPACE + '.plugin_enabled',
     NAMESPACE + '.forward_healthcheck_broken_count',
+    NAMESPACE + '.forward_conn_cache_misses_count',
+    NAMESPACE + '.forward_request_count',
+    NAMESPACE + '.forward_request_duration.seconds.sum',
+    NAMESPACE + '.forward_request_duration.seconds.count',
+    NAMESPACE + '.forward_response_rcode_count',
     NAMESPACE + '.hosts.reload_timestamp',
     NAMESPACE + '.reload.failed_count',
     NAMESPACE + '.health_request_failures_count',
@@ -168,48 +175,45 @@ METRICS_V1_8_OMV2 = COMMON_METRICS_OMV2 + [
     NAMESPACE + '.go.info',
     NAMESPACE + '.go.memstats.gc_cpu_fraction',
     NAMESPACE + '.go.memstats.heap_released_bytes',
+    NAMESPACE + '.go.memstats.lookups_total.count',
     NAMESPACE + '.cache_request_count.count',
     NAMESPACE + '.plugin_enabled',
     NAMESPACE + '.forward_healthcheck_broken_count.count',
+    NAMESPACE + '.forward_conn_cache_misses_count.count',
+    NAMESPACE + '.forward_request_count.count',
+    NAMESPACE + '.forward_request_duration.seconds.sum',
+    NAMESPACE + '.forward_request_duration.seconds.count',
+    NAMESPACE + '.forward_request_duration.seconds.bucket',
+    NAMESPACE + '.forward_response_rcode_count.count',
     NAMESPACE + '.hosts.reload_timestamp',
     NAMESPACE + '.reload.failed_count.count',
     NAMESPACE + '.health_request_failures_count.count',
 ]
 
-METRICS_V1_14 = METRICS_V1_8 + [
-    NAMESPACE + '.cache_evictions_count',
-    NAMESPACE + '.forward_conn_cache_hits_count',
+METRICS_V1_14 = COMMON_METRICS + [
+    NAMESPACE + '.forward_max_concurrent_rejects',
+    NAMESPACE + '.go.info',
+    NAMESPACE + '.go.memstats.heap_released_bytes',
+    NAMESPACE + '.cache_request_count',
+    NAMESPACE + '.plugin_enabled',
+    NAMESPACE + '.forward_healthcheck_broken_count',
     NAMESPACE + '.forward_conn_cache_misses_count',
-    NAMESPACE + '.dns64.requests_translated_count',
-    NAMESPACE + '.https_response_code_count',
-    NAMESPACE + '.acl.filtered_requests',
-    NAMESPACE + '.acl.dropped_requests',
-    NAMESPACE + '.quic_response_code_count',
-    NAMESPACE + '.kubernetes.rest_client_request_duration.sum',
-    NAMESPACE + '.kubernetes.rest_client_request_duration.count',
-    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.sum',
-    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.count',
-    NAMESPACE + '.kubernetes.rest_client_requests_count',
-    NAMESPACE + '.reload.version_info',
+    NAMESPACE + '.hosts.reload_timestamp',
+    NAMESPACE + '.reload.failed_count',
+    NAMESPACE + '.health_request_failures_count',
 ]
 
-METRICS_V1_14_OMV2 = METRICS_V1_8_OMV2 + [
-    NAMESPACE + '.cache_evictions_count.count',
-    NAMESPACE + '.forward_conn_cache_hits_count.count',
+METRICS_V1_14_OMV2 = COMMON_METRICS_OMV2 + [
+    NAMESPACE + '.forward_max_concurrent_rejects.count',
+    NAMESPACE + '.go.info',
+    NAMESPACE + '.go.memstats.heap_released_bytes',
+    NAMESPACE + '.cache_request_count.count',
+    NAMESPACE + '.plugin_enabled',
+    NAMESPACE + '.forward_healthcheck_broken_count.count',
     NAMESPACE + '.forward_conn_cache_misses_count.count',
-    NAMESPACE + '.dns64.requests_translated_count.count',
-    NAMESPACE + '.https_response_code_count.count',
-    NAMESPACE + '.acl.filtered_requests.count',
-    NAMESPACE + '.acl.dropped_requests.count',
-    NAMESPACE + '.quic_response_code_count.count',
-    NAMESPACE + '.kubernetes.rest_client_request_duration.sum',
-    NAMESPACE + '.kubernetes.rest_client_request_duration.count',
-    NAMESPACE + '.kubernetes.rest_client_request_duration.bucket',
-    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.sum',
-    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.count',
-    NAMESPACE + '.kubernetes.rest_client_rate_limiter_duration.bucket',
-    NAMESPACE + '.kubernetes.rest_client_requests_count.count',
-    NAMESPACE + '.reload.version_info',
+    NAMESPACE + '.hosts.reload_timestamp',
+    NAMESPACE + '.reload.failed_count.count',
+    NAMESPACE + '.health_request_failures_count.count',
 ]
 
 

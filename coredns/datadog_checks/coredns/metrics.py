@@ -81,8 +81,6 @@ NEW_METRICS = {
     'coredns_cache_requests_total': 'cache_request_count',
     # dnssec: https://github.com/coredns/coredns/tree/v1.7.0/plugin/dnssec
     'coredns_dnssec_cache_entries': 'dnssec.cache_size',
-    # dns64: https://github.com/coredns/coredns/tree/v1.7.0/plugin/dns64
-    'coredns_dns64_requests_translated_total': 'dns64.requests_translated_count',
     # forward: https://github.com/coredns/coredns/tree/v1.7.0/plugin/forward
     'coredns_forward_requests_total': 'forward_request_count',
     'coredns_forward_responses_total': 'forward_response_rcode_count',

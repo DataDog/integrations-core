@@ -30,8 +30,6 @@ coredns.dnssec.cache_hits.count,count,,hit,,[OpenMetrics V2] Counter of cache hi
 coredns.dnssec.cache_misses,count,,miss,,[OpenMetrics V1] Counter of cache misses.,0,coredns,dnssec cache miss,
 coredns.dnssec.cache_misses.count,count,,miss,,[OpenMetrics V2] Counter of cache misses.,0,coredns,dnssec cache miss,
 coredns.dnssec.cache_size,gauge,,,,"[OpenMetrics V1 and V2] Total elements in the cache, type is signature.",0,coredns,dnssec cache size,
-coredns.dns64.requests_translated_count,count,,request,,[OpenMetrics V1] Counter of DNS requests translated by the dns64 plugin.,0,coredns,dns64 translated requests,
-coredns.dns64.requests_translated_count.count,count,,request,,[OpenMetrics V2] Counter of DNS requests translated by the dns64 plugin.,0,coredns,dns64 translated requests,
 coredns.forward_conn_cache_hits_count,count,,hit,,[OpenMetrics V1] Counter of connection cache hits per upstream and protocol.,1,coredns,forward conn cache hits,
 coredns.forward_conn_cache_hits_count.count,count,,hit,,[OpenMetrics V2] Counter of connection cache hits per upstream and protocol.,1,coredns,forward conn cache hits,
 coredns.forward_conn_cache_misses_count,count,,miss,,[OpenMetrics V1] Counter of connection cache misses per upstream and protocol.,0,coredns,forward conn cache misses,
