@@ -1,0 +1,121 @@
+[
+  {
+    "metadata": {
+      "name": "partial-host-pod",
+      "namespace": "default"
+    },
+    "spec": {
+      "nodeName": "node-a1",
+      "containers": [
+        {
+          "name": "trainer",
+          "resources": {
+            "requests": {
+              "nvidia.com/gpu": "3"
+            }
+          }
+        }
+      ]
+    },
+    "status": {
+      "phase": "Running"
+    }
+  },
+  {
+    "metadata": {
+      "name": "full-host-pod",
+      "namespace": "default"
+    },
+    "spec": {
+      "nodeName": "node-b1",
+      "containers": [
+        {
+          "name": "trainer",
+          "resources": {
+            "requests": {
+              "nvidia.com/gpu": "4"
+            }
+          }
+        }
+      ]
+    },
+    "status": {
+      "phase": "Pending"
+    }
+  },
+  {
+    "metadata": {
+      "name": "unscheduled-pending-pod",
+      "namespace": "default"
+    },
+    "spec": {
+      "containers": [
+        {
+          "name": "trainer",
+          "resources": {
+            "requests": {
+              "nvidia.com/gpu": "4"
+            }
+          }
+        }
+      ]
+    },
+    "status": {
+      "phase": "Pending"
+    }
+  },
+  {
+    "metadata": {
+      "name": "finished-pod",
+      "namespace": "default"
+    },
+    "spec": {
+      "nodeName": "node-a2",
+      "containers": [
+        {
+          "name": "trainer",
+          "resources": {
+            "requests": {
+              "nvidia.com/gpu": "4"
+            }
+          }
+        }
+      ]
+    },
+    "status": {
+      "phase": "Succeeded"
+    }
+  },
+  {
+    "metadata": {
+      "name": "init-container-pod",
+      "namespace": "default"
+    },
+    "spec": {
+      "nodeName": "node-other-flavor",
+      "initContainers": [
+        {
+          "name": "init",
+          "resources": {
+            "requests": {
+              "nvidia.com/gpu": "6"
+            }
+          }
+        }
+      ],
+      "containers": [
+        {
+          "name": "trainer",
+          "resources": {
+            "requests": {
+              "nvidia.com/gpu": "2"
+            }
+          }
+        }
+      ]
+    },
+    "status": {
+      "phase": "Running"
+    }
+  }
+]

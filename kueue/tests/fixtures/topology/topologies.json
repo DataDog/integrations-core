@@ -1,0 +1,35 @@
+[
+  {
+    "metadata": {
+      "name": "default"
+    },
+    "spec": {
+      "levels": [
+        {
+          "nodeLabel": "cloud.provider.com/topology-block"
+        },
+        {
+          "nodeLabel": "cloud.provider.com/topology-rack"
+        },
+        {
+          "nodeLabel": "kubernetes.io/hostname"
+        }
+      ]
+    }
+  },
+  {
+    "metadata": {
+      "name": "zone-topology"
+    },
+    "spec": {
+      "levels": [
+        {
+          "nodeLabel": "zone"
+        },
+        {
+          "nodeLabel": "kubernetes.io/hostname"
+        }
+      ]
+    }
+  }
+]

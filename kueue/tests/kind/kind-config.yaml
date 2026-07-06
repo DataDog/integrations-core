@@ -10,3 +10,7 @@ networking:
 nodes:
 - role: control-plane
   image: kindest/node:v1.34.8@sha256:02722c2dedddcfc00febf5d27fbeb9b7b2c14294c82109ff4a85d89ac9ba3256
+  labels:
+    cloud.provider.com/node-group: tas-group
+    cloud.provider.com/topology-block: block-a
+    cloud.provider.com/topology-rack: rack-a

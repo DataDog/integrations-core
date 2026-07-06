@@ -4,6 +4,25 @@ metadata:
   name: default-flavor
 ---
 apiVersion: kueue.x-k8s.io/v1beta2
+kind: Topology
+metadata:
+  name: default-topology
+spec:
+  levels:
+  - nodeLabel: cloud.provider.com/topology-block
+  - nodeLabel: cloud.provider.com/topology-rack
+  - nodeLabel: kubernetes.io/hostname
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ResourceFlavor
+metadata:
+  name: tas-flavor
+spec:
+  nodeLabels:
+    cloud.provider.com/node-group: tas-group
+  topologyName: default-topology
+---
+apiVersion: kueue.x-k8s.io/v1beta2
 kind: ClusterQueue
 metadata:
   name: cluster-queue
@@ -20,6 +39,13 @@ spec:
         nominalQuota: 1
       - name: memory
         nominalQuota: 1Gi
+  - coveredResources:
+    - nvidia.com/gpu
+    flavors:
+    - name: tas-flavor
+      resources:
+      - name: nvidia.com/gpu
+        nominalQuota: 1
 ---
 apiVersion: kueue.x-k8s.io/v1beta2
 kind: LocalQueue
