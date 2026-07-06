@@ -145,6 +145,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return resource_name.replace('/', '.').replace('-', '_')
 
     def _parse_workload_events_config(self):
+        if self._config_model_instance is None:
+            self.load_configuration_models()
+
         self.collect_workload_events = self.config.collect_workload_events
         self.kube_config_dict = self.config.kube_config_dict
         self.workload_events_namespaces = set(self.config.workload_events_namespaces or [])

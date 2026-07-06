@@ -142,6 +142,14 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
+def test_workload_events_config_can_be_parsed_before_check(instance):
+    check = KueueCheck('kueue', {}, [instance])
+
+    check._parse_workload_events_config()
+
+    assert check.collect_workload_events is True
+
+
 class FakeKubernetesAPIClient:
     def __init__(self, *workload_snapshots):
         self.workload_snapshots = list(workload_snapshots)
