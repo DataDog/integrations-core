@@ -88,7 +88,7 @@ class ProduceMessage(BaseModel):
     )
     key: Optional[str] = Field(
         None,
-        description='Message key (optional). Its expected shape depends on key_format:\nbase64-encoded for raw (default), plain text for string, or JSON text\nfor json/bson/avro/protobuf.\nIf not provided, the message will have a null key in Kafka.\nExample (raw): "12345" -> base64 -> "MTIzNDU="\n',
+        description='Message key (optional). Its expected shape depends on key_format:\nbase64-encoded for raw (default), plain text for string, or JSON text\nfor json, avro, or protobuf (BSON extended JSON text for bson).\nIf not provided, the message will have a null key in Kafka.\nExample (raw): "12345" -> base64 -> "MTIzNDU="\n',
         examples=['MTIzNDU='],
     )
     key_format: Optional[str] = Field(
@@ -117,7 +117,7 @@ class ProduceMessage(BaseModel):
     topic: str = Field(..., description='Topic to produce to', examples=['test-topic'])
     value: str = Field(
         ...,
-        description='Message value. Its expected shape depends on value_format:\nbase64-encoded for raw (default), plain text for string, or JSON text\nfor json/bson/avro/protobuf.\nExample (raw): \'{"order_id": "12345"}\' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"\n',
+        description='Message value. Its expected shape depends on value_format:\nbase64-encoded for raw (default), plain text for string, or JSON text\nfor json, avro, or protobuf (BSON extended JSON text for bson).\nExample (raw): \'{"order_id": "12345"}\' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"\n',
         examples=['eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9'],
     )
     value_format: Optional[str] = Field(

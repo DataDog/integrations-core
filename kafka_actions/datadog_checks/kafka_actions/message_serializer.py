@@ -25,9 +25,7 @@ from .schema_helpers import (
     REGISTRY_TYPE_MAP,
     SCHEMA_FORMATS,
     SCHEMA_REGISTRY_MAGIC_BYTE,
-    build_avro_schema,
-    build_protobuf_schema,
-    build_protobuf_schema_from_registry,
+    build_schema_for_format,
     get_protobuf_message_class,
     write_protobuf_message_indices,
 )
@@ -61,7 +59,10 @@ class MessageSerializer:
                 when uses_schema_registry is True.
             uses_schema_registry: Whether to fetch the schema from the Schema
                 Registry by schema_id and frame the payload with the Confluent
-                wire format (magic byte + 4-byte schema ID).
+                wire format (magic byte + 4-byte schema ID). When set, the
+                registry's reported schema type takes precedence over
+                format_type for serialization purposes, mirroring how
+                MessageDeserializer trusts the registry on the read path.
             schema_id: Schema Registry schema ID to embed. Required when
                 uses_schema_registry is True.
 
@@ -71,20 +72,20 @@ class MessageSerializer:
         if format_type == 'raw':
             return base64.b64decode(value)
 
-        actual_format = format_type
-        schema = None
-
-        if format_type in SCHEMA_FORMATS or uses_schema_registry:
-            if uses_schema_registry:
-                if self.schema_registry is None:
-                    raise ValueError("uses_schema_registry is set but no Schema Registry is configured")
-                if schema_id is None:
-                    raise ValueError("uses_schema_registry requires a schema_id to embed in the message")
-                schema, actual_format = self._fetch_and_build_schema(schema_id, format_type)
-            elif schema_str:
-                schema = self._build_schema(format_type, schema_str)
-
         try:
+            actual_format = format_type
+            schema = None
+
+            if format_type in SCHEMA_FORMATS or uses_schema_registry:
+                if uses_schema_registry:
+                    if self.schema_registry is None:
+                        raise ValueError("uses_schema_registry is set but no Schema Registry is configured")
+                    if schema_id is None:
+                        raise ValueError("uses_schema_registry requires a schema_id to embed in the message")
+                    schema, actual_format = self._fetch_and_build_schema(schema_id, format_type)
+                elif schema_str:
+                    schema = self._build_schema(format_type, schema_str)
+
             payload = self._serialize_bytes(value, actual_format, schema)
         except Exception as e:
             raise ValueError(f"Failed to serialize {format_type} message: {e}") from e
@@ -152,12 +153,7 @@ class MessageSerializer:
         schema_str, schema_type, dep_schemas = self.schema_registry.get_schema(schema_id)
         actual_format = REGISTRY_TYPE_MAP.get(schema_type, format_type)
 
-        if actual_format == 'protobuf':
-            schema = build_protobuf_schema_from_registry(schema_str, dep_schemas)
-        elif actual_format == 'avro':
-            schema = build_avro_schema(schema_str)
-        else:
-            schema = None
+        schema = build_schema_for_format(actual_format, schema_str, from_registry=True, dep_schemas=dep_schemas)
 
         result = (schema, actual_format)
         self._registry_schema_cache[cache_key] = result
@@ -169,12 +165,7 @@ class MessageSerializer:
         if cache_key in self._schema_cache:
             return self._schema_cache[cache_key]
 
-        if format_type == 'protobuf':
-            schema = build_protobuf_schema(schema_str)
-        elif format_type == 'avro':
-            schema = build_avro_schema(schema_str)
-        else:
-            schema = None
+        schema = build_schema_for_format(format_type, schema_str)
 
         self._schema_cache[cache_key] = schema
         return schema

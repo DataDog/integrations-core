@@ -208,6 +208,22 @@ def build_protobuf_schema(schema_str: str):
     return (pool, descriptor_set)
 
 
+def build_schema_for_format(
+    format_type: str, schema_str: str, from_registry: bool = False, dep_schemas: list[str] | None = None
+):
+    """Dispatch to the appropriate schema builder for 'protobuf' or 'avro'.
+
+    Returns None for any other format_type (e.g. 'json', 'bson', 'string').
+    """
+    if format_type == 'protobuf':
+        if from_registry:
+            return build_protobuf_schema_from_registry(schema_str, dep_schemas or [])
+        return build_protobuf_schema(schema_str)
+    elif format_type == 'avro':
+        return build_avro_schema(schema_str)
+    return None
+
+
 def build_protobuf_schema_from_registry(schema_str: str, dep_schemas: list):
     """Build a Protobuf schema from base64-encoded FileDescriptorProtos.
 

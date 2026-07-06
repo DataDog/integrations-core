@@ -806,29 +806,8 @@ class KafkaActionsCheck(AgentCheck):
 
         self.log.debug("Producing message to topic '%s' on cluster '%s'", topic, self.cluster)
 
-        try:
-            value_bytes = self.serializer.serialize_message(
-                value,
-                format_type=config.get('value_format', 'raw'),
-                schema_str=config.get('value_schema'),
-                uses_schema_registry=config.get('value_uses_schema_registry', False),
-                schema_id=config.get('value_schema_id'),
-            )
-        except Exception as e:
-            raise Exception(f"Failed to serialize value: {e}")
-
-        key_bytes = None
-        if key:
-            try:
-                key_bytes = self.serializer.serialize_message(
-                    key,
-                    format_type=config.get('key_format', 'raw'),
-                    schema_str=config.get('key_schema'),
-                    uses_schema_registry=config.get('key_uses_schema_registry', False),
-                    schema_id=config.get('key_schema_id'),
-                )
-            except Exception as e:
-                raise Exception(f"Failed to serialize key: {e}")
+        value_bytes = self._serialize_side('value', value, config)
+        key_bytes = self._serialize_side('key', key, config) if key else None
 
         headers_decoded = {}
         for header_key, header_value_b64 in headers_b64.items():
@@ -849,3 +828,16 @@ class KafkaActionsCheck(AgentCheck):
             raise Exception(f"Message delivery failed: {result['error']}")
 
         return {'topic': topic, 'partition': result['partition'], 'offset': result['offset']}
+
+    def _serialize_side(self, side: str, value: str, config: dict) -> bytes:
+        """Serialize a produce_message key/value side using its {side}_format/{side}_schema config fields."""
+        try:
+            return self.serializer.serialize_message(
+                value,
+                format_type=config.get(f'{side}_format', 'raw'),
+                schema_str=config.get(f'{side}_schema'),
+                uses_schema_registry=config.get(f'{side}_uses_schema_registry', False),
+                schema_id=config.get(f'{side}_schema_id'),
+            )
+        except Exception as e:
+            raise Exception(f"Failed to serialize {side}: {e}")

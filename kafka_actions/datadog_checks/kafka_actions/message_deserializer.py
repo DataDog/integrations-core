@@ -19,9 +19,7 @@ from google.protobuf.json_format import MessageToJson
 from .schema_helpers import (
     REGISTRY_TYPE_MAP,
     SCHEMA_REGISTRY_MAGIC_BYTE,
-    build_avro_schema,
-    build_protobuf_schema,
-    build_protobuf_schema_from_registry,
+    build_schema_for_format,
     get_protobuf_message_class,
     read_protobuf_message_indices,
 )
@@ -347,13 +345,7 @@ class MessageDeserializer:
         Returns:
             Schema object
         """
-        if message_format == 'protobuf':
-            if from_registry:
-                return build_protobuf_schema_from_registry(schema_str, dep_schemas or [])
-            return build_protobuf_schema(schema_str)
-        elif message_format == 'avro':
-            return build_avro_schema(schema_str)
-        return None
+        return build_schema_for_format(message_format, schema_str, from_registry, dep_schemas)
 
 
 class DeserializedMessage:

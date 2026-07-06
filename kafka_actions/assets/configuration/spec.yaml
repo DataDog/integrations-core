@@ -580,7 +580,7 @@ files:
         Configuration for producing a message to a Kafka topic.
         By default, key and value are base64-encoded strings (raw format), and headers
         are always base64-encoded. Key and value can also be produced as string, json,
-        bson, avro, or protobuf by setting value_format/key_format, optionally serialized
+        bson, avro, or protobuf by setting value_format and key_format, optionally serialized
         against a schema and framed with the Confluent Schema Registry wire format.
       value:
         type: object
@@ -610,7 +610,7 @@ files:
           description: |
             Message key (optional). Its expected shape depends on key_format:
             base64-encoded for raw (default), plain text for string, or JSON text
-            for json/bson/avro/protobuf.
+            for json, avro, or protobuf (BSON extended JSON text for bson).
             If not provided, the message will have a null key in Kafka.
             Example (raw): "12345" -> base64 -> "MTIzNDU="
           example: "MTIzNDU="
@@ -619,7 +619,7 @@ files:
           description: |
             Message value. Its expected shape depends on value_format:
             base64-encoded for raw (default), plain text for string, or JSON text
-            for json/bson/avro/protobuf.
+            for json, avro, or protobuf (BSON extended JSON text for bson).
             Example (raw): '{"order_id": "12345"}' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"
           example: "eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9"
         - name: partition

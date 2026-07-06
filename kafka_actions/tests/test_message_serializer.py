@@ -27,9 +27,9 @@ PROTOBUF_SCHEMA = (
 # The Schema Registry's ?format=serialized endpoint returns a single base64-encoded
 # FileDescriptorProto rather than a FileDescriptorSet, so derive that form for the
 # schema-registry round-trip test.
-_book_descriptor_set = descriptor_pb2.FileDescriptorSet()
-_book_descriptor_set.ParseFromString(base64.b64decode(PROTOBUF_SCHEMA))
-PROTOBUF_SCHEMA_REGISTRY = base64.b64encode(_book_descriptor_set.file[0].SerializeToString()).decode('ascii')
+book_descriptor_set = descriptor_pb2.FileDescriptorSet()
+book_descriptor_set.ParseFromString(base64.b64decode(PROTOBUF_SCHEMA))
+PROTOBUF_SCHEMA_REGISTRY = base64.b64encode(book_descriptor_set.file[0].SerializeToString()).decode('ascii')
 
 BOOK_JSON = json.dumps(common.BOOK)
 # proto3 JSON encodes int64 fields as strings, so round-tripped isbn comes back as a string.
@@ -150,13 +150,13 @@ class TestMessageSerializer:
         import datadog_checks.kafka_actions.message_serializer as message_serializer_module
 
         build_calls = []
-        original_build_avro_schema = message_serializer_module.build_avro_schema
+        original_build_schema_for_format = message_serializer_module.build_schema_for_format
 
-        def counting_build_avro_schema(schema_str):
-            build_calls.append(schema_str)
-            return original_build_avro_schema(schema_str)
+        def counting_build_schema_for_format(*args, **kwargs):
+            build_calls.append(args[1] if len(args) > 1 else kwargs.get('schema_str'))
+            return original_build_schema_for_format(*args, **kwargs)
 
-        monkeypatch.setattr(message_serializer_module, "build_avro_schema", counting_build_avro_schema)
+        monkeypatch.setattr(message_serializer_module, "build_schema_for_format", counting_build_schema_for_format)
 
         serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
         serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
