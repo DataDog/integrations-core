@@ -7,6 +7,7 @@ import json
 import logging
 import random
 import time
+from typing import Any
 
 EVENT_CACHE_TTL = 3600  # 1 hour in seconds
 
@@ -70,7 +71,7 @@ class CacheHelper:
 
         self.set_cached_json(cache_key, cache_dict)
 
-    def get_cached_json(self, cache_key: str) -> dict:
+    def get_cached_json(self, cache_key: str) -> dict[str, Any]:
         """Read and JSON-decode a persistent cache entry, defaulting to {} on any failure."""
         try:
             cached_str = self._check.read_persistent_cache(cache_key)
@@ -79,7 +80,7 @@ class CacheHelper:
             self._log.debug("Could not read cache %s: %s", cache_key, e)
             return {}
 
-    def set_cached_json(self, cache_key: str, value: dict) -> None:
+    def set_cached_json(self, cache_key: str, value: dict[str, Any]) -> None:
         """JSON-encode and write a persistent cache entry, logging (not raising) on failure."""
         try:
             self._check.write_persistent_cache(cache_key, json.dumps(value))

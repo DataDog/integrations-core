@@ -211,7 +211,7 @@ class KafkaConnectCollector:
         tags_base = self.config._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
         self._emit_connector_metrics(connectors_data, tags_base)
-        connector_topics = self._get_connector_topics(url, list(connectors_data.keys()))
+        connector_topics = self._fetch_connector_topics(url, list(connectors_data.keys()))
         self._emit_connector_config_events(connectors_data, cluster_id, url, connector_topics)
         self._collect_plugins(url, cluster_id)
 
@@ -264,21 +264,27 @@ class KafkaConnectCollector:
             for state_name, count in task_state_counts.items():
                 self.check.gauge('connector.tasks', count, tags=connector_tags + [f'task_state:{state_name}'])
 
-    def _get_connector_topics(self, url: str, connector_names: list[str]) -> dict[str, list[str]]:
+    def _url_cache_key(self, prefix: str, url: str) -> str:
+        """Namespace a cache key by Connect URL."""
+        return f'{prefix}:{quote(url, safe="")}'
+
+    def _fetch_connector_topics(self, url: str, connector_names: list[str]) -> dict[str, list[str]]:
         """Return each connector's tracked topics, refreshing entries whose TTL has expired.
 
         Kafka Connect's topic-tracking API only reports topics that pass through the
         Connect-managed producer/consumer, so a source connector's own upstream topic
         (e.g. an external database) isn't included, only what it publishes into Kafka.
+
+        A connector is backed off on the same TTL whether its fetch succeeds or fails,
+        so a connector with topic tracking permanently unavailable doesn't get re-requested
+        on every check run.
         """
-        safe_url = quote(url, safe='')
-        fetch_cache_key = f'{CONNECTOR_TOPICS_FETCH_CACHE_KEY}:{safe_url}'
-        data_cache_key = f'{CONNECTOR_TOPICS_DATA_CACHE_KEY}:{safe_url}'
+        fetch_cache_key = self._url_cache_key(CONNECTOR_TOPICS_FETCH_CACHE_KEY, url)
+        data_cache_key = self._url_cache_key(CONNECTOR_TOPICS_DATA_CACHE_KEY, url)
 
         topics_by_connector: dict[str, list[str]] = self.cache.get_cached_json(data_cache_key)
 
         names_to_refresh = self.cache.get_items_to_fetch(fetch_cache_key, connector_names)
-        names_fetched = []
         for name in names_to_refresh:
             try:
                 response = self.http.get(
@@ -288,61 +294,73 @@ class KafkaConnectCollector:
                 )
                 response.raise_for_status()
                 topics_by_connector[name] = sorted((response.json().get(name) or {}).get('topics', []))
-                names_fetched.append(name)
             except Exception as e:
+                # Broad by design: a malformed or unreachable response for one connector
+                # shouldn't block topic tracking for the others.
                 self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
 
-        if names_fetched:
-            self.cache.mark_items_fetched(fetch_cache_key, names_fetched, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE)
+        if names_to_refresh:
+            self.cache.mark_items_fetched(
+                fetch_cache_key, names_to_refresh, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE
+            )
             pruned_topics = {name: topics_by_connector[name] for name in connector_names if name in topics_by_connector}
             self.cache.set_cached_json(data_cache_key, pruned_topics)
 
         return {name: topics_by_connector.get(name, []) for name in connector_names}
 
-    def _emit_connector_config_events(
-        self, connectors_data: dict[str, Any], cluster_id: str, url: str, connector_topics: dict[str, list[str]]
-    ) -> None:
-        connector_contents: dict[str, str] = {}
+    def _build_connector_event_content(
+        self, name: str, data: dict[str, Any], cluster_id: str, url: str, topics: list[str]
+    ) -> dict[str, Any]:
+        """Derive the event payload for a single connector's config/status."""
+        info = data.get('info') or {}
+        status = data.get('status') or {}
 
-        for name, data in connectors_data.items():
-            if data is None:
-                continue
-            info = data.get('info') or {}
-            status = data.get('status') or {}
+        connector_status = status.get('connector') or {}
+        connector_type = info.get('type', 'unknown')
+        connector_state = connector_status.get('state', 'UNKNOWN')
+        connector_trace = connector_status.get('trace') if connector_state == 'FAILED' else None
+        tasks = status.get('tasks') or []
+        raw_config = info.get('config') or {}
 
-            connector_status = status.get('connector') or {}
-            connector_type = info.get('type', 'unknown')
-            connector_state = connector_status.get('state', 'UNKNOWN')
-            connector_trace = connector_status.get('trace') if connector_state == 'FAILED' else None
-            tasks = status.get('tasks') or []
-            raw_config = info.get('config') or {}
+        redacted_config = {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in raw_config.items()}
 
-            redacted_config = {k: '[hidden]' if SENSITIVE_KEY_PATTERN.search(k) else v for k, v in raw_config.items()}
-
-            task_traces = [
+        task_traces = sorted(
+            (
                 {'task_id': task.get('id'), 'trace': task.get('trace')}
                 for task in tasks
                 if task.get('state') == 'FAILED' and task.get('trace')
-            ]
+            ),
+            key=lambda t: t['task_id'],
+        )
 
-            content = {
-                'kafka_cluster_id': cluster_id,
-                **self.config._original_cluster_id_field(),
-                'connector': name,
-                'connector_type': connector_type,
-                'connector_state': connector_state,
-                'connector_trace': connector_trace,
-                'task_count': len(tasks),
-                'task_traces': task_traces,
-                'topics': connector_topics.get(name, []),
-                'connect_url': url,
-                'config_type': 'connector',
-                'config': redacted_config,
-            }
-            connector_contents[name] = json.dumps(content, sort_keys=True)
+        return {
+            'kafka_cluster_id': cluster_id,
+            **self.config._original_cluster_id_field(),
+            'connector': name,
+            'connector_type': connector_type,
+            'connector_state': connector_state,
+            'connector_trace': connector_trace,
+            'task_count': len(tasks),
+            'task_traces': task_traces,
+            'topics': topics,
+            'connect_url': url,
+            'config_type': 'connector',
+            'config': redacted_config,
+        }
 
-        safe_url = quote(url, safe='')
-        cache_key = f'{CONNECTOR_CONFIG_CACHE_KEY}:{safe_url}'
+    def _emit_connector_config_events(
+        self, connectors_data: dict[str, Any], cluster_id: str, url: str, connector_topics: dict[str, list[str]]
+    ) -> None:
+        connector_contents = {
+            name: json.dumps(
+                self._build_connector_event_content(name, data, cluster_id, url, connector_topics.get(name, [])),
+                sort_keys=True,
+            )
+            for name, data in connectors_data.items()
+            if data is not None
+        }
+
+        cache_key = self._url_cache_key(CONNECTOR_CONFIG_CACHE_KEY, url)
         connectors_to_emit = self.cache.get_events_to_send(
             cache_key, connector_contents, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE
         )
@@ -354,8 +372,7 @@ class KafkaConnectCollector:
             self.check.event_platform_event(json.dumps(event), 'data-streams-message')
 
     def _collect_plugins(self, url: str, cluster_id: str) -> None:
-        safe_url = quote(url, safe='')
-        fetch_cache_key = f'{CONNECTOR_PLUGINS_CACHE_KEY}:{safe_url}'
+        fetch_cache_key = self._url_cache_key(CONNECTOR_PLUGINS_CACHE_KEY, url)
         items_to_fetch = self.cache.get_items_to_fetch(fetch_cache_key, ['plugins'])
         if not items_to_fetch:
             return
@@ -375,7 +392,7 @@ class KafkaConnectCollector:
             ttl_jitter=self.cache.refresh_jitter,
         )
 
-        event_cache_key = f'{CONNECTOR_PLUGINS_EVENT_CACHE_KEY}:{safe_url}'
+        event_cache_key = self._url_cache_key(CONNECTOR_PLUGINS_EVENT_CACHE_KEY, url)
         content_dict = {
             'kafka_cluster_id': cluster_id,
             **self.config._original_cluster_id_field(),

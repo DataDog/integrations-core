@@ -168,8 +168,8 @@ def test_connector_topics_requested_per_connector(run_connect_check):
     _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
     requested_urls = [call.args[0] for call in http.get.call_args_list]
-    assert any(url.endswith('/connectors/demo-source/topics') for url in requested_urls)
-    assert any(url.endswith('/connectors/demo-heartbeat/topics') for url in requested_urls)
+    assert sum(url.endswith('/connectors/demo-source/topics') for url in requested_urls) == 1
+    assert sum(url.endswith('/connectors/demo-heartbeat/topics') for url in requested_urls) == 1
 
 
 def test_topics_not_refetched_within_refresh_interval(run_connect_check):
