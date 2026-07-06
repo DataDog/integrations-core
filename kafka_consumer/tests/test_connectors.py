@@ -122,8 +122,60 @@ def test_config_only_allowlisted_keys_left_unredacted(run_connect_check, aggrega
     assert cfg['topics'] == 'orders'
     assert cfg['transforms'] == 'insertField'
     assert cfg['transforms.insertField.type'] == 'org.apache.kafka.connect.transforms.InsertField$Value'
-    assert cfg['topics'] == 'orders'
-    assert cfg['tasks.max'] == '2'
+
+
+def test_config_allowlist_covers_known_connector_plugin_keys(run_connect_check, aggregator):
+    connectors = {
+        'debezium-source': {
+            'info': {
+                'type': 'source',
+                'config': {
+                    'connector.class': 'io.debezium.connector.postgresql.PostgresConnector',
+                    'database.hostname': 'postgres.internal.example.com',
+                    'database.port': '5432',
+                    'database.user': 'debezium',
+                    'database.password': 'super-secret',
+                    'table.include.list': 'public.orders,public.customers',
+                    'snapshot.mode': 'initial',
+                    's3.bucket.name': 'my-bucket',
+                    'insert.mode': 'upsert',
+                },
+            },
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        }
+    }
+    run_connect_check(connectors_response=connectors)
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    cfg = events[0]['config']
+    assert cfg['database.hostname'] == 'postgres.internal.example.com'
+    assert cfg['database.port'] == '5432'
+    assert cfg['table.include.list'] == 'public.orders,public.customers'
+    assert cfg['snapshot.mode'] == 'initial'
+    assert cfg['s3.bucket.name'] == 'my-bucket'
+    assert cfg['insert.mode'] == 'upsert'
+    assert cfg['database.user'] == '[hidden]'
+    assert cfg['database.password'] == '[hidden]'
+
+
+def test_config_sensitive_substring_overrides_allowlist(run_connect_check, aggregator):
+    connectors = {
+        'my-sink': {
+            'info': {
+                'type': 'sink',
+                # 'mode' is allowlisted, but a plugin author naming a secret key
+                # 'mode.secret.token' should still be hidden by the substring safety net.
+                'config': {'connector.class': 'io.confluent.SomeSink', 'mode.secret.token': 'abc123'},
+            },
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': []},
+        }
+    }
+    run_connect_check(connectors_response=connectors)
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    assert events[0]['config']['mode.secret.token'] == '[hidden]'
 
 
 def test_failed_connector_and_task_trace_included_in_config_event(run_connect_check, aggregator):

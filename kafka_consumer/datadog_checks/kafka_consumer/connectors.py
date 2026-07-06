@@ -14,12 +14,14 @@ from datadog_checks.kafka_consumer.cache import CacheHelper
 if TYPE_CHECKING:
     from datadog_checks.kafka_consumer.config import KafkaConfig
 
-# Kafka Connect framework-level settings that are safe to surface as-is. Everything else —
-# including any plugin-specific config key we don't recognize — is hidden by default, since
-# connector plugins are free to define arbitrary keys (including credentials) that we have
-# no way to enumerate ahead of time.
+# Config keys known to be safe to surface as-is: Kafka Connect framework-level settings plus
+# non-sensitive settings from popular official/OSS connector plugins (JDBC, Debezium, S3/GCS/
+# BigQuery/Snowflake/Elasticsearch sinks, HTTP Sink, MirrorMaker2). This can't be truly exhaustive —
+# plugins are free to define arbitrary keys we've never seen — so anything not listed here, plus
+# anything matching SENSITIVE_KEY_SUBSTRINGS even if listed here, is hidden by default.
 ALLOWED_CONFIG_KEYS = frozenset(
     {
+        # Kafka Connect framework
         'connector.class',
         'name',
         'tasks.max',
@@ -41,7 +43,176 @@ ALLOWED_CONFIG_KEYS = frozenset(
         'errors.deadletterqueue.topic.replication.factor',
         'errors.deadletterqueue.context.headers.enable',
         'config.action.reload',
+        # JDBC Source/Sink
+        'table.whitelist',
+        'table.blacklist',
+        'table.types',
+        'table.poll.interval.ms',
+        'poll.interval.ms',
+        'batch.max.rows',
+        'numeric.mapping',
+        'dialect.name',
+        'topic.prefix',
+        'validate.non.null',
+        'timestamp.delay.interval.ms',
+        'timestamp.column.name',
+        'incrementing.column.name',
+        'db.timezone',
+        'quote.sql.identifiers',
+        'catalog.pattern',
+        'schema.pattern',
+        'mode',
+        'table.name.format',
+        'insert.mode',
+        'batch.size',
+        'delete.enabled',
+        'pk.mode',
+        'pk.fields',
+        'fields.whitelist',
+        'auto.create',
+        'auto.evolve',
+        # S3 / GCS sinks
+        's3.bucket.name',
+        's3.region',
+        's3.part.size',
+        's3.compression.type',
+        's3.acl.canned',
+        'gcs.bucket.name',
+        'gcs.part.size',
+        'flush.size',
+        'rotate.interval.ms',
+        'rotate.schedule.interval.ms',
+        'topics.dir',
+        'storage.class',
+        'format.class',
+        'partitioner.class',
+        'path.format',
+        'locale',
+        'timezone',
+        'schema.compatibility',
+        'behavior.on.null.values',
+        'parquet.codec',
+        # BigQuery sink
+        'project',
+        'datasets',
+        'defaultDataset',
+        'autoCreateTables',
+        'sanitizeTopics',
+        'autoUpdateSchemas',
+        'allowNewBigQueryFields',
+        'allowSchemaUnionization',
+        'allowBigQueryRequiredFieldRelaxation',
+        'bigQueryRetry',
+        'bigQueryRetryWait',
+        'tableWriteWait',
+        'mergeIntervalMs',
+        'upsertEnabled',
+        'deleteEnabled',
+        'kafkaKeyFieldName',
+        'kafkaDataFieldName',
+        # Snowflake sink
+        'snowflake.url.name',
+        'snowflake.database.name',
+        'snowflake.schema.name',
+        'snowflake.role.name',
+        'snowflake.topic2table.map',
+        'buffer.count.records',
+        'buffer.flush.time',
+        'buffer.size.bytes',
+        # Elasticsearch sink
+        'type.name',
+        'key.ignore',
+        'schema.ignore',
+        'topic.index.map',
+        'drop.invalid.message',
+        'behavior.on.malformed.documents',
+        'max.buffered.records',
+        'flush.timeout.ms',
+        'max.retries',
+        'retry.backoff.ms',
+        'linger.ms',
+        'read.timeout.ms',
+        # HTTP sink
+        'request.method',
+        'batch.max.size',
+        'batch.prefix',
+        'batch.suffix',
+        'batch.separator',
+        'request.body.format',
+        # MirrorMaker2
+        'topics.exclude',
+        'groups',
+        'groups.exclude',
+        'replication.factor',
+        'sync.topic.acls.enabled',
+        'sync.topic.configs.enabled',
+        'refresh.topics.enabled',
+        'refresh.topics.interval.seconds',
+        'refresh.groups.interval.seconds',
+        'emit.heartbeats.enabled',
+        'emit.checkpoints.enabled',
+        'sync.group.offsets.enabled',
+        'source.cluster.alias',
+        'target.cluster.alias',
+        # Debezium (common across MySQL/Postgres/SQL Server/Oracle/MongoDB connectors)
+        'database.hostname',
+        'database.port',
+        'database.dbname',
+        'database.server.id',
+        'database.server.name',
+        'table.include.list',
+        'table.exclude.list',
+        'database.include.list',
+        'database.exclude.list',
+        'column.include.list',
+        'column.exclude.list',
+        'snapshot.mode',
+        'snapshot.locking.mode',
+        'snapshot.fetch.size',
+        'snapshot.include.collection.list',
+        'max.batch.size',
+        'max.queue.size',
+        'heartbeat.interval.ms',
+        'heartbeat.topics.prefix',
+        'skipped.operations',
+        'signal.data.collection',
+        'signal.enabled.channels',
+        'provide.transaction.metadata',
+        'tombstones.on.delete',
+        'decimal.handling.mode',
+        'time.precision.mode',
+        'binary.handling.mode',
+        'include.schema.changes',
+        'schema.include.list',
+        'schema.exclude.list',
+        'plugin.name',
+        'slot.name',
+        'publication.name',
+        'publication.autocreate.mode',
     }
+)
+
+# Substrings that mark a config value as credential-shaped. Checked even against allowlisted
+# keys, so a plugin that overloads a common name (or a mistake in ALLOWED_CONFIG_KEYS) can't
+# leak a secret.
+SENSITIVE_KEY_SUBSTRINGS = (
+    'password',
+    'passwd',
+    'secret',
+    'token',
+    'credential',
+    'apikey',
+    'api_key',
+    'api-key',
+    'access_key',
+    'access-key',
+    'accesskey',
+    'private_key',
+    'private-key',
+    'privatekey',
+    'client_secret',
+    'client-secret',
+    'clientsecret',
 )
 
 
@@ -52,6 +223,9 @@ def _is_allowed_config_key(key: str) -> bool:
     per-transform settings (e.g. a replacement pattern) aren't framework-defined and
     could hold arbitrary plugin-specific data.
     """
+    key_lower = key.lower()
+    if any(substring in key_lower for substring in SENSITIVE_KEY_SUBSTRINGS):
+        return False
     if key in ALLOWED_CONFIG_KEYS:
         return True
     return (key.startswith('transforms.') or key.startswith('predicates.')) and key.endswith('.type')
