@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import logging
+from copy import deepcopy
 
 import mock
 import pytest
@@ -144,9 +145,32 @@ def test_get_template_metrics_raise_exception(aggregator, instance):
     aggregator.assert_metric("elasticsearch.templates.count", count=0)
 
 
-def test_get_value_from_path():
-    value = get_value_from_path({"5": {"b": [0, 1, 2, {"a": ["foo"]}]}}, "5.b.3.a.0")
-    assert value == "foo"
+@pytest.mark.parametrize(
+    'value, path, expected',
+    [
+        pytest.param({"5": {"b": [0, 1, 2, {"a": ["foo"]}]}}, "5.b.3.a.0", "foo", id='nested_path'),
+        pytest.param({"count": 42, "_shards": {}}, "", {"count": 42, "_shards": {}}, id='empty_path_returns_root'),
+        pytest.param({"count": 42, "_shards": {}}, None, {"count": 42, "_shards": {}}, id='none_path_returns_root'),
+    ],
+)
+def test_get_value_from_path(value, path, expected):
+    assert get_value_from_path(value, path) == expected
+
+
+@pytest.mark.parametrize('data_path', ['', None], ids=['empty_data_path', 'omitted_data_path'])
+def test_run_custom_queries_root_data_path(aggregator, instance, data_path):
+    instance = deepcopy(instance)
+    column = {'value_path': 'count', 'name': 'elasticsearch.custom.count', 'type': 'gauge'}
+    custom_query = {'endpoint': '/my-index/_count', 'columns': [column]}
+    if data_path is not None:
+        custom_query['data_path'] = data_path
+    instance['custom_queries'] = [custom_query]
+
+    check = ESCheck('elastic', {}, instances=[instance])
+    with mock.patch.object(check, '_get_data', return_value={'count': 42, '_shards': {'total': 5}}):
+        check._run_custom_queries(admin_forwarder=False, base_tags=[])
+
+    aggregator.assert_metric('elasticsearch.custom.count', value=42, count=1)
 
 
 def test__get_data_throws_authentication_error(instance):
