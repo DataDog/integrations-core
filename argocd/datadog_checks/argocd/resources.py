@@ -397,9 +397,14 @@ class ArgocdResourceCollector:
 
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
-        # extra_headers (not headers) so a dedicated token is *merged* into the wrapper's configured headers;
-        # passing headers= would shadow them and drop inherited auth when genresources_auth_token is unset.
-        response = self.check.http.get(url, extra_headers=auth_headers(self._auth_token))
+        # Pass a dedicated genresources token only when set, via extra_headers (merges with configured
+        # headers). Omit it otherwise: even an empty extra_headers makes RequestsWrapper snapshot the default
+        # headers before its auth_token handler writes the inherited token, which would drop that auth.
+        kwargs: dict = {}
+        headers = auth_headers(self._auth_token)
+        if headers:
+            kwargs["extra_headers"] = headers
+        response = self.check.http.get(url, **kwargs)
         response.raise_for_status()
         payload = response.json()
         return list(payload.get("items") or [])

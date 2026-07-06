@@ -656,4 +656,6 @@ def test_fetch_inherits_wrapper_auth_when_no_genresources_token():
 
     kwargs = get.call_args.kwargs
     assert "headers" not in kwargs  # must not clobber the wrapper's configured headers
-    assert not kwargs.get("extra_headers")  # nothing added -> the inherited auth headers survive
+    assert (
+        "extra_headers" not in kwargs
+    )  # omit entirely -- even empty extra_headers would drop the inherited auth_token

@@ -356,7 +356,9 @@ def test_stream_once_inherits_wrapper_auth_when_no_token():
 
     kwargs = http.get.call_args.kwargs
     assert "headers" not in kwargs  # must not clobber the wrapper's configured auth
-    assert not kwargs.get("extra_headers")  # no token -> nothing added, inherited auth survives
+    assert (
+        "extra_headers" not in kwargs
+    )  # omit entirely -- even empty extra_headers would drop the inherited auth_token
 
 
 def test_handle_line_emits_events_received_metric_matching_metadata(aggregator):
