@@ -62,8 +62,8 @@ def pod_gpu_request(pod: dict) -> int:
 
 
 def container_gpu_request(container: dict) -> int:
-    resource_requests = container.get('resources', {}).get('requests', {})
-    return parse_gpu_quantity(resource_requests.get(GPU_RESOURCE))
+    requests = container.get('resources', {}).get('requests', {})
+    return parse_gpu_quantity(requests.get(GPU_RESOURCE))
 
 
 def iter_domain_stats(
