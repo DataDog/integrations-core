@@ -158,17 +158,31 @@ def test_get_value_from_path(value, path, expected):
 
 
 @pytest.mark.parametrize('data_path', ['', None], ids=['empty_data_path', 'omitted_data_path'])
-def test_run_custom_queries_root_data_path(aggregator, instance, data_path):
+def test_run_custom_queries_root_data_path(
+    aggregator, instance, dd_run_check, mock_http_response_per_endpoint, data_path
+):
+    # A flat endpoint such as `/my-index/_count` returns `{"count": N, "_shards": {...}}`, so the metric
+    # lives at the response root. Omitting or emptying `data_path` must resolve `value_path` against it.
     instance = deepcopy(instance)
+    instance['pending_task_stats'] = False
     column = {'value_path': 'count', 'name': 'elasticsearch.custom.count', 'type': 'gauge'}
     custom_query = {'endpoint': '/my-index/_count', 'columns': [column]}
     if data_path is not None:
         custom_query['data_path'] = data_path
     instance['custom_queries'] = [custom_query]
 
+    mock_http_response_per_endpoint(
+        {
+            URL: [MockResponse(json_data={'version': {'number': '8.8.0'}})],
+            '{}/_nodes/_local/stats'.format(URL): [MockResponse(json_data={'cluster_name': 'test', 'nodes': {}})],
+            '{}/_cat/templates?format=json'.format(URL): [MockResponse(json_data=[])],
+            '{}/_cluster/health'.format(URL): [MockResponse(json_data={'status': 'yellow', 'cluster_name': 'test'})],
+            '{}/my-index/_count'.format(URL): [MockResponse(json_data={'count': 42, '_shards': {'total': 5}})],
+        }
+    )
+
     check = ESCheck('elastic', {}, instances=[instance])
-    with mock.patch.object(check, '_get_data', return_value={'count': 42, '_shards': {'total': 5}}):
-        check._run_custom_queries(admin_forwarder=False, base_tags=[])
+    dd_run_check(check)
 
     aggregator.assert_metric('elasticsearch.custom.count', value=42, count=1)
 
