@@ -14,7 +14,7 @@ from datadog_checks.kafka_consumer.client import KafkaClient
 pytestmark = [pytest.mark.unit]
 
 
-def fake_consumer_offsets_for_times(partitions, offset=-1):
+def fake_get_partition_offsets(partitions, offset=-1):
     """In our testing environment the offset is 80 for all partitions and topics."""
 
     return [(t, p, 80) for t, p in partitions]
@@ -41,7 +41,7 @@ def seed_mock_client(cluster_id="cluster_id"):
             ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
         ],
     )
-    client.consumer_offsets_for_times = fake_consumer_offsets_for_times
+    client.get_partition_offsets = fake_get_partition_offsets
     return client
 
 
@@ -500,7 +500,7 @@ def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check
 
     mock_client = seed_mock_client()
     mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 30)])]
-    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 100)]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 100)]
     kafka_consumer_check.client = mock_client
 
     # Cache has entries below (5, 50) and above (200) the new highwater of 100 — all must be cleared.
@@ -585,7 +585,7 @@ def test_check_compacts_timestamps_and_preserves_lag_accuracy(
     mock_client = seed_mock_client()
     mock_client.get_partitions_for_topic.return_value = [0]
     mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, consumer_offset)])]
-    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, highwater_offset)]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, highwater_offset)]
     kafka_consumer_check.client = mock_client
 
     kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=json.dumps(initial_cache))
@@ -609,7 +609,7 @@ def test_check_prunes_timestamps_below_earliest_consumer_offset(kafka_instance, 
 
     mock_client = seed_mock_client()
     mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 25)])]
-    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
     kafka_consumer_check.client = mock_client
 
     # Pre-seed the cache with 3 entries. Adding the new highwater at 40 fills the 4-entry
@@ -747,7 +747,7 @@ def test_check_prunes_floor_uses_minimum_offset_across_groups(kafka_instance, ch
         ("group1", [("topic1", 0, 25)]),
         ("group2", [("topic1", 0, 5)]),
     ]
-    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
     kafka_consumer_check.client = mock_client
 
     # With floor=5 (correct min), nothing below 5 exists, so no pruning; VW keeps {10, 40}.
@@ -776,7 +776,7 @@ def test_check_prunes_anchor_at_floor_boundary(kafka_instance, check, dd_run_che
 
     mock_client = seed_mock_client()
     mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 30)])]
-    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
     kafka_consumer_check.client = mock_client
 
     initial_cache = {"topic1_0": {"10": 1.0, "20": 2.0, "30": 3.0}}
@@ -802,7 +802,7 @@ def test_check_keeps_sole_entry_below_floor_as_anchor(kafka_instance, check, dd_
 
     mock_client = seed_mock_client()
     mock_client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", 0, 25)])]
-    mock_client.consumer_offsets_for_times = lambda partitions, offset=-1: [("topic1", 0, 40)]
+    mock_client.get_partition_offsets = lambda partitions, offset=-1: [("topic1", 0, 40)]
     kafka_consumer_check.client = mock_client
 
     initial_cache = {"topic1_0": {"20": 2.0, "30": 3.0}}
@@ -1054,3 +1054,113 @@ def test_connection_error_sink_failure_does_not_mask_broker_error(check, kafka_i
     kafka_consumer_check.event_platform_event = mock.Mock(side_effect=Exception('intake unavailable'))
     with pytest.raises(Exception, match="Unable to connect to the AdminClient"):
         dd_run_check(kafka_consumer_check)
+
+
+def _offset_future(offset):
+    """Build a list_offsets future whose result() returns an object with the given offset."""
+    future = mock.MagicMock()
+    future.result.return_value = mock.MagicMock(offset=offset)
+    return future
+
+
+def _raising_future(exc):
+    """Build a list_offsets future whose result() raises the given exception."""
+    future = mock.MagicMock()
+    future.result.side_effect = exc
+    return future
+
+
+def test_get_partition_offsets_skips_unqueryable_partitions():
+    """A partition whose list_offsets future raises is skipped; healthy partitions are still returned."""
+    from confluent_kafka import KafkaException, TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="healthy_topic", partition=0): _offset_future(100),
+        TopicPartition(topic="bad_topic", partition=0): _raising_future(KafkaException("UNKNOWN_TOPIC_OR_PART")),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("healthy_topic", 0), ("bad_topic", 0)])
+
+    # (a) no exception escaped, (b) the healthy partition's offset is returned,
+    # (c) the unqueryable partition is skipped.
+    assert results == [("healthy_topic", 0, 100)]
+
+
+def test_get_partition_offsets_skips_partition_on_non_kafka_error():
+    """A non-Kafka error on one partition's future is skipped, not propagated, so the loop survives."""
+    from confluent_kafka import TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="healthy_topic", partition=0): _offset_future(100),
+        TopicPartition(topic="bad_topic", partition=0): _raising_future(RuntimeError("unexpected")),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("healthy_topic", 0), ("bad_topic", 0)])
+
+    assert results == [("healthy_topic", 0, 100)]
+
+
+def test_get_partition_offsets_raises_when_list_offsets_request_fails():
+    """A request/broker-level list_offsets failure propagates, aborting highwater collection."""
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.side_effect = RuntimeError("connection dropped")
+
+    with pytest.raises(RuntimeError):
+        client.get_partition_offsets([("topic_a", 0)])
+
+
+def test_get_partition_offsets_empty_partitions_returns_empty_without_request():
+    """No partitions means no list_offsets request is issued and an empty result is returned."""
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+    client._kafka_client = mock.MagicMock()
+
+    results = client.get_partition_offsets([])
+
+    assert results == []
+    assert client._kafka_client.list_offsets.call_count == 0
+
+
+def test_get_partition_offsets_returns_all_healthy_partitions():
+    """When every list_offsets future succeeds, all partition offsets are returned."""
+    from confluent_kafka import IsolationLevel, TopicPartition
+
+    config = mock.MagicMock()
+    config._request_timeout = 5
+
+    client = KafkaClient(config, logging.getLogger(__name__))
+
+    futures = {
+        TopicPartition(topic="topic_a", partition=0): _offset_future(42),
+        TopicPartition(topic="topic_b", partition=1): _offset_future(7),
+    }
+    client._kafka_client = mock.MagicMock()
+    client._kafka_client.list_offsets.return_value = futures
+
+    results = client.get_partition_offsets([("topic_a", 0), ("topic_b", 1)])
+
+    assert sorted(results) == [("topic_a", 0, 42), ("topic_b", 1, 7)]
+    assert client._kafka_client.list_offsets.call_count == 1
+    # READ_UNCOMMITTED is load-bearing: READ_COMMITTED would return the LSO, not the true high watermark.
+    assert client._kafka_client.list_offsets.call_args.kwargs["isolation_level"] == IsolationLevel.READ_UNCOMMITTED
+    assert client._kafka_client.list_offsets.call_args.kwargs["request_timeout"] == 5
