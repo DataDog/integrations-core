@@ -50,7 +50,7 @@ CONNECTOR_PLUGINS_CACHE_KEY = 'kafka_connector_plugins_cache'
 CONNECTOR_PLUGINS_EVENT_CACHE_KEY = 'kafka_connector_plugins_event_cache'
 CONNECTOR_TOPICS_FETCH_CACHE_KEY = 'kafka_connector_topics_fetch_cache'
 CONNECTOR_TOPICS_DATA_CACHE_KEY = 'kafka_connector_topics_data_cache'
-CONNECTOR_CONFIG_CACHE_MAX_SIZE = 5_000
+CONNECTOR_CACHE_MAX_SIZE = 5_000
 
 
 def _short_class_name(full_class: str) -> str:
@@ -264,7 +264,8 @@ class KafkaConnectCollector:
             for state_name, count in task_state_counts.items():
                 self.check.gauge('connector.tasks', count, tags=connector_tags + [f'task_state:{state_name}'])
 
-    def _url_cache_key(self, prefix: str, url: str) -> str:
+    @staticmethod
+    def _url_cache_key(prefix: str, url: str) -> str:
         """Namespace a cache key by Connect URL."""
         return f'{prefix}:{quote(url, safe="")}'
 
@@ -300,11 +301,10 @@ class KafkaConnectCollector:
                 self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
 
         if names_to_refresh:
-            self.cache.mark_items_fetched(
-                fetch_cache_key, names_to_refresh, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE
-            )
-            pruned_topics = {name: topics_by_connector[name] for name in connector_names if name in topics_by_connector}
-            self.cache.set_cached_json(data_cache_key, pruned_topics)
+            self.cache.mark_items_fetched(fetch_cache_key, names_to_refresh, max_cache_size=CONNECTOR_CACHE_MAX_SIZE)
+
+        pruned_topics = {name: topics_by_connector[name] for name in connector_names if name in topics_by_connector}
+        self.cache.set_cached_json(data_cache_key, pruned_topics)
 
         return {name: topics_by_connector.get(name, []) for name in connector_names}
 
@@ -362,7 +362,7 @@ class KafkaConnectCollector:
 
         cache_key = self._url_cache_key(CONNECTOR_CONFIG_CACHE_KEY, url)
         connectors_to_emit = self.cache.get_events_to_send(
-            cache_key, connector_contents, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE
+            cache_key, connector_contents, max_cache_size=CONNECTOR_CACHE_MAX_SIZE
         )
 
         collection_timestamp = int(time.time() * 1000)
@@ -402,7 +402,7 @@ class KafkaConnectCollector:
         }
         content = json.dumps(content_dict, sort_keys=True)
         if self.cache.get_events_to_send(
-            event_cache_key, {'plugins': content}, max_cache_size=CONNECTOR_CONFIG_CACHE_MAX_SIZE
+            event_cache_key, {'plugins': content}, max_cache_size=CONNECTOR_CACHE_MAX_SIZE
         ):
             event = json.loads(content)
             event['collection_timestamp'] = int(time.time() * 1000)
