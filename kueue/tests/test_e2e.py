@@ -5,6 +5,7 @@
 import os
 import tempfile
 import time
+from pathlib import Path
 
 import pytest
 import yaml
@@ -17,6 +18,10 @@ from datadog_checks.kueue import KueueCheck
 from .common import EXPECTED_METRIC_TAGS
 
 HERE = get_here()
+DDEV_CONFIG_PATHS = (
+    Path('~/.local/share/ddev/env/kueue/py3.13-v0.18.0/config/kueue.yaml'),
+    Path('~/Library/Application Support/ddev/env/kueue/py3.13-v0.18.0/config/kueue.yaml'),
+)
 
 
 @pytest.mark.e2e
@@ -57,10 +62,26 @@ def test_e2e_workload_events(dd_agent_check, aggregator):
             env=kubectl_env,
         )
 
-    check.check(check.instance)
+    wait_for_workload_event(check, aggregator, f'Workload default/{workload_name} admitted.')
+
+
+def wait_for_workload_event(check, aggregator, msg_text):
+    for _ in range(10):
+        check.check(check.instance)
+        try:
+            aggregator.assert_event(
+                msg_text,
+                exact_match=False,
+                event_type='kueue.workload.admitted',
+                source_type_name='kueue',
+                alert_type='info',
+            )
+            return
+        except AssertionError:
+            time.sleep(1)
 
     aggregator.assert_event(
-        f'Workload default/{workload_name} admitted.',
+        msg_text,
         exact_match=False,
         event_type='kueue.workload.admitted',
         source_type_name='kueue',
@@ -78,11 +99,19 @@ def write_kind_kubeconfig(kubeconfig):
 
 
 def load_check_instance(kubeconfig_dict):
-    with open(os.path.expanduser('~/.local/share/ddev/env/kueue/py3.13-v0.18.0/config/kueue.yaml')) as config_file:
+    with open(get_ddev_config_path()) as config_file:
         instance = yaml.safe_load(config_file)['instances'][0]
     instance['kube_config_dict'] = kubeconfig_dict
     instance['collect_workload_events'] = True
     return instance
+
+
+def get_ddev_config_path():
+    for config_path in DDEV_CONFIG_PATHS:
+        config_path = config_path.expanduser()
+        if config_path.exists():
+            return config_path
+    raise FileNotFoundError('Could not find ddev Kueue config file')
 
 
 def apply_event_workload(kubectl_env):

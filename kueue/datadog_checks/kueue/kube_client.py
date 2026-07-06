@@ -13,7 +13,7 @@ class KubernetesAPIClient:
         self.log = log
 
         if kube_config_dict:
-            api_client = config.new_client_from_config_dict(kube_config_dict)
+            api_client = config.new_client_from_config_dict(to_mutable_config(kube_config_dict))
             self.custom_obj_client = client.CustomObjectsApi(api_client=api_client)
         else:
             if self.log:
@@ -35,3 +35,11 @@ class KubernetesAPIClient:
             version='v1beta1',
             plural='workloads',
         )['items']
+
+
+def to_mutable_config(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {key: to_mutable_config(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [to_mutable_config(item) for item in value]
+    return value
