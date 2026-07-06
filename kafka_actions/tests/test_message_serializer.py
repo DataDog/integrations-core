@@ -12,13 +12,11 @@ from datadog_checks.kafka_actions.message_deserializer import MessageDeserialize
 from datadog_checks.kafka_actions.message_serializer import MessageSerializer
 from google.protobuf import descriptor_pb2
 
+from . import common
+
 pytestmark = [pytest.mark.unit]
 
-AVRO_SCHEMA = (
-    '{"type": "record", "name": "Book", "namespace": "com.book", '
-    '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-    '{"name": "author", "type": "string"}]}'
-)
+AVRO_SCHEMA = common.BOOK_AVRO_SCHEMA
 
 # Base64-encoded FileDescriptorSet, as used for inline protobuf schemas (value_schema/key_schema).
 PROTOBUF_SCHEMA = (
@@ -33,7 +31,7 @@ _book_descriptor_set = descriptor_pb2.FileDescriptorSet()
 _book_descriptor_set.ParseFromString(base64.b64decode(PROTOBUF_SCHEMA))
 PROTOBUF_SCHEMA_REGISTRY = base64.b64encode(_book_descriptor_set.file[0].SerializeToString()).decode('ascii')
 
-BOOK_JSON = json.dumps({"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"})
+BOOK_JSON = json.dumps(common.BOOK)
 # proto3 JSON encodes int64 fields as strings, so round-tripped isbn comes back as a string.
 BOOK_DICT_AFTER_PROTOBUF_ROUND_TRIP = {
     "isbn": "9780134190440",
@@ -137,6 +135,33 @@ class TestMessageSerializer:
         decoded, schema_id = deserializer.deserialize_message(result, 'protobuf', PROTOBUF_SCHEMA, True)
         assert json.loads(decoded) == BOOK_DICT_AFTER_PROTOBUF_ROUND_TRIP
         assert schema_id == 350
+
+    def test_serialize_avro_schema_registry_fetch_is_cached(self, serializer):
+        schema_registry = MagicMock()
+        schema_registry.get_schema.return_value = (AVRO_SCHEMA, 'AVRO', [])
+        serializer.schema_registry = schema_registry
+
+        serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
+        serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
+
+        schema_registry.get_schema.assert_called_once_with(350)
+
+    def test_serialize_avro_inline_schema_build_is_cached(self, serializer, monkeypatch):
+        import datadog_checks.kafka_actions.message_serializer as message_serializer_module
+
+        build_calls = []
+        original_build_avro_schema = message_serializer_module.build_avro_schema
+
+        def counting_build_avro_schema(schema_str):
+            build_calls.append(schema_str)
+            return original_build_avro_schema(schema_str)
+
+        monkeypatch.setattr(message_serializer_module, "build_avro_schema", counting_build_avro_schema)
+
+        serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
+        serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
+
+        assert len(build_calls) == 1
 
     def test_serialize_schema_registry_without_registry_raises(self, serializer):
         with pytest.raises(ValueError, match="no Schema Registry is configured"):

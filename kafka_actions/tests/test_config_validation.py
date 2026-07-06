@@ -383,8 +383,19 @@ class TestProduceMessageValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_schema_registry_without_url(self):
-        """Test that value_uses_schema_registry without schema_registry_url raises error."""
+    @pytest.mark.parametrize(
+        "schema_registry_url,value_schema_id,match",
+        [
+            (None, 1, "requires 'schema_registry_url' to be configured"),
+            ('http://localhost:8081', None, "requires an integer 'value_schema_id'"),
+            ('http://localhost:8081', -1, "requires an integer 'value_schema_id'"),
+            ('http://localhost:8081', True, "requires an integer 'value_schema_id'"),
+            ('http://localhost:8081', 'not-an-int', "requires an integer 'value_schema_id'"),
+        ],
+        ids=["no-url", "missing-schema-id", "negative-schema-id", "bool-schema-id", "non-integer-schema-id"],
+    )
+    def test_schema_registry_requirement_violations(self, schema_registry_url, value_schema_id, match):
+        """Test that avro + value_uses_schema_registry rejects a missing url or an invalid value_schema_id."""
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
@@ -394,30 +405,14 @@ class TestProduceMessageValidation:
                 'value': 'test',
                 'value_format': 'avro',
                 'value_uses_schema_registry': True,
-                'value_schema_id': 1,
             },
         }
+        if schema_registry_url is not None:
+            instance['schema_registry_url'] = schema_registry_url
+        if value_schema_id is not None:
+            instance['produce_message']['value_schema_id'] = value_schema_id
 
-        with pytest.raises(ConfigurationError, match="requires 'schema_registry_url' to be configured"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_schema_registry_without_schema_id(self):
-        """Test that value_uses_schema_registry without an integer value_schema_id raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'schema_registry_url': 'http://localhost:8081',
-            'produce_message': {
-                'cluster': 'test',
-                'topic': 'test',
-                'value': 'test',
-                'value_format': 'avro',
-                'value_uses_schema_registry': True,
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="requires an integer 'value_schema_id'"):
+        with pytest.raises(ConfigurationError, match=match):
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
@@ -440,62 +435,24 @@ class TestProduceMessageValidation:
             config = KafkaActionsConfig(instance, None)
             config.validate_config()
 
-    def test_negative_schema_id(self):
-        """Test that a negative value_schema_id raises error."""
+    def test_raw_format_with_schema_registry_is_not_validated(self):
+        """Test that value_format='raw' skips the schema-registry requirement entirely.
+
+        'raw' never touches the registry on either side of the wire (MessageSerializer
+        base64-decodes it unconditionally; MessageDeserializer base64-encodes the wire
+        bytes as-is), so it must not be forced to supply a schema_registry_url/schema_id.
+        """
         instance = {
             'remote_config_id': 'test-id',
             'kafka_connect_str': 'localhost:9092',
-            'schema_registry_url': 'http://localhost:8081',
             'produce_message': {
                 'cluster': 'test',
                 'topic': 'test',
-                'value': 'test',
-                'value_format': 'avro',
+                'value': base64.b64encode(b'test').decode('utf-8'),
+                'value_format': 'raw',
                 'value_uses_schema_registry': True,
-                'value_schema_id': -1,
             },
         }
 
-        with pytest.raises(ConfigurationError, match="requires an integer 'value_schema_id'"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_bool_schema_id_rejected(self):
-        """Test that a boolean value_schema_id (a bool subclasses int) raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'schema_registry_url': 'http://localhost:8081',
-            'produce_message': {
-                'cluster': 'test',
-                'topic': 'test',
-                'value': 'test',
-                'value_format': 'avro',
-                'value_uses_schema_registry': True,
-                'value_schema_id': True,
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="requires an integer 'value_schema_id'"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
-
-    def test_schema_registry_non_integer_schema_id(self):
-        """Test that a non-integer value_schema_id raises error."""
-        instance = {
-            'remote_config_id': 'test-id',
-            'kafka_connect_str': 'localhost:9092',
-            'schema_registry_url': 'http://localhost:8081',
-            'produce_message': {
-                'cluster': 'test',
-                'topic': 'test',
-                'value': 'test',
-                'value_format': 'avro',
-                'value_uses_schema_registry': True,
-                'value_schema_id': 'not-an-int',
-            },
-        }
-
-        with pytest.raises(ConfigurationError, match="requires an integer 'value_schema_id'"):
-            config = KafkaActionsConfig(instance, None)
-            config.validate_config()
+        config = KafkaActionsConfig(instance, None)
+        config.validate_config()

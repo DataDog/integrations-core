@@ -10,9 +10,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 from confluent_kafka import KafkaError, KafkaException, TopicPartition
 from confluent_kafka.admin import OffsetSpec
-
 from datadog_checks.kafka_actions import KafkaActionsCheck
 from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
+
+from . import common
 
 pytestmark = [pytest.mark.unit]
 
@@ -645,12 +646,8 @@ class TestProduceMessageAction:
 
     def test_produce_message_avro_inline_schema(self, aggregator, dd_run_check):
         """Test producing an Avro value with an inline schema."""
-        avro_schema = (
-            '{"type": "record", "name": "Book", "namespace": "com.book", '
-            '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-            '{"name": "author", "type": "string"}]}'
-        )
-        book = {"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}
+        avro_schema = common.BOOK_AVRO_SCHEMA
+        book = common.BOOK
 
         instance = {
             'remote_config_id': 'test-produce-message-003',
@@ -684,12 +681,8 @@ class TestProduceMessageAction:
 
     def test_produce_message_avro_schema_registry(self, aggregator, dd_run_check):
         """Test producing an Avro value using an explicit Schema Registry schema_id."""
-        avro_schema = (
-            '{"type": "record", "name": "Book", "namespace": "com.book", '
-            '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
-            '{"name": "author", "type": "string"}]}'
-        )
-        book = {"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}
+        avro_schema = common.BOOK_AVRO_SCHEMA
+        book = common.BOOK
 
         instance = {
             'remote_config_id': 'test-produce-message-004',

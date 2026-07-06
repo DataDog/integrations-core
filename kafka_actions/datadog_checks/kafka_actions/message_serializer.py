@@ -12,6 +12,7 @@ format/schema configuration.
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 from io import BytesIO
 
@@ -38,6 +39,8 @@ class MessageSerializer:
     def __init__(self, log, schema_registry=None):
         self.log = log
         self.schema_registry = schema_registry
+        self._registry_schema_cache: dict[tuple[str, int], tuple[object, str]] = {}
+        self._schema_cache: dict[tuple[str, str], object] = {}
 
     def serialize_message(
         self,
@@ -135,12 +138,17 @@ class MessageSerializer:
         return instance.SerializeToString()
 
     def _fetch_and_build_schema(self, schema_id: int, format_type: str):
-        """Fetch schema from the registry by ID and build it.
+        """Fetch schema from the registry by ID and build it, caching by (format_type, schema_id).
 
         Returns:
             Tuple of (schema_object, actual_format), where actual_format is
             the format reported by the registry (may differ from format_type).
         """
+        cache_key = (format_type, schema_id)
+        cached = self._registry_schema_cache.get(cache_key)
+        if cached is not None:
+            return cached
+
         schema_str, schema_type, dep_schemas = self.schema_registry.get_schema(schema_id)
         actual_format = REGISTRY_TYPE_MAP.get(schema_type, format_type)
 
@@ -151,11 +159,22 @@ class MessageSerializer:
         else:
             schema = None
 
-        return schema, actual_format
+        result = (schema, actual_format)
+        self._registry_schema_cache[cache_key] = result
+        return result
 
     def _build_schema(self, format_type: str, schema_str: str):
+        """Build a schema from an inline schema string, caching by (format_type, schema hash)."""
+        cache_key = (format_type, hashlib.sha256(schema_str.encode('utf-8')).hexdigest())
+        if cache_key in self._schema_cache:
+            return self._schema_cache[cache_key]
+
         if format_type == 'protobuf':
-            return build_protobuf_schema(schema_str)
+            schema = build_protobuf_schema(schema_str)
         elif format_type == 'avro':
-            return build_avro_schema(schema_str)
-        return None
+            schema = build_avro_schema(schema_str)
+        else:
+            schema = None
+
+        self._schema_cache[cache_key] = schema
+        return schema

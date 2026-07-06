@@ -644,8 +644,8 @@ files:
             - string: Plain UTF-8 text
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
-            - protobuf: Protocol Buffers. Only the first top-level message type
-              defined in the schema is used.
+            - protobuf: Protocol Buffers, using only the first top-level message type
+              defined in the schema
             - avro: Apache Avro
           default: raw
           example: raw
@@ -676,8 +676,8 @@ files:
             - string: Plain UTF-8 text
             - json: JSON data (strict validation, fails if not valid JSON)
             - bson: BSON (Binary JSON) data
-            - protobuf: Protocol Buffers. Only the first top-level message type
-              defined in the schema is used.
+            - protobuf: Protocol Buffers, using only the first top-level message type
+              defined in the schema
             - avro: Apache Avro
           default: raw
           example: raw

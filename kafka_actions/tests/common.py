@@ -50,3 +50,10 @@ INSTANCE = {
 }
 
 E2E_INSTANCE = copy.deepcopy(INSTANCE)
+
+BOOK_AVRO_SCHEMA = (
+    '{"type": "record", "name": "Book", "namespace": "com.book", '
+    '"fields": [{"name": "isbn", "type": "long"}, {"name": "title", "type": "string"}, '
+    '{"name": "author", "type": "string"}]}'
+)
+BOOK = {"isbn": 9780134190440, "title": "The Go Programming Language", "author": "Alan Donovan"}
