@@ -324,6 +324,13 @@ def test_scontrol_processing_does_not_resolve_host_pid_by_default(
     aggregator.assert_all_metrics_covered()
 
 
+def test_resolve_scontrol_host_pid_logs_multiple_matches(instance, caplog):
+    check = SlurmCheck('slurm', {}, [instance])
+
+    assert check._resolve_scontrol_host_pid("3771", {"3771": ["12345", "23456"]}) == "12345"
+    assert "Found multiple host PIDs matching scontrol namespace PID 3771" in caplog.text
+
+
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check):
     instance['collect_sinfo_stats'] = True

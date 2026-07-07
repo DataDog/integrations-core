@@ -590,7 +590,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         # Cache for job details to avoid duplicate calls
         job_details_cache = {}
-        host_pid_by_namespace_pid = self._get_host_pid_by_namespace_pid() if self.resolve_scontrol_host_pids else {}
+        host_pids_by_namespace_pid = self._get_host_pids_by_namespace_pid() if self.resolve_scontrol_host_pids else {}
 
         for line in lines[1:]:
             tags = [f"slurm_node_name:{slurm_node.strip()}"]
@@ -601,7 +601,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
 
                 if new_header == "pid":
-                    value = host_pid_by_namespace_pid.get(value, value)
+                    value = self._resolve_scontrol_host_pid(value, host_pids_by_namespace_pid)
                     # Example gpu tags being returned:
                     # ['gpu_vendor:nvidia', 'gpu_device:tesla_v100', 'gpu_uuid:gpu_xxxx...']
                     pidtags = tagger.tag(f"process://{value}", tagger.ORCHESTRATOR)
@@ -621,15 +621,30 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
 
-    def _get_host_pid_by_namespace_pid(self):
+    def _resolve_scontrol_host_pid(self, namespace_pid, host_pids_by_namespace_pid):
+        host_pids = host_pids_by_namespace_pid.get(namespace_pid)
+        if not host_pids:
+            return namespace_pid
+
+        if len(host_pids) > 1:
+            self.log.debug(
+                "Found multiple host PIDs matching scontrol namespace PID %s: %s. Using %s.",
+                namespace_pid,
+                host_pids,
+                host_pids[0],
+            )
+
+        return host_pids[0]
+
+    def _get_host_pids_by_namespace_pid(self):
         host_proc = os.environ.get("HOST_PROC", "/host/proc")
-        host_pid_by_namespace_pid = {}
+        host_pids_by_namespace_pid = {}
 
         try:
             proc_entries = os.scandir(host_proc)
         except OSError as e:
             self.log.debug("Unable to scan host proc path '%s': %s", host_proc, e)
-            return host_pid_by_namespace_pid
+            return host_pids_by_namespace_pid
 
         with proc_entries:
             for entry in proc_entries:
@@ -637,9 +652,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                     continue
 
                 for namespace_pid in self._read_namespace_pids(entry.path, entry.name):
-                    host_pid_by_namespace_pid.setdefault(namespace_pid, entry.name)
+                    host_pids_by_namespace_pid.setdefault(namespace_pid, []).append(entry.name)
 
-        return host_pid_by_namespace_pid
+        return host_pids_by_namespace_pid
 
     def _read_namespace_pids(self, proc_path, host_pid):
         try:
