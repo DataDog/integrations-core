@@ -377,6 +377,11 @@ class IbmDb2Check(DatabaseCheck):
         self.tag_manager.set_tags_from_list(self._tags, replace=True)
         self.add_core_tags()
         self.set_resource_tags()
+        # Base check metrics are emitted with self._tags (not the tag manager), so also
+        # stamp the DBM identity tags here — otherwise ibm_db2.* metrics land without a
+        # database_instance and can't be correlated with the instance in the DBM UI.
+        self._tags.append('database_hostname:{}'.format(self.database_hostname))
+        self._tags.append('database_instance:{}'.format(self.database_identifier))
         self.connection = Db2Connection(self, self._config)
         self.statement_metrics = Db2StatementMetrics(self, self._config)
         self.statement_samples = Db2StatementSamples(self, self._config)

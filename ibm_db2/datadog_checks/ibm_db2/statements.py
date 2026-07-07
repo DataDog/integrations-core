@@ -440,6 +440,12 @@ class Db2StatementMetrics(DBMAsyncJob):
         payload_row = dict(row)
         payload_row.pop('stmt_text', None)
         payload_row.pop('stmt_text_length', None)
+        # Db2's MEMBER column is a SMALLINT, so it arrives as an int. The dbm-metrics
+        # processor decodes `member` into a string tag field, and a JSON number there
+        # fails the decode and drops the entire query-metrics payload. Emit it as a
+        # string to match the backend contract (it's a tag value, i.e. a string anyway).
+        if payload_row.get('member') is not None:
+            payload_row['member'] = str(payload_row['member'])
         return payload_row
 
     def _get_query_metrics_payloads(self, payload_wrapper: dict[str, Any], rows: list[dict[str, Any]]) -> list[str]:
