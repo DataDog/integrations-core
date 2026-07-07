@@ -14,7 +14,7 @@ from ddev.ai.agent.types import StopReason
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.config import AgentConfig
+    from ddev.ai.config.models import AgentConfig
     from ddev.ai.react.factory import ReActProcessFactory
 
 SPAWN_SUBAGENT_NAME = "spawn_subagent"

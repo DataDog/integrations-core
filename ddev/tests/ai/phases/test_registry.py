@@ -6,8 +6,9 @@ from pathlib import Path
 
 import pytest
 
+from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.agentic_phase import AgenticPhase
-from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+from ddev.ai.phases.registry import PhaseRegistry
 
 FRAMEWORK_PHASES_DIR = Path(__file__).resolve().parents[3] / "src" / "ddev" / "ai" / "phases"
 FRAMEWORK_IMPORT_PREFIX = "ddev.ai.phases"
@@ -15,7 +16,7 @@ FRAMEWORK_IMPORT_PREFIX = "ddev.ai.phases"
 
 def test_discover_registers_agentic_phase():
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
+    registry.register_from(FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     assert "AgenticPhase" in registry.known_names()
     assert registry.get("AgenticPhase") is AgenticPhase
 
@@ -31,7 +32,7 @@ def test_discover_registers_custom_subclass(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(tmp_path))
 
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="fake_phases")
+    registry.register_from(phases_dir=fake_dir, import_prefix="fake_phases")
 
     assert "CustomPhase" in registry.known_names()
     assert issubclass(registry.get("CustomPhase"), AgenticPhase)
@@ -45,7 +46,7 @@ def test_discover_ignores_module_without_phase_subclass(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(tmp_path))
 
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="no_phase_pkg")
+    registry.register_from(phases_dir=fake_dir, import_prefix="no_phase_pkg")
 
     assert registry.known_names() == []
 
@@ -59,7 +60,7 @@ def test_discover_does_not_register_imported_phase_class(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(tmp_path))
 
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="importer_pkg")
+    registry.register_from(phases_dir=fake_dir, import_prefix="importer_pkg")
 
     assert "AgenticPhase" not in registry.known_names()
 
@@ -78,7 +79,7 @@ def test_discover_skips_underscore_prefixed_files(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(tmp_path))
 
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, phases_dir=fake_dir, import_prefix="underscore_pkg")
+    registry.register_from(phases_dir=fake_dir, import_prefix="underscore_pkg")
 
     assert "PrivatePhase" not in registry.known_names()
     assert "PublicPhase" in registry.known_names()
@@ -86,9 +87,9 @@ def test_discover_skips_underscore_prefixed_files(tmp_path, monkeypatch):
 
 def test_discover_idempotent():
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
+    registry.register_from(FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     first = registry.known_names()
-    discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
+    registry.register_from(FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     second = registry.known_names()
     assert first == second
 
@@ -102,15 +103,62 @@ def test_registry_get_unknown_raises():
 def test_imported_class_not_registered():
     """A class imported into a phases module but defined elsewhere should not be registered."""
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
+    registry.register_from(FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     # BaseMessage is imported in messages.py but defined in event_bus — it should NOT be registered
     assert "BaseMessage" not in registry.known_names()
 
 
-def test_discover_does_not_mutate_global_state():
-    """_discover_and_register_phases only touches the registry passed to it."""
+def test_register_from_discovers_subpackage_phases():
     registry = PhaseRegistry()
-    discover_and_register_phases(registry, FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
+    registry.register_from(CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
+    names = registry.known_names()
+    assert "AgenticPhase" in names
+    assert "InspectEndpointPhase" in names
+    assert registry.import_errors == {}
+
+
+def test_register_from_records_missing_optional_dependency_and_continues(tmp_path, monkeypatch):
+    fake_dir = tmp_path / "missing_dep_pkg"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "bad_dep.py").write_text("import definitely_missing_pkg_xyz\n")
+    (fake_dir / "sibling.py").write_text(
+        "from ddev.ai.phases.agentic_phase import AgenticPhase\nclass SiblingPhase(AgenticPhase):\n    pass\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    registry = PhaseRegistry()
+    registry.register_from(phases_dir=fake_dir, import_prefix="missing_dep_pkg")
+
+    module_name = "missing_dep_pkg.bad_dep"
+    assert module_name in registry.import_errors
+    assert "optional dependency missing" in registry.import_errors[module_name]
+    assert "SiblingPhase" in registry.known_names()
+
+
+def test_register_from_records_broken_module_and_continues(tmp_path, monkeypatch):
+    fake_dir = tmp_path / "broken_pkg"
+    fake_dir.mkdir()
+    (fake_dir / "__init__.py").write_text("")
+    (fake_dir / "broken.py").write_text("def (:\n")
+    (fake_dir / "sibling.py").write_text(
+        "from ddev.ai.phases.agentic_phase import AgenticPhase\nclass SiblingPhase(AgenticPhase):\n    pass\n"
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+
+    registry = PhaseRegistry()
+    registry.register_from(phases_dir=fake_dir, import_prefix="broken_pkg")
+
+    module_name = "broken_pkg.broken"
+    assert module_name in registry.import_errors
+    assert "failed to import" in registry.import_errors[module_name]
+    assert "SiblingPhase" in registry.known_names()
+
+
+def test_discover_does_not_mutate_global_state():
+    """register_from only touches the registry it is called on."""
+    registry = PhaseRegistry()
+    registry.register_from(FRAMEWORK_PHASES_DIR, FRAMEWORK_IMPORT_PREFIX)
     # No module-level / class-level container should have been touched.
     # Verify by checking there is no class-level _registry attribute on PhaseRegistry.
     assert not hasattr(PhaseRegistry, "_registry")

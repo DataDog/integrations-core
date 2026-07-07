@@ -81,7 +81,7 @@ include = ["src"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ddev"]
-artifacts = ["src/ddev/cli/create/templates"]
+artifacts = ["src/ddev/cli/create/templates", "src/ddev/ai/flows"]
 
 [tool.hatch.build.targets.binary]
 python-version = "3.13"
