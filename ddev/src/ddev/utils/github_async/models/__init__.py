@@ -34,7 +34,10 @@ if TYPE_CHECKING:
     from .user import GitHubUser as GitHubUser
     from .workflow import Artifact as Artifact
     from .workflow import ArtifactsList as ArtifactsList
+    from .workflow import JobStep as JobStep
     from .workflow import WorkflowDispatchResult as WorkflowDispatchResult
+    from .workflow import WorkflowJob as WorkflowJob
+    from .workflow import WorkflowJobsList as WorkflowJobsList
     from .workflow import WorkflowRun as WorkflowRun
 
 # Map of exported attribute name -> submodule (relative to this package) that
@@ -45,11 +48,14 @@ MODULE_BY_NAME: dict[str, str] = {
     'CheckRun': 'check_run',
     'GitHubUser': 'user',
     'IssueComment': 'comment',
+    'JobStep': 'workflow',
     'Label': 'label',
     'PullRequest': 'pull_request',
     'PullRequestRef': 'pull_request',
     'PullRequestReviewComment': 'comment',
     'WorkflowDispatchResult': 'workflow',
+    'WorkflowJob': 'workflow',
+    'WorkflowJobsList': 'workflow',
     'WorkflowRun': 'workflow',
 }
 

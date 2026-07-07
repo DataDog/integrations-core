@@ -12,7 +12,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Any, Literal, Self, overload
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
@@ -25,6 +25,7 @@ from .models import (
     PullRequest,
     PullRequestReviewComment,
     WorkflowDispatchResult,
+    WorkflowJobsList,
     WorkflowRun,
 )
 
@@ -161,6 +162,7 @@ class AsyncGitHubClient:
     # Endpoint methods
     # ------------------------------------------------------------------
 
+    @overload
     async def create_workflow_dispatch(
         self,
         owner: str,
@@ -169,7 +171,34 @@ class AsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-    ) -> GitHubResponse[WorkflowDispatchResult]:
+        *,
+        return_run_details: Literal[True],
+    ) -> GitHubResponse[WorkflowDispatchResult]: ...
+
+    @overload
+    async def create_workflow_dispatch(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        inputs: dict[str, str] | None = None,
+        timeout: float | None = None,
+        *,
+        return_run_details: Literal[False] = False,
+    ) -> GitHubResponse[None]: ...
+
+    async def create_workflow_dispatch(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        inputs: dict[str, str] | None = None,
+        timeout: float | None = None,
+        *,
+        return_run_details: bool = False,
+    ) -> GitHubResponse[WorkflowDispatchResult] | GitHubResponse[None]:
         """
         Calls the GitHub API to trigger a workflow dispatch event.
 
@@ -183,20 +212,29 @@ class AsyncGitHubClient:
             ref: Branch or tag name to run the workflow on.
             inputs: Optional key/value inputs forwarded to the workflow.
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            return_run_details: When True, requests a 200 response with the new run's metadata
+                (workflow_run_id, run_url, html_url) instead of the default 204 No Content.
+                See https://github.blog/changelog/2026-02-19-workflow-dispatch-api-now-returns-run-ids/.
 
         Returns:
-            GitHubResponse[WorkflowDispatchResult]: The dispatched run id and headers.
+            When ``return_run_details=False`` (default): ``GitHubResponse[None]`` wrapping the 204.
+            When ``return_run_details=True``: ``GitHubResponse[WorkflowDispatchResult]`` with the new run's
+            IDs and URLs.
         """
-        body: dict[str, Any] = {"ref": ref, "return_run_details": True}
+        body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
             body["inputs"] = inputs
+        if return_run_details:
+            body["return_run_details"] = True
         response = await self._request(
             "POST",
             f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
             timeout=timeout,
             json=body,
         )
-        return self._parse_response(response, WorkflowDispatchResult)
+        if return_run_details:
+            return self._parse_response(response, WorkflowDispatchResult)
+        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
 
     async def get_workflow_run(
         self,
@@ -250,6 +288,34 @@ class AsyncGitHubClient:
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
             yield self._parse_response(response, ArtifactsList)
+
+    async def list_workflow_jobs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowJobsList]]:
+        """
+        Calls the GitHub API to list jobs for a workflow run (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-jobs#list-jobs-for-a-workflow-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            run_id: Numeric ID of the workflow run.
+            per_page: Number of jobs per page (default 30, max 100).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            AsyncIterator[GitHubResponse[WorkflowJobsList]]: One page of jobs per iteration.
+        """
+        endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
+            yield self._parse_response(response, WorkflowJobsList)
 
     async def create_issue_comment(
         self,
