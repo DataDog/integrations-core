@@ -7,8 +7,11 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubeflow import KubeflowCheck
+from datadog_checks.kubeflow.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 from .common import METRICS_MOCK, get_fixture_path
+
+pytestmark = pytest.mark.unit
 
 
 def test_check_kubeflow(dd_run_check, aggregator, instance, mock_http_response):
@@ -32,3 +35,16 @@ def test_empty_instance(dd_run_check):
     ):
         check = KubeflowCheck('KubeflowCheck', {}, [{}])
         dd_run_check(check)
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert KubeflowCheck.DEFAULT_METRIC_LIMIT == 0
+
+
+def test_get_default_config_uses_metric_map_and_rename_labels(instance):
+    # Confirms get_default_config wires METRIC_MAP/RENAME_LABELS_MAP into the returned config.
+    check = KubeflowCheck('kubeflow', {}, [instance])
+    config = check.get_default_config()
+    assert config['metrics'] == [METRIC_MAP]
+    assert config['rename_labels'] == RENAME_LABELS_MAP
