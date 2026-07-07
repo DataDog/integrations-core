@@ -1,0 +1,1 @@
+Fix Checkpoint Harmony Endpoint log-only configuration to avoid loading a missing Python check.
