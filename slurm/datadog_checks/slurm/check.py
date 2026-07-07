@@ -640,6 +640,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             return ProcessPidMatch(host_pid=namespace_pid, namespace_pids=[])
 
         if len(host_pid_matches) > 1:
+            # We do not disambiguate by container yet, so use the first matching host PID.
             matches = [
                 {"host_pid": match.host_pid, "namespace_pids": match.namespace_pids} for match in host_pid_matches
             ]
