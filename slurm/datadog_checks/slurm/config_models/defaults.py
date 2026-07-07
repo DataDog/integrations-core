@@ -84,6 +84,10 @@ def instance_min_collection_interval():
     return 60
 
 
+def instance_resolve_scontrol_host_pids():
+    return False
+
+
 def instance_sacct_path():
     return '/usr/bin/sacct'
 

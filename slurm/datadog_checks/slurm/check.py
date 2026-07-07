@@ -70,6 +70,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_sacct_stats = is_affirmative(self.instance.get('collect_sacct_stats', True))
         self.collect_scontrol_stats = is_affirmative(self.instance.get('collect_scontrol_stats', False))
         self.collect_seff_stats = is_affirmative(self.instance.get('collect_seff_stats', False))
+        self.resolve_scontrol_host_pids = is_affirmative(self.instance.get('resolve_scontrol_host_pids', False))
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
@@ -589,6 +590,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         # Cache for job details to avoid duplicate calls
         job_details_cache = {}
+        host_pid_by_namespace_pid = self._get_host_pid_by_namespace_pid() if self.resolve_scontrol_host_pids else {}
 
         for line in lines[1:]:
             tags = [f"slurm_node_name:{slurm_node.strip()}"]
@@ -597,14 +599,16 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             for header, value in zip(headers, fields):
                 new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
-                tags.append(f"{new_header}:{value}")
 
                 if new_header == "pid":
+                    value = host_pid_by_namespace_pid.get(value, value)
                     # Example gpu tags being returned:
                     # ['gpu_vendor:nvidia', 'gpu_device:tesla_v100', 'gpu_uuid:gpu_xxxx...']
                     pidtags = tagger.tag(f"process://{value}", tagger.ORCHESTRATOR)
                     if pidtags:  # Guard against tagger.tag returning None
                         tags.extend(pidtags)
+
+                tags.append(f"{new_header}:{value}")
 
                 if header == "JOBID" and value.isdigit():
                     job_id = value
@@ -616,6 +620,37 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 tags.extend(job_details_cache[job_id])
 
             self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
+
+    def _get_host_pid_by_namespace_pid(self):
+        host_proc = os.environ.get("HOST_PROC", "/host/proc")
+        host_pid_by_namespace_pid = {}
+
+        try:
+            proc_entries = os.scandir(host_proc)
+        except OSError as e:
+            self.log.debug("Unable to scan host proc path '%s': %s", host_proc, e)
+            return host_pid_by_namespace_pid
+
+        with proc_entries:
+            for entry in proc_entries:
+                if not entry.name.isdigit():
+                    continue
+
+                for namespace_pid in self._read_namespace_pids(entry.path, entry.name):
+                    host_pid_by_namespace_pid.setdefault(namespace_pid, entry.name)
+
+        return host_pid_by_namespace_pid
+
+    def _read_namespace_pids(self, proc_path, host_pid):
+        try:
+            with open(os.path.join(proc_path, "status")) as status_file:
+                for line in status_file:
+                    if line.startswith("NSpid:"):
+                        return line.split()[1:]
+        except OSError as e:
+            self.log.debug("Unable to read process status for PID %s: %s", host_pid, e)
+
+        return [host_pid]
 
     def _enrich_scontrol_tags(self, job_id):
         # Tries to enrich the scontrol job with additional details from squeue.

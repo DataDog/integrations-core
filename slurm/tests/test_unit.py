@@ -228,6 +228,103 @@ def test_scontrol_processing(mock_get_subprocess_output, instance, aggregator):
 
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_processing_resolves_host_pid(mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path):
+    instance['collect_scontrol_stats'] = True
+    instance['resolve_scontrol_host_pids'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    host_proc = tmp_path / "proc"
+    host_process = host_proc / "12345"
+    other_process = host_proc / "999"
+    host_process.mkdir(parents=True)
+    other_process.mkdir()
+    (host_process / "status").write_text("Name:\tjob\nNSpid:\t12345\t3771\n")
+    (other_process / "status").write_text("Name:\tother\n")
+    monkeypatch.setenv("HOST_PROC", str(host_proc))
+
+    mock_get_subprocess_output.side_effect = [
+        (mock_output('scontrol.txt'), "", 0),
+        ("c1", "", 0),
+        (mock_output('scontrol_squeue.txt'), "", 0),
+        (mock_output('scontrol_squeue2.txt'), "", 0),
+    ]
+
+    check.check(None)
+
+    aggregator.assert_metric(
+        name='slurm.scontrol.jobs.info',
+        value=1,
+        tags=[
+            "pid:12345",
+            "slurm_global_id:0",
+            "slurm_job_id:14",
+            "slurm_local_id:0",
+            "slurm_node_name:c1",
+            "slurm_step_id:batch",
+            "slurm_job_name:my_job",
+            "slurm_job_state:RUNNING",
+            "slurm_job_user:root",
+        ],
+    )
+    aggregator.assert_metric(
+        name='slurm.scontrol.jobs.info',
+        value=1,
+        tags=[
+            "pid:3772",
+            "slurm_global_id:-",
+            "slurm_job_id:14",
+            "slurm_local_id:-",
+            "slurm_node_name:c1",
+            "slurm_step_id:batch",
+            "slurm_job_name:my_job",
+            "slurm_job_state:RUNNING",
+            "slurm_job_user:root",
+        ],
+    )
+    aggregator.assert_metric(
+        name='slurm.scontrol.jobs.info',
+        value=1,
+        tags=[
+            "pid:3773",
+            "slurm_global_id:0",
+            "slurm_job_id:15",
+            "slurm_local_id:0",
+            "slurm_node_name:c1",
+            "slurm_step_id:batch",
+            "slurm_job_name:my_job2",
+            "slurm_job_state:RUNNING",
+            "slurm_job_user:root",
+        ],
+    )
+    aggregator.assert_all_metrics_covered()
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_scontrol_processing_does_not_resolve_host_pid_by_default(
+    mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path
+):
+    instance['collect_scontrol_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    host_proc = tmp_path / "proc"
+    host_process = host_proc / "12345"
+    host_process.mkdir(parents=True)
+    (host_process / "status").write_text("Name:\tjob\nNSpid:\t12345\t3771\n")
+    monkeypatch.setenv("HOST_PROC", str(host_proc))
+
+    mock_get_subprocess_output.side_effect = [
+        (mock_output('scontrol.txt'), "", 0),
+        ("c1", "", 0),
+        (mock_output('scontrol_squeue.txt'), "", 0),
+        (mock_output('scontrol_squeue2.txt'), "", 0),
+    ]
+
+    check.check(None)
+
+    for metric in SCONTROL_MAP['metrics']:
+        aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
+    aggregator.assert_all_metrics_covered()
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_metadata(mock_get_subprocess_out, instance, datadog_agent, dd_run_check):
     instance['collect_sinfo_stats'] = True
     instance['sinfo_collection_level'] = 1

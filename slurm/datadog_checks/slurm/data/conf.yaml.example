@@ -51,6 +51,12 @@ instances:
     #
     # collect_scontrol_stats: false
 
+    ## @param resolve_scontrol_host_pids - boolean - optional - default: false
+    ## Whether or not to resolve PIDs reported by scontrol through the host proc filesystem before collecting
+    ## process tags. Enable this when scontrol reports namespace PIDs instead of host PIDs.
+    #
+    # resolve_scontrol_host_pids: false
+
     ## @param collect_gpu_stats - boolean - optional - default: false
     ## Whether or not to collect GPU statistics when Slurm is configured to use GPUs.
     #
