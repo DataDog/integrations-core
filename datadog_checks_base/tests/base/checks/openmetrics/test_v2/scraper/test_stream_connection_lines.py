@@ -7,7 +7,11 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base.checks.openmetrics.v2.scraper.base_scraper import OpenMetricsScraper
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
+
+# A raw requests ConnectTimeout translates to HTTPTimeoutError, a sibling of HTTPConnectionError, so both
+# must be swallowed under ignore_connection_errors to preserve the pre-migration ConnectionError coverage.
+AGNOSTIC_CONNECTION_ERRORS = [HTTPConnectionError, HTTPTimeoutError]
 
 
 def _scraper_with_connection_error(exception, *, ignore_connection_errors):
@@ -19,8 +23,9 @@ def _scraper_with_connection_error(exception, *, ignore_connection_errors):
     return scraper
 
 
-def test_agnostic_connection_error_swallowed_when_ignored(caplog):
-    scraper = _scraper_with_connection_error(HTTPConnectionError('refused'), ignore_connection_errors=True)
+@pytest.mark.parametrize('error_cls', AGNOSTIC_CONNECTION_ERRORS)
+def test_agnostic_connection_error_swallowed_when_ignored(caplog, error_cls):
+    scraper = _scraper_with_connection_error(error_cls('refused'), ignore_connection_errors=True)
     with caplog.at_level(logging.WARNING, logger='test_stream_connection_lines'):
         assert list(scraper.stream_connection_lines()) == []
     assert any(
@@ -29,7 +34,8 @@ def test_agnostic_connection_error_swallowed_when_ignored(caplog):
     )
 
 
-def test_agnostic_connection_error_reraised_when_not_ignored():
-    scraper = _scraper_with_connection_error(HTTPConnectionError('refused'), ignore_connection_errors=False)
-    with pytest.raises(HTTPConnectionError):
+@pytest.mark.parametrize('error_cls', AGNOSTIC_CONNECTION_ERRORS)
+def test_agnostic_connection_error_reraised_when_not_ignored(error_cls):
+    scraper = _scraper_with_connection_error(error_cls('refused'), ignore_connection_errors=False)
+    with pytest.raises(error_cls):
         list(scraper.stream_connection_lines())

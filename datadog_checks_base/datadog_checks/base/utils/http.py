@@ -10,6 +10,7 @@ import re
 import socket
 import warnings
 from collections import ChainMap
+from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from typing import TYPE_CHECKING
@@ -214,11 +215,14 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
-def _translate_requests_exception(exc) -> HTTPError:
+def _translate_requests_exception(exc: BaseException, *, response=None) -> HTTPError:
     """Translate a requests exception into the library-agnostic equivalent.
 
     Order is significant. Several requests types subclass others, so the most
-    specific must be tested first (see the Step 0.1 subpage mapping table).
+    specific must be tested first.
+
+    ``response`` is supplied only by the ``raise_for_status`` seam, which passes the
+    agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
     """
     message = str(exc) or exc.__class__.__name__
     request = getattr(exc, 'request', None)
@@ -241,15 +245,14 @@ def _translate_requests_exception(exc) -> HTTPError:
     if isinstance(exc, requests_exceptions.ContentDecodingError):
         return HTTPRequestError(message, request=request)
     if isinstance(exc, requests_exceptions.HTTPError):
-        # response is attached at the raise_for_status seam (the agnostic wrapper), never the raw one here
-        return HTTPStatusError(message, request=request)
+        return HTTPStatusError(message, request=request, response=response)
     if isinstance(exc, requests_exceptions.RequestException):
         return HTTPRequestError(message, request=request)
     return HTTPError(message)
 
 
 @contextmanager
-def _translate_http_errors():
+def _translate_http_errors() -> Iterator[None]:
     """Re-raise requests exceptions as their library-agnostic equivalents."""
     try:
         yield
@@ -268,11 +271,7 @@ class ResponseWrapper(ObjectProxy):
         try:
             self.__wrapped__.raise_for_status()
         except requests_exceptions.HTTPError as exc:
-            raise HTTPStatusError(
-                str(exc) or exc.__class__.__name__,
-                request=getattr(exc, 'request', None),
-                response=self,
-            ) from exc
+            raise _translate_requests_exception(exc, response=self) from exc
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:

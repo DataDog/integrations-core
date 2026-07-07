@@ -818,10 +818,10 @@ class OpenMetricsScraperMixin(object):
 
     def poll(self, scraper_config, headers=None):
         """
-        Returns a valid `requests.Response`, otherwise raise HTTPStatusError if the status code of the
+        Returns a valid response, otherwise raise HTTPStatusError if the status code of the
         response isn't valid - see `response.raise_for_status()`
 
-        The caller needs to close the requests.Response.
+        The caller needs to close the response.
 
         Custom headers can be added to the default headers.
         """

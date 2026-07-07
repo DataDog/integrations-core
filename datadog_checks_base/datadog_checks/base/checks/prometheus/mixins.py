@@ -545,15 +545,15 @@ class PrometheusScraperMixin(object):
         the PrometheusFormat class.
         Custom headers can be added to the default headers.
 
-        Returns a valid requests.Response, raise HTTPStatusError if the status code of the requests.Response
+        Returns a valid response, raise HTTPStatusError if the status code of the response
         isn't valid - see response.raise_for_status()
 
-        The caller needs to close the requests.Response
+        The caller needs to close the response
 
         :param endpoint: string url endpoint
         :param pFormat: the preferred format defined in PrometheusFormat
         :param headers: extra headers
-        :return: requests.Response
+        :return: the response object
         """
         if headers is None:
             headers = {}
