@@ -18,32 +18,30 @@ class Model(BaseModel):
     count: Annotated[int, Field(ge=1)] = 1
 
 
-def test_single_error_header_and_line():
+def capture(**kwargs) -> ValidationError:
     with pytest.raises(ValidationError) as exc_info:
-        Model(items=[{"name": "ok"}], count=0)
-    msg = format_validation_error(exc_info.value)
+        Model(**kwargs)
+    return exc_info.value
+
+
+def test_single_error_header_and_line():
+    msg = format_validation_error(capture(items=[{"name": "ok"}], count=0))
     assert msg.startswith("1 validation error:\n")
 
 
 def test_plural_header_counts_all_errors():
-    with pytest.raises(ValidationError) as exc_info:
-        Model(items=[{"name": "BAD"}], count=0)
-    msg = format_validation_error(exc_info.value)
+    msg = format_validation_error(capture(items=[{"name": "BAD"}], count=0))
     assert msg.startswith("2 validation errors:\n")
 
 
 def test_no_pydantic_docs_url():
-    with pytest.raises(ValidationError) as exc_info:
-        Model(items=[{"name": "BAD"}], count=0)
-    msg = format_validation_error(exc_info.value)
+    msg = format_validation_error(capture(items=[{"name": "BAD"}], count=0))
     assert "errors.pydantic.dev" not in msg
     assert "https://" not in msg
 
 
 def test_does_not_echo_offending_input():
-    with pytest.raises(ValidationError) as exc_info:
-        Model(items=[{"name": "BAD_VALUE_123"}], count=1)
-    msg = format_validation_error(exc_info.value)
+    msg = format_validation_error(capture(items=[{"name": "BAD_VALUE_123"}], count=1))
     assert "BAD_VALUE_123" not in msg
 
 
@@ -56,7 +54,5 @@ def test_does_not_echo_offending_input():
     ],
 )
 def test_loc_paths(kwargs, expected_loc):
-    with pytest.raises(ValidationError) as exc_info:
-        Model(**kwargs)
-    msg = format_validation_error(exc_info.value)
+    msg = format_validation_error(capture(**kwargs))
     assert f"- {expected_loc}: " in msg
