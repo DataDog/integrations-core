@@ -12,6 +12,13 @@ from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS, get_fixture_path
 
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:14 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert CeleryCheck.DEFAULT_METRIC_LIMIT == 0
+
 
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('flower_metrics.txt'))
