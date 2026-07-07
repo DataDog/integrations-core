@@ -168,6 +168,7 @@ class ArgocdApplicationStreamListener:
         try:
             event = json.loads(line)
         except (ValueError, TypeError):
+            self.check.log.debug("genresources: ignoring malformed stream frame", exc_info=True)
             return
         result = event.get("result") if isinstance(event, dict) else None
         if not isinstance(result, dict):

@@ -21,7 +21,7 @@ from datadog_checks.argocd.resources_constants import (
 from datadog_checks.argocd.stream_listener import ArgocdApplicationStreamListener
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import GENRESOURCES_ENDPOINT, _check
+from .common import GENRESOURCES_ENDPOINT, build_check
 
 pytestmark = pytest.mark.unit
 
@@ -114,7 +114,7 @@ def test_handle_line_ignores_bookmark_and_unknown_event_types():
 
 
 def test_emit_stream_application_dedupes_unchanged_app():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     app = _application("web", resource_version="100")
 
     with patch.object(check, "submit_generic_resource") as submit:
@@ -125,7 +125,7 @@ def test_emit_stream_application_dedupes_unchanged_app():
 
 
 def test_forget_application_lets_a_readded_app_resubmit():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     app = _application("web", resource_version="100")
 
@@ -138,7 +138,7 @@ def test_forget_application_lets_a_readded_app_resubmit():
 
 
 def test_forget_application_during_a_concurrent_full_scrape_is_not_resurrected():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     app = _application("web", resource_version="100")
 
@@ -154,7 +154,7 @@ def test_forget_application_during_a_concurrent_full_scrape_is_not_resurrected()
 
 
 def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener():
-    check = _check(genresources_stream_applications_enabled=False)
+    check = build_check(genresources_stream_applications_enabled=False)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
@@ -167,7 +167,7 @@ def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener():
 
 
 def test_collect_with_streaming_on_starts_listener_and_rescrapes_all_types():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
@@ -180,7 +180,7 @@ def test_collect_with_streaming_on_starts_listener_and_rescrapes_all_types():
 
 
 def test_ensure_listener_gives_the_listener_its_own_http_session():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
@@ -193,7 +193,7 @@ def test_ensure_listener_gives_the_listener_its_own_http_session():
 
 
 def test_ensure_listener_passes_the_configured_read_timeout():
-    check = _check(genresources_stream_applications_enabled=True, genresources_stream_read_timeout_seconds=123)
+    check = build_check(genresources_stream_applications_enabled=True, genresources_stream_read_timeout_seconds=123)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
@@ -204,7 +204,7 @@ def test_ensure_listener_passes_the_configured_read_timeout():
 
 
 def test_collect_with_stream_emits_stream_up_one_when_the_listener_is_connected(aggregator):
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:
@@ -217,7 +217,7 @@ def test_collect_with_stream_emits_stream_up_one_when_the_listener_is_connected(
 
 
 def test_collect_with_stream_emits_stream_up_zero_even_when_scrapes_are_throttled(aggregator):
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     now = time.time()
     collector._last_app_full = now  # within every scrape interval -> nothing is fetched this cycle
@@ -235,7 +235,7 @@ def test_collect_with_stream_emits_stream_up_zero_even_when_scrapes_are_throttle
 
 
 def test_stop_signals_cancel_without_joining():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     listener = Mock()
     collector._listener = listener
@@ -247,7 +247,7 @@ def test_stop_signals_cancel_without_joining():
 
 
 def test_ensure_listener_does_not_start_a_listener_after_stop():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     collector.stop()  # cancel arrived before the first collection cycle created a listener
 
@@ -260,7 +260,7 @@ def test_ensure_listener_does_not_start_a_listener_after_stop():
 
 
 def test_collect_throttles_the_missing_endpoint_warning_but_still_emits_api_up(aggregator, caplog):
-    check = _check(genresources_endpoint=None)
+    check = build_check(genresources_endpoint=None)
     collector = check._resource_collector
 
     collector.collect()
@@ -273,7 +273,7 @@ def test_collect_throttles_the_missing_endpoint_warning_but_still_emits_api_up(a
 
 
 def test_stream_once_survives_a_frame_that_raises_and_keeps_the_connection():
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     bad = json.dumps({"result": {"type": "ADDED", "application": {"metadata": "not-a-dict"}}}).encode()
     good = _event("ADDED", _application("web"))
@@ -311,7 +311,7 @@ def test_stream_once_survives_a_frame_that_raises_and_keeps_the_connection():
 def test_stream_once_reports_data_received_even_when_the_connection_then_errors():
     # A connection that delivers a line and THEN drops (read timeout / reset) must still report got_data=True,
     # so the supervisor resets backoff instead of treating a healthy stream as a dead one.
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
 
     class _Resp:
@@ -344,7 +344,7 @@ def test_stream_once_reports_data_received_even_when_the_connection_then_errors(
 
 
 def test_stream_once_inherits_wrapper_auth_when_no_token():
-    check = _check(genresources_stream_applications_enabled=True, genresources_auth_token=None)
+    check = build_check(genresources_stream_applications_enabled=True, genresources_auth_token=None)
     collector = check._resource_collector
 
     class _Resp:
@@ -379,7 +379,7 @@ def test_stream_once_inherits_wrapper_auth_when_no_token():
 
 
 def test_handle_line_emits_events_received_metric_matching_metadata(aggregator):
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     collector = check._resource_collector
     listener = _listener(collector, check=check)
 
@@ -391,7 +391,7 @@ def test_handle_line_emits_events_received_metric_matching_metadata(aggregator):
 
 
 def test_run_counts_a_reconnect_on_disconnect(aggregator):
-    check = _check(genresources_stream_applications_enabled=True)
+    check = build_check(genresources_stream_applications_enabled=True)
     listener = _listener(check._resource_collector, check=check)
 
     _run_stream_and_record_waits(listener, [False], stop_after=1)  # one clean disconnect, then stop

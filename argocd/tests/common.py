@@ -8,7 +8,7 @@ from datadog_checks.argocd.resources import ArgocdResourceCollector
 GENRESOURCES_ENDPOINT = "https://argocd.example.com"
 
 
-def _instance(**overrides) -> dict:
+def build_instance(**overrides) -> dict:
     instance = {
         "app_controller_endpoint": "http://app_controller:8082",
         "collect_genresources": True,
@@ -19,14 +19,14 @@ def _instance(**overrides) -> dict:
     return instance
 
 
-def _check(**overrides) -> ArgocdCheck:
+def build_check(**overrides) -> ArgocdCheck:
     """Build an ArgocdCheck with config models loaded and the genresources collector attached.
 
     Production builds the collector lazily on the first ``check()`` once
     ``check_initializations`` has populated ``self.config``; tests reach into
     ``check._resource_collector`` directly, so we mirror that bootstrap here.
     """
-    check = ArgocdCheck("argocd", {}, [_instance(**overrides)])
+    check = ArgocdCheck("argocd", {}, [build_instance(**overrides)])
     check.load_configuration_models()
     check._resource_collector = ArgocdResourceCollector(check)
     return check

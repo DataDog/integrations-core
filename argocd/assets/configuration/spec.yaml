@@ -61,7 +61,7 @@ files:
       fleet_configurable: false
       description: |
         Collect the Argo CD Prometheus (OpenMetrics) endpoints, the check's
-        default metrics. Enabled by default. Set to false to run only the
+        default metrics. Enabled by default. Set to ``false`` to run only the
         generic resources collector (``collect_genresources``) without scraping
         metrics; in that mode the ``*_endpoint`` options are not required.
       value:
@@ -109,7 +109,7 @@ files:
         expire this many seconds after their last observation, so it also bounds
         how long a deleted resource lingers in Datadog. Must be at least as long
         as the longest scrape interval, or resources expire before their next
-        refresh. Defaults to 1800 (3x the application full scrape interval).
+        refresh. Defaults to 1800 (three times the application full scrape interval).
         Minimum of 1.
       value:
         type: integer
@@ -136,7 +136,7 @@ files:
         modes. A full scrape re-submits every Application to refresh its
         time-to-live (TTL) and backfill anything the stream missed. While
         streaming, the dedup poll is disabled, so during a stream outage a newly
-        created Application is not collected until the next full scrape -- this
+        created Application is not collected until the next full scrape. This
         value is the worst-case discovery lag. Minimum of 1.
       value:
         type: integer
@@ -198,7 +198,7 @@ files:
         Applications are polled every ``genresources_application_poll_interval_seconds``
         instead. Clusters and Repositories are always polled regardless of this
         setting. Enabled by default; only takes effect when ``collect_genresources``
-        is true.
+        is ``true``.
       value:
         type: boolean
         example: true

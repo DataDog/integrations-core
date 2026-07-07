@@ -17,7 +17,7 @@ from datadog_checks.argocd.resources_constants import (
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.http import MockResponse
 
-from .common import _check as _make_check
+from . import common
 
 pytestmark = pytest.mark.unit
 
@@ -57,10 +57,10 @@ def _items_response(items: list[dict], status_code: int = 200) -> MockResponse:
     return MockResponse(json_data={"items": items}, status_code=status_code)
 
 
-def _check(**overrides):
+def build_check(**overrides):
     # These tests drive the REST/polling path; disable streaming so collect() never spawns a listener thread.
     overrides.setdefault("genresources_stream_applications_enabled", False)
-    return _make_check(**overrides)
+    return common.build_check(**overrides)
 
 
 def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_http_response_per_endpoint):
@@ -71,7 +71,7 @@ def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_h
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -141,7 +141,7 @@ def test_collect_scrubs_credentials_from_operation_state_message(mock_http_respo
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -162,7 +162,7 @@ def test_collect_strips_credentials_from_external_urls(mock_http_response_per_en
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -188,7 +188,7 @@ def test_real_helper_ships_multisource_history_and_scrubs_its_repo_urls(aggregat
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     check._resource_collector.collect()
 
@@ -229,7 +229,7 @@ def test_application_key_uses_app_identity_not_destination(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -247,7 +247,7 @@ def test_collect_appends_extra_include_paths_to_every_type(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = _check(genresources_extra_include_paths=extra)
+    check = build_check(genresources_extra_include_paths=extra)
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -264,7 +264,7 @@ def test_collect_isolates_per_endpoint_failures(aggregator, mock_http_response_p
             REPOSITORIES_URL: [_items_response([_repository("https://github.com/team/repo")])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -285,7 +285,7 @@ def test_collect_skips_malformed_items_without_poisoning_cycle(mock_http_respons
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -303,7 +303,7 @@ def test_collect_caps_per_type_with_warning(mock_http_response_per_endpoint, cap
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check(genresources_max_resources_per_cycle=3)
+    check = build_check(genresources_max_resources_per_cycle=3)
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -326,7 +326,7 @@ def test_collect_logs_submit_failures_distinctly_from_malformed(mock_http_respon
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource", side_effect=RuntimeError("helper boom")):
         check._resource_collector.collect()
@@ -346,7 +346,7 @@ def test_collect_strips_credentials_from_repo_urls(mock_http_response_per_endpoi
             REPOSITORIES_URL: [_items_response([repo])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -372,7 +372,7 @@ def test_collect_scrubs_credentials_from_condition_messages(mock_http_response_p
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -397,7 +397,7 @@ def test_collect_scrubs_credentials_from_cluster_connection_state(mock_http_resp
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -411,7 +411,7 @@ def test_collect_scrubs_credentials_from_cluster_connection_state(mock_http_resp
 
 def test_collect_emits_api_up_zero_when_endpoint_missing(aggregator, mock_http_response_per_endpoint, caplog):
     captured = mock_http_response_per_endpoint({})
-    check = _check(genresources_endpoint=None)
+    check = build_check(genresources_endpoint=None)
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -435,7 +435,7 @@ def test_collect_skips_unchanged_resources_on_second_cycle(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -460,7 +460,7 @@ def test_collect_resubmits_application_when_resource_version_changes(mock_http_r
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -483,7 +483,7 @@ def test_collect_resubmits_unchanged_resources_on_ttl_sweep(mock_http_response_p
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()
+    check = build_check()
     collector = check._resource_collector
 
     with patch.object(check, "submit_generic_resource") as submit:
@@ -509,7 +509,7 @@ def test_collect_respects_application_poll_interval(mock_http_response_per_endpo
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check()  # streaming off; default 120s application poll, 600s full scrape
+    check = build_check()  # streaming off; default 120s application poll, 600s full scrape
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -533,7 +533,7 @@ def test_collect_excludes_listed_leaf_path_from_allow_list(mock_http_response_pe
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check(genresources_exclude_paths=["status.conditions[*].message"])
+    check = build_check(genresources_exclude_paths=["status.conditions[*].message"])
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -551,7 +551,7 @@ def test_collect_exclude_drops_whole_subtree_given_parent_path(mock_http_respons
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check(genresources_exclude_paths=["status.history"])
+    check = build_check(genresources_exclude_paths=["status.history"])
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -569,7 +569,7 @@ def test_collect_exclude_removes_map_path(mock_http_response_per_endpoint):
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check(genresources_exclude_paths=["metadata.labels"])
+    check = build_check(genresources_exclude_paths=["metadata.labels"])
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
@@ -585,7 +585,7 @@ def test_collect_exclude_overrides_extra_include_path(mock_http_response_per_end
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check(
+    check = build_check(
         genresources_extra_include_paths=["metadata.generation"],
         genresources_exclude_paths=["metadata.generation"],
     )
@@ -614,7 +614,7 @@ def test_real_helper_strips_secrets_and_excluded_fields(aggregator, mock_http_re
             REPOSITORIES_URL: [_items_response([])],
         }
     )
-    check = _check(genresources_exclude_paths=["status.conditions"])
+    check = build_check(genresources_exclude_paths=["status.conditions"])
 
     check._resource_collector.collect()
 
@@ -630,17 +630,17 @@ def test_real_helper_strips_secrets_and_excluded_fields(aggregator, mock_http_re
 
 def test_collector_warns_when_exclude_empties_a_type(caplog):
     nuke = list(CLUSTER_INCLUDE["paths"]) + list(CLUSTER_INCLUDE["map_paths"])
-    _check(genresources_exclude_paths=nuke)
+    build_check(genresources_exclude_paths=nuke)
     assert any("emptied the allow-list for argocd_cluster" in rec.message for rec in caplog.records)
 
 
 def test_collector_warns_when_ttl_shorter_than_longest_scrape_interval(caplog):
-    _check(genresources_ttl_seconds=100, genresources_application_full_scrape_interval_seconds=600)
+    build_check(genresources_ttl_seconds=100, genresources_application_full_scrape_interval_seconds=600)
     assert any("shorter than the longest scrape interval" in rec.message for rec in caplog.records)
 
 
 def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved():
-    check = _check(genresources_auth_token="tok")
+    check = build_check(genresources_auth_token="tok")
     with patch.object(RequestsWrapper, "get", return_value=MockResponse(json_data={"items": []})) as get:
         check._resource_collector._fetch("/api/v1/applications")
 
@@ -650,7 +650,7 @@ def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved():
 
 
 def test_fetch_inherits_wrapper_auth_when_no_genresources_token():
-    check = _check(genresources_auth_token=None)  # rely on the instance's HTTP auth (headers / auth_token)
+    check = build_check(genresources_auth_token=None)  # rely on the instance's HTTP auth (headers / auth_token)
     with patch.object(RequestsWrapper, "get", return_value=MockResponse(json_data={"items": []})) as get:
         check._resource_collector._fetch("/api/v1/applications")
 
