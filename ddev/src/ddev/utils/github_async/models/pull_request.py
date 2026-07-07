@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import StrEnum, auto
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -21,8 +21,8 @@ class PullRequestState(StrEnum):
     https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
     """
 
-    OPEN = "open"
-    CLOSED = "closed"
+    OPEN = auto()
+    CLOSED = auto()
 
 
 class PullRequestRef(BaseModel):

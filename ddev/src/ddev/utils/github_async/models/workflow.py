@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import StrEnum, auto
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -19,12 +19,12 @@ class WorkflowJobStatus(StrEnum):
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
     """
 
-    QUEUED = "queued"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    WAITING = "waiting"
-    REQUESTED = "requested"
-    PENDING = "pending"
+    QUEUED = auto()
+    IN_PROGRESS = auto()
+    COMPLETED = auto()
+    WAITING = auto()
+    REQUESTED = auto()
+    PENDING = auto()
 
 
 class WorkflowJobConclusion(StrEnum):
@@ -36,13 +36,13 @@ class WorkflowJobConclusion(StrEnum):
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
     """
 
-    SUCCESS = "success"
-    FAILURE = "failure"
-    NEUTRAL = "neutral"
-    CANCELLED = "cancelled"
-    SKIPPED = "skipped"
-    TIMED_OUT = "timed_out"
-    ACTION_REQUIRED = "action_required"
+    SUCCESS = auto()
+    FAILURE = auto()
+    NEUTRAL = auto()
+    CANCELLED = auto()
+    SKIPPED = auto()
+    TIMED_OUT = auto()
+    ACTION_REQUIRED = auto()
 
 
 class JobStepStatus(StrEnum):
@@ -56,9 +56,9 @@ class JobStepStatus(StrEnum):
     https://docs.github.com/en/rest/actions/workflow-jobs#get-a-job-for-a-workflow-run
     """
 
-    QUEUED = "queued"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
+    QUEUED = auto()
+    IN_PROGRESS = auto()
+    COMPLETED = auto()
 
 
 class WorkflowRun(BaseModel):
