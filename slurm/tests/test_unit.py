@@ -335,6 +335,12 @@ def test_resolve_scontrol_host_pid_logs_multiple_matches(instance, caplog):
     assert "Found multiple host PID matches for scontrol namespace PID 3771" in caplog.text
 
 
+def test_resolve_scontrol_host_pid_returns_match_without_nspids_when_missing(instance):
+    check = SlurmCheck('slurm', {}, [instance])
+
+    assert check._resolve_scontrol_host_pid("3771", {}) == ProcessPidMatch(host_pid="3771", namespace_pids=[])
+
+
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 @patch('datadog_checks.slurm.check.SlurmCheck._get_process_tags')
 def test_scontrol_processing_gets_process_tags_for_pid_and_nspid(
@@ -358,8 +364,8 @@ def test_scontrol_processing_gets_process_tags_for_pid_and_nspid(
 
     check.check(None)
 
-    mock_get_process_tags.assert_any_call("3771")
     mock_get_process_tags.assert_any_call("12345")
+    mock_get_process_tags.assert_any_call("3771")
     mock_get_process_tags.assert_any_call("3772")
     mock_get_process_tags.assert_any_call("3773")
 

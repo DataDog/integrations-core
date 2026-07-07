@@ -597,7 +597,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         # Cache for job details to avoid duplicate calls
         job_details_cache = {}
-        host_pid_matches_by_namespace_pid = (
+        host_pid_matches_by_namespace_pid: dict[str, list[ProcessPidMatch]] = (
             self._get_host_pid_matches_by_namespace_pid() if self.resolve_scontrol_host_pids else {}
         )
 
@@ -611,11 +611,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
                 if new_header == "pid":
                     host_pid_match = self._resolve_scontrol_host_pid(value, host_pid_matches_by_namespace_pid)
-                    tags.extend(self._get_process_tags(value))
-                    if host_pid_match is not None:
-                        tags.append(f"nspid:{value}")
-                        value = host_pid_match.host_pid
-                        tags.extend(self._get_process_tags(value))
+                    tags.extend(self._get_process_tags(host_pid_match.host_pid))
+                    for namespace_pid in host_pid_match.namespace_pids:
+                        if namespace_pid == host_pid_match.host_pid:
+                            continue
+                        tags.append(f"nspid:{namespace_pid}")
+                        tags.extend(self._get_process_tags(namespace_pid))
+                    value = host_pid_match.host_pid
 
                 tags.append(f"{new_header}:{value}")
 
@@ -630,10 +632,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
 
-    def _resolve_scontrol_host_pid(self, namespace_pid, host_pid_matches_by_namespace_pid):
+    def _resolve_scontrol_host_pid(
+        self, namespace_pid: str, host_pid_matches_by_namespace_pid: dict[str, list[ProcessPidMatch]]
+    ) -> ProcessPidMatch:
         host_pid_matches = host_pid_matches_by_namespace_pid.get(namespace_pid)
         if not host_pid_matches:
-            return None
+            return ProcessPidMatch(host_pid=namespace_pid, namespace_pids=[])
 
         if len(host_pid_matches) > 1:
             matches = [
