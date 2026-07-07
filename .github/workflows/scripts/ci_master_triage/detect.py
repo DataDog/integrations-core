@@ -12,16 +12,17 @@ Output contract (``triage_output.json`` + ``$GITHUB_OUTPUT``) is consumed by
 from __future__ import annotations
 
 import json
-import os
 import re
 import sys
-import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
+from common import FailedTarget, RunRecord, Severity, env
+
 API_ROOT = "https://api.github.com"
+REQUEST_TIMEOUT = 30
 
 # Reusable-workflow job names surface in the API as
 #   "test / <job-id>[ (<matrix>)] / <leaf>"
@@ -42,15 +43,10 @@ BASE_PACKAGE_TARGETS = {
 
 MASTER_WORKFLOWS = ("master.yml", "master-windows.yml")
 
-
-class Severity:
-    HIGH = "HIGH"
-    NORMAL = "NORMAL"
-    NONE = "NONE"
-
-
-def env(name: str, default: str = "") -> str:
-    return os.environ.get(name, default).strip()
+# Drop dedup state older than this so the persisted set can't grow without
+# bound. Must comfortably exceed the largest lookback window (18h digest) so a
+# run still in a lookback window is never pruned and re-alerted.
+STATE_RETENTION_HOURS = 72
 
 
 def github_request(path: str, token: str) -> Any:
@@ -65,7 +61,7 @@ def github_request(path: str, token: str) -> Any:
             "User-Agent": "ci-master-triage",
         },
     )
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
         return json.loads(resp.read().decode())
 
 
@@ -114,7 +110,7 @@ def iter_failed_jobs(run_id: int, token: str, repo: str) -> Iterator[dict[str, A
         page += 1
 
 
-def classify(failed_targets: list[dict[str, str]], storm_threshold: int) -> str:
+def classify(failed_targets: list[FailedTarget], storm_threshold: int) -> str:
     """Severity for one run from its failed test targets."""
     if not failed_targets:
         return Severity.NONE
@@ -127,31 +123,34 @@ def classify(failed_targets: list[dict[str, str]], storm_threshold: int) -> str:
 
 def build_run_record(
     run: dict[str, Any], token: str, repo: str, target_map: dict[str, dict[str, str]], storm_threshold: int
-) -> dict[str, Any]:
-    """Collect failed test-target jobs for a run and classify its severity."""
-    failed_targets: list[dict[str, str]] = []
+) -> RunRecord:
+    """Collect failed test-target jobs for a run and classify its severity.
+
+    Matrix legs of one target share a reusable-workflow job-id, so they collapse
+    to a single target entry whose ``leg_count`` records how many legs failed.
+    """
+    target_records: dict[str, FailedTarget] = {}
     other_failures = 0
-    seen_job_ids: set[str] = set()
     for job in iter_failed_jobs(run["id"], token, repo):
         match = TEST_JOB_NAME_RE.match(job.get("name", ""))
         if not match:
             other_failures += 1
             continue
         job_id = match.group(1)
-        if job_id in seen_job_ids:
-            continue
-        seen_job_ids.add(job_id)
-        meta = target_map.get(job_id, {"job_name": job_id, "target": job_id})
-        failed_targets.append(
-            {
+        record = target_records.get(job_id)
+        if record is None:
+            meta = target_map.get(job_id, {"job_name": job_id, "target": job_id})
+            record = {
                 "target": meta["target"],
                 "job_name": meta["job_name"],
                 "job_id": job_id,
                 "gh_job_id": str(job.get("id", "")),
                 "url": job.get("html_url", ""),
+                "leg_count": 0,
             }
-        )
-    failed_targets.sort(key=lambda t: t["job_name"].lower())
+            target_records[job_id] = record
+        record["leg_count"] += 1
+    failed_targets = sorted(target_records.values(), key=lambda t: t["job_name"].lower())
     return {
         "run_id": run["id"],
         "sha": run.get("head_sha", ""),
@@ -175,15 +174,86 @@ def candidate_runs(token: str, repo: str, cutoff: datetime, explicit_ids: list[i
             yield github_request(f"/repos/{repo}/actions/runs/{run_id}", token)
         return
     for workflow in MASTER_WORKFLOWS:
-        payload = github_request(
-            f"/repos/{repo}/actions/workflows/{workflow}/runs"
-            f"?branch=master&status=failure&per_page=50",
-            token,
-        )
-        for run in payload.get("workflow_runs", []):
-            created = datetime.fromisoformat(run["created_at"].replace("Z", "+00:00"))
-            if created >= cutoff:
+        page = 1
+        while True:
+            payload = github_request(
+                f"/repos/{repo}/actions/workflows/{workflow}/runs"
+                f"?branch=master&status=failure&per_page=100&page={page}",
+                token,
+            )
+            runs = payload.get("workflow_runs", [])
+            reached_cutoff = False
+            for run in runs:
+                created = datetime.fromisoformat(run["created_at"].replace("Z", "+00:00"))
+                if created < cutoff:
+                    # Results are newest-first, so nothing past here is in-window.
+                    reached_cutoff = True
+                    break
                 yield run
+            if reached_cutoff or len(runs) < 100:
+                return
+            page += 1
+
+
+def select_runs(records: list[RunRecord], mode: str, posted: dict[int, str]) -> list[RunRecord]:
+    """Pick the fresh runs worth alerting on for this mode, worst-severity first."""
+    fresh = [r for r in records if r["run_id"] not in posted]
+    if mode == "realtime":
+        selected = [r for r in fresh if r["severity"] == Severity.HIGH]
+    else:
+        selected = [r for r in fresh if r["severity"] in (Severity.HIGH, Severity.NORMAL)]
+    selected.sort(key=lambda r: 0 if r["severity"] == Severity.HIGH else 1)
+    return selected
+
+
+def overall_severity(selected: list[RunRecord]) -> str:
+    """Roll the selected runs up to a single alert severity."""
+    if any(r["severity"] == Severity.HIGH for r in selected):
+        return Severity.HIGH
+    return Severity.NORMAL if selected else Severity.NONE
+
+
+def load_posted_state(state_file: Path) -> dict[int, str]:
+    """Read the run_id -> created_at dedup map, tolerating the legacy list format."""
+    if not state_file.exists():
+        return {}
+    raw = json.loads(state_file.read_text())
+    posted = raw.get("posted", {})
+    if isinstance(posted, dict):
+        return {int(k): v for k, v in posted.items()}
+    # Legacy format: a bare list of ids with no timestamps.
+    return {int(rid): "" for rid in raw.get("posted_run_ids", [])}
+
+
+def prune_posted(posted: dict[int, str], now: datetime) -> dict[int, str]:
+    """Drop entries older than the retention window (undated entries are kept once)."""
+    horizon = now - timedelta(hours=STATE_RETENTION_HOURS)
+    kept: dict[int, str] = {}
+    for run_id, created_at in posted.items():
+        if not created_at:
+            kept[run_id] = now.isoformat()
+            continue
+        try:
+            created = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+        except ValueError:
+            kept[run_id] = now.isoformat()
+            continue
+        if created >= horizon:
+            kept[run_id] = created_at
+    return kept
+
+
+def build_enrichment_jobs(selected: list[RunRecord], limit: int = 8) -> list[dict[str, str]]:
+    """Flatten failed targets into enrichment jobs, capped globally at ``limit``.
+
+    The cap bounds log volume and Claude cost; ``selected`` is severity-sorted so
+    the budget is spent on the most severe runs first.
+    """
+    jobs: list[dict[str, str]] = []
+    for record in selected:
+        for target in record["failed_targets"]:
+            jobs.append({"run_id": str(record["run_id"]), **target})
+    return jobs[:limit]
 
 
 def write_outputs(should_alert: bool, severity: str, run_count: int) -> None:
@@ -212,39 +282,28 @@ def main() -> int:
     lookback = (
         timedelta(minutes=int(env("LOOKBACK_MINUTES", "45")))
         if mode == "realtime"
-        else timedelta(hours=int(env("LOOKBACK_HOURS", "12")))
+        else timedelta(hours=int(env("LOOKBACK_HOURS", "18")))
     )
-    cutoff = datetime.now(timezone.utc) - lookback
+    now = datetime.now(timezone.utc)
+    cutoff = now - lookback
 
-    posted: set[int] = set()
-    if state_file.exists():
-        posted = set(json.loads(state_file.read_text()).get("posted_run_ids", []))
-
+    posted = load_posted_state(state_file)
     target_map = parse_target_map(repo_root)
-    records = [build_run_record(r, token, repo, target_map, storm_threshold) for r in candidate_runs(token, repo, cutoff, explicit_ids)]
+    records = [
+        build_run_record(r, token, repo, target_map, storm_threshold)
+        for r in candidate_runs(token, repo, cutoff, explicit_ids)
+    ]
 
-    fresh = [r for r in records if r["run_id"] not in posted]
-    if mode == "realtime":
-        selected = [r for r in fresh if r["severity"] == Severity.HIGH]
-    else:
-        selected = [r for r in fresh if r["severity"] in (Severity.HIGH, Severity.NORMAL)]
-
-    non_test_count = sum(1 for r in fresh if r["severity"] == Severity.NONE)
-    overall = Severity.HIGH if any(r["severity"] == Severity.HIGH for r in selected) else (
-        Severity.NORMAL if selected else Severity.NONE
-    )
-
-    enrichment_jobs: list[dict[str, str]] = []
-    for record in selected:
-        for target in record["failed_targets"][:8]:
-            enrichment_jobs.append({"run_id": str(record["run_id"]), **target})
+    selected = select_runs(records, mode, posted)
+    non_test_count = sum(1 for r in records if r["run_id"] not in posted and r["severity"] == Severity.NONE)
+    overall = overall_severity(selected)
 
     output = {
         "mode": mode,
         "severity": overall,
         "runs": selected,
         "non_test_failure_count": non_test_count,
-        "enrichment_jobs": enrichment_jobs[:8],
+        "enrichment_jobs": build_enrichment_jobs(selected),
         "dashboard_url": env(
             "DASHBOARD_URL",
             "https://app-dev-prod.datadoghq.com/dashboard/knc-6sp-caq/agent-integrations-overview",
@@ -254,8 +313,10 @@ def main() -> int:
 
     should_alert = bool(selected)
     if should_alert and not explicit_ids:
-        posted.update(r["run_id"] for r in selected)
-        state_file.write_text(json.dumps({"posted_run_ids": sorted(posted)}))
+        for record in selected:
+            posted[record["run_id"]] = record["created_at"] or now.isoformat()
+        posted = prune_posted(posted, now)
+        state_file.write_text(json.dumps({"posted": {str(k): v for k, v in posted.items()}}))
 
     write_outputs(should_alert, overall, len(selected))
     print(json.dumps(output, indent=2))

@@ -13,20 +13,17 @@ to an empty mapping so the Slack alert is still posted (with links only).
 from __future__ import annotations
 
 import json
-import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
+from common import env
+
 MODEL = "claude-opus-4-8"
 MAX_TOKENS = 8000
 MAX_LOG_LINES = 200
-
-
-def env(name: str, default: str = "") -> str:
-    return os.environ.get(name, default).strip()
 
 
 def fetch_failed_log(repo: str, gh_job_id: str) -> str:
@@ -42,7 +39,10 @@ def fetch_failed_log(repo: str, gh_job_id: str) -> str:
         )
     except (subprocess.SubprocessError, OSError) as exc:
         return f"(log fetch failed: {exc})"
-    output = proc.stdout or proc.stderr or "(no output)"
+    if proc.returncode != 0:
+        detail = proc.stderr.strip() or "no stderr"
+        return f"(gh exit {proc.returncode}: {detail})"
+    output = proc.stdout or "(no output)"
     lines = output.splitlines()
     return "\n".join(lines[-MAX_LOG_LINES:])
 
@@ -89,13 +89,16 @@ def parse_enrichment(text: str) -> dict[str, str]:
     """Pull a ``{run_id: note}`` object out of the model response."""
     if not text:
         return {}
-    match = re.search(r"\{.*\}", text, re.DOTALL)
-    if not match:
-        return {}
+    parsed: Any = None
     try:
-        parsed = json.loads(match.group(0))
+        parsed = json.loads(text)
     except json.JSONDecodeError:
-        return {}
+        match = re.search(r"\{.*?\}", text, re.DOTALL)
+        if match:
+            try:
+                parsed = json.loads(match.group(0))
+            except json.JSONDecodeError:
+                return {}
     return {str(k): str(v) for k, v in parsed.items()} if isinstance(parsed, dict) else {}
 
 

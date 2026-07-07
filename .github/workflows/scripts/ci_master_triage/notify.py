@@ -10,25 +10,28 @@ without posting (used by the verification step).
 from __future__ import annotations
 
 import json
-import os
 import sys
 import urllib.request
 from pathlib import Path
 from typing import Any
 
+from common import env
+
 POST_URL = "https://slack.com/api/chat.postMessage"
 MAX_RUNS_SHOWN = 15
 MAX_TARGETS_PER_RUN = 20
+REQUEST_TIMEOUT = 30
 
 
-def env(name: str, default: str = "") -> str:
-    return os.environ.get(name, default).strip()
-
-
-def target_line(targets: list[dict[str, str]]) -> str:
+def target_line(targets: list[dict[str, Any]]) -> str:
     """Render failed targets as linked job-names, capped for readability."""
     shown = targets[:MAX_TARGETS_PER_RUN]
-    links = [f"<{t['url']}|{t['job_name']}>" for t in shown]
+    links = []
+    for t in shown:
+        link = f"<{t['url']}|{t['job_name']}>"
+        if t.get("leg_count", 1) > 1:
+            link += f" _×{t['leg_count']}_"
+        links.append(link)
     extra = len(targets) - len(shown)
     if extra > 0:
         links.append(f"_+{extra} more_")
@@ -86,10 +89,10 @@ def post(channel: str, token: str, blocks: list[dict[str, Any]], text: str) -> N
         headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json; charset=utf-8"},
         method="POST",
     )
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
         result = json.loads(resp.read().decode())
     if not result.get("ok"):
-        raise SystemExit(f"Slack API error: {result.get('error')}")
+        raise RuntimeError(f"Slack API error: {result}")
     print(f"Posted to {channel} (ts={result.get('ts')})")
 
 
@@ -119,7 +122,11 @@ def main() -> int:
     if not token:
         print("SLACK_API_TOKEN is required to post", file=sys.stderr)
         return 1
-    post(channel, token, blocks, text)
+    try:
+        post(channel, token, blocks, text)
+    except RuntimeError as exc:
+        print(exc, file=sys.stderr)
+        return 1
     return 0
 
 

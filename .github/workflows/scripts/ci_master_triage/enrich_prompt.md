@@ -6,7 +6,7 @@ delimited by a line of the form `### RUN <run_id> · TARGET <target>`.
 
 For every distinct `run_id`, write a single concise root-cause line that:
 
-- names the probable cause (e.g. assertion failure, import error, container
+- names the probable cause (e.g., assertion failure, import error, container
   failed to start, dependency/version mismatch, timeout, runner/network issue);
 - states whether it looks like a **real regression** or a **likely flake/infra**
   issue, based on the log signature (timeouts, connection resets, image pulls,
