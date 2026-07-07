@@ -87,6 +87,7 @@ class AsyncGitHubClient:
     def __init__(
         self,
         token: str,
+        *,
         rate_limiter: InstrumentedAsyncLimiter | None = None,
         default_timeout: float = 30.0,
         transport: httpx.AsyncBaseTransport | None = None,
@@ -613,13 +614,14 @@ class AsyncGitHubClient:
         timeout: float | None = None,
     ) -> str:
         """Authenticated GET; return the unauthenticated signed URL from the 302 Location header."""
-        effective_timeout = self._effective_timeout(timeout)
-        redirect_response = await self._client.request(
-            "GET",
-            archive_download_url,
-            timeout=effective_timeout,
-            follow_redirects=False,
-        )
+        try:
+            redirect_response = await self._request(
+                "GET", archive_download_url, timeout=timeout, follow_redirects=False
+            )
+        except httpx.HTTPStatusError as exc:
+            # httpx.raise_for_status() treats the expected 302 as an error since it isn't a 2xx;
+            # recover the response from the exception so the redirect can still be inspected below.
+            redirect_response = exc.response
         if redirect_response.status_code != 302:
             redirect_response.raise_for_status()
             raise httpx.HTTPError(
@@ -693,6 +695,7 @@ class AsyncGitHubClient:
 @asynccontextmanager
 async def async_github_client(
     token: str,
+    *,
     rate_limiter: InstrumentedAsyncLimiter | None = None,
     default_timeout: float = 30.0,
     transport: httpx.AsyncBaseTransport | None = None,
