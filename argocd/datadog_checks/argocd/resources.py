@@ -264,7 +264,7 @@ class ArgocdResourceCollector:
 
     def collect(self) -> None:
         if not self._endpoint:
-            self._warn_missing_endpoint()
+            self._report_endpoint_unavailable()
             return
         now = int(time.time())
         if self._stream_enabled:
@@ -277,7 +277,8 @@ class ArgocdResourceCollector:
             self.check.gauge(GENRESOURCES_STREAM_UP_METRIC, 1 if connected else 0)
         self._collect_due_types(now)
 
-    def _warn_missing_endpoint(self) -> None:
+    def _report_endpoint_unavailable(self) -> None:
+        """Throttle a misconfiguration warning and emit api.up=0 for every resource type."""
         now = int(time.time())
         if now - self._last_endpoint_warn >= self._app_poll_interval:
             self._last_endpoint_warn = now
