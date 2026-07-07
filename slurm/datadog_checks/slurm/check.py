@@ -616,7 +616,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                         if namespace_pid == host_pid_match.host_pid:
                             continue
                         tags.append(f"nspid:{namespace_pid}")
-                        tags.extend(self._get_process_tags(namespace_pid))
                     value = host_pid_match.host_pid
 
                 tags.append(f"{new_header}:{value}")
@@ -640,7 +639,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             return ProcessPidMatch(host_pid=namespace_pid, namespace_pids=[])
 
         if len(host_pid_matches) > 1:
-            # We do not disambiguate by container yet, so use the first matching host PID.
+            namespace_match = host_pid_matches[0]
+            for host_pid_match in host_pid_matches:
+                # Prefer a translated namespace PID, but do not disambiguate by container yet.
+                if namespace_pid != host_pid_match.host_pid and namespace_pid in host_pid_match.namespace_pids:
+                    namespace_match = host_pid_match
+                    break
+
             matches = [
                 {"host_pid": match.host_pid, "namespace_pids": match.namespace_pids} for match in host_pid_matches
             ]
@@ -648,8 +653,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 "Found multiple host PID matches for scontrol namespace PID %s: %s. Using host PID %s.",
                 namespace_pid,
                 matches,
-                host_pid_matches[0].host_pid,
+                namespace_match.host_pid,
             )
+            return namespace_match
 
         return host_pid_matches[0]
 

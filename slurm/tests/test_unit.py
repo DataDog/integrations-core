@@ -328,11 +328,11 @@ def test_scontrol_processing_does_not_resolve_host_pid_by_default(
 
 def test_resolve_scontrol_host_pid_logs_multiple_matches(instance, caplog):
     check = SlurmCheck('slurm', {}, [instance])
-    first_match = ProcessPidMatch(host_pid="12345", namespace_pids=["12345", "3771"])
-    second_match = ProcessPidMatch(host_pid="23456", namespace_pids=["23456", "3771"])
+    first_match = ProcessPidMatch(host_pid="1", namespace_pids=["1"])
+    second_match = ProcessPidMatch(host_pid="12345", namespace_pids=["12345", "1"])
 
-    assert check._resolve_scontrol_host_pid("3771", {"3771": [first_match, second_match]}) == first_match
-    assert "Found multiple host PID matches for scontrol namespace PID 3771" in caplog.text
+    assert check._resolve_scontrol_host_pid("1", {"1": [first_match, second_match]}) == second_match
+    assert "Found multiple host PID matches for scontrol namespace PID 1" in caplog.text
 
 
 def test_resolve_scontrol_host_pid_returns_match_without_nspids_when_missing(instance):
@@ -343,7 +343,7 @@ def test_resolve_scontrol_host_pid_returns_match_without_nspids_when_missing(ins
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 @patch('datadog_checks.slurm.check.SlurmCheck._get_process_tags')
-def test_scontrol_processing_gets_process_tags_for_pid_and_nspid(
+def test_scontrol_processing_gets_process_tags_for_host_pid_only(
     mock_get_process_tags, mock_get_subprocess_output, instance, monkeypatch, tmp_path
 ):
     instance['collect_scontrol_stats'] = True
@@ -365,9 +365,9 @@ def test_scontrol_processing_gets_process_tags_for_pid_and_nspid(
     check.check(None)
 
     mock_get_process_tags.assert_any_call("12345")
-    mock_get_process_tags.assert_any_call("3771")
     mock_get_process_tags.assert_any_call("3772")
     mock_get_process_tags.assert_any_call("3773")
+    assert mock_get_process_tags.call_count == 3
 
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
