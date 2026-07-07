@@ -6,6 +6,7 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kyverno import KyvernoCheck
+from datadog_checks.kyverno.metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 from .common import (
     ADMISSION_METRICS,
@@ -15,6 +16,20 @@ from .common import (
     REPORTS_METRICS,
     get_fixture_path,
 )
+
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert KyvernoCheck.DEFAULT_METRIC_LIMIT == 0
+
+
+def test_get_default_config_contains_metric_map_and_rename_labels():
+    check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
+    default_config = check.get_default_config()
+    assert default_config['metrics'] == [METRIC_MAP]
+    assert default_config['rename_labels'] == RENAME_LABELS_MAP
 
 
 @pytest.mark.parametrize(
