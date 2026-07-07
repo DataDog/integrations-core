@@ -75,7 +75,7 @@ class RateLimiterFactory:
         logger: logging.Logger | None = None,
     ) -> None:
         cfg = config or RateLimiterFactoryConfig()
-        self._slow_integrations = cfg.slow_integrations
+        self.slow_integrations = cfg.slow_integrations
         budget_governor = BudgetGovernor(
             reserve_fraction=cfg.reserve_fraction,
             buffer_seconds=cfg.budget_buffer_seconds,
@@ -98,12 +98,12 @@ class RateLimiterFactory:
                 else None
             ),
         )
-        self._default = InstrumentedAsyncLimiter(
+        self.default = InstrumentedAsyncLimiter(
             AsyncLimiter(cfg.default.max_rate, cfg.default.time_period),
             on_throttled=lambda: logger.debug("Default rate limiter throttling request") if logger else None,
             budget_governor=budget_governor,
         )
-        self._slow = InstrumentedAsyncLimiter(
+        self.slow = InstrumentedAsyncLimiter(
             AsyncLimiter(cfg.slow.max_rate, cfg.slow.time_period),
             on_throttled=lambda: logger.debug("Slow rate limiter throttling request") if logger else None,
             budget_governor=budget_governor,
@@ -115,4 +115,4 @@ class RateLimiterFactory:
         Returns the slow limiter if any integration appears in the slow list,
         otherwise returns the default limiter.
         """
-        return self._slow if integrations & self._slow_integrations else self._default
+        return self.slow if integrations & self.slow_integrations else self.default

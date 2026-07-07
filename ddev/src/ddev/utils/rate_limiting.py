@@ -108,12 +108,32 @@ class BudgetGovernor:
         self.next_slot = 0.0
 
     def observe(self, snapshot: BudgetSnapshot) -> None:
-        """Update governor state from a freshly observed provider rate-limit snapshot."""
+        """Update governor state from a freshly observed provider rate-limit snapshot.
+
+        Merges are commutative so out-of-order concurrent responses converge to the strictest
+        constraint seen: the longest secondary-limit pause and the lowest remaining per window.
+        """
         if snapshot.retry_after is not None:
-            self.pause_until = self.now() + snapshot.retry_after + self.buffer_seconds
+            self.pause_until = max(self.pause_until, self.now() + snapshot.retry_after + self.buffer_seconds)
             self.on_secondary_limit(snapshot.retry_after)
-        self.budget = self.budget.merged_with(snapshot)
+        self.budget = self.reconcile_budget(snapshot)
         self.notify_if_budget_low()
+
+    def reconcile_budget(self, snapshot: BudgetSnapshot) -> BudgetSnapshot:
+        """Merge a snapshot, keeping the lowest remaining within the current window.
+
+        Remaining only decreases until the window resets, so a stale out-of-order response
+        reporting a higher remaining must not inflate it; a larger reset_at is a new window
+        and adopts the fresh remaining as-is.
+        """
+        merged = self.budget.merged_with(snapshot)
+        if (
+            self.budget.remaining is not None
+            and merged.remaining is not None
+            and merged.reset_at == self.budget.reset_at
+        ):
+            return dataclasses.replace(merged, remaining=min(self.budget.remaining, merged.remaining))
+        return merged
 
     def notify_if_budget_low(self) -> None:
         """Fire the on_budget_low callback when the tracked budget is at or below the reserve."""
@@ -182,22 +202,22 @@ class InstrumentedAsyncLimiter:
         on_acquired: Callable[[], None] | None = None,
         budget_governor: BudgetGovernor | None = None,
     ) -> None:
-        self._limiter = limiter
-        self._on_throttled = on_throttled or (lambda: None)
-        self._on_acquired = on_acquired or (lambda: None)
+        self.limiter = limiter
+        self.on_throttled = on_throttled or (lambda: None)
+        self.on_acquired = on_acquired or (lambda: None)
         self.budget_governor = budget_governor
 
     async def __aenter__(self) -> InstrumentedAsyncLimiter:
-        if not self._limiter.has_capacity():
-            self._on_throttled()
-        await self._limiter.__aenter__()
+        if not self.limiter.has_capacity():
+            self.on_throttled()
+        await self.limiter.__aenter__()
         if self.budget_governor is not None:
             await self.budget_governor.wait()
-        self._on_acquired()
+        self.on_acquired()
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        await self._limiter.__aexit__(exc_type, exc_val, exc_tb)
+        await self.limiter.__aexit__(exc_type, exc_val, exc_tb)
 
     def observe(self, snapshot: BudgetSnapshot) -> None:
         """Forward a provider rate-limit snapshot to the budget governor, if any."""

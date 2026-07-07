@@ -249,6 +249,34 @@ def test_observe_with_retry_after_sets_hard_pause_and_fires_callback(clock: Fake
     on_secondary_limit.assert_called_once_with(30.0)
 
 
+def test_observe_keeps_lowest_remaining_within_window(clock: FakeClock, governor: BudgetGovernor) -> None:
+    """An out-of-order response reporting a higher remaining for the same window must not inflate it."""
+    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=4000, reset_in=60))
+    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=4999, reset_in=60))
+
+    assert governor.budget.remaining == 4000
+
+
+def test_observe_adopts_new_remaining_when_window_advances(clock: FakeClock, governor: BudgetGovernor) -> None:
+    """A later reset_at is a fresh window, so the new (higher) remaining is adopted as-is."""
+    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=100, reset_in=60))
+    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=4999, reset_in=3600))
+
+    assert governor.budget.remaining == 4999
+    assert governor.budget.reset_at == clock.current + 3600
+
+
+def test_observe_keeps_longest_retry_after_pause(clock: FakeClock) -> None:
+    """A later, shorter retry_after must not shorten an already-committed secondary-limit pause."""
+    governor = BudgetGovernor(now=clock, buffer_seconds=0.0)
+    governor.observe(BudgetSnapshot(retry_after=60.0))
+    long_pause = governor.pause_until
+
+    governor.observe(BudgetSnapshot(retry_after=10.0))
+
+    assert governor.pause_until == long_pause
+
+
 def test_reserve_returns_paced_slot_when_it_exceeds_pause_until(clock: FakeClock, governor: BudgetGovernor) -> None:
     """The floor in reserve() must take the larger of the two targets, not the smaller."""
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))

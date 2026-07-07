@@ -105,22 +105,22 @@ def test_factory_with_logger_does_not_raise():
 
 def test_get_limiter_returns_default_for_non_slow_integrations():
     factory = RateLimiterFactory(RateLimiterFactoryConfig(slow_integrations=frozenset({"mongo", "mysql"})))
-    assert factory.get_limiter(frozenset({"redis", "postgres_lite"})) is factory._default
+    assert factory.get_limiter(frozenset({"redis", "postgres_lite"})) is factory.default
 
 
 def test_get_limiter_returns_slow_for_slow_integration():
     factory = RateLimiterFactory(RateLimiterFactoryConfig(slow_integrations=frozenset({"mongo", "mysql"})))
-    assert factory.get_limiter(frozenset({"mongo"})) is factory._slow
+    assert factory.get_limiter(frozenset({"mongo"})) is factory.slow
 
 
 def test_get_limiter_returns_slow_when_any_integration_is_slow():
     factory = RateLimiterFactory(RateLimiterFactoryConfig(slow_integrations=frozenset({"mongo", "mysql"})))
-    assert factory.get_limiter(frozenset({"redis", "mysql", "postgres_lite"})) is factory._slow
+    assert factory.get_limiter(frozenset({"redis", "mysql", "postgres_lite"})) is factory.slow
 
 
 def test_get_limiter_returns_default_for_empty_integrations():
     factory = RateLimiterFactory(RateLimiterFactoryConfig(slow_integrations=frozenset({"mongo"})))
-    assert factory.get_limiter(frozenset()) is factory._default
+    assert factory.get_limiter(frozenset()) is factory.default
 
 
 # ---------------------------------------------------------------------------
@@ -155,6 +155,6 @@ def test_factory_config_rejects_non_positive_max_wait_seconds():
 
 def test_factory_shares_max_wait_seconds_across_both_tiers():
     factory = RateLimiterFactory(RateLimiterFactoryConfig(max_wait_seconds=45.0))
-    governor = factory._default.budget_governor
-    assert governor is factory._slow.budget_governor
+    governor = factory.default.budget_governor
+    assert governor is factory.slow.budget_governor
     assert governor.max_wait_seconds == 45.0
