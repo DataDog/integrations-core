@@ -363,14 +363,10 @@ class OpenMetricsScraper:
             # If line_streamer is an empty iterator, next(line_streamer) fails.
             return
 
-        # Use Go bridge for Prometheus text format when available (faster native parsing).
-        # Only applies to regular Prometheus exposition format, not OpenMetrics.
+        # Use Go bridge when available (faster native parsing).
+        # Supports both Prometheus text and OpenMetrics formats.
         _go_parse = getattr(datadog_agent, 'parse_prometheus_metrics', None)
-        use_bridge = (
-            _go_parse is not None
-            and not self._use_latest_spec
-            and self._content_type.split(';')[0] != 'application/openmetrics-text'
-        )
+        use_bridge = _go_parse is not None
 
         if use_bridge:
             all_lines = [first_line] + list(line_streamer)
