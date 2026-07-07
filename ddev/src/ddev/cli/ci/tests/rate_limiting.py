@@ -10,7 +10,7 @@ import logging
 from aiolimiter import AsyncLimiter
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, InstrumentedAsyncLimiter
+from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, BudgetGovernor, InstrumentedAsyncLimiter
 
 SECONDS_PER_HOUR = 3600.0
 
@@ -45,6 +45,9 @@ class RateLimiterFactoryConfig(BaseModel):
     slow: RateLimiterConfig = RateLimiterConfig(max_rate=120.0)
     total_hourly_max_rate: float = Field(default=1500.0, gt=0)
     slow_integrations: frozenset[str] = frozenset()
+    reserve_fraction: float = Field(default=0.15, gt=0, le=1)
+    budget_buffer_seconds: float = Field(default=1.0, ge=0)
+    max_wait_seconds: float = Field(default=300.0, gt=0)
 
     @model_validator(mode="after")
     def validate_combined_rate(self) -> RateLimiterFactoryConfig:
@@ -73,13 +76,37 @@ class RateLimiterFactory:
     ) -> None:
         cfg = config or RateLimiterFactoryConfig()
         self._slow_integrations = cfg.slow_integrations
+        budget_governor = BudgetGovernor(
+            reserve_fraction=cfg.reserve_fraction,
+            buffer_seconds=cfg.budget_buffer_seconds,
+            max_wait_seconds=cfg.max_wait_seconds,
+            on_budget_low=(
+                (
+                    lambda remaining, limit, reset_in_seconds: logger.debug(
+                        "GitHub rate-limit budget low: %d/%d remaining, resets in %.1fs",
+                        remaining,
+                        limit,
+                        reset_in_seconds,
+                    )
+                )
+                if logger
+                else None
+            ),
+            on_secondary_limit=(
+                (lambda retry_after: logger.debug("GitHub secondary rate limit hit, retry after %.1fs", retry_after))
+                if logger
+                else None
+            ),
+        )
         self._default = InstrumentedAsyncLimiter(
             AsyncLimiter(cfg.default.max_rate, cfg.default.time_period),
             on_throttled=lambda: logger.debug("Default rate limiter throttling request") if logger else None,
+            budget_governor=budget_governor,
         )
         self._slow = InstrumentedAsyncLimiter(
             AsyncLimiter(cfg.slow.max_rate, cfg.slow.time_period),
             on_throttled=lambda: logger.debug("Slow rate limiter throttling request") if logger else None,
+            budget_governor=budget_governor,
         )
 
     def get_limiter(self, integrations: frozenset[str]) -> InstrumentedAsyncLimiter:

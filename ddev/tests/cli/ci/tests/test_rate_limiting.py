@@ -137,3 +137,24 @@ def test_get_limiter_same_tier_returns_same_object():
 def test_get_limiter_slow_tier_returns_same_object():
     factory = RateLimiterFactory(RateLimiterFactoryConfig(slow_integrations=frozenset({"mongo", "mysql"})))
     assert factory.get_limiter(frozenset({"mongo"})) is factory.get_limiter(frozenset({"mysql"}))
+
+
+# ---------------------------------------------------------------------------
+# max_wait_seconds
+# ---------------------------------------------------------------------------
+
+
+def test_factory_config_default_max_wait_seconds():
+    assert RateLimiterFactoryConfig().max_wait_seconds == 300.0
+
+
+def test_factory_config_rejects_non_positive_max_wait_seconds():
+    with pytest.raises(ValidationError):
+        RateLimiterFactoryConfig(max_wait_seconds=0)
+
+
+def test_factory_shares_max_wait_seconds_across_both_tiers():
+    factory = RateLimiterFactory(RateLimiterFactoryConfig(max_wait_seconds=45.0))
+    governor = factory._default.budget_governor
+    assert governor is factory._slow.budget_governor
+    assert governor.max_wait_seconds == 45.0

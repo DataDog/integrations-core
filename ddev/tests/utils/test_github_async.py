@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import dataclasses
 import io
 import json
@@ -21,6 +20,7 @@ from ddev.utils.github_async import (
     PaginationData,
     async_github_client,
 )
+from ddev.utils.github_async.client import github_rate_limit_snapshot
 from ddev.utils.github_async.models import (
     ArtifactsList,
     GitHubUser,
@@ -34,7 +34,8 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
-from ddev.utils.rate_limiting import InstrumentedAsyncLimiter
+from ddev.utils.rate_limiting import BudgetGovernor, BudgetSnapshot, InstrumentedAsyncLimiter
+from tests.helpers.assertions import assert_blocks
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -763,12 +764,6 @@ async def test_per_request_timeout_forwarded() -> None:
 # ---------------------------------------------------------------------------
 
 
-async def _assert_blocks(coro, timeout: float = 0.05) -> None:
-    """Assert that a coroutine blocks without completing within the timeout."""
-    with pytest.raises(asyncio.TimeoutError):
-        await asyncio.wait_for(coro, timeout=timeout)
-
-
 async def test_client_request_without_rate_limiter_goes_through() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return _json_response(_workflow_run_payload())
@@ -813,9 +808,60 @@ async def test_client_request_throttled_when_bucket_exhausted() -> None:
     async with async_github_client(
         token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
     ) as client:
-        await _assert_blocks(client.get_workflow_run("o", "r", 42))
+        await assert_blocks(client.get_workflow_run("o", "r", 42))
 
     on_throttled.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# github_rate_limit_snapshot
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("headers", "expected"),
+    [
+        (
+            {
+                "x-ratelimit-limit": "5000",
+                "x-ratelimit-remaining": "4321",
+                "x-ratelimit-reset": "1700000000",
+                "retry-after": "30",
+            },
+            BudgetSnapshot(limit=5000, remaining=4321, reset_at=1700000000.0, retry_after=30.0),
+        ),
+        (
+            {"x-ratelimit-limit": "5000", "x-ratelimit-remaining": "4999"},
+            BudgetSnapshot(limit=5000, remaining=4999),
+        ),
+        ({"x-ratelimit-limit": "5000", "retry-after": "not-a-number"}, BudgetSnapshot(limit=5000)),
+        ({"x-ratelimit-limit": "not-a-number"}, None),
+        ({"content-type": "application/json"}, None),
+    ],
+    ids=["all_present", "partial_primary", "non_integer_retry_after", "all_unparseable", "no_ratelimit_headers"],
+)
+def test_github_rate_limit_snapshot(headers: dict[str, str], expected: BudgetSnapshot | None) -> None:
+    assert github_rate_limit_snapshot(httpx.Headers(headers)) == expected
+
+
+async def test_client_request_observes_rate_limit_headers_into_governor() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response(
+            _workflow_run_payload(),
+            headers={"x-ratelimit-limit": "5000", "x-ratelimit-remaining": "4999", "x-ratelimit-reset": "1700000000"},
+        )
+
+    governor = BudgetGovernor()
+    rate_limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000), budget_governor=governor)
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        await client.get_workflow_run("o", "r", 42)
+
+    assert governor.budget.limit == 5000
+    assert governor.budget.remaining == 4999
+    assert governor.budget.reset_at == 1700000000.0
 
 
 # ---------------------------------------------------------------------------

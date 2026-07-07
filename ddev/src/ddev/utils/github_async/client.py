@@ -8,8 +8,8 @@ from __future__ import annotations
 import io
 import re
 import zipfile
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator, Callable
+from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, Self, overload
@@ -17,7 +17,7 @@ from typing import Any, Literal, Self, overload
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
-from ddev.utils.rate_limiting import InstrumentedAsyncLimiter
+from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
 
 from .models import (
     ArtifactsList,
@@ -76,6 +76,27 @@ class GitHubResponse[T](BaseModel):
     headers: dict[str, str] = Field(default_factory=dict)
 
 
+def parse_header[T](headers: httpx.Headers, key: str, cast: Callable[[str], T]) -> T | None:
+    """Return the header at *key* run through *cast*, or None if it is absent or unparseable."""
+    raw = headers.get(key)
+    if raw is None:
+        return None
+    with suppress(ValueError, TypeError):
+        return cast(raw)
+    return None
+
+
+def github_rate_limit_snapshot(headers: httpx.Headers) -> BudgetSnapshot | None:
+    """Parse GitHub's `x-ratelimit-*` / `retry-after` response headers into a BudgetSnapshot."""
+    snapshot = BudgetSnapshot(
+        limit=parse_header(headers, "x-ratelimit-limit", int),
+        remaining=parse_header(headers, "x-ratelimit-remaining", int),
+        reset_at=parse_header(headers, "x-ratelimit-reset", float),
+        retry_after=parse_header(headers, "retry-after", lambda raw: float(int(raw))),
+    )
+    return snapshot if snapshot != NULL_SNAPSHOT else None
+
+
 class AsyncGitHubClient:
     """
     Async HTTP client for the GitHub REST API.
@@ -131,6 +152,10 @@ class AsyncGitHubClient:
             response = await self._client.request(method, endpoint, timeout=timeout, **kwargs)
         except httpx.TransportError as exc:
             raise type(exc)(f"{method} {endpoint}: {exc}") from exc
+        if self._rate_limiter is not None:
+            snapshot = github_rate_limit_snapshot(response.headers)
+            if snapshot is not None:
+                self._rate_limiter.observe(snapshot)
         response.raise_for_status()
         return response
 
