@@ -1,4 +1,5 @@
 {
     "type": "url",
+    "intake": "events",
     "source": "incident-io"
 }
