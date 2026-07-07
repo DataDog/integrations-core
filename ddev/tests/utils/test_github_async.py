@@ -30,6 +30,8 @@ from ddev.utils.github_async.models import (
     PullRequestRef,
     PullRequestReviewComment,
     WorkflowDispatchResult,
+    WorkflowJob,
+    WorkflowJobsList,
     WorkflowRun,
 )
 from ddev.utils.rate_limiting import InstrumentedAsyncLimiter
@@ -73,6 +75,17 @@ def _workflow_run_payload() -> dict[str, Any]:
         "html_url": "https://github.com/owner/repo/actions/runs/42",
         "created_at": "2024-01-01T00:00:00Z",
         "updated_at": "2024-01-01T01:00:00Z",
+    }
+
+
+def _workflow_job(idx: int, *, status: str = "completed", conclusion: str | None = "success") -> dict[str, Any]:
+    return {
+        "id": idx,
+        "run_id": 42,
+        "name": f"job-{idx}",
+        "status": status,
+        "conclusion": conclusion,
+        "html_url": f"https://github.com/owner/repo/actions/runs/42/job/{idx}",
     }
 
 
@@ -200,10 +213,17 @@ async def test_create_workflow_dispatch_success() -> None:
         assert body["ref"] == "main"
         assert body["return_run_details"] is True
         assert "inputs" not in body
-        return _json_response({"workflow_run_id": 999}, headers={"x-ratelimit-remaining": "59"})
+        return _json_response(
+            {
+                "workflow_run_id": 999,
+                "run_url": "https://api.github.com/repos/owner/repo/actions/runs/999",
+                "html_url": "https://github.com/owner/repo/actions/runs/999",
+            },
+            headers={"x-ratelimit-remaining": "59"},
+        )
 
     client = _make_client(httpx.MockTransport(handler))
-    result = await client.create_workflow_dispatch("owner", "repo", "my-workflow.yml", "main")
+    result = await client.create_workflow_dispatch("owner", "repo", "my-workflow.yml", "main", return_run_details=True)
     assert isinstance(result, GitHubResponse)
     assert isinstance(result.data, WorkflowDispatchResult)
     assert result.data.workflow_run_id == 999
@@ -215,10 +235,18 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
         body = json.loads(request.content)
         assert body["inputs"] == {"env": "prod"}
         assert body["return_run_details"] is True
-        return _json_response({"workflow_run_id": 1})
+        return _json_response(
+            {
+                "workflow_run_id": 1,
+                "run_url": "https://api.github.com/repos/o/r/actions/runs/1",
+                "html_url": "https://github.com/o/r/actions/runs/1",
+            }
+        )
 
     client = _make_client(httpx.MockTransport(handler))
-    result = await client.create_workflow_dispatch("o", "r", 123, "main", inputs={"env": "prod"})
+    result = await client.create_workflow_dispatch(
+        "o", "r", 123, "main", inputs={"env": "prod"}, return_run_details=True
+    )
     assert result.data.workflow_run_id == 1
 
 
@@ -227,6 +255,34 @@ async def test_create_workflow_dispatch_http_error_raises() -> None:
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
     assert exc_info.value.response.status_code == 422
+
+
+async def test_create_workflow_dispatch_return_run_details_parses_response() -> None:
+    payload = {
+        "workflow_run_id": 987,
+        "run_url": "https://api.github.com/repos/o/r/actions/runs/987",
+        "html_url": "https://github.com/o/r/actions/runs/987",
+    }
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert body["return_run_details"] is True
+        return _json_response(payload)
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.create_workflow_dispatch("o", "r", "wf.yml", "main", return_run_details=True)
+    assert result.data.workflow_run_id == 987
+    assert result.data.html_url == "https://github.com/o/r/actions/runs/987"
+
+
+async def test_create_workflow_dispatch_omits_return_run_details_when_false() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        assert "return_run_details" not in body
+        return httpx.Response(204)
+
+    client = _make_client(httpx.MockTransport(handler))
+    await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
 
 
 # ---------------------------------------------------------------------------
@@ -337,6 +393,62 @@ async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
 
     client = _make_client(httpx.MockTransport(handler))
     async for _ in client.list_workflow_run_artifacts("owner", "repo", 1, per_page=100):
+        pass
+
+
+# ---------------------------------------------------------------------------
+# list_workflow_jobs (pagination)
+# ---------------------------------------------------------------------------
+
+
+async def test_list_workflow_jobs_single_page() -> None:
+    jobs = [_workflow_job(1), _workflow_job(2, status="in_progress", conclusion=None)]
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert "/actions/runs/42/jobs" in request.url.path
+        return _json_response({"total_count": 2, "jobs": jobs})
+
+    client = _make_client(httpx.MockTransport(handler))
+    pages = []
+    async for page in client.list_workflow_jobs("owner", "repo", 42):
+        pages.append(page)
+
+    assert len(pages) == 1
+    assert isinstance(pages[0].data, WorkflowJobsList)
+    assert pages[0].data.total_count == 2
+    assert isinstance(pages[0].data.jobs[0], WorkflowJob)
+    assert pages[0].data.jobs[1].html_url == "https://github.com/owner/repo/actions/runs/42/job/2"
+
+
+async def test_list_workflow_jobs_two_pages() -> None:
+    call_count = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            link = f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'
+            return _json_response({"total_count": 2, "jobs": [_workflow_job(1)]}, headers={"link": link})
+        return _json_response({"total_count": 2, "jobs": [_workflow_job(2)]})
+
+    client = _make_client(httpx.MockTransport(handler))
+    pages = []
+    async for page in client.list_workflow_jobs("owner", "repo", 42):
+        pages.append(page)
+
+    assert len(pages) == 2
+    assert pages[0].data.jobs[0].id == 1
+    assert pages[1].data.jobs[0].id == 2
+
+
+async def test_list_workflow_jobs_per_page_forwarded() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params["per_page"] == "100"
+        return _json_response({"total_count": 0, "jobs": []})
+
+    client = _make_client(httpx.MockTransport(handler))
+    async for _ in client.list_workflow_jobs("owner", "repo", 42, per_page=100):
         pass
 
 

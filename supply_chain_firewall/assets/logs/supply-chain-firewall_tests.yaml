@@ -9,6 +9,54 @@ tests:
       "created" : 1755017456.590666,
       "source" : "scfw",
       "env" : "dev",
+      "version" : "3.0.0",
+      "log_version" : 1,
+      "install_targets" : [ { "ecosystem" : "PyPI", "name" : "urllib3", "version" : "2.0.2" } ],
+      "executable" : "/home/devuser/.venv/bin/python",
+      "hostname" : "test10-10-1-10",
+      "package_manager" : "pip",
+      "service" : "scfw",
+      "warning" : true,
+      "verified" : true,
+      "action" : "ALLOW",
+      "username" : "root",
+      "cwd" : "/home/devuser/project"
+    }
+  result:
+    custom:
+      created: 1.755017456590666E12
+      cwd: "/home/devuser/project"
+      ecosystem: "PyPI"
+      env: "dev"
+      evt:
+        outcome: "ALLOW"
+      executable: "/home/devuser/.venv/bin/python"
+      hostname: "test10-10-1-10"
+      install_targets:
+       - ecosystem: "PyPI"
+         name: "urllib3"
+         version: "2.0.2"
+      log_version: 1
+      package_manager: "pip"
+      service: "scfw"
+      source: "scfw"
+      usr:
+        name: "root"
+      verified: true
+      version: "3.0.0"
+      warning: true
+    message: "Command 'pip install urllib3==2.0.2' was allowed"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1755017456590
+ -
+  sample: |-
+    {
+      "msg" : "Command 'pip install urllib3==2.0.2' was allowed",
+      "ecosystem" : "PyPI",
+      "created" : 1755017456.590666,
+      "source" : "scfw",
+      "env" : "dev",
       "version" : "2.1.0",
       "targets" : [ "urllib3-2.0.2" ],
       "executable" : "/home/devuser/.venv/bin/python",
@@ -36,7 +84,7 @@ tests:
       usr:
         name: "root"
       version: "2.1.0"
-      warned: true
+      warning: true
     message: "Command 'pip install urllib3==2.0.2' was allowed"
     tags:
      - "source:LOGS_SOURCE"

@@ -190,4 +190,4 @@ if __name__ == "__main__":
     app.config["start_time"] = time.time()
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ctx.load_cert_chain(CERT_FILE, KEY_FILE)
-    app.run(host="0.0.0.0", port=8444, ssl_context=ctx)
+    app.run(host="0.0.0.0", port=443, ssl_context=ctx)
