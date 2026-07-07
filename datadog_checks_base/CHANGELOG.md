@@ -14,7 +14,7 @@
 * Implement the `DatabaseCheck.tags` property backed by a shared `TagManager` so DBM integrations can consolidate tag handling. ([#24244](https://github.com/DataDog/integrations-core/pull/24244))
 * Provide a default `database_identifier` implementation on the `DatabaseCheck` base class that is built (and cached) from the `database_identifier_template` and `database_identifier_params` hooks, so integrations no longer need to reimplement the database identifier templating logic. ([#24250](https://github.com/DataDog/integrations-core/pull/24250))
 
-## 37.40.1 / 2026-06-18
+## 37.40.1 / 2026-06-18 / Agent 7.81.0
 
 ***Fixed***:
 
