@@ -13,6 +13,7 @@ from anthropic.types import ToolParam
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from .types import ToolResult
+from .validation import format_validation_error
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +106,9 @@ class BaseTool[TInput: BaseToolInput](ABC):
         try:
             input_cls = _get_input_type(type(self))
             validated: TInput = input_cls.model_validate(raw)  # type: ignore[assignment]
-        except (ValidationError, TypeError, ValueError) as e:
+        except ValidationError as e:
+            return ToolResult(success=False, error=format_validation_error(e))
+        except (TypeError, ValueError) as e:
             return ToolResult(success=False, error=str(e))
         try:
             return await self(validated)

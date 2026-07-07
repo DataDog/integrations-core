@@ -4,15 +4,25 @@
 from typing import Annotated
 
 import httpx
-from pydantic import Field
+from pydantic import AfterValidator, Field
 
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
 from ddev.ai.tools.core.truncation import make_tool_result, truncate
 from ddev.ai.tools.core.types import ToolResult
 
 
+def requires_http_scheme(url: str) -> str:
+    if not url.startswith(("http://", "https://")):
+        raise ValueError("URL must start with http:// or https://")
+    return url
+
+
 class HttpGetInput(BaseToolInput):
-    url: Annotated[str, Field(description="Full URL to probe (must start with http:// or https://)")]
+    url: Annotated[
+        str,
+        Field(description="Full URL to probe (must start with http:// or https://)"),
+        AfterValidator(requires_http_scheme),
+    ]
     timeout: Annotated[float, Field(description="Request timeout in seconds (default: 10)", gt=0)] = 10.0
 
 
@@ -28,9 +38,6 @@ class HttpGetTool(BaseTool[HttpGetInput]):
     async def __call__(self, tool_input: HttpGetInput) -> ToolResult:
         url: str = tool_input.url
         timeout: float = tool_input.timeout
-
-        if not url.startswith(("http://", "https://")):
-            return ToolResult(success=False, error="URL must start with http:// or https://")
 
         try:
             async with httpx.AsyncClient(timeout=timeout) as client:
