@@ -115,10 +115,8 @@ class EditFileTool(FileRegistryTool[EditFileInput]):
             if count > 1:
                 return [], ToolResult(
                     success=False,
-                    error=(
-                        f"edits[{i}]: old_string appears {count} times in the file; "
-                        "include more surrounding context to make it unique"
-                    ),
+                    error=f"edits[{i}]: old_string appears {count} times in the file",
+                    hint="include more surrounding context to make it unique",
                 )
             start = content.index(old_string)
             matches.append((start, start + len(old_string), new_string))
