@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import time
+from dataclasses import dataclass
 from datetime import timedelta
 
 from datadog_checks.base import AgentCheck, is_affirmative
@@ -49,6 +50,12 @@ def parse_duration(time_str):
         return duration.total_seconds()
     except Exception:
         return None
+
+
+@dataclass
+class ProcessPidMatch:
+    host_pid: str
+    namespace_pids: list[str]
 
 
 class SlurmCheck(AgentCheck, ConfigMixin):
@@ -590,7 +597,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         # Cache for job details to avoid duplicate calls
         job_details_cache = {}
-        host_pids_by_namespace_pid = self._get_host_pids_by_namespace_pid() if self.resolve_scontrol_host_pids else {}
+        host_pid_matches_by_namespace_pid = (
+            self._get_host_pid_matches_by_namespace_pid() if self.resolve_scontrol_host_pids else {}
+        )
 
         for line in lines[1:]:
             tags = [f"slurm_node_name:{slurm_node.strip()}"]
@@ -601,12 +610,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 new_header = SCONTROL_TAG_MAPPING.get(header, f"slurm_{header.lower()}")
 
                 if new_header == "pid":
-                    value = self._resolve_scontrol_host_pid(value, host_pids_by_namespace_pid)
-                    # Example gpu tags being returned:
-                    # ['gpu_vendor:nvidia', 'gpu_device:tesla_v100', 'gpu_uuid:gpu_xxxx...']
-                    pidtags = tagger.tag(f"process://{value}", tagger.ORCHESTRATOR)
-                    if pidtags:  # Guard against tagger.tag returning None
-                        tags.extend(pidtags)
+                    host_pid_match = self._resolve_scontrol_host_pid(value, host_pid_matches_by_namespace_pid)
+                    tags.extend(self._get_process_tags(value))
+                    if host_pid_match is not None:
+                        tags.append(f"nspid:{value}")
+                        value = host_pid_match.host_pid
+                        tags.extend(self._get_process_tags(value))
 
                 tags.append(f"{new_header}:{value}")
 
@@ -621,40 +630,56 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             self.gauge("scontrol.jobs.info", 1, tags=tags + self.tags)
 
-    def _resolve_scontrol_host_pid(self, namespace_pid, host_pids_by_namespace_pid):
-        host_pids = host_pids_by_namespace_pid.get(namespace_pid)
-        if not host_pids:
-            return namespace_pid
+    def _resolve_scontrol_host_pid(self, namespace_pid, host_pid_matches_by_namespace_pid):
+        host_pid_matches = host_pid_matches_by_namespace_pid.get(namespace_pid)
+        if not host_pid_matches:
+            return None
 
-        if len(host_pids) > 1:
+        if len(host_pid_matches) > 1:
+            matches = [
+                {"host_pid": match.host_pid, "namespace_pids": match.namespace_pids} for match in host_pid_matches
+            ]
             self.log.debug(
-                "Found multiple host PIDs matching scontrol namespace PID %s: %s. Using %s.",
+                "Found multiple host PID matches for scontrol namespace PID %s: %s. Using host PID %s.",
                 namespace_pid,
-                host_pids,
-                host_pids[0],
+                matches,
+                host_pid_matches[0].host_pid,
             )
 
-        return host_pids[0]
+        return host_pid_matches[0]
 
-    def _get_host_pids_by_namespace_pid(self):
+    def _get_process_tags(self, pid):
+        # Example gpu tags being returned:
+        # ['gpu_vendor:nvidia', 'gpu_device:tesla_v100', 'gpu_uuid:gpu_xxxx...']
+        pidtags = tagger.tag(f"process://{pid}", tagger.ORCHESTRATOR)
+        if pidtags:  # Guard against tagger.tag returning None
+            return pidtags
+
+        return []
+
+    def _get_host_pid_matches_by_namespace_pid(self):
         host_proc = os.environ.get("HOST_PROC", "/host/proc")
-        host_pids_by_namespace_pid = {}
+        host_pid_matches_by_namespace_pid = {}
 
         try:
             proc_entries = os.scandir(host_proc)
         except OSError as e:
             self.log.debug("Unable to scan host proc path '%s': %s", host_proc, e)
-            return host_pids_by_namespace_pid
+            return host_pid_matches_by_namespace_pid
 
         with proc_entries:
             for entry in proc_entries:
                 if not entry.name.isdigit():
                     continue
 
-                for namespace_pid in self._read_namespace_pids(entry.path, entry.name):
-                    host_pids_by_namespace_pid.setdefault(namespace_pid, []).append(entry.name)
+                pid_match = ProcessPidMatch(
+                    host_pid=entry.name,
+                    namespace_pids=self._read_namespace_pids(entry.path, entry.name),
+                )
+                for namespace_pid in pid_match.namespace_pids:
+                    host_pid_matches_by_namespace_pid.setdefault(namespace_pid, []).append(pid_match)
 
-        return host_pids_by_namespace_pid
+        return host_pid_matches_by_namespace_pid
 
     def _read_namespace_pids(self, proc_path, host_pid):
         try:
