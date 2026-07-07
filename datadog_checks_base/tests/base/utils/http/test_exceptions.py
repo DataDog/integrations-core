@@ -155,3 +155,13 @@ def test_json_parse_error_converges_to_stdlib():
     assert exc_info.value.msg == 'Expecting value'
     assert exc_info.value.doc == 'not json'
     assert exc_info.value.pos == 0
+
+
+# Group E: the auth-token seam. The poll runs before the main request (see handle_auth_token), so a
+# transport failure while fetching the token must surface as an agnostic type, not a raw requests one.
+def test_auth_token_fetch_error_maps_to_agnostic():
+    http = RequestsWrapper({}, {})
+    http.auth_token_handler = mock.MagicMock()
+    http.auth_token_handler.poll.side_effect = requests.exceptions.ConnectionError('token endpoint refused')
+    with pytest.raises(HTTPConnectionError):
+        http.get('http://example.test/')

@@ -726,7 +726,8 @@ class RequestsWrapper(object):
 
     def handle_auth_token(self, **request):
         if self.auth_token_handler is not None:
-            self.auth_token_handler.poll(**request)
+            with _translate_http_errors():
+                self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
         try:
