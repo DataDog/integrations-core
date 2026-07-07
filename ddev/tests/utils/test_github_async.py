@@ -60,8 +60,8 @@ def _make_client(handler: httpx.MockTransport | None = None) -> AsyncGitHubClien
     return AsyncGitHubClient(token=TOKEN, transport=transport)
 
 
-def _artifact(idx: int) -> dict[str, Any]:
-    return {
+def _artifact(idx: int, **overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
         "id": idx,
         "name": f"artifact-{idx}",
         "size_in_bytes": 100 * idx,
@@ -69,10 +69,12 @@ def _artifact(idx: int) -> dict[str, Any]:
         "archive_download_url": f"https://api.github.com/artifact/{idx}/zip",
         "expired": False,
     }
+    payload.update(overrides)
+    return payload
 
 
-def _workflow_run_payload() -> dict[str, Any]:
-    return {
+def _workflow_run_payload(**overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
         "id": 42,
         "name": "CI",
         "status": "completed",
@@ -81,21 +83,26 @@ def _workflow_run_payload() -> dict[str, Any]:
         "created_at": "2024-01-01T00:00:00Z",
         "updated_at": "2024-01-01T01:00:00Z",
     }
+    payload.update(overrides)
+    return payload
 
 
-def _workflow_job(idx: int, *, status: str = "completed", conclusion: str | None = "success") -> dict[str, Any]:
-    return {
+def _workflow_job(idx: int = 1, **overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
         "id": idx,
         "run_id": 42,
         "name": f"job-{idx}",
-        "status": status,
-        "conclusion": conclusion,
+        "status": "completed",
+        "conclusion": "success",
         "html_url": f"https://github.com/owner/repo/actions/runs/42/job/{idx}",
+        "steps": [{"name": "Run tests", "status": "completed", "conclusion": "success", "number": 1}],
     }
+    payload.update(overrides)
+    return payload
 
 
-def _issue_comment_payload() -> dict[str, Any]:
-    return {
+def _issue_comment_payload(**overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
         "id": 1,
         "body": "Hello world",
         "user": {"login": "octocat"},
@@ -103,10 +110,12 @@ def _issue_comment_payload() -> dict[str, Any]:
         "updated_at": "2024-01-01T00:00:00Z",
         "html_url": "https://github.com/owner/repo/issues/1#issuecomment-1",
     }
+    payload.update(overrides)
+    return payload
 
 
-def _pr_review_comment_payload() -> dict[str, Any]:
-    return {
+def _pr_review_comment_payload(**overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
         "id": 10,
         "body": "Nice change",
         "path": "src/foo.py",
@@ -116,6 +125,8 @@ def _pr_review_comment_payload() -> dict[str, Any]:
         "updated_at": "2024-01-01T00:00:00Z",
         "user": {"login": "reviewer"},
     }
+    payload.update(overrides)
+    return payload
 
 
 # ---------------------------------------------------------------------------
@@ -295,17 +306,23 @@ async def test_create_workflow_dispatch_omits_return_run_details_when_false() ->
 # ---------------------------------------------------------------------------
 
 
-async def test_get_workflow_run_success() -> None:
+@pytest.mark.parametrize(
+    ("status", "is_completed"),
+    [("completed", True), ("in_progress", False), ("queued", False)],
+    ids=["completed", "in_progress", "queued"],
+)
+async def test_get_workflow_run_success(status: str, is_completed: bool) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert "/actions/runs/42" in request.url.path
-        return _json_response(_workflow_run_payload())
+        return _json_response(_workflow_run_payload(status=status))
 
     client = _make_client(httpx.MockTransport(handler))
     result = await client.get_workflow_run("owner", "repo", 42)
     assert isinstance(result.data, WorkflowRun)
     assert result.data.id == 42
-    assert result.data.status == "completed"
+    assert result.data.status == status
+    assert result.data.is_completed is is_completed
 
 
 async def test_get_workflow_run_headers_forwarded() -> None:
@@ -422,8 +439,39 @@ async def test_list_workflow_jobs_single_page() -> None:
     assert len(pages) == 1
     assert isinstance(pages[0].data, WorkflowJobsList)
     assert pages[0].data.total_count == 2
-    assert isinstance(pages[0].data.jobs[0], WorkflowJob)
-    assert pages[0].data.jobs[1].html_url == "https://github.com/owner/repo/actions/runs/42/job/2"
+
+    first, second = pages[0].data.jobs
+    assert isinstance(first, WorkflowJob)
+    assert first.status is WorkflowJobStatus.COMPLETED
+    assert first.conclusion is WorkflowJobConclusion.SUCCESS
+    assert second.status is WorkflowJobStatus.IN_PROGRESS
+    assert second.conclusion is None
+    assert second.html_url == "https://github.com/owner/repo/actions/runs/42/job/2"
+
+    # A step's status is its own StrEnum; its conclusion has no declared enum (stays str).
+    step = first.steps[0]
+    assert isinstance(step, JobStep)
+    assert step.status is JobStepStatus.COMPLETED
+
+
+@pytest.mark.parametrize("status", list(WorkflowJobStatus), ids=[s.value for s in WorkflowJobStatus])
+async def test_list_workflow_jobs_parses_every_status(status: WorkflowJobStatus) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response({"total_count": 1, "jobs": [_workflow_job(1, status=status.value, conclusion=None)]})
+
+    client = _make_client(httpx.MockTransport(handler))
+    pages = [page async for page in client.list_workflow_jobs("owner", "repo", 42)]
+    assert pages[0].data.jobs[0].status is status
+
+
+async def test_list_workflow_jobs_unexpected_status_raises() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response({"total_count": 1, "jobs": [_workflow_job(1, status="bogus")]})
+
+    client = _make_client(httpx.MockTransport(handler))
+    with pytest.raises(ValidationError):
+        async for _ in client.list_workflow_jobs("owner", "repo", 42):
+            pass
 
 
 async def test_list_workflow_jobs_two_pages() -> None:
@@ -468,7 +516,7 @@ async def test_create_issue_comment_success() -> None:
         assert "/issues/7/comments" in request.url.path
         body = json.loads(request.content)
         assert body["body"] == "LGTM"
-        return _json_response({**_issue_comment_payload(), "body": "LGTM"}, status_code=201)
+        return _json_response(_issue_comment_payload(body="LGTM"), status_code=201)
 
     client = _make_client(httpx.MockTransport(handler))
     result = await client.create_issue_comment("owner", "repo", 7, "LGTM")
@@ -535,16 +583,18 @@ async def test_create_pr_review_comment_http_error_raises() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _pull_request_payload(number: int = 1) -> dict[str, Any]:
-    return {
+def _pull_request_payload(number: int = 1, **overrides: Any) -> dict[str, Any]:
+    payload: dict[str, Any] = {
         "number": number,
         "html_url": f"https://github.com/owner/repo/pull/{number}",
     }
+    payload.update(overrides)
+    return payload
 
 
-def _full_pull_request_payload(number: int = 42) -> dict[str, Any]:
+def _full_pull_request_payload(number: int = 42, **overrides: Any) -> dict[str, Any]:
     """A richer PR payload exercising sub-models (user, labels, head/base)."""
-    return {
+    payload: dict[str, Any] = {
         "id": 9000 + number,
         "number": number,
         "node_id": "PR_kwDOABCD123",
@@ -588,6 +638,8 @@ def _full_pull_request_payload(number: int = 42) -> dict[str, Any]:
             "label": "owner:master",
         },
     }
+    payload.update(overrides)
+    return payload
 
 
 async def test_create_pull_request_success() -> None:
@@ -641,7 +693,7 @@ async def test_create_pull_request_parses_full_response() -> None:
     pr = result.data
     assert pr.id == 9042
     assert pr.number == 42
-    assert pr.state == "open"
+    assert pr.state is PullRequestState.OPEN
     assert pr.draft is True
     assert pr.title == "Fix bug"
 
@@ -665,15 +717,58 @@ async def test_create_pull_request_ignores_extra_fields() -> None:
     """Unknown top-level fields in the response must not break parsing."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        payload = _full_pull_request_payload()
-        payload["mergeable_state"] = "clean"
-        payload["additions"] = 42
-        payload["unknown_future_field"] = {"nested": True}
+        payload = _full_pull_request_payload(
+            mergeable_state="clean", additions=42, unknown_future_field={"nested": True}
+        )
         return _json_response(payload, status_code=201)
 
     client = _make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("o", "r", "T", "h", "b")
     assert result.data.number == 42
+
+
+# ---------------------------------------------------------------------------
+# get_pull_request
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("state", list(PullRequestState), ids=[s.value for s in PullRequestState])
+async def test_get_pull_request_success(state: PullRequestState) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert "/repos/owner/repo/pulls/5" in request.url.path
+        return _json_response(_full_pull_request_payload(number=5, state=state.value))
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.get_pull_request("owner", "repo", 5)
+    assert isinstance(result.data, PullRequest)
+    assert result.data.number == 5
+    assert result.data.state is state
+
+
+async def test_get_pull_request_headers_forwarded() -> None:
+    def handler(_: httpx.Request) -> httpx.Response:
+        return _json_response(_full_pull_request_payload(number=5), headers={"x-ratelimit-remaining": "50"})
+
+    client = _make_client(httpx.MockTransport(handler))
+    result = await client.get_pull_request("o", "r", 5)
+    assert result.headers.get("x-ratelimit-remaining") == "50"
+
+
+async def test_get_pull_request_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.get_pull_request("o", "r", 5)
+    assert exc_info.value.response.status_code == 404
+
+
+async def test_get_pull_request_unexpected_state_raises() -> None:
+    def handler(_: httpx.Request) -> httpx.Response:
+        return _json_response(_full_pull_request_payload(number=5, state="merged"))
+
+    client = _make_client(httpx.MockTransport(handler))
+    with pytest.raises(ValidationError):
+        await client.get_pull_request("o", "r", 5)
 
 
 # ---------------------------------------------------------------------------
@@ -793,7 +888,9 @@ async def test_create_check_run_success() -> None:
 
     client = _make_client(httpx.MockTransport(handler))
     result = await client.create_check_run("o", "r", name="ck", head_sha="abc", status="in_progress")
+    assert isinstance(result.data, CheckRun)
     assert result.data.id == 1
+    assert result.data.status is CheckRunStatus.IN_PROGRESS
     assert captured == {"name": "ck", "head_sha": "abc", "status": "in_progress"}
 
 
@@ -820,18 +917,42 @@ async def test_create_check_run_with_optional_fields() -> None:
 
 
 @pytest.mark.asyncio
-async def test_update_check_run_success() -> None:
-    captured: dict[str, Any] = {}
+async def test_create_check_run_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.create_check_run("o", "r", name="ck", head_sha="abc", status="in_progress")
+    assert exc_info.value.response.status_code == 422
 
+
+# One case per non-completed status (conclusion is null until completed), plus every
+# conclusion (incl. the GitHub-only ``stale``) paired with ``completed``.
+_CHECK_RUN_RESULT_CASES = [
+    *[
+        pytest.param(status, None, id=status.value)
+        for status in CheckRunStatus
+        if status is not CheckRunStatus.COMPLETED
+    ],
+    *[
+        pytest.param(CheckRunStatus.COMPLETED, conclusion, id=f"completed-{conclusion.value}")
+        for conclusion in CheckRunConclusion
+    ],
+]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("status", "conclusion"), _CHECK_RUN_RESULT_CASES)
+async def test_update_check_run_success(status: CheckRunStatus, conclusion: CheckRunConclusion | None) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "PATCH"
         assert "/repos/o/r/check-runs/77" in request.url.path
-        captured.update(json.loads(request.content))
-        return _json_response(_check_run_payload(id=77, status="completed", conclusion="success"))
+        return _json_response(
+            _check_run_payload(id=77, status=status.value, conclusion=conclusion.value if conclusion else None)
+        )
 
     client = _make_client(httpx.MockTransport(handler))
-    await client.update_check_run("o", "r", 77, status="completed", conclusion="success")
-    assert captured == {"status": "completed", "conclusion": "success"}
+    result = await client.update_check_run("o", "r", 77, status="in_progress")
+    assert result.data.status is status
+    assert result.data.conclusion is conclusion
 
 
 @pytest.mark.asyncio
@@ -860,6 +981,24 @@ async def test_update_check_run_requires_conclusion_when_completed() -> None:
     with pytest.raises(ValueError, match="conclusion is required"):
         await client.update_check_run("o", "r", 77, status="completed")
     assert requested is False
+
+
+@pytest.mark.asyncio
+async def test_update_check_run_http_error_raises() -> None:
+    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.update_check_run("o", "r", 77, status="in_progress")
+    assert exc_info.value.response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_check_run_unexpected_status_raises() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return _json_response(_check_run_payload(id=77, status="bogus"))
+
+    client = _make_client(httpx.MockTransport(handler))
+    with pytest.raises(ValidationError):
+        await client.update_check_run("o", "r", 77, status="in_progress")
 
 
 # ---------------------------------------------------------------------------
@@ -1004,89 +1143,3 @@ async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
-
-
-# ---------------------------------------------------------------------------
-# StrEnum modeling of declared-enum fields
-# ---------------------------------------------------------------------------
-
-
-def test_pull_request_state_is_enum() -> None:
-    pr = PullRequest.model_validate(_full_pull_request_payload(number=1))
-    assert pr.state is PullRequestState.OPEN
-    assert pr.state == "open"
-
-
-def test_pull_request_state_rejects_unknown_value() -> None:
-    with pytest.raises(ValidationError):
-        PullRequest.model_validate({**_pull_request_payload(), "state": "merged"})
-
-
-def test_check_run_status_and_conclusion_are_enums() -> None:
-    check = CheckRun.model_validate(_check_run_payload(status="completed", conclusion="success"))
-    assert check.status is CheckRunStatus.COMPLETED
-    assert check.conclusion is CheckRunConclusion.SUCCESS
-
-
-def test_check_run_conclusion_stays_nullable() -> None:
-    check = CheckRun.model_validate(_check_run_payload(status="in_progress", conclusion=None))
-    assert check.conclusion is None
-
-
-def test_check_run_status_rejects_unknown_value() -> None:
-    with pytest.raises(ValidationError):
-        CheckRun.model_validate(_check_run_payload(status="bogus"))
-
-
-def _workflow_job_payload(**overrides: Any) -> dict[str, Any]:
-    payload: dict[str, Any] = {
-        "id": 1,
-        "run_id": 2,
-        "name": "unit (py3.12)",
-        "status": "completed",
-        "conclusion": "success",
-        "html_url": "https://github.com/o/r/actions/jobs/1",
-        "steps": [{"name": "Run tests", "status": "completed", "conclusion": "failure", "number": 1}],
-    }
-    payload.update(overrides)
-    return payload
-
-
-def test_workflow_job_and_step_enums() -> None:
-    job = WorkflowJob.model_validate(_workflow_job_payload())
-    assert job.status is WorkflowJobStatus.COMPLETED
-    assert job.conclusion is WorkflowJobConclusion.SUCCESS
-
-    step = job.steps[0]
-    assert isinstance(step, JobStep)
-    assert step.status is JobStepStatus.COMPLETED
-    # A step's conclusion has no declared enum, so it stays a plain string.
-    assert step.conclusion == "failure"
-
-
-def test_workflow_job_conclusion_stays_nullable() -> None:
-    job = WorkflowJob.model_validate(_workflow_job_payload(status="in_progress", conclusion=None))
-    assert job.conclusion is None
-
-
-def test_workflow_job_status_rejects_unknown_value() -> None:
-    with pytest.raises(ValidationError):
-        WorkflowJob.model_validate(_workflow_job_payload(status="bogus"))
-
-
-def test_workflow_run_status_and_conclusion_stay_free_form() -> None:
-    """`workflow-run` declares no enum for these, so arbitrary strings must validate."""
-    run = WorkflowRun.model_validate(
-        {**_workflow_run_payload(), "status": "some_future_status", "conclusion": "some_future_conclusion"}
-    )
-    assert run.status == "some_future_status"
-    assert run.conclusion == "some_future_conclusion"
-
-
-@pytest.mark.parametrize(
-    ("status", "expected"),
-    [("completed", True), ("in_progress", False), ("queued", False)],
-)
-def test_workflow_run_is_completed(status: str, expected: bool) -> None:
-    run = WorkflowRun.model_validate({**_workflow_run_payload(), "status": status})
-    assert run.is_completed is expected

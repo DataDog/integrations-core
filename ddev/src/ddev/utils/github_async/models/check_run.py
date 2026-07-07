@@ -30,10 +30,14 @@ class CheckRunStatus(StrEnum):
 class CheckRunConclusion(StrEnum):
     """The conclusion of a check run.
 
-    The `check-run` schema declares `conclusion` as a nullable
+    The `check-run` response schema declares `conclusion` as a nullable
     `enum: [success, failure, neutral, cancelled, skipped, timed_out, action_required]`.
+    `stale` is added on top of those: it is a valid conclusion that only GitHub can
+    set (present in the update-a-check-run request enum and the docs, though the
+    response schema omits it), so a real response can carry it and the model must
+    accept it.
     Reference:
-    https://docs.github.com/en/rest/checks/runs#get-a-check-run
+    https://docs.github.com/en/rest/checks/runs#update-a-check-run
     """
 
     SUCCESS = auto()
@@ -43,6 +47,7 @@ class CheckRunConclusion(StrEnum):
     SKIPPED = auto()
     TIMED_OUT = auto()
     ACTION_REQUIRED = auto()
+    STALE = auto()
 
 
 class CheckRun(BaseModel):
