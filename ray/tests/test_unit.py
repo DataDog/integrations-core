@@ -5,8 +5,22 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.ray import RayCheck
+from datadog_checks.ray.metrics import METRIC_MAP
 
 from .common import HEAD_METRICS, MOCKED_HEAD_INSTANCE, MOCKED_WORKER_INSTANCE, WORKER_METRICS, mock_http_responses
+
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:13 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert RayCheck.DEFAULT_METRIC_LIMIT == 0
+
+
+def test_get_default_config_uses_metric_map():
+    check = RayCheck('ray', {}, [MOCKED_HEAD_INSTANCE])
+    assert check.get_default_config() == {"metrics": [METRIC_MAP]}
 
 
 @pytest.mark.parametrize(
