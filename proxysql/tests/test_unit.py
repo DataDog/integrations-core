@@ -140,3 +140,94 @@ def test_tls_config_legacy(extra_config, expected_http_kwargs, instance_all_metr
     c.get_tls_context()  # need to call this for config values to be saved by _tls_context_wrapper
     actual_options = {k: v for k, v in c._tls_context_wrapper.config.items() if k in expected_http_kwargs}
     assert expected_http_kwargs == actual_options
+
+
+@pytest.mark.unit
+def test_missing_port_defaults_to_zero_and_fails_validation():
+    # Kills the core/NumberReplacer mutants at proxysql.py:48 (port default 0 -> 1/-1); 0 is falsy so
+    # validation must still fail when host, username and password are present but port is omitted.
+    with pytest.raises(ConfigurationError, match='ProxySQL host, port, username and password are needed'):
+        ProxysqlCheck('proxysql', {}, [{'host': 'localhost', 'username': 'admin', 'password': 'pass'}])
+
+
+@pytest.mark.unit
+def test_tls_verify_defaults_to_false(instance_basic):
+    # Kills the core/ReplaceFalseWithTrue mutant at proxysql.py:55 (tls_verify default False -> True).
+    check = get_check(instance_basic)
+    assert check.tls_verify is False
+
+
+@pytest.mark.unit
+def test_connect_timeout_defaults_to_10(instance_basic):
+    # Kills the core/NumberReplacer mutants at proxysql.py:57 (connect_timeout default 10 -> 9/11).
+    check = get_check(instance_basic)
+    assert check.connect_timeout == 10
+
+
+@pytest.mark.unit
+def test_execute_query_raw_returns_empty_list_when_rowcount_is_zero(instance_basic):
+    # Kills the core/ReplaceComparisonOperator and NumberReplacer mutants at proxysql.py:92
+    # (`cursor.rowcount < 1`); with no rows fetched the method must return an empty list.
+    check = get_check(instance_basic)
+    cursor = mock.MagicMock()
+    cursor.rowcount = 0
+    check._connection = mock.MagicMock()
+    check._connection.cursor.return_value = cursor
+
+    assert check.execute_query_raw('select 1') == []
+
+
+@pytest.mark.unit
+def test_execute_query_raw_returns_rows_when_rowcount_is_one(instance_basic):
+    # Kills the core/ReplaceComparisonOperator and NumberReplacer mutants at proxysql.py:92
+    # (`cursor.rowcount < 1`); exactly one row must still be fetched, not treated as empty.
+    check = get_check(instance_basic)
+    cursor = mock.MagicMock()
+    cursor.rowcount = 1
+    cursor.fetchall.return_value = [('row',)]
+    check._connection = mock.MagicMock()
+    check._connection.cursor.return_value = cursor
+
+    assert check.execute_query_raw('select 1') == [('row',)]
+
+
+@pytest.mark.unit
+def test_execute_query_raw_returns_rows_when_rowcount_is_two(instance_basic):
+    # Kills the core/ReplaceComparisonOperator_Lt_NotEq mutant at proxysql.py:92
+    # (`cursor.rowcount < 1` -> `!= 1`); several rows must be returned as-is.
+    check = get_check(instance_basic)
+    cursor = mock.MagicMock()
+    cursor.rowcount = 2
+    cursor.fetchall.return_value = [('row1',), ('row2',)]
+    check._connection = mock.MagicMock()
+    check._connection.cursor.return_value = cursor
+
+    assert check.execute_query_raw('select 1') == [('row1',), ('row2',)]
+
+
+@pytest.mark.unit
+def test_connect_failure_marks_service_check_critical(aggregator, instance_basic):
+    # Kills the core/ExceptionReplacer mutant at proxysql.py:121 (except Exception ->
+    # except CosmicRayTestingException); a generic connection error must still be caught.
+    check = get_check(instance_basic)
+    with mock.patch('datadog_checks.proxysql.proxysql.pymysql') as pymysql_mock:
+        pymysql_mock.connect.side_effect = Exception('boom')
+        with pytest.raises(Exception, match='boom'):
+            with check.connect():
+                pass
+
+    aggregator.assert_service_check('proxysql.can_connect', AgentCheck.CRITICAL)
+
+
+@pytest.mark.unit
+def test_connect_closes_db_connection_on_success(instance_basic):
+    # Kills the core/AddNot mutant at proxysql.py:128 (`if db` -> `if not db`); a
+    # successfully opened connection must be closed on exit.
+    check = get_check(instance_basic)
+    mock_db = mock.MagicMock()
+    with mock.patch('datadog_checks.proxysql.proxysql.pymysql') as pymysql_mock:
+        pymysql_mock.connect.return_value = mock_db
+        with check.connect():
+            pass
+
+    mock_db.close.assert_called_once()
