@@ -215,7 +215,7 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
-def _translate_requests_exception(exc: BaseException, *, response=None) -> HTTPError:
+def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
     """Translate a requests exception into the library-agnostic equivalent.
 
     Order is significant. Several requests types subclass others, so the most
