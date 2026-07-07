@@ -48,19 +48,19 @@ from ddev.utils.github_async.models import (
 TOKEN = "ghp_test_token"
 
 
-def _json_response(data: Any, status_code: int = 200, headers: dict[str, str] | None = None) -> httpx.Response:
+def json_response(data: Any, status_code: int = 200, headers: dict[str, str] | None = None) -> httpx.Response:
     all_headers = {"content-type": "application/json"}
     if headers:
         all_headers.update(headers)
     return httpx.Response(status_code, json=data, headers=all_headers)
 
 
-def _make_client(handler: httpx.MockTransport | None = None) -> AsyncGitHubClient:
+def make_client(handler: httpx.MockTransport | None = None) -> AsyncGitHubClient:
     transport = handler or httpx.MockTransport(lambda r: httpx.Response(200))
     return AsyncGitHubClient(token=TOKEN, transport=transport)
 
 
-def _artifact(idx: int, **overrides: Any) -> dict[str, Any]:
+def artifact(idx: int, **overrides: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "id": idx,
         "name": f"artifact-{idx}",
@@ -73,7 +73,7 @@ def _artifact(idx: int, **overrides: Any) -> dict[str, Any]:
     return payload
 
 
-def _workflow_run_payload(**overrides: Any) -> dict[str, Any]:
+def workflow_run_payload(**overrides: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "id": 42,
         "name": "CI",
@@ -87,7 +87,7 @@ def _workflow_run_payload(**overrides: Any) -> dict[str, Any]:
     return payload
 
 
-def _workflow_job(idx: int = 1, **overrides: Any) -> dict[str, Any]:
+def workflow_job(idx: int = 1, **overrides: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "id": idx,
         "run_id": 42,
@@ -101,7 +101,7 @@ def _workflow_job(idx: int = 1, **overrides: Any) -> dict[str, Any]:
     return payload
 
 
-def _issue_comment_payload(**overrides: Any) -> dict[str, Any]:
+def issue_comment_payload(**overrides: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "id": 1,
         "body": "Hello world",
@@ -114,7 +114,7 @@ def _issue_comment_payload(**overrides: Any) -> dict[str, Any]:
     return payload
 
 
-def _pr_review_comment_payload(**overrides: Any) -> dict[str, Any]:
+def pr_review_comment_payload(**overrides: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "id": 10,
         "body": "Nice change",
@@ -133,7 +133,7 @@ def _pr_review_comment_payload(**overrides: Any) -> dict[str, Any]:
 # PaginationData
 # ---------------------------------------------------------------------------
 
-_BASE = "https://api.github.com"
+BASE = "https://api.github.com"
 
 
 @pytest.mark.parametrize(
@@ -141,22 +141,22 @@ _BASE = "https://api.github.com"
     [
         (None, PaginationData()),
         ("", PaginationData()),
-        (f'<{_BASE}/page2>; rel="next"', PaginationData(next=f"{_BASE}/page2")),
-        (f'<{_BASE}/page10>; rel="last"', PaginationData(last=f"{_BASE}/page10")),
+        (f'<{BASE}/page2>; rel="next"', PaginationData(next=f"{BASE}/page2")),
+        (f'<{BASE}/page10>; rel="last"', PaginationData(last=f"{BASE}/page10")),
         (
-            f'<{_BASE}/page2>; rel="next", <{_BASE}/page5>; rel="last"',
-            PaginationData(next=f"{_BASE}/page2", last=f"{_BASE}/page5"),
+            f'<{BASE}/page2>; rel="next", <{BASE}/page5>; rel="last"',
+            PaginationData(next=f"{BASE}/page2", last=f"{BASE}/page5"),
         ),
         (
-            f'<{_BASE}/page1>; rel="first", <{_BASE}/page1>; rel="prev",'
-            f' <{_BASE}/page3>; rel="next", <{_BASE}/page5>; rel="last"',
-            PaginationData(first=f"{_BASE}/page1", prev=f"{_BASE}/page1", next=f"{_BASE}/page3", last=f"{_BASE}/page5"),
+            f'<{BASE}/page1>; rel="first", <{BASE}/page1>; rel="prev",'
+            f' <{BASE}/page3>; rel="next", <{BASE}/page5>; rel="last"',
+            PaginationData(first=f"{BASE}/page1", prev=f"{BASE}/page1", next=f"{BASE}/page3", last=f"{BASE}/page5"),
         ),
         (
-            f'<{_BASE}/page1>; rel="prev", <{_BASE}/page5>; rel="last"',
-            PaginationData(prev=f"{_BASE}/page1", last=f"{_BASE}/page5"),
+            f'<{BASE}/page1>; rel="prev", <{BASE}/page5>; rel="last"',
+            PaginationData(prev=f"{BASE}/page1", last=f"{BASE}/page5"),
         ),
-        (f'<{_BASE}/page1>; rel="first"', PaginationData(first=f"{_BASE}/page1")),
+        (f'<{BASE}/page1>; rel="first"', PaginationData(first=f"{BASE}/page1")),
     ],
     ids=["none", "blank", "next_only", "last_only", "next_and_last", "all_links", "prev_and_last", "first_only"],
 )
@@ -188,9 +188,9 @@ async def test_client_request_headers() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         nonlocal captured
         captured = request.headers
-        return _json_response(_workflow_run_payload())
+        return json_response(workflow_run_payload())
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     await client.get_workflow_run("o", "r", 42)
 
     assert captured is not None
@@ -229,7 +229,7 @@ async def test_create_workflow_dispatch_success() -> None:
         assert body["ref"] == "main"
         assert body["return_run_details"] is True
         assert "inputs" not in body
-        return _json_response(
+        return json_response(
             {
                 "workflow_run_id": 999,
                 "run_url": "https://api.github.com/repos/owner/repo/actions/runs/999",
@@ -238,7 +238,7 @@ async def test_create_workflow_dispatch_success() -> None:
             headers={"x-ratelimit-remaining": "59"},
         )
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_workflow_dispatch("owner", "repo", "my-workflow.yml", "main", return_run_details=True)
     assert isinstance(result, GitHubResponse)
     assert isinstance(result.data, WorkflowDispatchResult)
@@ -251,7 +251,7 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
         body = json.loads(request.content)
         assert body["inputs"] == {"env": "prod"}
         assert body["return_run_details"] is True
-        return _json_response(
+        return json_response(
             {
                 "workflow_run_id": 1,
                 "run_url": "https://api.github.com/repos/o/r/actions/runs/1",
@@ -259,7 +259,7 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
             }
         )
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_workflow_dispatch(
         "o", "r", 123, "main", inputs={"env": "prod"}, return_run_details=True
     )
@@ -267,7 +267,7 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
 
 
 async def test_create_workflow_dispatch_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
     assert exc_info.value.response.status_code == 422
@@ -283,9 +283,9 @@ async def test_create_workflow_dispatch_return_run_details_parses_response() -> 
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["return_run_details"] is True
-        return _json_response(payload)
+        return json_response(payload)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_workflow_dispatch("o", "r", "wf.yml", "main", return_run_details=True)
     assert result.data.workflow_run_id == 987
     assert result.data.html_url == "https://github.com/o/r/actions/runs/987"
@@ -297,7 +297,7 @@ async def test_create_workflow_dispatch_omits_return_run_details_when_false() ->
         assert "return_run_details" not in body
         return httpx.Response(204)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
 
 
@@ -315,9 +315,9 @@ async def test_get_workflow_run_success(status: str, is_completed: bool) -> None
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert "/actions/runs/42" in request.url.path
-        return _json_response(_workflow_run_payload(status=status))
+        return json_response(workflow_run_payload(status=status))
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.get_workflow_run("owner", "repo", 42)
     assert isinstance(result.data, WorkflowRun)
     assert result.data.id == 42
@@ -327,15 +327,15 @@ async def test_get_workflow_run_success(status: str, is_completed: bool) -> None
 
 async def test_get_workflow_run_headers_forwarded() -> None:
     def handler(_: httpx.Request) -> httpx.Response:
-        return _json_response(_workflow_run_payload(), headers={"x-ratelimit-remaining": "50"})
+        return json_response(workflow_run_payload(), headers={"x-ratelimit-remaining": "50"})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.get_workflow_run("o", "r", 42)
     assert result.headers.get("x-ratelimit-remaining") == "50"
 
 
 async def test_get_workflow_run_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.get_workflow_run("o", "r", 99)
     assert exc_info.value.response.status_code == 404
@@ -347,12 +347,12 @@ async def test_get_workflow_run_http_error_raises() -> None:
 
 
 async def test_list_workflow_run_artifacts_single_page() -> None:
-    artifacts = [_artifact(1), _artifact(2)]
+    artifacts = [artifact(1), artifact(2)]
 
     def handler(_: httpx.Request) -> httpx.Response:
-        return _json_response({"total_count": 2, "artifacts": artifacts})
+        return json_response({"total_count": 2, "artifacts": artifacts})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     pages = []
     async for page in client.list_workflow_run_artifacts("owner", "repo", 1):
         pages.append(page)
@@ -364,8 +364,8 @@ async def test_list_workflow_run_artifacts_single_page() -> None:
 
 
 async def test_list_workflow_run_artifacts_two_pages() -> None:
-    page1_artifacts = [_artifact(1)]
-    page2_artifacts = [_artifact(2)]
+    page1_artifacts = [artifact(1)]
+    page2_artifacts = [artifact(2)]
     call_count = 0
 
     def handler(request: httpx.Request) -> httpx.Response:
@@ -373,13 +373,13 @@ async def test_list_workflow_run_artifacts_two_pages() -> None:
         call_count += 1
         if call_count == 1:
             link = f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'
-            return _json_response(
+            return json_response(
                 {"total_count": 2, "artifacts": page1_artifacts},
                 headers={"link": link},
             )
-        return _json_response({"total_count": 2, "artifacts": page2_artifacts})
+        return json_response({"total_count": 2, "artifacts": page2_artifacts})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     pages = []
     async for page in client.list_workflow_run_artifacts("owner", "repo", 1):
         pages.append(page)
@@ -391,9 +391,9 @@ async def test_list_workflow_run_artifacts_two_pages() -> None:
 
 async def test_list_workflow_run_artifacts_pagination_stops_when_no_next() -> None:
     def handler(_: httpx.Request) -> httpx.Response:
-        return _json_response({"total_count": 1, "artifacts": [_artifact(1)]})
+        return json_response({"total_count": 1, "artifacts": [artifact(1)]})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     count = 0
     async for _ in client.list_workflow_run_artifacts("owner", "repo", 1):
         count += 1
@@ -401,7 +401,7 @@ async def test_list_workflow_run_artifacts_pagination_stops_when_no_next() -> No
 
 
 async def test_list_workflow_run_artifacts_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(403)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(403)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         async for _ in client.list_workflow_run_artifacts("o", "r", 1):
             pass
@@ -411,9 +411,9 @@ async def test_list_workflow_run_artifacts_http_error_raises() -> None:
 async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params["per_page"] == "100"
-        return _json_response({"total_count": 0, "artifacts": []})
+        return json_response({"total_count": 0, "artifacts": []})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     async for _ in client.list_workflow_run_artifacts("owner", "repo", 1, per_page=100):
         pass
 
@@ -424,14 +424,14 @@ async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
 
 
 async def test_list_workflow_jobs_single_page() -> None:
-    jobs = [_workflow_job(1), _workflow_job(2, status="in_progress", conclusion=None)]
+    jobs = [workflow_job(1), workflow_job(2, status="in_progress", conclusion=None)]
 
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert "/actions/runs/42/jobs" in request.url.path
-        return _json_response({"total_count": 2, "jobs": jobs})
+        return json_response({"total_count": 2, "jobs": jobs})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     pages = []
     async for page in client.list_workflow_jobs("owner", "repo", 42):
         pages.append(page)
@@ -457,18 +457,18 @@ async def test_list_workflow_jobs_single_page() -> None:
 @pytest.mark.parametrize("status", list(WorkflowJobStatus), ids=[s.value for s in WorkflowJobStatus])
 async def test_list_workflow_jobs_parses_every_status(status: WorkflowJobStatus) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        return _json_response({"total_count": 1, "jobs": [_workflow_job(1, status=status.value, conclusion=None)]})
+        return json_response({"total_count": 1, "jobs": [workflow_job(1, status=status.value, conclusion=None)]})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     pages = [page async for page in client.list_workflow_jobs("owner", "repo", 42)]
     assert pages[0].data.jobs[0].status is status
 
 
 async def test_list_workflow_jobs_unexpected_status_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        return _json_response({"total_count": 1, "jobs": [_workflow_job(1, status="bogus")]})
+        return json_response({"total_count": 1, "jobs": [workflow_job(1, status="bogus")]})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     with pytest.raises(ValidationError):
         async for _ in client.list_workflow_jobs("owner", "repo", 42):
             pass
@@ -482,10 +482,10 @@ async def test_list_workflow_jobs_two_pages() -> None:
         call_count += 1
         if call_count == 1:
             link = f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'
-            return _json_response({"total_count": 2, "jobs": [_workflow_job(1)]}, headers={"link": link})
-        return _json_response({"total_count": 2, "jobs": [_workflow_job(2)]})
+            return json_response({"total_count": 2, "jobs": [workflow_job(1)]}, headers={"link": link})
+        return json_response({"total_count": 2, "jobs": [workflow_job(2)]})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     pages = []
     async for page in client.list_workflow_jobs("owner", "repo", 42):
         pages.append(page)
@@ -498,9 +498,9 @@ async def test_list_workflow_jobs_two_pages() -> None:
 async def test_list_workflow_jobs_per_page_forwarded() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.url.params["per_page"] == "100"
-        return _json_response({"total_count": 0, "jobs": []})
+        return json_response({"total_count": 0, "jobs": []})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     async for _ in client.list_workflow_jobs("owner", "repo", 42, per_page=100):
         pass
 
@@ -516,9 +516,9 @@ async def test_create_issue_comment_success() -> None:
         assert "/issues/7/comments" in request.url.path
         body = json.loads(request.content)
         assert body["body"] == "LGTM"
-        return _json_response(_issue_comment_payload(body="LGTM"), status_code=201)
+        return json_response(issue_comment_payload(body="LGTM"), status_code=201)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_issue_comment("owner", "repo", 7, "LGTM")
     assert isinstance(result.data, IssueComment)
     assert result.data.body == "LGTM"
@@ -527,7 +527,7 @@ async def test_create_issue_comment_success() -> None:
 
 
 async def test_create_issue_comment_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_issue_comment("o", "r", 1, "hi")
     assert exc_info.value.response.status_code == 404
@@ -546,9 +546,9 @@ async def test_create_pr_review_comment_success_with_position() -> None:
         assert body["path"] == "src/foo.py"
         assert body["position"] == 5
         assert "line" not in body
-        return _json_response(_pr_review_comment_payload(), status_code=201)
+        return json_response(pr_review_comment_payload(), status_code=201)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_pr_review_comment(
         "owner", "repo", 3, "Nice change", "abc123", "src/foo.py", position=5
     )
@@ -564,15 +564,15 @@ async def test_create_pr_review_comment_success_with_line_and_side() -> None:
         assert body["line"] == 10
         assert body["side"] == "RIGHT"
         assert "position" not in body
-        return _json_response(_pr_review_comment_payload(), status_code=201)
+        return json_response(pr_review_comment_payload(), status_code=201)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_pr_review_comment("o", "r", 1, "comment", "abc123", "file.py", line=10, side="RIGHT")
     assert isinstance(result.data, PullRequestReviewComment)
 
 
 async def test_create_pr_review_comment_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_pr_review_comment("o", "r", 1, "body", "sha", "path")
     assert exc_info.value.response.status_code == 422
@@ -583,7 +583,7 @@ async def test_create_pr_review_comment_http_error_raises() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _pull_request_payload(number: int = 1, **overrides: Any) -> dict[str, Any]:
+def pull_request_payload(number: int = 1, **overrides: Any) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "number": number,
         "html_url": f"https://github.com/owner/repo/pull/{number}",
@@ -592,7 +592,7 @@ def _pull_request_payload(number: int = 1, **overrides: Any) -> dict[str, Any]:
     return payload
 
 
-def _full_pull_request_payload(number: int = 42, **overrides: Any) -> dict[str, Any]:
+def full_pull_request_payload(number: int = 42, **overrides: Any) -> dict[str, Any]:
     """A richer PR payload exercising sub-models (user, labels, head/base)."""
     payload: dict[str, Any] = {
         "id": 9000 + number,
@@ -654,9 +654,9 @@ async def test_create_pull_request_success() -> None:
             "body": "Fix description",
             "draft": False,
         }
-        return _json_response(_pull_request_payload(number=42), status_code=201)
+        return json_response(pull_request_payload(number=42), status_code=201)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master", "Fix description")
     assert isinstance(result.data, PullRequest)
     assert result.data.number == 42
@@ -667,15 +667,15 @@ async def test_create_pull_request_draft_true_forwarded() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["draft"] is True
-        return _json_response(_pull_request_payload(number=7), status_code=201)
+        return json_response(pull_request_payload(number=7), status_code=201)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("o", "r", "T", "h", "b", draft=True)
     assert result.data.number == 7
 
 
 async def test_create_pull_request_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_pull_request("o", "r", "T", "h", "b")
     assert exc_info.value.response.status_code == 422
@@ -685,9 +685,9 @@ async def test_create_pull_request_parses_full_response() -> None:
     """Exercises sub-models (GitHubUser, Label, PullRequestRef) end-to-end."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        return _json_response(_full_pull_request_payload(number=42), status_code=201)
+        return json_response(full_pull_request_payload(number=42), status_code=201)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master")
 
     pr = result.data
@@ -717,12 +717,12 @@ async def test_create_pull_request_ignores_extra_fields() -> None:
     """Unknown top-level fields in the response must not break parsing."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        payload = _full_pull_request_payload(
+        payload = full_pull_request_payload(
             mergeable_state="clean", additions=42, unknown_future_field={"nested": True}
         )
-        return _json_response(payload, status_code=201)
+        return json_response(payload, status_code=201)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_pull_request("o", "r", "T", "h", "b")
     assert result.data.number == 42
 
@@ -737,9 +737,9 @@ async def test_get_pull_request_success(state: PullRequestState) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert "/repos/owner/repo/pulls/5" in request.url.path
-        return _json_response(_full_pull_request_payload(number=5, state=state.value))
+        return json_response(full_pull_request_payload(number=5, state=state.value))
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.get_pull_request("owner", "repo", 5)
     assert isinstance(result.data, PullRequest)
     assert result.data.number == 5
@@ -748,15 +748,15 @@ async def test_get_pull_request_success(state: PullRequestState) -> None:
 
 async def test_get_pull_request_headers_forwarded() -> None:
     def handler(_: httpx.Request) -> httpx.Response:
-        return _json_response(_full_pull_request_payload(number=5), headers={"x-ratelimit-remaining": "50"})
+        return json_response(full_pull_request_payload(number=5), headers={"x-ratelimit-remaining": "50"})
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.get_pull_request("o", "r", 5)
     assert result.headers.get("x-ratelimit-remaining") == "50"
 
 
 async def test_get_pull_request_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.get_pull_request("o", "r", 5)
     assert exc_info.value.response.status_code == 404
@@ -764,9 +764,9 @@ async def test_get_pull_request_http_error_raises() -> None:
 
 async def test_get_pull_request_unexpected_state_raises() -> None:
     def handler(_: httpx.Request) -> httpx.Response:
-        return _json_response(_full_pull_request_payload(number=5, state="merged"))
+        return json_response(full_pull_request_payload(number=5, state="merged"))
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     with pytest.raises(ValidationError):
         await client.get_pull_request("o", "r", 5)
 
@@ -782,16 +782,16 @@ async def test_add_labels_to_issue_success() -> None:
         assert "/repos/owner/repo/issues/3/labels" in request.url.path
         body = json.loads(request.content)
         assert body == {"labels": ["qa/skip-qa", "backport/7.62.x"]}
-        return _json_response([{"id": 1, "name": "qa/skip-qa"}, {"id": 2, "name": "backport/7.62.x"}], status_code=200)
+        return json_response([{"id": 1, "name": "qa/skip-qa"}, {"id": 2, "name": "backport/7.62.x"}], status_code=200)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.add_labels_to_issue("owner", "repo", 3, ["qa/skip-qa", "backport/7.62.x"])
     assert [label.name for label in result.data] == ["qa/skip-qa", "backport/7.62.x"]
     assert all(isinstance(label, Label) for label in result.data)
 
 
 async def test_add_labels_to_issue_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.add_labels_to_issue("o", "r", 1, ["bug"])
     assert exc_info.value.response.status_code == 404
@@ -851,7 +851,7 @@ async def test_per_request_timeout_forwarded() -> None:
     """Ensure per-request timeout reaches the transport without raising."""
 
     def handler(request: httpx.Request) -> httpx.Response:
-        return _json_response(_workflow_run_payload())
+        return json_response(workflow_run_payload())
 
     client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
     result = await client.get_workflow_run("o", "r", 42, timeout=2.0)
@@ -863,7 +863,7 @@ async def test_per_request_timeout_forwarded() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _check_run_payload(**overrides: Any) -> dict[str, Any]:
+def check_run_payload(**overrides: Any) -> dict[str, Any]:
     payload = {
         "id": 1,
         "name": "ck",
@@ -884,9 +884,9 @@ async def test_create_check_run_success() -> None:
         assert request.method == "POST"
         assert "/repos/o/r/check-runs" in request.url.path
         captured.update(json.loads(request.content))
-        return _json_response(_check_run_payload(name=captured["name"], head_sha=captured["head_sha"]))
+        return json_response(check_run_payload(name=captured["name"], head_sha=captured["head_sha"]))
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.create_check_run("o", "r", name="ck", head_sha="abc", status="in_progress")
     assert isinstance(result.data, CheckRun)
     assert result.data.id == 1
@@ -900,9 +900,9 @@ async def test_create_check_run_with_optional_fields() -> None:
 
     def handler(request: httpx.Request) -> httpx.Response:
         captured.update(json.loads(request.content))
-        return _json_response(_check_run_payload())
+        return json_response(check_run_payload())
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     await client.create_check_run(
         "o",
         "r",
@@ -918,7 +918,7 @@ async def test_create_check_run_with_optional_fields() -> None:
 
 @pytest.mark.asyncio
 async def test_create_check_run_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_check_run("o", "r", name="ck", head_sha="abc", status="in_progress")
     assert exc_info.value.response.status_code == 422
@@ -926,7 +926,7 @@ async def test_create_check_run_http_error_raises() -> None:
 
 # One case per non-completed status (conclusion is null until completed), plus every
 # conclusion (incl. the GitHub-only ``stale``) paired with ``completed``.
-_CHECK_RUN_RESULT_CASES = [
+CHECK_RUN_RESULT_CASES = [
     *[
         pytest.param(status, None, id=status.value)
         for status in CheckRunStatus
@@ -940,16 +940,16 @@ _CHECK_RUN_RESULT_CASES = [
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("status", "conclusion"), _CHECK_RUN_RESULT_CASES)
+@pytest.mark.parametrize(("status", "conclusion"), CHECK_RUN_RESULT_CASES)
 async def test_update_check_run_success(status: CheckRunStatus, conclusion: CheckRunConclusion | None) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "PATCH"
         assert "/repos/o/r/check-runs/77" in request.url.path
-        return _json_response(
-            _check_run_payload(id=77, status=status.value, conclusion=conclusion.value if conclusion else None)
+        return json_response(
+            check_run_payload(id=77, status=status.value, conclusion=conclusion.value if conclusion else None)
         )
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     result = await client.update_check_run("o", "r", 77, status="in_progress")
     assert result.data.status is status
     assert result.data.conclusion is conclusion
@@ -961,9 +961,9 @@ async def test_update_check_run_omits_unset_fields() -> None:
 
     def handler(request: httpx.Request) -> httpx.Response:
         captured.update(json.loads(request.content))
-        return _json_response(_check_run_payload(id=77))
+        return json_response(check_run_payload(id=77))
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     await client.update_check_run("o", "r", 77, conclusion="failure")
     assert captured == {"conclusion": "failure"}
 
@@ -975,9 +975,9 @@ async def test_update_check_run_requires_conclusion_when_completed() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         nonlocal requested
         requested = True
-        return _json_response(_check_run_payload())
+        return json_response(check_run_payload())
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     with pytest.raises(ValueError, match="conclusion is required"):
         await client.update_check_run("o", "r", 77, status="completed")
     assert requested is False
@@ -985,7 +985,7 @@ async def test_update_check_run_requires_conclusion_when_completed() -> None:
 
 @pytest.mark.asyncio
 async def test_update_check_run_http_error_raises() -> None:
-    client = _make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.update_check_run("o", "r", 77, status="in_progress")
     assert exc_info.value.response.status_code == 404
@@ -994,9 +994,9 @@ async def test_update_check_run_http_error_raises() -> None:
 @pytest.mark.asyncio
 async def test_update_check_run_unexpected_status_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
-        return _json_response(_check_run_payload(id=77, status="bogus"))
+        return json_response(check_run_payload(id=77, status="bogus"))
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     with pytest.raises(ValidationError):
         await client.update_check_run("o", "r", 77, status="in_progress")
 
@@ -1006,7 +1006,7 @@ async def test_update_check_run_unexpected_status_raises() -> None:
 # ---------------------------------------------------------------------------
 
 
-def _make_zip(members: dict[str, bytes]) -> bytes:
+def make_zip(members: dict[str, bytes]) -> bytes:
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
         for name, content in members.items():
@@ -1024,7 +1024,7 @@ async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch
 
     def signed_handler(request: httpx.Request) -> httpx.Response:
         captured_signed_headers.update({k.lower(): v for k, v in request.headers.items()})
-        return httpx.Response(200, content=_make_zip({"hello.txt": b"hi"}))
+        return httpx.Response(200, content=make_zip({"hello.txt": b"hi"}))
 
     real_async_client = httpx.AsyncClient
 
@@ -1047,7 +1047,7 @@ async def test_download_artifact_non_302_raises(tmp_path) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, content=b"not a redirect")
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     with pytest.raises(httpx.HTTPError, match="Expected 302"):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
@@ -1079,7 +1079,7 @@ async def test_download_artifact_missing_location_header_raises(tmp_path) -> Non
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302)
 
-    client = _make_client(httpx.MockTransport(handler))
+    client = make_client(httpx.MockTransport(handler))
     with pytest.raises(httpx.HTTPError, match="Missing Location"):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
@@ -1097,7 +1097,7 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malici
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
 
     def signed_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(200, content=_make_zip({malicious_member: b"pwn"}))
+        return httpx.Response(200, content=make_zip({malicious_member: b"pwn"}))
 
     real_async_client = httpx.AsyncClient
 
@@ -1117,7 +1117,7 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malici
     assert list(dest.rglob("*")) == []
 
 
-def _patch_signed_download(monkeypatch, handler: Any) -> None:
+def patch_signed_download(monkeypatch, handler: Any) -> None:
     """Route the anonymous signed-URL download through a mock transport."""
     real_async_client = httpx.AsyncClient
 
@@ -1139,7 +1139,7 @@ async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) 
     def signed_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, content=b"unavailable")
 
-    _patch_signed_download(monkeypatch, signed_handler)
+    patch_signed_download(monkeypatch, signed_handler)
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
