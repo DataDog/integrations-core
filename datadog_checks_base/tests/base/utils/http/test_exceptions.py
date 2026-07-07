@@ -165,3 +165,28 @@ def test_auth_token_fetch_error_maps_to_agnostic():
     http.auth_token_handler.poll.side_effect = requests.exceptions.ConnectionError('token endpoint refused')
     with pytest.raises(HTTPConnectionError):
         http.get('http://example.test/')
+
+
+class IterableFailingResponse:
+    """Raw-response stand-in mirroring requests.Response.__iter__, which delegates to iter_content."""
+
+    def __init__(self, exc):
+        self._exc = exc
+
+    def iter_content(self, chunk_size=1, decode_unicode=False):
+        yield b'first'
+        raise self._exc
+
+    def __iter__(self):
+        return self.iter_content(128)
+
+
+# Group F: direct iteration. requests.Response.__iter__ delegates to iter_content, so `for chunk in
+# response` must translate mid-stream errors the same as an explicit iter_content() call.
+def test_direct_iteration_maps_mid_stream_exceptions():
+    response = IterableFailingResponse(requests.exceptions.ConnectionError('dropped'))
+    http = RequestsWrapper({}, {})
+    with mock.patch('requests.Session.get', return_value=response):
+        wrapped = http.get('http://example.test/', stream=True)
+        with pytest.raises(HTTPConnectionError):
+            list(wrapped)

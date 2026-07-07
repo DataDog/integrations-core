@@ -290,6 +290,11 @@ class ResponseWrapper(ObjectProxy):
                 chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
             )
 
+    def __iter__(self):
+        # requests.Response.__iter__ delegates to the raw iter_content, so route direct iteration
+        # through the translating override instead of the wrapt-forwarded raw one.
+        return self.iter_content(128)
+
     @property
     def content(self):
         with _translate_http_errors():
