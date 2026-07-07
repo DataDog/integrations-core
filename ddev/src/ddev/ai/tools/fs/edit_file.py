@@ -48,8 +48,7 @@ class EditFileInput(BaseToolInput):
     def _reject_duplicate_old_strings(self) -> EditFileInput:
         first_index: dict[str, int] = {}
         for i, edit in enumerate(self.edits):
-            if edit.old_string in first_index:
-                j = first_index[edit.old_string]
+            if (j := first_index.get(edit.old_string, None)) is not None:
                 raise ValueError(
                     f"edits[{i}].old_string duplicates edits[{j}].old_string; old_string values must be unique"
                 )
