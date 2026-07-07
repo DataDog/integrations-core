@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from string import Template
 from time import time
 
 import clickhouse_connect
@@ -10,7 +9,7 @@ from clickhouse_connect.driver import httputil
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db import QueryManager
-from datadog_checks.base.utils.db.utils import TagManager, default_json_event_encoding, resolve_db_host
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, resolve_db_host
 from datadog_checks.base.utils.serialization import json
 
 from . import advanced_queries, queries, utils
@@ -58,14 +57,11 @@ class ClickhouseCheck(DatabaseCheck):
         # DBM-related properties (computed lazily)
         self._resolved_hostname = None
         self._database_hostname = None
-        self._database_identifier = None
         self._dbms_version = None
 
         # Track last emission time for database instance metadata (rate limiting)
         self._database_instance_last_emitted = 0
 
-        # Initialize TagManager for tag management (similar to MySQL)
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self._add_core_tags()
 
@@ -141,11 +137,6 @@ class ClickhouseCheck(DatabaseCheck):
             self.parts_and_merges = ClickhousePartsAndMerges(self, self._config.parts_and_merges)
         else:
             self.parts_and_merges = None
-
-    @property
-    def tags(self) -> list[str]:
-        """Return the current list of tags from the TagManager."""
-        return list(self.tag_manager.get_tags())
 
     def _add_core_tags(self):
         """
@@ -360,30 +351,16 @@ class ClickhouseCheck(DatabaseCheck):
         return self._database_hostname
 
     @property
-    def database_identifier(self) -> str:
-        """
-        Get a unique identifier for this database instance.
-        Uses the database_identifier template from config, defaulting to "$server:$port:$db".
-        """
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.template)
-            tag_dict = {}
-            tags = self.tags.copy()
-            # Sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            # Add connection parameters to the template variables
-            tag_dict['server'] = str(self._config.server)
-            tag_dict['port'] = str(self._config.port)
-            tag_dict['db'] = str(self._config.db)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.template
+
+    @property
+    def database_identifier_params(self) -> dict:
+        return {
+            "server": str(self._config.server),
+            "port": str(self._config.port),
+            "db": str(self._config.db),
+        }
 
     @property
     def dbms(self) -> str:

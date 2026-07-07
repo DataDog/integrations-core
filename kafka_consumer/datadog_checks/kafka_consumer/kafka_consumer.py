@@ -185,7 +185,7 @@ class KafkaCheck(AgentCheck):
         )
 
     def _collect_connect_status(self, cluster_id: str) -> dict[str, bool] | None:
-        """Collect connector status for all configured Connect URLs, or None if unconfigured."""
+        """Collect connector status for all configured Connect endpoints, or None if unconfigured."""
         if not self.config._kafka_connect_urls:
             return None
         try:
@@ -482,7 +482,7 @@ class KafkaCheck(AgentCheck):
             self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
             result = {}
-            for topic, partition, offset in self.client.consumer_offsets_for_times(
+            for topic, partition, offset in self.client.get_partition_offsets(
                 partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
             ):
                 result[(topic, partition)] = offset
