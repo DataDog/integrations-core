@@ -122,6 +122,7 @@ async def test_edit_file_fails_if_old_string_ambiguous(
     assert result.success is False
     assert "edits[0]" in result.error
     assert "3" in result.error
+    assert result.hint is not None
     assert f.read_text(encoding="utf-8") == "foo\nfoo\nfoo\n"
 
 
