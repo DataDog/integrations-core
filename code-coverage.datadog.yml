@@ -166,9 +166,6 @@ services:
 - id: cert_manager
   paths:
   - cert_manager/datadog_checks/cert_manager/
-- id: checkpoint_harmony_endpoint
-  paths:
-  - checkpoint_harmony_endpoint/datadog_checks/checkpoint_harmony_endpoint/
 - id: cilium
   paths:
   - cilium/datadog_checks/cilium/
