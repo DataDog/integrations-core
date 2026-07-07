@@ -161,7 +161,9 @@ async def test_shared_registry_does_not_share_parent_read_authorization(file_reg
     child_config = config.model_copy(update={"tools": ["edit_file"]})
     runtime = build_runtime(factory, child_config, system_prompt="sys", owner_id="parent.sub.001-child")
     registry = runtime.tool_registry
-    result = await registry.run("edit_file", {"path": str(path), "old_string": "before", "new_string": "after"})
+    result = await registry.run(
+        "edit_file", {"path": str(path), "edits": [{"old_string": "before", "new_string": "after"}]}
+    )
 
     assert result.success is False
     assert "Not authorized" in result.error

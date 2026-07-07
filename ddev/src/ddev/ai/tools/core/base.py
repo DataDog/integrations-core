@@ -25,7 +25,15 @@ class BaseToolInput(BaseModel):
     def to_input_schema(cls) -> dict[str, object]:
         schema = cls.model_json_schema()
         schema.pop('title', None)
-        for prop in schema.get('properties', {}).values():
+        cls._clean_properties(schema.get('properties', {}))
+        for definition in schema.get('$defs', {}).values():
+            definition.pop('title', None)
+            cls._clean_properties(definition.get('properties', {}))
+        return schema
+
+    @staticmethod
+    def _clean_properties(properties: dict[str, dict]):
+        for prop in properties.values():
             prop.pop('title', None)
             prop.pop('default', None)
             if 'anyOf' in prop:
@@ -33,7 +41,6 @@ class BaseToolInput(BaseModel):
                 if len(non_null) == 1:
                     prop.update(non_null[0])
                     del prop['anyOf']
-        return schema
 
 
 def _get_input_type(cls: type) -> type[BaseToolInput]:

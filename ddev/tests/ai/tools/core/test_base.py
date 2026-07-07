@@ -108,6 +108,28 @@ def test_to_input_schema_all_optional_no_required_key():
     assert "required" not in schema
 
 
+def test_to_input_schema_cleans_nested_defs():
+    class Item(BaseToolInput):
+        name: Annotated[str, Field(description="Item name")]
+        note: Annotated[str | None, Field(description="Optional note")] = None
+
+    class NestedInput(BaseToolInput):
+        items: Annotated[list[Item], Field(description="A list of items")]
+
+    schema = NestedInput.to_input_schema()
+    item_def = schema["$defs"]["Item"]
+    assert "title" not in item_def
+    for prop in item_def["properties"].values():
+        assert "title" not in prop
+        assert "default" not in prop
+    # Field descriptions must be preserved.
+    assert item_def["properties"]["name"]["description"] == "Item name"
+    # anyOf-with-null on nested optional fields is flattened too.
+    note = item_def["properties"]["note"]
+    assert "anyOf" not in note
+    assert note["type"] == "string"
+
+
 # ---------------------------------------------------------------------------
 # _get_input_type
 # ---------------------------------------------------------------------------
