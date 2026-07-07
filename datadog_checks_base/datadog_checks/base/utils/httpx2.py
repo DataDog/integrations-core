@@ -631,7 +631,10 @@ class HTTPX2Wrapper:
 
     def handle_auth_token(self, **request: Any) -> None:
         if self.auth_token_handler is not None:
-            self.auth_token_handler.poll(**request)
+            try:
+                self.auth_token_handler.poll(**request)
+            except (httpx2.HTTPError, httpx2.InvalidURL) as exc:
+                raise _map_httpx2_exception(exc) from exc
 
     def _request(self, method: str, url: str, options: dict[str, Any]) -> HTTPX2ResponseAdapter:
         # stream=True keeps the connection open until the body is consumed (.content/.text/.iter_*)

@@ -10,6 +10,7 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.base.utils.httpx2 import DEFAULT_EXPIRATION, HTTPX2Wrapper
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import write_file
@@ -401,6 +402,25 @@ class TestAuthTokenOAuth:
 
         with patch_oauth_client(oauth_transport({'error': 'unauthorized_client'})):
             with pytest.raises(Exception, match='OAuth2 client credentials grant error: unauthorized_client'):
+                http.get('https://www.example.com')
+
+    def test_token_endpoint_transport_failure_is_translated(self, capturing_transport, raising_transport_factory):
+        instance = {
+            'auth_token': {
+                'reader': {
+                    'type': 'oauth',
+                    'url': 'http://example.com/token',
+                    'client_id': 'bar',
+                    'client_secret': 'baz',
+                },
+                'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+            }
+        }
+        http = HTTPX2Wrapper(instance, {}, transport=capturing_transport)
+
+        failing_token_endpoint = raising_transport_factory(httpx2.ConnectError('token endpoint unreachable'))
+        with patch_oauth_client(failing_token_endpoint):
+            with pytest.raises(HTTPConnectionError):
                 http.get('https://www.example.com')
 
     def test_options_passthrough(self, capturing_transport, captured_requests):
