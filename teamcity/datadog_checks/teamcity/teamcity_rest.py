@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-from requests.exceptions import HTTPError
-
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.time import get_precise_time
 
 from .build_configs import BuildConfigs
@@ -245,7 +244,7 @@ class TeamCityRest(AgentCheck):
             options = {"since_build": last_build_id}
         try:
             new_builds = get_response(self, resource, build_conf=self.current_build_config, **options)
-        except HTTPError:
+        except HTTPStatusError:
             # In the case where a build config has been deleted, no new builds should be returned and it will be removed
             # from the list of all build configs in the next re-initialization
             self.log.debug('Failed to retrieve new builds for build config %s', self.current_build_config)

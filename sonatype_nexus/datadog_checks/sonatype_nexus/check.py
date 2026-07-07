@@ -2,9 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import re
-
-import requests
 
 from datadog_checks.base import AgentCheck
 
@@ -41,7 +40,7 @@ class SonatypeNexusCheck(AgentCheck):
         url = f"{self._server_url}{STATUS_ENDPOINT}"
         try:
             response_json = self.sonatype_nexus_client.call_sonatype_nexus_api(url).json()
-        except requests.exceptions.JSONDecodeError as ex:
+        except json.JSONDecodeError as ex:
             self.log.error("Can't decode API response to json, Error: %s", str(ex))
             return {"message": "Can't decode API response to json", "error": str(ex)}
         for key, metric_name in constants.STATUS_METRICS_MAP.items():
@@ -57,7 +56,7 @@ class SonatypeNexusCheck(AgentCheck):
         url = f"{self._server_url}{ANALYTICS_ENDPOINT}"
         try:
             response_json = self.sonatype_nexus_client.call_sonatype_nexus_api(url).json()
-        except requests.exceptions.JSONDecodeError as ex:
+        except json.JSONDecodeError as ex:
             self.log.error("Can't decode API response to json, Error: %s", str(ex))
             return {"message": "Can't decode API response to json", "error": str(ex)}
         try:

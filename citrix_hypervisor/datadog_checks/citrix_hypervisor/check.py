@@ -10,7 +10,6 @@ from xmlrpc.client import ServerProxy
 import yaml
 
 from datadog_checks.base import AgentCheck, ConfigurationError
-from datadog_checks.base.utils.http import requests
 
 from .metrics import build_metric
 
@@ -26,7 +25,7 @@ def _safely_process_metrics_response(data: ResponseWrapper) -> dict[str, dict]:
     # See https://github.com/yaml/pyyaml/issues/443
     try:
         return data.json()
-    except (requests.exceptions.JSONDecodeError, StdJSONDecodeError):
+    except StdJSONDecodeError:
         return yaml.load(data.content, Loader=yaml.SafeLoader)
 
 

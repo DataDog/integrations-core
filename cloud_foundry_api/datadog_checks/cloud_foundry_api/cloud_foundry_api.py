@@ -7,8 +7,6 @@ import time
 from typing import Any, Dict, Generator, Tuple  # noqa: F401
 from urllib.parse import urlparse
 
-from requests.exceptions import HTTPError as RequestsHTTPError
-from requests.exceptions import RequestException
 from semver import VersionInfo
 
 from datadog_checks.base import AgentCheck
@@ -66,12 +64,12 @@ class CloudFoundryApiCheck(AgentCheck):
         self.log.info("Discovering Cloud Foundry API version and authentication endpoint")
         try:
             res = self.http.get(self._api_url)
-        except (RequestException, HTTPError):
+        except HTTPError:
             self.log.exception("Error connecting to the API server")
             raise
         try:
             res.raise_for_status()
-        except (RequestsHTTPError, HTTPStatusError):
+        except HTTPStatusError:
             self.log.exception("Error querying API information: response: %s", res.text)
             raise
         try:
@@ -116,13 +114,13 @@ class CloudFoundryApiCheck(AgentCheck):
                 auth=(self._client_id, self._client_secret),  # SKIP_HTTP_VALIDATION`
                 params={"grant_type": "client_credentials"},
             )
-        except (RequestException, HTTPError):
+        except HTTPError:
             self.log.exception("Error connecting to the UAA server")
             self.service_check(UAA_SERVICE_CHECK_NAME, CloudFoundryApiCheck.CRITICAL, tags=sc_tags)
             raise
         try:
             res.raise_for_status()
-        except (RequestsHTTPError, HTTPStatusError):
+        except HTTPStatusError:
             self.log.exception("Error authenticating to the UAA server: response: %s", res.text)
             self.service_check(UAA_SERVICE_CHECK_NAME, CloudFoundryApiCheck.CRITICAL, tags=sc_tags)
             raise
@@ -259,14 +257,14 @@ class CloudFoundryApiCheck(AgentCheck):
                 self.log.debug("Fetching events page %s", page)
                 try:
                     res = self.http.get(url, params=params, headers=headers)
-                except (RequestException, HTTPError):
+                except HTTPError:
                     self.log.exception("Error connecting to the Cloud Controller API: URL %s", url)
                     self.service_check(API_SERVICE_CHECK_NAME, CloudFoundryApiCheck.CRITICAL, tags=sc_tags)
                     raised = True
                     return
                 try:
                     res.raise_for_status()
-                except (RequestsHTTPError, HTTPStatusError):
+                except HTTPStatusError:
                     self.log.exception("Error querying Cloud Controller API: URL %s - response %s", url, res.text)
                     self.service_check(API_SERVICE_CHECK_NAME, CloudFoundryApiCheck.CRITICAL, tags=sc_tags)
                     raised = True

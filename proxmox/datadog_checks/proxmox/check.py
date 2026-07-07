@@ -5,8 +5,6 @@
 import re
 from json import JSONDecodeError as StdJSONDecodeError
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, JSONDecodeError, Timeout
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError as AgentHTTPConnectionError,
@@ -161,11 +159,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             hostname_json = hostname_response.json()
             hostname = hostname_json.get("data", {}).get("result", {}).get("host-name", vm_name)
         except (
-            HTTPError,
-            InvalidURL,
-            ConnectionError,
-            Timeout,
-            JSONDecodeError,
             StdJSONDecodeError,
             AttributeError,
             HTTPStatusError,
@@ -413,11 +406,6 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             self.gauge("api.up", 1, tags=self.base_tags + ['proxmox_status:up'])
 
         except (
-            HTTPError,
-            InvalidURL,
-            ConnectionError,
-            Timeout,
-            JSONDecodeError,
             StdJSONDecodeError,
             HTTPStatusError,
             HTTPInvalidURLError,

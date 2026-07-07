@@ -8,6 +8,7 @@ from unittest.mock import Mock
 import pytest
 from requests import HTTPError, Response
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.nutanix import NutanixCheck
 
 pytestmark = [pytest.mark.unit]
@@ -82,7 +83,7 @@ def test_retry_on_rate_limit_max_retries_exceeded(dd_run_check, aggregator, mock
     mock_get = mocker.patch('requests.Session.get', return_value=mock_response_429)
     mock_sleep = mocker.patch('time.sleep')
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(HTTPStatusError):
         check._get_request_data("api/test")
 
     # Initial request + 1 retry (range(1, 2)) = 2 total
@@ -106,7 +107,7 @@ def test_retry_on_non_429_error_no_retry(dd_run_check, aggregator, mock_instance
     mock_get = mocker.patch('requests.Session.get', return_value=mock_response_500)
     mock_sleep = mocker.patch('time.sleep')
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(HTTPStatusError):
         check._get_request_data("api/test")
 
     # Should only try once, no retries for non-429 errors
@@ -210,7 +211,7 @@ def test_retry_disabled_with_zero_max_retries(dd_run_check, aggregator, mock_ins
     mock_get = mocker.patch('requests.Session.get', return_value=mock_response_429)
     mock_sleep = mocker.patch('time.sleep')
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(HTTPStatusError):
         check._get_request_data("api/test")
 
     # Should only try once when max_retries is 0

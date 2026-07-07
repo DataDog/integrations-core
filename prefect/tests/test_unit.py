@@ -3,9 +3,9 @@ from typing import Callable, NamedTuple
 from unittest.mock import Mock
 
 import pytest
-from requests.exceptions import InvalidURL
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.http_exceptions import HTTPInvalidURLError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.prefect import PrefectCheck
 from datadog_checks.prefect.check import PrefectClient
@@ -632,7 +632,7 @@ def test_paginate_events_rejects_external_next_page():
     log.error.assert_called_once()
     args = log.error.call_args[0]
     assert args[0] == "Could not collect next page of events: %s, data is incomplete"
-    assert isinstance(args[1], InvalidURL)
+    assert isinstance(args[1], HTTPInvalidURLError)
     assert str(args[1]) == "Invalid next_page URL with unexpected host: http://attacker.example/evil"
 
 

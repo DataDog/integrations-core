@@ -6,7 +6,7 @@ from typing import Any
 
 import requests
 
-from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPError, HTTPTimeoutError
 
 
 class APIError(Exception):
@@ -82,15 +82,15 @@ def handle_errors(method: Callable) -> Callable:
 
             return response
 
-        except (requests.exceptions.Timeout, HTTPTimeoutError) as ex:
+        except HTTPTimeoutError as ex:
             self.log.error("TimeoutError: Timeout while requesting data from the API.")
             raise APIError("Timeout while requesting data from the API.") from ex
 
-        except requests.exceptions.ConnectionError as ex:
+        except HTTPConnectionError as ex:
             self.log.error("ConnectionError: Error while connecting to the API.")
             raise APIError("Error while connecting to the API.") from ex
 
-        except requests.exceptions.RequestException as ex:
+        except HTTPError as ex:
             self.log.error("RequestError: General request error occurred.")
             raise APIError("General request error occurred.") from ex
 

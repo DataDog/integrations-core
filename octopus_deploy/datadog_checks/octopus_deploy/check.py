@@ -6,7 +6,6 @@ import datetime
 from collections.abc import Iterable
 
 from cachetools import TTLCache
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
@@ -83,10 +82,6 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 self.gauge('api.can_connect', 1, tags=self._base_tags)
             return response.json()
         except (
-            Timeout,
-            HTTPError,
-            InvalidURL,
-            ConnectionError,
             HTTPTimeoutError,
             HTTPStatusError,
             HTTPInvalidURLError,

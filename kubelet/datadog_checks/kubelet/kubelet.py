@@ -9,7 +9,6 @@ from collections import defaultdict
 from copy import deepcopy
 from urllib.parse import urlparse
 
-import requests
 from kubeutil import get_connection_info
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck
@@ -436,7 +435,7 @@ class KubeletCheck(
         try:
             node_resp = self._retrieve_node_spec()
             node_resp.raise_for_status()
-        except (requests.HTTPError, HTTPStatusError) as e:
+        except HTTPStatusError as e:
             if node_resp.status_code == 404:
                 # ignore HTTPError, for supporting k8s >= 1.18 in a degrated mode
                 # in 1.18 the /spec can be reactivated from the kubelet config

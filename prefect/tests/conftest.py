@@ -131,15 +131,25 @@ def mock_prefect_client(mocker):
     from json import JSONDecodeError
     from unittest.mock import create_autospec
 
-    from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-
+    from datadog_checks.base.utils.http_exceptions import (
+        HTTPConnectionError,
+        HTTPInvalidURLError,
+        HTTPStatusError,
+        HTTPTimeoutError,
+    )
     from datadog_checks.prefect.check import PrefectClient
 
     get_responses = _load_fixture("get_metrics.json")
     post_responses = _load_fixture("post_metrics.json")
 
     mock_client = create_autospec(PrefectClient, instance=True)
-    mock_client.http_exceptions = (HTTPError, InvalidURL, ConnectionError, Timeout, JSONDecodeError)
+    mock_client.http_exceptions = (
+        HTTPStatusError,
+        HTTPInvalidURLError,
+        HTTPConnectionError,
+        HTTPTimeoutError,
+        JSONDecodeError,
+    )
 
     mock_client.get.side_effect = lambda endpoint, **kwargs: get_responses[endpoint]
     mock_client.paginate_filter.side_effect = lambda endpoint, payload=None: post_responses[endpoint]

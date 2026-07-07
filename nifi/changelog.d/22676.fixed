@@ -1,0 +1,1 @@
+Raise a backend-agnostic HTTP error from the token endpoint instead of a ``requests`` error.

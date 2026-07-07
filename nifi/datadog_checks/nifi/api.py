@@ -4,7 +4,7 @@
 
 # ABOUTME: REST API client for Apache NiFi.
 # ABOUTME: Handles token-based auth, request retries on 401, and endpoint access.
-from requests.exceptions import HTTPError
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 
 from .constants import (
     ABOUT_ENDPOINT,
@@ -34,7 +34,7 @@ class NiFiApi:
             extra_headers={'Content-Type': 'application/x-www-form-urlencoded'},
         )
         if resp.status_code != 201:
-            raise HTTPError(f'Expected 201 from token endpoint, got {resp.status_code}', response=resp)
+            raise HTTPStatusError(f'Expected 201 from token endpoint, got {resp.status_code}', response=resp)
         self._token = resp.text
         self._log.debug('Obtained NiFi auth token (%d chars)', len(self._token))
 

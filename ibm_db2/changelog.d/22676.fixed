@@ -1,0 +1,1 @@
+Use the builtin ``ConnectionError`` on the database connection path instead of the ``requests`` alias.
