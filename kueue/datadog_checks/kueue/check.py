@@ -42,6 +42,7 @@ WORKLOAD_TRANSITION_EVENT_TYPES = {
     'evicted': 'kueue.workload.evicted',
     'finished': 'kueue.workload.finished',
 }
+WORKLOAD_TRANSITION_ORDER = tuple(WORKLOAD_TRANSITIONS)
 
 DEFAULT_RENAME_LABELS = {
     'cluster_queue': 'kueue_cluster_queue',
@@ -267,6 +268,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 'msg_text': self.workload_event_text(transition, workload, condition),
                 'aggregation_key': metadata.get('uid', f'{namespace}/{name}'),
                 'alert_type': alert_type,
+                'attributes': self.workload_event_attributes(condition_type, workload, condition),
                 'tags': self.workload_event_tags(transition, workload, condition, previous_state),
             }
         )
@@ -306,6 +308,32 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             parts.append(f'Finished reason: {condition["reason"]}.')
 
         return ' '.join(parts)
+
+    def workload_event_attributes(self, condition_type: str, workload: dict, condition: dict | None) -> dict:
+        time_until_transition = self.workload_time_until_transition(condition_type, workload, condition)
+        if time_until_transition is None:
+            return {}
+        return {'workload_time_until_transition': time_until_transition}
+
+    def workload_time_until_transition(
+        self, condition_type: str, workload: dict, condition: dict | None
+    ) -> float | None:
+        if not condition:
+            return None
+
+        previous_transition_time = self.previous_workload_transition_time(condition_type, workload)
+        return self.duration_seconds(previous_transition_time, condition.get('last_transition_time'))
+
+    def previous_workload_transition_time(self, condition_type: str, workload: dict) -> str | None:
+        condition_index = WORKLOAD_TRANSITION_ORDER.index(condition_type)
+        previous_condition_types = WORKLOAD_TRANSITION_ORDER[:condition_index]
+
+        for previous_condition_type in reversed(previous_condition_types):
+            previous_condition = self.get_condition(workload, previous_condition_type)
+            if previous_condition and previous_condition.get('status') == 'True':
+                return previous_condition.get('lastTransitionTime')
+
+        return workload.get('metadata', {}).get('creationTimestamp')
 
     def workload_event_tags(
         self,
