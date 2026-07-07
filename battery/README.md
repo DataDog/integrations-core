@@ -34,9 +34,7 @@ The metric `system.battery.power_state` can report any of the following tags:
 - `power_state:battery_charging`: Indicates that the battery is charging
 - `power_state:battery_discharging`: Indicates that the battery is discharging
 - `power_state:battery_power_on_line`: Indicates that the battery is connected to AC power
-
-On Windows and macOS, the metric can also report the following tag:
-- `power_state:battery_critical`: Indicates a critical battery condition. On Windows, this indicates that battery failure is imminent. On macOS (Agent 7.81.0 or later), this indicates that the operating system detected a degraded battery that requires service.
+- `power_state:battery_critical`: Indicates a critical battery condition. On Windows, this indicates that battery failure is imminent. On macOS, this indicates that the operating system detected a degraded battery that requires service.
 
 ### Events
 
