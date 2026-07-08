@@ -146,7 +146,6 @@ class BudgetGovernor:
         self,
         reserve_fraction: float = 0.15,
         buffer_seconds: float = 1.0,
-        max_wait_seconds: float | None = None,
         now: Callable[[], float] = time.time,
         on_event: Callable[[RateLimitEvent], None] | None = None,
     ) -> None:
@@ -158,11 +157,6 @@ class BudgetGovernor:
                 remaining budget across the time left until reset.
             buffer_seconds: Extra seconds added to hard-pause waits (window reset and
                 ``retry_after``) to absorb clock skew between us and the provider.
-            max_wait_seconds: Upper bound on a single rationing interval. As remaining nears
-                empty the unbounded interval (time_to_reset / remaining) can approach the whole
-                window; this caps it so a request never paces itself out by more than this many
-                seconds. None means uncapped. Only bounds voluntary pacing: the hard pauses for
-                an exhausted budget or a ``retry_after`` are always honored in full.
             now: Wall-clock source returning epoch seconds. Injectable so tests can drive
                 time deterministically; defaults to ``time.time``.
             on_event: Called with a RateLimitEvent on every observe and every wait, so callers
@@ -170,7 +164,6 @@ class BudgetGovernor:
         """
         self.reserve_fraction = reserve_fraction
         self.buffer_seconds = buffer_seconds
-        self.max_wait_seconds = max_wait_seconds
         self.now = now
         self.on_event = on_event or (lambda event: None)
         self.budget = NULL_SNAPSHOT
@@ -225,7 +218,11 @@ class BudgetGovernor:
         return target, reason
 
     def claim_budget_target_with_reason(self, now: float) -> tuple[float, PacingReason]:
-        """Earliest epoch this request may fire at based on the observed budget, with the reason."""
+        """Earliest epoch this request may fire at based on the observed budget, with the reason.
+
+        A rationed request never waits past the window reset: once the cursor reaches reset_at the
+        window's budget is spent, so any further request waits exactly until reset plus buffer.
+        """
         budget = self.budget
         # Handle the case where the remote does not provide:
         # - limit: this means the budget does not govern anything
@@ -236,14 +233,17 @@ class BudgetGovernor:
         if budget.remaining <= 0:
             return budget.reset_at + self.buffer_seconds, PacingReason.EXHAUSTED
         if budget.remaining <= self.reserve_fraction * budget.limit:
+            # Clamp at the window boundary before claiming: a slot at or past reset_at means this
+            # window is spent, so wait until reset without advancing the cursor — later claims in
+            # this window must get the same reset target, not ever-later ones.
+            if max(self.next_slot, now) >= budget.reset_at:
+                return budget.reset_at + self.buffer_seconds, PacingReason.EXHAUSTED
             return self.claim_paced_slot(now, budget.reset_at, budget.remaining), PacingReason.RATIONING
         return now, PacingReason.NONE
 
     def claim_paced_slot(self, now: float, reset_at: float, remaining: int) -> float:
         """Advance the shared pacing cursor by one interval and return this request's slot."""
         interval = (reset_at - now) / remaining
-        if self.max_wait_seconds is not None:
-            interval = min(interval, self.max_wait_seconds)
         slot = max(self.next_slot, now)
         self.next_slot = slot + interval
         return slot

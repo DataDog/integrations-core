@@ -73,7 +73,6 @@ class RateLimiterFactoryConfig(BaseModel):
     slow_integrations: frozenset[str] = frozenset()
     reserve_fraction: float = Field(default=0.15, gt=0, le=1)
     budget_buffer_seconds: float = Field(default=1.0, ge=0)
-    max_wait_seconds: float = Field(default=300.0, gt=0)
 
     @model_validator(mode="after")
     def validate_combined_rate(self) -> RateLimiterFactoryConfig:
@@ -106,7 +105,6 @@ class RateLimiterFactory:
         budget_governor = BudgetGovernor(
             reserve_fraction=cfg.reserve_fraction,
             buffer_seconds=cfg.budget_buffer_seconds,
-            max_wait_seconds=cfg.max_wait_seconds,
             on_event=on_event,
         )
         self.default = InstrumentedAsyncLimiter(

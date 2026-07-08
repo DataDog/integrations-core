@@ -143,8 +143,7 @@ def test_reserve_returns_now(
 ) -> None:
     if snapshot_fields is not None:
         governor.observe(make_snapshot(clock=clock, **snapshot_fields))
-    if advance_seconds:
-        clock.advance(advance_seconds)
+    clock.advance(advance_seconds)
 
     assert governor.reserve()[0] == pytest.approx(clock.current)
 
@@ -164,43 +163,35 @@ def test_reserve_paces_requests_when_remaining_at_or_below_reserve(clock: FakeCl
     assert third - second == pytest.approx(interval)
 
 
-def test_reserve_caps_pacing_interval_at_max_wait_seconds(clock: FakeClock) -> None:
-    # remaining=1 with an hour to reset would pace ~3600s apart; the cap bounds it.
-    governor = BudgetGovernor(now=clock, max_wait_seconds=30.0)
-    governor.observe(make_snapshot(clock=clock, limit=100, remaining=1, reset_in=3600))
+def test_reserve_clamps_paced_slots_at_window_reset(clock: FakeClock, governor: BudgetGovernor) -> None:
+    # Only 2 requests fit in the window; the 3rd and 4th overflow and wait until reset, not beyond.
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=2, reset_in=100))
+    interval = 100 / 2
+    reset_target = clock.current + 100 + governor.buffer_seconds
 
-    first, _ = governor.reserve()
-    second, _ = governor.reserve()
+    first, first_reason = governor.reserve()
+    second, second_reason = governor.reserve()
+    third, third_reason = governor.reserve()
+    fourth, fourth_reason = governor.reserve()
 
-    assert first == pytest.approx(clock.current)
-    assert second - first == pytest.approx(30.0)
-
-
-def test_reserve_does_not_cap_pacing_interval_below_max_wait_seconds(clock: FakeClock) -> None:
-    # True interval (100/10 = 10s) is under the cap, so the cap must not shorten it.
-    governor = BudgetGovernor(now=clock, max_wait_seconds=30.0)
-    governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))
-
-    first, _ = governor.reserve()
-    second, _ = governor.reserve()
-
-    assert second - first == pytest.approx(10.0)
+    assert (first_reason, second_reason) == (PacingReason.RATIONING, PacingReason.RATIONING)
+    assert second - first == pytest.approx(interval)
+    assert (third_reason, fourth_reason) == (PacingReason.EXHAUSTED, PacingReason.EXHAUSTED)
+    # Both overflow requests get the SAME reset target — the cursor must not advance past the clamp.
+    assert third == pytest.approx(reset_target)
+    assert fourth == pytest.approx(reset_target)
 
 
-def test_max_wait_seconds_does_not_cap_exhausted_budget_hard_pause(clock: FakeClock) -> None:
-    # The cap bounds voluntary pacing only; an exhausted budget still waits the full reset.
-    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=30.0)
-    governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=3600))
+def test_reserve_returns_now_in_new_window_after_clamp(clock: FakeClock, governor: BudgetGovernor) -> None:
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=2, reset_in=100))
+    for _ in range(3):
+        governor.reserve()  # fill the window and engage the clamp
 
-    assert governor.reserve()[0] == pytest.approx(clock.current + 3601.0)
+    clock.advance(101)  # past reset_at: the window has rolled over
+    target, reason = governor.reserve()
 
-
-def test_max_wait_seconds_does_not_cap_retry_after_hard_pause(clock: FakeClock) -> None:
-    # A retry_after hard pause is honored in full regardless of the pacing cap.
-    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=30.0)
-    governor.observe(BudgetSnapshot(retry_after=600.0))
-
-    assert governor.reserve()[0] == pytest.approx(clock.current + 601.0)
+    assert reason is PacingReason.NONE
+    assert target == pytest.approx(clock.current)
 
 
 def test_reserve_exhausted_budget_targets_reset_plus_buffer(clock: FakeClock) -> None:

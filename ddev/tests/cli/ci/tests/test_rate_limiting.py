@@ -140,29 +140,14 @@ def test_get_limiter_slow_tier_returns_same_object():
 
 
 # ---------------------------------------------------------------------------
-# max_wait_seconds
+# shared governor + on_event wiring
 # ---------------------------------------------------------------------------
 
 
-def test_factory_config_default_max_wait_seconds():
-    assert RateLimiterFactoryConfig().max_wait_seconds == 300.0
+def test_factory_shares_budget_governor_across_both_tiers():
+    factory = RateLimiterFactory()
 
-
-def test_factory_config_rejects_non_positive_max_wait_seconds():
-    with pytest.raises(ValidationError):
-        RateLimiterFactoryConfig(max_wait_seconds=0)
-
-
-def test_factory_shares_max_wait_seconds_across_both_tiers():
-    factory = RateLimiterFactory(RateLimiterFactoryConfig(max_wait_seconds=45.0))
-    governor = factory.default.budget_governor
-    assert governor is factory.slow.budget_governor
-    assert governor.max_wait_seconds == 45.0
-
-
-# ---------------------------------------------------------------------------
-# on_event wiring
-# ---------------------------------------------------------------------------
+    assert factory.default.budget_governor is factory.slow.budget_governor
 
 
 def test_factory_shares_on_event_across_governor_and_both_limiters():
