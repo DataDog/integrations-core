@@ -257,7 +257,7 @@ datadog-win32-event-log==5.6.1; sys_platform == 'win32'
 datadog-windows-performance-counters==3.5.0; sys_platform == 'win32'
 datadog-windows-service==6.8.0; sys_platform == 'win32'
 datadog-wmi-check==4.1.1; sys_platform == 'win32'
-datadog-yarn==8.4.1
+datadog-yarn==8.4.2
 datadog-zeek==1.2.0; sys_platform != 'win32'
 datadog-zk==6.5.1; sys_platform != 'win32'
 datadog-zscaler-private-access==1.1.0; sys_platform != 'win32'
