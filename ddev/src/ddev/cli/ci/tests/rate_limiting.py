@@ -6,13 +6,39 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 
 from aiolimiter import AsyncLimiter
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from ddev.utils.rate_limiting import RATE_LIMIT_TIME_PERIOD, BudgetGovernor, InstrumentedAsyncLimiter
+from ddev.utils.rate_limiting import (
+    RATE_LIMIT_TIME_PERIOD,
+    BudgetGovernor,
+    InstrumentedAsyncLimiter,
+    RateLimitEvent,
+    RateLimitEventType,
+)
 
 SECONDS_PER_HOUR = 3600.0
+
+
+def event_logger(logger: logging.Logger) -> Callable[[RateLimitEvent], None]:
+    """Build an on_event handler that logs the informative rate-limit events at debug level."""
+
+    def handle(event: RateLimitEvent) -> None:
+        if event.type is RateLimitEventType.BUDGET and event.is_low:
+            logger.debug(
+                "GitHub rate-limit budget low: %s/%s remaining, resets in %.1fs",
+                event.remaining,
+                event.limit,
+                event.reset_in_seconds,
+            )
+        elif event.type is RateLimitEventType.SECONDARY_LIMIT:
+            logger.debug("GitHub secondary rate limit hit, retry after %.1fs", event.retry_after_seconds)
+        elif event.type is RateLimitEventType.BUCKET and event.throttled:
+            logger.debug("%s rate limiter throttling request", event.name)
+
+    return handle
 
 
 class RateLimiterConfig(BaseModel):
@@ -76,37 +102,24 @@ class RateLimiterFactory:
     ) -> None:
         cfg = config or RateLimiterFactoryConfig()
         self.slow_integrations = cfg.slow_integrations
+        on_event = event_logger(logger) if logger else None
         budget_governor = BudgetGovernor(
             reserve_fraction=cfg.reserve_fraction,
             buffer_seconds=cfg.budget_buffer_seconds,
             max_wait_seconds=cfg.max_wait_seconds,
-            on_budget_low=(
-                (
-                    lambda remaining, limit, reset_in_seconds: logger.debug(
-                        "GitHub rate-limit budget low: %d/%d remaining, resets in %.1fs",
-                        remaining,
-                        limit,
-                        reset_in_seconds,
-                    )
-                )
-                if logger
-                else None
-            ),
-            on_secondary_limit=(
-                (lambda retry_after: logger.debug("GitHub secondary rate limit hit, retry after %.1fs", retry_after))
-                if logger
-                else None
-            ),
+            on_event=on_event,
         )
         self.default = InstrumentedAsyncLimiter(
             AsyncLimiter(cfg.default.max_rate, cfg.default.time_period),
-            on_throttled=lambda: logger.debug("Default rate limiter throttling request") if logger else None,
+            on_event=on_event,
             budget_governor=budget_governor,
+            name="default",
         )
         self.slow = InstrumentedAsyncLimiter(
             AsyncLimiter(cfg.slow.max_rate, cfg.slow.time_period),
-            on_throttled=lambda: logger.debug("Slow rate limiter throttling request") if logger else None,
+            on_event=on_event,
             budget_governor=budget_governor,
+            name="slow",
         )
 
     def get_limiter(self, integrations: frozenset[str]) -> InstrumentedAsyncLimiter:

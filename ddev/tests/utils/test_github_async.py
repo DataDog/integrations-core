@@ -7,7 +7,6 @@ import io
 import json
 import zipfile
 from typing import Any
-from unittest.mock import MagicMock
 
 import httpx
 import pytest
@@ -34,8 +33,13 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
-from ddev.utils.rate_limiting import BudgetGovernor, BudgetSnapshot, InstrumentedAsyncLimiter
-from tests.helpers.assertions import assert_blocks
+from ddev.utils.rate_limiting import (
+    BucketEvent,
+    BudgetGovernor,
+    BudgetSnapshot,
+    InstrumentedAsyncLimiter,
+    RateLimitEvent,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -779,8 +783,8 @@ async def test_client_request_with_rate_limiter_consumes_token() -> None:
         return _json_response(_workflow_run_payload())
 
     real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
-    on_throttled = MagicMock()
-    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_throttled=on_throttled)
+    events: list[RateLimitEvent] = []
+    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_event=events.append)
 
     async with async_github_client(
         token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
@@ -788,7 +792,8 @@ async def test_client_request_with_rate_limiter_consumes_token() -> None:
         result = await client.get_workflow_run("o", "r", 42)
 
     assert result.data.id == 42
-    on_throttled.assert_not_called()
+    bucket_events = [event for event in events if isinstance(event, BucketEvent)]
+    assert bucket_events == [BucketEvent(throttled=False, name="")]
     assert not real_limiter.has_capacity()
 
 
@@ -796,9 +801,11 @@ async def test_client_request_throttled_when_bucket_exhausted() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return _json_response(_workflow_run_payload())
 
-    real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
-    on_throttled = MagicMock()
-    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_throttled=on_throttled)
+    # A short time_period lets the second, throttled acquire actually complete instead of
+    # blocking forever, so its BucketEvent fires.
+    real_limiter = AsyncLimiter(max_rate=1, time_period=0.1)
+    events: list[RateLimitEvent] = []
+    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_event=events.append)
 
     async with async_github_client(
         token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
@@ -808,9 +815,10 @@ async def test_client_request_throttled_when_bucket_exhausted() -> None:
     async with async_github_client(
         token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
     ) as client:
-        await assert_blocks(client.get_workflow_run("o", "r", 42))
+        await client.get_workflow_run("o", "r", 42)  # blocks until the 0.1s period refills it
 
-    on_throttled.assert_called_once()
+    bucket_events = [event for event in events if isinstance(event, BucketEvent)]
+    assert [event.throttled for event in bucket_events] == [False, True]
 
 
 # ---------------------------------------------------------------------------

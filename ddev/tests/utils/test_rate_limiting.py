@@ -9,7 +9,18 @@ from unittest.mock import MagicMock
 import pytest
 from aiolimiter import AsyncLimiter
 
-from ddev.utils.rate_limiting import MAX_WAIT_ITERATIONS, BudgetGovernor, BudgetSnapshot, InstrumentedAsyncLimiter
+from ddev.utils.rate_limiting import (
+    MAX_WAIT_ITERATIONS,
+    BucketEvent,
+    BudgetEvent,
+    BudgetGovernor,
+    BudgetSnapshot,
+    InstrumentedAsyncLimiter,
+    PacingEvent,
+    PacingReason,
+    RateLimitEvent,
+    SecondaryLimitEvent,
+)
 from tests.helpers.assertions import assert_blocks
 
 
@@ -62,14 +73,9 @@ def slept(clock: FakeClock, monkeypatch: pytest.MonkeyPatch) -> list[float]:
     return slept_durations
 
 
-@pytest.mark.parametrize(
-    "none_callback",
-    ["on_throttled", "on_acquired"],
-    ids=["none_on_throttled", "none_on_acquired"],
-)
-async def test_instrumented_limiter_none_callback_does_not_raise(none_callback: str) -> None:
+async def test_instrumented_limiter_none_callback_does_not_raise() -> None:
     real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
-    limiter = InstrumentedAsyncLimiter(real_limiter, **{none_callback: None})
+    limiter = InstrumentedAsyncLimiter(real_limiter, on_event=None)
 
     async with limiter:
         pass  # drain
@@ -78,28 +84,14 @@ async def test_instrumented_limiter_none_callback_does_not_raise(none_callback: 
     await assert_blocks(limiter.__aenter__())
 
 
-async def test_instrumented_limiter_calls_on_throttled_when_no_capacity():
-    real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
-    on_throttled = MagicMock()
-    limiter = InstrumentedAsyncLimiter(real_limiter, on_throttled=on_throttled)
-
-    async with limiter:
-        pass  # consumes the single token; has_capacity was True, so on_throttled not called
-
-    # on_throttled fires before the coroutine suspends, even though the acquire never completes
-    await assert_blocks(limiter.__aenter__())
-
-    on_throttled.assert_called_once()
-
-
-async def test_instrumented_limiter_does_not_call_on_throttled_when_capacity_available():
-    on_throttled = MagicMock()
-    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=2, time_period=1000), on_throttled=on_throttled)
+async def test_instrumented_limiter_bucket_event_not_throttled_when_capacity_available() -> None:
+    events: list[RateLimitEvent] = []
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=2, time_period=1000), on_event=events.append)
 
     async with limiter:
         pass
 
-    on_throttled.assert_not_called()
+    assert events == [BucketEvent(throttled=False, name="")]
 
 
 async def test_instrumented_limiter_drains_real_bucket():
@@ -124,31 +116,30 @@ async def test_instrumented_limiter_blocks_on_exhausted_bucket():
     await assert_blocks(limiter.__aenter__())
 
 
-async def test_instrumented_limiter_calls_on_acquired_after_token_granted():
-    on_acquired = MagicMock()
-    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000), on_acquired=on_acquired)
+async def test_instrumented_limiter_bucket_event_fires_once_per_acquire() -> None:
+    events: list[RateLimitEvent] = []
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000), on_event=events.append)
 
     async with limiter:
         pass
 
-    on_acquired.assert_called_once()
+    assert events == [BucketEvent(throttled=False, name="")]
 
 
-async def test_instrumented_limiter_on_acquired_fires_after_wait():
-    on_throttled = MagicMock()
-    on_acquired = MagicMock()
+async def test_instrumented_limiter_bucket_event_throttled_after_wait_for_capacity() -> None:
+    events: list[RateLimitEvent] = []
     real_limiter = AsyncLimiter(max_rate=1, time_period=0.1)
-    limiter = InstrumentedAsyncLimiter(real_limiter, on_throttled=on_throttled, on_acquired=on_acquired)
+    limiter = InstrumentedAsyncLimiter(real_limiter, on_event=events.append)
 
     async with limiter:
-        pass  # drain; on_acquired fires once here
+        pass  # drain; throttled=False fires once here
 
     # Bucket is empty — next acquire blocks until the 0.1s period refills it
     async with limiter:
-        pass  # on_throttled fires on entry, on_acquired fires once the wait is over
+        pass  # throttled=True fires once the wait is over
 
-    on_throttled.assert_called_once()
-    assert on_acquired.call_count == 2
+    bucket_events = [event for event in events if isinstance(event, BucketEvent)]
+    assert [event.throttled for event in bucket_events] == [False, True]
 
 
 # ---------------------------------------------------------------------------
@@ -239,14 +230,15 @@ def test_reserve_exhausted_budget_targets_reset_plus_buffer(clock: FakeClock) ->
     assert governor.reserve() == pytest.approx(clock.current + 52.0)
 
 
-def test_observe_with_retry_after_sets_hard_pause_and_fires_callback(clock: FakeClock) -> None:
-    on_secondary_limit = MagicMock()
-    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, on_secondary_limit=on_secondary_limit)
+def test_observe_with_retry_after_sets_hard_pause_and_fires_event(clock: FakeClock) -> None:
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, on_event=events.append)
 
     governor.observe(BudgetSnapshot(retry_after=30.0))
 
     assert governor.reserve() == pytest.approx(clock.current + 31.0)
-    on_secondary_limit.assert_called_once_with(30.0)
+    secondary_limit_events = [event for event in events if isinstance(event, SecondaryLimitEvent)]
+    assert secondary_limit_events == [SecondaryLimitEvent(retry_after_seconds=30.0, pause_seconds=pytest.approx(31.0))]
 
 
 def test_observe_keeps_longest_retry_after_pause(clock: FakeClock) -> None:
@@ -275,38 +267,46 @@ def test_reserve_returns_paced_slot_when_it_exceeds_pause_until(clock: FakeClock
 
 
 @pytest.mark.parametrize(
-    ("remaining", "expected_fires"),
+    ("remaining", "expected_is_low"),
     [
         pytest.param(10, True, id="below_threshold"),
         pytest.param(15, True, id="at_threshold_boundary"),
         pytest.param(50, False, id="above_threshold"),
     ],
 )
-def test_observe_fires_on_budget_low(clock: FakeClock, remaining: int, expected_fires: bool) -> None:
-    on_budget_low = MagicMock()
-    governor = BudgetGovernor(now=clock, reserve_fraction=0.15, on_budget_low=on_budget_low)
+def test_observe_fires_budget_event_with_is_low(clock: FakeClock, remaining: int, expected_is_low: bool) -> None:
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, reserve_fraction=0.15, on_event=events.append)
 
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=remaining, reset_in=40))
 
-    if expected_fires:
-        on_budget_low.assert_called_once_with(remaining, 100, pytest.approx(40.0))
-    else:
-        on_budget_low.assert_not_called()
+    budget_events = [event for event in events if isinstance(event, BudgetEvent)]
+    assert len(budget_events) == 1
+    last = budget_events[-1]
+    assert last.is_low is expected_is_low
+    assert last.limit == 100
+    assert last.remaining == remaining
+    assert last.reset_in_seconds == pytest.approx(40.0)
 
 
-@pytest.mark.parametrize(
-    "reset_at_offset",
-    [None, -50],
-    ids=["reset_at_none", "reset_at_in_past"],
-)
-def test_notify_if_budget_low_clamps_reset_in_seconds_to_zero(clock: FakeClock, reset_at_offset: int | None) -> None:
-    on_budget_low = MagicMock()
-    governor = BudgetGovernor(now=clock, reserve_fraction=0.15, on_budget_low=on_budget_low)
-    reset_at = None if reset_at_offset is None else clock.current + reset_at_offset
+def test_budget_event_reset_in_seconds_is_none_when_reset_at_unknown(clock: FakeClock) -> None:
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, reserve_fraction=0.15, on_event=events.append)
 
-    governor.observe(BudgetSnapshot(limit=100, remaining=10, reset_at=reset_at))
+    governor.observe(BudgetSnapshot(limit=100, remaining=10, reset_at=None))
 
-    on_budget_low.assert_called_once_with(10, 100, pytest.approx(0.0))
+    budget_events = [event for event in events if isinstance(event, BudgetEvent)]
+    assert budget_events[-1].reset_in_seconds is None
+
+
+def test_budget_event_clamps_reset_in_seconds_to_zero_when_reset_at_in_past(clock: FakeClock) -> None:
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, reserve_fraction=0.15, on_event=events.append)
+
+    governor.observe(BudgetSnapshot(limit=100, remaining=10, reset_at=clock.current - 50))
+
+    budget_events = [event for event in events if isinstance(event, BudgetEvent)]
+    assert budget_events[-1].reset_in_seconds == pytest.approx(0.0)
 
 
 def test_merged_with_overlays_non_none_fields():
@@ -371,8 +371,8 @@ def test_observe_partial_snapshot_does_not_clobber_known_budget(clock: FakeClock
     assert governor.budget.reset_at == clock.current + 60
 
 
-def test_none_callbacks_do_not_raise(clock: FakeClock) -> None:
-    governor = BudgetGovernor(now=clock, on_budget_low=None, on_secondary_limit=None)
+def test_none_callback_does_not_raise(clock: FakeClock) -> None:
+    governor = BudgetGovernor(now=clock, on_event=None)
 
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=1, reset_in=10, retry_after=5.0))
 
@@ -485,6 +485,59 @@ async def test_wait_caps_at_max_iterations_without_hanging(
     await asyncio.wait_for(governor.wait(), timeout=1.0)
 
     assert sleep_count == MAX_WAIT_ITERATIONS
+
+
+async def test_wait_healthy_budget_fires_pacing_event_with_no_reason(
+    clock: FakeClock, governor: BudgetGovernor
+) -> None:
+    events: list[RateLimitEvent] = []
+    governor.on_event = events.append
+
+    await governor.wait()
+
+    pacing_events = [event for event in events if isinstance(event, PacingEvent)]
+    assert pacing_events == [PacingEvent(wait_seconds=0.0, reason=PacingReason.NONE)]
+
+
+async def test_wait_rationing_fires_pacing_event_with_rationing_reason(
+    clock: FakeClock, governor: BudgetGovernor, slept: list[float]
+) -> None:
+    events: list[RateLimitEvent] = []
+    governor.on_event = events.append
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))
+    interval = 100 / 10
+    governor.reserve()  # a prior request already reserved the first slot
+
+    await governor.wait()
+
+    pacing_events = [event for event in events if isinstance(event, PacingEvent)]
+    assert pacing_events == [PacingEvent(wait_seconds=pytest.approx(interval), reason=PacingReason.RATIONING)]
+
+
+async def test_wait_exhausted_budget_fires_pacing_event_with_exhausted_reason(
+    clock: FakeClock, slept: list[float]
+) -> None:
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, on_event=events.append)
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=50))
+
+    await governor.wait()
+
+    pacing_events = [event for event in events if isinstance(event, PacingEvent)]
+    assert pacing_events == [PacingEvent(wait_seconds=pytest.approx(51.0), reason=PacingReason.EXHAUSTED)]
+
+
+async def test_wait_secondary_limit_fires_pacing_event_with_secondary_limit_reason(
+    clock: FakeClock, slept: list[float]
+) -> None:
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, on_event=events.append)
+    governor.observe(BudgetSnapshot(retry_after=30.0))
+
+    await governor.wait()
+
+    pacing_events = [event for event in events if isinstance(event, PacingEvent)]
+    assert pacing_events == [PacingEvent(wait_seconds=pytest.approx(31.0), reason=PacingReason.SECONDARY_LIMIT)]
 
 
 # ---------------------------------------------------------------------------

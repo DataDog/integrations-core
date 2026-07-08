@@ -158,3 +158,22 @@ def test_factory_shares_max_wait_seconds_across_both_tiers():
     governor = factory.default.budget_governor
     assert governor is factory.slow.budget_governor
     assert governor.max_wait_seconds == 45.0
+
+
+# ---------------------------------------------------------------------------
+# on_event wiring
+# ---------------------------------------------------------------------------
+
+
+def test_factory_shares_on_event_across_governor_and_both_limiters():
+    factory = RateLimiterFactory(logger=logging.getLogger("test"))
+
+    assert factory.default.on_event is factory.slow.on_event
+    assert factory.default.on_event is factory.default.budget_governor.on_event
+
+
+def test_factory_uses_distinct_names_for_default_and_slow_limiters():
+    factory = RateLimiterFactory()
+
+    assert factory.default.name == "default"
+    assert factory.slow.name == "slow"

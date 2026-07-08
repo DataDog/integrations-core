@@ -9,7 +9,8 @@ import asyncio
 import dataclasses
 import time
 from collections.abc import Callable
-from typing import Any
+from enum import StrEnum
+from typing import Any, Literal
 
 from aiolimiter import AsyncLimiter
 
@@ -64,6 +65,67 @@ NULL_SNAPSHOT = BudgetSnapshot()
 """Shared all-None snapshot: the governor's initial state and the "no headers" sentinel."""
 
 
+class RateLimitEventType(StrEnum):
+    """Discriminator for the RateLimitEvent union."""
+
+    BUCKET = "bucket"
+    BUDGET = "budget"
+    SECONDARY_LIMIT = "secondary_limit"
+    PACING = "pacing"
+
+
+class PacingReason(StrEnum):
+    """Why a PacingEvent's wait_seconds is what it is."""
+
+    NONE = "none"
+    RATIONING = "rationing"
+    EXHAUSTED = "exhausted"
+    SECONDARY_LIMIT = "secondary_limit"
+
+
+@dataclasses.dataclass(frozen=True)
+class BucketEvent:
+    """Fired once per InstrumentedAsyncLimiter acquire, carrying whether it had to throttle."""
+
+    throttled: bool
+    name: str = ""
+    type: Literal[RateLimitEventType.BUCKET] = RateLimitEventType.BUCKET
+
+
+@dataclasses.dataclass(frozen=True)
+class BudgetEvent:
+    """Fired on every BudgetGovernor.observe with the current budget and pause state."""
+
+    is_low: bool
+    is_paused: bool
+    limit: int | None = None
+    remaining: int | None = None
+    reset_in_seconds: float | None = None
+    pause_remaining_seconds: float = 0.0
+    type: Literal[RateLimitEventType.BUDGET] = RateLimitEventType.BUDGET
+
+
+@dataclasses.dataclass(frozen=True)
+class SecondaryLimitEvent:
+    """Fired when a secondary/abuse rate-limit response arms a hard pause."""
+
+    retry_after_seconds: float
+    pause_seconds: float
+    type: Literal[RateLimitEventType.SECONDARY_LIMIT] = RateLimitEventType.SECONDARY_LIMIT
+
+
+@dataclasses.dataclass(frozen=True)
+class PacingEvent:
+    """Fired once per BudgetGovernor.wait with the delay applied and why."""
+
+    wait_seconds: float
+    reason: PacingReason
+    type: Literal[RateLimitEventType.PACING] = RateLimitEventType.PACING
+
+
+RateLimitEvent = BucketEvent | BudgetEvent | SecondaryLimitEvent | PacingEvent
+
+
 class BudgetGovernor:
     """Reactive backpressure control loop driven by a remote provider's rate-limit information.
 
@@ -79,8 +141,7 @@ class BudgetGovernor:
         buffer_seconds: float = 1.0,
         max_wait_seconds: float | None = None,
         now: Callable[[], float] = time.time,
-        on_budget_low: Callable[[int, int, float], None] | None = None,
-        on_secondary_limit: Callable[[float], None] | None = None,
+        on_event: Callable[[RateLimitEvent], None] | None = None,
     ) -> None:
         """
         Args:
@@ -97,18 +158,14 @@ class BudgetGovernor:
                 an exhausted budget or a ``retry_after`` are always honored in full.
             now: Wall-clock source returning epoch seconds. Injectable so tests can drive
                 time deterministically; defaults to ``time.time``.
-            on_budget_low: Called as ``(remaining, limit, reset_in_seconds)`` whenever an
-                observed snapshot lands at or below the reserve threshold. Use it to log or
-                emit a metric on the shared budget running low.
-            on_secondary_limit: Called with the ``retry_after`` seconds whenever a
-                secondary/abuse rate-limit response is observed and a hard pause is armed.
+            on_event: Called with a RateLimitEvent on every observe and every wait, so callers
+                can log or emit continuous metrics from a single handler.
         """
         self.reserve_fraction = reserve_fraction
         self.buffer_seconds = buffer_seconds
         self.max_wait_seconds = max_wait_seconds
         self.now = now
-        self.on_budget_low = on_budget_low or (lambda remaining, limit, reset_in_seconds: None)
-        self.on_secondary_limit = on_secondary_limit or (lambda retry_after: None)
+        self.on_event = on_event or (lambda event: None)
         self.budget = NULL_SNAPSHOT
         self.pause_until = 0.0
         self.next_slot = 0.0
@@ -121,17 +178,30 @@ class BudgetGovernor:
         """
         if snapshot.retry_after is not None:
             self.pause_until = max(self.pause_until, self.now() + snapshot.retry_after + self.buffer_seconds)
-            self.on_secondary_limit(snapshot.retry_after)
+            self.on_event(
+                SecondaryLimitEvent(
+                    retry_after_seconds=snapshot.retry_after, pause_seconds=self.pause_until - self.now()
+                )
+            )
         self.budget = self.budget.merged_with(snapshot)
-        self.notify_if_budget_low()
+        self.emit_budget_event()
 
-    def notify_if_budget_low(self) -> None:
-        """Fire the on_budget_low callback when the tracked budget is at or below the reserve."""
+    def emit_budget_event(self) -> None:
+        """Build and emit a BudgetEvent reflecting the current budget and pause state."""
         limit, remaining = self.budget.limit, self.budget.remaining
-        if limit is not None and remaining is not None and remaining <= self.reserve_fraction * limit:
-            now = self.now()
-            reset_in_seconds = max(0.0, (self.budget.reset_at or now) - now)
-            self.on_budget_low(remaining, limit, reset_in_seconds)
+        is_low = limit is not None and remaining is not None and remaining <= self.reserve_fraction * limit
+        now = self.now()
+        reset_in_seconds = None if self.budget.reset_at is None else max(0.0, self.budget.reset_at - now)
+        self.on_event(
+            BudgetEvent(
+                is_low=is_low,
+                is_paused=now < self.pause_until,
+                limit=limit,
+                remaining=remaining,
+                reset_in_seconds=reset_in_seconds,
+                pause_remaining_seconds=max(0.0, self.pause_until - now),
+            )
+        )
 
     def reserve(self) -> float:
         """Reserve a pacing slot for the next request and return its absolute epoch target.
@@ -139,23 +209,29 @@ class BudgetGovernor:
         Advances the pacing cursor at most once per call so a single caller reserves exactly
         one slot; the returned target is floored by any active secondary-limit hard pause.
         """
-        return max(self.budget_target(), self.pause_until)
+        return self.reserve_with_reason()[0]
 
-    def budget_target(self) -> float:
-        """Earliest epoch this request may fire at based on the observed budget, ignoring hard pauses."""
-        now = self.now()
+    def reserve_with_reason(self) -> tuple[float, PacingReason]:
+        """Reserve a pacing slot like reserve(), also returning why the target ended up there."""
+        target, reason = self.budget_target_with_reason(self.now())
+        if self.pause_until > target:
+            return self.pause_until, PacingReason.SECONDARY_LIMIT
+        return target, reason
+
+    def budget_target_with_reason(self, now: float) -> tuple[float, PacingReason]:
+        """Earliest epoch this request may fire at based on the observed budget, with the reason."""
         budget = self.budget
         # Handle the case where the remote does not provide:
         # - limit: this means the budget does not govern anything
         # - remaining: this means we have no way of knowing how much budget is left
         # - reset_at: this means the budget does not reset at a known time
         if budget.limit is None or budget.remaining is None or budget.reset_at is None or now >= budget.reset_at:
-            return now
+            return now, PacingReason.NONE
         if budget.remaining <= 0:
-            return budget.reset_at + self.buffer_seconds
+            return budget.reset_at + self.buffer_seconds, PacingReason.EXHAUSTED
         if budget.remaining <= self.reserve_fraction * budget.limit:
-            return self.claim_paced_slot(now, budget.reset_at, budget.remaining)
-        return now
+            return self.claim_paced_slot(now, budget.reset_at, budget.remaining), PacingReason.RATIONING
+        return now, PacingReason.NONE
 
     def claim_paced_slot(self, now: float, reset_at: float, remaining: int) -> float:
         """Advance the shared pacing cursor by one interval and return this request's slot."""
@@ -168,7 +244,12 @@ class BudgetGovernor:
 
     async def wait(self) -> None:
         """Reserve one slot, then sleep until its target and any hard-pause floor elapse."""
-        deadline = self.reserve()
+        deadline, reason = self.reserve_with_reason()
+        now = self.now()
+        wait_seconds = max(0.0, deadline - now)
+        if wait_seconds <= 0:
+            reason = PacingReason.NONE
+        self.on_event(PacingEvent(wait_seconds=wait_seconds, reason=reason))
         for _ in range(MAX_WAIT_ITERATIONS):
             delay = max(deadline, self.pause_until) - self.now()
             if delay <= 0:
@@ -179,31 +260,29 @@ class BudgetGovernor:
 class InstrumentedAsyncLimiter:
     """Thin async context manager wrapper around AsyncLimiter.
 
-    Fires an optional callback when a request has to wait for capacity,
-    allowing callers to log or emit metrics on throttling events. Optionally layers a
-    BudgetGovernor on top, which adds extra backpressure reactive to a remote provider's
-    reported rate-limit budget.
+    Fires an optional callback on every acquire, allowing callers to log or emit metrics on
+    throttling. Optionally layers a BudgetGovernor on top, which adds extra backpressure
+    reactive to a remote provider's reported rate-limit budget.
     """
 
     def __init__(
         self,
         limiter: AsyncLimiter,
-        on_throttled: Callable[[], None] | None = None,
-        on_acquired: Callable[[], None] | None = None,
+        on_event: Callable[[RateLimitEvent], None] | None = None,
         budget_governor: BudgetGovernor | None = None,
+        name: str = "",
     ) -> None:
         self.limiter = limiter
-        self.on_throttled = on_throttled or (lambda: None)
-        self.on_acquired = on_acquired or (lambda: None)
+        self.on_event = on_event or (lambda event: None)
         self.budget_governor = budget_governor
+        self.name = name
 
     async def __aenter__(self) -> InstrumentedAsyncLimiter:
-        if not self.limiter.has_capacity():
-            self.on_throttled()
+        throttled = not self.limiter.has_capacity()
         await self.limiter.__aenter__()
         if self.budget_governor is not None:
             await self.budget_governor.wait()
-        self.on_acquired()
+        self.on_event(BucketEvent(throttled=throttled, name=self.name))
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
