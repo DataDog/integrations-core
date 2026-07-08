@@ -107,6 +107,30 @@ def test_from_config():
         assert scope.service_catalog.nova_endpoint == 'http://10.0.2.15:8773/test_project_id'
 
 
+def test_keystone_auth_ssl_verify_default():
+    """Keystone auth verifies TLS by default and honors an explicit ``ssl_verify: false`` opt-out."""
+    instance_config = {
+        'user': common.GOOD_USERS[0]['user'],
+        'auth_scope': common.GOOD_AUTH_SCOPES[0]['auth_scope'],
+    }
+    base_init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
+
+    def capture_ssl_verify(init_config):
+        with mock.patch(
+            'datadog_checks.openstack.openstack.OpenStackProjectScope.request_auth_token',
+            return_value=MOCK_HTTP_RESPONSE,
+        ) as mock_request_auth_token:
+            OpenStackProjectScope.from_config(init_config, instance_config)
+        # request_auth_token(cls, auth_scope, identity, keystone_server_url, ssl_verify, proxy=None)
+        return mock_request_auth_token.call_args.args[3]
+
+    default_ssl_verify = capture_ssl_verify(base_init_config)
+    explicit_off_ssl_verify = capture_ssl_verify({**base_init_config, 'ssl_verify': False})
+
+    assert default_ssl_verify is True
+    assert explicit_off_ssl_verify is False
+
+
 def test_unscoped_from_config():
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
 

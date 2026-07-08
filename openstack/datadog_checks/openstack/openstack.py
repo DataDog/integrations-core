@@ -210,7 +210,7 @@ class OpenStackScope(object):
         if not keystone_server_url:
             raise IncompleteConfig()
 
-        ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
 
         auth_scope = cls.get_auth_scope(instance_config)
         identity = cls.get_user_identity(instance_config)
