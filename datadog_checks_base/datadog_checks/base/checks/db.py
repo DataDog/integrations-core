@@ -4,14 +4,22 @@
 
 from abc import abstractmethod
 from string import Template
+from typing import TYPE_CHECKING, Dict
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.utils.db.utils import TagManager
 
 from . import AgentCheck
 
+if TYPE_CHECKING:
+    from datadog_checks.base.utils.db.utils import DBMAsyncJob
+
 
 class DatabaseCheck(AgentCheck):
+    """
+    Base class for Database Monitoring (DBM) integrations.
+    """
+
     #: Authoritative DBM platform identifier for this integration.
     #: Subclasses should set this explicitly; it is the value surfaced by
     #: :attr:`dbms` and used across DBM payloads, metric name prefixes and async jobs.
@@ -23,6 +31,51 @@ class DatabaseCheck(AgentCheck):
         self._database_identifier = None
         self._dbms_fallback_warning_logged = False
         self.tag_manager = TagManager()
+        #: Async jobs owned by this check, keyed by job name, populated via
+        #: :meth:`register_async_job`.
+        self._async_jobs: Dict[str, "DBMAsyncJob"] = {}
+
+    def register_async_job(self, job: "DBMAsyncJob | None") -> "DBMAsyncJob | None":
+        """
+        Register ``job`` under its ``job_name`` so the check manages its lifecycle, and return it
+        unchanged.
+
+        Passing ``None`` is a no-op. Registering a job whose name matches an already-registered job
+        replaces it. Raises ``ValueError`` if the job has no name.
+        """
+        if job is None:
+            return None
+        if job.job_name is None:
+            raise ValueError("Cannot register an async job without a job_name")
+        self._async_jobs[job.job_name] = job
+        return job
+
+    def run_async_jobs(self, tags):
+        """Run each registered job's loop, forwarding ``tags`` to every job."""
+        for job in self._async_jobs.values():
+            job.run_job_loop(tags)
+
+    def cancel_async_jobs(self):
+        """
+        Signal every registered job to stop, without waiting for loops to finish or releasing
+        resources.
+
+        Safe to call while ``check()`` is running. Follow with :meth:`shutdown_async_jobs` to wait
+        for the loops and release resources.
+        """
+        for job in self._async_jobs.values():
+            job.cancel()
+
+    def shutdown_async_jobs(self):
+        """
+        Wait for every registered job's loop to finish (:meth:`~DBMAsyncJob.wait_for_completion`)
+        and run its teardown (:meth:`~DBMAsyncJob.shutdown`).
+
+        Must not run concurrently with ``check()``.
+        """
+        for job in self._async_jobs.values():
+            job.wait_for_completion()
+            job.shutdown()
 
     def database_monitoring_query_sample(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-samples")
