@@ -1,1 +1,0 @@
-Add a DispatcherConfig model that reads Dispatcher settings from the repo config.toml.
