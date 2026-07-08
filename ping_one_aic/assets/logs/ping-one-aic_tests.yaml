@@ -50,7 +50,6 @@ tests:
         severity: "Informational"
         severity_id: 1
         time: 1775162566229
-        type_uid: 300403
       payload:
         _id: "7b6d5a19-7d91-48da-b600-5a3590d6442f-29082"
         eventName: "AM-CONFIG-CHANGE"
@@ -137,7 +136,7 @@ tests:
         treeName: "FRLogin"
       network:
         client:
-          geoip: { }
+          geoip: {}
           ip: "73.163.123.67"
       ocsf:
         activity_id: 1
@@ -158,6 +157,8 @@ tests:
             vendor_name: "Ping Identity"
           uid: "8e59aae1-3238-408f-9f3a-669ce8f9ebbb-13752"
           version: "1.5.0"
+        service:
+          name: "Access Management"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -165,7 +166,6 @@ tests:
         status: "Success"
         status_id: 1
         time: 1775756242330
-        type_uid: 300201
         user:
           name: "test.user@example.com"
           uid: "id=b1f39518-5805-427e-b76e-09851154e05a,ou=user,ou=am-config"
@@ -175,9 +175,9 @@ tests:
         entries:
          -
           info:
-            treeName: "FRLogin"
-            ipAddress: "73.163.123.67"
             authLevel: "0"
+            ipAddress: "73.163.123.67"
+            treeName: "FRLogin"
         eventName: "AM-TREE-LOGIN-COMPLETED"
         level: "INFO"
         principal:
@@ -287,12 +287,13 @@ tests:
             vendor_name: "Ping Identity"
           uid: "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-1818"
           version: "1.5.0"
+        service:
+          name: "Access Management"
         severity: "Informational"
         severity_id: 1
         status: "Failure"
         status_id: 2
         time: 1774982817456
-        type_uid: 300201
         user:
           name: "carlamj"
       payload:
@@ -301,12 +302,12 @@ tests:
         entries:
          -
           info:
-            nodeOutcome: "FALSE"
-            treeName: "Login"
-            displayName: "Identity Store Decision"
-            nodeType: "IdentityStoreDecisionNode"
             authLevel: "0"
+            displayName: "Identity Store Decision"
             nodeId: "7f0c2aee-8c74-4d02-82a6-9d4ed9d11708"
+            nodeOutcome: "FALSE"
+            nodeType: "IdentityStoreDecisionNode"
+            treeName: "Login"
         eventName: "AM-NODE-LOGIN-COMPLETED"
         level: "INFO"
         principal:
@@ -415,12 +416,13 @@ tests:
             vendor_name: "Ping Identity"
           uid: "273a7e98-b45d-432c-abb7-09b1a1accc7b-137311"
           version: "1.5.0"
+        service:
+          name: "Access Management"
         severity: "Informational"
         severity_id: 1
         status: "Failure"
         status_id: 2
         time: 1775476592748
-        type_uid: 300201
         user:
           name: "appraisal"
       payload:
@@ -429,12 +431,12 @@ tests:
         entries:
          -
           info:
-            nodeOutcome: "false"
-            treeName: "Login Public - MFA"
-            displayName: "Verify OTP"
-            nodeType: "OneTimePasswordCollectorDecisionNode"
             authLevel: "0"
+            displayName: "Verify OTP"
             nodeId: "ca180f07-8321-4409-b747-a8112d2ea463"
+            nodeOutcome: "false"
+            nodeType: "OneTimePasswordCollectorDecisionNode"
+            treeName: "Login Public - MFA"
         eventName: "AM-NODE-LOGIN-COMPLETED"
         level: "INFO"
         principal:
@@ -539,6 +541,11 @@ tests:
           geoip: { }
           ip: "73.163.123.67"
       ocsf:
+        activity_id: 0
+        activity_name: "Unknown"
+        category_uid: 0
+        class_name: "Base event"
+        class_uid: 0
         metadata:
           correlation_uid: "a38ce90f-54d1-47db-9f2a-db1a6e5a1455/0"
           event_code: "AM-ACCESS-OUTCOME"
@@ -546,6 +553,9 @@ tests:
             name: "PingOne Advanced Identity Cloud"
             vendor_name: "Ping Identity"
           uid: "a62fa996-47c1-4327-a86c-1c8fd6f475fe-5698"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
         time: 1772633184742
       payload:
         _id: "a62fa996-47c1-4327-a86c-1c8fd6f475fe-5698"
