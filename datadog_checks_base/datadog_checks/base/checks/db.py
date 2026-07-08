@@ -12,10 +12,16 @@ from . import AgentCheck
 
 
 class DatabaseCheck(AgentCheck):
+    #: Authoritative DBM platform identifier for this integration.
+    #: Subclasses should set this explicitly; it is the value surfaced by
+    #: :attr:`dbms` and used across DBM payloads, metric name prefixes and async jobs.
+    DBMS: str | None = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._agent_hostname = None
         self._database_identifier = None
+        self._dbms_fallback_warning_logged = False
         self.tag_manager = TagManager()
 
     def database_monitoring_query_sample(self, raw_event: str):
@@ -110,6 +116,22 @@ class DatabaseCheck(AgentCheck):
 
     @property
     def dbms(self) -> str:
+        """
+        The DBM platform identifier for this integration.
+
+        Returns the :attr:`DBMS` class attribute when set. Integrations that have not yet declared
+        ``DBMS`` fall back to a deprecated derivation from the class name; that fallback is
+        unreliable (it only matches for some integrations) and will be removed in a future version.
+        """
+        if self.DBMS is not None:
+            return self.DBMS
+        if not self._dbms_fallback_warning_logged:
+            self.log.warning(
+                "%s does not set the `DBMS` class attribute; falling back to a name-derived value. "
+                "This fallback is deprecated and will be removed; set `DBMS` explicitly.",
+                type(self).__name__,
+            )
+            self._dbms_fallback_warning_logged = True
         return self.__class__.__name__.lower()
 
     @property
