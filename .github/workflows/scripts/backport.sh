@@ -32,6 +32,114 @@ comment_pr() {
   gh pr comment "${PR_NUMBER}" --body "$1"
 }
 
+# Log a final line for the current base and close its Actions log group. Every
+# return path in backport_to_branch calls this exactly once, so the ::group::
+# opened by the caller is always balanced.
+end_group() {
+  echo "$1"
+  echo "::endgroup::"
+}
+
+# Backport MERGE_SHA onto a single release branch. Returns 0 when the base was
+# handled (PR opened, already open, already applied, or nothing to port) and 1
+# on a failure a human must resolve. It never aborts the whole run, so one bad
+# base does not skip the others.
+#
+# This function is invoked as `backport_to_branch "${base}" || exit_status=1`,
+# which means bash runs it with `set -e` suppressed for its whole body. Every
+# fallible git/gh call is therefore guarded explicitly rather than relying on
+# errexit.
+backport_to_branch() {
+  local base="$1"
+  local backport_branch="backport-${PR_NUMBER}-to-${base}"
+
+  if ! git fetch --quiet origin "${base}"; then
+    comment_pr "⚠️ Backport to \`${base}\`: could not fetch \`origin/${base}\` -- does the release branch exist?"
+    end_group "Fetch of origin/${base} failed."
+    return 1
+  fi
+
+  if gh pr list --head "${backport_branch}" --state open --json number --jq '.[].number' | grep -q .; then
+    end_group "A backport PR for ${base} is already open; skipping."
+    return 0
+  fi
+
+  # Clean slate for this base: force the working tree and branch to the target.
+  if ! git checkout --quiet -f -B "${backport_branch}" "origin/${base}"; then
+    comment_pr "⚠️ Backport to \`${base}\`: could not check out \`origin/${base}\`."
+    end_group "Checkout of origin/${base} failed."
+    return 1
+  fi
+
+  local cherry_pick_rc=0
+  git cherry-pick -n "${mainline[@]}" "${MERGE_SHA}" || cherry_pick_rc=$?
+
+  # Match the target branch's .deps/ exactly (handles added/removed/edited files),
+  # dropping the cherry-picked lockfiles that were resolved against master.
+  rm -rf .deps
+  git checkout "origin/${base}" -- .deps 2>/dev/null || true
+  git add -A .deps
+
+  # Anything still unmerged is a genuine conflict a human has to resolve.
+  local conflicts
+  conflicts=$(git diff --name-only --diff-filter=U)
+  if [[ -n "${conflicts}" ]]; then
+    comment_pr "⚠️ Backport to \`${base}\` failed: cherry-pick conflicts outside \`.deps/\` that need manual resolution:
+\`\`\`
+${conflicts}
+\`\`\`
+Please open the backport by hand."
+    end_group "Conflicts outside .deps/ that need manual resolution:
+${conflicts}"
+    return 1
+  fi
+
+  if git diff --cached --quiet; then
+    # A redundant cherry-pick (payload already on the branch) exits 0 and leaves
+    # an empty index. A *nonzero* exit with nothing staged means the cherry-pick
+    # itself hard-failed (unreachable SHA, wrong mainline, git error) -- surface
+    # that instead of silently reporting it as "already applied".
+    if [[ "${cherry_pick_rc}" -ne 0 ]]; then
+      comment_pr "⚠️ Backport to \`${base}\` failed: cherry-pick exited ${cherry_pick_rc} with nothing to commit -- resolve by hand."
+      end_group "Cherry-pick exited ${cherry_pick_rc} with no staged changes."
+      return 1
+    fi
+    end_group "Backport to ${base} is empty (payload already present); skipping."
+    return 0
+  fi
+
+  if ! git commit --quiet -m "${commit_subject} (backport #${PR_NUMBER})"; then
+    comment_pr "⚠️ Backport to \`${base}\`: git commit failed."
+    end_group "Commit for ${base} failed."
+    return 1
+  fi
+
+  if ! git push --force origin "HEAD:${backport_branch}"; then
+    comment_pr "⚠️ Backport to \`${base}\`: push failed. Please retry the backport."
+    end_group "Push to ${backport_branch} failed."
+    return 1
+  fi
+
+  local new_pr_url
+  if ! new_pr_url=$(gh pr create \
+    --base "${base}" \
+    --head "${backport_branch}" \
+    --title "[Backport ${base}] ${pr_title}" \
+    --body "Backport of #${PR_NUMBER} to \`${base}\`.
+
+Generated dependency resolution (\`.deps/\`) was reset to the target branch; \`resolve-build-deps.yaml\` re-resolves it for this release line on push. Wheels must still be promoted before merge with \`ddev dep promote <PR_URL>\`." \
+    --label backport \
+    --label bot); then
+    comment_pr "⚠️ Backport to \`${base}\`: branch pushed but \`gh pr create\` failed. Open the PR from \`${backport_branch}\` by hand."
+    end_group "gh pr create for ${base} failed (branch ${backport_branch} was pushed)."
+    return 1
+  fi
+
+  comment_pr "Backported to \`${base}\`: ${new_pr_url}"
+  end_group "Opened ${new_pr_url}"
+  return 0
+}
+
 # Collect the release branches to target from the PR's backport/<base> labels.
 # On a `labeled` event act only on the label just added; on merge (`closed`)
 # process every backport/* label on the PR.
@@ -54,10 +162,15 @@ fi
 git config user.name "${BOT_NAME}"
 git config user.email "${BOT_EMAIL}"
 
-# Squash merges are single-parent; a true merge commit needs an explicit mainline.
-parent_words=$(git rev-list --parents -n 1 "${MERGE_SHA}" | wc -w)
+# `git rev-list --parents -n 1` prints the commit SHA followed by each of its
+# parents. A squash merge has a single parent (2 words); a true merge commit has
+# two or more parents (>2 words) and needs an explicit mainline to cherry-pick.
+is_merge_commit=false
+if [[ "$(git rev-list --parents -n 1 "${MERGE_SHA}" | wc -w)" -gt 2 ]]; then
+  is_merge_commit=true
+fi
 mainline=()
-if [[ "${parent_words}" -gt 2 ]]; then
+if [[ "${is_merge_commit}" == true ]]; then
   mainline=(-m 1)
 fi
 
@@ -67,65 +180,7 @@ commit_subject=$(git log -1 --format=%s "${MERGE_SHA}")
 exit_status=0
 for base in "${targets[@]}"; do
   echo "::group::Backport #${PR_NUMBER} to ${base}"
-  backport_branch="backport-${PR_NUMBER}-to-${base}"
-
-  git fetch --quiet origin "${base}"
-
-  if gh pr list --head "${backport_branch}" --state open --json number --jq '.[].number' | grep -q .; then
-    echo "A backport PR for ${base} is already open; skipping."
-    echo "::endgroup::"
-    continue
-  fi
-
-  # Clean slate for this base: force the working tree and branch to the target.
-  git checkout --quiet -f -B "${backport_branch}" "origin/${base}"
-
-  git cherry-pick -n "${mainline[@]}" "${MERGE_SHA}" || \
-    echo "Cherry-pick reported conflicts; resolving generated .deps/ automatically."
-
-  # Match the target branch's .deps/ exactly (handles added/removed/edited files),
-  # dropping the cherry-picked lockfiles that were resolved against master.
-  rm -rf .deps
-  git checkout "origin/${base}" -- .deps 2>/dev/null || true
-  git add -A .deps
-
-  # Anything still unmerged is a genuine conflict a human has to resolve.
-  conflicts=$(git diff --name-only --diff-filter=U)
-  if [[ -n "${conflicts}" ]]; then
-    echo "Conflicts outside .deps/ that need manual resolution:"
-    echo "${conflicts}"
-    comment_pr "⚠️ Backport to \`${base}\` failed: cherry-pick conflicts outside \`.deps/\` that need manual resolution:
-\`\`\`
-${conflicts}
-\`\`\`
-Please open the backport by hand."
-    exit_status=1
-    echo "::endgroup::"
-    continue
-  fi
-
-  if git diff --cached --quiet; then
-    echo "Backport to ${base} is empty (payload already present); skipping."
-    echo "::endgroup::"
-    continue
-  fi
-
-  git commit --quiet -m "${commit_subject} (backport #${PR_NUMBER})"
-  git push --force origin "HEAD:${backport_branch}"
-
-  new_pr_url=$(gh pr create \
-    --base "${base}" \
-    --head "${backport_branch}" \
-    --title "[Backport ${base}] ${pr_title}" \
-    --body "Backport of #${PR_NUMBER} to \`${base}\`.
-
-Generated dependency resolution (\`.deps/\`) was reset to the target branch; \`resolve-build-deps.yaml\` re-resolves it for this release line on push. Wheels must still be promoted before merge with \`ddev dep promote <PR_URL>\`." \
-    --label backport \
-    --label bot)
-
-  comment_pr "Backported to \`${base}\`: ${new_pr_url}"
-  echo "Opened ${new_pr_url}"
-  echo "::endgroup::"
+  backport_to_branch "${base}" || exit_status=1
 done
 
 exit "${exit_status}"
