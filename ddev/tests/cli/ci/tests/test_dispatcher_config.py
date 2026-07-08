@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import pytest
 
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
@@ -12,9 +14,11 @@ from ddev.cli.ci.tests.rate_limiting import RateLimiterFactoryConfig
 from ddev.repo.config import RepositoryConfig
 from ddev.utils.fs import Path
 
+RepoConfigBuilder = Callable[[str], RepositoryConfig]
+
 
 @pytest.fixture
-def repo_config(tmp_path):
+def repo_config(tmp_path: Path) -> RepoConfigBuilder:
     def build(toml_content: str) -> RepositoryConfig:
         config_path = Path(tmp_path) / "config.toml"
         config_path.write_text(toml_content)
@@ -23,7 +27,7 @@ def repo_config(tmp_path):
     return build
 
 
-def test_from_repo_config_reads_full_dispatcher_table(repo_config):
+def test_from_repo_config_reads_full_dispatcher_table(repo_config: RepoConfigBuilder) -> None:
     config = repo_config(
         """
         [dispatcher]
@@ -52,7 +56,7 @@ def test_from_repo_config_reads_full_dispatcher_table(repo_config):
     assert result.github_rate_limits.slow.max_rate == 120
 
 
-def test_from_repo_config_reads_scalars_without_rate_limits_subtable(repo_config):
+def test_from_repo_config_reads_scalars_without_rate_limits_subtable(repo_config: RepoConfigBuilder) -> None:
     config = repo_config(
         """
         [dispatcher]
@@ -68,7 +72,7 @@ def test_from_repo_config_reads_scalars_without_rate_limits_subtable(repo_config
     assert result.github_rate_limits == RateLimiterFactoryConfig()
 
 
-def test_from_repo_config_falls_back_to_defaults_when_dispatcher_table_missing(repo_config):
+def test_from_repo_config_falls_back_to_defaults_when_dispatcher_table_missing(repo_config: RepoConfigBuilder) -> None:
     config = repo_config(
         """
         validations = []
