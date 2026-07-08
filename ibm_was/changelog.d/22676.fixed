@@ -1,0 +1,1 @@
+Catch the backend-agnostic ``HTTPStatusError`` and ``HTTPConnectionError`` when requesting the PerfServlet so the check keeps working after the httpx migration.

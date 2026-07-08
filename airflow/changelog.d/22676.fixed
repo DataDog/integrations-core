@@ -1,0 +1,1 @@
+Catch the backend-agnostic ``HTTPStatusError``, ``HTTPConnectionError``, and ``HTTPTimeoutError`` when fetching data so the check keeps working after the httpx migration.
