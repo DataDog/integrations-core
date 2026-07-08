@@ -33,7 +33,7 @@ class _GoSample:
     __slots__ = ('name', 'labels', 'value', 'timestamp')
 
     def __init__(self, data):
-        labels = dict(data['labels'])
+        labels = data['labels']
         self.name = labels.pop('__name__', '')
         self.labels = labels
         self.value = data['value']
