@@ -79,6 +79,8 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    auto_load_distribution: Optional[bool] = None
+    auto_load_distribution_interval: Optional[int] = None
     close_admin_client: Optional[bool] = None
     collect_consumer_group_state: Optional[bool] = None
     consumer_groups: Optional[MappingProxyType[str, Any]] = None

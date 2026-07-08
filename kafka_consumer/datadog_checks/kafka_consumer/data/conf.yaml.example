@@ -374,6 +374,30 @@ instances:
     #
     # kafka_configs_refresh_interval: 180
 
+    ## @param auto_load_distribution - boolean - optional - default: false
+    ## When multiple Datadog Agents are configured identically and pointed at the same
+    ## Kafka cluster (common when configuration is distributed to a whole fleet rather
+    ## than a single designated host), setting this to `true` elects a single instance
+    ## to perform collection each cycle instead of every instance collecting redundantly.
+    ##
+    ## Election happens through a dedicated topic on the monitored cluster
+    ## (`__datadog_kafka_consumer_leader_election`, 1 partition), created automatically
+    ## if missing. This requires the check's Kafka principal to additionally have
+    ## create-topic, and produce/consume/describe ACLs on that topic and on the
+    ## `datadog-kafka-consumer-leader-election` consumer group.
+    ##
+    ## If the election itself fails (for example, due to missing ACLs), the check does
+    ## not collect that run rather than falling back to collecting from every instance,
+    ## to avoid recreating the duplicate-collection problem this option exists to prevent.
+    #
+    # auto_load_distribution: false
+
+    ## @param auto_load_distribution_interval - integer - optional - default: 60
+    ## Minimum time in seconds between two collections across all Agents sharing
+    ## `auto_load_distribution`. Only used when `auto_load_distribution` is `true`.
+    #
+    # auto_load_distribution_interval: 60
+
     ## @param schema_registry_url - string - optional - default: http://localhost:8081
     ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
     #

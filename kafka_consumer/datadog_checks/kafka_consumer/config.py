@@ -108,6 +108,9 @@ class KafkaConfig:
 
         self._kafka_configs_refresh_interval = int(instance.get('kafka_configs_refresh_interval', 180))
 
+        self._auto_load_distribution = is_affirmative(instance.get('auto_load_distribution', False))
+        self._auto_load_distribution_interval = int(instance.get('auto_load_distribution_interval', 60))
+
         self._collect_schema_registry = instance.get('schema_registry_url')
 
         # Schema Registry authentication
