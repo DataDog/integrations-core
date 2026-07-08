@@ -1,0 +1,16 @@
+# A minimal Application so the generic resources collector has an app to poll and stream.
+# Sync policy is manual (the default), so it registers without deploying anything.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: e2e-genresources-sample
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/argoproj/argocd-example-apps
+    path: guestbook
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
