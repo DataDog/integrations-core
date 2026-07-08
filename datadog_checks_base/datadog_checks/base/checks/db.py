@@ -33,7 +33,7 @@ class DatabaseCheck(AgentCheck):
         self.tag_manager = TagManager()
         #: Async jobs owned by this check, keyed by job name, populated via
         #: :meth:`register_async_job`.
-        self._async_jobs: Dict[str, "DBMAsyncJob"] = {}
+        self._async_job_registry: Dict[str, "DBMAsyncJob"] = {}
 
     def register_async_job(self, job: "DBMAsyncJob | None") -> "DBMAsyncJob | None":
         """
@@ -47,12 +47,12 @@ class DatabaseCheck(AgentCheck):
             return None
         if job.job_name is None:
             raise ValueError("Cannot register an async job without a job_name")
-        self._async_jobs[job.job_name] = job
+        self._async_job_registry[job.job_name] = job
         return job
 
     def run_async_jobs(self, tags):
         """Run each registered job's loop, forwarding ``tags`` to every job."""
-        for job in self._async_jobs.values():
+        for job in self._async_job_registry.values():
             job.run_job_loop(tags)
 
     def cancel_async_jobs(self):
@@ -63,7 +63,7 @@ class DatabaseCheck(AgentCheck):
         Safe to call while ``check()`` is running. Follow with :meth:`shutdown_async_jobs` to wait
         for the loops and release resources.
         """
-        for job in self._async_jobs.values():
+        for job in self._async_job_registry.values():
             job.cancel()
 
     def shutdown_async_jobs(self):
@@ -73,7 +73,7 @@ class DatabaseCheck(AgentCheck):
 
         Must not run concurrently with ``check()``.
         """
-        for job in self._async_jobs.values():
+        for job in self._async_job_registry.values():
             job.wait_for_completion()
             job.shutdown()
 

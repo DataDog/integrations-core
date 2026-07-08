@@ -136,7 +136,7 @@ def test_register_async_job_adds_and_dedupes(registry_check, register_twice):
     assert registry_check.register_async_job(job) is job
     if register_twice:
         assert registry_check.register_async_job(job) is job
-    assert registry_check._async_jobs == {"test-job": job}
+    assert registry_check._async_job_registry == {"test-job": job}
 
 
 def test_register_async_job_replaces_job_with_same_name(registry_check):
@@ -146,7 +146,7 @@ def test_register_async_job_replaces_job_with_same_name(registry_check):
     registry_check.register_async_job(first)
     registry_check.register_async_job(second)
 
-    assert registry_check._async_jobs == {"query-metrics": second}
+    assert registry_check._async_job_registry == {"query-metrics": second}
 
 
 def test_register_async_job_requires_job_name(registry_check):
@@ -156,7 +156,7 @@ def test_register_async_job_requires_job_name(registry_check):
 
 def test_register_async_job_noops_on_none(registry_check):
     assert registry_check.register_async_job(None) is None
-    assert registry_check._async_jobs == {}
+    assert registry_check._async_job_registry == {}
 
 
 @pytest.mark.parametrize("enabled", [True, False], ids=["enabled", "disabled"])
