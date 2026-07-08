@@ -204,7 +204,7 @@ class ClusterMetadataCollector:
                     self.log.warning("Error fetching %s for %s: %s", error_label, subject, e)
         return results
 
-    def collect_all_metadata(self, highwater_offsets):
+    def collect_all_metadata(self, highwater_offsets, low_watermark_offsets, topic_partitions):
         try:
             shared_metadata = self.client.kafka_client.list_topics(timeout=self.config._request_timeout)
         except Exception as e:
@@ -217,7 +217,7 @@ class ClusterMetadataCollector:
             self.log.error("Error collecting broker metadata: %s", e)
 
         try:
-            self._collect_topic_metadata(shared_metadata, highwater_offsets)
+            self._collect_topic_metadata(shared_metadata, highwater_offsets, low_watermark_offsets, topic_partitions)
         except Exception as e:
             self.log.error("Error collecting topic metadata: %s", e)
 
@@ -386,7 +386,7 @@ class ClusterMetadataCollector:
                 "data-streams-message",
             )
 
-    def _fetch_earliest_offsets(self, topic_partitions):
+    def fetch_earliest_offsets(self, topic_partitions):
         """Batch-fetch log-start offsets via AdminClient.list_offsets(earliest).
 
         Uses ListOffsets with the EARLIEST_TIMESTAMP sentinel, which the broker
@@ -441,10 +441,8 @@ class ClusterMetadataCollector:
             )
         return result
 
-    def _collect_topic_metadata(self, metadata, highwater_offsets):
+    def _collect_topic_metadata(self, metadata, highwater_offsets, low_watermark_offsets, topic_partitions):
         self.log.debug("Collecting topic metadata")
-
-        topic_partitions = self.client.get_topic_partitions()
 
         cluster_id = self.config._kafka_cluster_id_override or (
             metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
@@ -454,8 +452,6 @@ class ClusterMetadataCollector:
         self.log.debug("Found %s topics", len(topic_partitions))
 
         self.check.gauge('topic.count', len(topic_partitions), tags=self.config._get_tags(cluster_id))
-
-        earliest_offsets = self._fetch_earliest_offsets(topic_partitions)
 
         now_ts = time.time()
         prev_ts = None
@@ -496,7 +492,7 @@ class ClusterMetadataCollector:
 
                 partition_metadata = topic_metadata.partitions.get(partition_id)
                 latest = highwater_offsets.get((topic_name, partition_id), 0)
-                earliest = earliest_offsets.get((topic_name, partition_id))
+                earliest = low_watermark_offsets.get((topic_name, partition_id))
 
                 if earliest is None:
                     have_all_earliest = False

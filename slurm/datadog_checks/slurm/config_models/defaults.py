@@ -84,6 +84,10 @@ def instance_min_collection_interval():
     return 60
 
 
+def instance_resolve_scontrol_host_pids():
+    return False
+
+
 def instance_sacct_path():
     return '/usr/bin/sacct'
 
@@ -94,6 +98,10 @@ def instance_scontrol_path():
 
 def instance_sdiag_path():
     return '/usr/bin/sdiag'
+
+
+def instance_seff_path():
+    return '/usr/bin/seff'
 
 
 def instance_sinfo_collection_level():

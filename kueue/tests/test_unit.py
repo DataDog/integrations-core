@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 import pytest
 
 from datadog_checks.base.stubs import tagger
@@ -48,7 +50,7 @@ def _base_metric_name(metric_name):
 def test_check(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     for metric in UNIT_METRICS:
@@ -75,7 +77,7 @@ def test_queue_tagger_tags(dd_run_check, aggregator, instance, mock_http_respons
         }
     )
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     aggregator.assert_metric_has_tag('kueue.pending_workloads', 'cluster_queue_tag:value')
@@ -98,7 +100,7 @@ def test_queue_tagger_tags_are_scoped(dd_run_check, aggregator, instance, mock_h
         }
     )
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     go_goroutines_tags = _get_metric_tags(aggregator, 'kueue.go.goroutines')
@@ -117,7 +119,7 @@ def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_respons
         },
     }
 
-    check = KueueCheck('kueue', {}, [instance])
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
     dd_run_check(check)
 
     aggregator.assert_metric('kueue.cluster_queue.resource_usage.cpu')
@@ -138,6 +140,249 @@ def test_empty_instance(dd_run_check):
     ):
         check = KueueCheck('kueue', {}, [{}])
         dd_run_check(check)
+
+
+def test_workload_events_config_can_be_parsed_before_check(instance):
+    check = KueueCheck('kueue', {}, [instance])
+
+    check._parse_workload_events_config()
+
+    assert check.collect_workload_events is True
+
+
+class FakeKubernetesAPIClient:
+    def __init__(self, *workload_snapshots):
+        self.workload_snapshots = list(workload_snapshots)
+        self.list_workloads_namespaces = []
+
+    def list_workloads(self, namespace=None):
+        self.list_workloads_namespaces.append(namespace)
+        return self.workload_snapshots.pop(0)
+
+
+def load_workloads(name):
+    with open(get_fixture_path(f'workloads/{name}.json')) as f:
+        return json.load(f)
+
+
+def with_namespace(workloads, namespace):
+    workloads = json.loads(json.dumps(workloads))
+    for workload in workloads:
+        workload['metadata']['namespace'] = namespace
+    return workloads
+
+
+def with_uid(workloads, uid):
+    workloads = json.loads(json.dumps(workloads))
+    for workload in workloads:
+        workload['metadata']['uid'] = uid
+    return workloads
+
+
+def without_admission(workloads):
+    workloads = json.loads(json.dumps(workloads))
+    for workload in workloads:
+        workload['status'].pop('admission', None)
+    return workloads
+
+
+def test_workload_events_suppress_first_poll(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'))
+
+    dd_run_check(check)
+
+    assert not aggregator.events
+
+
+def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.reset()
+    tagger.set_tags(
+        {
+            'kubernetes_kueue_queue://clusterqueue//default': ['cluster_queue_tag:value'],
+            'kubernetes_kueue_queue://localqueue/team-a/gpu': ['local_queue_tag:value'],
+            'kueue_workload://team-a/training-job': ['workload_tag:value'],
+        }
+    )
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    expected_tags = [
+        'test:tag',
+        'kube_namespace:team-a',
+        'kueue_workload:training-job',
+        'kueue_workload_uid:workload-uid',
+        'kueue_local_queue:gpu',
+        'kueue_cluster_queue:default',
+        'kueue_workload_priority:100',
+        'kueue_workload_priority_class:high',
+        'cluster_queue_tag:value',
+        'local_queue_tag:value',
+        'workload_tag:value',
+    ]
+    aggregator.assert_event(
+        'Workload team-a/training-job quota reserved. Quota reserved in ClusterQueue default',
+        source_type_name='kueue',
+        tags=[*expected_tags, 'kueue_transition:quota_reserved'],
+    )
+    aggregator.assert_event(
+        'Workload team-a/training-job admitted. The workload is admitted Queued wait time was 8s.',
+        source_type_name='kueue',
+        tags=[*expected_tags, 'kueue_transition:admitted'],
+    )
+    aggregator.assert_event(
+        'Workload team-a/training-job running. All pods are ready',
+        source_type_name='kueue',
+        tags=[*expected_tags, 'kueue_transition:running'],
+    )
+
+
+def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(
+        load_workloads('pending'),
+        load_workloads('admitted'),
+        load_workloads('admitted'),
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    aggregator.assert_event('Workload team-a/training-job admitted.', count=1, exact_match=False)
+
+
+def test_workload_events_created_for_new_workload(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(
+        load_workloads('pending'),
+        with_uid(load_workloads('admitted'), 'new-workload-uid'),
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert_event_has_tags(
+        aggregator,
+        'Workload team-a/training-job created.',
+        ['kueue_workload_uid:new-workload-uid', 'kueue_transition:created'],
+        event_type='kueue.workload.created',
+        alert_type='info',
+    )
+    assert_event_has_tags(
+        aggregator,
+        'Workload team-a/training-job admitted.',
+        ['kueue_workload_uid:new-workload-uid', 'kueue_transition:admitted'],
+    )
+
+
+def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.reset()
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'), load_workloads('evicted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    expected_evicted_tags = [
+        'test:tag',
+        'kube_namespace:team-a',
+        'kueue_workload:training-job',
+        'kueue_workload_uid:workload-uid',
+        'kueue_local_queue:gpu',
+        'kueue_transition:evicted',
+        'kueue_workload_priority:100',
+        'kueue_workload_priority_class:high',
+        'kueue_cluster_queue:default',
+        'kueue_eviction_reason:Preempted',
+        'kueue_preemption_reason:InClusterQueue',
+        'kueue_preempted_by:preempting-workload-uid',
+    ]
+    aggregator.assert_event(
+        'Workload team-a/training-job evicted. Preempted to accommodate a workload '
+        '(UID: preempting-workload-uid) due to prioritization in the ClusterQueue Eviction reason: Preempted. '
+        'Preemption reason: InClusterQueue.',
+        alert_type='warning',
+        tags=expected_evicted_tags,
+    )
+    aggregator.assert_event(
+        'Workload team-a/training-job finished. Reached expected number of succeeded pods Finished reason: Succeeded.',
+        alert_type='info',
+    )
+
+
+def test_workload_events_evicted_uses_previous_admission(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    tagger.set_tags(
+        {
+            'kubernetes_kueue_queue://clusterqueue//default': ['cluster_queue_tag:value'],
+        }
+    )
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(
+        load_workloads('admitted'),
+        without_admission(load_workloads('evicted')),
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert_event_has_tags(
+        aggregator,
+        'Workload team-a/training-job evicted.',
+        ['kueue_cluster_queue:default', 'cluster_queue_tag:value'],
+    )
+
+
+def test_workload_events_namespace_filter(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck(
+        'kueue',
+        {},
+        [
+            {
+                **instance,
+                'workload_events_namespaces': ['default'],
+            }
+        ],
+    )
+    check.kube_client = FakeKubernetesAPIClient(
+        with_namespace(load_workloads('pending'), 'default'),
+        with_namespace(load_workloads('admitted'), 'default'),
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert_event_has_tags(
+        aggregator,
+        'Workload default/training-job admitted.',
+        ['kube_namespace:default'],
+    )
+    assert check.kube_client.list_workloads_namespaces == ['default', 'default']
+
+
+def assert_event_has_tags(aggregator, msg_text, tags, **kwargs):
+    for event in aggregator.events:
+        if msg_text not in event['msg_text']:
+            continue
+        if not set(tags).issubset(event['tags']):
+            continue
+        for name, value in kwargs.items():
+            if event[name] != value:
+                break
+        else:
+            return
+
+    raise AssertionError(f'No event matching {msg_text!r} with tags {tags!r}')
 
 
 def _get_metric_tags(aggregator, metric_name):

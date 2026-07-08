@@ -5,9 +5,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import time
 from collections.abc import Generator
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
 
@@ -24,7 +25,13 @@ from ddev.event_bus.exceptions import (
     ProcessorQueueError,
     SkipMessageError,
 )
-from ddev.event_bus.orchestrator import AsyncProcessor, BaseMessage, EventBusOrchestrator, SyncProcessor
+from ddev.event_bus.orchestrator import (
+    DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
+    AsyncProcessor,
+    BaseMessage,
+    EventBusOrchestrator,
+    SyncProcessor,
+)
 
 # Test Structure Documentation
 # --------------------------
@@ -139,7 +146,7 @@ class MockOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
         logger: logging.Logger,
-        max_timeout: float = 300,
+        max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
         fail_fast: bool = False,
     ):
@@ -348,6 +355,26 @@ def test_validate_parameters(max_timeout: float, grace_period: float, expectatio
     logger = logging.getLogger("test")
     with expectation:
         MockOrchestrator(logger, max_timeout=max_timeout, grace_period=grace_period)
+
+
+def test_none_max_timeout_runs_unbounded():
+    """max_timeout=None runs with no overall time limit."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, max_timeout=None, grace_period=0.1)
+
+    assert orchestrator._max_timeout == math.inf
+
+
+def test_unbounded_still_stops_via_grace_period():
+    """Unbounded mode still exits when the queue is empty and the grace period elapses."""
+    logger = logging.getLogger("test")
+    orchestrator = MockOrchestrator(logger, max_timeout=None, grace_period=0.1)
+
+    with assert_time(0.0, 1.0):
+        orchestrator.run()
+
+    assert "finalize" in orchestrator.events
+    assert orchestrator.finalized_exception is None
 
 
 def test_default_on_error_with_default_policy_logs_and_continues(
@@ -604,6 +631,84 @@ def test_max_timeout_interruption(orchestrator: MockOrchestrator):
         orchestrator.run()
 
     assert slow_processor.cancelled
+
+
+def test_max_timeout_interruption_preserves_cancellation_reason(orchestrator: MockOrchestrator):
+    # A timed-out task's CancelledError should carry the timeout reason, not be
+    # silently re-cancelled without a message by the generic shutdown cleanup.
+    orchestrator._max_timeout = 0.5
+    orchestrator._grace_period = 5.0
+
+    class SlowProcessor(AsyncProcessor[Memo]):
+        def __init__(self, name: str):
+            super().__init__(name)
+            self.cancellation_message: str | None = None
+
+        async def process_message(self, message: Memo):
+            try:
+                await asyncio.sleep(2.0)
+            except asyncio.CancelledError as e:
+                self.cancellation_message = str(e)
+                raise
+
+    slow_processor = SlowProcessor("slow_processor")
+    orchestrator.register_processor(slow_processor, [Memo])
+
+    orchestrator.submit_message(Memo("slow_memo"))
+
+    with assert_time(0.5, 1.5):
+        orchestrator.run()
+
+    assert slow_processor.cancellation_message
+    assert "max_timeout" in slow_processor.cancellation_message
+
+
+def test_fatal_processing_error_cancels_task_that_already_swallowed_a_cancellation(
+    orchestrator: MockOrchestrator,
+):
+    # A task that previously caught and suppressed a CancelledError (without calling
+    # Task.uncancel()) still has a pending cancellation count. The shutdown cleanup
+    # must not treat that as "already being cancelled" and skip it: it should still be
+    # cancelled (and stopped) when a sibling processor's FatalProcessingError shuts
+    # the bus down.
+    class StubbornAnalyst(AsyncProcessor[TaskAssignment]):
+        def __init__(self, name: str):
+            super().__init__(name)
+            self.cancelled_again = False
+            self.finished = False
+
+        async def process_message(self, message: TaskAssignment):
+            asyncio.current_task().cancel()  # simulate an earlier, unrelated cancellation
+            with suppress(asyncio.CancelledError):
+                await asyncio.sleep(0)
+
+            try:
+                await asyncio.sleep(10)
+            except asyncio.CancelledError:
+                self.cancelled_again = True
+                raise
+            self.finished = True
+
+    stubborn = StubbornAnalyst("stubborn")
+    orchestrator.register_processor(stubborn, [TaskAssignment])
+
+    original_on_message = orchestrator.on_message_received
+
+    async def on_message_fatal(message: BaseMessage):
+        await original_on_message(message)
+        if message.id == "fatal_msg":
+            raise FatalProcessingError("Fatal error triggered")
+
+    orchestrator.on_message_received = on_message_fatal  # type: ignore[method-assign]
+
+    orchestrator.submit_message(TaskAssignment("stubborn_msg", task_type="slow"))
+    orchestrator.submit_message(Memo("fatal_msg"))
+
+    with assert_time(0, 2.0), pytest.raises(FatalProcessingError, match="Fatal error triggered"):
+        orchestrator.run()
+
+    assert stubborn.cancelled_again
+    assert not stubborn.finished
 
 
 def test_sync_processor_thread_execution(orchestrator: MockOrchestrator, secretary: Secretary):

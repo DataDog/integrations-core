@@ -49,8 +49,16 @@ files:
         example: True
     - name: collect_scontrol_stats
       description: |
-        Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
+        Whether or not to collect statistics from the scontrol command. This is mainly used in the worker
         node to collect the list of running jobs along with their PIDs.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: False
+    - name: resolve_scontrol_host_pids
+      description: |
+        Whether or not to resolve PIDs reported by scontrol through the host proc filesystem before collecting
+        process tags. Enable this when scontrol reports namespace PIDs instead of host PIDs.
       fleet_configurable: true
       value:
         type: boolean
@@ -70,8 +78,8 @@ files:
     - name: sinfo_collection_level
       description: |
         The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
-        3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
-        collects data from from individual nodes as well but is more verbose and includes data such as CPU and 
+        3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3
+        collects data from from individual nodes as well but is more verbose and includes data such as CPU and
         memory usage as reported from the OS, as well as additional tags.
       fleet_configurable: true
       value:
@@ -119,6 +127,13 @@ files:
         type: string
         require_trusted_provider: true
         example: /usr/bin/scontrol
+    - name: seff_path
+      description: Full path to the seff binary.
+      fleet_configurable: true
+      value:
+        type: string
+        require_trusted_provider: true
+        example: /usr/bin/seff
     - name: debug_sinfo_stats
       description: |
         Whether or not to enable debug logging for the sinfo command. This logs the output of the sinfo command
@@ -180,7 +195,7 @@ files:
           https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
 
           Most Slurm metrics are collected from calling the different binaries. Depending on the size of the Slurm cluster,
-          this can be a very expensive operation. It is recommended to set this to a higher value than the default 15 
+          this can be a very expensive operation. It is recommended to set this to a higher value than the default 15
           seconds, but this can be adjusted based on the size of the cluster and the desired granularity of the metrics.
         min_collection_interval.value.display_default: 60
         min_collection_interval.value.default: 60
@@ -189,7 +204,7 @@ files:
   - template: logs
     example:
     - type: file
-      path: /var/log/slurm/slurmd.log 
+      path: /var/log/slurm/slurmd.log
       source: slurm
       service: slurm
     - type: file
