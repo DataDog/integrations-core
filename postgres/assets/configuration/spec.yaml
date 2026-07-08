@@ -49,7 +49,7 @@ files:
       value:
         type: string
     - name: dbname
-      display_priority: 19
+      display_priority: 0
       description: |
         The name of the PostgreSQL database to monitor.
         Note: If omitted, the default system Postgres database is queried.
@@ -58,7 +58,7 @@ files:
         type: string
         display_default: postgres
     - name: dbm
-      display_priority: 18
+      display_priority: 0
       fleet_configurable: true
       description: |
         Set to `true` to enable Database Monitoring.
@@ -67,7 +67,7 @@ files:
         example: false
         display_default: false
     - name: relations
-      display_priority: 17
+      display_priority: 0
       fleet_configurable: true
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
@@ -129,7 +129,7 @@ files:
               - r
               - p
     - name: collect_activity_metrics
-      display_priority: 15
+      display_priority: 0
       fleet_configurable: true
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
@@ -138,7 +138,7 @@ files:
         type: boolean
         example: false
     - name: collect_function_metrics
-      display_priority: 14
+      display_priority: 0
       fleet_configurable: true
       description: |
         If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
@@ -146,14 +146,14 @@ files:
         type: boolean
         example: false
     - name: collect_database_size_metrics
-      display_priority: 13
+      display_priority: 0
       fleet_configurable: true
       description: Collect database size metrics.
       value:
         type: boolean
         example: true
     - name: collect_bloat_metrics
-      display_priority: 12
+      display_priority: 0
       fleet_configurable: true
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
@@ -161,7 +161,7 @@ files:
         type: boolean
         example: false
     - name: tag_replication_role
-      display_priority: 10
+      display_priority: 0
       fleet_configurable: true
       hidden: true
       description: Tag metrics and checks with `replication_role:<master|standby>`.
@@ -169,21 +169,21 @@ files:
         type: boolean
         example: true
     - name: collect_count_metrics
-      display_priority: 9
+      display_priority: 0
       fleet_configurable: true
       description: Collect count of user tables from pg_class.
       value:
         type: boolean
         example: true
     - name: max_relations
-      display_priority: 8
+      display_priority: 0
       fleet_configurable: true
       description: Determines the maximum number of relations to fetch.
       value:
         type: integer
         example: 300
     - name: ssl
-      display_priority: 7
+      display_priority: 0
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
         is negotiated with the server.
@@ -206,14 +206,14 @@ files:
         example: 'allow'
         default: 'allow'
     - name: collect_default_database
-      display_priority: 4
+      display_priority: 0
       fleet_configurable: true
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
         type: boolean
         example: true
     - name: query_timeout
-      display_priority: 3
+      display_priority: 0
       fleet_configurable: true
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -224,7 +224,7 @@ files:
         type: integer
         example: 5000
     - name: reported_hostname
-      display_priority: 2
+      display_priority: 0
       description: |
         Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
@@ -233,7 +233,7 @@ files:
         type: string
         default: null
     - name: ignore_databases
-      display_priority: 1
+      display_priority: 0
       fleet_configurable: true
       description: |
         A list of databases to ignore. No metrics or statement samples will be collected for these databases.
@@ -1628,16 +1628,16 @@ files:
             tags:
               - test:postgresql
             metric_prefix: postgresql
-        custom_queries.display_priority: 16
+        custom_queries.display_priority: 0
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: The integration will stop sending server tag as is reduntant with host tag
-        tags.display_priority: 20
-        min_collection_interval.display_priority: 11
-        disable_generic_tags.display_priority: 6
-        empty_default_hostname.display_priority: 5
+        tags.display_priority: 0
+        min_collection_interval.display_priority: 0
+        disable_generic_tags.display_priority: 0
+        empty_default_hostname.display_priority: 0
   - template: logs
     example:
     - type: file
