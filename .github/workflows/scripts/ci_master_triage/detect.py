@@ -257,7 +257,7 @@ def build_enrichment_jobs(selected: list[RunRecord], limit: int = 8) -> list[dic
     return jobs[:limit]
 
 
-def write_outputs(should_alert: bool, severity: str, run_count: int) -> None:
+def write_outputs(should_alert: bool, severity: Severity, run_count: int) -> None:
     out_path = env("GITHUB_OUTPUT")
     if not out_path:
         return
