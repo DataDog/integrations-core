@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 37.42.0 / 2026-07-08
+
+***Added***:
+
+* Add a `DBMS` class attribute to `DatabaseCheck` so integrations can declare their DBM platform identifier explicitly. The `dbms` property now returns `DBMS` when set and only falls back to the deprecated class-name derivation (with a warning) when it is not. ([#24297](https://github.com/DataDog/integrations-core/pull/24297))
+
 ## 37.41.0 / 2026-06-30
 
 ***Added***:

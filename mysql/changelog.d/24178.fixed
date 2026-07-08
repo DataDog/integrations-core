@@ -1,1 +1,0 @@
-Fix MariaDB multi-channel replication reporting 0 channels by using SHOW ALL REPLICAS STATUS when no specific channel is configured.
