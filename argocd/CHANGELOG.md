@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+<<<<<<< HEAD
 ## 4.7.0 / 2026-06-18 / Agent 7.81.0
+=======
+## 4.8.0 / 2026-07-08
+
+***Added***:
+
+* Add opt-in streaming of Argo CD Application changes for near real-time generic resource collection, configurable per-resource-type collection intervals, and a `collect_openmetrics` option to collect generic resources without scraping metrics. ([#24288](https://github.com/DataDog/integrations-core/pull/24288))
+
+## 4.7.0 / 2026-06-18
+>>>>>>> 0ee740bd4f ([Release] Release all changed integrations for 7.82 (#24439))
 
 ***Added***:
 
