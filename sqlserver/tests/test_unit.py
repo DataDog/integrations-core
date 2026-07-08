@@ -521,6 +521,42 @@ def test_azure_cross_database_queries_excluded(get_cursor, mock_connect, instanc
     assert len(cross_database_metrics) == 0
 
 
+@pytest.mark.parametrize(
+    'resource_id',
+    [
+        pytest.param(
+            '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/My-RG'
+            '/providers/Microsoft.Sql/servers/my-server/databases/my-db',
+            id='resource_id_set',
+        ),
+        pytest.param(None, id='resource_id_unset'),
+    ],
+)
+def test_azure_resource_id_emitted_as_tag(instance_minimal_defaults, resource_id):
+    instance = copy.deepcopy(instance_minimal_defaults)
+    instance['dbm'] = True
+    instance['reported_hostname'] = 'my-instance.database.windows.net'
+    instance['database'] = 'my-db'
+    azure = {
+        'deployment_type': 'sql_database',
+        'fully_qualified_domain_name': 'my-instance.database.windows.net',
+    }
+    if resource_id is not None:
+        azure['resource_id'] = resource_id
+    instance['azure'] = azure
+
+    check = SQLServer(CHECK_NAME, {}, [instance])
+    check.set_resource_tags()
+    tags = check.tag_manager.get_tags()
+
+    if resource_id is not None:
+        # Emitted verbatim (canonical case) as a regular tag so it survives to the
+        # database_instance metadata for Azure log correlation.
+        assert 'resource_id:{}'.format(resource_id) in tags
+    else:
+        assert not any(tag.startswith('resource_id:') for tag in tags)
+
+
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
     fetchall_results, mock_cursor = _mock_database_list()
     all_dbs = {Database(r.name) for r in fetchall_results}
