@@ -1,0 +1,1 @@
+Fix a segfault in `AdminClient.describe_cluster()` against brokers with a large controller/broker ID (e.g. WarpStream), caused by a buffer overrun in librdkafka's cluster_id parsing.
