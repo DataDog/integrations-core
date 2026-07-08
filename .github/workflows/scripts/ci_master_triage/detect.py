@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
-from common import FailedTarget, RunRecord, Severity, env
+from common import FailedTarget, RunRecord, Severity, TriageOutput, env, parse_github_timestamp
 
 API_ROOT = "https://api.github.com"
 REQUEST_TIMEOUT = 30
@@ -110,11 +110,12 @@ def iter_failed_jobs(run_id: int, token: str, repo: str) -> Iterator[dict[str, A
         page += 1
 
 
-def classify(failed_targets: list[FailedTarget], storm_threshold: int) -> str:
+def classify(failed_targets: list[FailedTarget], storm_threshold: int) -> Severity:
     """Severity for one run from its failed test targets."""
     if not failed_targets:
         return Severity.NONE
-    if len(failed_targets) >= storm_threshold:
+    total_legs = sum(t["leg_count"] for t in failed_targets)
+    if len(failed_targets) >= storm_threshold or total_legs >= storm_threshold:
         return Severity.HIGH
     if any(t["target"] in BASE_PACKAGE_TARGETS for t in failed_targets):
         return Severity.HIGH
@@ -184,7 +185,7 @@ def candidate_runs(token: str, repo: str, cutoff: datetime, explicit_ids: list[i
             runs = payload.get("workflow_runs", [])
             reached_cutoff = False
             for run in runs:
-                created = datetime.fromisoformat(run["created_at"].replace("Z", "+00:00"))
+                created = parse_github_timestamp(run["created_at"])
                 if created < cutoff:
                     # Results are newest-first, so nothing past here is in-window.
                     reached_cutoff = True
@@ -206,7 +207,7 @@ def select_runs(records: list[RunRecord], mode: str, posted: dict[int, str]) -> 
     return selected
 
 
-def overall_severity(selected: list[RunRecord]) -> str:
+def overall_severity(selected: list[RunRecord]) -> Severity:
     """Roll the selected runs up to a single alert severity."""
     if any(r["severity"] == Severity.HIGH for r in selected):
         return Severity.HIGH
@@ -218,7 +219,7 @@ def load_posted_state(state_file: Path) -> dict[int, str]:
     if not state_file.exists():
         return {}
     raw = json.loads(state_file.read_text())
-    posted = raw.get("posted", {})
+    posted = raw.get("posted")
     if isinstance(posted, dict):
         return {int(k): v for k, v in posted.items()}
     # Legacy format: a bare list of ids with no timestamps.
@@ -234,7 +235,7 @@ def prune_posted(posted: dict[int, str], now: datetime) -> dict[int, str]:
             kept[run_id] = now.isoformat()
             continue
         try:
-            created = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+            created = parse_github_timestamp(created_at)
         except ValueError:
             kept[run_id] = now.isoformat()
             continue
@@ -277,7 +278,11 @@ def main() -> int:
     storm_threshold = int(env("STORM_THRESHOLD", "25"))
     repo_root = Path(env("REPO_ROOT", "."))
     state_file = Path(env("STATE_FILE", "ci_triage_state.json"))
-    explicit_ids = [int(x) for x in env("EXPLICIT_RUN_IDS").split(",") if x.strip()]
+    try:
+        explicit_ids = [int(x) for x in env("EXPLICIT_RUN_IDS").split(",") if x.strip()]
+    except ValueError as exc:
+        print(f"EXPLICIT_RUN_IDS must be a comma-separated list of ints: {exc}", file=sys.stderr)
+        return 1
 
     lookback = (
         timedelta(minutes=int(env("LOOKBACK_MINUTES", "45")))
@@ -298,7 +303,7 @@ def main() -> int:
     non_test_count = sum(1 for r in records if r["run_id"] not in posted and r["severity"] == Severity.NONE)
     overall = overall_severity(selected)
 
-    output = {
+    output: TriageOutput = {
         "mode": mode,
         "severity": overall,
         "runs": selected,

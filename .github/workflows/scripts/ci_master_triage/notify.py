@@ -15,7 +15,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from common import env
+from common import FailedTarget, RunRecord, TriageOutput, env
 
 POST_URL = "https://slack.com/api/chat.postMessage"
 MAX_RUNS_SHOWN = 15
@@ -23,7 +23,7 @@ MAX_TARGETS_PER_RUN = 20
 REQUEST_TIMEOUT = 30
 
 
-def target_line(targets: list[dict[str, Any]]) -> str:
+def target_line(targets: list[FailedTarget]) -> str:
     """Render failed targets as linked job-names, capped for readability."""
     shown = targets[:MAX_TARGETS_PER_RUN]
     links = []
@@ -38,7 +38,7 @@ def target_line(targets: list[dict[str, Any]]) -> str:
     return ", ".join(links)
 
 
-def run_block(run: dict[str, Any], enrichment: dict[str, str]) -> dict[str, Any]:
+def run_block(run: RunRecord, enrichment: dict[str, str]) -> dict[str, Any]:
     """One Slack section block summarizing a single broken run."""
     header = (
         f"*<{run['url']}|{run['workflow']}>* · `{run['short_sha']}` · "
@@ -51,7 +51,7 @@ def run_block(run: dict[str, Any], enrichment: dict[str, str]) -> dict[str, Any]
     return {"type": "section", "text": {"type": "mrkdwn", "text": "\n".join(lines)}}
 
 
-def build_blocks(data: dict[str, Any], enrichment: dict[str, str]) -> list[dict[str, Any]]:
+def build_blocks(data: TriageOutput, enrichment: dict[str, str]) -> list[dict[str, Any]]:
     runs = data["runs"]
     realtime = data["mode"] == "realtime"
     if realtime:
@@ -77,7 +77,7 @@ def build_blocks(data: dict[str, Any], enrichment: dict[str, str]) -> list[dict[
     return blocks
 
 
-def fallback_text(data: dict[str, Any]) -> str:
+def fallback_text(data: TriageOutput) -> str:
     return f"Master CI {data['mode']} — {len(data['runs'])} broken run(s) ({data['severity']})"
 
 

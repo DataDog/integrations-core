@@ -17,9 +17,8 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
 
-from common import env
+from common import TriageOutput, env
 
 MODEL = "claude-opus-4-8"
 MAX_TOKENS = 8000
@@ -89,24 +88,26 @@ def parse_enrichment(text: str) -> dict[str, str]:
     """Pull a ``{run_id: note}`` object out of the model response."""
     if not text:
         return {}
-    parsed: Any = None
     try:
         parsed = json.loads(text)
     except json.JSONDecodeError:
         match = re.search(r"\{.*?\}", text, re.DOTALL)
-        if match:
-            try:
-                parsed = json.loads(match.group(0))
-            except json.JSONDecodeError:
-                return {}
-    return {str(k): str(v) for k, v in parsed.items()} if isinstance(parsed, dict) else {}
+        if not match:
+            return {}
+        try:
+            parsed = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return {}
+    if not isinstance(parsed, dict):
+        return {}
+    return {str(k): str(v) for k, v in parsed.items()}
 
 
 def main() -> int:
     out_path = Path(env("ENRICHMENT_FILE", "enrichment.json"))
     out_path.write_text("{}")  # ensure the file exists even if we bail early
 
-    data = json.loads(Path(env("TRIAGE_OUTPUT", "triage_output.json")).read_text())
+    data: TriageOutput = json.loads(Path(env("TRIAGE_OUTPUT", "triage_output.json")).read_text())
     jobs: list[dict[str, str]] = data.get("enrichment_jobs", [])
     if not jobs:
         print("No enrichment jobs; wrote empty mapping.")
