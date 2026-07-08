@@ -689,6 +689,48 @@ class TestProduceMessageAction:
             mock_prod.assert_called_once()
             check.serializer.schema_registry.get_latest_schema_id.assert_called_once_with('books-value')
 
+    def test_produce_message_key_avro_schema_registry(self, aggregator, dd_run_check):
+        """Test producing a key resolved against the latest Schema Registry schema for the topic."""
+        avro_schema = common.BOOK_AVRO_SCHEMA
+        book = common.BOOK
+
+        instance = {
+            'remote_config_id': 'test-produce-message-006',
+            'kafka_connect_str': 'localhost:9092',
+            'schema_registry_url': 'http://localhost:8081',
+            'produce_message': {
+                'cluster': 'test-cluster',
+                'topic': 'test-topic',
+                'value': base64.b64encode(b'raw-value').decode('utf-8'),
+                'key': json.dumps(book),
+                'key_uses_schema_registry': True,
+                'partition': -1,
+            },
+        }
+
+        def mock_produce(*args, **kwargs):
+            return {'delivered': True, 'partition': 0, 'offset': 1}
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        check.serializer.schema_registry.get_latest_schema_id = MagicMock(return_value=350)
+        check.serializer.schema_registry.get_schema = MagicMock(return_value=(avro_schema, 'AVRO', []))
+
+        with (
+            patch.object(check.kafka_client, 'produce_message', side_effect=mock_produce) as mock_prod,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+        ):
+            dd_run_check(check)
+
+            mock_prod.assert_called_once()
+            key_bytes = mock_prod.call_args[1]['key']
+            assert key_bytes[:5] == b'\x00\x00\x00\x01\x5e'
+            assert mock_prod.call_args[1]['value'] == b'raw-value'
+            check.serializer.schema_registry.get_latest_schema_id.assert_called_once_with('test-topic-key')
+
+            decoded, schema_id = check.deserializer.deserialize_message(key_bytes, 'avro', avro_schema, True)
+            assert json.loads(decoded) == book
+            assert schema_id == 350
+
 
 class TestReadMessagesAdvancedFiltering:
     """Test read_messages with more complex filtering scenarios."""

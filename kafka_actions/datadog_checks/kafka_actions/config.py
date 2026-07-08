@@ -178,10 +178,6 @@ class KafkaActionsConfig:
                 f"Invalid {field_name}: {format_type}. Supported formats: {', '.join(sorted(VALID_FORMATS))}"
             )
 
-    def _is_valid_schema_id(self, schema_id: Any) -> bool:
-        """Check that schema_id is an int (not bool) in the Confluent wire-format's 4-byte range."""
-        return isinstance(schema_id, int) and not isinstance(schema_id, bool) and 0 <= schema_id < 2**32
-
     def _validate_read_schema_requirement(
         self,
         config: dict[str, Any],
@@ -192,8 +188,7 @@ class KafkaActionsConfig:
         """Validate that avro/protobuf formats have a schema.
 
         MessageDeserializer tolerates uses_schema_registry without a configured registry for non-schema
-        formats (it just strips the wire-format header), and doesn't require a schema_id since it reads
-        whatever schema_id is embedded in the wire format - so neither is enforced here for those formats.
+        formats (it just strips the wire-format header) - so it's not enforced here for those formats.
         'raw' never touches the Schema Registry at all.
         """
         if format_type not in SCHEMA_FORMATS:
@@ -205,10 +200,6 @@ class KafkaActionsConfig:
                 raise ConfigurationError(
                     f"{side}_uses_schema_registry=true requires 'schema_registry_url' to be configured"
                 )
-
-            schema_id = config.get(f'{side}_schema_id')
-            if schema_id is not None and not self._is_valid_schema_id(schema_id):
-                raise ConfigurationError(f"{side}_schema_id must be an integer in the range [0, 2**32)")
         elif not config.get(f'{side}_schema'):
             raise ConfigurationError(
                 f"{side}_format='{format_type}' requires either '{side}_uses_schema_registry=true' "

@@ -34,7 +34,7 @@ class MessageSerializer:
     def __init__(self, log, schema_registry=None):
         self.log = log
         self.schema_registry = schema_registry
-        self._registry_schema_cache: dict[int, tuple[object, str]] = {}
+        self._registry_schema_cache: dict[int, tuple[object, str, int]] = {}
 
     def serialize_message(
         self,
@@ -93,7 +93,7 @@ class MessageSerializer:
         protobuf_json_format.Parse(value, instance)
         return instance.SerializeToString()
 
-    def _fetch_and_build_schema(self, schema_subject: str):
+    def _fetch_and_build_schema(self, schema_subject: str) -> tuple[object, str, int]:
         """Resolve the latest schema for schema_subject and build it, caching by schema_id.
 
         The subject -> schema_id lookup is never cached (a new version may be registered
@@ -110,6 +110,8 @@ class MessageSerializer:
             return cached
 
         schema_str, schema_type, dep_schemas = self.schema_registry.get_schema(schema_id)
+        if schema_type not in REGISTRY_TYPE_MAP:
+            raise ValueError(f"Unsupported schema type '{schema_type}' from Schema Registry")
         actual_format = REGISTRY_TYPE_MAP[schema_type]
 
         schema = build_schema_for_format(actual_format, schema_str, from_registry=True, dep_schemas=dep_schemas)

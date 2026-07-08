@@ -840,4 +840,4 @@ class KafkaActionsCheck(AgentCheck):
                 schema_subject=schema_subject if uses_schema_registry else None,
             )
         except Exception as e:
-            raise Exception(f"Failed to serialize {side}: {e}")
+            raise Exception(f"Failed to serialize {side}: {e}") from e

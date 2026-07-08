@@ -577,11 +577,12 @@ files:
     # ========================================================================
     - name: produce_message
       description: |
-        Configuration for producing a message to a Kafka topic.
-        Key, value, and headers are base64-encoded strings unless {side}_uses_schema_registry
-        is set, in which case that side is JSON text serialized against the latest schema
-        registered for the topic's subject and framed with the Confluent Schema Registry
-        wire format (avro, protobuf, or JSON, whichever the registry reports).
+        Configuration for producing a message to a Kafka topic. Headers are always
+        base64-encoded. Key and value are base64-encoded too, unless
+        value_uses_schema_registry / key_uses_schema_registry is set, in which case
+        that side is JSON text serialized against the latest schema registered for
+        the topic's subject and framed with the Confluent Schema Registry wire
+        format (Avro, Protobuf, or JSON, whichever the registry reports).
       value:
         type: object
         required:
