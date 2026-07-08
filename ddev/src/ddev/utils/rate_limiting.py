@@ -256,16 +256,17 @@ class BudgetGovernor:
         if wait_seconds <= 0:
             reason = PacingReason.NONE
         self.on_event(PacingEvent(wait_seconds=wait_seconds, reason=reason))
-        first = True
+        floor = max(deadline, self.pause_until)
         for _ in range(MAX_WAIT_ITERATIONS):
             delay = max(deadline, self.pause_until) - self.now()
             if delay <= 0:
                 return
-            if not first:
-                # A second positive delay can only happen because pause_until grew while
-                # sleeping, which only happens on a secondary-limit observe.
+            new_floor = max(deadline, self.pause_until)
+            if new_floor > floor:
+                # The floor only grows when pause_until does, i.e. a secondary-limit observe
+                # extended the wait mid-sleep; emit so the extension is observable.
                 self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.SECONDARY_LIMIT))
-            first = False
+                floor = new_floor
             await asyncio.sleep(delay)
         raise RuntimeError(
             f"BudgetGovernor.wait failed to converge after {MAX_WAIT_ITERATIONS} iterations "

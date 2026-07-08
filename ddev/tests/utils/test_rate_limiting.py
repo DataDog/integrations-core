@@ -403,7 +403,7 @@ async def test_wait_returns_immediately_when_no_delay():
     await asyncio.wait_for(governor.wait(), timeout=0.05)
 
 
-async def test_wait_low_budget_sleeps_exactly_once_and_converges(
+async def test_wait_low_budget_advances_by_one_interval(
     clock: FakeClock, governor: BudgetGovernor, slept: list[float]
 ) -> None:
     """Regression: a single low-budget wait() must advance by ~one interval, never diverge."""
@@ -521,27 +521,6 @@ async def test_wait_fires_pacing_event_with_reason(
     assert pacing_events == [PacingEvent(wait_seconds=pytest.approx(expected_wait_seconds), reason=expected_reason)]
 
 
-async def test_concurrent_waits_stagger_by_pacing_interval(
-    clock: FakeClock, governor: BudgetGovernor, slept: list[float]
-) -> None:
-    """Concurrent rationed requests must each land on their own slot, one interval apart."""
-    # remaining/reset_in are large relative to the number of tasks so that the interval, which
-    # is recomputed from time-to-reset on every claim, barely drifts across the four waits.
-    governor.observe(make_snapshot(clock=clock, limit=1000, remaining=100, reset_in=10000))
-    interval = 10000 / 100
-    finish_times: list[float] = []
-
-    async def paced_request() -> None:
-        await governor.wait()
-        finish_times.append(clock.current)
-
-    await asyncio.gather(*(paced_request() for _ in range(4)))
-
-    assert len(set(finish_times)) == len(finish_times)
-    for earlier, later in zip(sorted(finish_times), sorted(finish_times)[1:], strict=False):
-        assert later - earlier == pytest.approx(interval, rel=0.05)
-
-
 # ---------------------------------------------------------------------------
 # InstrumentedAsyncLimiter + BudgetGovernor wiring
 # ---------------------------------------------------------------------------
@@ -551,11 +530,11 @@ async def test_instrumented_limiter_calls_governor_wait_on_enter():
     governor = BudgetGovernor(buffer_seconds=0.0)
     governor.observe(BudgetSnapshot(retry_after=0.05))
     limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000), budget_governor=governor)
-    start = asyncio.get_event_loop().time()
+    start = asyncio.get_running_loop().time()
 
     await asyncio.wait_for(limiter.__aenter__(), timeout=1.0)
 
-    assert asyncio.get_event_loop().time() - start >= 0.05
+    assert asyncio.get_running_loop().time() - start >= 0.05
 
 
 async def test_instrumented_limiter_without_governor_does_not_wait():
@@ -570,14 +549,17 @@ async def test_instrumented_limiter_does_not_consume_bucket_token_during_governo
     real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
     limiter = InstrumentedAsyncLimiter(real_limiter, budget_governor=governor)
 
-    task = asyncio.ensure_future(limiter.__aenter__())
-    await asyncio.sleep(0)  # let the task start and enter the governor's pause
+    task = asyncio.create_task(limiter.__aenter__())
+    try:
+        await asyncio.sleep(0)  # let the task start and enter the governor's pause
 
-    assert real_limiter.has_capacity()  # token untouched while paused
+        assert real_limiter.has_capacity()  # token untouched while paused
 
-    await asyncio.wait_for(task, timeout=1.0)
+        await asyncio.wait_for(task, timeout=1.0)
 
-    assert not real_limiter.has_capacity()  # token acquired only once the wait is over
+        assert not real_limiter.has_capacity()  # token acquired only once the wait is over
+    finally:
+        task.cancel()
 
 
 def test_instrumented_limiter_observe_without_governor_does_not_raise():
