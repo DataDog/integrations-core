@@ -808,11 +808,19 @@ class KafkaActionsCheck(AgentCheck):
 
         value_uses_schema_registry = config.get('value_uses_schema_registry', False)
         value_schema_subject = config.get('value_schema_subject') or f"{topic}-value"
-        value_bytes = self._serialize(value, value_uses_schema_registry, value_schema_subject)
+        value_bytes = self.serializer.serialize_message(
+            value, uses_schema_registry=value_uses_schema_registry, schema_subject=value_schema_subject
+        )
 
         key_uses_schema_registry = config.get('key_uses_schema_registry', False)
         key_schema_subject = config.get('key_schema_subject') or f"{topic}-key"
-        key_bytes = self._serialize(key, key_uses_schema_registry, key_schema_subject) if key else None
+        key_bytes = (
+            self.serializer.serialize_message(
+                key, uses_schema_registry=key_uses_schema_registry, schema_subject=key_schema_subject
+            )
+            if key
+            else None
+        )
 
         headers_decoded = {}
         for header_key, header_value_b64 in headers_b64.items():
@@ -833,10 +841,3 @@ class KafkaActionsCheck(AgentCheck):
             raise Exception(f"Message delivery failed: {result['error']}")
 
         return {'topic': topic, 'partition': result['partition'], 'offset': result['offset']}
-
-    def _serialize(self, value: str, use_schema_registry: bool, schema_subject: str) -> bytes:
-        return self.serializer.serialize_message(
-            value,
-            uses_schema_registry=use_schema_registry,
-            schema_subject=schema_subject,
-        )

@@ -50,7 +50,10 @@ class MessageSerializer:
         framed with the Confluent wire format (magic byte + 4-byte schema ID).
         """
         if not uses_schema_registry:
-            return base64.b64decode(value)
+            try:
+                return base64.b64decode(value)
+            except Exception as e:
+                raise ValueError(f"Failed to decode base64 value for subject '{schema_subject}': {e}") from e
 
         if self.schema_registry is None:
             raise ValueError("uses_schema_registry is set but no Schema Registry is configured")

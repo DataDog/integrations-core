@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import base64
+import json
 
 from google.protobuf import (
     any_pb2,
@@ -35,7 +36,7 @@ REGISTRY_TYPE_MAP = {
     'JSON': 'json',
 }
 
-_WELL_KNOWN_TYPE_MODULES = (
+WELL_KNOWN_TYPE_MODULES = (
     any_pb2,
     duration_pb2,
     empty_pb2,
@@ -57,7 +58,7 @@ def preload_well_known_types(pool):
     A custom DescriptorPool doesn't have them by default, so we copy them from
     the generated modules before adding user schemas.
     """
-    for module in _WELL_KNOWN_TYPE_MODULES:
+    for module in WELL_KNOWN_TYPE_MODULES:
         file_name = module.DESCRIPTOR.name
         try:
             pool.FindFileByName(file_name)
@@ -177,8 +178,6 @@ def get_protobuf_message_class(schema_info, message_indices: list[int]):
 
 def build_avro_schema(schema_str: str):
     """Build an Avro schema from a JSON string."""
-    import json
-
     schema = json.loads(schema_str)
 
     if schema is None:

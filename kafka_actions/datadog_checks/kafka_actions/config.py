@@ -171,11 +171,18 @@ class KafkaActionsConfig:
                     f"Invalid method '{method}' for sasl_oauth_token_provider. Must be 'aws_msk_iam' or 'oidc'"
                 )
 
-    def _validate_message_format(self, format_type: str, field_name: str) -> None:
+    def _validate_message_format(self, format_type: str, field_name: str):
         """Validate that a value_format/key_format is one of the supported message formats."""
         if format_type not in VALID_FORMATS:
             raise ConfigurationError(
                 f"Invalid {field_name}: {format_type}. Supported formats: {', '.join(sorted(VALID_FORMATS))}"
+            )
+
+    def _require_schema_registry_url(self, side: str, schema_registry_url: str | None):
+        """Raise if {side}_uses_schema_registry=true but no schema_registry_url is configured."""
+        if not schema_registry_url:
+            raise ConfigurationError(
+                f"{side}_uses_schema_registry=true requires 'schema_registry_url' to be configured"
             )
 
     def _validate_read_schema_requirement(
@@ -184,7 +191,7 @@ class KafkaActionsConfig:
         side: str,
         format_type: str,
         schema_registry_url: str | None,
-    ) -> None:
+    ):
         """Validate that avro/protobuf formats have a schema.
 
         MessageDeserializer tolerates uses_schema_registry without a configured registry for non-schema
@@ -194,12 +201,8 @@ class KafkaActionsConfig:
         if format_type not in SCHEMA_FORMATS:
             return
 
-        uses_schema_registry = config.get(f'{side}_uses_schema_registry')
-        if uses_schema_registry:
-            if not schema_registry_url:
-                raise ConfigurationError(
-                    f"{side}_uses_schema_registry=true requires 'schema_registry_url' to be configured"
-                )
+        if config.get(f'{side}_uses_schema_registry'):
+            self._require_schema_registry_url(side, schema_registry_url)
         elif not config.get(f'{side}_schema'):
             raise ConfigurationError(
                 f"{side}_format='{format_type}' requires either '{side}_uses_schema_registry=true' "
@@ -211,7 +214,7 @@ class KafkaActionsConfig:
         config: dict[str, Any],
         side: str,
         schema_registry_url: str | None,
-    ) -> None:
+    ):
         """Validate that a schema registry is configured when {side}_uses_schema_registry is set.
 
         MessageSerializer resolves the latest schema registered for the topic's subject
@@ -222,10 +225,7 @@ class KafkaActionsConfig:
         if not config.get(f'{side}_uses_schema_registry'):
             return
 
-        if not schema_registry_url:
-            raise ConfigurationError(
-                f"{side}_uses_schema_registry=true requires 'schema_registry_url' to be configured"
-            )
+        self._require_schema_registry_url(side, schema_registry_url)
 
     def _validate_read_messages(self):
         """Validate read_messages action configuration."""

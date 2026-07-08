@@ -614,22 +614,39 @@ class TestProduceMessageAction:
             assert call_kwargs['headers']['version'] == header_version
             assert call_kwargs['partition'] == -1
 
-    def test_produce_message_avro_schema_registry(self, aggregator, dd_run_check):
-        """Test producing a value resolved against the latest Schema Registry schema for the topic."""
+    @pytest.mark.parametrize(
+        'produce_overrides,expected_subject,produced_field',
+        [
+            pytest.param({'value_uses_schema_registry': True}, 'test-topic-value', 'value', id='value_default_subject'),
+            pytest.param(
+                {'value_uses_schema_registry': True, 'value_schema_subject': 'books-value'},
+                'books-value',
+                'value',
+                id='value_schema_subject_override',
+            ),
+            pytest.param({'key_uses_schema_registry': True}, 'test-topic-key', 'key', id='key_default_subject'),
+        ],
+    )
+    def test_produce_message_avro_schema_registry(
+        self, aggregator, dd_run_check, produce_overrides, expected_subject, produced_field
+    ):
+        """Test producing a value/key resolved against a Schema Registry schema, with an optional subject override."""
         avro_schema = common.BOOK_AVRO_SCHEMA
         book = common.BOOK
 
+        produce_message = {'cluster': 'test-cluster', 'topic': 'test-topic', 'partition': -1}
+        if produced_field == 'value':
+            produce_message['value'] = json.dumps(book)
+        else:
+            produce_message['value'] = base64.b64encode(b'raw-value').decode('utf-8')
+            produce_message['key'] = json.dumps(book)
+        produce_message.update(produce_overrides)
+
         instance = {
-            'remote_config_id': 'test-produce-message-004',
+            'remote_config_id': 'test-produce-message-schema-registry',
             'kafka_connect_str': 'localhost:9092',
             'schema_registry_url': 'http://localhost:8081',
-            'produce_message': {
-                'cluster': 'test-cluster',
-                'topic': 'test-topic',
-                'value': json.dumps(book),
-                'value_uses_schema_registry': True,
-                'partition': -1,
-            },
+            'produce_message': produce_message,
         }
 
         def mock_produce(*args, **kwargs):
@@ -646,90 +663,16 @@ class TestProduceMessageAction:
             dd_run_check(check)
 
             mock_prod.assert_called_once()
-            value_bytes = mock_prod.call_args[1]['value']
-            assert value_bytes[:5] == b'\x00\x00\x00\x01\x5e'
-            check.serializer.schema_registry.get_latest_schema_id.assert_called_once_with('test-topic-value')
+            check.serializer.schema_registry.get_latest_schema_id.assert_called_once_with(expected_subject)
 
-            decoded, schema_id = check.deserializer.deserialize_message(value_bytes, 'avro', avro_schema, True)
+            result_bytes = mock_prod.call_args[1][produced_field]
+            assert result_bytes[:5] == b'\x00\x00\x00\x01\x5e'
+            decoded, schema_id = check.deserializer.deserialize_message(result_bytes, 'avro', avro_schema, True)
             assert json.loads(decoded) == book
             assert schema_id == 350
 
-    def test_produce_message_schema_subject_override(self, aggregator, dd_run_check):
-        """Test that value_schema_subject overrides the default '<topic>-value' subject."""
-        avro_schema = common.BOOK_AVRO_SCHEMA
-        book = common.BOOK
-
-        instance = {
-            'remote_config_id': 'test-produce-message-005',
-            'kafka_connect_str': 'localhost:9092',
-            'schema_registry_url': 'http://localhost:8081',
-            'produce_message': {
-                'cluster': 'test-cluster',
-                'topic': 'test-topic',
-                'value': json.dumps(book),
-                'value_uses_schema_registry': True,
-                'value_schema_subject': 'books-value',
-                'partition': -1,
-            },
-        }
-
-        def mock_produce(*args, **kwargs):
-            return {'delivered': True, 'partition': 0, 'offset': 1}
-
-        check = KafkaActionsCheck('kafka_actions', {}, [instance])
-        check.serializer.schema_registry.get_latest_schema_id = MagicMock(return_value=350)
-        check.serializer.schema_registry.get_schema = MagicMock(return_value=(avro_schema, 'AVRO', []))
-
-        with (
-            patch.object(check.kafka_client, 'produce_message', side_effect=mock_produce) as mock_prod,
-            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
-        ):
-            dd_run_check(check)
-
-            mock_prod.assert_called_once()
-            check.serializer.schema_registry.get_latest_schema_id.assert_called_once_with('books-value')
-
-    def test_produce_message_key_avro_schema_registry(self, aggregator, dd_run_check):
-        """Test producing a key resolved against the latest Schema Registry schema for the topic."""
-        avro_schema = common.BOOK_AVRO_SCHEMA
-        book = common.BOOK
-
-        instance = {
-            'remote_config_id': 'test-produce-message-006',
-            'kafka_connect_str': 'localhost:9092',
-            'schema_registry_url': 'http://localhost:8081',
-            'produce_message': {
-                'cluster': 'test-cluster',
-                'topic': 'test-topic',
-                'value': base64.b64encode(b'raw-value').decode('utf-8'),
-                'key': json.dumps(book),
-                'key_uses_schema_registry': True,
-                'partition': -1,
-            },
-        }
-
-        def mock_produce(*args, **kwargs):
-            return {'delivered': True, 'partition': 0, 'offset': 1}
-
-        check = KafkaActionsCheck('kafka_actions', {}, [instance])
-        check.serializer.schema_registry.get_latest_schema_id = MagicMock(return_value=350)
-        check.serializer.schema_registry.get_schema = MagicMock(return_value=(avro_schema, 'AVRO', []))
-
-        with (
-            patch.object(check.kafka_client, 'produce_message', side_effect=mock_produce) as mock_prod,
-            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
-        ):
-            dd_run_check(check)
-
-            mock_prod.assert_called_once()
-            key_bytes = mock_prod.call_args[1]['key']
-            assert key_bytes[:5] == b'\x00\x00\x00\x01\x5e'
-            assert mock_prod.call_args[1]['value'] == b'raw-value'
-            check.serializer.schema_registry.get_latest_schema_id.assert_called_once_with('test-topic-key')
-
-            decoded, schema_id = check.deserializer.deserialize_message(key_bytes, 'avro', avro_schema, True)
-            assert json.loads(decoded) == book
-            assert schema_id == 350
+            if produced_field == 'key':
+                assert mock_prod.call_args[1]['value'] == b'raw-value'
 
 
 class TestReadMessagesAdvancedFiltering:

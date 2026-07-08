@@ -226,7 +226,7 @@ class MessageDeserializer:
 
         Args:
             message: Raw protobuf bytes
-            schema_info: Tuple of (descriptor_pool, file_descriptor_set) from _build_protobuf_schema
+            schema_info: Tuple of (descriptor_pool, file_descriptor_set) from schema_helpers.build_protobuf_schema
             uses_schema_registry: Whether to extract Confluent message indices from the message
         """
         if schema_info is None:

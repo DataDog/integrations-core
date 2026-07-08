@@ -142,3 +142,12 @@ class TestMessageSerializer:
 
         with pytest.raises(ValueError, match="Failed to serialize message for subject 'books-value'"):
             serializer.serialize_message('not valid json', uses_schema_registry=True, schema_subject='books-value')
+
+    def test_serialize_schema_registry_unsupported_schema_type_raises(self, serializer):
+        schema_registry = MagicMock()
+        schema_registry.get_latest_schema_id.return_value = 350
+        schema_registry.get_schema.return_value = ('<xml/>', 'XML', [])
+        serializer.schema_registry = schema_registry
+
+        with pytest.raises(ValueError, match="Unsupported schema type 'XML'"):
+            serializer.serialize_message(BOOK_JSON, uses_schema_registry=True, schema_subject='books-value')
