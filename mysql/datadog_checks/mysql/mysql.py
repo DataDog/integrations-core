@@ -283,6 +283,12 @@ class MySql(DatabaseCheck):
                     "dd.internal.resource",
                     "{}:{}".format(resource_type, self.cloud_metadata.get("azure")["name"]),
                 )
+            resource_id = self.cloud_metadata.get("azure").get("resource_id")
+            if resource_id:
+                # Emitted as a regular tag (not a dd.internal.resource) so it survives to the
+                # database_instance metadata and lets DBM correlate Azure resource logs when the
+                # automatic FQDN-to-resource mapping is unavailable.
+                self.tag_manager.set_tag("resource_id", resource_id, replace=True)
         # finally, emit a `database_instance` resource for this instance
         self.tag_manager.set_tag(
             "dd.internal.resource",

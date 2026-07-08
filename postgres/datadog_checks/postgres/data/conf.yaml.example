@@ -751,6 +751,17 @@ instances:
         #
         # fully_qualified_domain_name: my-postgres-database.database.windows.net
 
+        ## @param resource_id - string - optional - default: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/my-server
+        ## The full Azure Resource Manager (ARM) resource ID of this PostgreSQL server, for example
+        ## /subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.DBforPostgreSQL/flexibleServers/<server>.
+        ##
+        ## Set this when the automatic mapping from the fully qualified domain name to the Azure
+        ## resource cannot be made (for example, proxy connections, a custom `reported_hostname`, or
+        ## when the Azure resource is not crawled), so that DBM can correlate Azure resource logs to
+        ## this database instance.
+        #
+        # resource_id: /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-resource-group/providers/Microsoft.DBforPostgreSQL/flexibleServers/my-server
+
         ## @param managed_authentication - mapping - optional
         ## Configuration section used for Azure AD Authentication.
         ##
