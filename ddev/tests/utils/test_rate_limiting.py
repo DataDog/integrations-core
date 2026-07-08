@@ -166,7 +166,7 @@ def test_reserve_returns_now(
     if advance_seconds:
         clock.advance(advance_seconds)
 
-    assert governor.reserve() == pytest.approx(clock.current)
+    assert governor.reserve()[0] == pytest.approx(clock.current)
 
 
 def test_reserve_paces_requests_when_remaining_at_or_below_reserve(clock: FakeClock, governor: BudgetGovernor) -> None:
@@ -175,9 +175,9 @@ def test_reserve_paces_requests_when_remaining_at_or_below_reserve(clock: FakeCl
 
     # Without advancing the clock, successive reservations return targets that increase by
     # exactly one interval each — the pacing cursor advances exactly once per reserve() call.
-    first = governor.reserve()
-    second = governor.reserve()
-    third = governor.reserve()
+    first, _ = governor.reserve()
+    second, _ = governor.reserve()
+    third, _ = governor.reserve()
 
     assert first == pytest.approx(clock.current)
     assert second - first == pytest.approx(interval)
@@ -189,8 +189,8 @@ def test_reserve_caps_pacing_interval_at_max_wait_seconds(clock: FakeClock) -> N
     governor = BudgetGovernor(now=clock, max_wait_seconds=30.0)
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=1, reset_in=3600))
 
-    first = governor.reserve()
-    second = governor.reserve()
+    first, _ = governor.reserve()
+    second, _ = governor.reserve()
 
     assert first == pytest.approx(clock.current)
     assert second - first == pytest.approx(30.0)
@@ -201,8 +201,8 @@ def test_reserve_does_not_cap_pacing_interval_below_max_wait_seconds(clock: Fake
     governor = BudgetGovernor(now=clock, max_wait_seconds=30.0)
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))
 
-    first = governor.reserve()
-    second = governor.reserve()
+    first, _ = governor.reserve()
+    second, _ = governor.reserve()
 
     assert second - first == pytest.approx(10.0)
 
@@ -212,7 +212,7 @@ def test_max_wait_seconds_does_not_cap_exhausted_budget_hard_pause(clock: FakeCl
     governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=30.0)
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=3600))
 
-    assert governor.reserve() == pytest.approx(clock.current + 3601.0)
+    assert governor.reserve()[0] == pytest.approx(clock.current + 3601.0)
 
 
 def test_max_wait_seconds_does_not_cap_retry_after_hard_pause(clock: FakeClock) -> None:
@@ -220,14 +220,14 @@ def test_max_wait_seconds_does_not_cap_retry_after_hard_pause(clock: FakeClock) 
     governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=30.0)
     governor.observe(BudgetSnapshot(retry_after=600.0))
 
-    assert governor.reserve() == pytest.approx(clock.current + 601.0)
+    assert governor.reserve()[0] == pytest.approx(clock.current + 601.0)
 
 
 def test_reserve_exhausted_budget_targets_reset_plus_buffer(clock: FakeClock) -> None:
     governor = BudgetGovernor(now=clock, buffer_seconds=2.0)
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=50))
 
-    assert governor.reserve() == pytest.approx(clock.current + 52.0)
+    assert governor.reserve()[0] == pytest.approx(clock.current + 52.0)
 
 
 def test_observe_with_retry_after_sets_hard_pause_and_fires_event(clock: FakeClock) -> None:
@@ -236,7 +236,7 @@ def test_observe_with_retry_after_sets_hard_pause_and_fires_event(clock: FakeClo
 
     governor.observe(BudgetSnapshot(retry_after=30.0))
 
-    assert governor.reserve() == pytest.approx(clock.current + 31.0)
+    assert governor.reserve()[0] == pytest.approx(clock.current + 31.0)
     secondary_limit_events = [event for event in events if isinstance(event, SecondaryLimitEvent)]
     assert secondary_limit_events == [SecondaryLimitEvent(retry_after_seconds=30.0, pause_seconds=pytest.approx(31.0))]
 
@@ -257,9 +257,9 @@ def test_reserve_returns_paced_slot_when_it_exceeds_pause_until(clock: FakeClock
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))
     interval = 100 / 10
 
-    first_slot = governor.reserve()  # claims a slot at now, advances the cursor by one interval
+    first_slot, _ = governor.reserve()  # claims a slot at now, advances the cursor by one interval
     governor.observe(BudgetSnapshot(retry_after=1.0))  # pause_until = now + 1.0, well below the next paced slot
-    second_slot = governor.reserve()
+    second_slot, _ = governor.reserve()
 
     assert first_slot == pytest.approx(clock.current)
     assert second_slot == pytest.approx(clock.current + interval)
@@ -387,14 +387,14 @@ def test_claim_paced_slot_interval_widens_after_lower_remaining_observed(
 ) -> None:
     governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))
 
-    first = governor.reserve()
-    second = governor.reserve()
+    first, _ = governor.reserve()
+    second, _ = governor.reserve()
     interval_before = second - first
 
     governor.observe(BudgetSnapshot(remaining=5))  # same reset_at, same clock, fewer requests left
 
-    third = governor.reserve()
-    fourth = governor.reserve()
+    third, _ = governor.reserve()
+    fourth, _ = governor.reserve()
     interval_after = fourth - third
 
     assert interval_after > interval_before

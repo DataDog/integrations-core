@@ -203,16 +203,13 @@ class BudgetGovernor:
             )
         )
 
-    def reserve(self) -> float:
-        """Reserve a pacing slot for the next request and return its absolute epoch target.
+    def reserve(self) -> tuple[float, PacingReason]:
+        """Reserve a pacing slot for the next request; return its epoch target and the reason.
 
-        Advances the pacing cursor at most once per call so a single caller reserves exactly
-        one slot; the returned target is floored by any active secondary-limit hard pause.
+        Advances the pacing cursor at most once per call so a single caller reserves exactly one
+        slot. The target is floored by any active secondary-limit hard pause, which then dominates
+        the reason.
         """
-        return self.reserve_with_reason()[0]
-
-    def reserve_with_reason(self) -> tuple[float, PacingReason]:
-        """Reserve a pacing slot like reserve(), also returning why the target ended up there."""
         target, reason = self.budget_target_with_reason(self.now())
         if self.pause_until > target:
             return self.pause_until, PacingReason.SECONDARY_LIMIT
@@ -244,7 +241,7 @@ class BudgetGovernor:
 
     async def wait(self) -> None:
         """Reserve one slot, then sleep until its target and any hard-pause floor elapse."""
-        deadline, reason = self.reserve_with_reason()
+        deadline, reason = self.reserve()
         now = self.now()
         wait_seconds = max(0.0, deadline - now)
         if wait_seconds <= 0:
