@@ -1,0 +1,32 @@
+diff --git a/src/rdkafka_metadata.c b/src/rdkafka_metadata.c
+index 552c10c0..1a2b3c4d 100644
+--- a/src/rdkafka_metadata.c
++++ b/src/rdkafka_metadata.c
+@@ -676,9 +676,24 @@
+         mdi->cluster_id = NULL;
+         if (ApiVersion >= 2) {
+                 rd_kafka_buf_read_str(rkbuf, &cluster_id);
+-                if (cluster_id.str)
+-                        mdi->cluster_id =
+-                            rd_tmpabuf_write_str(&tbuf, cluster_id.str);
++                if (cluster_id.str) {
++                        /* cluster_id.str points into the network receive
++                         * buffer and is not nul-terminated - the wire
++                         * format's next field (controller_id) follows
++                         * immediately. rd_tmpabuf_write_str() relies on
++                         * strlen(), which would read past the string into
++                         * that adjacent data whenever it doesn't happen to
++                         * contain an early nul byte (e.g. for a large
++                         * controller/broker id), corrupting the copy.
++                         * Use the wire-known length instead. */
++                        size_t cluster_id_len = RD_KAFKAP_STR_LEN(&cluster_id);
++                        char *cluster_id_dst  = rd_tmpabuf_write(
++                            &tbuf, cluster_id.str, cluster_id_len + 1);
++                        if (cluster_id_dst) {
++                                cluster_id_dst[cluster_id_len] = '\0';
++                                mdi->cluster_id = cluster_id_dst;
++                        }
++                }
+         }
+
+         mdi->controller_id = -1;
