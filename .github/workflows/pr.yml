@@ -21,6 +21,10 @@ jobs:
     uses: ./.github/workflows/pr-test.yml
     with:
       repo: core
+      # Set the "test-debug" label on a PR to run its tests with verbose pytest
+      # logging. Useful for inspecting test output, such as E2E discovery
+      # candidate probing, on platforms where tests can't be run locally.
+      pytest-args: ${{ contains(github.event.pull_request.labels.*.name, 'test-debug') && '-rP --log-level=DEBUG' || '' }}
     secrets: inherit
 
     permissions:
