@@ -1,0 +1,1 @@
+Enable TLS certificate verification by default for the Keystone authentication request.
