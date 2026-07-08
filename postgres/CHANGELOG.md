@@ -16,7 +16,7 @@
 * Migrate the Postgres check's tag handling to the shared `TagManager`. ([#24265](https://github.com/DataDog/integrations-core/pull/24265))
 * Remove duplicated agent_hostname logic now provided by the DatabaseCheck base class. ([#24270](https://github.com/DataDog/integrations-core/pull/24270))
 * Remove duplicated database_identifier logic now provided by the DatabaseCheck base class. ([#24278](https://github.com/DataDog/integrations-core/pull/24278))
-* Change display priority of postgres and mysql to keep only most important fields on top ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+* Change display priority of postgres and mysql to keep only most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
 
 ## 23.9.1 / 2026-06-16
 
