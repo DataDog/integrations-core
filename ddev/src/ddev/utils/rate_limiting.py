@@ -41,15 +41,21 @@ class BudgetSnapshot:
     retry_after: float | None = None
 
     def merged_with(self, updates: BudgetSnapshot) -> BudgetSnapshot:
-        """Return a new snapshot with the non-None fields of *updates* overlaid on this one.
+        """Return a new snapshot combining this observation with a newer one (*updates*).
 
-        A response only carries the headers it reported, so a None field in *updates* means
-        "not reported this time" and must not clobber a value we already know.
+        A None field in *updates* means "not reported this time" and keeps the prior value.
+        Within one window (unchanged reset_at) remaining is monotonically non-increasing, so a
+        higher remaining from a stale, out-of-order response is discarded in favour of the lower
+        one; a larger reset_at is a new window and adopts the reported remaining as-is.
         """
+        reset_at = self.reset_at if updates.reset_at is None else updates.reset_at
+        remaining = self.remaining if updates.remaining is None else updates.remaining
+        if remaining is not None and self.remaining is not None and reset_at == self.reset_at:
+            remaining = min(remaining, self.remaining)
         return BudgetSnapshot(
             limit=self.limit if updates.limit is None else updates.limit,
-            remaining=self.remaining if updates.remaining is None else updates.remaining,
-            reset_at=self.reset_at if updates.reset_at is None else updates.reset_at,
+            remaining=remaining,
+            reset_at=reset_at,
             retry_after=self.retry_after if updates.retry_after is None else updates.retry_after,
         )
 
@@ -110,30 +116,14 @@ class BudgetGovernor:
     def observe(self, snapshot: BudgetSnapshot) -> None:
         """Update governor state from a freshly observed provider rate-limit snapshot.
 
-        Merges are commutative so out-of-order concurrent responses converge to the strictest
+        Updates are commutative so out-of-order concurrent responses converge to the strictest
         constraint seen: the longest secondary-limit pause and the lowest remaining per window.
         """
         if snapshot.retry_after is not None:
             self.pause_until = max(self.pause_until, self.now() + snapshot.retry_after + self.buffer_seconds)
             self.on_secondary_limit(snapshot.retry_after)
-        self.budget = self.reconcile_budget(snapshot)
+        self.budget = self.budget.merged_with(snapshot)
         self.notify_if_budget_low()
-
-    def reconcile_budget(self, snapshot: BudgetSnapshot) -> BudgetSnapshot:
-        """Merge a snapshot, keeping the lowest remaining within the current window.
-
-        Remaining only decreases until the window resets, so a stale out-of-order response
-        reporting a higher remaining must not inflate it; a larger reset_at is a new window
-        and adopts the fresh remaining as-is.
-        """
-        merged = self.budget.merged_with(snapshot)
-        if (
-            self.budget.remaining is not None
-            and merged.remaining is not None
-            and merged.reset_at == self.budget.reset_at
-        ):
-            return dataclasses.replace(merged, remaining=min(self.budget.remaining, merged.remaining))
-        return merged
 
     def notify_if_budget_low(self) -> None:
         """Fire the on_budget_low callback when the tracked budget is at or below the reserve."""

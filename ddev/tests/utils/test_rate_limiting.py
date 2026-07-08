@@ -249,23 +249,6 @@ def test_observe_with_retry_after_sets_hard_pause_and_fires_callback(clock: Fake
     on_secondary_limit.assert_called_once_with(30.0)
 
 
-def test_observe_keeps_lowest_remaining_within_window(clock: FakeClock, governor: BudgetGovernor) -> None:
-    """An out-of-order response reporting a higher remaining for the same window must not inflate it."""
-    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=4000, reset_in=60))
-    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=4999, reset_in=60))
-
-    assert governor.budget.remaining == 4000
-
-
-def test_observe_adopts_new_remaining_when_window_advances(clock: FakeClock, governor: BudgetGovernor) -> None:
-    """A later reset_at is a fresh window, so the new (higher) remaining is adopted as-is."""
-    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=100, reset_in=60))
-    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=4999, reset_in=3600))
-
-    assert governor.budget.remaining == 4999
-    assert governor.budget.reset_at == clock.current + 3600
-
-
 def test_observe_keeps_longest_retry_after_pause(clock: FakeClock) -> None:
     """A later, shorter retry_after must not shorten an already-committed secondary-limit pause."""
     governor = BudgetGovernor(now=clock, buffer_seconds=0.0)
@@ -357,6 +340,25 @@ def test_merged_with_coalesces_retry_after(
     merged = base.merged_with(BudgetSnapshot(retry_after=update_retry_after))
 
     assert merged.retry_after == expected
+
+
+def test_merged_with_keeps_lowest_remaining_within_window() -> None:
+    """Within one window (same reset_at) a stale higher remaining must not inflate the value."""
+    base = BudgetSnapshot(limit=5000, remaining=4000, reset_at=1700000000.0)
+
+    merged = base.merged_with(BudgetSnapshot(remaining=4999, reset_at=1700000000.0))
+
+    assert merged.remaining == 4000
+
+
+def test_merged_with_adopts_new_remaining_when_window_advances() -> None:
+    """A larger reset_at is a new window, so the reported remaining is adopted as-is."""
+    base = BudgetSnapshot(limit=5000, remaining=100, reset_at=1700000000.0)
+
+    merged = base.merged_with(BudgetSnapshot(remaining=4999, reset_at=1700003600.0))
+
+    assert merged.remaining == 4999
+    assert merged.reset_at == 1700003600.0
 
 
 def test_observe_partial_snapshot_does_not_clobber_known_budget(clock: FakeClock, governor: BudgetGovernor) -> None:
