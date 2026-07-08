@@ -47,8 +47,15 @@ class BudgetSnapshot:
         A None field in *updates* means "not reported this time" and keeps the prior value.
         Within one window (unchanged reset_at) remaining is monotonically non-increasing, so a
         higher remaining from a stale, out-of-order response is discarded in favour of the lower
-        one; a larger reset_at is a new window and adopts the reported remaining as-is.
+        one; a larger reset_at is a new window and adopts the reported remaining as-is. A smaller
+        reset_at than the one already known is a stale, out-of-order response for a previous
+        window: its budget fields are discarded entirely, keeping this snapshot's values, while
+        retry_after is still coalesced since a secondary-limit signal is meaningful regardless of
+        window.
         """
+        retry_after = self.retry_after if updates.retry_after is None else updates.retry_after
+        if self.reset_at is not None and updates.reset_at is not None and updates.reset_at < self.reset_at:
+            return dataclasses.replace(self, retry_after=retry_after)
         reset_at = self.reset_at if updates.reset_at is None else updates.reset_at
         remaining = self.remaining if updates.remaining is None else updates.remaining
         if remaining is not None and self.remaining is not None and reset_at == self.reset_at:
@@ -57,7 +64,7 @@ class BudgetSnapshot:
             limit=self.limit if updates.limit is None else updates.limit,
             remaining=remaining,
             reset_at=reset_at,
-            retry_after=self.retry_after if updates.retry_after is None else updates.retry_after,
+            retry_after=retry_after,
         )
 
 
@@ -177,11 +184,10 @@ class BudgetGovernor:
         constraint seen: the longest secondary-limit pause and the lowest remaining per window.
         """
         if snapshot.retry_after is not None:
-            self.pause_until = max(self.pause_until, self.now() + snapshot.retry_after + self.buffer_seconds)
+            now = self.now()
+            self.pause_until = max(self.pause_until, now + snapshot.retry_after + self.buffer_seconds)
             self.on_event(
-                SecondaryLimitEvent(
-                    retry_after_seconds=snapshot.retry_after, pause_seconds=self.pause_until - self.now()
-                )
+                SecondaryLimitEvent(retry_after_seconds=snapshot.retry_after, pause_seconds=self.pause_until - now)
             )
         self.budget = self.budget.merged_with(snapshot)
         self.emit_budget_event()
@@ -210,12 +216,15 @@ class BudgetGovernor:
         slot. The target is floored by any active secondary-limit hard pause, which then dominates
         the reason.
         """
-        target, reason = self.budget_target_with_reason(self.now())
+        # Race-free under asyncio only because there is no await between reading and advancing
+        # self.next_slot in claim_paced_slot; inserting one here would let concurrent callers
+        # claim the same slot.
+        target, reason = self.claim_budget_target_with_reason(self.now())
         if self.pause_until > target:
             return self.pause_until, PacingReason.SECONDARY_LIMIT
         return target, reason
 
-    def budget_target_with_reason(self, now: float) -> tuple[float, PacingReason]:
+    def claim_budget_target_with_reason(self, now: float) -> tuple[float, PacingReason]:
         """Earliest epoch this request may fire at based on the observed budget, with the reason."""
         budget = self.budget
         # Handle the case where the remote does not provide:
@@ -247,11 +256,21 @@ class BudgetGovernor:
         if wait_seconds <= 0:
             reason = PacingReason.NONE
         self.on_event(PacingEvent(wait_seconds=wait_seconds, reason=reason))
+        first = True
         for _ in range(MAX_WAIT_ITERATIONS):
             delay = max(deadline, self.pause_until) - self.now()
             if delay <= 0:
                 return
+            if not first:
+                # A second positive delay can only happen because pause_until grew while
+                # sleeping, which only happens on a secondary-limit observe.
+                self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.SECONDARY_LIMIT))
+            first = False
             await asyncio.sleep(delay)
+        raise RuntimeError(
+            f"BudgetGovernor.wait failed to converge after {MAX_WAIT_ITERATIONS} iterations "
+            f"(remaining delay: {max(deadline, self.pause_until) - self.now()}s)"
+        )
 
 
 class InstrumentedAsyncLimiter:
@@ -275,10 +294,10 @@ class InstrumentedAsyncLimiter:
         self.name = name
 
     async def __aenter__(self) -> InstrumentedAsyncLimiter:
-        throttled = not self.limiter.has_capacity()
-        await self.limiter.__aenter__()
         if self.budget_governor is not None:
             await self.budget_governor.wait()
+        throttled = not self.limiter.has_capacity()
+        await self.limiter.__aenter__()
         self.on_event(BucketEvent(throttled=throttled, name=self.name))
         return self
 
