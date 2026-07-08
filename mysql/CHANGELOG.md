@@ -15,7 +15,7 @@
 * Remove duplicated agent_hostname logic now provided by the DatabaseCheck base class. ([#24269](https://github.com/DataDog/integrations-core/pull/24269))
 * Remove duplicated tags logic now provided by the DatabaseCheck base class. ([#24273](https://github.com/DataDog/integrations-core/pull/24273))
 * Remove duplicated database_identifier logic now provided by the DatabaseCheck base class. ([#24277](https://github.com/DataDog/integrations-core/pull/24277))
-* Change display priority of postgres and mysql to keep only most important fields on top ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+* Change display priority of postgres and mysql to keep only most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
 
 ## 15.17.2 / 2026-06-18
 
