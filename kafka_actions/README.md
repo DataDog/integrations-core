@@ -65,7 +65,7 @@ This integration does not include service checks.
 Ensure the correct format is specified (`json`, `string`, `bson`, `avro`, `protobuf`) and provide schemas for Avro/Protobuf.
 
 ### Message serialization failures
-By default, `produce_message`'s `key` and `value` are base64-encoded raw bytes. Setting `value_uses_schema_registry` or `key_uses_schema_registry` to `true` (along with a configured `schema_registry_url`) switches that side to JSON text, serialized against the latest schema registered for the topic's `<topic>-value`/`<topic>-key` subject — or the subject named by `value_schema_subject`/`key_schema_subject`, if set. The wire format (Avro, Protobuf, or JSON) is whatever the Schema Registry reports for that schema, not something you configure directly. Avro schemas with `bytes` or `fixed` fields aren't supported this way, since JSON has no native binary type.
+By default, `produce_message`'s `key` and `value` are base64-encoded raw bytes. Setting `value_uses_schema_registry` or `key_uses_schema_registry` to `true` (along with a configured `schema_registry_url`) switches that side to JSON text, serialized against the latest schema registered for the topic's `<topic>-value`/`<topic>-key` subject, or the subject named by `value_schema_subject`/`key_schema_subject`, if set. The wire format (Avro, Protobuf, or JSON) is whatever the Schema Registry reports for that schema, not something you configure directly. Avro schemas with `bytes` or `fixed` fields aren't supported this way, since JSON has no native binary type.
 
 Need help? Contact [Datadog support][2] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
 
