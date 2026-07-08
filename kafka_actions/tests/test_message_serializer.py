@@ -19,7 +19,7 @@ pytestmark = [pytest.mark.unit]
 
 AVRO_SCHEMA = common.BOOK_AVRO_SCHEMA
 
-# Base64-encoded FileDescriptorSet, as used for inline protobuf schemas (value_schema/key_schema).
+# Base64-encoded FileDescriptorSet, as used by the Schema Registry's inline test fixtures.
 PROTOBUF_SCHEMA = (
     'CmoKDHNjaGVtYS5wcm90bxIIY29tLmJvb2siSAoEQm9vaxISCgRpc2JuGAEgASgDUgRpc2Ju'
     'EhQKBXRpdGxlGAIgASgJUgV0aXRsZRIWCgZhdXRob3IYAyABKAlSBmF1dGhvcmIGcHJvdG8z'
@@ -54,67 +54,23 @@ def serializer(log):
 class TestMessageSerializer:
     """Test MessageSerializer class."""
 
-    def test_serialize_raw_format(self, serializer):
+    def test_serialize_raw(self, serializer):
         original = b'hello world'
         encoded = base64.b64encode(original).decode('ascii')
 
-        result = serializer.serialize_message(encoded, 'raw')
+        result = serializer.serialize_message(encoded)
         assert result == original
-
-    def test_serialize_string_format(self, serializer):
-        result = serializer.serialize_message('hello world', 'string')
-        assert result == b'hello world'
-
-    def test_serialize_json_format(self, serializer):
-        value = json.dumps({"order_id": "12345", "status": "pending"})
-        result = serializer.serialize_message(value, 'json')
-        assert json.loads(result.decode('utf-8')) == json.loads(value)
-
-    def test_serialize_json_format_invalid_json_raises(self, serializer):
-        with pytest.raises(ValueError, match="Failed to serialize json message"):
-            serializer.serialize_message('not valid json', 'json')
-
-    def test_serialize_bson_format(self, log, serializer):
-        value = json.dumps({"order_id": "12345", "status": "pending"})
-        result = serializer.serialize_message(value, 'bson')
-        assert isinstance(result, bytes)
-
-        deserializer = MessageDeserializer(log)
-        decoded, schema_id = deserializer.deserialize_message(result, 'bson', None, False)
-        assert json.loads(decoded) == {"order_id": "12345", "status": "pending"}
-        assert schema_id is None
-
-    def test_serialize_avro_inline_schema_round_trip(self, log, serializer):
-        result = serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
-        assert isinstance(result, bytes)
-
-        deserializer = MessageDeserializer(log)
-        decoded, schema_id = deserializer.deserialize_message(result, 'avro', AVRO_SCHEMA, False)
-        assert json.loads(decoded) == json.loads(BOOK_JSON)
-        assert schema_id is None
-
-    def test_serialize_protobuf_inline_schema_round_trip(self, log, serializer):
-        result = serializer.serialize_message(BOOK_JSON, 'protobuf', schema_str=PROTOBUF_SCHEMA)
-        assert isinstance(result, bytes)
-
-        deserializer = MessageDeserializer(log)
-        decoded, schema_id = deserializer.deserialize_message(result, 'protobuf', PROTOBUF_SCHEMA, False)
-        assert json.loads(decoded) == BOOK_DICT_AFTER_PROTOBUF_ROUND_TRIP
-        assert schema_id is None
-
-    @pytest.mark.parametrize("fmt", ["avro", "protobuf"])
-    def test_serialize_schema_format_without_schema_raises(self, serializer, fmt):
-        with pytest.raises(ValueError, match=f"Failed to serialize {fmt} message"):
-            serializer.serialize_message(BOOK_JSON, fmt)
 
     def test_serialize_avro_schema_registry_round_trip(self, log, serializer):
         schema_registry = MagicMock()
+        schema_registry.get_latest_schema_id.return_value = 350
         schema_registry.get_schema.return_value = (AVRO_SCHEMA, 'AVRO', [])
         serializer.schema_registry = schema_registry
 
-        result = serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
+        result = serializer.serialize_message(BOOK_JSON, uses_schema_registry=True, schema_subject='books-value')
 
         assert result[:5] == b'\x00\x00\x00\x01\x5e'
+        schema_registry.get_latest_schema_id.assert_called_once_with('books-value')
         schema_registry.get_schema.assert_called_once_with(350)
 
         deserializer = MessageDeserializer(log)
@@ -124,10 +80,11 @@ class TestMessageSerializer:
 
     def test_serialize_protobuf_schema_registry_round_trip(self, log, serializer):
         schema_registry = MagicMock()
+        schema_registry.get_latest_schema_id.return_value = 350
         schema_registry.get_schema.return_value = (PROTOBUF_SCHEMA_REGISTRY, 'PROTOBUF', [])
         serializer.schema_registry = schema_registry
 
-        result = serializer.serialize_message(BOOK_JSON, 'protobuf', uses_schema_registry=True, schema_id=350)
+        result = serializer.serialize_message(BOOK_JSON, uses_schema_registry=True, schema_subject='books-value')
 
         # magic byte + schema id + message indices (empty array -> single zero byte)
         assert result[:6] == b'\x00\x00\x00\x01\x5e\x00'
@@ -137,39 +94,51 @@ class TestMessageSerializer:
         assert json.loads(decoded) == BOOK_DICT_AFTER_PROTOBUF_ROUND_TRIP
         assert schema_id == 350
 
+    def test_serialize_json_schema_registry_round_trip(self, log, serializer):
+        schema_registry = MagicMock()
+        schema_registry.get_latest_schema_id.return_value = 350
+        schema_registry.get_schema.return_value = ('{}', 'JSON', [])
+        serializer.schema_registry = schema_registry
+
+        value = json.dumps({"order_id": "12345", "status": "pending"})
+        result = serializer.serialize_message(value, uses_schema_registry=True, schema_subject='orders-value')
+
+        assert result[:5] == b'\x00\x00\x00\x01\x5e'
+
+        deserializer = MessageDeserializer(log)
+        decoded, schema_id = deserializer.deserialize_message(result, 'json', None, True)
+        assert json.loads(decoded) == json.loads(value)
+        assert schema_id == 350
+
     def test_serialize_avro_schema_registry_fetch_is_cached(self, serializer):
         schema_registry = MagicMock()
+        schema_registry.get_latest_schema_id.return_value = 350
         schema_registry.get_schema.return_value = (AVRO_SCHEMA, 'AVRO', [])
         serializer.schema_registry = schema_registry
 
-        serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
-        serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
+        serializer.serialize_message(BOOK_JSON, uses_schema_registry=True, schema_subject='books-value')
+        serializer.serialize_message(BOOK_JSON, uses_schema_registry=True, schema_subject='books-value')
 
+        # The subject -> id lookup always re-runs (a new version may have been registered)...
+        assert schema_registry.get_latest_schema_id.call_count == 2
+        # ...but the schema itself, once fetched for a given id, is cached.
         schema_registry.get_schema.assert_called_once_with(350)
-
-    def test_serialize_avro_inline_schema_build_is_cached(self, serializer, monkeypatch):
-        import datadog_checks.kafka_actions.message_serializer as message_serializer_module
-
-        build_calls = []
-        original_build_schema_for_format = message_serializer_module.build_schema_for_format
-
-        def counting_build_schema_for_format(*args, **kwargs):
-            build_calls.append(args[1] if len(args) > 1 else kwargs.get('schema_str'))
-            return original_build_schema_for_format(*args, **kwargs)
-
-        monkeypatch.setattr(message_serializer_module, "build_schema_for_format", counting_build_schema_for_format)
-
-        serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
-        serializer.serialize_message(BOOK_JSON, 'avro', schema_str=AVRO_SCHEMA)
-
-        assert len(build_calls) == 1
 
     def test_serialize_schema_registry_without_registry_raises(self, serializer):
         with pytest.raises(ValueError, match="no Schema Registry is configured"):
-            serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True, schema_id=350)
+            serializer.serialize_message(BOOK_JSON, uses_schema_registry=True, schema_subject='books-value')
 
-    def test_serialize_schema_registry_without_schema_id_raises(self, serializer):
+    def test_serialize_schema_registry_without_schema_subject_raises(self, serializer):
         serializer.schema_registry = MagicMock()
 
-        with pytest.raises(ValueError, match="requires a schema_id"):
-            serializer.serialize_message(BOOK_JSON, 'avro', uses_schema_registry=True)
+        with pytest.raises(ValueError, match="requires a schema_subject"):
+            serializer.serialize_message(BOOK_JSON, uses_schema_registry=True)
+
+    def test_serialize_avro_schema_registry_invalid_json_raises(self, serializer):
+        schema_registry = MagicMock()
+        schema_registry.get_latest_schema_id.return_value = 350
+        schema_registry.get_schema.return_value = (AVRO_SCHEMA, 'AVRO', [])
+        serializer.schema_registry = schema_registry
+
+        with pytest.raises(ValueError, match="Failed to serialize message for subject 'books-value'"):
+            serializer.serialize_message('not valid json', uses_schema_registry=True, schema_subject='books-value')

@@ -779,10 +779,10 @@ class KafkaActionsCheck(AgentCheck):
     def _action_produce_message(self):
         """Produce a message to a Kafka topic (RFC Action #7).
 
-        By default, key/value are base64-encoded strings (raw format). They can
-        also be produced as string/json/bson/avro/protobuf, optionally serialized
-        against a schema and framed with the Confluent Schema Registry wire format.
-        Headers remain base64-encoded strings regardless of key/value format.
+        Key/value are base64-encoded strings unless {side}_uses_schema_registry is set,
+        in which case they're JSON text serialized against the latest schema registered
+        for the topic's subject and framed with the Confluent Schema Registry wire format.
+        Headers are always base64-encoded strings.
 
         Config format:
             produce_message:
@@ -806,8 +806,8 @@ class KafkaActionsCheck(AgentCheck):
 
         self.log.debug("Producing message to topic '%s' on cluster '%s'", topic, self.cluster)
 
-        value_bytes = self._serialize_side('value', value, config)
-        key_bytes = self._serialize_side('key', key, config) if key else None
+        value_bytes = self._serialize_side('value', value, config, topic)
+        key_bytes = self._serialize_side('key', key, config, topic) if key else None
 
         headers_decoded = {}
         for header_key, header_value_b64 in headers_b64.items():
@@ -829,15 +829,15 @@ class KafkaActionsCheck(AgentCheck):
 
         return {'topic': topic, 'partition': result['partition'], 'offset': result['offset']}
 
-    def _serialize_side(self, side: str, value: str, config: dict) -> bytes:
-        """Serialize a produce_message key/value side using its {side}_format/{side}_schema config fields."""
+    def _serialize_side(self, side: str, value: str, config: dict, topic: str) -> bytes:
+        """Serialize a produce_message key/value side using its {side}_uses_schema_registry config field."""
+        uses_schema_registry = config.get(f'{side}_uses_schema_registry', False)
+        schema_subject = config.get(f'{side}_schema_subject') or f"{topic}-{side}"
         try:
             return self.serializer.serialize_message(
                 value,
-                format_type=config.get(f'{side}_format', 'raw'),
-                schema_str=config.get(f'{side}_schema'),
-                uses_schema_registry=config.get(f'{side}_uses_schema_registry', False),
-                schema_id=config.get(f'{side}_schema_id'),
+                uses_schema_registry=uses_schema_registry,
+                schema_subject=schema_subject if uses_schema_registry else None,
             )
         except Exception as e:
             raise Exception(f"Failed to serialize {side}: {e}")

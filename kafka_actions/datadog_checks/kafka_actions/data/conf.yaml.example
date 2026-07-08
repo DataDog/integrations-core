@@ -277,10 +277,10 @@ instances:
 
     ## @param produce_message - mapping - optional
     ## Configuration for producing a message to a Kafka topic.
-    ## By default, key and value are base64-encoded strings (raw format), and headers
-    ## are always base64-encoded. Key and value can also be produced as string, json,
-    ## bson, avro, or protobuf by setting value_format and key_format, optionally serialized
-    ## against a schema and framed with the Confluent Schema Registry wire format.
+    ## Key, value, and headers are base64-encoded strings unless {side}_uses_schema_registry
+    ## is set, in which case that side is JSON text serialized against the latest schema
+    ## registered for the topic's subject and framed with the Confluent Schema Registry
+    ## wire format (avro, protobuf, or JSON, whichever the registry reports).
     #
     # produce_message:
     #   cluster: prod-kafka-1

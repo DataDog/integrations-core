@@ -219,39 +219,21 @@ class KafkaActionsConfig:
         self,
         config: dict[str, Any],
         side: str,
-        format_type: str,
         schema_registry_url: str | None,
     ) -> None:
-        """Validate that avro/protobuf formats, or any non-raw format routed through the Schema Registry,
-        have a schema.
+        """Validate that a schema registry is configured when {side}_uses_schema_registry is set.
 
-        MessageSerializer hard-requires a configured registry and schema_id for any non-raw format once
-        uses_schema_registry is set, so that combination is checked here regardless of format_type. 'raw'
-        never touches the Schema Registry - MessageSerializer base64-decodes it unconditionally - so it's
-        exempted here the same way it's exempted on read.
+        MessageSerializer resolves the latest schema registered for the topic's subject
+        (Confluent TopicNameStrategy) and derives the wire format from it at produce time,
+        so nothing else needs validating here. Without a registry, the value/key is always
+        base64-decoded raw bytes.
         """
-        if format_type == 'raw':
+        if not config.get(f'{side}_uses_schema_registry'):
             return
 
-        uses_schema_registry = config.get(f'{side}_uses_schema_registry')
-        if format_type not in SCHEMA_FORMATS and not uses_schema_registry:
-            return
-
-        if uses_schema_registry:
-            if not schema_registry_url:
-                raise ConfigurationError(
-                    f"{side}_uses_schema_registry=true requires 'schema_registry_url' to be configured"
-                )
-
-            schema_id = config.get(f'{side}_schema_id')
-            if not self._is_valid_schema_id(schema_id):
-                raise ConfigurationError(
-                    f"{side}_uses_schema_registry=true requires an integer '{side}_schema_id' in the range [0, 2**32)"
-                )
-        elif not config.get(f'{side}_schema'):
+        if not schema_registry_url:
             raise ConfigurationError(
-                f"{side}_format='{format_type}' requires either '{side}_uses_schema_registry=true' "
-                f"or '{side}_schema' to be specified"
+                f"{side}_uses_schema_registry=true requires 'schema_registry_url' to be configured"
             )
 
     def _validate_read_messages(self):
@@ -416,13 +398,7 @@ class KafkaActionsConfig:
         if not config.get('value'):
             raise ConfigurationError("produce_message action requires 'value' parameter")
 
-        value_format = config.get('value_format', 'raw')
-        self._validate_message_format(value_format, 'value_format')
-
-        key_format = config.get('key_format', 'raw')
-        self._validate_message_format(key_format, 'key_format')
-
         schema_registry_url = self.instance.get('schema_registry_url')
 
-        self._validate_produce_schema_requirement(config, 'value', value_format, schema_registry_url)
-        self._validate_produce_schema_requirement(config, 'key', key_format, schema_registry_url)
+        self._validate_produce_schema_requirement(config, 'value', schema_registry_url)
+        self._validate_produce_schema_requirement(config, 'key', schema_registry_url)
