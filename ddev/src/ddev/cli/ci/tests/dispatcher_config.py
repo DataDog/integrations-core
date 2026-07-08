@@ -20,8 +20,8 @@ class DispatcherConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
-    max_jobs_per_batch: int = Field(default=240, gt=0)
-    global_timeout_seconds: float = Field(default=10800.0, gt=0)
+    max_jobs_per_batch: int = Field(default=240, gt=0)  # 256 max jobs per workflow minus a 16-job buffer for setup jobs
+    global_timeout_seconds: float = Field(default=10800.0, gt=0)  # 3 hours
     github_rate_limits: RateLimiterFactoryConfig = RateLimiterFactoryConfig()
 
     @classmethod
