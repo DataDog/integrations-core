@@ -27,7 +27,7 @@ def repo_config(tmp_path: Path) -> RepoConfigBuilder:
     return build
 
 
-def test_from_repo_config_reads_full_dispatcher_table(repo_config: RepoConfigBuilder) -> None:
+def test_from_repo_config_reads_full_dispatcher_table(repo_config: RepoConfigBuilder):
     config = repo_config(
         """
         [dispatcher]
@@ -56,7 +56,7 @@ def test_from_repo_config_reads_full_dispatcher_table(repo_config: RepoConfigBui
     assert result.github_rate_limits.slow.max_rate == 120
 
 
-def test_from_repo_config_reads_scalars_without_rate_limits_subtable(repo_config: RepoConfigBuilder) -> None:
+def test_from_repo_config_reads_scalars_without_rate_limits_subtable(repo_config: RepoConfigBuilder):
     config = repo_config(
         """
         [dispatcher]
@@ -72,7 +72,7 @@ def test_from_repo_config_reads_scalars_without_rate_limits_subtable(repo_config
     assert result.github_rate_limits == RateLimiterFactoryConfig()
 
 
-def test_from_repo_config_falls_back_to_defaults_when_dispatcher_table_missing(repo_config: RepoConfigBuilder) -> None:
+def test_from_repo_config_falls_back_to_defaults_when_dispatcher_table_missing(repo_config: RepoConfigBuilder):
     config = repo_config(
         """
         validations = []
