@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import fnmatch
 import inspect
-import json
 import re
 from collections.abc import Generator
 from copy import copy, deepcopy
@@ -23,6 +22,7 @@ from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransforme
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.format._json import decode as json_decode
 from datadog_checks.base.utils.functions import no_op, return_true
 from datadog_checks.base.utils.http import RequestsWrapper
 
@@ -372,7 +372,7 @@ class OpenMetricsScraper:
             all_lines = [first_line] + list(line_streamer)
             raw_text = '\n'.join(all_lines)
             try:
-                for family_data in json.loads(_go_parse(raw_text, self._content_type)):
+                for family_data in json_decode(_go_parse(raw_text, self._content_type)):
                     metric = _GoMetric(family_data)
                     self.submit_telemetry_number_of_total_metric_samples(metric)
 
