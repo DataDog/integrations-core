@@ -346,7 +346,7 @@ class DBMAsyncJob(object):
             self._features = [None]
 
     @property
-    def job_name(self):
+    def job_name(self) -> Optional[str]:
         """The job's name"""
         return self._job_name
 
@@ -356,7 +356,7 @@ class DBMAsyncJob(object):
         """
         self._cancel_event.set()
 
-    def wait_for_completion(self):
+    def wait_for_completion(self) -> None:
         """
         Block until the job loop has finished running, then clear its future. No-op if the loop is
         not running. Typically called after :meth:`cancel` to wait for the loop to stop.
@@ -514,7 +514,7 @@ class DBMAsyncJob(object):
     def run_job(self):
         raise NotImplementedError()
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """
         Release resources the job holds for its whole lifetime, such as dedicated DB connections or
         clients.

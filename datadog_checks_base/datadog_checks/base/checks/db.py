@@ -4,7 +4,7 @@
 
 from abc import abstractmethod
 from string import Template
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING, Dict, List
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.utils.db.utils import TagManager
@@ -50,12 +50,12 @@ class DatabaseCheck(AgentCheck):
         self._async_job_registry[job.job_name] = job
         return job
 
-    def run_async_jobs(self, tags):
+    def run_async_jobs(self, tags: List[str]) -> None:
         """Run each registered job's loop, forwarding ``tags`` to every job."""
         for job in self._async_job_registry.values():
             job.run_job_loop(tags)
 
-    def cancel_async_jobs(self):
+    def cancel_async_jobs(self) -> None:
         """
         Signal every registered job to stop, without waiting for loops to finish or releasing
         resources.
@@ -66,7 +66,7 @@ class DatabaseCheck(AgentCheck):
         for job in self._async_job_registry.values():
             job.cancel()
 
-    def shutdown_async_jobs(self):
+    def shutdown_async_jobs(self) -> None:
         """
         Wait for every registered job's loop to finish (:meth:`~DBMAsyncJob.wait_for_completion`)
         and run its teardown (:meth:`~DBMAsyncJob.shutdown`).
