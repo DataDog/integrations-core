@@ -17,7 +17,7 @@ This integration is exclusively triggered through [Remote Configuration][4] and 
 | Action | Description |
 |--------|-------------|
 | `read_messages` | Read and filter messages with jq-style expressions, supporting JSON, string, BSON, Avro, and Protobuf formats |
-| `produce_message` | Produce messages to topics, base64-encoded by default, or serialized against a Schema Registry (Avro, Protobuf, or JSON) |
+| `produce_message` | Produce messages to topics, either base64-encoded (default) or serialized against a Schema Registry (Avro, Protobuf, or JSON) |
 | `create_topic` | Create topics with custom partitions, replication factor, and configurations |
 | `update_topic_config` | Update topic configurations and partition counts |
 | `delete_topic` | Delete topics |
