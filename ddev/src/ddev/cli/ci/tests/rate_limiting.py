@@ -44,7 +44,7 @@ def event_logger(logger: logging.Logger) -> Callable[[RateLimitEvent], None]:
 class RateLimiterConfig(BaseModel):
     """Rate limit configuration for a single limiter tier."""
 
-    model_config = ConfigDict(frozen=True)
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
     max_rate: float = Field(gt=0)
     time_period: float = Field(default=RATE_LIMIT_TIME_PERIOD, gt=0)
@@ -66,6 +66,8 @@ class RateLimiterFactoryConfig(BaseModel):
     - slow: 120 req/hr — integrations with long-running tests
     - total_hourly_max_rate: 1,500 req/hr — = 15k octo-sts budget / 10 max concurrent runs
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     default: RateLimiterConfig = RateLimiterConfig(max_rate=360.0)
     slow: RateLimiterConfig = RateLimiterConfig(max_rate=120.0)
