@@ -5,7 +5,8 @@
       "bearer_token": {
         "password_setting": {
           "key": "incident_io_api_key",
-          "label": "Incident.io API key",
+          "label": "API key",
+          "help": "incident.io API Key"
           "required": true,
           "password": {}
         }
