@@ -57,51 +57,69 @@ class ResourceRegistry:
     """
 
     def __init__(self, entries: Iterable[Entry[Any]]) -> None:
-        raise NotImplementedError
+        groups: dict[tuple[ResourceKind, str], list[Entry[Any]]] = {}
+        for e in entries:
+            groups.setdefault((e.kind, e.name), []).append(e)
+
+        self._entries: dict[tuple[ResourceKind, str], Entry[Any]] = {}
+        self._conflicts: list[ResourceConflict] = []
+        for (kind, name), group in groups.items():
+            if len(group) == 1:
+                self._entries[(kind, name)] = group[0]
+            else:
+                self._conflicts.append(ResourceConflict(kind=kind, name=name, sources=[e.source_file for e in group]))
 
     def entry(self, kind: ResourceKind, name: str) -> Entry[Any] | None:
         """The single entry for ``(kind, name)``, or ``None`` if absent or conflicting."""
-        raise NotImplementedError
+        return self._entries.get((kind, name))
+
+    def _valid_configs_of_kind(self, kind: ResourceKind) -> dict[str, Any]:
+        """Configs of VALID, non-conflicting entries of ``kind``, keyed by name."""
+        return {
+            name: entry.config
+            for (entry_kind, name), entry in self._entries.items()
+            if entry_kind == kind and isinstance(entry, ValidEntry)
+        }
 
     @property
     def agents(self) -> dict[str, AgentConfig]:
         """Valid, non-conflicting agent configs by name."""
-        raise NotImplementedError
+        return self._valid_configs_of_kind("agent")
 
     @property
     def phases(self) -> dict[str, PhaseConfig]:
         """Valid, non-conflicting phase configs by name."""
-        raise NotImplementedError
+        return self._valid_configs_of_kind("phase")
 
     @property
     def flows(self) -> dict[str, FlowConfig]:
         """Valid, non-conflicting flow configs by name."""
-        raise NotImplementedError
+        return self._valid_configs_of_kind("flow")
 
     @property
     def prompts(self) -> dict[str, str]:
         """Valid, non-conflicting prompt bodies by name."""
-        raise NotImplementedError
+        return self._valid_configs_of_kind("prompt")
 
     @property
     def goals(self) -> dict[str, str]:
         """Valid, non-conflicting goal bodies by name."""
-        raise NotImplementedError
+        return self._valid_configs_of_kind("goal")
 
     @property
     def memories(self) -> dict[str, str]:
         """Valid, non-conflicting memory-prompt bodies by name."""
-        raise NotImplementedError
+        return self._valid_configs_of_kind("memory_prompt")
 
     @property
     def flow_names(self) -> list[str]:
         """Every non-conflicting flow key, valid or broken (for eager diagnostics)."""
-        raise NotImplementedError
+        return [name for (kind, name) in self._entries if kind == "flow"]
 
     @property
     def conflicts(self) -> list[ResourceConflict]:
-        raise NotImplementedError
+        return self._conflicts
 
     @property
     def has_conflicts(self) -> bool:
-        raise NotImplementedError
+        return bool(self._conflicts)
