@@ -5,6 +5,7 @@
 #
 ad_identifiers:
   - kong
+  - kong-gateway
 
 ## Enables configuration discovery
 #

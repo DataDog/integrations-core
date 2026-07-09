@@ -57,4 +57,5 @@ files:
     overrides:
       value.example:
       - kong
+      - kong-gateway
   - template: auto_conf/discovery
