@@ -94,7 +94,7 @@
                     {
                         "definition": {
                             "background_color": "blue",
-                            "content": "This is an overview of service checks, monitors and connect statuses of your Argo Rollouts rollouts.",
+                            "content": "This is an overview of service checks, monitors and connection statuses of your Argo Rollouts deployment.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
