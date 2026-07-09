@@ -1,1 +1,0 @@
-The base check HTTP request wrapper now raises library-agnostic ``http_exceptions`` types instead of ``requests.exceptions``.

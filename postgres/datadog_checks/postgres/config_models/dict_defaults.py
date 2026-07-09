@@ -155,3 +155,10 @@ def instance_data_observability():
         config_id=None,
         queries=(),
     )
+
+
+def instance_automatic_diagnostics():
+    return instance.AutomaticDiagnostics(
+        enabled=False,
+        interval=600,
+    )

@@ -1,0 +1,1 @@
+Migrate the base check HTTP layer to a library-agnostic exception surface: the request wrapper now raises ``http_exceptions`` types instead of ``requests.exceptions``, backed by new agnostic HTTP mocks, proto, and exception types with the base check tests migrated onto them.

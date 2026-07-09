@@ -743,10 +743,12 @@ class KafkaActionsCheck(AgentCheck):
                 offsets:
                     - topic: orders
                       partition: 0
-                      offset: 1000
+                      offset: 1000       # explicit offset
                     - topic: orders
                       partition: 1
-                      offset: 1500
+                      offset: -2         # earliest
+                    - topic: payments
+                      timestamp: 1735689600000   # all partitions at/after this timestamp
         """
         config = self.config.update_consumer_group_offsets
 
@@ -755,10 +757,14 @@ class KafkaActionsCheck(AgentCheck):
         consumer_group = config['consumer_group']
         offsets = config['offsets']
 
+        self.kafka_client.check_consumer_group_inactive(consumer_group)
+
         self.log.warning(
-            "Updating offsets for consumer group '%s' on cluster '%s' - may cause duplicate processing or data loss",
+            "Updating offsets for consumer group '%s' on cluster '%s' - may cause duplicate processing or data loss. "
+            "Offsets: %s",
             consumer_group,
             self.cluster,
+            offsets,
         )
 
         success = self.kafka_client.update_consumer_group_offsets(consumer_group=consumer_group, offsets=offsets)

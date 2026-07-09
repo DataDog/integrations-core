@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 import requests
 from openstack import connection
 
-from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError, HTTPTimeoutError
 
 from .exceptions import (
     AuthenticationNeeded,
@@ -290,7 +290,7 @@ class SimpleApi(AbstractApi):
         try:
             resp = self.http.get(url, params=params)
             resp.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except HTTPStatusError as e:
             self.logger.debug("Error contacting openstack endpoint: %s", e)
             if resp.status_code == 401:
                 self.logger.info('Need to reauthenticate before next check')
@@ -373,7 +373,7 @@ class SimpleApi(AbstractApi):
                 try:
                     resp = self._make_request(url, params=query_params)
                     break
-                except requests.exceptions.HTTPError as e:
+                except HTTPStatusError as e:
                     # Only catch HTTPErrors to enable the retry mechanism.
                     # Other exceptions raised by _make_request (e.g. AuthenticationNeeded) should be caught downstream
                     self.logger.debug(

@@ -1,0 +1,64 @@
+[
+  {
+    "metadata": {
+      "name": "training-job",
+      "namespace": "team-a",
+      "uid": "workload-uid",
+      "creationTimestamp": "2026-06-16T10:00:00Z"
+    },
+    "spec": {
+      "queueName": "gpu",
+      "priority": 100,
+      "priorityClassName": "high"
+    },
+    "status": {
+      "admission": {
+        "clusterQueue": "default"
+      },
+      "conditions": [
+        {
+          "type": "QuotaReserved",
+          "status": "True",
+          "reason": "QuotaReserved",
+          "lastTransitionTime": "2026-06-16T10:00:05Z",
+          "message": "Quota reserved in ClusterQueue default"
+        },
+        {
+          "type": "Admitted",
+          "status": "True",
+          "reason": "Admitted",
+          "lastTransitionTime": "2026-06-16T10:00:08Z",
+          "message": "The workload is admitted"
+        },
+        {
+          "type": "PodsReady",
+          "status": "True",
+          "reason": "Started",
+          "lastTransitionTime": "2026-06-16T10:00:20Z",
+          "message": "All pods are ready"
+        },
+        {
+          "type": "Evicted",
+          "status": "True",
+          "reason": "Preempted",
+          "lastTransitionTime": "2026-06-16T10:01:00Z",
+          "message": "Preempted to accommodate a workload (UID: preempting-workload-uid) due to prioritization in the ClusterQueue"
+        },
+        {
+          "type": "Preempted",
+          "status": "True",
+          "reason": "InClusterQueue",
+          "lastTransitionTime": "2026-06-16T10:01:00Z",
+          "message": "Preempted to accommodate a workload (UID: preempting-workload-uid) due to prioritization in the ClusterQueue"
+        },
+        {
+          "type": "Finished",
+          "status": "True",
+          "reason": "Succeeded",
+          "lastTransitionTime": "2026-06-16T10:01:30Z",
+          "message": "Reached expected number of succeeded pods"
+        }
+      ]
+    }
+  }
+]

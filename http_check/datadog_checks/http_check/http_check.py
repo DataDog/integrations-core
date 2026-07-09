@@ -10,13 +10,13 @@ import time
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
-import requests
 import socks
 from cryptography import x509
 from requests import Response  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.http import should_bypass_proxy
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path, parse_proxy_url
@@ -134,8 +134,8 @@ class HTTPCheck(AgentCheck):
             )
         except (
             socket.timeout,
-            requests.exceptions.ConnectionError,
-            requests.exceptions.Timeout,
+            HTTPConnectionError,
+            HTTPTimeoutError,
         ) as e:
             length = int((time.time() - start) * 1000)
             self.log.info("%s is DOWN, error: %s. Connection failed after %s ms", addr, e, length)
