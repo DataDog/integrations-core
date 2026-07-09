@@ -113,7 +113,8 @@ jobs:
             git fetch --no-tags origin "+refs/heads/${base}:refs/remotes/origin/${base}"
 
             echo "::group::Backport #${PR_NUMBER} to ${base}"
-            if ddev --no-interactive release port-commit "PR-${PR_NUMBER}" \
+            # Pass the merge SHA we already have rather than PR-<n>, which would round-trip via the API back to this commit.
+            if ddev --no-interactive release port-commit "${MERGE_SHA}" \
                  --target-branch "${base}" \
                  --branch-prefix backport \
                  --pr-labels "backport,bot"; then
