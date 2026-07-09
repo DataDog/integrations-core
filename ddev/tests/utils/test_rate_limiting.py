@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import itertools
 from collections.abc import Callable
 from typing import Any
@@ -254,6 +255,48 @@ def test_reserve_returns_paced_slot_when_it_exceeds_pause_until(clock: FakeClock
     assert first_slot == pytest.approx(clock.current)
     assert second_slot == pytest.approx(clock.current + interval)
     assert governor.pause_until < second_slot
+
+
+async def test_reserve_assigns_distinct_slots_under_concurrent_claims(
+    clock: FakeClock, governor: BudgetGovernor
+) -> None:
+    """Concurrently reserved slots must be distinct and one interval apart.
+
+    Runs on the real event loop with asyncio.sleep left intact. reserve() must claim its slot
+    without yielding. If the claim path is ever made async, this test fails immediately because
+    reserve() returns a coroutine and reserve()[0] raises TypeError; once someone updates the test
+    to await reserve(), an await between reading and advancing next_slot makes the gathered claims
+    interleave, all read the same cursor, and the slot assertion below fails.
+    """
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))
+    interval = 100 / 10
+
+    async def claim() -> float:
+        return governor.reserve()[0]
+
+    slots = await asyncio.gather(*(claim() for _ in range(4)))
+
+    assert sorted(slots) == [pytest.approx(clock.current + step * interval) for step in range(4)]
+
+
+def test_pacing_claim_path_is_synchronous() -> None:
+    """The pacing read-modify-write of next_slot is race-free under asyncio only because no
+    function in the claim path is a coroutine: a plain def cannot contain an await, so a task
+    entering reserve() cannot be suspended before it finishes advancing the cursor.
+
+    If this fails, you are converting the claim path to async. That is not forbidden, but it
+    removes the structural guarantee: you must then make the read-modify-write in
+    claim_paced_slot atomic by other means (e.g. an asyncio.Lock) and update
+    test_reserve_assigns_distinct_slots_under_concurrent_claims to await reserve() —
+    that test's slot-collision assertion will then verify your replacement mechanism.
+    """
+    claim_path = (
+        BudgetGovernor.reserve,
+        BudgetGovernor.claim_budget_target_with_reason,
+        BudgetGovernor.claim_paced_slot,
+    )
+    for fn in claim_path:
+        assert not inspect.iscoroutinefunction(fn), f"{fn.__qualname__} must remain synchronous"
 
 
 @pytest.mark.parametrize(

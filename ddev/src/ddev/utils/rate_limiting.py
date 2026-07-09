@@ -199,7 +199,8 @@ class BudgetGovernor:
         """
         # Race-free under asyncio only because there is no await between reading and advancing
         # self.next_slot in claim_paced_slot; inserting one here would let concurrent callers
-        # claim the same slot.
+        # claim the same slot. Enforced by test_pacing_claim_path_is_synchronous and
+        # test_reserve_assigns_distinct_slots_under_concurrent_claims.
         target, reason = self.claim_budget_target_with_reason(self.now())
         if self.pause_until > target:
             return self.pause_until, PacingReason.SECONDARY_LIMIT
