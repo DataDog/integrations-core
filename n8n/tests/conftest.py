@@ -12,7 +12,7 @@ from typing import Any, Iterator
 import pytest
 import requests
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
 from . import common
@@ -195,7 +195,7 @@ def dd_environment() -> Iterator[Any]:
                 },
             )
         else:
-            yield instances, common.E2E_METADATA
+            yield instances, get_e2e_discovery_metadata()
 
 
 @pytest.fixture

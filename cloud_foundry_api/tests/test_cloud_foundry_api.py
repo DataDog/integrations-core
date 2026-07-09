@@ -285,9 +285,10 @@ def test_get_oauth_token_errors(_, __, ___, aggregator, instance):
     check = CloudFoundryApiCheck('cloud_foundry_api', {}, [instance])
     check._http = None  # initialize the _http attribute for mocking
 
-    with mock.patch.object(check, "_http") as http_mock, pytest.raises(HTTPError):
+    with mock.patch.object(check, "_http") as http_mock:
         http_mock.get.side_effect = HTTPError("error")
-        check.get_oauth_token()
+        with pytest.raises(HTTPError):
+            check.get_oauth_token()
         aggregator.assert_service_check(
             name="cloud_foundry_api.uaa.can_authenticate",
             status=CloudFoundryApiCheck.CRITICAL,
@@ -296,11 +297,12 @@ def test_get_oauth_token_errors(_, __, ___, aggregator, instance):
         )
         aggregator.reset()
 
-    with mock.patch.object(check, "_http") as http_mock, pytest.raises(HTTPStatusError):
+    with mock.patch.object(check, "_http") as http_mock:
         http_mock.get.return_value = mock.MagicMock(
             raise_for_status=mock.MagicMock(side_effect=HTTPStatusError("error"))
         )
-        check.get_oauth_token()
+        with pytest.raises(HTTPStatusError):
+            check.get_oauth_token()
         aggregator.assert_service_check(
             name="cloud_foundry_api.uaa.can_authenticate",
             status=CloudFoundryApiCheck.CRITICAL,
@@ -309,9 +311,10 @@ def test_get_oauth_token_errors(_, __, ___, aggregator, instance):
         )
         aggregator.reset()
 
-    with mock.patch.object(check, "_http") as http_mock, pytest.raises(ValueError):
+    with mock.patch.object(check, "_http") as http_mock:
         http_mock.get.return_value = mock.MagicMock(json=mock.MagicMock(side_effect=ValueError()))
-        check.get_oauth_token()
+        with pytest.raises(ValueError):
+            check.get_oauth_token()
         aggregator.assert_service_check(
             name="cloud_foundry_api.uaa.can_authenticate",
             status=CloudFoundryApiCheck.CRITICAL,

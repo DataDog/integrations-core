@@ -136,6 +136,15 @@ instances:
     #
     # prefix_category_tags: false
 
+    ## @param collect_resource_ids_as_tags - boolean - optional - default: false
+    ## Whether to collect Nutanix resource extId values as tags on infrastructure metrics.
+    ## When true, cluster metrics get 'ntnx_cluster_id', host metrics get 'ntnx_host_id',
+    ## and VM metrics get 'ntnx_vm_id', 'ntnx_host_id', and 'ntnx_cluster_id'.
+    ## These tags are high cardinality (one unique value per resource).
+    ## Default is false.
+    #
+    # collect_resource_ids_as_tags: false
+
     ## @param collect_events - boolean - optional - default: true
     ## Whether to collect events from Prism Central.
     ## Default is true.
