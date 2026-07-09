@@ -11,7 +11,7 @@ from ddev.utils.github_async.models import (
     PullRequestRef,
     PullRequestState,
 )
-from tests.utils.test_github_async import full_pull_request_payload
+from tests.utils.github_async.conftest import full_pull_request_payload
 
 
 def test_pull_request_parses_full_response() -> None:
