@@ -104,16 +104,6 @@ class CnwPhysIfAttributes(BaseModel):
     router_mac: Optional[str] = Field(default=None, alias="routerMac")
     oper_st: Optional[str] = Field(default=None, alias="operSt")
 
-    @model_validator(mode='before')
-    @classmethod
-    def validate_name(cls, data: dict) -> dict:
-        if isinstance(data, dict):
-            name = data.get('name')
-            id = data.get('id')
-            if not name or name == '':
-                data['name'] = id
-        return data
-
 
 class CnwPhysIf(BaseModel):
     attributes: CnwPhysIfAttributes
@@ -282,7 +272,10 @@ class InterfaceMetadata(BaseModel):
     def parse_index(cls, index: str | int | None) -> int | None:
         if type(index) == str:
             split = re.split('eth|/', index)
-            return int(split[-1])
+            try:
+                return int(split[-1])
+            except (ValueError, IndexError):
+                return None
         if type(index) == int:
             return index
         return None

@@ -74,17 +74,28 @@ def create_interface_metadata(phys_if, address, namespace):
     return interface
 
 
-def create_controller_interface_metadata(cphys_if, address, namespace):
+def create_controller_interface_metadata(cphys_if, address, namespace, device_name):
     """
-    Create an InterfaceMetadata object from an APIC controller's physical interface (cnwPhysIf)
+    Create an InterfaceMetadata object from an APIC controller's physical interface (cnwPhysIf).
+
+    raw_id is set to "{device_name}-eth{port}" (e.g. "apic1-eth2") to match the portDesc that
+    APIC controllers advertise via LLDP, so that topology links resolve to the correct interface.
     """
     eth = CnwPhysIf(**cphys_if.get('cnwPhysIf', {}))
+    # name is the LLDP portDesc when populated (e.g. "eth2-1" matching id "eth2/1").
+    # Fall back to "{device_name}-eth{port}" for older APIC firmware where name is empty.
+    if eth.attributes.name:
+        raw_id = eth.attributes.name
+    else:
+        port = (eth.attributes.id or '').split('/')[-1]
+        raw_id = '{}-eth{}'.format(device_name, port)
+    display_name = eth.attributes.name or eth.attributes.id
     return InterfaceMetadata(
         device_id='{}:{}'.format(namespace, address),
-        raw_id=eth.attributes.name,
-        id_tags=['interface:{}'.format(eth.attributes.name)],
+        raw_id=raw_id,
+        id_tags=['interface:{}'.format(raw_id)],
         index=eth.attributes.id,
-        name=eth.attributes.name,
+        name=display_name,
         alias=eth.attributes.id,
         description=eth.attributes.descr,
         mac_address=eth.attributes.router_mac,

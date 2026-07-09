@@ -174,7 +174,9 @@ class Fabric:
         cphys_list = self.api.get_cphys_list(pod_id, node['id'])
         interfaces = []
         for c in cphys_list:
-            interface_metadata = ndm.create_controller_interface_metadata(c, node.get('address', ''), self.namespace)
+            interface_metadata = ndm.create_controller_interface_metadata(
+                c, node.get('address', ''), self.namespace, device_hostname
+            )
             interfaces.append(interface_metadata)
             tags = self.tagger.get_fabric_tags(c, 'cnwPhysIf')
             tags.extend(ndm.common_tags(node.get('address', ''), device_hostname, self.namespace))
