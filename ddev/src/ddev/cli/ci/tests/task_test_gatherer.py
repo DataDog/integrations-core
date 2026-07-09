@@ -3,25 +3,23 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import asyncio
 import logging
 import shutil
+import threading
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from ddev.cli.ci.tests.common import conclusion_to_status
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
     BatchJob,
+    BatchJobResult,
     UpdatePRComment,
     WorkflowResult,
     WorkflowStatus,
 )
-from ddev.event_bus.orchestrator import AsyncProcessor
+from ddev.cli.ci.tests.status import Status, conclusion_to_status
+from ddev.event_bus.orchestrator import SyncProcessor
+from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import parse_junit_dir
-
-if TYPE_CHECKING:
-    from ddev.utils.github_async.models import WorkflowJob
 
 # Expected layout of the extracted ``test-result.zip`` tree (defined by ``test-batch.yaml``):
 #   {artifacts_path}/
@@ -29,12 +27,13 @@ if TYPE_CHECKING:
 #       coverage.xml                  Cobertura coverage report
 #       test-{unit|e2e}-{env}.xml     pytest JUnit report(s)
 # Each job's spec, workflow-job result, and artifact directory come pre-correlated on the message
-# (BatchFinished.batch_jobs); a job whose workflow job is absent falls back to the batch-level status.
+# (BatchFinished.batch_jobs). A timed-out batch fails every job; otherwise each job's status is its own
+# workflow-job conclusion, and a job with no correlated workflow job is a runner bug and raises.
 COVERAGE_GLOB = "coverage*.xml"
 JUNIT_GLOB = "test-*.xml"
 
 
-class TaskTestGatherer(AsyncProcessor[BatchFinished]):
+class TaskTestGatherer(SyncProcessor[BatchFinished]):
     """
     Reads ``BatchFinished`` messages, analyzes the downloaded artifacts on disk, builds per-job
     ``WorkflowResult`` records, and organizes coverage/JUnit files for later publishing.
@@ -55,37 +54,20 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         self._received_batches = 0
         self._status_by_run: dict[int, WorkflowStatus] = {}
         self._results_by_run: dict[int, list[WorkflowResult]] = {}
-        self._lock = asyncio.Lock()
+        self._lock = threading.Lock()
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
-    async def process_message(self, message: BatchFinished) -> None:
-        default_status = (message.status, "timed out" if message.timed_out else None)
-        results: list[WorkflowResult] = []
-        for batch_job_result in message.batch_jobs:
-            batch_job = batch_job_result.job
-            conclusion, failed_step = self._job_status(batch_job_result.workflow_job, default_status)
-            job_dir = Path(batch_job_result.artifact_name_path) if batch_job_result.artifact_name_path else None
-            failed_tests: list[str] = []
-            if job_dir is not None:
-                failed_tests = [test.identifier for test in parse_junit_dir(job_dir)]
-                self._organize_artifacts(job_dir, batch_job)
-            else:
-                self._logger.info(
-                    "No artifact directory found for job %s", batch_job.name, extra={"run_id": message.run_id}
-                )
-            results.append(
-                WorkflowResult(
-                    integration=batch_job.target,
-                    environment=batch_job.environment,
-                    platform=batch_job.platform,
-                    status=conclusion_to_status(conclusion),
-                    failed_step=failed_step,
-                    failed_tests=failed_tests,
-                )
+    def process_message(self, message: BatchFinished) -> None:
+        if not message.batch_jobs:
+            self._logger.warning(
+                "BatchFinished carried no jobs; nothing to gather", extra={"run_id": message.run_id}
             )
+            return
+
+        results = [self._job_result(batch_job_result, message) for batch_job_result in message.batch_jobs]
 
         status = self._build_workflow_status(message, results)
-        async with self._lock:
+        with self._lock:
             self._results_by_run[message.run_id] = results
             self._status_by_run[message.run_id] = status
             self._received_batches += 1
@@ -105,16 +87,47 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         """
         return UpdatePRComment(id=message_id, done=True, workflows=list(self._status_by_run.values()))
 
+    def _job_result(self, batch_job_result: BatchJobResult, message: BatchFinished) -> WorkflowResult:
+        """Build a job's ``WorkflowResult`` from its correlated workflow job and artifacts on disk."""
+        batch_job = batch_job_result.job
+        status, failed_step = self._job_status(batch_job_result, message)
+
+        failed_tests: list[str] = []
+        job_dir = Path(batch_job_result.artifact_name_path) if batch_job_result.artifact_name_path else None
+        if job_dir is not None:
+            failed_tests = [test.identifier for test in parse_junit_dir(job_dir)]
+            self._organize_artifacts(job_dir, batch_job)
+        else:
+            self._logger.info(
+                "No artifact directory found for job %s", batch_job.name, extra={"run_id": message.run_id}
+            )
+
+        return WorkflowResult(
+            integration=batch_job.target,
+            environment=batch_job.environment,
+            platform=batch_job.platform,
+            status=status,
+            failed_step=failed_step,
+            failed_tests=failed_tests,
+        )
+
     @staticmethod
-    def _job_status(
-        workflow_job: WorkflowJob | None,
-        default: tuple[str | None, str | None],
-    ) -> tuple[str | None, str | None]:
-        """Per-job (conclusion, failed_step) from its workflow job, or the batch-level default when absent."""
+    def _job_status(batch_job_result: BatchJobResult, message: BatchFinished) -> tuple[Status, str | None]:
+        """Per-job (status, failed_step). Deterministic: timed-out batches fail every job; otherwise the
+        job's own workflow-job conclusion decides. A missing workflow job is unexpected and raises — the
+        runner correlates every job before emitting, so a miss is a bug, not a state to paper over.
+        """
+        if message.timed_out:
+            return (Status.FAILURE, "timed out")
+
+        workflow_job = batch_job_result.workflow_job
         if workflow_job is None:
-            return default
-        failed_step = next((step.name for step in workflow_job.steps if step.conclusion == "failure"), None)
-        return (workflow_job.conclusion, failed_step)
+            raise ValueError(f"No workflow job correlated for {batch_job_result.job.name!r}")
+
+        failed_step = next(
+            (step.name for step in workflow_job.steps if step.conclusion == WorkflowJobConclusion.FAILURE), None
+        )
+        return (conclusion_to_status(workflow_job.conclusion), failed_step)
 
     def _organize_artifacts(self, job_dir: Path, batch_job: BatchJob) -> None:
         """Copy coverage and JUnit files into the organized output tree with unique names."""
@@ -136,9 +149,9 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
 
     @staticmethod
     def _build_workflow_status(message: BatchFinished, results: list[WorkflowResult]) -> WorkflowStatus:
-        success_count = sum(1 for result in results if result.status == "success")
-        failed_count = sum(1 for result in results if result.status == "failure")
-        failed_checks = [result for result in results if result.status == "failure"]
+        success_count = sum(1 for result in results if result.status == Status.SUCCESS)
+        failed_count = sum(1 for result in results if result.status == Status.FAILURE)
+        failed_checks = [result for result in results if result.status == Status.FAILURE]
         return WorkflowStatus(
             url=message.workflow_url,
             id=message.run_id,

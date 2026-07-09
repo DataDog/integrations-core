@@ -11,8 +11,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from ddev.cli.ci.tests.common import conclusion_to_status
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch
+from ddev.cli.ci.tests.status import conclusion_to_status
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import WorkflowJob, WorkflowRun

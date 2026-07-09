@@ -7,6 +7,7 @@ import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal
 
+from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.orchestrator import BaseMessage
 
 if TYPE_CHECKING:
@@ -51,7 +52,7 @@ class WorkflowResult:
     integration: str
     environment: str
     platform: Literal["linux", "windows", "macos"]
-    status: Literal["success", "failure", "skipped"]
+    status: Status
     failed_step: str | None = None
     failed_tests: list[str] = field(default_factory=list)
 
@@ -131,7 +132,7 @@ class TestBatch(BaseMessage):
 class BatchFinished(BaseMessage):
     """Emitted when a GitHub Actions test workflow has completed."""
 
-    status: Literal["success", "failure", "skipped"]
+    status: Status
     run_id: int
     workflow_url: str
     artifacts_path: str
