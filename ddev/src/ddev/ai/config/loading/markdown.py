@@ -5,21 +5,22 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import yaml
 
 from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.loading.files import MarkdownFile
 
 
-def parse_md_file(path: Path) -> tuple[dict[str, Any], str]:
+def parse_markdown(path: Path) -> MarkdownFile | None:
+    """Parse a Markdown file's YAML front matter, or return None if it has none."""
     try:
         text = path.read_text(encoding="utf-8")
     except OSError as e:
         raise FlowConfigError(f"Cannot read {path}: {e}") from e
 
     if not text.startswith("---\n"):
-        raise FlowConfigError(f"{path}: missing YAML front matter (file must start with '---')")
+        return None
 
     remainder = text[4:]
     for delimiter in ("\n---\n", "\n---"):
@@ -37,4 +38,4 @@ def parse_md_file(path: Path) -> tuple[dict[str, Any], str]:
     if not isinstance(meta, dict):
         raise FlowConfigError(f"{path}: YAML front matter must be a mapping")
 
-    return meta, raw_body.strip()
+    return MarkdownFile(path=path, meta=meta, body=raw_body.strip())
