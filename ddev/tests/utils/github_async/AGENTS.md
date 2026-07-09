@@ -24,7 +24,7 @@ propagation, retry behavior, and the limiter/governor integration points.
 
 ## Cross-cutting behavior goes through the registry
 
-Every public endpoint method must be registered in `ENDPOINT_CALLS` (in `conftest.py`) with minimal
+Every public endpoint method must be registered in `ENDPOINT_CALLS` (in `helpers.py`) with minimal
 valid arguments and a valid response factory. The registry drives error-propagation and
 header-forwarding coverage for all endpoints at once. Never write a per-endpoint
 `*_http_error_raises` or `*_headers_forwarded` test; register the method instead.

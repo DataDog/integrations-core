@@ -30,7 +30,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
-from tests.utils.github_async.conftest import (
+from tests.utils.github_async.helpers import (
     ENDPOINT_CALLS,
     artifact,
     check_run_payload,
@@ -45,7 +45,7 @@ from tests.utils.github_async.conftest import (
 )
 
 if TYPE_CHECKING:
-    from tests.utils.github_async.conftest import EndpointCase
+    from tests.utils.github_async.helpers import EndpointCase
 
 
 async def test_create_workflow_dispatch_success() -> None:

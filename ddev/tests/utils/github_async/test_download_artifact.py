@@ -6,7 +6,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import AsyncGitHubClient
-from tests.utils.github_async.conftest import TOKEN, make_client, make_zip, patch_signed_download
+from tests.utils.github_async.helpers import TOKEN, make_client, make_zip, patch_signed_download
 
 
 async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch, tmp_path) -> None:

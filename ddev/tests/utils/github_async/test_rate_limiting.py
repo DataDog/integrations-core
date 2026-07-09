@@ -24,7 +24,7 @@ from ddev.utils.rate_limiting import (
     SecondaryLimitEvent,
 )
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
-from tests.utils.github_async.conftest import (
+from tests.utils.github_async.helpers import (
     TOKEN,
     governed_client,
     json_response,

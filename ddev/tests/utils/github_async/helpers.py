@@ -1,4 +1,4 @@
-"""Shared fixtures, payload factories, transports, and the endpoint registry."""
+"""Shared payload factories, transports, and the endpoint registry for the async-client tests."""
 
 from __future__ import annotations
 

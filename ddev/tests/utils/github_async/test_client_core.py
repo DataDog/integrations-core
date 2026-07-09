@@ -9,7 +9,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import GITHUB_API_VERSION, AsyncGitHubClient, PaginationData, async_github_client
-from tests.utils.github_async.conftest import TOKEN, artifact, json_response, make_client, workflow_run_payload
+from tests.utils.github_async.helpers import TOKEN, artifact, json_response, make_client, workflow_run_payload
 
 BASE = "https://api.github.com"
 
