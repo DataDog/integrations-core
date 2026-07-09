@@ -1,0 +1,1 @@
+`release port-commit` now resets `.deps/` in addition to `.in-toto` when porting a commit, so resolved dependency lockfiles are taken from the target branch.
