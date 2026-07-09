@@ -99,7 +99,12 @@ def _assert_openmetrics_v2(aggregator, tags=None):
         metrics = EXPECTED_METRICS
 
     for metric in metrics:
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
+        # Use a subset match instead of passing tags to `assert_metric` since
+        # the `shared_dict` metrics carry an extra `shared_dict:<name>` tag not
+        # in `tags`.
+        if tags:
+            aggregator.assert_metric_has_tags(metric, tags)
 
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
