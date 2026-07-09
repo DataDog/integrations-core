@@ -12,7 +12,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Any, Literal, Self, overload
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
@@ -20,6 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from .models import (
     ArtifactsList,
     CheckRun,
+    CheckRunConclusion,
     IssueComment,
     Label,
     PullRequest,
@@ -162,6 +163,7 @@ class AsyncGitHubClient:
     # Endpoint methods
     # ------------------------------------------------------------------
 
+    @overload
     async def create_workflow_dispatch(
         self,
         owner: str,
@@ -170,7 +172,34 @@ class AsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-    ) -> GitHubResponse[WorkflowDispatchResult]:
+        *,
+        return_run_details: Literal[True],
+    ) -> GitHubResponse[WorkflowDispatchResult]: ...
+
+    @overload
+    async def create_workflow_dispatch(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        inputs: dict[str, str] | None = None,
+        timeout: float | None = None,
+        *,
+        return_run_details: Literal[False] = False,
+    ) -> GitHubResponse[None]: ...
+
+    async def create_workflow_dispatch(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        inputs: dict[str, str] | None = None,
+        timeout: float | None = None,
+        *,
+        return_run_details: bool = False,
+    ) -> GitHubResponse[WorkflowDispatchResult] | GitHubResponse[None]:
         """
         Calls the GitHub API to trigger a workflow dispatch event.
 
@@ -184,20 +213,29 @@ class AsyncGitHubClient:
             ref: Branch or tag name to run the workflow on.
             inputs: Optional key/value inputs forwarded to the workflow.
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            return_run_details: When True, requests a 200 response with the new run's metadata
+                (workflow_run_id, run_url, html_url) instead of the default 204 No Content.
+                See https://github.blog/changelog/2026-02-19-workflow-dispatch-api-now-returns-run-ids/.
 
         Returns:
-            GitHubResponse[WorkflowDispatchResult]: The dispatched run id and headers.
+            When ``return_run_details=False`` (default): ``GitHubResponse[None]`` wrapping the 204.
+            When ``return_run_details=True``: ``GitHubResponse[WorkflowDispatchResult]`` with the new run's
+            IDs and URLs.
         """
-        body: dict[str, Any] = {"ref": ref, "return_run_details": True}
+        body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
             body["inputs"] = inputs
+        if return_run_details:
+            body["return_run_details"] = True
         response = await self._request(
             "POST",
             f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
             timeout=timeout,
             json=body,
         )
-        return self._parse_response(response, WorkflowDispatchResult)
+        if return_run_details:
+            return self._parse_response(response, WorkflowDispatchResult)
+        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
 
     async def get_workflow_run(
         self,
@@ -511,7 +549,7 @@ class AsyncGitHubClient:
         repo: str,
         check_run_id: int,
         status: Literal["queued", "in_progress", "completed"] | None = None,
-        conclusion: str | None = None,
+        conclusion: CheckRunConclusion | None = None,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,

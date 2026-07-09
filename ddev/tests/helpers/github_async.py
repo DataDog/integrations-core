@@ -37,6 +37,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -51,6 +52,10 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowRun,
 )
+
+# Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
+# that assert on the URL can reference the helper rather than duplicating the literal.
+DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
 
 
 @dataclass
@@ -87,7 +92,11 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             response=httpx.Response(404),
         ),
         'create_workflow_dispatch': lambda: GitHubResponse(
-            data=WorkflowDispatchResult(workflow_run_id=123),
+            data=WorkflowDispatchResult(
+                workflow_run_id=123,
+                run_url='https://api.github.com/repos/test/repo/actions/runs/123',
+                html_url=DEFAULT_DISPATCH_HTML_URL,
+            ),
             headers={},
         ),
         # Default to a completed/successful run so happy-path tests don't have to register one.
@@ -259,7 +268,9 @@ class FakeAsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-    ) -> GitHubResponse[WorkflowDispatchResult]:
+        *,
+        return_run_details: bool = False,
+    ) -> GitHubResponse[Any]:
         return self._call(
             'create_workflow_dispatch',
             owner=owner,
@@ -268,6 +279,7 @@ class FakeAsyncGitHubClient:
             ref=ref,
             inputs=inputs,
             timeout=timeout,
+            return_run_details=return_run_details,
         )
 
     async def get_workflow_run(
@@ -412,6 +424,7 @@ class FakeAsyncGitHubClient:
         )
         if isinstance(response, BaseException):
             raise response
+        Path(dest_path).mkdir(parents=True, exist_ok=True)
         return None
 
     async def aclose(self) -> None:

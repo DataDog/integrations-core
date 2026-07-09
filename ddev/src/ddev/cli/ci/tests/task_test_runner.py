@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from ddev.cli.ci.tests.common import conclusion_to_status
-from ddev.cli.ci.tests.messages import BatchFinished, TestBatch
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, TestBatch
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import WorkflowJob, WorkflowRun
@@ -50,7 +50,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         log_extra: dict[str, Any] = {"batch_id": message.id}
 
         dispatch = await self._client.create_workflow_dispatch(
-            self._options.owner, self._options.repo, self._options.workflow_id, ref=self._options.ref, inputs=inputs
+            self._options.owner,
+            self._options.repo,
+            self._options.workflow_id,
+            ref=self._options.ref,
+            inputs=inputs,
+            return_run_details=True,
         )
         run_id = dispatch.data.workflow_run_id
         log_extra["run_id"] = run_id
@@ -85,19 +90,19 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 self._logger.warning("Workflow completed with null conclusion", extra=log_extra)
             final_conclusion = raw or "neutral"
 
-            artifacts_path = await self._download_artifacts(run_id, log_extra)
+            artifact_dirs = await self._download_artifacts(run_id, log_extra)
             self._logger.info("Artifacts downloaded", extra=log_extra)
 
             jobs = await self._list_jobs(run_id, log_extra)
+            batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
 
             finished = BatchFinished(
                 id=message.id,
                 status=conclusion_to_status(raw),
                 run_id=run_id,
                 workflow_url=workflow_url,
-                artifacts_path=str(artifacts_path),
-                job_list=message.job_list,
-                workflow_jobs=jobs,
+                artifacts_path=str(self._options.artifacts_base_path),
+                batch_jobs=batch_jobs,
             )
         finally:
             try:
@@ -140,11 +145,23 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             "batch_id": message.id,
             "checkout_sha": self._options.checkout_sha,
             "integrations": json.dumps(message.integrations),
-            "job_list": json.dumps([dataclasses.asdict(job) for job in message.job_list]),
+            "job_list": json.dumps([self._job_input(job) for job in message.job_list]),
         }
 
-    async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> Path:
-        run_path = self._options.artifacts_base_path / str(run_id)
+    @staticmethod
+    def _job_input(job: BatchJob) -> dict[str, Any]:
+        """Serialize a job for the workflow, carrying the artifact name so all its files upload under
+        a single folder/zip named after it (matched later via ``BatchJob.artifact_name``)."""
+        return {**dataclasses.asdict(job), "artifact_name": job.artifact_name()}
+
+    async def _download_artifacts(self, run_id: int, log_extra: dict[str, Any]) -> dict[str, Path]:
+        """Download the run's artifacts and return an artifact-name -> path map.
+
+        The map keys on the GitHub artifact name (the contract a ``BatchJob`` reproduces via
+        ``artifact_name``), letting the producer resolve each job's directory deterministically.
+        """
+        base_path = self._options.artifacts_base_path
+        artifact_dirs: dict[str, Path] = {}
         failures: list[tuple[int, str]] = []
         try:
             async for page in self._client.list_workflow_run_artifacts(self._options.owner, self._options.repo, run_id):
@@ -165,9 +182,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                             extra=log_extra,
                         )
                         continue
-                    target = run_path / f"{artifact.id}-{artifact.name}"
+                    target = base_path / artifact.name
                     try:
                         await self._client.download_artifact(artifact.archive_download_url, target)
+                        artifact_dirs[artifact.name] = target
                         self._logger.info("Downloaded artifact %s -> %s", artifact.id, target, extra=log_extra)
                     except Exception as exc:
                         self._logger.warning(
@@ -187,4 +205,4 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 failures,
                 extra=log_extra,
             )
-        return run_path
+        return artifact_dirs

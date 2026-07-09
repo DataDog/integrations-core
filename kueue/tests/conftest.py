@@ -6,7 +6,9 @@ import time
 from contextlib import ExitStack
 
 import pytest
+import yaml
 
+from datadog_checks.base.stubs import tagger
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
@@ -17,6 +19,13 @@ from .common import MOCKED_INSTANCE
 HERE = get_here()
 KUEUE_VERSION = os.environ.get('KUEUE_VERSION', 'v0.18.0')
 KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
+
+
+@pytest.fixture(autouse=True)
+def reset_tagger():
+    tagger.reset()
+    yield
+    tagger.reset()
 
 
 def wait_for_controller():
@@ -152,6 +161,9 @@ def get_service_account_token():
 def dd_environment():
     kind_config = os.path.join(HERE, 'kind', 'kind-config.yaml')
     with kind_run(conditions=[setup_kueue], kind_config=kind_config, sleep=10) as kubeconfig, ExitStack() as stack:
+        with open(kubeconfig) as f:
+            kubeconfig_content = yaml.safe_load(f)
+
         kueue_host, kueue_port = stack.enter_context(
             port_forward(kubeconfig, 'kueue-system', 8443, 'service', 'kueue-controller-manager-metrics-service')
         )
@@ -160,6 +172,9 @@ def dd_environment():
                 'openmetrics_endpoint': f'https://{kueue_host}:{kueue_port}/metrics',
                 'tls_verify': False,
                 'extra_headers': {'Authorization': f'Bearer {get_service_account_token()}'},
+                'collect_workload_events': True,
+                'kube_config_dict': kubeconfig_content,
+                'min_collection_interval': 3600,
             }
         ]
 

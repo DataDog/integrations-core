@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
 import shutil
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.common import conclusion_to_status
 from ddev.cli.ci.tests.messages import (
@@ -20,13 +20,16 @@ from ddev.cli.ci.tests.messages import (
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.utils.junit import parse_junit_dir
 
+if TYPE_CHECKING:
+    from ddev.utils.github_async.models import WorkflowJob
+
 # Expected layout of the extracted ``test-result.zip`` tree (defined by ``test-batch.yaml``):
 #   {artifacts_path}/
-#     {job_name}/                     one directory per test target, named after BatchJob.name
+#     {artifact_name}/                one directory per job (its BatchJobResult.artifact_name_path)
 #       coverage.xml                  Cobertura coverage report
 #       test-{unit|e2e}-{env}.xml     pytest JUnit report(s)
-# Per-job conclusions and failed step come from the jobs forwarded on the message
-# (BatchFinished.workflow_jobs); jobs absent from that list fall back to the batch-level status.
+# Each job's spec, workflow-job result, and artifact directory come pre-correlated on the message
+# (BatchFinished.batch_jobs); a job whose workflow job is absent falls back to the batch-level status.
 COVERAGE_GLOB = "coverage*.xml"
 JUNIT_GLOB = "test-*.xml"
 
@@ -56,21 +59,20 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
     async def process_message(self, message: BatchFinished) -> None:
-        artifacts_path = Path(message.artifacts_path)
-        jobs_by_name = {job.name: job for job in message.job_list}
-        job_statuses = self._read_job_statuses(message)
-
         default_status = (message.status, "timed out" if message.timed_out else None)
         results: list[WorkflowResult] = []
-        for job_name, batch_job in jobs_by_name.items():
-            conclusion, failed_step = job_statuses.get(job_name, default_status)
-            job_dir = self._locate_job_dir(artifacts_path, job_name)
+        for batch_job_result in message.batch_jobs:
+            batch_job = batch_job_result.job
+            conclusion, failed_step = self._job_status(batch_job_result.workflow_job, default_status)
+            job_dir = Path(batch_job_result.artifact_name_path) if batch_job_result.artifact_name_path else None
             failed_tests: list[str] = []
             if job_dir is not None:
                 failed_tests = [test.identifier for test in parse_junit_dir(job_dir)]
                 self._organize_artifacts(job_dir, batch_job)
             else:
-                self._logger.info("No artifact directory found for job %s", job_name, extra={"run_id": message.run_id})
+                self._logger.info(
+                    "No artifact directory found for job %s", batch_job.name, extra={"run_id": message.run_id}
+                )
             results.append(
                 WorkflowResult(
                     integration=batch_job.target,
@@ -104,28 +106,15 @@ class TaskTestGatherer(AsyncProcessor[BatchFinished]):
         return UpdatePRComment(id=message_id, done=True, workflows=list(self._status_by_run.values()))
 
     @staticmethod
-    def _read_job_statuses(message: BatchFinished) -> dict[str, tuple[str | None, str | None]]:
-        """Map job name -> (conclusion, failed_step) from the jobs forwarded on the message."""
-        statuses: dict[str, tuple[str | None, str | None]] = {}
-        for job in message.workflow_jobs or []:
-            failed_step = next((step.name for step in job.steps if step.conclusion == "failure"), None)
-            statuses[job.name] = (job.conclusion, failed_step)
-        return statuses
-
-    @staticmethod
-    def _locate_job_dir(artifacts_path: Path, job_name: str) -> Path | None:
-        """Find the artifact directory for a job: an exact name match, else one whose name
-        contains the job name as a whole, delimiter-bounded token (so ``j1`` never matches ``j12``)."""
-        if not artifacts_path.exists():
-            return None
-        exact = artifacts_path / job_name
-        if exact.is_dir():
-            return exact
-        token = re.compile(rf"(?<![A-Za-z0-9]){re.escape(job_name)}(?![A-Za-z0-9])")
-        for child in sorted(artifacts_path.iterdir()):
-            if child.is_dir() and token.search(child.name):
-                return child
-        return None
+    def _job_status(
+        workflow_job: WorkflowJob | None,
+        default: tuple[str | None, str | None],
+    ) -> tuple[str | None, str | None]:
+        """Per-job (conclusion, failed_step) from its workflow job, or the batch-level default when absent."""
+        if workflow_job is None:
+            return default
+        failed_step = next((step.name for step in workflow_job.steps if step.conclusion == "failure"), None)
+        return (workflow_job.conclusion, failed_step)
 
     def _organize_artifacts(self, job_dir: Path, batch_job: BatchJob) -> None:
         """Copy coverage and JUnit files into the organized output tree with unique names."""

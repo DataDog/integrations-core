@@ -36,6 +36,7 @@ files:
       Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
+      display_priority: 3
       description: |
         Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used.
         If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
@@ -47,11 +48,13 @@ files:
         type: string
         example: <HOST>,<PORT>
     - name: username
+      display_priority: 2
       description: Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       fleet_configurable: true
       value:
         type: string
     - name: password
+      display_priority: 1
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       fleet_configurable: true
       secret: true

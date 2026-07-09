@@ -361,10 +361,23 @@ def test_reported_hostname_loopback_substitutes_agent_hostname(loopback):
         assert check.reported_hostname == 'my-agent-host'
 
 
-def test_reported_hostname_non_loopback():
+@pytest.mark.parametrize(
+    'reported_hostname, expected_reported_hostname',
+    [
+        pytest.param(None, 'resolved-host', id='no-override'),
+        pytest.param('custom-host', 'custom-host', id='with-override'),
+    ],
+)
+def test_database_hostname_ignores_reported_hostname_override(reported_hostname, expected_reported_hostname):
+    instance = {**BASE_INSTANCE}
+    if reported_hostname:
+        instance['reported_hostname'] = reported_hostname
     with mock.patch(
-        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value=BASE_INSTANCE['server']
+        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value='resolved-host'
     ) as mock_resolve:
-        check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
-        assert check.reported_hostname == BASE_INSTANCE['server']
-        mock_resolve.assert_called_once_with(BASE_INSTANCE['server'])
+        check = ClickhouseCheck('clickhouse', {}, [instance])
+        # database_hostname always resolves the real host, regardless of the override
+        assert check.database_hostname == 'resolved-host'
+        # reported_hostname honors the override when configured, otherwise the resolved host
+        assert check.reported_hostname == expected_reported_hostname
+        mock_resolve.assert_called_with(BASE_INSTANCE['server'])

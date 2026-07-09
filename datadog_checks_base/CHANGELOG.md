@@ -2,7 +2,25 @@
 
 <!-- towncrier release notes start -->
 
-## 37.40.1 / 2026-06-18
+## 37.42.0 / 2026-07-08
+
+***Added***:
+
+* Add a `DBMS` class attribute to `DatabaseCheck` so integrations can declare their DBM platform identifier explicitly. The `dbms` property now returns `DBMS` when set and only falls back to the deprecated class-name derivation (with a warning) when it is not. ([#24297](https://github.com/DataDog/integrations-core/pull/24297))
+
+## 37.41.0 / 2026-06-30
+
+***Added***:
+
+* Lazy load the validation package (core, security, utils) on import of datadog_checks.checks. ([#23936](https://github.com/DataDog/integrations-core/pull/23936))
+* Add configuration discovery runtime (Service/Port types, candidate_ports, probing harness, and discovery entry points). ([#23963](https://github.com/DataDog/integrations-core/pull/23963))
+* Add ``include_internal`` and ``include_db`` options to ``TagManager.get_tags`` so DBM checks can exclude internal resource tags (``dd.internal.*``) and the per-database ``db`` tag from tag views that should not carry them. ([#23976](https://github.com/DataDog/integrations-core/pull/23976))
+* Add report_issue and resolve_issue for Agent Health reporting from integrations. ([#24016](https://github.com/DataDog/integrations-core/pull/24016))
+* Implement the ``agent_hostname`` property on the ``DatabaseCheck`` base class. ([#24243](https://github.com/DataDog/integrations-core/pull/24243))
+* Implement the `DatabaseCheck.tags` property backed by a shared `TagManager` so DBM integrations can consolidate tag handling. ([#24244](https://github.com/DataDog/integrations-core/pull/24244))
+* Provide a default `database_identifier` implementation on the `DatabaseCheck` base class that is built (and cached) from the `database_identifier_template` and `database_identifier_params` hooks, so integrations no longer need to reimplement the database identifier templating logic. ([#24250](https://github.com/DataDog/integrations-core/pull/24250))
+
+## 37.40.1 / 2026-06-18 / Agent 7.81.0
 
 ***Fixed***:
 

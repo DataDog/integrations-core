@@ -1,0 +1,1 @@
+Retype async GitHub client response-model enum fields (PR state, workflow-job and check-run status/conclusion) as StrEnums.

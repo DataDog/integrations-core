@@ -640,3 +640,9 @@ instances:
     #   - <INCLUDE_REGEX>
     #   exclude:
     #   - <EXCLUDE_REGEX>
+
+    ## @param kube_state_metrics_endpoint - string - optional
+    ## URL exposing a kube-state-metrics endpoint. Enables collection of kube-state-metrics
+    ## for Flux custom resources (Flux 2.1+).
+    #
+    # kube_state_metrics_endpoint: <KUBE_STATE_METRICS_ENDPOINT>
