@@ -37,7 +37,7 @@ def file_access_policy(tmp_path) -> FileAccessPolicy:
 def core_dir(tmp_path) -> Path:
     """A core config dir with a 'writer' agent and a two-phase 'demo' flow ('a' root, 'b' after 'a')."""
     core = tmp_path / "core"
-    write(core / "agents" / "writer.md", "---\ntype: agent\n---\nsystem prompt")
+    write(core / "agents" / "writer.md", "---\ntype: agent\nname: writer\n---\nsystem prompt")
     write(
         core / "demo.yaml",
         "- type: phase\n  config:\n    name: a\n    agent: writer\n"
