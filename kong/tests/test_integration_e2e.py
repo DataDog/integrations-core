@@ -88,7 +88,7 @@ def test_connection_failure(aggregator, check, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
-def _assert_openmetrics_v2(aggregator, tags=None):
+def assert_openmetrics_v2(aggregator, tags=None):
     aggregator.assert_service_check('kong.openmetrics.health', AgentCheck.OK, count=2, tags=tags)
 
     # Only a subset(3) of metrics are exposed currently in our Kong test environment
@@ -113,14 +113,14 @@ def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
     tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
     tags = instance_openmetrics_v2.get('tags') + [tags]
-    _assert_openmetrics_v2(aggregator, tags)
+    assert_openmetrics_v2(aggregator, tags)
 
 
 @pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(rate=True)
-    _assert_openmetrics_v2(aggregator)
+    assert_openmetrics_v2(aggregator)
 
 
 @pytest.mark.e2e
