@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "## Argo CD Overview\n\n### The Argo CD dashboard gives you broad visibility into your Argo CD Clusters\n\nThis dashboard provides a high-level overview of your Argo CD clusters so that you can monitor the deployments, performance, and overall health of a cluster.\n\n### Useful Links\n\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)\n- [Monitoring Argo CD Blogpost](https://www.datadoghq.com/blog/argo-cd-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
+    "description": "## Argo CD Overview\n\n### The Argo CD dashboard gives you broad visibility into your Argo CD Clusters\n\nThis dashboard provides a high-level overview of your Argo CD clusters so that you can monitor the deployments, performance, and overall health of a cluster.\n\n### Useful Links\n\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)\n- [Monitoring Argo CD Blog Post](https://www.datadoghq.com/blog/argo-cd-datadog/)\n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -68,7 +68,7 @@
                     {
                         "definition": {
                             "background_color": "transparent",
-                            "content": "\n### Useful Links\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)\n- [Monitor Argo CD Blogpost](https://www.datadoghq.com/blog/argo-cd-datadog/)",
+                            "content": "\n### Useful Links\n- [Datadog Argo CD Integration Documentation](https://docs.datadoghq.com/integrations/argocd/)\n- [Argo CD Official Documentation](https://argo-cd.readthedocs.io/en/latest/)\n- [Monitor Argo CD Blog Post](https://www.datadoghq.com/blog/argo-cd-datadog/)",
                             "font_size": "14",
                             "has_padding": true,
                             "show_tick": false,
