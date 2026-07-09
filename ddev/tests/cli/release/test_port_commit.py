@@ -15,10 +15,11 @@ from ddev.cli.release.port_commit_workflow import (
     CreatePullRequestStep,
     PortStep,
     PortStepError,
-    PreserveInTotoStep,
+    PreserveGeneratedFilesStep,
     SetupWorktreeStep,
     TeardownWorktreeStep,
     build_pr_body,
+    is_reset_to_target,
     parse_labels,
     split_commit_subject,
 )
@@ -230,7 +231,7 @@ def test_cherry_pick_mixed_conflict_aborts(app_mock, git_mock):
     git_mock.capture.return_value = 'src/foo.py\npath/file.in-toto.link\n'
 
     step = CherryPickStep(app_mock, git=git_mock, sha='1234567890')
-    with pytest.raises(PortStepError, match='non-`.in-toto`'):
+    with pytest.raises(PortStepError, match='outside regenerated files'):
         step.execute()
 
     git_mock.run.assert_any_call('cherry-pick', '--abort')
@@ -251,7 +252,7 @@ def test_preserve_in_toto_resets_staged_modifications(app_mock, git_mock):
         '',
     ]
 
-    step = PreserveInTotoStep(app_mock, git=git_mock)
+    step = PreserveGeneratedFilesStep(app_mock, git=git_mock)
     step.execute()
 
     git_mock.run.assert_called_once_with('checkout', 'HEAD', '--', 'path/file.in-toto.link')
@@ -263,7 +264,7 @@ def test_preserve_in_toto_removes_files_not_in_head(app_mock, git_mock):
         OSError('not in head'),
     ]
 
-    step = PreserveInTotoStep(app_mock, git=git_mock)
+    step = PreserveGeneratedFilesStep(app_mock, git=git_mock)
     step.execute()
 
     git_mock.run.assert_called_once_with('rm', '--force', 'path/new.in-toto.link')
@@ -272,10 +273,52 @@ def test_preserve_in_toto_removes_files_not_in_head(app_mock, git_mock):
 def test_preserve_in_toto_noop_when_clean(app_mock, git_mock):
     git_mock.capture.return_value = 'src/foo.py\n'
 
-    step = PreserveInTotoStep(app_mock, git=git_mock)
+    step = PreserveGeneratedFilesStep(app_mock, git=git_mock)
     step.execute()
 
     git_mock.run.assert_not_called()
+
+
+def test_cherry_pick_deps_conflict_is_resolved(app_mock, git_mock):
+    git_mock.run.side_effect = [OSError('conflict'), None, None]
+    git_mock.capture.side_effect = [
+        '.deps/resolved/foo_dep.json\n',
+        '',
+    ]
+
+    step = CherryPickStep(app_mock, git=git_mock, sha='1234567890')
+    step.execute()
+
+    assert git_mock.run.call_args_list == [
+        call('cherry-pick', '--no-commit', '1234567890'),
+        call('checkout', '--ours', '.deps/resolved/foo_dep.json'),
+        call('add', '--force', '.deps/resolved/foo_dep.json'),
+    ]
+
+
+def test_preserve_deps_resets_staged_modifications(app_mock, git_mock):
+    git_mock.capture.side_effect = [
+        'src/foo.py\n.deps/resolved/foo_dep.json\n',
+        '',
+    ]
+
+    step = PreserveGeneratedFilesStep(app_mock, git=git_mock)
+    step.execute()
+
+    git_mock.run.assert_called_once_with('checkout', 'HEAD', '--', '.deps/resolved/foo_dep.json')
+
+
+@pytest.mark.parametrize(
+    'path, expected',
+    [
+        ('path/file.in-toto.link', True),
+        ('.deps/resolved/foo_dep.json', True),
+        ('src/foo.py', False),
+        ('pyproject.toml', False),
+    ],
+)
+def test_is_reset_to_target(path, expected):
+    assert is_reset_to_target(path) is expected
 
 
 @pytest.mark.parametrize(
@@ -911,11 +954,33 @@ def test_command_aborts_on_unconfirmed(
     mocker.patch('click.confirm', return_value=False)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
-    result = ddev('release', 'port-commit', '1234567890abcdef00')
+    # Force interactive so the decline path is exercised regardless of whether the test run
+    # is itself detected as CI (where prompts are auto-confirmed).
+    result = ddev('--interactive', 'release', 'port-commit', '1234567890abcdef00')
 
     assert result.exit_code == 1, result.output
     assert 'Did not get confirmation' in result.output
     fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_non_interactive_skips_confirmation(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    _setup_command_mocks(mocker)
+    fake_async_github.mock_response(
+        'create_pull_request',
+        PullRequest(number=1, html_url='https://github.com/x/pr/1'),
+    )
+    confirm = mocker.patch('click.confirm', return_value=False)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    # In CI (`--no-interactive`) the guarded prompts are skipped, so the port proceeds without ever
+    # calling `click.confirm` even though it would decline. This is the path the backport workflow uses.
+    result = ddev('--no-interactive', 'release', 'port-commit', '1234567890abcdef00')
+
+    assert result.exit_code == 0, result.output
+    confirm.assert_not_called()
+    assert len(fake_async_github.calls_to('create_pull_request')) == 1
 
 
 def test_command_uses_head_when_no_commit_given(

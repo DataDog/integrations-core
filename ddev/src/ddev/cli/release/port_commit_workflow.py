@@ -34,7 +34,11 @@ if TYPE_CHECKING:
 PR_NUMBER_SUFFIX_PATTERN = re.compile(r'\s*\(#(\d+)\)\s*$')
 PR_TEMPLATE_RELATIVE_PATH = '.github/PULL_REQUEST_TEMPLATE.md'
 PR_TEMPLATE_HEADING = '### What does this PR do?'
-IN_TOTO_SUFFIX = '.in-toto'
+# Paths whose contents are regenerated per branch: after a cherry-pick they must match the
+# target branch rather than carry over from the ported commit's branch.
+#   .in-toto  - package signature metadata (gitignored)
+#   .deps/    - resolved dependency lockfiles (tracked)
+RESET_TO_TARGET_PATTERNS = ('.in-toto', '.deps/')
 WORKTREE_BASE = '.worktrees/port-commit'
 FULL_SHA_PATTERN = re.compile(r'^[0-9a-fA-F]{40}$')
 HEX_PATTERN = re.compile(r'^[0-9a-fA-F]+$')
@@ -170,7 +174,7 @@ class TeardownWorktreeStep(PortStep):
 
 
 class CherryPickStep(PortStep):
-    """Cherry-pick a commit, auto-resolving `.in-toto`-only conflicts."""
+    """Cherry-pick a commit, auto-resolving conflicts in regenerated files (`.in-toto`, `.deps/`)."""
 
     def __init__(self, app: Application, *, git: GitRepository, sha: str, dry_run: bool = False) -> None:
         super().__init__(app, dry_run=dry_run)
@@ -191,40 +195,42 @@ class CherryPickStep(PortStep):
             pass
 
         conflicts = [line for line in self.git.capture('diff', '--name-only', '--diff-filter=U').splitlines() if line]
-        non_in_toto = [f for f in conflicts if IN_TOTO_SUFFIX not in f]
-        in_toto = [f for f in conflicts if IN_TOTO_SUFFIX in f]
+        resettable = [f for f in conflicts if is_reset_to_target(f)]
+        manual = [f for f in conflicts if not is_reset_to_target(f)]
 
-        if non_in_toto:
+        if manual:
             try:
                 self.git.run('cherry-pick', '--abort')
             except OSError:
                 pass
-            listing = '\n  '.join(non_in_toto)
-            raise PortStepError(f'Cherry-pick has conflicts in non-`.in-toto` files:\n  {listing}')
+            listing = '\n  '.join(manual)
+            raise PortStepError(
+                f'Cherry-pick has conflicts outside regenerated files (`.in-toto`, `.deps/`):\n  {listing}'
+            )
 
-        if not in_toto:
+        if not resettable:
             raise PortStepError('Cherry-pick failed without conflicts. Resolve manually and try again.')
 
-        for path in in_toto:
-            _resolve_in_toto_conflict(self.git, path)
+        for path in resettable:
+            _resolve_reset_to_target_conflict(self.git, path)
 
 
-class PreserveInTotoStep(PortStep):
-    """Reset any staged `.in-toto` changes to keep the target branch's signature metadata."""
+class PreserveGeneratedFilesStep(PortStep):
+    """Reset staged `.in-toto` / `.deps/` changes back to the target branch's regenerated versions."""
 
     def __init__(self, app: Application, *, git: GitRepository, dry_run: bool = False) -> None:
         super().__init__(app, dry_run=dry_run)
         self.git = git
 
     def describe(self) -> str:
-        return 'Preserving `.in-toto` files from target branch'
+        return 'Preserving generated files (`.in-toto`, `.deps/`) from target branch'
 
     def planned_commands(self) -> list[str]:
-        return ['# Reset any staged .in-toto changes to HEAD']
+        return ['# Reset any staged .in-toto / .deps/ changes to HEAD']
 
     def execute(self) -> None:
         staged = [line for line in self.git.capture('diff', '--cached', '--name-only').splitlines() if line]
-        affected = [f for f in staged if IN_TOTO_SUFFIX in f]
+        affected = [f for f in staged if is_reset_to_target(f)]
         if not affected:
             return
 
@@ -515,6 +521,11 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str, *, dry_run: boo
     raise _CommitNotResolvable(f'Commit `{commit_hash}` does not exist locally or on origin.')
 
 
+def is_reset_to_target(path: str) -> bool:
+    """Whether a path holds per-branch regenerated content that must be reset to the target branch."""
+    return any(pattern in path for pattern in RESET_TO_TARGET_PATTERNS)
+
+
 def _path_exists_in_head(git: GitRepository, path: str) -> bool:
     try:
         git.capture('cat-file', '-e', f'HEAD:{path}')
@@ -523,14 +534,14 @@ def _path_exists_in_head(git: GitRepository, path: str) -> bool:
         return False
 
 
-def _resolve_in_toto_conflict(git: GitRepository, path: str) -> None:
+def _resolve_reset_to_target_conflict(git: GitRepository, path: str) -> None:
     if not _path_exists_in_head(git, path):
         git.run('rm', '--force', path)
         return
     git.run('checkout', '--ours', path)
-    # `.in-toto/` is gitignored in this repo, so `git add` refuses without `--force` even though
-    # the path is already tracked in HEAD. The force is safe: we only get here for paths that
-    # came out of `git diff --diff-filter=U`, i.e. files git itself flagged as needing resolution.
+    # `.in-toto/` is gitignored, so `git add` refuses without `--force` even though the path is
+    # tracked in HEAD; for tracked `.deps/` files the force is a harmless no-op. Safe either way:
+    # we only reach here for paths from `git diff --diff-filter=U`, i.e. files git itself flagged.
     git.run('add', '--force', path)
 
 
@@ -642,7 +653,7 @@ def resolve_port_plan(
     if commit_hash is None:
         head_commit = app.repo.git.latest_commit()
         app.display_info(f'No commit specified. Current HEAD: `{head_commit.sha[:10]}` - {head_commit.subject}')
-        if not dry_run and not click.confirm('Use this commit?'):
+        if not dry_run and app.interactive and not click.confirm('Use this commit?'):
             app.abort('Did not get confirmation, aborting.')
         commit_hash = head_commit.sha
 
@@ -656,16 +667,16 @@ def resolve_port_plan(
         app.abort(f'Could not read commit `{full_sha}`.')
     clean_subject, original_pr = split_commit_subject(log_entries[0]['subject'])
 
-    in_toto_files = [
+    reset_files = [
         line
         for line in app.repo.git.capture('diff-tree', '--no-commit-id', '--name-only', '-r', full_sha).splitlines()
-        if IN_TOTO_SUFFIX in line
+        if is_reset_to_target(line)
     ]
-    if in_toto_files:
-        listing = '\n  '.join(in_toto_files)
+    if reset_files:
+        listing = '\n  '.join(reset_files)
         app.display_warning(
-            f'Commit touches {len(in_toto_files)} `.in-toto` file(s); they will be preserved '
-            f'from `{target_branch}`:\n  {listing}'
+            f'Commit touches {len(reset_files)} generated file(s) (`.in-toto` / `.deps/`); they will be '
+            f'preserved from `{target_branch}`:\n  {listing}'
         )
 
     suffix = branch_suffix or f'to-{target_branch}'
@@ -697,7 +708,7 @@ def resolve_port_plan(
 
     app.output(_format_plan_summary(app, plan), stderr=True)
 
-    if not dry_run and not click.confirm('Continue?'):
+    if not dry_run and app.interactive and not click.confirm('Continue?'):
         app.abort('Did not get confirmation, aborting.')
 
     return plan
@@ -770,7 +781,7 @@ def build_port_steps(app: Application, plan: PortPlan) -> PortStepBundle:
             dry_run=plan.dry_run,
         ),
         CherryPickStep(app, git=worktree_git, sha=plan.full_sha, dry_run=plan.dry_run),
-        PreserveInTotoStep(app, git=worktree_git, dry_run=plan.dry_run),
+        PreserveGeneratedFilesStep(app, git=worktree_git, dry_run=plan.dry_run),
         CommitStep(app, git=worktree_git, subject=plan.clean_subject, verify=plan.verify, dry_run=plan.dry_run),
         PushStep(app, git=worktree_git, branch=plan.new_branch, dry_run=plan.dry_run),
     ]

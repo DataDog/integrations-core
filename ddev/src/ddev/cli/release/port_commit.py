@@ -44,7 +44,7 @@ def port_commit(
     Backport a commit onto a target branch.
 
     Cherry-picks COMMIT_OR_PR onto `--target-branch` (default `master`) on a new branch named
-    `<github-user>/<prefix>-<sha[:10]>-<suffix>`, preserving `.in-toto` files from the target
+    `<github-user>/<prefix>-<sha[:10]>-<suffix>`, preserving `.in-toto` and `.deps/` files from the target
     branch so package signatures stay intact. Pushes the branch and, unless `--no-pr` is set,
     opens a pull request titled `[Backport] <subject>` and labeled with `--pr-labels`.
 
