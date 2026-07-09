@@ -68,7 +68,7 @@ json = [
     "orjson==3.11.9",
 ]
 kube = [
-    "kubernetes==36.0.2",
+    "kubernetes==35.0.0",
     "requests-oauthlib==2.0.0",
 ]
 
