@@ -4,12 +4,10 @@ files:
 - name: kong.yaml
   discovery:
     strategies:
-    - strategy: from_ports
-      port_hints:
-      - 8001
-      candidates:
-      - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
-      - kong_status_url: "http://{service.host}:{port.number}/status/"
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        - 8001
   options:
   - template: init_config
     options:

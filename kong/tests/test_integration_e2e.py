@@ -88,13 +88,9 @@ def test_connection_failure(aggregator, check, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
-@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.e2e
-def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
+def _assert_openmetrics_v2(aggregator, tags=None):
     kong_version = os.environ.get('KONG_VERSION').split('.')[0]
-    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
-    tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
-    tags = instance_openmetrics_v2.get('tags').append(tags)
+
     aggregator.assert_service_check('kong.openmetrics.health', AgentCheck.OK, count=2, tags=tags)
 
     # Only a subset(3) of metrics are exposed currently in our Kong test environment
@@ -107,21 +103,22 @@ def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
         aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
 
 
+@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.e2e
+def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
+    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
+    tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
+    tags = instance_openmetrics_v2.get('tags') + [tags]
+
+    _assert_openmetrics_v2(aggregator, tags)
+
+
+@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
-    kong_version = os.environ.get('KONG_VERSION').split('.')[0]
     aggregator = dd_agent_check_discovery(rate=True)
 
-    aggregator.assert_service_check('kong.openmetrics.health', AgentCheck.OK, count=2)
-
-    # Only a subset(3) of metrics are exposed currently in our Kong test environment
-    if kong_version >= '3':
-        metrics = EXPECTED_METRICS_V3
-    else:
-        metrics = EXPECTED_METRICS
-
-    for metric in metrics:
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
+    _assert_openmetrics_v2(aggregator)
 
 
 @pytest.mark.e2e

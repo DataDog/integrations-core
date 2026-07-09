@@ -32,13 +32,6 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
             instance_data, context={'configured_fields': frozenset(instance_data)}
         ).model_dump(by_alias=True, mode='json', exclude_none=True)
         yield {'init_config': shared, 'instances': [instance]}
-        instance_data = {
-            'kong_status_url': 'http://{service.host}:{port.number}/status/'.format(service=service, **ctx),
-        }
-        instance = InstanceConfig.model_validate(
-            instance_data, context={'configured_fields': frozenset(instance_data)}
-        ).model_dump(by_alias=True, mode='json', exclude_none=True)
-        yield {'init_config': shared, 'instances': [instance]}
 
 
 def candidates(service: Service) -> Iterator[dict[str, Any]]:
