@@ -22,7 +22,7 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall, ToolResultMessage
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.tools.registry import ToolRegistry

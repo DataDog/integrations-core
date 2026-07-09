@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.base import SPAWN_IDENTICAL_NAME, SPAWN_SUBAGENT_NAME, BaseSpawnTool
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
