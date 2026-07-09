@@ -33,11 +33,21 @@ comment_pr() {
 }
 
 # Log a final line for the current base and close its Actions log group. Every
-# return path in backport_to_branch calls this exactly once, so the ::group::
-# opened by the caller is always balanced.
+# return path in backport_to_branch closes the group exactly once -- directly on
+# the success/skip paths, or via fail_branch on the failure paths -- so the
+# ::group:: opened by the caller is always balanced.
 end_group() {
   echo "$1"
   echo "::endgroup::"
+}
+
+# Report a failed base: post the PR comment ($1), then close the Actions log
+# group with the log line ($2). The caller must still `return 1` itself -- a
+# return here would leave fail_branch, not backport_to_branch, and fall through
+# the guard.
+fail_branch() {
+  comment_pr "$1"
+  end_group "$2"
 }
 
 # Backport MERGE_SHA onto a single release branch. Returns 0 when the base was
@@ -54,8 +64,8 @@ backport_to_branch() {
   local backport_branch="backport-${PR_NUMBER}-to-${base}"
 
   if ! git fetch --quiet origin "${base}"; then
-    comment_pr "⚠️ Backport to \`${base}\`: could not fetch \`origin/${base}\` -- does the release branch exist?"
-    end_group "Fetch of origin/${base} failed."
+    fail_branch "⚠️ Backport to \`${base}\`: could not fetch \`origin/${base}\` -- does the release branch exist?" \
+      "Fetch of origin/${base} failed."
     return 1
   fi
 
@@ -66,8 +76,8 @@ backport_to_branch() {
 
   # Clean slate for this base: force the working tree and branch to the target.
   if ! git checkout --quiet -f -B "${backport_branch}" "origin/${base}"; then
-    comment_pr "⚠️ Backport to \`${base}\`: could not check out \`origin/${base}\`."
-    end_group "Checkout of origin/${base} failed."
+    fail_branch "⚠️ Backport to \`${base}\`: could not check out \`origin/${base}\`." \
+      "Checkout of origin/${base} failed."
     return 1
   fi
 
@@ -75,21 +85,30 @@ backport_to_branch() {
   git cherry-pick -n "${mainline[@]}" "${MERGE_SHA}" || cherry_pick_rc=$?
 
   # Match the target branch's .deps/ exactly (handles added/removed/edited files),
-  # dropping the cherry-picked lockfiles that were resolved against master.
+  # dropping the cherry-picked lockfiles that were resolved against master. Only
+  # restore when the target actually has a .deps/ tree; a blanket "|| true" would
+  # make a real checkout failure indistinguishable from "this branch has no
+  # .deps/" and silently stage a wholesale .deps/ deletion into the backport.
   rm -rf .deps
-  git checkout "origin/${base}" -- .deps 2>/dev/null || true
+  if git rev-parse --quiet --verify "origin/${base}:.deps" >/dev/null 2>&1; then
+    if ! git checkout "origin/${base}" -- .deps; then
+      fail_branch "⚠️ Backport to \`${base}\`: failed to restore \`.deps/\` from the target branch." \
+        "Restore of .deps from origin/${base} failed."
+      return 1
+    fi
+  fi
   git add -A .deps
 
   # Anything still unmerged is a genuine conflict a human has to resolve.
   local conflicts
   conflicts=$(git diff --name-only --diff-filter=U)
   if [[ -n "${conflicts}" ]]; then
-    comment_pr "⚠️ Backport to \`${base}\` failed: cherry-pick conflicts outside \`.deps/\` that need manual resolution:
+    fail_branch "⚠️ Backport to \`${base}\` failed: cherry-pick conflicts outside \`.deps/\` that need manual resolution:
 \`\`\`
 ${conflicts}
 \`\`\`
-Please open the backport by hand."
-    end_group "Conflicts outside .deps/ that need manual resolution:
+Please open the backport by hand." \
+      "Conflicts outside .deps/ that need manual resolution:
 ${conflicts}"
     return 1
   fi
@@ -100,8 +119,8 @@ ${conflicts}"
     # itself hard-failed (unreachable SHA, wrong mainline, git error) -- surface
     # that instead of silently reporting it as "already applied".
     if [[ "${cherry_pick_rc}" -ne 0 ]]; then
-      comment_pr "⚠️ Backport to \`${base}\` failed: cherry-pick exited ${cherry_pick_rc} with nothing to commit -- resolve by hand."
-      end_group "Cherry-pick exited ${cherry_pick_rc} with no staged changes."
+      fail_branch "⚠️ Backport to \`${base}\` failed: cherry-pick exited ${cherry_pick_rc} with nothing to commit -- resolve by hand." \
+        "Cherry-pick exited ${cherry_pick_rc} with no staged changes."
       return 1
     fi
     end_group "Backport to ${base} is empty (payload already present); skipping."
@@ -109,14 +128,14 @@ ${conflicts}"
   fi
 
   if ! git commit --quiet -m "${commit_subject} (backport #${PR_NUMBER})"; then
-    comment_pr "⚠️ Backport to \`${base}\`: git commit failed."
-    end_group "Commit for ${base} failed."
+    fail_branch "⚠️ Backport to \`${base}\`: git commit failed." \
+      "Commit for ${base} failed."
     return 1
   fi
 
   if ! git push --force origin "HEAD:${backport_branch}"; then
-    comment_pr "⚠️ Backport to \`${base}\`: push failed. Please retry the backport."
-    end_group "Push to ${backport_branch} failed."
+    fail_branch "⚠️ Backport to \`${base}\`: push failed. Please retry the backport." \
+      "Push to ${backport_branch} failed."
     return 1
   fi
 
@@ -130,8 +149,8 @@ ${conflicts}"
 Generated dependency resolution (\`.deps/\`) was reset to the target branch; \`resolve-build-deps.yaml\` re-resolves it for this release line on push. Wheels must still be promoted before merge with \`ddev dep promote <PR_URL>\`." \
     --label backport \
     --label bot); then
-    comment_pr "⚠️ Backport to \`${base}\`: branch pushed but \`gh pr create\` failed. Open the PR from \`${backport_branch}\` by hand."
-    end_group "gh pr create for ${base} failed (branch ${backport_branch} was pushed)."
+    fail_branch "⚠️ Backport to \`${base}\`: branch pushed but \`gh pr create\` failed. Open the PR from \`${backport_branch}\` by hand." \
+      "gh pr create for ${base} failed (branch ${backport_branch} was pushed)."
     return 1
   fi
 
