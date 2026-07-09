@@ -11,23 +11,117 @@ files:
 
       - template: instances
         options:
-          - name: url
-            description: URL to a VoltDB client endpoint.
+          - name: host
+            description: |
+              Host of the VoltDB cluster member to connect to via the native binary
+              protocol. Use this (with `port`) for direct connections to a database
+              node. Set `url` instead to talk to the VoltDB Management Center (VMC)
+              over HTTP/JSON. For failover across multiple cluster members, use
+              `hosts` instead.
             fleet_configurable: true
-            formats: ["url"]
-            required: true
-            display_priority: 3
+            display_priority: 5
+            value:
+              type: string
+              example: localhost
+
+          - name: hosts
+            description: |
+              List of VoltDB cluster members to try when connecting via the native
+              binary protocol. Each entry is either `hostname` (uses the global
+              `port`) or `hostname:port`. The Agent connects to the first
+              reachable entry and silently fails over to subsequent entries if
+              the active node becomes unavailable. Takes precedence over `host`.
+            fleet_configurable: true
+            display_priority: 5
+            value:
+              type: array
+              items:
+                type: string
+              example:
+                - voltdb-1.example:21212
+                - voltdb-2.example:21212
+                - voltdb-3.example:21212
+
+          - name: url
+            description: |
+              URL of a VoltDB HTTP/JSON endpoint, typically served by the
+              VoltDB Management Center (VMC). When set, the integration uses the
+              HTTP/JSON transport instead of the native binary client. The
+              `username` and `password` options are required in this mode.
+
+              For direct connections to a database node, prefer `host` (and
+              optionally `port`), which uses the native Python client.
+            display_priority: 5
             value:
               type: string
               example: http://localhost:8080
 
-          - name: password_hashed
+          - name: port
             description: |
-              Set to true if the `password` value refers to a hashed version of the password.
-            display_priority: 1
+              Native client port of the VoltDB cluster member.
+
+              See: https://docs.voltdb.com/UsingVoltDB/HostConfigPortOpts.php
+            fleet_configurable: true
+            display_priority: 4
+            value:
+              type: integer
+              example: 21212
+              default: 21212
+
+          - name: username
+            description: The username to use to authenticate with VoltDB.
+            display_priority: 3
+            value:
+              type: string
+              example: <USERNAME>
+
+          - name: password
+            description: The password to use to authenticate with VoltDB.
+            display_priority: 3
+            secret: true
+            value:
+              type: string
+              example: <PASSWORD>
+
+          - name: use_ssl
+            description: |
+              Set to `true` to connect to VoltDB using TLS.
+
+              See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
+            display_priority: 2
             value:
               type: boolean
               example: false
+              default: false
+
+          - name: ssl_config_file
+            description: |
+              Path to a VoltDB SSL configuration file that defines the Java keystore
+              and truststore files used by the native Python client.
+
+              See: https://docs.voltdb.com/UsingVoltDB/SecuritySSL.php
+            display_priority: 2
+            value:
+              type: string
+              example: <SSL_CONFIG_FILE_PATH>
+
+          - name: connect_timeout
+            description: Connection timeout (in seconds) when establishing the native client connection.
+            display_priority: 1
+            value:
+              type: number
+              example: 8
+              default: 8
+
+          - name: procedure_timeout
+            description: |
+              Timeout (in seconds) for individual stored procedure calls. Set to
+              `0` to wait indefinitely for a response.
+            display_priority: 1
+            value:
+              type: number
+              example: 60
+              default: 60
             fleet_configurable: false
 
           - name: statistics_components
@@ -71,14 +165,20 @@ files:
                 - SNAPSHOTSTATUS
                 - TABLE
 
+          - name: password_hashed
+            description: |
+              Only applicable to the HTTP/VMC transport (`url` is set). Set to
+              `true` if the `password` value is the SHA-256 hex digest of the
+              password instead of the cleartext. The native binary client does
+              not support pre-hashed passwords.
+            display_priority: 1
+            value:
+              type: boolean
+              example: false
+              default: false
+
           - template: instances/http
             overrides:
-              username.display_priority: 2
-              username.required: true
-              username.description: The username to use to authenticate with VoltDB.
-              password.display_priority: 2
-              password.required: true
-              password.description: The password to use to authenticate with VoltDB.
               auth_type.hidden: true
               ntlm_domain.hidden: true
               kerberos_auth.hidden: true
@@ -92,6 +192,9 @@ files:
               aws_region.hidden: true
               aws_host.hidden: true
               aws_service.hidden: true
+              username.hidden: true
+              password.hidden: true
+              connect_timeout.hidden: true
           - template: instances/db
           - template: instances/default
 
