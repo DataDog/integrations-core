@@ -70,7 +70,7 @@ files:
               type: string
 
           - name: dbm
-            display_priority: 2
+            display_priority: 0
             fleet_configurable: true
             description: |
               Set to `true` to enable Database Monitoring.
@@ -1023,7 +1023,7 @@ files:
                   tags:
                     - test:mysql
                   metric_prefix: mysql
-              custom_queries.display_priority: 1
+              custom_queries.display_priority: 0
           - template: instances/default
             overrides:
               disable_generic_tags.hidden: false
@@ -1032,7 +1032,7 @@ files:
                 Replaces generic tag such as `server` with `mysql_server` to avoid getting it mixed with
                 other integrations tags.
 
-              tags.display_priority: 3
+              tags.display_priority: 0
       - template: logs
         example:
           - type: file
