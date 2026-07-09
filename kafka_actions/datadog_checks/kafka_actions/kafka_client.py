@@ -8,7 +8,14 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING, Any
 
-from confluent_kafka import Consumer, KafkaError, KafkaException, Producer, TopicPartition
+from confluent_kafka import (
+    Consumer,
+    ConsumerGroupTopicPartitions,
+    KafkaError,
+    KafkaException,
+    Producer,
+    TopicPartition,
+)
 from confluent_kafka.admin import AdminClient, ConfigResource, NewTopic, OffsetSpec, ResourceType
 
 try:
@@ -228,11 +235,7 @@ class KafkaActionsClient:
 
         try:
             if partition == -1:
-                metadata = consumer.list_topics(topic, timeout=10)
-                if topic not in metadata.topics:
-                    raise ValueError(f"Topic '{topic}' not found")
-
-                partition_ids = list(metadata.topics[topic].partitions.keys())
+                partition_ids = self._discover_partition_ids(consumer, topic)
             else:
                 partition_ids = [partition]
 
@@ -307,6 +310,13 @@ class KafkaActionsClient:
             if consumer:
                 consumer.close()
                 self.consumer = None
+
+    def _discover_partition_ids(self, client, topic: str) -> list[int]:
+        """Look up all partition IDs for a topic via the given client's list_topics."""
+        metadata = client.list_topics(topic, timeout=10)
+        if topic not in metadata.topics:
+            raise ValueError(f"Topic '{topic}' not found")
+        return list(metadata.topics[topic].partitions.keys())
 
     def _resolve_start_offsets(
         self,
@@ -561,15 +571,117 @@ class KafkaActionsClient:
                 self.log.error("Failed to delete consumer group '%s': %s", group_id, e)
                 raise
 
+    def check_consumer_group_inactive(self, consumer_group: str) -> None:
+        """Raise if the consumer group has active members.
+
+        alter_consumer_group_offsets requires a dead or empty group; active members
+        cause Kafka to return NON_EMPTY_GROUP errors per partition.
+        """
+        admin = self.get_admin_client()
+        futures = admin.describe_consumer_groups([consumer_group], request_timeout=10)
+        future = futures[consumer_group]
+        try:
+            description = future.result()
+        except Exception as e:
+            self.log.error("Failed to describe consumer group '%s': %s", consumer_group, e)
+            raise
+        if description.members:
+            raise Exception(
+                f"Consumer group '{consumer_group}' has {len(description.members)} active member(s). "
+                "Stop all consumers in the group before resetting offsets."
+            )
+
+    def _resolve_sentinel_offsets(
+        self, admin: AdminClient, requests: list[tuple[str, int, int]]
+    ) -> dict[tuple[str, int], int]:
+        """Resolve a batch of sentinel offset values (-1 latest, -2 earliest) to concrete offsets.
+
+        requests is a list of (topic, partition, offset) tuples; returns a dict keyed by
+        (topic, partition) mapping to the resolved concrete offset.
+        """
+        tp_by_key = {}
+        offset_request = {}
+        for topic, partition, offset in requests:
+            if offset not in (-1, -2):
+                raise ValueError(f"Sentinel offset must be -1 (latest) or -2 (earliest), got {offset}")
+            tp = TopicPartition(topic, partition)
+            tp_by_key[(topic, partition)] = tp
+            offset_request[tp] = OffsetSpec.earliest() if offset == -2 else OffsetSpec.latest()
+
+        futures = admin.list_offsets(offset_request, request_timeout=10)
+        resolved = {}
+        for (topic, partition), tp in tp_by_key.items():
+            try:
+                resolved[(topic, partition)] = futures[tp].result().offset
+            except Exception as e:
+                self.log.error("Failed to resolve sentinel offset for %s[%d]: %s", topic, partition, e)
+                raise
+        return resolved
+
+    def _resolve_sentinel_offset(self, admin: AdminClient, topic: str, partition: int, offset: int) -> int:
+        """Resolve a single sentinel offset value (-1 latest, -2 earliest) to a concrete offset."""
+        return self._resolve_sentinel_offsets(admin, [(topic, partition, offset)])[(topic, partition)]
+
+    def _resolve_timestamp_targets(
+        self, admin: AdminClient, topic: str, partition: int | None, timestamp: int
+    ) -> list[TopicPartition]:
+        """Resolve a timestamp offset spec to concrete TopicPartitions for one or all partitions of a topic."""
+        partition_ids = [partition] if partition is not None else self._discover_partition_ids(admin, topic)
+
+        offset_request = {TopicPartition(topic, p): OffsetSpec.for_timestamp(timestamp) for p in partition_ids}
+        futures = admin.list_offsets(offset_request, request_timeout=10)
+
+        resolved_by_partition = {}
+        for tp, future in futures.items():
+            try:
+                resolved_by_partition[tp.partition] = future.result().offset
+            except Exception as e:
+                self.log.error("Failed to resolve timestamp offset for %s[%d]: %s", topic, tp.partition, e)
+                raise
+
+        no_message_partitions = [p for p, offset in resolved_by_partition.items() if offset == -1]
+        if no_message_partitions:
+            fallback = self._resolve_sentinel_offsets(admin, [(topic, p, -1) for p in no_message_partitions])
+            for p in no_message_partitions:
+                resolved_by_partition[p] = fallback[(topic, p)]
+                self.log.debug(
+                    "Partition %d: no message at timestamp %d, using latest offset %d",
+                    p,
+                    timestamp,
+                    resolved_by_partition[p],
+                )
+
+        resolved_partitions = []
+        for partition_id, resolved in resolved_by_partition.items():
+            if partition_id not in no_message_partitions:
+                self.log.debug("Partition %d: timestamp %d resolved to offset %d", partition_id, timestamp, resolved)
+            resolved_partitions.append(TopicPartition(topic, partition_id, resolved))
+        return resolved_partitions
+
+    def _resolve_explicit_target(self, admin: AdminClient, topic: str, partition: int, offset: int) -> TopicPartition:
+        """Resolve an explicit or sentinel offset spec to a concrete TopicPartition."""
+        if offset in (-1, -2):
+            resolved = self._resolve_sentinel_offset(admin, topic, partition, offset)
+            label = 'earliest' if offset == -2 else 'latest'
+            self.log.debug("Resolved '%s' for %s[%d] to offset %d", label, topic, partition, resolved)
+        else:
+            resolved = offset
+        return TopicPartition(topic, partition, resolved)
+
     def update_consumer_group_offsets(self, consumer_group: str, offsets: list[dict[str, Any]]) -> bool:
         """Update consumer group offsets for specific topic-partitions.
 
         Args:
             consumer_group: Consumer group ID
             offsets: List of offset specifications, each with:
-                - topic: Topic name
-                - partition: Partition number
-                - offset: New offset value
+                - topic: Topic name (required)
+                - partition: Partition number. Required when 'offset' is specified;
+                  optional when 'timestamp' is specified (auto-discovers all partitions).
+                - offset: Offset to commit. Use -2 for earliest, -1 for latest, or a
+                  non-negative integer for an explicit offset. Mutually exclusive with timestamp.
+                - timestamp: Milliseconds since epoch. Resets to the first offset at or after
+                  this timestamp in each matching partition. When no message exists at or after
+                  the timestamp the partition is reset to latest. Mutually exclusive with offset.
 
         Returns:
             True if successful
@@ -577,27 +689,53 @@ class KafkaActionsClient:
         admin = self.get_admin_client()
 
         topic_partitions = []
+        seen_targets = set()
         for offset_spec in offsets:
             topic = offset_spec.get('topic')
             partition = offset_spec.get('partition')
             offset = offset_spec.get('offset')
+            timestamp = offset_spec.get('timestamp')
 
-            if topic is None or partition is None or offset is None:
-                raise ValueError("Each offset specification must have 'topic', 'partition', and 'offset'")
+            if topic is None:
+                raise ValueError("Each offset specification must have 'topic'")
+            if offset is not None and timestamp is not None:
+                raise ValueError(f"offsets entry for topic '{topic}' cannot specify both 'offset' and 'timestamp'")
 
-            tp = TopicPartition(topic, partition, offset)
-            topic_partitions.append(tp)
+            if timestamp is not None:
+                targets = self._resolve_timestamp_targets(admin, topic, partition, timestamp)
+            else:
+                if partition is None:
+                    raise ValueError("Each offset specification must have 'partition' when 'offset' is specified")
+                targets = [self._resolve_explicit_target(admin, topic, partition, offset)]
 
-        futures = admin.alter_consumer_group_offsets(consumer_group, topic_partitions)
+            for tp in targets:
+                key = (tp.topic, tp.partition)
+                if key in seen_targets:
+                    raise ValueError(
+                        f"Multiple offset specifications target the same partition: {tp.topic}[{tp.partition}]"
+                    )
+                seen_targets.add(key)
+                topic_partitions.append(tp)
+
+        futures = admin.alter_consumer_group_offsets([ConsumerGroupTopicPartitions(consumer_group, topic_partitions)])
 
         for group_id, future in futures.items():
             try:
-                future.result()
-                self.log.debug("Consumer group '%s' offsets updated for %d partitions", group_id, len(topic_partitions))
-                return True
+                result = future.result()
             except Exception as e:
                 self.log.error("Failed to update consumer group '%s' offsets: %s", group_id, e)
                 raise
+
+            partition_errors = [
+                f"{tp.topic}[{tp.partition}]: {tp.error}" for tp in result.topic_partitions if tp.error is not None
+            ]
+            if partition_errors:
+                error_msg = f"Per-partition errors for group '{group_id}': {'; '.join(partition_errors)}"
+                self.log.error(error_msg)
+                raise Exception(error_msg)
+
+            self.log.debug("Consumer group '%s' offsets updated for %d partitions", group_id, len(topic_partitions))
+            return True
 
     def close(self):
         """Close all Kafka clients."""
