@@ -7,7 +7,8 @@ from __future__ import annotations
 import pytest
 
 from ddev.ai.config.engine import ConfigurationEngine
-from ddev.ai.config.errors import ConfigStatus, ErrorKind, FlowConfigError
+from ddev.ai.config.errors import ConfigError, ConfigStatus, ErrorKind
+from ddev.ai.config.registry import ResourceKind
 
 from .utils import StubReg, write
 
@@ -146,20 +147,20 @@ def test_flows_overview_populated_without_get_flow(tmp_path):
     assert eng.flows["good"].status == ConfigStatus.OK
     assert eng.flows["bad"].status == ConfigStatus.BROKEN
     eng.get_flow("good")
-    with pytest.raises(FlowConfigError):
+    with pytest.raises(ConfigError):
         eng.get_flow("bad")
 
 
 def test_get_flow_unknown_name_raises(tmp_path):
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    with pytest.raises(FlowConfigError):
+    with pytest.raises(ConfigError):
         eng.get_flow("nope")
 
 
 def test_get_flow_missing_surfaces_file_error_note(tmp_path):
     write(tmp_path / "bad.yaml", "not valid: [")
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
-    with pytest.raises(FlowConfigError, match="failed to parse"):
+    with pytest.raises(ConfigError, match="failed to parse"):
         eng.get_flow("anything")
 
 
@@ -176,7 +177,7 @@ def test_core_and_user_same_identity_conflict(tmp_path):
     eng = ConfigurationEngine(core_dir=core, user_dirs=[str(user)], phase_registry=StubReg())
     assert eng.has_conflicts
     conflict = next(c for c in eng.conflicts if c.name == "ag")
-    assert conflict.kind == "agent"
+    assert conflict.kind == ResourceKind.AGENT
     assert len(conflict.sources) == 2
 
 
@@ -204,7 +205,7 @@ def test_flow_conflict_surfaces_as_broken(tmp_path):
     assert diag.status == ConfigStatus.BROKEN
     err = next(e for e in diag.errors if e.kind is ErrorKind.FLOW)
     assert {p.name for p in err.sources} == {"one.yaml", "two.yaml"}
-    with pytest.raises(FlowConfigError):
+    with pytest.raises(ConfigError):
         eng.get_flow("demo")
 
 
@@ -214,12 +215,12 @@ def test_flow_conflict_surfaces_as_broken(tmp_path):
 
 
 def test_missing_core_dir_raises(tmp_path):
-    with pytest.raises(FlowConfigError, match="Core config directory"):
+    with pytest.raises(ConfigError, match="Core config directory"):
         ConfigurationEngine(core_dir=tmp_path / "nope", user_dirs=[], phase_registry=StubReg())
 
 
 def test_missing_user_dir_raises(tmp_path):
-    with pytest.raises(FlowConfigError, match="User config directory"):
+    with pytest.raises(ConfigError, match="User config directory"):
         ConfigurationEngine(core_dir=tmp_path, user_dirs=[str(tmp_path / "nope")], phase_registry=StubReg())
 
 

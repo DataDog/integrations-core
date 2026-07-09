@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, run_goal_loop
@@ -93,9 +93,9 @@ class AgenticPhase(Phase):
     @classmethod
     def validate_config(cls, phase_id: str, config: PhaseConfig) -> None:
         if config.agent is None:
-            raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
+            raise ConfigError(f"Phase {phase_id!r} (AgenticPhase) requires 'agent'")
         if not config.tasks:
-            raise FlowConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
+            raise ConfigError(f"Phase {phase_id!r} (AgenticPhase) must have at least one task")
 
     @classmethod
     def build(

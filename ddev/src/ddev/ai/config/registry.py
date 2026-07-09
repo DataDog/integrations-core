@@ -5,7 +5,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal
+from enum import StrEnum
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -13,7 +14,14 @@ if TYPE_CHECKING:
 
     from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig
 
-ResourceKind = Literal["agent", "phase", "flow", "prompt", "goal", "memory_prompt"]
+
+class ResourceKind(StrEnum):
+    AGENT = "agent"
+    PHASE = "phase"
+    FLOW = "flow"
+    PROMPT = "prompt"
+    GOAL = "goal"
+    MEMORY_PROMPT = "memory_prompt"
 
 
 @dataclass(frozen=True)
@@ -84,37 +92,37 @@ class ResourceRegistry:
     @property
     def agents(self) -> dict[str, AgentConfig]:
         """Valid, non-conflicting agent configs by name."""
-        return self._valid_configs_of_kind("agent")
+        return self._valid_configs_of_kind(ResourceKind.AGENT)
 
     @property
     def phases(self) -> dict[str, PhaseConfig]:
         """Valid, non-conflicting phase configs by name."""
-        return self._valid_configs_of_kind("phase")
+        return self._valid_configs_of_kind(ResourceKind.PHASE)
 
     @property
     def flows(self) -> dict[str, FlowConfig]:
         """Valid, non-conflicting flow configs by name."""
-        return self._valid_configs_of_kind("flow")
+        return self._valid_configs_of_kind(ResourceKind.FLOW)
 
     @property
     def prompts(self) -> dict[str, str]:
         """Valid, non-conflicting prompt bodies by name."""
-        return self._valid_configs_of_kind("prompt")
+        return self._valid_configs_of_kind(ResourceKind.PROMPT)
 
     @property
     def goals(self) -> dict[str, str]:
         """Valid, non-conflicting goal bodies by name."""
-        return self._valid_configs_of_kind("goal")
+        return self._valid_configs_of_kind(ResourceKind.GOAL)
 
     @property
     def memories(self) -> dict[str, str]:
         """Valid, non-conflicting memory-prompt bodies by name."""
-        return self._valid_configs_of_kind("memory_prompt")
+        return self._valid_configs_of_kind(ResourceKind.MEMORY_PROMPT)
 
     @property
     def flow_names(self) -> list[str]:
         """Every non-conflicting flow key, valid or broken (for eager diagnostics)."""
-        return [name for (kind, name) in self._entries if kind == "flow"]
+        return [name for (kind, name) in self._entries if kind == ResourceKind.FLOW]
 
     @property
     def conflicts(self) -> list[ResourceConflict]:

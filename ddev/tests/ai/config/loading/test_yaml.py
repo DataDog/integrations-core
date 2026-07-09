@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.loading.yaml import load_yaml
 
 
@@ -43,5 +43,5 @@ def test_yaml_syntax_error_raises(tmp_path):
     path = tmp_path / "broken.yaml"
     write(path, "this: : bad: [")
 
-    with pytest.raises(FlowConfigError):
+    with pytest.raises(ConfigError):
         load_yaml(path)

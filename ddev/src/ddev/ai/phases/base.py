@@ -97,7 +97,7 @@ class Phase(AsyncProcessor[PhaseTrigger]):
 
     @classmethod
     def validate_config(cls, phase_id: str, config: PhaseConfig) -> None:
-        """Override to enforce per-subclass config invariants. Raise FlowConfigError on mismatch."""
+        """Override to enforce per-subclass config invariants. Raise ConfigError on mismatch."""
         return None
 
     @classmethod

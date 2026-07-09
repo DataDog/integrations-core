@@ -11,7 +11,7 @@ import pytest
 from ddev.ai.config.classify import classify
 from ddev.ai.config.loading.files import MarkdownFile, YamlFile
 from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig
-from ddev.ai.config.registry import BrokenEntry, ValidEntry
+from ddev.ai.config.registry import BrokenEntry, ResourceKind, ValidEntry
 
 PATH = Path("/x/a.md")
 YAML_PATH = Path("/x/a.yaml")
@@ -24,7 +24,7 @@ def test_markdown_agent_happy_path():
     assert not output.file_errors
     (entry,) = output.entries
     assert isinstance(entry, ValidEntry)
-    assert entry.kind == "agent"
+    assert entry.kind == ResourceKind.AGENT
     assert entry.name == "a"
     assert entry.source_file == PATH
     assert isinstance(entry.config, AgentConfig)
@@ -94,7 +94,7 @@ def test_markdown_agent_invalid_field_is_broken_entry():
     assert output.file_errors == []
     (entry,) = output.entries
     assert isinstance(entry, BrokenEntry)
-    assert entry.kind == "agent"
+    assert entry.kind == ResourceKind.AGENT
     assert entry.name == "a"
     assert entry.source_file == PATH
     assert entry.error
@@ -108,7 +108,7 @@ def test_yaml_phase_happy_path():
     assert not output.file_errors
     (entry,) = output.entries
     assert isinstance(entry, ValidEntry)
-    assert entry.kind == "phase"
+    assert entry.kind == ResourceKind.PHASE
     assert entry.name == "p"
     assert isinstance(entry.config, PhaseConfig)
 
@@ -121,7 +121,7 @@ def test_yaml_flow_happy_path():
     assert not output.file_errors
     (entry,) = output.entries
     assert isinstance(entry, ValidEntry)
-    assert entry.kind == "flow"
+    assert entry.kind == ResourceKind.FLOW
     assert entry.name == "f"
     assert isinstance(entry.config, FlowConfig)
 
@@ -162,7 +162,7 @@ def test_yaml_named_but_invalid_is_broken_entry():
     assert output.file_errors == []
     (entry,) = output.entries
     assert isinstance(entry, BrokenEntry)
-    assert entry.kind == "flow"
+    assert entry.kind == ResourceKind.FLOW
     assert entry.name == "f"
     assert entry.source_file == YAML_PATH
 

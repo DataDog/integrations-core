@@ -9,10 +9,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.config.classify import classify
-from ddev.ai.config.errors import ConfigStatus, ErrorKind, FlowConfigError, FlowDiagnostics, FlowError
+from ddev.ai.config.errors import ConfigError, ConfigStatus, ErrorKind, FlowDiagnostics, FlowError
 from ddev.ai.config.loading.discovery import discover
 from ddev.ai.config.loading.files import FileError
-from ddev.ai.config.registry import ResourceRegistry
+from ddev.ai.config.registry import ResourceKind, ResourceRegistry
 from ddev.ai.config.resolver import FlowResolver
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ class ConfigurationEngine:
 
     Owns the eager pass that validates every discovered flow at construction so callers
     can list all flows and mark the unusable ones. Does not parse, classify, or validate
-    directly. Public surface is stable so the future composition root wiring is a drop-in.
+    directly.
     """
 
     def __init__(
@@ -40,7 +40,7 @@ class ConfigurationEngine:
         self._logger = logger or logging.getLogger(__name__)
 
         if not core_dir.is_dir():
-            raise FlowConfigError(f"Core config directory does not exist or is not a directory: {core_dir}")
+            raise ConfigError(f"Core config directory does not exist or is not a directory: {core_dir}")
         resolved_dirs = [core_dir, *self._resolve_user_dirs(user_dirs)]
 
         entries: list[Entry[Any]] = []
@@ -64,14 +64,14 @@ class ConfigurationEngine:
         for d in user_dirs:
             p = Path(d).expanduser().resolve()
             if not p.is_dir():
-                raise FlowConfigError(f"User config directory does not exist or is not a directory: {p}")
+                raise ConfigError(f"User config directory does not exist or is not a directory: {p}")
             resolved.append(p)
         return resolved
 
     def _add_flow_conflict_diagnostics(self) -> None:
         """Surface flow-kind conflicts (disabled in the registry) as broken flows."""
         for conflict in self._registry.conflicts:
-            if conflict.kind != "flow" or conflict.name in self._flows_diag:
+            if conflict.kind != ResourceKind.FLOW or conflict.name in self._flows_diag:
                 continue
             sources = ", ".join(str(s) for s in conflict.sources)
             self._flows_diag[conflict.name] = FlowDiagnostics(
@@ -101,11 +101,11 @@ class ConfigurationEngine:
     def get_flow(self, name: str) -> ResolvedFlow:
         diag = self._flows_diag.get(name)
         if diag is None:
-            raise FlowConfigError(f"Flow {name!r} not found{self._file_errors_note()}")
+            raise ConfigError(f"Flow {name!r} not found{self._file_errors_note()}")
         if diag.status is ConfigStatus.BROKEN:
-            raise FlowConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e.message}" for e in diag.errors))
+            raise ConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e.message}" for e in diag.errors))
         if diag.resolved is None:
-            raise FlowConfigError(f"Flow {name!r} passed validation but produced no resolved flow (engine bug)")
+            raise ConfigError(f"Flow {name!r} passed validation but produced no resolved flow (engine bug)")
         return diag.resolved
 
     @property

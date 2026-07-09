@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from ddev.ai.config.engine import ConfigurationEngine
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -358,7 +358,7 @@ async def test_no_resume_ignores_checkpoints(linear_flow, make_orchestrator):
 async def test_resume_corrupt_checkpoints_raises_flow_config_error(linear_flow, make_orchestrator):
     (linear_flow / "checkpoints.yaml").write_text("{ not: valid: yaml", encoding="utf-8")
     orchestrator, _, _ = make_orchestrator(linear_flow, resume=True)
-    with pytest.raises(FlowConfigError, match="Cannot resume"):
+    with pytest.raises(ConfigError, match="Cannot resume"):
         await orchestrator.on_initialize()
 
 

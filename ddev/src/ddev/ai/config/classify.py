@@ -12,11 +12,13 @@ from pydantic import TypeAdapter, ValidationError
 
 from ddev.ai.config.loading.files import FileError, MarkdownFile, YamlFile
 from ddev.ai.config.models import AgentConfig, FlowEnvelope, PhaseEnvelope, ResourceEnvelope
-from ddev.ai.config.registry import BrokenEntry, ValidEntry
+from ddev.ai.config.registry import BrokenEntry, ResourceKind, ValidEntry
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from ddev.ai.config.loading.files import LoadedFile
-    from ddev.ai.config.registry import Entry, ResourceKind
+    from ddev.ai.config.registry import Entry
 
 
 @dataclass(frozen=True)
@@ -36,12 +38,12 @@ class TypeSpec:
 
 
 TYPE_TABLE: dict[str, TypeSpec] = {
-    "agent": TypeSpec(kind="agent", format="markdown"),
-    "prompt": TypeSpec(kind="prompt", format="markdown"),
-    "goal": TypeSpec(kind="goal", format="markdown"),
-    "memory_prompt": TypeSpec(kind="memory_prompt", format="markdown"),
-    "phase": TypeSpec(kind="phase", format="yaml"),
-    "flow": TypeSpec(kind="flow", format="yaml"),
+    ResourceKind.AGENT: TypeSpec(kind=ResourceKind.AGENT, format="markdown"),
+    ResourceKind.PROMPT: TypeSpec(kind=ResourceKind.PROMPT, format="markdown"),
+    ResourceKind.GOAL: TypeSpec(kind=ResourceKind.GOAL, format="markdown"),
+    ResourceKind.MEMORY_PROMPT: TypeSpec(kind=ResourceKind.MEMORY_PROMPT, format="markdown"),
+    ResourceKind.PHASE: TypeSpec(kind=ResourceKind.PHASE, format="yaml"),
+    ResourceKind.FLOW: TypeSpec(kind=ResourceKind.FLOW, format="yaml"),
 }
 
 RESOURCE_ADAPTER: TypeAdapter[PhaseEnvelope | FlowEnvelope] = TypeAdapter(ResourceEnvelope)
@@ -50,6 +52,23 @@ RESOURCE_ADAPTER: TypeAdapter[PhaseEnvelope | FlowEnvelope] = TypeAdapter(Resour
 def meta_without(meta: dict[str, Any], *keys: str) -> dict[str, Any]:
     """A shallow copy of ``meta`` with ``keys`` removed."""
     return {k: v for k, v in meta.items() if k not in keys}
+
+
+def _build_agent(loaded: MarkdownFile) -> AgentConfig:
+    return AgentConfig(**meta_without(loaded.meta, "type", "name"), system_prompt=loaded.body)
+
+
+def _build_body(loaded: MarkdownFile) -> str:
+    return loaded.body
+
+
+# Each body-bearing markdown kind maps to the builder that turns its file into a config.
+MARKDOWN_BUILDERS: dict[ResourceKind, Callable[[MarkdownFile], Any]] = {
+    ResourceKind.AGENT: _build_agent,
+    ResourceKind.PROMPT: _build_body,
+    ResourceKind.GOAL: _build_body,
+    ResourceKind.MEMORY_PROMPT: _build_body,
+}
 
 
 def classify(loaded: LoadedFile) -> ClassifyOutput:
@@ -87,15 +106,11 @@ def _classify_markdown(loaded: MarkdownFile) -> ClassifyOutput:
 
 
 def _build_markdown_entry(kind: ResourceKind, name: str, loaded: MarkdownFile) -> Entry[Any]:
-    if kind != "agent":
-        return ValidEntry(kind=kind, name=name, config=loaded.body, source_file=loaded.path)
-
-    fields = meta_without(loaded.meta, "type", "name")
     try:
-        config = AgentConfig(**fields, system_prompt=loaded.body)
+        config = MARKDOWN_BUILDERS[kind](loaded)
     except ValidationError as e:
-        return BrokenEntry(kind="agent", name=name, source_file=loaded.path, error=str(e))
-    return ValidEntry(kind="agent", name=name, config=config, source_file=loaded.path)
+        return BrokenEntry(kind=kind, name=name, source_file=loaded.path, error=str(e))
+    return ValidEntry(kind=kind, name=name, config=config, source_file=loaded.path)
 
 
 def _classify_yaml(loaded: YamlFile) -> ClassifyOutput:
@@ -124,7 +139,7 @@ def _classify_yaml(loaded: YamlFile) -> ClassifyOutput:
             continue
 
         entries.append(
-            ValidEntry(kind=envelope.type, name=envelope.config.name, config=envelope.config, source_file=loaded.path)
+            ValidEntry(kind=spec.kind, name=envelope.config.name, config=envelope.config, source_file=loaded.path)
         )
 
     return ClassifyOutput(entries=entries, file_errors=file_errors)

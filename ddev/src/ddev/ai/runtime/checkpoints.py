@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Annotated, Any, Literal
 import yaml
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 
 if TYPE_CHECKING:
     from ddev.ai.config.models import ResolvedFlow
@@ -156,7 +156,7 @@ def resolve_resume_state(
     try:
         succeeded = checkpoint_manager.successful_phases()
     except CheckpointReadError as e:
-        raise FlowConfigError(
+        raise ConfigError(
             f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
         ) from e
     completed: set[str] = set()

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.base import Phase, PhaseOutcome
 
@@ -46,7 +46,7 @@ def _parse_exposition(body: str, content_type: str) -> tuple[list[Metric], str]:
         from prometheus_client.openmetrics.parser import text_string_to_metric_families as parse_openmetrics
         from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
     except ModuleNotFoundError as e:
-        raise FlowConfigError(
+        raise ConfigError(
             "InspectEndpointPhase requires the 'ai' extra (prometheus-client); install with `pip install ddev[ai]`"
         ) from e
 
@@ -175,16 +175,16 @@ class InspectEndpointPhase(Phase):
     @classmethod
     def validate_config(cls, phase_id: str, config: PhaseConfig) -> None:
         if config.agent is not None:
-            raise FlowConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'agent'")
+            raise ConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'agent'")
         if config.tasks:
-            raise FlowConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'tasks'")
+            raise ConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'tasks'")
         if config.checkpoint is not None:
-            raise FlowConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'checkpoint'")
+            raise ConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'checkpoint'")
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         endpoint_url = context.get("endpoint_url")
         if not endpoint_url:
-            raise FlowConfigError(f"Phase {self._phase_id!r}: 'endpoint_url' runtime variable is required")
+            raise ConfigError(f"Phase {self._phase_id!r}: 'endpoint_url' runtime variable is required")
 
         limit_mb = RESPONSE_BODY_LIMIT_BYTES // (1024 * 1024)
         try:

@@ -12,9 +12,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ddev.ai.config.models import ResolvedFlow
+    from ddev.ai.config.registry import ResourceKind
 
 
-class FlowConfigError(Exception):
+class ConfigError(Exception):
     """Wraps Pydantic ValidationError or YAML errors with a user-friendly message."""
 
 
@@ -24,6 +25,13 @@ class ConfigStatus(StrEnum):
 
 
 class ErrorKind(StrEnum):
+    """The category of a flow validation error.
+
+    The first six members mirror the ``ResourceKind`` values (a reference error is
+    categorized by the kind of the referenced resource); ``DEPENDENCY`` and ``VARIABLE``
+    are structural problems not tied to a single resource.
+    """
+
     FLOW = "flow"
     PHASE = "phase"
     AGENT = "agent"
@@ -32,6 +40,11 @@ class ErrorKind(StrEnum):
     MEMORY_PROMPT = "memory_prompt"
     DEPENDENCY = "dependency"
     VARIABLE = "variable"
+
+    @classmethod
+    def for_resource(cls, kind: ResourceKind) -> ErrorKind:
+        """The error category for a problem with a resource of the given kind."""
+        return cls(kind)
 
 
 @dataclass(frozen=True)
@@ -47,5 +60,5 @@ class FlowError:
 class FlowDiagnostics:
     name: str
     status: ConfigStatus
-    errors: list[FlowError]
+    errors: list[FlowError] = field(default_factory=list)
     resolved: ResolvedFlow | None = None

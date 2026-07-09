@@ -11,7 +11,7 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -58,7 +58,7 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
     ids=["missing_agent", "empty_tasks"],
 )
 def test_validate_config_rejects_invalid(config, match):
-    with pytest.raises(FlowConfigError, match=match):
+    with pytest.raises(ConfigError, match=match):
         AgenticPhase.validate_config("p1", config)
 
 

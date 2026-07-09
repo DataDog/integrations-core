@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.loading.markdown import parse_markdown
 
 
@@ -37,7 +37,7 @@ def test_unclosed_front_matter_raises(tmp_path):
     path = tmp_path / "broken.md"
     write(path, "---\n")
 
-    with pytest.raises(FlowConfigError):
+    with pytest.raises(ConfigError):
         parse_markdown(path)
 
 
@@ -45,7 +45,7 @@ def test_invalid_yaml_front_matter_raises(tmp_path):
     path = tmp_path / "invalid.md"
     write(path, "---\nthis: : bad: [\n---\nbody\n")
 
-    with pytest.raises(FlowConfigError):
+    with pytest.raises(ConfigError):
         parse_markdown(path)
 
 
@@ -53,7 +53,7 @@ def test_non_mapping_front_matter_raises(tmp_path):
     path = tmp_path / "list.md"
     write(path, "---\n- a\n- b\n---\nbody")
 
-    with pytest.raises(FlowConfigError):
+    with pytest.raises(ConfigError):
         parse_markdown(path)
 
 

@@ -16,10 +16,16 @@ from ddev.ai.config.models import (
     TaskConfig,
     VariableDeclaration,
 )
-from ddev.ai.config.registry import BrokenEntry, ResourceRegistry, ValidEntry
+from ddev.ai.config.registry import BrokenEntry, ResourceKind, ResourceRegistry, ValidEntry
 from ddev.ai.config.resolver import FlowResolver
 
 from .utils import StubReg, StubRegMissing
+
+
+def test_every_resource_kind_maps_to_an_error_kind():
+    """ErrorKind.for_resource relies on ErrorKind reusing every ResourceKind value."""
+    for kind in ResourceKind:
+        assert ErrorKind.for_resource(kind).value == kind.value
 
 
 class RaisingPhase:
@@ -40,29 +46,33 @@ class StubRegRaising:
 
 
 def agent_entry(name: str, path: str = "/x/agent.md", **kwargs) -> ValidEntry:
-    return ValidEntry(kind="agent", name=name, config=AgentConfig(**kwargs), source_file=Path(path))
+    return ValidEntry(kind=ResourceKind.AGENT, name=name, config=AgentConfig(**kwargs), source_file=Path(path))
 
 
 def phase_entry(name: str, path: str | None = None, **kwargs) -> ValidEntry:
     source_file = Path(path or f"/x/{name}.yaml")
-    return ValidEntry(kind="phase", name=name, config=PhaseConfig(name=name, **kwargs), source_file=source_file)
+    return ValidEntry(
+        kind=ResourceKind.PHASE, name=name, config=PhaseConfig(name=name, **kwargs), source_file=source_file
+    )
 
 
 def flow_entry(name: str, entries: list[FlowEntry], path: str = "/x/flow.yaml", **kwargs) -> ValidEntry:
     config = FlowConfig(name=name, flow=entries, **kwargs)
-    return ValidEntry(kind="flow", name=name, config=config, source_file=Path(path))
+    return ValidEntry(kind=ResourceKind.FLOW, name=name, config=config, source_file=Path(path))
 
 
 def prompt_entry(name: str, body: str, path: str | None = None) -> ValidEntry:
-    return ValidEntry(kind="prompt", name=name, config=body, source_file=Path(path or f"/x/{name}.md"))
+    return ValidEntry(kind=ResourceKind.PROMPT, name=name, config=body, source_file=Path(path or f"/x/{name}.md"))
 
 
 def goal_entry(name: str, body: str, path: str | None = None) -> ValidEntry:
-    return ValidEntry(kind="goal", name=name, config=body, source_file=Path(path or f"/x/{name}.md"))
+    return ValidEntry(kind=ResourceKind.GOAL, name=name, config=body, source_file=Path(path or f"/x/{name}.md"))
 
 
 def memory_entry(name: str, body: str, path: str | None = None) -> ValidEntry:
-    return ValidEntry(kind="memory_prompt", name=name, config=body, source_file=Path(path or f"/x/{name}.md"))
+    return ValidEntry(
+        kind=ResourceKind.MEMORY_PROMPT, name=name, config=body, source_file=Path(path or f"/x/{name}.md")
+    )
 
 
 def test_happy_path_resolves_and_inlines():
@@ -182,7 +192,7 @@ def test_missing_memory_prompt_ref():
 
 
 def test_broken_phase_entry_referenced():
-    broken = BrokenEntry(kind="phase", name="p", source_file=Path("/x/p.yaml"), error="parse failure")
+    broken = BrokenEntry(kind=ResourceKind.PHASE, name="p", source_file=Path("/x/p.yaml"), error="parse failure")
     entries = [broken, flow_entry("demo", [FlowEntry(phase="p")])]
     registry = ResourceRegistry(entries)
     diagnostics = FlowResolver(registry, StubReg()).resolve("demo")
@@ -195,7 +205,9 @@ def test_broken_phase_entry_referenced():
 
 
 def test_broken_agent_entry_referenced():
-    broken_agent = BrokenEntry(kind="agent", name="writer", source_file=Path("/x/agent.md"), error="bad agent")
+    broken_agent = BrokenEntry(
+        kind=ResourceKind.AGENT, name="writer", source_file=Path("/x/agent.md"), error="bad agent"
+    )
     entries = [
         broken_agent,
         phase_entry("p", agent="writer"),

@@ -7,7 +7,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from pathlib import Path
 
-from ddev.ai.config.errors import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.loading.files import FileError, MarkdownFile, YamlFile
 from ddev.ai.config.loading.markdown import parse_markdown
 from ddev.ai.config.loading.yaml import load_yaml
@@ -27,7 +27,7 @@ def discover(dirs: list[Path]) -> Iterator[MarkdownFile | YamlFile | FileError]:
                     result = load_yaml(path)
                 else:
                     continue
-            except FlowConfigError as e:
+            except ConfigError as e:
                 yield FileError(path, str(e))
                 continue
             if result is not None:

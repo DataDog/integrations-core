@@ -8,15 +8,15 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ddev.ai.config.dependency_graph import detect_cycles, topological_sort
-from ddev.ai.config.errors import ConfigStatus, ErrorKind, FlowConfigError, FlowDiagnostics, FlowError
+from ddev.ai.config.errors import ConfigError, ConfigStatus, ErrorKind, FlowDiagnostics, FlowError
 from ddev.ai.config.models import ResolvedFlow
-from ddev.ai.config.registry import BrokenEntry
+from ddev.ai.config.registry import BrokenEntry, ResourceKind
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from ddev.ai.config.models import FlowConfig, PhaseConfig, TaskConfig
-    from ddev.ai.config.registry import ResourceKind, ResourceRegistry
+    from ddev.ai.config.registry import ResourceRegistry
     from ddev.ai.phases.registry import PhaseRegistryProtocol
 
 
@@ -32,8 +32,7 @@ class FlowResolver:
     """Cross-resource, flow-scoped validation and inlining over a registry.
 
     Stateless and per-flow: every :meth:`resolve` call validates one flow in a single pass,
-    accumulating all errors. Depends on the phase registry only through
-    :class:`PhaseRegistryProtocol`. Knows nothing about files or eager-vs-lazy evaluation.
+    accumulating all errors. Knows nothing about files or eager-vs-lazy evaluation.
     """
 
     def __init__(self, registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol) -> None:
@@ -42,7 +41,7 @@ class FlowResolver:
 
     def resolve(self, flow_name: str) -> FlowDiagnostics:
         """Validate and, if sound, inline one flow into a ``ResolvedFlow``."""
-        entry = self._registry.entry("flow", flow_name)
+        entry = self._registry.entry(ResourceKind.FLOW, flow_name)
         if entry is None:
             return FlowDiagnostics(
                 flow_name,
@@ -72,7 +71,7 @@ class FlowResolver:
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
 
         resolved = self._build_resolved_flow(flow_name, fc, scheduled_phases, resolved_variables)
-        return FlowDiagnostics(flow_name, ConfigStatus.OK, [], resolved=resolved)
+        return FlowDiagnostics(flow_name, ConfigStatus.OK, resolved=resolved)
 
     def _validate_scheduled_phases(self, fc: FlowConfig, flow_name: str) -> tuple[list[PhaseConfig], list[FlowError]]:
         scheduled_phases: list[PhaseConfig] = []
@@ -87,7 +86,7 @@ class FlowResolver:
         return scheduled_phases, errors
 
     def _resolve_scheduled_phase(self, phase_name: str, flow_name: str) -> tuple[PhaseConfig | None, list[FlowError]]:
-        phase_entry = self._registry.entry("phase", phase_name)
+        phase_entry = self._registry.entry(ResourceKind.PHASE, phase_name)
         if phase_entry is None:
             return None, [self._unregistered_phase_error(phase_name, flow_name)]
         if isinstance(phase_entry, BrokenEntry):
@@ -103,7 +102,9 @@ class FlowResolver:
         return phase_entry.config, []
 
     def _unregistered_phase_error(self, phase_name: str, flow_name: str) -> FlowError:
-        conflict = next((c for c in self._registry.conflicts if c.kind == "phase" and c.name == phase_name), None)
+        conflict = next(
+            (c for c in self._registry.conflicts if c.kind == ResourceKind.PHASE and c.name == phase_name), None
+        )
         if conflict is not None:
             return FlowError(
                 ErrorKind.PHASE,
@@ -113,7 +114,7 @@ class FlowResolver:
                 phase=phase_name,
                 sources=list(conflict.sources),
             )
-        flow_entry = self._registry.entry("flow", flow_name)
+        flow_entry = self._registry.entry(ResourceKind.FLOW, flow_name)
         return FlowError(
             ErrorKind.PHASE,
             f"Phase {phase_name!r} referenced by flow {flow_name!r} is not registered",
@@ -126,7 +127,7 @@ class FlowResolver:
         return [*self._validate_phase_class(pc), *self._validate_phase_agent(pc), *self._validate_phase_refs(pc)]
 
     def _validate_phase_class(self, pc: PhaseConfig) -> list[FlowError]:
-        phase_src = self._registry.entry("phase", pc.name).source_file
+        phase_src = self._registry.entry(ResourceKind.PHASE, pc.name).source_file
         if not self._phase_registry.contains(pc.class_):
             return [
                 FlowError(
@@ -140,7 +141,7 @@ class FlowResolver:
             ]
         try:
             self._phase_registry.get(pc.class_).validate_config(pc.name, pc)
-        except FlowConfigError as e:
+        except ConfigError as e:
             return [FlowError(ErrorKind.PHASE, str(e), subject=pc.name, phase=pc.name, sources=[phase_src])]
         except Exception as e:
             return [
@@ -157,9 +158,9 @@ class FlowResolver:
     def _validate_phase_agent(self, pc: PhaseConfig) -> list[FlowError]:
         if pc.agent is None:
             return []
-        agent_entry = self._registry.entry("agent", pc.agent)
+        agent_entry = self._registry.entry(ResourceKind.AGENT, pc.agent)
         if agent_entry is None:
-            phase_src = self._registry.entry("phase", pc.name).source_file
+            phase_src = self._registry.entry(ResourceKind.PHASE, pc.name).source_file
             return [
                 FlowError(
                     ErrorKind.AGENT,
@@ -185,20 +186,19 @@ class FlowResolver:
         errors: list[FlowError] = []
         for task in pc.tasks:
             if task.prompt_ref is not None:
-                errors.extend(self._check_ref("prompt", task.prompt_ref, ErrorKind.PROMPT, pc.name))
+                errors.extend(self._check_ref(ResourceKind.PROMPT, task.prompt_ref, pc.name))
             if task.goal_ref is not None:
-                errors.extend(self._check_ref("goal", task.goal_ref, ErrorKind.GOAL, pc.name))
+                errors.extend(self._check_ref(ResourceKind.GOAL, task.goal_ref, pc.name))
         if pc.checkpoint is not None and pc.checkpoint.memory_prompt_ref is not None:
-            errors.extend(
-                self._check_ref("memory_prompt", pc.checkpoint.memory_prompt_ref, ErrorKind.MEMORY_PROMPT, pc.name)
-            )
+            errors.extend(self._check_ref(ResourceKind.MEMORY_PROMPT, pc.checkpoint.memory_prompt_ref, pc.name))
         return errors
 
-    def _check_ref(self, kind: ResourceKind, ref: str, error_kind: ErrorKind, phase_name: str) -> list[FlowError]:
+    def _check_ref(self, kind: ResourceKind, ref: str, phase_name: str) -> list[FlowError]:
+        error_kind = ErrorKind.for_resource(kind)
         ref_entry = self._registry.entry(kind, ref)
         label = error_kind.value.replace("_", " ").capitalize()
         if ref_entry is None:
-            phase_src = self._registry.entry("phase", phase_name).source_file
+            phase_src = self._registry.entry(ResourceKind.PHASE, phase_name).source_file
             return [
                 FlowError(
                     error_kind,
@@ -221,7 +221,7 @@ class FlowResolver:
         return []
 
     def _validate_dependencies(self, flow_name: str, fc: FlowConfig) -> list[FlowError]:
-        flow_src = self._registry.entry("flow", flow_name).source_file
+        flow_src = self._registry.entry(ResourceKind.FLOW, flow_name).source_file
         dependency_map = {fe.phase: fe.dependencies for fe in fc.flow}
         return [
             *self._check_duplicate_schedule(fc, flow_name, flow_src),
@@ -298,9 +298,9 @@ class FlowResolver:
     def _gather_variable_declarations(self, scheduled_phases: list[PhaseConfig]) -> list[_DeclaredVar]:
         declared: list[_DeclaredVar] = []
         for pc in scheduled_phases:
-            phase_src = self._registry.entry("phase", pc.name).source_file
+            phase_src = self._registry.entry(ResourceKind.PHASE, pc.name).source_file
             if pc.agent is not None and pc.agent in self._registry.agents:
-                agent_src = self._registry.entry("agent", pc.agent).source_file
+                agent_src = self._registry.entry(ResourceKind.AGENT, pc.agent).source_file
                 for v in self._registry.agents[pc.agent].variables:
                     declared.append(_DeclaredVar(v.name, v.default, f"agent {pc.agent!r}", agent_src))
             for v in pc.variables:
@@ -378,6 +378,7 @@ class FlowResolver:
             variables=resolved_variables,
         )
 
+    # TODO: create new dataclasses for inlined objects.
     def _inline_phase(self, phase: PhaseConfig) -> PhaseConfig:
         tasks = [self._inline_task(task) for task in phase.tasks]
         checkpoint = phase.checkpoint
