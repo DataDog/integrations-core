@@ -8,6 +8,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPConnectionError,
     HTTPInvalidURLError,
     HTTPRequestError,
+    HTTPStatusError,
     HTTPTimeoutError,
 )
 from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper, _map_httpx2_exception
@@ -93,3 +94,12 @@ def test_buffered_reads_map_exceptions(mid_stream_raising_transport_factory, rai
     response = http.get('http://example.test/')
     with pytest.raises(expected):
         reader(response)
+
+
+def test_map_status_error_does_not_leak_raw_response():
+    # The mapper never carries a raw backend response; the agnostic adapter is attached at raise_for_status.
+    request = httpx2.Request('GET', 'http://example.test/')
+    exc = httpx2.HTTPStatusError('500', request=request, response=httpx2.Response(500, request=request))
+    mapped = _map_httpx2_exception(exc)
+    assert isinstance(mapped, HTTPStatusError)
+    assert mapped.response is None

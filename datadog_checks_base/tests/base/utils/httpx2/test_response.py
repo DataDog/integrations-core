@@ -18,8 +18,10 @@ def test_response_raise_for_status_raises_on_error_codes(status_transport_factor
     transport = status_transport_factory(status_code, b'')
     http = HTTPX2Wrapper({}, {}, transport=transport)
     response = http.get('http://example.test/')
-    with pytest.raises(HTTPStatusError):
+    with pytest.raises(HTTPStatusError) as exc_info:
         response.raise_for_status()
+    # .response carries the agnostic adapter, never the raw backend response
+    assert exc_info.value.response is response
 
 
 def test_response_iter_content_bytes(status_transport_factory):

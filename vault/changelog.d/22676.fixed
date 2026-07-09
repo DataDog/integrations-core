@@ -1,0 +1,1 @@
+Preserve Vault auth headers now that the OpenMetrics scraper shares the check's HTTP client.
