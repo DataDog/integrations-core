@@ -23,17 +23,14 @@ MAX_WAIT_ITERATIONS = 1000  # safety cap; the pacing math converges well before 
 class BudgetSnapshot:
     """Provider-agnostic snapshot of a remote rate-limit budget observed from a response.
 
-    Every field is optional so a snapshot can carry only what a given response exposed;
-    a field left as None means the response did not report it and the governor keeps its
-    previous value for that field.
+    Every field is optional; a field left as None means the response did not report it.
 
     Attributes:
-        limit: Total requests allowed in the current window, as reported by the provider.
+        limit: Total requests allowed in the current window.
         remaining: Requests still available in the current window.
-        reset_at: Wall-clock epoch (seconds) at which the current window resets and the
-            budget refills.
+        reset_at: Wall-clock epoch (seconds) at which the current window resets.
         retry_after: Seconds the provider asked us to wait before retrying, sent on a
-            secondary/abuse rate-limit response. Triggers a hard pause when present.
+            secondary/abuse rate-limit response.
     """
 
     limit: int | None = None
@@ -42,20 +39,15 @@ class BudgetSnapshot:
     retry_after: float | None = None
 
     def merged_with(self, updates: BudgetSnapshot) -> BudgetSnapshot:
-        """Return a new snapshot combining this observation with a newer one (*updates*).
+        """Return a new snapshot merging the budget fields of *updates* onto this one.
 
-        A None field in *updates* means "not reported this time" and keeps the prior value.
-        Within one window (unchanged reset_at) remaining is monotonically non-increasing, so a
-        higher remaining from a stale, out-of-order response is discarded in favour of the lower
-        one; a larger reset_at is a new window and adopts the reported remaining as-is. A smaller
-        reset_at than the one already known is a stale, out-of-order response for a previous
-        window: its budget fields are discarded entirely, keeping this snapshot's values, while
-        retry_after is still coalesced since a secondary-limit signal is meaningful regardless of
-        window.
+        Merges only limit, remaining, and reset_at; retry_after is not carried over. A None field
+        in *updates* keeps the prior value. Within one window (unchanged reset_at) the lower
+        remaining is kept; a larger reset_at is a new window and takes the reported remaining; a
+        smaller reset_at is a stale response for a previous window and is discarded.
         """
-        retry_after = self.retry_after if updates.retry_after is None else updates.retry_after
         if self.reset_at is not None and updates.reset_at is not None and updates.reset_at < self.reset_at:
-            return dataclasses.replace(self, retry_after=retry_after)
+            return self
         reset_at = self.reset_at if updates.reset_at is None else updates.reset_at
         remaining = self.remaining if updates.remaining is None else updates.remaining
         if remaining is not None and self.remaining is not None and reset_at == self.reset_at:
@@ -64,7 +56,6 @@ class BudgetSnapshot:
             limit=self.limit if updates.limit is None else updates.limit,
             remaining=remaining,
             reset_at=reset_at,
-            retry_after=retry_after,
         )
 
 
@@ -151,16 +142,13 @@ class BudgetGovernor:
     ) -> None:
         """
         Args:
-            reserve_fraction: Fraction of the total limit at or below which the governor
-                starts rationing. While ``remaining > reserve_fraction * limit`` the local
-                bucket alone governs; once at or below it, requests are paced to spread the
-                remaining budget across the time left until reset.
+            reserve_fraction: Fraction of the total limit at or below which the governor starts
+                pacing requests to spread the remaining budget across the time left until reset.
             buffer_seconds: Extra seconds added to hard-pause waits (window reset and
                 ``retry_after``) to absorb clock skew between us and the provider.
-            now: Wall-clock source returning epoch seconds. Injectable so tests can drive
-                time deterministically; defaults to ``time.time``.
-            on_event: Called with a RateLimitEvent on every observe and every wait, so callers
-                can log or emit continuous metrics from a single handler.
+            now: Wall-clock source returning epoch seconds; defaults to ``time.time``.
+            on_event: Called with a RateLimitEvent on every observe and every wait, for logging
+                or emitting metrics.
         """
         self.reserve_fraction = reserve_fraction
         self.buffer_seconds = buffer_seconds

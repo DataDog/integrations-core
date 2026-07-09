@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import itertools
 from collections.abc import Callable
 from typing import Any
 from unittest.mock import MagicMock
@@ -38,10 +39,28 @@ class FakeClock:
         self.current += seconds
 
 
-def make_snapshot(*, clock: FakeClock | None = None, reset_in: float | None = None, **fields: Any) -> BudgetSnapshot:
-    """Build a BudgetSnapshot; reset_in (seconds from clock.current) sets reset_at."""
+def make_snapshot(
+    *,
+    clock: FakeClock | None = None,
+    reset_in: float | None = None,
+    limit: int | None = None,
+    remaining: int | None = None,
+    reset_at: float | None = None,
+    retry_after: float | None = None,
+) -> BudgetSnapshot:
+    """Build a BudgetSnapshot from the given fields; reset_in sets reset_at to clock.current + reset_in."""
+    fields: dict[str, Any] = {}
+    if limit is not None:
+        fields["limit"] = limit
+    if remaining is not None:
+        fields["remaining"] = remaining
+    if reset_at is not None:
+        fields["reset_at"] = reset_at
     if reset_in is not None:
+        assert clock is not None, "clock is required when reset_in is provided"
         fields["reset_at"] = clock.current + reset_in
+    if retry_after is not None:
+        fields["retry_after"] = retry_after
     return BudgetSnapshot(**fields)
 
 
@@ -205,7 +224,7 @@ def test_observe_with_retry_after_sets_hard_pause_and_fires_event(clock: FakeClo
     events: list[RateLimitEvent] = []
     governor = BudgetGovernor(now=clock, buffer_seconds=1.0, on_event=events.append)
 
-    governor.observe(BudgetSnapshot(retry_after=30.0))
+    governor.observe(make_snapshot(retry_after=30.0))
 
     assert governor.reserve()[0] == pytest.approx(clock.current + 31.0)
     secondary_limit_events = [event for event in events if isinstance(event, SecondaryLimitEvent)]
@@ -215,10 +234,10 @@ def test_observe_with_retry_after_sets_hard_pause_and_fires_event(clock: FakeClo
 def test_observe_keeps_longest_retry_after_pause(clock: FakeClock) -> None:
     """A later, shorter retry_after must not shorten an already-committed secondary-limit pause."""
     governor = BudgetGovernor(now=clock, buffer_seconds=0.0)
-    governor.observe(BudgetSnapshot(retry_after=60.0))
+    governor.observe(make_snapshot(retry_after=60.0))
     long_pause_target, _ = governor.reserve()
 
-    governor.observe(BudgetSnapshot(retry_after=10.0))
+    governor.observe(make_snapshot(retry_after=10.0))
 
     assert governor.reserve()[0] == long_pause_target
 
@@ -229,7 +248,7 @@ def test_reserve_returns_paced_slot_when_it_exceeds_pause_until(clock: FakeClock
     interval = 100 / 10
 
     first_slot, _ = governor.reserve()  # claims a slot at now, advances the cursor by one interval
-    governor.observe(BudgetSnapshot(retry_after=1.0))  # pause_until = now + 1.0, well below the next paced slot
+    governor.observe(make_snapshot(retry_after=1.0))  # pause_until = now + 1.0, well below the next paced slot
     second_slot, _ = governor.reserve()
 
     assert first_slot == pytest.approx(clock.current)
@@ -264,7 +283,7 @@ def test_budget_event_reset_in_seconds_is_none_when_reset_at_unknown(clock: Fake
     events: list[RateLimitEvent] = []
     governor = BudgetGovernor(now=clock, reserve_fraction=0.15, on_event=events.append)
 
-    governor.observe(BudgetSnapshot(limit=100, remaining=10, reset_at=None))
+    governor.observe(make_snapshot(limit=100, remaining=10))
 
     budget_events = [event for event in events if isinstance(event, BudgetEvent)]
     assert budget_events[-1].reset_in_seconds is None
@@ -274,7 +293,7 @@ def test_budget_event_clamps_reset_in_seconds_to_zero_when_reset_at_in_past(cloc
     events: list[RateLimitEvent] = []
     governor = BudgetGovernor(now=clock, reserve_fraction=0.15, on_event=events.append)
 
-    governor.observe(BudgetSnapshot(limit=100, remaining=10, reset_at=clock.current - 50))
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=-50))
 
     budget_events = [event for event in events if isinstance(event, BudgetEvent)]
     assert budget_events[-1].reset_in_seconds == pytest.approx(0.0)
@@ -295,44 +314,32 @@ def test_budget_event_clamps_reset_in_seconds_to_zero_when_reset_at_in_past(cloc
             {"limit": 5000, "remaining": 4999, "reset_at": 1700000000.0},
             id="none_update_keeps_prior",
         ),
-        pytest.param(
-            {"limit": 5000, "remaining": 4999, "reset_at": 1700000000.0, "retry_after": None},
-            {"retry_after": 30.0},
-            {"limit": 5000, "remaining": 4999, "reset_at": 1700000000.0, "retry_after": 30.0},
-            id="retry_after_overlays_onto_none_base",
-        ),
-        pytest.param(
-            {"limit": 5000, "remaining": 4999, "reset_at": 1700000000.0, "retry_after": 30.0},
-            {"retry_after": None},
-            {"limit": 5000, "remaining": 4999, "reset_at": 1700000000.0, "retry_after": 30.0},
-            id="retry_after_preserved_when_update_is_none",
-        ),
     ],
 )
 def test_merged_with_overlay_rule(
     base_fields: dict[str, Any], update_fields: dict[str, Any], expected_fields: dict[str, Any]
 ) -> None:
-    base = BudgetSnapshot(**base_fields)
+    base = make_snapshot(**base_fields)
 
-    merged = base.merged_with(BudgetSnapshot(**update_fields))
+    merged = base.merged_with(make_snapshot(**update_fields))
 
-    assert merged == BudgetSnapshot(**expected_fields)
+    assert merged == make_snapshot(**expected_fields)
 
 
 def test_merged_with_keeps_lowest_remaining_within_window() -> None:
     """Within one window (same reset_at) a stale higher remaining must not inflate the value."""
-    base = BudgetSnapshot(limit=5000, remaining=4000, reset_at=1700000000.0)
+    base = make_snapshot(limit=5000, remaining=4000, reset_at=1700000000.0)
 
-    merged = base.merged_with(BudgetSnapshot(remaining=4999, reset_at=1700000000.0))
+    merged = base.merged_with(make_snapshot(remaining=4999, reset_at=1700000000.0))
 
     assert merged.remaining == 4000
 
 
 def test_merged_with_adopts_new_remaining_when_window_advances() -> None:
     """A larger reset_at is a new window, so the reported remaining is adopted as-is."""
-    base = BudgetSnapshot(limit=5000, remaining=100, reset_at=1700000000.0)
+    base = make_snapshot(limit=5000, remaining=100, reset_at=1700000000.0)
 
-    merged = base.merged_with(BudgetSnapshot(remaining=4999, reset_at=1700003600.0))
+    merged = base.merged_with(make_snapshot(remaining=4999, reset_at=1700003600.0))
 
     assert merged.remaining == 4999
     assert merged.reset_at == 1700003600.0
@@ -340,22 +347,46 @@ def test_merged_with_adopts_new_remaining_when_window_advances() -> None:
 
 def test_merged_with_discards_stale_window_update() -> None:
     """A smaller reset_at than the known one is a stale, out-of-order response and is discarded."""
-    base = BudgetSnapshot(limit=5000, remaining=100, reset_at=1700003600.0)
+    base = make_snapshot(limit=5000, remaining=100, reset_at=1700003600.0)
 
-    merged = base.merged_with(BudgetSnapshot(limit=5000, remaining=4999, reset_at=1700000000.0))
+    merged = base.merged_with(make_snapshot(limit=5000, remaining=4999, reset_at=1700000000.0))
 
     assert merged == base
 
 
-def test_merged_with_still_coalesces_retry_after_on_stale_window_update() -> None:
-    """A secondary-limit signal is meaningful regardless of window, even on a stale update."""
-    base = BudgetSnapshot(limit=5000, remaining=100, reset_at=1700003600.0)
+def test_observe_honors_retry_after_on_stale_window_snapshot(clock: FakeClock) -> None:
+    """retry_after is consumed in observe regardless of the budget merge, even for a stale window."""
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0)
+    governor.observe(make_snapshot(clock=clock, limit=5000, remaining=100, reset_in=3600))
 
-    merged = base.merged_with(BudgetSnapshot(remaining=4999, reset_at=1700000000.0, retry_after=30.0))
+    # A stale, out-of-order response for an earlier window: its budget is discarded, but the
+    # secondary-limit signal it carries must still arm the pause.
+    governor.observe(make_snapshot(clock=clock, remaining=4999, reset_in=0, retry_after=30.0))
 
-    assert merged.remaining == 100
-    assert merged.reset_at == 1700003600.0
-    assert merged.retry_after == 30.0
+    assert governor.budget.remaining == 100
+    assert governor.budget.reset_at == clock.current + 3600
+    assert governor.pause_until == pytest.approx(clock.current + 30.0 + 1.0)
+
+
+def test_observe_converges_regardless_of_order(clock: FakeClock) -> None:
+    """Observing the same responses in any order yields the same budget and pause (commutative)."""
+    snapshots = {
+        "window_a": make_snapshot(clock=clock, limit=100, remaining=50, reset_in=100),
+        "window_a_lower_remaining": make_snapshot(clock=clock, remaining=10, reset_in=100),
+        "window_b": make_snapshot(clock=clock, limit=100, remaining=90, reset_in=200),
+        "secondary_limit": make_snapshot(retry_after=30.0),
+    }
+    # The latest window (b) wins the budget; retry_after is not persisted but arms pause_until.
+    expected_budget = make_snapshot(clock=clock, limit=100, remaining=90, reset_in=200)
+
+    for order in itertools.permutations(snapshots.items()):
+        governor = BudgetGovernor(now=clock)
+        for _, snapshot in order:
+            governor.observe(snapshot)
+        applied = " -> ".join(name for name, _ in order)
+        expected_pause_until = clock.current + 30.0 + governor.buffer_seconds
+        assert governor.budget == expected_budget, f"budget diverged for order: {applied}"
+        assert governor.pause_until == pytest.approx(expected_pause_until), f"pause diverged for order: {applied}"
 
 
 def test_none_callback_does_not_raise(clock: FakeClock) -> None:
@@ -375,7 +406,7 @@ def test_claim_paced_slot_interval_widens_after_lower_remaining_observed(
     second, _ = governor.reserve()
     interval_before = second - first
 
-    governor.observe(BudgetSnapshot(remaining=5))  # same reset_at, same clock, fewer requests left
+    governor.observe(make_snapshot(remaining=5))  # same reset_at, same clock, fewer requests left
 
     third, _ = governor.reserve()
     fourth, _ = governor.reserve()
@@ -441,7 +472,7 @@ async def test_wait_extends_when_retry_after_observed_mid_wait(
         if not injected:
             injected = True
             # A concurrent observe() lands a secondary-limit pause well beyond the paced slot.
-            governor.observe(BudgetSnapshot(retry_after=50.0))
+            governor.observe(make_snapshot(retry_after=50.0))
 
     monkeypatch.setattr(asyncio, "sleep", MagicMock(side_effect=fake_sleep))
 
@@ -487,7 +518,7 @@ def arm_rationing(clock: FakeClock, governor: BudgetGovernor) -> None:
             id="exhausted",
         ),
         pytest.param(
-            lambda clock, governor: governor.observe(BudgetSnapshot(retry_after=30.0)),
+            lambda clock, governor: governor.observe(make_snapshot(retry_after=30.0)),
             31.0,
             PacingReason.SECONDARY_LIMIT,
             id="secondary_limit",
@@ -519,7 +550,7 @@ async def test_wait_fires_pacing_event_with_reason(
 
 async def test_instrumented_limiter_calls_governor_wait_on_enter():
     governor = BudgetGovernor(buffer_seconds=0.0)
-    governor.observe(BudgetSnapshot(retry_after=0.05))
+    governor.observe(make_snapshot(retry_after=0.05))
     limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000), budget_governor=governor)
     start = asyncio.get_running_loop().time()
 
@@ -536,7 +567,7 @@ async def test_instrumented_limiter_without_governor_does_not_wait():
 async def test_instrumented_limiter_does_not_consume_bucket_token_during_governor_wait() -> None:
     """The bucket token must be acquired only after the governor wait, not before it."""
     governor = BudgetGovernor(buffer_seconds=0.0)
-    governor.observe(BudgetSnapshot(retry_after=0.05))
+    governor.observe(make_snapshot(retry_after=0.05))
     real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
     limiter = InstrumentedAsyncLimiter(real_limiter, budget_governor=governor)
 
@@ -555,4 +586,4 @@ async def test_instrumented_limiter_does_not_consume_bucket_token_during_governo
 
 def test_instrumented_limiter_observe_without_governor_does_not_raise():
     limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000))
-    limiter.observe(BudgetSnapshot(limit=100, remaining=50, reset_at=2000.0))
+    limiter.observe(make_snapshot(limit=100, remaining=50, reset_at=2000.0))
