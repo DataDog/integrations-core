@@ -11,9 +11,9 @@
 ***Fixed***:
 
 * Fix the `database_hostname` tag and metadata to always report the resolved database host instead of the `reported_hostname` override. ([#24247](https://github.com/DataDog/integrations-core/pull/24247))
-* Remove duplicated agent_hostname logic now provided by the DatabaseCheck base class. ([#24268](https://github.com/DataDog/integrations-core/pull/24268))
-* Remove duplicated tags logic now provided by the DatabaseCheck base class. ([#24272](https://github.com/DataDog/integrations-core/pull/24272))
-* Remove duplicated database_identifier logic now provided by the DatabaseCheck base class. ([#24276](https://github.com/DataDog/integrations-core/pull/24276))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24268](https://github.com/DataDog/integrations-core/pull/24268))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24272](https://github.com/DataDog/integrations-core/pull/24272))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24276](https://github.com/DataDog/integrations-core/pull/24276))
 
 ## 7.0.0 / 2026-06-09 / Agent 7.81.0
 

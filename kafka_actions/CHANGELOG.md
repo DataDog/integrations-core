@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Added earliest, latest, and timestamp-based offset support to the ``update_consumer_group_offsets`` action, along with an inactive-group precondition check and per-partition error reporting. ([#24165](https://github.com/DataDog/integrations-core/pull/24165))
+* Add earliest, latest, and timestamp-based offset support to the ``update_consumer_group_offsets`` action, along with an inactive-group precondition check and per-partition error reporting. ([#24165](https://github.com/DataDog/integrations-core/pull/24165))
 
 ***Fixed***:
 

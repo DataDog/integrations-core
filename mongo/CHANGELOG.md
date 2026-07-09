@@ -10,7 +10,7 @@
 
 ***Fixed***:
 
-* Remove server-side sort from MongoDB query metrics collection to avoid queryStats sort memory failures. ([#24140](https://github.com/DataDog/integrations-core/pull/24140))
+* Remove server-side sort from MongoDB query metrics collection to avoid `queryStats` sort memory failures. ([#24140](https://github.com/DataDog/integrations-core/pull/24140))
 
 ## 10.10.2 / 2026-06-09 / Agent 7.81.0
 
