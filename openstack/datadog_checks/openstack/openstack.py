@@ -15,6 +15,9 @@ import simplejson as json
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
 
+# HTTP failures the check treats as an unreachable Keystone or API endpoint (a 4xx/5xx included).
+API_TRANSPORT_ERRORS = (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError)
+
 SOURCE_TYPE = 'openstack'
 
 V21_NOVA_API_VERSION = 'v2.1'
@@ -209,11 +212,7 @@ class OpenStackScope(object):
         exception_msg = None
         try:
             auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, http)
-        except (
-            HTTPStatusError,
-            HTTPTimeoutError,
-            HTTPConnectionError,
-        ):
+        except API_TRANSPORT_ERRORS:
             exception_msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
                 user=identity['password']['user']['name'],
                 domain=identity['password']['user']['domain']['id'],
@@ -231,11 +230,7 @@ class OpenStackScope(object):
                     else:
                         auth_scope['project']['name'] = auth_scope['project'].pop('id')
                 auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, http)
-            except (
-                HTTPStatusError,
-                HTTPTimeoutError,
-                HTTPConnectionError,
-            ) as e:
+            except API_TRANSPORT_ERRORS as e:
                 exception_msg = "{msg} and also failed keystone auth with \
                 identity:{user} domain:{domain} scope:{scope} @{url}: {ex}".format(
                     msg=exception_msg,
@@ -268,11 +263,7 @@ class OpenStackUnscoped(OpenStackScope):
         try:
             project_resp = cls.request_project_list(auth_token, keystone_server_url, http)
             projects = project_resp.json().get('projects')
-        except (
-            HTTPStatusError,
-            HTTPTimeoutError,
-            HTTPConnectionError,
-        ) as e:
+        except API_TRANSPORT_ERRORS as e:
             exception_msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
                 url=keystone_server_url, ex=e
             )
@@ -284,11 +275,7 @@ class OpenStackUnscoped(OpenStackScope):
                 project_key = project['name'], project['id']
                 token_resp = cls.get_token_for_project(auth_token, project, keystone_server_url, http)
                 project_auth_token = token_resp.headers.get('X-Subject-Token')
-            except (
-                HTTPStatusError,
-                HTTPTimeoutError,
-                HTTPConnectionError,
-            ) as e:
+            except API_TRANSPORT_ERRORS as e:
                 exception_msg = "unable to retrieve project from keystone auth with identity: @{url}: {ex}".format(
                     url=keystone_server_url, ex=e
                 )
@@ -1031,11 +1018,7 @@ class OpenStackCheck(AgentCheck):
                 AgentCheck.OK,
                 tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
             )
-        except (
-            HTTPStatusError,
-            HTTPTimeoutError,
-            HTTPConnectionError,
-        ):
+        except API_TRANSPORT_ERRORS:
             self.service_check(
                 self.COMPUTE_API_SC,
                 AgentCheck.CRITICAL,
@@ -1050,11 +1033,7 @@ class OpenStackCheck(AgentCheck):
                 AgentCheck.OK,
                 tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
             )
-        except (
-            HTTPStatusError,
-            HTTPTimeoutError,
-            HTTPConnectionError,
-        ):
+        except API_TRANSPORT_ERRORS:
             self.service_check(
                 self.NETWORK_API_SC,
                 AgentCheck.CRITICAL,
