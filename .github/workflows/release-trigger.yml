@@ -76,15 +76,15 @@ jobs:
         with:
           fetch-depth: 1
           sparse-checkout: .github/workflows/scripts
-      - name: Notify Slack of pending release
+      - name: Notify pending release via Datadog workflow
         env:
-          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_RELEASE }}
+          DD_WORKFLOW_WEBHOOK_URL: ${{ secrets.DD_RELEASE_WORKFLOW_WEBHOOK_URL }}
+          DD_WORKFLOW_WEBHOOK_TOKEN: ${{ secrets.DD_RELEASE_WORKFLOW_WEBHOOK_TOKEN }}
           SOURCE_REPO: integrations-core
           REF: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
           PACKAGES: ${{ inputs.packages || '' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: python3 .github/workflows/scripts/notify_slack.py
+        run: python3 .github/workflows/scripts/notify_release.py
 
   approve:
     name: Await release approval
