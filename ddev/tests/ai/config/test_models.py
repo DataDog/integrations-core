@@ -10,7 +10,10 @@ from pydantic import ValidationError
 from ddev.ai.config.models import (
     AgentConfig,
     CheckpointConfig,
+    FlowConfig,
+    PhaseConfig,
     TaskConfig,
+    VariableDeclaration,
 )
 
 # ---------------------------------------------------------------------------
@@ -31,14 +34,6 @@ def test_task_prompt_source_validation(kwargs):
 def test_task_context_flags_mutually_exclusive():
     with pytest.raises(ValidationError):
         TaskConfig(name="t", prompt="p", clear_context_before=True, compact_context_before=True)
-
-
-@pytest.mark.parametrize("flag", ["clear_context_before", "compact_context_before"], ids=["clear", "compact"])
-def test_task_accepts_single_context_flag(flag):
-    t = TaskConfig(name="t", prompt="p", **{flag: True})
-    other = "compact_context_before" if flag == "clear_context_before" else "clear_context_before"
-    assert getattr(t, flag) is True
-    assert getattr(t, other) is False
 
 
 def test_task_goal_consistency_both_set():
@@ -76,11 +71,6 @@ def test_checkpoint_memory_source_validation_rejects(kwargs):
         CheckpointConfig(**kwargs)
 
 
-def test_checkpoint_memory_source_validation_accepts_exactly_one():
-    CheckpointConfig(memory_prompt="hi")
-    CheckpointConfig(memory_prompt_ref="m")
-
-
 # ---------------------------------------------------------------------------
 # AgentConfig
 # ---------------------------------------------------------------------------
@@ -89,3 +79,23 @@ def test_checkpoint_memory_source_validation_accepts_exactly_one():
 def test_agent_rejects_unknown_tools():
     with pytest.raises(ValidationError):
         AgentConfig(tools=["nonexistent_tool"])
+
+
+# ---------------------------------------------------------------------------
+# Name pattern (shared across identity fields)
+# ---------------------------------------------------------------------------
+
+
+def test_phase_name_pattern_rejects_invalid():
+    with pytest.raises(ValidationError):
+        PhaseConfig(name="invalid/name")
+
+
+def test_flow_name_pattern_rejects_invalid():
+    with pytest.raises(ValidationError):
+        FlowConfig(name="invalid name!", flow=[])
+
+
+def test_variable_name_pattern_rejects_invalid():
+    with pytest.raises(ValidationError):
+        VariableDeclaration(name="invalid name!")

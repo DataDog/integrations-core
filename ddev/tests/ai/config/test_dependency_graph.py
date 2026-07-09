@@ -9,6 +9,7 @@ def test_detect_cycles_finds_simple_cycle():
     cycles, truncated = detect_cycles({"a": ["b"], "b": ["a"]})
     assert truncated is False
     assert ["a", "b", "a"] in cycles
+    assert len(cycles) == 1
 
 
 def test_detect_cycles_none_when_acyclic():

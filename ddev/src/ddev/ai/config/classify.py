@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
@@ -11,7 +12,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from pydantic import TypeAdapter, ValidationError
 
 from ddev.ai.config.loading.files import FileError, MarkdownFile, YamlFile
-from ddev.ai.config.models import AgentConfig, FlowEnvelope, PhaseEnvelope, ResourceEnvelope
+from ddev.ai.config.models import NAME_PATTERN, AgentConfig, FlowEnvelope, PhaseEnvelope, ResourceEnvelope
 from ddev.ai.config.registry import BrokenEntry, ResourceKind, ValidEntry
 
 if TYPE_CHECKING:
@@ -99,6 +100,9 @@ def _classify_markdown(loaded: MarkdownFile) -> ClassifyOutput:
     name = loaded.meta.get("name")
     if not name:
         message = f"Markdown resource of type {type_!r} is missing required 'name'"
+        return ClassifyOutput(file_errors=[FileError(loaded.path, message)])
+    if not isinstance(name, str) or not re.match(NAME_PATTERN, name):
+        message = f"Markdown resource of type {type_!r} has invalid name {name!r}"
         return ClassifyOutput(file_errors=[FileError(loaded.path, message)])
 
     entry = _build_markdown_entry(spec.kind, name, loaded)

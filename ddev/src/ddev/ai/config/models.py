@@ -11,16 +11,18 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from ddev.ai.tools.registry import ToolRegistry
 
+NAME_PATTERN = r"^[A-Za-z0-9._-]{1,64}$"
+
 
 class VariableDeclaration(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    name: str
+    name: str = Field(pattern=NAME_PATTERN)
     default: str | None = None
 
 
 class TaskConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    name: str = Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")
+    name: str = Field(pattern=NAME_PATTERN)
     prompt: str | None = None
     prompt_ref: str | None = None
     goal: str | None = None
@@ -85,7 +87,7 @@ class AgentConfig(BaseModel):
 
 class PhaseConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
-    name: str
+    name: str = Field(pattern=NAME_PATTERN)
     class_: str = Field(default="AgenticPhase", alias="class")
     agent: str | None = None
     tasks: list[TaskConfig] = Field(default_factory=list)
@@ -102,7 +104,7 @@ class FlowEntry(BaseModel):
 
 class FlowConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    name: str
+    name: str = Field(pattern=NAME_PATTERN)
     variables: dict[str, str] = Field(default_factory=dict)
     flow: list[FlowEntry]
 

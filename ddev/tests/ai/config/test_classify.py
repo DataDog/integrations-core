@@ -83,6 +83,15 @@ def test_markdown_missing_name_is_file_error():
     assert "missing required 'name'" in error.message
 
 
+def test_markdown_invalid_name_is_file_error():
+    md = MarkdownFile(path=PATH, meta={"type": "agent", "name": "not a valid name!"}, body="sys")
+    output = classify(md)
+
+    assert output.entries == []
+    (error,) = output.file_errors
+    assert "invalid name" in error.message
+
+
 def test_markdown_agent_invalid_field_is_broken_entry():
     md = MarkdownFile(
         path=PATH,
