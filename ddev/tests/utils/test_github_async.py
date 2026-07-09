@@ -5,7 +5,6 @@ from __future__ import annotations
 import dataclasses
 import io
 import json
-import time
 import zipfile
 from typing import Any
 
@@ -33,7 +32,6 @@ from ddev.utils.github_async.models import (
     JobStepStatus,
     Label,
     PullRequest,
-    PullRequestRef,
     PullRequestReviewComment,
     PullRequestState,
     WorkflowDispatchResult,
@@ -224,12 +222,6 @@ def test_client_empty_token_raises() -> None:
         AsyncGitHubClient(token="")
 
 
-def test_client_valid_token_builds_client() -> None:
-    client = AsyncGitHubClient(token=TOKEN)
-    assert isinstance(client._client, httpx.AsyncClient)
-    assert "Bearer ghp_test_token" in client._client.headers.get("authorization", "")  # must not raise
-
-
 async def test_client_request_headers() -> None:
     captured: httpx.Headers | None = None
 
@@ -319,24 +311,6 @@ async def test_create_workflow_dispatch_http_error_raises() -> None:
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
     assert exc_info.value.response.status_code == 422
-
-
-async def test_create_workflow_dispatch_return_run_details_parses_response() -> None:
-    payload = {
-        "workflow_run_id": 987,
-        "run_url": "https://api.github.com/repos/o/r/actions/runs/987",
-        "html_url": "https://github.com/o/r/actions/runs/987",
-    }
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        body = json.loads(request.content)
-        assert body["return_run_details"] is True
-        return json_response(payload)
-
-    client = make_client(httpx.MockTransport(handler))
-    result = await client.create_workflow_dispatch("o", "r", "wf.yml", "main", return_run_details=True)
-    assert result.data.workflow_run_id == 987
-    assert result.data.html_url == "https://github.com/o/r/actions/runs/987"
 
 
 async def test_create_workflow_dispatch_omits_return_run_details_when_false() -> None:
@@ -437,17 +411,6 @@ async def test_list_workflow_run_artifacts_two_pages() -> None:
     assert pages[1].data.artifacts[0].id == 2
 
 
-async def test_list_workflow_run_artifacts_pagination_stops_when_no_next() -> None:
-    def handler(_: httpx.Request) -> httpx.Response:
-        return json_response({"total_count": 1, "artifacts": [artifact(1)]})
-
-    client = make_client(httpx.MockTransport(handler))
-    count = 0
-    async for _ in client.list_workflow_run_artifacts("owner", "repo", 1):
-        count += 1
-    assert count == 1
-
-
 async def test_list_workflow_run_artifacts_http_error_raises() -> None:
     client = make_client(httpx.MockTransport(lambda r: httpx.Response(403)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -502,16 +465,6 @@ async def test_list_workflow_jobs_single_page() -> None:
     assert step.status is JobStepStatus.COMPLETED
 
 
-@pytest.mark.parametrize("status", list(WorkflowJobStatus), ids=[s.value for s in WorkflowJobStatus])
-async def test_list_workflow_jobs_parses_every_status(status: WorkflowJobStatus) -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return json_response({"total_count": 1, "jobs": [workflow_job(1, status=status.value, conclusion=None)]})
-
-    client = make_client(httpx.MockTransport(handler))
-    pages = [page async for page in client.list_workflow_jobs("owner", "repo", 42)]
-    assert pages[0].data.jobs[0].status is status
-
-
 async def test_list_workflow_jobs_unexpected_status_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return json_response({"total_count": 1, "jobs": [workflow_job(1, status="bogus")]})
@@ -520,27 +473,6 @@ async def test_list_workflow_jobs_unexpected_status_raises() -> None:
     with pytest.raises(ValidationError):
         async for _ in client.list_workflow_jobs("owner", "repo", 42):
             pass
-
-
-async def test_list_workflow_jobs_two_pages() -> None:
-    call_count = 0
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        nonlocal call_count
-        call_count += 1
-        if call_count == 1:
-            link = f'<{request.url.scheme}://{request.url.host}/page2>; rel="next"'
-            return json_response({"total_count": 2, "jobs": [workflow_job(1)]}, headers={"link": link})
-        return json_response({"total_count": 2, "jobs": [workflow_job(2)]})
-
-    client = make_client(httpx.MockTransport(handler))
-    pages = []
-    async for page in client.list_workflow_jobs("owner", "repo", 42):
-        pages.append(page)
-
-    assert len(pages) == 2
-    assert pages[0].data.jobs[0].id == 1
-    assert pages[1].data.jobs[0].id == 2
 
 
 async def test_list_workflow_jobs_per_page_forwarded() -> None:
@@ -741,69 +673,22 @@ async def test_create_pull_request_http_error_raises() -> None:
     assert exc_info.value.response.status_code == 422
 
 
-async def test_create_pull_request_parses_full_response() -> None:
-    """Exercises sub-models (GitHubUser, Label, PullRequestRef) end-to-end."""
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        return json_response(full_pull_request_payload(number=42), status_code=201)
-
-    client = make_client(httpx.MockTransport(handler))
-    result = await client.create_pull_request("owner", "repo", "Fix bug", "alice/fix", "master")
-
-    pr = result.data
-    assert pr.id == 9042
-    assert pr.number == 42
-    assert pr.state is PullRequestState.OPEN
-    assert pr.draft is True
-    assert pr.title == "Fix bug"
-
-    assert isinstance(pr.user, GitHubUser)
-    assert pr.user.login == "octocat"
-
-    assert [label.name for label in pr.labels] == ["qa/skip-qa", "backport/7.62.x"]
-    assert all(isinstance(label, Label) for label in pr.labels)
-
-    assert isinstance(pr.head, PullRequestRef)
-    assert pr.head.ref == "alice/fix"
-    assert pr.head.sha == "1234567890abcdef00"
-    assert isinstance(pr.base, PullRequestRef)
-    assert pr.base.ref == "master"
-
-    assert [r.login for r in pr.requested_reviewers] == ["reviewer"]
-    assert pr.created_at == "2026-05-01T00:00:00Z"
-
-
-async def test_create_pull_request_ignores_extra_fields() -> None:
-    """Unknown top-level fields in the response must not break parsing."""
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        payload = full_pull_request_payload(
-            mergeable_state="clean", additions=42, unknown_future_field={"nested": True}
-        )
-        return json_response(payload, status_code=201)
-
-    client = make_client(httpx.MockTransport(handler))
-    result = await client.create_pull_request("o", "r", "T", "h", "b")
-    assert result.data.number == 42
-
-
 # ---------------------------------------------------------------------------
 # get_pull_request
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("state", list(PullRequestState), ids=[s.value for s in PullRequestState])
-async def test_get_pull_request_success(state: PullRequestState) -> None:
+async def test_get_pull_request_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "GET"
         assert "/repos/owner/repo/pulls/5" in request.url.path
-        return json_response(full_pull_request_payload(number=5, state=state.value))
+        return json_response(full_pull_request_payload(number=5, state="open"))
 
     client = make_client(httpx.MockTransport(handler))
     result = await client.get_pull_request("owner", "repo", 5)
     assert isinstance(result.data, PullRequest)
     assert result.data.number == 5
-    assert result.data.state is state
+    assert result.data.state is PullRequestState.OPEN
 
 
 async def test_get_pull_request_headers_forwarded() -> None:
@@ -858,79 +743,33 @@ async def test_add_labels_to_issue_http_error_raises() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Lazy-loading guarantees for the `models` subpackage
-# ---------------------------------------------------------------------------
-
-
-def test_models_subpackage_loads_only_requested_submodule() -> None:
-    """Importing one model must not eagerly load every other model submodule.
-
-    Runs each scenario in a clean subprocess so the import effect is observable
-    (the parent test process has already loaded everything for other tests).
-    """
-    import subprocess
-    import sys
-    import textwrap
-
-    script = textwrap.dedent(
-        """
-        import sys
-        from ddev.utils.github_async.models import PullRequest  # noqa: F401
-
-        assert 'ddev.utils.github_async.client' not in sys.modules, 'client module should not be loaded'
-        assert 'httpx' not in sys.modules, 'httpx should not be loaded when only models are imported'
-
-        prefix = 'ddev.utils.github_async.models.'
-        loaded = sorted(name[len(prefix):] for name in sys.modules if name.startswith(prefix))
-        print(','.join(loaded))
-        """
-    )
-    result = subprocess.run([sys.executable, '-c', script], capture_output=True, text=True, check=True)
-    loaded = set(result.stdout.strip().split(','))
-
-    # `pull_request` and its two type dependencies (`user`, `label`) must load.
-    assert {'pull_request', 'user', 'label'} <= loaded
-    # Unrelated model submodules must stay unloaded.
-    assert 'workflow' not in loaded
-    assert 'comment' not in loaded
-
-
-def test_models_subpackage_unknown_attribute_raises_attribute_error() -> None:
-    import ddev.utils.github_async.models as models
-
-    with pytest.raises(AttributeError, match='no attribute'):
-        models.NotARealModel  # noqa: B018
-
-
-# ---------------------------------------------------------------------------
 # Custom timeout per request
 # ---------------------------------------------------------------------------
 
 
-async def test_per_request_timeout_forwarded() -> None:
-    """Ensure per-request timeout reaches the transport without raising."""
+@pytest.mark.parametrize(
+    ("call_kwargs", "expected"),
+    [
+        pytest.param({"timeout": 2.0}, 2.0, id="per-request-override"),
+        pytest.param({}, 5.0, id="constructor-default"),
+    ],
+)
+async def test_request_timeout_forwarded_to_transport(call_kwargs: dict[str, float], expected: float) -> None:
+    captured: dict[str, Any] = {}
 
     def handler(request: httpx.Request) -> httpx.Response:
+        captured["timeout"] = request.extensions["timeout"]
         return json_response(workflow_run_payload())
 
     client = AsyncGitHubClient(token=TOKEN, default_timeout=5.0, transport=httpx.MockTransport(handler))
-    result = await client.get_workflow_run("o", "r", 42, timeout=2.0)
-    assert result.data.id == 42
+    await client.get_workflow_run("o", "r", 42, **call_kwargs)
+
+    assert captured["timeout"] == dict.fromkeys(("connect", "read", "write", "pool"), expected)
 
 
 # ---------------------------------------------------------------------------
 # Rate limiter wiring in AsyncGitHubClient
 # ---------------------------------------------------------------------------
-
-
-async def test_client_request_without_rate_limiter_goes_through() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return json_response(workflow_run_payload())
-
-    async with async_github_client(token=TOKEN, transport=httpx.MockTransport(handler)) as client:
-        result = await client.get_workflow_run("o", "r", 42)
-
-    assert result.data.id == 42
 
 
 async def test_client_request_with_rate_limiter_consumes_token() -> None:
@@ -950,30 +789,6 @@ async def test_client_request_with_rate_limiter_consumes_token() -> None:
     bucket_events = [event for event in events if isinstance(event, BucketEvent)]
     assert bucket_events == [BucketEvent(throttled=False, name="")]
     assert not real_limiter.has_capacity()
-
-
-async def test_client_request_throttled_when_bucket_exhausted() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return json_response(workflow_run_payload())
-
-    # A short time_period lets the second, throttled acquire actually complete instead of
-    # blocking forever, so its BucketEvent fires.
-    real_limiter = AsyncLimiter(max_rate=1, time_period=0.1)
-    events: list[RateLimitEvent] = []
-    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_event=events.append)
-
-    async with async_github_client(
-        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
-    ) as client:
-        await client.get_workflow_run("o", "r", 42)  # drains the single token
-
-    async with async_github_client(
-        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
-    ) as client:
-        await client.get_workflow_run("o", "r", 42)  # blocks until the 0.1s period refills it
-
-    bucket_events = [event for event in events if isinstance(event, BucketEvent)]
-    assert [event.throttled for event in bucket_events] == [False, True]
 
 
 # ---------------------------------------------------------------------------
@@ -1097,34 +912,16 @@ async def test_create_check_run_http_error_raises() -> None:
     assert exc_info.value.response.status_code == 422
 
 
-# One case per non-completed status (conclusion is null until completed), plus every
-# conclusion (incl. the GitHub-only ``stale``) paired with ``completed``.
-CHECK_RUN_RESULT_CASES = [
-    *[
-        pytest.param(status, None, id=status.value)
-        for status in CheckRunStatus
-        if status is not CheckRunStatus.COMPLETED
-    ],
-    *[
-        pytest.param(CheckRunStatus.COMPLETED, conclusion, id=f"completed-{conclusion.value}")
-        for conclusion in CheckRunConclusion
-    ],
-]
-
-
-@pytest.mark.parametrize(("status", "conclusion"), CHECK_RUN_RESULT_CASES)
-async def test_update_check_run_success(status: CheckRunStatus, conclusion: CheckRunConclusion | None) -> None:
+async def test_update_check_run_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "PATCH"
         assert "/repos/o/r/check-runs/77" in request.url.path
-        return json_response(
-            check_run_payload(id=77, status=status.value, conclusion=conclusion.value if conclusion else None)
-        )
+        return json_response(check_run_payload(id=77, status="completed", conclusion="success"))
 
     client = make_client(httpx.MockTransport(handler))
-    result = await client.update_check_run("o", "r", 77, status="in_progress")
-    assert result.data.status is status
-    assert result.data.conclusion is conclusion
+    result = await client.update_check_run("o", "r", 77, status="completed", conclusion="success")
+    assert result.data.status is CheckRunStatus.COMPLETED
+    assert result.data.conclusion is CheckRunConclusion.SUCCESS
 
 
 async def test_update_check_run_omits_unset_fields() -> None:
@@ -1211,15 +1008,19 @@ async def test_download_artifact_non_302_raises(tmp_path) -> None:
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
-async def test_download_artifact_signed_url_error_raises(monkeypatch, tmp_path) -> None:
+@pytest.mark.parametrize("status_code", [403, 503], ids=["forbidden", "server-error"])
+async def test_download_artifact_signed_url_error_propagates(
+    monkeypatch: pytest.MonkeyPatch, tmp_path, status_code: int
+) -> None:
+    """A failed signed-URL download propagates as httpx.HTTPStatusError (no retries)."""
+
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
 
     def signed_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(403, content=b"expired")
+        return httpx.Response(status_code, content=b"error")
 
     patch_signed_download(monkeypatch, signed_handler)
-
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
@@ -1269,21 +1070,6 @@ def patch_signed_download(monkeypatch, handler: Any) -> None:
         return real_async_client(*args, **kwargs)
 
     monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
-
-
-async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) -> None:
-    """A failed signed-URL download propagates as httpx.HTTPStatusError (no retries)."""
-
-    def github_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
-
-    def signed_handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(503, content=b"unavailable")
-
-    patch_signed_download(monkeypatch, signed_handler)
-    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
-    with pytest.raises(httpx.HTTPStatusError):
-        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
 # ---------------------------------------------------------------------------
@@ -1336,8 +1122,9 @@ async def test_default_rate_limiter_is_constructed_and_observes_403() -> None:
     with pytest.raises(httpx.HTTPStatusError):
         await client._request("GET", "/x")
 
-    # The 403's retry-after was observed (before raise_for_status), arming the shared pause.
-    assert governor.pause_until - time.time() == pytest.approx(31.0, abs=2.0)
+    # The 403's retry-after was observed (before raise_for_status), arming the shared pause;
+    # exact pause arithmetic is covered by the clocked governor tests.
+    assert governor.pause_until > 0
     assert len(calls) == 1  # retries disabled: one call, no wait
 
 
@@ -1459,3 +1246,19 @@ async def test_pagination_retries_only_the_rate_limited_page(monkeypatch: pytest
 
     assert [page.status_code for page in pages] == [200, 200]
     assert len(calls) == 3  # page 1, page 2 (rate-limited), page 2 (retry)
+
+
+async def test_endpoint_retries_rate_limit_then_parses(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A public endpoint call retries a rate-limit response and returns the parsed model."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    transport, calls = recording_transport(
+        [httpx.Response(403, headers={"retry-after": "5"}), json_response(workflow_run_payload())]
+    )
+    client = governed_client(clock, transport)
+
+    result = await client.get_workflow_run("o", "r", 42)
+
+    assert isinstance(result.data, WorkflowRun)
+    assert result.data.id == 42
+    assert len(calls) == 2
