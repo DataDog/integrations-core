@@ -1,14 +1,39 @@
 """Post a 'wheel release starting' Slack notification via chat.postMessage.
 
 Env: SLACK_API_TOKEN, SLACK_CHANNEL_ID (both required or no-op), SOURCE_REPO,
-REF, PACKAGES, RUN_URL. Slack/network errors warn and never fail the job.
+REF, PACKAGES, RUN_URL.
+
+Error handling distinguishes two failure classes so a broken token is never
+silently swallowed as a green run:
+
+* Persistent misconfigurations (missing OAuth scope, bad/expired token, wrong
+  channel, bot not in channel) recur on every release. They are reported to the
+  GitHub step summary and fail the step so they get fixed immediately. This is
+  safe because the notify job is not a dependency of the release itself.
+* Transient problems (network, timeout, 5xx, rate limiting) only warn and never
+  fail the job, so a momentary Slack blip does not create release noise.
 """
 import json
 import os
+import sys
 import urllib.error
 import urllib.request
 
 SLACK_URL = "https://slack.com/api/chat.postMessage"
+
+# Slack API `error` codes that mean the notifier is misconfigured rather than
+# hitting a transient blip. These will fail on every release until fixed.
+CONFIG_ERRORS = frozenset(
+    {
+        "missing_scope",
+        "invalid_auth",
+        "not_authed",
+        "token_revoked",
+        "account_inactive",
+        "channel_not_found",
+        "not_in_channel",
+    }
+)
 
 
 def build_text(source_repo: str, ref: str, packages: str, run_url: str) -> str:
@@ -24,8 +49,26 @@ def build_text(source_repo: str, ref: str, packages: str, run_url: str) -> str:
     )
 
 
-def post(token: str, channel: str, text: str) -> None:
-    """Post *text* to *channel*, warning (not failing) on error."""
+def report_config_error(error: str) -> None:
+    """Surface a persistent misconfiguration loudly in the GitHub step summary."""
+    message = (
+        f"Slack notification misconfigured: `{error}`. The pending-release message was NOT delivered. "
+        "Verify SLACK_API_TOKEN has the `chat:write` scope and is valid, and that the bot is a member "
+        "of SLACK_CHANNEL_ID."
+    )
+    print(f"::error::{message}")
+    summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary_path:
+        with open(summary_path, "a", encoding="utf-8") as summary:
+            summary.write(f"### \u274c Slack notification failed\n\n{message}\n")
+
+
+def post(token: str, channel: str, text: str) -> bool:
+    """Post *text* to *channel*; return False only on a persistent misconfiguration.
+
+    Success and transient failures return True (transient ones only warn), so the
+    caller fails the step exclusively for config errors that need a human fix.
+    """
     data = json.dumps({"channel": channel, "text": text, "unfurl_links": False}).encode()
     request = urllib.request.Request(
         SLACK_URL,
@@ -36,10 +79,16 @@ def post(token: str, channel: str, text: str) -> None:
         with urllib.request.urlopen(request, timeout=15) as response:
             body = json.loads(response.read())
     except (urllib.error.URLError, TimeoutError, ValueError) as e:
-        print(f"::warning::Slack request failed: {e}")
-        return
-    if not body.get("ok"):
-        print(f"::warning::Slack notification failed: {body.get('error', 'unknown error')}")
+        print(f"::warning::Slack request failed (transient): {e}")
+        return True
+    if body.get("ok"):
+        return True
+    error = body.get("error", "unknown error")
+    if error in CONFIG_ERRORS:
+        report_config_error(error)
+        return False
+    print(f"::warning::Slack notification failed: {error}")
+    return True
 
 
 def main() -> None:
@@ -48,7 +97,7 @@ def main() -> None:
     if not token or not channel:
         print("Slack token or channel not configured; skipping notification.")
         return
-    post(
+    delivered = post(
         token,
         channel,
         build_text(
@@ -58,6 +107,8 @@ def main() -> None:
             os.environ.get("RUN_URL", ""),
         ),
     )
+    if not delivered:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
