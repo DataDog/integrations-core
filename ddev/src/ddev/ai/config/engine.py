@@ -13,7 +13,7 @@ from ddev.ai.config.errors import ConfigError, ConfigStatus, ErrorKind, FlowDiag
 from ddev.ai.config.loading.discovery import discover
 from ddev.ai.config.loading.files import FileError
 from ddev.ai.config.registry import ResourceKind, ResourceRegistry
-from ddev.ai.config.resolver import FlowResolver
+from ddev.ai.config.resolving.resolver import FlowResolver
 
 if TYPE_CHECKING:
     from ddev.ai.config.models import ResolvedFlow
