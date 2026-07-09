@@ -199,9 +199,9 @@ def test_azure_resource_id_emitted_as_tag(pg_instance, integration_check, resour
     if resource_id is not None:
         # Emitted verbatim (canonical case) as a regular tag so it survives to the
         # database_instance metadata for Azure log correlation.
-        assert 'resource_id:{}'.format(resource_id) in tags
+        assert 'azure_resource_id:{}'.format(resource_id) in tags
     else:
-        assert not any(tag.startswith('resource_id:') for tag in tags)
+        assert not any(tag.startswith('azure_resource_id:') for tag in tags)
 
 
 @pytest.mark.parametrize(

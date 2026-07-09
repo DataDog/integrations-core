@@ -288,7 +288,7 @@ class PostgreSql(DatabaseCheck):
             # Emitted as a regular tag (not a dd.internal.resource) so it survives to the
             # database_instance metadata and lets DBM correlate Azure resource logs when the
             # automatic FQDN-to-resource mapping is unavailable.
-            self.tag_manager.set_tag("resource_id", self._config.azure.resource_id, replace=True)
+            self.tag_manager.set_tag("azure_resource_id", self._config.azure.resource_id, replace=True)
         # finally, tag the `database_instance` resource for this instance
         # metrics intake will use this tag to add all the tags for the instance
         self.tag_manager.set_tag(

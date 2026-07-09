@@ -552,9 +552,9 @@ def test_azure_resource_id_emitted_as_tag(instance_minimal_defaults, resource_id
     if resource_id is not None:
         # Emitted verbatim (canonical case) as a regular tag so it survives to the
         # database_instance metadata for Azure log correlation.
-        assert 'resource_id:{}'.format(resource_id) in tags
+        assert 'azure_resource_id:{}'.format(resource_id) in tags
     else:
-        assert not any(tag.startswith('resource_id:') for tag in tags)
+        assert not any(tag.startswith('azure_resource_id:') for tag in tags)
 
 
 def test_autodiscovery_matches_all_by_default(instance_autodiscovery):
