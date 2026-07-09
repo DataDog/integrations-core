@@ -10,13 +10,11 @@ import time
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin
 
+import requests
 import simplejson as json
 
 from datadog_checks.base import AgentCheck, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
-
-# HTTP failures the check treats as an unreachable Keystone or API endpoint (a 4xx/5xx included).
-API_TRANSPORT_ERRORS = (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError)
+from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
 
 SOURCE_TYPE = 'openstack'
 
@@ -138,7 +136,7 @@ class OpenStackScope(object):
         self.auth_token = auth_token
 
     @classmethod
-    def request_auth_token(cls, auth_scope, identity, keystone_server_url, http):
+    def request_auth_token(cls, auth_scope, identity, keystone_server_url, ssl_verify, proxy=None):
         if not auth_scope:
             auth_scope = UNSCOPED_AUTH
 
@@ -146,7 +144,14 @@ class OpenStackScope(object):
         auth_url = urljoin(keystone_server_url, "{0}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'Content-Type': 'application/json'}
 
-        resp = http.post(auth_url, extra_headers=headers, data=json.dumps(payload))
+        resp = requests.post(  # SKIP_HTTP_VALIDATION
+            auth_url,
+            headers=headers,
+            data=json.dumps(payload),
+            verify=ssl_verify,
+            timeout=DEFAULT_API_REQUEST_TIMEOUT,
+            proxies=proxy,
+        )
         resp.raise_for_status()
 
         return resp
@@ -201,18 +206,25 @@ class OpenStackScope(object):
         return auth_scope
 
     @classmethod
-    def get_auth_response_from_config(cls, init_config, instance_config, http=None):
+    def get_auth_response_from_config(cls, init_config, instance_config, proxy_config=None):
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
+
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", False))
 
         auth_scope = cls.get_auth_scope(instance_config)
         identity = cls.get_user_identity(instance_config)
 
         exception_msg = None
         try:
-            auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, http)
-        except API_TRANSPORT_ERRORS:
+            auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ):
             exception_msg = "Failed keystone auth with user:{user} domain:{domain} scope:{scope} @{url}".format(
                 user=identity['password']['user']['name'],
                 domain=identity['password']['user']['domain']['id'],
@@ -229,8 +241,13 @@ class OpenStackScope(object):
                         auth_scope['project']['domain']['name'] = auth_scope['project']['domain'].pop('id')
                     else:
                         auth_scope['project']['name'] = auth_scope['project'].pop('id')
-                auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, http)
-            except API_TRANSPORT_ERRORS as e:
+                auth_resp = cls.request_auth_token(auth_scope, identity, keystone_server_url, ssl_verify, proxy_config)
+            except (
+                requests.exceptions.HTTPError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectionError,
+                HTTPTimeoutError,
+            ) as e:
                 exception_msg = "{msg} and also failed keystone auth with \
                 identity:{user} domain:{domain} scope:{scope} @{url}: {ex}".format(
                     msg=exception_msg,
@@ -251,19 +268,25 @@ class OpenStackUnscoped(OpenStackScope):
         self.project_scope_map = project_scope_map
 
     @classmethod
-    def from_config(cls, init_config, instance_config, http=None):
+    def from_config(cls, init_config, instance_config, proxy_config=None):
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
 
+        ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
-        _, auth_token, _ = cls.get_auth_response_from_config(init_config, instance_config, http)
+        _, auth_token, _ = cls.get_auth_response_from_config(init_config, instance_config, proxy_config)
 
         try:
-            project_resp = cls.request_project_list(auth_token, keystone_server_url, http)
+            project_resp = cls.request_project_list(auth_token, keystone_server_url, ssl_verify, proxy_config)
             projects = project_resp.json().get('projects')
-        except API_TRANSPORT_ERRORS as e:
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ) as e:
             exception_msg = "unable to retrieve project list from keystone auth with identity: @{url}: {ex}".format(
                 url=keystone_server_url, ex=e
             )
@@ -273,9 +296,16 @@ class OpenStackUnscoped(OpenStackScope):
         for project in projects:
             try:
                 project_key = project['name'], project['id']
-                token_resp = cls.get_token_for_project(auth_token, project, keystone_server_url, http)
+                token_resp = cls.get_token_for_project(
+                    auth_token, project, keystone_server_url, ssl_verify, proxy_config
+                )
                 project_auth_token = token_resp.headers.get('X-Subject-Token')
-            except API_TRANSPORT_ERRORS as e:
+            except (
+                requests.exceptions.HTTPError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectionError,
+                HTTPTimeoutError,
+            ) as e:
                 exception_msg = "unable to retrieve project from keystone auth with identity: @{url}: {ex}".format(
                     url=keystone_server_url, ex=e
                 )
@@ -299,24 +329,33 @@ class OpenStackUnscoped(OpenStackScope):
         return cls(auth_token, project_scope_map)
 
     @classmethod
-    def get_token_for_project(cls, auth_token, project, keystone_server_url, http):
+    def get_token_for_project(cls, auth_token, project, keystone_server_url, ssl_verify, proxy=None):
         identity = {"methods": ['token'], "token": {"id": auth_token}}
         scope = {'project': {'id': project['id']}}
         payload = {'auth': {'identity': identity, 'scope': scope}}
         headers = {'Content-Type': 'application/json'}
         auth_url = urljoin(keystone_server_url, "{0}/auth/tokens".format(DEFAULT_KEYSTONE_API_VERSION))
 
-        resp = http.post(auth_url, extra_headers=headers, data=json.dumps(payload))
+        resp = requests.post(
+            auth_url,
+            headers=headers,
+            data=json.dumps(payload),
+            verify=ssl_verify,
+            timeout=DEFAULT_API_REQUEST_TIMEOUT,
+            proxies=proxy,
+        )
         resp.raise_for_status()
 
         return resp
 
     @classmethod
-    def request_project_list(cls, auth_token, keystone_server_url, http):
+    def request_project_list(cls, auth_token, keystone_server_url, ssl_verify, proxy=None):
         auth_url = urljoin(keystone_server_url, "{0}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'X-Auth-Token': auth_token}
 
-        resp = http.get(auth_url, extra_headers=headers)
+        resp = requests.get(
+            auth_url, headers=headers, verify=ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=proxy
+        )
         resp.raise_for_status()
 
         return resp
@@ -339,14 +378,16 @@ class OpenStackProjectScope(OpenStackScope):
         self.service_catalog = service_catalog
 
     @classmethod
-    def from_config(cls, init_config, instance_config, http=None):
+    def from_config(cls, init_config, instance_config, proxy_config=None):
         keystone_server_url = init_config.get("keystone_server_url")
         if not keystone_server_url:
             raise IncompleteConfig()
 
         nova_api_version = init_config.get("nova_api_version", DEFAULT_NOVA_API_VERSION)
 
-        auth_scope, auth_token, auth_resp = cls.get_auth_response_from_config(init_config, instance_config, http)
+        auth_scope, auth_token, auth_resp = cls.get_auth_response_from_config(
+            init_config, instance_config, proxy_config
+        )
 
         try:
             service_catalog = KeystoneCatalog.from_auth_response(auth_resp.json(), nova_api_version)
@@ -382,7 +423,7 @@ class KeystoneCatalog(object):
         self.neutron_endpoint = neutron_endpoint
 
     @classmethod
-    def from_auth_response(cls, json_response, nova_api_version, keystone_server_url=None, auth_token=None, http=None):
+    def from_auth_response(cls, json_response, nova_api_version, keystone_server_url=None, auth_token=None, proxy=None):
         try:
             return cls(
                 nova_endpoint=cls.get_nova_endpoint(json_response, nova_api_version),
@@ -390,16 +431,18 @@ class KeystoneCatalog(object):
             )
         except (MissingNeutronEndpoint, MissingNovaEndpoint) as e:
             if keystone_server_url and auth_token:
-                return cls.from_unscoped_token(keystone_server_url, auth_token, nova_api_version, http)
+                return cls.from_unscoped_token(keystone_server_url, auth_token, nova_api_version, proxy)
             else:
                 raise e
 
     @classmethod
-    def from_unscoped_token(cls, keystone_server_url, auth_token, nova_api_version, http=None):
+    def from_unscoped_token(cls, keystone_server_url, auth_token, nova_api_version, ssl_verify=True, proxy=None):
         catalog_url = urljoin(keystone_server_url, "{0}/auth/catalog".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'X-Auth-Token': auth_token}
 
-        resp = http.get(catalog_url, extra_headers=headers)
+        resp = requests.get(
+            catalog_url, headers=headers, verify=ssl_verify, timeout=DEFAULT_API_REQUEST_TIMEOUT, proxies=proxy
+        )
         resp.raise_for_status()
         json_resp = resp.json()
         json_resp = {'token': json_resp}
@@ -492,9 +535,6 @@ class OpenStackCheck(AgentCheck):
         super(OpenStackCheck, self).__init__(name, init_config, instances)
 
         self._ssl_verify = is_affirmative(init_config.get("ssl_verify", True))
-        # ssl_verify is init_config-level here; bridge it to the instance-level tls_verify the HTTP client reads.
-        if self.instance is not None:
-            self.instance['tls_verify'] = self._ssl_verify
         self.keystone_server_url = init_config.get("keystone_server_url")
         self._hypervisor_name_cache = {}
 
@@ -518,6 +558,9 @@ class OpenStackCheck(AgentCheck):
 
         self.exclude_server_id_rules = {re.compile(ex) for ex in init_config.get('exclude_server_ids', [])}
 
+        skip_proxy = not is_affirmative(init_config.get('use_agent_proxy', True))
+        self.proxy_config = None if skip_proxy else self.proxies
+
         self.backoff = {}
         random.seed()
 
@@ -538,9 +581,16 @@ class OpenStackCheck(AgentCheck):
         """
         self.log.debug("Request URL and Params: %s, %s", url, params)
         try:
-            resp = self.http.get(url, extra_headers=headers, params=params)
+            resp = requests.get(
+                url,
+                headers=headers,
+                verify=self._ssl_verify,
+                params=params,
+                timeout=DEFAULT_API_REQUEST_TIMEOUT,
+                proxies=self.proxy_config,
+            )
             resp.raise_for_status()
-        except HTTPStatusError as e:
+        except requests.exceptions.HTTPError as e:
             self.log.debug("Error contacting openstack endpoint: %s", e)
             if resp.status_code == 401:
                 self.log.info('Need to reauthenticate before next check')
@@ -928,7 +978,7 @@ class OpenStackCheck(AgentCheck):
         except InstancePowerOffFailure:  # 409 response code came back for nova
             self.log.debug("Server %s is powered off and cannot be monitored", server_id)
             del self.server_details_by_id[server_id]
-        except HTTPStatusError as e:
+        except requests.exceptions.HTTPError as e:
             if e.response.status_code == 404:
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
                 del self.server_details_by_id[server_id]
@@ -1012,13 +1062,24 @@ class OpenStackCheck(AgentCheck):
         headers = {"X-Auth-Token": scope.auth_token}
 
         try:
-            self.http.get(scope.service_catalog.nova_endpoint, extra_headers=headers)
+            requests.get(
+                scope.service_catalog.nova_endpoint,
+                headers=headers,
+                verify=self._ssl_verify,
+                timeout=DEFAULT_API_REQUEST_TIMEOUT,
+                proxies=self.proxy_config,
+            )
             self.service_check(
                 self.COMPUTE_API_SC,
                 AgentCheck.OK,
                 tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
             )
-        except API_TRANSPORT_ERRORS:
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ):
             self.service_check(
                 self.COMPUTE_API_SC,
                 AgentCheck.CRITICAL,
@@ -1027,13 +1088,24 @@ class OpenStackCheck(AgentCheck):
 
         # Neutron
         try:
-            self.http.get(scope.service_catalog.neutron_endpoint, extra_headers=headers)
+            requests.get(
+                scope.service_catalog.neutron_endpoint,
+                headers=headers,
+                verify=self._ssl_verify,
+                timeout=DEFAULT_API_REQUEST_TIMEOUT,
+                proxies=self.proxy_config,
+            )
             self.service_check(
                 self.NETWORK_API_SC,
                 AgentCheck.OK,
                 tags=["keystone_server:%s" % self.init_config.get("keystone_server_url")] + tags,
             )
-        except API_TRANSPORT_ERRORS:
+        except (
+            requests.exceptions.HTTPError,
+            requests.exceptions.Timeout,
+            requests.exceptions.ConnectionError,
+            HTTPTimeoutError,
+        ):
             self.service_check(
                 self.NETWORK_API_SC,
                 AgentCheck.CRITICAL,
@@ -1059,9 +1131,9 @@ class OpenStackCheck(AgentCheck):
             # Let's populate it now
             try:
                 if 'auth_scope' in instance:
-                    instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.http)
+                    instance_scope = OpenStackProjectScope.from_config(self.init_config, instance, self.proxy_config)
                 else:
-                    instance_scope = OpenStackUnscoped.from_config(self.init_config, instance, self.http)
+                    instance_scope = OpenStackUnscoped.from_config(self.init_config, instance, self.proxy_config)
 
                 self.service_check(
                     self.IDENTITY_API_SC,
@@ -1228,7 +1300,7 @@ class OpenStackCheck(AgentCheck):
                 )
             else:
                 self.warning("Configuration Incomplete! Check your openstack.yaml file")
-        except HTTPStatusError as e:
+        except requests.exceptions.HTTPError as e:
             if e.response.status_code >= 500:
                 # exponential backoff
                 self.do_backoff(instance)
@@ -1237,7 +1309,7 @@ class OpenStackCheck(AgentCheck):
                 self.warning("Error reaching nova API")
 
             return
-        except (HTTPTimeoutError, HTTPConnectionError):
+        except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, HTTPTimeoutError):
             # exponential backoff
             self.do_backoff(instance)
             self.warning("There were some problems reaching the nova API - applying exponential backoff")
