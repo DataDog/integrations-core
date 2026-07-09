@@ -75,13 +75,18 @@ def test_e2e(dd_agent_check, instance):
 def assert_openmetrics(aggregator, tags=None):
     aggregator.assert_service_check('aerospike.openmetrics.health', AgentCheck.OK, tags=tags)
 
+    def assert_metric_with_tags(metric):
+        aggregator.assert_metric(metric)
+        for tag in tags or ():
+            aggregator.assert_metric_has_tag(metric, tag)
+
     for metric in EXPECTED_PROMETHEUS_METRICS:
-        aggregator.assert_metric(metric, tags=tags)
+        assert_metric_with_tags(metric)
 
     version_parts = [int(p) for p in VERSION.split('.')]
     if version_parts >= [5, 6]:
         for metric in EXPECTED_PROMETHEUS_METRICS_5_6:
-            aggregator.assert_metric(metric, tags=tags)
+            assert_metric_with_tags(metric)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
