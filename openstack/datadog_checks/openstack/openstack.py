@@ -138,7 +138,7 @@ class OpenStackScope(object):
         self.auth_token = auth_token
 
     @classmethod
-    def request_auth_token(cls, auth_scope, identity, keystone_server_url, http=None):
+    def request_auth_token(cls, auth_scope, identity, keystone_server_url, http):
         if not auth_scope:
             auth_scope = UNSCOPED_AUTH
 
@@ -299,7 +299,7 @@ class OpenStackUnscoped(OpenStackScope):
         return cls(auth_token, project_scope_map)
 
     @classmethod
-    def get_token_for_project(cls, auth_token, project, keystone_server_url, http=None):
+    def get_token_for_project(cls, auth_token, project, keystone_server_url, http):
         identity = {"methods": ['token'], "token": {"id": auth_token}}
         scope = {'project': {'id': project['id']}}
         payload = {'auth': {'identity': identity, 'scope': scope}}
@@ -312,7 +312,7 @@ class OpenStackUnscoped(OpenStackScope):
         return resp
 
     @classmethod
-    def request_project_list(cls, auth_token, keystone_server_url, http=None):
+    def request_project_list(cls, auth_token, keystone_server_url, http):
         auth_url = urljoin(keystone_server_url, "{0}/auth/projects".format(DEFAULT_KEYSTONE_API_VERSION))
         headers = {'X-Auth-Token': auth_token}
 
