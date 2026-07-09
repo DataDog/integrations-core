@@ -89,11 +89,10 @@ def test_connection_failure(aggregator, check, dd_run_check):
 
 
 def _assert_openmetrics_v2(aggregator, tags=None):
-    kong_version = os.environ.get('KONG_VERSION').split('.')[0]
-
     aggregator.assert_service_check('kong.openmetrics.health', AgentCheck.OK, count=2, tags=tags)
 
     # Only a subset(3) of metrics are exposed currently in our Kong test environment
+    kong_version = os.environ.get('KONG_VERSION').split('.')[0]
     if kong_version >= '3':
         metrics = EXPECTED_METRICS_V3
     else:
