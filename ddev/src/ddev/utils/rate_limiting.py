@@ -20,7 +20,7 @@ RATE_LIMIT_TIME_PERIOD = 3600.0  # 1 hour — matches GitHub's rate limit window
 # time-based budget can never detect because a frozen now() never reaches its give-up point. With
 # max_wait_seconds absorbing real floods and long windows, this reverts to "unreachable except by
 # bug" — which is exactly what its RuntimeError means.
-MAX_WAIT_ITERATIONS = 1000
+MAX_WAIT_ITERATIONS = 100
 
 
 @dataclasses.dataclass(frozen=True)

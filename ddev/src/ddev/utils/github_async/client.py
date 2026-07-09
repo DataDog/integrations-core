@@ -19,6 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
 
+from .defaults import default_github_rate_limiter
 from .models import (
     ArtifactsList,
     CheckRun,
@@ -104,6 +105,32 @@ class AsyncGitHubClient:
 
     Uses a shared httpx.AsyncClient for connection pooling. Call `aclose()` when
     finished to release resources, or use the `async_github_client` context manager.
+
+    Rate-limit protection is on by default: requests are paced and, when GitHub signals a
+    rate-limit rejection, retried in reaction to the response headers. The governor supplies the
+    backoff, so there is no sleeping or backoff arithmetic in this client. The default protection
+    logs through the ``ddev.utils.github_async.defaults`` logger.
+
+    Args:
+        token: GitHub token; must be non-empty.
+        rate_limiter: Overrides the default rate limiter; it does not enable protection, which is
+            already on. None builds the default (a permissive local bucket fronting a reactive
+            BudgetGovernor). There is deliberately no way to disable protection: GitHub requires
+            clients to honor ``retry-after``, and persistent violations risk the shared token being
+            throttled harder or banned. Because octo-sts mints the token against one installation
+            for the whole company, a single unprotected client instance degrades every other
+            consumer of that token. Callers with special needs pass their own limiter; they do not
+            turn protection off.
+        default_timeout: Default per-request HTTP timeout in seconds. Bounds individual HTTP
+            requests only; it does not bound governor waits. To bound total wait, pass a limiter
+            whose governor sets ``max_wait_seconds``.
+        max_rate_limit_retries: Extra attempts for a header-confirmed rate-limit response (403/429).
+            Each retry is a full fresh acquisition (governor wait plus bucket token); the default of
+            2 covers the common "hit a secondary limit once, wait, succeed" case plus one repeat.
+            Only rate-limit responses are retried: transport errors and non-rate-limit statuses
+            propagate immediately, and RateLimitWaitAbandoned (the governor's ``max_wait_seconds``
+            killswitch) propagates to the caller.
+        transport: Optional custom HTTPX transport (useful for testing with MockTransport).
     """
 
     def __init__(
@@ -112,13 +139,19 @@ class AsyncGitHubClient:
         *,
         rate_limiter: InstrumentedAsyncLimiter | None = None,
         default_timeout: float = 30.0,
+        max_rate_limit_retries: int = 2,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         if not token:
             raise ValueError("GitHub token must not be empty.")
 
-        self._rate_limiter = rate_limiter
+        # A None limiter means "use the default protection," not "no protection." The local bucket
+        # is deliberately permissive because the governor is the protection; with a healthy budget
+        # and no secondary limits the governor adds zero wait, so this default is invisible to
+        # well-behaved callers and engages only once GitHub has already signaled backpressure.
+        self._rate_limiter = rate_limiter if rate_limiter is not None else default_github_rate_limiter()
         self._default_timeout = default_timeout
+        self._max_rate_limit_retries = max_rate_limit_retries
         self._headers = {
             "Authorization": f"Bearer {token}",
             "X-GitHub-Api-Version": GITHUB_API_VERSION,
@@ -142,6 +175,18 @@ class AsyncGitHubClient:
     def _effective_timeout(self, timeout: float | None) -> float:
         return timeout if timeout is not None else self._default_timeout
 
+    @staticmethod
+    def _is_rate_limit_response(response: httpx.Response) -> bool:
+        """Whether *response* is a retryable rate-limit rejection, by GitHub's own discrimination rule.
+
+        A 403 is also used for plain permission denials, which waiting cannot fix; retrying one would
+        sleep out a pause (up to a full window) and then fail identically. Only header-confirmed
+        rate-limit responses are retryable.
+        """
+        if response.status_code not in (403, 429):
+            return False
+        return "retry-after" in response.headers or response.headers.get("x-ratelimit-remaining") == "0"
+
     async def _execute_request(
         self,
         method: str,
@@ -153,10 +198,13 @@ class AsyncGitHubClient:
             response = await self._client.request(method, endpoint, timeout=timeout, **kwargs)
         except httpx.TransportError as exc:
             raise type(exc)(f"{method} {endpoint}: {exc}") from exc
-        if self._rate_limiter is not None:
-            snapshot = github_rate_limit_snapshot(response.headers)
-            if snapshot is not None:
-                self._rate_limiter.observe(snapshot)
+        # Observe before raise_for_status, never after: learning must not be gated on success. A
+        # failed response's rate-limit headers arm the shared pause even if the caller swallows the
+        # exception, so one request's 403 protects every other in-flight and future request in this
+        # process.
+        snapshot = github_rate_limit_snapshot(response.headers)
+        if snapshot is not None:
+            self._rate_limiter.observe(snapshot)
         response.raise_for_status()
         return response
 
@@ -168,10 +216,29 @@ class AsyncGitHubClient:
         **kwargs: Any,
     ) -> httpx.Response:
         effective_timeout = self._effective_timeout(timeout)
-        if self._rate_limiter:
+        # Rate-limit-aware retry lives here, not in _execute_request: re-entering the limiter IS the
+        # backoff. The failed response's headers were observed inside _execute_request before the
+        # exception propagated, so the governor already holds the pause this very 403 armed;
+        # re-acquiring waits it out exactly (retry-after plus buffer for secondary limits, until
+        # reset for an exhausted window). Hence no sleeps or backoff math. A loop inside
+        # _execute_request would be wrong: it would retry while still holding the acquisition,
+        # without re-consulting the governor. Concurrent retries also serialize behind the same
+        # shared pause instead of stampeding, which is what GitHub's secondary-limit guidance asks
+        # for. RateLimitWaitAbandoned raised while (re-)acquiring propagates untouched from here: it
+        # is the caller-configured killswitch, and counting it as an attempt would defeat it.
+        for attempt in range(self._max_rate_limit_retries + 1):
             async with self._rate_limiter:
-                return await self._execute_request(method, endpoint, effective_timeout, **kwargs)
-        return await self._execute_request(method, endpoint, effective_timeout, **kwargs)
+                try:
+                    return await self._execute_request(method, endpoint, effective_timeout, **kwargs)
+                except httpx.HTTPStatusError as exc:
+                    # A rate-limit 403/429 is safe to retry for every endpoint, including
+                    # non-idempotent POSTs, precisely because GitHub rejected it without performing
+                    # the action. (Transport errors are never retried, and are not caught here: after
+                    # one we cannot know whether the action executed.) Give up on the last attempt or
+                    # on a non-rate-limit status, which waiting cannot fix.
+                    if attempt == self._max_rate_limit_retries or not self._is_rate_limit_response(exc.response):
+                        raise
+        raise RuntimeError("unreachable: the retry loop always returns or raises")  # pragma: no cover
 
     async def _paginated_request(
         self,
@@ -647,6 +714,9 @@ class AsyncGitHubClient:
         except httpx.HTTPStatusError as exc:
             # httpx.raise_for_status() treats the expected 302 as an error since it isn't a 2xx;
             # recover the response from the exception so the redirect can still be inspected below.
+            # The retry layer in _request is deliberately transparent here: a 302 is not a rate-limit
+            # response by _is_rate_limit_response, so it is never retried and surfaces on the first
+            # attempt exactly as before.
             redirect_response = exc.response
         if redirect_response.status_code != 302:
             redirect_response.raise_for_status()
@@ -724,16 +794,26 @@ async def async_github_client(
     *,
     rate_limiter: InstrumentedAsyncLimiter | None = None,
     default_timeout: float = 30.0,
+    max_rate_limit_retries: int = 2,
     transport: httpx.AsyncBaseTransport | None = None,
 ) -> AsyncIterator[AsyncGitHubClient]:
     """
     Async context manager that creates an AsyncGitHubClient and ensures it is closed on exit.
 
+    Rate-limit protection is on by default; the governor paces requests and supplies the backoff for
+    retries. Header-confirmed rate-limit responses (403/429) are retried, transport errors and
+    non-rate-limit statuses are not, and RateLimitWaitAbandoned propagates to the caller when the
+    governor is configured with a wait budget. The default protection logs through the
+    ``ddev.utils.github_async.defaults`` logger.
+
     Args:
         token: GitHub personal access token or app token.
-        rate_limiter: Optional rate limiter applied to every request. When provided, each
-            request acquires a token before proceeding. Create one via RateLimiterFactory.
-        default_timeout: Default request timeout in seconds.
+        rate_limiter: Overrides the default rate limiter; None uses the built-in default. This
+            selects which limiter to use, it does not enable or disable protection (protection is
+            always on).
+        default_timeout: Default per-request HTTP timeout in seconds. Bounds individual HTTP
+            requests only, not governor waits.
+        max_rate_limit_retries: Extra attempts for a header-confirmed rate-limit response.
         transport: Optional custom HTTPX transport (useful for testing with MockTransport).
 
     Yields:
@@ -743,6 +823,7 @@ async def async_github_client(
         token=token,
         rate_limiter=rate_limiter,
         default_timeout=default_timeout,
+        max_rate_limit_retries=max_rate_limit_retries,
         transport=transport,
     )
     try:
