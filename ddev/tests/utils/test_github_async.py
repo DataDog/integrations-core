@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import dataclasses
 import io
 import json
@@ -55,6 +54,7 @@ from ddev.utils.rate_limiting import (
     RateLimitEvent,
     SecondaryLimitEvent,
 )
+from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -1052,7 +1052,6 @@ def check_run_payload(
     }
 
 
-@pytest.mark.asyncio
 async def test_create_check_run_success() -> None:
     captured: dict[str, Any] = {}
 
@@ -1070,7 +1069,6 @@ async def test_create_check_run_success() -> None:
     assert captured == {"name": "ck", "head_sha": "abc", "status": "in_progress"}
 
 
-@pytest.mark.asyncio
 async def test_create_check_run_with_optional_fields() -> None:
     captured: dict[str, Any] = {}
 
@@ -1092,7 +1090,6 @@ async def test_create_check_run_with_optional_fields() -> None:
     assert captured["output"] == {"title": "t", "summary": "s"}
 
 
-@pytest.mark.asyncio
 async def test_create_check_run_http_error_raises() -> None:
     client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -1115,7 +1112,6 @@ CHECK_RUN_RESULT_CASES = [
 ]
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(("status", "conclusion"), CHECK_RUN_RESULT_CASES)
 async def test_update_check_run_success(status: CheckRunStatus, conclusion: CheckRunConclusion | None) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
@@ -1131,7 +1127,6 @@ async def test_update_check_run_success(status: CheckRunStatus, conclusion: Chec
     assert result.data.conclusion is conclusion
 
 
-@pytest.mark.asyncio
 async def test_update_check_run_omits_unset_fields() -> None:
     captured: dict[str, Any] = {}
 
@@ -1144,7 +1139,6 @@ async def test_update_check_run_omits_unset_fields() -> None:
     assert captured == {"conclusion": "failure"}
 
 
-@pytest.mark.asyncio
 async def test_update_check_run_requires_conclusion_when_completed() -> None:
     requested = False
 
@@ -1159,7 +1153,6 @@ async def test_update_check_run_requires_conclusion_when_completed() -> None:
     assert requested is False
 
 
-@pytest.mark.asyncio
 async def test_update_check_run_http_error_raises() -> None:
     client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
@@ -1167,7 +1160,6 @@ async def test_update_check_run_http_error_raises() -> None:
     assert exc_info.value.response.status_code == 404
 
 
-@pytest.mark.asyncio
 async def test_update_check_run_unexpected_status_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return json_response(check_run_payload(id=77, status="bogus"))
@@ -1190,7 +1182,6 @@ def make_zip(members: dict[str, bytes]) -> bytes:
     return buf.getvalue()
 
 
-@pytest.mark.asyncio
 async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch, tmp_path) -> None:
     captured_signed_headers: dict[str, str] = {}
 
@@ -1202,14 +1193,7 @@ async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch
         captured_signed_headers.update({k.lower(): v for k, v in request.headers.items()})
         return httpx.Response(200, content=make_zip({"hello.txt": b"hi"}))
 
-    real_async_client = httpx.AsyncClient
-
-    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
-        if kwargs.get("transport") is None:
-            kwargs["transport"] = httpx.MockTransport(signed_handler)
-        return real_async_client(*args, **kwargs)
-
-    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+    patch_signed_download(monkeypatch, signed_handler)
 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
@@ -1218,7 +1202,6 @@ async def test_download_artifact_token_not_leaked_to_redirect_target(monkeypatch
     assert (tmp_path / "out" / "hello.txt").read_bytes() == b"hi"
 
 
-@pytest.mark.asyncio
 async def test_download_artifact_non_302_raises(tmp_path) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, content=b"not a redirect")
@@ -1228,7 +1211,6 @@ async def test_download_artifact_non_302_raises(tmp_path) -> None:
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
-@pytest.mark.asyncio
 async def test_download_artifact_signed_url_error_raises(monkeypatch, tmp_path) -> None:
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
@@ -1236,21 +1218,13 @@ async def test_download_artifact_signed_url_error_raises(monkeypatch, tmp_path) 
     def signed_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(403, content=b"expired")
 
-    real_async_client = httpx.AsyncClient
-
-    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
-        if kwargs.get("transport") is None:
-            kwargs["transport"] = httpx.MockTransport(signed_handler)
-        return real_async_client(*args, **kwargs)
-
-    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+    patch_signed_download(monkeypatch, signed_handler)
 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 
-@pytest.mark.asyncio
 async def test_download_artifact_missing_location_header_raises(tmp_path) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302)
@@ -1267,7 +1241,6 @@ async def test_download_artifact_missing_location_header_raises(tmp_path) -> Non
         pytest.param("/etc/passwd", id="absolute-path"),
     ],
 )
-@pytest.mark.asyncio
 async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malicious_member: str) -> None:
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
@@ -1275,14 +1248,7 @@ async def test_download_artifact_zip_slip_rejected(monkeypatch, tmp_path, malici
     def signed_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, content=make_zip({malicious_member: b"pwn"}))
 
-    real_async_client = httpx.AsyncClient
-
-    def fake_async_client(*args: Any, **kwargs: Any) -> httpx.AsyncClient:
-        if kwargs.get("transport") is None:
-            kwargs["transport"] = httpx.MockTransport(signed_handler)
-        return real_async_client(*args, **kwargs)
-
-    monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
+    patch_signed_download(monkeypatch, signed_handler)
 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     dest = tmp_path / "out"
@@ -1305,7 +1271,6 @@ def patch_signed_download(monkeypatch, handler: Any) -> None:
     monkeypatch.setattr("ddev.utils.github_async.client.httpx.AsyncClient", fake_async_client)
 
 
-@pytest.mark.asyncio
 async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) -> None:
     """A failed signed-URL download propagates as httpx.HTTPStatusError (no retries)."""
 
@@ -1324,19 +1289,6 @@ async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) 
 # ---------------------------------------------------------------------------
 # Default rate-limit protection + rate-limit-aware retry
 # ---------------------------------------------------------------------------
-
-
-class FakeClock:
-    """Injectable, manually-advanceable clock for deterministic governor-driven retries."""
-
-    def __init__(self, start: float = 1000.0) -> None:
-        self.current = start
-
-    def __call__(self) -> float:
-        return self.current
-
-    def advance(self, seconds: float) -> None:
-        self.current += seconds
 
 
 def recording_transport(items: list[httpx.Response | Exception]) -> tuple[httpx.MockTransport, list[httpx.Request]]:
@@ -1370,15 +1322,6 @@ def governed_client(
     return AsyncGitHubClient(
         token=TOKEN, rate_limiter=limiter, transport=transport, max_rate_limit_retries=max_rate_limit_retries
     )
-
-
-def advance_clock_on_sleep(clock: FakeClock, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Make asyncio.sleep advance the fake clock instead of blocking, so governor waits are instant."""
-
-    async def fake_sleep(delay: float) -> None:
-        clock.advance(delay)
-
-    monkeypatch.setattr(asyncio, "sleep", fake_sleep)
 
 
 async def test_default_rate_limiter_is_constructed_and_observes_403() -> None:
