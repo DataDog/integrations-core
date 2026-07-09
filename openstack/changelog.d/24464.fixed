@@ -1,0 +1,1 @@
+Remove dead unscoped-catalog fallback code that could never execute.
