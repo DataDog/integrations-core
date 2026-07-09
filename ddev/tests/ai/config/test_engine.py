@@ -61,7 +61,7 @@ def test_get_flow_resolves_all_refs_and_variables(tmp_path):
 
 
 def test_directory_layout_is_irrelevant(tmp_path):
-    """D1: classification is by type tag, not directory; nesting/naming don't matter."""
+    """Classification is by type tag, not directory; nesting/naming don't matter."""
     write(tmp_path / "deeply" / "nested" / "anything.md", "---\ntype: agent\nname: ag\n---\nsys")
     write(tmp_path / "intro.md", "---\ntype: prompt\nname: intro\n---\np")
     write(tmp_path / "g.md", "---\ntype: goal\nname: g\n---\ng")
@@ -74,7 +74,7 @@ def test_directory_layout_is_irrelevant(tmp_path):
 
 
 def test_markdown_keyed_by_front_matter_name_not_stem(tmp_path):
-    """D3: identity is the front-matter name; the filename stem is organizational only."""
+    """Identity is the front-matter name; the filename stem is organizational only."""
     write(tmp_path / "unrelated-filename.md", "---\ntype: agent\nname: ag\n---\nsys")
     write(tmp_path / "intro.md", "---\ntype: prompt\nname: intro\n---\np")
     write(tmp_path / "g.md", "---\ntype: goal\nname: g\n---\ng")

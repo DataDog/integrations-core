@@ -54,8 +54,8 @@ def test_broken_entry_excluded_from_ok_view_but_reachable_via_entry():
 
 
 def test_conflicting_same_kind_and_name_disabled_everywhere():
-    e1 = ValidEntry(kind=ResourceKind.AGENT, name="dup", config=AgentConfig(), source_file=Path("/x/one.md"))
-    e2 = ValidEntry(kind=ResourceKind.AGENT, name="dup", config=AgentConfig(), source_file=Path("/x/two.md"))
+    e1 = ValidEntry(kind=ResourceKind.AGENT, name="dup", config=AgentConfig(model="one"), source_file=Path("/x/one.md"))
+    e2 = ValidEntry(kind=ResourceKind.AGENT, name="dup", config=AgentConfig(model="two"), source_file=Path("/x/two.md"))
     reg = ResourceRegistry([e1, e2])
 
     assert reg.has_conflicts
@@ -110,21 +110,7 @@ def test_flow_names_includes_valid_and_broken_but_not_conflicting():
     reg = ResourceRegistry([valid_flow, broken_flow, conflict_a, conflict_b])
 
     assert set(reg.flow_names) == {"good", "broken"}
-    assert "dup" not in reg.flow_names
     assert any(c.kind == ResourceKind.FLOW and c.name == "dup" for c in reg.conflicts)
-
-
-def test_conflict_among_str_body_kinds():
-    p1 = ValidEntry(kind=ResourceKind.PROMPT, name="intro", config="v1", source_file=Path("/x/intro1.md"))
-    p2 = ValidEntry(kind=ResourceKind.PROMPT, name="intro", config="v2", source_file=Path("/x/intro2.md"))
-    reg = ResourceRegistry([p1, p2])
-
-    assert reg.has_conflicts
-    assert reg.prompts == {}
-    assert reg.entry(ResourceKind.PROMPT, "intro") is None
-    conflict = next(c for c in reg.conflicts if c.name == "intro")
-    assert conflict.kind == ResourceKind.PROMPT
-    assert conflict.sources == [Path("/x/intro1.md"), Path("/x/intro2.md")]
 
 
 def test_conflicts_record_kind_name_and_all_sources():

@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import StrEnum, auto
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -16,12 +16,12 @@ if TYPE_CHECKING:
 
 
 class ResourceKind(StrEnum):
-    AGENT = "agent"
-    PHASE = "phase"
-    FLOW = "flow"
-    PROMPT = "prompt"
-    GOAL = "goal"
-    MEMORY_PROMPT = "memory_prompt"
+    AGENT = auto()
+    PHASE = auto()
+    FLOW = auto()
+    PROMPT = auto()
+    GOAL = auto()
+    MEMORY_PROMPT = auto()
 
 
 @dataclass(frozen=True)

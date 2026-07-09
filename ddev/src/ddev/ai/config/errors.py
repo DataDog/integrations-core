@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import StrEnum, auto
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,8 +20,8 @@ class ConfigError(Exception):
 
 
 class ConfigStatus(StrEnum):
-    OK = "ok"
-    BROKEN = "broken"
+    OK = auto()
+    BROKEN = auto()
 
 
 class ErrorKind(StrEnum):
@@ -32,14 +32,14 @@ class ErrorKind(StrEnum):
     are structural problems not tied to a single resource.
     """
 
-    FLOW = "flow"
-    PHASE = "phase"
-    AGENT = "agent"
-    PROMPT = "prompt"
-    GOAL = "goal"
-    MEMORY_PROMPT = "memory_prompt"
-    DEPENDENCY = "dependency"
-    VARIABLE = "variable"
+    FLOW = auto()
+    PHASE = auto()
+    AGENT = auto()
+    PROMPT = auto()
+    GOAL = auto()
+    MEMORY_PROMPT = auto()
+    DEPENDENCY = auto()
+    VARIABLE = auto()
 
     @classmethod
     def for_resource(cls, kind: ResourceKind) -> ErrorKind:
