@@ -5,6 +5,8 @@
 #
 ad_identifiers:
   - teleport-distroless
+  - teleport-ent-distroless
+  - teleport-ent-fips-distroless
 
 ## Enables configuration discovery
 #

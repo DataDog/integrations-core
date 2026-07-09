@@ -39,4 +39,6 @@ files:
       overrides:
         value.example:
         - teleport-distroless
+        - teleport-ent-distroless
+        - teleport-ent-fips-distroless
     - template: auto_conf/discovery
