@@ -3,7 +3,7 @@
   "app_uuid": "d4315abc-0191-40e9-a14c-e3efafc41c1e",
   "app_id": "trellix-endpoint-security",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

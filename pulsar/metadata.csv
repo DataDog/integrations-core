@@ -30,7 +30,7 @@ pulsar.brk_ml_cursor_writeLedgerLogicalSize,gauge,,,,The size of write to ledger
 pulsar.brk_ml_cursor_writeLedgerSize,gauge,,,,The size of write to ledger.,0,pulsar,,
 pulsar.broker_load_manager_bundle_assignment,gauge,,,,The summary of latency of bundles ownership operations.,0,pulsar,,
 pulsar.broker_lookup.count,count,,,,Number of samples of the latency of all lookup operations.,0,pulsar,,
-pulsar.broker_lookup.quantle,count,,,,Latency of all lookup operations.,0,pulsar,,
+pulsar.broker_lookup.quantile,gauge,,,,Latency of all lookup operations by `quantile`.,0,pulsar,,
 pulsar.broker_lookup.sum,count,,,,Total latency of all lookup operations.,0,pulsar,,
 pulsar.broker_lookup_answers.count,count,,response,,The number of lookup responses (i.e. not redirected requests).,0,pulsar,,
 pulsar.broker_lookup_failures.count,count,,,,The number of lookup failures.,0,pulsar,,

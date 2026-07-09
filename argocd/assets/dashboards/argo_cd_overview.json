@@ -524,7 +524,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Number of Non Successful Application Syncs",
+                            "title": "Number of Unsuccessful Application Syncs",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
@@ -1830,7 +1830,7 @@
                                 }
                             ],
                             "show_legend": true,
-                            "title": "Count of of Redis Requests",
+                            "title": "Count of Redis Requests",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "timeseries"
