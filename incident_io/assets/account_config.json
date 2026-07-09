@@ -6,7 +6,7 @@
         "password_setting": {
           "key": "incident_io_api_key",
           "label": "API key",
-          "help": "incident.io API Key"
+          "help": "incident.io API Key",
           "required": true,
           "password": {}
         }
