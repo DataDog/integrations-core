@@ -74,7 +74,7 @@
                         "id": 2570179001713344,
                         "definition": {
                             "type": "note",
-                            "content": "This is an overview of service checks, monitors and connect statuses of your Consul deployment",
+                            "content": "This is an overview of service checks, monitors and connection statuses of your Consul deployment",
                             "background_color": "pink",
                             "font_size": "14",
                             "text_align": "center",
