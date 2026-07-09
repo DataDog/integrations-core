@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "**Nvidia Triton**\n\nThis dashboard provides insights into your Nvidia Triton Server. You can use this dashboard to check resource consumption in GPU and CPU. You can also use it to get in depth look at your inference requests per model and cache stats(if enabled).\n\n**Useful Links**\n\n* [Integration Docs]()",
+    "description": "**Nvidia Triton**\n\nThis dashboard provides insights into your Nvidia Triton Server. You can use this dashboard to check resource consumption in GPU and CPU. You can also use it to get in depth look at your inference requests per model and cache stats(if enabled).\n\n**Useful Links**\n\n* [Integration Docs](https://docs.datadoghq.com/integrations/nvidia_triton/?tab=host)",
     "layout_type": "ordered",
     "template_variables": [
         {
