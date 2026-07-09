@@ -1,0 +1,1 @@
+Anchor in-core editable installs in the hatch environment collector to the project root so the post-install command works on hatch 1.10+ when invoked from a subdirectory of the integration. The generated install, lint, and typing commands now shell-quote those absolute paths so checkouts under a path containing whitespace work on both POSIX and Windows.

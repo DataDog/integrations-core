@@ -802,7 +802,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -914,7 +914,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true @evt.outcome:ALLOW $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) @evt.outcome:ALLOW $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -929,7 +929,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1076,7 +1076,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1201,7 +1201,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1281,7 +1281,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1360,7 +1360,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1569,7 +1569,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true @evt.outcome:ALLOW $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) @evt.outcome:ALLOW $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1646,7 +1646,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1789,14 +1789,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:pip @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:pip (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -1950,7 +1950,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2062,7 +2062,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true @evt.outcome:ALLOW $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) @evt.outcome:ALLOW $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2077,7 +2077,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2224,7 +2224,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2350,7 +2350,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2430,7 +2430,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2509,7 +2509,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2718,7 +2718,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true @evt.outcome:ALLOW $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) @evt.outcome:ALLOW $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -2795,7 +2795,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -2938,14 +2938,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:npm @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:npm (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -3099,7 +3099,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3211,7 +3211,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true @evt.outcome:ALLOW $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) @evt.outcome:ALLOW $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3226,7 +3226,7 @@
                                             "name": "query2",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3373,7 +3373,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3498,7 +3498,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3578,7 +3578,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3657,7 +3657,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3866,7 +3866,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true @evt.outcome:ALLOW $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) @evt.outcome:ALLOW $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
@@ -3943,7 +3943,7 @@
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
@@ -4086,14 +4086,14 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:scfw service:scfw @package_manager:poetry @warned:true $User-Name $Hostname $Action"
+                                                "query": "source:scfw service:scfw @package_manager:poetry (@warning:true OR @warned:true) $User-Name $Hostname $Action"
                                             },
                                             "indexes": [
                                                 "*"
                                             ],
                                             "group_by": [
                                                 {
-                                                    "facet": "@targets",
+                                                    "facet": "@install_targets.name",
                                                     "limit": 10,
                                                     "sort": {
                                                         "aggregation": "count",
