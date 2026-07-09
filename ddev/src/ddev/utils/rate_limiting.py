@@ -16,7 +16,11 @@ from aiolimiter import AsyncLimiter
 
 RATE_LIMIT_TIME_PERIOD = 3600.0  # 1 hour — matches GitHub's rate limit window
 
-MAX_WAIT_ITERATIONS = 1000  # safety cap; the pacing math converges well before this
+# Backstop for the pathological no-progress bug (e.g. a clock that never advances), which a
+# time-based budget can never detect because a frozen now() never reaches its give-up point. With
+# max_wait_seconds absorbing real floods and long windows, this reverts to "unreachable except by
+# bug" — which is exactly what its RuntimeError means.
+MAX_WAIT_ITERATIONS = 1000
 
 
 @dataclasses.dataclass(frozen=True)
@@ -79,6 +83,7 @@ class PacingReason(StrEnum):
     RATIONING = "rationing"
     EXHAUSTED = "exhausted"
     SECONDARY_LIMIT = "secondary_limit"
+    ABANDONED = "abandoned"
 
 
 @dataclasses.dataclass(frozen=True)
@@ -124,6 +129,21 @@ class PacingEvent:
 RateLimitEvent = BucketEvent | BudgetEvent | SecondaryLimitEvent | PacingEvent
 
 
+class RateLimitWaitAbandoned(TimeoutError):
+    """Raised when a single wait() would exceed the configured max_wait_seconds budget.
+
+    Subclasses the builtin TimeoutError (which asyncio.TimeoutError aliases since 3.11) so generic
+    timeout handling catches it, while catching this class enables a rate-limit-specific reaction.
+    """
+
+    def __init__(self, waited_seconds: float, remaining_seconds: float) -> None:
+        super().__init__(
+            f"Abandoned rate-limit wait after {waited_seconds:.1f}s; the target was still {remaining_seconds:.1f}s away"
+        )
+        self.waited_seconds = waited_seconds
+        self.remaining_seconds = remaining_seconds
+
+
 class BudgetGovernor:
     """Reactive backpressure control loop driven by a remote provider's rate-limit information.
 
@@ -139,6 +159,7 @@ class BudgetGovernor:
         buffer_seconds: float = 1.0,
         now: Callable[[], float] = time.time,
         on_event: Callable[[RateLimitEvent], None] | None = None,
+        max_wait_seconds: float | None = None,
     ) -> None:
         """
         Args:
@@ -149,11 +170,18 @@ class BudgetGovernor:
             now: Wall-clock source returning epoch seconds; defaults to ``time.time``.
             on_event: Called with a RateLimitEvent on every observe and every wait, for logging
                 or emitting metrics.
+            max_wait_seconds: Total time a single wait() may target before it raises
+                RateLimitWaitAbandoned, measured from when the call starts and covering both
+                exhausted-window waits and accumulated secondary-limit extensions. None (default)
+                disables the killswitch and waits indefinitely for legitimate targets. If set below
+                the provider's window length, a fully exhausted window will exceed the budget and
+                raise; size this above the ``reset_at - now`` waits you intend to survive.
         """
         self.reserve_fraction = reserve_fraction
         self.buffer_seconds = buffer_seconds
         self.now = now
         self.on_event = on_event or (lambda event: None)
+        self.max_wait_seconds = max_wait_seconds
         self.budget = NULL_SNAPSHOT
         self.pause_until = 0.0
         self.next_slot = 0.0
@@ -238,24 +266,34 @@ class BudgetGovernor:
         return slot
 
     async def wait(self) -> None:
-        """Reserve one slot, then sleep until its target and any hard-pause floor elapse."""
+        """Reserve one slot, then sleep until its target and any hard-pause floor elapse.
+
+        Raises RateLimitWaitAbandoned if the target ever exceeds the configured max_wait_seconds.
+        """
         deadline, reason = self.reserve()
-        now = self.now()
-        wait_seconds = max(0.0, deadline - now)
+        start = self.now()
+        wait_seconds = max(0.0, deadline - start)
         if wait_seconds <= 0:
             reason = PacingReason.NONE
         self.on_event(PacingEvent(wait_seconds=wait_seconds, reason=reason))
+        give_up_at = None if self.max_wait_seconds is None else start + self.max_wait_seconds
         floor = max(deadline, self.pause_until)
         for _ in range(MAX_WAIT_ITERATIONS):
-            delay = max(deadline, self.pause_until) - self.now()
+            current_floor = max(deadline, self.pause_until)
+            now = self.now()
+            delay = current_floor - now
             if delay <= 0:
                 return
-            new_floor = max(deadline, self.pause_until)
-            if new_floor > floor:
+            if give_up_at is not None and current_floor > give_up_at:
+                # The floor is past the budget: the request is doomed, so fail now rather than
+                # sleep into a wait we already know we will abandon.
+                self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.ABANDONED))
+                raise RateLimitWaitAbandoned(waited_seconds=now - start, remaining_seconds=delay)
+            if current_floor > floor:
                 # The floor only grows when pause_until does, i.e. a secondary-limit observe
                 # extended the wait mid-sleep; emit so the extension is observable.
                 self.on_event(PacingEvent(wait_seconds=delay, reason=PacingReason.SECONDARY_LIMIT))
-                floor = new_floor
+                floor = current_floor
             await asyncio.sleep(delay)
         raise RuntimeError(
             f"BudgetGovernor.wait failed to converge after {MAX_WAIT_ITERATIONS} iterations "

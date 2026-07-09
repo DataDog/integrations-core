@@ -22,6 +22,7 @@ from ddev.utils.rate_limiting import (
     PacingEvent,
     PacingReason,
     RateLimitEvent,
+    RateLimitWaitAbandoned,
     SecondaryLimitEvent,
 )
 from tests.helpers.assertions import assert_blocks
@@ -541,6 +542,92 @@ async def test_wait_raises_when_max_iterations_exceeded_without_hanging(
 
     with pytest.raises(RuntimeError, match=str(MAX_WAIT_ITERATIONS)):
         await asyncio.wait_for(governor.wait(), timeout=1.0)
+
+
+async def test_wait_abandons_immediately_when_exhausted_window_exceeds_budget(
+    clock: FakeClock, slept: list[float]
+) -> None:
+    """A window that resets past the budget must raise before sleeping at all."""
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=300)
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=3600))
+
+    with pytest.raises(RateLimitWaitAbandoned) as exc_info:
+        await governor.wait()
+
+    assert slept == []
+    assert exc_info.value.waited_seconds == pytest.approx(0.0)
+    assert exc_info.value.remaining_seconds == pytest.approx(3601.0)
+
+
+async def test_wait_abandons_when_flood_pushes_floor_past_budget(
+    clock: FakeClock, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A secondary-limit extension that crosses the budget mid-wait must raise, not be slept out."""
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(
+        now=clock, buffer_seconds=0.0, reserve_fraction=0.15, max_wait_seconds=60, on_event=events.append
+    )
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=10, reset_in=100))
+    interval = 100 / 10
+    governor.reserve()  # first request reserved; this wait() paces by one interval
+
+    async def fake_sleep(delay: float) -> None:
+        clock.advance(delay)
+        # Each sleep lands a fresh secondary-limit pause far beyond the budget.
+        governor.observe(make_snapshot(retry_after=100.0))
+
+    monkeypatch.setattr(asyncio, "sleep", MagicMock(side_effect=fake_sleep))
+
+    start = clock.current
+    with pytest.raises(RateLimitWaitAbandoned) as exc_info:
+        await governor.wait()
+
+    # Only the initial paced interval was slept; the 100s flood extension was never slept out.
+    assert clock.current - start == pytest.approx(interval)
+    assert exc_info.value.waited_seconds == pytest.approx(interval)
+    assert exc_info.value.remaining_seconds == pytest.approx(100.0)
+    abandoned = [e for e in events if isinstance(e, PacingEvent) and e.reason is PacingReason.ABANDONED]
+    assert abandoned == [PacingEvent(wait_seconds=pytest.approx(100.0), reason=PacingReason.ABANDONED)]
+
+
+async def test_wait_with_ample_budget_sleeps_identically_to_no_budget(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A budget larger than the whole wait must not change any sleep versus a disabled budget."""
+
+    def armed_governor(max_wait_seconds: float | None) -> tuple[BudgetGovernor, list[float]]:
+        clock = FakeClock()
+        governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=max_wait_seconds)
+        governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=100))
+        fake_sleep, slept = sleep_advancing(clock)
+        monkeypatch.setattr(asyncio, "sleep", fake_sleep)
+        return governor, slept
+
+    governor_none, slept_none = armed_governor(None)
+    await governor_none.wait()
+
+    governor_budget, slept_budget = armed_governor(100_000)
+    await governor_budget.wait()
+
+    assert slept_budget == slept_none
+
+
+async def test_wait_without_budget_does_not_abandon_long_exhausted_wait(clock: FakeClock, slept: list[float]) -> None:
+    """With max_wait_seconds=None the governor waits out an entire window without raising."""
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=None)
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=3600))
+    start = clock.current
+
+    await governor.wait()
+
+    assert clock.current - start == pytest.approx(3601.0)
+
+
+async def test_wait_abandoned_is_caught_as_timeout_error(clock: FakeClock, slept: list[float]) -> None:
+    """RateLimitWaitAbandoned subclasses TimeoutError so generic timeout handling catches it."""
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, max_wait_seconds=1.0)
+    governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=3600))
+
+    with pytest.raises(TimeoutError):
+        await governor.wait()
 
 
 def arm_rationing(clock: FakeClock, governor: BudgetGovernor) -> None:
