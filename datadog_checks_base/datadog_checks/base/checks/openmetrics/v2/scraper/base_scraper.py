@@ -232,6 +232,16 @@ class OpenMetricsScraper:
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
 
+        # When no label filtering/renaming is configured, use a streamlined sample data generator
+        # that avoids per-label dict lookups and conditional checks.
+        if (
+            not self.exclude_metrics_by_labels
+            and not self.exclude_labels
+            and not self.include_labels
+            and not self.rename_labels
+        ):
+            self.generate_sample_data = self._generate_sample_data_no_filters
+
         # Used for monotonic counts
         self.flush_first_value = None
 
@@ -402,6 +412,37 @@ class OpenMetricsScraper:
                     hostname = self.hostname_formatter(hostname)
 
             self.submit_telemetry_number_of_processed_metric_samples()
+            yield sample, tags, hostname
+
+    def _generate_sample_data_no_filters(self, metric):
+        """Fast path for generate_sample_data when no label exclude/include/rename is configured."""
+        label_normalizer = get_label_normalizer(metric.type)
+        hostname_label = self.hostname_label
+        hostname_formatter = self.hostname_formatter
+        static_tags = self.tags
+        populate = self.label_aggregator.populate
+        submit_telemetry = self.submit_telemetry_number_of_processed_metric_samples
+
+        for sample in metric.samples:
+            value = sample.value
+            if isnan(value) or isinf(value):
+                self.log.debug('Ignoring sample for metric `%s` as it has an invalid value: %s', metric.name, value)
+                continue
+
+            labels = sample.labels
+            populate(labels)
+            label_normalizer(labels)
+
+            tags = [f'{label_name}:{label_value}' for label_name, label_value in labels.items()]
+            tags.extend(static_tags)
+
+            hostname = ""
+            if hostname_label and hostname_label in labels:
+                hostname = labels[hostname_label]
+                if hostname_formatter is not None:
+                    hostname = hostname_formatter(hostname)
+
+            submit_telemetry()
             yield sample, tags, hostname
 
     def stream_connection_lines(self):
