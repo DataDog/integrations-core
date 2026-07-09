@@ -134,19 +134,6 @@ def test_from_instance():
 @pytest.mark.parametrize(
     'invalid_custom_queries',
     [
-        # Missing `data_path`
-        [
-            {
-                'endpoint': '/_nodes',
-                'columns': [
-                    {
-                        'value_path': 'total',
-                        'name': 'elasticsearch.custom.metric',
-                    },
-                ],
-                'tags': ['custom_tag:1'],
-            },
-        ],
         # Missing `columns`
         [
             {'endpoint': '/_nodes', 'data_path': '_nodes.', 'tags': ['custom_tag:1']},

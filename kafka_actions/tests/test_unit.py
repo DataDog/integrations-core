@@ -8,7 +8,8 @@ import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
-from confluent_kafka import KafkaError
+from confluent_kafka import KafkaError, KafkaException, TopicPartition
+from confluent_kafka.admin import OffsetSpec
 
 from datadog_checks.kafka_actions import KafkaActionsCheck
 from datadog_checks.kafka_actions.kafka_client import KafkaActionsClient
@@ -24,6 +25,28 @@ def _futures(offsets):
         fut.result.return_value = MagicMock(offset=off)
         out[MagicMock(partition=p)] = fut
     return out
+
+
+def _offset_future(offset):
+    fut = MagicMock()
+    fut.result.return_value = MagicMock(offset=offset)
+    return fut
+
+
+def _offset_future_with_topic_partitions(topic_partitions):
+    """Build a future mimicking AdminClient.alter_consumer_group_offsets results."""
+    future = MagicMock()
+    future.result.return_value = MagicMock(topic_partitions=topic_partitions)
+    return future
+
+
+def _list_offsets_stub(offsets_by_partition):
+    """A `list_offsets`-compatible side_effect resolving any requested TopicPartition by partition number."""
+
+    def _stub(request, **kwargs):
+        return {tp: _offset_future(offsets_by_partition[tp.partition]) for tp in request}
+
+    return _stub
 
 
 def _eof(partition):
@@ -272,7 +295,7 @@ class TestUpdateConsumerGroupOffsetsAction:
     """Test update_consumer_group_offsets action."""
 
     def test_update_consumer_group_offsets(self, aggregator, dd_run_check):
-        """Test updating consumer group offsets."""
+        """Test updating consumer group offsets with explicit values."""
         instance = {
             'remote_config_id': 'test-update-offsets-001',
             'kafka_connect_str': 'localhost:9092',
@@ -291,6 +314,7 @@ class TestUpdateConsumerGroupOffsetsAction:
         with (
             patch.object(check.kafka_client, 'update_consumer_group_offsets', return_value=True) as mock_update_offsets,
             patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+            patch.object(check.kafka_client, 'check_consumer_group_inactive'),
         ):
             dd_run_check(check)
 
@@ -299,6 +323,248 @@ class TestUpdateConsumerGroupOffsetsAction:
             assert call_kwargs['consumer_group'] == 'my-consumer-group'
             assert len(call_kwargs['offsets']) == 3
             assert call_kwargs['offsets'][0] == {'topic': 'orders', 'partition': 0, 'offset': 1000}
+
+    def test_update_consumer_group_offsets_with_sentinels(self, aggregator, dd_run_check):
+        """Test updating consumer group offsets with sentinel values -2 (earliest) and -1 (latest)."""
+        instance = {
+            'remote_config_id': 'test-update-offsets-002',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test-cluster',
+                'consumer_group': 'my-consumer-group',
+                'offsets': [
+                    {'topic': 'orders', 'partition': 0, 'offset': -2},
+                    {'topic': 'orders', 'partition': 1, 'offset': -1},
+                ],
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'update_consumer_group_offsets', return_value=True) as mock_update_offsets,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+            patch.object(check.kafka_client, 'check_consumer_group_inactive'),
+        ):
+            dd_run_check(check)
+
+            mock_update_offsets.assert_called_once()
+            call_kwargs = mock_update_offsets.call_args[1]
+            assert call_kwargs['offsets'][0] == {'topic': 'orders', 'partition': 0, 'offset': -2}
+            assert call_kwargs['offsets'][1] == {'topic': 'orders', 'partition': 1, 'offset': -1}
+
+    def test_update_consumer_group_offsets_with_timestamp(self, aggregator, dd_run_check):
+        """Test updating consumer group offsets with a timestamp (all partitions)."""
+        instance = {
+            'remote_config_id': 'test-update-offsets-004',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test-cluster',
+                'consumer_group': 'my-consumer-group',
+                'offsets': [
+                    {'topic': 'payments', 'timestamp': 1735689600000},
+                ],
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'update_consumer_group_offsets', return_value=True) as mock_update_offsets,
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+            patch.object(check.kafka_client, 'check_consumer_group_inactive'),
+        ):
+            dd_run_check(check)
+
+            mock_update_offsets.assert_called_once()
+            call_kwargs = mock_update_offsets.call_args[1]
+            assert call_kwargs['offsets'][0] == {'topic': 'payments', 'timestamp': 1735689600000}
+
+    def test_update_consumer_group_offsets_blocks_on_active_group(self, aggregator, dd_run_check):
+        """Test that the check aborts when the consumer group has active members."""
+        instance = {
+            'remote_config_id': 'test-update-offsets-003',
+            'kafka_connect_str': 'localhost:9092',
+            'update_consumer_group_offsets': {
+                'cluster': 'test-cluster',
+                'consumer_group': 'my-consumer-group',
+                'offsets': [{'topic': 'orders', 'partition': 0, 'offset': 0}],
+            },
+        }
+
+        check = KafkaActionsCheck('kafka_actions', {}, [instance])
+        with (
+            patch.object(check.kafka_client, 'get_cluster_id', return_value='test-cluster'),
+            patch.object(
+                check.kafka_client,
+                'check_consumer_group_inactive',
+                side_effect=Exception("Consumer group 'my-consumer-group' has 2 active member(s)."),
+            ),
+        ):
+            with pytest.raises(Exception, match="active member"):
+                dd_run_check(check)
+
+
+class TestCheckConsumerGroupInactive:
+    """Test the check_consumer_group_inactive guard."""
+
+    def test_raises_when_group_has_active_members(self):
+        mock_admin = MagicMock()
+        description = MagicMock(members=[MagicMock(), MagicMock()])
+        future = MagicMock()
+        future.result.return_value = description
+        mock_admin.describe_consumer_groups.return_value = {'my-group': future}
+
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            with pytest.raises(Exception, match="2 active member"):
+                client.check_consumer_group_inactive('my-group')
+
+        mock_admin.describe_consumer_groups.assert_called_once_with(['my-group'], request_timeout=10)
+
+    def test_passes_when_group_has_no_members(self):
+        mock_admin = MagicMock()
+        description = MagicMock(members=[])
+        future = MagicMock()
+        future.result.return_value = description
+        mock_admin.describe_consumer_groups.return_value = {'my-group': future}
+
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            client.check_consumer_group_inactive('my-group')
+
+
+class TestResolveSentinelOffset:
+    """Test _resolve_sentinel_offset."""
+
+    def test_resolves_earliest(self):
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.side_effect = _list_offsets_stub({0: 42})
+
+        client = _client()
+        assert client._resolve_sentinel_offset(mock_admin, 't', 0, -2) == 42
+
+    def test_resolves_latest(self):
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.side_effect = _list_offsets_stub({0: 99})
+
+        client = _client()
+        assert client._resolve_sentinel_offset(mock_admin, 't', 0, -1) == 99
+
+    def test_rejects_non_sentinel_offset_without_calling_admin(self):
+        mock_admin = MagicMock()
+        client = _client()
+        with pytest.raises(ValueError, match="Sentinel offset"):
+            client._resolve_sentinel_offset(mock_admin, 't', 0, 5)
+
+        mock_admin.list_offsets.assert_not_called()
+
+    def test_propagates_result_error(self):
+        tp = TopicPartition('t', 0)
+        future = MagicMock()
+        future.result.side_effect = KafkaException(MagicMock())
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.return_value = {tp: future}
+
+        client = _client()
+        with pytest.raises(KafkaException):
+            client._resolve_sentinel_offset(mock_admin, 't', 0, -1)
+
+
+class TestUpdateConsumerGroupOffsetsClient:
+    """Test update_consumer_group_offsets client-internal offset resolution logic."""
+
+    def test_resolves_sentinel_and_explicit_offsets(self):
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.side_effect = _list_offsets_stub({0: 500})
+        mock_admin.alter_consumer_group_offsets.return_value = {'g': _offset_future_with_topic_partitions([])}
+
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            assert client.update_consumer_group_offsets(
+                'g',
+                [
+                    {'topic': 't', 'partition': 0, 'offset': -2},
+                    {'topic': 't', 'partition': 1, 'offset': 1000},
+                ],
+            )
+
+        committed = mock_admin.alter_consumer_group_offsets.call_args[0][0][0].topic_partitions
+        by_partition = {tp.partition: tp.offset for tp in committed}
+        assert by_partition == {0: 500, 1: 1000}
+
+    def test_resolves_timestamp_across_all_partitions(self):
+        admin_metadata = MagicMock()
+        admin_metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+
+        mock_admin = MagicMock()
+        mock_admin.list_topics.return_value = admin_metadata
+        mock_admin.list_offsets.side_effect = _list_offsets_stub({0: 10, 1: 20})
+        mock_admin.alter_consumer_group_offsets.return_value = {'g': _offset_future_with_topic_partitions([])}
+
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            assert client.update_consumer_group_offsets('g', [{'topic': 't', 'timestamp': 1700000000000}])
+
+        committed = mock_admin.alter_consumer_group_offsets.call_args[0][0][0].topic_partitions
+        by_partition = {tp.partition: tp.offset for tp in committed}
+        assert by_partition == {0: 10, 1: 20}
+
+    def test_resolves_timestamp_falls_back_to_latest_when_no_message_after(self):
+        admin_metadata = MagicMock()
+        admin_metadata.topics = {'t': MagicMock(partitions={0: MagicMock(), 1: MagicMock()})}
+
+        # Partition 0 has a message at/after the timestamp; partition 1 doesn't (-1) and
+        # must fall back to a separate batched `latest` lookup.
+        timestamp_offsets = {0: 10, 1: -1}
+        latest_offsets = {1: 30}
+
+        def list_offsets_side_effect(request, **kwargs):
+            is_latest_batch = all(spec == OffsetSpec.latest() for spec in request.values())
+            offsets = latest_offsets if is_latest_batch else timestamp_offsets
+            return {tp: _offset_future(offsets[tp.partition]) for tp in request}
+
+        mock_admin = MagicMock()
+        mock_admin.list_topics.return_value = admin_metadata
+        mock_admin.list_offsets.side_effect = list_offsets_side_effect
+        mock_admin.alter_consumer_group_offsets.return_value = {'g': _offset_future_with_topic_partitions([])}
+
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            assert client.update_consumer_group_offsets('g', [{'topic': 't', 'timestamp': 1700000000000}])
+
+        committed = mock_admin.alter_consumer_group_offsets.call_args[0][0][0].topic_partitions
+        by_partition = {tp.partition: tp.offset for tp in committed}
+        assert by_partition == {0: 10, 1: 30}
+        assert mock_admin.list_offsets.call_count == 2
+
+    def test_rejects_both_offset_and_timestamp(self):
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=MagicMock()):
+            with pytest.raises(ValueError, match="cannot specify both"):
+                client.update_consumer_group_offsets('g', [{'topic': 't', 'partition': 0, 'offset': 1, 'timestamp': 1}])
+
+    def test_rejects_overlapping_targets(self):
+        mock_admin = MagicMock()
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            with pytest.raises(ValueError, match="Multiple offset specifications target the same partition"):
+                client.update_consumer_group_offsets(
+                    'g',
+                    [
+                        {'topic': 't', 'partition': 0, 'offset': 1},
+                        {'topic': 't', 'partition': 0, 'offset': 2},
+                    ],
+                )
+
+    def test_raises_on_per_partition_error(self):
+        mock_admin = MagicMock()
+        mock_admin.list_offsets.side_effect = _list_offsets_stub({0: 1})
+        failed_tp = MagicMock(topic='t', partition=0, error='UNKNOWN_MEMBER_ID')
+        mock_admin.alter_consumer_group_offsets.return_value = {'g': _offset_future_with_topic_partitions([failed_tp])}
+
+        client = _client()
+        with patch.object(client, 'get_admin_client', return_value=mock_admin):
+            with pytest.raises(Exception, match="Per-partition errors"):
+                client.update_consumer_group_offsets('g', [{'topic': 't', 'partition': 0, 'offset': 1}])
 
 
 class TestProduceMessageAction:
