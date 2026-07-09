@@ -7,6 +7,9 @@ files:
     - template: discovery/openmetrics_from_ports
       overrides:
         port_hints:
+        # Status API
+        - 8007
+        # Admin API
         - 8001
   options:
   - template: init_config

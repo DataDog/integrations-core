@@ -23,7 +23,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         by_alias=True, mode='json', exclude_none=True
     )
     # discovery[0]: from_ports
-    for port in candidate_ports(service, [8001]):
+    for port in candidate_ports(service, [8007, 8001]):
         ctx = {'port': port}
         instance_data = {
             'openmetrics_endpoint': 'http://{service.host}:{port.number}/metrics'.format(service=service, **ctx),
