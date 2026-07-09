@@ -246,19 +246,20 @@ def test_cherry_pick_failure_without_conflicts_aborts(app_mock, git_mock):
         step.execute()
 
 
-def test_preserve_in_toto_resets_staged_modifications(app_mock, git_mock):
+@pytest.mark.parametrize('generated_path', ['path/file.in-toto.link', '.deps/resolved/foo_dep.json'])
+def test_preserve_generated_files_resets_staged_modifications(app_mock, git_mock, generated_path):
     git_mock.capture.side_effect = [
-        'src/foo.py\npath/file.in-toto.link\n',
+        f'src/foo.py\n{generated_path}\n',
         '',
     ]
 
     step = PreserveGeneratedFilesStep(app_mock, git=git_mock)
     step.execute()
 
-    git_mock.run.assert_called_once_with('checkout', 'HEAD', '--', 'path/file.in-toto.link')
+    git_mock.run.assert_called_once_with('checkout', 'HEAD', '--', generated_path)
 
 
-def test_preserve_in_toto_removes_files_not_in_head(app_mock, git_mock):
+def test_preserve_generated_files_removes_files_not_in_head(app_mock, git_mock):
     git_mock.capture.side_effect = [
         'path/new.in-toto.link\n',
         OSError('not in head'),
@@ -270,7 +271,7 @@ def test_preserve_in_toto_removes_files_not_in_head(app_mock, git_mock):
     git_mock.run.assert_called_once_with('rm', '--force', 'path/new.in-toto.link')
 
 
-def test_preserve_in_toto_noop_when_clean(app_mock, git_mock):
+def test_preserve_generated_files_noop_when_clean(app_mock, git_mock):
     git_mock.capture.return_value = 'src/foo.py\n'
 
     step = PreserveGeneratedFilesStep(app_mock, git=git_mock)
@@ -296,18 +297,6 @@ def test_cherry_pick_deps_conflict_is_resolved(app_mock, git_mock):
     ]
 
 
-def test_preserve_deps_resets_staged_modifications(app_mock, git_mock):
-    git_mock.capture.side_effect = [
-        'src/foo.py\n.deps/resolved/foo_dep.json\n',
-        '',
-    ]
-
-    step = PreserveGeneratedFilesStep(app_mock, git=git_mock)
-    step.execute()
-
-    git_mock.run.assert_called_once_with('checkout', 'HEAD', '--', '.deps/resolved/foo_dep.json')
-
-
 @pytest.mark.parametrize(
     'path, expected',
     [
@@ -315,6 +304,7 @@ def test_preserve_deps_resets_staged_modifications(app_mock, git_mock):
         ('.deps/resolved/foo_dep.json', True),
         ('src/foo.py', False),
         ('pyproject.toml', False),
+        ('vendor/foo.deps/bar.txt', False),
     ],
 )
 def test_is_reset_to_target(path, expected):

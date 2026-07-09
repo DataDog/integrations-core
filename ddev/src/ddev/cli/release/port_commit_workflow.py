@@ -34,11 +34,6 @@ if TYPE_CHECKING:
 PR_NUMBER_SUFFIX_PATTERN = re.compile(r'\s*\(#(\d+)\)\s*$')
 PR_TEMPLATE_RELATIVE_PATH = '.github/PULL_REQUEST_TEMPLATE.md'
 PR_TEMPLATE_HEADING = '### What does this PR do?'
-# Paths whose contents are regenerated per branch: after a cherry-pick they must match the
-# target branch rather than carry over from the ported commit's branch.
-#   .in-toto  - package signature metadata (gitignored)
-#   .deps/    - resolved dependency lockfiles (tracked)
-RESET_TO_TARGET_PATTERNS = ('.in-toto', '.deps/')
 WORKTREE_BASE = '.worktrees/port-commit'
 FULL_SHA_PATTERN = re.compile(r'^[0-9a-fA-F]{40}$')
 HEX_PATTERN = re.compile(r'^[0-9a-fA-F]+$')
@@ -523,7 +518,9 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str, *, dry_run: boo
 
 def is_reset_to_target(path: str) -> bool:
     """Whether a path holds per-branch regenerated content that must be reset to the target branch."""
-    return any(pattern in path for pattern in RESET_TO_TARGET_PATTERNS)
+    # `.deps/` lockfiles (tracked) live at the repo root, so anchor the match; `.in-toto` signature
+    # metadata is matched anywhere, since those files are named like `*.in-toto.link` in subdirectories.
+    return path.startswith('.deps/') or '.in-toto' in path
 
 
 def _path_exists_in_head(git: GitRepository, path: str) -> bool:
@@ -623,6 +620,12 @@ class PortPlan:
     dry_run: bool
 
 
+def confirm_or_abort(app: Application, prompt: str, *, dry_run: bool) -> None:
+    """Prompt for confirmation when interactive, aborting if declined; a no-op under dry-run or non-interactive."""
+    if not dry_run and app.interactive and not click.confirm(prompt):
+        app.abort('Did not get confirmation, aborting.')
+
+
 def resolve_port_plan(
     app: Application,
     *,
@@ -653,8 +656,7 @@ def resolve_port_plan(
     if commit_hash is None:
         head_commit = app.repo.git.latest_commit()
         app.display_info(f'No commit specified. Current HEAD: `{head_commit.sha[:10]}` - {head_commit.subject}')
-        if not dry_run and app.interactive and not click.confirm('Use this commit?'):
-            app.abort('Did not get confirmation, aborting.')
+        confirm_or_abort(app, 'Use this commit?', dry_run=dry_run)
         commit_hash = head_commit.sha
 
     try:
@@ -708,8 +710,7 @@ def resolve_port_plan(
 
     app.output(_format_plan_summary(app, plan), stderr=True)
 
-    if not dry_run and app.interactive and not click.confirm('Continue?'):
-        app.abort('Did not get confirmation, aborting.')
+    confirm_or_abort(app, 'Continue?', dry_run=dry_run)
 
     return plan
 
