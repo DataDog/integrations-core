@@ -259,7 +259,8 @@ instances:
     ## @param update_consumer_group_offsets - mapping - optional
     ## Configuration for updating consumer group offsets.
     ## WARNING: Can cause duplicate processing or data loss.
-    ## Consumer group should be stopped (no active members).
+    ## The consumer group must have no active members before this action runs.
+    ## The check enforces this and will fail with a clear error if members are found.
     #
     # update_consumer_group_offsets:
     #   cluster: prod-kafka-1
@@ -270,7 +271,9 @@ instances:
     #     offset: 1000
     #   - topic: orders
     #     partition: 1
-    #     offset: 1500
+    #     offset: -2
+    #   - topic: payments
+    #     timestamp: 1735689600000
 
     ## @param produce_message - mapping - optional
     ## Configuration for producing a message to a Kafka topic.
