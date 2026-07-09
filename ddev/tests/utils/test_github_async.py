@@ -6,6 +6,7 @@ import dataclasses
 import io
 import json
 import zipfile
+from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import Any
 
 import httpx
@@ -306,13 +307,6 @@ async def test_create_workflow_dispatch_with_inputs() -> None:
     assert result.data.workflow_run_id == 1
 
 
-async def test_create_workflow_dispatch_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.create_workflow_dispatch("o", "r", "wf.yml", "main")
-    assert exc_info.value.response.status_code == 422
-
-
 async def test_create_workflow_dispatch_omits_return_run_details_when_false() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
@@ -345,22 +339,6 @@ async def test_get_workflow_run_success(status: str, is_completed: bool) -> None
     assert result.data.id == 42
     assert result.data.status == status
     assert result.data.is_completed is is_completed
-
-
-async def test_get_workflow_run_headers_forwarded() -> None:
-    def handler(_: httpx.Request) -> httpx.Response:
-        return json_response(workflow_run_payload(), headers={"x-ratelimit-remaining": "50"})
-
-    client = make_client(httpx.MockTransport(handler))
-    result = await client.get_workflow_run("o", "r", 42)
-    assert result.headers.get("x-ratelimit-remaining") == "50"
-
-
-async def test_get_workflow_run_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.get_workflow_run("o", "r", 99)
-    assert exc_info.value.response.status_code == 404
 
 
 # ---------------------------------------------------------------------------
@@ -409,14 +387,6 @@ async def test_list_workflow_run_artifacts_two_pages() -> None:
     assert len(pages) == 2
     assert pages[0].data.artifacts[0].id == 1
     assert pages[1].data.artifacts[0].id == 2
-
-
-async def test_list_workflow_run_artifacts_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(403)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        async for _ in client.list_workflow_run_artifacts("o", "r", 1):
-            pass
-    assert exc_info.value.response.status_code == 403
 
 
 async def test_list_workflow_run_artifacts_per_page_forwarded() -> None:
@@ -506,13 +476,6 @@ async def test_create_issue_comment_success() -> None:
     assert result.data.user.login == "octocat"
 
 
-async def test_create_issue_comment_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.create_issue_comment("o", "r", 1, "hi")
-    assert exc_info.value.response.status_code == 404
-
-
 # ---------------------------------------------------------------------------
 # create_pr_review_comment
 # ---------------------------------------------------------------------------
@@ -549,13 +512,6 @@ async def test_create_pr_review_comment_success_with_line_and_side() -> None:
     client = make_client(httpx.MockTransport(handler))
     result = await client.create_pr_review_comment("o", "r", 1, "comment", "abc123", "file.py", line=10, side="RIGHT")
     assert isinstance(result.data, PullRequestReviewComment)
-
-
-async def test_create_pr_review_comment_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.create_pr_review_comment("o", "r", 1, "body", "sha", "path")
-    assert exc_info.value.response.status_code == 422
 
 
 # ---------------------------------------------------------------------------
@@ -666,13 +622,6 @@ async def test_create_pull_request_draft_true_forwarded() -> None:
     assert result.data.number == 7
 
 
-async def test_create_pull_request_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.create_pull_request("o", "r", "T", "h", "b")
-    assert exc_info.value.response.status_code == 422
-
-
 # ---------------------------------------------------------------------------
 # get_pull_request
 # ---------------------------------------------------------------------------
@@ -689,22 +638,6 @@ async def test_get_pull_request_success() -> None:
     assert isinstance(result.data, PullRequest)
     assert result.data.number == 5
     assert result.data.state is PullRequestState.OPEN
-
-
-async def test_get_pull_request_headers_forwarded() -> None:
-    def handler(_: httpx.Request) -> httpx.Response:
-        return json_response(full_pull_request_payload(number=5), headers={"x-ratelimit-remaining": "50"})
-
-    client = make_client(httpx.MockTransport(handler))
-    result = await client.get_pull_request("o", "r", 5)
-    assert result.headers.get("x-ratelimit-remaining") == "50"
-
-
-async def test_get_pull_request_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.get_pull_request("o", "r", 5)
-    assert exc_info.value.response.status_code == 404
 
 
 async def test_get_pull_request_unexpected_state_raises() -> None:
@@ -733,13 +666,6 @@ async def test_add_labels_to_issue_success() -> None:
     result = await client.add_labels_to_issue("owner", "repo", 3, ["qa/skip-qa", "backport/7.62.x"])
     assert [label.name for label in result.data] == ["qa/skip-qa", "backport/7.62.x"]
     assert all(isinstance(label, Label) for label in result.data)
-
-
-async def test_add_labels_to_issue_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.add_labels_to_issue("o", "r", 1, ["bug"])
-    assert exc_info.value.response.status_code == 404
 
 
 # ---------------------------------------------------------------------------
@@ -905,13 +831,6 @@ async def test_create_check_run_with_optional_fields() -> None:
     assert captured["output"] == {"title": "t", "summary": "s"}
 
 
-async def test_create_check_run_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.create_check_run("o", "r", name="ck", head_sha="abc", status="in_progress")
-    assert exc_info.value.response.status_code == 422
-
-
 async def test_update_check_run_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "PATCH"
@@ -950,13 +869,6 @@ async def test_update_check_run_requires_conclusion_when_completed() -> None:
     assert requested is False
 
 
-async def test_update_check_run_http_error_raises() -> None:
-    client = make_client(httpx.MockTransport(lambda r: httpx.Response(404)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
-        await client.update_check_run("o", "r", 77, status="in_progress")
-    assert exc_info.value.response.status_code == 404
-
-
 async def test_update_check_run_unexpected_status_raises() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return json_response(check_run_payload(id=77, status="bogus"))
@@ -964,6 +876,109 @@ async def test_update_check_run_unexpected_status_raises() -> None:
     client = make_client(httpx.MockTransport(handler))
     with pytest.raises(ValidationError):
         await client.update_check_run("o", "r", 77, status="in_progress")
+
+
+# ---------------------------------------------------------------------------
+# Cross-cutting endpoint coverage
+#
+# Every new public endpoint method must be added to ENDPOINT_CALLS. The registry is what
+# guarantees error-propagation and header-forwarding coverage without a per-endpoint copy of
+# each test. download_artifact is excluded: it does not return a GitHubResponse and has its own
+# dedicated tests.
+# ---------------------------------------------------------------------------
+
+
+async def first_page(pages: AsyncIterator[GitHubResponse[Any]]) -> GitHubResponse[Any]:
+    """Return the first page of a paginated endpoint (enough to exercise errors and headers)."""
+    async for page in pages:
+        return page
+    raise AssertionError("expected at least one page")
+
+
+@dataclasses.dataclass
+class EndpointCase:
+    id: str
+    call: Callable[[AsyncGitHubClient], Awaitable[GitHubResponse[Any]]]
+    ok_response: Callable[[], httpx.Response]
+
+
+ENDPOINT_CALLS = [
+    EndpointCase(
+        "create_workflow_dispatch",
+        lambda c: c.create_workflow_dispatch("o", "r", "wf.yml", "main", return_run_details=True),
+        lambda: json_response(
+            {"workflow_run_id": 1, "run_url": "https://api.github.com/x", "html_url": "https://github.com/x"}
+        ),
+    ),
+    EndpointCase(
+        "get_workflow_run", lambda c: c.get_workflow_run("o", "r", 42), lambda: json_response(workflow_run_payload())
+    ),
+    EndpointCase(
+        "list_workflow_run_artifacts",
+        lambda c: first_page(c.list_workflow_run_artifacts("o", "r", 1)),
+        lambda: json_response({"total_count": 1, "artifacts": [artifact(1)]}),
+    ),
+    EndpointCase(
+        "list_workflow_jobs",
+        lambda c: first_page(c.list_workflow_jobs("o", "r", 42)),
+        lambda: json_response({"total_count": 1, "jobs": [workflow_job(1)]}),
+    ),
+    EndpointCase(
+        "create_issue_comment",
+        lambda c: c.create_issue_comment("o", "r", 1, "body"),
+        lambda: json_response(issue_comment_payload()),
+    ),
+    EndpointCase(
+        "get_pull_request",
+        lambda c: c.get_pull_request("o", "r", 5),
+        lambda: json_response(full_pull_request_payload(number=5)),
+    ),
+    EndpointCase(
+        "create_pull_request",
+        lambda c: c.create_pull_request("o", "r", "t", "h", "b"),
+        lambda: json_response(pull_request_payload(number=1), status_code=201),
+    ),
+    EndpointCase(
+        "add_labels_to_issue",
+        lambda c: c.add_labels_to_issue("o", "r", 1, ["bug"]),
+        lambda: json_response([{"id": 1, "name": "bug"}]),
+    ),
+    EndpointCase(
+        "create_pr_review_comment",
+        lambda c: c.create_pr_review_comment("o", "r", 1, "body", "sha", "path", position=1),
+        lambda: json_response(pr_review_comment_payload()),
+    ),
+    EndpointCase(
+        "create_check_run",
+        lambda c: c.create_check_run("o", "r", "ck", "abc", "in_progress"),
+        lambda: json_response(check_run_payload()),
+    ),
+    EndpointCase(
+        "update_check_run",
+        lambda c: c.update_check_run("o", "r", 77, status="in_progress"),
+        lambda: json_response(check_run_payload(id=77)),
+    ),
+]
+
+
+@pytest.mark.parametrize("case", ENDPOINT_CALLS, ids=[case.id for case in ENDPOINT_CALLS])
+async def test_endpoint_http_error_raises(case: EndpointCase) -> None:
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await case.call(client)
+    assert exc_info.value.response.status_code == 422
+
+
+@pytest.mark.parametrize("case", ENDPOINT_CALLS, ids=[case.id for case in ENDPOINT_CALLS])
+async def test_endpoint_forwards_response_headers(case: EndpointCase) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        response = case.ok_response()
+        response.headers["x-ratelimit-remaining"] = "42"
+        return response
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await case.call(client)
+    assert result.headers["x-ratelimit-remaining"] == "42"
 
 
 # ---------------------------------------------------------------------------
