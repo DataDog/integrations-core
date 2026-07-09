@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import base64
 import json
+import marshal
 from collections import defaultdict
 from time import time
 
@@ -242,9 +244,7 @@ class KafkaCheck(AgentCheck):
         """Loads broker timestamps from persistent cache."""
         broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(self.read_persistent_cache(persistent_cache_key)).items():
-                for offset, timestamp in content.items():
-                    broker_timestamps[topic_partition][int(offset)] = timestamp
+            broker_timestamps.update(marshal.loads(base64.b64decode(self.read_persistent_cache(persistent_cache_key))))
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
@@ -268,7 +268,8 @@ class KafkaCheck(AgentCheck):
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
         """Saves broker timestamps to persistent cache."""
-        self.write_persistent_cache(persistent_cache_key, json.dumps(broker_timestamps))
+        blob = marshal.dumps(dict(broker_timestamps))
+        self.write_persistent_cache(persistent_cache_key, base64.b64encode(blob).decode('ascii'))
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
