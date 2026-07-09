@@ -21,6 +21,12 @@ propagation, retry behavior, and the limiter/governor integration points.
 - Enum exhaustiveness is never tested here. The client-owned boundary is "one valid member parses,
   one invalid string raises." A request-constant, response-varying matrix over a `StrEnum` field
   tests Pydantic, not the client.
+- Helper modules obey the same layer boundaries as tests. Pure payload factories
+  live in `payloads.py` and import nothing beyond the stdlib; client-layer
+  helpers (transports, client factories, the endpoint registry) live in
+  `helpers.py` and may import payloads, never the reverse. `test_models.py`
+  imports only from `payloads.py` — if a model test needs something from
+  `helpers.py`, either the helper is misplaced or the test is not a model test.
 
 ## Cross-cutting behavior goes through the registry
 

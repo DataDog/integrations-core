@@ -31,8 +31,8 @@ from tests.utils.github_async.helpers import (
     make_zip,
     patch_signed_download,
     recording_transport,
-    workflow_run_payload,
 )
+from tests.utils.github_async.payloads import workflow_run_payload
 
 LOGGER_NAME = "ddev.utils.github_async.defaults"
 

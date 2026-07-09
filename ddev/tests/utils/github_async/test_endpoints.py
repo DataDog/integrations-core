@@ -30,14 +30,12 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
-from tests.utils.github_async.helpers import (
-    ENDPOINT_CALLS,
+from tests.utils.github_async.helpers import ENDPOINT_CALLS, json_response, make_client
+from tests.utils.github_async.payloads import (
     artifact,
     check_run_payload,
     full_pull_request_payload,
     issue_comment_payload,
-    json_response,
-    make_client,
     pr_review_comment_payload,
     pull_request_payload,
     workflow_job,
