@@ -108,7 +108,6 @@ def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
     aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
     tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
     tags = instance_openmetrics_v2.get('tags') + [tags]
-
     _assert_openmetrics_v2(aggregator, tags)
 
 
@@ -116,7 +115,6 @@ def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(rate=True)
-
     _assert_openmetrics_v2(aggregator)
 
 
