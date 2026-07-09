@@ -576,9 +576,9 @@ files:
         - name: enabled
           description: |
             Enable collection of asynchronous insert buffer snapshots from system.asynchronous_inserts.
-            Requires `dbm: true`. Emits per-table gauge metrics (clickhouse.asynchronous_inserts.buffer.*)
-            showing bytes pending, pending entry count, active buffer count, and oldest entry age,
-            for trend dashboards and alerting.
+            Requires `dbm: true`. Sends per-buffer records as DBM events (dbm_type="async_inserts_buffer")
+            including the originating query text, showing bytes pending, pending entry count, and oldest
+            entry age per buffer.
           value:
             type: boolean
             example: false
