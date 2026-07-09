@@ -60,7 +60,7 @@ def set_default_driver_conf():
         The agent running on Linux has msodbcsql18 and FreeTDS installed.
         The default driver is msodbcsql18.
         To best leverage the default driver, we set the ODBCSYSINI environment variable to the directory
-        containing the pre-configured odbcinst.ini file.
+        containing the odbcinst.ini file, which is patched at runtime with the correct embedded driver paths.
         However, if the user has already configured the ODBCSYSINI environment variable,
         OR if the user has already created or copied the odbcinst.ini file in the unixODBC sysconfig location,
         we do not override the ODBCSYSINI environment variable.
@@ -83,7 +83,19 @@ def set_default_driver_conf():
                 # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
                 return
 
-        # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
+        # Patch the bundled odbcinst.ini with the correct embedded dir path i.e.
+        # /opt/datadog-agent/ or /opt/datadog-packages/.
+        embedded_dir = os.path.dirname(linux_unixodbc_sysconfig)
+        ini_path = os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI)
+        try:
+            with open(ini_path, 'r+') as f:
+                content = f.read().replace('/opt/datadog-agent/embedded', embedded_dir)
+                f.seek(0)
+                f.write(content)
+                f.truncate()
+        except OSError:
+            pass
+
         os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
 
         # required when using pyodbc with FreeTDS on Ubuntu 18.04

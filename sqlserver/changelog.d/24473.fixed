@@ -1,0 +1,1 @@
+Fix embedded ODBC driver paths (FreeTDS and msodbcsql) breaking after fleet automation agent upgrades on Linux.
