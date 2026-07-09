@@ -1,1 +1,1 @@
-Catch the backend-agnostic ``HTTPError`` when probing the readiness endpoint so the check keeps working after the httpx migration.
+Handle readiness endpoint errors with backend-agnostic HTTP exceptions.

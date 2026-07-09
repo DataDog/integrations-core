@@ -1,1 +1,1 @@
-Catch the backend-agnostic ``HTTPConnectionError`` and ``HTTPTimeoutError`` on scrape and health-check failures so the check keeps working after the httpx migration.
+Handle scrape and health-check errors with backend-agnostic HTTP exceptions.

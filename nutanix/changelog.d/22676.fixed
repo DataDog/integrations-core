@@ -1,1 +1,1 @@
-Catch the backend-agnostic ``HTTPError`` types when calling the Prism Central API so the check keeps working after the httpx migration.
+Handle Prism Central API errors with backend-agnostic HTTP exceptions.

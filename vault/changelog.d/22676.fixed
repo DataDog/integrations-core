@@ -1,2 +1,2 @@
-Preserve Vault auth headers now that the OpenMetrics scraper shares the check's HTTP client.
-Catch the backend-agnostic ``HTTPError`` and ``HTTPTimeoutError`` when accessing the Vault API so the check keeps working after the httpx migration.
+Preserve Vault authentication headers when scraping OpenMetrics endpoints.
+Handle Vault API errors with backend-agnostic HTTP exceptions.

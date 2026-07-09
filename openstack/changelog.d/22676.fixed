@@ -1,1 +1,1 @@
-Route the OpenStack API and Keystone authentication requests through the shared HTTP client and catch the backend-agnostic ``HTTPStatusError``, ``HTTPTimeoutError``, and ``HTTPConnectionError`` types. Existing behavior is preserved, including the Keystone auth request's legacy default of skipping TLS verification unless ``ssl_verify`` is set.
+Handle OpenStack and Keystone API errors with backend-agnostic HTTP exceptions.
