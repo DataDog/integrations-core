@@ -20,7 +20,7 @@ SKIPPED_METRICS = [
 DISCOVERY_STABILITY_LOG_PATTERNS = tuple(pattern for pattern in CONTAINER_STABILITY_LOG_PATTERNS if pattern != 'error')
 
 
-def _assert_standalone_metrics(aggregator):
+def assert_standalone_metrics(aggregator):
     for metric in common.STANDALONE_TEST_METRICS:
         if metric in SKIPPED_METRICS:
             continue
@@ -32,13 +32,13 @@ def _assert_standalone_metrics(aggregator):
 @pytest.mark.e2e
 def test_check_milvus_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
-    _assert_standalone_metrics(aggregator)
+    assert_standalone_metrics(aggregator)
 
 
 @pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(rate=True)
-    _assert_standalone_metrics(aggregator)
+    assert_standalone_metrics(aggregator)
 
 
 @pytest.mark.e2e
