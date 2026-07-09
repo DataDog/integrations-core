@@ -5,8 +5,23 @@
 import importlib
 import inspect
 from pathlib import Path
+from typing import Protocol
 
 from ddev.ai.phases.base import Phase
+
+
+class PhaseRegistryProtocol(Protocol):
+    """The phase-registry surface the flow resolver depends on.
+
+    Lets a caller supply phase implementation classes from anywhere and makes stubbing
+    type-checked. The concrete :class:`PhaseRegistry` already satisfies it.
+    """
+
+    def contains(self, name: str) -> bool: ...
+
+    def get(self, name: str) -> type[Phase]: ...
+
+    def format_import_errors(self) -> str: ...
 
 
 class PhaseRegistry:
