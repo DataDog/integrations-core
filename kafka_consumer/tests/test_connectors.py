@@ -314,3 +314,118 @@ def test_connector_metrics_match_metadata(run_connect_check, aggregator):
     run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+# ---------------------------------------------------------------------------
+# Single-expand fallback (e.g. Confluent Cloud)
+# ---------------------------------------------------------------------------
+
+CONFLUENT_CLOUD_URL = 'https://api.confluent.cloud/connect/v1/environments/env-abc123/clusters/lkc-xyz789'
+
+
+def test_single_expand_sections_merged(run_connect_check, aggregator):
+    """A Connect endpoint honoring one expand value per request still yields complete metrics."""
+    info_only = {
+        'my-conn': {
+            'info': {
+                'type': 'source',
+                'config': {'connector.class': 'io.confluent.SomeSource'},
+            },
+            'status': None,
+        }
+    }
+    status_only = {
+        'my-conn': {
+            'status': {
+                'connector': {'state': 'RUNNING'},
+                'tasks': [{'id': 0, 'state': 'RUNNING'}],
+                'type': 'source',
+            }
+        }
+    }
+
+    def get(url, **kwargs):
+        response = mock.MagicMock()
+        if 'connector-plugins' in url:
+            response.json.return_value = []
+            return response
+        expand = kwargs.get('params', {}).get('expand')
+        response.json.return_value = status_only if expand == 'status' else info_only
+        return response
+
+    _, http = run_connect_check(
+        get_side_effect=get,
+        instance_extra={'kafka_connect_url': CONFLUENT_CLOUD_URL},
+    )
+
+    aggregator.assert_metric('kafka.connector.count', value=1)
+    aggregator.assert_metric('kafka.connector.task.count', value=1)
+    aggregator.assert_metric_has_tag('kafka.connector.task.count', 'connector_state:running')
+    aggregator.assert_metric('kafka.connector.task.running', value=1)
+
+    # The info section arrives via the supplementary fetch; assert it survived the merge
+    # by checking the config event derived from it.
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    assert events[0]['connector'] == 'my-conn'
+    assert events[0]['connector_type'] == 'source'
+    assert events[0]['connector_state'] == 'RUNNING'
+    assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
+
+    # A supplementary /connectors fetch is issued because the combined call returns a null section.
+    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    assert len(connectors_fetches) == 2
+
+
+def test_oss_combined_response_makes_single_connectors_request(run_connect_check, aggregator):
+    """When the combined call returns both sections, no supplementary fetch is issued."""
+    _, http = run_connect_check(connectors_response=SAMPLE_CONNECTORS_RESPONSE)
+
+    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    assert len(connectors_fetches) == 1
+
+
+def test_combined_expand_list_ignored_falls_back_to_single_expand(run_connect_check, aggregator):
+    """A combined ``expand`` list is serialized as repeated query params, which Confluent Cloud's
+    expansions endpoint doesn't honor — it returns the plain connector-name list instead of the
+    expanded dict. The collector must retry with a single expand value rather than treating that
+    response as an unsupported (pre-2.3) worker.
+    """
+    name_list = ['my-conn']
+    info_only = {'my-conn': {'info': {'type': 'source', 'config': {'connector.class': 'io.confluent.SomeSource'}}}}
+    status_only = {
+        'my-conn': {
+            'status': {'connector': {'state': 'RUNNING'}, 'tasks': [{'id': 0, 'state': 'RUNNING'}], 'type': 'source'}
+        }
+    }
+
+    def get(url, **kwargs):
+        response = mock.MagicMock()
+        if 'connector-plugins' in url:
+            response.json.return_value = []
+            return response
+        expand = kwargs.get('params', {}).get('expand')
+        if expand == 'status':
+            response.json.return_value = status_only
+        elif expand == 'info':
+            response.json.return_value = info_only
+        else:
+            response.json.return_value = name_list
+        return response
+
+    _, http = run_connect_check(
+        get_side_effect=get,
+        instance_extra={'kafka_connect_url': CONFLUENT_CLOUD_URL},
+    )
+
+    aggregator.assert_metric('kafka.connector.count', value=1)
+    aggregator.assert_metric('kafka.connector.task.count', value=1)
+    aggregator.assert_metric_has_tag('kafka.connector.task.count', 'connector_state:running')
+
+    events = dsm_events(aggregator, 'connector')
+    assert len(events) == 1
+    assert events[0]['connector'] == 'my-conn'
+    assert events[0]['config']['connector.class'] == 'io.confluent.SomeSource'
+
+    connectors_fetches = [call for call in http.get.call_args_list if 'connector-plugins' not in call.args[0]]
+    assert len(connectors_fetches) == 3

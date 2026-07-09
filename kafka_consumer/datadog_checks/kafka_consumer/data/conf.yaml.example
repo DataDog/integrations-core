@@ -460,6 +460,10 @@ instances:
     ## Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
     ## collects connector metrics and configuration events from the Kafka Connect REST API.
     ## Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
+    ## For Confluent Cloud, set this to
+    ## ``https://api.confluent.cloud/connect/v1/environments/<env>/clusters/<cluster>`` and supply the
+    ## Cloud API key (the key ID) as ``kafka_connect_username`` and its API secret as
+    ## ``kafka_connect_password``.
     #
     # kafka_connect_url: http://localhost:8083
 
