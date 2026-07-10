@@ -1,1 +1,0 @@
-Fix metadata.csv metric name mismatches for changefeed histogram metrics and add missing go.scheduler_latency entries.
