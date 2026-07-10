@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.marathon import Marathon
 
 from .common import HERE, INSTANCE_INTEGRATION
@@ -23,7 +23,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'docker-compose.yml'), log_patterns='All services up and running.'
     ):
-        yield INSTANCE_INTEGRATION
+        yield INSTANCE_INTEGRATION, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
