@@ -12,11 +12,11 @@ from datadog_checks.scylla import ScyllaCheck
 from .common import FLAKY_METRICS, INSTANCE_DEFAULT_METRICS_V2
 
 # Probing scylla-db's internal storage RPC port (7000) with a plain HTTP GET makes Scylla's own RPC
-# layer log a benign ERROR ("server connection dropped: connection is closed") once it rejects the
-# unrecognized protocol magic. Exclude only that known-benign substring so real crashes/errors from
-# other candidates are still caught.
+# layer log a benign ERROR ("rpc - client <addr>: server connection dropped: connection is closed")
+# once it rejects the unrecognized protocol magic. Exclude only that known-benign, anchored log shape
+# so real crashes/errors from other candidates are still caught.
 DISCOVERY_STABILITY_LOG_PATTERNS = [
-    r'error(?!.*server connection dropped: connection is closed)',
+    r'error(?!.*rpc - client \S+: server connection dropped: connection is closed)',
     r'panic',
     r'fatal',
     r'segmentation fault',
