@@ -1,1 +1,0 @@
-Remove duplicated agent_hostname logic now provided by the DatabaseCheck base class.
