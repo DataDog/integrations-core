@@ -248,6 +248,14 @@ async def _fetch(client: httpx.AsyncClient, url: str) -> tuple[str, str, int]:
     return body, content_type, response.status_code
 
 
+def _jsonl_sidecar_path(memory_dir: Path, phase_id: str, name: str) -> Path:
+    return (memory_dir / f"{phase_id}_{name}{JSONL_FILENAME_SUFFIX}").resolve()
+
+
+def _exposition_sidecar_path(memory_dir: Path, phase_id: str, name: str) -> Path:
+    return (memory_dir / f"{phase_id}_{name}{EXPOSITION_FILENAME_SUFFIX}").resolve()
+
+
 async def _inspect_one(
     client: httpx.AsyncClient,
     endpoint: EndpointSpec,
@@ -274,10 +282,10 @@ async def _inspect_one(
     }
     rows = _build_jsonl_rows(families)
 
-    jsonl_path = (memory_dir / f"{phase_id}_{name}{JSONL_FILENAME_SUFFIX}").resolve()
+    jsonl_path = _jsonl_sidecar_path(memory_dir, phase_id, name)
     _write_jsonl(jsonl_path, [header, *rows])
 
-    exposition_path = (memory_dir / f"{phase_id}_{name}{EXPOSITION_FILENAME_SUFFIX}").resolve()
+    exposition_path = _exposition_sidecar_path(memory_dir, phase_id, name)
     _write_exposition(exposition_path, body)
 
     return EndpointResult(
@@ -344,10 +352,9 @@ class InspectEndpointPhase(Phase):
 
         failures = [(ep.name, r) for ep, r in zip(endpoints, settled, strict=True) if isinstance(r, BaseException)]
         if failures:
-            for r in settled:
-                if isinstance(r, EndpointResult):
-                    Path(r.metrics_jsonl_path).unlink(missing_ok=True)
-                    Path(r.exposition_path).unlink(missing_ok=True)
+            for ep in endpoints:
+                _jsonl_sidecar_path(memory_dir, self._phase_id, ep.name).unlink(missing_ok=True)
+                _exposition_sidecar_path(memory_dir, self._phase_id, ep.name).unlink(missing_ok=True)
             detail = "; ".join(f"{name}: {err}" for name, err in failures)
             raise EndpointInspectionError(f"{len(failures)} endpoint(s) failed to inspect — {detail}")
 

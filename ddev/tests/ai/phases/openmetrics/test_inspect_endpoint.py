@@ -900,6 +900,42 @@ async def test_all_or_nothing_one_endpoint_fails_aborts_phase(flow_dir, message_
     assert not _exposition_path(flow_dir, "agent").exists()
 
 
+async def test_all_or_nothing_cleans_up_partial_write_of_failing_endpoint(flow_dir, message_queue, monkeypatch):
+    """The failing endpoint's own jsonl (written before its exposition write failed) must not be left behind."""
+    url_a = "http://host:9962/metrics"
+    url_b = "http://host:9963/metrics"
+    _install_mock_transport(
+        monkeypatch,
+        _multi_handler(
+            {
+                url_a: (200, PROMETHEUS_BODY, "text/plain"),
+                url_b: (200, PROMETHEUS_BODY_SECOND, "text/plain"),
+            }
+        ),
+    )
+
+    real_replace = os.replace
+
+    def replace_failing_for_operator_exposition(src, dst):
+        if str(dst).endswith("operator_exposition.txt"):
+            raise OSError("simulated exposition write failure")
+        real_replace(src, dst)
+
+    monkeypatch.setattr(inspect_endpoint_module.os, "replace", replace_failing_for_operator_exposition)
+
+    phase, mgr = _make_phase(
+        flow_dir,
+        message_queue,
+        runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
+    )
+
+    await _assert_phase_fails(phase, mgr, message_queue, error_contains="endpoint(s) failed to inspect")
+
+    for name in ("agent", "operator"):
+        assert not _jsonl_path(flow_dir, name).exists()
+        assert not _exposition_path(flow_dir, name).exists()
+
+
 async def test_multiple_failures_are_all_reported(flow_dir, message_queue, monkeypatch):
     url_a = "http://host:9962/metrics"
     url_b = "http://host:9963/metrics"
