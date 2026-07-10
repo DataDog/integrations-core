@@ -4,12 +4,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
+import re
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import httpx
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import PhaseConfig
@@ -33,6 +37,55 @@ EXPOSITION_FILENAME_SUFFIX = "_exposition.txt"
 
 class EndpointInspectionError(Exception):
     """Raised when the endpoint is unreachable, its body is unusable, or the catalog cannot be written."""
+
+
+def normalize_endpoint_name(v: str) -> str:
+    """snake_case an endpoint name and reject anything that isn't a valid identifier."""
+    name = re.sub(r"[^a-z0-9]+", "_", v.strip().lower()).strip("_")
+    if not re.fullmatch(r"[a-z][a-z0-9_]*", name):
+        raise ValueError(f"endpoint name {v!r} is not a valid identifier after normalization")
+    return name
+
+
+def requires_http_scheme(url: str) -> str:
+    if not url.startswith(("http://", "https://")):
+        raise ValueError("URL must start with http:// or https://")
+    return url
+
+
+class EndpointSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    name: Annotated[str, AfterValidator(normalize_endpoint_name)]
+    url: Annotated[str, Field(min_length=1), AfterValidator(requires_http_scheme)]
+
+
+class InspectInput(BaseModel):
+    """Phase 0's structured input contract."""
+
+    model_config = ConfigDict(extra="forbid")
+    endpoints: list[EndpointSpec]
+
+    @model_validator(mode="after")
+    def _non_empty_unique(self) -> InspectInput:
+        names = [e.name for e in self.endpoints]
+        if not names:
+            raise ValueError("at least one endpoint is required")
+        dupes = sorted({n for n in names if names.count(n) > 1})
+        if dupes:
+            raise ValueError(f"duplicate endpoint names after normalization: {dupes}")
+        return self
+
+
+@dataclass(frozen=True)
+class EndpointResult:
+    name: str
+    url: str
+    status_code: int
+    content_type: str
+    exposition_format: str
+    metric_count: int
+    metrics_jsonl_path: str  # absolute path, as strpat
+    exposition_path: str  # absolute path, as str
 
 
 def _parse_exposition(body: str, content_type: str) -> tuple[list[Metric], str]:
@@ -129,47 +182,131 @@ def _write_exposition(path: Path, body: str) -> None:
         raise EndpointInspectionError(f"Failed to write exposition snapshot at {path}: {e}") from e
 
 
-def _build_memory_text(
-    url: str,
-    status: int,
-    content_type: str,
-    exposition_format: str,
-    metric_count: int,
-    jsonl_path: Path,
-    exposition_path: Path,
-) -> str:
-    """Render the markdown memory file describing the inspected endpoint."""
+def _fixture_name(name: str, single: bool) -> str:
+    """Intended Phase 2 fixture name for an endpoint (single endpoint → generic metrics.txt)."""
+    return "tests/fixtures/metrics.txt" if single else f"tests/fixtures/{name}_metrics.txt"
+
+
+def _build_memory_text(results: list[EndpointResult]) -> str:
+    """Render the markdown memory file describing every inspected endpoint."""
+    single = len(results) == 1
     lines = [
         "# Endpoint inspection",
         "",
-        f"- **URL:** {url}",
-        f"- **HTTP status:** {status}",
-        f"- **Content-Type:** {content_type}",
-        f"- **Exposition format:** {exposition_format}",
-        f"- **Metric families detected:** {metric_count}",
-        f"- **Metrics catalog:** {jsonl_path}",
-        f"- **Raw exposition snapshot:** {exposition_path}",
+        f"Inspected {len(results)} endpoint(s). Each is reachable and serves a Prometheus/OpenMetrics-compatible body.",
         "",
-        "Endpoint is reachable and serves a Prometheus/OpenMetrics-compatible body.",
-        "The full list of metrics with metadata is in the catalog file above. The raw exposition",
-        "snapshot is the verbatim endpoint body, suitable for use as a test fixture.",
+        "| Endpoint | Format | Metric families |",
+        "| --- | --- | --- |",
     ]
-    return "\n".join(lines)
+    for r in results:
+        lines.append(f"| {r.name} | {r.exposition_format} | {r.metric_count} |")
+    lines.append("")
+
+    for r in results:
+        lines.extend(
+            [
+                f"## {r.name}",
+                "",
+                f"- **URL:** {r.url}",
+                f"- **HTTP status:** {r.status_code}",
+                f"- **Content-Type:** {r.content_type}",
+                f"- **Exposition format:** {r.exposition_format}",
+                f"- **Metric families detected:** {r.metric_count}",
+                f"- **Metrics catalog:** {r.metrics_jsonl_path}",
+                f"- **Raw exposition snapshot:** {r.exposition_path}",
+                f"- **Intended fixture:** {_fixture_name(r.name, single)}",
+                "",
+                "The catalog file lists every metric with its metadata. The raw exposition snapshot is the",
+                "verbatim endpoint body, suitable for use as a test fixture.",
+                "",
+            ]
+        )
+    return "\n".join(lines).rstrip("\n")
+
+
+async def _fetch(client: httpx.AsyncClient, url: str) -> tuple[str, str, int]:
+    """Fetch url, enforce 200 + size limit, return (body, content_type, status_code)."""
+    try:
+        async with client.stream("GET", url) as response:
+            if response.status_code != 200:
+                raise EndpointInspectionError(f"Endpoint returned HTTP {response.status_code} (expected 200): {url}")
+            chunks: list[bytes] = []
+            received = 0
+            async for chunk in response.aiter_bytes():
+                received += len(chunk)
+                if received > RESPONSE_BODY_LIMIT_BYTES:
+                    limit_mb = RESPONSE_BODY_LIMIT_BYTES // (1024 * 1024)
+                    raise EndpointInspectionError(f"Response body exceeds {limit_mb} MB limit: {url}")
+                chunks.append(chunk)
+            body = b"".join(chunks).decode("utf-8", errors="replace")
+            content_type = response.headers.get("Content-Type", "")
+    except httpx.TimeoutException as e:
+        raise EndpointInspectionError(f"Endpoint timed out after {REQUEST_TIMEOUT_SECONDS}s: {url}") from e
+    except httpx.RequestError as e:
+        raise EndpointInspectionError(f"Request failed for {url}: {e}") from e
+
+    return body, content_type, response.status_code
+
+
+async def _inspect_one(
+    client: httpx.AsyncClient,
+    name: str,
+    url: str,
+    memory_dir: Path,
+    phase_id: str,
+) -> EndpointResult:
+    """Fetch, parse, and write the sidecars for a single named endpoint."""
+    try:
+        body, content_type, status_code = await _fetch(client, url)
+    except EndpointInspectionError as e:
+        raise EndpointInspectionError(f"[{name}] {e}") from e
+
+    try:
+        families, exposition_format = _parse_exposition(body, content_type)
+    except EndpointInspectionError as e:
+        raise EndpointInspectionError(f"[{name}] {e} ({url})") from e
+
+    header = {
+        "endpoint_name": name,
+        "endpoint_url": url,
+        "exposition_format": exposition_format,
+        "metric_families": len(families),
+    }
+    rows = _build_jsonl_rows(families)
+
+    jsonl_path = (memory_dir / f"{phase_id}_{name}{JSONL_FILENAME_SUFFIX}").resolve()
+    _write_jsonl(jsonl_path, [header, *rows])
+
+    exposition_path = (memory_dir / f"{phase_id}_{name}{EXPOSITION_FILENAME_SUFFIX}").resolve()
+    _write_exposition(exposition_path, body)
+
+    return EndpointResult(
+        name=name,
+        url=url,
+        status_code=status_code,
+        content_type=content_type,
+        exposition_format=exposition_format,
+        metric_count=len(families),
+        metrics_jsonl_path=str(jsonl_path),
+        exposition_path=str(exposition_path),
+    )
 
 
 class InspectEndpointPhase(Phase):
     """Deterministic Phase 0 for the OpenMetrics pipeline.
 
-    Performs a single HTTP fetch of ``endpoint_url`` and:
+    Fetches every named endpoint in ``inspect_input`` concurrently and, per endpoint:
 
     1. Confirms the endpoint is reachable (HTTP 200).
     2. Confirms the body is valid Prometheus or OpenMetrics exposition.
-    3. Writes a ``<phase_id>_metrics.jsonl`` sidecar next to the memory file,
-       with one row per metric family — the ground-truth catalog later phases
-       use to drive metric renaming, ``metrics.py`` mapping, and
+    3. Writes a ``<phase_id>_<name>_metrics.jsonl`` sidecar (provenance header line 1 +
+       one row per metric family) next to the memory file — the ground-truth catalog
+       later phases use to drive metric renaming, ``metrics.py`` mapping, and
        ``metadata.csv`` generation.
+    4. Writes a ``<phase_id>_<name>_exposition.txt`` verbatim snapshot for reuse as a fixture.
 
-    Aborts the pipeline with EndpointInspectionError on any failure.
+    All-or-nothing: if any endpoint fails, the phase aborts with a single
+    EndpointInspectionError listing every failed endpoint.
     """
 
     @classmethod
@@ -182,75 +319,36 @@ class InspectEndpointPhase(Phase):
             raise ConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'checkpoint'")
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
-        endpoint_url = context.get("endpoint_url")
-        if not endpoint_url:
-            raise ConfigError(f"Phase {self._phase_id!r}: 'endpoint_url' runtime variable is required")
-
-        limit_mb = RESPONSE_BODY_LIMIT_BYTES // (1024 * 1024)
+        raw = context.get("inspect_input")
+        if not raw:
+            raise ConfigError(f"Phase {self._phase_id!r}: 'inspect_input' runtime variable is required")
         try:
-            async with httpx.AsyncClient(
-                timeout=REQUEST_TIMEOUT_SECONDS,
-                follow_redirects=True,
-                headers={"Accept": DEFAULT_ACCEPT_HEADER},
-            ) as client:
-                async with client.stream("GET", endpoint_url) as response:
-                    if response.status_code != 200:
-                        raise EndpointInspectionError(
-                            f"Endpoint returned HTTP {response.status_code} (expected 200): {endpoint_url}"
-                        )
-                    chunks: list[bytes] = []
-                    received = 0
-                    async for chunk in response.aiter_bytes():
-                        received += len(chunk)
-                        if received > RESPONSE_BODY_LIMIT_BYTES:
-                            raise EndpointInspectionError(f"Response body exceeds {limit_mb} MB limit: {endpoint_url}")
-                        chunks.append(chunk)
-                    body = b"".join(chunks).decode("utf-8", errors="replace")
-                    content_type = response.headers.get("Content-Type", "")
-        except EndpointInspectionError:
-            raise
-        except httpx.TimeoutException as e:
-            raise EndpointInspectionError(f"Endpoint timed out after {REQUEST_TIMEOUT_SECONDS}s: {endpoint_url}") from e
-        except httpx.RequestError as e:
-            raise EndpointInspectionError(f"Request failed for {endpoint_url}: {e}") from e
+            endpoints = InspectInput.model_validate_json(raw).endpoints
+        except ValidationError as e:
+            raise ConfigError(f"Phase {self._phase_id!r}: invalid 'inspect_input': {e}") from e
 
-        try:
-            families, exposition_format = _parse_exposition(body, content_type)
-        except EndpointInspectionError as e:
-            raise EndpointInspectionError(f"{e} ({endpoint_url})") from e
+        memory_dir = self._checkpoint_manager.memory_dir
+        memory_dir.mkdir(parents=True, exist_ok=True)
 
-        rows = _build_jsonl_rows(families)
-        self._checkpoint_manager.memory_dir.mkdir(parents=True, exist_ok=True)
-        jsonl_path = (self._checkpoint_manager.memory_dir / f"{self._phase_id}{JSONL_FILENAME_SUFFIX}").resolve()
-        _write_jsonl(jsonl_path, rows)
+        async with httpx.AsyncClient(
+            timeout=REQUEST_TIMEOUT_SECONDS,
+            follow_redirects=True,
+            headers={"Accept": DEFAULT_ACCEPT_HEADER},
+        ) as client:
+            settled = await asyncio.gather(
+                *(_inspect_one(client, ep.name, ep.url, memory_dir, self._phase_id) for ep in endpoints),
+                return_exceptions=True,
+            )
 
-        exposition_path = (
-            self._checkpoint_manager.memory_dir / f"{self._phase_id}{EXPOSITION_FILENAME_SUFFIX}"
-        ).resolve()
-        _write_exposition(exposition_path, body)
+        failures = [(ep.name, r) for ep, r in zip(endpoints, settled, strict=False) if isinstance(r, Exception)]
+        if failures:
+            detail = "; ".join(f"{name}: {err}" for name, err in failures)
+            raise EndpointInspectionError(f"{len(failures)} endpoint(s) failed to inspect — {detail}")
 
-        metric_count = len(families)
-        memory_text = _build_memory_text(
-            url=endpoint_url,
-            status=response.status_code,
-            content_type=content_type,
-            exposition_format=exposition_format,
-            metric_count=metric_count,
-            jsonl_path=jsonl_path,
-            exposition_path=exposition_path,
-        )
-
+        results = [r for r in settled if not isinstance(r, BaseException)]
         return PhaseOutcome(
-            memory_text=memory_text,
+            memory_text=_build_memory_text(results),
             total_input_tokens=0,
             total_output_tokens=0,
-            checkpoint_data={
-                "endpoint_url": endpoint_url,
-                "status_code": response.status_code,
-                "content_type": content_type,
-                "exposition_format": exposition_format,
-                "metric_count": metric_count,
-                "metrics_jsonl_path": str(jsonl_path),
-                "exposition_path": str(exposition_path),
-            },
+            checkpoint_data={"endpoints": [asdict(r) for r in results]},
         )
