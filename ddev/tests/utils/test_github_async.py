@@ -1427,6 +1427,38 @@ async def test_retry_on_secondary_limit_returns_success(monkeypatch: pytest.Monk
     assert secondary_index < pacing_index
 
 
+@pytest.mark.parametrize(
+    'rate_limited_response',
+    [
+        pytest.param(
+            httpx.Response(403, json={"message": "You have exceeded a secondary rate limit."}),
+            id='response_message',
+        ),
+        pytest.param(httpx.Response(403, headers={'retry-after': '0'}), id='zero_retry_after'),
+        pytest.param(httpx.Response(403, headers={'retry-after': '-1'}), id='negative_retry_after'),
+    ],
+)
+async def test_retry_on_secondary_limit_without_valid_wait_returns_success(
+    monkeypatch: pytest.MonkeyPatch, rate_limited_response: httpx.Response
+) -> None:
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    events: list[RateLimitEvent] = []
+    transport, calls = recording_transport(
+        [
+            rate_limited_response,
+            httpx.Response(200),
+        ]
+    )
+    client = governed_client(clock, transport, on_event=events.append)
+
+    response = await client._request("GET", "/x")
+
+    assert response.status_code == 200
+    assert len(calls) == 2
+    assert any(isinstance(event, SecondaryLimitEvent) and event.retry_after_seconds == 60 for event in events)
+
+
 async def test_retry_on_primary_exhaustion_waits_until_reset(monkeypatch: pytest.MonkeyPatch) -> None:
     """A 403 with x-ratelimit-remaining=0 is retried, and the retry waits until the window reset."""
     clock = FakeClock()

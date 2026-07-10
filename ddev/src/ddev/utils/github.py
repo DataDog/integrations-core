@@ -8,7 +8,14 @@ from functools import cached_property
 from time import time
 from typing import TYPE_CHECKING, overload
 
-from ddev.utils.github_errors import GITHUB_AUTHENTICATION_STATUS_CODES, GitHubAuthenticationError
+from ddev.utils.github_errors import (
+    GITHUB_AUTHENTICATION_STATUS_CODES,
+    GitHubAuthenticationError,
+    github_secondary_rate_limit_wait,
+)
+
+MAX_SECONDARY_RATE_LIMIT_RETRIES = 2
+MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS = 3600
 
 if TYPE_CHECKING:
     from typing import Any, Literal
@@ -310,13 +317,26 @@ class GitHubManager:
         from httpx import HTTPError, HTTPStatusError
 
         retry_wait = 2
+        secondary_rate_limit_retries = 0
         while True:
             try:
                 response = getattr(self.client, method)(*args, auth=self.__auth, **kwargs)
 
+                secondary_rate_limit_wait = github_secondary_rate_limit_wait(response)
+                if secondary_rate_limit_wait is not None:
+                    if (
+                        secondary_rate_limit_retries < MAX_SECONDARY_RATE_LIMIT_RETRIES
+                        and secondary_rate_limit_wait <= MAX_SECONDARY_RATE_LIMIT_WAIT_SECONDS
+                    ):
+                        secondary_rate_limit_retries += 1
+                        self.__status.wait_for(
+                            secondary_rate_limit_wait + 1,
+                            context='GitHub API secondary rate limit reached',
+                        )
+                        continue
                 # https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting
                 # https://docs.github.com/en/rest/guides/best-practices-for-integrators?apiVersion=2022-11-28#dealing-with-rate-limits
-                if response.status_code == 403 and response.headers.get('X-RateLimit-Remaining') == '0':  # noqa: PLR2004
+                elif response.status_code == 403 and response.headers.get('X-RateLimit-Remaining') == '0':  # noqa: PLR2004
                     self.__status.wait_for(
                         float(response.headers['X-RateLimit-Reset']) - time() + 1,
                         context='GitHub API rate limit reached',
@@ -330,6 +350,8 @@ class GitHubManager:
             try:
                 response.raise_for_status()
             except HTTPStatusError as e:
+                if github_secondary_rate_limit_wait(e.response) is not None:
+                    raise
                 if e.response.status_code in GITHUB_AUTHENTICATION_STATUS_CODES:
                     raise GitHubAuthenticationError.from_http_status_error(e) from e
                 raise

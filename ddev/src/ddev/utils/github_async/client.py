@@ -10,14 +10,18 @@ import re
 import zipfile
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager, suppress
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Literal, Self, overload
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
-from ddev.utils.github_errors import GITHUB_AUTHENTICATION_STATUS_CODES, GitHubAuthenticationError
+from ddev.utils.github_errors import (
+    GITHUB_AUTHENTICATION_STATUS_CODES,
+    GitHubAuthenticationError,
+    github_secondary_rate_limit_wait,
+)
 from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
 
 from .defaults import default_github_rate_limiter
@@ -181,12 +185,15 @@ class AsyncGitHubClient:
         """Whether *response* is a retryable rate-limit rejection, by GitHub's own discrimination rule.
 
         A 403 is also used for plain permission denials, which waiting cannot fix; retrying one would
-        sleep out a pause (up to a full window) and then fail identically. Only header-confirmed
-        rate-limit responses are retryable.
+        sleep out a pause (up to a full window) and then fail identically. Only responses confirmed
+        by rate-limit headers or GitHub's secondary-limit message are retryable.
         """
         if response.status_code not in (403, 429):
             return False
-        return "retry-after" in response.headers or response.headers.get("x-ratelimit-remaining") == "0"
+        return (
+            github_secondary_rate_limit_wait(response) is not None
+            or response.headers.get("x-ratelimit-remaining") == "0"
+        )
 
     async def _execute_request(
         self,
@@ -204,6 +211,9 @@ class AsyncGitHubClient:
         # exception, so one request's 403 protects every other in-flight and future request in this
         # process.
         snapshot = github_rate_limit_snapshot(response.headers)
+        secondary_rate_limit_wait = github_secondary_rate_limit_wait(response)
+        if secondary_rate_limit_wait is not None:
+            snapshot = replace(snapshot or NULL_SNAPSHOT, retry_after=secondary_rate_limit_wait)
         if snapshot is not None:
             self._rate_limiter.observe(snapshot)
         response.raise_for_status()

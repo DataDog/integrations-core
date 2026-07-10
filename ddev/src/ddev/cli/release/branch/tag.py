@@ -9,6 +9,7 @@ from httpx import HTTPStatusError
 from packaging.version import Version
 
 from ddev.utils.git import GitRepository
+from ddev.utils.github_errors import GitHubAuthenticationError
 
 from .build_agent import BUILD_AGENT_YAML_PATH, find_build_agent_template_main_branch_matches
 from .create import BRANCH_NAME_REGEX
@@ -366,7 +367,7 @@ def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str
             UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF,
             {'branch': branch_name},
         )
-    except HTTPStatusError as e:
+    except (GitHubAuthenticationError, HTTPStatusError) as e:
         app.display_warning(
             f'Warning: unable to trigger `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}`: {e}\n'
             f'To trigger it manually: gh workflow run {UPDATE_BUILD_AGENT_YAML_WORKFLOW} -f branch={branch_name}'

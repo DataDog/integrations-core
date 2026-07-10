@@ -518,7 +518,13 @@ def test_create_pull_request_step_reports_partial_failure_when_labeling_fails(
     )
     fake_async_github.mock_response(
         'add_labels_to_issue',
-        httpx.HTTPStatusError('forbidden', request=httpx.Request('POST', 'https://x'), response=httpx.Response(403)),
+        GitHubAuthenticationError.from_http_status_error(
+            httpx.HTTPStatusError(
+                'forbidden',
+                request=httpx.Request('POST', 'https://x'),
+                response=httpx.Response(403),
+            )
+        ),
     )
 
     step = CreatePullRequestStep(
@@ -551,7 +557,13 @@ def test_command_suppresses_worktree_warning_on_partial_pr_failure(
     )
     fake_async_github.mock_response(
         'add_labels_to_issue',
-        httpx.HTTPStatusError('forbidden', request=httpx.Request('POST', 'https://x'), response=httpx.Response(403)),
+        GitHubAuthenticationError.from_http_status_error(
+            httpx.HTTPStatusError(
+                'forbidden',
+                request=httpx.Request('POST', 'https://x'),
+                response=httpx.Response(403),
+            )
+        ),
     )
     mocker.patch('click.confirm', return_value=True)
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})

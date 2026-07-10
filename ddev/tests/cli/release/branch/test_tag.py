@@ -7,6 +7,7 @@ import pytest
 from httpx import HTTPStatusError, Request, Response
 
 from ddev.utils.git import GitRepository
+from ddev.utils.github_errors import GitHubAuthenticationError
 
 ORIGIN_REF = 'origin/7.56.x'
 
@@ -508,5 +509,26 @@ def test_build_agent_yaml_workflow_dispatch_failure_warns_and_continues(ddev, ba
     assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
     assert 'Dispatched `update-build-agent-yaml.yml`' not in result.output
     dispatch_workflow.assert_called_once_with('update-build-agent-yaml.yml', 'master', {'branch': '7.56.x'})
+    basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
+    basic_git.push.assert_called_once_with('7.56.0')
+
+
+def test_build_agent_yaml_workflow_authentication_failure_preserves_manual_guidance(ddev, basic_git, mocker):
+    basic_git.current_branch.return_value = '7.56.x'
+    basic_git.tags.return_value = []
+    mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=True)
+    request = Request('POST', 'https://api.github.com')
+    response = Response(403, request=request)
+    error = HTTPStatusError('forbidden', request=request, response=response)
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.dispatch_workflow',
+        side_effect=GitHubAuthenticationError.from_http_status_error(error),
+    )
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
+
+    assert result.exit_code == 0, result.output
+    assert 'unable to trigger `update-build-agent-yaml.yml`' in result.output
+    assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
     basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
     basic_git.push.assert_called_once_with('7.56.0')

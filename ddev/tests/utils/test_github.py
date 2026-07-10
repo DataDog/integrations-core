@@ -170,6 +170,56 @@ def test_primary_rate_limit_is_retried_before_authentication_classification(
 
 
 @pytest.mark.parametrize(
+    ('rate_limit_response', 'expected_wait'),
+    [
+        (
+            httpx.Response(403, headers={'retry-after': '30'}),
+            31,
+        ),
+        (
+            httpx.Response(403, json={'message': 'You have exceeded a secondary rate limit.'}),
+            61,
+        ),
+    ],
+    ids=['retry_after', 'response_message'],
+)
+def test_secondary_rate_limit_is_retried_before_authentication_classification(
+    github_manager: GitHubManager,
+    mocker: MockerFixture,
+    rate_limit_response: httpx.Response,
+    expected_wait: float,
+) -> None:
+    request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/pulls/1')
+    rate_limit_response.request = request
+    success = httpx.Response(200, json={'head': {'sha': 'abc', 'ref': 'feature'}}, request=request)
+    client = mocker.Mock(get=mocker.Mock(side_effect=[rate_limit_response, success]))
+    github_manager.__dict__['client'] = client
+    wait_for = mocker.patch.object(github_manager._GitHubManager__status, 'wait_for')
+
+    assert github_manager.get_pr_head(1) == ('abc', 'feature')
+    assert client.get.call_count == 2
+    wait_for.assert_called_once_with(expected_wait, context='GitHub API secondary rate limit reached')
+
+
+def test_secondary_rate_limit_retries_are_bounded(github_manager: GitHubManager, mocker: MockerFixture) -> None:
+    request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/pulls/1')
+    responses = [
+        httpx.Response(403, headers={'retry-after': '30'}, request=request),
+        httpx.Response(403, headers={'retry-after': '30'}, request=request),
+        httpx.Response(403, headers={'retry-after': '30'}, request=request),
+    ]
+    client = mocker.Mock(get=mocker.Mock(side_effect=responses))
+    github_manager.__dict__['client'] = client
+    wait_for = mocker.patch.object(github_manager._GitHubManager__status, 'wait_for')
+
+    with pytest.raises(httpx.HTTPStatusError):
+        github_manager.get_pr_head(1)
+
+    assert client.get.call_count == 3
+    assert wait_for.call_count == 2
+
+
+@pytest.mark.parametrize(
     ('method_name', 'args'),
     [
         ('get_changed_files_by_commit_sha', ('abc',)),

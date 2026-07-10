@@ -323,9 +323,11 @@ class CreatePullRequestStep(PortStep):
         import httpx
         from pydantic import ValidationError
 
+        from ddev.utils.github_errors import GitHubAuthenticationError
+
         try:
             asyncio.run(self._create_pr())
-        except (httpx.HTTPError, ValidationError) as e:
+        except (GitHubAuthenticationError, httpx.HTTPError, ValidationError) as e:
             if self.pr_url:
                 raise PortStepError(
                     f'Pull request created at {self.pr_url} but labeling failed: {e}. '
