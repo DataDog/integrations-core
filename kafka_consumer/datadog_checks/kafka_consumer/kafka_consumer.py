@@ -1,10 +1,12 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import base64
 import ctypes
 import ctypes.util
 import heapq
 import json
+import marshal
 import platform
 from collections import defaultdict
 from time import time
@@ -320,9 +322,7 @@ class KafkaCheck(AgentCheck):
 
         broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(self.read_persistent_cache(persistent_cache_key)).items():
-                for offset, timestamp in content.items():
-                    broker_timestamps[topic_partition][int(offset)] = timestamp
+            broker_timestamps.update(marshal.loads(base64.b64decode(self.read_persistent_cache(persistent_cache_key))))
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         self.broker_timestamps = broker_timestamps
@@ -353,11 +353,12 @@ class KafkaCheck(AgentCheck):
                 _visvalingam_whyatt(timestamps, max(2, self._max_timestamps // 2))
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
-        """Persist broker timestamps to disk, but only periodically to avoid per-run json churn."""
+        """Persist broker timestamps to disk periodically."""
         now = time()
         if now - self.broker_timestamps_last_save < BROKER_TIMESTAMPS_SAVE_INTERVAL:
             return
-        self.write_persistent_cache(persistent_cache_key, json.dumps(broker_timestamps))
+        blob = marshal.dumps(dict(broker_timestamps))
+        self.write_persistent_cache(persistent_cache_key, base64.b64encode(blob).decode('ascii'))
         self.broker_timestamps_last_save = now
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
