@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from ddev.cli.ci.tests.messages import ARTIFACT_NAME_DISALLOWED, BatchJob, BatchJobResult
+from ddev.cli.ci.tests.messages import ARTIFACT_NAME_DISALLOWED, BatchJob, BatchJobResult, Platform
 from ddev.utils.github_async.models import WorkflowJob
 
 
@@ -18,7 +18,7 @@ def batch_job(
     target="ntp",
     runner="ubuntu-latest",
     environment="py3.13",
-    platform="linux",
+    platform=Platform.LINUX,
     unit_tests=True,
     e2e_tests=False,
 ) -> BatchJob:
@@ -46,7 +46,7 @@ def test_artifact_name_ignores_non_identifying_fields(field: str) -> None:
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [("target", "kafka"), ("environment", "py3.12"), ("platform", "windows")],
+    [("target", "kafka"), ("environment", "py3.12"), ("platform", Platform.WINDOWS)],
 )
 def test_artifact_name_varies_with_identifying_fields(field: str, value: str) -> None:
     assert batch_job(**{field: value}).artifact_name() != batch_job().artifact_name()

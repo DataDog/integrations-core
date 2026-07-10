@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, UpdatePRComment
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, Platform, UpdatePRComment
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async.models import JobStep, WorkflowJob
@@ -37,7 +37,7 @@ def _batch_job(
     name: str,
     target: str = "ntp",
     environment: str = "py3.13",
-    platform: str = "linux",
+    platform: Platform = Platform.LINUX,
     runner: str = "ubuntu-latest",
 ) -> BatchJob:
     return BatchJob(
@@ -243,10 +243,10 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path) -
     gatherer = _make_gatherer(tmp_path)
     batch_jobs = [
         _batch_job_result(
-            _batch_job("j1", platform="linux", runner="ubuntu-latest"), _workflow_job("j1", "success"), j1_dir
+            _batch_job("j1", platform=Platform.LINUX, runner="ubuntu-latest"), _workflow_job("j1", "success"), j1_dir
         ),
         _batch_job_result(
-            _batch_job("j2", platform="windows", runner="windows-latest"), _workflow_job("j2", "success"), j2_dir
+            _batch_job("j2", platform=Platform.WINDOWS, runner="windows-latest"), _workflow_job("j2", "success"), j2_dir
         ),
     ]
     gatherer.process_message(_batch_finished(artifacts, batch_jobs=batch_jobs))

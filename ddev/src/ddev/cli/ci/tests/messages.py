@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from enum import StrEnum, auto
+from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.orchestrator import BaseMessage
@@ -14,6 +15,15 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from ddev.utils.github_async.models import WorkflowJob
+
+
+class Platform(StrEnum):
+    """Operating system a test job runs on."""
+
+    LINUX = auto()
+    WINDOWS = auto()
+    MACOS = auto()
+
 
 # Characters GitHub disallows in an artifact name (plus CR/LF).
 ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
@@ -30,7 +40,7 @@ class BatchJob:
     target: str
     runner: str
     environment: str
-    platform: Literal["linux", "windows", "macos"]
+    platform: Platform
     unit_tests: bool
     e2e_tests: bool
 
@@ -51,7 +61,7 @@ class WorkflowResult:
 
     integration: str
     environment: str
-    platform: Literal["linux", "windows", "macos"]
+    platform: Platform
     status: Status
     failed_step: str | None = None
     failed_tests: list[str] = field(default_factory=list)

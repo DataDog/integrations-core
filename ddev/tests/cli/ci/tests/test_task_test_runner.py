@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
+from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, Platform, TestBatch
 from ddev.cli.ci.tests.status import Status, conclusion_to_status
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.orchestrator import BaseMessage
@@ -41,7 +41,7 @@ def make_job(name: str = "job-1", environment: str = "py3.13") -> BatchJob:
         target="ntp",
         runner="ubuntu-latest",
         environment=environment,
-        platform="linux",
+        platform=Platform.LINUX,
         unit_tests=True,
         e2e_tests=False,
     )
