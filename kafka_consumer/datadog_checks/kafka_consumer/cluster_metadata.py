@@ -68,8 +68,6 @@ class ClusterMetadataCollector:
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
-        # Earliest offsets only move via the broker's log-cleaner cycle (log.retention.check.interval.ms),
-        # so the result is cached across runs instead of refetched on every collection interval.
         self.EARLIEST_OFFSETS_DEFAULT_TTL = 300  # 5 minutes, matches Kafka's own broker default
         self.EARLIEST_OFFSETS_MIN_TTL = 60
         self.EARLIEST_OFFSETS_MAX_TTL = 1800
@@ -438,14 +436,7 @@ class ClusterMetadataCollector:
             self.log.debug("Could not write earliest offsets cache: %s", e)
 
     def fetch_earliest_offsets(self, topic_partitions):
-        """Return cached log-start offsets, refetching from the broker only once the TTL expires.
-
-        The log start offset only moves via the broker's log-cleaner cycle
-        (log.retention.check.interval.ms), so there's no point refetching it on every
-        collection interval. The TTL is derived from that broker config when known
-        (clamped to [EARLIEST_OFFSETS_MIN_TTL, EARLIEST_OFFSETS_MAX_TTL]), else defaults
-        to EARLIEST_OFFSETS_DEFAULT_TTL.
-        """
+        """Return cached log-start offsets, refetching from the broker only once the TTL expires."""
         requested = self._topic_partition_pairs(topic_partitions)
         if not requested:
             return {}
