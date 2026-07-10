@@ -25,14 +25,25 @@ if TYPE_CHECKING:
     # execute at runtime (they live behind `TYPE_CHECKING`), so they do not
     # break the lazy-loading guarantee. The `X as X` aliases mark these as
     # explicit re-exports for linters.
+    from .check_run import CheckRun as CheckRun
+    from .check_run import CheckRunConclusion as CheckRunConclusion
+    from .check_run import CheckRunStatus as CheckRunStatus
     from .comment import IssueComment as IssueComment
     from .comment import PullRequestReviewComment as PullRequestReviewComment
     from .label import Label as Label
     from .pull_request import PullRequest as PullRequest
     from .pull_request import PullRequestRef as PullRequestRef
+    from .pull_request import PullRequestState as PullRequestState
     from .user import GitHubUser as GitHubUser
     from .workflow import Artifact as Artifact
     from .workflow import ArtifactsList as ArtifactsList
+    from .workflow import JobStep as JobStep
+    from .workflow import JobStepStatus as JobStepStatus
+    from .workflow import WorkflowDispatchResult as WorkflowDispatchResult
+    from .workflow import WorkflowJob as WorkflowJob
+    from .workflow import WorkflowJobConclusion as WorkflowJobConclusion
+    from .workflow import WorkflowJobsList as WorkflowJobsList
+    from .workflow import WorkflowJobStatus as WorkflowJobStatus
     from .workflow import WorkflowRun as WorkflowRun
 
 # Map of exported attribute name -> submodule (relative to this package) that
@@ -40,12 +51,23 @@ if TYPE_CHECKING:
 MODULE_BY_NAME: dict[str, str] = {
     'Artifact': 'workflow',
     'ArtifactsList': 'workflow',
+    'CheckRun': 'check_run',
+    'CheckRunConclusion': 'check_run',
+    'CheckRunStatus': 'check_run',
     'GitHubUser': 'user',
     'IssueComment': 'comment',
+    'JobStep': 'workflow',
+    'JobStepStatus': 'workflow',
     'Label': 'label',
     'PullRequest': 'pull_request',
     'PullRequestRef': 'pull_request',
     'PullRequestReviewComment': 'comment',
+    'PullRequestState': 'pull_request',
+    'WorkflowDispatchResult': 'workflow',
+    'WorkflowJob': 'workflow',
+    'WorkflowJobConclusion': 'workflow',
+    'WorkflowJobStatus': 'workflow',
+    'WorkflowJobsList': 'workflow',
     'WorkflowRun': 'workflow',
 }
 

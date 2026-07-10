@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.0.0 / 2026-05-14
+## 5.0.1 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 5.0.0 / 2026-05-14 / Agent 7.80.0
 
 ***Removed***:
 

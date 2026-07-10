@@ -2,7 +2,33 @@
 
 <!-- towncrier release notes start -->
 
-## 7.3.0 / 2026-05-14
+## 8.1.0 / 2026-07-08
+
+***Added***:
+
+* Add consumer group rebalance detection and membership-change counting metrics, plus partition assignor, group type, simple-group, and static-membership tags, when cluster monitoring is enabled. (DSM only) ([#23915](https://github.com/DataDog/integrations-core/pull/23915))
+* Add Kafka Connect connector monitoring via the Kafka Connect REST API, including connector health metrics and configuration events. ([#24013](https://github.com/DataDog/integrations-core/pull/24013))
+* Support monitoring Confluent Cloud managed connectors by pointing kafka_connect_url at the Confluent Cloud Connect REST API. ([#24033](https://github.com/DataDog/integrations-core/pull/24033))
+
+***Fixed***:
+
+* Fix kafka.broker_offset and kafka.topic.message_rate not being collected when enable_cluster_monitoring is true and the consumer context count exceeds max_partition_contexts. ([#24149](https://github.com/DataDog/integrations-core/pull/24149))
+* Improve the accuracy of ``estimated_consumer_lag`` for consumers that are far behind: cap interpolation for offsets older than the cached broker history, use the low watermark as a floor for the lag offset when cluster monitoring is enabled, and retain a longer broker-timestamp history by compacting the cache (Visvalingam-Whyatt) and pruning samples below the lowest readable offset (the low watermark, or the earliest consumer offset when cluster monitoring is disabled) instead of evicting the oldest one. ([#24167](https://github.com/DataDog/integrations-core/pull/24167))
+* Continue collecting high-watermark offsets for healthy partitions when an individual partition's offset lookup fails, instead of aborting the check. ([#24263](https://github.com/DataDog/integrations-core/pull/24263))
+
+## 8.0.0 / 2026-06-09 / Agent 7.81.0
+
+***Removed***:
+
+* Remove the Data Streams live messages reading feature, which has moved to the kafka_actions integration. ([#23842](https://github.com/DataDog/integrations-core/pull/23842))
+
+***Added***:
+
+* Schema Registry: emit per-subject and global compatibility on the Data Streams schema payload, and stop emitting Datadog Events for broker, topic, and schema registry configurations (those payloads continue to flow to the Data Streams intake). ([#23778](https://github.com/DataDog/integrations-core/pull/23778))
+* Add broker list to the cluster monitoring heartbeat payload. ([#23898](https://github.com/DataDog/integrations-core/pull/23898))
+* Emit connection_error DSM event when the integration cannot connect to Kafka. ([#23902](https://github.com/DataDog/integrations-core/pull/23902))
+
+## 7.3.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 

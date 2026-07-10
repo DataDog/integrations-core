@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.0 / 2026-07-08
+
+***Added***:
+
+* Add adaptive concurrency gradient controller metrics. ([#24237](https://github.com/DataDog/integrations-core/pull/24237))
+
 ## 6.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

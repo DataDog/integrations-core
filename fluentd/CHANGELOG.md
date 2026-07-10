@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 5.6.0 / 2026-05-14
+## 5.7.0 / 2026-07-08
+
+***Added***:
+
+* Add the ``fluentd.tracked_file_count`` gauge from the in_tail plugin. ([#24159](https://github.com/DataDog/integrations-core/pull/24159))
+
+## 5.6.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 

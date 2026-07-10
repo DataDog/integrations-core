@@ -205,8 +205,10 @@ files:
     - name: read_messages
       description: |
         Configuration for reading messages from Kafka topics.
-        Messages are streamed in real-time and sent to Datadog as they arrive.
-        The check has a 20-second timeout for the entire operation.
+        Only messages already present in the log when the check starts are read; the
+        per-partition high watermark is captured up front and consumption stops once every
+        partition is drained, so messages produced after the check began are never returned.
+        A 5-second timeout bounds the entire operation as a safety net.
         Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
         Filtering is applied after deserialization using jq-style expressions.
       fleet_configurable: true
@@ -500,7 +502,8 @@ files:
       description: |
         Configuration for updating consumer group offsets.
         WARNING: Can cause duplicate processing or data loss.
-        Consumer group should be stopped (no active members).
+        The consumer group must have no active members before this action runs.
+        The check enforces this and will fail with a clear error if members are found.
       value:
         type: object
         required:
@@ -516,7 +519,9 @@ files:
               offset: 1000
             - topic: orders
               partition: 1
-              offset: 1500
+              offset: -2
+            - topic: payments
+              timestamp: 1735689600000
         properties:
         - name: cluster
           type: string
@@ -528,30 +533,43 @@ files:
           example: order-processor
         - name: offsets
           type: array
-          description: List of topic-partition-offset tuples to update
+          description: |
+            List of offset specifications. Each entry must specify exactly one of `offset`
+            or `timestamp`. See the action description for details.
           items:
             type: object
             required:
               - topic
-              - partition
-              - offset
             properties:
             - name: topic
               type: string
               description: Topic name
             - name: partition
               type: integer
-              description: Partition number
+              description: |
+                Non-negative partition number. Required when `offset` is specified.
+                Optional when `timestamp` is specified. Omit to target all partitions.
             - name: offset
               type: integer
-              description: New offset value
+              description: |
+                Offset to commit. Use -2 for earliest (log-start), -1 for latest
+                (high-watermark), or a non-negative integer for an explicit position.
+                Mutually exclusive with `timestamp`. Requires `partition`.
+            - name: timestamp
+              type: integer
+              description: |
+                Milliseconds since epoch. Resets to the first offset at or after this
+                timestamp. Partitions with no message at or after the timestamp are
+                reset to latest. Mutually exclusive with `offset`.
           example:
             - topic: orders
               partition: 0
               offset: 1000
             - topic: orders
               partition: 1
-              offset: 1500
+              offset: -2
+            - topic: payments
+              timestamp: 1735689600000
       fleet_configurable: false
     
     # ========================================================================

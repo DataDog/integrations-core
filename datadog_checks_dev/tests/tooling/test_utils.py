@@ -38,7 +38,7 @@ def test_get_version_string():
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')
 def test_is_logs_only(get_root):
     get_root.return_value = REPO_ROOT
-    assert is_logs_only('flink')
+    assert is_logs_only('cisco_asa')
 
 
 @mock.patch('datadog_checks.dev.tooling.utils.get_root')

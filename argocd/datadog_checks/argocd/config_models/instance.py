@@ -101,7 +101,9 @@ class InstanceConfig(BaseModel):
     cache_metric_wildcards: Optional[bool] = None
     cache_shared_labels: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
+    collect_genresources: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_openmetrics: Optional[bool] = None
     commit_server_endpoint: Optional[str] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
@@ -113,6 +115,19 @@ class InstanceConfig(BaseModel):
     exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
+    genresources_application_full_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_application_poll_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_auth_token: Optional[str] = None
+    genresources_cluster_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_endpoint: Optional[str] = None
+    genresources_exclude_paths: Optional[tuple[str, ...]] = None
+    genresources_extra_include_paths: Optional[tuple[str, ...]] = None
+    genresources_max_resources_per_cycle: Optional[int] = Field(None, ge=1)
+    genresources_repository_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_stream_applications_enabled: Optional[bool] = None
+    genresources_stream_backoff_max_seconds: Optional[int] = Field(None, ge=1)
+    genresources_stream_read_timeout_seconds: Optional[int] = Field(None, ge=1)
+    genresources_ttl_seconds: Optional[int] = Field(None, ge=1)
     headers: Optional[MappingProxyType[str, Any]] = None
     histogram_buckets_as_distributions: Optional[bool] = None
     hostname_format: Optional[str] = None
