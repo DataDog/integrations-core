@@ -2,6 +2,15 @@ name: PHP-FPM
 fleet_configurable: true
 files:
 - name: php_fpm.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 9000
+      candidates:
+      - status_url: "http://{service.host}:{port.number}/status"
+        ping_url: "http://{service.host}:{port.number}/ping"
+        use_fastcgi: "true"
   options:
   - template: init_config
     options:
@@ -60,3 +69,10 @@ files:
         type: string
     - template: instances/http
     - template: instances/default
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - php-fpm
+  - template: auto_conf/discovery
