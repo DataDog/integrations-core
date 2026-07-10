@@ -8,7 +8,7 @@ from copy import deepcopy
 import pytest
 from mock import patch
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
@@ -22,7 +22,7 @@ def dd_environment():
         log_patterns='Got finalize command for block pool',
         sleep=30,
     ):
-        yield INSTANCE_INTEGRATION
+        yield INSTANCE_INTEGRATION, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
