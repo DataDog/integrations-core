@@ -20,7 +20,6 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
-from requests import cookies as requests_cookies
 from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
@@ -276,8 +275,9 @@ class _OutgoingRequest:
 class _RequestsAuthHookAdapter(requests_auth.AuthBase):
     """Adapt an agnostic HTTPRequestAuth hook to a requests.auth.AuthBase.
 
-    Builds a backend-neutral view of the prepared request, lets the hook contribute headers and
-    query params, then applies those contributions back onto the prepared request.
+    Passes the hook a mutable view of the outgoing request: header edits apply directly (the view
+    shares the prepared request's headers) and any params it adds are merged into the URL query.
+    The request URL is provided for inspection only and is not written back.
     """
 
     def __init__(self, hook: HTTPRequestAuth) -> None:
@@ -583,13 +583,8 @@ class RequestsWrapper(object):
             self._session = None
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
-        """Look up a persisted cookie by name, returning its value (or default if absent)."""
-        if self._session is None:
-            return default
-        try:
-            return self._session.cookies.get(name, default)
-        except requests_cookies.CookieConflictError:
-            return default
+        """Look up a persisted cookie by name, returning its value as a plain string."""
+        return self.session.cookies.get(name, default)
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """Look up a request header by name. Lookup is case-insensitive."""
@@ -633,6 +628,8 @@ class RequestsWrapper(object):
         if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
             options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
 
+        # Only per-call auth= is adapted here; an HTTPRequestAuth set persistently via
+        # self.options['auth'] is not supported.
         auth = options.get('auth')
         if isinstance(auth, HTTPRequestAuth):
             options['auth'] = _RequestsAuthHookAdapter(auth)
