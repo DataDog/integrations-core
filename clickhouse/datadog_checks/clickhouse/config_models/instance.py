@@ -30,7 +30,7 @@ class AsynchronousInsertBufferSnapshot(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
-    run_sync: Optional[bool] = None
+    payload_row_limit: Optional[int] = None
 
 
 class CollectSchemas(BaseModel):

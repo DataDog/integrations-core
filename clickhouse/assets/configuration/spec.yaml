@@ -591,13 +591,12 @@ files:
             type: number
             example: 10
           fleet_configurable: false
-        - name: run_sync
-          hidden: true
+        - name: payload_row_limit
           description: |
-            Run the async insert buffer snapshot collection synchronously. For testing only.
+            Set the maximum number of buffers to include in each buffer snapshot.
           value:
-            type: boolean
-            example: false
+            type: integer
+            example: 1000
           fleet_configurable: false
     - template: instances/db
       overrides:
