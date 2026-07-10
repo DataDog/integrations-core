@@ -16,6 +16,7 @@ services:
   server:
     hostname: airflow-server
     container_name: airflow-server
+    image: airflow:${AIRFLOW_VERSION}
     build:
       context: .
       args:

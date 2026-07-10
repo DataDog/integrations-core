@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.airflow import AirflowCheck
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
+from datadog_checks.dev.docker import CONTAINER_STABILITY_LOG_PATTERNS, assert_all_discovery_candidates_stable
 
 from . import common
 
@@ -46,15 +46,16 @@ def test_e2e_discovery(dd_agent_check_discovery):
     aggregator.assert_service_check('airflow.healthy', AgentCheck.OK, count=1)
     aggregator.assert_metric('airflow.healthy', 1, count=1)
 
-    aggregator.assert_metric('airflow.dag.task.total_running', count=1)
-    aggregator.assert_metric(
-        'airflow.dag.task.ongoing_duration',
-        count=0,
-    )
-
+    # discovery has no way to supply the `username`/`password` the task-instances endpoint requires, so that request
+    # gets a 401 and `airflow.dag.task.total_running`/`ongoing_duration` are never submitted for a discovered instance
     aggregator.assert_all_metrics_covered()
 
 
 @pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check):
-    assert_all_discovery_candidates_stable(dd_agent_check, AirflowCheck, compose_service='server')
+    # Airflow's own admin/RBAC bootstrap logs permission views named e.g. "can read on ImportError", which trips the
+    # generic `error` pattern even though nothing is actually failing; keep only the crash-indicating patterns.
+    log_patterns = [pattern for pattern in CONTAINER_STABILITY_LOG_PATTERNS if pattern != r'error']
+    assert_all_discovery_candidates_stable(
+        dd_agent_check, AirflowCheck, compose_service='server', log_patterns=log_patterns
+    )
