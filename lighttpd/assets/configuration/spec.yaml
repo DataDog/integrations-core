@@ -8,7 +8,7 @@ files:
       port_hints:
       - 80
       candidates:
-      - lighttpd_status_url: "http://{service.host}:{port.number}/server-status?auto"
+      - lighttpd_status_url: "http://{service.host}:{port.number}/server-status"
   options:
   - template: init_config
     options:

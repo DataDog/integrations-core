@@ -26,9 +26,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
     for port in candidate_ports(service, [80]):
         ctx = {'port': port}
         instance_data = {
-            'lighttpd_status_url': 'http://{service.host}:{port.number}/server-status?auto'.format(
-                service=service, **ctx
-            ),
+            'lighttpd_status_url': 'http://{service.host}:{port.number}/server-status'.format(service=service, **ctx),
         }
         instance = InstanceConfig.model_validate(
             instance_data, context={'configured_fields': frozenset(instance_data)}
