@@ -1,0 +1,1 @@
+Add ``kube_discovery`` e2e test helpers for exercising Kubernetes/Kubelet Autodiscovery.
