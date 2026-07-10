@@ -78,6 +78,9 @@ def assert_openmetrics(aggregator, tags=None):
     for metric in EXPECTED_PROMETHEUS_METRICS:
         aggregator.assert_metric(metric)
         if tags:
+            # Some metrics have additional tags than the ones in `tags`, so we
+            # use `assert_metric_has_tags` instead of passing the tags to
+            # `assert_metric`
             aggregator.assert_metric_has_tags(metric, tags)
 
     version_parts = [int(p) for p in VERSION.split('.')]
