@@ -5,9 +5,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
+from pydantic import ValidationError
 
+from ddev.ai.agent.build import AgentProviderRegistry
 from ddev.ai.config.classify import classify
 from ddev.ai.config.loading.files import MarkdownFile, YamlFile
 from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig
@@ -15,6 +18,46 @@ from ddev.ai.config.registry import BrokenEntry, ResourceKind, ValidEntry
 
 PATH = Path("/x/a.md")
 YAML_PATH = Path("/x/a.yaml")
+
+
+def provider_registry(*names: str) -> AgentProviderRegistry:
+    registry = AgentProviderRegistry()
+    for name in names:
+        registry.register(name, MagicMock())
+    return registry
+
+
+def test_agent_provider_validation_accepts_registered_provider():
+    config = AgentConfig.model_validate(
+        {},
+        context={"provider_registry": provider_registry("anthropic")},
+    )
+
+    assert config.provider == "anthropic"
+
+
+def test_direct_agent_config_preserves_anthropic_default_provider():
+    assert AgentConfig().provider == "anthropic"
+
+
+def test_agent_provider_validation_rejects_unknown_provider():
+    with pytest.raises(ValidationError, match="Agent provider 'unknown' is not available"):
+        AgentConfig.model_validate({"provider": "unknown"}, context={"provider_registry": provider_registry()})
+
+
+def test_agent_provider_validation_rejects_unavailable_default_provider():
+    with pytest.raises(ValidationError, match="Agent provider 'anthropic' is not available"):
+        AgentConfig.model_validate({}, context={"provider_registry": provider_registry()})
+
+
+def test_markdown_agent_with_unavailable_provider_is_broken_entry():
+    md = MarkdownFile(path=PATH, meta={"type": "agent", "name": "a", "provider": "anthropic"}, body="sys")
+
+    output = classify(md, provider_registry=provider_registry())
+
+    (entry,) = output.entries
+    assert isinstance(entry, BrokenEntry)
+    assert "Agent provider 'anthropic' is not available" in entry.error
 
 
 def test_markdown_agent_happy_path():

@@ -4,8 +4,8 @@
 
 import logging
 from pathlib import Path
-from typing import Any
 
+from ddev.ai.agent.build import AgentProviderRegistry
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.phases.base import FlowContext
@@ -26,7 +26,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         phase_registry: PhaseRegistry,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
-        agent_clients: dict[str, Any],
+        provider_registry: AgentProviderRegistry,
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
         resume: bool = False,
@@ -40,9 +40,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
         ``engine.get_flow(name)``. ``phase_registry`` is the same registry the engine
         validated against, used to instantiate phase classes.
 
-        ``agent_clients`` maps provider name (e.g. ``"anthropic"``) to a constructed
-        provider client. ``DefaultAgentRuntimeFactory`` resolves the right one based on each
-        ``AgentConfig.provider``.
+        ``provider_registry`` is the same configured registry used to validate agent
+        definitions and constructs provider-specific agents on demand.
 
         ``file_access_policy`` must have ``write_root`` set to the integration
         output directory so that agent writes are confined to that path.
@@ -59,7 +58,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._phase_registry = phase_registry
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
-        self._agent_clients = agent_clients
+        self._provider_registry = provider_registry
         self._file_access_policy = file_access_policy
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._resume = resume
@@ -84,7 +83,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         run_callbacks = self._callbacks.with_set(self._agent_logger.as_callback_set())
 
         self._resources = RunResources(
-            agent_clients=self._agent_clients,
+            provider_registry=self._provider_registry,
             file_access_policy=self._file_access_policy,
             agents=self._resolved_flow.agents,
             callbacks=run_callbacks,

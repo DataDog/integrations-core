@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from functools import cached_property
-from typing import Any
 
-from ddev.ai.agent.build import AgentRuntimeFactory, DefaultAgentRuntimeFactory
+from ddev.ai.agent.build import AgentProviderRegistry, AgentRuntimeFactory, AgentRuntimeFactoryProtocol
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.phases.resources import ResourceUnavailableError
@@ -19,12 +18,12 @@ class RunResources:
 
     def __init__(
         self,
-        agent_clients: dict[str, Any],
+        provider_registry: AgentProviderRegistry,
         file_access_policy: FileAccessPolicy,
         agents: dict[str, AgentConfig],
         callbacks: Callbacks,
     ) -> None:
-        self._agent_clients = agent_clients
+        self._provider_registry = provider_registry
         self._file_access_policy = file_access_policy
         self._agents = agents
         self._callbacks = callbacks
@@ -42,10 +41,10 @@ class RunResources:
             raise ResourceUnavailableError(f"No agent definition named {name!r}. Known: {sorted(self._agents)}") from e
 
     @cached_property
-    def agent_runtime_factory(self) -> AgentRuntimeFactory:
+    def agent_runtime_factory(self) -> AgentRuntimeFactoryProtocol:
         """Ready-to-use generic runtime factory."""
-        return DefaultAgentRuntimeFactory(
-            agent_clients=self._agent_clients,
+        return AgentRuntimeFactory(
+            provider_registry=self._provider_registry,
             file_registry=self.file_registry,
         )
 

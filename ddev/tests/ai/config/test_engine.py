@@ -4,14 +4,33 @@
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import pytest
 
-from ddev.ai.config.engine import ConfigurationEngine
+from ddev.ai.agent.build import AgentProviderRegistry
+from ddev.ai.config.engine import ConfigurationEngine as BaseConfigurationEngine
 from ddev.ai.config.errors import ConfigError, ErrorKind
 from ddev.ai.config.models import ConfigStatus
 from ddev.ai.config.registry import ResourceKind
 
 from .utils import StubReg, write
+
+
+def make_provider_registry(*names: str) -> AgentProviderRegistry:
+    registry = AgentProviderRegistry()
+    for name in names:
+        registry.register(name, MagicMock())
+    return registry
+
+
+class ConfigurationEngine(BaseConfigurationEngine):
+    def __init__(self, *args, provider_registry=None, **kwargs):
+        super().__init__(
+            *args,
+            provider_registry=provider_registry or make_provider_registry("anthropic"),
+            **kwargs,
+        )
 
 
 def real_phase_registry():
@@ -38,6 +57,35 @@ def write_full_flow(root):
     write(root / "g.md", "---\ntype: goal\nname: g\n---\ngoal body")
     write(root / "mem.md", "---\ntype: memory_prompt\nname: mem\n---\nRemember ${x}")
     write(root / "f.yaml", PHASE_AND_FLOW)
+
+
+def test_unavailable_agent_provider_breaks_dependent_flow(tmp_path):
+    write_full_flow(tmp_path)
+    write(tmp_path / "ag.md", "---\ntype: agent\nname: ag\nprovider: unavailable\n---\nsys")
+
+    eng = ConfigurationEngine(
+        core_dir=tmp_path,
+        user_dirs=[],
+        phase_registry=StubReg(),
+        provider_registry=make_provider_registry("anthropic"),
+    )
+
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("unavailable" in error.message for error in eng.flows["demo"].errors)
+
+
+def test_missing_provider_key_breaks_dependent_flow(tmp_path):
+    write_full_flow(tmp_path)
+
+    eng = ConfigurationEngine(
+        core_dir=tmp_path,
+        user_dirs=[],
+        phase_registry=StubReg(),
+        provider_registry=make_provider_registry(),
+    )
+
+    assert eng.flows["demo"].status == ConfigStatus.BROKEN
+    assert any("Agent provider 'anthropic' is not available" in error.message for error in eng.flows["demo"].errors)
 
 
 # ---------------------------------------------------------------------------

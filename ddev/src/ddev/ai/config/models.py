@@ -9,11 +9,12 @@ from dataclasses import dataclass, field
 from enum import StrEnum, auto
 from typing import TYPE_CHECKING, Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
 from ddev.ai.tools.registry import ToolRegistry
 
 if TYPE_CHECKING:
+    from ddev.ai.agent.build import AgentProviderRegistry
     from ddev.ai.config.errors import FlowError
 
 NAME_PATTERN = r"^[A-Za-z0-9._-]{1,64}$"
@@ -99,6 +100,15 @@ class AgentConfig(BaseModel):
         if unknown:
             raise ValueError(f"Unknown tool names: {sorted(unknown)}")
         return tools
+
+    @model_validator(mode="after")
+    def provider_must_be_available(self, info: ValidationInfo) -> AgentConfig:
+        if info.context is None:
+            return self
+        provider_registry: AgentProviderRegistry | None = info.context.get("provider_registry")
+        if provider_registry is not None:
+            provider_registry.validate_config(self)
+        return self
 
 
 class PhaseConfig(BaseModel):

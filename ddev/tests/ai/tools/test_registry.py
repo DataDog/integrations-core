@@ -164,7 +164,7 @@ def from_names(tool_names: list[str], tmp_path, *, owner_id: str = OWNER_ID) -> 
         tool_names,
         owner_id=owner_id,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
-        agent_config=AgentConfig.model_construct(provider="anthropic", tools=tool_names),
+        agent_config=AgentConfig.model_construct(tools=tool_names),
         process_factory=PROCESS_FACTORY,
     )
 

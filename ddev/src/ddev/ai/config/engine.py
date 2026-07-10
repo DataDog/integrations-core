@@ -17,6 +17,7 @@ from ddev.ai.config.registry import ResourceKind, ResourceRegistry
 from ddev.ai.config.resolving.resolver import FlowResolver
 
 if TYPE_CHECKING:
+    from ddev.ai.agent.build import AgentProviderRegistry
     from ddev.ai.config.models import ResolvedFlow
     from ddev.ai.config.registry import Entry, ResourceConflict
     from ddev.ai.phases.registry import PhaseRegistryProtocol
@@ -36,6 +37,7 @@ class ConfigurationEngine:
         user_dirs: list[str | Path],
         phase_registry: PhaseRegistryProtocol,
         *,
+        provider_registry: AgentProviderRegistry,
         logger: logging.Logger | None = None,
     ) -> None:
         self._logger = logger or logging.getLogger(__name__)
@@ -50,7 +52,7 @@ class ConfigurationEngine:
             if isinstance(loaded, FileError):
                 self._record_file_error(loaded.path, loaded.message)
                 continue
-            output = classify(loaded)
+            output = classify(loaded, provider_registry=provider_registry)
             entries.extend(output.entries)
             for file_error in output.file_errors:
                 self._record_file_error(file_error.path, file_error.message)

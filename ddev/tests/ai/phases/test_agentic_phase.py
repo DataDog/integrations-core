@@ -378,12 +378,15 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
 
     monkeypatch.setattr("ddev.ai.agent.build.AnthropicAgent", fake_anthropic_agent)
 
+    from types import SimpleNamespace
+
+    from ddev.ai.agent.build import build_agent_provider_registry
     from ddev.ai.runtime.resources import RunResources
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
     run_callbacks = Callbacks([AgentLogger(checkpoint_manager.root).as_callback_set()])
     resources = RunResources(
-        agent_clients={"anthropic": object()},
+        provider_registry=build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret")),
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
         agents={"writer": AgentConfig(tools=["spawn_subagent"])},
         callbacks=run_callbacks,

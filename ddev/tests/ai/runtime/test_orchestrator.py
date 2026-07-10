@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import inspect
 import logging
 from pathlib import Path
 from typing import Any
@@ -9,6 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ddev.ai.agent.build import AgentProviderRegistry
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
@@ -17,6 +19,7 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
+from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
 
@@ -31,6 +34,13 @@ def write(p: Path, text: str) -> None:
 @pytest.fixture
 def file_access_policy(tmp_path) -> FileAccessPolicy:
     return FileAccessPolicy(write_root=tmp_path)
+
+
+@pytest.fixture
+def provider_registry() -> AgentProviderRegistry:
+    registry = AgentProviderRegistry()
+    registry.register("anthropic", MagicMock())
+    return registry
 
 
 @pytest.fixture
@@ -51,7 +61,7 @@ def core_dir(tmp_path) -> Path:
 
 
 @pytest.fixture
-def make_orchestrator(file_access_policy, tmp_path):
+def make_orchestrator(file_access_policy, provider_registry, tmp_path):
     """Composition root: build a registry, discover core phases, build the engine, build the orchestrator.
 
     Pass ``core_dir`` to point the engine at a config fixture and ``flow_name`` to select the flow.
@@ -73,6 +83,7 @@ def make_orchestrator(file_access_policy, tmp_path):
             core_dir=core_dir if core_dir is not None else tmp_path,
             user_dirs=[],
             phase_registry=registry,
+            provider_registry=provider_registry,
         )
         resolved = engine.get_flow(flow_name)
         kwargs: dict[str, Any] = {
@@ -80,13 +91,32 @@ def make_orchestrator(file_access_policy, tmp_path):
             "phase_registry": registry,
             "checkpoint_path": tmp_path / "checkpoints.yaml",
             "runtime_variables": {},
-            "agent_clients": {"anthropic": MagicMock()},
+            "provider_registry": provider_registry,
             "file_access_policy": file_access_policy,
             **overrides,
         }
         return PhaseOrchestrator(**kwargs), registry, engine
 
     return _make
+
+
+async def test_orchestrator_shares_provider_registry_with_run_resources(
+    core_dir,
+    make_orchestrator,
+    provider_registry,
+):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+
+    await orchestrator.on_initialize()
+
+    assert orchestrator._resources._provider_registry is provider_registry
+
+
+def test_orchestrator_and_resources_expose_provider_registry_not_agent_clients():
+    for constructor in (PhaseOrchestrator, RunResources):
+        parameters = inspect.signature(constructor).parameters
+        assert "provider_registry" in parameters
+        assert "agent_clients" not in parameters
 
 
 # ---------------------------------------------------------------------------
