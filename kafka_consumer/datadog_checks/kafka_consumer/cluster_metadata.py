@@ -479,7 +479,6 @@ class ClusterMetadataCollector:
                 for config_name in [
                     'log.retention.bytes',
                     'log.retention.ms',
-                    'log.retention.check.interval.ms',
                     'log.segment.bytes',
                     'num.partitions',
                     'num.network.threads',
@@ -492,11 +491,6 @@ class ClusterMetadataCollector:
                             value = float(config_data[config_name]) if config_data[config_name] else 0
                             metric_name = f"broker.config.{config_name.replace('.', '_')}"
                             self.check.gauge(metric_name, value, tags=metric_tags)
-                            if config_name == 'log.retention.check.interval.ms' and value > 0:
-                                interval_s = value / 1000
-                                self._log_retention_check_interval_s = min(
-                                    interval_s, self._log_retention_check_interval_s or interval_s
-                                )
                         except (ValueError, TypeError):
                             self.log.debug(
                                 "Could not convert broker %s config %s value %r to float",
@@ -504,6 +498,21 @@ class ClusterMetadataCollector:
                                 config_name,
                                 config_data[config_name],
                             )
+
+                retention_check_interval_ms = config_data.get('log.retention.check.interval.ms')
+                if retention_check_interval_ms:
+                    try:
+                        interval_s = float(retention_check_interval_ms) / 1000
+                        if interval_s > 0:
+                            self._log_retention_check_interval_s = min(
+                                interval_s, self._log_retention_check_interval_s or interval_s
+                            )
+                    except (ValueError, TypeError):
+                        self.log.debug(
+                            "Could not convert broker %s config log.retention.check.interval.ms value %r to float",
+                            broker_id_str,
+                            retention_check_interval_ms,
+                        )
 
                 truncated_config = self._truncate_config_for_event(config_data, max_configs=50)
                 event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
@@ -570,10 +579,10 @@ class ClusterMetadataCollector:
             self.log.debug("Could not read earliest offsets cache: %s", e)
             return None
 
-    def _save_earliest_offsets_cache(self, offsets: dict[tuple[str, int], int]) -> None:
+    def _save_earliest_offsets_cache(self, offsets: dict[tuple[str, int], int], expire_at: float | None = None) -> None:
         try:
             payload = {
-                'expire_at': time.time() + self._earliest_offsets_ttl(),
+                'expire_at': expire_at if expire_at is not None else time.time() + self._earliest_offsets_ttl(),
                 'offsets': [[topic, partition, offset] for (topic, partition), offset in offsets.items()],
             }
             self.check.write_persistent_cache(self.EARLIEST_OFFSETS_CACHE_KEY, json.dumps(payload))
@@ -588,7 +597,14 @@ class ClusterMetadataCollector:
 
         cached = self._load_earliest_offsets_cache()
         if cached is not None and time.time() < cached['expire_at']:
-            return {tp: offset for tp, offset in cached['offsets'].items() if tp in requested}
+            cached_offsets = {tp: offset for tp, offset in cached['offsets'].items() if tp in requested}
+            if cached_offsets.keys() == requested:
+                return cached_offsets
+
+            result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+            if result:
+                self._save_earliest_offsets_cache(result, expire_at=cached['expire_at'])
+            return result
 
         result = self._fetch_earliest_offsets_from_broker(topic_partitions)
         if result:

@@ -1132,6 +1132,32 @@ def test_fetch_earliest_offsets_cached_across_calls(check):
     assert mock_kafka_client.kafka_client.list_offsets.call_count == 1
 
 
+def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
+    """A fresh cache that doesn't cover every requested partition triggers a full refetch, keeping the same TTL."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+    }
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    collector = kafka_consumer_check.metadata_collector
+    expire_at = time.time() + 300
+    seed_payload = json.dumps({'expire_at': expire_at, 'offsets': [['test-topic', 0, 10]]})
+    _wire_cache(kafka_consumer_check, seed={collector.EARLIEST_OFFSETS_CACHE_KEY: seed_payload})
+
+    topic_partitions = {'test-topic': [0, 1]}
+    result = collector._fetch_earliest_offsets(topic_partitions)
+
+    assert result == {('test-topic', 0): 10, ('test-topic', 1): 20}
+    assert mock_kafka_client.kafka_client.list_offsets.call_count == 1
+
+    saved = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
+    assert saved['expire_at'] == expire_at
+
+
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     """Test that OIDC OAuth token is fetched and passed as Bearer header for Schema Registry."""
     instance = {
