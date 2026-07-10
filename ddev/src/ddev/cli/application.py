@@ -146,7 +146,7 @@ class Application(Terminal):
 
     def handle_exception(self, error: Exception) -> bool:
         """Render an exception with its nearest registered type."""
-        for exception_type in type(error).__mro__:
+        for exception_type in type(error).mro():
             if handler := self.__exception_handlers.get(exception_type):
                 handler(self, error)
                 return True
