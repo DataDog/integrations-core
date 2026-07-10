@@ -1,0 +1,1 @@
+Fix a bug where `pod_name`/`kube_namespace` tags were set to the literal string "None" when those optional config fields were unset.
