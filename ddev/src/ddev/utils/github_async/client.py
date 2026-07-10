@@ -17,6 +17,7 @@ from typing import Any, Literal, Self, overload
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
+from ddev.utils.github_errors import GITHUB_AUTHENTICATION_STATUS_CODES, GitHubAuthenticationError
 from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
 
 from .defaults import default_github_rate_limiter
@@ -236,8 +237,14 @@ class AsyncGitHubClient:
                     # the action. (Transport errors are never retried, and are not caught here: after
                     # one we cannot know whether the action executed.) Give up on the last attempt or
                     # on a non-rate-limit status, which waiting cannot fix.
-                    if attempt == self._max_rate_limit_retries or not self._is_rate_limit_response(exc.response):
-                        raise
+                    is_rate_limit_response = self._is_rate_limit_response(exc.response)
+                    if is_rate_limit_response:
+                        if attempt == self._max_rate_limit_retries:
+                            raise
+                        continue
+                    if exc.response.status_code in GITHUB_AUTHENTICATION_STATUS_CODES:
+                        raise GitHubAuthenticationError.from_http_status_error(exc) from exc
+                    raise
         raise RuntimeError("unreachable: the retry loop always returns or raises")  # pragma: no cover
 
     async def _paginated_request(
@@ -711,6 +718,8 @@ class AsyncGitHubClient:
             redirect_response = await self._request(
                 "GET", archive_download_url, timeout=timeout, follow_redirects=False
             )
+        except GitHubAuthenticationError:
+            raise
         except httpx.HTTPStatusError as exc:
             # httpx.raise_for_status() treats the expected 302 as an error since it isn't a 2xx;
             # recover the response from the exception so the redirect can still be inspected below.

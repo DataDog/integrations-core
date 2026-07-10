@@ -6,6 +6,7 @@ from __future__ import annotations
 from pathlib import Path as StdPath
 from unittest.mock import MagicMock, call
 
+import httpx
 import pytest
 from pytest_mock import MockerFixture
 
@@ -844,6 +845,24 @@ def test_command_aborts_when_pr_input_has_no_token(
     assert 'GitHub token required to resolve a PR reference' in result.output
     assert '--no-pr does not skip this lookup' in result.output
     fake_async_github.assert_not_called('get_pull_request')
+
+
+def test_command_reports_actionable_github_authentication_error(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    error = httpx.HTTPStatusError(
+        'forbidden',
+        request=httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/pulls/23703'),
+        response=httpx.Response(403),
+    )
+    fake_async_github.mock_response('get_pull_request', error)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--dry-run', 'PR-23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'GitHub denied the request for PR #23703 (HTTP 403)' in result.output
+    assert 'ddev config set github.token' in result.output
 
 
 def test_command_falls_back_to_commit_on_pr_not_found(

@@ -8,6 +8,7 @@ import io
 import json
 import time
 import zipfile
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -44,6 +45,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
+from ddev.utils.github_errors import GitHubAuthenticationError
 from ddev.utils.rate_limiting import (
     RATE_LIMIT_TIME_PERIOD,
     BucketEvent,
@@ -1229,6 +1231,14 @@ async def test_download_artifact_non_302_raises(tmp_path) -> None:
 
 
 @pytest.mark.asyncio
+async def test_download_artifact_authentication_error_remains_actionable(tmp_path: Path) -> None:
+    client = make_client(httpx.MockTransport(lambda request: httpx.Response(403)))
+
+    with pytest.raises(GitHubAuthenticationError, match='ddev config set github.token'):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+@pytest.mark.asyncio
 async def test_download_artifact_signed_url_error_raises(monkeypatch, tmp_path) -> None:
     def github_handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(302, headers={"location": "https://signed.example/zip"})
@@ -1443,15 +1453,18 @@ async def test_retry_on_primary_exhaustion_waits_until_reset(monkeypatch: pytest
     assert any(isinstance(e, PacingEvent) and e.reason is PacingReason.EXHAUSTED for e in events)
 
 
-async def test_no_retry_on_permission_denied_403() -> None:
-    """A 403 with no retry-after and nonzero remaining is a permission denial: raise on first attempt."""
-    transport, calls = recording_transport([httpx.Response(403, headers={"x-ratelimit-remaining": "5"})])
+@pytest.mark.parametrize('status_code', [401, 403])
+async def test_authentication_error_is_actionable_and_not_retried(status_code: int) -> None:
+    """Authentication failures are actionable and raise on the first attempt."""
+    transport, calls = recording_transport([httpx.Response(status_code, headers={"x-ratelimit-remaining": "5"})])
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(GitHubAuthenticationError) as exc_info:
         await client._request("GET", "/x")
 
     assert len(calls) == 1
+    assert exc_info.value.response.status_code == status_code
+    assert "ddev config set github.token" in str(exc_info.value)
 
 
 async def test_no_retry_on_transport_error() -> None:
@@ -1474,10 +1487,11 @@ async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatc
     )
     client = governed_client(clock, transport, max_rate_limit_retries=1)
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client._request("GET", "/x")
 
     assert len(calls) == 2
+    assert type(exc_info.value) is httpx.HTTPStatusError
 
 
 async def test_download_redirect_302_is_not_retried(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
