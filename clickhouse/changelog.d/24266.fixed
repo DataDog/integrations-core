@@ -1,0 +1,1 @@
+Collect standard system table metrics per node via clusterAllReplicas in single endpoint mode so per-node counters no longer produce phantom failures (e.g. clickhouse.query.failed.count).
