@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 1.5.1b1 / 2026-07-10
+
+***Fixed***:
+
+* Collect client stat metrics on Lustre 2.15.x clients (e.g. AWS FSx for Lustre) by calling `lctl get_param -n` instead of `-ny`. The `-y` (YAML) flag was only added in Lustre 2.16, so on 2.15.x every stats-based family (llite/mdc/osc/ldlm) was silently collected as empty. ([#24501](https://github.com/DataDog/integrations-core/pull/24501))
+* Log `lctl`/`lnetctl` command failures at WARNING instead of DEBUG so silent data gaps are visible in the check status. ([#24501](https://github.com/DataDog/integrations-core/pull/24501))
+
 ## 1.5.0 / 2026-04-01 / Agent 7.78.1
 
 ***Added***:
