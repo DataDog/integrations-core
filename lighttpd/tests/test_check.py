@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.lighttpd import Lighttpd
 
 from . import common
@@ -76,3 +77,28 @@ def test_e2e(dd_agent_check, instance):
 
     tags = ['host:{}'.format(common.HOST), 'port:9449', 'instance:first']
     aggregator.assert_service_check('lighttpd.can_connect', status=Lighttpd.OK, tags=tags)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    if common.FLAVOR == 'auth':
+        pytest.skip("discovery can't supply the digest auth credentials required by the 'auth' fixture flavor")
+
+    aggregator = dd_agent_check_discovery(rate=True)
+    # discovery-derived instances don't carry the static `instance:first` tag from config, and the
+    # Agent adds its own AD container tags, so tags aren't asserted exactly here as they are in test_e2e.
+    aggregator.assert_metric('lighttpd.net.bytes', count=2)
+    aggregator.assert_metric('lighttpd.net.hits', count=2)
+    aggregator.assert_metric('lighttpd.performance.busy_servers', count=2)
+    aggregator.assert_metric('lighttpd.performance.idle_server', count=2)
+    aggregator.assert_metric('lighttpd.performance.uptime', count=2)
+    aggregator.assert_metric('lighttpd.net.bytes_per_s', count=1)
+    aggregator.assert_metric('lighttpd.net.request_per_s', count=1)
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_service_check('lighttpd.can_connect', status=Lighttpd.OK)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, Lighttpd)

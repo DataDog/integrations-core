@@ -7,7 +7,7 @@ from urllib.request import urlopen
 
 import pytest
 
-from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev import WaitFor, docker_run, get_e2e_discovery_metadata
 from datadog_checks.lighttpd import Lighttpd
 
 from . import common
@@ -25,7 +25,7 @@ def wait_for_lighttpd():
 def dd_environment():
     with docker_run(common.COMPOSE_FILE, conditions=[WaitFor(wait_for_lighttpd)], mount_logs=True):
         instance = deepcopy(common.INSTANCE)
-        yield instance
+        yield instance, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
