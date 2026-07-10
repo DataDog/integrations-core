@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import pytest
-
 from datadog_checks.cockroachdb import CockroachdbCheck
 from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 
@@ -22,12 +20,10 @@ def test_metrics_classic_histograms(dd_agent_check, instance):
     assert_metrics(aggregator)
 
 
-@pytest.mark.e2e
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(rate=True)
     assert_metrics(aggregator)
 
 
-@pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check):
     assert_all_discovery_candidates_stable(dd_agent_check, CockroachdbCheck)
