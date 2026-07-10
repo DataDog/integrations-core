@@ -9,6 +9,7 @@ import pytest
 import requests
 
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
@@ -61,6 +62,8 @@ def wait_for_kuma_readiness(api_url, api_port, max_wait=600):
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_kuma]) as kubeconfig:
         with ExitStack() as stack:
+            setup_discovery_agent(kubeconfig)
+
             kuma_metrics_url, kuma_metrics_port = stack.enter_context(
                 port_forward(kubeconfig, 'kuma-system', 5680, 'service', 'kuma-control-plane')
             )
