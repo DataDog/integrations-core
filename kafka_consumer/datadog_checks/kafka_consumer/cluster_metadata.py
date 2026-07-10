@@ -70,8 +70,6 @@ class ClusterMetadataCollector:
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
-        # Earliest offsets only move via the broker's log-cleaner cycle (log.retention.check.interval.ms),
-        # so the result is cached across runs instead of refetched on every collection interval.
         self.EARLIEST_OFFSETS_DEFAULT_TTL = 300  # 5 minutes, matches Kafka's own broker default
         self.EARLIEST_OFFSETS_MIN_TTL = 60
         self.EARLIEST_OFFSETS_MAX_TTL = 1800
