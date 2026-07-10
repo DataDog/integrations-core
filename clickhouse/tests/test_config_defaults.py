@@ -103,6 +103,12 @@ EXPECTED_DEFAULTS = {
         'stalled_merge_elapsed_threshold_seconds': 3600,
         'stuck_replication_num_tries': 3,
     },
+    # === DBM: Async insert buffer snapshot ===
+    'asynchronous_insert_buffer_snapshot': {
+        'enabled': False,
+        'collection_interval': 10,
+        'payload_row_limit': 1000,
+    },
     # === Tagging ===
     'tags': (),
     'disable_generic_tags': False,
