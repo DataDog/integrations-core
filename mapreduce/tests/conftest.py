@@ -7,7 +7,7 @@ from copy import deepcopy
 import pytest
 from mock import patch
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.mapreduce import MapReduceCheck
@@ -37,7 +37,7 @@ def dd_environment():
         env_vars=env,
     ):
         # 'custom_hosts' in metadata provides native /etc/hosts mappings in the agent's docker container
-        yield INSTANCE_INTEGRATION, {'custom_hosts': get_custom_hosts()}
+        yield INSTANCE_INTEGRATION, {'custom_hosts': get_custom_hosts(), **get_e2e_discovery_metadata()}
 
 
 @pytest.fixture
