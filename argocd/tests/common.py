@@ -14,6 +14,8 @@ def build_instance(**overrides) -> dict:
         "collect_genresources": True,
         "genresources_endpoint": GENRESOURCES_ENDPOINT,
         "genresources_auth_token": "test-token",
+        # Off by default here so existing per-endpoint mocks stay valid; project tests enable it explicitly.
+        "genresources_collect_projects": False,
     }
     instance.update(overrides)
     return instance
