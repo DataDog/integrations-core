@@ -70,8 +70,16 @@ class ClusterMetadataCollector:
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
+        # Earliest offsets only move via the broker's log-cleaner cycle (log.retention.check.interval.ms),
+        # so the result is cached across runs instead of refetched on every collection interval.
+        self.EARLIEST_OFFSETS_DEFAULT_TTL = 300  # 5 minutes, matches Kafka's own broker default
+        self.EARLIEST_OFFSETS_MIN_TTL = 60
+        self.EARLIEST_OFFSETS_MAX_TTL = 1800
+        self._log_retention_check_interval_s: float | None = None
+
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
         self.BROKER_CONFIG_FETCH_CACHE_KEY = 'kafka_broker_config_fetch_cache'
+        self.EARLIEST_OFFSETS_CACHE_KEY = 'kafka_earliest_offsets_cache'
         self.TOPIC_CONFIG_CACHE_KEY = 'kafka_topic_config_cache'
         self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
@@ -473,6 +481,7 @@ class ClusterMetadataCollector:
                 for config_name in [
                     'log.retention.bytes',
                     'log.retention.ms',
+                    'log.retention.check.interval.ms',
                     'log.segment.bytes',
                     'num.partitions',
                     'num.network.threads',
@@ -485,6 +494,11 @@ class ClusterMetadataCollector:
                             value = float(config_data[config_name]) if config_data[config_name] else 0
                             metric_name = f"broker.config.{config_name.replace('.', '_')}"
                             self.check.gauge(metric_name, value, tags=metric_tags)
+                            if config_name == 'log.retention.check.interval.ms' and value > 0:
+                                interval_s = value / 1000
+                                self._log_retention_check_interval_s = min(
+                                    interval_s, self._log_retention_check_interval_s or interval_s
+                                )
                         except (ValueError, TypeError):
                             self.log.debug(
                                 "Could not convert broker %s config %s value %r to float",
@@ -531,7 +545,59 @@ class ClusterMetadataCollector:
                 "data-streams-message",
             )
 
+    def _topic_partition_pairs(self, topic_partitions):
+        return {
+            (topic, partition)
+            for topic, partitions in topic_partitions.items()
+            if topic not in KAFKA_INTERNAL_TOPICS
+            for partition in partitions
+        }
+
+    def _earliest_offsets_ttl(self) -> float:
+        """TTL for the earliest-offsets cache, derived from the broker's log-cleaner cycle."""
+        ttl = self._log_retention_check_interval_s or self.EARLIEST_OFFSETS_DEFAULT_TTL
+        return max(self.EARLIEST_OFFSETS_MIN_TTL, min(self.EARLIEST_OFFSETS_MAX_TTL, ttl))
+
+    def _load_earliest_offsets_cache(self) -> dict[str, Any] | None:
+        try:
+            cached_str = self.check.read_persistent_cache(self.EARLIEST_OFFSETS_CACHE_KEY)
+            if not cached_str:
+                return None
+            data = json.loads(cached_str)
+            return {
+                'expire_at': data['expire_at'],
+                'offsets': {(topic, partition): offset for topic, partition, offset in data['offsets']},
+            }
+        except Exception as e:
+            self.log.debug("Could not read earliest offsets cache: %s", e)
+            return None
+
+    def _save_earliest_offsets_cache(self, offsets: dict[tuple[str, int], int]) -> None:
+        try:
+            payload = {
+                'expire_at': time.time() + self._earliest_offsets_ttl(),
+                'offsets': [[topic, partition, offset] for (topic, partition), offset in offsets.items()],
+            }
+            self.check.write_persistent_cache(self.EARLIEST_OFFSETS_CACHE_KEY, json.dumps(payload))
+        except Exception as e:
+            self.log.debug("Could not write earliest offsets cache: %s", e)
+
     def _fetch_earliest_offsets(self, topic_partitions):
+        """Return cached log-start offsets, refetching from the broker only once the TTL expires."""
+        requested = self._topic_partition_pairs(topic_partitions)
+        if not requested:
+            return {}
+
+        cached = self._load_earliest_offsets_cache()
+        if cached is not None and time.time() < cached['expire_at']:
+            return {tp: offset for tp, offset in cached['offsets'].items() if tp in requested}
+
+        result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+        if result:
+            self._save_earliest_offsets_cache(result)
+        return result
+
+    def _fetch_earliest_offsets_from_broker(self, topic_partitions):
         """Batch-fetch log-start offsets via AdminClient.list_offsets(earliest).
 
         Uses ListOffsets with the EARLIEST_TIMESTAMP sentinel, which the broker
@@ -542,9 +608,7 @@ class ClusterMetadataCollector:
         """
         requests = {
             TopicPartition(topic, partition): OffsetSpec.earliest()
-            for topic, partitions in topic_partitions.items()
-            if topic not in KAFKA_INTERNAL_TOPICS
-            for partition in partitions
+            for topic, partition in self._topic_partition_pairs(topic_partitions)
         }
         if not requests:
             return {}
