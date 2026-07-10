@@ -1,9 +1,10 @@
-"""Trigger the 'Wheels Release Pipeline Notification' Datadog workflow.
+"""Trigger the release-notification Datadog workflow with structured facts.
 
-The Datadog workflow owns delivery (Slack connection, retries, run history);
-this script renders the message and triggers the workflow's API trigger via
-POST /api/v2/workflows/{id}/instances. Credentials are minted in CI by dd-sts
-(DD-API-KEY + a DD-APPLICATION-KEY with Actions API access).
+The Datadog workflow owns the Slack message presentation; this script only
+sends the facts (kind + repository + action_url + context), so the message
+wording can be iterated in the workflow without a repo change. Credentials are
+minted in CI by dd-sts (DD-API-KEY + a DD-APPLICATION-KEY with Actions API
+access).
 
 Env: DD_API_KEY, DD_APP_KEY, DD_WORKFLOW_ID (all required or no-op), DD_SITE
 (default datadoghq.com), SOURCE_REPO, REF, PACKAGES, RUN_URL.
@@ -23,18 +24,7 @@ import sys
 import urllib.error
 import urllib.request
 
-
-def build_text(source_repo: str, ref: str, packages: str, run_url: str) -> str:
-    """Return the release notification message body."""
-    # TODO: this fires before the approval gate, so the release is pending. Once
-    # the `release` environment gate is removed, reword to "Wheel release starting"
-    # with a "View release run" link, since the release will start immediately.
-    return (
-        f":hourglass_flowing_sand: *Wheel release pending approval* — `{source_repo}`\n"
-        f"• ref: `{ref[:12] or '—'}`\n"
-        f"• packages: {packages.strip() or 'auto-detect from tags at HEAD'}\n"
-        f"• <{run_url}|Review &amp; approve →>"
-    )
+KIND = "wheel-release-pending-approval"
 
 
 def report_config_error(error: str) -> None:
@@ -89,17 +79,12 @@ def main() -> None:
         print("Datadog workflow credentials not configured; skipping notification.")
         return
     site = os.environ.get("DD_SITE", "").strip() or "datadoghq.com"
-    source_repo = os.environ.get("SOURCE_REPO", "integrations-core")
-    ref = os.environ.get("REF", "")
-    packages = os.environ.get("PACKAGES", "")
-    run_url = os.environ.get("RUN_URL", "")
     payload = {
-        "text": build_text(source_repo, ref, packages, run_url),
-        "state": "pending",
-        "repository": source_repo,
-        "ref": ref,
-        "packages": packages,
-        "run_url": run_url,
+        "kind": KIND,
+        "repository": os.environ.get("SOURCE_REPO", "integrations-core"),
+        "action_url": os.environ.get("RUN_URL", ""),
+        "ref": os.environ.get("REF", ""),
+        "packages": os.environ.get("PACKAGES", ""),
     }
     api_url = f"https://api.{site}/api/v2/workflows/{workflow_id}/instances"
     if not post(api_url, api_key, app_key, payload):
