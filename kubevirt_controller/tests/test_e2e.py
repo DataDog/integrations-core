@@ -4,6 +4,12 @@
 
 import pytest
 
+from datadog_checks.dev.kube_discovery import (
+    assert_all_discovery_candidates_stable_kubernetes,
+    run_discovery_check_kubernetes,
+)
+from datadog_checks.kubevirt_controller import KubeVirtControllerCheck
+
 pytestmark = [pytest.mark.e2e]
 
 
@@ -30,3 +36,25 @@ def test_e2e_check_collects_kubevirt_controller_metrics(dd_agent_check):
         aggregator.assert_metric("kubevirt_controller.can_connect", value=1, tags=healthz_tags)
         aggregator.assert_metric("kubevirt_controller.virt_controller.leading_status")
         aggregator.assert_metric("kubevirt_controller.virt_controller.ready_status")
+
+
+def test_e2e_discovery(aggregator, datadog_agent):
+    run_discovery_check_kubernetes(aggregator, datadog_agent)
+
+    # discovery has no way to populate `kube_namespace`/`kube_pod_name` (the `Service`/`Port` model
+    # discovery works off of carries no Kubernetes metadata), so `pod_name`/`kube_namespace` tags
+    # are absent on discovered instances, and the `endpoint` tag varies with the real pod IP -
+    # neither is asserted here, unlike the static-instance tests above.
+    aggregator.assert_metric("kubevirt_controller.can_connect", value=1)
+    aggregator.assert_metric("kubevirt_controller.virt_controller.leading_status")
+    aggregator.assert_metric("kubevirt_controller.virt_controller.ready_status")
+
+
+def test_e2e_discovery_all_candidates(aggregator, datadog_agent):
+    assert_all_discovery_candidates_stable_kubernetes(
+        KubeVirtControllerCheck,
+        aggregator,
+        datadog_agent,
+        namespace="kubevirt",
+        pod_selector="kubevirt.io=virt-controller",
+    )

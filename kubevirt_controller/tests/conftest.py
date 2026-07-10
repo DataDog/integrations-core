@@ -10,6 +10,7 @@ import yaml
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import save_kube_discovery_state, setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 
 HERE = get_here()
@@ -61,6 +62,9 @@ def setup_kubevirt():
 @pytest.fixture(scope="session")
 def dd_environment():
     with kind_run(conditions=[setup_kubevirt], sleep=10) as kubeconfig, ExitStack() as stack:
+        setup_discovery_agent(kubeconfig)
+        save_kube_discovery_state(kubeconfig)
+
         kubeconfig_content = None
 
         with open(kubeconfig, "r") as f:

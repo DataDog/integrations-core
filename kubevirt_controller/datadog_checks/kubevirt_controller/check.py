@@ -29,10 +29,11 @@ class KubeVirtControllerCheck(OpenMetricsBaseCheckV2):
         super().check(_)
 
     def _init_base_tags(self):
-        self.base_tags = [
-            "pod_name:{}".format(self.pod_name),
-            "kube_namespace:{}".format(self.kube_namespace),
-        ]
+        self.base_tags = []
+        if self.pod_name:
+            self.base_tags.append("pod_name:{}".format(self.pod_name))
+        if self.kube_namespace:
+            self.base_tags.append("kube_namespace:{}".format(self.kube_namespace))
 
     def _report_health_check(self, health_endpoint):
         try:
