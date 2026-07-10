@@ -6,5 +6,5 @@ services:
     volumes:
       - ./lighttpd.conf:/etc/lighttpd/lighttpd.conf
       - ./passwd:/etc/lighttpd/passwd
-      - ${DD_LOG_1}:/var/log/lighttpd/access.log
-      - ${DD_LOG_2}:/var/log/lighttpd/error.log
+      - ${DD_LOG_1:-/dev/null}:/var/log/lighttpd/access.log
+      - ${DD_LOG_2:-/dev/null}:/var/log/lighttpd/error.log
