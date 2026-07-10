@@ -7,7 +7,7 @@ minted in CI by dd-sts (DD-API-KEY + a DD-APPLICATION-KEY with Actions API
 access).
 
 Env: DD_API_KEY, DD_APP_KEY, DD_WORKFLOW_ID (all required or no-op), DD_SITE
-(default datadoghq.com), SOURCE_REPO, REF, PACKAGES, RUN_URL.
+(default datadoghq.com), SOURCE_REPO, REF, REF_URL, PACKAGES, RUN_URL.
 
 Error handling keeps a misconfiguration from passing as a green run:
 
@@ -84,6 +84,7 @@ def main() -> None:
         "repository": os.environ.get("SOURCE_REPO", "integrations-core"),
         "action_url": os.environ.get("RUN_URL", ""),
         "ref": os.environ.get("REF", ""),
+        "ref_url": os.environ.get("REF_URL", ""),
         "packages": os.environ.get("PACKAGES", ""),
     }
     api_url = f"https://api.{site}/api/v2/workflows/{workflow_id}/instances"

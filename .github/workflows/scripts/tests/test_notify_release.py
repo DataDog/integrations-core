@@ -24,6 +24,7 @@ def test_main_sends_facts_payload(monkeypatch):
     monkeypatch.setenv("DD_WORKFLOW_ID", "wf-id")
     monkeypatch.setenv("SOURCE_REPO", "integrations-core")
     monkeypatch.setenv("REF", "abc123")
+    monkeypatch.setenv("REF_URL", "http://commit/abc123")
     monkeypatch.setenv("PACKAGES", '["postgres"]')
     monkeypatch.setenv("RUN_URL", "http://run")
     with patch.object(notify_release, "post", return_value=True) as post:
@@ -35,6 +36,7 @@ def test_main_sends_facts_payload(monkeypatch):
         "repository": "integrations-core",
         "action_url": "http://run",
         "ref": "abc123",
+        "ref_url": "http://commit/abc123",
         "packages": '["postgres"]',
     }
 
