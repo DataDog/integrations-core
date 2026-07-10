@@ -1,10 +1,10 @@
 services:
   fluentd:
     image: fluent/fluentd:${FLUENTD_IMAGE_TAG}
-    container_name: ${FLUENTD_CONTAINER_NAME}
+    container_name: ${FLUENTD_CONTAINER_NAME:-dd-test-fluentd}
     ports:
       - 24220:24220
     volumes:
-      - ${TD_AGENT_CONF_PATH}:/fluentd/etc/td-agent.conf
+      - ${TD_AGENT_CONF_PATH:-/dev/null}:/fluentd/etc/td-agent.conf
     environment:
       - FLUENTD_CONF=td-agent.conf
