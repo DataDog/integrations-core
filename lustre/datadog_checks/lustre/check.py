@@ -238,7 +238,7 @@ class LustreCheck(AgentCheck):
 
     @AgentCheck.metadata_entrypoint
     def _update_metadata(self):
-        version = self._run_command("lctl", 'get_param', '-ny', 'version').strip()
+        version = self._run_command("lctl", 'get_param', '-n', 'version').strip()
         if version:
             self.log.debug("Setting version %s for Lustre", version)
             self.set_metadata("version", version)
@@ -293,7 +293,7 @@ class LustreCheck(AgentCheck):
             return
         param_names = self._get_jobstats_params_list(jobstats_param)
         jobid_config_tags = [
-            f'{param.regex}:{self._run_command("lctl", "get_param", "-ny", param.regex, sudo=True).strip()}'
+            f'{param.regex}:{self._run_command("lctl", "get_param", "-n", param.regex, sudo=True).strip()}'
             for param in JOBID_TAG_PARAMS
         ]
         for param_name in param_names:
@@ -339,7 +339,7 @@ class LustreCheck(AgentCheck):
         '''
         Get the jobstats metrics for a given jobstats param.
         '''
-        jobstats_output = self._run_command('lctl', 'get_param', '-ny', jobstats_param, sudo=True)
+        jobstats_output = self._run_command('lctl', 'get_param', '-n', jobstats_param, sudo=True)
         try:
             return yaml.safe_load(jobstats_output) or {}
         except Exception as e:
@@ -454,7 +454,7 @@ class LustreCheck(AgentCheck):
                     tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
                 except IgnoredFilesystemName:
                     continue
-                raw_stats = self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True)
+                raw_stats = self._run_command('lctl', 'get_param', '-n', param_name, sudo=True)
                 if not param.regex.endswith('.stats'):
                     self._submit_param(param.prefix, param_name, tags)
                     continue
@@ -467,7 +467,7 @@ class LustreCheck(AgentCheck):
         Submit a single parameter.
         '''
         try:
-            output = int(self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True))
+            output = int(self._run_command('lctl', 'get_param', '-n', param_name, sudo=True))
             suffix = param_name.split('.')[-1]
         except (ValueError, TypeError):
             self.log.debug('No output found for %s', param_name)
