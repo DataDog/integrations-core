@@ -1,0 +1,2 @@
+rtx-pro|up|slurm-rtx-pro-129-015|36/92/0/128|978944|N/A|2.96|969522|0|mixed|none|cu130,driver-580.159.03,gpu,rtx-pro|2|274176|gpu:nvidia_rtx_pro_6000_blackwell_server_edition:8(S:0-1)|gpu:nvidia_rtx_pro_6000_blackwell_server_edition:3(IDX:0,4-5)
+rtx-pro|up|slurm-rtx-pro-134-237|0/128/0/128|978944|N/A|3.08|969306|0|idle|none|cu130,driver-580.159.03,gpu,rtx-pro|2|0|gpu:nvidia_rtx_pro_6000_blackwell_server_edition:8(S:0-1)|gpu:nvidia_rtx_pro_6000_blackwell_server_edition:0(IDX:N/A)
