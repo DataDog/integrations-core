@@ -59,9 +59,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
 
     def process_message(self, message: BatchFinished) -> None:
         if not message.batch_jobs:
-            self._logger.warning(
-                "BatchFinished carried no jobs; nothing to gather", extra={"run_id": message.run_id}
-            )
+            self._logger.warning("BatchFinished carried no jobs; nothing to gather", extra={"run_id": message.run_id})
             return
 
         results = [self._job_result(batch_job_result, message) for batch_job_result in message.batch_jobs]

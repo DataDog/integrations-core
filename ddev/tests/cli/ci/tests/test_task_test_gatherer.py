@@ -21,10 +21,13 @@ from ddev.utils.github_async.models import JobStep, WorkflowJob
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
+# Sample report contents captured from real CI runs. Filenames label the content (passing/failing);
+# the on-disk artifact name a job actually produces (``test-{unit,e2e}-{env}.xml``) is built by
+# ``_make_job_tree`` — failure is encoded in the XML, never in the filename.
 COVERAGE_XML = (FIXTURES / "coverage-sample.xml").read_text(encoding="utf-8")
-JUNIT_PASSING = (FIXTURES / "test-unit-py3.13-4.4.xml").read_text(encoding="utf-8")
-JUNIT_E2E = (FIXTURES / "test-e2e-py3.13-4.4.xml").read_text(encoding="utf-8")
-JUNIT_FAILING = (FIXTURES / "test-unit-failing.xml").read_text(encoding="utf-8")
+JUNIT_PASSING = (FIXTURES / "junit-unit-passing.sample.xml").read_text(encoding="utf-8")
+JUNIT_E2E = (FIXTURES / "junit-e2e-passing.sample.xml").read_text(encoding="utf-8")
+JUNIT_FAILING = (FIXTURES / "junit-unit-failing.sample.xml").read_text(encoding="utf-8")
 
 # The single failing test case in JUNIT_FAILING, as parsed into a classname::name identifier.
 FAILING_TEST_ID = "nagios.tests.test_nagios.TestEventLogTailer::test_line_parser"
@@ -205,9 +208,7 @@ def test_timed_out_batch_marks_all_jobs_failed(tmp_path: Path) -> None:
         _batch_job_result(_batch_job("j1", environment="py3.12")),
         _batch_job_result(_batch_job("j2", target="kafka", environment="py3.13")),
     ]
-    gatherer.process_message(
-        _batch_finished("", status="failure", run_id=300, batch_jobs=batch_jobs, timed_out=True)
-    )
+    gatherer.process_message(_batch_finished("", status="failure", run_id=300, batch_jobs=batch_jobs, timed_out=True))
 
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.failed_count == 2
