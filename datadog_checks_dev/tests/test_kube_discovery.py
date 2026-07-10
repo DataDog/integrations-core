@@ -71,7 +71,29 @@ def test_get_kube_discovery_state_missing_raises(monkeypatch):
         _get_kube_discovery_state()
 
 
+def test_save_kube_discovery_state_is_noop_when_setup_disabled(monkeypatch):
+    monkeypatch.delenv('DDEV_E2E_ENV_kube_discovery', raising=False)
+    monkeypatch.setenv('DDEV_E2E_UP', 'false')
+
+    save_kube_discovery_state('/tmp/kubeconfig')
+
+    from datadog_checks.dev.kube_discovery import _get_kube_discovery_state
+
+    with pytest.raises(AssertionError, match='No kube_discovery state found'):
+        _get_kube_discovery_state()
+
+
 class TestSetupDiscoveryAgent:
+    def test_is_noop_when_setup_disabled(self, monkeypatch):
+        monkeypatch.setenv('DDEV_E2E_UP', 'false')
+
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command') as run_command:
+            # env test/env stop re-run this fixture body to reach kind_run's teardown, but must not
+            # re-apply manifests against a KUBECONFIG that isn't guaranteed to point at a live cluster.
+            setup_discovery_agent('/tmp/kubeconfig')
+
+        run_command.assert_not_called()
+
     def test_applies_manifests_and_installs_package(self, tmp_path):
         check_root = tmp_path / 'test_check'
         _write_auto_conf(check_root)

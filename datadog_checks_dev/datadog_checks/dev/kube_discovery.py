@@ -23,7 +23,7 @@ from typing import Any
 import pytest
 import yaml
 
-from ._env import e2e_testing, format_config, get_state, replay_check_run, save_state
+from ._env import e2e_testing, format_config, get_state, replay_check_run, save_state, set_up_env
 from .docker import CONTAINER_STABILITY_LOG_PATTERNS, _assert_no_log_patterns
 from .subprocess import run_command
 from .utils import find_check_root
@@ -48,7 +48,14 @@ JSON_COLLECTOR_PATTERN = r'((?:\{ \[|\[).*?\n(?:\} \]|\]))'
 
 
 def save_kube_discovery_state(kubeconfig_path: str | os.PathLike[str], *, namespace: str = DISCOVERY_NAMESPACE) -> None:
-    """Persist the kubeconfig path and agent namespace from the setup process to the test process."""
+    """Persist the kubeconfig path and agent namespace from the setup process to the test process.
+
+    A no-op outside the actual environment setup pass (``env test``/``env stop`` re-run the fixture
+    body to reach ``kind_run``'s teardown, but must not re-derive or overwrite this state).
+    """
+    if not set_up_env():
+        return
+
     save_state('kube_discovery', {'kubeconfig_path': os.fspath(kubeconfig_path), 'namespace': namespace})
 
 
@@ -62,8 +69,14 @@ def setup_discovery_agent(
     """Deploy a sleeping, RBAC-scoped Agent pod that ``run_discovery_check_kubernetes`` can exec into.
 
     Call this inside the integration's existing ``kind_run(...)`` block, while ``KUBECONFIG`` still
-    points at the freshly created cluster.
+    points at the freshly created cluster. A no-op outside the actual environment setup pass, matching
+    how ``KindUp``/``ComposeFileUp``/``PortForwardUp`` behave: ``env test``/``env stop`` re-run the
+    fixture body to reach ``kind_run``'s teardown, but ``KUBECONFIG`` isn't guaranteed to resolve to a
+    live cluster at that point.
     """
+    if not set_up_env():
+        return
+
     check_root = os.fspath(check_root or find_check_root(depth=1))
     check_name = os.path.basename(check_root)
 
