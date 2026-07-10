@@ -34,12 +34,4 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
 @pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check):
-    try:
-        assert_all_discovery_candidates_stable(dd_agent_check, Marathon, compose_service='marathon')
-    except AssertionError:
-        from datadog_checks.dev.docker import _get_compose_container_id, _get_container_logs
-
-        container_id = _get_compose_container_id(None, 'marathon')
-        print('DIAGNOSTIC FULL CONTAINER LOGS:')
-        print(_get_container_logs(container_id))
-        raise
+    assert_all_discovery_candidates_stable(dd_agent_check, Marathon, compose_service='marathon')

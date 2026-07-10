@@ -1,0 +1,1 @@
+Fix a crash on startup when the HTTP auth type resolves to something other than basic/digest (for example Kerberos), which construction of the ACS auth body assumed was always a username/password pair.

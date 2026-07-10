@@ -63,8 +63,12 @@ class Marathon(AgentCheck):
                 float(self.instance.get('connect_timeout', timeout)),
             )
         self._auth_body = None
-        if self.http.options['auth'] is not None:
-            self._auth_body = {'uid': self.http.options['auth'][0], 'password': self.http.options['auth'][1]}
+        auth = self.http.options['auth']
+        # `auth` is only a (username, password) tuple for basic/digest auth; other auth
+        # types (e.g. kerberos, ntlm, aws) use non-subscriptable auth objects that don't
+        # carry a plain-text password to forward as the ACS auth body.
+        if isinstance(auth, tuple) and len(auth) == 2:
+            self._auth_body = {'uid': auth[0], 'password': auth[1]}
 
     def check(self, instance):
         try:

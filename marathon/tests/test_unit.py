@@ -82,6 +82,21 @@ def test_get_instance_config(check):
     assert label_tags == ['label_foo']
 
 
+def test_non_tuple_auth_does_not_crash_init():
+    """
+    `self.http.options['auth']` is a non-subscriptable object for auth types other than
+    basic/digest (e.g. kerberos, ntlm, aws). The constructor must not assume a 2-tuple.
+    """
+    instance = {'url': 'http://foo'}
+    with mock.patch.object(Marathon, 'http', new_callable=mock.PropertyMock) as http_mock:
+        http_obj = mock.MagicMock()
+        http_obj.options = {'auth': object(), 'timeout': 10}
+        http_mock.return_value = http_obj
+
+        check = Marathon('marathon', {}, [instance])
+        assert check._auth_body is None
+
+
 @pytest.mark.parametrize(
     'test_case, init_config, extra_config, expected_http_kwargs',
     [
