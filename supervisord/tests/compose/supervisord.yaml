@@ -1,7 +1,12 @@
 services:
   supervisord:
-    image: datadog/docker-library:supervisord_${SUPERVISOR_VERSION}
+    # Re-tagged locally as `supervisord` (rather than the pulled `datadog/docker-library` name) so the
+    # container is discoverable under the same image name real supervisord containers commonly use.
+    build:
+      dockerfile_inline: |
+        FROM datadog/docker-library:supervisord_${SUPERVISOR_VERSION}
+    image: supervisord:${SUPERVISOR_VERSION}
     ports:
       - "19001:19001"
     volumes:
-      - ${DD_LOG_1}:/supervisor/supervisord.log
+      - ${DD_LOG_1:-/dev/null}:/supervisor/supervisord.log

@@ -8,7 +8,7 @@ from xmlrpc.client import ServerProxy
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.supervisord.supervisord import SupervisordCheck
 
 from .common import BAD_SUPERVISORD_CONFIG, HERE, SUPERVISORD_CONFIG, URL
@@ -34,4 +34,4 @@ def dd_environment():
     with docker_run(compose_file=os.path.join(HERE, 'compose', 'supervisord.yaml'), endpoints=URL, mount_logs=True):
         server = ServerProxy('{}/RPC2'.format(URL))
         server.supervisor.startAllProcesses()
-        yield SUPERVISORD_CONFIG
+        yield SUPERVISORD_CONFIG, get_e2e_discovery_metadata()
