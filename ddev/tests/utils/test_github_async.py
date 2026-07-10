@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import asyncio
 import dataclasses
 import io
 import json
+import time
 import zipfile
 from typing import Any
 
 import httpx
 import pytest
+from aiolimiter import AsyncLimiter
 from pydantic import ValidationError
 
 from ddev.utils.github_async import (
@@ -19,6 +22,7 @@ from ddev.utils.github_async import (
     PaginationData,
     async_github_client,
 )
+from ddev.utils.github_async.client import github_rate_limit_snapshot
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
@@ -39,6 +43,17 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
+)
+from ddev.utils.rate_limiting import (
+    RATE_LIMIT_TIME_PERIOD,
+    BucketEvent,
+    BudgetGovernor,
+    BudgetSnapshot,
+    InstrumentedAsyncLimiter,
+    PacingEvent,
+    PacingReason,
+    RateLimitEvent,
+    SecondaryLimitEvent,
 )
 
 # ---------------------------------------------------------------------------
@@ -904,6 +919,115 @@ async def test_per_request_timeout_forwarded() -> None:
 
 
 # ---------------------------------------------------------------------------
+# Rate limiter wiring in AsyncGitHubClient
+# ---------------------------------------------------------------------------
+
+
+async def test_client_request_without_rate_limiter_goes_through() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return json_response(workflow_run_payload())
+
+    async with async_github_client(token=TOKEN, transport=httpx.MockTransport(handler)) as client:
+        result = await client.get_workflow_run("o", "r", 42)
+
+    assert result.data.id == 42
+
+
+async def test_client_request_with_rate_limiter_consumes_token() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return json_response(workflow_run_payload())
+
+    real_limiter = AsyncLimiter(max_rate=1, time_period=1000)
+    events: list[RateLimitEvent] = []
+    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_event=events.append)
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        result = await client.get_workflow_run("o", "r", 42)
+
+    assert result.data.id == 42
+    bucket_events = [event for event in events if isinstance(event, BucketEvent)]
+    assert bucket_events == [BucketEvent(throttled=False, name="")]
+    assert not real_limiter.has_capacity()
+
+
+async def test_client_request_throttled_when_bucket_exhausted() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return json_response(workflow_run_payload())
+
+    # A short time_period lets the second, throttled acquire actually complete instead of
+    # blocking forever, so its BucketEvent fires.
+    real_limiter = AsyncLimiter(max_rate=1, time_period=0.1)
+    events: list[RateLimitEvent] = []
+    rate_limiter = InstrumentedAsyncLimiter(real_limiter, on_event=events.append)
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        await client.get_workflow_run("o", "r", 42)  # drains the single token
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        await client.get_workflow_run("o", "r", 42)  # blocks until the 0.1s period refills it
+
+    bucket_events = [event for event in events if isinstance(event, BucketEvent)]
+    assert [event.throttled for event in bucket_events] == [False, True]
+
+
+# ---------------------------------------------------------------------------
+# github_rate_limit_snapshot
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("headers", "expected"),
+    [
+        (
+            {
+                "x-ratelimit-limit": "5000",
+                "x-ratelimit-remaining": "4321",
+                "x-ratelimit-reset": "1700000000",
+                "retry-after": "30",
+            },
+            BudgetSnapshot(limit=5000, remaining=4321, reset_at=1700000000.0, retry_after=30.0),
+        ),
+        (
+            {"x-ratelimit-limit": "5000", "x-ratelimit-remaining": "4999"},
+            BudgetSnapshot(limit=5000, remaining=4999),
+        ),
+        ({"x-ratelimit-limit": "5000", "retry-after": "not-a-number"}, BudgetSnapshot(limit=5000)),
+        ({"x-ratelimit-limit": "not-a-number"}, None),
+        ({"content-type": "application/json"}, None),
+    ],
+    ids=["all_present", "partial_primary", "non_integer_retry_after", "all_unparseable", "no_ratelimit_headers"],
+)
+def test_github_rate_limit_snapshot(headers: dict[str, str], expected: BudgetSnapshot | None) -> None:
+    assert github_rate_limit_snapshot(httpx.Headers(headers)) == expected
+
+
+async def test_client_request_observes_rate_limit_headers_into_governor() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return json_response(
+            workflow_run_payload(),
+            headers={"x-ratelimit-limit": "5000", "x-ratelimit-remaining": "4999", "x-ratelimit-reset": "1700000000"},
+        )
+
+    governor = BudgetGovernor()
+    rate_limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000), budget_governor=governor)
+
+    async with async_github_client(
+        token=TOKEN, rate_limiter=rate_limiter, transport=httpx.MockTransport(handler)
+    ) as client:
+        await client.get_workflow_run("o", "r", 42)
+
+    assert governor.budget.limit == 5000
+    assert governor.budget.remaining == 4999
+    assert governor.budget.reset_at == 1700000000.0
+
+
+# ---------------------------------------------------------------------------
 # create_check_run / update_check_run
 # ---------------------------------------------------------------------------
 
@@ -1195,3 +1319,200 @@ async def test_download_artifact_server_error_propagates(monkeypatch, tmp_path) 
     client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
     with pytest.raises(httpx.HTTPStatusError):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+# ---------------------------------------------------------------------------
+# Default rate-limit protection + rate-limit-aware retry
+# ---------------------------------------------------------------------------
+
+
+class FakeClock:
+    """Injectable, manually-advanceable clock for deterministic governor-driven retries."""
+
+    def __init__(self, start: float = 1000.0) -> None:
+        self.current = start
+
+    def __call__(self) -> float:
+        return self.current
+
+    def advance(self, seconds: float) -> None:
+        self.current += seconds
+
+
+def recording_transport(items: list[httpx.Response | Exception]) -> tuple[httpx.MockTransport, list[httpx.Request]]:
+    """MockTransport that returns/raises *items* in order (last item repeats) and records each request."""
+    calls: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        item = items[min(len(calls), len(items) - 1)]
+        calls.append(request)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+    return httpx.MockTransport(handler), calls
+
+
+def governed_client(
+    clock: FakeClock,
+    transport: httpx.MockTransport,
+    on_event: Any = None,
+    max_rate_limit_retries: int = 2,
+) -> AsyncGitHubClient:
+    """Client whose governor runs on *clock*, so retry waits are deterministic under a fake sleep."""
+    governor = BudgetGovernor(now=clock, on_event=on_event)
+    limiter = InstrumentedAsyncLimiter(
+        AsyncLimiter(max_rate=5000, time_period=RATE_LIMIT_TIME_PERIOD),
+        on_event=on_event,
+        budget_governor=governor,
+        name="github",
+    )
+    return AsyncGitHubClient(
+        token=TOKEN, rate_limiter=limiter, transport=transport, max_rate_limit_retries=max_rate_limit_retries
+    )
+
+
+def advance_clock_on_sleep(clock: FakeClock, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make asyncio.sleep advance the fake clock instead of blocking, so governor waits are instant."""
+
+    async def fake_sleep(delay: float) -> None:
+        clock.advance(delay)
+
+    monkeypatch.setattr(asyncio, "sleep", fake_sleep)
+
+
+async def test_default_rate_limiter_is_constructed_and_observes_403() -> None:
+    """rate_limiter=None builds a limiter with a governor that observes a 403's retry-after."""
+    transport, calls = recording_transport([httpx.Response(403, headers={"retry-after": "30"})])
+    client = AsyncGitHubClient(token=TOKEN, transport=transport, max_rate_limit_retries=0)
+
+    assert client._rate_limiter is not None
+    governor = client._rate_limiter.budget_governor
+    assert governor is not None
+
+    with pytest.raises(httpx.HTTPStatusError):
+        await client._request("GET", "/x")
+
+    # The 403's retry-after was observed (before raise_for_status), arming the shared pause.
+    assert governor.pause_until - time.time() == pytest.approx(31.0, abs=2.0)
+    assert len(calls) == 1  # retries disabled: one call, no wait
+
+
+async def test_retry_on_secondary_limit_returns_success(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A 403 with retry-after then a 200 is retried once and the wait goes through the governor."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    events: list[RateLimitEvent] = []
+    transport, calls = recording_transport([httpx.Response(403, headers={"retry-after": "5"}), httpx.Response(200)])
+    client = governed_client(clock, transport, on_event=events.append)
+
+    response = await client._request("GET", "/x")
+
+    assert response.status_code == 200
+    assert len(calls) == 2
+    secondary_index = next(i for i, e in enumerate(events) if isinstance(e, SecondaryLimitEvent))
+    pacing_index = next(
+        i for i, e in enumerate(events) if isinstance(e, PacingEvent) and e.reason is PacingReason.SECONDARY_LIMIT
+    )
+    assert secondary_index < pacing_index
+
+
+async def test_retry_on_primary_exhaustion_waits_until_reset(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A 403 with x-ratelimit-remaining=0 is retried, and the retry waits until the window reset."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    events: list[RateLimitEvent] = []
+    reset_at = clock.current + 30
+    transport, calls = recording_transport(
+        [
+            httpx.Response(
+                403,
+                headers={"x-ratelimit-limit": "5000", "x-ratelimit-remaining": "0", "x-ratelimit-reset": str(reset_at)},
+            ),
+            httpx.Response(200),
+        ]
+    )
+    client = governed_client(clock, transport, on_event=events.append)
+
+    response = await client._request("GET", "/x")
+
+    assert response.status_code == 200
+    assert len(calls) == 2
+    governor = client._rate_limiter.budget_governor
+    assert clock.current == pytest.approx(reset_at + governor.buffer_seconds)
+    assert any(isinstance(e, PacingEvent) and e.reason is PacingReason.EXHAUSTED for e in events)
+
+
+async def test_no_retry_on_permission_denied_403() -> None:
+    """A 403 with no retry-after and nonzero remaining is a permission denial: raise on first attempt."""
+    transport, calls = recording_transport([httpx.Response(403, headers={"x-ratelimit-remaining": "5"})])
+    client = AsyncGitHubClient(token=TOKEN, transport=transport)
+
+    with pytest.raises(httpx.HTTPStatusError):
+        await client._request("GET", "/x")
+
+    assert len(calls) == 1
+
+
+async def test_no_retry_on_transport_error() -> None:
+    """A transport error is never retried (the action may have executed); it propagates immediately."""
+    transport, calls = recording_transport([httpx.ConnectError("boom")])
+    client = AsyncGitHubClient(token=TOKEN, transport=transport)
+
+    with pytest.raises(httpx.ConnectError):
+        await client._request("GET", "/x")
+
+    assert len(calls) == 1
+
+
+async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Two consecutive rate-limit responses with max_rate_limit_retries=1 raise after exactly two calls."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    transport, calls = recording_transport(
+        [httpx.Response(403, headers={"retry-after": "5"}), httpx.Response(403, headers={"retry-after": "5"})]
+    )
+    client = governed_client(clock, transport, max_rate_limit_retries=1)
+
+    with pytest.raises(httpx.HTTPStatusError):
+        await client._request("GET", "/x")
+
+    assert len(calls) == 2
+
+
+async def test_download_redirect_302_is_not_retried(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """The artifact 302 redirect is not a rate-limit response, so it resolves without any retry."""
+    github_calls: list[httpx.Request] = []
+
+    def github_handler(request: httpx.Request) -> httpx.Response:
+        github_calls.append(request)
+        return httpx.Response(302, headers={"location": "https://signed.example/zip"})
+
+    def signed_handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, content=make_zip({"hello.txt": b"hi"}))
+
+    patch_signed_download(monkeypatch, signed_handler)
+    client = AsyncGitHubClient(token=TOKEN, transport=httpx.MockTransport(github_handler))
+
+    await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+    assert len(github_calls) == 1
+
+
+async def test_pagination_retries_only_the_rate_limited_page(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A rate-limited page is retried in place; the iterator then continues to the next page."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    transport, calls = recording_transport(
+        [
+            httpx.Response(200, json={"page": 1}, headers={"link": '<https://api.github.com/next>; rel="next"'}),
+            httpx.Response(403, headers={"retry-after": "5"}),
+            httpx.Response(200, json={"page": 2}),
+        ]
+    )
+    client = governed_client(clock, transport)
+
+    pages = [response async for response in client._paginated_request("GET", "/start")]
+
+    assert [page.status_code for page in pages] == [200, 200]
+    assert len(calls) == 3  # page 1, page 2 (rate-limited), page 2 (retry)
