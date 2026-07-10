@@ -377,7 +377,10 @@ def docker_run(
         conditions (callable):
             A list of callable objects that will be executed before yielding to check for errors
         env_vars (dict[str, str]):
-            A dictionary to update `os.environ` with during execution
+            A dictionary to update `os.environ` with during execution. When `compose_file` is provided and
+            `COMPOSE_PROJECT_NAME` isn't set here or already in `os.environ`, it defaults to the check's
+            directory name so that concurrent E2E runs sharing a Docker daemon don't collide on Compose's
+            own directory-basename-derived default project name.
         wrappers (list[callable]):
             A list of context managers to use during execution
         attempts (int):
@@ -391,6 +394,11 @@ def docker_run(
     if compose_file is not None:
         if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
+
+        env_vars = dict(env_vars) if env_vars else {}
+        if not env_vars.get('COMPOSE_PROJECT_NAME') and not os.getenv('COMPOSE_PROJECT_NAME'):
+            # An extra level deep because of the context manager
+            env_vars['COMPOSE_PROJECT_NAME'] = os.path.basename(find_check_root(depth=2))
 
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
@@ -445,7 +453,7 @@ def docker_run(
             'docker_compose_metadata',
             {
                 'compose_file': compose_file,
-                'project_name': (env_vars or {}).get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
+                'project_name': env_vars.get('COMPOSE_PROJECT_NAME'),
                 'service_name': service_name,
             },
         )
