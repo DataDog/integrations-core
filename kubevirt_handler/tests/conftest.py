@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 
 HERE = get_here()
@@ -17,10 +18,10 @@ KUBEVIRT_VERSION = "v1.2.2"
 
 def setup_kubevirt():
     # deploy the KubeVirt operator
-    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-operator.yaml")])
+    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-operator.yaml")], check=True)
 
     # deploy the KubeVirt Custom Resource Definitions
-    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-cr.yaml")])
+    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-cr.yaml")], check=True)
 
     # enable nested virtualization
     run_command(
@@ -34,7 +35,8 @@ def setup_kubevirt():
             "--type=merge",
             "--patch",
             '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}',
-        ]
+        ],
+        check=True,
     )
 
     # wait for kubevirt deployment
@@ -46,14 +48,29 @@ def setup_kubevirt():
             "-n",
             "kubevirt",
             "--for=jsonpath={.status.phase}=Deployed",
+            "--timeout=5m",
+        ],
+        check=True,
+    )
+    run_command(
+        [
+            "kubectl",
+            "rollout",
+            "status",
+            "daemonset/virt-handler",
+            "-n",
+            "kubevirt",
             "--timeout=2m",
-        ]
+        ],
+        check=True,
     )
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
     with kind_run(conditions=[setup_kubevirt], sleep=10) as kubeconfig, ExitStack() as stack:
+        setup_discovery_agent(kubeconfig)
+
         instance = {}
 
         host, port = stack.enter_context(port_forward(kubeconfig, "kubevirt", 8443, "daemonset", "virt-handler"))
