@@ -7,7 +7,7 @@ from os import path
 
 import pytest
 
-from datadog_checks.dev import TempDir, docker_run
+from datadog_checks.dev import TempDir, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints
 
 from .common import URL
@@ -43,10 +43,14 @@ dogstatsd_metrics_stats_enable: true
             build=True,
             conditions=[CheckEndpoints(URL + "/api/v1/health", attempts=120)],
         ):
+            discovery_metadata = get_e2e_discovery_metadata()
             yield (
                 instance,
                 {
-                    'docker_volumes': ['{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(temp_dir)],
+                    'docker_volumes': [
+                        '{}/datadog.yaml:/etc/datadog-agent/datadog.yaml'.format(temp_dir),
+                        *discovery_metadata['docker_volumes'],
+                    ],
                 },
             )
 
