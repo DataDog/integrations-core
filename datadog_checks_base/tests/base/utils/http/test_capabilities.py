@@ -31,6 +31,14 @@ class TestClose:
         # A fresh session is created on next access.
         assert http.session is not first
 
+    def test_close_is_idempotent_after_open(self):
+        http = RequestsWrapper({}, {})
+        # Open a session, then close twice; the second close must be a safe no-op.
+        http.session
+        http.close()
+        http.close()
+        assert http._session is None
+
 
 class TestCookies:
     def test_get_cookie_missing_returns_default(self):
@@ -48,6 +56,20 @@ class TestCookies:
         http.session.cookies.set('sid', 'xyz')
         value = http.get_cookie('sid')
         assert isinstance(value, str)
+
+    def test_get_cookie_does_not_build_session(self):
+        http = RequestsWrapper({}, {})
+        # A lookup before the first request must not eagerly build a session.
+        assert http.get_cookie('anything') is None
+        assert http._session is None
+
+    def test_get_cookie_conflict_returns_default(self):
+        http = RequestsWrapper({}, {})
+        # Same cookie name on multiple domains makes RequestsCookieJar.get raise
+        # CookieConflictError; get_cookie must honor its value-or-default contract.
+        http.session.cookies.set('dup', 'a', domain='a.example.com')
+        http.session.cookies.set('dup', 'b', domain='b.example.com')
+        assert http.get_cookie('dup', 'fallback') == 'fallback'
 
 
 class TestTrustEnv:

@@ -10,7 +10,7 @@ import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Iterator
+from collections.abc import Iterator, MutableMapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from typing import TYPE_CHECKING
@@ -20,6 +20,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
 from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
@@ -266,7 +267,7 @@ def _translate_http_errors() -> Iterator[None]:
 class _OutgoingRequest:
     """Concrete, mutable request view passed to an agnostic auth hook on the requests backend."""
 
-    def __init__(self, url, headers, params):
+    def __init__(self, url: str, headers: MutableMapping[str, str], params: MutableMapping[str, str]) -> None:
         self.url = url
         self.headers = headers
         self.params = params
@@ -279,10 +280,10 @@ class _RequestsAuthHookAdapter(requests_auth.AuthBase):
     query params, then applies those contributions back onto the prepared request.
     """
 
-    def __init__(self, hook):
+    def __init__(self, hook: HTTPRequestAuth) -> None:
         self.hook = hook
 
-    def __call__(self, r):
+    def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
         request = _OutgoingRequest(url=r.url, headers=r.headers, params={})
         self.hook(request)
         if request.params:
@@ -582,8 +583,13 @@ class RequestsWrapper(object):
             self._session = None
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
-        """Look up a persisted cookie by name, returning its value as a plain string."""
-        return self.session.cookies.get(name, default)
+        """Look up a persisted cookie by name, returning its value (or default if absent)."""
+        if self._session is None:
+            return default
+        try:
+            return self._session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """Look up a request header by name. Lookup is case-insensitive."""
