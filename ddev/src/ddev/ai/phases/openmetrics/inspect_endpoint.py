@@ -342,7 +342,7 @@ class InspectEndpointPhase(Phase):
                 return_exceptions=True,
             )
 
-        failures = [(ep.name, r) for ep, r in zip(endpoints, settled, strict=False) if isinstance(r, Exception)]
+        failures = [(ep.name, r) for ep, r in zip(endpoints, settled, strict=True) if isinstance(r, BaseException)]
         if failures:
             for r in settled:
                 if isinstance(r, EndpointResult):
@@ -351,7 +351,7 @@ class InspectEndpointPhase(Phase):
             detail = "; ".join(f"{name}: {err}" for name, err in failures)
             raise EndpointInspectionError(f"{len(failures)} endpoint(s) failed to inspect — {detail}")
 
-        results = [r for r in settled if not isinstance(r, BaseException)]
+        results = [r for r in settled if isinstance(r, EndpointResult)]
         return PhaseOutcome(
             memory_text=_build_memory_text(results),
             total_input_tokens=0,
