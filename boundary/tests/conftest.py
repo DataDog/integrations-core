@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.boundary import BoundaryCheck
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 
 from . import common
 
@@ -12,7 +12,7 @@ from . import common
 @pytest.fixture(scope='session')
 def dd_environment(instance):
     with docker_run(common.COMPOSE_FILE, endpoints=[common.HEALTH_ENDPOINT, common.METRIC_ENDPOINT], mount_logs=True):
-        yield instance
+        yield instance, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')
