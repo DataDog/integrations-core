@@ -7,7 +7,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.mesos_master import MesosMaster
 
 from . import common
@@ -19,7 +19,7 @@ def dd_environment():
     compose_file = os.path.join(common.HERE, 'compose', 'docker-compose.yml')
 
     with docker_run(compose_file, service_name="mesos-master", log_patterns=['A new leading master']):
-        yield common.INSTANCE
+        yield common.INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')

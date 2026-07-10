@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.mesos_master import MesosMaster
 
 from .common import BASIC_METRICS, CHECK_NAME, INSTANCE, OPTIONAL_METRICS, not_windows_ci
@@ -23,6 +24,17 @@ def test_check_integration(instance, aggregator):
 def test_check_e2e(dd_agent_check):
     aggregator = dd_agent_check(INSTANCE, rate=True)
     assert_metric_coverage(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(rate=True)
+    assert_metric_coverage(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, MesosMaster, compose_service='mesos-master')
 
 
 def assert_metric_coverage(aggregator):
