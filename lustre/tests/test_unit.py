@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import subprocess
 from typing import ChainMap
 
 import mock
@@ -729,3 +730,27 @@ def test_device_discovery(mock_lustre_commands, yaml_fixture, non_yaml_fixture):
         ]
 
         assert actual_devices == expected_devices
+
+
+def test_run_command_warns_on_failure(caplog, mock_lustre_commands):
+    """A command that exits non-zero with stderr is surfaced at WARNING, not DEBUG (#24475)."""
+    with mock_lustre_commands(
+        {
+            'lctl get_param -n version': 'all_version.txt',
+            'lctl dl': 'client_dl_yaml.txt',
+        }
+    ):
+        check = LustreCheck('lustre', {}, [{}])
+
+    failed = subprocess.CompletedProcess(
+        args=[], returncode=4, stdout='', stderr="get_param: invalid option -- 'y'"
+    )
+    with caplog.at_level(logging.WARNING):
+        with mock.patch('subprocess.run', return_value=failed):
+            result = check._run_command('lctl', 'get_param', '-n', 'llite.lustrefs.stats')
+
+    assert result == ''
+    assert any(
+        record.levelno == logging.WARNING and 'exited with returncode 4' in record.getMessage()
+        for record in caplog.records
+    ), caplog.text

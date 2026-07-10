@@ -260,7 +260,10 @@ class LustreCheck(AgentCheck):
                 cmd, timeout=5, shell=False, capture_output=True, text=True
             )  # Explicitly disable shell invocation to prevent command injection
             if not output.returncode == 0 and output.stderr:
-                self.log.debug(
+                # Surface command failures at WARNING (not DEBUG) so data gaps are visible.
+                # A silent DEBUG here is what let the `get_param -y` incompatibility (#24475)
+                # empty out client stats while the check still reported [OK].
+                self.log.warning(
                     'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
                 )
                 return ''
