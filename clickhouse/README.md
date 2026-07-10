@@ -39,7 +39,7 @@ To configure this check for an Agent running on a host:
 
 *Note*: This integration uses the official `clickhouse-connect` client to connect over HTTP.
 
-*Note*: For a ClickHouse Cloud service reached through a single load-balanced endpoint, set `single_endpoint_mode: true`. The Agent then collects system-table metrics from all nodes behind the endpoint using `clusterAllReplicas()` and tags each series with `clickhouse_node`. Without this setting, cumulative per-node counters (such as the counter behind `clickhouse.query.failed.count`) can be read from different nodes on consecutive collections, producing inaccurate values. Per-node collection requires Agent version 7.82.0 or later.
+*Note*: For a ClickHouse Cloud service reached through a single load-balanced endpoint, set `single_endpoint_mode: true`. The Agent then collects system-table metrics from all nodes behind the endpoint using `clusterAllReplicas()` and tags each series with `clickhouse_node`. Without this setting, cumulative per-node counters (such as the counter behind `clickhouse.query.failed.count`) can be read from different nodes on consecutive collections, producing inaccurate values. Per-node collection requires Agent version 7.83.0 or later.
 
 2. [Restart the Agent][5].
 
