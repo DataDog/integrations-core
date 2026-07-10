@@ -35,16 +35,14 @@ class DatabaseCheck(AgentCheck):
         #: :meth:`register_async_job`.
         self._async_job_registry: Dict[str, "DBMAsyncJob"] = {}
 
-    def register_async_job(self, job: "DBMAsyncJob | None") -> "DBMAsyncJob | None":
+    def register_async_job(self, job: "DBMAsyncJob") -> "DBMAsyncJob":
         """
         Register ``job`` under its ``job_name`` so the check manages its lifecycle, and return it
         unchanged.
 
-        Passing ``None`` is a no-op. Registering a job whose name matches an already-registered job
-        replaces it. Raises ``ValueError`` if the job has no name.
+        Registering a job whose name matches an already-registered job replaces it. Raises
+        ``ValueError`` if the job has no name.
         """
-        if job is None:
-            return None
         if job.job_name is None:
             raise ValueError("Cannot register an async job without a job_name")
         self._async_job_registry[job.job_name] = job

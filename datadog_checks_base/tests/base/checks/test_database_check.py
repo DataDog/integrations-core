@@ -154,11 +154,6 @@ def test_register_async_job_requires_job_name(registry_check):
         registry_check.register_async_job(RegistryTestJob(registry_check, job_name=None))
 
 
-def test_register_async_job_noops_on_none(registry_check):
-    assert registry_check.register_async_job(None) is None
-    assert registry_check._async_job_registry == {}
-
-
 @pytest.mark.parametrize("enabled", [True, False], ids=["enabled", "disabled"])
 def test_run_async_jobs_starts_only_enabled_jobs(registry_check, enabled):
     job = registry_check.register_async_job(RegistryTestJob(registry_check, enabled=enabled))
