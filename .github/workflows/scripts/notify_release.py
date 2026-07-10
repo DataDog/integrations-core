@@ -1,19 +1,19 @@
-"""Post a 'wheel release pending' notification to a Datadog Workflow webhook.
+"""Trigger the 'Wheels Release Pipeline Notification' Datadog workflow.
 
-The Datadog workflow owns the delivery (Slack connection, retries, run
-history), so this script only builds the message and hands a JSON payload to
-the workflow's inbound webhook trigger.
+The Datadog workflow owns delivery (Slack connection, retries, run history);
+this script renders the message and triggers the workflow's API trigger via
+POST /api/v2/workflows/{id}/instances. Credentials are minted in CI by dd-sts
+(DD-API-KEY + a DD-APPLICATION-KEY with Actions API access).
 
-Env: DD_WORKFLOW_WEBHOOK_URL (required or no-op), DD_WORKFLOW_WEBHOOK_TOKEN
-(optional bearer auth for the trigger), SOURCE_REPO, REF, PACKAGES, RUN_URL.
+Env: DD_API_KEY, DD_APP_KEY, DD_WORKFLOW_ID (all required or no-op), DD_SITE
+(default datadoghq.com), SOURCE_REPO, REF, PACKAGES, RUN_URL.
 
-Error handling mirrors the Slack notifier: a persistent misconfiguration must
-not be swallowed as a green run.
+Error handling keeps a misconfiguration from passing as a green run:
 
-* Persistent problems (bad/missing webhook URL or token, rejected payload —
-  HTTP 4xx) are reported to the GitHub step summary and fail the step so they
-  get fixed immediately. This is safe because the notify job is not a
-  dependency of the release itself.
+* Persistent problems (bad/expired keys, missing scope, wrong workflow id,
+  rejected payload — HTTP 4xx) are reported to the GitHub step summary and fail
+  the step. This is safe because the notify job is not a dependency of the
+  release itself.
 * Transient problems (network, timeout, 5xx, HTTP 429) only warn and never fail
   the job, so a momentary blip does not create release noise.
 """
@@ -22,9 +22,6 @@ import os
 import sys
 import urllib.error
 import urllib.request
-
-# HTTP status codes that are retriable/transient rather than a misconfiguration.
-TRANSIENT_STATUSES = frozenset({408, 429})
 
 
 def build_text(source_repo: str, ref: str, packages: str, run_url: str) -> str:
@@ -44,8 +41,8 @@ def report_config_error(error: str) -> None:
     """Surface a persistent misconfiguration loudly in the GitHub step summary."""
     message = (
         f"Release notification misconfigured: {error}. The pending-release message was NOT delivered. "
-        "Verify DD_WORKFLOW_WEBHOOK_URL points at the workflow's inbound webhook trigger and that "
-        "DD_WORKFLOW_WEBHOOK_TOKEN (if the trigger requires it) is valid."
+        "Verify the dd-sts credentials (DD-APPLICATION-KEY with Actions API access), DD_WORKFLOW_ID, "
+        "and DD_SITE."
     )
     print(f"::error::{message}")
     summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -54,27 +51,26 @@ def report_config_error(error: str) -> None:
             summary.write(f"### \u274c Release notification failed\n\n{message}\n")
 
 
-def post(url: str, token: str, source_repo: str, ref: str, packages: str, run_url: str) -> bool:
-    """Send the payload to the Datadog webhook; return False only on a config error.
+def post(api_url: str, api_key: str, app_key: str, payload: dict) -> bool:
+    """Trigger the workflow; return False only on a persistent misconfiguration.
 
     Success and transient failures return True (transient ones only warn), so the
     caller fails the step exclusively for problems that need a human fix.
     """
-    payload = {
-        "text": build_text(source_repo, ref, packages, run_url),
-        "source_repo": source_repo,
-        "ref": ref,
-        "packages": packages,
-        "run_url": run_url,
-    }
-    headers = {"Content-Type": "application/json; charset=utf-8"}
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    request = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers)
+    data = json.dumps({"meta": {"payload": payload}}).encode()
+    request = urllib.request.Request(
+        api_url,
+        data=data,
+        headers={
+            "Content-Type": "application/json",
+            "DD-API-KEY": api_key,
+            "DD-APPLICATION-KEY": app_key,
+        },
+    )
     try:
         urllib.request.urlopen(request, timeout=15).close()
     except urllib.error.HTTPError as e:
-        if e.code in TRANSIENT_STATUSES or e.code >= 500:
+        if e.code == 429 or e.code >= 500:
             print(f"::warning::Release notification failed (transient): HTTP {e.code}")
             return True
         report_config_error(f"HTTP {e.code}")
@@ -86,19 +82,27 @@ def post(url: str, token: str, source_repo: str, ref: str, packages: str, run_ur
 
 
 def main() -> None:
-    url = os.environ.get("DD_WORKFLOW_WEBHOOK_URL", "").strip()
-    if not url:
-        print("Datadog workflow webhook not configured; skipping notification.")
+    api_key = os.environ.get("DD_API_KEY", "").strip()
+    app_key = os.environ.get("DD_APP_KEY", "").strip()
+    workflow_id = os.environ.get("DD_WORKFLOW_ID", "").strip()
+    if not (api_key and app_key and workflow_id):
+        print("Datadog workflow credentials not configured; skipping notification.")
         return
-    delivered = post(
-        url,
-        os.environ.get("DD_WORKFLOW_WEBHOOK_TOKEN", "").strip(),
-        os.environ.get("SOURCE_REPO", "integrations-core"),
-        os.environ.get("REF", ""),
-        os.environ.get("PACKAGES", ""),
-        os.environ.get("RUN_URL", ""),
-    )
-    if not delivered:
+    site = os.environ.get("DD_SITE", "").strip() or "datadoghq.com"
+    source_repo = os.environ.get("SOURCE_REPO", "integrations-core")
+    ref = os.environ.get("REF", "")
+    packages = os.environ.get("PACKAGES", "")
+    run_url = os.environ.get("RUN_URL", "")
+    payload = {
+        "text": build_text(source_repo, ref, packages, run_url),
+        "state": "pending",
+        "repository": source_repo,
+        "ref": ref,
+        "packages": packages,
+        "run_url": run_url,
+    }
+    api_url = f"https://api.{site}/api/v2/workflows/{workflow_id}/instances"
+    if not post(api_url, api_key, app_key, payload):
         sys.exit(1)
 
 
