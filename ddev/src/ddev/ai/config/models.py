@@ -14,7 +14,7 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationInf
 from ddev.ai.tools.registry import ToolRegistry
 
 if TYPE_CHECKING:
-    from ddev.ai.agent.build import AgentProviderRegistry
+    from ddev.ai.agent.registry import AgentProviderRegistry
     from ddev.ai.config.errors import FlowError
 
 NAME_PATTERN = r"^[A-Za-z0-9._-]{1,64}$"

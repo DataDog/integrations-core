@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.agent.build import AgentProviderRegistry
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.engine import ConfigurationEngine as BaseConfigurationEngine
 from ddev.ai.config.errors import ConfigError, ErrorKind
 from ddev.ai.config.models import ConfigStatus

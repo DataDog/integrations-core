@@ -5,7 +5,7 @@
 import logging
 from pathlib import Path
 
-from ddev.ai.agent.build import AgentProviderRegistry
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.phases.base import FlowContext

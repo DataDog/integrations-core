@@ -376,11 +376,11 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
         agent._system_prompt = system_prompt
         return agent
 
-    monkeypatch.setattr("ddev.ai.agent.build.AnthropicAgent", fake_anthropic_agent)
+    monkeypatch.setattr("ddev.ai.agent.provider.AnthropicAgent", fake_anthropic_agent)
 
     from types import SimpleNamespace
 
-    from ddev.ai.agent.build import build_agent_provider_registry
+    from ddev.ai.agent.registry import build_agent_provider_registry
     from ddev.ai.runtime.resources import RunResources
 
     checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")

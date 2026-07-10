@@ -18,7 +18,7 @@ from ddev.ai.config.registry import BrokenEntry, ResourceKind, ValidEntry
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from ddev.ai.agent.build import AgentProviderRegistry
+    from ddev.ai.agent.registry import AgentProviderRegistry
     from ddev.ai.config.loading.files import LoadedFile
     from ddev.ai.config.registry import Entry
 

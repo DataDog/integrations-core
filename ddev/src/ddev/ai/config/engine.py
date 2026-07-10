@@ -17,7 +17,7 @@ from ddev.ai.config.registry import ResourceKind, ResourceRegistry
 from ddev.ai.config.resolving.resolver import FlowResolver
 
 if TYPE_CHECKING:
-    from ddev.ai.agent.build import AgentProviderRegistry
+    from ddev.ai.agent.registry import AgentProviderRegistry
     from ddev.ai.config.models import ResolvedFlow
     from ddev.ai.config.registry import Entry, ResourceConflict
     from ddev.ai.phases.registry import PhaseRegistryProtocol

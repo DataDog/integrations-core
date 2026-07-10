@@ -4,7 +4,8 @@
 
 from functools import cached_property
 
-from ddev.ai.agent.build import AgentProviderRegistry, AgentRuntimeFactory, AgentRuntimeFactoryProtocol
+from ddev.ai.agent.build import AgentRuntimeFactory, AgentRuntimeFactoryProtocol
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.phases.resources import ResourceUnavailableError

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ddev.ai.agent.build import AgentProviderRegistry
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE

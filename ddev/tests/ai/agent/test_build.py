@@ -7,9 +7,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-import ddev.ai.agent.build as agent_build
+import ddev.ai.agent.provider as agent_provider
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.build import AgentRuntime, AgentRuntimeFactory
+from ddev.ai.agent.registry import AgentProviderRegistry, build_agent_provider_registry
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -28,21 +29,21 @@ def file_registry(policy) -> FileRegistry:
 
 
 def test_registry_without_anthropic_key_does_not_advertise_anthropic():
-    registry = agent_build.build_agent_provider_registry(SimpleNamespace(anthropic_api_key=None))
+    registry = build_agent_provider_registry(SimpleNamespace(anthropic_api_key=None))
 
     assert not registry.contains("anthropic")
 
 
 def test_registry_with_anthropic_key_advertises_anthropic():
-    registry = agent_build.build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret"))
+    registry = build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret"))
 
     assert registry.contains("anthropic")
 
 
 def test_anthropic_client_is_created_lazily_and_cached(monkeypatch):
     client_factory = MagicMock(return_value=MagicMock())
-    monkeypatch.setattr(agent_build.anthropic, "AsyncAnthropic", client_factory)
-    registry = agent_build.build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret"))
+    monkeypatch.setattr(agent_provider.anthropic, "AsyncAnthropic", client_factory)
+    registry = build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret"))
     tools = MagicMock(spec=ToolRegistry)
     config = AgentConfig(provider="anthropic")
 
@@ -56,7 +57,7 @@ def test_anthropic_client_is_created_lazily_and_cached(monkeypatch):
 
 
 def test_registry_rejects_duplicate_provider_registration():
-    registry = agent_build.AgentProviderRegistry()
+    registry = AgentProviderRegistry()
     registry.register("custom", MagicMock())
 
     with pytest.raises(ValueError, match="already registered"):
@@ -66,7 +67,7 @@ def test_registry_rejects_duplicate_provider_registration():
 def test_registry_validates_runtime_config_before_building_agent():
     provider = MagicMock()
     provider.validate_config.side_effect = ValueError("runtime config rejected")
-    registry = agent_build.AgentProviderRegistry()
+    registry = AgentProviderRegistry()
     registry.register("custom", provider)
     config = AgentConfig(provider="custom")
 
@@ -80,7 +81,7 @@ def test_runtime_factory_delegates_agent_building_and_builds_tools(file_registry
     agent = MagicMock()
     provider = MagicMock()
     provider.build_agent.return_value = agent
-    provider_registry = agent_build.AgentProviderRegistry()
+    provider_registry = AgentProviderRegistry()
     provider_registry.register("custom", provider)
     factory = AgentRuntimeFactory(provider_registry=provider_registry, file_registry=file_registry)
     config = AgentConfig(provider="custom", tools=["read_file"])
@@ -99,7 +100,7 @@ def test_runtime_factory_delegates_agent_building_and_builds_tools(file_registry
 
 def make_factory(file_registry: FileRegistry) -> AgentRuntimeFactory:
     return AgentRuntimeFactory(
-        provider_registry=agent_build.build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret")),
+        provider_registry=build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret")),
         file_registry=file_registry,
     )
 
@@ -133,7 +134,7 @@ def test_unknown_provider_raises(file_registry):
 
 def test_missing_client_raises(file_registry):
     config = AgentConfig(provider="anthropic", tools=[])
-    factory = AgentRuntimeFactory(provider_registry=agent_build.AgentProviderRegistry(), file_registry=file_registry)
+    factory = AgentRuntimeFactory(provider_registry=AgentProviderRegistry(), file_registry=file_registry)
     with pytest.raises(ValueError, match="Agent provider 'anthropic' is not available"):
         build_runtime(factory, config)
 

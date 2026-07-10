@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import ValidationError
 
-from ddev.ai.agent.build import AgentProviderRegistry
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.classify import classify
 from ddev.ai.config.loading.files import MarkdownFile, YamlFile
 from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig
