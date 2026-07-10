@@ -49,4 +49,4 @@ services:
     depends_on:
       - etcd0
     volumes:
-      - ${DD_LOG_1}:/var/log/twemproxy/stderr.log
+      - ${DD_LOG_1:-/dev/null}:/var/log/twemproxy/stderr.log

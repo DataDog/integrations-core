@@ -7,6 +7,8 @@ import simplejson as json
 
 from datadog_checks.base import AgentCheck, ensure_unicode
 
+DEFAULT_SOCKET_TIMEOUT = 10
+
 GLOBAL_STATS = {'curr_connections'}
 
 GLOBAL_STATS_RATES = {'total_connections'}
@@ -128,6 +130,7 @@ class Twemproxy(AgentCheck):
             try:
                 if addr[1] == socket.SOCK_STREAM:
                     client = socket.socket(*addr[0:3])
+                    client.settimeout(DEFAULT_SOCKET_TIMEOUT)
                     client.connect(addr[-1])
 
                     self.log.debug("Querying: %s:%s", host, port)

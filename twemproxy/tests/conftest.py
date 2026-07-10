@@ -4,7 +4,7 @@
 import pytest
 import requests
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.twemproxy import Twemproxy
 
@@ -28,7 +28,7 @@ def dd_environment():
         attempts=2,
     ):
         with docker_run(common.COMPOSE_FILE, log_patterns="listening on stats server", attempts=2):
-            yield common.INSTANCE
+            yield common.INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.fixture

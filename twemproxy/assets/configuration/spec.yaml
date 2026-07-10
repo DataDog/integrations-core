@@ -2,6 +2,14 @@ name: Twemproxy
 fleet_configurable: true
 files:
 - name: twemproxy.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 22222
+      candidates:
+      - host: "{service.host}"
+        port: "{port.number}"
   options:
   - template: init_config
     options:
@@ -28,3 +36,10 @@ files:
       - type: file
         path: var/log/twemproxy/*.log
         source: twemproxy
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - twemproxy
+  - template: auto_conf/discovery
