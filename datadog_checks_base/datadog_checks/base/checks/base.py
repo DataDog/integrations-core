@@ -437,12 +437,20 @@ class AgentCheck(object):
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
-
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = self.create_http_wrapper()
 
         return self._http
+
+    def create_http_wrapper(self) -> HTTPClientProtocol:
+        """Construct the HTTP client backing self.http.
+
+        Override this to build a bespoke wrapper or swap the backend. The default returns a
+        RequestsWrapper configured from this check's instance and init config.
+        """
+        # See Performance Optimizations in this package's README.md.
+        from datadog_checks.base.utils.http import RequestsWrapper
+
+        return RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
     @property
     def logs_enabled(self):
