@@ -506,7 +506,7 @@ def test_command_dry_run_makes_no_mutating_calls(
     fake_async_github.assert_not_called('create_pull_request')
 
 
-def test_create_pull_request_step_reports_partial_failure_when_labeling_fails(
+def test_create_pull_request_step_propagates_authentication_failure_when_labeling_fails(
     app_mock: MagicMock, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
     import httpx
@@ -539,13 +539,13 @@ def test_create_pull_request_step_reports_partial_failure_when_labeling_fails(
         draft=False,
     )
 
-    with pytest.raises(PortStepError, match=r'created at https://github.com/x/pr/7 but labeling failed'):
+    with pytest.raises(GitHubAuthenticationError, match='ddev config set github.token'):
         step.execute()
 
     assert step.pr_url == 'https://github.com/x/pr/7'
 
 
-def test_command_suppresses_worktree_warning_on_partial_pr_failure(
+def test_command_uses_central_handler_on_label_authentication_failure(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
     import httpx
@@ -571,7 +571,8 @@ def test_command_suppresses_worktree_warning_on_partial_pr_failure(
     result = ddev('release', 'port-commit', '1234567890abcdef00')
 
     assert result.exit_code == 1, result.output
-    assert 'Pull request created at https://github.com/x/pr/1 but labeling failed' in result.output
+    assert 'ddev config set github.token' in result.output
+    assert 'Pull request created at https://github.com/x/pr/1 but labeling failed' not in result.output
     assert 'Worktree left at' not in result.output
 
 

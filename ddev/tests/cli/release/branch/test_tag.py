@@ -513,7 +513,7 @@ def test_build_agent_yaml_workflow_dispatch_failure_warns_and_continues(ddev, ba
     basic_git.push.assert_called_once_with('7.56.0')
 
 
-def test_build_agent_yaml_workflow_authentication_failure_preserves_manual_guidance(ddev, basic_git, mocker):
+def test_build_agent_yaml_workflow_authentication_failure_uses_central_handler(ddev, basic_git, mocker):
     basic_git.current_branch.return_value = '7.56.x'
     basic_git.tags.return_value = []
     mocker.patch('ddev.cli.release.branch.tag._build_agent_yaml_points_to_main', return_value=True)
@@ -527,8 +527,8 @@ def test_build_agent_yaml_workflow_authentication_failure_preserves_manual_guida
 
     result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', '--skip-open-pr-check', input='y\n')
 
-    assert result.exit_code == 0, result.output
-    assert 'unable to trigger `update-build-agent-yaml.yml`' in result.output
-    assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
+    assert result.exit_code == 1, result.output
+    assert 'ddev config set github.token' in result.output
+    assert 'gh workflow run update-build-agent-yaml.yml' not in result.output
     basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
     basic_git.push.assert_called_once_with('7.56.0')

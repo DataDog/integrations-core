@@ -327,7 +327,9 @@ class CreatePullRequestStep(PortStep):
 
         try:
             asyncio.run(self._create_pr())
-        except (GitHubAuthenticationError, httpx.HTTPError, ValidationError) as e:
+        except GitHubAuthenticationError:
+            raise
+        except (httpx.HTTPError, ValidationError) as e:
             if self.pr_url:
                 raise PortStepError(
                     f'Pull request created at {self.pr_url} but labeling failed: {e}. '

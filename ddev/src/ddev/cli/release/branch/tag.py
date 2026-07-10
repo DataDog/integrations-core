@@ -367,7 +367,9 @@ def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str
             UPDATE_BUILD_AGENT_YAML_WORKFLOW_REF,
             {'branch': branch_name},
         )
-    except (GitHubAuthenticationError, HTTPStatusError) as e:
+    except GitHubAuthenticationError:
+        raise
+    except HTTPStatusError as e:
         app.display_warning(
             f'Warning: unable to trigger `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}`: {e}\n'
             f'To trigger it manually: gh workflow run {UPDATE_BUILD_AGENT_YAML_WORKFLOW} -f branch={branch_name}'

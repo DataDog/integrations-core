@@ -139,7 +139,9 @@ def bump_milestone(app: Application, branch_name: str) -> None:
             f'after cutting the `{branch_name}` release branch.',
         )
         app.display_success(f'Pull request created: {pr_url}')
-    except (GitHubAuthenticationError, HTTPError) as e:
+    except GitHubAuthenticationError:
+        raise
+    except HTTPError as e:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
         )

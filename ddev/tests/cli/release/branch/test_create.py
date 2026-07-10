@@ -372,7 +372,7 @@ def test_create_branch_pr_creation_failure(ddev, mocker):
     assert 'All done' in result.output
 
 
-def test_create_branch_pr_authentication_failure_preserves_manual_pr_guidance(ddev, mocker):
+def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mocker):
     request = httpx.Request('POST', 'https://api.github.com/repos/DataDog/integrations-core/pulls')
     response = httpx.Response(403, request=request)
     error = httpx.HTTPStatusError('forbidden', request=request, response=response)
@@ -390,6 +390,6 @@ def test_create_branch_pr_authentication_failure_preserves_manual_pr_guidance(dd
 
     result = ddev('release', 'branch', 'create', '7.79.x')
 
-    assert result.exit_code == 0, result.output
-    assert 'Failed to create the pull request' in result.output
-    assert 'Please create one manually' in result.output
+    assert result.exit_code == 1, result.output
+    assert 'ddev config set github.token' in result.output
+    assert 'Please create one manually' not in result.output
