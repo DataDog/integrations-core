@@ -9,8 +9,8 @@ from datadog_checks.flink import FlinkCheck
 pytestmark = [pytest.mark.e2e]
 
 # Flink logs a harmless startup notice ("Hadoop FS is not available ...: NoClassDefFoundError")
-# whenever the Hadoop filesystem classes aren't bundled, which they never are in the vanilla
-# `flink` image. Exclude only that known-benign substring so a real error is still caught.
+# with the vanilla `flink` image. Exclude only that known-benign substring so a real error is
+# still caught.
 DISCOVERY_STABILITY_LOG_PATTERNS = tuple(
     pattern if pattern != r'error' else r'(?<!NoClassDefFound)error' for pattern in CONTAINER_STABILITY_LOG_PATTERNS
 )
