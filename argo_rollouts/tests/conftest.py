@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import save_kube_discovery_state, setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
@@ -28,6 +29,8 @@ def setup_argo_rollouts():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_argo_rollouts], sleep=30) as kubeconfig, ExitStack() as stack:
+        setup_discovery_agent(kubeconfig)
+        save_kube_discovery_state(kubeconfig)
         argo_rollouts_host, argo_rollouts_port = stack.enter_context(
             port_forward(kubeconfig, 'argo-rollouts', 8090, 'deployment', 'argo-rollouts')
         )
