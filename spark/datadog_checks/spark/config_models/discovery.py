@@ -27,7 +27,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         ctx = {'port': port}
         instance_data = {
             'spark_url': 'http://{service.host}:{port.number}'.format(service=service, **ctx),
-            'cluster_name': 'spark-cluster',
+            'cluster_name': 'spark-cluster-{service.host}'.format(service=service, **ctx),
             'spark_cluster_mode': 'spark_standalone_mode',
         }
         instance = InstanceConfig.model_validate(

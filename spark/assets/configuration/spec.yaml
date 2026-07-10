@@ -9,7 +9,7 @@ files:
       - 8080
       candidates:
       - spark_url: "http://{service.host}:{port.number}"
-        cluster_name: "spark-cluster"
+        cluster_name: "spark-cluster-{service.host}"
         spark_cluster_mode: "spark_standalone_mode"
   options:
   - template: init_config
