@@ -4,7 +4,10 @@ services:
     image: zookeeper:3.4.11
 
   druid-broker:
-    image: datadog/docker-library:druid_0_16
+    build:
+      dockerfile_inline: |
+        FROM datadog/docker-library:druid_0_16
+    image: druid:0.16
     command: "broker"
     depends_on:
       - zookeeper
@@ -12,9 +15,10 @@ services:
       - 8082:8082
 
   druid-coordinator:
-    image: datadog/docker-library:druid_0_16
+    image: druid:0.16
     command: "coordinator-overlord"
     depends_on:
       - zookeeper
+      - druid-broker
     ports:
       - 8081:8081

@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints
 
 from .common import BROKER_URL, COORDINATOR_URL
@@ -22,7 +22,7 @@ def dd_environment(instance):
             CheckEndpoints(BROKER_URL + '/status', attempts=100),
         ],
     ):
-        yield instance
+        yield instance, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')

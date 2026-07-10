@@ -2,6 +2,14 @@ name: Druid
 fleet_configurable: true
 files:
 - name: druid.yaml
+  discovery:
+    strategies:
+      - strategy: from_ports
+        port_hints:
+          - 8081
+          - 8082
+        candidates:
+          - url: "http://{service.host}:{port.number}"
   options:
   - template: init_config
     options:
@@ -29,3 +37,11 @@ files:
         - type: multi_line
           name: new_log_start_with_date
           pattern: \d{4}\-\d{2}\-\d{2}
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - druid
+  - template: auto_conf/discovery
