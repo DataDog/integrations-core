@@ -1,0 +1,1 @@
+Add a socket timeout to prevent the check from hanging when connecting to a non-responsive endpoint.
