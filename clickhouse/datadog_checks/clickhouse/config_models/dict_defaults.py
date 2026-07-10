@@ -102,4 +102,3 @@ def instance_asynchronous_insert_buffer_snapshot():
         collection_interval=10,
         payload_row_limit=1000,
     )
-

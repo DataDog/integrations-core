@@ -104,6 +104,7 @@ ORDER BY total_bytes DESC
 LIMIT {payload_row_limit}
 """
 
+
 def agent_check_getter(self):
     return self._check
 
