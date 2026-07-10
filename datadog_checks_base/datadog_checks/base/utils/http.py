@@ -43,6 +43,9 @@ from .http_exceptions import (  # noqa: F401
     HTTPStatusError,
     HTTPTimeoutError,
 )
+
+# Re-export the agnostic auth hook interface so integrations import it from one place.
+from .http_protocol import HTTPRequestAuth, OutgoingRequest  # noqa: F401
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -260,6 +263,33 @@ def _translate_http_errors() -> Iterator[None]:
         raise _translate_requests_exception(exc) from exc
 
 
+class _OutgoingRequest:
+    """Concrete, mutable request view passed to an agnostic auth hook on the requests backend."""
+
+    def __init__(self, url, headers, params):
+        self.url = url
+        self.headers = headers
+        self.params = params
+
+
+class _RequestsAuthHookAdapter(requests_auth.AuthBase):
+    """Adapt an agnostic HTTPRequestAuth hook to a requests.auth.AuthBase.
+
+    Builds a backend-neutral view of the prepared request, lets the hook contribute headers and
+    query params, then applies those contributions back onto the prepared request.
+    """
+
+    def __init__(self, hook):
+        self.hook = hook
+
+    def __call__(self, r):
+        request = _OutgoingRequest(url=r.url, headers=r.headers, params={})
+        self.hook(request)
+        if request.params:
+            r.prepare_url(r.url, request.params)
+        return r
+
+
 class ResponseWrapper(ObjectProxy):
     def __init__(self, response, default_chunk_size):
         super(ResponseWrapper, self).__init__(response)
@@ -318,6 +348,7 @@ class ResponseWrapper(ObjectProxy):
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        '_trust_env',
         '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
@@ -509,6 +540,10 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
+        # Whether to trust environment configuration (proxies, auth, CA bundles).
+        # Mirrors requests.Session.trust_env, which defaults to True.
+        self._trust_env = True
+
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
@@ -528,6 +563,27 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    @property
+    def trust_env(self) -> bool:
+        """Whether the client trusts environment config (proxies, auth, CA bundles)."""
+        return self._trust_env
+
+    @trust_env.setter
+    def trust_env(self, value: bool) -> None:
+        self._trust_env = value
+        if self._session is not None:
+            self._session.trust_env = value
+
+    def close(self) -> None:
+        """Close any open connections. Idempotent; the client stays usable afterwards."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Look up a persisted cookie by name, returning its value as a plain string."""
+        return self.session.cookies.get(name, default)
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """Look up a request header by name. Lookup is case-insensitive."""
@@ -570,6 +626,10 @@ class RequestsWrapper(object):
 
         if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
             options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
+
+        auth = options.get('auth')
+        if isinstance(auth, HTTPRequestAuth):
+            options['auth'] = _RequestsAuthHookAdapter(auth)
 
         persist = options.pop('persist', None)
         if persist is None:
@@ -718,6 +778,7 @@ class RequestsWrapper(object):
         # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
+        session.trust_env = self._trust_env
         return session
 
     @property
