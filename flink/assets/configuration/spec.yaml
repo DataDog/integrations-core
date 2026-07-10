@@ -2,6 +2,12 @@ name: flink
 fleet_configurable: true
 files:
 - name: flink.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        - 9249
   options:
   - template: init_config
     options:
@@ -23,3 +29,10 @@ files:
       path: /var/log/flink.log
       source: flink
       service: <SERVICE>
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - flink
+  - template: auto_conf/discovery
