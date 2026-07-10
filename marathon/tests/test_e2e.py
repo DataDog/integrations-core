@@ -32,14 +32,25 @@ def test_e2e_discovery(dd_agent_check_discovery):
     aggregator.assert_all_metrics_covered()
 
 
+# Marathon's own startup logs contain two fixed, benign lines that match a bare `error`
+# pattern for reasons unrelated to any real failure:
+#   - "continueOnError(...)" is the literal name of a startup step logged while wiring up
+#     `TaskTrackerUpdateStepsProcessorImpl` (contains "Error" as part of the identifier).
+#   - "Will not attempt to authenticate using SASL (unknown error)" is Curator's fixed log
+#     message whenever ZooKeeper SASL auth isn't configured, which is always the case here.
+# Both appear on every boot regardless of which discovery candidate is being probed.
+DISCOVERY_STABILITY_LOG_PATTERNS = [
+    r'error(?<!continueOnError)(?<!unknown error)',
+    r'panic',
+    r'fatal',
+    r'segmentation fault',
+    r'core dumped',
+    r'Traceback',
+]
+
+
 @pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check):
-    try:
-        assert_all_discovery_candidates_stable(dd_agent_check, Marathon, compose_service='marathon')
-    except AssertionError:
-        from datadog_checks.dev.docker import _get_compose_container_id, _get_container_logs
-
-        container_id = _get_compose_container_id(None, 'marathon')
-        print('DIAGNOSTIC FULL CONTAINER LOGS:')
-        print(_get_container_logs(container_id))
-        raise
+    assert_all_discovery_candidates_stable(
+        dd_agent_check, Marathon, compose_service='marathon', log_patterns=DISCOVERY_STABILITY_LOG_PATTERNS
+    )
