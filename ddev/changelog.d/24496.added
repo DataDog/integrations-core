@@ -1,0 +1,1 @@
+Centralize AI provider validation and construction behind a configured provider registry.
