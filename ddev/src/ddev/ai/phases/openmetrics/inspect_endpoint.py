@@ -60,7 +60,7 @@ class EndpointSpec(BaseModel):
 
 
 class InspectInput(BaseModel):
-    """Phase 0's structured input contract."""
+    """InspectEndpointPhase's structured input contract."""
 
     model_config = ConfigDict(extra="forbid")
     endpoints: list[EndpointSpec]
@@ -183,7 +183,7 @@ def _write_exposition(path: Path, body: str) -> None:
 
 
 def _fixture_name(name: str, single: bool) -> str:
-    """Intended Phase 2 fixture name for an endpoint (single endpoint → generic metrics.txt)."""
+    """Intended fixture name for an endpoint (single endpoint → generic metrics.txt)."""
     return "tests/fixtures/metrics.txt" if single else f"tests/fixtures/{name}_metrics.txt"
 
 
@@ -250,12 +250,12 @@ async def _fetch(client: httpx.AsyncClient, url: str) -> tuple[str, str, int]:
 
 async def _inspect_one(
     client: httpx.AsyncClient,
-    name: str,
-    url: str,
+    endpoint: EndpointSpec,
     memory_dir: Path,
     phase_id: str,
 ) -> EndpointResult:
     """Fetch, parse, and write the sidecars for a single named endpoint."""
+    name, url = endpoint.name, endpoint.url
     try:
         body, content_type, status_code = await _fetch(client, url)
     except EndpointInspectionError as e:
@@ -306,7 +306,9 @@ class InspectEndpointPhase(Phase):
     4. Writes a ``<phase_id>_<name>_exposition.txt`` verbatim snapshot for reuse as a fixture.
 
     All-or-nothing: if any endpoint fails, the phase aborts with a single
-    EndpointInspectionError listing every failed endpoint.
+    EndpointInspectionError listing every failed endpoint, and any sidecar files
+    already written by endpoints that succeeded before a sibling failure are
+    deleted so no partial output is left behind.
     """
 
     @classmethod
@@ -336,12 +338,16 @@ class InspectEndpointPhase(Phase):
             headers={"Accept": DEFAULT_ACCEPT_HEADER},
         ) as client:
             settled = await asyncio.gather(
-                *(_inspect_one(client, ep.name, ep.url, memory_dir, self._phase_id) for ep in endpoints),
+                *(_inspect_one(client, ep, memory_dir, self._phase_id) for ep in endpoints),
                 return_exceptions=True,
             )
 
         failures = [(ep.name, r) for ep, r in zip(endpoints, settled, strict=False) if isinstance(r, Exception)]
         if failures:
+            for r in settled:
+                if isinstance(r, EndpointResult):
+                    Path(r.metrics_jsonl_path).unlink(missing_ok=True)
+                    Path(r.exposition_path).unlink(missing_ok=True)
             detail = "; ".join(f"{name}: {err}" for name, err in failures)
             raise EndpointInspectionError(f"{len(failures)} endpoint(s) failed to inspect — {detail}")
 

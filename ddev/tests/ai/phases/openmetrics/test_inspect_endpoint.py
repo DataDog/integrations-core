@@ -444,6 +444,7 @@ def test_build_memory_text_renders_all_fields(tmp_path):
     assert "prometheus" in text
     assert str(jsonl_path) in text
     assert str(exposition_path) in text
+    assert "tests/fixtures/metrics.txt" in text
 
 
 def test_build_memory_text_renders_every_endpoint(tmp_path):
@@ -455,6 +456,8 @@ def test_build_memory_text_renders_every_endpoint(tmp_path):
         assert r.url in text
         assert r.metrics_jsonl_path in text
         assert r.exposition_path in text
+    assert "tests/fixtures/agent_metrics.txt" in text
+    assert "tests/fixtures/operator_metrics.txt" in text
 
 
 # ---------------------------------------------------------------------------
@@ -893,6 +896,8 @@ async def test_all_or_nothing_one_endpoint_fails_aborts_phase(flow_dir, message_
 
     raised = await _assert_phase_fails(phase, mgr, message_queue, error_contains="[operator]")
     assert "HTTP 503" in str(raised)
+    assert not _jsonl_path(flow_dir, "agent").exists()
+    assert not _exposition_path(flow_dir, "agent").exists()
 
 
 async def test_multiple_failures_are_all_reported(flow_dir, message_queue, monkeypatch):
@@ -921,31 +926,23 @@ async def test_multiple_failures_are_all_reported(flow_dir, message_queue, monke
     assert "timed out" in text
 
 
-async def test_inspect_input_missing_raises_config_error(flow_dir, message_queue):
-    phase, _mgr = _make_phase(flow_dir, message_queue, runtime_variables={})
-    with pytest.raises(ConfigError, match="inspect_input"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-
-async def test_inspect_input_malformed_json_raises_config_error(flow_dir, message_queue):
-    phase, _mgr = _make_phase(flow_dir, message_queue, runtime_variables={"inspect_input": "not json"})
-    with pytest.raises(ConfigError, match="invalid 'inspect_input'"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-
-async def test_inspect_input_empty_endpoints_raises_config_error(flow_dir, message_queue):
-    phase, _mgr = _make_phase(flow_dir, message_queue, runtime_variables={"inspect_input": '{"endpoints": []}'})
-    with pytest.raises(ConfigError, match="inspect_input"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
-
-
-async def test_duplicate_endpoint_names_raise_config_error(flow_dir, message_queue):
-    phase, _mgr = _make_phase(
-        flow_dir,
-        message_queue,
-        runtime_variables=_inspect_input_var(("App Controller", "http://h:1/m"), ("app-controller", "http://h:2/m")),
-    )
-    with pytest.raises(ConfigError, match="duplicate endpoint names"):
+@pytest.mark.parametrize(
+    ("runtime_variables", "match"),
+    [
+        pytest.param({}, "inspect_input", id="missing"),
+        pytest.param({"inspect_input": "not json"}, "invalid 'inspect_input'", id="malformed_json"),
+        pytest.param({"inspect_input": '{"endpoints": []}'}, "inspect_input", id="empty_endpoints"),
+        pytest.param(
+            _inspect_input_var(("App Controller", "http://h:1/m"), ("app-controller", "http://h:2/m")),
+            "duplicate endpoint names",
+            id="duplicate_names",
+        ),
+        pytest.param(_inspect_input_var(("main", "example.com/metrics")), "inspect_input", id="url_without_scheme"),
+    ],
+)
+async def test_invalid_inspect_input_raises_config_error(flow_dir, message_queue, runtime_variables, match):
+    phase, _mgr = _make_phase(flow_dir, message_queue, runtime_variables=runtime_variables)
+    with pytest.raises(ConfigError, match=match):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
 
@@ -960,14 +957,6 @@ async def test_endpoint_name_normalized_to_snake_case(flow_dir, message_queue, m
     assert _exposition_path(flow_dir, "app_controller").exists()
     checkpoint = mgr.read()[PHASE_ID]
     assert _endpoint_data(checkpoint)["name"] == "app_controller"
-
-
-async def test_url_without_scheme_raises_config_error(flow_dir, message_queue):
-    phase, _mgr = _make_phase(
-        flow_dir, message_queue, runtime_variables=_inspect_input_var(("main", "example.com/metrics"))
-    )
-    with pytest.raises(ConfigError, match="inspect_input"):
-        await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
 
 async def test_multi_endpoint_deterministic_jsonl(flow_dir, message_queue, monkeypatch, tmp_path_factory):
