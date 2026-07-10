@@ -2,6 +2,13 @@ name: Yarn
 fleet_configurable: true
 files:
   - name: yarn.yaml
+    discovery:
+      strategies:
+      - strategy: from_ports
+        port_hints:
+        - 8088
+        candidates:
+        - resourcemanager_uri: "http://{service.host}:{port.number}"
     options:
       - template: init_config
         options:
@@ -192,3 +199,10 @@ files:
         - type: file
           path: /usr/local/hadoop/logs/yarn--resourcemanager-yarn-container.log
           source: yarn
+  - name: auto_conf.yaml
+    options:
+    - template: ad_identifiers
+      overrides:
+        value.example:
+        - hadoop
+    - template: auto_conf/discovery

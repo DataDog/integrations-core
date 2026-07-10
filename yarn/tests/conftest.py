@@ -10,7 +10,7 @@ import pytest
 from mock import patch
 from requests.exceptions import SSLError
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckEndpoints
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.yarn import YarnCheck
@@ -42,7 +42,7 @@ def dd_environment():
         conditions=conditions,
         sleep=30,
     ):
-        yield INSTANCE_INTEGRATION
+        yield INSTANCE_INTEGRATION, get_e2e_discovery_metadata()
 
 
 @pytest.fixture
