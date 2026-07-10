@@ -80,7 +80,7 @@ def assert_openmetrics(aggregator, tags=None):
         if tags:
             # Some metrics have additional tags than the ones in `tags`, so we
             # use `assert_metric_has_tags` instead of passing the tags to
-            # `assert_metric`
+            # `assert_metric`.
             aggregator.assert_metric_has_tags(metric, tags)
 
     version_parts = [int(p) for p in VERSION.split('.')]
