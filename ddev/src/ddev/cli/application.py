@@ -74,6 +74,7 @@ class Application(Terminal):
 
         # TODO: remove this when the old CLI is gone
         self.__config: dict[str, Any] = {}
+
         self.__exception_handlers: dict[type[Exception], ExceptionHandler] = {}
 
     @property
