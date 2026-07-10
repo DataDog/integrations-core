@@ -11,11 +11,15 @@ from . import common
 from .conftest import get_tls
 from .metrics import METRICS_36_E2E_SKIPS
 
-# Zookeeper always logs a benign ERROR-level line at startup ("Invalid configuration, only one
-# server specified (ignoring)") because the test fixture's zoo.cfg defines a single `server.1`
-# entry even in standalone mode, so the generic "error" pattern is dropped in favor of the more
-# specific crash indicators.
-DISCOVERY_STABILITY_LOG_PATTERNS = tuple(pattern for pattern in CONTAINER_STABILITY_LOG_PATTERNS if pattern != 'error')
+# Zookeeper logs a benign ERROR-level line at startup ("Invalid configuration, only one server
+# specified (ignoring)") because the test fixture's zoo.cfg defines a single `server.1` entry even
+# in standalone mode. Only that specific message is excluded (rather than dropping the generic
+# "error" pattern outright), so a genuinely new error-level log line from a bad candidate still
+# fails the check.
+DISCOVERY_STABILITY_LOG_PATTERNS = tuple(
+    r'error(?!.*Invalid configuration, only one server specified)' if pattern == 'error' else pattern
+    for pattern in CONTAINER_STABILITY_LOG_PATTERNS
+)
 
 
 @pytest.mark.e2e
