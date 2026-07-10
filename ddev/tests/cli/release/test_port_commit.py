@@ -25,6 +25,7 @@ from ddev.cli.release.port_commit_workflow import (
 )
 from ddev.utils.git import GitCommit
 from ddev.utils.github_async.models import PullRequest
+from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 
@@ -855,13 +856,16 @@ def test_command_reports_actionable_github_authentication_error(
         request=httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/pulls/23703'),
         response=httpx.Response(403),
     )
-    fake_async_github.mock_response('get_pull_request', error)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        GitHubAuthenticationError.from_http_status_error(error),
+    )
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
     result = ddev('release', 'port-commit', '--dry-run', 'PR-23703')
 
     assert result.exit_code == 1, result.output
-    assert 'GitHub denied the request for PR #23703 (HTTP 403)' in result.output
+    assert 'GitHub denied the requested operation (HTTP 403)' in result.output
     assert 'ddev config set github.token' in result.output
 
 

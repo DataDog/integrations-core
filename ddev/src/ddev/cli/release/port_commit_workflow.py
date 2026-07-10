@@ -25,7 +25,6 @@ from rich.text import Text
 
 from ddev.utils.fs import Path
 from ddev.utils.git import GitRepository
-from ddev.utils.github_errors import github_authentication_error_message
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
@@ -425,8 +424,6 @@ def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) ->
         status = exc.response.status_code
         if status == 404:
             raise _PRNotFound(str(pr_number)) from exc
-        if status in (401, 403):
-            app.abort(github_authentication_error_message(status, action=f'request for PR #{pr_number}'))
         app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')
     except (httpx.HTTPError, ValidationError) as exc:
         app.abort(f'Failed to fetch PR #{pr_number} from GitHub: {exc}.')

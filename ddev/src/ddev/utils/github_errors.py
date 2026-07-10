@@ -16,8 +16,13 @@ def github_authentication_error_message(status_code: int, *, action: str = 'requ
     )
 
 
-class GitHubAuthenticationError(httpx.HTTPStatusError):
+class GitHubAuthenticationError(Exception):
     """A GitHub HTTP failure caused by invalid authentication or insufficient permissions."""
+
+    def __init__(self, message: str, *, request: httpx.Request, response: httpx.Response) -> None:
+        super().__init__(message)
+        self.request = request
+        self.response = response
 
     @classmethod
     def from_http_status_error(cls, error: httpx.HTTPStatusError) -> GitHubAuthenticationError:

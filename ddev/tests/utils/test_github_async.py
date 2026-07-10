@@ -452,7 +452,7 @@ async def test_list_workflow_run_artifacts_pagination_stops_when_no_next() -> No
 
 async def test_list_workflow_run_artifacts_http_error_raises() -> None:
     client = make_client(httpx.MockTransport(lambda r: httpx.Response(403)))
-    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+    with pytest.raises(GitHubAuthenticationError) as exc_info:
         async for _ in client.list_workflow_run_artifacts("o", "r", 1):
             pass
     assert exc_info.value.response.status_code == 403
