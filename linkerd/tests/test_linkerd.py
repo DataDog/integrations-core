@@ -145,7 +145,33 @@ def test_e2e_discovery_debug_dump():
         capture_output=True,
         text=True,
     )
-    print('DEBUG emojivoto pods:\n' + result2.stdout + result2.stderr)
+
+    result3 = subprocess.run(
+        [
+            'kubectl',
+            'get',
+            'pods',
+            '-A',
+            '-o',
+            'jsonpath={range .items[*]}{.metadata.namespace}/{.metadata.name}{"\n"}{end}',
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+    # Force pytest to show captured output regardless of default capture settings.
+    raise AssertionError(
+        'DEBUG linkerd pods/images:\n'
+        + result.stdout
+        + result.stderr
+        + '\nDEBUG emojivoto pods:\n'
+        + result2.stdout
+        + result2.stderr
+        + '\nDEBUG all pods:\n'
+        + result3.stdout
+        + result3.stderr
+    )
 
 
 @pytest.mark.e2e
