@@ -146,14 +146,48 @@ def test_e2e_discovery_debug_dump():
         text=True,
     )
 
-    result3 = subprocess.run(
+    pod_ip_result = subprocess.run(
         [
             'kubectl',
             'get',
             'pods',
-            '-A',
+            '-n',
+            'linkerd',
+            '-l',
+            'linkerd.io/control-plane-component=controller',
             '-o',
-            'jsonpath={range .items[*]}{.metadata.namespace}/{.metadata.name}{"\n"}{end}',
+            'jsonpath={.items[0].status.podIP}',
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    controller_ip = pod_ip_result.stdout.strip()
+
+    # Test whether the discovery agent pod can actually reach the controller's linkerd-proxy
+    # admin port directly over the pod network (bypassing kubectl port-forward, which the
+    # manual test_e2e relies on and which does not go through the same network path).
+    connectivity_result = subprocess.run(
+        [
+            'kubectl',
+            'exec',
+            '-n',
+            'dd-agent-discovery',
+            'dd-agent-discovery',
+            '--',
+            '/opt/datadog-agent/embedded/bin/python3',
+            '-c',
+            (
+                'import urllib.request,sys\n'
+                f'url = "http://{controller_ip}:4191/metrics"\n'
+                'try:\n'
+                '    with urllib.request.urlopen(url, timeout=10) as resp:\n'
+                '        body = resp.read(500)\n'
+                '        print("STATUS", resp.status)\n'
+                '        print("BODY", body)\n'
+                'except Exception as e:\n'
+                '    print("ERROR", repr(e))\n'
+            ),
         ],
         env=env,
         capture_output=True,
@@ -168,9 +202,10 @@ def test_e2e_discovery_debug_dump():
         + '\nDEBUG emojivoto pods:\n'
         + result2.stdout
         + result2.stderr
-        + '\nDEBUG all pods:\n'
-        + result3.stdout
-        + result3.stderr
+        + f'\nDEBUG controller pod IP: {controller_ip!r}\n'
+        + 'DEBUG connectivity from agent pod to controller proxy admin port:\n'
+        + connectivity_result.stdout
+        + connectivity_result.stderr
     )
 
 
