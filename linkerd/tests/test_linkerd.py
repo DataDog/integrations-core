@@ -109,6 +109,45 @@ def test_e2e(dd_agent_check):
 
 
 @pytest.mark.e2e
+def test_e2e_discovery_debug_dump2():
+    # TEMPORARY debug test #2: inspect the mounted auto_conf.yaml and running processes inside
+    # the discovery agent pod itself. Will be removed before merge.
+    import subprocess
+
+    from datadog_checks.dev._env import e2e_testing, get_state
+
+    if not e2e_testing():
+        pytest.skip('Not running E2E tests')
+
+    state = get_state('kube_discovery')
+    env = os.environ.copy()
+    env['KUBECONFIG'] = state['kubeconfig_path']
+
+    def agent_exec(*args):
+        return subprocess.run(
+            ['kubectl', 'exec', '-n', 'dd-agent-discovery', 'dd-agent-discovery', '--', *args],
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+
+    mounted_conf = agent_exec('cat', '/etc/datadog-agent/conf.d/linkerd.d/auto_conf.yaml')
+    processes = agent_exec('ps', 'aux')
+    agent_status = agent_exec('agent', 'status', '--json')
+
+    raise AssertionError(
+        'DEBUG mounted auto_conf.yaml:\n'
+        + mounted_conf.stdout
+        + mounted_conf.stderr
+        + '\nDEBUG processes in agent pod:\n'
+        + processes.stdout
+        + processes.stderr
+        + '\nDEBUG agent status --json (first 8000 chars):\n'
+        + (agent_status.stdout + agent_status.stderr)[:8000]
+    )
+
+
+@pytest.mark.e2e
 def test_e2e_discovery(aggregator, datadog_agent):
     # The `proxy` ad_identifier matches every linkerd-proxy sidecar in the cluster (control-plane
     # components and injected emojivoto pods alike), so the Agent's Autodiscovery has more
