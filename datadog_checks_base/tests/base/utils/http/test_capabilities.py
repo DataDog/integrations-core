@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
+import requests
 
 from datadog_checks.base.utils.http import RequestsWrapper
 
@@ -89,3 +90,10 @@ class TestTrustEnv:
         http.trust_env = False
         http.trust_env = True
         assert http.session.trust_env is True
+
+    def test_trust_env_adopts_injected_session(self):
+        session = requests.Session()
+        session.trust_env = False
+        http = RequestsWrapper({}, {}, session=session)
+        # The reported value must match the injected session, not the default True.
+        assert http.trust_env is False
