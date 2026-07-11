@@ -110,7 +110,11 @@ def test_e2e(dd_agent_check):
 
 @pytest.mark.e2e
 def test_e2e_discovery(aggregator, datadog_agent):
-    run_discovery_check_kubernetes(aggregator, datadog_agent, check_rate=True)
+    # The `proxy` ad_identifier matches every linkerd-proxy sidecar in the cluster (control-plane
+    # components and injected emojivoto pods alike), so the Agent's Autodiscovery has more
+    # containers to enumerate and render configs for than a typical single-target integration;
+    # give it more room than the default 30s to complete within a busy kind cluster.
+    run_discovery_check_kubernetes(aggregator, datadog_agent, check_rate=True, discovery_timeout=90)
 
     for metric_name, metric_type in EXPECTED_METRICS_V2_E2E.items():
         if metric_name in OPTIONAL_METRICS_V2_E2E:
