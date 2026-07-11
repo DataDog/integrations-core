@@ -20,6 +20,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
 from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
@@ -583,8 +584,11 @@ class RequestsWrapper(object):
             self._session = None
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
-        """Look up a persisted cookie by name, returning its value as a plain string."""
-        return self.session.cookies.get(name, default)
+        """Look up a persisted cookie by name, returning its value, or default if absent or ambiguous."""
+        try:
+            return self.session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """Look up a request header by name. Lookup is case-insensitive."""

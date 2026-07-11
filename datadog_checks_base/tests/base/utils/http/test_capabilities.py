@@ -57,6 +57,14 @@ class TestCookies:
         value = http.get_cookie('sid')
         assert isinstance(value, str)
 
+    def test_get_cookie_conflict_returns_default(self):
+        http = RequestsWrapper({}, {})
+        # Same cookie name on multiple domains makes RequestsCookieJar.get raise
+        # CookieConflictError. get_cookie must still honor its value-or-default contract.
+        http.session.cookies.set('dup', 'a', domain='a.example.com')
+        http.session.cookies.set('dup', 'b', domain='b.example.com')
+        assert http.get_cookie('dup', 'fallback') == 'fallback'
+
 
 class TestTrustEnv:
     def test_trust_env_defaults_to_true(self):
