@@ -1,0 +1,1 @@
+Add an `extra_cluster_roles` option to `setup_discovery_agent()` for integrations whose check needs additional in-cluster RBAC beyond the base discovery agent role.
