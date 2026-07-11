@@ -114,7 +114,10 @@ def test_e2e_discovery_debug_dump():
     # ad_identifiers matching isn't finding candidates. Will be removed before merge.
     import subprocess
 
-    from datadog_checks.dev._env import get_state
+    from datadog_checks.dev._env import e2e_testing, get_state
+
+    if not e2e_testing():
+        pytest.skip('Not running E2E tests')
 
     state = get_state('kube_discovery')
     env = os.environ.copy()
