@@ -6,6 +6,10 @@ import os
 import pytest
 import requests_mock
 
+from datadog_checks.dev.kube_discovery import (
+    assert_all_discovery_candidates_stable_kubernetes,
+    run_discovery_check_kubernetes,
+)
 from datadog_checks.linkerd import LinkerdCheck
 
 from .common import (
@@ -102,3 +106,28 @@ def test_e2e(dd_agent_check):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, count=2)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(aggregator, datadog_agent):
+    run_discovery_check_kubernetes(aggregator, datadog_agent, check_rate=True)
+
+    for metric_name, metric_type in EXPECTED_METRICS_V2_E2E.items():
+        if metric_name in OPTIONAL_METRICS_V2_E2E:
+            aggregator.assert_metric(metric_name, metric_type=metric_type, at_least=0)
+        else:
+            aggregator.assert_metric(metric_name, metric_type=metric_type)
+    aggregator.assert_all_metrics_covered()
+
+    aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, count=2)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(aggregator, datadog_agent):
+    assert_all_discovery_candidates_stable_kubernetes(
+        LinkerdCheck,
+        aggregator,
+        datadog_agent,
+        namespace='linkerd',
+        pod_selector='linkerd.io/control-plane-component=controller',
+    )

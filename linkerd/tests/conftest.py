@@ -9,6 +9,7 @@ import pytest
 from datadog_checks.dev import docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import save_kube_discovery_state, setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 
 from .common import HERE, LINKERD_FIXTURE_METRICS, LINKERD_FIXTURE_TYPES
@@ -35,6 +36,9 @@ def setup_linkerd_cluster():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_linkerd_cluster]) as kubeconfig:
+        setup_discovery_agent(kubeconfig)
+        save_kube_discovery_state(kubeconfig)
+
         compose_file = os.path.join(HERE, "compose", "docker-compose.yaml")
         with docker_run(
             compose_file=compose_file,
