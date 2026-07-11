@@ -65,6 +65,7 @@ def setup_discovery_agent(
     check_root: str | os.PathLike[str] | None = None,
     namespace: str = DISCOVERY_NAMESPACE,
     agent_image: str = DEFAULT_AGENT_IMAGE,
+    extra_cluster_roles: Sequence[str] = (),
 ) -> None:
     """Deploy a sleeping, RBAC-scoped Agent pod that ``run_discovery_check_kubernetes`` can exec into.
 
@@ -73,6 +74,11 @@ def setup_discovery_agent(
     how ``KindUp``/``ComposeFileUp``/``PortForwardUp`` behave: ``env test``/``env stop`` re-run the
     fixture body to reach ``kind_run``'s teardown, but ``KUBECONFIG`` isn't guaranteed to resolve to a
     live cluster at that point.
+
+    ``extra_cluster_roles`` binds additional, already-existing ``ClusterRole``\\ s (e.g. a
+    CRD-provided ``view`` role like KubeVirt's ``kubevirt.io:view``) to the agent's service account,
+    for checks whose production setup docs require binding such a role to the real ``datadog-agent``
+    service account.
     """
     if not set_up_env():
         return
@@ -82,6 +88,13 @@ def setup_discovery_agent(
 
     with tempfile.TemporaryDirectory() as manifest_dir:
         _apply_manifests(kubeconfig_path, _build_rbac_manifests(namespace), manifest_dir, 'rbac.yaml')
+        if extra_cluster_roles:
+            _apply_manifests(
+                kubeconfig_path,
+                _build_extra_cluster_role_binding_manifests(namespace, extra_cluster_roles),
+                manifest_dir,
+                'extra-rbac.yaml',
+            )
         _apply_manifests(kubeconfig_path, [_build_ipc_secret_manifest(namespace)], manifest_dir, 'secret.yaml')
         _apply_manifests(
             kubeconfig_path,
@@ -264,6 +277,23 @@ def _build_rbac_manifests(namespace: str) -> list[dict[str, Any]]:
             },
             'subjects': [{'kind': 'ServiceAccount', 'name': AGENT_SERVICE_ACCOUNT, 'namespace': namespace}],
         },
+    ]
+
+
+def _build_extra_cluster_role_binding_manifests(namespace: str, cluster_roles: Sequence[str]) -> list[dict[str, Any]]:
+    return [
+        {
+            'apiVersion': 'rbac.authorization.k8s.io/v1',
+            'kind': 'ClusterRoleBinding',
+            'metadata': {'name': '{}-extra-{}'.format(AGENT_CLUSTER_ROLE_BINDING, index)},
+            'roleRef': {
+                'apiGroup': 'rbac.authorization.k8s.io',
+                'kind': 'ClusterRole',
+                'name': cluster_role,
+            },
+            'subjects': [{'kind': 'ServiceAccount', 'name': AGENT_SERVICE_ACCOUNT, 'namespace': namespace}],
+        }
+        for index, cluster_role in enumerate(cluster_roles)
     ]
 
 
