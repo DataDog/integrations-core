@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -485,7 +486,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         return gpu_tags, gpu_info_tags
 
-    def _iter_rows(self, output, debug=False, name=""):
+    def _iter_rows(self, output, debug=False, name="") -> Iterator[tuple[list[str], list[str]]]:
         # Yield (fields, base_tags) for each pipe-delimited row of a command's output.
         lines = output.strip().split('\n')
         if debug:

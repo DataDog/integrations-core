@@ -200,10 +200,9 @@ def test_sdiag_processing(mock_get_subprocess_output, instance, aggregator):
     check = SlurmCheck('slurm', {}, [instance])
     mock_output_main = (mock_output('sdiag.txt'), "", 0)
     mock_get_subprocess_output.side_effect = [mock_output_main]
-    from unittest.mock import patch as patch_time
 
     # Patch time.time only for sdiag to make the test deterministic
-    with patch_time('datadog_checks.slurm.check.time') as mock_time:
+    with patch('datadog_checks.slurm.check.time') as mock_time:
         # The epoch in sdiag.txt is 1726207912, mocking current time to 1726208912 (diff = 1000)
         mock_time.time.return_value = 1726208912
         check.check(None)
