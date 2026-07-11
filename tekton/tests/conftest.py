@@ -10,6 +10,7 @@ import pytest
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 
 HERE = get_here()
@@ -76,6 +77,8 @@ def setup_tekton():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_tekton], sleep=10) as kubeconfig, ExitStack() as stack:
+        setup_discovery_agent(kubeconfig)
+
         instances = {}
 
         pipeline_host, pipeline_port = stack.enter_context(
