@@ -109,6 +109,43 @@ def test_e2e(dd_agent_check):
 
 
 @pytest.mark.e2e
+def test_e2e_discovery_debug_dump():
+    # TEMPORARY debug test: dump real pod/container image info to CI logs to diagnose why
+    # ad_identifiers matching isn't finding candidates. Will be removed before merge.
+    import subprocess
+
+    from datadog_checks.dev._env import get_state
+
+    state = get_state('kube_discovery')
+    env = os.environ.copy()
+    env['KUBECONFIG'] = state['kubeconfig_path']
+    result = subprocess.run(
+        [
+            'kubectl',
+            'get',
+            'pods',
+            '-n',
+            'linkerd',
+            '-o',
+            r'jsonpath={range .items[*]}{.metadata.name}{"\n"}'
+            r'{range .spec.containers[*]}  {.name}={.image}{"\n"}{end}{end}',
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    print('DEBUG linkerd pods/images:\n' + result.stdout + result.stderr)
+
+    result2 = subprocess.run(
+        ['kubectl', 'get', 'pods', '-n', 'emojivoto', '-o', 'wide'],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    print('DEBUG emojivoto pods:\n' + result2.stdout + result2.stderr)
+
+
+@pytest.mark.e2e
 def test_e2e_discovery(aggregator, datadog_agent):
     # The `proxy` ad_identifier matches every linkerd-proxy sidecar in the cluster (control-plane
     # components and injected emojivoto pods alike), so the Agent's Autodiscovery has more
