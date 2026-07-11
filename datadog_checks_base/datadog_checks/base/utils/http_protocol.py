@@ -41,8 +41,9 @@ class HTTPResponseProtocol(Protocol):
 
 class OutgoingRequest(Protocol):
     # Mutable view of an outgoing request handed to an auth hook. A hook adds entries to headers
-    # or params. Each backend builds its own instance and applies the values onto its native
-    # request.
+    # or params. Each backend applies those onto its native request. url is provided for
+    # inspection only, such as request signing. Writing to url is not guaranteed to be honored.
+    # Hooks must not rely on it.
     url: str
     headers: MutableMapping[str, str]
     params: MutableMapping[str, str]
