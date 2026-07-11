@@ -119,7 +119,11 @@ def test_e2e_discovery(aggregator, datadog_agent):
             aggregator.assert_metric(metric_name, metric_type=metric_type)
     aggregator.assert_all_metrics_covered()
 
-    aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, count=2)
+    # Unlike the manual E2E test above, the `proxy` ad_identifier matches every linkerd-proxy
+    # sidecar in the cluster (control-plane components and injected emojivoto pods alike), so
+    # discovery yields more than one instance here; assert at least the two check runs
+    # (check_rate=True) that a single instance would produce, rather than an exact count.
+    aggregator.assert_service_check('linkerd.prometheus.health', status=LinkerdCheck.OK, at_least=2)
 
 
 @pytest.mark.e2e
