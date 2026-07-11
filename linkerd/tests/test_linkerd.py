@@ -139,6 +139,13 @@ def test_e2e_discovery_debug_dump():
     )
     print('DEBUG linkerd pods/images:\n' + result.stdout + result.stderr)
 
+    readiness_result = subprocess.run(
+        ['kubectl', 'get', 'pods', '-n', 'linkerd', '-o', 'wide'],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
     result2 = subprocess.run(
         ['kubectl', 'get', 'pods', '-n', 'emojivoto', '-o', 'wide'],
         env=env,
@@ -194,6 +201,33 @@ def test_e2e_discovery_debug_dump():
         text=True,
     )
 
+    # Run the real discovery-driven `agent check` directly (not through the helper, which
+    # swallows most output) with debug logging and a short timeout, to see the Agent's own
+    # reasoning for why it does/doesn't find a candidate.
+    agent_check_result = subprocess.run(
+        [
+            'kubectl',
+            'exec',
+            '-n',
+            'dd-agent-discovery',
+            'dd-agent-discovery',
+            '--',
+            'agent',
+            'check',
+            'linkerd',
+            '--discovery-min-instances',
+            '1',
+            '--discovery-timeout',
+            '20',
+            '--log-level',
+            'debug',
+            '--json',
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
     # Force pytest to show captured output regardless of default capture settings.
     raise AssertionError(
         'DEBUG linkerd pods/images:\n'
@@ -206,6 +240,11 @@ def test_e2e_discovery_debug_dump():
         + 'DEBUG connectivity from agent pod to controller proxy admin port:\n'
         + connectivity_result.stdout
         + connectivity_result.stderr
+        + '\nDEBUG linkerd pod readiness (-o wide):\n'
+        + readiness_result.stdout
+        + readiness_result.stderr
+        + '\nDEBUG agent check --log-level debug (last 15000 chars of stdout+stderr):\n'
+        + (agent_check_result.stdout + agent_check_result.stderr)[-15000:]
     )
 
 
