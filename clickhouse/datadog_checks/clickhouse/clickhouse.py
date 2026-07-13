@@ -104,8 +104,10 @@ class ClickhouseCheck(DatabaseCheck):
 
         # Initialize query samples (from system.processes - analogous to pg_stat_activity).
         # The async insert buffer snapshot piggybacks on this job (shares its connection and loop),
-        # so its config is passed in here rather than run as its own DBMAsyncJob.
-        if self._config.dbm and self._config.query_samples.enabled:
+        # so its config is passed in here rather than run as its own DBMAsyncJob. 
+        if self._config.dbm and (
+            self._config.query_samples.enabled or self._config.asynchronous_insert_buffer_snapshot.enabled
+        ):
             self.statement_samples = ClickhouseStatementSamples(
                 self, self._config.query_samples, self._config.asynchronous_insert_buffer_snapshot
             )
