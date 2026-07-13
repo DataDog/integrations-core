@@ -35,7 +35,7 @@ class TestClose:
     def test_close_is_idempotent_after_open(self):
         http = RequestsWrapper({}, {})
         # Open a session, then close twice; the second close must be a safe no-op.
-        http.session
+        assert http.session is not None
         http.close()
         http.close()
         assert http._session is None
