@@ -41,8 +41,8 @@ def _invoke_check_with_retry(
 def _validate_env_vars(ctx: click.Context, param: click.Parameter, value: tuple[str, ...]) -> dict[str, str] | None:
     env_vars: dict[str, str] = {}
     for entry in value:
-        key, _, env_value = entry.partition('=')
-        if '=' not in entry or not key:
+        key, sep, env_value = entry.partition('=')
+        if not sep or not key:
             raise click.BadParameter(f'`{entry}` is not in KEY=VALUE format', ctx=ctx, param=param)
         env_vars[key] = env_value
 
