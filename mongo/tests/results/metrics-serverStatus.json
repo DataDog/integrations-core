@@ -1400,6 +1400,78 @@
         ]
     },
     {
+        "name": "mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.page_evict_attempts_by_application_threadsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.page_evict_failures_by_application_threadsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.modified_page_evict_attempts_by_application_threadsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.modified_page_evict_failures_by_application_threadsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_serverps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.evict_page_failures_by_eviction_serverps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_worker_threadsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
+        "name": "mongodb.wiredtiger.cache.evict_page_failures_by_eviction_worker_threadsps",
+        "type": 1,
+        "value": 12.0,
+        "tags": [
+            "server:mongodb://testUser2:*****@localhost:27017/test"
+        ]
+    },
+    {
         "name": "mongodb.wiredtiger.cache.tracked_dirty_bytes_in_cache",
         "type": 0,
         "value": 12.0,
