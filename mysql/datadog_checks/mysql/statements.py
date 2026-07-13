@@ -76,7 +76,11 @@ def _row_state_key(row):
     """
     statement_source = row.get('_dd_statement_source', DIGEST_STATEMENT_SOURCE)
     if statement_source == PREPARED_STATEMENT_SOURCE:
-        return statement_source, row['schema_name'], row['_dd_statement_id']
+        # `object_instance_begin` is a memory address that MySQL can reuse for a
+        # different prepared statement once the old one is deallocated. Include
+        # the query_signature so a reused address doesn't merge two different
+        # statements' cumulative counters before diffing.
+        return statement_source, row['schema_name'], row['_dd_statement_id'], row['query_signature']
 
     return statement_source, row['schema_name'], row['digest']
 

@@ -382,6 +382,54 @@ def test_statement_metrics_baselines_new_prepared_statement_instance_before_merg
     assert '_dd_statement_source' not in rows[0]
 
 
+@pytest.mark.unit
+def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(dbm_instance, datadog_agent):
+    # object_instance_begin is a memory address MySQL can reuse for a different prepared statement once the
+    # previous one is deallocated. The deallocated row lingers in the _statement_rows cache until its TTL, so a
+    # reused id must not collapse the stale row and the new statement onto the same state key; otherwise the new
+    # statement's first execution is reported as a delta for the old query.
+    normalized_a = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    normalized_b = 'SELECT `name` FROM `dbm_user` WHERE `id` = ?'
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def row(object_instance_begin, digest_text, count_star):
+        return {
+            '_dd_statement_source': statements.PREPARED_STATEMENT_SOURCE,
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': digest_text,
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [row(1001, 'SELECT id FROM dbm_order WHERE id = ?', 100)],
+            # id 1001 was deallocated; a different statement reuses the same object_instance_begin
+            [row(1001, 'SELECT name FROM dbm_user WHERE id = ?', 5000)],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        normalized = normalized_a if 'dbm_order' in query else normalized_b
+        return json.dumps({'query': normalized, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+
+    # The reused id belongs to a different statement, so it is baselined instead of being merged with the stale
+    # row. Without keying on the SQL identity the two rows would merge and emit a spurious 5000 delta.
+    assert rows == []
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
