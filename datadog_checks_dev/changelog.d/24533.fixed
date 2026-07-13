@@ -1,0 +1,1 @@
+Preserve ``docker_run`` environment variables across e2e process boundaries so ``assert_all_discovery_candidates_stable`` can invoke ``docker compose`` without requiring fallback defaults in the compose file.
