@@ -177,14 +177,14 @@ class LustreCheck(AgentCheck):
         devices = []
         if self._use_yaml:
             try:
-                output = self._run_command('lctl', 'dl', '-y')
+                output = self._run_command('lctl', 'dl', '-y', sudo=True)
                 device_data = yaml.safe_load(output)
                 devices = device_data.get('devices', [])
             except AttributeError:
                 self.log.debug('Device update failed with yaml flag, retrying without it.')
                 self._use_yaml = False
         if not self._use_yaml:
-            output = self._run_command('lctl', 'dl')
+            output = self._run_command('lctl', 'dl', sudo=True)
             for device_line in output.splitlines():
                 device_attr = device_line.split()
                 if not len(device_attr) == len(DEVICE_ATTR_NAMES):
@@ -260,9 +260,6 @@ class LustreCheck(AgentCheck):
                 cmd, timeout=5, shell=False, capture_output=True, text=True
             )  # Explicitly disable shell invocation to prevent command injection
             if not output.returncode == 0 and output.stderr:
-                # Surface command failures at WARNING (not DEBUG) so data gaps are visible.
-                # A silent DEBUG here is what let the `get_param -y` incompatibility (#24475)
-                # empty out client stats while the check still reported [OK].
                 self.log.warning(
                     'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
                 )

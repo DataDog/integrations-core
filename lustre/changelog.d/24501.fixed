@@ -1,1 +1,0 @@
-Fix client stats collection on Lustre 2.15.x clients (e.g. AWS FSx for Lustre) by calling `lctl get_param -n` instead of `-ny`; the `-y` flag was only added in Lustre 2.16, so on 2.15.x every stats-based family (llite/mdc/osc/ldlm) was silently collected as empty.
