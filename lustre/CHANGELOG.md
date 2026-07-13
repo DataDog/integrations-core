@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 1.5.1b1 / 2026-07-13
+
+***Fixed***:
+
+* Fix silent client metric gaps on Lustre 2.15.x clients (e.g. AWS FSx for Lustre): use `lctl get_param -n` instead of `-ny` (the `-y` YAML flag was only added in Lustre 2.16) so llite/mdc/osc/ldlm stats are collected, and run `lctl dl` with sudo so device.health/refcount are collected. Command failures are now logged at WARNING instead of DEBUG so future gaps are visible. ([#24504](https://github.com/DataDog/integrations-core/pull/24504))
+
 ## 1.5.0 / 2026-04-01 / Agent 7.78.1
 
 ***Added***:
