@@ -20,7 +20,6 @@ from ddev.ai.phases.openmetrics import inspect_endpoint as inspect_endpoint_modu
 from ddev.ai.phases.openmetrics.inspect_endpoint import (
     EndpointInspectionError,
     EndpointResult,
-    EndpointSpec,
     InspectEndpointPhase,
     InspectInput,
     _build_jsonl_rows,
@@ -125,7 +124,7 @@ def _make_phase(
     phase_id: str = PHASE_ID,
     runtime_variables: dict[str, str] | None = None,
 ) -> tuple[InspectEndpointPhase, CheckpointManager]:
-    checkpoint_manager = CheckpointManager(flow_dir / "checkpoints.yaml")
+    checkpoint_mgr = CheckpointManager(flow_dir / "checkpoints.yaml")
     context = FlowContext(
         runtime_variables=(
             runtime_variables if runtime_variables is not None else _inspect_input_var((ENDPOINT_NAME, ENDPOINT_URL))
@@ -136,11 +135,11 @@ def _make_phase(
         phase_id=phase_id,
         dependencies=[],
         config=PhaseConfig(name=phase_id),
-        checkpoint_manager=checkpoint_manager,
+        checkpoint_manager=checkpoint_mgr,
         context=context,
     )
     phase.queue = message_queue
-    return phase, checkpoint_manager
+    return phase, checkpoint_mgr
 
 
 def _install_mock_transport(monkeypatch, handler):
@@ -227,17 +226,17 @@ async def test_success_with_prometheus_body(flow_dir, message_queue, monkeypatch
         monkeypatch,
         _ok_handler(200, PROMETHEUS_BODY, "text/plain; version=0.0.4; charset=utf-8"),
     )
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     expected_families = list(parse_prometheus(PROMETHEUS_BODY))
 
-    memory = mgr.memory_content(PHASE_ID)
+    memory = checkpoint_mgr.memory_content(PHASE_ID)
     assert ENDPOINT_URL in memory
     assert "HTTP status:** 200" in memory
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     endpoint = _endpoint_data(checkpoint)
     assert endpoint["exposition_format"] == "prometheus"
@@ -252,11 +251,11 @@ async def test_success_with_prometheus_body(flow_dir, message_queue, monkeypatch
 async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatch):
     content_type = "application/openmetrics-text; version=1.0.0; charset=utf-8"
     _install_mock_transport(monkeypatch, _ok_handler(200, OPENMETRICS_BODY_CLEAN, content_type))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     endpoint = _endpoint_data(checkpoint)
     assert endpoint["exposition_format"] == "openmetrics"
@@ -269,7 +268,7 @@ async def test_success_with_openmetrics_body(flow_dir, message_queue, monkeypatc
 # ---------------------------------------------------------------------------
 
 
-async def _assert_phase_fails(phase, mgr, message_queue, *, error_contains: str):
+async def _assert_phase_fails(phase, checkpoint_mgr, message_queue, *, error_contains: str):
     """Run process_message, expect failure, drive on_error like the framework would."""
     trigger = PhaseTrigger(id="start", phase_id=None)
     try:
@@ -277,7 +276,7 @@ async def _assert_phase_fails(phase, mgr, message_queue, *, error_contains: str)
     except Exception as raised:
         wrapped = MessageProcessingError(phase._phase_id, trigger, raised)
         await phase.on_error(wrapped)
-        checkpoint = mgr.read()[phase._phase_id]
+        checkpoint = checkpoint_mgr.read()[phase._phase_id]
         assert isinstance(checkpoint, FailedCheckpoint)
         assert error_contains.lower() in checkpoint.error.lower()
         msg = message_queue.get_nowait()
@@ -289,31 +288,31 @@ async def _assert_phase_fails(phase, mgr, message_queue, *, error_contains: str)
 
 async def test_failure_non_200_status(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(503, "service unavailable", "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="HTTP 503")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="HTTP 503")
 
 
 async def test_failure_body_is_html(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, "<html>not metrics</html>", "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="not valid prometheus exposition")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="not valid prometheus exposition")
 
 
 async def test_failure_body_is_json(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, '{"hello": "world"}', "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="prometheus")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="prometheus")
 
 
 async def test_failure_zero_families(flow_dir, message_queue, monkeypatch):
     body = "\n\n# just a stray comment, not a HELP/TYPE\n\n"
     _install_mock_transport(monkeypatch, _ok_handler(200, body, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="zero metric families")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="zero metric families")
 
 
 async def test_failure_openmetrics_missing_eof(flow_dir, message_queue, monkeypatch):
@@ -321,27 +320,27 @@ async def test_failure_openmetrics_missing_eof(flow_dir, message_queue, monkeypa
         monkeypatch,
         _ok_handler(200, PROMETHEUS_BODY, "application/openmetrics-text; version=1.0.0"),
     )
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="not valid openmetrics exposition")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="not valid openmetrics exposition")
 
 
 async def test_failure_timeout(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _raising_handler(httpx.TimeoutException("slow")))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="timed out")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="timed out")
 
 
 async def test_failure_request_error(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _raising_handler(httpx.ConnectError("refused")))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="request failed")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="request failed")
 
 
 async def test_failure_missing_inspect_input(flow_dir, message_queue):
-    phase, mgr = _make_phase(flow_dir, message_queue, runtime_variables={})
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue, runtime_variables={})
 
     trigger = PhaseTrigger(id="start", phase_id=None)
     with pytest.raises(ConfigError, match="inspect_input"):
@@ -350,7 +349,7 @@ async def test_failure_missing_inspect_input(flow_dir, message_queue):
     wrapped = MessageProcessingError(phase._phase_id, trigger, ConfigError("inspect_input required"))
     await phase.on_error(wrapped)
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, FailedCheckpoint)
     msg = message_queue.get_nowait()
     assert isinstance(msg, PhaseFailedMessage)
@@ -467,11 +466,11 @@ def test_build_memory_text_renders_every_endpoint(tmp_path):
 
 async def test_jsonl_path_in_checkpoint(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     path_str = _endpoint_data(checkpoint)["metrics_jsonl_path"]
     assert isinstance(path_str, str)
@@ -481,11 +480,11 @@ async def test_jsonl_path_in_checkpoint(flow_dir, message_queue, monkeypatch):
 
 async def test_jsonl_one_row_per_family(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     rows = _read_family_rows(_jsonl_path(flow_dir))
     expected_families = list(parse_prometheus(PROMETHEUS_BODY))
@@ -494,7 +493,7 @@ async def test_jsonl_one_row_per_family(flow_dir, message_queue, monkeypatch):
 
 async def test_jsonl_row_schema(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -509,7 +508,7 @@ async def test_jsonl_row_schema(flow_dir, message_queue, monkeypatch):
 
 async def test_jsonl_counter_total_stripped_prometheus(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -524,7 +523,7 @@ async def test_jsonl_counter_total_stripped_openmetrics(flow_dir, message_queue,
         monkeypatch,
         _ok_handler(200, OPENMETRICS_BODY_CLEAN, "application/openmetrics-text; version=1.0.0"),
     )
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -536,7 +535,7 @@ async def test_jsonl_counter_total_stripped_openmetrics(flow_dir, message_queue,
 
 async def test_jsonl_histogram_collapses_to_single_row(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -553,7 +552,7 @@ async def test_jsonl_summary_collapses_to_single_row(flow_dir, message_queue, mo
         monkeypatch,
         _ok_handler(200, OPENMETRICS_BODY_CLEAN, "application/openmetrics-text; version=1.0.0"),
     )
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -570,7 +569,7 @@ async def test_jsonl_unit_populated_for_openmetrics(flow_dir, message_queue, mon
         monkeypatch,
         _ok_handler(200, OPENMETRICS_BODY_WITH_UNIT, "application/openmetrics-text; version=1.0.0"),
     )
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -581,7 +580,7 @@ async def test_jsonl_unit_populated_for_openmetrics(flow_dir, message_queue, mon
 
 async def test_jsonl_unit_empty_for_prometheus(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -602,7 +601,7 @@ def test_jsonl_label_keys_are_union_across_samples():
 
 async def test_jsonl_sample_count_matches_parser(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -615,7 +614,7 @@ async def test_jsonl_sample_count_matches_parser(flow_dir, message_queue, monkey
 
 async def test_jsonl_ordering_matches_parser(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -642,13 +641,13 @@ async def test_jsonl_is_deterministic_byte_for_byte(flow_dir, message_queue, mon
 
 async def test_memory_text_includes_jsonl_path(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    memory = mgr.memory_content(PHASE_ID)
+    memory = checkpoint_mgr.memory_content(PHASE_ID)
     assert _endpoint_data(checkpoint)["metrics_jsonl_path"] in memory
 
 
@@ -660,21 +659,21 @@ async def test_jsonl_sidecar_atomic_on_os_replace_failure(flow_dir, message_queu
 
     monkeypatch.setattr(inspect_endpoint_module.os, "replace", boom)
 
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="Failed to write metrics catalog")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="Failed to write metrics catalog")
 
     assert not _jsonl_path(flow_dir).exists()
 
 
 async def test_jsonl_failure_propagates_as_phase_failure(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     blocker = flow_dir / f"{PHASE_ID}_{ENDPOINT_NAME}_metrics.jsonl.tmp"
     blocker.mkdir()
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="Failed to write metrics catalog")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="Failed to write metrics catalog")
 
 
 # ---------------------------------------------------------------------------
@@ -684,11 +683,11 @@ async def test_jsonl_failure_propagates_as_phase_failure(flow_dir, message_queue
 
 async def test_exposition_path_in_checkpoint(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     path_str = _endpoint_data(checkpoint)["exposition_path"]
     assert isinstance(path_str, str)
@@ -698,7 +697,7 @@ async def test_exposition_path_in_checkpoint(flow_dir, message_queue, monkeypatc
 
 async def test_exposition_file_holds_verbatim_body(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, _mgr = _make_phase(flow_dir, message_queue)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -708,24 +707,26 @@ async def test_exposition_file_holds_verbatim_body(flow_dir, message_queue, monk
 
 async def test_memory_text_includes_exposition_path(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
-    assert _endpoint_data(checkpoint)["exposition_path"] in mgr.memory_content(PHASE_ID)
+    assert _endpoint_data(checkpoint)["exposition_path"] in checkpoint_mgr.memory_content(PHASE_ID)
 
 
 async def test_exposition_failure_propagates_as_phase_failure(flow_dir, message_queue, monkeypatch):
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue)
+    phase, checkpoint_mgr = _make_phase(flow_dir, message_queue)
 
     # Block only the exposition temp path (the JSONL is written first and succeeds).
     blocker = flow_dir / f"{PHASE_ID}_{ENDPOINT_NAME}_exposition.txt.tmp"
     blocker.mkdir()
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="Failed to write exposition snapshot")
+    await _assert_phase_fails(
+        phase, checkpoint_mgr, message_queue, error_contains="Failed to write exposition snapshot"
+    )
     assert not _exposition_path(flow_dir).exists()
 
 
@@ -741,29 +742,33 @@ def test_normalize_endpoint_name_variants():
     assert normalize_endpoint_name("foo123") == "foo123"
 
 
-def test_normalize_endpoint_name_rejects_leading_digit():
-    with pytest.raises(ValueError, match="not a valid identifier"):
-        normalize_endpoint_name("9metrics")
-
-
-def test_endpoint_spec_rejects_url_without_scheme():
-    with pytest.raises(ValidationError):
-        EndpointSpec(name="main", url="example.com/metrics")
-
-
-def test_inspect_input_rejects_empty_endpoints():
-    with pytest.raises(ValidationError, match="at least one endpoint"):
-        InspectInput(endpoints=[])
-
-
-def test_inspect_input_rejects_duplicate_names():
-    with pytest.raises(ValidationError, match="duplicate endpoint names"):
-        InspectInput(
-            endpoints=[
-                EndpointSpec(name="App Controller", url="http://h:1/m"),
-                EndpointSpec(name="app-controller", url="http://h:2/m"),
-            ]
-        )
+@pytest.mark.parametrize(
+    "endpoints, match",
+    [
+        (
+            [{"name": "9metrics", "url": "http://h/m"}],
+            "not a valid identifier",
+        ),
+        (
+            [{"name": "main", "url": "example.com/metrics"}],
+            "URL must start with",
+        ),
+        (
+            [],
+            "at least one endpoint",
+        ),
+        (
+            [
+                {"name": "App Controller", "url": "http://h:1/m"},
+                {"name": "app-controller", "url": "http://h:2/m"},
+            ],
+            "duplicate endpoint names",
+        ),
+    ],
+)
+def test_inspect_input_invalid_inputs(endpoints, match):
+    with pytest.raises(ValidationError, match=match):
+        InspectInput(endpoints=endpoints)
 
 
 # ---------------------------------------------------------------------------
@@ -783,16 +788,16 @@ def _two_endpoint_run(flow_dir, message_queue, monkeypatch):
             }
         ),
     )
-    phase, mgr = _make_phase(
+    phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
         runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
     )
-    return phase, mgr, url_a, url_b
+    return phase, checkpoint_mgr, url_a, url_b
 
 
 async def test_multi_endpoint_writes_one_jsonl_per_endpoint(flow_dir, message_queue, monkeypatch):
-    phase, _mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+    phase, _checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -803,7 +808,7 @@ async def test_multi_endpoint_writes_one_jsonl_per_endpoint(flow_dir, message_qu
 
 
 async def test_multi_endpoint_writes_one_exposition_per_endpoint(flow_dir, message_queue, monkeypatch):
-    phase, _mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+    phase, _checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -812,7 +817,7 @@ async def test_multi_endpoint_writes_one_exposition_per_endpoint(flow_dir, messa
 
 
 async def test_jsonl_first_row_is_provenance_header(flow_dir, message_queue, monkeypatch):
-    phase, _mgr, url_a, url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+    phase, _checkpoint_mgr, url_a, url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -826,7 +831,7 @@ async def test_jsonl_first_row_is_provenance_header(flow_dir, message_queue, mon
 
 
 async def test_family_rows_follow_header_unchanged_schema(flow_dir, message_queue, monkeypatch):
-    phase, _mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+    phase, _checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -837,11 +842,11 @@ async def test_family_rows_follow_header_unchanged_schema(flow_dir, message_queu
 
 
 async def test_checkpoint_lists_all_endpoints(flow_dir, message_queue, monkeypatch):
-    phase, mgr, url_a, url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+    phase, checkpoint_mgr, url_a, url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert isinstance(checkpoint, SuccessCheckpoint)
     endpoints = checkpoint.phase_data["endpoints"]
     assert [e["name"] for e in endpoints] == ["agent", "operator"]
@@ -865,11 +870,11 @@ async def test_checkpoint_lists_all_endpoints(flow_dir, message_queue, monkeypat
 
 
 async def test_memory_text_includes_every_endpoint(flow_dir, message_queue, monkeypatch):
-    phase, mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+    phase, checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
-    memory = mgr.memory_content(PHASE_ID)
+    memory = checkpoint_mgr.memory_content(PHASE_ID)
     for name in ("agent", "operator"):
         assert name in memory
         assert str(_jsonl_path(flow_dir, name)) in memory
@@ -888,13 +893,13 @@ async def test_all_or_nothing_one_endpoint_fails_aborts_phase(flow_dir, message_
             }
         ),
     )
-    phase, mgr = _make_phase(
+    phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
         runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
     )
 
-    raised = await _assert_phase_fails(phase, mgr, message_queue, error_contains="[operator]")
+    raised = await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="[operator]")
     assert "HTTP 503" in str(raised)
     assert not _jsonl_path(flow_dir, "agent").exists()
     assert not _exposition_path(flow_dir, "agent").exists()
@@ -923,13 +928,13 @@ async def test_all_or_nothing_cleans_up_partial_write_of_failing_endpoint(flow_d
 
     monkeypatch.setattr(inspect_endpoint_module.os, "replace", replace_failing_for_operator_exposition)
 
-    phase, mgr = _make_phase(
+    phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
         runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
     )
 
-    await _assert_phase_fails(phase, mgr, message_queue, error_contains="endpoint(s) failed to inspect")
+    await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="endpoint(s) failed to inspect")
 
     for name in ("agent", "operator"):
         assert not _jsonl_path(flow_dir, name).exists()
@@ -948,13 +953,13 @@ async def test_multiple_failures_are_all_reported(flow_dir, message_queue, monke
             }
         ),
     )
-    phase, mgr = _make_phase(
+    phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
         runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
     )
 
-    raised = await _assert_phase_fails(phase, mgr, message_queue, error_contains="2 endpoint(s) failed")
+    raised = await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="2 endpoint(s) failed")
     text = str(raised)
     assert "agent" in text
     assert "operator" in text
@@ -977,7 +982,7 @@ async def test_multiple_failures_are_all_reported(flow_dir, message_queue, monke
     ],
 )
 async def test_invalid_inspect_input_raises_config_error(flow_dir, message_queue, runtime_variables, match):
-    phase, _mgr = _make_phase(flow_dir, message_queue, runtime_variables=runtime_variables)
+    phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue, runtime_variables=runtime_variables)
     with pytest.raises(ConfigError, match=match):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -985,24 +990,26 @@ async def test_invalid_inspect_input_raises_config_error(flow_dir, message_queue
 async def test_endpoint_name_normalized_to_snake_case(flow_dir, message_queue, monkeypatch):
     url = "http://host:9962/metrics"
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
-    phase, mgr = _make_phase(flow_dir, message_queue, runtime_variables=_inspect_input_var(("App Controller", url)))
+    phase, checkpoint_mgr = _make_phase(
+        flow_dir, message_queue, runtime_variables=_inspect_input_var(("App Controller", url))
+    )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert _jsonl_path(flow_dir, "app_controller").exists()
     assert _exposition_path(flow_dir, "app_controller").exists()
-    checkpoint = mgr.read()[PHASE_ID]
+    checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert _endpoint_data(checkpoint)["name"] == "app_controller"
 
 
 async def test_multi_endpoint_deterministic_jsonl(flow_dir, message_queue, monkeypatch, tmp_path_factory):
-    phase1, _mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+    phase1, _, _, _ = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
     await phase1.process_message(PhaseTrigger(id="start", phase_id=None))
     first = {name: _jsonl_path(flow_dir, name).read_bytes() for name in ("agent", "operator")}
 
     flow_dir_2 = tmp_path_factory.mktemp("second_run")
     queue_2 = asyncio.Queue()
-    phase2, _mgr2, _a, _b = _two_endpoint_run(flow_dir_2, queue_2, monkeypatch)
+    phase2, _, _, _ = _two_endpoint_run(flow_dir_2, queue_2, monkeypatch)
     await phase2.process_message(PhaseTrigger(id="start", phase_id=None))
     second = {name: _jsonl_path(flow_dir_2, name).read_bytes() for name in ("agent", "operator")}
 
