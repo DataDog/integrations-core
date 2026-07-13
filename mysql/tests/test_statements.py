@@ -328,6 +328,60 @@ def test_statement_metrics_baselines_new_digest_before_merging_query_signature(d
     assert '_dd_statement_source' not in rows[0]
 
 
+@pytest.mark.unit
+def test_statement_metrics_baselines_new_prepared_statement_instance_before_merging_query_signature(
+    dbm_instance, datadog_agent
+):
+    # Two prepared-statement instances (distinct object_instance_begin) share the same sql_text and therefore
+    # the same query_signature. `prepared_statements_instances` rows have a NULL digest, so they must be baselined
+    # and diffed by their instance identity (object_instance_begin) rather than merged by signature before diffing.
+    # Otherwise a newly-prepared instance dumps its full count_execute into a single interval.
+    normalized_query = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
+    query_signature = compute_sql_signature(normalized_query)
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def row(object_instance_begin, count_star):
+        return {
+            '_dd_statement_source': statements.PREPARED_STATEMENT_SOURCE,
+            '_dd_statement_id': object_instance_begin,
+            'schema_name': 'personio',
+            'digest': None,
+            'digest_text': 'SELECT id FROM dbm_order WHERE id = ?',
+            'count_star': count_star,
+            'last_seen': time.time(),
+        }
+
+    rows_by_run = iter(
+        [
+            [row(1001, 100)],
+            [
+                row(1001, 110),
+                row(2002, 5000),  # a newly-prepared instance of the same statement
+            ],
+        ]
+    )
+
+    def obfuscate_sql(query, options=None):
+        return json.dumps({'query': normalized_query, 'metadata': {}})
+
+    with (
+        mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent,
+        mock.patch.object(mysql_check._statement_metrics, '_get_statement_count'),
+        mock.patch.object(mysql_check._statement_metrics, '_query_summary_per_statement', side_effect=rows_by_run),
+    ):
+        mock_agent.side_effect = obfuscate_sql
+
+        assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
+        rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
+
+    assert len(rows) == 1
+    assert rows[0]['query_signature'] == query_signature
+    # Only instance 1001's delta (10) is counted; the newly-seen instance 2002 is baselined, not dumped.
+    assert rows[0]['count_star'] == 10
+    assert '_dd_statement_id' not in rows[0]
+    assert '_dd_statement_source' not in rows[0]
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(
