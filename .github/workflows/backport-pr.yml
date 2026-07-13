@@ -11,15 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for OIDC token federation with dd-octo-sts
-      contents: write  # Push the backport branch
-      pull-requests: write  # Open the backport PR and comment on the source PR
+      # Branch push, PR creation, and PR comments all use the scoped octo-sts token, so the ambient
+      # GITHUB_TOKEN stays read-only to minimize blast radius under pull_request_target.
+      contents: read
+      pull-requests: read
     if: >
       github.event.pull_request.merged
       && (
         github.event.action == 'closed'
         || (
           github.event.action == 'labeled'
-          && contains(github.event.label.name, 'backport')
+          && startsWith(github.event.label.name, 'backport/')
         )
       )
     steps:
