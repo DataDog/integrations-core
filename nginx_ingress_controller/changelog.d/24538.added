@@ -1,0 +1,1 @@
+Add support for `connect_duration_seconds` and `header_duration_seconds` histogram metrics behind the `collect_nginx_histograms` flag.
