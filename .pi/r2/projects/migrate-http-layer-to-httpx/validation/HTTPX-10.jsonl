@@ -1,0 +1,2 @@
+{"ref":{"id":"val-1-mrdwnp6a-loy1w1","source":"subagent_error","createdAt":1783625646897,"charCount":25,"lineCount":1,"preview":"Subagent error: timed out"},"text":"Subagent error: timed out"}
+{"ref":{"id":"val-2-mrdwyqol-rtj4r0","source":"validation","createdAt":1783626162065,"charCount":66,"lineCount":1,"preview":"OK: 6 integrations rerouted through the factory, clean of requests","exitCode":0,"passed":true},"text":"OK: 6 integrations rerouted through the factory, clean of requests"}

@@ -3,10 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import time
 
-import requests
-
 from datadog_checks.base import OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPError, HTTPTimeoutError
 
 from .check import VaultCheckV2
 from .common import API_METHODS, DEFAULT_API_VERSION, SYS_HEALTH_DEFAULT_CODES, SYS_LEADER_DEFAULT_CODES, Api, Leader
@@ -258,11 +256,11 @@ class Vault(OpenMetricsBaseCheck):
             msg = 'The Vault endpoint `{}` returned invalid json data: {}.'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except (requests.exceptions.Timeout, HTTPTimeoutError):
+        except HTTPTimeoutError:
             msg = 'Vault endpoint `{}` timed out after {} seconds'.format(url, self.http.options['timeout'][0])
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)
-        except (requests.exceptions.RequestException, requests.exceptions.ConnectionError) as e:
+        except HTTPError as e:
             msg = 'Error accessing Vault endpoint `{}`: {}'.format(url, e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, message=msg, tags=self._tags)
             raise ApiUnreachable(msg)

@@ -1,1 +1,0 @@
-Fix Cisco ASAv memory coverage in cisco-firepower-asa SNMP profile by replacing hardcoded single-pool scalar OIDs with a full table walk of cempMemPoolTable tagged by pool name.

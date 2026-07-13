@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.0.0 / 2026-07-08
+
+***Changed***:
+
+* Change `ibm_i.can_connect` service check to report OK when connection is successful, even if a query fails or times out. This aligns with the `.can_connect` service checks of our other integrations. ([#23986](https://github.com/DataDog/integrations-core/pull/23986))
+
 ## 4.5.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:

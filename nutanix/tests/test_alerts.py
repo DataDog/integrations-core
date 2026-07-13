@@ -7,8 +7,8 @@ from datetime import datetime
 from unittest import mock
 
 import pytest
-from requests.exceptions import HTTPError
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.nutanix import NutanixCheck
 
@@ -1327,7 +1327,7 @@ def test_get_alert_returns_none_on_404(dd_run_check, mock_instance, mock_http_ge
 
     response = mocker.Mock()
     response.status_code = 404
-    mocker.patch.object(check, '_get_request_data', side_effect=HTTPError(response=response))
+    mocker.patch.object(check, '_get_request_data', side_effect=HTTPStatusError("mocked HTTP error", response=response))
 
     assert check.activity_monitor._get_alert("missing-ext-id") is None
 
@@ -1340,9 +1340,9 @@ def test_get_alert_propagates_on_transient_http_error(dd_run_check, mock_instanc
 
     response = mocker.Mock()
     response.status_code = status_code
-    mocker.patch.object(check, '_get_request_data', side_effect=HTTPError(response=response))
+    mocker.patch.object(check, '_get_request_data', side_effect=HTTPStatusError("mocked HTTP error", response=response))
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(HTTPStatusError):
         check.activity_monitor._get_alert("any-ext-id")
 
 
@@ -1366,7 +1366,9 @@ def test_transient_alert_get_failure_preserves_tracking(
     mocker.patch.object(check.activity_monitor, '_list_alerts_unresolved', return_value=remaining)
     response = mocker.Mock()
     response.status_code = 503
-    mocker.patch.object(check.activity_monitor, '_get_alert', side_effect=HTTPError(response=response))
+    mocker.patch.object(
+        check.activity_monitor, '_get_alert', side_effect=HTTPStatusError("mocked HTTP error", response=response)
+    )
 
     dd_run_check(check)
 
