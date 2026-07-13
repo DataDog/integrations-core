@@ -74,6 +74,16 @@ def test_markdown_with_yaml_only_type_is_file_error(type_):
     assert "not valid in a Markdown file" in error.message
 
 
+def test_markdown_non_string_type_is_file_error():
+    md = MarkdownFile(path=PATH, meta={"type": ["prompt", "memory_prompt"], "name": "a"}, body="sys")
+    output = classify(md)
+
+    assert output.entries == []
+    (error,) = output.file_errors
+    assert error.path == PATH
+    assert "resource type must be a string" in error.message
+
+
 def test_markdown_missing_name_is_file_error():
     md = MarkdownFile(path=PATH, meta={"type": "agent"}, body="sys")
     output = classify(md)
@@ -161,6 +171,16 @@ def test_yaml_markdown_only_type_is_file_error():
     (error,) = output.file_errors
     assert "item 0:" in error.message
     assert "not valid in a YAML file" in error.message
+
+
+def test_yaml_non_string_type_is_file_error():
+    yaml_file = YamlFile(path=YAML_PATH, docs=[{"type": ["phase", "flow"], "config": {"name": "x"}}])
+    output = classify(yaml_file)
+
+    assert output.entries == []
+    (error,) = output.file_errors
+    assert "item 0:" in error.message
+    assert "resource type must be a string" in error.message
 
 
 def test_yaml_named_but_invalid_is_broken_entry():

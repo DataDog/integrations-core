@@ -47,7 +47,7 @@ def test_non_config_files_skipped(tmp_path):
 
 
 def test_broken_files_yielded_as_file_error(tmp_path):
-    write(tmp_path / "broken.md", "---\n")
+    write(tmp_path / "broken.md", "---\nthis: : bad: [\n---\nbody")
     write(tmp_path / "broken.yaml", "this: : bad: [")
 
     results = list(discover([tmp_path]))

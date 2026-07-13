@@ -89,6 +89,10 @@ def _classify_markdown(loaded: MarkdownFile) -> ClassifyOutput:
     if type_ is None:
         return ClassifyOutput()
 
+    if not isinstance(type_, str):
+        message = f"resource type must be a string, got {type(type_).__name__}"
+        return ClassifyOutput(file_errors=[FileError(loaded.path, message)])
+
     spec = TYPE_TABLE.get(type_)
     if spec is None:
         return ClassifyOutput(file_errors=[FileError(loaded.path, f"unknown resource type {type_!r}")])
@@ -126,6 +130,11 @@ def _classify_yaml(loaded: YamlFile) -> ClassifyOutput:
             continue
 
         type_ = item["type"]
+        if not isinstance(type_, str):
+            message = f"item {i}: resource type must be a string, got {type(type_).__name__}"
+            file_errors.append(FileError(loaded.path, message))
+            continue
+
         spec = TYPE_TABLE.get(type_)
         if spec is None or spec.format != "yaml":
             message = f"item {i}: type {type_!r} is not valid in a YAML file"

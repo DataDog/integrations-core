@@ -51,6 +51,7 @@ dynamic = ["version"]
 [project.optional-dependencies]
 ai = [
     "prometheus-client",
+    "python-frontmatter",
 ]
 
 [project.urls]

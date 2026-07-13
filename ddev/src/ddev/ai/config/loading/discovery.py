@@ -16,19 +16,20 @@ from ddev.ai.config.loading.yaml import load_yaml
 def discover(dirs: list[Path]) -> Iterator[MarkdownFile | YamlFile | FileError]:
     """Walk the given directories and yield parsed config files or errors."""
     for base in dirs:
-        for path in sorted(base.rglob("*")):
-            if not path.is_file():
-                continue
-            suffix = path.suffix.lower()
-            try:
-                if suffix == ".md":
-                    result = parse_markdown(path)
-                elif suffix in {".yaml", ".yml"}:
-                    result = load_yaml(path)
-                else:
+        for root, dirnames, filenames in base.walk():
+            dirnames.sort()
+            for filename in sorted(filenames):
+                path = root / filename
+                suffix = path.suffix.lower()
+                try:
+                    if suffix == ".md":
+                        result = parse_markdown(path)
+                    elif suffix in {".yaml", ".yml"}:
+                        result = load_yaml(path)
+                    else:
+                        continue
+                except ConfigError as e:
+                    yield FileError(path, str(e))
                     continue
-            except ConfigError as e:
-                yield FileError(path, str(e))
-                continue
-            if result is not None:
-                yield result
+                if result is not None:
+                    yield result

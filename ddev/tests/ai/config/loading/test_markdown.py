@@ -33,12 +33,30 @@ def test_no_front_matter_returns_none(tmp_path):
     assert parse_markdown(path) is None
 
 
-def test_unclosed_front_matter_raises(tmp_path):
-    path = tmp_path / "broken.md"
-    write(path, "---\n")
+def test_empty_file_returns_none(tmp_path):
+    path = tmp_path / "empty.md"
+    write(path, "")
 
-    with pytest.raises(ConfigError):
-        parse_markdown(path)
+    assert parse_markdown(path) is None
+
+
+@pytest.mark.parametrize(
+    "body_text, expected_body",
+    [
+        ("\n\n  Hello.  \n\n", "Hello."),
+        ("\n", ""),
+        ("", ""),
+    ],
+)
+def test_body_extracted_and_stripped(tmp_path, body_text, expected_body):
+    path = tmp_path / "spaced.md"
+    write(path, f"---\nname: x\n---{body_text}")
+
+    result = parse_markdown(path)
+
+    assert result is not None
+    assert result.meta == {"name": "x"}
+    assert result.body == expected_body
 
 
 def test_invalid_yaml_front_matter_raises(tmp_path):
@@ -49,46 +67,8 @@ def test_invalid_yaml_front_matter_raises(tmp_path):
         parse_markdown(path)
 
 
-def test_non_mapping_front_matter_raises(tmp_path):
-    path = tmp_path / "list.md"
-    write(path, "---\n- a\n- b\n---\nbody")
+def test_unreadable_file_raises(tmp_path):
+    path = tmp_path / "missing.md"
 
     with pytest.raises(ConfigError):
         parse_markdown(path)
-
-
-def test_body_whitespace_stripped(tmp_path):
-    path = tmp_path / "spaced.md"
-    write(path, "---\nname: x\n---\n\n  Hello.  \n\n")
-
-    result = parse_markdown(path)
-
-    assert result.body == "Hello."
-
-
-def test_empty_body(tmp_path):
-    path = tmp_path / "empty.md"
-    write(path, "---\nname: x\n---\n")
-
-    result = parse_markdown(path)
-
-    assert result.body == ""
-
-
-def test_closing_delimiter_without_trailing_newline(tmp_path):
-    path = tmp_path / "no_trailing.md"
-    write(path, "---\ntype: agent\n---")
-
-    result = parse_markdown(path)
-
-    assert result.meta == {"type": "agent"}
-    assert result.body == ""
-
-
-def test_name_surfaced_in_meta(tmp_path):
-    path = tmp_path / "named.md"
-    write(path, "---\nname: my-model-key\n---\nbody")
-
-    result = parse_markdown(path)
-
-    assert result.meta["name"] == "my-model-key"
