@@ -4,13 +4,15 @@
 
 from unittest.mock import MagicMock
 
+import pytest
+
 import ddev.ai.agent.provider as agent_provider
 from ddev.ai.agent.provider import AnthropicProvider
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
 
 
-def test_anthropic_client_is_created_lazily_and_cached(monkeypatch):
+def test_anthropic_client_is_created_lazily_and_cached(monkeypatch: pytest.MonkeyPatch):
     client = MagicMock()
     client_factory = MagicMock(return_value=client)
     monkeypatch.setattr(agent_provider.anthropic, "AsyncAnthropic", client_factory)
@@ -22,7 +24,7 @@ def test_anthropic_client_is_created_lazily_and_cached(monkeypatch):
     client_factory.assert_called_once_with(api_key="secret")
 
 
-def test_anthropic_provider_forwards_agent_configuration(monkeypatch):
+def test_anthropic_provider_forwards_agent_configuration(monkeypatch: pytest.MonkeyPatch):
     client = MagicMock()
     monkeypatch.setattr(agent_provider.anthropic, "AsyncAnthropic", MagicMock(return_value=client))
     agent_factory = MagicMock()
