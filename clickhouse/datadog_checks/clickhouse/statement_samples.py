@@ -9,6 +9,7 @@ This module provides real-time visibility into currently executing queries,
 
 from __future__ import annotations
 
+import math
 import time
 from typing import TYPE_CHECKING
 
@@ -123,13 +124,22 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         config: QuerySamples,
         buffer_config: AsynchronousInsertBufferSnapshot,
     ):
-        collection_interval = config.collection_interval
+        samples_collection_interval = config.collection_interval
+
+        enabled_intervals = []
+        if config.enabled:
+            enabled_intervals.append(samples_collection_interval)
+        if buffer_config.enabled:
+            enabled_intervals.append(buffer_config.collection_interval)
+        collection_interval = (
+            math.gcd(*(int(i) for i in enabled_intervals)) if enabled_intervals else samples_collection_interval
+        )
 
         super(ClickhouseStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
             run_sync=config.run_sync,
-            enabled=config.enabled,
+            enabled=config.enabled or buffer_config.enabled,
             dbms="clickhouse",
             min_collection_interval=check.check_interval if hasattr(check, 'check_interval') else 15,
             expected_db_exceptions=(Exception,),
@@ -152,7 +162,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         }
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
-        self._collection_interval = collection_interval
+        self._collection_interval = samples_collection_interval
+        self._last_samples_time = 0.0
         self._payload_row_limit = config.payload_row_limit
 
         # Async insert buffer snapshot collapses into this job
@@ -596,7 +607,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
         try:
-            self._collect_samples()
+            if self._config.enabled and time.time() - self._last_samples_time >= self._collection_interval:
+                self._last_samples_time = time.time()
+                self._collect_samples()
         except Exception as e:
             self._log.exception("Failed to collect samples snapshot: %s", e)
             self._check.count(
