@@ -76,3 +76,39 @@ def test_directories_not_yielded(tmp_path):
 
     assert all(r.path.is_file() for r in results)
     assert not any(isinstance(r, (MarkdownFile, YamlFile)) and r.path.is_dir() for r in results)
+
+
+def test_same_directory_listed_twice_yields_each_file_once(tmp_path):
+    write(tmp_path / "a.md", "---\nname: a\n---\nbody")
+
+    results = list(discover([tmp_path, tmp_path]))
+
+    assert [r.path for r in results] == [tmp_path / "a.md"]
+
+
+def test_overlapping_directories_yield_each_file_once(tmp_path):
+    write(tmp_path / "sub" / "a.md", "---\nname: a\n---\nbody")
+
+    results = list(discover([tmp_path, tmp_path / "sub"]))
+
+    assert [r.path for r in results] == [tmp_path / "sub" / "a.md"]
+
+
+def test_symlinked_directory_alias_yields_each_file_once(tmp_path):
+    real = tmp_path / "real"
+    write(real / "a.md", "---\nname: a\n---\nbody")
+    link = tmp_path / "link"
+    link.symlink_to(real, target_is_directory=True)
+
+    results = list(discover([real, link]))
+
+    assert len(results) == 1
+
+
+def test_non_overlapping_directories_are_all_walked(tmp_path):
+    write(tmp_path / "one" / "a.md", "---\nname: a\n---\nbody")
+    write(tmp_path / "two" / "b.md", "---\nname: b\n---\nbody")
+
+    results = list(discover([tmp_path / "one", tmp_path / "two"]))
+
+    assert {r.path for r in results} == {tmp_path / "one" / "a.md", tmp_path / "two" / "b.md"}

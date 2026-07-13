@@ -220,6 +220,15 @@ def test_flow_conflict_surfaces_as_broken(tmp_path):
         eng.get_flow("demo")
 
 
+def test_overlapping_core_and_user_dir_is_not_a_false_conflict(tmp_path):
+    """A file reachable from both core and an overlapping user dir is read once, not conflicting."""
+    write_full_flow(tmp_path)
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[str(tmp_path)], phase_registry=StubReg())
+    assert not eng.has_conflicts
+    assert eng.flows["demo"].status == ConfigStatus.OK
+    assert eng.get_flow("demo").variables == {"x": "hi"}
+
+
 # ---------------------------------------------------------------------------
 # Directory validation & real phase registry
 # ---------------------------------------------------------------------------
