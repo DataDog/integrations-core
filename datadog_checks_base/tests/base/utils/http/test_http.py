@@ -15,6 +15,7 @@ import requests_unixsocket
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http_exceptions import HTTPSSLError, HTTPTimeoutError
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -151,7 +152,7 @@ class TestTLSCiphers:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
         assert http.session.verify == cert_path  # The session attribute instantiates the SSLContext
-        with pytest.raises(requests.exceptions.SSLError):
+        with pytest.raises(HTTPSSLError):
             http.get(url)
 
     def test_http_failure_with_ssl_defaults(self, openssl_https_server):
@@ -168,7 +169,7 @@ class TestTLSCiphers:
         # Mock SSL set_ciphers to disable it and use the default ciphers
         with mock.patch.object(ssl.SSLContext, 'set_ciphers'):
             http = RequestsWrapper(instance, init_config)
-            with pytest.raises(requests.exceptions.SSLError):
+            with pytest.raises(HTTPSSLError):
                 http.get(url)
 
 
@@ -268,7 +269,7 @@ class TestSession:
 
         Here we test two things:
         - We pass the timemout option correctly to the requests library.
-        - We let the requests.exceptions.Timeout bubble up from the requests library.
+        - The timeout surfaces as the agnostic HTTPTimeoutError.
 
         We trust requests to respect the timeout so we mock its response.
         """
@@ -277,7 +278,7 @@ class TestSession:
         mock_session.get.side_effect = requests.exceptions.Timeout()
         http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08}, session=mock_session)
 
-        with pytest.raises(requests.exceptions.Timeout):
+        with pytest.raises(HTTPTimeoutError):
             http.get('https://foobar.com')
 
         assert 'timeout' in mock_session.get.call_args.kwargs, mock_session.get.call_args.kwargs

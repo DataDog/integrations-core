@@ -11,6 +11,7 @@ import pytest
 import requests
 import simplejson as json
 
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.openstack_controller.legacy.api import ApiFactory, Authenticator, Credential, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import (
     AuthenticationNeeded,
@@ -704,9 +705,9 @@ def test__get_paginated_list(requests_wrapper):
         "datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request",
         side_effect=[
             # First call: 3 exceptions -> failure
-            requests.exceptions.HTTPError,
-            requests.exceptions.HTTPError,
-            requests.exceptions.HTTPError,
+            HTTPStatusError("mocked HTTP error"),
+            HTTPStatusError("mocked HTTP error"),
+            HTTPStatusError("mocked HTTP error"),
         ],
     ):
         # First call
@@ -733,7 +734,7 @@ def test__get_paginated_list(requests_wrapper):
         "datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request",
         side_effect=[
             # Third call: 1 exception, limit is divided once by 2
-            requests.exceptions.HTTPError,
+            HTTPStatusError("mocked HTTP error"),
             {"obj": [{"id": 0}, {"id": 1}], "obj_links": "test"},
             {"obj": [{"id": 2}, {"id": 3}], "obj_links": "test"},
             {"obj": [{"id": 4}]},
@@ -781,7 +782,7 @@ def test__make_request_failure(requests_wrapper):
             api._make_request("", {})
 
         response_mock.status_code = 500
-        with pytest.raises(requests.exceptions.HTTPError):
+        with pytest.raises(HTTPStatusError):
             api._make_request("", {})
 
         response_mock.raise_for_status.side_effect = Exception
