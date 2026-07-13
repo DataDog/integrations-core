@@ -1,13 +1,10 @@
-"""Trigger the release-notification Datadog workflow with structured facts.
+"""Send a rendered release notification through a Datadog workflow.
 
-The Datadog workflow owns the Slack message presentation; this script only
-sends the facts (kind + repository + action_url + context), so the message
-wording can be iterated in the workflow without a repo change. Credentials are
-minted in CI by dd-sts (DD-API-KEY + a DD-APPLICATION-KEY with Actions API
-access).
+The workflow owns the Slack connection and destination; this script owns the
+message. Credentials are minted in CI by dd-sts.
 
 Env: DD_API_KEY, DD_APP_KEY, DD_WORKFLOW_ID (all required or no-op), DD_SITE
-(default datadoghq.com), SOURCE_REPO, REF, REF_URL, PACKAGES, RUN_URL.
+(default datadoghq.com), SOURCE_REPO, REF, PACKAGES, RUN_URL.
 
 Error handling keeps a misconfiguration from passing as a green run:
 
@@ -24,7 +21,18 @@ import sys
 import urllib.error
 import urllib.request
 
-KIND = "wheel-release-pending-approval"
+
+def build_text(source_repo: str, ref: str, packages: str, run_url: str) -> str:
+    """Return the release notification message body."""
+    # TODO: this fires before the approval gate, so the release is pending. Once
+    # the `release` environment gate is removed, reword to "Wheel release starting"
+    # with a "View release run" link, since the release will start immediately.
+    return (
+        f":hourglass_flowing_sand: *Wheel release pending approval* — `{source_repo}`\n"
+        f"• ref: `{ref[:12] or '—'}`\n"
+        f"• packages: {packages.strip() or 'auto-detect from tags at HEAD'}\n"
+        f"• <{run_url}|Review &amp; approve →>"
+    )
 
 
 def report_config_error(error: str) -> None:
@@ -41,13 +49,9 @@ def report_config_error(error: str) -> None:
             summary.write(f"### \u274c Release notification failed\n\n{message}\n")
 
 
-def post(api_url: str, api_key: str, app_key: str, payload: dict) -> bool:
-    """Trigger the workflow; return False only on a persistent misconfiguration.
-
-    Success and transient failures return True (transient ones only warn), so the
-    caller fails the step exclusively for problems that need a human fix.
-    """
-    data = json.dumps({"meta": {"payload": payload}}).encode()
+def post(api_url: str, api_key: str, app_key: str, text: str) -> bool:
+    """Trigger the workflow; return False only on a persistent misconfiguration."""
+    data = json.dumps({"meta": {"payload": {"text": text}}}).encode()
     request = urllib.request.Request(
         api_url,
         data=data,
@@ -79,16 +83,14 @@ def main() -> None:
         print("Datadog workflow credentials not configured; skipping notification.")
         return
     site = os.environ.get("DD_SITE", "").strip() or "datadoghq.com"
-    payload = {
-        "kind": KIND,
-        "repository": os.environ.get("SOURCE_REPO", "integrations-core"),
-        "action_url": os.environ.get("RUN_URL", ""),
-        "ref": os.environ.get("REF", ""),
-        "ref_url": os.environ.get("REF_URL", ""),
-        "packages": os.environ.get("PACKAGES", ""),
-    }
+    text = build_text(
+        os.environ.get("SOURCE_REPO", "integrations-core"),
+        os.environ.get("REF", ""),
+        os.environ.get("PACKAGES", ""),
+        os.environ.get("RUN_URL", ""),
+    )
     api_url = f"https://api.{site}/api/v2/workflows/{workflow_id}/instances"
-    if not post(api_url, api_key, app_key, payload):
+    if not post(api_url, api_key, app_key, text):
         sys.exit(1)
 
 

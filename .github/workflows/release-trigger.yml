@@ -65,7 +65,7 @@ jobs:
   # TODO: this notification currently runs before the approval gate, so it
   # announces a *pending* release. Once the `release` environment gate is removed
   # the release starts immediately — switch `needs` back to the release step and
-  # update the wording in notify_slack.py to "release starting".
+  # update the wording in notify_release.py to "release starting".
   notify:
     name: Notify pending release
     needs: context
@@ -91,7 +91,6 @@ jobs:
           DD_WORKFLOW_ID: 8f4e31b8-8a2a-4e46-a0c3-9a25c989108e
           SOURCE_REPO: integrations-core
           REF: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
-          REF_URL: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
           PACKAGES: ${{ inputs.packages || '' }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python3 .github/workflows/scripts/notify_release.py
