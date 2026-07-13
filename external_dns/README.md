@@ -32,7 +32,7 @@ metadata:
     ad.datadoghq.com/external-dns.instances: '[{"prometheus_url":"http://%%host%%:7979/metrics", "tags":["externaldns-pod:%%host%%"]}]'
 ```
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: external_dns`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][9].
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: external_dns`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][9].
 
 - The `externaldns-pod` tag keeps track of the target DNS pod IP. The other tags are related to the Datadog Agent that is polling the information using the autodiscovery.
 - The autodiscovery annotations are done on the pod. To deploy, add the annotations to the metadata of the template's specification.

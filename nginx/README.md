@@ -264,7 +264,7 @@ To configure this check for an Agent running on Kubernetes:
 
 To collect metrics, set the following parameters and values in an [Autodiscovery template][11]. You can do this with Kubernetes Annotations (shown below) on your NGINX pod(s), or with a [local file, ConfigMap, key-value store, Datadog Operator manifest, or Helm chart][12].
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: nginx`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][24].
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: nginx`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][24].
 
 | Parameter            | Value                                                                      |
 | -------------------- | -------------------------------------------------------------------------- |

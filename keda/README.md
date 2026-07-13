@@ -37,7 +37,7 @@ prometheus:
 
 For the Agent to start collecting metrics, the KEDA controller pods need to be annotated. For more information about annotations, refer to the [Autodiscovery Integration Templates][3] for guidance. You can find additional configuration options by reviewing the [sample keda.d/conf.yaml][4]. 
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: keda`, and set `containerImage` to match each component image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][12].
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: keda`, and set `containerName` to match each component's container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][12].
 
 **Note**: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `keda.scaler.detail_errors.count` metric is exposed only after a scaler encountered an error.
 

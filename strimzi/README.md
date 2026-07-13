@@ -114,7 +114,7 @@ spec:
 ```
 **Note**: The template used as for this example can be found [here][14].
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration` to the check used by each target workload (`strimzi`, `kafka`, `kafka_consumer`, or `zk` in these examples), and set `containerImage` to match each target image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration` to the check used by each target workload (`strimzi`, `kafka`, `kafka_consumer`, or `zk` in these examples), and set `containerName` to match each target container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
 
 See the [sample strimzi.d/conf.yaml][4] for all available configuration options.
 
