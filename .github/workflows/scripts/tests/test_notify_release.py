@@ -1,10 +1,12 @@
 """Tests for notify_release."""
+import http.client
 import json
 import urllib.error
 from unittest.mock import MagicMock, patch
 
-import notify_release
 import pytest
+
+import notify_release
 
 WEBHOOK = "https://api.datadoghq.com/api/v2/workflows/wf-id/instances"
 
@@ -61,8 +63,12 @@ def test_post_returns_true_on_success():
         assert notify_release.post(WEBHOOK, "api", "app", "hi") is True
 
 
-def test_post_warns_on_transient_network_error(capsys):
-    with patch("urllib.request.urlopen", side_effect=urllib.error.URLError("boom")):
+@pytest.mark.parametrize(
+    "error",
+    [urllib.error.URLError("boom"), http.client.RemoteDisconnected("disconnected")],
+)
+def test_post_warns_on_transient_network_error(error, capsys):
+    with patch("urllib.request.urlopen", side_effect=error):
         result = notify_release.post(WEBHOOK, "api", "app", "hi")
     assert result is True
     out = capsys.readouterr().out

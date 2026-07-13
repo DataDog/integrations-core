@@ -1,20 +1,9 @@
 """Send a rendered release notification through a Datadog workflow.
 
-The workflow owns the Slack connection and destination; this script owns the
-message. Credentials are minted in CI by dd-sts.
-
-Env: DD_API_KEY, DD_APP_KEY, DD_WORKFLOW_ID (all required or no-op), DD_SITE
-(default datadoghq.com), SOURCE_REPO, REF, PACKAGES, RUN_URL.
-
-Error handling keeps a misconfiguration from passing as a green run:
-
-* Persistent problems (bad/expired keys, missing scope, wrong workflow id,
-  rejected payload — HTTP 4xx) are reported to the GitHub step summary and fail
-  the step. This is safe because the notify job is not a dependency of the
-  release itself.
-* Transient problems (network, timeout, 5xx, HTTP 429) only warn and never fail
-  the job, so a momentary blip does not create release noise.
+Environment variables: DD_API_KEY, DD_APP_KEY, DD_WORKFLOW_ID, DD_SITE,
+SOURCE_REPO, REF, PACKAGES, RUN_URL.
 """
+import http.client
 import json
 import os
 import sys
@@ -69,7 +58,7 @@ def post(api_url: str, api_key: str, app_key: str, text: str) -> bool:
             return True
         report_config_error(f"HTTP {e.code}")
         return False
-    except (urllib.error.URLError, TimeoutError, ValueError) as e:
+    except (OSError, http.client.HTTPException, ValueError) as e:
         print(f"::warning::Release notification request failed (transient): {e}")
         return True
     return True
