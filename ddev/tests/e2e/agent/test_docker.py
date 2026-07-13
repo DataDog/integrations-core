@@ -1217,6 +1217,35 @@ class TestInvoke:
             ),
         ]
 
+    def test_with_env_vars(self, app, get_integration, docker_path, mocker):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        integration = 'postgres'
+        environment = 'py3.12'
+        metadata = {}
+
+        agent = DockerAgent(app, get_integration(integration), environment, metadata, Path('config.yaml'))
+        agent.invoke(['check', 'postgres'], env_vars={'FOO': 'bar', 'BAZ': 'qux'})
+
+        assert run.call_args_list == [
+            mocker.call(
+                [
+                    docker_path,
+                    'exec',
+                    '-e',
+                    'FOO=bar',
+                    '-e',
+                    'BAZ=qux',
+                    f'dd_{integration}_{environment}',
+                    'agent',
+                    'check',
+                    'postgres',
+                ],
+                shell=False,
+                check=True,
+            ),
+        ]
+
 
 class TestEnterShell:
     def test_linux_container(self, app, get_integration, docker_path, mocker):
