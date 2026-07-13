@@ -10,9 +10,8 @@ jobs:
     name: Backport PR
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # Required for OIDC token federation with dd-octo-sts
-      # Branch push, PR creation, and PR comments all use the scoped octo-sts token, so the ambient
-      # GITHUB_TOKEN stays read-only to minimize blast radius under pull_request_target.
+      id-token: write  # OIDC token federation with dd-octo-sts
+      # Writes use the scoped octo-sts token; ambient GITHUB_TOKEN stays read-only (pull_request_target).
       contents: read
       pull-requests: read
     if: >
@@ -35,8 +34,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          # Full history so the merged commit and the target release branches are reachable, and the
-          # octo-sts token so the backport branch push and PR creation are authenticated.
+          # Full history reaches the merged commit and release branches; octo-sts token authenticates the push.
           fetch-depth: 0
           token: ${{ steps.octo-sts.outputs.token }}
 
@@ -78,8 +76,7 @@ jobs:
             exit 1
           fi
 
-          # Determine the target release branches from the backport/<base> labels. On a `labeled`
-          # event only the just-added label is processed; on `closed` every backport/* label is.
+          # Target branches come from backport/<base> labels: only the new one on `labeled`, all of them on `closed`.
           bases=()
           if [ "${EVENT_ACTION}" = "labeled" ]; then
             case "${LABEL_NAME}" in
@@ -111,8 +108,7 @@ jobs:
               continue
             fi
 
-            # SetupWorktreeStep bases the worktree on origin/<base>; make sure that ref exists locally.
-            # Guard the fetch so a label pointing at a missing branch fails only that base, not the whole run.
+            # Ensure origin/<base> exists locally for the worktree; a missing branch fails just this base, not the run.
             if ! git fetch --no-tags origin "+refs/heads/${base}:refs/remotes/origin/${base}"; then
               echo "::error::Target branch ${base} does not exist on origin; skipping."
               gh pr comment "${PR_NUMBER}" --repo "${REPO}" \
