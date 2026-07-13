@@ -50,7 +50,6 @@ class AgentProviderRegistry:
         owner_id: str,
     ) -> BaseAgent[Any]:
         provider = self._get_provider(agent_config.provider)
-        provider.validate_config(agent_config)
         return provider.build_agent(
             agent_config,
             tools=tools,

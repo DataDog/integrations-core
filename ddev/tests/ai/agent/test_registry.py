@@ -33,16 +33,3 @@ def test_registry_rejects_unavailable_provider():
 
     with pytest.raises(ValueError, match="Agent provider 'unknown' is not available"):
         registry.validate_config(config)
-
-
-def test_registry_validates_config_before_building_agent():
-    provider = MagicMock()
-    provider.validate_config.side_effect = ValueError("config rejected")
-    registry = AgentProviderRegistry()
-    registry.register("custom", provider)
-    config = AgentConfig.model_construct(provider="custom")
-
-    with pytest.raises(ValueError, match="config rejected"):
-        registry.build_agent(config, tools=MagicMock(), system_prompt="system", owner_id="owner")
-
-    provider.build_agent.assert_not_called()
