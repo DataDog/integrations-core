@@ -238,37 +238,43 @@ def _get_auto_conf_volume(check_root: str | os.PathLike[str] | None = None) -> s
 
 def get_e2e_discovery_metadata(
     check_root: str | os.PathLike[str] | None = None,
+    *,
+    process: bool = False,
 ) -> dict[str, list[str] | dict[str, str]]:
     """Return metadata for an e2e discovery run.
 
-    Mounts the integration's ``auto_conf.yaml`` into the agent container, and grants
-    the capabilities needed for process-based autodiscovery to see processes running
-    in sibling containers (on top of the container-based autodiscovery already
-    enabled via the Docker socket mount).
+    Mounts the integration's ``auto_conf.yaml`` into the agent container. Pass
+    ``process=True`` to also grant the capabilities needed for process-based
+    autodiscovery to see processes running in sibling containers (on top of the
+    container-based autodiscovery already enabled via the Docker socket mount).
 
     Use ``dd_agent_check_discovery`` alongside this metadata so that the static
     per-env config is temporarily replaced with an empty-instances file, leaving
     ``auto_conf.yaml`` as the sole AD template driving config-discovery.
     """
-    return {
+    metadata: dict[str, list[str] | dict[str, str]] = {
         'docker_volumes': [
             _get_auto_conf_volume(check_root),
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
-        'env_vars': {
+    }
+
+    if process:
+        metadata['env_vars'] = {
             # Reduce the default service collection interval and minimum process
             # age to speed up tests. This needs to be set on the container
             # instead of being passed in to `agent check` since it's read by the
             # system-probe(-lite) daemon.
             'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '5s',
             'DD_DISCOVERY_SERVICE_COLLECTION_MIN_PROCESS_AGE': '1s',
-        },
+        }
         # system-probe(-lite) needs these capabilities to read /proc entries of
         # other processes for service discovery. Without them it falls back to
         # only scanning the agent's own PID namespace, which finds no host
         # processes.
-        'cap_add': ['SYS_PTRACE', 'DAC_READ_SEARCH'],
-    }
+        metadata['cap_add'] = ['SYS_PTRACE', 'DAC_READ_SEARCH']
+
+    return metadata
 
 
 def compose_file_active(compose_file):
