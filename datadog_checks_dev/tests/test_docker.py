@@ -394,3 +394,39 @@ def test_assert_all_discovery_candidates_stable_detects_new_crash_logs():
                 '/tmp/docker-compose.yml',
                 'service',
             )
+
+
+def test_assert_all_discovery_candidates_stable_ignores_old_stderr_when_new_stdout_arrives():
+    # Regression test: containers that split access logs (stdout) from error logs (stderr), like Kong,
+    # previously caused stale stderr content to be re-flagged as new whenever fresh stdout arrived, because
+    # the diff compared the *concatenation* of stdout+stderr against the previous concatenation. Any new
+    # stdout content shifts the position of the unchanged stderr tail, breaking the `startswith` check and
+    # replaying the entire log (old errors included) as "new".
+    class DiscoveryCheck:
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{'url': f'http://{service.host}:8080/metrics'}]}
+
+    logs = iter(
+        [
+            _docker_result(stdout='', stderr='old startup error\n'),
+            _docker_result(stdout='new access log line\n', stderr='old startup error\n'),
+        ]
+    )
+
+    def fake_run_command(command, **kwargs):
+        if command[:2] == ['docker', 'compose']:
+            return _docker_result(stdout='container-id\n')
+        if command[:2] == ['docker', 'inspect']:
+            return _docker_result(stdout=json.dumps([_container_inspect()]))
+        if command[:2] == ['docker', 'logs']:
+            return next(logs)
+        raise AssertionError(f'Unexpected command: {command}')
+
+    with mock.patch('datadog_checks.dev.docker.run_command', side_effect=fake_run_command):
+        assert_all_discovery_candidates_stable(
+            mock.Mock(),
+            DiscoveryCheck,
+            '/tmp/docker-compose.yml',
+            'service',
+        )
