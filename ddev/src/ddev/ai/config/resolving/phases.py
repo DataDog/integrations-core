@@ -16,18 +16,18 @@ if TYPE_CHECKING:
 
 
 def resolve_scheduled_phases(
-    registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol, fc: FlowConfig, flow_name: str
+    registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol, flow_config: FlowConfig, flow_name: str
 ) -> tuple[list[PhaseConfig], list[FlowError]]:
     """Resolve each scheduled phase to its config and run its per-phase checks."""
     scheduled_phases: list[PhaseConfig] = []
     errors: list[FlowError] = []
-    for fe in fc.flow:
-        pc, phase_errors = _resolve_scheduled_phase(registry, fe.phase, flow_name)
+    for step in flow_config.flow:
+        phase_config, phase_errors = _resolve_scheduled_phase(registry, step.phase, flow_name)
         errors.extend(phase_errors)
-        if pc is None:
+        if phase_config is None:
             continue
-        scheduled_phases.append(pc)
-        errors.extend(_validate_phase(registry, phase_registry, pc))
+        scheduled_phases.append(phase_config)
+        errors.extend(_validate_phase(registry, phase_registry, phase_config))
     return scheduled_phases, errors
 
 
@@ -72,59 +72,61 @@ def _unregistered_phase_error(registry: ResourceRegistry, phase_name: str, flow_
 
 
 def _validate_phase(
-    registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol, pc: PhaseConfig
+    registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol, phase_config: PhaseConfig
 ) -> list[FlowError]:
     return [
-        *_validate_phase_class(registry, phase_registry, pc),
-        *_validate_phase_agent(registry, pc),
-        *_validate_phase_refs(registry, pc),
+        *_validate_phase_class(registry, phase_registry, phase_config),
+        *_validate_phase_agent(registry, phase_config),
+        *_validate_phase_refs(registry, phase_config),
     ]
 
 
 def _validate_phase_class(
-    registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol, pc: PhaseConfig
+    registry: ResourceRegistry, phase_registry: PhaseRegistryProtocol, phase_config: PhaseConfig
 ) -> list[FlowError]:
-    phase_src = registry.entry(ResourceKind.PHASE, pc.name).source_file
-    if not phase_registry.contains(pc.class_):
+    phase_src = registry.entry(ResourceKind.PHASE, phase_config.name).source_file
+    if not phase_registry.contains(phase_config.class_):
         return [
             FlowError(
                 ErrorKind.PHASE,
-                f"Phase {pc.name!r} uses unknown implementation class {pc.class_!r}"
+                f"Phase {phase_config.name!r} uses unknown implementation class {phase_config.class_!r}"
                 f"{phase_registry.format_import_errors()}",
-                subject=pc.class_,
-                phase=pc.name,
+                subject=phase_config.class_,
+                phase=phase_config.name,
                 sources=[phase_src],
             )
         ]
     try:
-        phase_registry.get(pc.class_).validate_config(pc.name, pc)
+        phase_registry.get(phase_config.class_).validate_config(phase_config.name, phase_config)
     except ConfigError as e:
-        return [FlowError(ErrorKind.PHASE, str(e), subject=pc.name, phase=pc.name, sources=[phase_src])]
+        return [
+            FlowError(ErrorKind.PHASE, str(e), subject=phase_config.name, phase=phase_config.name, sources=[phase_src])
+        ]
     except Exception as e:
         return [
             FlowError(
                 ErrorKind.PHASE,
-                f"Phase {pc.name!r} class {pc.class_!r} raised during validation: {e!r}",
-                subject=pc.name,
-                phase=pc.name,
+                f"Phase {phase_config.name!r} class {phase_config.class_!r} raised during validation: {e!r}",
+                subject=phase_config.name,
+                phase=phase_config.name,
                 sources=[phase_src],
             )
         ]
     return []
 
 
-def _validate_phase_agent(registry: ResourceRegistry, pc: PhaseConfig) -> list[FlowError]:
-    if pc.agent is None:
+def _validate_phase_agent(registry: ResourceRegistry, phase_config: PhaseConfig) -> list[FlowError]:
+    if phase_config.agent is None:
         return []
-    agent_entry = registry.entry(ResourceKind.AGENT, pc.agent)
+    agent_entry = registry.entry(ResourceKind.AGENT, phase_config.agent)
     if agent_entry is None:
-        phase_src = registry.entry(ResourceKind.PHASE, pc.name).source_file
+        phase_src = registry.entry(ResourceKind.PHASE, phase_config.name).source_file
         return [
             FlowError(
                 ErrorKind.AGENT,
-                f"Agent {pc.agent!r} referenced by phase {pc.name!r} is not registered",
-                subject=pc.agent,
-                phase=pc.name,
+                f"Agent {phase_config.agent!r} referenced by phase {phase_config.name!r} is not registered",
+                subject=phase_config.agent,
+                phase=phase_config.name,
                 sources=[phase_src],
             )
         ]
@@ -132,24 +134,31 @@ def _validate_phase_agent(registry: ResourceRegistry, pc: PhaseConfig) -> list[F
         return [
             FlowError(
                 ErrorKind.AGENT,
-                f"Agent {pc.agent!r} referenced by phase {pc.name!r} is broken: {agent_entry.error}",
-                subject=pc.agent,
-                phase=pc.name,
+                (
+                    f"Agent {phase_config.agent!r} referenced by phase {phase_config.name!r} "
+                    f"is broken: {agent_entry.error}"
+                ),
+                subject=phase_config.agent,
+                phase=phase_config.name,
                 sources=[agent_entry.source_file],
             )
         ]
     return []
 
 
-def _validate_phase_refs(registry: ResourceRegistry, pc: PhaseConfig) -> list[FlowError]:
+def _validate_phase_refs(registry: ResourceRegistry, phase_config: PhaseConfig) -> list[FlowError]:
     errors: list[FlowError] = []
-    for task in pc.tasks:
+    for task in phase_config.tasks:
         if task.prompt_ref is not None:
-            errors.extend(_check_ref(registry, ResourceKind.PROMPT, task.prompt_ref, pc.name))
+            errors.extend(_check_ref(registry, ResourceKind.PROMPT, task.prompt_ref, phase_config.name))
         if task.goal_ref is not None:
-            errors.extend(_check_ref(registry, ResourceKind.GOAL, task.goal_ref, pc.name))
-    if pc.checkpoint is not None and pc.checkpoint.memory_prompt_ref is not None:
-        errors.extend(_check_ref(registry, ResourceKind.MEMORY_PROMPT, pc.checkpoint.memory_prompt_ref, pc.name))
+            errors.extend(_check_ref(registry, ResourceKind.GOAL, task.goal_ref, phase_config.name))
+    if phase_config.checkpoint is not None and phase_config.checkpoint.memory_prompt_ref is not None:
+        errors.extend(
+            _check_ref(
+                registry, ResourceKind.MEMORY_PROMPT, phase_config.checkpoint.memory_prompt_ref, phase_config.name
+            )
+        )
     return errors
 
 

@@ -50,14 +50,16 @@ class FlowResolver:
                 ],
             )
 
-        fc = entry.config
+        flow_config = entry.config
         flow_src = entry.source_file
-        scheduled_phases, errors = resolve_scheduled_phases(self._registry, self._phase_registry, fc, flow_name)
-        errors.extend(validate_dependencies(fc, flow_name, flow_src))
-        resolved_variables, var_errors = resolve_variables(self._registry, scheduled_phases, fc)
+        scheduled_phases, errors = resolve_scheduled_phases(
+            self._registry, self._phase_registry, flow_config, flow_name
+        )
+        errors.extend(validate_dependencies(flow_config, flow_name, flow_src))
+        resolved_variables, var_errors = resolve_variables(self._registry, scheduled_phases, flow_config)
         errors.extend(var_errors)
         if errors:
             return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
 
-        resolved = build_resolved_flow(self._registry, flow_name, fc, scheduled_phases, resolved_variables)
+        resolved = build_resolved_flow(self._registry, flow_name, flow_config, scheduled_phases, resolved_variables)
         return FlowDiagnostics(flow_name, ConfigStatus.OK, resolved=resolved)
