@@ -84,13 +84,13 @@ class Query(BaseModel):
     )
     monitor_id: Optional[int] = None
     query: str
+    query_timeout: Optional[int] = Field(
+        None,
+        description='Statement timeout for this query in milliseconds. Applied as a connection-level\nstatementTimeout when executing the query.\n',
+    )
     schedule: Optional[str] = Field(
         None,
         description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
-    )
-    timeout_seconds: Optional[int] = Field(
-        None,
-        description='Statement timeout for this query in seconds. Applied as a connection-level\nstatementTimeout when executing the query.\n',
     )
     type: Optional[str] = None
 

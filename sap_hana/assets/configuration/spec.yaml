@@ -161,7 +161,7 @@ files:
         fleet_configurable: true
         description: |
           Configure the Data Observability async job, which executes monitoring
-          queries delivered via Remote Configuration.
+          queries delivered through Remote Configuration.
         options:
           - name: enabled
             fleet_configurable: true
@@ -224,9 +224,9 @@ files:
                     schedule wins and interval_seconds is ignored. If neither is set, the
                     query is skipped at runtime with a warning.
                   type: string
-                - name: timeout_seconds
+                - name: query_timeout
                   description: |
-                    Statement timeout for this query in seconds. Applied as a connection-level
+                    Statement timeout for this query in milliseconds. Applied as a connection-level
                     statementTimeout when executing the query.
                   type: integer
                 - name: dbname

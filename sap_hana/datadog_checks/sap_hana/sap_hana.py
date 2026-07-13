@@ -159,6 +159,12 @@ class SapHanaCheck(AgentCheck):
                 )
                 self._connection_flaked = False
 
+    def cancel(self):
+        # Signal the Data Observability async job to stop so its executor thread is
+        # released when the check is unscheduled (e.g. cluster-agent flavor or one-off
+        # check invocations), instead of leaking the DBMAsyncJob thread pool.
+        self.data_observability.cancel()
+
     def set_default_methods(self):
         self._default_methods.extend(
             [

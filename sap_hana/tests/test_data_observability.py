@@ -11,7 +11,7 @@ import pytest
 
 from datadog_checks.sap_hana.config_models.instance import CustomSqlSelectFields, Entity, Query
 from datadog_checks.sap_hana.data_observability import (
-    DEFAULT_DO_QUERY_TIMEOUT_S,
+    DEFAULT_DO_QUERY_TIMEOUT_MS,
     SapHanaDataObservability,
     _query_key,
 )
@@ -39,7 +39,7 @@ def _make_do(queries=(), config_id=None, tags=None):
     do._do_config = do_config
     do._last_execution = {}
     do._do_conn = None
-    do._do_conn_timeout_s = None
+    do._do_conn_timeout_ms = None
     do._log = mock.MagicMock()
     do._cancel_event = threading.Event()
     do._tags = tags
@@ -52,7 +52,7 @@ def _q(
     interval_seconds=None,
     schedule=None,
     monitor_id=None,
-    timeout_seconds=None,
+    query_timeout=None,
     dbname=None,
 ):
     return Query(
@@ -60,7 +60,7 @@ def _q(
         interval_seconds=interval_seconds,
         schedule=schedule,
         monitor_id=monitor_id,
-        timeout_seconds=timeout_seconds,
+        query_timeout=query_timeout,
         dbname=dbname,
     )
 
@@ -79,16 +79,32 @@ def _mock_conn(columns, rows):
 
 
 class TestQueryKey:
-    def test_same_sql_same_key(self):
+    def test_same_query_same_key(self):
         assert _query_key(_q('SELECT 1')) == _query_key(_q('SELECT 1'))
 
     def test_different_sql_different_key(self):
+        # Distinct monitors always yield distinct SQL (monitor ids are embedded in the query).
         assert _query_key(_q('SELECT 1')) != _query_key(_q('SELECT 2'))
 
     def test_key_is_16_hex_chars(self):
         key = _query_key(_q('SELECT 1'))
         assert len(key) == 16
         assert all(c in '0123456789abcdef' for c in key)
+
+    def test_nonzero_monitor_id_used_as_key(self):
+        assert _query_key(_q('SELECT 1', monitor_id=42)) == 'monitor:42'
+
+    def test_different_monitor_ids_different_key(self):
+        # With a real monitor id, identity comes from the id, not the SQL.
+        assert _query_key(_q('SELECT 1', monitor_id=1)) != _query_key(_q('SELECT 1', monitor_id=2))
+
+    def test_same_monitor_id_same_key_regardless_of_sql(self):
+        assert _query_key(_q('SELECT 1', monitor_id=7)) == _query_key(_q('SELECT 2', monitor_id=7))
+
+    def test_zero_monitor_id_falls_back_to_query_hash(self):
+        # monitor_id 0 (the omitempty default) and None both fall back to the query hash.
+        assert _query_key(_q('SELECT 1', monitor_id=0)) == _query_key(_q('SELECT 1', monitor_id=None))
+        assert _query_key(_q('SELECT 1', monitor_id=0)) == _query_key(_q('SELECT 1'))
 
 
 # ── _filter_valid_queries ──────────────────────────────────────────────────────
@@ -121,11 +137,11 @@ class TestFilterValidQueries:
         assert do._queries == ()
 
     def test_mixed_valid_and_invalid(self):
-        queries = [_q(interval_seconds=30), _q(), _q(schedule='*/10 * * * *')]
+        queries = [_q('SELECT 1', interval_seconds=30), _q('SELECT 2'), _q('SELECT 3', schedule='*/10 * * * *')]
         do = _make_do(queries)
         assert len(do._queries) == 2
 
-    def test_cron_scheduler_keyed_by_query_hash(self):
+    def test_cron_scheduler_keyed_by_query_key(self):
         q = _q(schedule='0 * * * *')
         do = _make_do([q])
         assert _query_key(q) in do._schedulers
@@ -136,7 +152,7 @@ class TestFilterValidQueries:
         assert _query_key(q) not in do._schedulers
 
     def test_skipped_queries_emit_warning(self):
-        do = _make_do([_q(), _q(interval_seconds=30)])
+        do = _make_do([_q('SELECT 1'), _q('SELECT 2', interval_seconds=30)])
         do._log.warning.assert_called()
 
 
@@ -237,7 +253,7 @@ class TestBuildEventPayload:
         assert payload['monitor_id'] == 42
 
     def test_monitor_id_absent_when_none(self):
-        q = _q()
+        q = _q()  # monitor_id is None
         payload = _make_do()._build_event_payload(q, self._RESULT)
         assert 'monitor_id' not in payload
 
@@ -300,7 +316,7 @@ class TestExecuteSingleQuery:
         do = _make_do([q])
         conn, _ = _mock_conn(['id', 'name'], [[1, 'alice'], [2, 'bob']])
         do._do_conn = conn
-        do._do_conn_timeout_s = DEFAULT_DO_QUERY_TIMEOUT_S
+        do._do_conn_timeout_ms = DEFAULT_DO_QUERY_TIMEOUT_MS
 
         result = do._execute_single_query(q)
 
@@ -318,7 +334,7 @@ class TestExecuteSingleQuery:
         conn, cursor = _mock_conn(['id'], [])
         cursor.execute.side_effect = HanaError('connection lost')
         do._do_conn = conn
-        do._do_conn_timeout_s = DEFAULT_DO_QUERY_TIMEOUT_S
+        do._do_conn_timeout_ms = DEFAULT_DO_QUERY_TIMEOUT_MS
 
         result = do._execute_single_query(q)
 
@@ -335,34 +351,34 @@ class TestExecuteSingleQuery:
         conn, cursor = _mock_conn([], [])
         cursor.execute.side_effect = HanaError('timeout')
         do._do_conn = conn
-        do._do_conn_timeout_s = DEFAULT_DO_QUERY_TIMEOUT_S
+        do._do_conn_timeout_ms = DEFAULT_DO_QUERY_TIMEOUT_MS
 
         do._execute_single_query(q)
 
         assert do._do_conn is None
-        assert do._do_conn_timeout_s is None
+        assert do._do_conn_timeout_ms is None
 
     def test_uses_default_timeout_when_none(self):
-        q = _q(interval_seconds=60)  # timeout_seconds is None
+        q = _q(interval_seconds=60)  # query_timeout is None
         do = _make_do([q])
         called_with = []
 
-        def fake_get_connection(timeout_s):
-            called_with.append(timeout_s)
+        def fake_get_connection(timeout_ms):
+            called_with.append(timeout_ms)
             conn, _ = _mock_conn(['x'], [])
             return conn
 
         do._get_connection = fake_get_connection
         do._execute_single_query(q)
-        assert called_with == [DEFAULT_DO_QUERY_TIMEOUT_S]
+        assert called_with == [DEFAULT_DO_QUERY_TIMEOUT_MS]
 
     def test_uses_query_timeout_when_set(self):
-        q = _q(interval_seconds=60, timeout_seconds=120)
+        q = _q(interval_seconds=60, query_timeout=120)
         do = _make_do([q])
         called_with = []
 
-        def fake_get_connection(timeout_s):
-            called_with.append(timeout_s)
+        def fake_get_connection(timeout_ms):
+            called_with.append(timeout_ms)
             conn, _ = _mock_conn(['x'], [])
             return conn
 

@@ -29,13 +29,23 @@ MAX_RESULT_ROWS = 10_000
 
 CRON_STARTUP_LOOKBACK_SECONDS = 300
 
-DEFAULT_DO_QUERY_TIMEOUT_S = 60
+DEFAULT_DO_QUERY_TIMEOUT_MS = 60_000
 
 Mode = Literal["cron", "interval"]
 
 
 def _query_key(q: Query) -> str:
-    """Stable per-query scheduling key derived from the query text."""
+    """Stable per-query scheduling key.
+
+    Prefer the monitor id when the RC payload carries a real one — this is the
+    forward-looking contract shared with Postgres. Today the payload delivers no
+    per-query monitor id (it decodes to 0/None), so fall back to a hash of the query
+    text. That is sufficient because the SQL embeds the monitor id(s) it serves (in a
+    trailing "-- Datadog {\"monitor_ids\":[...]}" comment, or the column alias for
+    custom SQL), so distinct monitors always produce distinct query text.
+    """
+    if q.monitor_id:  # real, non-zero monitor id
+        return f"monitor:{q.monitor_id}"
     return hashlib.sha256(q.query.encode()).hexdigest()[:16]
 
 
@@ -53,7 +63,7 @@ class SapHanaDataObservability(DBMAsyncJob):
         self._do_config = do_config
         self._last_execution: dict[str, float] = {}
         self._do_conn: Any = None
-        self._do_conn_timeout_s: int | None = None
+        self._do_conn_timeout_ms: int | None = None
 
         collection_interval = do_config.collection_interval or 10
         super().__init__(
@@ -140,15 +150,15 @@ class SapHanaDataObservability(DBMAsyncJob):
         tags.append('db_type:saphana')
         return tags
 
-    def _get_connection(self, timeout_seconds: int) -> Any:
+    def _get_connection(self, timeout_ms: int) -> Any:
         """Return the persistent DO connection, (re)creating it when the timeout changes."""
-        if self._do_conn is not None and self._do_conn_timeout_s == timeout_seconds:
+        if self._do_conn is not None and self._do_conn_timeout_ms == timeout_ms:
             return self._do_conn
         if self._do_conn is not None:
             self._log.debug(
-                "Data Observability: reopening DO connection (timeout changed from %ds to %ds).",
-                self._do_conn_timeout_s,
-                timeout_seconds,
+                "Data Observability: reopening DO connection (timeout changed from %dms to %dms).",
+                self._do_conn_timeout_ms,
+                timeout_ms,
             )
             try:
                 self._do_conn.close()
@@ -161,7 +171,7 @@ class SapHanaDataObservability(DBMAsyncJob):
         # its own connection (instead of reusing self._check._conn) because it
         # needs a per-query statementTimeout that must not affect main-check queries.
         conn_props = self._check._get_connection_properties()
-        conn_props['statementTimeout'] = timeout_seconds * 1000
+        conn_props['statementTimeout'] = timeout_ms
         try:
             self._do_conn = hana_connect(**conn_props)
         except HanaError as e:
@@ -174,14 +184,14 @@ class SapHanaDataObservability(DBMAsyncJob):
             raise
         self._log.debug(
             "Data Observability: DO connection opened (statementTimeout=%dms).",
-            timeout_seconds * 1000,
+            timeout_ms,
         )
-        self._do_conn_timeout_s = timeout_seconds
+        self._do_conn_timeout_ms = timeout_ms
         return self._do_conn
 
     def _execute_single_query(self, query_spec: Query) -> dict[str, Any]:
-        timeout_s = query_spec.timeout_seconds or DEFAULT_DO_QUERY_TIMEOUT_S
-        conn = self._get_connection(timeout_s)
+        timeout_ms = query_spec.query_timeout or DEFAULT_DO_QUERY_TIMEOUT_MS
+        conn = self._get_connection(timeout_ms)
         start = time.time()
         try:
             if self._cancel_event.is_set():
@@ -211,7 +221,7 @@ class SapHanaDataObservability(DBMAsyncJob):
             )
             self._log.warning("Data Observability: resetting DO connection after query failure.")
             self._do_conn = None
-            self._do_conn_timeout_s = None
+            self._do_conn_timeout_ms = None
             return {
                 'status': 'error',
                 'columns': [],
