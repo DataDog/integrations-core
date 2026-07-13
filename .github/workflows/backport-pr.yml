@@ -112,7 +112,14 @@ jobs:
             fi
 
             # SetupWorktreeStep bases the worktree on origin/<base>; make sure that ref exists locally.
-            git fetch --no-tags origin "+refs/heads/${base}:refs/remotes/origin/${base}"
+            # Guard the fetch so a label pointing at a missing branch fails only that base, not the whole run.
+            if ! git fetch --no-tags origin "+refs/heads/${base}:refs/remotes/origin/${base}"; then
+              echo "::error::Target branch ${base} does not exist on origin; skipping."
+              gh pr comment "${PR_NUMBER}" --repo "${REPO}" \
+                --body "⚠️ Automatic backport to \`${base}\` skipped: the target branch does not exist." || true
+              overall_rc=1
+              continue
+            fi
 
             echo "::group::Backport #${PR_NUMBER} to ${base}"
             # Pass the merge SHA we already have rather than PR-<n>, which would round-trip via the API back to this commit.
@@ -120,7 +127,7 @@ jobs:
                  --target-branch "${base}" \
                  --branch-prefix backport \
                  --pr-labels "backport,bot"; then
-              pr_url="$(gh pr list --repo "${REPO}" --head "${branch}" --state open --json url --jq '.[0].url' || true)"
+              pr_url="$(gh pr list --repo "${REPO}" --head "${branch}" --state open --json url --jq '.[0].url // ""' || true)"
               echo "::notice::Opened backport PR for ${base}: ${pr_url}"
               if [ -n "${pr_url}" ]; then
                 gh pr comment "${PR_NUMBER}" --repo "${REPO}" \
