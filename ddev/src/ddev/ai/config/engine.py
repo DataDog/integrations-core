@@ -9,9 +9,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.config.classify import classify
-from ddev.ai.config.errors import ConfigError, ConfigStatus, ErrorKind, FlowDiagnostics, FlowError
+from ddev.ai.config.errors import ConfigError, ErrorKind, FlowError
 from ddev.ai.config.loading.discovery import discover
 from ddev.ai.config.loading.files import FileError
+from ddev.ai.config.models import ConfigStatus, FlowResult
 from ddev.ai.config.registry import ResourceKind, ResourceRegistry
 from ddev.ai.config.resolving.resolver import FlowResolver
 
@@ -56,8 +57,8 @@ class ConfigurationEngine:
 
         self._registry = ResourceRegistry(entries)
         resolver = FlowResolver(self._registry, phase_registry)
-        self._flows_diag = {name: resolver.resolve(name) for name in self._registry.flow_names}
-        self._add_flow_conflict_diagnostics()
+        self._flow_results = {name: resolver.resolve(name) for name in self._registry.flow_names}
+        self._add_flow_conflict_results()
 
     def _resolve_user_dirs(self, user_dirs: list[str | Path]) -> list[Path]:
         resolved = []
@@ -68,13 +69,13 @@ class ConfigurationEngine:
             resolved.append(p)
         return resolved
 
-    def _add_flow_conflict_diagnostics(self) -> None:
+    def _add_flow_conflict_results(self) -> None:
         """Surface flow-kind conflicts (disabled in the registry) as broken flows."""
         for conflict in self._registry.conflicts:
-            if conflict.kind != ResourceKind.FLOW or conflict.name in self._flows_diag:
+            if conflict.kind != ResourceKind.FLOW or conflict.name in self._flow_results:
                 continue
             sources = ", ".join(str(s) for s in conflict.sources)
-            self._flows_diag[conflict.name] = FlowDiagnostics(
+            self._flow_results[conflict.name] = FlowResult(
                 conflict.name,
                 ConfigStatus.BROKEN,
                 [
@@ -99,18 +100,18 @@ class ConfigurationEngine:
         return f"\nNote: these files failed to parse and may contain the missing resource:\n{listed}"
 
     def get_flow(self, name: str) -> ResolvedFlow:
-        diag = self._flows_diag.get(name)
-        if diag is None:
+        result = self._flow_results.get(name)
+        if result is None:
             raise ConfigError(f"Flow {name!r} not found{self._file_errors_note()}")
-        if diag.status is ConfigStatus.BROKEN:
-            raise ConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e.message}" for e in diag.errors))
-        if diag.resolved is None:
+        if result.status is ConfigStatus.BROKEN:
+            raise ConfigError(f"Flow {name!r} is invalid:\n" + "\n".join(f"  {e.message}" for e in result.errors))
+        if result.resolved is None:
             raise ConfigError(f"Flow {name!r} passed validation but produced no resolved flow (engine bug)")
-        return diag.resolved
+        return result.resolved
 
     @property
-    def flows(self) -> dict[str, FlowDiagnostics]:
-        return self._flows_diag
+    def flows(self) -> dict[str, FlowResult]:
+        return self._flow_results
 
     @property
     def file_errors(self) -> dict[Path, str]:

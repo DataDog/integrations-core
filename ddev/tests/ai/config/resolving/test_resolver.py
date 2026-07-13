@@ -6,8 +6,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ddev.ai.config.errors import ConfigStatus, ErrorKind
-from ddev.ai.config.models import CheckpointConfig, FlowEntry, TaskConfig, VariableDeclaration
+from ddev.ai.config.errors import ErrorKind
+from ddev.ai.config.models import CheckpointConfig, ConfigStatus, FlowEntry, TaskConfig, VariableDeclaration
 from ddev.ai.config.registry import BrokenEntry, ResourceKind, ResourceRegistry
 from ddev.ai.config.resolving.resolver import FlowResolver
 

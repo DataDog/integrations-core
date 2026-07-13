@@ -6,7 +6,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ddev.ai.config.errors import ConfigStatus, ErrorKind, FlowDiagnostics, FlowError
+from ddev.ai.config.errors import ErrorKind, FlowError
+from ddev.ai.config.models import ConfigStatus, FlowResult
 from ddev.ai.config.registry import BrokenEntry, ResourceKind
 from ddev.ai.config.resolving.dependencies import validate_dependencies
 from ddev.ai.config.resolving.inlining import build_resolved_flow
@@ -30,17 +31,17 @@ class FlowResolver:
         self._registry = registry
         self._phase_registry = phase_registry
 
-    def resolve(self, flow_name: str) -> FlowDiagnostics:
+    def resolve(self, flow_name: str) -> FlowResult:
         """Validate and, if sound, inline one flow into a ``ResolvedFlow``."""
         entry = self._registry.entry(ResourceKind.FLOW, flow_name)
         if entry is None:
-            return FlowDiagnostics(
+            return FlowResult(
                 flow_name,
                 ConfigStatus.BROKEN,
                 [FlowError(ErrorKind.FLOW, f"Flow {flow_name!r} not found", subject=flow_name)],
             )
         if isinstance(entry, BrokenEntry):
-            return FlowDiagnostics(
+            return FlowResult(
                 flow_name,
                 ConfigStatus.BROKEN,
                 [
@@ -59,7 +60,7 @@ class FlowResolver:
         resolved_variables, var_errors = resolve_variables(self._registry, scheduled_phases, flow_config)
         errors.extend(var_errors)
         if errors:
-            return FlowDiagnostics(flow_name, ConfigStatus.BROKEN, errors)
+            return FlowResult(flow_name, ConfigStatus.BROKEN, errors)
 
         resolved = build_resolved_flow(self._registry, flow_name, flow_config, scheduled_phases, resolved_variables)
-        return FlowDiagnostics(flow_name, ConfigStatus.OK, resolved=resolved)
+        return FlowResult(flow_name, ConfigStatus.OK, resolved=resolved)

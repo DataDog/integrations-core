@@ -4,8 +4,8 @@
 
 from __future__ import annotations
 
-from ddev.ai.config.errors import ConfigStatus, ErrorKind
-from ddev.ai.config.models import FlowEntry, VariableDeclaration
+from ddev.ai.config.errors import ErrorKind
+from ddev.ai.config.models import ConfigStatus, FlowEntry, VariableDeclaration
 from ddev.ai.config.registry import ResourceRegistry
 from ddev.ai.config.resolving.resolver import FlowResolver
 

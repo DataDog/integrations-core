@@ -11,17 +11,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ddev.ai.config.models import ResolvedFlow
     from ddev.ai.config.registry import ResourceKind
 
 
 class ConfigError(Exception):
     """Wraps Pydantic ValidationError or YAML errors with a user-friendly message."""
-
-
-class ConfigStatus(StrEnum):
-    OK = auto()
-    BROKEN = auto()
 
 
 class ErrorKind(StrEnum):
@@ -54,11 +48,3 @@ class FlowError:
     subject: str | None = None  # the named entity the error is about (phase/agent/ref/variable name)
     phase: str | None = None  # the phase context, when the error occurs inside one
     sources: list[Path] = field(default_factory=list)  # every file relevant to fixing it
-
-
-@dataclass
-class FlowDiagnostics:
-    name: str
-    status: ConfigStatus
-    errors: list[FlowError] = field(default_factory=list)
-    resolved: ResolvedFlow | None = None

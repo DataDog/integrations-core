@@ -7,7 +7,8 @@ from __future__ import annotations
 import pytest
 
 from ddev.ai.config.engine import ConfigurationEngine
-from ddev.ai.config.errors import ConfigError, ConfigStatus, ErrorKind
+from ddev.ai.config.errors import ConfigError, ErrorKind
+from ddev.ai.config.models import ConfigStatus
 from ddev.ai.config.registry import ResourceKind
 
 from .utils import StubReg, write

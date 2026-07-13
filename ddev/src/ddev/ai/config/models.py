@@ -5,12 +5,16 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from typing import Annotated, Literal
+from dataclasses import dataclass, field
+from enum import StrEnum, auto
+from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from ddev.ai.tools.registry import ToolRegistry
+
+if TYPE_CHECKING:
+    from ddev.ai.config.errors import FlowError
 
 NAME_PATTERN = r"^[A-Za-z0-9._-]{1,64}$"
 # Variable names are interpolated via ``string.Template``, so they must be legal
@@ -143,3 +147,19 @@ class ResolvedFlow:
     phases: dict[str, PhaseConfig]
     flow: list[FlowEntry]
     variables: dict[str, str]
+
+
+class ConfigStatus(StrEnum):
+    OK = auto()
+    BROKEN = auto()
+
+
+@dataclass
+class FlowResult:
+    """The complete outcome of processing one flow: its status, any errors, and, when
+    valid, the ready-to-execute :class:`ResolvedFlow`."""
+
+    name: str
+    status: ConfigStatus
+    errors: list[FlowError] = field(default_factory=list)
+    resolved: ResolvedFlow | None = None
