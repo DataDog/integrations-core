@@ -559,10 +559,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             )
             return None
 
-    def _emit_buffer_events(self, buffer_snapshot):
-        if not buffer_snapshot:
-            return
-
+    def _create_buffer_event(self, buffer_snapshot):
+        """
+        Create a database monitoring buffer snapshot event payload.
+        """
         buffers = []
         for row in buffer_snapshot:
             obfuscated = self._obfuscate_buffer_query(row['query'])
@@ -584,7 +584,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     }
                 )
 
-        payload = {
+        return {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "ddagentversion": datadog_agent.get_version(),
@@ -596,7 +596,13 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             "clickhouse_version": self._check.dbms_version,
             "clickhouse_async_insert_buffers": buffers,
         }
-        self._check.database_monitoring_query_activity(json.dumps(payload, default=default_json_event_encoding))
+
+    def _emit_buffer_events(self, buffer_snapshot):
+        if not buffer_snapshot:
+            return
+
+        buffer_event = self._create_buffer_event(buffer_snapshot)
+        self._check.database_monitoring_query_activity(json.dumps(buffer_event, default=default_json_event_encoding))
 
     def run_job(self):
         """
