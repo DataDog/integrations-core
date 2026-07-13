@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlparse
 import mock
 import pytest
 
-from datadog_checks.base.utils.http import HTTPRequestAuth, HTTPRequest, RequestsWrapper
+from datadog_checks.base.utils.http import HTTPRequest, HTTPRequestAuth, RequestsWrapper
 
 pytestmark = [pytest.mark.unit]
 

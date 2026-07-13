@@ -46,7 +46,7 @@ from .http_exceptions import (  # noqa: F401
 )
 
 # Re-export the agnostic auth hook interface so integrations import it from one place.
-from .http_protocol import HTTPRequestAuth, HTTPRequest  # noqa: F401
+from .http_protocol import HTTPRequest, HTTPRequestAuth  # noqa: F401
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
