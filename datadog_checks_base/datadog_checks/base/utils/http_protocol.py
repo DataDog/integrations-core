@@ -39,7 +39,7 @@ class HTTPResponseProtocol(Protocol):
     def __iter__(self) -> Iterator[bytes | str]: ...
 
 
-class OutgoingRequest(Protocol):
+class HTTPRequest(Protocol):
     # Mutable view of an outgoing request handed to an auth hook. A hook adds entries to headers
     # or params. Each backend applies those onto its native request. url is provided for
     # inspection only, such as request signing. Writing to url is not guaranteed to be honored.
@@ -55,7 +55,7 @@ class HTTPRequestAuth(ABC):
     # to httpx.Auth. Reactive challenge-response schemes (digest, kerberos, ntlm) stay in the
     # auth_type dispatch, not here.
     @abstractmethod
-    def __call__(self, request: OutgoingRequest) -> None:
+    def __call__(self, request: HTTPRequest) -> None:
         """Contribute headers or params to the outgoing request in place."""
 
 

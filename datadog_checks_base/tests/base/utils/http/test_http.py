@@ -94,13 +94,13 @@ class TestAttribute:
     def test_factory_default_returns_requests_wrapper(self):
         check = AgentCheck('test', {}, [{}])
 
-        assert isinstance(check.create_http_wrapper(), RequestsWrapper)
+        assert isinstance(check.create_http_client(), RequestsWrapper)
 
     def test_factory_override_swaps_client(self):
         sentinel = object()
 
         class CustomCheck(AgentCheck):
-            def create_http_wrapper(self):
+            def create_http_client(self):
                 return sentinel
 
         check = CustomCheck('test', {}, [{}])
