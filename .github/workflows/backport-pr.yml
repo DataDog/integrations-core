@@ -71,6 +71,9 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Best-effort PR comment; a comment failure must never fail the backport.
+          comment_pr() { gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "$1" || true; }
+
           if [ -z "${MERGE_SHA}" ]; then
             echo "::error::merge_commit_sha is empty; cannot backport."
             exit 1
@@ -111,8 +114,7 @@ jobs:
             # Ensure origin/<base> exists locally for the worktree; a missing branch fails just this base, not the run.
             if ! git fetch --no-tags origin "+refs/heads/${base}:refs/remotes/origin/${base}"; then
               echo "::error::Target branch ${base} does not exist on origin; skipping."
-              gh pr comment "${PR_NUMBER}" --repo "${REPO}" \
-                --body "⚠️ Automatic backport to \`${base}\` skipped: the target branch does not exist." || true
+              comment_pr "⚠️ Automatic backport to \`${base}\` skipped: the target branch does not exist."
               overall_rc=1
               continue
             fi
@@ -126,13 +128,11 @@ jobs:
               pr_url="$(gh pr list --repo "${REPO}" --head "${branch}" --state open --json url --jq '.[0].url // ""' || true)"
               echo "::notice::Opened backport PR for ${base}: ${pr_url}"
               if [ -n "${pr_url}" ]; then
-                gh pr comment "${PR_NUMBER}" --repo "${REPO}" \
-                  --body "Backport to \`${base}\` opened: ${pr_url}" || true
+                comment_pr "Backport to \`${base}\` opened: ${pr_url}"
               fi
             else
               echo "::error::Backport to ${base} failed."
-              gh pr comment "${PR_NUMBER}" --repo "${REPO}" \
-                --body "⚠️ Automatic backport to \`${base}\` failed. See the [workflow run](${RUN_URL}) for details, or backport manually with \`ddev release port-commit PR-${PR_NUMBER} --target-branch ${base}\`." || true
+              comment_pr "⚠️ Automatic backport to \`${base}\` failed. See the [workflow run](${RUN_URL}) for details, or backport manually with \`ddev release port-commit PR-${PR_NUMBER} --target-branch ${base}\`."
               overall_rc=1
             fi
             echo "::endgroup::"
