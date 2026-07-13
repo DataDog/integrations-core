@@ -122,7 +122,9 @@ def _get_compose_container_id(
         command.extend(['-p', project_name])
     command.extend(['-f', os.fspath(compose_file), 'ps', '-q', compose_service])
 
-    container_id = run_command(command, capture='out', check=True).stdout.strip()
+    container_id = run_command(
+        command, capture='out', check=True, env={**os.environ, **_get_default_compose_env_vars()}
+    ).stdout.strip()
     if not container_id:
         raise AssertionError(f'No container found for compose service {compose_service!r}')
 
@@ -154,6 +156,11 @@ def _get_default_compose_file() -> str:
 def _get_default_compose_project_name() -> str | None:
     docker_metadata = get_state('docker_compose_metadata', {})
     return docker_metadata.get('project_name') or os.getenv('COMPOSE_PROJECT_NAME')
+
+
+def _get_default_compose_env_vars() -> dict[str, str]:
+    docker_metadata = get_state('docker_compose_metadata', {})
+    return docker_metadata.get('env_vars') or {}
 
 
 def _inspect_container(container_id: str) -> dict[str, Any]:
@@ -447,6 +454,7 @@ def docker_run(
                 'compose_file': compose_file,
                 'project_name': (env_vars or {}).get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
                 'service_name': service_name,
+                'env_vars': env_vars or {},
             },
         )
 
