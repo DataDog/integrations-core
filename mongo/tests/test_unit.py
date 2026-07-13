@@ -39,15 +39,9 @@ DEFAULT_METRICS_LEN = len(
 
 
 MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS = {
-    'application thread time evicting (usecs)': (
-        'mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps'
-    ),
-    'page evict attempts by application threads': (
-        'mongodb.wiredtiger.cache.page_evict_attempts_by_application_threadsps'
-    ),
-    'page evict failures by application threads': (
-        'mongodb.wiredtiger.cache.page_evict_failures_by_application_threadsps'
-    ),
+    'application thread time evicting (usecs)': 'mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps',
+    'page evict attempts by application threads': 'mongodb.wiredtiger.cache.page_evict_attempts_by_application_threadsps',
+    'page evict failures by application threads': 'mongodb.wiredtiger.cache.page_evict_failures_by_application_threadsps',
     'modified page evict attempts by application threads': (
         'mongodb.wiredtiger.cache.modified_page_evict_attempts_by_application_threadsps'
     ),
