@@ -3,12 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
 import socket
 import warnings
 from collections import ChainMap
+from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from typing import TYPE_CHECKING
@@ -18,6 +20,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
@@ -34,6 +37,7 @@ from .headers import get_default_headers, update_headers
 from .http_exceptions import (  # noqa: F401
     HTTPConnectionError,
     HTTPError,
+    HTTPInvalidURLError,
     HTTPRequestError,
     HTTPSSLError,
     HTTPStatusError,
@@ -211,6 +215,51 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
+def _translate_requests_exception(exc: BaseException, *, response: ResponseWrapper | None = None) -> HTTPError:
+    """Translate a requests exception into the library-agnostic equivalent.
+
+    Order is significant. Several requests types subclass others, so the most
+    specific must be tested first.
+
+    ``response`` is supplied only by the ``raise_for_status`` seam, which passes the
+    agnostic wrapper. Every other seam leaves it ``None`` so no raw backend response leaks.
+    """
+    message = str(exc) or exc.__class__.__name__
+    request = getattr(exc, 'request', None)
+    if isinstance(
+        exc,
+        (
+            requests_exceptions.InvalidURL,
+            requests_exceptions.MissingSchema,
+            requests_exceptions.InvalidSchema,
+            requests_exceptions.URLRequired,
+        ),
+    ):
+        return HTTPInvalidURLError(message, request=request)
+    if isinstance(exc, requests_exceptions.SSLError):
+        return HTTPSSLError(message, request=request)
+    if isinstance(exc, requests_exceptions.Timeout):
+        return HTTPTimeoutError(message, request=request)
+    if isinstance(exc, requests_exceptions.ConnectionError):
+        return HTTPConnectionError(message, request=request)
+    if isinstance(exc, requests_exceptions.ContentDecodingError):
+        return HTTPRequestError(message, request=request)
+    if isinstance(exc, requests_exceptions.HTTPError):
+        return HTTPStatusError(message, request=request, response=response)
+    if isinstance(exc, requests_exceptions.RequestException):
+        return HTTPRequestError(message, request=request)
+    return HTTPError(message)
+
+
+@contextmanager
+def _translate_http_errors() -> Iterator[None]:
+    """Re-raise requests exceptions as their library-agnostic equivalents."""
+    try:
+        yield
+    except requests_exceptions.RequestException as exc:
+        raise _translate_requests_exception(exc) from exc
+
+
 class ResponseWrapper(ObjectProxy):
     def __init__(self, response, default_chunk_size):
         super(ResponseWrapper, self).__init__(response)
@@ -218,17 +267,49 @@ class ResponseWrapper(ObjectProxy):
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
 
+    def raise_for_status(self):
+        try:
+            self.__wrapped__.raise_for_status()
+        except requests_exceptions.HTTPError as exc:
+            raise _translate_requests_exception(exc, response=self) from exc
+
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+        with _translate_http_errors():
+            yield from self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+        with _translate_http_errors():
+            yield from self.__wrapped__.iter_lines(
+                chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
+            )
+
+    def __iter__(self):
+        # requests.Response.__iter__ delegates to the raw iter_content, so route direct iteration
+        # through the translating override instead of the wrapt-forwarded raw one.
+        return self.iter_content(128)
+
+    @property
+    def content(self):
+        with _translate_http_errors():
+            return self.__wrapped__.content
+
+    @property
+    def text(self):
+        with _translate_http_errors():
+            return self.__wrapped__.text
+
+    def json(self, **kwargs):
+        with _translate_http_errors():
+            try:
+                return self.__wrapped__.json(**kwargs)
+            except requests_exceptions.JSONDecodeError as exc:
+                raise json.JSONDecodeError(exc.msg, exc.doc, exc.pos) from exc
 
     def __enter__(self):
         return self
@@ -533,22 +614,23 @@ class RequestsWrapper(object):
             return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
-        try:
-            response = request_method(url, **new_options)
-        except SSLError as e:
-            # fetch the intermediate certs
-            parsed_url = urlparse(url)
-            hostname = parsed_url.hostname
-            port = parsed_url.port
-            certs = self.fetch_intermediate_certs(hostname, port)
-            if not certs:
-                raise e
-            session = self.session if persist else self._create_session()
-            if parsed_url.scheme == "https":
-                self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
-            request_method = getattr(session, method)
-            response = request_method(url, **new_options)
-        return response
+        with _translate_http_errors():
+            try:
+                response = request_method(url, **new_options)
+            except SSLError as e:
+                # fetch the intermediate certs
+                parsed_url = urlparse(url)
+                hostname = parsed_url.hostname
+                port = parsed_url.port
+                certs = self.fetch_intermediate_certs(hostname, port)
+                if not certs:
+                    raise e
+                session = self.session if persist else self._create_session()
+                if parsed_url.scheme == "https":
+                    self._mount_https_adapter(session, ChainMap({'tls_intermediate_ca_certs': certs}, self.tls_config))
+                request_method = getattr(session, method)
+                response = request_method(url, **new_options)
+            return response
 
     def fetch_intermediate_certs(self, hostname, port=443):
         # TODO: prefer stdlib implementation when available, see https://bugs.python.org/issue18617
@@ -648,7 +730,8 @@ class RequestsWrapper(object):
 
     def handle_auth_token(self, **request):
         if self.auth_token_handler is not None:
-            self.auth_token_handler.poll(**request)
+            with _translate_http_errors():
+                self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
         try:

@@ -1,1 +1,2 @@
-Preserve Vault auth headers now that the OpenMetrics scraper shares the check's HTTP client.
+Preserve Vault authentication headers when scraping OpenMetrics endpoints.
+Handle Vault API errors with backend-agnostic HTTP exceptions.

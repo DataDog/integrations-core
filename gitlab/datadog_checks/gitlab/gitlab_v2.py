@@ -4,8 +4,6 @@
 import copy
 from collections import ChainMap
 
-import requests
-
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompatibilityScraper
 from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
@@ -103,7 +101,7 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
             else:
                 self.service_check(service_check_name, OpenMetricsBaseCheckV2.OK, self._tags)
-        except (requests.exceptions.Timeout, HTTPTimeoutError):
+        except HTTPTimeoutError:
             self.service_check(
                 service_check_name,
                 OpenMetricsBaseCheckV2.CRITICAL,

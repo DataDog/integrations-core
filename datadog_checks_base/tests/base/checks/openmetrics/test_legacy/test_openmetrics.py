@@ -19,6 +19,7 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from prometheus_client.samples import Sample
 
 from datadog_checks.base import ensure_bytes
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
@@ -2548,7 +2549,7 @@ def test_health_service_check_failing(aggregator, mocked_prometheus_check, mocke
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
     mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
-    with pytest.raises(requests.ConnectionError):
+    with pytest.raises(HTTPConnectionError):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
         'ksm.prometheus.health',
