@@ -445,12 +445,18 @@ class AgentCheck(object):
         """Construct the HTTP client backing self.http.
 
         Override this to build a bespoke wrapper or swap the backend. The default returns a
-        RequestsWrapper configured from this check's instance and init config.
+        RequestsWrapper configured from this check's instance and init config, or an
+        HTTPX2Wrapper when the instance opts in via the ``use_httpx2`` flag.
         """
+        instance = self.instance or {}
+        if is_affirmative(instance.get('use_httpx2', False)):
+            from datadog_checks.base.utils.httpx2 import HTTPX2Wrapper
+
+            return HTTPX2Wrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
         # See Performance Optimizations in this package's README.md.
         from datadog_checks.base.utils.http import RequestsWrapper
 
-        return RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+        return RequestsWrapper(instance, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
     @property
     def logs_enabled(self):

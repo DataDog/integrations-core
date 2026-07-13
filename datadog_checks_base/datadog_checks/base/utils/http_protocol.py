@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, MutableMapping
-from typing import Any, Iterator, Protocol
+from typing import Any, Iterator, Protocol, runtime_checkable
 
 # Frozen backend-neutral HTTP surface. RequestsWrapper implements it on requests today; a future
 # HTTPX2Wrapper implements the same surface on httpx. Do not change existing methods, attributes,
@@ -13,6 +13,7 @@ from typing import Any, Iterator, Protocol
 # backend object (no requests or httpx type is returned).
 
 
+@runtime_checkable
 class HTTPResponseProtocol(Protocol):
     status_code: int
     content: bytes
