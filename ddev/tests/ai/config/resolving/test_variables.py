@@ -61,6 +61,20 @@ def test_identical_defaults_coalesce():
     assert diagnostics.resolved.variables == {"x": "A"}
 
 
+def test_explicit_flow_value_resolves_conflicting_defaults():
+    entries = [
+        agent_entry("writer", variables=[VariableDeclaration(name="model", default="agent-default")]),
+        phase_entry("p", agent="writer", variables=[VariableDeclaration(name="model", default="phase-default")]),
+        flow_entry("demo", [FlowEntry(phase="p")], variables={"model": "flow-value"}),
+    ]
+    registry = ResourceRegistry(entries)
+    diagnostics = FlowResolver(registry, StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.OK
+    assert not [e for e in diagnostics.errors if e.kind == ErrorKind.VARIABLE]
+    assert diagnostics.resolved.variables == {"model": "flow-value"}
+
+
 def test_flow_variable_overrides_default():
     entries = [
         agent_entry("writer", variables=[VariableDeclaration(name="topic", default="cats")]),
