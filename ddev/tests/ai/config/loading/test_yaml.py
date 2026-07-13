@@ -32,11 +32,14 @@ def test_scalar_returns_none(tmp_path):
     assert load_yaml(path) is None
 
 
-def test_mapping_returns_none(tmp_path):
+def test_mapping_normalized_to_single_document(tmp_path):
     path = tmp_path / "mapping.yaml"
-    write(path, "a: 1\nb: 2")
+    write(path, "type: flow\nconfig:\n  name: demo\n  flow: []\n")
 
-    assert load_yaml(path) is None
+    result = load_yaml(path)
+
+    assert result is not None
+    assert result.docs == [{"type": "flow", "config": {"name": "demo", "flow": []}}]
 
 
 def test_yaml_syntax_error_raises(tmp_path):

@@ -85,6 +85,17 @@ def test_markdown_keyed_by_front_matter_name_not_stem(tmp_path):
     assert "ag" in eng.get_flow("demo").agents
 
 
+def test_single_mapping_yaml_resource_resolves(tmp_path):
+    """A YAML file may hold one resource as a bare mapping, with no list wrapper."""
+    write(tmp_path / "ag.md", "---\ntype: agent\nname: ag\n---\nsys")
+    write(tmp_path / "phase.yaml", "type: phase\nconfig:\n  name: p\n  agent: ag\n")
+    write(tmp_path / "flow.yaml", "type: flow\nconfig:\n  name: demo\n  flow:\n    - phase: p\n")
+
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    assert eng.flows["demo"].status == ConfigStatus.OK
+    assert "p" in eng.get_flow("demo").phases
+
+
 # ---------------------------------------------------------------------------
 # File errors vs skip-silently (behavior changes)
 # ---------------------------------------------------------------------------

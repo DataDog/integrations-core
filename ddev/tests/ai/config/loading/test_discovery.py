@@ -39,7 +39,7 @@ def test_only_md_yaml_yml_are_candidates(tmp_path):
 
 def test_non_config_files_skipped(tmp_path):
     write(tmp_path / "plain.md", "no front matter")
-    write(tmp_path / "mapping.yaml", "a: 1\n")
+    write(tmp_path / "scalar.yaml", "just_a_string")
 
     results = list(discover([tmp_path]))
 
