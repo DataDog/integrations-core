@@ -177,7 +177,7 @@ class LustreCheck(AgentCheck):
         devices = []
         if self._use_yaml:
             try:
-                output = self._run_command('lctl', 'dl', '-y', sudo=True)
+                output = self._run_command('lctl', 'dl', '-y', sudo=True, warn_on_error=False)
                 device_data = yaml.safe_load(output)
                 devices = device_data.get('devices', [])
             except AttributeError:
@@ -243,9 +243,13 @@ class LustreCheck(AgentCheck):
             self.log.debug("Setting version %s for Lustre", version)
             self.set_metadata("version", version)
 
-    def _run_command(self, bin: str, *args: str, sudo: bool = False) -> str:
+    def _run_command(self, bin: str, *args: str, sudo: bool = False, warn_on_error: bool = True) -> str:
         '''
         Run a command using the given binary.
+
+        Set warn_on_error=False for commands whose failure is expected and handled
+        by the caller (e.g. a capability probe with a fallback), to avoid logging a
+        WARNING on every check run.
         '''
         if bin not in self._bin_mapping:
             raise ValueError('Unknown binary: {}'.format(bin))
@@ -260,9 +264,8 @@ class LustreCheck(AgentCheck):
                 cmd, timeout=5, shell=False, capture_output=True, text=True
             )  # Explicitly disable shell invocation to prevent command injection
             if not output.returncode == 0 and output.stderr:
-                self.log.warning(
-                    'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
-                )
+                log = self.log.warning if warn_on_error else self.log.debug
+                log('Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr)
                 return ''
             if output.stdout is None:
                 self.log.debug(

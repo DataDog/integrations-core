@@ -742,9 +742,7 @@ def test_run_command_warns_on_failure(caplog, mock_lustre_commands):
     ):
         check = LustreCheck('lustre', {}, [{}])
 
-    failed = subprocess.CompletedProcess(
-        args=[], returncode=4, stdout='', stderr="get_param: invalid option -- 'y'"
-    )
+    failed = subprocess.CompletedProcess(args=[], returncode=4, stdout='', stderr="get_param: invalid option -- 'y'")
     with caplog.at_level(logging.WARNING):
         with mock.patch('subprocess.run', return_value=failed):
             result = check._run_command('lctl', 'get_param', '-n', 'llite.lustrefs.stats')
@@ -752,5 +750,28 @@ def test_run_command_warns_on_failure(caplog, mock_lustre_commands):
     assert result == ''
     assert any(
         record.levelno == logging.WARNING and 'exited with returncode 4' in record.getMessage()
+        for record in caplog.records
+    ), caplog.text
+
+
+def test_run_command_warn_on_error_false_stays_debug(caplog, mock_lustre_commands):
+    """An expected/handled failure (warn_on_error=False) logs at DEBUG, not WARNING, to avoid per-run noise."""
+    with mock_lustre_commands(
+        {
+            'lctl get_param -n version': 'all_version.txt',
+            'lctl dl': 'client_dl_yaml.txt',
+        }
+    ):
+        check = LustreCheck('lustre', {}, [{}])
+
+    failed = subprocess.CompletedProcess(args=[], returncode=4, stdout='', stderr="dl: invalid option -- 'y'")
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch('subprocess.run', return_value=failed):
+            result = check._run_command('lctl', 'dl', '-y', warn_on_error=False)
+
+    assert result == ''
+    assert not any(record.levelno == logging.WARNING for record in caplog.records), caplog.text
+    assert any(
+        record.levelno == logging.DEBUG and 'exited with returncode 4' in record.getMessage()
         for record in caplog.records
     ), caplog.text
