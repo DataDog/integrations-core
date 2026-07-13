@@ -10,7 +10,7 @@ import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Iterator, MutableMapping
+from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from typing import TYPE_CHECKING
@@ -46,7 +46,6 @@ from .http_exceptions import (  # noqa: F401
 )
 
 # Re-export the agnostic auth hook interface so integrations import it from one place.
-from .http_protocol import HTTPRequest, HTTPRequestAuth  # noqa: F401
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -262,34 +261,6 @@ def _translate_http_errors() -> Iterator[None]:
         yield
     except requests_exceptions.RequestException as exc:
         raise _translate_requests_exception(exc) from exc
-
-
-class _HTTPRequest:
-    """Concrete, mutable request view passed to an agnostic auth hook on the requests backend."""
-
-    def __init__(self, url: str, headers: MutableMapping[str, str], params: MutableMapping[str, str]) -> None:
-        self.url = url
-        self.headers = headers
-        self.params = params
-
-
-class _RequestsAuthHookAdapter(requests_auth.AuthBase):
-    """Adapt an agnostic HTTPRequestAuth hook to a requests.auth.AuthBase.
-
-    Passes the hook a mutable view of the outgoing request: header edits apply directly (the view
-    shares the prepared request's headers) and any params it adds are merged into the URL query.
-    The request URL is provided for inspection only and is not written back.
-    """
-
-    def __init__(self, hook: HTTPRequestAuth) -> None:
-        self.hook = hook
-
-    def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
-        request = _HTTPRequest(url=r.url, headers=r.headers, params={})
-        self.hook(request)
-        if request.params:
-            r.prepare_url(r.url, request.params)
-        return r
 
 
 class ResponseWrapper(ObjectProxy):
@@ -632,12 +603,6 @@ class RequestsWrapper(object):
 
         if self.no_proxy_uris and should_bypass_proxy(url, self.no_proxy_uris):
             options.setdefault('proxies', PROXY_SETTINGS_DISABLED)
-
-        # Only per-call auth= is adapted here; an HTTPRequestAuth set persistently via
-        # self.options['auth'] is not supported.
-        auth = options.get('auth')
-        if isinstance(auth, HTTPRequestAuth):
-            options['auth'] = _RequestsAuthHookAdapter(auth)
 
         persist = options.pop('persist', None)
         if persist is None:
