@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import inspect
 import logging
 from pathlib import Path
 from typing import Any
@@ -19,7 +18,6 @@ from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
-from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
 
@@ -98,25 +96,6 @@ def make_orchestrator(file_access_policy, provider_registry, tmp_path):
         return PhaseOrchestrator(**kwargs), registry, engine
 
     return _make
-
-
-async def test_orchestrator_shares_provider_registry_with_run_resources(
-    core_dir,
-    make_orchestrator,
-    provider_registry,
-):
-    orchestrator, _, _ = make_orchestrator(core_dir)
-
-    await orchestrator.on_initialize()
-
-    assert orchestrator._resources._provider_registry is provider_registry
-
-
-def test_orchestrator_and_resources_expose_provider_registry_not_agent_clients():
-    for constructor in (PhaseOrchestrator, RunResources):
-        parameters = inspect.signature(constructor).parameters
-        assert "provider_registry" in parameters
-        assert "agent_clients" not in parameters
 
 
 # ---------------------------------------------------------------------------

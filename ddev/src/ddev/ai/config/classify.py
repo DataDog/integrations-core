@@ -56,11 +56,10 @@ def meta_without(meta: dict[str, Any], *keys: str) -> dict[str, Any]:
     return {k: v for k, v in meta.items() if k not in keys}
 
 
-def _build_agent(loaded: MarkdownFile, provider_registry: AgentProviderRegistry | None) -> AgentConfig:
+def _build_agent(loaded: MarkdownFile, provider_registry: AgentProviderRegistry) -> AgentConfig:
     data = meta_without(loaded.meta, "type", "name")
     data["system_prompt"] = loaded.body
-    context = {"provider_registry": provider_registry} if provider_registry is not None else None
-    return AgentConfig.model_validate(data, context=context)
+    return AgentConfig.model_validate(data, context={"provider_registry": provider_registry})
 
 
 def _build_body(loaded: MarkdownFile) -> str:
@@ -78,7 +77,7 @@ MARKDOWN_BUILDERS: dict[ResourceKind, Callable[[MarkdownFile], Any]] = {
 def classify(
     loaded: LoadedFile,
     *,
-    provider_registry: AgentProviderRegistry | None = None,
+    provider_registry: AgentProviderRegistry,
 ) -> ClassifyOutput:
     """Turn one loaded file into zero or more identity-carrying entries.
 
@@ -93,7 +92,7 @@ def classify(
 
 def _classify_markdown(
     loaded: MarkdownFile,
-    provider_registry: AgentProviderRegistry | None,
+    provider_registry: AgentProviderRegistry,
 ) -> ClassifyOutput:
     type_ = loaded.meta.get("type")
     if type_ is None:
@@ -127,7 +126,7 @@ def _build_markdown_entry(
     kind: ResourceKind,
     name: str,
     loaded: MarkdownFile,
-    provider_registry: AgentProviderRegistry | None,
+    provider_registry: AgentProviderRegistry,
 ) -> Entry[Any]:
     try:
         config = (

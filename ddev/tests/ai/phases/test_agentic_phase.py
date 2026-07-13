@@ -12,7 +12,7 @@ from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.config.errors import ConfigError
-from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
+from ddev.ai.config.models import CheckpointConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.template import render_inline
@@ -27,6 +27,7 @@ from ddev.ai.runtime.checkpoints import (
 )
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
+from tests.ai.config.utils import make_agent_config
 
 from .conftest import MockAgent, make_agent_phase, make_response
 
@@ -172,14 +173,14 @@ async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatc
         message_queue,
         flow_variables={"project": "myproj"},
         captured_worker_kwargs=captured,
-        agent_config=AgentConfig(tools=[], system_prompt="Project: ${project}"),
+        agent_config=make_agent_config(tools=[], system_prompt="Project: ${project}"),
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert captured["owner_id"] == "p1"
     assert captured["system_prompt"] == "Project: myproj"
-    assert captured["agent_config"] == AgentConfig(tools=[], system_prompt="Project: ${project}")
+    assert captured["agent_config"] == make_agent_config(tools=[], system_prompt="Project: ${project}")
 
 
 async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, message_queue):
@@ -193,7 +194,7 @@ async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, m
         flow_variables={"project": "flow"},
         runtime_variables={"project": "runtime"},
         captured_worker_kwargs=captured,
-        agent_config=AgentConfig(tools=[], system_prompt="Project: ${project}"),
+        agent_config=make_agent_config(tools=[], system_prompt="Project: ${project}"),
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -210,7 +211,7 @@ async def test_build_runtime_receives_memory_resolver(flow_dir, monkeypatch, mes
         monkeypatch,
         message_queue,
         captured_worker_kwargs=captured,
-        agent_config=AgentConfig(tools=[], system_prompt="Memory: ${draft_memory}"),
+        agent_config=make_agent_config(tools=[], system_prompt="Memory: ${draft_memory}"),
     )
     mgr.write_memory("draft", "Created file.py")
 
@@ -388,7 +389,7 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
     resources = RunResources(
         provider_registry=build_agent_provider_registry(SimpleNamespace(anthropic_api_key="secret")),
         file_access_policy=FileAccessPolicy(write_root=flow_dir),
-        agents={"writer": AgentConfig(tools=["spawn_subagent"])},
+        agents={"writer": make_agent_config(tools=["spawn_subagent"])},
         callbacks=run_callbacks,
     )
     phase = AgenticPhase.build(

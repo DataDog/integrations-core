@@ -7,15 +7,17 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ddev.ai.config.models import AgentConfig, FlowConfig, PhaseConfig
+from ddev.ai.config.models import FlowConfig, PhaseConfig
 from ddev.ai.config.registry import ResourceKind, ValidEntry
+
+from ..utils import make_agent_config
 
 if TYPE_CHECKING:
     from ddev.ai.config.models import FlowEntry
 
 
 def agent_entry(name: str, path: str = "/x/agent.md", **kwargs) -> ValidEntry:
-    return ValidEntry(kind=ResourceKind.AGENT, name=name, config=AgentConfig(**kwargs), source_file=Path(path))
+    return ValidEntry(kind=ResourceKind.AGENT, name=name, config=make_agent_config(**kwargs), source_file=Path(path))
 
 
 def phase_entry(name: str, path: str | None = None, **kwargs) -> ValidEntry:

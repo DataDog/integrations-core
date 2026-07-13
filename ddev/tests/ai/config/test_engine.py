@@ -4,24 +4,14 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
-
 import pytest
 
-from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.engine import ConfigurationEngine as BaseConfigurationEngine
 from ddev.ai.config.errors import ConfigError, ErrorKind
 from ddev.ai.config.models import ConfigStatus
 from ddev.ai.config.registry import ResourceKind
 
-from .utils import StubReg, write
-
-
-def make_provider_registry(*names: str) -> AgentProviderRegistry:
-    registry = AgentProviderRegistry()
-    for name in names:
-        registry.register(name, MagicMock())
-    return registry
+from .utils import StubReg, make_provider_registry, write
 
 
 class ConfigurationEngine(BaseConfigurationEngine):
@@ -72,20 +62,6 @@ def test_unavailable_agent_provider_breaks_dependent_flow(tmp_path):
 
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
     assert any("unavailable" in error.message for error in eng.flows["demo"].errors)
-
-
-def test_missing_provider_key_breaks_dependent_flow(tmp_path):
-    write_full_flow(tmp_path)
-
-    eng = ConfigurationEngine(
-        core_dir=tmp_path,
-        user_dirs=[],
-        phase_registry=StubReg(),
-        provider_registry=make_provider_registry(),
-    )
-
-    assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any("Agent provider 'anthropic' is not available" in error.message for error in eng.flows["demo"].errors)
 
 
 # ---------------------------------------------------------------------------

@@ -280,7 +280,7 @@ async def run_goal_loop(
     The phase callbacks see only the bracketing before/after_goal_check events.
     """
     reviewer_scope = AgentScope(owner_id=f"{phase_id}.goal.{task.name}", role=AgentRole.GOAL_REVIEWER)
-    reviewer_config = AgentConfig(
+    reviewer_config = AgentConfig.model_construct(
         provider=parent_agent_config.provider,
         tools=filter_read_only(parent_agent_config.tools),
     )

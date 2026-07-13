@@ -7,6 +7,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import (
     AgentConfig,
     CheckpointConfig,
@@ -15,6 +16,8 @@ from ddev.ai.config.models import (
     TaskConfig,
     VariableDeclaration,
 )
+
+from .utils import make_agent_config, make_provider_registry
 
 # ---------------------------------------------------------------------------
 # TaskConfig
@@ -76,9 +79,27 @@ def test_checkpoint_memory_source_validation_rejects(kwargs):
 # ---------------------------------------------------------------------------
 
 
+def test_agent_requires_provider_registry_context():
+    with pytest.raises(ValidationError, match="Agent provider registry is required"):
+        AgentConfig()
+
+
+def test_agent_validates_default_provider_against_registry():
+    registry = make_provider_registry("anthropic")
+
+    config = AgentConfig.model_validate({}, context={"provider_registry": registry})
+
+    assert config.provider == "anthropic"
+
+
+def test_agent_rejects_default_provider_when_not_configured():
+    with pytest.raises(ValidationError, match="Agent provider 'anthropic' is not available"):
+        AgentConfig.model_validate({}, context={"provider_registry": AgentProviderRegistry()})
+
+
 def test_agent_rejects_unknown_tools():
     with pytest.raises(ValidationError):
-        AgentConfig(tools=["nonexistent_tool"])
+        make_agent_config(tools=["nonexistent_tool"])
 
 
 # ---------------------------------------------------------------------------

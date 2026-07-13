@@ -14,6 +14,7 @@ from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentInput, SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import ToolRegistry
+from tests.ai.config.utils import make_agent_config
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -38,7 +39,7 @@ def make_tool(
 ) -> SpawnSubagentTool:
     return SpawnSubagentTool(
         owner_id=owner_id,
-        agent_config=agent_config or AgentConfig(tools=parent_tools or ["read_file", "edit_file"]),
+        agent_config=agent_config or make_agent_config(tools=parent_tools or ["read_file", "edit_file"]),
         process_factory=factory,
     )
 
@@ -110,7 +111,7 @@ async def test_multi_iteration_wires_callbacks(
 async def test_child_runtime_config_inherits_parent_settings_and_requested_tools(
     process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent], make_response: ResponseFactory
 ):
-    parent_config = AgentConfig(
+    parent_config = make_agent_config(
         provider="anthropic",
         tools=["read_file", "edit_file", "spawn_subagent"],
         model="custom-model",

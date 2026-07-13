@@ -4,13 +4,30 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock
+
+from ddev.ai.agent.registry import AgentProviderRegistry
+from ddev.ai.config.models import AgentConfig
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from ddev.ai.config.models import PhaseConfig
     from ddev.ai.phases.base import Phase
+
+
+def make_provider_registry(*names: str) -> AgentProviderRegistry:
+    registry = AgentProviderRegistry()
+    for name in names:
+        registry.register(name, MagicMock())
+    return registry
+
+
+def make_agent_config(**kwargs: Any) -> AgentConfig:
+    provider = kwargs.get("provider", "anthropic")
+    registry = make_provider_registry(provider)
+    return AgentConfig.model_validate(kwargs, context={"provider_registry": registry})
 
 
 def write(p: Path, text: str) -> None:

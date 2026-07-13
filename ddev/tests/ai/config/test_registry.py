@@ -6,12 +6,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ddev.ai.config.models import AgentConfig, FlowConfig, FlowEntry, PhaseConfig
+from ddev.ai.config.models import FlowConfig, FlowEntry, PhaseConfig
 from ddev.ai.config.registry import BrokenEntry, ResourceKind, ResourceRegistry, ValidEntry
+
+from .utils import make_agent_config
 
 
 def test_single_entries_land_in_entry_and_ok_view():
-    agent = ValidEntry(kind=ResourceKind.AGENT, name="a", config=AgentConfig(), source_file=Path("/x/a.md"))
+    agent = ValidEntry(kind=ResourceKind.AGENT, name="a", config=make_agent_config(), source_file=Path("/x/a.md"))
     phase = ValidEntry(kind=ResourceKind.PHASE, name="p", config=PhaseConfig(name="p"), source_file=Path("/x/p.yaml"))
     flow = ValidEntry(
         kind=ResourceKind.FLOW,
@@ -54,8 +56,12 @@ def test_broken_entry_excluded_from_ok_view_but_reachable_via_entry():
 
 
 def test_conflicting_same_kind_and_name_disabled_everywhere():
-    e1 = ValidEntry(kind=ResourceKind.AGENT, name="dup", config=AgentConfig(model="one"), source_file=Path("/x/one.md"))
-    e2 = ValidEntry(kind=ResourceKind.AGENT, name="dup", config=AgentConfig(model="two"), source_file=Path("/x/two.md"))
+    e1 = ValidEntry(
+        kind=ResourceKind.AGENT, name="dup", config=make_agent_config(model="one"), source_file=Path("/x/one.md")
+    )
+    e2 = ValidEntry(
+        kind=ResourceKind.AGENT, name="dup", config=make_agent_config(model="two"), source_file=Path("/x/two.md")
+    )
     reg = ResourceRegistry([e1, e2])
 
     assert reg.has_conflicts
@@ -70,7 +76,7 @@ def test_conflicting_same_kind_and_name_disabled_everywhere():
 
 
 def test_cross_type_same_name_coexists_without_conflict():
-    agent = ValidEntry(kind=ResourceKind.AGENT, name="x", config=AgentConfig(), source_file=Path("/x/agent.md"))
+    agent = ValidEntry(kind=ResourceKind.AGENT, name="x", config=make_agent_config(), source_file=Path("/x/agent.md"))
     flow = ValidEntry(
         kind=ResourceKind.FLOW,
         name="x",

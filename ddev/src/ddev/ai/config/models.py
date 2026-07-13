@@ -103,11 +103,12 @@ class AgentConfig(BaseModel):
 
     @model_validator(mode="after")
     def provider_must_be_available(self, info: ValidationInfo) -> AgentConfig:
-        if info.context is None:
-            return self
-        provider_registry: AgentProviderRegistry | None = info.context.get("provider_registry")
-        if provider_registry is not None:
-            provider_registry.validate_config(self)
+        provider_registry: AgentProviderRegistry | None = (
+            info.context.get("provider_registry") if info.context is not None else None
+        )
+        if provider_registry is None:
+            raise ValueError("Agent provider registry is required")
+        provider_registry.validate_config(self)
         return self
 
 
