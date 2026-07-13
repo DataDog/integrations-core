@@ -163,6 +163,10 @@ class MockHTTPResponse:
             # Decode to string when decode_unicode=True (matches requests behavior)
             yield chunk.decode('utf-8') if decode_unicode else chunk
 
+    def __iter__(self) -> Iterator[bytes | str]:
+        # requests.Response.__iter__ delegates to iter_content(128); mirror that.
+        return self.iter_content(128)
+
     def iter_lines(
         self, chunk_size: int | None = None, decode_unicode: bool = False, delimiter: bytes | str | None = None
     ) -> Iterator[bytes | str]:

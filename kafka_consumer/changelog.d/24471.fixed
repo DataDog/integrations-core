@@ -1,0 +1,1 @@
+Reduce cluster-check-runner memory churn by persisting the DSM broker timestamps cache in a compact binary format (marshal) instead of serializing it as JSON on every run.

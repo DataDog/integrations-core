@@ -1,0 +1,1 @@
+Handle Prism Central API errors with backend-agnostic HTTP exceptions.

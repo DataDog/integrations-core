@@ -1,0 +1,1 @@
+Add support for the `--env` option to `ddev env agent` to pass environment variables.
