@@ -79,5 +79,7 @@ class HTTPClientProtocol(Protocol):
     # opened); the client stays usable and reconnects on the next request.
     def close(self) -> None: ...
 
-    # Look up a persisted cookie by name, returning its value (or default) as a plain string.
+    # Look up a persisted cookie by name, returning its value as a plain string, or default when the
+    # cookie is absent or its name is ambiguous (the same name set for multiple domains or paths). A
+    # backend must return default in the ambiguous case rather than raising.
     def get_cookie(self, name: str, default: str | None = None) -> str | None: ...
