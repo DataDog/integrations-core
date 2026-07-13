@@ -12,6 +12,7 @@ import mock
 import pytest
 import requests
 
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
@@ -1914,7 +1915,7 @@ def test_health_service_check_failing():
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
-    with pytest.raises(requests.ConnectionError):
+    with pytest.raises(HTTPConnectionError):
         check.process("http://fake.endpoint:10055/metrics")
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
