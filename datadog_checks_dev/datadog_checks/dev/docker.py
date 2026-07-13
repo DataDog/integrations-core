@@ -448,15 +448,29 @@ def docker_run(
                 )
 
     if compose_file is not None:
+        env_snapshot = dict(os.environ)
+
         save_state(
             'docker_compose_metadata',
             {
                 'compose_file': compose_file,
                 'project_name': (env_vars or {}).get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
                 'service_name': service_name,
-                'env_vars': env_vars or {},
             },
         )
+
+        # Runs after every other wrapper (docker_run's own `env_vars`, `mount_logs`'s `shared_logs`,
+        # and any caller-supplied `wrappers`) so it captures whatever env vars they added to interpolate
+        # into the compose file, for `assert_all_discovery_candidates_stable` to reuse in later processes.
+        @contextmanager
+        def _persist_compose_env_vars():
+            new_env_vars = {key: value for key, value in os.environ.items() if env_snapshot.get(key) != value}
+            docker_metadata = get_state('docker_compose_metadata', {})
+            docker_metadata['env_vars'] = new_env_vars
+            save_state('docker_compose_metadata', docker_metadata)
+            yield
+
+        wrappers.append(_persist_compose_env_vars())
 
     with environment_run(
         up=set_up,
