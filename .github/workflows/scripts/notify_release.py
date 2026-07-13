@@ -11,16 +11,34 @@ import urllib.error
 import urllib.request
 
 
+def escape_slack_text(value: str) -> str:
+    """Escape dynamic text for Slack mrkdwn."""
+    return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def format_packages(packages: str) -> str:
+    """Return a readable package list without failing on malformed input."""
+    raw_packages = packages.strip()
+    if not raw_packages:
+        return "auto-detect from tags at HEAD"
+    try:
+        parsed_packages = json.loads(raw_packages)
+    except json.JSONDecodeError:
+        return escape_slack_text(raw_packages)
+    if not isinstance(parsed_packages, list):
+        return escape_slack_text(raw_packages)
+    if not parsed_packages:
+        return "auto-detect from tags at HEAD"
+    return ", ".join(escape_slack_text(str(package)) for package in parsed_packages)
+
+
 def build_text(source_repo: str, ref: str, packages: str, run_url: str) -> str:
     """Return the release notification message body."""
-    # TODO: this fires before the approval gate, so the release is pending. Once
-    # the `release` environment gate is removed, reword to "Wheel release starting"
-    # with a "View release run" link, since the release will start immediately.
     return (
-        f":hourglass_flowing_sand: *Wheel release pending approval* — `{source_repo}`\n"
-        f"• ref: `{ref[:12] or '—'}`\n"
-        f"• packages: {packages.strip() or 'auto-detect from tags at HEAD'}\n"
-        f"• <{run_url}|Review &amp; approve →>"
+        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        f"`{escape_slack_text(source_repo)}` · `{escape_slack_text(ref[:12] or '—')}` · "
+        f"{format_packages(packages)}\n"
+        f"<{run_url}|Review and approve →>"
     )
 
 

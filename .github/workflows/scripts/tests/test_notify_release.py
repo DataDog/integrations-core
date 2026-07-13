@@ -11,18 +11,42 @@ import notify_release
 WEBHOOK = "https://api.datadoghq.com/api/v2/workflows/wf-id/instances"
 
 
-def test_build_text_lists_packages():
-    text = notify_release.build_text("integrations-core", "abcdef1234567890", '["postgres"]', "http://run")
-    assert "pending approval" in text
-    assert '["postgres"]' in text
-    assert "`abcdef123456`" in text
-    assert "http://run" in text
+def test_build_text_formats_package_list():
+    text = notify_release.build_text(
+        "integrations-core", "abcdef1234567890", '["postgres", "mysql"]', "http://run"
+    )
+    assert text == (
+        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        "`integrations-core` · `abcdef123456` · postgres, mysql\n"
+        "<http://run|Review and approve →>"
+    )
 
 
-def test_build_text_auto_detect_and_dash_ref():
+def test_build_text_auto_detects_packages_and_defaults_ref():
     text = notify_release.build_text("marketplace", "", "", "http://run")
-    assert "auto-detect from tags at HEAD" in text
-    assert "ref: `—`" in text
+    assert text == (
+        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        "`marketplace` · `—` · auto-detect from tags at HEAD\n"
+        "<http://run|Review and approve →>"
+    )
+
+
+def test_build_text_preserves_malformed_package_input():
+    text = notify_release.build_text("integrations-core", "abcdef", "postgres, mysql", "http://run")
+    assert text == (
+        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        "`integrations-core` · `abcdef` · postgres, mysql\n"
+        "<http://run|Review and approve →>"
+    )
+
+
+def test_build_text_escapes_dynamic_slack_text():
+    text = notify_release.build_text("core<&>", "<abc", '["postgres<&>"]', "http://run")
+    assert text == (
+        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        "`core&lt;&amp;&gt;` · `&lt;abc` · postgres&lt;&amp;&gt;\n"
+        "<http://run|Review and approve →>"
+    )
 
 
 def test_main_no_op_without_credentials(monkeypatch):
