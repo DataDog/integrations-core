@@ -76,7 +76,7 @@ jobs:
 
       - name: Get source tag token via dd-octo-sts
         id: source-octo-sts
-        uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         with:
           scope: DataDog/${{ inputs.source-repo || 'integrations-core' }}
           policy: self.release.tag-push
