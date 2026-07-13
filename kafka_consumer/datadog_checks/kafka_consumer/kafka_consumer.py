@@ -19,6 +19,10 @@ from datadog_checks.kafka_consumer.constants import (
 
 MAX_TIMESTAMPS = 1000
 
+# Total broker-timestamp entries retained per cluster, ~0.5 GiB at ~89 bytes/entry. The
+# per-partition history is scaled down from this budget as the partition count grows.
+MAX_TIMESTAMP_ENTRIES = 6_000_000
+
 
 class KafkaCheck(AgentCheck):
     __NAMESPACE__ = 'kafka'
@@ -249,7 +253,14 @@ class KafkaCheck(AgentCheck):
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
 
+    def _max_history(self, num_partitions):
+        """Per-partition timestamp cap, scaled so total retained entries stay within the budget."""
+        if num_partitions <= 0:
+            return self._max_timestamps
+        return max(2, min(self._max_timestamps, MAX_TIMESTAMP_ENTRIES // num_partitions))
+
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets):
+        max_history = self._max_history(len(highwater_offsets))
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
             # If the highwater offset went backwards (topic recreated,
@@ -263,7 +274,7 @@ class KafkaCheck(AgentCheck):
             # If there's too many timestamps, we delete the oldest one (by
             # timestamp, not by offset — evicting by min offset would discard
             # the fresh post-reset entries and keep poisonous stale ones).
-            if len(timestamps) > self._max_timestamps:
+            if len(timestamps) > max_history:
                 del timestamps[min(timestamps, key=timestamps.get)]
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
