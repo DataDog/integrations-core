@@ -106,6 +106,8 @@ jobs:
             # Mirror port-commit's branch naming so we can detect an existing backport before doing work.
             branch="$(printf '%s' "${DD_GITHUB_USER}/backport-${sha10}-to-${base}" | tr '[:upper:]' '[:lower:]')"
 
+            # Only an OPEN backport PR is detected. A branch left by a failed prior run (no open PR) is not
+            # auto-cleaned; port-commit's push then fails non-fast-forward until the stale branch is deleted manually.
             if [ -n "$(gh pr list --repo "${REPO}" --head "${branch}" --state open --json number --jq '.[].number')" ]; then
               echo "::notice::Backport to ${base} already has an open PR (branch ${branch}); skipping."
               continue
@@ -132,7 +134,7 @@ jobs:
               fi
             else
               echo "::error::Backport to ${base} failed."
-              comment_pr "⚠️ Automatic backport to \`${base}\` failed. See the [workflow run](${RUN_URL}) for details, or backport manually with \`ddev release port-commit PR-${PR_NUMBER} --target-branch ${base}\`."
+              comment_pr "⚠️ Automatic backport to \`${base}\` failed. See the [workflow run](${RUN_URL}) for details, or backport manually with \`ddev release port-commit PR-${PR_NUMBER} --target-branch ${base}\`. If the push was rejected as non-fast-forward, delete the stale \`${branch}\` branch and retry."
               overall_rc=1
             fi
             echo "::endgroup::"
