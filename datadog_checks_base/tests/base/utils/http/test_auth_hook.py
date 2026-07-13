@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlparse
 import mock
 import pytest
 
-from datadog_checks.base.utils.http import HTTPRequestAuth, OutgoingRequest, RequestsWrapper
+from datadog_checks.base.utils.http import HTTPRequestAuth, HTTPRequest, RequestsWrapper
 
 pytestmark = [pytest.mark.unit]
 
@@ -16,7 +16,7 @@ class HeaderAuth(HTTPRequestAuth):
         self.name = name
         self.value = value
 
-    def __call__(self, request: OutgoingRequest) -> None:
+    def __call__(self, request: HTTPRequest) -> None:
         request.headers[self.name] = self.value
 
 
@@ -24,7 +24,7 @@ class ParamAuth(HTTPRequestAuth):
     def __init__(self, params):
         self.params = params
 
-    def __call__(self, request: OutgoingRequest) -> None:
+    def __call__(self, request: HTTPRequest) -> None:
         request.params.update(self.params)
 
 
@@ -64,7 +64,7 @@ class TestAuthHookAdapter:
 
     def test_hook_contributes_both_headers_and_params(self):
         class BothAuth(HTTPRequestAuth):
-            def __call__(self, request: OutgoingRequest) -> None:
+            def __call__(self, request: HTTPRequest) -> None:
                 request.headers['X-Token'] = 'secret'
                 request.params['tenant'] = 'acme'
 

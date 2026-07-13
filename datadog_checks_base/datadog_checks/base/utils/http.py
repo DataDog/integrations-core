@@ -46,7 +46,7 @@ from .http_exceptions import (  # noqa: F401
 )
 
 # Re-export the agnostic auth hook interface so integrations import it from one place.
-from .http_protocol import HTTPRequestAuth, OutgoingRequest  # noqa: F401
+from .http_protocol import HTTPRequestAuth, HTTPRequest  # noqa: F401
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -264,7 +264,7 @@ def _translate_http_errors() -> Iterator[None]:
         raise _translate_requests_exception(exc) from exc
 
 
-class _OutgoingRequest:
+class _HTTPRequest:
     """Concrete, mutable request view passed to an agnostic auth hook on the requests backend."""
 
     def __init__(self, url: str, headers: MutableMapping[str, str], params: MutableMapping[str, str]) -> None:
@@ -285,7 +285,7 @@ class _RequestsAuthHookAdapter(requests_auth.AuthBase):
         self.hook = hook
 
     def __call__(self, r: requests.PreparedRequest) -> requests.PreparedRequest:
-        request = _OutgoingRequest(url=r.url, headers=r.headers, params={})
+        request = _HTTPRequest(url=r.url, headers=r.headers, params={})
         self.hook(request)
         if request.params:
             r.prepare_url(r.url, request.params)

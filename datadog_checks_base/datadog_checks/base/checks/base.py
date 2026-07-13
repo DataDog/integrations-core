@@ -437,11 +437,11 @@ class AgentCheck(object):
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
-            self._http = self.create_http_wrapper()
+            self._http = self.create_http_client()
 
         return self._http
 
-    def create_http_wrapper(self) -> HTTPClientProtocol:
+    def create_http_client(self) -> HTTPClientProtocol:
         """Construct the HTTP client backing self.http.
 
         Override this to build a bespoke wrapper or swap the backend. The default returns a
