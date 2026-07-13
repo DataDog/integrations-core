@@ -1,1 +1,0 @@
-Migrate the Postgres check's tag handling to the shared `TagManager`.

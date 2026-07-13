@@ -1,0 +1,4 @@
+{"ref":{"id":"val-1-mrdipqr2-34dvf4","source":"subagent_error","createdAt":1783602227630,"charCount":25,"lineCount":1,"preview":"Subagent error: timed out"},"text":"Subagent error: timed out"}
+{"ref":{"id":"val-2-mrdjzy0u-1eixrx","source":"subagent_error","createdAt":1783604383230,"charCount":25,"lineCount":1,"preview":"Subagent error: timed out"},"text":"Subagent error: timed out"}
+{"ref":{"id":"val-1-mrduqxge-62os8h","source":"validation","createdAt":1783622438364,"charCount":64,"lineCount":1,"preview":"OK: 5 integrations clean of requests-specific refs in production","exitCode":0,"passed":true},"text":"OK: 5 integrations clean of requests-specific refs in production"}
+{"ref":{"id":"val-2-mrdxri1j-e5cxdd","source":"validation","createdAt":1783627503891,"charCount":64,"lineCount":1,"preview":"OK: 5 integrations clean of requests-specific refs in production","exitCode":0,"passed":true},"text":"OK: 5 integrations clean of requests-specific refs in production"}

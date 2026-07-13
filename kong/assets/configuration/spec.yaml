@@ -2,6 +2,15 @@ name: Kong
 fleet_configurable: true
 files:
 - name: kong.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        # Status API
+        - 8007
+        # Admin API
+        - 8001
   options:
   - template: init_config
     options:
@@ -42,3 +51,11 @@ files:
       path: /var/log/nginx/error.log
       source: kong
       service: <SERVICE_NAME>
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - kong
+      - kong-gateway
+  - template: auto_conf/discovery

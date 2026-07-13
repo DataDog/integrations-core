@@ -1,1 +1,0 @@
-Reformat auto-generated `config_models` files following the migration of the model formatter from black to ruff. No behavior or type-contract change.
