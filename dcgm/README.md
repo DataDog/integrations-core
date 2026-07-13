@@ -289,7 +289,7 @@ LABEL "com.datadoghq.ad.instances"='[{"openmetrics_endpoint": "http://%%host%%:9
 
 Set [Autodiscovery Integrations Templates][12] as pod annotations on your application container. Aside from this, templates can also be configured with [a file, a configmap, or a key-value store][11].
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: dcgm`, and set `containerImage` to match each exporter image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][20].
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Create one `DatadogInstrumentation` resource per target workload, use the same check instance configuration in `spec.config.checks`, set `integration: dcgm`, and set `containerName` to match each exporter's container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][20].
 
 **Annotations v2** (for Datadog Agent v7.47+)
 

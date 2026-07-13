@@ -45,7 +45,7 @@ Using annotations:
        [....]
    ```
 
-   For a Prometheus pod managed by a supported Kubernetes workload, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: openmetrics`, and set `containerImage` to match the Prometheus pod image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
+   You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: openmetrics`, and set `containerName` to match the Prometheus container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][16].
 
 You can find values for `<FELIX-SERVICE-IP>` and `<FELIX-SERVICE-PORT>` by running `kubectl get all -all-namespaces`.
 

@@ -122,7 +122,7 @@ spec:
         - name: haproxy
 ```
 
-For supported Kubernetes workloads, you can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: haproxy`, and set `containerImage` to match the application image. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
+You can use a `DatadogInstrumentation` resource instead of pod annotations. Use the same check instance configuration in `spec.config.checks`, set `integration: haproxy`, and set `containerName` to match the application container name. For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][31].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
