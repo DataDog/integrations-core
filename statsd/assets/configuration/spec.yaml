@@ -3,6 +3,14 @@ fleet_configurable: true
 
 files:
   - name: statsd.yaml
+    discovery:
+      strategies:
+      - strategy: from_ports
+        port_hints:
+        - 8126
+        candidates:
+        - host: "{service.host}"
+          port: "{port.number}"
     options:
       - template: init_config
         options:
@@ -33,3 +41,10 @@ files:
           - type: file
             path: /var/log/statsd/statsd.log
             source: statsd
+  - name: auto_conf.yaml
+    options:
+    - template: ad_identifiers
+      overrides:
+        value.example:
+        - statsd
+    - template: auto_conf/discovery

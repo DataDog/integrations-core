@@ -7,7 +7,8 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname
+from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.statsd.statsd import SERVICE_CHECK_NAME, SERVICE_CHECK_NAME_HEALTH, StatsCheck
 
 log = logging.getLogger(__file__)
@@ -44,7 +45,7 @@ def dd_environment():
     with docker_run(
         compose_file=os.path.join(HERE, 'compose', 'statsd.yaml'), log_patterns=['server is up'], mount_logs=True
     ):
-        yield DEFAULT_INSTANCE
+        yield DEFAULT_INSTANCE, get_e2e_discovery_metadata()
 
 
 @pytest.mark.usefixtures("dd_environment")
@@ -59,6 +60,25 @@ def test_simple_run(aggregator, instance):
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance)
     assert_metrics_covered(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery()
+
+    # discovery connects directly to the container's own host/port, which isn't known ahead of
+    # time, so the host:/port: tags assert_metrics_covered() checks for can't be asserted here
+    for mname in METRICS:
+        aggregator.assert_metric(mname, count=1)
+
+    aggregator.assert_service_check(SERVICE_CHECK_NAME, status=StatsCheck.OK, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_NAME_HEALTH, status=StatsCheck.OK, count=1)
+    aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, StatsCheck)
 
 
 def assert_metrics_covered(aggregator):
