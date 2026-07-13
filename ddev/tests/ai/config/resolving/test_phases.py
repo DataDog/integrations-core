@@ -12,7 +12,7 @@ from ddev.ai.config.registry import BrokenEntry, ResourceKind, ResourceRegistry
 from ddev.ai.config.resolving.resolver import FlowResolver
 
 from ..utils import StubReg, StubRegMissing
-from .helpers import StubRegRaising, flow_entry, phase_entry
+from .helpers import StubRegRaising, agent_entry, flow_entry, phase_entry, prompt_entry
 
 
 def test_unknown_phase_ref():
@@ -138,4 +138,37 @@ def test_phase_referenced_via_conflict():
 
     assert diagnostics.status == ConfigStatus.BROKEN
     error = next(e for e in diagnostics.errors if e.kind == ErrorKind.PHASE)
-    assert "conflict" in error.message.lower()
+    assert "conflicting definitions" in error.message
+    assert set(error.sources) == {Path("/x/a.yaml"), Path("/x/b.yaml")}
+
+
+def test_conflicting_agent_referenced_reports_conflict():
+    entries = [
+        agent_entry("writer", path="/x/a.md"),
+        agent_entry("writer", path="/x/b.md"),
+        phase_entry("p", agent="writer"),
+        flow_entry("demo", [FlowEntry(phase="p")]),
+    ]
+    registry = ResourceRegistry(entries)
+    diagnostics = FlowResolver(registry, StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.BROKEN
+    error = next(e for e in diagnostics.errors if e.kind == ErrorKind.AGENT and e.subject == "writer")
+    assert "conflicting definitions" in error.message
+    assert set(error.sources) == {Path("/x/a.md"), Path("/x/b.md")}
+
+
+def test_conflicting_prompt_ref_reports_conflict():
+    entries = [
+        prompt_entry("intro", "a", path="/x/a.md"),
+        prompt_entry("intro", "b", path="/x/b.md"),
+        phase_entry("p", tasks=[TaskConfig(name="t1", prompt_ref="intro")]),
+        flow_entry("demo", [FlowEntry(phase="p")]),
+    ]
+    registry = ResourceRegistry(entries)
+    diagnostics = FlowResolver(registry, StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.BROKEN
+    error = next(e for e in diagnostics.errors if e.kind == ErrorKind.PROMPT and e.subject == "intro")
+    assert "conflicting definitions" in error.message
+    assert set(error.sources) == {Path("/x/a.md"), Path("/x/b.md")}

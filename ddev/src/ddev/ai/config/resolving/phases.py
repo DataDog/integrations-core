@@ -4,14 +4,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ddev.ai.config.errors import ConfigError, ErrorKind, FlowError
-from ddev.ai.config.registry import BrokenEntry, ResourceKind
+from ddev.ai.config.registry import BrokenEntry, ResourceConflict, ResourceKind
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from ddev.ai.config.models import FlowConfig, PhaseConfig
-    from ddev.ai.config.registry import ResourceRegistry
+    from ddev.ai.config.registry import ResourceRegistry, ValidEntry
     from ddev.ai.phases.registry import PhaseRegistryProtocol
 
 
@@ -34,41 +36,45 @@ def resolve_scheduled_phases(
 def _resolve_scheduled_phase(
     registry: ResourceRegistry, phase_name: str, flow_name: str
 ) -> tuple[PhaseConfig | None, list[FlowError]]:
-    phase_entry = registry.entry(ResourceKind.PHASE, phase_name)
+    flow_source = registry.entry(ResourceKind.FLOW, flow_name).source_file
+    phase_entry, errors = _resolve_resource_reference(
+        registry,
+        ResourceKind.PHASE,
+        phase_name,
+        referenced_by=f"flow {flow_name!r}",
+        reference_source=flow_source,
+        phase_name=phase_name,
+    )
     if phase_entry is None:
-        return None, [_unregistered_phase_error(registry, phase_name, flow_name)]
-    if isinstance(phase_entry, BrokenEntry):
-        return None, [
-            FlowError(
-                ErrorKind.PHASE,
-                f"Phase {phase_name!r} referenced by flow {flow_name!r} is broken: {phase_entry.error}",
-                subject=phase_name,
-                phase=phase_name,
-                sources=[phase_entry.source_file],
-            )
-        ]
+        return None, errors
     return phase_entry.config, []
 
 
-def _unregistered_phase_error(registry: ResourceRegistry, phase_name: str, flow_name: str) -> FlowError:
-    conflict = next((c for c in registry.conflicts if c.kind == ResourceKind.PHASE and c.name == phase_name), None)
-    if conflict is not None:
-        return FlowError(
-            ErrorKind.PHASE,
-            f"Phase {phase_name!r} referenced by flow {flow_name!r} is defined in multiple sources; "
-            "resolve the conflict",
-            subject=phase_name,
-            phase=phase_name,
-            sources=list(conflict.sources),
-        )
-    flow_entry = registry.entry(ResourceKind.FLOW, flow_name)
-    return FlowError(
-        ErrorKind.PHASE,
-        f"Phase {phase_name!r} referenced by flow {flow_name!r} is not registered",
-        subject=phase_name,
-        phase=phase_name,
-        sources=[flow_entry.source_file],
-    )
+def _resolve_resource_reference(
+    registry: ResourceRegistry,
+    kind: ResourceKind,
+    name: str,
+    *,
+    referenced_by: str,
+    reference_source: Path,
+    phase_name: str | None = None,
+) -> tuple[ValidEntry[Any] | None, list[FlowError]]:
+    """Resolve a reference to a resource, mapping every non-valid state to its own diagnostic."""
+    result = registry.lookup(kind, name)
+    error_kind = ErrorKind.for_resource(kind)
+    label = kind.value.replace("_", " ").capitalize()
+
+    def error(reason: str, sources: list[Path]) -> tuple[None, list[FlowError]]:
+        message = f"{label} {name!r} referenced by {referenced_by} {reason}"
+        return None, [FlowError(error_kind, message, subject=name, phase=phase_name, sources=sources)]
+
+    if result is None:
+        return error("is not registered", [reference_source])
+    if isinstance(result, ResourceConflict):
+        return error("has conflicting definitions", list(result.sources))
+    if isinstance(result, BrokenEntry):
+        return error(f"is broken: {result.error}", [result.source_file])
+    return result, []
 
 
 def _validate_phase(
@@ -118,32 +124,16 @@ def _validate_phase_class(
 def _validate_phase_agent(registry: ResourceRegistry, phase_config: PhaseConfig) -> list[FlowError]:
     if phase_config.agent is None:
         return []
-    agent_entry = registry.entry(ResourceKind.AGENT, phase_config.agent)
-    if agent_entry is None:
-        phase_src = registry.entry(ResourceKind.PHASE, phase_config.name).source_file
-        return [
-            FlowError(
-                ErrorKind.AGENT,
-                f"Agent {phase_config.agent!r} referenced by phase {phase_config.name!r} is not registered",
-                subject=phase_config.agent,
-                phase=phase_config.name,
-                sources=[phase_src],
-            )
-        ]
-    if isinstance(agent_entry, BrokenEntry):
-        return [
-            FlowError(
-                ErrorKind.AGENT,
-                (
-                    f"Agent {phase_config.agent!r} referenced by phase {phase_config.name!r} "
-                    f"is broken: {agent_entry.error}"
-                ),
-                subject=phase_config.agent,
-                phase=phase_config.name,
-                sources=[agent_entry.source_file],
-            )
-        ]
-    return []
+    phase_src = registry.entry(ResourceKind.PHASE, phase_config.name).source_file
+    _, errors = _resolve_resource_reference(
+        registry,
+        ResourceKind.AGENT,
+        phase_config.agent,
+        referenced_by=f"phase {phase_config.name!r}",
+        reference_source=phase_src,
+        phase_name=phase_config.name,
+    )
+    return errors
 
 
 def _validate_phase_refs(registry: ResourceRegistry, phase_config: PhaseConfig) -> list[FlowError]:
@@ -163,28 +153,13 @@ def _validate_phase_refs(registry: ResourceRegistry, phase_config: PhaseConfig) 
 
 
 def _check_ref(registry: ResourceRegistry, kind: ResourceKind, ref: str, phase_name: str) -> list[FlowError]:
-    error_kind = ErrorKind.for_resource(kind)
-    ref_entry = registry.entry(kind, ref)
-    label = error_kind.value.replace("_", " ").capitalize()
-    if ref_entry is None:
-        phase_src = registry.entry(ResourceKind.PHASE, phase_name).source_file
-        return [
-            FlowError(
-                error_kind,
-                f"{label} {ref!r} referenced by phase {phase_name!r} is not registered",
-                subject=ref,
-                phase=phase_name,
-                sources=[phase_src],
-            )
-        ]
-    if isinstance(ref_entry, BrokenEntry):
-        return [
-            FlowError(
-                error_kind,
-                f"{label} {ref!r} referenced by phase {phase_name!r} is broken: {ref_entry.error}",
-                subject=ref,
-                phase=phase_name,
-                sources=[ref_entry.source_file],
-            )
-        ]
-    return []
+    phase_src = registry.entry(ResourceKind.PHASE, phase_name).source_file
+    _, errors = _resolve_resource_reference(
+        registry,
+        kind,
+        ref,
+        referenced_by=f"phase {phase_name!r}",
+        reference_source=phase_src,
+        phase_name=phase_name,
+    )
+    return errors

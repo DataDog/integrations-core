@@ -70,12 +70,14 @@ class ResourceRegistry:
             groups.setdefault((e.kind, e.name), []).append(e)
 
         self._entries: dict[tuple[ResourceKind, str], Entry[Any]] = {}
-        self._conflicts: list[ResourceConflict] = []
+        self._conflicts: dict[tuple[ResourceKind, str], ResourceConflict] = {}
         for (kind, name), group in groups.items():
             if len(group) == 1:
                 self._entries[(kind, name)] = group[0]
             else:
-                self._conflicts.append(ResourceConflict(kind=kind, name=name, sources=[e.source_file for e in group]))
+                self._conflicts[(kind, name)] = ResourceConflict(
+                    kind=kind, name=name, sources=[e.source_file for e in group]
+                )
 
     @overload
     def entry(self, kind: Literal[ResourceKind.AGENT], name: str) -> Entry[AgentConfig] | None: ...
@@ -91,6 +93,13 @@ class ResourceRegistry:
     def entry(self, kind: ResourceKind, name: str) -> Entry[Any] | None:
         """The single entry for ``(kind, name)``, or ``None`` if absent or conflicting."""
         return self._entries.get((kind, name))
+
+    def lookup(self, kind: ResourceKind, name: str) -> Entry[Any] | ResourceConflict | None:
+        """The full state of ``(kind, name)``: valid/broken entry, conflict, or ``None`` if absent."""
+        entry = self._entries.get((kind, name))
+        if entry is not None:
+            return entry
+        return self._conflicts.get((kind, name))
 
     def _valid_configs_of_kind(self, kind: ResourceKind) -> dict[str, Any]:
         """Configs of VALID, non-conflicting entries of ``kind``, keyed by name."""
@@ -137,7 +146,7 @@ class ResourceRegistry:
 
     @property
     def conflicts(self) -> list[ResourceConflict]:
-        return self._conflicts
+        return list(self._conflicts.values())
 
     @property
     def has_conflicts(self) -> bool:
