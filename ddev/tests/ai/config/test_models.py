@@ -96,6 +96,23 @@ def test_flow_name_pattern_rejects_invalid():
         FlowConfig(name="invalid name!", flow=[])
 
 
-def test_variable_name_pattern_rejects_invalid():
+@pytest.mark.parametrize("name", ["invalid name!", "my-var", "my.var", "1var", "MyVar", ""])
+def test_variable_name_rejects_non_template_identifiers(name):
     with pytest.raises(ValidationError):
-        VariableDeclaration(name="invalid name!")
+        VariableDeclaration(name=name)
+
+
+@pytest.mark.parametrize("name", ["x", "my_var", "_hidden", "var1"])
+def test_variable_name_accepts_template_identifiers(name):
+    assert VariableDeclaration(name=name).name == name
+
+
+@pytest.mark.parametrize("bad_key", ["my-var", "my.var", "1var", "MyVar"])
+def test_flow_variables_reject_non_template_identifiers(bad_key):
+    with pytest.raises(ValidationError):
+        FlowConfig(name="demo", variables={bad_key: "v"}, flow=[])
+
+
+def test_flow_variables_accept_template_identifiers():
+    fc = FlowConfig(name="demo", variables={"topic": "cats", "_n": "1"}, flow=[])
+    assert fc.variables == {"topic": "cats", "_n": "1"}

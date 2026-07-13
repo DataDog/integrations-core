@@ -33,9 +33,9 @@ PHASE_AND_FLOW = (
 
 def write_full_flow(root):
     write(root / "ag.md", "---\ntype: agent\nname: ag\n---\nsys")
-    write(root / "intro.md", "---\ntype: prompt\nname: intro\n---\nDo the thing {{x}}")
+    write(root / "intro.md", "---\ntype: prompt\nname: intro\n---\nDo the thing ${x}")
     write(root / "g.md", "---\ntype: goal\nname: g\n---\ngoal body")
-    write(root / "mem.md", "---\ntype: memory_prompt\nname: mem\n---\nRemember {{x}}")
+    write(root / "mem.md", "---\ntype: memory_prompt\nname: mem\n---\nRemember ${x}")
     write(root / "f.yaml", PHASE_AND_FLOW)
 
 
@@ -50,11 +50,11 @@ def test_get_flow_resolves_all_refs_and_variables(tmp_path):
     rf = eng.get_flow("demo")
 
     task = rf.phases["p"].tasks[0]
-    assert task.prompt == "Do the thing {{x}}"
+    assert task.prompt == "Do the thing ${x}"
     assert task.prompt_ref is None
     assert task.goal == "goal body"
     assert task.goal_ref is None
-    assert rf.phases["p"].checkpoint.memory_prompt == "Remember {{x}}"
+    assert rf.phases["p"].checkpoint.memory_prompt == "Remember ${x}"
     assert rf.phases["p"].checkpoint.memory_prompt_ref is None
     assert rf.variables == {"x": "hi"}
     assert rf.agents["ag"].system_prompt == "sys"

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum, auto
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -76,6 +76,17 @@ class ResourceRegistry:
                 self._entries[(kind, name)] = group[0]
             else:
                 self._conflicts.append(ResourceConflict(kind=kind, name=name, sources=[e.source_file for e in group]))
+
+    @overload
+    def entry(self, kind: Literal[ResourceKind.AGENT], name: str) -> Entry[AgentConfig] | None: ...
+    @overload
+    def entry(self, kind: Literal[ResourceKind.PHASE], name: str) -> Entry[PhaseConfig] | None: ...
+    @overload
+    def entry(self, kind: Literal[ResourceKind.FLOW], name: str) -> Entry[FlowConfig] | None: ...
+    @overload
+    def entry(
+        self, kind: Literal[ResourceKind.PROMPT, ResourceKind.GOAL, ResourceKind.MEMORY_PROMPT], name: str
+    ) -> Entry[str] | None: ...
 
     def entry(self, kind: ResourceKind, name: str) -> Entry[Any] | None:
         """The single entry for ``(kind, name)``, or ``None`` if absent or conflicting."""

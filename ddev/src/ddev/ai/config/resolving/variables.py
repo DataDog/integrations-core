@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 @dataclass(frozen=True)
-class _DeclaredVar:
+class DeclaredVar:
     name: str
     default: str | None
     origin: str
@@ -36,23 +36,21 @@ def resolve_variables(
     return resolved, errors
 
 
-def _gather_variable_declarations(
-    registry: ResourceRegistry, scheduled_phases: list[PhaseConfig]
-) -> list[_DeclaredVar]:
-    declared: list[_DeclaredVar] = []
+def _gather_variable_declarations(registry: ResourceRegistry, scheduled_phases: list[PhaseConfig]) -> list[DeclaredVar]:
+    declared: list[DeclaredVar] = []
     for pc in scheduled_phases:
         phase_src = registry.entry(ResourceKind.PHASE, pc.name).source_file
         if pc.agent is not None and pc.agent in registry.agents:
             agent_src = registry.entry(ResourceKind.AGENT, pc.agent).source_file
             for v in registry.agents[pc.agent].variables:
-                declared.append(_DeclaredVar(v.name, v.default, f"agent {pc.agent!r}", agent_src))
+                declared.append(DeclaredVar(v.name, v.default, f"agent {pc.agent!r}", agent_src))
         for v in pc.variables:
-            declared.append(_DeclaredVar(v.name, v.default, f"phase {pc.name!r}", phase_src))
+            declared.append(DeclaredVar(v.name, v.default, f"phase {pc.name!r}", phase_src))
     return declared
 
 
-def _collect_default_values(declared: list[_DeclaredVar]) -> tuple[dict[str, str], list[FlowError]]:
-    by_name: dict[str, list[_DeclaredVar]] = {}
+def _collect_default_values(declared: list[DeclaredVar]) -> tuple[dict[str, str], list[FlowError]]:
+    by_name: dict[str, list[DeclaredVar]] = {}
     for dv in declared:
         by_name.setdefault(dv.name, []).append(dv)
 
@@ -81,8 +79,8 @@ def _collect_default_values(declared: list[_DeclaredVar]) -> tuple[dict[str, str
     return defaults, errors
 
 
-def _find_missing_variables(declared: list[_DeclaredVar], fc: FlowConfig) -> list[FlowError]:
-    by_name: dict[str, list[_DeclaredVar]] = {}
+def _find_missing_variables(declared: list[DeclaredVar], fc: FlowConfig) -> list[FlowError]:
+    by_name: dict[str, list[DeclaredVar]] = {}
     for dv in declared:
         by_name.setdefault(dv.name, []).append(dv)
 

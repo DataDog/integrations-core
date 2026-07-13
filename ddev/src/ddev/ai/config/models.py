@@ -4,19 +4,31 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from ddev.ai.tools.registry import ToolRegistry
 
 NAME_PATTERN = r"^[A-Za-z0-9._-]{1,64}$"
+# Variable names are interpolated via ``string.Template``, so they must be legal
+# ``$identifier`` placeholders: start with a letter/underscore, then letters/digits/underscores.
+VARIABLE_NAME_PATTERN = r"^[_a-z][_a-z0-9]{0,63}$"
+
+
+def validate_variable_names(variables: dict[str, str]) -> dict[str, str]:
+    """Ensure every variable name is a legal ``string.Template`` placeholder."""
+    invalid = sorted(name for name in variables if re.match(VARIABLE_NAME_PATTERN, name) is None)
+    if invalid:
+        raise ValueError(f"Invalid variable names (must match {VARIABLE_NAME_PATTERN}): {invalid}")
+    return variables
 
 
 class VariableDeclaration(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    name: str = Field(pattern=NAME_PATTERN)
+    name: str = Field(pattern=VARIABLE_NAME_PATTERN)
     default: str | None = None
 
 
@@ -105,7 +117,7 @@ class FlowEntry(BaseModel):
 class FlowConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=NAME_PATTERN)
-    variables: dict[str, str] = Field(default_factory=dict)
+    variables: Annotated[dict[str, str], AfterValidator(validate_variable_names)] = Field(default_factory=dict)
     flow: list[FlowEntry]
 
 
