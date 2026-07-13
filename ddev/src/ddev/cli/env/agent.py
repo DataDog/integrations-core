@@ -38,13 +38,15 @@ def _invoke_check_with_retry(
             time.sleep(backoff)
 
 
-def _validate_env_vars(ctx: click.Context, param: click.Parameter, value: tuple[str, ...]) -> tuple[str, ...]:
+def _validate_env_vars(ctx: click.Context, param: click.Parameter, value: tuple[str, ...]) -> dict[str, str] | None:
+    env_vars: dict[str, str] = {}
     for entry in value:
-        key, _, _ = entry.partition('=')
+        key, _, env_value = entry.partition('=')
         if '=' not in entry or not key:
             raise click.BadParameter(f'`{entry}` is not in KEY=VALUE format', ctx=ctx, param=param)
+        env_vars[key] = env_value
 
-    return value
+    return env_vars or None
 
 
 @click.command(
@@ -70,7 +72,7 @@ def agent(
     environment: str,
     args: tuple[str, ...],
     config_file: str | None,
-    env_vars: tuple[str, ...],
+    env_vars: dict[str, str] | None,
 ):
     """
     Invoke the Agent.
@@ -92,8 +94,6 @@ def agent(
     agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
     agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
 
-    invoke_env_vars = dict(entry.split('=', 1) for entry in env_vars) if env_vars else None
-
     full_args = list(args)
     trigger_run = False
     if full_args[0] == 'check':
@@ -109,9 +109,9 @@ def agent(
     if config_file is None or not trigger_run:
         try:
             if trigger_run:
-                _invoke_check_with_retry(agent, full_args, env_vars=invoke_env_vars)
+                _invoke_check_with_retry(agent, full_args, env_vars=env_vars)
             else:
-                agent.invoke(full_args, env_vars=invoke_env_vars)
+                agent.invoke(full_args, env_vars=env_vars)
         except subprocess.CalledProcessError as e:
             app.abort(code=e.returncode)
         except NotImplementedError as e:
@@ -126,7 +126,7 @@ def agent(
     if not env_data.config_file.is_file():
         try:
             env_data.write_config(config)
-            _invoke_check_with_retry(agent, full_args, env_vars=invoke_env_vars)
+            _invoke_check_with_retry(agent, full_args, env_vars=env_vars)
         except NotImplementedError as e:
             app.abort(str(e))
         finally:
@@ -136,7 +136,7 @@ def agent(
         env_data.config_file.replace(temp_config_file)
         try:
             env_data.write_config(config)
-            _invoke_check_with_retry(agent, full_args, env_vars=invoke_env_vars)
+            _invoke_check_with_retry(agent, full_args, env_vars=env_vars)
         except NotImplementedError as e:
             app.abort(str(e))
         finally:
