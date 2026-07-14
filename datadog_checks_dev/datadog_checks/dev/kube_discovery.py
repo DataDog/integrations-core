@@ -207,7 +207,7 @@ def assert_all_discovery_candidates_stable_kubernetes(
             probe_candidate(state, check_name, candidate, aggregator, datadog_agent)
         except Exception:
             # Even a failing candidate should still be checked for restarts or dangerous log output.
-            logging.debug('Error probing candidate #%d: %r', index, candidate)
+            logging.debug('Error probing candidate #%d: %r', index, candidate, exc_info=True)
 
         current_state = get_pod(kubeconfig_path, namespace, pod_name)
         assert_pod_stable(initial_state, current_state, index)
