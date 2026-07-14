@@ -1,0 +1,1 @@
+Migrate off requests-specific exception handling to the HTTP-agnostic exception surface.

@@ -1,0 +1,1 @@
+Migrate off the requests library to the HTTP-agnostic response type hint.
