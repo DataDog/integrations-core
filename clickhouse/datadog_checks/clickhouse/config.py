@@ -136,6 +136,10 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_collect_schemas().model_dump(),
                 **(instance.get('collect_schemas', {})),
             },
+            "asynchronous_insert_flush_log": {
+                **dict_defaults.instance_asynchronous_insert_flush_log().model_dump(),
+                **(instance.get('asynchronous_insert_flush_log', {})),
+            },
             # Tags - ensure we have a list, not None
             "tags": list(instance.get('tags', [])),
             # Other settings
@@ -237,6 +241,14 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
         args['collect_schemas']['collection_interval'] = default_value
         validation_result.add_warning(
             f"collect_schemas.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if _safefloat(args.get('asynchronous_insert_flush_log', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_asynchronous_insert_flush_log().collection_interval
+        args['asynchronous_insert_flush_log']['collection_interval'] = default_value
+        validation_result.add_warning(
+            "asynchronous_insert_flush_log.collection_interval must be greater than 0, "
+            f"defaulting to {default_value} seconds."
         )
 
     _pm_defaults = dict_defaults.instance_parts_and_merges()
