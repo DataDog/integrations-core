@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from typing import Never
+
 import pytest
 from pydantic import ValidationError
 
@@ -82,6 +84,24 @@ def test_checkpoint_memory_source_validation_rejects(kwargs):
 def test_agent_requires_provider_registry_context():
     with pytest.raises(ValidationError, match="Agent provider registry is required"):
         AgentConfig(provider="custom")
+
+
+def test_agent_runs_provider_config_validation():
+    class CustomProvider:
+        def validate_config(self, agent_config: AgentConfig) -> None:
+            if agent_config.model != "supported-model":
+                raise ValueError("Custom provider rejected model")
+
+        def build_agent(self, *_args: object, **_kwargs: object) -> Never:
+            raise NotImplementedError
+
+    registry = AgentProviderRegistry()
+    registry.register("custom", CustomProvider())
+
+    with pytest.raises(ValidationError, match="Custom provider rejected model"):
+        AgentConfig.model_validate(
+            {"provider": "custom", "model": "unsupported-model"}, context={"provider_registry": registry}
+        )
 
 
 def test_agent_validates_provider_against_registry():
