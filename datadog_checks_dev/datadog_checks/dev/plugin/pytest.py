@@ -514,3 +514,68 @@ def pytest_collection_modifyitems(config, items):
         for ttype in TEST_TYPES:
             if ttype.filepath_match in str(item_path):
                 item.add_marker(getattr(pytest.mark, ttype.name))
+
+
+@pytest.fixture
+def mock_http(mocker):
+    from unittest.mock import PropertyMock, create_autospec
+
+    from datadog_checks.base.checks.base import AgentCheck
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
+
+    client = create_autospec(HTTPClientProtocol)
+    # Protocol annotations are not picked up by create_autospec, so set options explicitly.
+    client.options = {
+        'auth': None,
+        'cert': None,
+        'headers': {},
+        'proxies': None,
+        'timeout': (10.0, 10.0),
+        'verify': True,
+        'allow_redirects': True,
+    }
+
+    def _get_header(name, default=None):
+        for key, value in client.options['headers'].items():
+            if key.lower() == name.lower():
+                return value
+        return default
+
+    def _set_header(name, value):
+        for key in list(client.options['headers']):
+            if key.lower() == name.lower():
+                client.options['headers'][key] = value
+                return
+        client.options['headers'][name] = value
+
+    client.get_header.side_effect = _get_header
+    client.set_header.side_effect = _set_header
+    client.options_method.side_effect = NotImplementedError('HTTP OPTIONS not yet supported in mock_http')
+    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
+    return client
+
+
+@pytest.fixture
+def mock_openmetrics_http(mock_http, mocker):
+    """OpenMetrics HTTP mock with dual interception:
+
+    - v1 checks (OpenMetricsBaseCheck): patches OpenMetricsScraperMixin.get_http_handler to return mock_http.
+    - v2 checks (OpenMetricsBaseCheckV2): inherited via mock_http's AgentCheck.http PropertyMock; the
+      get_http_handler patch is unused on this path because v2 calls self.http.get(...) directly.
+    """
+    mocker.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http
+
+
+@pytest.fixture
+def mock_prometheus_http(mock_http, mocker):
+    """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
+    mock_http.ignore_tls_warning = False
+    mocker.patch(
+        'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
+        return_value=mock_http,
+    )
+    return mock_http

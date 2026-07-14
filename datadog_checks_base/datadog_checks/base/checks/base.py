@@ -67,7 +67,7 @@ if TYPE_CHECKING:
 
     from datadog_checks.base.utils.diagnose import Diagnosis
     from datadog_checks.base.utils.discovery import Service
-    from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
     from datadog_checks.base.utils.metadata import MetadataManager
 
 inspect: _module_inspect = lazy_loader.load('inspect')
@@ -430,19 +430,27 @@ class AgentCheck(object):
         return limit
 
     @property
-    def http(self) -> RequestsWrapper:
+    def http(self) -> HTTPClientProtocol:
         """
         Provides logic to yield consistent network behavior based on user configuration.
 
         Only new checks or checks on Agent 6.13+ can and should use this for HTTP requests.
         """
         if not hasattr(self, '_http'):
-            # See Performance Optimizations in this package's README.md.
-            from datadog_checks.base.utils.http import RequestsWrapper
-
-            self._http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+            self._http = self.create_http_client()
 
         return self._http
+
+    def create_http_client(self) -> HTTPClientProtocol:
+        """Construct the HTTP client backing self.http.
+
+        Override this to build a bespoke wrapper or swap the backend. The default returns a
+        RequestsWrapper configured from this check's instance and init config.
+        """
+        # See Performance Optimizations in this package's README.md.
+        from datadog_checks.base.utils.http import RequestsWrapper
+
+        return RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
     @property
     def logs_enabled(self):

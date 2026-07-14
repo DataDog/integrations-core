@@ -17,6 +17,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
@@ -223,6 +224,7 @@ class ResponseWrapper(ObjectProxy):
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        '_trust_env',
         '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
@@ -414,6 +416,11 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
+        # Whether to trust environment configuration (proxies, auth, CA bundles).
+        # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
+        # value so the reported state matches it. getattr guards sessions that lack the attribute.
+        self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
+
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
@@ -433,6 +440,44 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    @property
+    def trust_env(self) -> bool:
+        """Whether the client trusts environment config (proxies, auth, CA bundles)."""
+        return self._trust_env
+
+    @trust_env.setter
+    def trust_env(self, value: bool) -> None:
+        self._trust_env = value
+        if self._session is not None:
+            self._session.trust_env = value
+
+    def close(self) -> None:
+        """Close any open connections. Idempotent; the client stays usable afterwards."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Look up a persisted cookie by name, returning its value, or default if absent or ambiguous."""
+        try:
+            return self.session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
+
+    def get_header(self, name: str, default: str | None = None) -> str | None:
+        """Look up a request header by name. Lookup is case-insensitive."""
+        for key, value in self.options['headers'].items():
+            if key.lower() == name.lower():
+                return value
+        return default
+
+    def set_header(self, name: str, value: str) -> None:
+        for key in self.options['headers']:
+            if key.lower() == name.lower():
+                self.options['headers'][key] = value
+                return
+        self.options['headers'][name] = value
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -608,6 +653,7 @@ class RequestsWrapper(object):
         # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
+        session.trust_env = self._trust_env
         return session
 
     @property
