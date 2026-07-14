@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import subprocess
 from typing import ChainMap
 
 import mock
@@ -65,7 +66,7 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
     }
     filesystem_tag_metric_prefixes = set()
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': dl_fixture,
         'lnetctl stats show': 'all_lnet_stats.txt',
         'lnetctl net show': 'all_lnet_net.txt',
@@ -73,7 +74,7 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
     }
     for param in DEFAULT_STATS + EXTRA_STATS + JOBSTATS_PARAMS + JOBID_TAG_PARAMS + CURATED_PARAMS:
         mapping[f'lctl list_param {param.regex}'] = param.regex
-        mapping[f'lctl get_param -ny {param.regex}'] = param.fixture
+        mapping[f'lctl get_param -n {param.regex}'] = param.fixture
         if any(wildcard in TAGS_WITH_FILESYSTEM for wildcard in param.wildcards):
             filesystem_tag_metric_prefixes.add(f"lustre.{param.prefix}")
 
@@ -99,10 +100,10 @@ def test_check(dd_run_check, aggregator, mock_lustre_commands, node_type, dl_fix
 def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, expected_metrics):
     instance = {'node_type': node_type, 'filesystems': ['lustre']}
 
-    jobid_tag_commands = {f'lctl get_param -ny {param.regex}': f'{param.fixture}' for param in JOBID_TAG_PARAMS}
+    jobid_tag_commands = {f'lctl get_param -n {param.regex}': f'{param.fixture}' for param in JOBID_TAG_PARAMS}
     mapping = ChainMap(
         {
-            'lctl get_param -ny version': 'all_version.txt',
+            'lctl get_param -n version': 'all_version.txt',
             'lctl dl': f'{node_type}_dl_yaml.txt',
             'lctl list_param': "all_list_param.txt",
             'lctl get_param': fixture_file,
@@ -128,7 +129,7 @@ def test_jobstats(aggregator, mock_lustre_commands, node_type, fixture_file, exp
 )
 def test_lnet(aggregator, instance, mock_lustre_commands, method, fixture_file, expected_metrics):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lnetctl': fixture_file,
     }
@@ -141,7 +142,7 @@ def test_lnet(aggregator, instance, mock_lustre_commands, method, fixture_file, 
 
 def test_device_health(aggregator, instance, mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
@@ -187,7 +188,7 @@ def test_device_health(aggregator, instance, mock_lustre_commands):
 )
 def test_node_type(mock_lustre_commands, fixture_file, expected_node_type):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': fixture_file,
     }
     with mock_lustre_commands(mapping):
@@ -198,7 +199,7 @@ def test_node_type(mock_lustre_commands, fixture_file, expected_node_type):
 
 def test_submit_changelogs(instance, mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lfs changelog': 'client_changelogs.txt',
     }
@@ -226,7 +227,7 @@ def test_submit_changelogs(instance, mock_lustre_commands):
 
 def test_get_changelog(instance, mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lfs changelog': 'client_changelogs.txt',
     }
@@ -251,10 +252,10 @@ def test_get_changelog(instance, mock_lustre_commands):
 
 def test_submit_param_data(aggregator, instance, mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lctl list_param llite.*.stats': 'llite.lustre.stats',
-        'lctl get_param -ny llite': 'client_llite_stats.txt',
+        'lctl get_param -n llite': 'client_llite_stats.txt',
     }
     with mock_lustre_commands(mapping):
         check = LustreCheck('lustre', {}, [instance])
@@ -273,7 +274,7 @@ def test_submit_param_data(aggregator, instance, mock_lustre_commands):
 
 def test_extract_tags_from_param(mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
@@ -306,7 +307,7 @@ def test_extract_tags_from_param(mock_lustre_commands):
 
 def test_parse_stats(mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
@@ -350,7 +351,7 @@ short_line 1
 
 def test_update_filesystems(mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'mds_dl_yaml.txt',
         'lctl list_param mdt.*.job_stats': 'mdt.lustre-MDT0000.job_stats\nmdt.lustre2-MDT0000.job_stats',
     }
@@ -365,7 +366,7 @@ def test_update_filesystems(mock_lustre_commands):
 
 def test_update_changelog_targets(mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
@@ -387,7 +388,7 @@ def test_update_changelog_targets(mock_lustre_commands):
 
 def test_lnet_group_filtering(aggregator, instance, mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lnetctl net show': 'all_lnet_net.txt',
     }
@@ -406,7 +407,7 @@ def test_lnet_group_filtering(aggregator, instance, mock_lustre_commands):
 
 def test_metric_type_assignment(aggregator, instance, mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
@@ -427,8 +428,8 @@ def test_metric_type_assignment(aggregator, instance, mock_lustre_commands):
 
 def test_empty_command_outputs(instance, mock_lustre_commands):
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
-        'lctl get_param -ny mdt': '',
+        'lctl get_param -n version': 'all_version.txt',
+        'lctl get_param -n mdt': '',
         'lctl dl': 'client_dl_yaml.txt',
     }
     with mock_lustre_commands(mapping):
@@ -445,7 +446,7 @@ def test_empty_command_outputs(instance, mock_lustre_commands):
 def test_exception_handling(mock_lustre_commands):
     """Test various exception handling scenarios."""
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
 
@@ -505,7 +506,7 @@ def test_run_command_exceptions():
 def test_node_type_determination_logging(caplog, mock_lustre_commands):
     """Test logging for node type determination errors."""
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
     }
 
@@ -522,7 +523,7 @@ def test_filesystem_discovery_logging(caplog, mock_lustre_commands):
     """Test logging for filesystem discovery."""
     filesystem = 'testfilesystem'
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lctl list_param mdt.*.job_stats': f'mdt.{filesystem}-MDT0000.job_stats',
     }
@@ -553,7 +554,7 @@ def test_filesystem_discovery_logging(caplog, mock_lustre_commands):
 def test_lnet_error_logging(caplog, mock_lustre_commands):
     """Test logging for LNET data retrieval errors."""
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lnetctl stats show': 'invalid yaml',
     }
@@ -572,7 +573,7 @@ def test_parameter_filtering_logging(caplog, mock_lustre_commands):
     """Test logging for parameter filtering based on node type and filesystem."""
     wrong_filesystem_param = 'some.wrongfilesystem-MDT0000.param.mds'
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lctl list_param some.*.param.mds': wrong_filesystem_param,
     }
@@ -606,7 +607,7 @@ def test_parameter_filtering_logging(caplog, mock_lustre_commands):
 def test_changelog_logging(caplog, mock_lustre_commands):
     """Test logging for changelog operations."""
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl': 'client_dl_yaml.txt',
         'lfs changelog': 'test_changelog',
     }
@@ -666,7 +667,7 @@ def test_sanitize_command(bin_path, should_pass):
 def test_device_discovery(mock_lustre_commands, yaml_fixture, non_yaml_fixture):
     """Devices should be discovered regardless of Lustre version"""
     mapping = {
-        'lctl get_param -ny version': 'all_version.txt',
+        'lctl get_param -n version': 'all_version.txt',
         'lctl dl -y': yaml_fixture,
         'lctl dl': non_yaml_fixture,
         'lfs changelog': 'test_changelog',
@@ -729,3 +730,48 @@ def test_device_discovery(mock_lustre_commands, yaml_fixture, non_yaml_fixture):
         ]
 
         assert actual_devices == expected_devices
+
+
+def test_run_command_warns_on_failure(caplog, mock_lustre_commands):
+    """A command that exits non-zero with stderr is surfaced at WARNING, not DEBUG (#24475)."""
+    with mock_lustre_commands(
+        {
+            'lctl get_param -n version': 'all_version.txt',
+            'lctl dl': 'client_dl_yaml.txt',
+        }
+    ):
+        check = LustreCheck('lustre', {}, [{}])
+
+    failed = subprocess.CompletedProcess(args=[], returncode=4, stdout='', stderr="get_param: invalid option -- 'y'")
+    with caplog.at_level(logging.WARNING):
+        with mock.patch('subprocess.run', return_value=failed):
+            result = check._run_command('lctl', 'get_param', '-n', 'llite.lustrefs.stats')
+
+    assert result == ''
+    assert any(
+        record.levelno == logging.WARNING and 'exited with returncode 4' in record.getMessage()
+        for record in caplog.records
+    ), caplog.text
+
+
+def test_run_command_warn_on_error_false_stays_debug(caplog, mock_lustre_commands):
+    """An expected/handled failure (warn_on_error=False) logs at DEBUG, not WARNING, to avoid per-run noise."""
+    with mock_lustre_commands(
+        {
+            'lctl get_param -n version': 'all_version.txt',
+            'lctl dl': 'client_dl_yaml.txt',
+        }
+    ):
+        check = LustreCheck('lustre', {}, [{}])
+
+    failed = subprocess.CompletedProcess(args=[], returncode=4, stdout='', stderr="dl: invalid option -- 'y'")
+    with caplog.at_level(logging.DEBUG):
+        with mock.patch('subprocess.run', return_value=failed):
+            result = check._run_command('lctl', 'dl', '-y', warn_on_error=False)
+
+    assert result == ''
+    assert not any(record.levelno == logging.WARNING for record in caplog.records), caplog.text
+    assert any(
+        record.levelno == logging.DEBUG and 'exited with returncode 4' in record.getMessage()
+        for record in caplog.records
+    ), caplog.text
