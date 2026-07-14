@@ -163,6 +163,6 @@ def _recover_broken_yaml_entry(
 ) -> Entry[Any] | FileError:
     config = item.get("config")
     name = config.get("name") if isinstance(config, dict) else None
-    if name:
+    if isinstance(name, str) and name:
         return BrokenEntry(kind=spec.kind, name=name, source_file=path, error=str(error))
     return FileError(path, f"item {index}: {error}")

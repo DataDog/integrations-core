@@ -206,6 +206,16 @@ def test_yaml_nameless_invalid_is_file_error():
     assert "item 0:" in error.message
 
 
+def test_yaml_non_string_name_is_file_error():
+    doc = {"type": "phase", "config": {"name": ["p"]}}
+    yaml_file = YamlFile(path=YAML_PATH, docs=[doc])
+    output = classify(yaml_file)
+
+    assert output.entries == []
+    (error,) = output.file_errors
+    assert "item 0:" in error.message
+
+
 def test_yaml_multiple_docs_produce_indexed_entries_and_errors():
     docs = [
         {"type": "phase", "config": {"name": "p"}},
