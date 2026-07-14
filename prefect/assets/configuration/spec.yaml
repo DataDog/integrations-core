@@ -1,6 +1,13 @@
 name: Prefect
 files:
 - name: prefect.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 4200
+      candidates:
+      - prefect_url: "http://{service.host}:{port.number}/api"
   options:
   - template: init_config
     options:
@@ -146,4 +153,11 @@ files:
       - type: multi_line
         name: python_stack_trace
         pattern: '^\d{2}:\d{2}:\d{2}\.\d{3} \|'
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - prefect
+  - template: auto_conf/discovery
 
