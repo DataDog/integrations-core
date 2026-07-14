@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from unittest.mock import MagicMock
-
 import pytest
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -36,9 +34,7 @@ class TestQueryMetricsPayload:
         dd_run_check(check)
 
         event = aggregator.get_event_platform_events("dbm-metrics")[0]
-        assert event['cloud_metadata'] == {
-            'gcp': {'project_id': 'test-project', 'instance_id': 'test-instance'}
-        }
+        assert event['cloud_metadata'] == {'gcp': {'project_id': 'test-project', 'instance_id': 'test-instance'}}
 
     def test_payload_tags(self, aggregator, dd_run_check, check):
         dd_run_check(check)
@@ -99,12 +95,18 @@ class TestQueryMetricsRowFields:
     def test_numeric_metrics_are_correct_types(self, aggregator, dd_run_check, check):
         rows = self._get_rows(aggregator, dd_run_check, check)
         float_fields = [
-            'avg_latency_seconds', 'avg_rows', 'avg_bytes', 'avg_rows_scanned',
-            'avg_cpu_seconds', 'all_failed_avg_latency_seconds',
+            'avg_latency_seconds',
+            'avg_rows',
+            'avg_bytes',
+            'avg_rows_scanned',
+            'avg_cpu_seconds',
+            'all_failed_avg_latency_seconds',
         ]
         int_fields = [
-            'execution_count', 'all_failed_execution_count',
-            'cancelled_or_disconnected_execution_count', 'timed_out_execution_count',
+            'execution_count',
+            'all_failed_execution_count',
+            'cancelled_or_disconnected_execution_count',
+            'timed_out_execution_count',
         ]
         for row in rows:
             for field in float_fields:
@@ -173,8 +175,8 @@ class TestQueryMetricsNullHandling:
 
     def test_null_numeric_fields_become_zero(self, aggregator, dd_run_check):
         row = list(MOCK_QUERY_STATS_ROWS[0])
-        row[6] = None   # execution_count
-        row[7] = None   # avg_latency_seconds
+        row[6] = None  # execution_count
+        row[7] = None  # avg_latency_seconds
         row[11] = None  # avg_cpu_seconds
         mock_client, _ = _build_mock_spanner_client(rows=[row])
         check = SpannerCheck('cloud_spanner', {}, [INSTANCE_CONFIG])
@@ -218,9 +220,7 @@ class TestSpannerClientInit:
 
     def test_cloud_metadata_structure(self):
         check = SpannerCheck('cloud_spanner', {}, [INSTANCE_CONFIG])
-        assert check.cloud_metadata == {
-            'gcp': {'project_id': 'test-project', 'instance_id': 'test-instance'}
-        }
+        assert check.cloud_metadata == {'gcp': {'project_id': 'test-project', 'instance_id': 'test-instance'}}
 
     def test_mock_client_does_not_call_create(self, aggregator, dd_run_check, check, mock_spanner_client):
         mock_client, _ = mock_spanner_client

@@ -32,7 +32,7 @@ CREDENTIALS = os.environ.get('SPANNER_CREDENTIALS', '/home/bits/dd/integrations-
 def live_instance_config():
     missing = [v for name, v in [('SPANNER_INSTANCE', INSTANCE), ('SPANNER_DATABASE', DATABASE)] if not v]
     if missing:
-        pytest.skip(f"Set SPANNER_INSTANCE and SPANNER_DATABASE env vars to run live tests")
+        pytest.skip("Set SPANNER_INSTANCE and SPANNER_DATABASE env vars to run live tests")
     return {
         'project_id': PROJECT,
         'instance_id': INSTANCE,

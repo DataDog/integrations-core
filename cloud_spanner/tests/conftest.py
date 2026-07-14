@@ -27,6 +27,7 @@ def dd_run_check():
 
     return run
 
+
 INSTANCE_CONFIG = {
     'project_id': 'test-project',
     'instance_id': 'test-instance',
