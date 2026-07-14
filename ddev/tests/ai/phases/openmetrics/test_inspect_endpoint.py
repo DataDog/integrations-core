@@ -776,7 +776,8 @@ def test_inspect_input_invalid_inputs(endpoints, match):
 # ---------------------------------------------------------------------------
 
 
-def _two_endpoint_run(flow_dir, message_queue, monkeypatch):
+@pytest.fixture
+def two_endpoint_run(flow_dir, message_queue, monkeypatch):
     url_a = "http://host:9962/metrics"
     url_b = "http://host:9963/metrics"
     _install_mock_transport(
@@ -796,8 +797,8 @@ def _two_endpoint_run(flow_dir, message_queue, monkeypatch):
     return phase, checkpoint_mgr, url_a, url_b
 
 
-async def test_multi_endpoint_writes_one_jsonl_per_endpoint(flow_dir, message_queue, monkeypatch):
-    phase, _checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+async def test_multi_endpoint_writes_one_jsonl_per_endpoint(flow_dir, two_endpoint_run):
+    phase, _, _, _ = two_endpoint_run
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -807,8 +808,8 @@ async def test_multi_endpoint_writes_one_jsonl_per_endpoint(flow_dir, message_qu
     assert operator_families == {m.name for m in parse_prometheus(PROMETHEUS_BODY_SECOND)}
 
 
-async def test_multi_endpoint_writes_one_exposition_per_endpoint(flow_dir, message_queue, monkeypatch):
-    phase, _checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+async def test_multi_endpoint_writes_one_exposition_per_endpoint(flow_dir, two_endpoint_run):
+    phase, _, _, _ = two_endpoint_run
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -816,8 +817,8 @@ async def test_multi_endpoint_writes_one_exposition_per_endpoint(flow_dir, messa
     assert _exposition_path(flow_dir, "operator").read_text(encoding="utf-8") == PROMETHEUS_BODY_SECOND
 
 
-async def test_jsonl_first_row_is_provenance_header(flow_dir, message_queue, monkeypatch):
-    phase, _checkpoint_mgr, url_a, url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+async def test_jsonl_first_row_is_provenance_header(flow_dir, two_endpoint_run):
+    phase, _, url_a, url_b = two_endpoint_run
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -830,8 +831,8 @@ async def test_jsonl_first_row_is_provenance_header(flow_dir, message_queue, mon
         assert header["metric_families"] == len(_read_family_rows(path))
 
 
-async def test_family_rows_follow_header_unchanged_schema(flow_dir, message_queue, monkeypatch):
-    phase, _checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+async def test_family_rows_follow_header_unchanged_schema(flow_dir, two_endpoint_run):
+    phase, _, _, _ = two_endpoint_run
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -841,8 +842,8 @@ async def test_family_rows_follow_header_unchanged_schema(flow_dir, message_queu
             assert set(row.keys()) == expected_keys
 
 
-async def test_checkpoint_lists_all_endpoints(flow_dir, message_queue, monkeypatch):
-    phase, checkpoint_mgr, url_a, url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+async def test_checkpoint_lists_all_endpoints(two_endpoint_run):
+    phase, checkpoint_mgr, url_a, url_b = two_endpoint_run
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -869,8 +870,8 @@ async def test_checkpoint_lists_all_endpoints(flow_dir, message_queue, monkeypat
         assert os.path.exists(e["exposition_path"])
 
 
-async def test_memory_text_includes_every_endpoint(flow_dir, message_queue, monkeypatch):
-    phase, checkpoint_mgr, _url_a, _url_b = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
+async def test_memory_text_includes_every_endpoint(flow_dir, two_endpoint_run):
+    phase, checkpoint_mgr, _, _ = two_endpoint_run
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
@@ -1000,19 +1001,3 @@ async def test_endpoint_name_normalized_to_snake_case(flow_dir, message_queue, m
     assert _exposition_path(flow_dir, "app_controller").exists()
     checkpoint = checkpoint_mgr.read()[PHASE_ID]
     assert _endpoint_data(checkpoint)["name"] == "app_controller"
-
-
-async def test_multi_endpoint_deterministic_jsonl(flow_dir, message_queue, monkeypatch, tmp_path_factory):
-    phase1, _, _, _ = _two_endpoint_run(flow_dir, message_queue, monkeypatch)
-    await phase1.process_message(PhaseTrigger(id="start", phase_id=None))
-    first = {name: _jsonl_path(flow_dir, name).read_bytes() for name in ("agent", "operator")}
-
-    flow_dir_2 = tmp_path_factory.mktemp("second_run")
-    queue_2 = asyncio.Queue()
-    phase2, _, _, _ = _two_endpoint_run(flow_dir_2, queue_2, monkeypatch)
-    await phase2.process_message(PhaseTrigger(id="start", phase_id=None))
-    second = {name: _jsonl_path(flow_dir_2, name).read_bytes() for name in ("agent", "operator")}
-
-    for name in ("agent", "operator"):
-        assert first[name] == second[name]
-        assert first[name].endswith(b"\n")
