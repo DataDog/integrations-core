@@ -296,7 +296,7 @@ mongodb.usage.update.time,gauge,,microsecond,,Total time spent performing update
 mongodb.usage.writelock.count,gauge,,lock,,Number of write locks since server start (deprecated),0,mongodb,,,
 mongodb.usage.writelock.countps,gauge,,lock,second,Number of write locks per second,0,mongodb,,,
 mongodb.usage.writelock.time,gauge,,microsecond,,Total time spent performing write locks in microseconds,-1,mongodb,,,
-mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps,gauge,,microsecond,,Application thread time spent evicting pages per second.,-1,mongodb,application thread time evicting ps,,
+mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps,gauge,,microsecond,second,Application thread time spent evicting pages per second.,-1,mongodb,application thread time evicting ps,,
 mongodb.wiredtiger.cache.bytes_currently_in_cache,gauge,,byte,,Size of the data currently in cache.,0,mongodb,bytes currently in the cache,,
 mongodb.wiredtiger.cache.bytes_read_into_cache,gauge,,byte,,Number of bytes read into the cache.,-1,mongodb,bytes read into cache,,
 mongodb.wiredtiger.cache.bytes_written_from_cache,gauge,,byte,,Number of bytes written from the cache.,-1,mongodb,bytes written from cache,,
