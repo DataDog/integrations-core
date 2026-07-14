@@ -7,6 +7,11 @@ Exercises real Kubelet Autodiscovery inside a ``kind`` cluster by running ``agen
 ``kubectl exec`` against a sleeping, RBAC-scoped Agent pod, rather than a normal long-running Agent.
 There is no Kubernetes equivalent of ``mount_logs``/``shared_logs()`` here: there is no host
 bind-mount channel into a cluster pod.
+
+The agent pod is pinned to its own node (see the ``DD_KUBERNETES_KUBELET_HOST``/``NODENAME`` env
+vars in ``build_agent_pod_manifest``), matching real Kubelet-AD semantics: it only sees pods
+scheduled on that same node. This assumes a single-node ``kind`` cluster, or that discovery targets
+are pinned to the same node as the agent pod.
 """
 
 import json
