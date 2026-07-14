@@ -94,3 +94,10 @@ def instance_parts_and_merges():
         stalled_merge_elapsed_threshold_seconds=3600,
         stuck_replication_num_tries=3,
     )
+
+
+def instance_asynchronous_insert_flush_log():
+    return instance.AsynchronousInsertFlushLog(
+        enabled=False,
+        collection_interval=60,
+    )
