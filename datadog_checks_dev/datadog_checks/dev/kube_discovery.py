@@ -399,7 +399,9 @@ def build_agent_pod_manifest(namespace: str, check_name: str, agent_image: str) 
                         {'name': 'DD_AUTOCONFIG_FROM_ENVIRONMENT', 'value': 'true'},
                         {'name': 'DD_AUTH_TOKEN_FILE_PATH', 'value': AGENT_AUTH_TOKEN_PATH},
                         {'name': 'DD_IPC_CERT_FILE_PATH', 'value': AGENT_IPC_CERT_PATH},
-                        # kind's kubelet certificate does not cover status.hostIP.
+                        # DD_KUBERNETES_KUBELET_HOST (below) reaches the local kubelet at status.hostIP.
+                        # kind issues kubelet certs for the node name (e.g. kind-control-plane), not
+                        # that IP, so TLS verification would fail without this.
                         {'name': 'DD_KUBELET_TLS_VERIFY', 'value': 'false'},
                         {
                             'name': 'DD_KUBERNETES_KUBELET_HOST',
