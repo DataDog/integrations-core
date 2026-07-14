@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 import anthropic
 import pytest
 
-from ddev.ai.agent.anthropic_client import (
+from ddev.ai.agent.anthropic_agent import (
     MAX_CONTINUATIONS,
     NATIVE_TOOL_DEFINITIONS,
     WEB_FETCH_VERSION,
@@ -96,6 +96,7 @@ def make_agent(
         tools=registry,
         system_prompt="You are helpful.",
         name="test-agent",
+        model="claude-sonnet-5",
     )
     return agent, client.messages.create
 
@@ -235,7 +236,7 @@ def _make_error_agent(side_effect: Exception) -> AnthropicAgent:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.create = AsyncMock(side_effect=side_effect)
-    return AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    return AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
 
 async def test_connection_error_maps_to_agent_connection_error() -> None:
@@ -372,7 +373,7 @@ async def test_multi_turn_history_grows_correctly() -> None:
     client.messages.create = AsyncMock(side_effect=[tool_resp, text_resp])
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     first = await agent.send("Do X")
     assert first.stop_reason is StopReason.TOOL_USE
@@ -783,7 +784,7 @@ async def test_pause_turn_triggers_continuation() -> None:
     client.messages.create = AsyncMock(side_effect=[pause_resp, final_resp])
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     result = await agent.send("Hi")
 
@@ -804,7 +805,7 @@ async def test_pause_turn_second_call_includes_paused_turn_in_messages() -> None
     client.messages.create = AsyncMock(side_effect=[pause_resp, final_resp])
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     await agent.send("Hi")
 
@@ -825,7 +826,7 @@ async def test_multiple_consecutive_pause_turns() -> None:
     client.messages.create = AsyncMock(side_effect=[pause1, pause2, final])
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     result = await agent.send("Hi")
 
@@ -852,7 +853,7 @@ async def test_error_during_paused_continuation_leaves_history_unchanged() -> No
     )
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     await agent.send("First")
     history_after_first = agent.history[:]
@@ -874,7 +875,7 @@ async def test_pause_turn_token_usage_summed_across_calls() -> None:
     client.messages.create = AsyncMock(side_effect=[pause_resp, final_resp])
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     result = await agent.send("Hi")
 
@@ -923,7 +924,7 @@ async def test_error_mid_conversation_leaves_history_unchanged() -> None:
     )
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     await agent.send("First message")
     history_after_first = agent.history[:]
@@ -1156,7 +1157,7 @@ async def test_multi_turn_only_latest_user_message_in_request_has_cache_control(
     client.messages.create = AsyncMock(side_effect=[first_resp, second_resp])
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="sp", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="sp", name="t", model="claude-sonnet-5")
 
     await agent.send("First")
     await agent.send([ToolResultMessage(tool_call_id="t1", result=ToolResult(success=True, data="r"))])
@@ -1186,7 +1187,7 @@ async def test_pause_turn_raises_after_max_continuations() -> None:
     client.messages.create = AsyncMock(return_value=pause_resp)
     client.models = MagicMock()
     client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t")
+    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
 
     with pytest.raises(AgentError, match=f"pause_turn did not resolve after {MAX_CONTINUATIONS} continuations"):
         await agent.send("Hi")

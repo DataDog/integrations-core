@@ -89,6 +89,9 @@ def test_agent_requires_provider_registry_context():
 
 def test_agent_runs_provider_config_validation():
     class CustomProvider:
+        def supported_models(self) -> frozenset[str]:
+            return frozenset()
+
         def validate_config(self, agent_config: AgentConfig) -> None:
             if agent_config.model != "supported-model":
                 raise ValueError("Custom provider rejected model")
@@ -118,9 +121,35 @@ def test_agent_rejects_provider_when_not_configured():
         AgentConfig.model_validate({"provider": "custom"}, context={"provider_registry": AgentProviderRegistry()})
 
 
+def test_agent_infers_provider_from_model():
+    registry = make_provider_registry("anthropic")
+
+    config = AgentConfig.model_validate({"model": "opus"}, context={"provider_registry": registry})
+
+    assert config.provider == "anthropic"
+    assert config.model == "opus"
+
+
+def test_agent_defaults_model_and_infers_provider_when_unset():
+    registry = make_provider_registry("anthropic")
+
+    config = AgentConfig.model_validate({}, context={"provider_registry": registry})
+
+    assert config.provider == "anthropic"
+    assert config.model == "sonnet"
+
+
 def test_agent_rejects_unknown_tools():
     with pytest.raises(ValidationError):
         make_agent_config(tools=["nonexistent_tool"])
+
+
+def test_agent_rejects_unknown_model():
+    registry = make_provider_registry("anthropic")
+
+    with pytest.raises(ValidationError, match="Unknown model"):
+        # a raw API string is not a valid alias, and no provider claims it
+        AgentConfig.model_validate({"model": "claude-opus-4-8"}, context={"provider_registry": registry})
 
 
 # ---------------------------------------------------------------------------

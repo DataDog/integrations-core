@@ -6,8 +6,9 @@ from __future__ import annotations
 
 from typing import Any, Protocol
 
+from ddev.ai.agent.anthropic_provider import AnthropicProvider
 from ddev.ai.agent.base import BaseAgent
-from ddev.ai.agent.provider import AgentProvider, AnthropicProvider
+from ddev.ai.agent.provider import AgentProvider
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.registry import ToolRegistry
 
@@ -23,14 +24,26 @@ class AgentProviderRegistry:
 
     def __init__(self):
         self._providers: dict[str, AgentProvider] = {}
+        self._model_index: dict[str, str] = {}
 
     def register(self, name: str, provider: AgentProvider):
         if name in self._providers:
             raise ValueError(f"Agent provider {name!r} is already registered")
+        for model in provider.supported_models():
+            owner = self._model_index.get(model)
+            if owner is not None:
+                raise ValueError(f"Model {model!r} is claimed by both providers {owner!r} and {name!r}")
+            self._model_index[model] = name
         self._providers[name] = provider
 
     def contains(self, name: str) -> bool:
         return name in self._providers
+
+    def provider_for_model(self, model: str) -> str:
+        provider = self._model_index.get(model)
+        if provider is None:
+            raise ValueError(f"Unknown model {model!r}")
+        return provider
 
     def _get_provider(self, name: str) -> AgentProvider:
         provider = self._providers.get(name)

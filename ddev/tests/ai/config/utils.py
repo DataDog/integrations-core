@@ -7,8 +7,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 
+from ddev.ai.agent.anthropic_provider import AnthropicProvider
 from ddev.ai.agent.registry import AgentProviderRegistry
-from ddev.ai.config.models import AgentConfig
+from ddev.ai.config.models import DEFAULT_MODEL, AgentConfig
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -20,13 +21,24 @@ if TYPE_CHECKING:
 def make_provider_registry(*names: str) -> AgentProviderRegistry:
     registry = AgentProviderRegistry()
     for name in names:
-        registry.register(name, MagicMock())
+        if name == "anthropic":
+            registry.register(name, AnthropicProvider("test-key"))
+        else:
+            provider = MagicMock()
+            provider.supported_models.return_value = frozenset()
+            registry.register(name, provider)
     return registry
 
 
 def make_agent_config(**kwargs: Any) -> AgentConfig:
     provider = kwargs.get("provider", "anthropic")
-    registry = make_provider_registry(provider)
+    model = kwargs.get("model")
+    # Register a stub that claims exactly this config's model so provider inference and
+    # validation succeed for any placeholder model string used in tests.
+    registry = AgentProviderRegistry()
+    stub = MagicMock()
+    stub.supported_models.return_value = frozenset({model if model is not None else DEFAULT_MODEL})
+    registry.register(provider, stub)
     return AgentConfig.model_validate(kwargs, context={"provider_registry": registry})
 
 

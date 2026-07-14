@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 from enum import StrEnum, auto
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Any, Literal, Mapping, assert_never
+from typing import TYPE_CHECKING, Annotated, Any, Final, Literal, Mapping, assert_never
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
@@ -32,6 +32,10 @@ def validate_variable_names(variables: dict[str, str]) -> dict[str, str]:
     if invalid:
         raise ValueError(f"Invalid variable names (must match {VARIABLE_NAME_PATTERN}): {invalid}")
     return variables
+
+
+# Model alias used when an agent config leaves the model unset; its provider is inferred from it.
+DEFAULT_MODEL: Final[str] = "sonnet"
 
 
 class VariableDeclaration(BaseModel):
@@ -141,7 +145,7 @@ class CheckpointConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    provider: str = "anthropic"
+    provider: str | None = None
     model: str | None = None
     max_tokens: int | None = Field(default=None, ge=1)
     tools: list[str] = Field(default_factory=list)
@@ -157,12 +161,16 @@ class AgentConfig(BaseModel):
         return tools
 
     @model_validator(mode="after")
-    def provider_must_be_available(self, info: ValidationInfo) -> AgentConfig:
+    def resolve_and_validate_provider(self, info: ValidationInfo) -> AgentConfig:
         provider_registry: AgentProviderRegistry | None = (
             info.context.get("provider_registry") if info.context is not None else None
         )
         if provider_registry is None:
             raise ValueError("Agent provider registry is required")
+        if self.model is None:
+            self.model = DEFAULT_MODEL
+        if self.provider is None:
+            self.provider = provider_registry.provider_for_model(self.model)
         provider_registry.validate_config(self)
         return self
 

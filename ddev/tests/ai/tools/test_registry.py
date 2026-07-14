@@ -208,7 +208,7 @@ def test_from_names_spawn_tools_get_runtime_context(name, tool_type, tmp_path):
     tool = registry._tools[name]
     assert isinstance(tool, tool_type)
     assert tool._parent_scope is SCOPE
-    assert tool._agent_config == make_agent_config(tools=["read_file", name])
+    assert tool._agent_config == AgentConfig.model_construct(tools=["read_file", name])
     assert tool._process_factory is PROCESS_FACTORY
     assert tool._allowed_tools == {"read_file"}
 

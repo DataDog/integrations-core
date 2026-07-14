@@ -12,6 +12,7 @@ import pytest
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import ConfigError
+from ddev.ai.config.models import DEFAULT_MODEL
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -37,7 +38,9 @@ def file_access_policy(tmp_path) -> FileAccessPolicy:
 @pytest.fixture
 def provider_registry() -> AgentProviderRegistry:
     registry = AgentProviderRegistry()
-    registry.register("anthropic", MagicMock())
+    provider = MagicMock()
+    provider.supported_models.return_value = frozenset({DEFAULT_MODEL})
+    registry.register("anthropic", provider)
     return registry
 
 

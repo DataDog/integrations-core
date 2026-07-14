@@ -37,7 +37,6 @@ if TYPE_CHECKING:
 
     from ddev.ai.tools.core.types import ToolResult
 
-DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
 MAX_CONTINUATIONS: Final[int] = 10
 
@@ -90,7 +89,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         tools: ToolRegistry,
         system_prompt: str,
         name: str,
-        model: str = DEFAULT_MODEL,
+        model: str,
         max_tokens: int = DEFAULT_MAX_TOKENS,
     ) -> None:
         """Initialize an AnthropicAgent.

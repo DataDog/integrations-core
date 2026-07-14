@@ -377,7 +377,7 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
         agent._system_prompt = system_prompt
         return agent
 
-    monkeypatch.setattr("ddev.ai.agent.provider.AnthropicAgent", fake_anthropic_agent)
+    monkeypatch.setattr("ddev.ai.agent.anthropic_provider.AnthropicAgent", fake_anthropic_agent)
 
     from types import SimpleNamespace
 
