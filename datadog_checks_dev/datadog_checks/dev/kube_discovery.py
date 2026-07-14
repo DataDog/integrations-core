@@ -12,7 +12,6 @@ bind-mount channel into a cluster pod.
 import json
 import logging
 import os
-import re
 import secrets
 import tarfile
 import tempfile
@@ -24,9 +23,17 @@ from typing import Any
 import pytest
 import yaml
 
-from ._env import e2e_testing, format_config, get_state, replay_check_run, save_state, set_up_env
-from .docker import CONTAINER_STABILITY_LOG_PATTERNS
-from .docker import _assert_no_log_patterns as assert_no_log_patterns
+from ._env import (
+    e2e_testing,
+    find_collector_blobs,
+    flags_to_argv,
+    format_config,
+    get_state,
+    replay_check_run,
+    save_state,
+    set_up_env,
+)
+from .docker import CONTAINER_STABILITY_LOG_PATTERNS, assert_no_new_log_patterns
 from .subprocess import run_command
 from .utils import find_check_root
 
@@ -44,9 +51,6 @@ AGENT_AUTH_TOKEN_PATH = '/etc/datadog-agent/auth_token'
 AGENT_IPC_CERT_PATH = '/etc/datadog-agent/ipc_cert.pem'
 FAKE_API_KEY = 'a' * 32
 EXCLUDED_ARCHIVE_DIR_NAMES = frozenset({'.git', '.tox', '__pycache__', '.cache', '.mypy_cache', '.pytest_cache'})
-
-# Same pattern `dd_agent_check` uses to pull collector JSON blobs out of `agent check --json` output.
-JSON_COLLECTOR_PATTERN = r'((?:\{ \[|\[).*?\n(?:\} \]|\]))'
 
 
 def save_kube_discovery_state(kubeconfig_path: str | os.PathLike[str], *, namespace: str = DISCOVERY_NAMESPACE) -> None:
@@ -149,11 +153,7 @@ def run_discovery_check_kubernetes(
         str(discovery_timeout),
         '--json',
     ]
-    for key, value in flags.items():
-        if value is not False:
-            command.append('--{}'.format(key.replace('_', '-')))
-            if value is not True:
-                command.append(str(value))
+    command.extend(flags_to_argv(flags))
 
     result = exec_agent_pod(state['kubeconfig_path'], state['namespace'], command, capture=True, check=False)
     if not replay_collector_output(result.stdout, aggregator, datadog_agent):
@@ -213,11 +213,7 @@ def assert_all_discovery_candidates_stable_kubernetes(
         assert_pod_stable(initial_state, current_state, index)
 
         current_logs = get_pod_logs(kubeconfig_path, namespace, pod_name)
-        new_logs = current_logs[len(previous_logs) :] if current_logs.startswith(previous_logs) else current_logs
-        for line in new_logs.splitlines():
-            logging.debug('New log line: %s', line)
-        assert_no_log_patterns(new_logs, log_patterns, index)
-        previous_logs = current_logs
+        previous_logs = assert_no_new_log_patterns(previous_logs, current_logs, log_patterns, index)
 
 
 def get_kube_discovery_state() -> dict[str, Any]:
@@ -230,7 +226,7 @@ def get_kube_discovery_state() -> dict[str, Any]:
 
 def replay_collector_output(output: str, aggregator: Any, datadog_agent: Any) -> int:
     """Replay collector JSON blobs from ``agent check --json`` output."""
-    matches = re.findall(JSON_COLLECTOR_PATTERN, output, re.DOTALL)
+    matches = find_collector_blobs(output)
     for raw_json in matches:
         collector = json.loads(raw_json)
         replay_check_run(collector, aggregator, datadog_agent)

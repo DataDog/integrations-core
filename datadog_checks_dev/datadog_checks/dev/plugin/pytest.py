@@ -5,7 +5,6 @@ from __future__ import absolute_import
 
 import json
 import os
-import re
 from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
@@ -21,6 +20,8 @@ from datadog_checks.dev._env import (
     TESTING_PLUGIN,
     e2e_active,
     e2e_testing,
+    find_collector_blobs,
+    flags_to_argv,
     format_config,
     get_env_vars,
     get_state,
@@ -203,16 +204,11 @@ def dd_agent_check(request, aggregator, datadog_agent):
         if 'times' in kwargs:
             kwargs['check_times'] = kwargs.pop('times')
 
-        for key, value in kwargs.items():
-            if value is not False:
-                check_command.append('--{}'.format(key.replace('_', '-')))
-
-                if value is not True:
-                    check_command.append(str(value))
+        check_command.extend(flags_to_argv(kwargs))
 
         result = run_command(check_command, capture=True)
 
-        matches = re.findall(r'((?:\{ \[|\[).*?\n(?:\} \]|\]))', result.stdout, re.DOTALL)
+        matches = find_collector_blobs(result.stdout)
 
         if not matches:
             message_parts = []
