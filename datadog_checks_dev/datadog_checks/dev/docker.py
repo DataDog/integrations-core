@@ -101,6 +101,7 @@ def assert_all_discovery_candidates_stable(
         _assert_container_stable(initial_state, current_state, index)
 
         current_stdout, current_stderr = _get_container_logs(current_container_id)
+        # Diffed separately: stdout/stderr interleaving varies across calls, breaking a combined diff.
         new_stdout = _diff_logs(previous_stdout, current_stdout)
         new_stderr = _diff_logs(previous_stderr, current_stderr)
         new_logs = new_stdout + new_stderr
@@ -196,12 +197,7 @@ def _get_container_logs(container_id: str) -> tuple[str, str]:
 
 
 def _diff_logs(previous: str, current: str) -> str:
-    """Return the portion of `current` appended since `previous`.
-
-    stdout and stderr must be diffed separately and then combined, rather than diffing their
-    concatenation: interleaving between the two streams isn't fixed across `docker logs` calls, so
-    concatenating first breaks the `startswith` prefix check and replays already-seen lines as new.
-    """
+    """Return the portion of `current` appended since `previous`."""
     return current[len(previous) :] if current.startswith(previous) else current
 
 

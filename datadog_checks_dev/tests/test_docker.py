@@ -397,11 +397,7 @@ def test_assert_all_discovery_candidates_stable_detects_new_crash_logs():
 
 
 def test_assert_all_discovery_candidates_stable_ignores_old_stderr_when_new_stdout_arrives():
-    # Regression test: containers that split access logs (stdout) from error logs (stderr), like Kong,
-    # previously caused stale stderr content to be re-flagged as new whenever fresh stdout arrived, because
-    # the diff compared the *concatenation* of stdout+stderr against the previous concatenation. Any new
-    # stdout content shifts the position of the unchanged stderr tail, breaking the `startswith` check and
-    # replaying the entire log (old errors included) as "new".
+    # Regression test: new stdout previously shifted unchanged stderr, replaying it as new.
     class DiscoveryCheck:
         @classmethod
         def generate_configs(cls, service):
