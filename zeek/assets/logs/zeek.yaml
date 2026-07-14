@@ -3268,30 +3268,20 @@ pipeline:
       filter:
         query: "@_path:(dns OR dns_red)"
       processors:
-        - type: string-builder-processor
-          name: Stringify answers into ocsf.answer
+        - type: array-map-processor
+          name: Map `answers` to `ocsf.answers`
           enabled: true
-          template: "%{answers}"
-          target: ocsf.answer
-          replaceMissing: false
-        - type: grok-parser
-          name: Extract first answer into ocsf.answer.rdata
-          enabled: true
-          source: ocsf.answer
-          samples:
-            - "185.64.148.0"
-            - "185.64.148.0,8.8.8.8"
-          grok:
-            supportRules: ""
-            matchRules: 'a %{data:ocsf.answer.rdata}(,%{data})?'
-        - type: array-processor
-          name: Append ocsf.answer into ocsf.answers array
-          enabled: true
-          operation:
-            source: ocsf.answer
-            target: ocsf.answers
-            preserveSource: false
-            type: append
+          source: answers
+          target: ocsf.answers
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem` to `$targetElem.rdata`
+              sources:
+                - $sourceElem
+              target: $targetElem.rdata
+              preserveSource: true
+              overrideOnConflict: false
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true

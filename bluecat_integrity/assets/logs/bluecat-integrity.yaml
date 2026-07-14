@@ -307,6 +307,42 @@ pipeline:
           template: "%{requestData.question.questionType}"
           target: ocsf.query.type
           replaceMissing: false
+        - type: array-map-processor
+          name: Map `responseData.answers` to `ocsf.answers`
+          enabled: true
+          source: responseData.answers
+          target: ocsf.answers
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem.recordType` to `$targetElem.type`
+              sources:
+                - $sourceElem.recordType
+              target: $targetElem.type
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.rData` to `$targetElem.rdata`
+              sources:
+                - $sourceElem.rData
+              target: $targetElem.rdata
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.class` to `$targetElem.class`
+              sources:
+                - $sourceElem.class
+              target: $targetElem.class
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.ttl` to `$targetElem.ttl`
+              sources:
+                - $sourceElem.ttl
+              target: $targetElem.ttl
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: false
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -354,6 +390,14 @@ pipeline:
               sourceType: attribute
               target: ocsf.time
               targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.answers` to `ocsf.answers`
+              sources:
+                - ocsf.answers
+              sourceType: attribute
+              target: ocsf.answers
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
