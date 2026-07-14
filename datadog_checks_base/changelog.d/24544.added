@@ -1,0 +1,1 @@
+Add a backend-agnostic HTTP surface: HTTPClientProtocol/HTTPResponseProtocol, a shared http_exceptions hierarchy, and trust_env, close, get_cookie, get_header, set_header on the HTTP wrapper plus a create_http_client factory seam on AgentCheck.
