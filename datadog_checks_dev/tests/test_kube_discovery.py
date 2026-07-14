@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+from contextlib import nullcontext
 
 import mock
 import pytest
@@ -367,25 +368,42 @@ class TestAssertAllDiscoveryCandidatesStableKubernetes:
 
 
 class TestAssertPodStable:
-    def test_detects_uid_change(self):
-        with pytest.raises(AssertionError, match='Pod changed'):
-            assert_pod_stable(pod_state(uid='a'), pod_state(uid='b'), 1)
-
-    def test_detects_not_running(self):
-        with pytest.raises(AssertionError, match="Pod phase is 'Pending'"):
-            assert_pod_stable(pod_state(), pod_state(phase='Pending'), 1)
-
-    def test_detects_restart(self):
-        with pytest.raises(AssertionError, match='restart count changed'):
-            assert_pod_stable(pod_state(restart_count=0), pod_state(restart_count=1), 1)
-
-    def test_detects_not_ready(self):
-        with pytest.raises(AssertionError, match='is not ready'):
-            assert_pod_stable(pod_state(), pod_state(ready=False), 1)
-
-    def test_detects_oom_killed(self):
-        with pytest.raises(AssertionError, match='OOMKilled'):
-            assert_pod_stable(pod_state(), pod_state(terminated_reason='OOMKilled'), 1)
-
-    def test_stable_pod_does_not_raise(self):
-        assert_pod_stable(pod_state(), pod_state(), 1)
+    @pytest.mark.parametrize(
+        ('initial', 'current', 'expectation'),
+        [
+            pytest.param(
+                pod_state(uid='a'),
+                pod_state(uid='b'),
+                pytest.raises(AssertionError, match='Pod changed'),
+                id='uid_change',
+            ),
+            pytest.param(
+                pod_state(),
+                pod_state(phase='Pending'),
+                pytest.raises(AssertionError, match="Pod phase is 'Pending'"),
+                id='not_running',
+            ),
+            pytest.param(
+                pod_state(restart_count=0),
+                pod_state(restart_count=1),
+                pytest.raises(AssertionError, match='restart count changed'),
+                id='restart',
+            ),
+            pytest.param(
+                pod_state(),
+                pod_state(ready=False),
+                pytest.raises(AssertionError, match='is not ready'),
+                id='not_ready',
+            ),
+            pytest.param(
+                pod_state(),
+                pod_state(terminated_reason='OOMKilled'),
+                pytest.raises(AssertionError, match='OOMKilled'),
+                id='oom_killed',
+            ),
+            pytest.param(pod_state(), pod_state(), nullcontext(), id='stable'),
+        ],
+    )
+    def test_assert_pod_stable(self, initial, current, expectation):
+        with expectation:
+            assert_pod_stable(initial, current, 1)
