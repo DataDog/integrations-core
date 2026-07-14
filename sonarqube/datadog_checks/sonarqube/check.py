@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 
-from requests.exceptions import RequestException
-
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http_exceptions import HTTPError
 
@@ -32,7 +30,7 @@ class SonarqubeCheck(AgentCheck):
         try:
             self.collect_metadata()
             self.collect_metrics()
-        except (RequestException, HTTPError) as e:
+        except HTTPError as e:
             self.log.error('Error querying the SonarQube API: %s', e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags, message=str(e))
         else:
