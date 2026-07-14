@@ -423,6 +423,69 @@ class TestAssertAllDiscoveryCandidatesStableKubernetes:
         assert selector_command[:6] == ['kubectl', 'get', 'pods', '-n', 'keda', '-l']
         assert selector_command[6] == 'app=workload'
 
+    def test_detects_dangerous_log_output(self, e2e_mode):
+        save_kube_discovery_state('/tmp/kubeconfig')
+
+        class DiscoveryCheck:
+            @classmethod
+            def generate_configs(cls, service):
+                yield {'instances': [{'openmetrics_endpoint': f'http://{service.host}:8080/metrics'}]}
+
+        # A dangerous pattern appears only in the logs emitted after the baseline was captured.
+        logs = iter(['ready\n', 'ready\npanic: something exploded\n'])
+
+        def fake_run_command(command, **kwargs):
+            if command[:3] == ['kubectl', 'get', 'pod']:
+                return result(stdout=json.dumps(pod_state()))
+            if command[:2] == ['kubectl', 'logs']:
+                return result(stdout=next(logs))
+            return result()
+
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command', side_effect=fake_run_command):
+            with mock.patch('datadog_checks.dev.kube_discovery.find_check_root', return_value='/root/keda'):
+                with pytest.raises(AssertionError, match=r"matched 'panic'"):
+                    assert_all_discovery_candidates_stable_kubernetes(
+                        DiscoveryCheck,
+                        mock.Mock(),
+                        mock.Mock(),
+                        namespace='keda',
+                        pod_name='workload',
+                    )
+
+    def test_probe_failure_still_checks_stability(self, e2e_mode):
+        save_kube_discovery_state('/tmp/kubeconfig')
+
+        class DiscoveryCheck:
+            @classmethod
+            def generate_configs(cls, service):
+                yield {'instances': [{'openmetrics_endpoint': f'http://{service.host}:8080/metrics'}]}
+
+        pod_states = iter([pod_state(restart_count=0), pod_state(restart_count=1)])
+
+        def fake_run_command(command, **kwargs):
+            if command[:3] == ['kubectl', 'get', 'pod']:
+                return result(stdout=json.dumps(next(pod_states)))
+            if command[:2] == ['kubectl', 'logs']:
+                return result(stdout='ready\n')
+            return result()
+
+        # A probe that raises must not abort the sweep: the pod restart is still caught afterwards. If the
+        # except branch were gone, this would surface the RuntimeError instead of the restart AssertionError.
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command', side_effect=fake_run_command):
+            with mock.patch('datadog_checks.dev.kube_discovery.find_check_root', return_value='/root/keda'):
+                with mock.patch(
+                    'datadog_checks.dev.kube_discovery.probe_candidate',
+                    side_effect=RuntimeError('probe blew up'),
+                ):
+                    with pytest.raises(AssertionError, match='restart count changed'):
+                        assert_all_discovery_candidates_stable_kubernetes(
+                            DiscoveryCheck,
+                            mock.Mock(),
+                            mock.Mock(),
+                            namespace='keda',
+                            pod_name='workload',
+                        )
+
 
 class TestAssertPodStable:
     @pytest.mark.parametrize(
