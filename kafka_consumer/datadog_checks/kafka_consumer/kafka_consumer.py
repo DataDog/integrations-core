@@ -2,9 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import base64
+import ctypes
+import ctypes.util
 import heapq
 import json
 import marshal
+import platform
 from collections import defaultdict
 from time import time
 
@@ -28,6 +31,32 @@ MAX_TIMESTAMP_ENTRIES = 6_000_000
 LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
 
 
+def _load_malloc_trim():
+    """Return glibc's ``malloc_trim`` on Linux, or ``None`` where it is unavailable (macOS, musl)."""
+    if platform.system() != 'Linux':
+        return None
+    try:
+        libc = ctypes.CDLL(ctypes.util.find_library('c') or 'libc.so.6', use_errno=True)
+        trim = libc.malloc_trim
+    except (OSError, AttributeError):
+        return None
+    trim.argtypes = [ctypes.c_size_t]
+    trim.restype = ctypes.c_int
+    return trim
+
+
+# librdkafka runs one thread per broker, so allocations spread across many glibc arenas whose freed
+# memory is retained per-arena rather than returned to the OS. Trimming after each run hands that
+# free memory back and keeps RSS from growing unbounded on high-core hosts.
+MALLOC_TRIM = _load_malloc_trim()
+
+
+def _malloc_trim():
+    """Return glibc per-arena free memory to the OS after a run; no-op where unavailable."""
+    if MALLOC_TRIM is not None:
+        MALLOC_TRIM(0)
+
+
 class KafkaCheck(AgentCheck):
     __NAMESPACE__ = 'kafka'
 
@@ -49,6 +78,12 @@ class KafkaCheck(AgentCheck):
 
     def check(self, _):
         """The main entrypoint of the check."""
+        try:
+            self._run_check()
+        finally:
+            _malloc_trim()
+
+    def _run_check(self):
         # Fetch Kafka consumer offsets
 
         consumer_offsets = {}
