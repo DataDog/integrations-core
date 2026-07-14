@@ -21,7 +21,8 @@ def discover(dirs: list[Path]) -> Iterator[MarkdownFile | YamlFile | FileError]:
     """
     seen: set[Path] = set()
     for base in dirs:
-        for root, dirnames, filenames in base.walk():
+        walk_errors: list[OSError] = []
+        for root, dirnames, filenames in base.walk(on_error=walk_errors.append):
             dirnames.sort()
             for filename in sorted(filenames):
                 path = root / filename
@@ -42,3 +43,6 @@ def discover(dirs: list[Path]) -> Iterator[MarkdownFile | YamlFile | FileError]:
                     continue
                 if result is not None:
                     yield result
+        for error in walk_errors:
+            error_path = Path(error.filename) if error.filename else base
+            yield FileError(error_path, f"Cannot read directory: {error.strerror or error}")

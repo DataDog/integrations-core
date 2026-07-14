@@ -67,6 +67,35 @@ def test_invalid_yaml_front_matter_raises(tmp_path):
         parse_markdown(path)
 
 
+@pytest.mark.parametrize(
+    "text",
+    ['{\n"type": "agent"\n}\nbody', "+++\ntype = 'agent'\n+++\nbody"],
+    ids=["json", "toml"],
+)
+def test_non_yaml_front_matter_not_treated_as_config(tmp_path, text):
+    path = tmp_path / "other.md"
+    write(path, text)
+
+    assert parse_markdown(path) is None
+
+
+def test_unterminated_front_matter_raises(tmp_path):
+    path = tmp_path / "unterminated.md"
+    write(path, "---\ntype: agent\nno closing fence here")
+
+    with pytest.raises(ConfigError, match="unterminated"):
+        parse_markdown(path)
+
+
+@pytest.mark.parametrize("front_matter", ["- a\n- b", "just_a_string", ""])
+def test_non_mapping_front_matter_raises(tmp_path, front_matter):
+    path = tmp_path / "nonmapping.md"
+    write(path, f"---\n{front_matter}\n---\nbody")
+
+    with pytest.raises(ConfigError, match="must be a mapping"):
+        parse_markdown(path)
+
+
 def test_invalid_utf8_raises(tmp_path):
     path = tmp_path / "invalid.md"
     path.write_bytes(b"\xff")

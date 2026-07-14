@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 NAME_PATTERN = r"^[A-Za-z0-9._-]{1,64}$"
 # Variable names are interpolated via ``string.Template``, so they must be legal
 # ``$identifier`` placeholders: start with a letter/underscore, then letters/digits/underscores.
-VARIABLE_NAME_PATTERN = r"^[_a-z][_a-z0-9]{0,63}$"
+VARIABLE_NAME_PATTERN = r"^[_a-zA-Z][_a-zA-Z0-9]{0,63}$"
 
 
 def validate_variable_names(variables: dict[str, str]) -> dict[str, str]:

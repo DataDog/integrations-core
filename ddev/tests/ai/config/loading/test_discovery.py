@@ -4,6 +4,10 @@
 
 from __future__ import annotations
 
+import os
+
+import pytest
+
 from ddev.ai.config.loading.discovery import discover
 from ddev.ai.config.loading.files import FileError, MarkdownFile, YamlFile
 
@@ -115,6 +119,21 @@ def test_symlinked_directory_alias_yields_each_file_once(tmp_path):
     results = list(discover([real, link]))
 
     assert len(results) == 1
+
+
+def test_unreadable_directory_yields_file_error(tmp_path):
+    if os.getuid() == 0:
+        pytest.skip("root bypasses directory permissions")
+    blocked = tmp_path / "blocked"
+    write(blocked / "a.md", "---\nname: a\n---\nbody")
+    blocked.chmod(0o000)
+    try:
+        results = list(discover([tmp_path]))
+    finally:
+        blocked.chmod(0o755)
+
+    errors = [r for r in results if isinstance(r, FileError)]
+    assert any(r.path == blocked for r in errors)
 
 
 def test_non_overlapping_directories_are_all_walked(tmp_path):

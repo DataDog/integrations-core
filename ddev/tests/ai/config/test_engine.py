@@ -262,4 +262,14 @@ def test_agentic_phase_without_agent_fails_with_real_registry(tmp_path):
     )
     eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=real_phase_registry())
     assert eng.flows["demo"].status == ConfigStatus.BROKEN
-    assert any(e.kind is ErrorKind.PHASE and "agent" in e.message.lower() for e in eng.flows["demo"].errors)
+    assert any(e.kind is ErrorKind.PHASE and "requires 'agent'" in e.message for e in eng.flows["demo"].errors)
+
+
+def test_flows_returns_a_copy(tmp_path):
+    """Mutating the mapping returned by ``flows`` must not corrupt the engine's cache."""
+    write_full_flow(tmp_path)
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+
+    eng.flows.clear()
+
+    assert "demo" in eng.flows

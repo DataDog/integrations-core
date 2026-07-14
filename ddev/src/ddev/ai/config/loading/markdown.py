@@ -14,15 +14,27 @@ from ddev.ai.config.loading.files import MarkdownFile, read_utf8
 
 
 def parse_markdown(path: Path) -> MarkdownFile | None:
-    """Parse a Markdown file's YAML front matter, or return None if it has none."""
+    """Parse a Markdown file's YAML front matter, or return None if it has none.
+
+    Malformed, unterminated, or non-mapping front matter is surfaced as a ``ConfigError``.
+    """
     text = read_utf8(path)
 
-    if not frontmatter.checks(text):
+    handler = frontmatter.YAMLHandler()
+    if not handler.detect(text):
         return None
 
     try:
-        meta, body = frontmatter.parse(text)
+        raw_meta, body = handler.split(text)
+    except ValueError as e:
+        raise ConfigError(f"{path}: unterminated YAML front matter") from e
+
+    try:
+        meta = handler.load(raw_meta)
     except yaml.YAMLError as e:
         raise ConfigError(f"{path}: Invalid YAML in front matter: {e}") from e
 
-    return MarkdownFile(path=path, meta=meta, body=body)
+    if not isinstance(meta, dict):
+        raise ConfigError(f"{path}: YAML front matter must be a mapping")
+
+    return MarkdownFile(path=path, meta=meta, body=body.strip())

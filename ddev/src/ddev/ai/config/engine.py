@@ -111,7 +111,7 @@ class ConfigurationEngine:
 
     @property
     def flows(self) -> dict[str, FlowResult]:
-        return self._flow_results
+        return dict(self._flow_results)
 
     @property
     def file_errors(self) -> dict[Path, str]:
