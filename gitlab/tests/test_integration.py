@@ -131,7 +131,7 @@ def test_check_submit_metadata(
     enable_metadata_collection,
     use_openmetrics,
 ):
-    with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
+    with mock.patch('datadog_checks.base.utils.http.ResponseWrapper.json') as g:
         # mock the api call so that it returns the given version
         g.return_value = {"version": raw_version}
 

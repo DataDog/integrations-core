@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, Dict, Generator, List, Tuple  # noqa: F401
 
-from requests.exceptions import ConnectionError, HTTPError
-
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 
 from .api import MarkLogicApi
 from .config import Config
@@ -53,7 +52,7 @@ class MarklogicCheck(AgentCheck):
         # type: (Any) -> None
         try:
             raw_resources = self.api.get_resources()
-        except (HTTPError, ConnectionError) as e:
+        except (HTTPStatusError, HTTPConnectionError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable",
                 self._config.url,

@@ -1,0 +1,1 @@
+Use library-agnostic HTTP exceptions when reporting node metrics.

@@ -1,1 +1,1 @@
-Catch the backend-agnostic ``HTTPTimeoutError`` on request timeout so the check keeps working after the httpx migration.
+Use library-agnostic HTTP exceptions when handling request timeouts.

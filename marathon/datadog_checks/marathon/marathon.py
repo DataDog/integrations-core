@@ -4,10 +4,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from urllib.parse import urljoin
 
-import requests
-
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 
 
 class Marathon(AgentCheck):
@@ -89,7 +91,7 @@ class Marathon(AgentCheck):
             token = r.json()['token']
             self.ACS_TOKEN = token
             return token
-        except requests.exceptions.HTTPError:
+        except HTTPStatusError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -115,7 +117,7 @@ class Marathon(AgentCheck):
                 self.refresh_acs_token(acs_url, tags)
                 r = self.http.get(url)
             r.raise_for_status()
-        except (requests.exceptions.Timeout, HTTPTimeoutError):
+        except HTTPTimeoutError:
             # If there's a timeout
             self.service_check(
                 self.SERVICE_CHECK_NAME,
@@ -125,7 +127,7 @@ class Marathon(AgentCheck):
             )
             raise Exception("Timeout when hitting {}".format(url))
 
-        except requests.exceptions.HTTPError:
+        except HTTPStatusError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,
@@ -134,7 +136,7 @@ class Marathon(AgentCheck):
             )
             raise Exception("Got {} when hitting {}".format(r.status_code, url))
 
-        except requests.exceptions.ConnectionError:
+        except HTTPConnectionError:
             self.service_check(
                 self.SERVICE_CHECK_NAME,
                 AgentCheck.CRITICAL,

@@ -3,10 +3,15 @@
 # Licensed under Simplified BSD License (see LICENSE)
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPConnectionError,
+    HTTPInvalidURLError,
+    HTTPStatusError,
+    HTTPTimeoutError,
+)
 from datadog_checks.mapreduce.metrics import (
     HISTOGRAM,
     INCREMENT,
@@ -411,11 +416,11 @@ class MapReduceCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
 
-        except Timeout as e:
+        except HTTPTimeoutError as e:
             self._critical_service(service_name, service_check_tags, "Request timeout: {}, {}".format(url, e))
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError) as e:
+        except (HTTPStatusError, HTTPInvalidURLError, HTTPConnectionError) as e:
             self._critical_service(service_name, service_check_tags, "Request failed: {}, {}".format(url, e))
             raise
 
