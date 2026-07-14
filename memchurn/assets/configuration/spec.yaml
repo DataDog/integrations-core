@@ -1,0 +1,89 @@
+name: Memchurn
+files:
+  - name: memchurn.yaml
+    example_name: conf.yaml.example
+    options:
+      - template: init_config
+        options:
+          - template: init_config/default
+      - template: instances
+        options:
+          - name: num_workers
+            description: |
+              Number of long-lived allocator threads. Each worker gets its own glibc
+              malloc arena (glibc creates up to `8 * ncores` arenas), so raising this
+              raises the arena count and resident memory.
+            value:
+              type: integer
+              example: 48
+          - name: allocations_per_worker
+            description: |
+              Number of malloc/free cycles each worker performs per check run (its "burst").
+            value:
+              type: integer
+              example: 256
+          - name: min_alloc_bytes
+            description: |
+              Lower bound of the per-allocation size distribution, in bytes.
+            value:
+              type: integer
+              example: 512
+          - name: max_alloc_bytes
+            description: |
+              Upper bound of the per-allocation size distribution, in bytes. The default
+              (4 MiB) ensures a long tail of allocations crosses glibc's ~128 KiB mmap
+              threshold.
+            value:
+              type: integer
+              example: 4194304
+          - name: retained_fraction
+            description: |
+              Fraction (0.0-1.0) of each worker's allocations that are retained across runs
+              instead of being freed. The retained working set pins the heap high so RSS
+              stays elevated rather than spiking and returning.
+            value:
+              type: number
+              example: 0.1
+          - name: max_retained_bytes
+            description: |
+              Global ceiling, in bytes, on the retained working set. When exceeded, the
+              oldest retained buffers are freed. Lowering this lowers the RSS plateau.
+            value:
+              type: integer
+              example: 268435456
+          - name: max_total_bytes
+            description: |
+              Hard ceiling, in bytes, on all live allocations across every worker at any
+              instant. The check never allocates past this, so it cannot runaway-OOM the node.
+            value:
+              type: integer
+              example: 1073741824
+          - name: hold_ms
+            description: |
+              Milliseconds to hold each allocation between touching it and deciding its fate.
+              Larger values increase the concurrent live set and overlap between workers.
+            value:
+              type: number
+              example: 0
+          - name: thread_churn_per_run
+            description: |
+              Number of short-lived threads spawned each run that allocate, touch, and exit.
+              This simulates per-connection churn and forces glibc to cycle arenas.
+            value:
+              type: integer
+              example: 8
+          - name: run_budget_seconds
+            description: |
+              Wall-clock budget for a single check run. Workers stop their burst once this
+              elapses so the check returns promptly and idles between runs.
+            value:
+              type: number
+              example: 5
+          - name: touch_pages
+            description: |
+              Whether to `memset` every allocation so its pages become resident and affect
+              RSS. Disable only to contrast virtual vs. resident memory growth.
+            value:
+              type: boolean
+              example: true
+          - template: instances/default

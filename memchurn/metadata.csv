@@ -1,0 +1,8 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+memchurn.workers,gauge,,thread,,Number of persistent allocator worker threads.,0,memchurn,workers,,
+memchurn.retained_bytes,gauge,,byte,,Bytes retained live across check runs to pin the heap.,0,memchurn,retained bytes,,
+memchurn.live_bytes,gauge,,byte,,Bytes currently allocated and not yet freed.,0,memchurn,live bytes,,
+memchurn.alloc_calls_last_run,gauge,,operation,,Number of malloc calls issued during the last run.,0,memchurn,alloc calls,,
+memchurn.free_calls_last_run,gauge,,operation,,Number of free calls issued during the last run.,0,memchurn,free calls,,
+memchurn.rss_bytes,gauge,,byte,,Resident set size of the Agent process.,0,memchurn,rss bytes,,
+memchurn.arenas,gauge,,,,Number of glibc malloc arenas reported by malloc_info (Linux/glibc only).,0,memchurn,arenas,,

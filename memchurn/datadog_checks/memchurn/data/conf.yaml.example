@@ -1,0 +1,122 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+  -
+    ## @param num_workers - integer - optional - default: 48
+    ## Number of long-lived allocator threads. Each worker gets its own glibc
+    ## malloc arena (glibc creates up to `8 * ncores` arenas), so raising this
+    ## raises the arena count and resident memory.
+    #
+    # num_workers: 48
+
+    ## @param allocations_per_worker - integer - optional - default: 256
+    ## Number of malloc/free cycles each worker performs per check run (its "burst").
+    #
+    # allocations_per_worker: 256
+
+    ## @param min_alloc_bytes - integer - optional - default: 512
+    ## Lower bound of the per-allocation size distribution, in bytes.
+    #
+    # min_alloc_bytes: 512
+
+    ## @param max_alloc_bytes - integer - optional - default: 4194304
+    ## Upper bound of the per-allocation size distribution, in bytes. The default
+    ## (4 MiB) ensures a long tail of allocations crosses glibc's ~128 KiB mmap
+    ## threshold.
+    #
+    # max_alloc_bytes: 4194304
+
+    ## @param retained_fraction - number - optional - default: 0.1
+    ## Fraction (0.0-1.0) of each worker's allocations that are retained across runs
+    ## instead of being freed. The retained working set pins the heap high so RSS
+    ## stays elevated rather than spiking and returning.
+    #
+    # retained_fraction: 0.1
+
+    ## @param max_retained_bytes - integer - optional - default: 268435456
+    ## Global ceiling, in bytes, on the retained working set. When exceeded, the
+    ## oldest retained buffers are freed. Lowering this lowers the RSS plateau.
+    #
+    # max_retained_bytes: 268435456
+
+    ## @param max_total_bytes - integer - optional - default: 1073741824
+    ## Hard ceiling, in bytes, on all live allocations across every worker at any
+    ## instant. The check never allocates past this, so it cannot runaway-OOM the node.
+    #
+    # max_total_bytes: 1073741824
+
+    ## @param hold_ms - number - optional - default: 0
+    ## Milliseconds to hold each allocation between touching it and deciding its fate.
+    ## Larger values increase the concurrent live set and overlap between workers.
+    #
+    # hold_ms: 0
+
+    ## @param thread_churn_per_run - integer - optional - default: 8
+    ## Number of short-lived threads spawned each run that allocate, touch, and exit.
+    ## This simulates per-connection churn and forces glibc to cycle arenas.
+    #
+    # thread_churn_per_run: 8
+
+    ## @param run_budget_seconds - number - optional - default: 5
+    ## Wall-clock budget for a single check run. Workers stop their burst once this
+    ## elapses so the check returns promptly and idles between runs.
+    #
+    # run_budget_seconds: 5
+
+    ## @param touch_pages - boolean - optional - default: true
+    ## Whether to `memset` every allocation so its pages become resident and affect
+    ## RSS. Disable only to contrast virtual vs. resident memory growth.
+    #
+    # touch_pages: true
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 15
+    ## This changes the collection interval of the check. For more information, see:
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
+    #
+    # min_collection_interval: 15
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
