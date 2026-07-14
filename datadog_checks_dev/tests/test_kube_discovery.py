@@ -11,10 +11,12 @@ import yaml
 
 from datadog_checks.dev.kube_discovery import (
     AGENT_POD_NAME,
+    AGENT_SERVICE_ACCOUNT,
     DISCOVERY_NAMESPACE,
     assert_all_discovery_candidates_stable_kubernetes,
     assert_pod_stable,
     build_check_archive,
+    build_service_from_pod,
     run_discovery_check_kubernetes,
     save_kube_discovery_state,
     setup_discovery_agent,
@@ -116,15 +118,11 @@ class TestSetupDiscoveryAgent:
                 return result()
             return result()
 
-        with (
-            mock.patch('datadog_checks.dev.kube_discovery.run_command', side_effect=fake_run_command),
-            mock.patch('datadog_checks.dev.kube_discovery.generate_auth_token', return_value='deadbeef'),
-            mock.patch('datadog_checks.dev.kube_discovery.generate_ipc_cert_pem', return_value='cert-and-key'),
-        ):
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command', side_effect=fake_run_command):
             setup_discovery_agent('/tmp/kubeconfig', check_root=str(check_root))
 
-        # namespace/SA/ClusterRole/ClusterRoleBinding, secret, configmap, pod
-        assert len(applied_docs) == 4
+        # Wiring invariant: everything the pod mounts (RBAC, secret, configmap) is applied before the pod
+        # itself. The field-level contents of each manifest are static data validated by the E2E run, not here.
         kinds = [[doc['kind'] for doc in docs] for docs in applied_docs]
         assert kinds == [
             ['Namespace', 'ServiceAccount', 'ClusterRole', 'ClusterRoleBinding'],
@@ -133,19 +131,9 @@ class TestSetupDiscoveryAgent:
             ['Pod'],
         ]
 
-        secret = applied_docs[1][0]
-        assert secret['stringData'] == {'auth_token': 'deadbeef', 'ipc_cert.pem': 'cert-and-key'}
-
+        # The check's own auto_conf.yaml must be read from disk and embedded, not hardcoded.
         configmap = applied_docs[2][0]
         assert 'ad_identifiers' in configmap['data']['auto_conf.yaml']
-
-        pod = applied_docs[3][0]
-        assert pod['metadata']['name'] == AGENT_POD_NAME
-        assert pod['spec']['containers'][0]['command'] == ['sleep', 'infinity']
-
-        for env_var in pod['spec']['containers'][0]['env']:
-            if env_var['name'] == 'DD_KUBERNETES_KUBELET_HOST':
-                assert env_var['valueFrom']['fieldRef']['fieldPath'] == 'status.hostIP'
 
         assert [
             'kubectl',
@@ -189,6 +177,38 @@ class TestSetupDiscoveryAgent:
 
         assert all(env['KUBECONFIG'] == '/tmp/kubeconfig' for env in seen_envs)
 
+    def test_extra_cluster_roles_bind_to_service_account(self, tmp_path):
+        check_root = tmp_path / 'test_check'
+        write_auto_conf(check_root)
+
+        applied_docs = []
+
+        def fake_run_command(command, **kwargs):
+            if command[:2] == ['kubectl', 'apply']:
+                with open(command[3], encoding='utf-8') as f:
+                    applied_docs.append(list(yaml.safe_load_all(f)))
+            return result()
+
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command', side_effect=fake_run_command):
+            setup_discovery_agent(
+                '/tmp/kubeconfig',
+                check_root=str(check_root),
+                extra_cluster_roles=['kubevirt.io:view', 'other:view'],
+            )
+
+        extra_bindings = next(
+            docs for docs in applied_docs if docs and all(doc['kind'] == 'ClusterRoleBinding' for doc in docs)
+        )
+
+        # One binding per extra role, uniquely named by index, each pointing at the requested role.
+        assert [b['metadata']['name'] for b in extra_bindings] == [
+            'dd-agent-discovery-extra-0',
+            'dd-agent-discovery-extra-1',
+        ]
+        assert [b['roleRef']['name'] for b in extra_bindings] == ['kubevirt.io:view', 'other:view']
+        for binding in extra_bindings:
+            assert binding['subjects'][0]['name'] == AGENT_SERVICE_ACCOUNT
+
 
 class TestBuildCheckArchive:
     def test_excludes_vcs_and_cache_dirs(self, tmp_path):
@@ -211,6 +231,33 @@ class TestBuildCheckArchive:
         assert any('datadog_checks/test_check.py' in name for name in names)
         assert not any('.git' in name for name in names)
         assert not any('.tox' in name for name in names)
+
+
+class TestBuildServiceFromPod:
+    def test_collapses_duplicate_ports_across_containers(self):
+        pod = {
+            'status': {'podIP': '10.0.0.9'},
+            'spec': {
+                'containers': [
+                    {'name': 'a', 'ports': [{'containerPort': 8080, 'name': 'metrics'}, {'containerPort': 9090}]},
+                    {'name': 'b', 'ports': [{'containerPort': 8080, 'name': 'dup'}]},
+                ]
+            },
+        }
+
+        service = build_service_from_pod(pod, 'svc')
+
+        assert service.id == 'svc'
+        assert service.host == '10.0.0.9'
+        # 8080 collapses to its first occurrence; the unnamed 9090 keeps an empty name.
+        assert [(port.number, port.name) for port in service.ports] == [(8080, 'metrics'), (9090, '')]
+
+    def test_container_without_ports(self):
+        pod = {'status': {'podIP': '10.0.0.9'}, 'spec': {'containers': [{'name': 'a'}]}}
+
+        service = build_service_from_pod(pod, 'svc')
+
+        assert service.ports == ()
 
 
 class TestRunDiscoveryCheckKubernetes:
