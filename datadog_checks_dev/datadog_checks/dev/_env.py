@@ -137,7 +137,7 @@ def replay_collector_blobs(matches: list[str], stub_aggregator: Any, stub_agent:
     for raw_json in matches:
         try:
             collector = json.loads(raw_json)
-        except Exception as e:
+        except json.JSONDecodeError as e:
             raise ValueError(f'Error loading json: {e}\nCollector Json Output:\n{raw_json}') from e
         replay_check_run(collector, stub_aggregator, stub_agent)
 
