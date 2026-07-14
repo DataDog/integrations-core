@@ -243,7 +243,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
 CONTAINER_ORIGIN_TAG_PREFIXES = ('docker_image:', 'image_id:', 'image_name:', 'image_tag:', 'short_image:')
 
 
-def _assert_discovery_used_expected_mechanism(aggregator: Any, *, process: bool) -> None:
+def assert_discovery_used_expected_mechanism(aggregator: Any, *, process: bool) -> None:
     """Assert that a ``dd_agent_check_discovery`` run actually used the mechanism it claims to.
 
     Container-based Autodiscovery has its instances tagged by the Agent's tagger with container-origin
@@ -310,7 +310,7 @@ def dd_agent_check_discovery(dd_agent_check):
             **kwargs,
         )
 
-        _assert_discovery_used_expected_mechanism(aggregator, process=process)
+        assert_discovery_used_expected_mechanism(aggregator, process=process)
 
         return aggregator
 
