@@ -36,7 +36,11 @@ def test_service_check_can_connect_success(aggregator, instance, mock_http):
     )
 
 
-@pytest.mark.parametrize("exception", [HTTPConnectionError('boom'), HTTPTimeoutError('boom')])
+@pytest.mark.parametrize(
+    "exception",
+    [HTTPConnectionError('boom'), HTTPTimeoutError('boom')],
+    ids=["connection_error", "timeout"],
+)
 def test_service_check_can_connect_failure(aggregator, instance, mock_http, exception):
     check = DruidCheck('druid', {}, [instance])
 

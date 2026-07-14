@@ -5,7 +5,7 @@ from xml.etree import ElementTree
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.config import _is_affirmative
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 
 QUEUE_URL = "/admin/xml/queues.jsp"
 TOPIC_URL = "/admin/xml/topics.jsp"
@@ -56,7 +56,7 @@ class ActiveMQXML(AgentCheck):
         try:
             r = self.http.get(url)
             r.raise_for_status()
-        except HTTPConnectionError:
+        except (HTTPConnectionError, HTTPTimeoutError):
             if suppress_errors:
                 self.log.warning("ActiveMQ not contactable, but suppressing the error due to configuration.")
                 return False
