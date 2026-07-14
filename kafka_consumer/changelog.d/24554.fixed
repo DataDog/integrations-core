@@ -1,0 +1,1 @@
+Keep the DSM broker_timestamps cache in memory and persist it at most every 5 minutes to reduce per-run allocation churn and memory growth.
