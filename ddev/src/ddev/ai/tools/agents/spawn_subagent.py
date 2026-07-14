@@ -13,8 +13,8 @@ from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.config import AgentConfig
-    from ddev.ai.react.process import ReActProcessFactory
+    from ddev.ai.config.models import AgentConfig
+    from ddev.ai.react.factory import ReActProcessFactory
 
 
 class SpawnSubagentInput(BaseToolInput):

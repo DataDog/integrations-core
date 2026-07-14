@@ -10,7 +10,7 @@ import pytest
 
 from ddev.ai.agent.exceptions import AgentError
 from ddev.ai.agent.types import StopReason, ToolCall
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentInput, SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import ToolRegistry

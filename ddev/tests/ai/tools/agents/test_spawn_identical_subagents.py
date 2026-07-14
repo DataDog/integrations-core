@@ -7,7 +7,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from ddev.ai.agent.types import StopReason
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_identical_subagents import (
     CONCISE_DIRECTIVE,
     Assignment,

@@ -7,10 +7,10 @@ from pathlib import Path
 from typing import Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
+from ddev.ai.config.models import ResolvedFlow
 from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import FlowConfig, FlowConfigError
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.phases.registry import PhaseRegistry, discover_and_register_phases
+from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
 from ddev.ai.runtime.resources import RunResources
@@ -22,7 +22,8 @@ from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 class PhaseOrchestrator(EventBusOrchestrator):
     def __init__(
         self,
-        flow_yaml_path: Path,
+        resolved_flow: ResolvedFlow,
+        phase_registry: PhaseRegistry,
         checkpoint_path: Path,
         runtime_variables: dict[str, str],
         agent_clients: dict[str, Any],
@@ -34,6 +35,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
         logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
+
+        ``resolved_flow`` is a fully validated, reference-inlined flow obtained from
+        ``engine.get_flow(name)``. ``phase_registry`` is the same registry the engine
+        validated against, used to instantiate phase classes.
 
         ``agent_clients`` maps provider name (e.g. ``"anthropic"``) to a constructed
         provider client. ``DefaultAgentRuntimeFactory`` resolves the right one based on each
@@ -50,7 +55,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
             grace_period=grace_period,
             max_timeout=max_timeout,
         )
-        self._flow_yaml_path = flow_yaml_path
+        self._resolved_flow = resolved_flow
+        self._phase_registry = phase_registry
         self._checkpoint_path = checkpoint_path
         self._runtime_variables = runtime_variables
         self._agent_clients = agent_clients
@@ -58,53 +64,17 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._callbacks: Callbacks = callbacks or Callbacks()
         self._resume = resume
         self._agent_logger: AgentLogger | None = None
-        self._phase_registry = PhaseRegistry()
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
 
     async def on_initialize(self) -> None:
-        """Discover custom phases, parse flow.yaml, construct phases, submit PhaseTrigger."""
-        config_dir = self._flow_yaml_path.parent
-
-        discover_and_register_phases(
-            self._phase_registry,
-            Path(__file__).parent.parent / "phases",
-            "ddev.ai.phases",
-        )
-
-        flow_phases_dir = config_dir / "phases"
-        if flow_phases_dir.is_dir():
-            ai_root = Path(__file__).parent.parent
-            try:
-                rel = flow_phases_dir.relative_to(ai_root)
-            except ValueError as e:
-                raise FlowConfigError(
-                    f"Flow phases directory {flow_phases_dir} must be inside the ddev.ai package tree ({ai_root})"
-                ) from e
-            flow_import_prefix = "ddev.ai." + ".".join(rel.parts)
-            discover_and_register_phases(
-                self._phase_registry,
-                flow_phases_dir,
-                flow_import_prefix,
-            )
-
-        config = FlowConfig.from_yaml(self._flow_yaml_path, config_dir)
-
-        flow_phase_ids = {entry.phase for entry in config.flow}
-        for phase_id, phase_config in config.phases.items():
-            if phase_id not in flow_phase_ids:
-                self._logger.warning("Phase %r is defined but not referenced in flow — it will not run", phase_id)
-                continue
-            try:
-                phase_cls = self._phase_registry.get(phase_config.type)
-            except ValueError as e:
-                raise FlowConfigError(str(e)) from e
-            phase_cls.validate_config(phase_id, phase_config, config.agents)
-
+        """Construct phases from the resolved flow and submit the start PhaseTrigger."""
         checkpoint_manager = CheckpointManager(self._checkpoint_path)
-        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in config.flow}
+        dependency_map: dict[str, list[str]] = {entry.phase: entry.dependencies for entry in self._resolved_flow.flow}
 
-        completed, frontier = resolve_resume_state(config, checkpoint_manager) if self._resume else (set(), set())
+        completed, frontier = (
+            resolve_resume_state(self._resolved_flow, checkpoint_manager) if self._resume else (set(), set())
+        )
         if self._resume:
             self._logger.info(
                 "Resuming: %d phase(s) completed, re-running frontier %r", len(completed), sorted(frontier)
@@ -116,30 +86,26 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._resources = RunResources(
             agent_clients=self._agent_clients,
             file_access_policy=self._file_access_policy,
-            agents=config.agents,
+            agents=self._resolved_flow.agents,
             callbacks=run_callbacks,
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,
-            flow_variables=config.variables,
-            config_dir=config_dir,
+            flow_variables=self._resolved_flow.variables,
             callbacks=run_callbacks,
             logger=self._logger,
             resume_frontier=frozenset(frontier),
         )
 
-        for entry in config.flow:
-            phase_id = entry.phase
-            if phase_id in completed:
-                self._logger.info("Resuming: skipping already-completed phase %r", phase_id)
+        for entry in self._resolved_flow.flow:
+            if entry.phase in completed:
+                self._logger.info("Resuming: skipping already-completed phase %r", entry.phase)
                 continue
-            phase_config = config.phases[phase_id]
-            deps = dependency_map[phase_id]
-            phase_cls = self._phase_registry.get(phase_config.type)
-            phase = phase_cls.build(
-                phase_id=phase_id,
+            phase_config = self._resolved_flow.phases[entry.phase]
+            phase = self._phase_registry.get(phase_config.class_).build(
+                phase_id=entry.phase,
                 config=phase_config,
-                deps=deps,
+                deps=dependency_map[entry.phase],
                 resources=self._resources,
                 checkpoint_manager=checkpoint_manager,
                 context=context,
@@ -147,7 +113,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             self.register_processor(phase, [PhaseTrigger])
 
         self.submit_message(PhaseTrigger(id="start", phase_id=None))
-        for entry in config.flow:
+        for entry in self._resolved_flow.flow:
             if entry.phase in completed:
                 self.submit_message(PhaseTrigger(id=f"{entry.phase}_resumed", phase_id=entry.phase))
 

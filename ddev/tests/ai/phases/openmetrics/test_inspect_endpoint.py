@@ -11,23 +11,19 @@ import pytest
 from prometheus_client import Metric
 from prometheus_client.parser import text_string_to_metric_families as parse_prometheus
 
-from ddev.ai.flows.openmetrics.phases import inspect_endpoint as inspect_endpoint_module
-from ddev.ai.flows.openmetrics.phases.inspect_endpoint import (
+from ddev.ai.config.errors import ConfigError
+from ddev.ai.config.models import CheckpointConfig, PhaseConfig, TaskConfig
+from ddev.ai.phases.base import FlowContext
+from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.openmetrics import inspect_endpoint as inspect_endpoint_module
+from ddev.ai.phases.openmetrics.inspect_endpoint import (
     EndpointInspectionError,
     InspectEndpointPhase,
     _build_jsonl_rows,
     _build_memory_text,
     _parse_exposition,
 )
-from ddev.ai.phases.base import FlowContext
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
-from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
-from ddev.ai.runtime.checkpoints import (
-    CheckpointManager,
-    CheckpointTokenInfo,
-    FailedCheckpoint,
-    SuccessCheckpoint,
-)
+from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointTokenInfo, FailedCheckpoint, SuccessCheckpoint
 from ddev.event_bus.exceptions import MessageProcessingError
 
 ENDPOINT_URL = "http://example.test:9100/metrics"
@@ -112,12 +108,11 @@ def _make_phase(
     context = FlowContext(
         runtime_variables=runtime_variables if runtime_variables is not None else {"endpoint_url": ENDPOINT_URL},
         flow_variables={},
-        config_dir=flow_dir,
     )
     phase = InspectEndpointPhase(
         phase_id=phase_id,
         dependencies=[],
-        config=PhaseConfig(),
+        config=PhaseConfig(name=phase_id),
         checkpoint_manager=checkpoint_manager,
         context=context,
     )
@@ -287,10 +282,10 @@ async def test_failure_missing_endpoint_url(flow_dir, message_queue):
     phase, mgr = _make_phase(flow_dir, message_queue, runtime_variables={})
 
     trigger = PhaseTrigger(id="start", phase_id=None)
-    with pytest.raises(FlowConfigError, match="endpoint_url"):
+    with pytest.raises(ConfigError, match="endpoint_url"):
         await phase.process_message(trigger)
 
-    wrapped = MessageProcessingError(phase._phase_id, trigger, FlowConfigError("endpoint_url required"))
+    wrapped = MessageProcessingError(phase._phase_id, trigger, ConfigError("endpoint_url required"))
     await phase.on_error(wrapped)
 
     checkpoint = mgr.read()[PHASE_ID]
@@ -305,24 +300,24 @@ async def test_failure_missing_endpoint_url(flow_dir, message_queue):
 
 
 def test_validate_config_rejects_agent():
-    with pytest.raises(FlowConfigError, match="must not declare 'agent'"):
-        InspectEndpointPhase.validate_config("p", PhaseConfig(agent="x"), {"x": AgentConfig()})
+    with pytest.raises(ConfigError, match="must not declare 'agent'"):
+        InspectEndpointPhase.validate_config("p", PhaseConfig(name="p", agent="x"))
 
 
 def test_validate_config_rejects_tasks():
-    config = PhaseConfig(tasks=[TaskConfig(name="t", prompt="hi")])
-    with pytest.raises(FlowConfigError, match="must not declare 'tasks'"):
-        InspectEndpointPhase.validate_config("p", config, {})
+    config = PhaseConfig(name="p", tasks=[TaskConfig(name="t", prompt="hi")])
+    with pytest.raises(ConfigError, match="must not declare 'tasks'"):
+        InspectEndpointPhase.validate_config("p", config)
 
 
 def test_validate_config_rejects_checkpoint():
-    config = PhaseConfig(checkpoint=CheckpointConfig(memory_prompt="x"))
-    with pytest.raises(FlowConfigError, match="must not declare 'checkpoint'"):
-        InspectEndpointPhase.validate_config("p", config, {})
+    config = PhaseConfig(name="p", checkpoint=CheckpointConfig(memory_prompt="x"))
+    with pytest.raises(ConfigError, match="must not declare 'checkpoint'"):
+        InspectEndpointPhase.validate_config("p", config)
 
 
 def test_validate_config_accepts_minimal():
-    InspectEndpointPhase.validate_config("p", PhaseConfig(), {})
+    InspectEndpointPhase.validate_config("p", PhaseConfig(name="p"))
 
 
 # ---------------------------------------------------------------------------

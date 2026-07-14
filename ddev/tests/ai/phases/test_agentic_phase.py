@@ -11,9 +11,11 @@ from ddev.ai.agent.build import AgentRuntime
 from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import AgentResponse, StopReason, TokenUsage, ToolCall
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.phases.agentic_phase import AgenticPhase, render_memory_prompt, render_task_prompt
-from ddev.ai.phases.config import AgentConfig, CheckpointConfig, FlowConfigError, PhaseConfig, TaskConfig
+from ddev.ai.config.errors import ConfigError
+from ddev.ai.config.models import AgentConfig, CheckpointConfig, PhaseConfig, TaskConfig
+from ddev.ai.phases.agentic_phase import AgenticPhase
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
+from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import (
@@ -26,7 +28,7 @@ from ddev.ai.runtime.checkpoints import (
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
 
-from .conftest import MockAgent, make_agent_phase, make_response, resolve_key
+from .conftest import MockAgent, make_agent_phase, make_response
 
 
 def read_jsonl(path: Path) -> list[dict]:
@@ -43,57 +45,6 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
 
 
 # ---------------------------------------------------------------------------
-# render_task_prompt
-# ---------------------------------------------------------------------------
-
-
-def test_render_task_prompt_from_file(tmp_path):
-    prompt_file = tmp_path / "task.md"
-    prompt_file.write_text("Hello ${name}.")
-    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {"name": "Alice"})
-    assert result == "Hello Alice."
-
-
-def test_render_task_prompt_inline():
-    result = render_task_prompt(TaskConfig(name="t1", prompt="Hello ${name}."), None, {"name": "Bob"})
-    assert result == "Hello Bob."
-
-
-def test_render_task_prompt_forwards_resolver(tmp_path):
-    (tmp_path / "task.md").write_text("Memory: ${draft_memory}")
-    result = render_task_prompt(TaskConfig(name="t1", prompt_path="task.md"), tmp_path, {}, resolve_key)
-    assert result == "Memory: resolved(draft_memory)"
-
-
-def test_render_task_prompt_raises_when_no_source():
-    with pytest.raises(FlowConfigError, match="prompt"):
-        render_task_prompt(TaskConfig.model_construct(name="t1", prompt=None, prompt_path=None), None, {})
-
-
-# ---------------------------------------------------------------------------
-# render_memory_prompt
-# ---------------------------------------------------------------------------
-
-
-def test_render_memory_prompt_from_file(tmp_path):
-    (tmp_path / "mem.md").write_text("List files for ${phase_name}.")
-    result = render_memory_prompt(CheckpointConfig(memory_prompt_path="mem.md"), tmp_path, {"phase_name": "draft"})
-    assert result == "List files for draft."
-
-
-def test_render_memory_prompt_inline():
-    result = render_memory_prompt(
-        CheckpointConfig(memory_prompt="List files for ${phase_name}."), None, {"phase_name": "draft"}
-    )
-    assert result == "List files for draft."
-
-
-def test_render_memory_prompt_raises_when_no_source():
-    with pytest.raises(FlowConfigError, match="memory_prompt"):
-        render_memory_prompt(CheckpointConfig.model_construct(memory_prompt=None, memory_prompt_path=None), None, {})
-
-
-# ---------------------------------------------------------------------------
 # AgenticPhase.validate_config
 # ---------------------------------------------------------------------------
 
@@ -101,20 +52,19 @@ def test_render_memory_prompt_raises_when_no_source():
 @pytest.mark.parametrize(
     "config,match",
     [
-        (PhaseConfig(tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
-        (PhaseConfig(agent="ghost", tasks=[TaskConfig(name="t1", prompt="x")]), "unknown agent"),
-        (PhaseConfig(agent="writer"), "at least one task"),
+        (PhaseConfig(name="p1", tasks=[TaskConfig(name="t1", prompt="x")]), "requires 'agent'"),
+        (PhaseConfig(name="p1", agent="writer"), "at least one task"),
     ],
-    ids=["missing_agent", "unknown_agent", "empty_tasks"],
+    ids=["missing_agent", "empty_tasks"],
 )
 def test_validate_config_rejects_invalid(config, match):
-    with pytest.raises(FlowConfigError, match=match):
-        AgenticPhase.validate_config("p1", config, {"writer": AgentConfig()})
+    with pytest.raises(ConfigError, match=match):
+        AgenticPhase.validate_config("p1", config)
 
 
 def test_validate_config_accepts_valid():
     AgenticPhase.validate_config(
-        "p1", PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="x")]), {"writer": AgentConfig()}
+        "p1", PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="x")])
     )
 
 
@@ -213,7 +163,6 @@ async def test_react_hook_failure_fails_phase(flow_dir, monkeypatch, message_que
 
 
 async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, _ = make_agent_phase(
@@ -223,17 +172,17 @@ async def test_build_runtime_receives_rendered_flow_context(flow_dir, monkeypatc
         message_queue,
         flow_variables={"project": "myproj"},
         captured_worker_kwargs=captured,
+        agent_config=AgentConfig(tools=[], system_prompt="Project: ${project}"),
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
 
     assert captured["owner_id"] == "p1"
     assert captured["system_prompt"] == "Project: myproj"
-    assert captured["agent_config"] == AgentConfig(tools=[])
+    assert captured["agent_config"] == AgentConfig(tools=[], system_prompt="Project: ${project}")
 
 
 async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Project: ${project}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, _ = make_agent_phase(
@@ -244,6 +193,7 @@ async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, m
         flow_variables={"project": "flow"},
         runtime_variables={"project": "runtime"},
         captured_worker_kwargs=captured,
+        agent_config=AgentConfig(tools=[], system_prompt="Project: ${project}"),
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -252,7 +202,6 @@ async def test_build_runtime_receives_runtime_overrides(flow_dir, monkeypatch, m
 
 
 async def test_build_runtime_receives_memory_resolver(flow_dir, monkeypatch, message_queue):
-    (flow_dir / "prompts" / "writer.md").write_text("Memory: ${draft_memory}", encoding="utf-8")
     mock_agent = MockAgent([make_response("done", 100, 50), make_response("summary", 10, 5)])
     captured: dict = {}
     phase, mgr = make_agent_phase(
@@ -261,6 +210,7 @@ async def test_build_runtime_receives_memory_resolver(flow_dir, monkeypatch, mes
         monkeypatch,
         message_queue,
         captured_worker_kwargs=captured,
+        agent_config=AgentConfig(tools=[], system_prompt="Memory: ${draft_memory}"),
     )
     mgr.write_memory("draft", "Created file.py")
 
@@ -311,10 +261,15 @@ async def test_memory_template_render_failure_fails_phase(flow_dir, monkeypatch,
         message_queue,
         checkpoint=CheckpointConfig(memory_prompt="Summarize."),
     )
-    monkeypatch.setattr(
-        "ddev.ai.phases.agentic_phase.render_memory_prompt",
-        lambda *a, **kw: (_ for _ in ()).throw(ValueError("bad template")),
-    )
+
+    real_render = render_inline
+
+    def fail_only_memory(text, *args, **kwargs):
+        if text == "Summarize.":
+            raise ValueError("bad template")
+        return real_render(text, *args, **kwargs)
+
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_inline", fail_only_memory)
 
     with pytest.raises(ValueError, match="bad template"):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -351,7 +306,7 @@ async def test_run_memory_step_passes_user_additions_to_build(
 ):
     mock_agent = MockAgent([make_response("ok", 0, 0)])
     phase, mgr = make_agent_phase(flow_dir, mock_agent, monkeypatch, message_queue, checkpoint=checkpoint)
-    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_memory_prompt", lambda *a, **kw: "USER_ADDITIONS")
+    monkeypatch.setattr("ddev.ai.phases.agentic_phase.render_inline", lambda *a, **kw: "USER_ADDITIONS")
     build_calls: list = []
     monkeypatch.setattr(
         mgr, "build_memory_prompt", lambda user_additions: build_calls.append(user_additions) or "PROMPT"
@@ -393,9 +348,8 @@ async def test_run_memory_step_returns_response_data(flow_dir, monkeypatch, mess
 # ---------------------------------------------------------------------------
 
 
-async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
+async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, message_queue):
     """Real runtime factory wires spawn_subagent logs under the checkpoint root."""
-    flow_dir = flow_context.config_dir
 
     def make_usage() -> TokenUsage:
         return TokenUsage(input_tokens=100, output_tokens=50, cache_read_input_tokens=0, cache_creation_input_tokens=0)
@@ -436,7 +390,7 @@ async def test_spawn_subagent_wiring(flow_context, monkeypatch, message_queue):
     )
     phase = AgenticPhase.build(
         phase_id="p1",
-        config=PhaseConfig(agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
+        config=PhaseConfig(name="p1", agent="writer", tasks=[TaskConfig(name="t1", prompt="Do the work.")]),
         deps=[],
         resources=resources,
         checkpoint_manager=checkpoint_manager,
@@ -805,28 +759,6 @@ async def test_compact_context_before_on_first_task_is_noop(flow_dir, monkeypatc
     assert isinstance(cp, SuccessCheckpoint)
     assert cp.tokens == CheckpointTokenInfo(total_input=110, total_output=55)
     assert mock_agent.compact_call_count == 1
-
-
-# ---------------------------------------------------------------------------
-# TaskConfig — context flag validation
-# ---------------------------------------------------------------------------
-
-
-def test_task_config_rejects_both_context_flags():
-    with pytest.raises(ValueError, match="mutually exclusive"):
-        TaskConfig(name="t1", prompt="x", clear_context_before=True, compact_context_before=True)
-
-
-def test_task_config_accepts_clear_context_alone():
-    t = TaskConfig(name="t1", prompt="x", clear_context_before=True)
-    assert t.clear_context_before is True
-    assert t.compact_context_before is False
-
-
-def test_task_config_accepts_compact_context_alone():
-    t = TaskConfig(name="t1", prompt="x", compact_context_before=True)
-    assert t.compact_context_before is True
-    assert t.clear_context_before is False
 
 
 async def test_goal_parse_error_logged_and_tokens_captured(flow_dir, monkeypatch, message_queue):

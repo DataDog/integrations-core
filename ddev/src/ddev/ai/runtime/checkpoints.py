@@ -11,10 +11,10 @@ from typing import TYPE_CHECKING, Annotated, Any, Literal
 import yaml
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
-from ddev.ai.phases.config import FlowConfigError
+from ddev.ai.config.errors import ConfigError
 
 if TYPE_CHECKING:
-    from ddev.ai.phases.config import FlowConfig
+    from ddev.ai.config.models import ResolvedFlow
 
 
 class CheckpointReadError(Exception):
@@ -142,24 +142,26 @@ class CheckpointManager:
         return f"<VARIABLE UNDEFINED: {key}>"
 
 
-def resolve_resume_state(config: FlowConfig, checkpoint_manager: CheckpointManager) -> tuple[set[str], set[str]]:
+def resolve_resume_state(
+    resolved_flow: ResolvedFlow, checkpoint_manager: CheckpointManager
+) -> tuple[set[str], set[str]]:
     """Compute (completed, frontier) for resuming a flow from its checkpoints.
 
     ``completed`` is the dependency-closed set of phases that succeeded and whose every
     transitive dependency also succeeded. ``frontier`` is the phases that will run first
     on resume (not completed, but all their dependencies are).
 
-    The single-pass closure relies on ``config.flow`` being topologically sorted.
+    The single-pass closure relies on ``resolved_flow.flow`` being topologically sorted.
     """
     try:
         succeeded = checkpoint_manager.successful_phases()
     except CheckpointReadError as e:
-        raise FlowConfigError(
+        raise ConfigError(
             f"Cannot resume: checkpoints file is unreadable ({e}). Delete it and restart from scratch."
         ) from e
     completed: set[str] = set()
     frontier: set[str] = set()
-    for entry in config.flow:
+    for entry in resolved_flow.flow:
         deps_done = all(dep in completed for dep in entry.dependencies)
         if entry.phase in succeeded and deps_done:
             completed.add(entry.phase)

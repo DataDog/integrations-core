@@ -8,7 +8,7 @@ import pytest
 
 from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.build import AgentRuntime, DefaultAgentRuntimeFactory
-from ddev.ai.phases.config import AgentConfig
+from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
