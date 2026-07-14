@@ -157,7 +157,10 @@ def run_discovery_check_kubernetes(
 
     result = exec_agent_pod(state['kubeconfig_path'], state['namespace'], command, capture=True, check=False)
     if not replay_collector_output(result.stdout, aggregator, datadog_agent):
-        raise ValueError(f'Could not find valid check output:\n{result.stdout}\n{result.stderr}')
+        agent_logs = get_pod_logs(state['kubeconfig_path'], state['namespace'], AGENT_POD_NAME)
+        raise ValueError(
+            f'Could not find valid check output:\n{result.stdout}\n{result.stderr}\n\nAgent pod logs:\n{agent_logs}'
+        )
 
     return aggregator
 
@@ -228,7 +231,10 @@ def replay_collector_output(output: str, aggregator: Any, datadog_agent: Any) ->
     """Replay collector JSON blobs from ``agent check --json`` output."""
     matches = find_collector_blobs(output)
     for raw_json in matches:
-        collector = json.loads(raw_json)
+        try:
+            collector = json.loads(raw_json)
+        except Exception as e:
+            raise Exception(f'Error loading json: {e}\nCollector Json Output:\n{raw_json}')
         replay_check_run(collector, aggregator, datadog_agent)
 
     return len(matches)
