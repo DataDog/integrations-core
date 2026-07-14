@@ -12,7 +12,6 @@
 import argparse
 import sys
 
-
 QUERY = """
 SELECT
   INTERVAL_END,
@@ -47,6 +46,7 @@ def main():
     kwargs = {'project': args.project_id}
     if args.credentials:
         from google.oauth2 import service_account
+
         kwargs['credentials'] = service_account.Credentials.from_service_account_file(
             args.credentials,
             scopes=['https://www.googleapis.com/auth/cloud-platform'],
@@ -62,7 +62,10 @@ def main():
         rows = list(snapshot.execute_sql(QUERY))
 
     if not rows:
-        print("Connected successfully — no rows in QUERY_STATS_TOP_MINUTE yet (the table populates after ~1 minute of query activity).")
+        print(
+            "Connected successfully — no rows in QUERY_STATS_TOP_MINUTE yet"
+            " (the table populates after ~1 minute of query activity)."
+        )
         return
 
     print(f"\nFound {len(rows)} row(s):\n")
@@ -71,14 +74,16 @@ def main():
     print("-" * 110)
     for row in rows:
         interval_end, request_tag, query_type, text, exec_count, avg_latency, avg_cpu = row
-        print(fmt.format(
-            str(interval_end)[:26],
-            (request_tag or '')[:20],
-            (query_type or '')[:20],
-            exec_count,
-            f"{avg_latency:.6f}",
-            f"{avg_cpu:.6f}",
-        ))
+        print(
+            fmt.format(
+                str(interval_end)[:26],
+                (request_tag or '')[:20],
+                (query_type or '')[:20],
+                exec_count,
+                f"{avg_latency:.6f}",
+                f"{avg_cpu:.6f}",
+            )
+        )
         print(f"  SQL: {(text or '')[:120]}")
 
 

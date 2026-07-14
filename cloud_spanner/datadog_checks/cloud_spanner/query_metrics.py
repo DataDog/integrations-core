@@ -4,17 +4,16 @@
 
 from __future__ import annotations
 
+import math
 import time
 
 from datadog_checks.base import datadog_agent
+from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import obfuscate_sql_with_metadata
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.common import to_native_string
 
 from .queries import QUERY_STATS_COLUMNS, QUERY_STATS_TOP_MINUTE
-
-import math
 
 OBFUSCATE_OPTIONS = to_native_string(json.dumps({'return_json_metadata': True}))
 
@@ -78,9 +77,7 @@ class SpannerQueryMetrics:
             'avg_cpu_seconds': float(raw.get('avg_cpu_seconds') or 0),
             'all_failed_execution_count': int(raw.get('all_failed_execution_count') or 0),
             'all_failed_avg_latency_seconds': _nan_to_zero(raw.get('all_failed_avg_latency_seconds')),
-            'cancelled_or_disconnected_execution_count': int(
-                raw.get('cancelled_or_disconnected_execution_count') or 0
-            ),
+            'cancelled_or_disconnected_execution_count': int(raw.get('cancelled_or_disconnected_execution_count') or 0),
             'timed_out_execution_count': int(raw.get('timed_out_execution_count') or 0),
         }
 

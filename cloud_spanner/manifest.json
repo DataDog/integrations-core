@@ -1,8 +1,13 @@
 {
   "manifest_version": "2.0.0",
+  "app_uuid": "65aa7da6-8c3d-4a2b-91fc-b3d7156d89b3",
   "app_id": "cloud-spanner",
+  "owner": "database-monitoring",
   "display_on_public_website": false,
   "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
     "description": "Monitor query performance and health of your Cloud Spanner databases.",
     "title": "Cloud Spanner",
     "classifier_tags": [
@@ -30,8 +35,10 @@
         "creates_events": false
       },
       "metrics": {
-        "prefix": "gcp.spanner.",
-        "check": [],
+        "prefix": "spanner.",
+        "check": [
+          "spanner.queries.count"
+        ],
         "metadata_path": "metadata.csv"
       },
       "service_checks": {
