@@ -87,7 +87,7 @@ class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     provider: str = "anthropic"
     model: str | None = None
-    max_tokens: int | None = None
+    max_tokens: int | None = Field(default=None, ge=1)
     tools: list[str] = Field(default_factory=list)
     variables: list[VariableDeclaration] = Field(default_factory=list)
     system_prompt: str = ""
@@ -107,7 +107,7 @@ class PhaseConfig(BaseModel):
     class_: str = Field(default="AgenticPhase", alias="class")
     agent: str | None = None
     tasks: list[TaskConfig] = Field(default_factory=list)
-    context_compact_threshold_pct: int = 80
+    context_compact_threshold_pct: int = Field(default=80, ge=0, le=100)
     checkpoint: CheckpointConfig | None = None
     variables: list[VariableDeclaration] = Field(default_factory=list)
 

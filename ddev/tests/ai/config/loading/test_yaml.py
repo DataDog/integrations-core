@@ -48,3 +48,11 @@ def test_yaml_syntax_error_raises(tmp_path):
 
     with pytest.raises(ConfigError):
         load_yaml(path)
+
+
+def test_invalid_utf8_raises(tmp_path):
+    path = tmp_path / "invalid.yaml"
+    path.write_bytes(b"\xff")
+
+    with pytest.raises(ConfigError, match="not valid UTF-8"):
+        load_yaml(path)

@@ -67,6 +67,14 @@ def test_invalid_yaml_front_matter_raises(tmp_path):
         parse_markdown(path)
 
 
+def test_invalid_utf8_raises(tmp_path):
+    path = tmp_path / "invalid.md"
+    path.write_bytes(b"\xff")
+
+    with pytest.raises(ConfigError, match="not valid UTF-8"):
+        parse_markdown(path)
+
+
 def test_unreadable_file_raises(tmp_path):
     path = tmp_path / "missing.md"
 

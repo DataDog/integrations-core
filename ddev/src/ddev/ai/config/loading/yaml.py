@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 from ddev.ai.config.errors import ConfigError
-from ddev.ai.config.loading.files import YamlFile
+from ddev.ai.config.loading.files import YamlFile, read_utf8
 
 
 def load_yaml(path: Path) -> YamlFile | None:
@@ -20,10 +20,7 @@ def load_yaml(path: Path) -> YamlFile | None:
     that could declare a ``type``, so it is not a config file. Deciding whether a
     document is actually config is left to classification.
     """
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as e:
-        raise ConfigError(f"Cannot read {path}: {e}") from e
+    text = read_utf8(path)
 
     try:
         docs = yaml.safe_load(text)

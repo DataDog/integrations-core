@@ -58,6 +58,18 @@ def test_broken_files_yielded_as_file_error(tmp_path):
     assert paths == {tmp_path / "broken.md", tmp_path / "broken.yaml"}
 
 
+def test_invalid_utf8_yields_file_error(tmp_path):
+    path = tmp_path / "invalid.yaml"
+    path.write_bytes(b"\xff")
+
+    results = list(discover([tmp_path]))
+
+    assert len(results) == 1
+    assert isinstance(results[0], FileError)
+    assert results[0].path == path
+    assert "not valid UTF-8" in results[0].message
+
+
 def test_results_sorted_by_path(tmp_path):
     write(tmp_path / "z.md", "---\nname: z\n---\nbody")
     write(tmp_path / "a.md", "---\nname: a\n---\nbody")

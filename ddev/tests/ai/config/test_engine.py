@@ -136,6 +136,15 @@ def test_unparseable_yaml_recorded_as_file_error(tmp_path):
     assert any(p.name == "bad.yaml" for p in eng.file_errors)
 
 
+def test_non_utf8_file_recorded_as_file_error(tmp_path):
+    path = tmp_path / "bad.yaml"
+    path.write_bytes(b"\xff")
+
+    eng = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+
+    assert "not valid UTF-8" in eng.file_errors[path]
+
+
 def test_skipped_file_error_is_logged(tmp_path, caplog):
     write(tmp_path / "bad.yaml", "not valid: [")
     with caplog.at_level("WARNING"):

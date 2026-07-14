@@ -10,15 +10,12 @@ import frontmatter
 import yaml
 
 from ddev.ai.config.errors import ConfigError
-from ddev.ai.config.loading.files import MarkdownFile
+from ddev.ai.config.loading.files import MarkdownFile, read_utf8
 
 
 def parse_markdown(path: Path) -> MarkdownFile | None:
     """Parse a Markdown file's YAML front matter, or return None if it has none."""
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as e:
-        raise ConfigError(f"Cannot read {path}: {e}") from e
+    text = read_utf8(path)
 
     if not frontmatter.checks(text):
         return None

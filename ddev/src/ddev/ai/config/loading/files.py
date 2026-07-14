@@ -8,6 +8,18 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ddev.ai.config.errors import ConfigError
+
+
+def read_utf8(path: Path) -> str:
+    """Read a UTF-8 config file and normalize filesystem and decoding errors."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError as e:
+        raise ConfigError(f"{path}: file is not valid UTF-8: {e}") from e
+    except OSError as e:
+        raise ConfigError(f"Cannot read {path}: {e}") from e
+
 
 @dataclass(frozen=True)
 class MarkdownFile:
