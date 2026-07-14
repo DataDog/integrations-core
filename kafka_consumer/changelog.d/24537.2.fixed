@@ -1,0 +1,1 @@
+Reuse the Kafka AdminClient and Consumer across check runs to prevent unbounded agent memory growth from librdkafka thread churn.

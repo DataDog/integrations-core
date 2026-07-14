@@ -42,6 +42,10 @@ class KafkaClient:
         return self._kafka_client
 
     def open_consumer(self, consumer_group):
+        # Reuse the consumer across runs so its per-broker threads (and their glibc arenas) persist.
+        if self._consumer is not None:
+            return
+
         config = {
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
@@ -55,8 +59,11 @@ class KafkaClient:
         self.log.debug("Consumer instance %s created for group %s", self._consumer, consumer_group)
 
     def close_consumer(self):
+        if self._consumer is None:
+            return
         self.log.debug("Closing consumer instance %s", self._consumer)
         self._consumer.close()
+        self._consumer = None
 
     def __get_authentication_config(self):
         config = {
