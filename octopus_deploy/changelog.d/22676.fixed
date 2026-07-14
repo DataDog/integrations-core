@@ -1,0 +1,1 @@
+Use library-agnostic HTTP exceptions when handling API request failures.
