@@ -1072,7 +1072,7 @@ def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_report_node_metrics_kubernetes1_18_requests_httperror(monkeypatch, aggregator):
+def test_report_node_metrics_kubernetes1_18_httpstatuserror(monkeypatch, aggregator):
     # In production, self.http.get returns a ResponseWrapper whose raise_for_status()
     # raises the agnostic HTTPStatusError.
     check = KubeletCheck('kubelet', {}, [{}])
