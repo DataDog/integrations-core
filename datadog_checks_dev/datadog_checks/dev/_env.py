@@ -132,6 +132,16 @@ def find_collector_blobs(output: str) -> list[str]:
     return re.findall(JSON_COLLECTOR_PATTERN, output, re.DOTALL)
 
 
+def replay_collector_blobs(matches: list[str], stub_aggregator: Any, stub_agent: Any) -> None:
+    """Parse and replay each collector JSON blob found by ``find_collector_blobs``."""
+    for raw_json in matches:
+        try:
+            collector = json.loads(raw_json)
+        except Exception as e:
+            raise ValueError(f'Error loading json: {e}\nCollector Json Output:\n{raw_json}') from e
+        replay_check_run(collector, stub_aggregator, stub_agent)
+
+
 def replay_check_run(agent_collector, stub_aggregator, stub_agent):
     errors = []
     for collector in agent_collector:

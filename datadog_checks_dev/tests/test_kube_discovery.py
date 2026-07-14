@@ -264,6 +264,16 @@ class TestRunDiscoveryCheckKubernetes:
                 with pytest.raises(ValueError, match='Could not find valid check output'):
                     run_discovery_check_kubernetes(mock.Mock(), mock.Mock())
 
+    def test_malformed_json_output_raises(self, e2e_mode):
+        save_kube_discovery_state('/tmp/kubeconfig')
+
+        stdout = 'preamble\n[ not valid json\n]\n'
+
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command', return_value=result(stdout=stdout)):
+            with mock.patch('datadog_checks.dev.kube_discovery.find_check_root', return_value='/root/test_check'):
+                with pytest.raises(ValueError, match='Error loading json'):
+                    run_discovery_check_kubernetes(mock.Mock(), mock.Mock())
+
 
 class TestAssertAllDiscoveryCandidatesStableKubernetes:
     def test_skips_outside_e2e(self, monkeypatch):

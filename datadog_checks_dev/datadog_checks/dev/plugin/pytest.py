@@ -25,7 +25,7 @@ from datadog_checks.dev._env import (
     format_config,
     get_env_vars,
     get_state,
-    replay_check_run,
+    replay_collector_blobs,
     save_state,
     serialize_data,
     set_up_env,
@@ -219,12 +219,7 @@ def dd_agent_check(request, aggregator, datadog_agent):
             message_parts.append(result.stdout + result.stderr)
             raise ValueError('{}\nCould not find valid check output'.format('\n'.join(message_parts)))
 
-        for raw_json in matches:
-            try:
-                collector = json.loads(raw_json)
-            except Exception as e:
-                raise Exception("Error loading json: {}\nCollector Json Output:\n{}".format(e, raw_json))
-            replay_check_run(collector, aggregator, datadog_agent)
+        replay_collector_blobs(matches, aggregator, datadog_agent)
 
         return aggregator
 

@@ -34,7 +34,7 @@ from ._env import (
     flags_to_argv,
     format_config,
     get_state,
-    replay_check_run,
+    replay_collector_blobs,
     save_state,
     set_up_env,
 )
@@ -235,12 +235,7 @@ def get_kube_discovery_state() -> dict[str, Any]:
 def replay_collector_output(output: str, aggregator: Any, datadog_agent: Any) -> int:
     """Replay collector JSON blobs from ``agent check --json`` output."""
     matches = find_collector_blobs(output)
-    for raw_json in matches:
-        try:
-            collector = json.loads(raw_json)
-        except Exception as e:
-            raise Exception(f'Error loading json: {e}\nCollector Json Output:\n{raw_json}')
-        replay_check_run(collector, aggregator, datadog_agent)
+    replay_collector_blobs(matches, aggregator, datadog_agent)
 
     return len(matches)
 
