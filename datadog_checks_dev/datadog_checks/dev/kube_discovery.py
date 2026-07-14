@@ -18,6 +18,7 @@ import tarfile
 import tempfile
 from collections.abc import Sequence
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -481,8 +482,6 @@ def get_pod_logs(kubeconfig_path: str | os.PathLike[str], namespace: str, pod_na
 
 
 def build_service_from_pod(pod_state: dict[str, Any], service_id: str) -> Any:
-    from datadog_checks.base.utils.discovery.discovery import Port, Service
-
     host = pod_state['status']['podIP']
     ports = []
     seen_numbers = set()
@@ -493,9 +492,9 @@ def build_service_from_pod(pod_state: dict[str, Any], service_id: str) -> Any:
             if number in seen_numbers:
                 continue
             seen_numbers.add(number)
-            ports.append(Port(number=number, name=port_spec.get('name', '')))
+            ports.append(SimpleNamespace(number=number, name=port_spec.get('name', '')))
 
-    return Service(id=service_id, host=host, ports=tuple(ports))
+    return SimpleNamespace(id=service_id, host=host, ports=tuple(ports))
 
 
 def probe_candidate(
