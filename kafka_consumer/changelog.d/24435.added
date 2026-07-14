@@ -1,0 +1,1 @@
+Add `auto_load_distribution` to elect a single collector when multiple identically configured checks monitor the same Kafka cluster.

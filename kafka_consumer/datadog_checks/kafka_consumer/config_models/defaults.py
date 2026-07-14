@@ -12,6 +12,14 @@ def shared_kafka_timeout():
     return 5
 
 
+def instance_auto_load_distribution():
+    return False
+
+
+def instance_auto_load_distribution_interval():
+    return 60
+
+
 def instance_close_admin_client():
     return True
 

@@ -3,8 +3,16 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures import as_completed
 
-from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, IsolationLevel, KafkaException, TopicPartition
-from confluent_kafka.admin import AdminClient, OffsetSpec
+from confluent_kafka import (
+    Consumer,
+    ConsumerGroupTopicPartitions,
+    IsolationLevel,
+    KafkaException,
+    Producer,
+    TopicPartition,
+)
+from confluent_kafka.admin import AdminClient, NewTopic, OffsetSpec
+from confluent_kafka.error import KafkaError
 
 # AWS MSK IAM authentication support
 try:
@@ -57,6 +65,34 @@ class KafkaClient:
     def close_consumer(self):
         self.log.debug("Closing consumer instance %s", self._consumer)
         self._consumer.close()
+
+    def build_election_consumer(self, group_id, extra_config=None):
+        config = dict(extra_config or {})
+        config.setdefault("bootstrap.servers", self.config._kafka_connect_str)
+        config.setdefault("group.id", group_id)
+        config.setdefault("enable.auto.commit", False)
+        config.setdefault("enable.partition.eof", True)
+        config.setdefault("log_level", self.config._librdkafka_log_level)
+        config.update(self.__get_authentication_config())
+        return Consumer(config, logger=self.log)
+
+    def build_election_producer(self, extra_config=None):
+        config = dict(extra_config or {})
+        config.setdefault("bootstrap.servers", self.config._kafka_connect_str)
+        config.setdefault("log_level", self.config._librdkafka_log_level)
+        config.update(self.__get_authentication_config())
+        return Producer(config, logger=self.log)
+
+    def ensure_topic(self, topic, num_partitions=1):
+        """Create `topic` with `num_partitions` if it doesn't already exist."""
+        futures = self.kafka_client.create_topics([NewTopic(topic, num_partitions=num_partitions)])
+        for created_topic, future in futures.items():
+            try:
+                future.result()
+            except KafkaException as e:
+                if e.args[0].code() != KafkaError.TOPIC_ALREADY_EXISTS:
+                    raise
+                self.log.debug("Topic %s already exists", created_topic)
 
     def __get_authentication_config(self):
         config = {

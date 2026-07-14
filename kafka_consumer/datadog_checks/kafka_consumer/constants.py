@@ -24,3 +24,9 @@ OFFSET_INVALID = -1001
 
 # offsets_for_times sentinel for "latest"
 HIGH_WATERMARK = -1
+
+# Coordination topic/group used to elect a single collector when auto_load_distribution
+# is enabled. Fixed rather than configurable: a static group name is safe because
+# consumer groups are already scoped per-cluster by the broker that hosts them.
+LEADER_ELECTION_TOPIC = "__datadog_kafka_consumer_leader_election"
+LEADER_ELECTION_GROUP_ID = "datadog-kafka-consumer-leader-election"

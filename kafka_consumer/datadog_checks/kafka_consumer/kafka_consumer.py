@@ -18,6 +18,7 @@ from datadog_checks.kafka_consumer.constants import (
     KAFKA_INTERNAL_TOPICS,
     OFFSET_INVALID,
 )
+from datadog_checks.kafka_consumer.leader_election import LeaderElection
 
 MAX_TIMESTAMPS = 1000
 
@@ -46,9 +47,23 @@ class KafkaCheck(AgentCheck):
         # Eagerly constructed so the check object owns the collector's lifetime; collect() is a
         # no-op when _kafka_connect_urls is empty, so this is safe without a URL guard.
         self._connector_collector = KafkaConnectCollector(self, self.config, self.log)
+        self.leader_election = (
+            LeaderElection(self, self.client, self.config, self.log) if self.config._auto_load_distribution else None
+        )
 
     def check(self, _):
         """The main entrypoint of the check."""
+        if self.leader_election is not None:
+            if not self.leader_election.should_collect():
+                return
+            self.leader_election.start_heartbeat()
+        try:
+            self._check(_)
+        finally:
+            if self.leader_election is not None:
+                self.leader_election.finish()
+
+    def _check(self, _):
         # Fetch Kafka consumer offsets
 
         consumer_offsets = {}
