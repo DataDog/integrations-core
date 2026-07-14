@@ -81,20 +81,20 @@ def test_checkpoint_memory_source_validation_rejects(kwargs):
 
 def test_agent_requires_provider_registry_context():
     with pytest.raises(ValidationError, match="Agent provider registry is required"):
-        AgentConfig()
+        AgentConfig(provider="custom")
 
 
-def test_agent_validates_default_provider_against_registry():
-    registry = make_provider_registry("anthropic")
+def test_agent_validates_provider_against_registry():
+    registry = make_provider_registry("custom")
 
-    config = AgentConfig.model_validate({}, context={"provider_registry": registry})
+    config = AgentConfig.model_validate({"provider": "custom"}, context={"provider_registry": registry})
 
-    assert config.provider == "anthropic"
+    assert config.provider == "custom"
 
 
-def test_agent_rejects_default_provider_when_not_configured():
-    with pytest.raises(ValidationError, match="Agent provider 'anthropic' is not available"):
-        AgentConfig.model_validate({}, context={"provider_registry": AgentProviderRegistry()})
+def test_agent_rejects_provider_when_not_configured():
+    with pytest.raises(ValidationError, match="Agent provider 'custom' is not available"):
+        AgentConfig.model_validate({"provider": "custom"}, context={"provider_registry": AgentProviderRegistry()})
 
 
 def test_agent_rejects_unknown_tools():

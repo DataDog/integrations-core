@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import json
+from typing import cast
 
 import pytest
 
@@ -184,7 +185,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     assert {"start", "finish"} <= events
 
 
-async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
+async def test_run_goal_loop_inherits_parent_config_with_read_only_tools(tmp_path):
     worker_process, _ = _make_worker_process([])
     initial_result = ReActResult(
         final_response=make_response("did things"),
@@ -214,11 +215,11 @@ async def test_run_goal_loop_derives_reviewer_runtime_policy(tmp_path):
         compact_if_needed=_noop_compact,
     )
 
-    reviewer_config = builder_calls[0]["agent_config"]
-    assert reviewer_config.provider == "anthropic"
+    reviewer_config = cast(AgentConfig, builder_calls[0]["agent_config"])
+    assert reviewer_config.provider == parent_config.provider
+    assert reviewer_config.model == parent_config.model
+    assert reviewer_config.max_tokens == parent_config.max_tokens
     assert reviewer_config.tools == ["read_file", "grep"]
-    assert reviewer_config.model is None
-    assert reviewer_config.max_tokens is None
     assert builder_calls[0]["system_prompt"] == GOAL_REVIEWER_SYSTEM_PROMPT
     assert builder_calls[0]["owner_id"] == "p1.goal.t1"
 
