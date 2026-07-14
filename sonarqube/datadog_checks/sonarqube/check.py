@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import re
 
 from datadog_checks.base import AgentCheck, ConfigurationError
@@ -30,7 +31,7 @@ class SonarqubeCheck(AgentCheck):
         try:
             self.collect_metadata()
             self.collect_metrics()
-        except HTTPError as e:
+        except (HTTPError, json.JSONDecodeError) as e:
             self.log.error('Error querying the SonarQube API: %s', e)
             self.service_check(self.SERVICE_CHECK_CONNECT, self.CRITICAL, tags=self._tags, message=str(e))
         else:
