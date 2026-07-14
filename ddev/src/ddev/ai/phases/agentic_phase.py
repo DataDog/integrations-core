@@ -72,7 +72,6 @@ class AgenticPhase(Phase):
         context: FlowContext,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
-        resources: PhaseResources,
     ) -> None:
         super().__init__(
             phase_id=phase_id,
@@ -81,10 +80,8 @@ class AgenticPhase(Phase):
             checkpoint_manager=checkpoint_manager,
             context=context,
         )
-        self._agent_name = cast(str, config.agent)
         self._agent_config = agent_config
         self._process_factory = process_factory
-        self._resources = resources
         self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE)
         self._goal_attempt_log: list[GoalValidationRecord] = []
         self._total_input_tokens: int = 0
@@ -122,7 +119,6 @@ class AgenticPhase(Phase):
             context=context,
             agent_config=agent_config,
             process_factory=process_factory,
-            resources=resources,
         )
 
     def before_react(self) -> None:

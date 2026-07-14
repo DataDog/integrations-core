@@ -94,6 +94,17 @@ class ResourceRegistry:
         """The single entry for ``(kind, name)``, or ``None`` if absent or conflicting."""
         return self._entries.get((kind, name))
 
+    @overload
+    def lookup(self, kind: Literal[ResourceKind.AGENT], name: str) -> Entry[AgentConfig] | ResourceConflict | None: ...
+    @overload
+    def lookup(self, kind: Literal[ResourceKind.PHASE], name: str) -> Entry[PhaseConfig] | ResourceConflict | None: ...
+    @overload
+    def lookup(self, kind: Literal[ResourceKind.FLOW], name: str) -> Entry[FlowConfig] | ResourceConflict | None: ...
+    @overload
+    def lookup(
+        self, kind: Literal[ResourceKind.PROMPT, ResourceKind.GOAL, ResourceKind.MEMORY_PROMPT], name: str
+    ) -> Entry[str] | ResourceConflict | None: ...
+
     def lookup(self, kind: ResourceKind, name: str) -> Entry[Any] | ResourceConflict | None:
         """The full state of ``(kind, name)``: valid/broken entry, conflict, or ``None`` if absent."""
         entry = self._entries.get((kind, name))

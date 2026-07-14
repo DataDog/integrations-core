@@ -5,7 +5,6 @@
 import asyncio
 from collections.abc import Callable
 from typing import Any
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -133,13 +132,6 @@ class MockProcessFactory:
         return ReActProcess(runtime, callbacks=self._callbacks, scope=scope)
 
 
-def make_mock_resources(agent_config: AgentConfig | None = None) -> MagicMock:
-    """Build a minimal PhaseResources mock for tests."""
-    resources = MagicMock()
-    resources.agent_config.return_value = agent_config or AgentConfig(tools=[])
-    return resources
-
-
 def make_agent_phase(
     flow_dir,
     mock_agent: MockAgent,
@@ -199,7 +191,6 @@ def make_agent_phase(
         context=context,
         agent_config=effective_agent_config,
         process_factory=process_factory,
-        resources=make_mock_resources(effective_agent_config),
     )
     phase.queue = message_queue
     return phase, checkpoint_manager
