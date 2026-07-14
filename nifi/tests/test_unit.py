@@ -187,7 +187,7 @@ def _standard_responses(
     }
 
 
-def _dispatch(responses_by_url):
+def dispatch(responses_by_url):
     """Build a mock_http side_effect that dispatches by URL substring."""
 
     def side_effect(url, *args, **kwargs):
@@ -199,10 +199,10 @@ def _dispatch(responses_by_url):
     return side_effect
 
 
-def _mock_http_responses(mock_http, responses_by_url):
+def mock_http_responses(mock_http, responses_by_url):
     """Route mock_http GET and POST through a URL-substring dispatch."""
-    mock_http.get.side_effect = _dispatch(responses_by_url)
-    mock_http.post.side_effect = _dispatch(responses_by_url)
+    mock_http.get.side_effect = dispatch(responses_by_url)
+    mock_http.post.side_effect = dispatch(responses_by_url)
 
 
 class TestAuth:
@@ -248,7 +248,7 @@ class TestCanConnect:
         """Full check run emits can_connect=1 on success."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses())
+        mock_http_responses(mock_http, _standard_responses())
         dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
@@ -277,7 +277,7 @@ class TestCanConnect:
             '/flow/bulletin-board': _mock_response(200, json_data=EMPTY_BULLETIN_BOARD),
         }
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
@@ -288,7 +288,7 @@ class TestClusterHealth:
         """Clustered mode with all nodes connected: is_healthy=1."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses(cluster=CLUSTER_SUMMARY_CLUSTERED))
+        mock_http_responses(mock_http, _standard_responses(cluster=CLUSTER_SUMMARY_CLUSTERED))
         dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
@@ -300,7 +300,7 @@ class TestClusterHealth:
         """Clustered mode with missing node: is_healthy=0."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses(cluster=CLUSTER_SUMMARY_DEGRADED))
+        mock_http_responses(mock_http, _standard_responses(cluster=CLUSTER_SUMMARY_DEGRADED))
         dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
@@ -310,7 +310,7 @@ class TestClusterHealth:
         """Standalone mode: no cluster metrics emitted."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses())
+        mock_http_responses(mock_http, _standard_responses())
         dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1)
@@ -322,7 +322,7 @@ class TestSystemDiagnostics:
         """System diagnostics emits JVM heap, threads, and CPU metrics."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses())
+        mock_http_responses(mock_http, _standard_responses())
         dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
@@ -339,7 +339,7 @@ class TestSystemDiagnostics:
         """GC metrics are tagged per garbage collector."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses())
+        mock_http_responses(mock_http, _standard_responses())
         dd_run_check(check)
 
         young_tags = ['nifi_version:2.8.0', 'gc_name:G1 Young Generation']
@@ -354,7 +354,7 @@ class TestSystemDiagnostics:
         """Repository metrics include flowfile, content, and provenance repos."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses())
+        mock_http_responses(mock_http, _standard_responses())
         dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
@@ -387,7 +387,7 @@ class TestFlowStatus:
         """Controller-level flow status metrics are emitted."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses())
+        mock_http_responses(mock_http, _standard_responses())
         dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
@@ -405,7 +405,7 @@ class TestProcessGroup:
         """Root process group metrics are emitted with correct tags."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, _standard_responses())
+        mock_http_responses(mock_http, _standard_responses())
         dd_run_check(check)
 
         pg_tags = ['nifi_version:2.8.0', 'process_group_name:NiFi Flow', 'process_group_id:root-pg-id']
@@ -465,7 +465,7 @@ class TestProcessGroup:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=nested_response)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         root_tags = ['nifi_version:2.8.0', 'process_group_name:Root', 'process_group_id:root-id']
@@ -514,28 +514,19 @@ class TestProcessGroup:
         }
         child_response = {'processGroupStatus': {'aggregateSnapshot': child_snapshot}}
 
-        def side_effect(url, *args, **kwargs):
-            if '/access/token' in url:
-                return _mock_response(201, text='test-token')
-            if '/flow/about' in url:
-                return _mock_response(200, json_data=ABOUT_RESPONSE)
-            if '/system-diagnostics' in url:
-                return _mock_response(200, json_data=SYSTEM_DIAGNOSTICS_RESPONSE)
-            if '/flow/status' in url:
-                return _mock_response(200, json_data=FLOW_STATUS_RESPONSE)
-            if 'root-id' in url:
-                return _mock_response(200, json_data=parent_response)
-            if 'child-id' in url:
-                return _mock_response(200, json_data=child_response)
-            if '/flow/cluster/summary' in url:
-                return _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE)
-            if '/flow/bulletin-board' in url:
-                return _mock_response(200, json_data=EMPTY_BULLETIN_BOARD)
-            raise ValueError(f'Unmocked URL: {url}')
+        responses = {
+            '/access/token': _mock_response(201, text='test-token'),
+            '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
+            '/system-diagnostics': _mock_response(200, json_data=SYSTEM_DIAGNOSTICS_RESPONSE),
+            '/flow/status': _mock_response(200, json_data=FLOW_STATUS_RESPONSE),
+            'root-id': _mock_response(200, json_data=parent_response),
+            'child-id': _mock_response(200, json_data=child_response),
+            '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
+            '/flow/bulletin-board': _mock_response(200, json_data=EMPTY_BULLETIN_BOARD),
+        }
+        mock_http_responses(mock_http, responses)
 
         check = NifiCheck('nifi', {}, [_make_instance(process_groups=['root-id', 'child-id'])])
-        mock_http.get.side_effect = side_effect
-        mock_http.post.side_effect = side_effect
         dd_run_check(check)
 
         child_tags = ['nifi_version:2.8.0', 'process_group_name:Child Group', 'process_group_id:child-id']
@@ -598,7 +589,7 @@ class TestProcessGroup:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=root_response)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         # Both children should emit metrics even though neither has an 'id' field
@@ -675,7 +666,7 @@ class TestConnectionMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         assert not aggregator.metrics('nifi.connection.queued_count')
@@ -686,7 +677,7 @@ class TestConnectionMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_connection_metrics=True)])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         conn_tags = [
@@ -709,7 +700,7 @@ class TestConnectionMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_connection_metrics=True, max_connections=0)])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         assert 'Truncated connections from 1 to 0' in caplog.text
@@ -722,7 +713,7 @@ class TestProcessorMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         assert not aggregator.metrics('nifi.processor.flowfiles_in')
@@ -733,7 +724,7 @@ class TestProcessorMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True)])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         proc_tags = [
@@ -757,7 +748,7 @@ class TestProcessorMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True, max_processors=0)])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         assert 'Truncated processors from 1 to 0' in caplog.text
@@ -815,7 +806,7 @@ class TestProcessorMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=pg_data)
         check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True)])
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         dd_run_check(check)
 
         proc_tags = [
@@ -834,7 +825,7 @@ class TestBulletins:
         check = NifiCheck('nifi', {}, [_make_instance(**instance_overrides)])
         cache = {'last_bulletin_id': cache_state}
 
-        _mock_http_responses(mock_http, responses)
+        mock_http_responses(mock_http, responses)
         with (
             patch.object(check, 'read_persistent_cache', side_effect=lambda k: cache.get(k, '')),
             patch.object(check, 'write_persistent_cache', side_effect=lambda k, v: cache.__setitem__(k, v)),
