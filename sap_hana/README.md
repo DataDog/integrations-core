@@ -149,6 +149,23 @@ The Agent can collect SAP HANA catalog metadata (schemas, tables, views, and col
 
 See the [sample sap_hana.d/conf.yaml][4] for all available schema collection options, including `include_schemas` and `exclude_schemas`.
 
+#### Data Observability query actions
+
+The Datadog backend can deliver monitoring queries to the SAP HANA check through Remote Configuration. When enabled, the Agent executes these queries against HANA on a schedule and forwards the results as Data Observability events.
+
+To allow Remote Configuration to push query configs to the `sap_hana` check, add `sap_hana` to the allowlist in `datadog.yaml`:
+
+```yaml
+remote_configuration:
+  agent_integrations:
+    allow_list:
+      - sap_hana
+```
+
+Without this entry, the Agent silently drops any query delivered by the backend without surfacing an error. After updating `datadog.yaml`, [restart the Agent][5].
+
+Data Observability query actions require schema collection to be enabled. Verify that the `collect_schemas` block is present and `enabled: true` in your `sap_hana.d/conf.yaml` (see [Schema collection](#schema-collection)).
+
 ### Validation
 
 Run the [Agent's status subcommand][6] and look for `sap_hana` under the Checks section.
