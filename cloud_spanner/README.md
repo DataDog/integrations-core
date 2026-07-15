@@ -10,7 +10,6 @@ When DBM is enabled, the integration queries `SPANNER_SYS.QUERY_STATS_TOP_MINUTE
 
 ### Prerequisites
 
-- Datadog Agent 7.36.1 or later
 - A Google Cloud service account with the `spanner.databases.select` permission, or Application Default Credentials (ADC) when running inside GCP
 
 ### Installation
