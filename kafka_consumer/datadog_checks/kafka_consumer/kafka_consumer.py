@@ -31,7 +31,7 @@ MAX_TIMESTAMP_ENTRIES = 6_000_000
 LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
 
 
-def _load_malloc_trim():
+def load_malloc_trim():
     """Return glibc's ``malloc_trim`` on Linux, or ``None`` where it is unavailable (macOS, musl)."""
     if platform.system() != 'Linux':
         return None
@@ -45,13 +45,10 @@ def _load_malloc_trim():
     return trim
 
 
-# librdkafka runs one thread per broker, so allocations spread across many glibc arenas whose freed
-# memory is retained per-arena rather than returned to the OS. Trimming after each run hands that
-# free memory back and keeps RSS from growing unbounded on high-core hosts.
-MALLOC_TRIM = _load_malloc_trim()
+MALLOC_TRIM = load_malloc_trim()
 
 
-def _malloc_trim():
+def malloc_trim():
     """Return glibc per-arena free memory to the OS after a run; no-op where unavailable."""
     if MALLOC_TRIM is not None:
         MALLOC_TRIM(0)
@@ -81,7 +78,7 @@ class KafkaCheck(AgentCheck):
         try:
             self._run_check()
         finally:
-            _malloc_trim()
+            malloc_trim()
 
     def _run_check(self):
         # Fetch Kafka consumer offsets
