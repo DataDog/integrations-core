@@ -74,13 +74,6 @@ jobs:
           sparse-checkout: .github
           path: tooling
 
-      - name: Get source tag token via dd-octo-sts
-        id: source-octo-sts
-        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
-        with:
-          scope: DataDog/${{ inputs.source-repo || 'integrations-core' }}
-          policy: self.release.tag-push
-
       # Source tree to tag and validate. ddev release tag operates on HEAD of
       # this checkout, so it must be at the ref the caller asked to release.
       - name: Checkout source repo
@@ -89,8 +82,6 @@ jobs:
           ref: ${{ inputs.source-repo-ref || github.sha }}
           fetch-depth: 0 # ddev needs full tag history
           path: source
-          token: ${{ steps.source-octo-sts.outputs.token }}
-          persist-credentials: true
 
       - name: Verify source ref is on release branch
         if: inputs.source-repo-branch != ''
@@ -137,6 +128,40 @@ jobs:
           REF: ${{ inputs.source-repo-ref || github.sha }}
           IS_STABLE_RELEASE: ${{ inputs.is-stable-release }}
         run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_prepare.py"
+
+      # Most stable tags are already created by GitLab. Only mint a write token
+      # when release preparation found local tags that still need to be pushed.
+      - name: Get source tag token via dd-octo-sts
+        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        id: source-octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        with:
+          scope: DataDog/${{ inputs.source-repo || 'integrations-core' }}
+          policy: self.release.tag-push
+
+      - name: Configure source tag credentials
+        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.source-repo-ref || github.sha }}
+          fetch-depth: 0
+          path: source
+          token: ${{ steps.source-octo-sts.outputs.token }}
+          persist-credentials: true
+          clean: false # Preserve the local tags created during preparation
+
+      - name: Push release tags
+        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        working-directory: source
+        env:
+          NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
+        run: |
+          mapfile -t tags < <(jq -r '.[]' <<< "$NEW_TAGS")
+          if (( ${#tags[@]} == 0 )); then
+            echo "::error::has_new_tags was true but no release tags were provided"
+            exit 1
+          fi
+          git push origin "${tags[@]}"
 
       - name: Build dispatch batches
         id: release-dispatch

@@ -40,10 +40,23 @@ def _parse_is_stable_release() -> bool:
     return os.environ.get("IS_STABLE_RELEASE", "true").strip().lower() != "false"
 
 
-def _tag(dry_run: bool, selected: str) -> None:
-    """Tag packages via ddev and optionally push to origin."""
+def _tags_at_head() -> set[str]:
+    """Return tags that point at HEAD."""
+    result = subprocess.run(
+        ["git", "tag", "--points-at", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return set(result.stdout.splitlines())
+
+
+def _tag(dry_run: bool, selected: str) -> list[str]:
+    """Create package tags locally and return the new tag names."""
     if dry_run:
         print("DRY RUN: tags will be created locally but not pushed to origin")
+
+    tags_before = _tags_at_head()
 
     subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True)
     subprocess.run(
@@ -51,8 +64,7 @@ def _tag(dry_run: bool, selected: str) -> None:
         check=True,
     )
 
-    push_flag = "--push" if not dry_run else "--no-push"
-    base_cmd = ["ddev", "release", "tag"] + _tag_package_args(selected) + ["--skip-prerelease", push_flag]
+    base_cmd = ["ddev", "release", "tag"] + _tag_package_args(selected) + ["--skip-prerelease", "--no-push"]
 
     result = subprocess.run(base_cmd)
     if result.returncode == 3:
@@ -64,6 +76,8 @@ def _tag(dry_run: bool, selected: str) -> None:
     if result.returncode not in (0, 2):
         print(f"ddev release tag failed with exit code {result.returncode}", file=sys.stderr)
         sys.exit(result.returncode)
+
+    return sorted(_tags_at_head() - tags_before)
 
 
 def _detect(selected: str) -> tuple[list[str], str]:
@@ -193,13 +207,15 @@ def main() -> None:
     ref = os.environ.get("REF", "")
     is_stable_release = _parse_is_stable_release()
 
-    _tag(dry_run, selected)
+    new_tags = _tag(dry_run, selected)
 
     packages, mode = _detect(selected)
 
     set_outputs(
         packages=json.dumps(packages),
         has_packages="true" if packages else "false",
+        new_tags=json.dumps(new_tags),
+        has_new_tags="true" if packages and new_tags else "false",
         mode=mode,
     )
 
