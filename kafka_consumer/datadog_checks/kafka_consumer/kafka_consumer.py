@@ -487,7 +487,8 @@ class KafkaCheck(AgentCheck):
             ):
                 result[(topic, partition)] = offset
         finally:
-            self.client.close_consumer()
+            if self.config._close_admin_client:
+                self.client.close_consumer()
 
         self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id
