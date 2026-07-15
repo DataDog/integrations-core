@@ -12,6 +12,7 @@ class HAProxyCheck(OpenMetricsBaseCheck):
     DEFAULT_METRIC_LIMIT = 0
 
     def __new__(cls, name, init_config, instances):
+        # test
         instance = instances[0]
 
         if is_affirmative(instance.get('use_openmetrics', False)):
