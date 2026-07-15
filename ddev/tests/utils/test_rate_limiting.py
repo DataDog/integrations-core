@@ -26,19 +26,7 @@ from ddev.utils.rate_limiting import (
     SecondaryLimitEvent,
 )
 from tests.helpers.assertions import assert_blocks
-
-
-class FakeClock:
-    """Injectable, manually-advanceable clock for deterministic governor tests."""
-
-    def __init__(self, start: float = 1000.0) -> None:
-        self.current = start
-
-    def __call__(self) -> float:
-        return self.current
-
-    def advance(self, seconds: float) -> None:
-        self.current += seconds
+from tests.helpers.clock import FakeClock
 
 
 def make_snapshot(
