@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 # Top queries by CPU time in the most recent completed 1-minute window.
+# SPANNER_SYS.QUERY_STATS_TOP_MINUTE retains at least 6 hours of data, so
+# filtering to MAX(INTERVAL_END) ensures each check run reads only the single
+# latest completed minute rather than re-sending hours of historical rows.
 # SPANNER_SYS tables are only available on real Spanner instances — the emulator
 # does not support them.
 QUERY_STATS_TOP_MINUTE = """
@@ -24,7 +27,8 @@ SELECT
   CANCELLED_OR_DISCONNECTED_EXECUTION_COUNT,
   TIMED_OUT_EXECUTION_COUNT
 FROM SPANNER_SYS.QUERY_STATS_TOP_MINUTE
-ORDER BY INTERVAL_END DESC, AVG_CPU_SECONDS DESC
+WHERE INTERVAL_END = (SELECT MAX(INTERVAL_END) FROM SPANNER_SYS.QUERY_STATS_TOP_MINUTE)
+ORDER BY AVG_CPU_SECONDS DESC
 """
 
 # Column positions in the result set above, kept in sync with the SELECT list.
