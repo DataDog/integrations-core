@@ -1,1 +1,1 @@
-Clarify ``exact_match`` behavior for ``search_string`` set to true, including the required file extension on Windows.
+Clarify ``exact_match`` behavior for ``search_string``, including the required file extension on Windows.
