@@ -15,15 +15,15 @@ from typing import Any
 from datadog_checks.argo_rollouts.config_models import discovery_overrides
 from datadog_checks.argo_rollouts.config_models.instance import InstanceConfig
 from datadog_checks.argo_rollouts.config_models.shared import SharedConfig
-from datadog_checks.base.utils.discovery import Service, candidate_ports
+from datadog_checks.base.utils.discovery import Service, candidate_ports_by_name
 
 
 def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
     shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
         by_alias=True, mode='json', exclude_none=True
     )
-    # discovery[0]: from_ports
-    for port in candidate_ports(service, [8090]):
+    # discovery[0]: from_named_ports
+    for port in candidate_ports_by_name(service, ['metrics']):
         ctx = {'port': port}
         instance_data = {
             'openmetrics_endpoint': 'http://{service.host}:{port.number}/metrics'.format(service=service, **ctx),
