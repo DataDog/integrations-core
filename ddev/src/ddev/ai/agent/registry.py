@@ -30,17 +30,18 @@ class AgentProviderRegistry:
         if name in self._providers:
             raise ValueError(f"Agent provider {name!r} is already registered")
         for model in provider.supported_models():
-            owner = self._model_index.get(model)
+            key = model.lower()
+            owner = self._model_index.get(key)
             if owner is not None:
                 raise ValueError(f"Model {model!r} is claimed by both providers {owner!r} and {name!r}")
-            self._model_index[model] = name
+            self._model_index[key] = name
         self._providers[name] = provider
 
     def contains(self, name: str) -> bool:
         return name in self._providers
 
     def provider_for_model(self, model: str) -> str:
-        provider = self._model_index.get(model)
+        provider = self._model_index.get(model.lower())
         if provider is None:
             raise ValueError(f"Unknown model {model!r}")
         return provider

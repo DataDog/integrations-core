@@ -131,6 +131,14 @@ def test_agent_infers_provider_from_model():
     assert config.model == "opus"
 
 
+def test_agent_infers_provider_from_differently_cased_model_alias():
+    registry = make_provider_registry("anthropic")
+
+    config = AgentConfig.model_validate({"model": "OPUS"}, context={"provider_registry": registry})
+
+    assert config.provider == "anthropic"
+
+
 def test_agent_defaults_model_and_infers_provider_when_unset():
     registry = make_provider_registry("anthropic")
 
