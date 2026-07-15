@@ -1,0 +1,41 @@
+{
+  "name": "Repeated NiFi authentication or authorization failures detected",
+  "partnerRuleId": "ext-nfi-aut",
+  "type": "log_detection",
+  "isEnabled": true,
+  "queries": [
+    {
+      "query": "source:nifi @logger.name:(*security* OR *Authentication*) status:(warn OR error)",
+      "groupByFields": ["host"],
+      "hasOptionalGroupByFields": false,
+      "distinctFields": [],
+      "aggregation": "count",
+      "name": "a",
+      "dataSource": "logs"
+    }
+  ],
+  "options": {
+    "detectionMethod": "threshold",
+    "evaluationWindow": 300,
+    "maxSignalDuration": 7200,
+    "keepAlive": 3600
+  },
+  "cases": [
+    {
+      "name": "High volume of authentication failures",
+      "status": "high",
+      "notifications": [],
+      "condition": "a > 20"
+    },
+    {
+      "name": "Elevated authentication failures",
+      "status": "medium",
+      "notifications": [],
+      "condition": "a > 5"
+    }
+  ],
+  "message": "## Repeated authentication or authorization failures on NiFi\n\nNiFi's web security layer logged multiple failed authentication or authorization events on host `{{host}}` within a short window. This can indicate a brute-force or credential-stuffing attempt against the NiFi UI/REST API, a misconfigured client repeatedly presenting invalid credentials or an expired token, or a rejected/untrusted proxy or client certificate.\n\n**Details**\n- Host: `{{host}}`\n- Logger: `{{@logger.name}}`\n\nNiFi's authentication filter records the requesting IP address, HTTP method, and target URL in the log **message** text (for example: `Authentication Failed 10.0.0.5 GET https://nifi:8443/nifi-api/... [Untrusted proxy]`). These are not parsed into separate fields, so open a matching log to read them.\n\n**Triage steps**\n1. Pivot to the Log Explorer with `source:nifi @logger.name:(*security* OR *Authentication*) status:(warn OR error) host:{{host}}` and inspect the message text for the source IP(s) and requested endpoints.\n2. Determine whether the failures originate from a single client/IP (likely misconfiguration or a targeted attempt) or many (possible distributed credential stuffing).\n3. If the source is untrusted, block it at the load balancer or firewall and confirm NiFi enforces authentication (single-user token or mutual TLS).\n4. Check whether any failure is immediately followed by a successful authentication from the same client, which may indicate a successful brute force.\n\n**Reference**\n- [Apache NiFi Documentation](https://nifi.apache.org/docs.html)",
+  "tags": ["source:nifi"],
+  "hasExtendedTitle": true,
+  "filters": []
+}
