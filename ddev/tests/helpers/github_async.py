@@ -91,6 +91,9 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             request=httpx.Request('GET', 'https://api.github.com/'),
             response=httpx.Response(404),
         ),
+        # Default to "no existing PRs" so the --from-pr idempotency check does not skip a base
+        # unless a test explicitly registers an existing backport PR.
+        'list_pull_requests': lambda: GitHubResponse.model_validate({'data': [], 'headers': {}}),
         'create_workflow_dispatch': lambda: GitHubResponse(
             data=WorkflowDispatchResult(
                 workflow_run_id=123,
@@ -217,6 +220,27 @@ class FakeAsyncGitHubClient:
             owner=owner,
             repo=repo,
             pull_number=pull_number,
+            timeout=timeout,
+        )
+
+    async def list_pull_requests(
+        self,
+        owner: str,
+        repo: str,
+        state: str = 'open',
+        head: str | None = None,
+        base: str | None = None,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> GitHubResponse[list[PullRequest]]:
+        return self._call(
+            'list_pull_requests',
+            owner=owner,
+            repo=repo,
+            state=state,
+            head=head,
+            base=base,
+            per_page=per_page,
             timeout=timeout,
         )
 

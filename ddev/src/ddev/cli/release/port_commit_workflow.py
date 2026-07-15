@@ -41,6 +41,22 @@ DIGITS_PATTERN = re.compile(r'^\d+$')
 PR_PREFIX_PATTERN = re.compile(r'^PR-(\d+)$', re.IGNORECASE)
 PR_URL_PATTERN = re.compile(r'^https?://github\.com/[^/]+/[^/]+/pull/(\d+)(?:[/?#].*)?$', re.IGNORECASE)
 
+# Paths whose content is regenerated per-branch, so a backport must reset them to the target
+# branch's version instead of carrying over the source commit's. A trailing slash matches as a
+# path prefix anchored at the repo root; an entry without one matches as a substring anywhere.
+RESETTABLE_PATHS = (
+    # `.in-toto` supply-chain attestations (e.g. `*.in-toto.link`) are per-branch and cannot be
+    # cherry-picked; they live in subdirectories, so match the substring anywhere in the path.
+    '.in-toto',
+    # `.deps/` lockfiles are regenerated per release branch; a cherry-picked dependency bump would
+    # otherwise drag in the source branch's lockfile. Anchored at the repo root.
+    '.deps/',
+)
+RESETTABLE_PATHS_DISPLAY = ', '.join(f'`{path}`' for path in RESETTABLE_PATHS)
+
+# Prefix of the labels that request a backport, e.g. `backport/7.62.x` targets the `7.62.x` branch.
+BACKPORT_LABEL_PREFIX = 'backport/'
+
 
 class PortStepError(Exception):
     """Raised by a PortStep to signal a clean abort with a user-facing message."""
@@ -169,7 +185,7 @@ class TeardownWorktreeStep(PortStep):
 
 
 class CherryPickStep(PortStep):
-    """Cherry-pick a commit, auto-resolving conflicts in regenerated files (`.in-toto`, `.deps/`)."""
+    """Cherry-pick a commit, auto-resolving conflicts in regenerated files (see `RESETTABLE_PATHS`)."""
 
     def __init__(self, app: Application, *, git: GitRepository, sha: str, dry_run: bool = False) -> None:
         super().__init__(app, dry_run=dry_run)
@@ -200,7 +216,7 @@ class CherryPickStep(PortStep):
                 pass
             listing = '\n  '.join(manual)
             raise PortStepError(
-                f'Cherry-pick has conflicts outside regenerated files (`.in-toto`, `.deps/`):\n  {listing}'
+                f'Cherry-pick has conflicts outside regenerated files ({RESETTABLE_PATHS_DISPLAY}):\n  {listing}'
             )
 
         if not resettable:
@@ -211,17 +227,17 @@ class CherryPickStep(PortStep):
 
 
 class PreserveGeneratedFilesStep(PortStep):
-    """Reset staged `.in-toto` / `.deps/` changes back to the target branch's regenerated versions."""
+    """Reset staged changes in regenerated files (see `RESETTABLE_PATHS`) back to the target branch's versions."""
 
     def __init__(self, app: Application, *, git: GitRepository, dry_run: bool = False) -> None:
         super().__init__(app, dry_run=dry_run)
         self.git = git
 
     def describe(self) -> str:
-        return 'Preserving generated files (`.in-toto`, `.deps/`) from target branch'
+        return f'Preserving generated files ({RESETTABLE_PATHS_DISPLAY}) from target branch'
 
     def planned_commands(self) -> list[str]:
-        return ['# Reset any staged .in-toto / .deps/ changes to HEAD']
+        return [f'# Reset any staged {RESETTABLE_PATHS_DISPLAY} changes to HEAD']
 
     def execute(self) -> None:
         staged = [line for line in self.git.capture('diff', '--cached', '--name-only').splitlines() if line]
@@ -399,12 +415,13 @@ def _extract_explicit_pr_number(raw: str) -> int | None:
     return None
 
 
-def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) -> str:
-    """Resolve a PR number to the SHA of its merge commit, validating squash-merge.
+def _resolve_pr(app: Application, pr_number: int, *, dry_run: bool) -> tuple[PullRequest, str]:
+    """Fetch PR #<pr_number> and resolve its squash-merge commit to a full SHA.
 
-    Raises `_PRNotFound` when GitHub returns 404. Raises `_CommitNotResolvable` (wrapped with PR
-    context) when the merge commit can't be resolved locally. Aborts on other auth / network /
-    validation errors so the user gets a clear, contextual message rather than a stack trace.
+    Returns `(pull_request, full_sha)`. Raises `_PRNotFound` when GitHub returns 404. Raises
+    `_CommitNotResolvable` (wrapped with PR context) when the merge commit can't be resolved locally.
+    Aborts on other auth / network / validation errors, or when the PR is not squash-merged, so the
+    user gets a clear, contextual message rather than a stack trace.
     """
     import asyncio
 
@@ -447,6 +464,12 @@ def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) ->
             f'PR #{pr_number} was found but its merge commit `{pr.merge_commit_sha}` could not be resolved: {exc}'
         ) from exc
     _abort_if_merge_commit(app, pr_number, full_sha)
+    return pr, full_sha
+
+
+def _resolve_pr_to_commit(app: Application, pr_number: int, *, dry_run: bool) -> str:
+    """Resolve a PR number to the full SHA of its squash-merge commit (see `_resolve_pr`)."""
+    _, full_sha = _resolve_pr(app, pr_number, dry_run=dry_run)
     return full_sha
 
 
@@ -518,9 +541,7 @@ def _resolve_commit_or_fetch(app: Application, commit_hash: str, *, dry_run: boo
 
 def is_reset_to_target(path: str) -> bool:
     """Whether a path holds per-branch regenerated content that must be reset to the target branch."""
-    # `.deps/` lockfiles (tracked) live at the repo root, so anchor the match; `.in-toto` signature
-    # metadata is matched anywhere, since those files are named like `*.in-toto.link` in subdirectories.
-    return path.startswith('.deps/') or '.in-toto' in path
+    return any(path.startswith(entry) if entry.endswith('/') else entry in path for entry in RESETTABLE_PATHS)
 
 
 def _path_exists_in_head(git: GitRepository, path: str) -> bool:
@@ -581,6 +602,17 @@ def parse_labels(raw: str) -> list[str]:
     return [label.strip() for label in raw.split(',') if label.strip()]
 
 
+def derive_backport_bases(pr: PullRequest) -> list[str]:
+    """Return the target branches from a PR's `backport/<base>` labels, in order and de-duplicated."""
+    bases: list[str] = []
+    for label in pr.labels:
+        if label.name.startswith(BACKPORT_LABEL_PREFIX):
+            base = label.name[len(BACKPORT_LABEL_PREFIX) :]
+            if base and base not in bases:
+                bases.append(base)
+    return bases
+
+
 def resolve_owner_repo(app: Application) -> tuple[str, str]:
     """Resolve (owner, repo) for the active repository.
 
@@ -626,10 +658,46 @@ def confirm_or_abort(app: Application, prompt: str, *, dry_run: bool) -> None:
         app.abort('Did not get confirmation, aborting.')
 
 
-def resolve_port_plan(
+def check_github_user(app: Application) -> str:
+    """Return the configured GitHub user for branch naming, aborting if none is set."""
+    user = app.config.github.user
+    if not user:
+        app.abort(
+            'No GitHub user configured. Set `github.user` via `ddev config set github.user <name>` '
+            'or export DD_GITHUB_USER.'
+        )
+    return user
+
+
+def _read_commit_subject(app: Application, full_sha: str) -> tuple[str, str | None]:
+    """Return (clean_subject, original_pr) for a resolved commit, aborting if it can't be read."""
+    log_entries = app.repo.git.log(['hash:%H', 'subject:%s'], n=1, source=full_sha)
+    if not log_entries:
+        app.abort(f'Could not read commit `{full_sha}`.')
+    return split_commit_subject(log_entries[0]['subject'])
+
+
+def _warn_about_reset_files(app: Application, full_sha: str) -> None:
+    """Warn when the commit touches generated files that will be reset to the target branch."""
+    reset_files = [
+        line
+        for line in app.repo.git.capture('diff-tree', '--no-commit-id', '--name-only', '-r', full_sha).splitlines()
+        if is_reset_to_target(line)
+    ]
+    if reset_files:
+        listing = '\n  '.join(reset_files)
+        app.display_warning(
+            f'Commit touches {len(reset_files)} generated file(s) ({RESETTABLE_PATHS_DISPLAY}); they will be '
+            f'preserved from the target branch:\n  {listing}'
+        )
+
+
+def build_port_plan(
     app: Application,
     *,
-    commit_hash: str | None,
+    full_sha: str,
+    clean_subject: str,
+    original_pr: str | None,
     target_branch: str,
     branch_prefix: str,
     branch_suffix: str | None,
@@ -639,52 +707,12 @@ def resolve_port_plan(
     verify: bool,
     dry_run: bool,
 ) -> PortPlan:
-    """Validate inputs, resolve derived values, and confirm with the user. Aborts on failure."""
-    user = app.config.github.user
-    if not user:
-        app.abort(
-            'No GitHub user configured. Set `github.user` via `ddev config set github.user <name>` '
-            'or export DD_GITHUB_USER.'
-        )
-
-    if not no_pr and not dry_run and not app.config.github.token:
-        app.abort(
-            'No GitHub token configured. Set `github.token` via `ddev config set github.token <token>` '
-            'or export DD_GITHUB_TOKEN. Re-run with `--no-pr` to skip pull request creation.'
-        )
-
-    if commit_hash is None:
-        head_commit = app.repo.git.latest_commit()
-        app.display_info(f'No commit specified. Current HEAD: `{head_commit.sha[:10]}` - {head_commit.subject}')
-        confirm_or_abort(app, 'Use this commit?', dry_run=dry_run)
-        commit_hash = head_commit.sha
-
-    try:
-        full_sha = _resolve_input(app, commit_hash, dry_run=dry_run)
-    except _CommitNotResolvable as exc:
-        app.abort(str(exc))
-
-    log_entries = app.repo.git.log(['hash:%H', 'subject:%s'], n=1, source=full_sha)
-    if not log_entries:
-        app.abort(f'Could not read commit `{full_sha}`.')
-    clean_subject, original_pr = split_commit_subject(log_entries[0]['subject'])
-
-    reset_files = [
-        line
-        for line in app.repo.git.capture('diff-tree', '--no-commit-id', '--name-only', '-r', full_sha).splitlines()
-        if is_reset_to_target(line)
-    ]
-    if reset_files:
-        listing = '\n  '.join(reset_files)
-        app.display_warning(
-            f'Commit touches {len(reset_files)} generated file(s) (`.in-toto` / `.deps/`); they will be '
-            f'preserved from `{target_branch}`:\n  {listing}'
-        )
-
+    """Assemble a `PortPlan` for an already-resolved commit and a single target branch."""
+    user = check_github_user(app)
     suffix = branch_suffix or f'to-{target_branch}'
     new_branch = f'{user}/{branch_prefix}-{full_sha[:10]}-{suffix}'.lower()
     owner, repo = resolve_owner_repo(app)
-    plan = PortPlan(
+    return PortPlan(
         full_sha=full_sha,
         clean_subject=clean_subject,
         original_pr=original_pr,
@@ -704,6 +732,58 @@ def resolve_port_plan(
         labels=parse_labels(pr_labels),
         draft=draft,
         create_pr=not no_pr,
+        verify=verify,
+        dry_run=dry_run,
+    )
+
+
+def resolve_port_plan(
+    app: Application,
+    *,
+    commit_hash: str | None,
+    target_branch: str,
+    branch_prefix: str,
+    branch_suffix: str | None,
+    pr_labels: str,
+    no_pr: bool,
+    draft: bool,
+    verify: bool,
+    dry_run: bool,
+) -> PortPlan:
+    """Validate inputs, resolve derived values, and confirm with the user. Aborts on failure."""
+    check_github_user(app)
+
+    if not no_pr and not dry_run and not app.config.github.token:
+        app.abort(
+            'No GitHub token configured. Set `github.token` via `ddev config set github.token <token>` '
+            'or export DD_GITHUB_TOKEN. Re-run with `--no-pr` to skip pull request creation.'
+        )
+
+    if commit_hash is None:
+        head_commit = app.repo.git.latest_commit()
+        app.display_info(f'No commit specified. Current HEAD: `{head_commit.sha[:10]}` - {head_commit.subject}')
+        confirm_or_abort(app, 'Use this commit?', dry_run=dry_run)
+        commit_hash = head_commit.sha
+
+    try:
+        full_sha = _resolve_input(app, commit_hash, dry_run=dry_run)
+    except _CommitNotResolvable as exc:
+        app.abort(str(exc))
+
+    clean_subject, original_pr = _read_commit_subject(app, full_sha)
+    _warn_about_reset_files(app, full_sha)
+
+    plan = build_port_plan(
+        app,
+        full_sha=full_sha,
+        clean_subject=clean_subject,
+        original_pr=original_pr,
+        target_branch=target_branch,
+        branch_prefix=branch_prefix,
+        branch_suffix=branch_suffix,
+        pr_labels=pr_labels,
+        no_pr=no_pr,
+        draft=draft,
         verify=verify,
         dry_run=dry_run,
     )
@@ -804,3 +884,173 @@ def build_port_steps(app: Application, plan: PortPlan) -> PortStepBundle:
         steps.append(pr_step)
     teardown = TeardownWorktreeStep(app, main_git=main_git, worktree_path=plan.worktree_path, dry_run=plan.dry_run)
     return PortStepBundle(steps=steps, pr_step=pr_step, teardown=teardown)
+
+
+@dataclass(frozen=True)
+class PortOutcome:
+    """Result of executing a single `PortPlan`. `error` is `None` on success."""
+
+    error: str | None
+    pr_url: str | None
+
+
+def execute_port_plan(app: Application, plan: PortPlan) -> PortOutcome:
+    """Run one resolved plan end to end without aborting.
+
+    On failure the worktree is left in place (with a warning) for inspection; on success it is torn
+    down. Returns the outcome so the caller decides whether to abort (single-commit path) or move on
+    to the next base (`--from-pr`).
+    """
+    bundle = build_port_steps(app, plan)
+    success = False
+    error_msg: str | None = None
+    try:
+        for step in bundle.steps:
+            step.run()
+        success = True
+    except PortStepError as e:
+        error_msg = str(e)
+    finally:
+        # If the PR was created before the failure (e.g. labeling failed afterwards), the worktree
+        # holds no recoverable state — the work is pushed and the PR exists on GitHub. Suppress the
+        # warning in that case to avoid a misleading "inspect the worktree" message.
+        pr_already_created = bundle.pr_step is not None and bundle.pr_step.pr_url is not None
+        if not success and not plan.dry_run and not pr_already_created:
+            app.display_warning(f'Worktree left at `{plan.worktree_path}` for inspection.')
+
+    pr_url = bundle.pr_step.pr_url if bundle.pr_step is not None else None
+    if error_msg is not None:
+        return PortOutcome(error=error_msg, pr_url=pr_url)
+
+    try:
+        bundle.teardown.run()
+    except PortStepError as e:
+        app.display_warning(f'Could not remove worktree at `{plan.worktree_path}`: {e}')
+        app.display_warning(f'Run `git worktree remove --force {plan.worktree_path}` to clean it up manually.')
+    return PortOutcome(error=None, pr_url=pr_url)
+
+
+def run_backport_from_pr(
+    app: Application,
+    *,
+    pr_number: int,
+    target_branch: str,
+    target_branch_explicit: bool,
+    branch_prefix: str,
+    branch_suffix: str | None,
+    pr_labels: str,
+    no_pr: bool,
+    draft: bool,
+    verify: bool,
+    dry_run: bool,
+) -> bool:
+    """Backport a merged PR to each of its `backport/<base>` labels.
+
+    Resolves the PR's squash-merge commit once, derives the target branches from its
+    `backport/<base>` labels (or the single `--target-branch` when one was given explicitly), and
+    ports to each. A base whose backport PR already exists in any state (open, merged, or closed) is
+    skipped so re-runs are idempotent. Returns True when every base succeeded or was skipped.
+    """
+    check_github_user(app)
+    if not app.config.github.token:
+        app.abort(
+            '`--from-pr` needs a GitHub token to read the pull request. Set `github.token` via '
+            '`ddev config set github.token <token>` or export DD_GITHUB_TOKEN.'
+        )
+
+    try:
+        pr, full_sha = _resolve_pr(app, pr_number, dry_run=dry_run)
+    except _PRNotFound:
+        app.abort(f'PR #{pr_number} not found.')
+    except _CommitNotResolvable as exc:
+        app.abort(str(exc))
+
+    bases = [target_branch] if target_branch_explicit else derive_backport_bases(pr)
+    if not bases:
+        app.display_warning(f'PR #{pr_number} has no `{BACKPORT_LABEL_PREFIX}<base>` labels; nothing to backport.')
+        return True
+
+    clean_subject, original_pr = _read_commit_subject(app, full_sha)
+    _warn_about_reset_files(app, full_sha)
+    owner, repo = resolve_owner_repo(app)
+    app.display_info(f'Backporting PR #{pr_number} (`{full_sha[:10]}` - {clean_subject}) to: {", ".join(bases)}')
+
+    results: list[tuple[str, str, str | None]] = []
+    for base in bases:
+        plan = build_port_plan(
+            app,
+            full_sha=full_sha,
+            clean_subject=clean_subject,
+            original_pr=original_pr,
+            target_branch=base,
+            branch_prefix=branch_prefix,
+            branch_suffix=branch_suffix,
+            pr_labels=pr_labels,
+            no_pr=no_pr,
+            draft=draft,
+            verify=verify,
+            dry_run=dry_run,
+        )
+        if not dry_run and _backport_pr_exists(app, owner, repo, plan.new_branch):
+            app.display_info(f'Backport to `{base}` already has a PR (branch `{plan.new_branch}`); skipping.')
+            results.append((base, 'skipped', None))
+            continue
+
+        app.output(Text(f'Backporting to `{base}`', style='bold'), stderr=True)
+        outcome = execute_port_plan(app, plan)
+        if outcome.error is None:
+            results.append((base, 'ported', outcome.pr_url))
+        else:
+            app.display_error(f'Backport to `{base}` failed: {outcome.error}')
+            results.append((base, 'failed', outcome.error))
+
+    _display_backport_summary(app, pr_number, results)
+    return all(status != 'failed' for _, status, _ in results)
+
+
+def _backport_pr_exists(app: Application, owner: str, repo: str, branch: str) -> bool:
+    """Whether a backport PR (any state) already exists for the deterministic `branch`.
+
+    Checks `state=all` so an already-merged backport (whose head branch GitHub deleted) still counts,
+    keeping re-runs idempotent. A stale branch from a failed run that never opened a PR is not
+    detected here; that surfaces later as a loud non-fast-forward push failure for the operator to
+    resolve, rather than a silent branch deletion.
+    """
+    import asyncio
+
+    import httpx
+    from pydantic import ValidationError
+
+    try:
+        exists = asyncio.run(_any_pr_for_head(app.config.github.token, owner, repo, branch))
+    except (httpx.HTTPError, ValidationError) as exc:
+        app.abort(f'Failed to check for an existing backport PR on `{branch}`: {exc}.')
+    return exists
+
+
+async def _any_pr_for_head(token: str, owner: str, repo: str, branch: str) -> bool:
+    from ddev.utils.github_async import async_github_client
+
+    async with async_github_client(token=token) as client:
+        response = await client.list_pull_requests(owner=owner, repo=repo, state='all', head=f'{owner}:{branch}')
+        return len(response.data) > 0
+
+
+def _display_backport_summary(app: Application, pr_number: int, results: list[tuple[str, str, str | None]]) -> None:
+    """Print a panel summarising the per-base backport outcomes."""
+    icons = {'ported': '✅', 'skipped': '⏭️', 'failed': '❌'}
+    rows: list[tuple[str, str]] = []
+    for base, status, detail in results:
+        label = f'{icons.get(status, "")} {status}'.strip()
+        if detail:
+            label = f'{label} - {detail}'
+        rows.append((base, label))
+    app.output(
+        Panel(
+            app.labeled_lines(rows),
+            title=f'Backport summary for PR #{pr_number}',
+            title_align='left',
+            border_style='cyan',
+        ),
+        stderr=True,
+    )

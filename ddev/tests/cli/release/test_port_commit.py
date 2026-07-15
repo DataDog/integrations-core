@@ -19,12 +19,13 @@ from ddev.cli.release.port_commit_workflow import (
     SetupWorktreeStep,
     TeardownWorktreeStep,
     build_pr_body,
+    derive_backport_bases,
     is_reset_to_target,
     parse_labels,
     split_commit_subject,
 )
 from ddev.utils.git import GitCommit
-from ddev.utils.github_async.models import PullRequest
+from ddev.utils.github_async.models import Label, PullRequest
 from tests.helpers.github_async import FakeAsyncGitHubClient
 from tests.helpers.runner import CliRunner
 
@@ -426,13 +427,20 @@ def _setup_command_mocks(
     return run_mock
 
 
-def _merged_pr(number=23703, merge_commit_sha=None):
-    """Build a PullRequest model for a squash-merged PR."""
+def _merged_pr(number=23703, merge_commit_sha=None, backport_bases=(), extra_labels=()):
+    """Build a PullRequest model for a squash-merged PR.
+
+    `backport_bases` become `backport/<base>` labels; `extra_labels` are added verbatim so a test
+    can prove non-backport labels are ignored.
+    """
+    names = [f'backport/{base}' for base in backport_bases] + list(extra_labels)
+    labels = [Label(id=idx, name=name) for idx, name in enumerate(names, start=1)]
     return PullRequest(
         number=number,
         html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
         merged=True,
         merge_commit_sha=merge_commit_sha or FULL_SHA_FOR_TESTS,
+        labels=labels,
     )
 
 
@@ -999,3 +1007,169 @@ def test_command_includes_worktree_path_in_dry_run_output(
     assert StdPath('.worktrees/port-commit/alice-port-1234567890-to-master').as_posix() in result.output.replace(
         '\\', '/'
     )
+
+
+@pytest.mark.parametrize(
+    'label_names,expected',
+    [
+        pytest.param(['backport/7.62.x', 'backport/7.61.x'], ['7.62.x', '7.61.x'], id='multiple-in-order'),
+        pytest.param(['qa/skip-qa', 'backport/7.62.x', 'bug'], ['7.62.x'], id='ignores-non-backport'),
+        pytest.param(['qa/skip-qa', 'bug'], [], id='no-backport-labels'),
+        pytest.param([], [], id='no-labels'),
+        pytest.param(['backport/7.62.x', 'backport/7.62.x'], ['7.62.x'], id='de-duplicated'),
+        pytest.param(['backport/'], [], id='empty-base-skipped'),
+    ],
+)
+def test_derive_backport_bases(label_names: list[str], expected: list[str]) -> None:
+    pr = PullRequest(
+        number=1,
+        html_url='https://github.com/DataDog/integrations-core/pull/1',
+        labels=[Label(id=idx, name=name) for idx, name in enumerate(label_names, start=1)],
+    )
+    assert derive_backport_bases(pr) == expected
+
+
+def test_command_from_pr_ports_every_backport_label(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x'], extra_labels=['qa/skip-qa']),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 0, result.output
+    bases = [c.kwargs['base'] for c in fake_async_github.calls_to('create_pull_request')]
+    assert bases == ['7.62.x', '7.61.x']
+    heads = [c.kwargs['head'] for c in fake_async_github.calls_to('create_pull_request')]
+    assert heads == ['alice/port-1234567890-to-7.62.x', 'alice/port-1234567890-to-7.61.x']
+
+
+def test_command_from_pr_explicit_target_restricts_to_one_base(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """An explicit --target-branch overrides the PR's labels and ports to that single base."""
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703', '--target-branch', '7.55.x')
+
+    assert result.exit_code == 0, result.output
+    bases = [c.kwargs['base'] for c in fake_async_github.calls_to('create_pull_request')]
+    assert bases == ['7.55.x']
+
+
+def test_command_from_pr_skips_base_with_existing_pr(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A base whose deterministic branch already has a PR (any state) is skipped, keeping re-runs idempotent."""
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    fake_async_github.mock_response(
+        'list_pull_requests',
+        [_merged_pr(number=999)],
+        head='DataDog:alice/port-1234567890-to-7.62.x',
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 0, result.output
+    assert 'already has a PR' in result.output
+    bases = [c.kwargs['base'] for c in fake_async_github.calls_to('create_pull_request')]
+    assert bases == ['7.61.x']
+
+
+def test_command_from_pr_aggregates_failures_and_continues(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """One base failing does not stop the others, and the command exits non-zero overall."""
+    import httpx
+
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    fake_async_github.mock_response(
+        'create_pull_request',
+        httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500)),
+        base='7.62.x',
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'Backport to `7.62.x` failed' in result.output
+    assert 'One or more backports failed' in result.output
+    bases = [c.kwargs['base'] for c in fake_async_github.calls_to('create_pull_request')]
+    assert bases == ['7.62.x', '7.61.x']
+
+
+def test_command_from_pr_no_backport_labels_is_a_noop(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, extra_labels=['qa/skip-qa']),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 0, result.output
+    assert 'nothing to backport' in result.output
+    fake_async_github.assert_not_called('create_pull_request')
+
+
+def test_command_from_pr_and_commit_are_mutually_exclusive(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '1234567890abcdef00', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'Pass either COMMIT_OR_PR or --from-pr, not both.' in result.output
+    fake_async_github.assert_not_called('get_pull_request')
+
+
+def test_command_from_pr_requires_token(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    mocker.patch.dict(
+        'os.environ',
+        {'DD_GITHUB_USER': 'alice', 'DD_GITHUB_TOKEN': '', 'GH_TOKEN': '', 'GITHUB_TOKEN': ''},
+    )
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    assert '`--from-pr` needs a GitHub token' in result.output
+    fake_async_github.assert_not_called('get_pull_request')
+
+
+def test_command_from_pr_aborts_when_pr_not_found(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """The default get_pull_request mock is a 404, so the lookup surfaces a clear not-found abort."""
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'PR #23703 not found.' in result.output
+    fake_async_github.assert_not_called('create_pull_request')

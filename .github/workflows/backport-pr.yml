@@ -6,14 +6,12 @@ on:
       - labeled
 
 jobs:
-  backport:
-    name: Backport PR
+  check:
+    name: Check for backport labels
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write  # OIDC token federation with dd-octo-sts
-      # Writes use the scoped octo-sts token; ambient GITHUB_TOKEN stays read-only (pull_request_target).
-      contents: read
-      pull-requests: read
+    # Cheap event filter: only merged PRs, and only the `closed` event or a freshly-added
+    # `backport/*` label. `should_run` below is the label-presence semaphore that gates the
+    # expensive backport job.
     if: >
       github.event.pull_request.merged
       && (
@@ -23,6 +21,33 @@ jobs:
           && startsWith(github.event.label.name, 'backport/')
         )
       )
+    permissions:
+      contents: read
+    outputs:
+      should_run: ${{ steps.gate.outputs.should_run }}
+    steps:
+      - name: Detect backport labels
+        id: gate
+        env:
+          PR_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          set -euo pipefail
+          if printf '%s' "${PR_LABELS_JSON}" | jq -e 'any(.[]; startswith("backport/"))' >/dev/null; then
+            echo "should_run=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "should_run=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+  backport:
+    name: Backport PR
+    needs: check
+    if: needs.check.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # OIDC token federation with dd-octo-sts
+      # Writes use the scoped octo-sts token; ambient GITHUB_TOKEN stays read-only (pull_request_target).
+      contents: read
+      pull-requests: read
     steps:
       - name: Get GitHub token via dd-octo-sts
         uses: DataDog/dd-octo-sts-action@acaa02eee7e3bb0839e4272dacb37b8f3b58ba80 # v1.0.3
@@ -34,7 +59,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          # Full history reaches the merged commit and release branches; octo-sts token authenticates the push.
+          # Full history reaches the merged commit and every release branch; octo-sts token authenticates the push.
           fetch-depth: 0
           token: ${{ steps.octo-sts.outputs.token }}
 
@@ -52,92 +77,20 @@ jobs:
       - name: Configure ddev
         run: |
           ddev config set upgrade_check false
-          ddev config set repos.core .
-          ddev config set repo core
+          ddev config override
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "dd-agent-integrations-bot[bot]"
+          git config --global user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
 
       - name: Backport merged PR to labelled branches
         env:
-          EVENT_ACTION: ${{ github.event.action }}
-          LABEL_NAME: ${{ github.event.label.name }}
-          PR_LABELS_JSON: ${{ toJSON(github.event.pull_request.labels.*.name) }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
-          REPO: ${{ github.repository }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           # ddev reads the token/user from these; the same token authenticates git push via checkout.
           DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           DD_GITHUB_USER: dd-agent-integrations-bot
         run: |
-          set -euo pipefail
-
-          # Best-effort PR comment; a comment failure must never fail the backport.
-          comment_pr() { gh pr comment "${PR_NUMBER}" --repo "${REPO}" --body "$1" || true; }
-
-          if [ -z "${MERGE_SHA}" ]; then
-            echo "::error::merge_commit_sha is empty; cannot backport."
-            exit 1
-          fi
-
-          # Target branches come from backport/<base> labels: only the new one on `labeled`, all of them on `closed`.
-          bases=()
-          if [ "${EVENT_ACTION}" = "labeled" ]; then
-            case "${LABEL_NAME}" in
-              backport/*) bases+=("${LABEL_NAME#backport/}") ;;
-              *) echo "Label '${LABEL_NAME}' is not a backport label; nothing to do."; exit 0 ;;
-            esac
-          else
-            while IFS= read -r base; do
-              [ -n "${base}" ] && bases+=("${base}")
-            done < <(printf '%s' "${PR_LABELS_JSON}" | jq -r '.[] | select(startswith("backport/")) | ltrimstr("backport/")')
-          fi
-
-          if [ "${#bases[@]}" -eq 0 ]; then
-            echo "No backport/* labels to process."
-            exit 0
-          fi
-
-          git config --global user.name "dd-agent-integrations-bot[bot]"
-          git config --global user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
-
-          sha10="${MERGE_SHA:0:10}"
-          overall_rc=0
-          for base in "${bases[@]}"; do
-            # Mirror port-commit's branch naming so we can detect an existing backport before doing work.
-            branch="$(printf '%s' "${DD_GITHUB_USER}/backport-${sha10}-to-${base}" | tr '[:upper:]' '[:lower:]')"
-
-            # Only an OPEN backport PR is detected. A branch left by a failed prior run (no open PR) is not
-            # auto-cleaned; port-commit's push then fails non-fast-forward until the stale branch is deleted manually.
-            if [ -n "$(gh pr list --repo "${REPO}" --head "${branch}" --state open --json number --jq '.[].number')" ]; then
-              echo "::notice::Backport to ${base} already has an open PR (branch ${branch}); skipping."
-              continue
-            fi
-
-            # Ensure origin/<base> exists locally for the worktree; a missing branch fails just this base, not the run.
-            if ! git fetch --no-tags origin "+refs/heads/${base}:refs/remotes/origin/${base}"; then
-              echo "::error::Target branch ${base} does not exist on origin; skipping."
-              comment_pr "⚠️ Automatic backport to \`${base}\` skipped: the target branch does not exist."
-              overall_rc=1
-              continue
-            fi
-
-            echo "::group::Backport #${PR_NUMBER} to ${base}"
-            # Pass the merge SHA we already have rather than PR-<n>, which would round-trip via the API back to this commit.
-            if ddev --no-interactive release port-commit "${MERGE_SHA}" \
-                 --target-branch "${base}" \
-                 --branch-prefix backport \
-                 --pr-labels "backport,bot"; then
-              pr_url="$(gh pr list --repo "${REPO}" --head "${branch}" --state open --json url --jq '.[0].url // ""' || true)"
-              echo "::notice::Opened backport PR for ${base}: ${pr_url}"
-              if [ -n "${pr_url}" ]; then
-                comment_pr "Backport to \`${base}\` opened: ${pr_url}"
-              fi
-            else
-              echo "::error::Backport to ${base} failed."
-              comment_pr "⚠️ Automatic backport to \`${base}\` failed. See the [workflow run](${RUN_URL}) for details, or backport manually with \`ddev release port-commit PR-${PR_NUMBER} --target-branch ${base}\`. If the push was rejected as non-fast-forward, delete the stale \`${branch}\` branch and retry."
-              overall_rc=1
-            fi
-            echo "::endgroup::"
-          done
-
-          exit "${overall_rc}"
+          ddev --no-interactive release port-commit --from-pr "${{ github.event.pull_request.number }}" \
+            --branch-prefix backport \
+            --pr-labels backport,bot
