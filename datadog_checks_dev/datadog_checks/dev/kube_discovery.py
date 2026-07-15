@@ -1,17 +1,22 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Kubernetes/Kubelet Autodiscovery e2e helpers, parallel to :mod:`.docker`.
+"""Helpers for testing Agent Autodiscovery against Kubernetes pods.
 
-Exercises real Kubelet Autodiscovery inside a ``kind`` cluster by running ``agent check`` through
-``kubectl exec`` against a sleeping, RBAC-scoped Agent pod, rather than a normal long-running Agent.
-There is no Kubernetes equivalent of ``mount_logs``/``shared_logs()`` here: there is no host
-bind-mount channel into a cluster pod.
+Docker E2E tests can start a container and run a check from the host. Kubernetes
+Autodiscovery has to be tested from inside the cluster instead: the Agent needs a Kubernetes service
+account, pod networking, and access to the kubelet on the node where it is running.
 
-The agent pod is pinned to its own node (see the ``DD_KUBERNETES_KUBELET_HOST``/``NODENAME`` env
-vars in ``build_agent_pod_manifest``), matching real Kubelet-AD semantics: it only sees pods
-scheduled on that same node. This assumes a single-node ``kind`` cluster, or that discovery targets
-are pinned to the same node as the agent pod.
+This module creates a minimal Agent pod in a ``kind`` cluster. The container only sleeps during
+setup; tests later run one-shot ``agent check`` commands inside it with ``kubectl exec``. That keeps
+the environment small while still using the Agent's real Kubernetes discovery code.
+
+Unlike the Docker helpers, this module cannot share a host log directory with the workload. The
+tests read Kubernetes pod logs with ``kubectl logs`` instead.
+
+Kubelet Autodiscovery is node-local. A node Agent asks the kubelet on its own node which pods are
+running there, then resolves integration templates for those pods. These helpers therefore assume a
+single-node ``kind`` cluster, or a test workload scheduled on the same node as the helper Agent pod.
 """
 
 import json
@@ -66,19 +71,20 @@ def setup_discovery_agent(
     agent_image: str = DEFAULT_AGENT_IMAGE,
     extra_cluster_roles: Sequence[str] = (),
 ) -> None:
-    """Deploy a sleeping, RBAC-scoped Agent pod that ``run_discovery_check_kubernetes`` can exec into.
+    """Create the helper Agent pod used by Kubernetes Autodiscovery E2E tests.
 
-    Call this inside the integration's existing ``kind_run(...)`` block, while ``KUBECONFIG`` still
-    points at the freshly created cluster. Also persists the kubeconfig path and agent namespace for
-    ``run_discovery_check_kubernetes``/``assert_all_discovery_candidates_stable_kubernetes`` to pick up.
-    A no-op outside the actual environment setup pass, matching how ``KindUp``/``ComposeFileUp``/
-    ``PortForwardUp`` behave: ``env test``/``env stop`` re-run the fixture body to reach ``kind_run``'s
-    teardown, but ``KUBECONFIG`` isn't guaranteed to resolve to a live cluster at that point, and this
-    must not re-derive or overwrite the persisted state.
+    Call this from the integration's ``kind_run(...)`` block while ``KUBECONFIG`` points at the
+    newly created test cluster. The setup pass stores that kubeconfig path and the helper namespace
+    so later test helpers can find the pod again.
 
-    ``extra_cluster_roles`` binds additional, already-existing ``ClusterRole``\\ s (e.g. a
-    CRD-provided ``view`` role like KubeVirt's ``kubevirt.io:view``) to the agent's service account,
-    for checks whose production setup docs require binding such a role to the real ``datadog-agent``
+    ``ddev env`` executes environment fixtures in more than one phase. The setup phase creates the
+    cluster, while later test and stop phases re-enter the same fixture body to run tests or tear the
+    cluster down. During those later phases, ``KUBECONFIG`` may no longer point at a usable cluster,
+    so this function returns immediately unless the current phase is allowed to create resources.
+
+    ``extra_cluster_roles`` is for checks whose Kubernetes setup docs tell users to bind an existing
+    ``ClusterRole`` to the Datadog Agent service account. For example, a CRD may install its own
+    read-only role. This helper does not create those roles; it only binds them to the test Agent's
     service account.
     """
     if not set_up_env():
@@ -87,9 +93,9 @@ def setup_discovery_agent(
     check_root = os.fspath(check_root or find_check_root(depth=1))
     check_name = os.path.basename(check_root)
 
-    # The pod stays asleep; tests exec one-shot Agent commands into it after setup.
+    # The pod is only a place to run commands. It does not start the long-running Agent daemon.
     with tempfile.TemporaryDirectory() as manifest_dir:
-        # RBAC mirrors the minimum resources Kubelet AD needs to resolve node and pod data.
+        # Apply manifests in dependency order so the pod can mount its config and use its service account.
         apply_manifests(kubeconfig_path, build_rbac_manifests(namespace), manifest_dir, 'rbac.yaml')
         if extra_cluster_roles:
             apply_manifests(
@@ -98,9 +104,11 @@ def setup_discovery_agent(
                 manifest_dir,
                 'extra-rbac.yaml',
             )
-        # `agent check` uses read-only IPC auth today, so mount the expected files up front.
+        # `agent check` initializes the Agent's local inter-process communication client. That client
+        # expects an auth token and TLS certificate on disk. A normal Agent daemon creates those files
+        # on startup, but this container only sleeps, so provide them through a Secret.
         apply_manifests(kubeconfig_path, [build_ipc_secret_manifest(namespace)], manifest_dir, 'secret.yaml')
-        # The real Agent file provider expects integration templates under conf.d/<check>.d.
+        # Mount the check's bundled Autodiscovery template where the Agent's file provider expects it.
         apply_manifests(
             kubeconfig_path,
             [build_auto_conf_configmap_manifest(namespace, check_root, check_name)],
@@ -118,7 +126,7 @@ def setup_discovery_agent(
         kubeconfig_path, ['wait', 'pod', AGENT_POD_NAME, '-n', namespace, '--for=condition=Ready', '--timeout=120s']
     )
 
-    # Install the local worktree into the Agent's embedded Python before running checks.
+    # Install the checkout under test, not the version already baked into the Agent image.
     install_local_package(kubeconfig_path, namespace, check_root, check_name)
 
     save_state('kube_discovery', {'kubeconfig_path': os.fspath(kubeconfig_path), 'namespace': namespace})
@@ -133,7 +141,12 @@ def run_discovery_check_kubernetes(
     discovery_timeout: int = 30,
     **flags: Any,
 ) -> Any:
-    """The Kubelet-AD analog of ``dd_agent_check_discovery``: run ``agent check`` inside the agent pod."""
+    """Run ``agent check`` in the helper pod and replay its JSON output into the test aggregator.
+
+    The command runs inside Kubernetes so the Agent discovers pods through the kubelet just as it
+    would in a real DaemonSet. ``discovery_min_instances`` and ``discovery_timeout`` control how long
+    the command waits for Autodiscovery to resolve the check template into runnable instances.
+    """
     if not e2e_testing():
         pytest.skip('Not running E2E tests')
 
@@ -173,12 +186,16 @@ def assert_all_discovery_candidates_stable_kubernetes(
     service_id: str | None = None,
     log_patterns: Sequence[str] = CONTAINER_STABILITY_LOG_PATTERNS,
 ) -> None:
-    """Structural mirror of ``docker.assert_all_discovery_candidates_stable`` for a Kubernetes workload pod.
+    """Check that generated configs can probe a Kubernetes workload without disturbing it.
 
-    ``namespace``/``pod_name``/``pod_selector`` identify the workload pod being monitored, not the
-    agent pod created by ``setup_discovery_agent``. Candidates are probed by copying each generated
-    config into the agent pod and running ``agent check --config-file`` against it there, exercising
-    real in-cluster reachability from the agent to the workload pod IP.
+    ``namespace``, ``pod_name``, and ``pod_selector`` identify the workload pod being monitored, not
+    the helper Agent pod. The function builds the same service shape that Autodiscovery gives to
+    ``check_cls.generate_configs``: pod IP plus declared container ports.
+
+    Each generated config is copied into the helper Agent pod and run with ``agent check
+    --config-file``. That deliberately bypasses template resolution so this test focuses on the
+    generated config itself: whether it can reach the workload from inside the cluster, and whether
+    trying it causes the workload pod to restart or log dangerous errors.
     """
     if not pod_name and not pod_selector:
         raise TypeError('Either pod_name or pod_selector must be provided.')
@@ -191,7 +208,7 @@ def assert_all_discovery_candidates_stable_kubernetes(
     check_name = os.path.basename(find_check_root(depth=1))
 
     pod_name = pod_name or resolve_pod_name(kubeconfig_path, namespace, pod_selector)
-    # Capture a baseline before probing generated configs; candidates must not disturb the workload pod.
+    # Capture the workload state before any probe so each candidate can be checked for side effects.
     initial_state = get_pod(kubeconfig_path, namespace, pod_name)
     previous_logs = get_pod_logs(kubeconfig_path, namespace, pod_name)
 
@@ -203,10 +220,11 @@ def assert_all_discovery_candidates_stable_kubernetes(
     for index, candidate in enumerate(candidates, 1):
         logging.debug('Probing candidate #%d: %r', index, candidate)
         try:
-            # Probe as a static config so this check validates generated candidates, not AD resolution.
+            # Run the generated config directly; discovery already happened when generate_configs ran.
             probe_candidate(state, check_name, candidate, aggregator, datadog_agent)
         except Exception:
-            # Even a failing candidate should still be checked for restarts or dangerous log output.
+            # The failed check may still have contacted the workload before erroring.
+            # Verify that the workload pod stayed healthy before trying the next config.
             logging.debug('Error probing candidate #%d: %r', index, candidate, exc_info=True)
 
         current_state = get_pod(kubeconfig_path, namespace, pod_name)
@@ -217,6 +235,7 @@ def assert_all_discovery_candidates_stable_kubernetes(
 
 
 def get_kube_discovery_state() -> dict[str, Any]:
+    """Return the helper pod location saved by ``setup_discovery_agent``."""
     state = get_state('kube_discovery')
     if not state:
         raise AssertionError('No kube_discovery state found. Call setup_discovery_agent() during setup.')
@@ -233,6 +252,7 @@ def replay_collector_output(output: str, aggregator: Any, datadog_agent: Any) ->
 
 
 def run_kubectl(kubeconfig_path: str | os.PathLike[str], args: list[str], **kwargs: Any) -> Any:
+    """Run ``kubectl`` against the cluster created during the setup phase."""
     env = os.environ.copy()
     env['KUBECONFIG'] = os.fspath(kubeconfig_path)
     kwargs.setdefault('check', True)
@@ -240,12 +260,14 @@ def run_kubectl(kubeconfig_path: str | os.PathLike[str], args: list[str], **kwar
 
 
 def exec_agent_pod(kubeconfig_path: str | os.PathLike[str], namespace: str, command: list[str], **kwargs: Any) -> Any:
+    """Run a command inside the sleeping helper Agent container."""
     return run_kubectl(kubeconfig_path, ['exec', AGENT_POD_NAME, '-n', namespace, '--', *command], **kwargs)
 
 
 def apply_manifests(
     kubeconfig_path: str | os.PathLike[str], manifests: list[dict[str, Any]], manifest_dir: str, filename: str
 ) -> None:
+    """Write Kubernetes objects to a temporary YAML file and apply them."""
     manifest_path = os.path.join(manifest_dir, filename)
     with open(manifest_path, 'w', encoding='utf-8') as f:
         yaml.dump_all(manifests, f)
@@ -254,6 +276,7 @@ def apply_manifests(
 
 
 def build_rbac_manifests(namespace: str) -> list[dict[str, Any]]:
+    """Build the namespace, service account, and Kubernetes permissions for the helper Agent."""
     return [
         {'apiVersion': 'v1', 'kind': 'Namespace', 'metadata': {'name': namespace}},
         {
@@ -265,6 +288,8 @@ def build_rbac_manifests(namespace: str) -> list[dict[str, Any]]:
             'apiVersion': 'rbac.authorization.k8s.io/v1',
             'kind': 'ClusterRole',
             'metadata': {'name': AGENT_CLUSTER_ROLE},
+            # The Agent lists pods, endpoints, and services to find targets. It also reads kubelet
+            # data through Kubernetes node resources, which is how it discovers pods on its own node.
             'rules': [
                 {'apiGroups': [''], 'resources': ['nodes'], 'verbs': ['get', 'list', 'watch']},
                 {
@@ -290,6 +315,7 @@ def build_rbac_manifests(namespace: str) -> list[dict[str, Any]]:
 
 
 def build_extra_cluster_role_binding_manifests(namespace: str, cluster_roles: Sequence[str]) -> list[dict[str, Any]]:
+    """Bind caller-provided ClusterRoles to the helper Agent service account."""
     return [
         {
             'apiVersion': 'rbac.authorization.k8s.io/v1',
@@ -307,7 +333,8 @@ def build_extra_cluster_role_binding_manifests(namespace: str, cluster_roles: Se
 
 
 def build_ipc_secret_manifest(namespace: str) -> dict[str, Any]:
-    # The sleeping pod never runs `agent run`, so it cannot create these auth artifacts itself.
+    """Build the Secret that provides the Agent's local communication auth files."""
+    # The sleeping pod never runs the Agent daemon, so it cannot create these files itself.
     return {
         'apiVersion': 'v1',
         'kind': 'Secret',
@@ -325,6 +352,7 @@ def generate_auth_token() -> str:
 
 
 def generate_ipc_cert_pem() -> str:
+    """Generate the certificate and private key format expected by the Agent IPC loader."""
     from cryptography import x509
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.asymmetric import ec
@@ -344,8 +372,8 @@ def generate_ipc_cert_pem() -> str:
         .sign(key, hashes.SHA256())
     )
 
-    # A certificate followed immediately by an SEC1 `EC PRIVATE KEY` (no `EC PARAMETERS` block):
-    # an `EC PARAMETERS` block makes the Agent's IPC component fail with a PEM decode error.
+    # The Agent expects the certificate followed immediately by an `EC PRIVATE KEY` block.
+    # If the PEM includes a separate `EC PARAMETERS` block, the Agent fails to decode it.
     cert_pem = cert.public_bytes(serialization.Encoding.PEM)
     key_pem = key.private_bytes(
         encoding=serialization.Encoding.PEM,
@@ -356,6 +384,7 @@ def generate_ipc_cert_pem() -> str:
 
 
 def build_auto_conf_configmap_manifest(namespace: str, check_root: str, check_name: str) -> dict[str, Any]:
+    """Build the ConfigMap containing the check's bundled Kubernetes Autodiscovery template."""
     auto_conf_path = os.path.join(check_root, 'datadog_checks', check_name, 'data', 'auto_conf.yaml')
     with open(auto_conf_path, encoding='utf-8') as f:
         auto_conf_contents = f.read()
@@ -369,6 +398,7 @@ def build_auto_conf_configmap_manifest(namespace: str, check_root: str, check_na
 
 
 def build_agent_pod_manifest(namespace: str, check_name: str, agent_image: str) -> dict[str, Any]:
+    """Build the sleeping Agent pod that later receives ``kubectl exec`` commands."""
     config_mount_path = f'/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml'
 
     return {
@@ -384,17 +414,20 @@ def build_agent_pod_manifest(namespace: str, check_name: str, agent_image: str) 
                     'image': agent_image,
                     'imagePullPolicy': 'Always',
                     'command': ['sleep', 'infinity'],
+                    # These settings give one-shot `agent check` enough of a normal Agent
+                    # environment to load Kubernetes templates and talk to the local kubelet.
                     'env': [
                         {'name': 'DD_API_KEY', 'value': FAKE_API_KEY},
                         {'name': 'DD_HOSTNAME', 'value': AGENT_POD_NAME},
                         {'name': 'DD_APM_ENABLED', 'value': 'false'},
+                        # Let the Agent enable Kubernetes Autodiscovery from its pod environment.
                         {'name': 'DD_AUTOCONFIG_FROM_ENVIRONMENT', 'value': 'true'},
                         {'name': 'DD_AUTH_TOKEN_FILE_PATH', 'value': AGENT_AUTH_TOKEN_PATH},
                         {'name': 'DD_IPC_CERT_FILE_PATH', 'value': AGENT_IPC_CERT_PATH},
-                        # DD_KUBERNETES_KUBELET_HOST (below) reaches the local kubelet at status.hostIP.
-                        # kind issues kubelet certs for the node name (e.g. kind-control-plane), not
-                        # that IP, so TLS verification would fail without this.
+                        # In kind, status.hostIP reaches the local kubelet, but the kubelet
+                        # certificate is issued for the node name instead of that IP address.
                         {'name': 'DD_KUBELET_TLS_VERIFY', 'value': 'false'},
+                        # The Downward API fills these from the node running this helper pod.
                         {
                             'name': 'DD_KUBERNETES_KUBELET_HOST',
                             'valueFrom': {'fieldRef': {'fieldPath': 'status.hostIP'}},
@@ -422,6 +455,7 @@ def build_agent_pod_manifest(namespace: str, check_name: str, agent_image: str) 
 def install_local_package(
     kubeconfig_path: str | os.PathLike[str], namespace: str, check_root: str, check_name: str
 ) -> None:
+    """Copy the local integration into the helper pod and install it editable."""
     remote_dir = f'{AGENT_PACKAGE_MOUNT_DIR}/{check_name}'
 
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -444,8 +478,10 @@ def install_local_package(
 
 
 def build_check_archive(check_root: str, archive_path: str) -> None:
+    """Create a small archive of the integration checkout for ``kubectl cp``."""
+
     def exclude_filter(tarinfo: tarfile.TarInfo) -> tarfile.TarInfo | None:
-        # Keep the upload small and avoid copying host-local cache state into the Agent pod.
+        # Keep the upload small and avoid copying host-only cache state into the Agent pod.
         if any(part in EXCLUDED_ARCHIVE_DIR_NAMES for part in tarinfo.name.split('/')):
             return None
         return tarinfo
@@ -455,6 +491,7 @@ def build_check_archive(check_root: str, archive_path: str) -> None:
 
 
 def resolve_pod_name(kubeconfig_path: str | os.PathLike[str], namespace: str, pod_selector: str) -> str:
+    """Resolve a pod selector to the first matching pod name."""
     result = run_kubectl(
         kubeconfig_path,
         ['get', 'pods', '-n', namespace, '-l', pod_selector, '-o', 'jsonpath={.items[0].metadata.name}'],
@@ -468,23 +505,26 @@ def resolve_pod_name(kubeconfig_path: str | os.PathLike[str], namespace: str, po
 
 
 def get_pod(kubeconfig_path: str | os.PathLike[str], namespace: str, pod_name: str) -> dict[str, Any]:
+    """Fetch the current Kubernetes Pod object."""
     result = run_kubectl(kubeconfig_path, ['get', 'pod', pod_name, '-n', namespace, '-o', 'json'], capture='out')
     return json.loads(result.stdout)
 
 
 def get_pod_logs(kubeconfig_path: str | os.PathLike[str], namespace: str, pod_name: str) -> str:
+    """Fetch pod logs without failing when the pod is already unhealthy."""
     result = run_kubectl(kubeconfig_path, ['logs', pod_name, '-n', namespace], capture=True, check=False)
     return result.stdout + result.stderr
 
 
 def build_service_from_pod(pod_state: dict[str, Any], service_id: str) -> Any:
+    """Convert a Pod object into the service shape expected by ``generate_configs``."""
     host = pod_state['status']['podIP']
     ports = []
     seen_numbers = set()
     for container in pod_state['spec']['containers']:
         for port_spec in container.get('ports', []):
             number = port_spec['containerPort']
-            # Discovery services model pod-level reachability, so duplicate container ports collapse.
+            # The Agent connects to a pod IP and port number, so the same port on two containers is one endpoint.
             if number in seen_numbers:
                 continue
             seen_numbers.add(number)
@@ -496,6 +536,7 @@ def build_service_from_pod(pod_state: dict[str, Any], service_id: str) -> Any:
 def probe_candidate(
     state: dict[str, Any], check_name: str, candidate: dict[str, Any], aggregator: Any, datadog_agent: Any
 ) -> None:
+    """Run one generated config from inside the helper Agent pod."""
     kubeconfig_path = state['kubeconfig_path']
     namespace = state['namespace']
     remote_config_path = f'/tmp/{check_name}-candidate.json'
@@ -519,6 +560,7 @@ def probe_candidate(
 
 
 def assert_pod_stable(initial_state: dict[str, Any], current_state: dict[str, Any], candidate_index: int) -> None:
+    """Fail if probing a candidate changed the workload pod's health."""
     initial_uid = initial_state['metadata']['uid']
     current_uid = current_state['metadata']['uid']
     if current_uid != initial_uid:
