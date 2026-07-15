@@ -18,6 +18,7 @@ from ddev.ai.config.registry import BrokenEntry, ResourceKind, ValidEntry
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from ddev.ai.agent.registry import AgentProviderRegistry
     from ddev.ai.config.loading.files import LoadedFile
     from ddev.ai.config.registry import Entry
 
@@ -55,8 +56,10 @@ def meta_without(meta: dict[str, Any], *keys: str) -> dict[str, Any]:
     return {k: v for k, v in meta.items() if k not in keys}
 
 
-def _build_agent(loaded: MarkdownFile) -> AgentConfig:
-    return AgentConfig(**meta_without(loaded.meta, "type", "name"), system_prompt=loaded.body)
+def _build_agent(loaded: MarkdownFile, provider_registry: AgentProviderRegistry) -> AgentConfig:
+    data = meta_without(loaded.meta, "type", "name")
+    data["system_prompt"] = loaded.body
+    return AgentConfig.model_validate(data, context={"provider_registry": provider_registry})
 
 
 def _build_body(loaded: MarkdownFile) -> str:
@@ -65,14 +68,17 @@ def _build_body(loaded: MarkdownFile) -> str:
 
 # Each body-bearing markdown kind maps to the builder that turns its file into a config.
 MARKDOWN_BUILDERS: dict[ResourceKind, Callable[[MarkdownFile], Any]] = {
-    ResourceKind.AGENT: _build_agent,
     ResourceKind.PROMPT: _build_body,
     ResourceKind.GOAL: _build_body,
     ResourceKind.MEMORY_PROMPT: _build_body,
 }
 
 
-def classify(loaded: LoadedFile) -> ClassifyOutput:
+def classify(
+    loaded: LoadedFile,
+    *,
+    provider_registry: AgentProviderRegistry,
+) -> ClassifyOutput:
     """Turn one loaded file into zero or more identity-carrying entries.
 
     Driven by the type table: a resource's kind comes from its ``type`` tag, the format
@@ -80,11 +86,14 @@ def classify(loaded: LoadedFile) -> ClassifyOutput:
     and cross-references nothing.
     """
     if isinstance(loaded, MarkdownFile):
-        return _classify_markdown(loaded)
+        return _classify_markdown(loaded, provider_registry)
     return _classify_yaml(loaded)
 
 
-def _classify_markdown(loaded: MarkdownFile) -> ClassifyOutput:
+def _classify_markdown(
+    loaded: MarkdownFile,
+    provider_registry: AgentProviderRegistry,
+) -> ClassifyOutput:
     type_ = loaded.meta.get("type")
     if type_ is None:
         return ClassifyOutput()
@@ -109,13 +118,20 @@ def _classify_markdown(loaded: MarkdownFile) -> ClassifyOutput:
         message = f"Markdown resource of type {type_!r} has invalid name {name!r}"
         return ClassifyOutput(file_errors=[FileError(loaded.path, message)])
 
-    entry = _build_markdown_entry(spec.kind, name, loaded)
+    entry = _build_markdown_entry(spec.kind, name, loaded, provider_registry)
     return ClassifyOutput(entries=[entry])
 
 
-def _build_markdown_entry(kind: ResourceKind, name: str, loaded: MarkdownFile) -> Entry[Any]:
+def _build_markdown_entry(
+    kind: ResourceKind,
+    name: str,
+    loaded: MarkdownFile,
+    provider_registry: AgentProviderRegistry,
+) -> Entry[Any]:
     try:
-        config = MARKDOWN_BUILDERS[kind](loaded)
+        config = (
+            _build_agent(loaded, provider_registry) if kind is ResourceKind.AGENT else MARKDOWN_BUILDERS[kind](loaded)
+        )
     except ValidationError as e:
         return BrokenEntry(kind=kind, name=name, source_file=loaded.path, error=str(e))
     return ValidEntry(kind=kind, name=name, config=config, source_file=loaded.path)

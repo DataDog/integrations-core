@@ -5,10 +5,10 @@ from __future__ import annotations
 
 import pytest
 
-from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.base import SPAWN_IDENTICAL_NAME, SPAWN_SUBAGENT_NAME, BaseSpawnTool
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
+from tests.ai.config.utils import make_agent_config
 
 
 class _ConcreteSpawnTool(BaseSpawnTool):
@@ -21,7 +21,7 @@ class _ConcreteSpawnTool(BaseSpawnTool):
 
 
 def make_tool(tools: list[str]) -> _ConcreteSpawnTool:
-    return _ConcreteSpawnTool(owner_id="p", agent_config=AgentConfig(tools=tools), process_factory=None)
+    return _ConcreteSpawnTool(owner_id="p", agent_config=make_agent_config(tools=tools), process_factory=None)
 
 
 def test_allowed_tools_excludes_both_spawn_tools():

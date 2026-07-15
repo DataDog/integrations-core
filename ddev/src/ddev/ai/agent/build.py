@@ -7,8 +7,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Protocol
 
-from ddev.ai.agent.anthropic_client import AnthropicAgent
 from ddev.ai.agent.base import BaseAgent
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
@@ -23,7 +23,7 @@ class AgentRuntime:
     tool_registry: ToolRegistry
 
 
-class AgentRuntimeFactory(Protocol):
+class AgentRuntimeFactoryProtocol(Protocol):
     """Interface for constructing an agent runtime from explicit runtime inputs."""
 
     def build_runtime(
@@ -49,46 +49,17 @@ class AgentRuntimeBuilder(Protocol):
     ) -> AgentRuntime: ...
 
 
-class DefaultAgentRuntimeFactory:
-    """Builds provider-specific agent runtimes from explicit runtime inputs."""
+class AgentRuntimeFactory:
+    """Build tool registries and provider-specific agents for a run."""
 
     def __init__(
         self,
         *,
-        agent_clients: dict[str, Any],
+        provider_registry: AgentProviderRegistry,
         file_registry: FileRegistry,
     ) -> None:
-        self._agent_clients = agent_clients
+        self._provider_registry = provider_registry
         self._file_registry = file_registry
-
-    def _resolve_client(self, provider: str) -> Any:
-        client = self._agent_clients.get(provider)
-        if client is None:
-            raise ValueError(f"No client provided for agent provider {provider!r}")
-        return client
-
-    def _build_provider_agent(
-        self,
-        *,
-        agent_config: AgentConfig,
-        system_prompt: str,
-        owner_id: str,
-        tool_registry: ToolRegistry,
-    ) -> BaseAgent[Any]:
-        if agent_config.provider == "anthropic":
-            kwargs: dict[str, Any] = {}
-            if agent_config.model is not None:
-                kwargs["model"] = agent_config.model
-            if agent_config.max_tokens is not None:
-                kwargs["max_tokens"] = agent_config.max_tokens
-            return AnthropicAgent(
-                client=self._resolve_client("anthropic"),
-                tools=tool_registry,
-                system_prompt=system_prompt,
-                name=owner_id,
-                **kwargs,
-            )
-        raise ValueError(f"Unknown agent provider: {agent_config.provider!r}")
 
     def build_runtime(
         self,
@@ -107,10 +78,10 @@ class DefaultAgentRuntimeFactory:
             # forwarded untouched to tools that spawn child agents
             process_factory=process_factory,
         )
-        agent = self._build_provider_agent(
-            agent_config=agent_config,
+        agent = self._provider_registry.build_agent(
+            agent_config,
+            tools=tool_registry,
             system_prompt=system_prompt,
             owner_id=owner_id,
-            tool_registry=tool_registry,
         )
         return AgentRuntime(agent=agent, tool_registry=tool_registry)

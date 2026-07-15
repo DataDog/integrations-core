@@ -13,6 +13,7 @@ from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry, filter_read_only
+from tests.ai.config.utils import make_agent_config
 
 if TYPE_CHECKING:
     from tests.ai.conftest import FakeToolFactory
@@ -164,7 +165,7 @@ def from_names(tool_names: list[str], tmp_path, *, owner_id: str = OWNER_ID) -> 
         tool_names,
         owner_id=owner_id,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
-        agent_config=AgentConfig.model_construct(provider="anthropic", tools=tool_names),
+        agent_config=AgentConfig.model_construct(tools=tool_names),
         process_factory=PROCESS_FACTORY,
     )
 
@@ -198,7 +199,7 @@ def test_from_names_spawn_subagent_gets_runtime_context(tmp_path):
 
     tool = registry._tools["spawn_subagent"]
     assert isinstance(tool, SpawnSubagentTool)
-    assert tool._agent_config == AgentConfig(tools=["read_file", "spawn_subagent"])
+    assert tool._agent_config == make_agent_config(tools=["read_file", "spawn_subagent"])
     assert tool._process_factory is PROCESS_FACTORY
     assert tool._allowed_tools == {"read_file"}
 
@@ -304,14 +305,14 @@ def test_from_names_reuses_supplied_file_registry(tmp_path):
         ["read_file", "create_file"],
         owner_id="a",
         file_registry=shared,
-        agent_config=AgentConfig(tools=["read_file", "create_file"]),
+        agent_config=make_agent_config(tools=["read_file", "create_file"]),
         process_factory=PROCESS_FACTORY,
     )
     reg_b = ToolRegistry.from_names(
         ["read_file", "create_file"],
         owner_id="b",
         file_registry=shared,
-        agent_config=AgentConfig(tools=["read_file", "create_file"]),
+        agent_config=make_agent_config(tools=["read_file", "create_file"]),
         process_factory=PROCESS_FACTORY,
     )
 

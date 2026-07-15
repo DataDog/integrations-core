@@ -20,6 +20,7 @@ from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.registry import ToolRegistry
+from tests.ai.config.utils import make_agent_config
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -157,7 +158,7 @@ def make_agent_phase(
     ``captured_worker_kwargs`` (a dict) to record the worker create() inputs.
     Pass ``goal_runtime_builder`` as a callable (owner_id: str) -> AgentRuntime for goal tests.
     """
-    effective_agent_config = agent_config or AgentConfig(tools=[])
+    effective_agent_config = agent_config or make_agent_config(tools=[])
     config = PhaseConfig(
         name=phase_id,
         agent="writer",

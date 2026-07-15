@@ -9,6 +9,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
@@ -34,6 +35,13 @@ def file_access_policy(tmp_path) -> FileAccessPolicy:
 
 
 @pytest.fixture
+def provider_registry() -> AgentProviderRegistry:
+    registry = AgentProviderRegistry()
+    registry.register("anthropic", MagicMock())
+    return registry
+
+
+@pytest.fixture
 def core_dir(tmp_path) -> Path:
     """A core config dir with a 'writer' agent and a two-phase 'demo' flow ('a' root, 'b' after 'a')."""
     core = tmp_path / "core"
@@ -51,7 +59,7 @@ def core_dir(tmp_path) -> Path:
 
 
 @pytest.fixture
-def make_orchestrator(file_access_policy, tmp_path):
+def make_orchestrator(file_access_policy, provider_registry, tmp_path):
     """Composition root: build a registry, discover core phases, build the engine, build the orchestrator.
 
     Pass ``core_dir`` to point the engine at a config fixture and ``flow_name`` to select the flow.
@@ -73,6 +81,7 @@ def make_orchestrator(file_access_policy, tmp_path):
             core_dir=core_dir if core_dir is not None else tmp_path,
             user_dirs=[],
             phase_registry=registry,
+            provider_registry=provider_registry,
         )
         resolved = engine.get_flow(flow_name)
         kwargs: dict[str, Any] = {
@@ -80,7 +89,7 @@ def make_orchestrator(file_access_policy, tmp_path):
             "phase_registry": registry,
             "checkpoint_path": tmp_path / "checkpoints.yaml",
             "runtime_variables": {},
-            "agent_clients": {"anthropic": MagicMock()},
+            "provider_registry": provider_registry,
             "file_access_policy": file_access_policy,
             **overrides,
         }

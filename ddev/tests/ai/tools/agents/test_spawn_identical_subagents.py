@@ -7,13 +7,13 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from ddev.ai.agent.types import StopReason
-from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_identical_subagents import (
     CONCISE_DIRECTIVE,
     Assignment,
     SpawnIdenticalSubagentsInput,
     SpawnIdenticalSubagentsTool,
 )
+from tests.ai.config.utils import make_agent_config
 
 if TYPE_CHECKING:
     from tests.ai.tools.agents.conftest import (
@@ -30,7 +30,7 @@ def make_tool(
 ) -> SpawnIdenticalSubagentsTool:
     return SpawnIdenticalSubagentsTool(
         owner_id=owner_id,
-        agent_config=AgentConfig(tools=parent_tools or ["read_file", "edit_file"]),
+        agent_config=make_agent_config(tools=parent_tools or ["read_file", "edit_file"]),
         process_factory=factory,
     )
 

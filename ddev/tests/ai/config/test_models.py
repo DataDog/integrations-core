@@ -4,9 +4,12 @@
 
 from __future__ import annotations
 
+from typing import Never
+
 import pytest
 from pydantic import ValidationError
 
+from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import (
     AgentConfig,
     CheckpointConfig,
@@ -15,6 +18,8 @@ from ddev.ai.config.models import (
     TaskConfig,
     VariableDeclaration,
 )
+
+from .utils import make_agent_config, make_provider_registry
 
 # ---------------------------------------------------------------------------
 # TaskConfig
@@ -76,9 +81,45 @@ def test_checkpoint_memory_source_validation_rejects(kwargs):
 # ---------------------------------------------------------------------------
 
 
+def test_agent_requires_provider_registry_context():
+    with pytest.raises(ValidationError, match="Agent provider registry is required"):
+        AgentConfig(provider="custom")
+
+
+def test_agent_runs_provider_config_validation():
+    class CustomProvider:
+        def validate_config(self, agent_config: AgentConfig) -> None:
+            if agent_config.model != "supported-model":
+                raise ValueError("Custom provider rejected model")
+
+        def build_agent(self, *_args: object, **_kwargs: object) -> Never:
+            raise NotImplementedError
+
+    registry = AgentProviderRegistry()
+    registry.register("custom", CustomProvider())
+
+    with pytest.raises(ValidationError, match="Custom provider rejected model"):
+        AgentConfig.model_validate(
+            {"provider": "custom", "model": "unsupported-model"}, context={"provider_registry": registry}
+        )
+
+
+def test_agent_validates_provider_against_registry():
+    registry = make_provider_registry("custom")
+
+    config = AgentConfig.model_validate({"provider": "custom"}, context={"provider_registry": registry})
+
+    assert config.provider == "custom"
+
+
+def test_agent_rejects_provider_when_not_configured():
+    with pytest.raises(ValidationError, match="Agent provider 'custom' is not available"):
+        AgentConfig.model_validate({"provider": "custom"}, context={"provider_registry": AgentProviderRegistry()})
+
+
 def test_agent_rejects_unknown_tools():
     with pytest.raises(ValidationError):
-        AgentConfig(tools=["nonexistent_tool"])
+        make_agent_config(tools=["nonexistent_tool"])
 
 
 # ---------------------------------------------------------------------------
