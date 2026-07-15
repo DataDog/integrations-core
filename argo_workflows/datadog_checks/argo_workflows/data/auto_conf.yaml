@@ -6,6 +6,13 @@
 ad_identifiers:
   - workflow-controller
 
+## @param cel_selector - mapping - optional
+## Advanced container selector rules for Autodiscovery
+#
+cel_selector:
+  containers:
+  - container.image.reference.contains("argoproj/workflow-controller")
+
 ## Enables configuration discovery
 #
 discovery: {}

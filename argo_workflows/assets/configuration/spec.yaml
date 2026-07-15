@@ -23,4 +23,14 @@ files:
     overrides:
       value.example:
       - workflow-controller
+  - name: cel_selector
+    description: Advanced container selector rules for Autodiscovery
+    enabled: true
+    value:
+      type: object
+      example:
+        containers:
+        # Narrow down matching containers since the short image name is generic
+        # and doesn't identify the container as being part of Argo.
+        - container.image.reference.contains("argoproj/workflow-controller")
   - template: auto_conf/discovery
