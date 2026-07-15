@@ -4,6 +4,7 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.docker import CONTAINER_STABILITY_LOG_PATTERNS
 from datadog_checks.dev.kube_discovery import (
     assert_all_discovery_candidates_stable_kubernetes,
     run_discovery_check_kubernetes,
@@ -11,6 +12,17 @@ from datadog_checks.dev.kube_discovery import (
 from datadog_checks.velero import VeleroCheck
 
 from .common import OPTIONAL_METRICS, TEST_METRICS
+
+BENIGN_DISCOVERY_ERROR_LOG_PATTERNS = (
+    r'BackupStorageLocation is in unavailable state, skip syncing backup from it',
+    r'Current BackupStorageLocations available/unavailable/unknown:',
+)
+
+# Velero can log backup-storage-location state transitions at error level while its controllers settle.
+DISCOVERY_STABILITY_LOG_PATTERNS = tuple(
+    r'error(?!.*(?:{}))'.format('|'.join(BENIGN_DISCOVERY_ERROR_LOG_PATTERNS)) if pattern == 'error' else pattern
+    for pattern in CONTAINER_STABILITY_LOG_PATTERNS
+)
 
 
 @pytest.mark.e2e
@@ -49,4 +61,5 @@ def test_e2e_discovery_all_candidates(aggregator, datadog_agent):
         datadog_agent,
         namespace='velero',
         pod_selector='name=velero',
+        log_patterns=DISCOVERY_STABILITY_LOG_PATTERNS,
     )
