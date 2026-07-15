@@ -392,4 +392,4 @@ def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mock
 
     assert result.exit_code == 1, result.output
     assert 'ddev config set github.token' in result.output
-    assert 'Please create one manually' not in result.output
+    assert 'Please create one manually from `release/bump-milestone-7.80.0` to `master`' in result.output

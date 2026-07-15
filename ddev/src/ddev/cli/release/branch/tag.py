@@ -329,6 +329,8 @@ def _check_open_prs(app: Application, target_branch: str, skip_open_pr_check: bo
     httpx_logger.setLevel(logging.WARNING)
     try:
         prs = app.github.list_open_pull_requests_targeting_base(target_branch)
+    except GitHubAuthenticationError:
+        raise
     except Exception as e:
         click.secho(f'Warning: unable to check for open PRs: {e}', fg='yellow')
         return []
@@ -368,6 +370,10 @@ def _trigger_build_agent_yaml_update_workflow(app: Application, branch_name: str
             {'branch': branch_name},
         )
     except GitHubAuthenticationError:
+        app.display_warning(
+            f'The tag was pushed, but `{UPDATE_BUILD_AGENT_YAML_WORKFLOW}` could not be triggered.\n'
+            f'To trigger it manually: gh workflow run {UPDATE_BUILD_AGENT_YAML_WORKFLOW} -f branch={branch_name}'
+        )
         raise
     except HTTPStatusError as e:
         app.display_warning(

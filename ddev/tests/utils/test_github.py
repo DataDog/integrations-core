@@ -144,6 +144,8 @@ def test_authentication_error_has_actionable_token_guidance(
     with pytest.raises(GitHubAuthenticationError) as exc_info:
         github_manager.get_pr_head(1)
 
+    assert isinstance(exc_info.value, httpx.HTTPStatusError)
+    assert isinstance(exc_info.value, httpx.HTTPError)
     assert exc_info.value.response is response
     assert exc_info.value.request is request
     assert f'HTTP {status_code}' in str(exc_info.value)

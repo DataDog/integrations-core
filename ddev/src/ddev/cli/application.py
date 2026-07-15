@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from typing import Any, NoReturn
 
 
-type ExceptionHandler = Callable[[Application, Exception], None]
+type ExceptionHandler[E: Exception] = Callable[[Application, E], None]
 
 
 class DdevGroup(click.Group):
@@ -75,7 +75,7 @@ class Application(Terminal):
         # TODO: remove this when the old CLI is gone
         self.__config: dict[str, Any] = {}
 
-        self.__exception_handlers: dict[type[Exception], ExceptionHandler] = {}
+        self.__exception_handlers: dict[type[Exception], ExceptionHandler[Exception]] = {}
 
     @property
     def config(self) -> RootConfig:
@@ -136,13 +136,13 @@ class Application(Terminal):
             self.display_error(text, **kwargs)
         self.__exit_func(code)
 
-    def register_exception_handler(
+    def register_exception_handler[E: Exception](
         self,
-        exception_type: type[Exception],
-        handler: ExceptionHandler,
+        exception_type: type[E],
+        handler: ExceptionHandler[E],
     ) -> None:
         """Register an internal CLI handler for an exception type."""
-        self.__exception_handlers[exception_type] = handler
+        self.__exception_handlers[exception_type] = cast(ExceptionHandler[Exception], handler)
 
     def handle_exception(self, error: Exception) -> bool:
         """Render an exception with its nearest registered type."""

@@ -65,6 +65,25 @@ def test_tag_github_api_error_degrades_gracefully(ddev, git, mocker, config_file
     assert 'unable to check for open PRs' in result.output
 
 
+def test_tag_open_pr_authentication_failure_aborts_before_tagging(ddev, git, mocker, config_file):
+    config_file.model.github = {'user': 'test-user', 'token': 'test-token'}
+    config_file.save()
+    request = Request('GET', 'https://api.github.com/search/issues')
+    error = HTTPStatusError('forbidden', request=request, response=Response(403, request=request))
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.list_open_pull_requests_targeting_base',
+        side_effect=GitHubAuthenticationError.from_http_status_error(error),
+    )
+
+    result = ddev('release', 'branch', 'tag', '--release', '7.56.x', '--final', input='y\n')
+
+    assert result.exit_code == 1, result.output
+    assert 'ddev config set github.token' in result.output
+    assert 'unable to check for open PRs' not in result.output
+    git.tag.assert_not_called()
+    git.push.assert_not_called()
+
+
 NO_CONFIRMATION_SO_ABORT = 'Did not get confirmation, aborting. Did not create or push the tag.'
 RC_NUMBER_PROMPT = 'What RC number are we tagging? (hit ENTER to accept suggestion) [{}]'
 TAG_THIS_RELEASE_PROMPT = 'You are on release branch `7.56.x`. Tag this release?'
@@ -529,6 +548,6 @@ def test_build_agent_yaml_workflow_authentication_failure_uses_central_handler(d
 
     assert result.exit_code == 1, result.output
     assert 'ddev config set github.token' in result.output
-    assert 'gh workflow run update-build-agent-yaml.yml' not in result.output
+    assert 'gh workflow run update-build-agent-yaml.yml -f branch=7.56.x' in result.output
     basic_git.tag.assert_called_once_with('7.56.0', message='7.56.0', ref=ORIGIN_REF)
     basic_git.push.assert_called_once_with('7.56.0')

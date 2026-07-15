@@ -42,13 +42,11 @@ def github_secondary_rate_limit_wait(response: httpx.Response) -> float | None:
     return None
 
 
-class GitHubAuthenticationError(Exception):
+class GitHubAuthenticationError(httpx.HTTPStatusError):
     """A GitHub HTTP failure caused by invalid authentication or insufficient permissions."""
 
     def __init__(self, message: str, *, request: httpx.Request, response: httpx.Response) -> None:
-        super().__init__(message)
-        self.request = request
-        self.response = response
+        super().__init__(message, request=request, response=response)
 
     @classmethod
     def from_http_status_error(cls, error: httpx.HTTPStatusError) -> GitHubAuthenticationError:

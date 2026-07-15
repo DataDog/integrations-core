@@ -208,6 +208,8 @@ class GitHubManager:
 
         try:
             response = self.__api_get(self.COMMIT_API.format(repo_id=self.repo_id, sha=sha))
+        except GitHubAuthenticationError:
+            raise
         except HTTPStatusError:
             return None
         return [file_data['filename'] for file_data in response.json().get('files', [])]
@@ -224,6 +226,8 @@ class GitHubManager:
 
         try:
             response = self.__api_get(self.PULL_REQUEST_API.format(repo_id=self.repo_id, pr_number=pr_number))
+        except GitHubAuthenticationError:
+            raise
         except HTTPStatusError:
             return None
         return [label['name'] for label in response.json().get('labels', [])]

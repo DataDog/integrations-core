@@ -140,6 +140,9 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         )
         app.display_success(f'Pull request created: {pr_url}')
     except GitHubAuthenticationError:
+        app.display_warning(
+            f'Failed to create the pull request. Please create one manually from `{bump_branch}` to `master`.'
+        )
         raise
     except HTTPError as e:
         app.display_warning(

@@ -728,6 +728,8 @@ class AsyncGitHubClient:
             redirect_response = await self._request(
                 "GET", archive_download_url, timeout=timeout, follow_redirects=False
             )
+        except GitHubAuthenticationError:
+            raise
         except httpx.HTTPStatusError as exc:
             # httpx.raise_for_status() treats the expected 302 as an error since it isn't a 2xx;
             # recover the response from the exception so the redirect can still be inspected below.

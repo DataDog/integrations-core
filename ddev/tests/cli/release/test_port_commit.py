@@ -543,6 +543,9 @@ def test_create_pull_request_step_propagates_authentication_failure_when_labelin
         step.execute()
 
     assert step.pr_url == 'https://github.com/x/pr/7'
+    app_mock.display_warning.assert_called_once_with(
+        'Pull request created at https://github.com/x/pr/7 but labeling failed. Add the labels manually on the PR.'
+    )
 
 
 def test_command_uses_central_handler_on_label_authentication_failure(
@@ -572,7 +575,8 @@ def test_command_uses_central_handler_on_label_authentication_failure(
 
     assert result.exit_code == 1, result.output
     assert 'ddev config set github.token' in result.output
-    assert 'Pull request created at https://github.com/x/pr/1 but labeling failed' not in result.output
+    assert 'Pull request created at https://github.com/x/pr/1 but labeling failed' in result.output
+    assert 'Add the labels manually on the PR' in result.output
     assert 'Worktree left at' not in result.output
 
 

@@ -232,6 +232,15 @@ def test_registered_exception_subclass_uses_application_error_output() -> None:
     assert 'Traceback' not in result.output
 
 
+def test_nearest_registered_exception_handler_wins(app: Application) -> None:
+    handled: list[str] = []
+    app.register_exception_handler(HandledError, lambda application, error: handled.append('base'))
+    app.register_exception_handler(HandledChildError, lambda application, error: handled.append('child'))
+
+    assert app.handle_exception(HandledChildError('details'))
+    assert handled == ['child']
+
+
 def test_unregistered_exception_propagates() -> None:
     with pytest.raises(RuntimeError, match='unexpected'):
         exception_cli(RuntimeError('unexpected'))('fail')
