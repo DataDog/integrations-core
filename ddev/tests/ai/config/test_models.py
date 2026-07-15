@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config import models
 from ddev.ai.config.models import (
+    DEFAULT_AGENT_MODEL,
     AgentConfig,
     CheckpointConfig,
     FlowConfig,
@@ -136,7 +137,7 @@ def test_agent_defaults_model_and_infers_provider_when_unset():
     config = AgentConfig.model_validate({}, context={"provider_registry": registry})
 
     assert config.provider == "anthropic"
-    assert config.model == "sonnet"
+    assert config.model == DEFAULT_AGENT_MODEL
 
 
 def test_agent_rejects_unknown_tools():
@@ -148,8 +149,7 @@ def test_agent_rejects_unknown_model():
     registry = make_provider_registry("anthropic")
 
     with pytest.raises(ValidationError, match="Unknown model"):
-        # a raw API string is not a valid alias, and no provider claims it
-        AgentConfig.model_validate({"model": "claude-opus-4-8"}, context={"provider_registry": registry})
+        AgentConfig.model_validate({"model": "bogus"}, context={"provider_registry": registry})
 
 
 # ---------------------------------------------------------------------------

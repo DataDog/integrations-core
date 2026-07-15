@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 from ddev.ai.agent.anthropic_provider import AnthropicProvider
 from ddev.ai.agent.registry import AgentProviderRegistry
-from ddev.ai.config.models import DEFAULT_MODEL, AgentConfig
+from ddev.ai.config.models import DEFAULT_AGENT_MODEL, AgentConfig
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -37,7 +37,7 @@ def make_agent_config(**kwargs: Any) -> AgentConfig:
     # validation succeed for any placeholder model string used in tests.
     registry = AgentProviderRegistry()
     stub = MagicMock()
-    stub.supported_models.return_value = frozenset({model if model is not None else DEFAULT_MODEL})
+    stub.supported_models.return_value = frozenset({model if model is not None else DEFAULT_AGENT_MODEL})
     registry.register(provider, stub)
     return AgentConfig.model_validate(kwargs, context={"provider_registry": registry})
 

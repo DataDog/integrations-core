@@ -8,7 +8,7 @@ import pytest
 
 import ddev.ai.agent.anthropic_provider as anthropic_provider
 from ddev.ai.agent.anthropic_provider import MODEL_ALIASES, AnthropicProvider
-from ddev.ai.config.models import DEFAULT_MODEL
+from ddev.ai.config.models import DEFAULT_AGENT_MODEL
 from ddev.ai.tools.registry import ToolRegistry
 from tests.ai.config.utils import make_agent_config
 
@@ -97,5 +97,5 @@ def test_build_agent_uses_default_model_when_unset(monkeypatch: pytest.MonkeyPat
     provider.build_agent(make_agent_config(), tools=MagicMock(spec=ToolRegistry), system_prompt="s", owner_id="o")
 
     _, kwargs = agent_factory.call_args
-    assert kwargs["model"] == MODEL_ALIASES[DEFAULT_MODEL]
+    assert kwargs["model"] == MODEL_ALIASES[DEFAULT_AGENT_MODEL]
     assert "max_tokens" not in kwargs

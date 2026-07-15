@@ -34,8 +34,7 @@ def validate_variable_names(variables: dict[str, str]) -> dict[str, str]:
     return variables
 
 
-# Model alias used when an agent config leaves the model unset; its provider is inferred from it.
-DEFAULT_MODEL: Final[str] = "sonnet"
+DEFAULT_AGENT_MODEL: Final[str] = "sonnet"
 
 
 class VariableDeclaration(BaseModel):
@@ -168,7 +167,7 @@ class AgentConfig(BaseModel):
         if provider_registry is None:
             raise ValueError("Agent provider registry is required")
         if self.model is None:
-            self.model = DEFAULT_MODEL
+            self.model = DEFAULT_AGENT_MODEL
         if self.provider is None:
             self.provider = provider_registry.provider_for_model(self.model)
         provider_registry.validate_config(self)
