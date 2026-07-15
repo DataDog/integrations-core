@@ -488,15 +488,20 @@ class KafkaCheck(AgentCheck):
         dd_consumer_group = "datadog-agent"
 
         self.client.open_consumer(dd_consumer_group)
-        cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        try:
+            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
-        self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
+            self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
-        result = {}
-        for topic, partition, offset in self.client.get_partition_offsets(
-            partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
-        ):
-            result[(topic, partition)] = offset
+            result = {}
+            for topic, partition, offset in self.client.get_partition_offsets(
+                partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
+            ):
+                result[(topic, partition)] = offset
+        finally:
+            # Reuse the consumer across runs unless close_admin_client is set (which reuses neither client).
+            if self.config._close_admin_client:
+                self.client.close_consumer()
 
         self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id
