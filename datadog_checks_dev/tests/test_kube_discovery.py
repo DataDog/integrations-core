@@ -17,6 +17,7 @@ from datadog_checks.dev.kube_discovery import (
     assert_pod_stable,
     build_check_archive,
     build_service_from_pod,
+    find_local_base_root,
     run_discovery_check_kubernetes,
     save_state,
     setup_discovery_agent,
@@ -162,6 +163,45 @@ class TestSetupDiscoveryAgent:
             '/home/test_check',
         ]
 
+    def test_installs_local_base_before_package_when_available(self, tmp_path):
+        check_root = tmp_path / 'test_check'
+        base_root = tmp_path / 'datadog_checks_base'
+        write_auto_conf(check_root)
+        (base_root / 'datadog_checks' / 'base').mkdir(parents=True)
+        (base_root / 'datadog_checks' / 'base' / '__init__.py').write_text('')
+
+        commands = []
+
+        def fake_run_command(command, **kwargs):
+            commands.append(command)
+            return result()
+
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command', side_effect=fake_run_command):
+            setup_discovery_agent('/tmp/kubeconfig', check_root=str(check_root))
+
+        cp_commands = [c for c in commands if c[:2] == ['kubectl', 'cp']]
+        assert cp_commands[0][3] == f'{DISCOVERY_NAMESPACE}/{AGENT_POD_NAME}:/tmp/datadog_checks_base.tar.gz'
+        assert cp_commands[1][3] == f'{DISCOVERY_NAMESPACE}/{AGENT_POD_NAME}:/tmp/test_check.tar.gz'
+
+        pip_commands = [c for c in commands if c[:3] == ['kubectl', 'exec', AGENT_POD_NAME] and '-m' in c]
+        assert pip_commands[0][-7:] == [
+            '-m',
+            'pip',
+            'install',
+            '--disable-pip-version-check',
+            '--no-deps',
+            '-e',
+            '/home/datadog_checks_base',
+        ]
+        assert pip_commands[1][-6:] == [
+            '-m',
+            'pip',
+            'install',
+            '--disable-pip-version-check',
+            '-e',
+            '/home/test_check',
+        ]
+
     def test_kubectl_calls_use_explicit_kubeconfig_env(self, tmp_path, monkeypatch):
         check_root = tmp_path / 'test_check'
         write_auto_conf(check_root)
@@ -209,6 +249,18 @@ class TestSetupDiscoveryAgent:
         assert [b['roleRef']['name'] for b in extra_bindings] == ['kubevirt.io:view', 'other:view']
         for binding in extra_bindings:
             assert binding['subjects'][0]['name'] == AGENT_SERVICE_ACCOUNT
+
+
+def test_find_local_base_root_returns_sibling_checkout(tmp_path):
+    check_root = tmp_path / 'test_check'
+    base_root = tmp_path / 'datadog_checks_base'
+    base_root.mkdir()
+
+    assert find_local_base_root(str(check_root)) == str(base_root)
+
+
+def test_find_local_base_root_returns_none_without_sibling_checkout(tmp_path):
+    assert find_local_base_root(str(tmp_path / 'test_check')) is None
 
 
 class TestBuildCheckArchive:

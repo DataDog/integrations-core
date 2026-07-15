@@ -126,6 +126,14 @@ def setup_discovery_agent(
         kubeconfig_path, ['wait', 'pod', AGENT_POD_NAME, '-n', namespace, '--for=condition=Ready', '--timeout=120s']
     )
 
+    # Install local shared code before the check so generated discovery can use helpers added in
+    # the same PR, even when the Agent image has an older datadog-checks-base package.
+    local_base_root = find_local_base_root(check_root)
+    if local_base_root is not None:
+        install_local_package(
+            kubeconfig_path, namespace, local_base_root, 'datadog_checks_base', pip_options=('--no-deps',)
+        )
+
     # Install the checkout under test, not the version already baked into the Agent image.
     install_local_package(kubeconfig_path, namespace, check_root, check_name)
 
@@ -452,17 +460,31 @@ def build_agent_pod_manifest(namespace: str, check_name: str, agent_image: str) 
     }
 
 
+def find_local_base_root(check_root: str) -> str | None:
+    """Return the sibling datadog_checks_base checkout when this is an integrations-core worktree."""
+    candidate = os.path.join(os.path.dirname(check_root), 'datadog_checks_base')
+    if os.path.isdir(candidate):
+        return candidate
+
+    return None
+
+
 def install_local_package(
-    kubeconfig_path: str | os.PathLike[str], namespace: str, check_root: str, check_name: str
+    kubeconfig_path: str | os.PathLike[str],
+    namespace: str,
+    package_root: str,
+    package_name: str,
+    *,
+    pip_options: Sequence[str] = (),
 ) -> None:
-    """Copy the local integration into the helper pod and install it editable."""
-    remote_dir = f'{AGENT_PACKAGE_MOUNT_DIR}/{check_name}'
+    """Copy a local package into the helper pod and install it editable."""
+    remote_dir = f'{AGENT_PACKAGE_MOUNT_DIR}/{package_name}'
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        archive_path = os.path.join(tmp_dir, f'{check_name}.tar.gz')
-        build_check_archive(check_root, archive_path)
+        archive_path = os.path.join(tmp_dir, f'{package_name}.tar.gz')
+        build_check_archive(package_root, archive_path)
 
-        remote_archive_path = f'/tmp/{check_name}.tar.gz'
+        remote_archive_path = f'/tmp/{package_name}.tar.gz'
         run_kubectl(kubeconfig_path, ['cp', archive_path, f'{namespace}/{AGENT_POD_NAME}:{remote_archive_path}'])
 
     exec_agent_pod(
@@ -473,7 +495,16 @@ def install_local_package(
     exec_agent_pod(
         kubeconfig_path,
         namespace,
-        [AGENT_PYTHON_PATH, '-m', 'pip', 'install', '--disable-pip-version-check', '-e', remote_dir],
+        [
+            AGENT_PYTHON_PATH,
+            '-m',
+            'pip',
+            'install',
+            '--disable-pip-version-check',
+            *pip_options,
+            '-e',
+            remote_dir,
+        ],
     )
 
 
