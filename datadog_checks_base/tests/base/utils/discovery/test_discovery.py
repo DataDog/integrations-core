@@ -209,78 +209,68 @@ def test_candidate_ports_prefers_hints_and_deduplicates():
     ]
 
 
-def test_candidate_ports_by_name_only_yields_matching_ports():
-    service = Service(
-        id='svc',
-        host='127.0.0.1',
-        ports=(
-            Port(number=8080, name='http'),
-            Port(number=9090, name='metrics'),
-            Port(number=8081, name='admin'),
+@pytest.mark.parametrize(
+    "ports, names, expected",
+    [
+        pytest.param(
+            (
+                Port(number=8080, name='http'),
+                Port(number=9090, name='metrics'),
+                Port(number=8081, name='admin'),
+            ),
+            ['metrics', 'http-prom'],
+            [Port(number=9090, name='metrics')],
+            id="only_yields_matching_ports",
         ),
-    )
-
-    assert list(candidate_ports_by_name(service, ['metrics', 'http-prom'])) == [Port(number=9090, name='metrics')]
-
-
-def test_candidate_ports_by_name_respects_name_priority():
-    service = Service(
-        id='svc',
-        host='127.0.0.1',
-        ports=(
-            Port(number=8080, name='bar'),
-            Port(number=9090, name='foo'),
-            Port(number=8081, name='bar'),
-            Port(number=9091, name='foo'),
+        pytest.param(
+            (
+                Port(number=8080, name='bar'),
+                Port(number=9090, name='foo'),
+                Port(number=8081, name='bar'),
+                Port(number=9091, name='foo'),
+            ),
+            ['foo', 'bar'],
+            [
+                Port(number=9090, name='foo'),
+                Port(number=9091, name='foo'),
+                Port(number=8080, name='bar'),
+                Port(number=8081, name='bar'),
+            ],
+            id="respects_name_priority",
         ),
-    )
-
-    assert list(candidate_ports_by_name(service, ['foo', 'bar'])) == [
-        Port(number=9090, name='foo'),
-        Port(number=9091, name='foo'),
-        Port(number=8080, name='bar'),
-        Port(number=8081, name='bar'),
-    ]
-
-
-def test_candidate_ports_by_name_does_not_fallback_to_other_ports():
-    service = Service(
-        id='svc',
-        host='127.0.0.1',
-        ports=(
-            Port(number=8080, name='http'),
-            Port(number=8081, name='admin'),
+        pytest.param(
+            (
+                Port(number=8080, name='http'),
+                Port(number=8081, name='admin'),
+            ),
+            ['metrics'],
+            [],
+            id="does_not_fallback_to_other_ports",
         ),
-    )
-
-    assert list(candidate_ports_by_name(service, ['metrics'])) == []
-
-
-def test_candidate_ports_by_name_deduplicates_matching_port_numbers():
-    service = Service(
-        id='svc',
-        host='127.0.0.1',
-        ports=(
-            Port(number=8443, name='metrics'),
-            Port(number=8443, name='http-metrics'),
-            Port(number=9443, name='metrics'),
+        pytest.param(
+            (
+                Port(number=8443, name='metrics'),
+                Port(number=8443, name='http-metrics'),
+                Port(number=9443, name='metrics'),
+            ),
+            ['http-metrics', 'metrics'],
+            [
+                Port(number=8443, name='http-metrics'),
+                Port(number=9443, name='metrics'),
+            ],
+            id="deduplicates_matching_port_numbers",
         ),
-    )
-
-    assert list(candidate_ports_by_name(service, ['http-metrics', 'metrics'])) == [
-        Port(number=8443, name='http-metrics'),
-        Port(number=9443, name='metrics'),
-    ]
-
-
-def test_candidate_ports_by_name_ignores_empty_names():
-    service = Service(
-        id='svc',
-        host='127.0.0.1',
-        ports=(Port(number=8080, name=''),),
-    )
-
-    assert list(candidate_ports_by_name(service, [''])) == []
+        pytest.param(
+            (Port(number=8080, name=''),),
+            [''],
+            [],
+            id="ignores_empty_names",
+        ),
+    ],
+)
+def test_candidate_ports_by_name(ports, names, expected):
+    service = Service(id='svc', host='127.0.0.1', ports=ports)
+    assert list(candidate_ports_by_name(service, names)) == expected
 
 
 def test_dev_placeholder_field_constants_match_models():
