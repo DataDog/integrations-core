@@ -7,7 +7,7 @@ ad_identifiers:
   - workflow-controller
 
 ## @param cel_selector - mapping - optional
-## Advanced container selector rules for Autodiscovery
+## CEL selector for autodiscovery.
 #
 cel_selector:
   containers:
