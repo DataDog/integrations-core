@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import Any, Iterator, Protocol
+from collections.abc import Iterator, Mapping
+from typing import Any, Protocol
 
-# Frozen backend-neutral HTTP surface. RequestsWrapper implements it on requests today; a future
-# HTTPX2Wrapper implements the same surface on httpx. Do not change existing methods, attributes,
-# or their semantics without coordinating both backends. Capabilities expose behavior, never a
-# backend object (no requests or httpx type is returned).
+# Provisional backend-neutral HTTP surface (stabilizes once the httpx backend lands). RequestsWrapper
+# implements it on requests today; a future HTTPX2Wrapper implements the same surface on httpx. Do not
+# change existing methods, attributes, or their semantics without coordinating both backends.
+# Capabilities expose behavior, never a backend object (no requests or httpx type is returned).
 
 
 class HTTPResponseProtocol(Protocol):
@@ -50,6 +50,7 @@ class HTTPClientProtocol(Protocol):
     def put(self, url: str, **options: Any) -> HTTPResponseProtocol: ...
     def patch(self, url: str, **options: Any) -> HTTPResponseProtocol: ...
     def delete(self, url: str, **options: Any) -> HTTPResponseProtocol: ...
+    # The HTTP OPTIONS verb. Suffixed because ``options`` above is the request-defaults dict.
     def options_method(self, url: str, **options: Any) -> HTTPResponseProtocol: ...
     def get_header(self, name: str, default: str | None = None) -> str | None: ...
     def set_header(self, name: str, value: str) -> None: ...

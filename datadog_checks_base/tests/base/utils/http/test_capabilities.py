@@ -50,12 +50,8 @@ class TestCookies:
     def test_get_cookie_returns_value(self):
         http = RequestsWrapper({}, {})
         http.session.cookies.set('csrftoken', 'abc123')
-        assert http.get_cookie('csrftoken') == 'abc123'
-
-    def test_get_cookie_returns_plain_string(self):
-        http = RequestsWrapper({}, {})
-        http.session.cookies.set('sid', 'xyz')
-        value = http.get_cookie('sid')
+        value = http.get_cookie('csrftoken')
+        assert value == 'abc123'
         assert isinstance(value, str)
 
     def test_get_cookie_conflict_returns_default(self):
@@ -97,3 +93,8 @@ class TestTrustEnv:
         http = RequestsWrapper({}, {}, session=session)
         # The reported value must match the injected session, not the default True.
         assert http.trust_env is False
+
+    def test_trust_env_defaults_true_when_injected_session_lacks_attribute(self):
+        # A duck-typed session without trust_env must fall back to the True default.
+        http = RequestsWrapper({}, {}, session=mock.Mock(spec=[]))
+        assert http.trust_env is True

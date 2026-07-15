@@ -513,7 +513,7 @@ class RequestsWrapper(object):
 
         # Whether to trust environment configuration (proxies, auth, CA bundles).
         # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
-        # value so the reported state matches it. getattr guards sessions that lack the attribute.
+        # value so the reported state matches it.
         self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
 
         # Whether or not to log request information like method and url
