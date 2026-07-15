@@ -151,7 +151,7 @@ See the [sample sap_hana.d/conf.yaml][4] for all available schema collection opt
 
 #### Data Observability query actions
 
-The Datadog backend can deliver monitoring queries to the SAP HANA check via Remote Configuration. When enabled, the Agent executes these queries against HANA on a schedule and forwards the results as Data Observability events.
+The Datadog backend can deliver monitoring queries to the SAP HANA check through Remote Configuration. When enabled, the Agent executes these queries against HANA on a schedule and forwards the results as Data Observability events.
 
 To allow Remote Configuration to push query configs to the `sap_hana` check, add `sap_hana` to the allowlist in `datadog.yaml`:
 

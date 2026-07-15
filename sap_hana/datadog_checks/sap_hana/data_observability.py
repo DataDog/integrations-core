@@ -86,12 +86,17 @@ class SapHanaDataObservability(DBMAsyncJob):
         )
 
     def _shutdown(self) -> None:
+        self._close_connection()
+
+    def _close_connection(self) -> None:
+        """Close the persistent DO connection and clear its cached state."""
         if self._do_conn is not None:
             try:
                 self._do_conn.close()
             except Exception:
                 pass
-            self._do_conn = None
+        self._do_conn = None
+        self._do_conn_timeout_ms = None
 
     def _filter_valid_queries(self, queries: Iterable[Query]) -> tuple[tuple[Query, ...], dict[str, CronScheduler]]:
         valid: list[Query] = []
@@ -160,10 +165,7 @@ class SapHanaDataObservability(DBMAsyncJob):
                 self._do_conn_timeout_ms,
                 timeout_ms,
             )
-            try:
-                self._do_conn.close()
-            except Exception:
-                pass
+            self._close_connection()
         from hdbcli.dbapi import connect as hana_connect  # noqa: PLC0415
 
         # Use the check's connection-property builder so that TLS settings from
@@ -191,9 +193,11 @@ class SapHanaDataObservability(DBMAsyncJob):
 
     def _execute_single_query(self, query_spec: Query) -> dict[str, Any]:
         timeout_ms = query_spec.query_timeout or DEFAULT_DO_QUERY_TIMEOUT_MS
-        conn = self._get_connection(timeout_ms)
         start = time.time()
         try:
+            # Acquire the connection inside the try so a failure to (re)open it is
+            # reported as a per-query error instead of aborting the whole run_job cycle.
+            conn = self._get_connection(timeout_ms)
             if self._cancel_event.is_set():
                 raise Exception("Job loop cancelled. Aborting query.")
             with closing(conn.cursor()) as cursor:
@@ -220,8 +224,7 @@ class SapHanaDataObservability(DBMAsyncJob):
                 query_spec.query,
             )
             self._log.warning("Data Observability: resetting DO connection after query failure.")
-            self._do_conn = None
-            self._do_conn_timeout_ms = None
+            self._close_connection()
             return {
                 'status': 'error',
                 'columns': [],
