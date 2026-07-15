@@ -463,7 +463,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
             event_time_int = self.to_microseconds(event_time_microseconds)
             flush_time_int = self.to_microseconds(flush_time_microseconds)
-            latency_us = flush_time_int - event_time_int if event_time_int and flush_time_int else 0
+            flush_latency_us = flush_time_int - event_time_int if event_time_int and flush_time_int else 0
 
             if event_time_int > max_event_time:
                 max_event_time = event_time_int
@@ -486,7 +486,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                     'query_signature': obfuscated['query_signature'] if obfuscated else None,
                     'event_time_microseconds': event_time_int,
                     'flush_time_microseconds': flush_time_int,
-                    'latency_us': latency_us,
+                    'flush_latency_us': flush_latency_us,
                 }
             )
 
