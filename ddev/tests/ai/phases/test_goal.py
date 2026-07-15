@@ -105,7 +105,7 @@ def test_build_reviewer_user_message_sections():
 def _make_worker_process(responses):
     """ReActProcess wired to a MockAgent — used as the worker."""
     agent = MockAgent(list(responses))
-    scope = AgentScope(owner_id="worker", role=AgentRole.PHASE)
+    scope = AgentScope(owner_id="worker", role=AgentRole.PHASE, phase_id="worker")
     return ReActProcess(AgentRuntime(agent=agent, tool_registry=ToolRegistry([])), scope=scope), agent
 
 
@@ -118,7 +118,14 @@ class ReviewerProcessFactory:
         self._callbacks = callbacks or Callbacks()
 
     def create(self, *, scope, agent_config: AgentConfig, system_prompt: str) -> ReActProcess:
-        self.calls.append({"agent_config": agent_config, "system_prompt": system_prompt, "owner_id": scope.owner_id})
+        self.calls.append(
+            {
+                "agent_config": agent_config,
+                "system_prompt": system_prompt,
+                "owner_id": scope.owner_id,
+                "phase_id": scope.phase_id,
+            }
+        )
         return ReActProcess(
             AgentRuntime(agent=self.agent, tool_registry=ToolRegistry([])),
             callbacks=self._callbacks,
@@ -178,6 +185,7 @@ async def test_run_goal_loop_passes_on_first_attempt(tmp_path):
     assert worker_agent.send_calls == []
     assert builder_calls[0]["owner_id"] == "p1.goal.t1"
     assert builder_calls[0]["system_prompt"] == GOAL_REVIEWER_SYSTEM_PROMPT
+    assert builder_calls[0]["phase_id"] == "p1"
 
     log_path = tmp_path / "goal_reviewer" / "p1.goal.t1.jsonl"
     assert log_path.exists()
@@ -372,12 +380,12 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
     cb_set = CallbackSet()
 
     @cb_set.on_before_goal_check
-    async def _before(task_name, attempt):
-        events.append(("before", task_name, attempt))
+    async def _before(phase_id: str, task_name: str, attempt: int) -> None:
+        events.append(("before", phase_id, task_name, attempt))
 
     @cb_set.on_after_goal_check
-    async def _after(task_name, attempt, valid, reason):
-        events.append(("after", task_name, attempt, valid, reason))
+    async def _after(phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None:
+        events.append(("after", phase_id, task_name, attempt, valid, reason))
 
     worker_process, _ = _make_worker_process([make_response("attempt 2", 0, 0)])
     initial_result = ReActResult(
@@ -407,8 +415,8 @@ async def test_run_goal_loop_fires_callbacks(tmp_path):
         compact_if_needed=_noop_compact,
     )
     assert events == [
-        ("before", "t1", 1),
-        ("after", "t1", 1, False, "fix X"),
-        ("before", "t1", 2),
-        ("after", "t1", 2, True, ""),
+        ("before", "p1", "t1", 1),
+        ("after", "p1", "t1", 1, False, "fix X"),
+        ("before", "p1", "t1", 2),
+        ("after", "p1", "t1", 2, True, ""),
     ]

@@ -92,7 +92,7 @@ def test_markdown_with_yaml_only_type_is_file_error(type_):
 
 def test_markdown_non_string_type_is_file_error():
     md = MarkdownFile(path=PATH, meta={"type": ["prompt", "memory_prompt"], "name": "a"}, body="sys")
-    output = classify(md)
+    output = classify_file(md)
 
     assert output.entries == []
     (error,) = output.file_errors
@@ -149,7 +149,15 @@ def test_yaml_phase_happy_path():
 
 
 def test_yaml_flow_happy_path():
-    doc = {"type": "flow", "config": {"name": "f", "flow": [{"phase": "p"}]}}
+    doc = {
+        "type": "flow",
+        "config": {
+            "name": "f",
+            "description": "Flow shown in the launcher",
+            "inputs": [{"name": "topic", "label": "Topic", "type": "string", "default": "metrics"}],
+            "flow": [{"phase": "p"}],
+        },
+    }
     yaml_file = YamlFile(path=YAML_PATH, docs=[doc])
     output = classify_file(yaml_file)
 
@@ -159,6 +167,8 @@ def test_yaml_flow_happy_path():
     assert entry.kind == ResourceKind.FLOW
     assert entry.name == "f"
     assert isinstance(entry.config, FlowConfig)
+    assert entry.config.description == "Flow shown in the launcher"
+    assert entry.config.inputs[0].name == "topic"
 
 
 def test_yaml_non_dict_and_typeless_docs_skipped_silently():
@@ -191,7 +201,7 @@ def test_yaml_markdown_only_type_is_file_error():
 
 def test_yaml_non_string_type_is_file_error():
     yaml_file = YamlFile(path=YAML_PATH, docs=[{"type": ["phase", "flow"], "config": {"name": "x"}}])
-    output = classify(yaml_file)
+    output = classify_file(yaml_file)
 
     assert output.entries == []
     (error,) = output.file_errors
@@ -225,7 +235,7 @@ def test_yaml_nameless_invalid_is_file_error():
 def test_yaml_non_string_name_is_file_error():
     doc = {"type": "phase", "config": {"name": ["p"]}}
     yaml_file = YamlFile(path=YAML_PATH, docs=[doc])
-    output = classify(yaml_file)
+    output = classify_file(yaml_file)
 
     assert output.entries == []
     (error,) = output.file_errors

@@ -198,6 +198,7 @@ async def _run_reviewer_once(
 
 async def _drive_goal_loop(
     *,
+    phase_id: str,
     task: TaskConfig,
     goal_text: str,
     rendered_task_prompt: str,
@@ -214,7 +215,7 @@ async def _drive_goal_loop(
     try:
         while True:
             attempts += 1
-            await callbacks.fire_before_goal_check(task.name, attempts)
+            await callbacks.fire_before_goal_check(phase_id, task.name, attempts)
 
             user_message = build_reviewer_user_message(
                 rendered_task_prompt=rendered_task_prompt,
@@ -229,7 +230,7 @@ async def _drive_goal_loop(
             total_in += check.input_tokens
             total_out += check.output_tokens
 
-            await callbacks.fire_after_goal_check(task.name, attempts, check.valid, check.reason)
+            await callbacks.fire_after_goal_check(phase_id, task.name, attempts, check.valid, check.reason)
 
             if check.valid:
                 return GoalLoopOutcome(
@@ -279,7 +280,11 @@ async def run_goal_loop(
     is captured by the run-wide logging callbacks bound to ``process_factory``.
     The phase callbacks see only the bracketing before/after_goal_check events.
     """
-    reviewer_scope = AgentScope(owner_id=f"{phase_id}.goal.{task.name}", role=AgentRole.GOAL_REVIEWER)
+    reviewer_scope = AgentScope(
+        owner_id=f"{phase_id}.goal.{task.name}",
+        role=AgentRole.GOAL_REVIEWER,
+        phase_id=phase_id,
+    )
     reviewer_config = parent_agent_config.model_copy(update={"tools": filter_read_only(parent_agent_config.tools)})
     try:
         reviewer_process = process_factory.create(
@@ -291,6 +296,7 @@ async def run_goal_loop(
         raise RuntimeError(f"Failed to create reviewer process for task {task.name}: {e}") from e
 
     return await _drive_goal_loop(
+        phase_id=phase_id,
         task=task,
         goal_text=goal_text,
         rendered_task_prompt=rendered_task_prompt,

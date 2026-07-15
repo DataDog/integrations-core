@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -45,8 +46,8 @@ def read_events(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-PHASE = AgentScope(owner_id="p1", role=AgentRole.PHASE)
-SUB = AgentScope(owner_id="p1.sub.001-x", role=AgentRole.SUBAGENT)
+PHASE = AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1")
+SUB = AgentScope(owner_id="p1.sub.001-x", role=AgentRole.SUBAGENT, phase_id="p1")
 
 
 async def test_demultiplexes_by_scope_into_separate_files(tmp_path):
@@ -96,6 +97,17 @@ async def test_error_emits_error_then_failed_finish(tmp_path):
     assert events[2]["success"] is False
 
 
+async def test_timeout_cancellation_has_meaningful_error(tmp_path):
+    logger = AgentLogger(tmp_path)
+    cb = logger.as_callback_set()
+
+    await cb.fire_agent_error(PHASE, asyncio.CancelledError("Orchestrator exceeded max_timeout of 10s"))
+
+    events = read_events(tmp_path / "phase" / "p1.jsonl")
+    assert events[0]["exception"] == "Timed out: Orchestrator exceeded max_timeout of 10s"
+    assert events[1]["error"] == "Timed out: Orchestrator exceeded max_timeout of 10s"
+
+
 async def test_compact_events_recorded(tmp_path):
     logger = AgentLogger(tmp_path)
     cb = logger.as_callback_set()
@@ -129,7 +141,7 @@ async def test_close_is_idempotent(tmp_path):
 
 async def test_emit_after_close_is_silently_dropped(tmp_path):
     logger = AgentLogger(tmp_path)
-    scope = AgentScope(owner_id="p1", role=AgentRole.PHASE)
+    scope = AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1")
     logger.close()
     cb = logger.as_callback_set()
     await cb.fire_agent_start(scope, "sys", [])

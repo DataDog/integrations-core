@@ -6,6 +6,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason
 from ddev.ai.tools.agents.spawn_identical_subagents import (
     CONCISE_DIRECTIVE,
@@ -26,10 +27,13 @@ if TYPE_CHECKING:
 
 
 def make_tool(
-    factory: FakeProcessFactory, parent_tools: list[str] | None = None, owner_id: str = "parent"
+    factory: FakeProcessFactory,
+    parent_tools: list[str] | None = None,
+    owner_id: str = "parent",
+    phase_id: str = "parent",
 ) -> SpawnIdenticalSubagentsTool:
     return SpawnIdenticalSubagentsTool(
-        owner_id=owner_id,
+        parent_scope=AgentScope(owner_id=owner_id, role=AgentRole.PHASE, phase_id=phase_id),
         agent_config=make_agent_config(tools=parent_tools or ["read_file", "edit_file"]),
         process_factory=factory,
     )
@@ -68,6 +72,19 @@ async def test_happy_path(
         "parent.par.001.002-c",
     ]
     assert result.data.index("## a") < result.data.index("## b") < result.data.index("## c")
+
+
+async def test_child_scopes_inherit_parent_phase_id(
+    process_factory: ProcessFactoryBuilder, mock_agent: type[MockAgent], make_response: ResponseFactory
+):
+    factory = process_factory(lambda: mock_agent([make_response(text="done")]))
+
+    result = await make_tool(factory, phase_id="phase_a")(
+        SpawnIdenticalSubagentsInput(system_prompt="sys", assignments=assignments("a", "b"))
+    )
+
+    assert result.success is True
+    assert [call["phase_id"] for call in factory.calls] == ["phase_a", "phase_a"]
 
 
 async def test_repeated_calls_produce_distinct_owner_ids(

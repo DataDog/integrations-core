@@ -36,7 +36,9 @@ PHASE_AND_FLOW = (
     "- type: phase\n  config:\n    name: p\n    agent: ag\n"
     "    tasks:\n      - name: t\n        prompt_ref: intro\n        goal_ref: g\n"
     "    checkpoint:\n      memory_prompt_ref: mem\n"
-    "- type: flow\n  config:\n    name: demo\n    variables:\n      x: hi\n"
+    "- type: flow\n  config:\n    name: demo\n    description: Generate an integration\n"
+    "    inputs:\n      - name: topic\n        label: Topic\n        type: string\n        default: metrics\n"
+    "    variables:\n      x: hi\n"
     "    flow:\n      - phase: p\n"
 )
 
@@ -83,6 +85,33 @@ def test_get_flow_resolves_all_refs_and_variables(tmp_path):
     assert rf.phases["p"].checkpoint.memory_prompt_ref is None
     assert rf.variables == {"x": "hi"}
     assert rf.agents["ag"].system_prompt == "sys"
+    assert rf.description == "Generate an integration"
+    assert [flow_input.name for flow_input in rf.inputs] == ["topic"]
+
+
+def test_runtime_input_satisfies_eager_variable_resolution(tmp_path):
+    write(
+        tmp_path / "flow.yaml",
+        "- type: phase\n"
+        "  config:\n"
+        "    name: p\n"
+        "    variables:\n"
+        "      - name: topic\n"
+        "- type: flow\n"
+        "  config:\n"
+        "    name: demo\n"
+        "    inputs:\n"
+        "      - name: topic\n"
+        "        label: Topic\n"
+        "        type: string\n"
+        "    flow:\n"
+        "      - phase: p\n",
+    )
+
+    resolved = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg()).get_flow("demo")
+
+    assert [flow_input.name for flow_input in resolved.inputs] == ["topic"]
+    assert resolved.variables == {}
 
 
 def test_directory_layout_is_irrelevant(tmp_path):

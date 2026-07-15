@@ -41,7 +41,7 @@ def _memory_process(agent: MockAgent, callbacks: Callbacks | None = None) -> ReA
     return ReActProcess(
         AgentRuntime(agent=agent, tool_registry=ToolRegistry([])),
         callbacks=callbacks,
-        scope=AgentScope(owner_id="p1", role=AgentRole.PHASE),
+        scope=AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1"),
     )
 
 

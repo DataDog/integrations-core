@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from ddev.ai.config.errors import ErrorKind
-from ddev.ai.config.models import ConfigStatus, FlowEntry, VariableDeclaration
+from ddev.ai.config.models import ConfigStatus, FlowEntry, FlowInput, VariableDeclaration
 from ddev.ai.config.registry import ResourceRegistry
 from ddev.ai.config.resolving.resolver import FlowResolver
 
@@ -86,3 +86,80 @@ def test_flow_variable_overrides_default():
 
     assert diagnostics.status == ConfigStatus.OK
     assert diagnostics.resolved.variables == {"topic": "dogs"}
+
+
+def test_required_runtime_input_satisfies_required_variable_without_static_value():
+    entries = [
+        phase_entry("p", variables=[VariableDeclaration(name="topic")]),
+        flow_entry(
+            "demo",
+            [FlowEntry(phase="p")],
+            inputs=[FlowInput(name="topic", label="Topic", input_type="string", required=True)],
+        ),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.OK
+    assert diagnostics.resolved.variables == {}
+
+
+def test_required_runtime_input_resolves_default_conflict_without_static_value():
+    entries = [
+        agent_entry("writer", variables=[VariableDeclaration(name="topic", default="agent")]),
+        phase_entry("p", agent="writer", variables=[VariableDeclaration(name="topic", default="phase")]),
+        flow_entry(
+            "demo",
+            [FlowEntry(phase="p")],
+            inputs=[FlowInput(name="topic", label="Topic", input_type="string", required=True)],
+        ),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.OK
+    assert diagnostics.resolved.variables == {}
+
+
+def test_optional_runtime_input_without_default_does_not_satisfy_required_variable():
+    entries = [
+        phase_entry("p", variables=[VariableDeclaration(name="topic")]),
+        flow_entry(
+            "demo",
+            [FlowEntry(phase="p")],
+            inputs=[FlowInput(name="topic", label="Topic", input_type="string", required=False)],
+        ),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.BROKEN
+    assert any(error.subject == "topic" and "Required variable" in error.message for error in diagnostics.errors)
+
+
+def test_optional_runtime_input_without_default_does_not_resolve_default_conflict():
+    entries = [
+        agent_entry("writer", variables=[VariableDeclaration(name="topic", default="agent")]),
+        phase_entry("p", agent="writer", variables=[VariableDeclaration(name="topic", default="phase")]),
+        flow_entry(
+            "demo",
+            [FlowEntry(phase="p")],
+            inputs=[FlowInput(name="topic", label="Topic", input_type="string", required=False)],
+        ),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.BROKEN
+    assert any(error.subject == "topic" and "conflicting defaults" in error.message for error in diagnostics.errors)
+
+
+def test_defaulted_optional_runtime_input_resolves_variable_without_static_value():
+    entries = [
+        phase_entry("p", variables=[VariableDeclaration(name="topic")]),
+        flow_entry(
+            "demo",
+            [FlowEntry(phase="p")],
+            inputs=[FlowInput(name="topic", label="Topic", input_type="string", required=False, default="metrics")],
+        ),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.OK
+    assert diagnostics.resolved.variables == {}

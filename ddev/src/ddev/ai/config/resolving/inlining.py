@@ -24,6 +24,8 @@ def build_resolved_flow(
     """Fold refs into their fields, resolve agents, and topo-sort into a ResolvedFlow."""
     return ResolvedFlow(
         name=flow_name,
+        description=fc.description,
+        inputs=fc.inputs,
         agents={pc.agent: registry.agents[pc.agent] for pc in scheduled_phases if pc.agent is not None},
         phases={pc.name: _inline_phase(registry, pc) for pc in scheduled_phases},
         flow=topological_sort(fc.flow),

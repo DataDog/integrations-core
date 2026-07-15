@@ -28,21 +28,21 @@ class _StubAgent(BaseAgent[Any]):
 def test_create_returns_scoped_process_and_forwards_build_inputs():
     calls: list[dict] = []
 
-    def runtime_builder(*, agent_config, system_prompt, owner_id, process_factory):
+    def runtime_builder(*, agent_config, system_prompt, process_factory, scope):
         calls.append(
             {
                 "agent_config": agent_config,
                 "system_prompt": system_prompt,
-                "owner_id": owner_id,
                 "process_factory": process_factory,
+                "scope": scope,
             }
         )
-        return AgentRuntime(agent=_StubAgent(owner_id), tool_registry=ToolRegistry([]))
+        return AgentRuntime(agent=_StubAgent(scope.owner_id), tool_registry=ToolRegistry([]))
 
     callbacks = Callbacks([CallbackSet()])
     factory = ReActProcessFactory(runtime_builder, callbacks)
 
-    scope = AgentScope(owner_id="p1.sub.001-x", role=AgentRole.SUBAGENT)
+    scope = AgentScope(owner_id="p1.sub.001-x", role=AgentRole.SUBAGENT, phase_id="p1")
     config = make_agent_config(tools=["read_file"])
     process = factory.create(scope=scope, agent_config=config, system_prompt="be helpful")
 
@@ -51,7 +51,7 @@ def test_create_returns_scoped_process_and_forwards_build_inputs():
     assert process._callbacks is callbacks
 
     assert len(calls) == 1
-    assert calls[0]["owner_id"] == "p1.sub.001-x"
+    assert calls[0]["scope"] is scope
     assert calls[0]["agent_config"] is config
     assert calls[0]["system_prompt"] == "be helpful"
     # The factory injects itself so nested spawn tools can create children.

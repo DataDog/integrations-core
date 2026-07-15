@@ -66,6 +66,10 @@ class PhaseOrchestrator(EventBusOrchestrator):
         self._failed_phase: str | None = None
         self._failed_error: str | None = None
 
+    @property
+    def failed_phase(self) -> str | None:
+        return self._failed_phase
+
     async def on_initialize(self) -> None:
         """Construct phases from the resolved flow and submit the start PhaseTrigger."""
         checkpoint_manager = CheckpointManager(self._checkpoint_path)

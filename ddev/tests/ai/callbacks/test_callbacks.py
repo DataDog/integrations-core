@@ -17,7 +17,7 @@ from ddev.ai.tools.core.types import ToolResult
 
 @pytest.fixture
 def scope() -> AgentScope:
-    return AgentScope(owner_id="p1", role=AgentRole.PHASE)
+    return AgentScope(owner_id="p1", role=AgentRole.PHASE, phase_id="p1")
 
 
 @pytest.fixture
@@ -494,11 +494,11 @@ async def test_goal_check_callbacks_register_fire_and_swallow_exceptions(event):
         fired.append(args)
 
     if event == "before":
-        await cb.fire_before_goal_check("task-x", 3)
-        assert fired == [("task-x", 3)]
+        await cb.fire_before_goal_check("phase-a", "task-x", 3)
+        assert fired == [("phase-a", "task-x", 3)]
     else:
-        await cb.fire_after_goal_check("task-x", 3, False, "missing y")
-        assert fired == [("task-x", 3, False, "missing y")]
+        await cb.fire_after_goal_check("phase-a", "task-x", 3, False, "missing y")
+        assert fired == [("phase-a", "task-x", 3, False, "missing y")]
 
 
 async def test_callbacks_dispatches_goal_check_to_all_sets():
@@ -506,17 +506,35 @@ async def test_callbacks_dispatches_goal_check_to_all_sets():
     fired: list = []
 
     @s1.on_before_goal_check
-    async def h1(name, attempt):
-        fired.append(("s1", name, attempt))
+    async def h1(phase_id, name, attempt):
+        fired.append(("s1", phase_id, name, attempt))
 
     @s2.on_after_goal_check
-    async def h2(name, attempt, valid, reason):
-        fired.append(("s2", name, attempt, valid, reason))
+    async def h2(phase_id, name, attempt, valid, reason):
+        fired.append(("s2", phase_id, name, attempt, valid, reason))
 
     cb = Callbacks([s1, s2])
-    await cb.fire_before_goal_check("t", 1)
-    await cb.fire_after_goal_check("t", 1, True, "")
-    assert fired == [("s1", "t", 1), ("s2", "t", 1, True, "")]
+    await cb.fire_before_goal_check("phase-a", "t", 1)
+    await cb.fire_after_goal_check("phase-a", "t", 1, True, "")
+    assert fired == [
+        ("s1", "phase-a", "t", 1),
+        ("s2", "phase-a", "t", 1, True, ""),
+    ]
+
+
+async def test_goal_callbacks_distinguish_duplicate_task_names_across_phases():
+    callback_set = CallbackSet()
+    fired: list[tuple[str, str]] = []
+
+    @callback_set.on_before_goal_check
+    async def record(phase_id: str, task_name: str, attempt: int) -> None:
+        fired.append((phase_id, task_name))
+
+    callbacks = Callbacks([callback_set])
+    await callbacks.fire_before_goal_check("phase-a", "review", 1)
+    await callbacks.fire_before_goal_check("phase-b", "review", 1)
+
+    assert fired == [("phase-a", "review"), ("phase-b", "review")]
 
 
 # ---------------------------------------------------------------------------
@@ -538,6 +556,8 @@ async def test_callbacks_empty_is_noop(
     await callbacks.fire_before_agent_send(scope, "p", 1)
     await callbacks.fire_phase_start("p")
     await callbacks.fire_phase_finish("p")
+    await callbacks.fire_before_goal_check("p", "t", 1)
+    await callbacks.fire_after_goal_check("p", "t", 1, True, "")
 
 
 async def test_callbacks_dispatches_to_all_sets(scope: AgentScope, response: AgentResponse) -> None:

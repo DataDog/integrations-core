@@ -12,6 +12,8 @@ from ddev.ai.callbacks.callbacks import Callbacks
 from ddev.ai.react.types import ReActResult
 from ddev.ai.tools.core.types import ToolResult
 
+TOOL_RESULTS_SENTINEL = "Tool results"
+
 # A turn that stops on MAX_TOKENS while a tool call is pending was truncated mid-call: the
 # tool_use block is incomplete and was never executed. We must still answer every tool_use
 # with a tool_result, otherwise the next send() replays a dangling tool_use and the provider
@@ -173,7 +175,7 @@ class ReActProcess:
 
                 messages = [ToolResultMessage(tool_call_id=tc.id, result=result) for tc, result in tool_call_results]
 
-                await self._callbacks.fire_before_agent_send(self._scope, "Tool results", iterations + 1)
+                await self._callbacks.fire_before_agent_send(self._scope, TOOL_RESULTS_SENTINEL, iterations + 1)
 
                 response = await self._agent.send(messages, allowed_tools)
                 iterations += 1

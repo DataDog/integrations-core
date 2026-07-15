@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, TextIO
 
+from ddev.ai.agent.exceptions import describe_agent_error
 from ddev.ai.callbacks.callbacks import CallbackSet
 
 if TYPE_CHECKING:
@@ -142,7 +143,7 @@ class AgentLogger:
 
         @cb.on_agent_error
         async def _on_agent_error(scope: AgentScope, error: BaseException) -> None:
-            detail = f"{type(error).__name__}: {error}"
+            detail = describe_agent_error(error)
             self._emit(scope, {"event": "error", "exception": detail})
             self._emit(scope, {"event": "finish", "success": False, "error": detail})
 

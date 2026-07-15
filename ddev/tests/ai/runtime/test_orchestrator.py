@@ -110,6 +110,8 @@ async def test_on_message_received_fatal_on_phase_failed(core_dir, make_orchestr
     with pytest.raises(FatalProcessingError, match="Phase 'p1' failed"):
         await orchestrator.on_message_received(msg)
 
+    assert orchestrator.failed_phase == "p1"
+
 
 async def test_on_message_received_ignores_other_messages(core_dir, make_orchestrator):
     orchestrator, _, _ = make_orchestrator(core_dir)

@@ -4,9 +4,9 @@
 
 from __future__ import annotations
 
-import os
-
-import pytest
+import errno
+from collections.abc import Callable, Iterator
+from pathlib import Path
 
 from ddev.ai.config.loading.discovery import discover
 from ddev.ai.config.loading.files import FileError, MarkdownFile, YamlFile
@@ -121,19 +121,21 @@ def test_symlinked_directory_alias_yields_each_file_once(tmp_path):
     assert len(results) == 1
 
 
-def test_unreadable_directory_yields_file_error(tmp_path):
-    if os.getuid() == 0:
-        pytest.skip("root bypasses directory permissions")
+def test_unreadable_directory_yields_file_error(tmp_path, monkeypatch):
     blocked = tmp_path / "blocked"
-    write(blocked / "a.md", "---\nname: a\n---\nbody")
-    blocked.chmod(0o000)
-    try:
-        results = list(discover([tmp_path]))
-    finally:
-        blocked.chmod(0o755)
 
-    errors = [r for r in results if isinstance(r, FileError)]
-    assert any(r.path == blocked for r in errors)
+    def failing_walk(
+        _path: Path,
+        *,
+        on_error: Callable[[OSError], object],
+        **_kwargs: object,
+    ) -> Iterator[tuple[Path, list[str], list[str]]]:
+        on_error(PermissionError(errno.EACCES, "Permission denied", str(blocked)))
+        return iter(())
+
+    monkeypatch.setattr(Path, "walk", failing_walk)
+
+    assert list(discover([tmp_path])) == [FileError(blocked, "Cannot read directory: Permission denied")]
 
 
 def test_non_overlapping_directories_are_all_walked(tmp_path):

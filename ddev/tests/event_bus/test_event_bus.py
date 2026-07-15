@@ -11,6 +11,7 @@ from collections.abc import Generator
 from contextlib import AbstractContextManager, contextmanager, suppress
 from contextlib import nullcontext as does_not_raise
 from dataclasses import dataclass
+from typing import get_type_hints
 
 import pytest
 from pytest_mock import MockerFixture
@@ -943,6 +944,75 @@ def test_should_process_message_conditional_filtering(bare_orchestrator: MockOrc
 
     assert len(analyst.processed) == 1
     assert analyst.processed[0].id == "high_task"
+
+
+# ---------------------------------------------------------------------------
+# run_async tests
+# ---------------------------------------------------------------------------
+
+
+def test_run_async_declares_none_return_type():
+    assert get_type_hints(EventBusOrchestrator.run_async)["return"] is type(None)
+
+
+async def test_run_async_completes_on_running_loop(bare_orchestrator: MockOrchestrator):
+    """run_async() succeeds when awaited inside an already-running event loop."""
+    # asyncio_mode=auto means this function itself runs on a live loop —
+    # no nested asyncio.run() call is made.
+    running_loop = asyncio.get_running_loop()
+
+    await bare_orchestrator.run_async()
+
+    assert "initialize" in bare_orchestrator.events
+    assert "finalize" in bare_orchestrator.events
+    # The loop must be the same one we were called from — no new loop was created.
+    assert asyncio.get_running_loop() is running_loop
+
+
+async def test_run_async_does_not_raise_nested_loop_error(bare_orchestrator: MockOrchestrator):
+    """run_async() must not raise RuntimeError about a running event loop."""
+    try:
+        await bare_orchestrator.run_async()
+    except RuntimeError as exc:
+        if "cannot be called from a running event loop" in str(exc):
+            pytest.fail(f"run_async raised nested-loop RuntimeError: {exc}")
+        raise
+
+
+async def test_run_async_processes_messages(orchestrator: MockOrchestrator, secretary: Secretary):
+    """run_async() processes messages just as run() does."""
+    orchestrator.submit_message(Memo("async_memo"))
+
+    await orchestrator.run_async()
+
+    assert len(secretary.delivered_memos) == 1
+    assert secretary.delivered_memos[0].id == "async_memo"
+    assert orchestrator.finalized_exception is None
+
+
+async def test_run_async_propagates_fatal_error(orchestrator: MockOrchestrator):
+    """run_async() propagates FatalProcessingError just as run() does."""
+    original_on_message = orchestrator.on_message_received
+
+    async def on_message_fatal(message: BaseMessage):
+        await original_on_message(message)
+        raise FatalProcessingError("fatal from run_async")
+
+    orchestrator.on_message_received = on_message_fatal  # type: ignore[method-assign]
+    orchestrator.submit_message(Memo("trigger"))
+
+    with pytest.raises(FatalProcessingError, match="fatal from run_async"):
+        await orchestrator.run_async()
+
+    assert "finalize" in orchestrator.events
+
+
+def test_run_still_works_after_run_async_added(bare_orchestrator: MockOrchestrator):
+    """Synchronous run() continues to work correctly after run_async is introduced."""
+    bare_orchestrator.run()
+
+    assert "initialize" in bare_orchestrator.events
+    assert "finalize" in bare_orchestrator.events
 
 
 def test_should_process_message_is_independent_per_processor(bare_orchestrator: MockOrchestrator, secretary: Secretary):

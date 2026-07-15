@@ -13,6 +13,7 @@ from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 if TYPE_CHECKING:
+    from ddev.ai.agent.scope import AgentScope
     from ddev.ai.config.models import AgentConfig
     from ddev.ai.react.factory import ReActProcessFactory
 
@@ -55,11 +56,15 @@ class SpawnSubagentTool(BaseSpawnTool[SpawnSubagentInput]):
 
     def __init__(
         self,
-        owner_id: str,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
+        parent_scope: AgentScope,
     ) -> None:
-        super().__init__(owner_id, agent_config, process_factory)
+        super().__init__(
+            agent_config=agent_config,
+            process_factory=process_factory,
+            parent_scope=parent_scope,
+        )
         self._counter = 0
 
     @property
@@ -73,7 +78,7 @@ class SpawnSubagentTool(BaseSpawnTool[SpawnSubagentInput]):
             return ToolResult(success=False, error=error)
 
         self._counter += 1
-        subagent_id = f"{self._owner_id}.sub.{self._counter:03d}-{label}"
+        subagent_id = f"{self._parent_scope.owner_id}.sub.{self._counter:03d}-{label}"
         outcome = await self._run_child(
             subagent_id, label, tool_input.system_prompt, tool_input.prompt, tool_input.tools
         )

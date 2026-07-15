@@ -14,6 +14,7 @@ from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
 
 if TYPE_CHECKING:
+    from ddev.ai.agent.scope import AgentScope
     from ddev.ai.config.models import AgentConfig
     from ddev.ai.react.factory import ReActProcessFactory
 
@@ -81,11 +82,15 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
 
     def __init__(
         self,
-        owner_id: str,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
+        parent_scope: AgentScope,
     ) -> None:
-        super().__init__(owner_id, agent_config, process_factory)
+        super().__init__(
+            agent_config=agent_config,
+            process_factory=process_factory,
+            parent_scope=parent_scope,
+        )
         self._call_counter = 0
 
     @property
@@ -104,7 +109,7 @@ class SpawnIdenticalSubagentsTool(BaseSpawnTool[SpawnIdenticalSubagentsInput]):
 
         async def run(index: int, assignment: Assignment) -> ChildOutcome:
             async with semaphore:
-                subagent_id = f"{self._owner_id}.par.{call_id:03d}.{index:03d}-{assignment.name}"
+                subagent_id = f"{self._parent_scope.owner_id}.par.{call_id:03d}.{index:03d}-{assignment.name}"
                 return await self._run_child(
                     subagent_id, assignment.name, system_prompt, assignment.prompt, tool_input.tools
                 )

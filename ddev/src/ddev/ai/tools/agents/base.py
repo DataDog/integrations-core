@@ -42,11 +42,11 @@ class ChildOutcome:
 class BaseSpawnTool[TInput: BaseToolInput](BaseTool[TInput]):
     def __init__(
         self,
-        owner_id: str,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
+        parent_scope: AgentScope,
     ) -> None:
-        self._owner_id = owner_id
+        self._parent_scope = parent_scope
         self._agent_config = agent_config
         self._process_factory = process_factory
         # Parent may itself have a spawn tool; never offer either to children.
@@ -74,7 +74,11 @@ class BaseSpawnTool[TInput: BaseToolInput](BaseTool[TInput]):
         prompt: str,
         tools: list[str],
     ) -> ChildOutcome:
-        child_scope = AgentScope(owner_id=subagent_id, role=AgentRole.SUBAGENT)
+        child_scope = AgentScope(
+            owner_id=subagent_id,
+            role=AgentRole.SUBAGENT,
+            phase_id=self._parent_scope.phase_id,
+        )
         try:
             child_config = self._agent_config.model_copy(update={"tools": tools})
             process = self._process_factory.create(

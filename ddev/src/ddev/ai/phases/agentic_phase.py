@@ -82,7 +82,7 @@ class AgenticPhase(Phase):
         )
         self._agent_config = agent_config
         self._process_factory = process_factory
-        self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE)
+        self._scope = AgentScope(owner_id=phase_id, role=AgentRole.PHASE, phase_id=phase_id)
         self._goal_attempt_log: list[GoalValidationRecord] = []
         self._total_input_tokens: int = 0
         self._total_output_tokens: int = 0

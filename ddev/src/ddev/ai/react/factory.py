@@ -27,7 +27,7 @@ class ReActProcessFactory:
         runtime = self._runtime_builder(
             agent_config=agent_config,
             system_prompt=system_prompt,
-            owner_id=scope.owner_id,
             process_factory=self,
+            scope=scope,
         )
         return ReActProcess(runtime, callbacks=self._callbacks, scope=scope)

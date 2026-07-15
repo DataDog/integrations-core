@@ -6,8 +6,11 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from decimal import Decimal, InvalidOperation
 from enum import StrEnum, auto
-from typing import TYPE_CHECKING, Annotated, Literal
+from os import PathLike
+from pathlib import Path
+from typing import TYPE_CHECKING, Annotated, Any, Literal, Mapping, assert_never
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
@@ -35,6 +38,58 @@ class VariableDeclaration(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=VARIABLE_NAME_PATTERN)
     default: str | None = None
+
+
+class InputType(StrEnum):
+    STRING = "string"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    PATH = "path"
+
+
+class FlowInput(BaseModel):
+    """Describe a typed value supplied when launching a flow."""
+
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    name: str = Field(pattern=VARIABLE_NAME_PATTERN)
+    label: str
+    input_type: InputType = Field(alias="type")
+    default: Any | None = None
+    required: bool = True
+    as_content: bool = False
+
+    @model_validator(mode="after")
+    def validate_input_options(self) -> FlowInput:
+        if self.as_content and self.input_type is not InputType.PATH:
+            raise ValueError("'as_content' may only be used with path inputs")
+        if self.default is not None:
+            match self.input_type:
+                case InputType.STRING | InputType.PATH:
+                    pass
+                case InputType.NUMBER:
+                    _validate_number(self.name, self.default, prefix="Default for number input")
+                case InputType.BOOLEAN:
+                    _convert_boolean(self.name, self.default, prefix="Default for boolean input")
+                case unexpected:
+                    assert_never(unexpected)
+        return self
+
+    def convert_runtime_value(self, value: object) -> str:
+        """Convert one runtime value according to this input's declared type."""
+        match self.input_type:
+            case InputType.STRING:
+                return str(value)
+            case InputType.NUMBER:
+                _validate_number(self.name, value)
+                return str(value)
+            case InputType.BOOLEAN:
+                return _convert_boolean(self.name, value)
+            case InputType.PATH:
+                if self.as_content:
+                    return _read_path_content(self.name, value)
+                return str(value)
+            case unexpected:
+                assert_never(unexpected)
 
 
 class TaskConfig(BaseModel):
@@ -132,8 +187,18 @@ class FlowEntry(BaseModel):
 class FlowConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=NAME_PATTERN)
+    description: str | None = None
+    inputs: list[FlowInput] = Field(default_factory=list)
     variables: Annotated[dict[str, str], AfterValidator(validate_variable_names)] = Field(default_factory=dict)
     flow: list[FlowEntry]
+
+    @field_validator("inputs", mode="after")
+    @classmethod
+    def input_names_must_be_unique(cls, inputs: list[FlowInput]) -> list[FlowInput]:
+        names = [flow_input.name for flow_input in inputs]
+        if len(names) != len(set(names)):
+            raise ValueError("Input names must be unique")
+        return inputs
 
 
 class PhaseEnvelope(BaseModel):
@@ -158,6 +223,57 @@ class ResolvedFlow:
     phases: dict[str, PhaseConfig]
     flow: list[FlowEntry]
     variables: dict[str, str]
+    description: str | None = None
+    inputs: list[FlowInput] = field(default_factory=list)
+
+    def convert_inputs(self, values: Mapping[str, object]) -> dict[str, str]:
+        """Convert declared launch inputs to runtime variable strings."""
+        converted: dict[str, str] = {}
+        for flow_input in self.inputs:
+            value = values.get(flow_input.name)
+            if value is None:
+                if flow_input.required:
+                    raise ValueError(f"Required input {flow_input.name!r} is missing")
+                if flow_input.default is None:
+                    continue
+                value = flow_input.default
+
+            converted[flow_input.name] = flow_input.convert_runtime_value(value)
+        return converted
+
+
+def _convert_boolean(name: str, value: object, *, prefix: str = "Input") -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str) and (lower := value.lower()) in {"true", "false"}:
+        return lower
+    raise ValueError(f"{prefix} {name!r} must be a boolean")
+
+
+def _validate_number(name: str, value: object, *, prefix: str = "Input") -> None:
+    if isinstance(value, bool):
+        raise ValueError(f"{prefix} {name!r} must be a number")
+    try:
+        number = Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        raise ValueError(f"{prefix} {name!r} must be a number") from None
+    if not number.is_finite():
+        raise ValueError(f"{prefix} {name!r} must be a number")
+
+
+def _read_path_content(name: str, value: object) -> str:
+    """Read an existing regular UTF-8 file supplied as a path input."""
+    if not isinstance(value, (str, PathLike)) or not str(value):
+        raise ValueError(f"Input {name!r} must be a valid path")
+    path = Path(value)
+    if not path.exists():
+        raise ValueError(f"Input {name!r} path does not exist: {path}")
+    if not path.is_file():
+        raise ValueError(f"Input {name!r} path is not a file: {path}")
+    try:
+        return path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise ValueError(f"Input {name!r} path could not be read: {path}: {error}") from error
 
 
 class ConfigStatus(StrEnum):

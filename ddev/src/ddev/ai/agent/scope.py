@@ -20,3 +20,4 @@ class AgentScope:
 
     owner_id: str
     role: AgentRole
+    phase_id: str
