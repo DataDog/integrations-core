@@ -15,7 +15,7 @@ from .common import EXPECTED_METRICS
 
 
 def assert_metrics(aggregator):
-    IGNORED_METRICS = {
+    ignore = {
         'fluxcd.controller.runtime.reconcile.count',
         'fluxcd.controller.runtime.reconcile.errors.count',
         'fluxcd.controller.runtime.reconcile.time.seconds.bucket',
@@ -32,7 +32,7 @@ def assert_metrics(aggregator):
         'fluxcd.workqueue.adds.count',
         'fluxcd.workqueue.retries.count',
     }
-    for metric_name in set(EXPECTED_METRICS['v2']) - IGNORED_METRICS:
+    for metric_name in set(EXPECTED_METRICS['v2']) - ignore:
         aggregator.assert_metric(metric_name)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
