@@ -4,10 +4,11 @@ files:
 - name: velero.yaml
   discovery:
     strategies:
-    - template: discovery/openmetrics_from_ports
+    - template: discovery/openmetrics_from_named_ports
       overrides:
-        port_hints:
-        - 8085
+        port_names:
+        - http-monitoring
+        - metrics
   options:
   - template: init_config
     options:

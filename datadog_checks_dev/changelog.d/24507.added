@@ -1,1 +1,1 @@
-Add ``kube_discovery`` e2e test helpers for exercising Kubernetes/Kubelet Autodiscovery.
+Add ``kube_discovery`` e2e test helpers and a named-port discovery strategy for generated candidates.
