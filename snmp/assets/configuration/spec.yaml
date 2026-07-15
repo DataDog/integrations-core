@@ -46,7 +46,7 @@ files:
         value:
           example: 10
           type: integer
-        fleet_configurable: false
+        fleet_configurable: true
       - name: min_collection_interval
         value:
           example: 15
@@ -76,7 +76,7 @@ files:
               name: tcpPassiveOpens
               metric_tags:
                 - TCP
-        fleet_configurable: false
+        fleet_configurable: true
       - name: profiles
         description: |
           Specify profiles to be able to reference a set of metrics by name.
@@ -623,7 +623,7 @@ files:
           value:
             type: integer
             example: 20
-          fleet_configurable: false
+          fleet_configurable: true
         - name: linux
           description: Linux-specific configuration
           options:
