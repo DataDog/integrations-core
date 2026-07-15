@@ -24,27 +24,26 @@ class AgentProviderRegistry:
 
     def __init__(self):
         self._providers: dict[str, AgentProvider] = {}
-        self._model_index: dict[str, str] = {}
+        self._model_index: dict[str, set[str]] = {}
 
     def register(self, name: str, provider: AgentProvider):
         if name in self._providers:
             raise ValueError(f"Agent provider {name!r} is already registered")
         for model in provider.supported_models():
-            key = model.lower()
-            owner = self._model_index.get(key)
-            if owner is not None:
-                raise ValueError(f"Model {model!r} is claimed by both providers {owner!r} and {name!r}")
-            self._model_index[key] = name
+            self._model_index.setdefault(model.lower(), set()).add(name)
         self._providers[name] = provider
 
     def contains(self, name: str) -> bool:
         return name in self._providers
 
     def provider_for_model(self, model: str) -> str:
-        provider = self._model_index.get(model.lower())
-        if provider is None:
+        providers = self._model_index.get(model.lower())
+        if not providers:
             raise ValueError(f"Unknown model {model!r}")
-        return provider
+        if len(providers) > 1:
+            owners = ", ".join(repr(owner) for owner in sorted(providers))
+            raise ValueError(f"Model {model!r} is served by multiple providers ({owners}); specify a provider")
+        return next(iter(providers))
 
     def _get_provider(self, name: str) -> AgentProvider:
         provider = self._providers.get(name)
