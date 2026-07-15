@@ -34,9 +34,6 @@ class KafkaConfig:
         # Optimization to avoid OOM kill:
         # https://github.com/confluentinc/confluent-kafka-python/issues/759
         self._consumer_queued_max_messages_kbytes = instance.get('consumer_queued_max_messages_kbytes', 1024)
-        # Reuse the AdminClient across runs by default so librdkafka's per-broker threads (and the
-        # glibc arenas they are bound to) stay alive and their memory is recycled in place instead of
-        # being stranded on every run. Set close_admin_client: true to restore the old churning behavior.
         self._close_admin_client = instance.get('close_admin_client', False)
 
         self._kafka_connect_str = instance.get('kafka_connect_str')

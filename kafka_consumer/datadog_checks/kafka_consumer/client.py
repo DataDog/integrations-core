@@ -42,7 +42,6 @@ class KafkaClient:
         return self._kafka_client
 
     def open_consumer(self, consumer_group):
-        # Reuse the consumer across runs so its per-broker threads (and their glibc arenas) persist.
         if self._consumer is not None:
             return
 

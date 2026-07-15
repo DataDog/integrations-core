@@ -487,7 +487,6 @@ class KafkaCheck(AgentCheck):
 
         dd_consumer_group = "datadog-agent"
 
-        # Reuse the consumer across runs (do not close it) so its per-broker threads persist.
         self.client.open_consumer(dd_consumer_group)
         cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
 
