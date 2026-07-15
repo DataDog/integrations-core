@@ -1,0 +1,2 @@
+Add Data Observability RC query actions support: execute Remote Configuration-delivered monitoring queries against SAP HANA and forward results as `do-query-results` events.
+Bump the minimum `datadog-checks-base` requirement to 37.39.0 for the `CronScheduler` used to schedule Data Observability queries.
