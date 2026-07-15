@@ -155,13 +155,7 @@ jobs:
         working-directory: source
         env:
           NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
-        run: |
-          mapfile -t tags < <(jq -r '.[]' <<< "$NEW_TAGS")
-          if (( ${#tags[@]} == 0 )); then
-            echo "::error::has_new_tags was true but no release tags were provided"
-            exit 1
-          fi
-          git push origin "${tags[@]}"
+        run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_push_tags.py"
 
       - name: Build dispatch batches
         id: release-dispatch
