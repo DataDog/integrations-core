@@ -43,6 +43,7 @@ def dd_environment():
             for controller in (
                 'source-controller',
                 'helm-controller',
+                'image-automation-controller',
                 'kustomize-controller',
                 'notification-controller',
             ):

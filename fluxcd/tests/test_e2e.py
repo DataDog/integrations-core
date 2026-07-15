@@ -50,9 +50,7 @@ def test_source_controller_metrics(dd_agent_check):
 
 @pytest.mark.e2e
 def test_e2e_discovery(aggregator, datadog_agent):
-    # Kubelet Autodiscovery is expected to find all four flux-system controller pods exercised by
-    # the non-discovery E2E test above (source, helm, kustomize, notification-controller).
-    run_discovery_check_kubernetes(aggregator, datadog_agent, discovery_min_instances=4)
+    run_discovery_check_kubernetes(aggregator, datadog_agent, discovery_min_instances=5)
     assert_metrics(aggregator)
 
 

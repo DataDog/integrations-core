@@ -5,6 +5,7 @@
 #
 ad_identifiers:
   - helm-controller
+  - image-automation-controller
   - kustomize-controller
   - notification-controller
   - source-controller

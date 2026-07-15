@@ -27,6 +27,7 @@ files:
     overrides:
       value.example:
       - helm-controller
+      - image-automation-controller
       - kustomize-controller
       - notification-controller
       - source-controller
