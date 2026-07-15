@@ -115,7 +115,7 @@ def test_from_named_ports():
         from collections.abc import Iterator
         from typing import Any
 
-        from datadog_checks.base.utils.discovery import Service, ports_by_name
+        from datadog_checks.base.utils.discovery import Service, candidate_ports_by_name
         from datadog_checks.test.config_models import discovery_overrides
         from datadog_checks.test.config_models.instance import InstanceConfig
         from datadog_checks.test.config_models.shared import SharedConfig
@@ -126,7 +126,7 @@ def test_from_named_ports():
                 by_alias=True, mode='json', exclude_none=True
             )
             # discovery[0]: from_named_ports
-            for port in ports_by_name(service, ['metrics', 'http-monitoring']):
+            for port in candidate_ports_by_name(service, ['metrics', 'http-monitoring']):
                 ctx = {'port': port}
                 instance_data = {
                     'endpoint': 'http://{service.host}:{port.number}/m'.format(service=service, **ctx),
