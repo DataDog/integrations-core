@@ -85,6 +85,7 @@ FROM {async_insert_log_table}
 WHERE
     {checkpoint_filter}
     AND event_time_microseconds <= now64(6)
+    AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))
 ORDER BY event_time_microseconds ASC
 LIMIT {max_flush_rows:UInt64}
 """
@@ -433,11 +434,12 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
     def _collect_flush_rows(self):
         """Load new flush records from system.asynchronous_insert_log using the flush checkpoint."""
         async_insert_log_table = self._check.get_system_table('asynchronous_insert_log')
-        checkpoint_filter, _min_checkpoint, params = self._flush_checkpoint.build_per_node_checkpoint_filter()
+        checkpoint_filter, min_checkpoint, params = self._flush_checkpoint.build_per_node_checkpoint_filter()
 
         query = FLUSH_LOG_QUERY.replace("{async_insert_log_table}", async_insert_log_table).replace(
             "{checkpoint_filter}", checkpoint_filter
         )
+        params["min_checkpoint_us"] = min_checkpoint
         params["max_flush_rows"] = self._max_samples_per_collection
 
         rows = self._execute_query(query, parameters=params)
