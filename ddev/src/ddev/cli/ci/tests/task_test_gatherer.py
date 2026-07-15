@@ -7,19 +7,23 @@ import logging
 import shutil
 import threading
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
     BatchJob,
     BatchJobResult,
+    JobResult,
     UpdatePRComment,
-    WorkflowResult,
     WorkflowStatus,
 )
 from ddev.cli.ci.tests.status import Status, conclusion_to_status
 from ddev.event_bus.orchestrator import SyncProcessor
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import parse_junit_dir
+
+if TYPE_CHECKING:
+    from ddev.utils.junit import JUnitReport
 
 # Expected layout of the extracted ``test-result.zip`` tree (defined by ``test-batch.yaml``):
 #   {artifacts_path}/
@@ -36,12 +40,12 @@ JUNIT_GLOB = "test-*.xml"
 class TaskTestGatherer(SyncProcessor[BatchFinished]):
     """
     Reads ``BatchFinished`` messages, analyzes the downloaded artifacts on disk, builds per-job
-    ``WorkflowResult`` records, and organizes coverage/JUnit files for later publishing.
+    ``JobResult`` records, and organizes coverage/JUnit files for later publishing.
 
-    It accumulates the results of each batch and, once all expected batches have finished,
-    emits a single ``UpdatePRComment`` (``done=True``) with the aggregate state. It does not
-    post to GitHub and does not update the PR before the final batch is in — the PR-comment
-    consumer is separate.
+    It keeps an in-memory registry of every job's full result across all batches and, on each finished
+    batch, emits an ``UpdatePRComment`` carrying a monotonically increasing ``revision`` and the whole
+    accumulated state. ``done`` is set once the final expected batch has been received. It does not post
+    to GitHub — rendering the comment (and rejecting stale revisions) is a separate consumer's job.
 
     This task makes no GitHub API calls — it works exclusively from the artifacts the runner
     already downloaded to ``BatchFinished.artifacts_path``.
@@ -53,7 +57,7 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         self._expected_batches = expected_batches
         self._received_batches = 0
         self._status_by_run: dict[int, WorkflowStatus] = {}
-        self._results_by_run: dict[int, list[WorkflowResult]] = {}
+        self._results_by_run: dict[int, list[JobResult]] = {}
         self._lock = threading.Lock()
         self._logger = logging.getLogger(f"{__name__}.{name}")
 
@@ -62,70 +66,83 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
             self._logger.warning("BatchFinished carried no jobs; nothing to gather", extra={"run_id": message.run_id})
             return
 
+        # Parse and organize artifacts outside the lock — these touch only this batch's own files.
         results = [self._job_result(batch_job_result, message) for batch_job_result in message.batch_jobs]
-
         status = self._build_workflow_status(message, results)
+
+        # Register the batch, bump the revision, and emit the update all under the lock so two batches
+        # finishing at once cannot build a comment from half-updated shared state.
         with self._lock:
+            if message.run_id in self._results_by_run:
+                # A batch result is terminal once gathered; a duplicate must not re-count the batch and
+                # inflate the revision. This check is authoritative only inside the lock.
+                self._logger.warning("Duplicate BatchFinished ignored", extra={"run_id": message.run_id})
+                return
             self._results_by_run[message.run_id] = results
             self._status_by_run[message.run_id] = status
             self._received_batches += 1
-            is_final = self._received_batches >= self._expected_batches
+            revision = self._received_batches
+            done = revision >= self._expected_batches
+            self.submit_message(self.build_update_message(message.id, revision, done))
 
-        # TODO: if an expected batch never yields a BatchFinished (e.g. a runner crashes), the count
-        # never completes and no final update fires. A future orchestrator on_finalize should call
-        # build_done_message as a backstop.
-        if is_final:
-            self.submit_message(self.build_done_message(message.id))
-            self._logger.info("Final batch received, UpdatePRComment emitted", extra={"run_id": message.run_id})
+        self._logger.info(
+            "Batch gathered, UpdatePRComment revision %s emitted (done=%s)",
+            revision,
+            done,
+            extra={"run_id": message.run_id},
+        )
 
-    def build_done_message(self, message_id: str) -> UpdatePRComment:
-        """Build the final ``done=True`` update from all accumulated results.
+    def build_update_message(self, message_id: str, revision: int, done: bool) -> UpdatePRComment:
+        """Build an ``UpdatePRComment`` for *revision* from all accumulated results.
 
-        Submitted by the gatherer once the final expected batch has been received.
+        Must be called while holding ``self._lock`` when reading live shared state.
         """
-        return UpdatePRComment(id=message_id, done=True, workflows=list(self._status_by_run.values()))
+        return UpdatePRComment(
+            id=message_id, revision=revision, done=done, workflows=list(self._status_by_run.values())
+        )
 
-    def _job_result(self, batch_job_result: BatchJobResult, message: BatchFinished) -> WorkflowResult:
-        """Build a job's ``WorkflowResult`` from its correlated workflow job and artifacts on disk."""
+    def _job_result(self, batch_job_result: BatchJobResult, message: BatchFinished) -> JobResult:
+        """Build a job's ``JobResult`` from its correlated workflow job and artifacts on disk."""
         batch_job = batch_job_result.job
-        status, failed_step = self._job_status(batch_job_result, message)
+        status, failed_steps = self._job_status(batch_job_result, message)
 
-        failed_tests: list[str] = []
+        reports: tuple[JUnitReport, ...] = ()
         job_dir = Path(batch_job_result.artifact_name_path) if batch_job_result.artifact_name_path else None
         if job_dir is not None:
-            failed_tests = [test.identifier for test in parse_junit_dir(job_dir)]
+            reports = tuple(parse_junit_dir(job_dir))
             self._organize_artifacts(job_dir, batch_job)
         else:
             self._logger.info(
                 "No artifact directory found for job %s", batch_job.name, extra={"run_id": message.run_id}
             )
 
-        return WorkflowResult(
+        return JobResult(
             integration=batch_job.target,
             environment=batch_job.environment,
             platform=batch_job.platform,
             status=status,
-            failed_step=failed_step,
-            failed_tests=failed_tests,
+            failed_steps=failed_steps,
+            reports=reports,
         )
 
     @staticmethod
-    def _job_status(batch_job_result: BatchJobResult, message: BatchFinished) -> tuple[Status, str | None]:
-        """Per-job (status, failed_step). Deterministic: timed-out batches fail every job; otherwise the
+    def _job_status(batch_job_result: BatchJobResult, message: BatchFinished) -> tuple[Status, list[str]]:
+        """Per-job (status, failed_steps). Deterministic: timed-out batches fail every job; otherwise the
         job's own workflow-job conclusion decides. A missing workflow job is unexpected and raises — the
         runner correlates every job before emitting, so a miss is a bug, not a state to paper over.
+
+        All steps concluding in failure are collected: a workflow can run on-failure steps, so more than
+        one step may fail for a single job.
         """
         if message.timed_out:
-            return (Status.FAILURE, "timed out")
+            return (Status.FAILURE, ["timed out"])
 
         workflow_job = batch_job_result.workflow_job
         if workflow_job is None:
             raise ValueError(f"No workflow job correlated for {batch_job_result.job.name!r}")
 
-        failed_step = next(
-            (step.name for step in workflow_job.steps if step.conclusion == WorkflowJobConclusion.FAILURE), None
-        )
-        return (conclusion_to_status(workflow_job.conclusion), failed_step)
+        failed_steps = [step.name for step in workflow_job.steps if step.conclusion == WorkflowJobConclusion.FAILURE]
+        return (conclusion_to_status(workflow_job.conclusion), failed_steps)
 
     def _organize_artifacts(self, job_dir: Path, batch_job: BatchJob) -> None:
         """Copy coverage and JUnit files into the organized output tree with unique names."""
@@ -146,14 +163,16 @@ class TaskTestGatherer(SyncProcessor[BatchFinished]):
         self._logger.debug("Organized artifact %s -> %s", source, destination)
 
     @staticmethod
-    def _build_workflow_status(message: BatchFinished, results: list[WorkflowResult]) -> WorkflowStatus:
+    def _build_workflow_status(message: BatchFinished, results: list[JobResult]) -> WorkflowStatus:
         success_count = sum(1 for result in results if result.status == Status.SUCCESS)
         failed_count = sum(1 for result in results if result.status == Status.FAILURE)
-        failed_checks = [result for result in results if result.status == Status.FAILURE]
+        skipped_count = sum(1 for result in results if result.status == Status.SKIPPED)
         return WorkflowStatus(
+            batch_id=message.id,
             url=message.workflow_url,
             id=message.run_id,
             success_count=success_count,
             failed_count=failed_count,
-            failed_checks=failed_checks,
+            skipped_count=skipped_count,
+            results=results,
         )
