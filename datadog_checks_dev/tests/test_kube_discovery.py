@@ -522,6 +522,12 @@ class TestAssertPodStable:
                 pytest.raises(AssertionError, match='OOMKilled'),
                 id='oom_killed',
             ),
+            pytest.param(
+                pod_state(restart_count=1, terminated_reason='OOMKilled'),
+                pod_state(restart_count=1, terminated_reason='OOMKilled'),
+                nullcontext(),
+                id='pre_existing_oom_killed',
+            ),
             pytest.param(pod_state(), pod_state(), nullcontext(), id='stable'),
         ],
     )

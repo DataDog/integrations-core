@@ -572,6 +572,9 @@ def assert_pod_stable(initial_state: dict[str, Any], current_state: dict[str, An
 
     initial_statuses = initial_state.get('status', {}).get('containerStatuses', [])
     current_statuses = current_state.get('status', {}).get('containerStatuses', [])
+    initial_terminated_reasons = {
+        status['name']: status.get('lastState', {}).get('terminated', {}).get('reason') for status in initial_statuses
+    }
 
     initial_restarts = sum(status['restartCount'] for status in initial_statuses)
     current_restarts = sum(status['restartCount'] for status in current_statuses)
@@ -588,7 +591,9 @@ def assert_pod_stable(initial_state: dict[str, Any], current_state: dict[str, An
             )
 
         terminated_reason = status.get('lastState', {}).get('terminated', {}).get('reason')
-        if terminated_reason in ('Error', 'OOMKilled'):
+        if terminated_reason in ('Error', 'OOMKilled') and terminated_reason != initial_terminated_reasons.get(
+            status['name']
+        ):
             raise AssertionError(
                 f"Container {status['name']!r} last terminated with reason {terminated_reason!r} "
                 f'after probing candidate #{candidate_index}'
