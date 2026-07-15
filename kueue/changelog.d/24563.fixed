@@ -1,0 +1,1 @@
+Use the current Kueue Workload API for workload event collection, with fallback support for older clusters.
