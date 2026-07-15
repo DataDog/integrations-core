@@ -5,9 +5,6 @@ files:
   discovery:
     strategies:
     - template: discovery/openmetrics_from_named_ports
-      overrides:
-        port_names:
-        - metrics
   options:
   - template: init_config
     options:
