@@ -54,7 +54,6 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     project_id: str
     query_metrics: Optional[QueryMetrics] = None
-    reported_hostname: Optional[str] = None
     service: Optional[str] = None
     tags: Optional[tuple[str, ...]] = None
 

@@ -29,7 +29,7 @@ instances:
     database: my-database
 
     ## @param dbm - boolean - optional - default: false
-    ## Set to `true` to enable Database Monitoring (DBM). Requires a Datadog Agent 7.36.1 or above.
+    ## Set to `true` to enable Database Monitoring (DBM).
     #
     # dbm: false
 
@@ -39,13 +39,6 @@ instances:
     ## authentication method when the agent runs inside GCP (GKE, Cloud Run, Compute Engine, etc.).
     #
     # credentials_path: /path/to/service-account-key.json
-
-    ## @param reported_hostname - string - optional
-    ## Override the hostname reported for this instance. Defaults to `project_id:instance_id`.
-    ## Useful when the agent connects via a proxy, or to align the hostname with what other
-    ## integrations report for the same Spanner instance.
-    #
-    # reported_hostname: <REPORTED_HOSTNAME>
 
     ## Configure collection of query metrics (requires `dbm: true`). Metrics are sourced from
     ## `SPANNER_SYS.QUERY_STATS_TOP_MINUTE`, which is populated by Cloud Spanner once per minute.

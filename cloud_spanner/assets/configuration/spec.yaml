@@ -31,7 +31,7 @@ files:
         example: my-database
     - name: dbm
       description: |
-        Set to `true` to enable Database Monitoring (DBM). Requires a Datadog Agent 7.36.1 or above.
+        Set to `true` to enable Database Monitoring (DBM).
       value:
         type: boolean
         example: false
@@ -44,13 +44,6 @@ files:
       value:
         type: string
         example: /path/to/service-account-key.json
-    - name: reported_hostname
-      description: |
-        Override the hostname reported for this instance. Defaults to `project_id:instance_id`.
-        Useful when the agent connects via a proxy, or to align the hostname with what other
-        integrations report for the same Spanner instance.
-      value:
-        type: string
     - name: query_metrics
       description: |
         Configure collection of query metrics (requires `dbm: true`). Metrics are sourced from
