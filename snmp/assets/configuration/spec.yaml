@@ -46,7 +46,7 @@ files:
         value:
           example: 10
           type: integer
-        fleet_configurable: true
+        fleet_configurable: false
       - name: min_collection_interval
         value:
           example: 15
@@ -623,7 +623,7 @@ files:
           value:
             type: integer
             example: 20
-          fleet_configurable: true
+          fleet_configurable: false
         - name: linux
           description: Linux-specific configuration
           options:
