@@ -63,7 +63,7 @@ def candidate_ports(service: Service, hints: Iterable[int]) -> Iterator[Port]:
 
 
 def candidate_ports_by_name(service: Service, names: Iterable[str]) -> Iterator[Port]:
-    """Yield service ports matching one of the provided names."""
+    """Yield ports matching each name in order, with no fallback to unmatched ports."""
     seen: set[int] = set()
 
     for name in dict.fromkeys(names):
