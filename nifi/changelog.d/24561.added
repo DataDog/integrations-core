@@ -1,0 +1,1 @@
+Add log collection for `nifi-app.log`, capturing startup, shutdown, error, and audit trail events.
