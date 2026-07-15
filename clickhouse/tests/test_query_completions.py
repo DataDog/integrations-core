@@ -416,14 +416,18 @@ def test_flush_log_query_format():
     assert '{checkpoint_filter}' in FLUSH_LOG_QUERY
     assert '{async_insert_log_table}' in FLUSH_LOG_QUERY
 
-    # Bound parameter (ClickHouse server-side)
+    # Bound parameters (ClickHouse server-side)
     assert '{max_flush_rows:UInt64}' in FLUSH_LOG_QUERY
+    assert '{min_checkpoint_us:UInt64}' in FLUSH_LOG_QUERY
 
     # hostName() is included for per-node checkpoint tracking
     assert 'hostName() AS server_node' in FLUSH_LOG_QUERY
 
     # Upper bound so the window never runs past "now"
     assert 'event_time_microseconds <= now64(6)' in FLUSH_LOG_QUERY
+
+    # Date bound so ClickHouse can prune old daily partitions
+    assert 'event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))' in FLUSH_LOG_QUERY
 
     # Fields used to build flush records
     assert 'database' in FLUSH_LOG_QUERY
