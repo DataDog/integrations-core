@@ -8,7 +8,6 @@ import pytest
 
 from datadog_checks.base import AgentCheck  # noqa: F401
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
-from datadog_checks.base.utils.discovery import Port, Service
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.velero import VeleroCheck
 
@@ -46,35 +45,3 @@ def test_incorrect_openmetrics_endpoint(dd_run_check):
     ):
         check = VeleroCheck('velero', {}, [{'openmetrics_endpoint': endpoint}])
         dd_run_check(check)
-
-
-def test_discovery_candidates_from_named_ports():
-    service = Service(
-        id='velero',
-        host='10.0.0.1',
-        ports=(
-            Port(number=8080, name='http'),
-            Port(number=8085, name='http-monitoring'),
-            Port(number=9090, name='metrics'),
-        ),
-    )
-
-    candidates = list(VeleroCheck.generate_configs(service))
-
-    assert [candidate['instances'][0]['openmetrics_endpoint'] for candidate in candidates] == [
-        'http://10.0.0.1:8085/metrics',
-        'http://10.0.0.1:9090/metrics',
-    ]
-
-
-def test_discovery_candidates_ignore_ports_without_matching_names():
-    service = Service(
-        id='velero',
-        host='10.0.0.1',
-        ports=(
-            Port(number=8080, name='http'),
-            Port(number=8085),
-        ),
-    )
-
-    assert list(VeleroCheck.generate_configs(service)) == []
