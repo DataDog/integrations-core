@@ -26,6 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
+    "aiolimiter==1.2.1",
     "anthropic>=0.18.0",
     "click~=8.1.6",
     "coverage",
@@ -41,7 +42,7 @@ dependencies = [
     "tomli-w",
     "tomlkit",
     "tqdm",
-    "requests==2.33.0",
+    "requests==2.34.2",
     "matplotlib",
     "squarify",
     "datadog",

@@ -1,8 +1,10 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import base64
 import heapq
 import json
+import marshal
 from collections import defaultdict
 from time import time
 
@@ -18,6 +20,10 @@ from datadog_checks.kafka_consumer.constants import (
 )
 
 MAX_TIMESTAMPS = 1000
+
+# Total broker-timestamp entries retained per cluster, ~0.5 GiB at ~89 bytes/entry. The
+# per-partition history is scaled down from this budget as the partition count grows.
+MAX_TIMESTAMP_ENTRIES = 6_000_000
 
 LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
 
@@ -281,9 +287,7 @@ class KafkaCheck(AgentCheck):
         """Loads broker timestamps from persistent cache."""
         broker_timestamps = defaultdict(dict)
         try:
-            for topic_partition, content in json.loads(self.read_persistent_cache(persistent_cache_key)).items():
-                for offset, timestamp in content.items():
-                    broker_timestamps[topic_partition][int(offset)] = timestamp
+            broker_timestamps.update(marshal.loads(base64.b64decode(self.read_persistent_cache(persistent_cache_key))))
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
         return broker_timestamps
@@ -297,8 +301,15 @@ class KafkaCheck(AgentCheck):
                     earliest[topic_partition] = offset
         return earliest
 
+    def _max_history(self, num_partitions):
+        """Per-partition timestamp cap, scaled so total retained entries stay within the budget."""
+        if num_partitions <= 0:
+            return self._max_timestamps
+        return max(2, min(self._max_timestamps, MAX_TIMESTAMP_ENTRIES // num_partitions))
+
     def _add_broker_timestamps(self, broker_timestamps, highwater_offsets, prune_floors=None):
         prune_floors = prune_floors or {}
+        max_history = self._max_history(len(highwater_offsets))
         for (topic, partition), highwater_offset in highwater_offsets.items():
             timestamps = broker_timestamps["{}_{}".format(topic, partition)]
             # Reset detected: clear the whole cache. Low-offset survivors are from the
@@ -306,15 +317,16 @@ class KafkaCheck(AgentCheck):
             if any(o > highwater_offset for o in timestamps):
                 timestamps.clear()
             timestamps[highwater_offset] = time()
-            if len(timestamps) >= self._max_timestamps:
+            if len(timestamps) >= max_history:
                 prune_floor = prune_floors.get((topic, partition))
                 if prune_floor is not None:
                     _prune_below_anchor(timestamps, prune_floor)
-                _visvalingam_whyatt(timestamps, max(2, self._max_timestamps // 2))
+                _visvalingam_whyatt(timestamps, max(2, max_history // 2))
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
         """Saves broker timestamps to persistent cache."""
-        self.write_persistent_cache(persistent_cache_key, json.dumps(broker_timestamps))
+        blob = marshal.dumps(dict(broker_timestamps))
+        self.write_persistent_cache(persistent_cache_key, base64.b64encode(blob).decode('ascii'))
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
