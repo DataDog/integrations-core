@@ -12,6 +12,7 @@ from datadog_checks.dev.tooling.commands.meta.prometheus import prom
 from datadog_checks.dev.tooling.commands.meta.snmp import snmp
 from datadog_checks.dev.tooling.commands.meta.windows import windows
 
+from ddev.cli.meta.ai import ai_group
 from ddev.cli.meta.scripts import scripts
 
 
@@ -24,6 +25,7 @@ def meta():
     """
 
 
+meta.add_command(ai_group)
 meta.add_command(catalog)
 meta.add_command(changes)
 meta.add_command(create_example_commits)
