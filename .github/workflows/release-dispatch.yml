@@ -129,8 +129,8 @@ jobs:
           IS_STABLE_RELEASE: ${{ inputs.is-stable-release }}
         run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_prepare.py"
 
-      # Most stable tags are already created by GitLab. Only mint a write token
-      # when release preparation found local tags that still need to be pushed.
+      # Only mint a write token when validated local tags need to be pushed.
+      # Dry runs and no-op reruns therefore do not consume App token quota.
       - name: Get source tag token via dd-octo-sts
         if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
         id: source-octo-sts
