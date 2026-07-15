@@ -163,6 +163,7 @@ jobs:
         working-directory: source
         env:
           PACKAGES: ${{ steps.prepare.outputs.packages }}
+          NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
           DRY_RUN: ${{ inputs.dry-run }}
