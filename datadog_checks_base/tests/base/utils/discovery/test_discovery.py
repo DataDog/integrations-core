@@ -273,6 +273,16 @@ def test_candidate_ports_by_name_deduplicates_matching_port_numbers():
     ]
 
 
+def test_candidate_ports_by_name_ignores_empty_names():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(Port(number=8080, name=''),),
+    )
+
+    assert list(candidate_ports_by_name(service, [''])) == []
+
+
 def test_dev_placeholder_field_constants_match_models():
     """Guard the one fact datadog_checks_dev must hand-copy from base.
 

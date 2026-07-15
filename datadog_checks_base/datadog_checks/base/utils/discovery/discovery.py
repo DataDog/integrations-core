@@ -67,6 +67,8 @@ def candidate_ports_by_name(service: Service, names: Iterable[str]) -> Iterator[
     seen: set[int] = set()
 
     for name in dict.fromkeys(names):
+        if not name:
+            continue
         for port in service.ports:
             if port.name == name and port.number not in seen:
                 seen.add(port.number)
