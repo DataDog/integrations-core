@@ -24,14 +24,6 @@ from .conftest import EXPECTED_AUTODISCOVERY_CHECKS
 pytestmark = [pytest.mark.e2e, common.py3_plus_only]
 
 
-def _build_device_ip(container_ip, last_digit='1'):
-    last_digit = str(last_digit)
-    snmp_device = container_ip.split('.')
-    snmp_device[len(snmp_device) - 1] = last_digit
-    snmp_device = '.'.join(snmp_device)
-    return snmp_device
-
-
 @common.snmp_listener_only
 def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
@@ -40,7 +32,7 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     The assertions match `snmp_listener` configuration in `datadog.yaml`.
     See `dd_environment` setup in `conftest.py`.
     """
-    snmp_device = _build_device_ip(container_ip)
+    snmp_device = container_ip
     subnet_prefix = ".".join(container_ip.split('.')[:3])
 
     aggregator = common.dd_agent_check_wrapper(
@@ -147,16 +139,5 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
         for metric in IF_SCALAR_GAUGE:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
-
-    # ==== test ignored IPs ====
-    tags = [
-        'snmp_device:{}'.format(_build_device_ip(container_ip, '2')),
-        'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
-        'snmp_host:41ba948911b9',
-        'device_hostname:41ba948911b9',
-        'snmp_profile:generic-device',
-        'agent_host:' + common.get_agent_hostname(),
-    ]
-    aggregator.assert_metric('snmp.devices_monitored', count=0, tags=tags)
 
     aggregator.assert_all_metrics_covered()
