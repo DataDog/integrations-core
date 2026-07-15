@@ -101,14 +101,8 @@ def assert_all_discovery_candidates_stable(
         _assert_container_stable(initial_state, current_state, index)
 
         current_stdout, current_stderr = _get_container_logs(current_container_id)
-        # Diffed separately: stdout/stderr interleaving varies across calls, breaking a combined diff.
-        new_stdout = _diff_logs(previous_stdout, current_stdout)
-        new_stderr = _diff_logs(previous_stderr, current_stderr)
-        new_logs = new_stdout + new_stderr
-        for line in new_logs.splitlines():
-            logging.debug('New log line: %s', line)
-        _assert_no_log_patterns(new_logs, log_patterns, index)
-        previous_stdout, previous_stderr = current_stdout, current_stderr
+        previous_stdout = assert_no_new_log_patterns(previous_stdout, current_stdout, log_patterns, index)
+        previous_stderr = assert_no_new_log_patterns(previous_stderr, current_stderr, log_patterns, index)
 
 
 def _get_compose_container_id(
@@ -196,11 +190,6 @@ def _get_container_logs(container_id: str) -> tuple[str, str]:
     return result.stdout, result.stderr
 
 
-def _diff_logs(previous: str, current: str) -> str:
-    """Return the portion of `current` appended since `previous`."""
-    return current[len(previous) :] if current.startswith(previous) else current
-
-
 def _assert_container_stable(
     initial_state: Mapping[str, Any], current_state: Mapping[str, Any], candidate_index: int
 ) -> None:
@@ -235,6 +224,17 @@ def _assert_no_log_patterns(logs: str, patterns: Sequence[str], candidate_index:
             raise AssertionError(
                 f'Container logs matched {pattern!r} after probing candidate #{candidate_index}: {match.group(0)!r}'
             )
+
+
+def assert_no_new_log_patterns(
+    previous_logs: str, current_logs: str, patterns: Sequence[str], candidate_index: int
+) -> str:
+    """Assert no dangerous pattern appears in the logs emitted since ``previous_logs``, returning the new baseline."""
+    new_logs = current_logs[len(previous_logs) :] if current_logs.startswith(previous_logs) else current_logs
+    for line in new_logs.splitlines():
+        logging.debug('New log line: %s', line)
+    _assert_no_log_patterns(new_logs, patterns, candidate_index)
+    return current_logs
 
 
 def get_e2e_discovery_metadata(

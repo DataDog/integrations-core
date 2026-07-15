@@ -75,6 +75,78 @@ def test():
     )
 
 
+def test_from_named_ports():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_named_ports
+              port_names:
+              - metrics
+              - http-monitoring
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/m
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    model_definitions = consumer.render()
+    files = model_definitions['test.yaml']
+
+    discovery_contents, discovery_errors = files['discovery.py']
+    assert not discovery_errors
+    assert discovery_contents == normalize_yaml(
+        """
+        from __future__ import annotations
+
+        from collections.abc import Iterator
+        from typing import Any
+
+        from datadog_checks.base.utils.discovery import Service, candidate_ports_by_name
+        from datadog_checks.test.config_models import discovery_overrides
+        from datadog_checks.test.config_models.instance import InstanceConfig
+        from datadog_checks.test.config_models.shared import SharedConfig
+
+
+        def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
+            shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
+                by_alias=True, mode='json', exclude_none=True
+            )
+            # discovery[0]: from_named_ports
+            for port in candidate_ports_by_name(service, ['metrics', 'http-monitoring']):
+                ctx = {'port': port}
+                instance_data = {
+                    'endpoint': 'http://{service.host}:{port.number}/m'.format(service=service, **ctx),
+                }
+                instance = InstanceConfig.model_validate(
+                    instance_data, context={'configured_fields': frozenset(instance_data)}
+                ).model_dump(by_alias=True, mode='json', exclude_none=True)
+                yield {'init_config': shared, 'instances': [instance]}
+
+
+        def candidates(service: Service) -> Iterator[dict[str, Any]]:
+            override = getattr(discovery_overrides, 'candidates', None)
+            if override is None:
+                yield from _generated_candidates(service)
+            else:
+                yield from override(service, default=_generated_candidates)
+        """
+    )
+
+
 def test_local_strategy():
     consumer = get_model_consumer(
         """

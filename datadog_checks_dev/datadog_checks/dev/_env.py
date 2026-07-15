@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
+import re
 from base64 import urlsafe_b64decode, urlsafe_b64encode
+from typing import Any
 
 DDTRACE_OPTIONS_LIST = [
     'DD_TAGS',
@@ -108,6 +110,36 @@ def format_config(config):
         config = dict(init_config={}, **config)
 
     return config
+
+
+def flags_to_argv(flags: dict[str, Any]) -> list[str]:
+    """Convert ``agent check`` keyword flags (e.g. ``check_rate=True``) into CLI argv tokens."""
+    argv = []
+    for key, value in flags.items():
+        if value is not False:
+            argv.append('--{}'.format(key.replace('_', '-')))
+            if value is not True:
+                argv.append(str(value))
+
+    return argv
+
+
+JSON_COLLECTOR_PATTERN = r'((?:\{ \[|\[).*?\n(?:\} \]|\]))'
+
+
+def find_collector_blobs(output: str) -> list[str]:
+    """Pull collector JSON blobs out of ``agent check --json`` output."""
+    return re.findall(JSON_COLLECTOR_PATTERN, output, re.DOTALL)
+
+
+def replay_collector_blobs(matches: list[str], stub_aggregator: Any, stub_agent: Any) -> None:
+    """Parse and replay each collector JSON blob found by ``find_collector_blobs``."""
+    for raw_json in matches:
+        try:
+            collector = json.loads(raw_json)
+        except json.JSONDecodeError as e:
+            raise ValueError(f'Error loading json: {e}\nCollector Json Output:\n{raw_json}') from e
+        replay_check_run(collector, stub_aggregator, stub_agent)
 
 
 def replay_check_run(agent_collector, stub_aggregator, stub_agent):
