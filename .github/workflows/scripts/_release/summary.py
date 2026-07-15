@@ -71,20 +71,25 @@ def build_summary(
         elif dry_run:
             footer = "> Dry run — no tags pushed, no builds triggered"
 
-    tags_row = ""
+    tags_section = ""
     if new_tags:
         tags_label = "Tags to push" if dry_run else "Tags pushed"
-        tags = ", ".join(f"`{tag}`" for tag in new_tags)
-        tags_row = f"| **{tags_label}** | {tags} |\n"
+        tags = "\n".join(f"- `{tag}`" for tag in new_tags)
+        tags_section = (
+            "<details>\n"
+            f"<summary><strong>{tags_label} ({len(new_tags)})</strong></summary>\n\n"
+            f"{tags}\n\n"
+            "</details>\n\n"
+        )
 
     return (
         "## Wheel Release\n\n"
         "| | |\n|---|---|\n"
         f"| **Mode** | {mode} |\n"
         f"| **Source** | {_source_link(source_repo, ref)} |\n"
-        f"| **Dry run** | {'Yes' if dry_run else 'No'} |\n"
-        + tags_row
-        + "\n| Package | Version | Status |\n"
+        f"| **Dry run** | {'Yes' if dry_run else 'No'} |\n\n"
+        + tags_section
+        + "| Package | Version | Status |\n"
         "|---------|---------|--------|\n"
         + "\n".join(rows)
         + (f"\n\n{footer}" if footer else "")

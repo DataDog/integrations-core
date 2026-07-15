@@ -87,11 +87,13 @@ class TestBuildSummary:
             was_dispatched=False,
             new_tags=["postgres-1.2.3", "mysql-2.0.0b1"],
         )
-        assert "| **Tags to push** | `postgres-1.2.3`, `mysql-2.0.0b1` |" in out
+        assert "<summary><strong>Tags to push (2)</strong></summary>" in out
+        assert "- `postgres-1.2.3`\n- `mysql-2.0.0b1`" in out
 
     def test_release_lists_pushed_tags(self) -> None:
         out = self._summary(new_tags=["postgres-1.2.3"])
-        assert "| **Tags pushed** | `postgres-1.2.3` |" in out
+        assert "<summary><strong>Tags pushed (1)</strong></summary>" in out
+        assert "- `postgres-1.2.3`" in out
 
     def test_custom_footer(self):
         out = self._summary(was_dispatched=False, footer="> Custom footer text")
