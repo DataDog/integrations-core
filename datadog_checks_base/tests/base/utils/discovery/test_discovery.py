@@ -6,7 +6,7 @@ import re
 import mock
 import pytest
 
-from datadog_checks.base.utils.discovery import Discovery, Port, Service, candidate_ports
+from datadog_checks.base.utils.discovery import Discovery, Port, Service, candidate_ports, candidate_ports_by_name
 
 
 def test_include_empty():
@@ -206,6 +206,70 @@ def test_candidate_ports_prefers_hints_and_deduplicates():
         Port(number=9090, name='metrics'),
         Port(number=8080, name='http'),
         Port(number=8081, name='admin'),
+    ]
+
+
+def test_candidate_ports_by_name_only_yields_matching_ports():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='http'),
+            Port(number=9090, name='metrics'),
+            Port(number=8081, name='admin'),
+        ),
+    )
+
+    assert list(candidate_ports_by_name(service, ['metrics', 'http-prom'])) == [Port(number=9090, name='metrics')]
+
+
+def test_candidate_ports_by_name_respects_name_priority():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='bar'),
+            Port(number=9090, name='foo'),
+            Port(number=8081, name='bar'),
+            Port(number=9091, name='foo'),
+        ),
+    )
+
+    assert list(candidate_ports_by_name(service, ['foo', 'bar'])) == [
+        Port(number=9090, name='foo'),
+        Port(number=9091, name='foo'),
+        Port(number=8080, name='bar'),
+        Port(number=8081, name='bar'),
+    ]
+
+
+def test_candidate_ports_by_name_does_not_fallback_to_other_ports():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='http'),
+            Port(number=8081, name='admin'),
+        ),
+    )
+
+    assert list(candidate_ports_by_name(service, ['metrics'])) == []
+
+
+def test_candidate_ports_by_name_deduplicates_matching_port_numbers():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8443, name='metrics'),
+            Port(number=8443, name='http-metrics'),
+            Port(number=9443, name='metrics'),
+        ),
+    )
+
+    assert list(candidate_ports_by_name(service, ['http-metrics', 'metrics'])) == [
+        Port(number=8443, name='http-metrics'),
+        Port(number=9443, name='metrics'),
     ]
 
 

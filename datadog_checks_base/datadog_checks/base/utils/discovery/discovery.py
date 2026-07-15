@@ -60,3 +60,14 @@ def candidate_ports(service: Service, hints: Iterable[int]) -> Iterator[Port]:
         if port.number not in seen:
             seen.add(port.number)
             yield port
+
+
+def candidate_ports_by_name(service: Service, names: Iterable[str]) -> Iterator[Port]:
+    """Yield service ports matching one of the provided names."""
+    seen: set[int] = set()
+
+    for name in dict.fromkeys(names):
+        for port in service.ports:
+            if port.name == name and port.number not in seen:
+                seen.add(port.number)
+                yield port
