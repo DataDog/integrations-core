@@ -499,7 +499,6 @@ class KafkaCheck(AgentCheck):
             ):
                 result[(topic, partition)] = offset
         finally:
-            # Reuse the consumer across runs unless close_admin_client is set (which reuses neither client).
             if self.config._close_admin_client:
                 self.client.close_consumer()
 
