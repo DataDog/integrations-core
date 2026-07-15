@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.dev import TempDir, run_command
 from datadog_checks.dev.fs import path_join
 from datadog_checks.dev.kind import KindLoad, kind_run
-from datadog_checks.dev.kube_discovery import save_kube_discovery_state, setup_discovery_agent
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 
 from .common import MOCKED_INSTANCE, PORT
@@ -90,7 +90,6 @@ def dd_environment():
             },
         ) as kubeconfig:
             setup_discovery_agent(kubeconfig)
-            save_kube_discovery_state(kubeconfig)
 
             with ExitStack() as stack:
                 ip_ports = [

@@ -18,7 +18,7 @@ from datadog_checks.dev.kube_discovery import (
     build_check_archive,
     build_service_from_pod,
     run_discovery_check_kubernetes,
-    save_kube_discovery_state,
+    save_state,
     setup_discovery_agent,
 )
 
@@ -55,6 +55,10 @@ def write_auto_conf(check_root):
         f.write('ad_identifiers:\n  - test\ndiscovery: {}\ninit_config:\ninstances: []\n')
 
 
+def seed_kube_discovery_state(kubeconfig_path, *, namespace=DISCOVERY_NAMESPACE):
+    save_state('kube_discovery', {'kubeconfig_path': kubeconfig_path, 'namespace': namespace})
+
+
 @pytest.fixture(autouse=True)
 def clear_kube_discovery_state(monkeypatch):
     monkeypatch.delenv('DDEV_E2E_ENV_kube_discovery', raising=False)
@@ -65,26 +69,7 @@ def e2e_mode(monkeypatch):
     monkeypatch.setenv('DDEV_E2E_PARENT_PYTHON', '/usr/bin/python3')
 
 
-def test_save_and_get_kube_discovery_state():
-    save_kube_discovery_state('/tmp/kubeconfig')
-
-    from datadog_checks.dev.kube_discovery import get_kube_discovery_state
-
-    assert get_kube_discovery_state() == {'kubeconfig_path': '/tmp/kubeconfig', 'namespace': DISCOVERY_NAMESPACE}
-
-
 def test_get_kube_discovery_state_missing_raises():
-    from datadog_checks.dev.kube_discovery import get_kube_discovery_state
-
-    with pytest.raises(AssertionError, match='No kube_discovery state found'):
-        get_kube_discovery_state()
-
-
-def test_save_kube_discovery_state_is_noop_when_setup_disabled(monkeypatch):
-    monkeypatch.setenv('DDEV_E2E_UP', 'false')
-
-    save_kube_discovery_state('/tmp/kubeconfig')
-
     from datadog_checks.dev.kube_discovery import get_kube_discovery_state
 
     with pytest.raises(AssertionError, match='No kube_discovery state found'):
@@ -101,6 +86,22 @@ class TestSetupDiscoveryAgent:
             setup_discovery_agent('/tmp/kubeconfig')
 
         run_command.assert_not_called()
+
+        from datadog_checks.dev.kube_discovery import get_kube_discovery_state
+
+        with pytest.raises(AssertionError, match='No kube_discovery state found'):
+            get_kube_discovery_state()
+
+    def test_persists_kube_discovery_state(self, tmp_path):
+        check_root = tmp_path / 'test_check'
+        write_auto_conf(check_root)
+
+        with mock.patch('datadog_checks.dev.kube_discovery.run_command', return_value=result()):
+            setup_discovery_agent('/tmp/kubeconfig', check_root=str(check_root))
+
+        from datadog_checks.dev.kube_discovery import get_kube_discovery_state
+
+        assert get_kube_discovery_state() == {'kubeconfig_path': '/tmp/kubeconfig', 'namespace': DISCOVERY_NAMESPACE}
 
     def test_applies_manifests_and_installs_package(self, tmp_path):
         check_root = tmp_path / 'test_check'
@@ -272,7 +273,7 @@ class TestRunDiscoveryCheckKubernetes:
             run_discovery_check_kubernetes(mock.Mock(), mock.Mock())
 
     def test_replays_collector_output(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig', namespace='dd-agent-discovery')
+        seed_kube_discovery_state('/tmp/kubeconfig', namespace='dd-agent-discovery')
 
         collector = {
             'aggregator': {'metrics': [], 'service_checks': []},
@@ -304,7 +305,7 @@ class TestRunDiscoveryCheckKubernetes:
         ]
 
     def test_no_json_output_raises(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         with mock.patch('datadog_checks.dev.kube_discovery.run_command', return_value=result(stdout='no json here')):
             with mock.patch('datadog_checks.dev.kube_discovery.find_check_root', return_value='/root/test_check'):
@@ -312,7 +313,7 @@ class TestRunDiscoveryCheckKubernetes:
                     run_discovery_check_kubernetes(mock.Mock(), mock.Mock())
 
     def test_malformed_json_output_raises(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         stdout = 'preamble\n[ not valid json\n]\n'
 
@@ -332,13 +333,13 @@ class TestAssertAllDiscoveryCandidatesStableKubernetes:
             )
 
     def test_requires_pod_name_or_selector(self):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         with pytest.raises(TypeError, match='pod_name or pod_selector'):
             assert_all_discovery_candidates_stable_kubernetes(mock.Mock(), mock.Mock(), mock.Mock(), namespace='keda')
 
     def test_probes_generated_candidates_and_detects_restart(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         class DiscoveryCheck:
             service = None
@@ -373,7 +374,7 @@ class TestAssertAllDiscoveryCandidatesStableKubernetes:
         assert [port.number for port in DiscoveryCheck.service.ports] == [8080]
 
     def test_no_candidates_raises(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         class DiscoveryCheck:
             @classmethod
@@ -394,7 +395,7 @@ class TestAssertAllDiscoveryCandidatesStableKubernetes:
                 )
 
     def test_resolves_pod_via_selector(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         class DiscoveryCheck:
             @classmethod
@@ -424,7 +425,7 @@ class TestAssertAllDiscoveryCandidatesStableKubernetes:
         assert selector_command[6] == 'app=workload'
 
     def test_detects_dangerous_log_output(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         class DiscoveryCheck:
             @classmethod
@@ -453,7 +454,7 @@ class TestAssertAllDiscoveryCandidatesStableKubernetes:
                     )
 
     def test_probe_failure_still_checks_stability(self, e2e_mode):
-        save_kube_discovery_state('/tmp/kubeconfig')
+        seed_kube_discovery_state('/tmp/kubeconfig')
 
         class DiscoveryCheck:
             @classmethod

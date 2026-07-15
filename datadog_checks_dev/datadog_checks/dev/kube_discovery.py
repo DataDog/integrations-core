@@ -58,18 +58,6 @@ FAKE_API_KEY = 'a' * 32
 EXCLUDED_ARCHIVE_DIR_NAMES = frozenset({'.git', '.tox', '__pycache__', '.cache', '.mypy_cache', '.pytest_cache'})
 
 
-def save_kube_discovery_state(kubeconfig_path: str | os.PathLike[str], *, namespace: str = DISCOVERY_NAMESPACE) -> None:
-    """Persist the kubeconfig path and agent namespace from the setup process to the test process.
-
-    A no-op outside the actual environment setup pass (``env test``/``env stop`` re-run the fixture
-    body to reach ``kind_run``'s teardown, but must not re-derive or overwrite this state).
-    """
-    if not set_up_env():
-        return
-
-    save_state('kube_discovery', {'kubeconfig_path': os.fspath(kubeconfig_path), 'namespace': namespace})
-
-
 def setup_discovery_agent(
     kubeconfig_path: str | os.PathLike[str],
     *,
@@ -81,10 +69,12 @@ def setup_discovery_agent(
     """Deploy a sleeping, RBAC-scoped Agent pod that ``run_discovery_check_kubernetes`` can exec into.
 
     Call this inside the integration's existing ``kind_run(...)`` block, while ``KUBECONFIG`` still
-    points at the freshly created cluster. A no-op outside the actual environment setup pass, matching
-    how ``KindUp``/``ComposeFileUp``/``PortForwardUp`` behave: ``env test``/``env stop`` re-run the
-    fixture body to reach ``kind_run``'s teardown, but ``KUBECONFIG`` isn't guaranteed to resolve to a
-    live cluster at that point.
+    points at the freshly created cluster. Also persists the kubeconfig path and agent namespace for
+    ``run_discovery_check_kubernetes``/``assert_all_discovery_candidates_stable_kubernetes`` to pick up.
+    A no-op outside the actual environment setup pass, matching how ``KindUp``/``ComposeFileUp``/
+    ``PortForwardUp`` behave: ``env test``/``env stop`` re-run the fixture body to reach ``kind_run``'s
+    teardown, but ``KUBECONFIG`` isn't guaranteed to resolve to a live cluster at that point, and this
+    must not re-derive or overwrite the persisted state.
 
     ``extra_cluster_roles`` binds additional, already-existing ``ClusterRole``\\ s (e.g. a
     CRD-provided ``view`` role like KubeVirt's ``kubevirt.io:view``) to the agent's service account,
@@ -130,6 +120,8 @@ def setup_discovery_agent(
 
     # Install the local worktree into the Agent's embedded Python before running checks.
     install_local_package(kubeconfig_path, namespace, check_root, check_name)
+
+    save_state('kube_discovery', {'kubeconfig_path': os.fspath(kubeconfig_path), 'namespace': namespace})
 
 
 def run_discovery_check_kubernetes(
@@ -227,7 +219,7 @@ def assert_all_discovery_candidates_stable_kubernetes(
 def get_kube_discovery_state() -> dict[str, Any]:
     state = get_state('kube_discovery')
     if not state:
-        raise AssertionError('No kube_discovery state found. Call save_kube_discovery_state() during setup.')
+        raise AssertionError('No kube_discovery state found. Call setup_discovery_agent() during setup.')
 
     return state
 
