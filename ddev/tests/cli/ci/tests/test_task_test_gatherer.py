@@ -171,9 +171,9 @@ def test_happy_path_organizes_artifacts_and_emits_update(tmp_path: Path) -> None
     assert status.skipped_count == 0
     assert len(status.results) == 1
 
-    assert (tmp_path / "out" / "coverage" / "ntp-py3.13-linux-ubuntu-latest.xml").is_file()
-    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-ubuntu-latest-test-unit-py3.13.xml").is_file()
-    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-ubuntu-latest-test-e2e-py3.13.xml").is_file()
+    assert (tmp_path / "out" / "coverage" / "ntp-py3.13-linux.xml").is_file()
+    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-test-unit-py3.13.xml").is_file()
+    assert (tmp_path / "out" / "test_results" / "ntp-py3.13-linux-test-e2e-py3.13.xml").is_file()
 
 
 def test_failure_path_records_failed_steps_and_reports(tmp_path: Path) -> None:
@@ -196,7 +196,7 @@ def test_failure_path_records_failed_steps_and_reports(tmp_path: Path) -> None:
     status = _drain_queue(gatherer.queue)[0].workflows[0]
     assert status.failed_count == 1
 
-    result = gatherer._results_by_run[100][0]
+    result = gatherer._results_by_batch["batch-1"][0]
     assert result.status == "failure"
     assert result.integration == "ntp"
     assert result.environment == "py3.13"
@@ -219,7 +219,7 @@ def test_full_report_keeps_passing_tests(tmp_path: Path) -> None:
         )
     )
 
-    result = gatherer._results_by_run[100][0]
+    result = gatherer._results_by_batch["batch-1"][0]
     suite = result.reports[0].test_suites[0]
     assert suite.reported_counts.tests == 2
     assert suite.reported_counts.passed == 1
@@ -280,8 +280,8 @@ def test_same_integration_different_platforms_do_not_overwrite(tmp_path: Path) -
 
     # Both jobs share target+environment but differ by platform/runner: each keeps its own file.
     coverage_dir = tmp_path / "out" / "coverage"
-    assert (coverage_dir / "ntp-py3.13-linux-ubuntu-latest.xml").is_file()
-    assert (coverage_dir / "ntp-py3.13-windows-windows-latest.xml").is_file()
+    assert (coverage_dir / "ntp-py3.13-linux.xml").is_file()
+    assert (coverage_dir / "ntp-py3.13-windows.xml").is_file()
 
 
 def test_emits_update_per_batch_done_on_last(tmp_path: Path) -> None:
@@ -348,7 +348,7 @@ def test_multiple_failing_steps_all_collected(tmp_path: Path) -> None:
         )
     )
 
-    result = gatherer._results_by_run[100][0]
+    result = gatherer._results_by_batch["batch-1"][0]
     assert result.failed_steps == ["Run unit tests", "Upload logs on failure"]
 
 
@@ -374,7 +374,7 @@ def test_per_job_status_comes_from_correlated_job(tmp_path: Path) -> None:
         )
     )
 
-    result = gatherer._results_by_run[100][0]
+    result = gatherer._results_by_batch["batch-1"][0]
     assert result.status == "failure"
     assert result.failed_steps == ["Run unit tests"]
 
@@ -389,7 +389,7 @@ def test_missing_artifact_dir_is_skipped(tmp_path: Path) -> None:
         )
     )
 
-    result = gatherer._results_by_run[100][0]
+    result = gatherer._results_by_batch["batch-1"][0]
     assert result.status == "success"
     assert result.reports == ()
     assert not (tmp_path / "out").exists()
@@ -406,7 +406,7 @@ def test_malformed_junit_is_swallowed(tmp_path: Path) -> None:
         )
     )
 
-    result = gatherer._results_by_run[100][0]
+    result = gatherer._results_by_batch["batch-1"][0]
     assert result.status == "success"
     assert result.reports == ()  # malformed junit skipped; coverage.xml is not a JUnit report
 
@@ -428,7 +428,7 @@ def test_empty_batch_jobs_is_skipped(tmp_path: Path) -> None:
     gatherer.process_message(_batch_finished("", batch_jobs=[]))
 
     assert _drain_queue(gatherer.queue) == []
-    assert gatherer._results_by_run == {}
+    assert gatherer._results_by_batch == {}
     assert gatherer._received_batches == 0
 
 
@@ -456,7 +456,7 @@ def test_no_emission_without_batch_finished(tmp_path: Path) -> None:
     # Invariant: the gatherer's state changes only when a BatchFinished is consumed.
     gatherer = _make_gatherer(tmp_path)
     assert _drain_queue(gatherer.queue) == []
-    assert gatherer._results_by_run == {}
+    assert gatherer._results_by_batch == {}
     assert gatherer._received_batches == 0
 
 
