@@ -568,6 +568,10 @@ class RequestsWrapper(object):
         except requests_cookies.CookieConflictError:
             return default
 
+    def should_bypass_proxy(self, url: str) -> bool:
+        """Whether url should bypass any configured proxy under the client's no_proxy rules."""
+        return should_bypass_proxy(url, self.no_proxy_uris or [])
+
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """Look up a request header by name. Lookup is case-insensitive."""
         for key, value in self.options['headers'].items():

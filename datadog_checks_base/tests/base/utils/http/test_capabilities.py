@@ -101,6 +101,44 @@ class TestTrustEnv:
         assert http.trust_env is True
 
 
+class TestShouldBypassProxy:
+    def test_no_no_proxy_rules_never_bypasses(self):
+        http = RequestsWrapper({}, {})
+        assert http.no_proxy_uris is None
+        assert http.should_bypass_proxy('http://example.com') is False
+
+    def test_matching_host_bypasses(self):
+        http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': 'example.com'}}, {})
+        assert http.should_bypass_proxy('http://example.com/path') is True
+
+    def test_non_matching_host_does_not_bypass(self):
+        http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': 'example.com'}}, {})
+        assert http.should_bypass_proxy('http://other.com') is False
+
+    def test_wildcard_bypasses_all(self):
+        http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': '*'}}, {})
+        assert http.should_bypass_proxy('http://anything.example') is True
+
+
+class TestClientProtocolSurface:
+    def test_client_capabilities_declared(self):
+        from datadog_checks.base.utils.http_protocol import HTTPClient
+
+        for name in ('ignore_tls_warning', 'persist_connections'):
+            assert name in HTTPClient.__annotations__, f'{name} missing from HTTPClient'
+        assert callable(HTTPClient.should_bypass_proxy)
+
+    def test_wrapper_satisfies_client_surface(self):
+        from datadog_checks.base.utils.http_protocol import HTTPClient
+
+        http = RequestsWrapper({}, {})
+        for name in HTTPClient.__annotations__:
+            assert hasattr(http, name), f'RequestsWrapper missing attribute {name}'
+        for name in vars(HTTPClient):
+            if not name.startswith('_'):
+                assert hasattr(http, name), f'RequestsWrapper missing member {name}'
+
+
 class TestResponseProtocolSurface:
     def test_promoted_attributes_declared(self):
         annotations = HTTPResponse.__annotations__

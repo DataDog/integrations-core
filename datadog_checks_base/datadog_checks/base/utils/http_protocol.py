@@ -61,6 +61,18 @@ class HTTPClient(Protocol):
     # Whether the client trusts environment config (proxies, auth, CA bundles).
     trust_env: bool
 
+    # Suppress the debug log emitted for an unverified HTTPS request. Writable so a caller that
+    # knowingly disables TLS verification (e.g. kubelet when tls_verify is off) can silence it.
+    ignore_tls_warning: bool
+
+    # Reuse a single persistent connection across requests by default. Writable so a caller can opt
+    # into persistence after construction; a single request can still override via the ``persist`` option.
+    persist_connections: bool
+
+    # The verb methods below accept the usual request parameters (headers, params, data, json,
+    # stream, ...) plus these cross-backend per-request options as keyword arguments:
+    #   persist: bool - reuse the persistent connection for this request only, overriding
+    #            ``persist_connections`` for the duration of the call.
     def get(self, url: str, **options: Any) -> HTTPResponse: ...
     def post(self, url: str, **options: Any) -> HTTPResponse: ...
     def head(self, url: str, **options: Any) -> HTTPResponse: ...
@@ -80,3 +92,7 @@ class HTTPClient(Protocol):
     # cookie is absent or its name is ambiguous (the same name set for multiple domains or paths). A
     # backend must return default in the ambiguous case rather than raising.
     def get_cookie(self, name: str, default: str | None = None) -> str | None: ...
+
+    # Whether ``url`` should bypass any configured proxy under the client's no_proxy rules. Exposes the
+    # decision as behavior so callers never read the raw no_proxy list; returns False when no rule matches.
+    def should_bypass_proxy(self, url: str) -> bool: ...
