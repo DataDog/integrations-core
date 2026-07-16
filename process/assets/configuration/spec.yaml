@@ -96,8 +96,10 @@ files:
           require_trusted_provider: true
       - name: exact_match
         description: |
-          If you want to match your `search_string` on a substring within the list of process names, 
-          set this to true. This is equivalent to running `ps -e` on Linux or `Get-Process` on Windows.
+          Set this to true to match `search_string` against the exact process name, as reported by
+          the operating system's process list (for example, the names shown by `ps -e` on Linux).
+          On Windows, these process names include the file extension, so `search_string` must include
+          it as well (for example, `agent.exe` rather than `agent`).
 
           If you want to match your `search_string` on a substring within the list of process names
           and the command line, set this to false. This is equivalent to running `ps -ef` on Linux or

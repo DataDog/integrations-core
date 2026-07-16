@@ -1,0 +1,1 @@
+Cache the earliest (log-start) offset used for `kafka.topic.size` and `kafka.partition.size` across collection intervals instead of refetching it from the broker on every run.

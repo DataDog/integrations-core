@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 13.0.0 / 2026-06-09
+## 13.1.0 / 2026-07-08
+
+***Added***:
+
+* Route Cisco Catalyst 1200/1300/1300X and Cisco Business 350 (CBS350) devices to the ``cisco-sb`` SNMP profile, and add ``serial_number`` device metadata for them through ``entPhysicalSerialNum.67109120``. ([#23939](https://github.com/DataDog/integrations-core/pull/23939))
+
+***Fixed***:
+
+* Fix Cisco ASAv memory coverage in the `cisco-firepower-asa` SNMP profile by replacing hardcoded single-pool scalar OIDs with a full table walk of `cempMemPoolTable` tagged by pool name. ([#24107](https://github.com/DataDog/integrations-core/pull/24107))
+
+## 13.0.0 / 2026-06-09 / Agent 7.81.0
 
 ***Changed***:
 
