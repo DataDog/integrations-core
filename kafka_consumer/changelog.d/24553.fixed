@@ -1,0 +1,1 @@
+Call malloc_trim after each run to return librdkafka's per-arena free memory to the OS and curb agent memory growth.

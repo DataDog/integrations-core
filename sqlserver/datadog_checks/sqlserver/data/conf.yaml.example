@@ -420,6 +420,13 @@ instances:
         #
         # lookback_window: 600
 
+        ## @param collect_plans - boolean - optional - default: true
+        ## Set to `false` to disable collection of query execution plans while keeping query
+        ## metrics collection running. Note that when `enabled` is set to `false`, plan
+        ## collection is also disabled regardless of this setting.
+        #
+        # collect_plans: true
+
     ## Configure collection of procedure metrics
     #
     # procedure_metrics:
