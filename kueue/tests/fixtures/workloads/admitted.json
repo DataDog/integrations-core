@@ -9,7 +9,9 @@
     "spec": {
       "queueName": "gpu",
       "priority": 100,
-      "priorityClassName": "high"
+      "priorityClassRef": {
+        "name": "high"
+      }
     },
     "status": {
       "admission": {

@@ -216,6 +216,21 @@ def test_workload_events_suppress_first_poll(dd_run_check, aggregator, instance,
     assert not aggregator.events
 
 
+@pytest.mark.parametrize(
+    ('spec', 'priority_class'),
+    [
+        ({'priorityClassName': 'v1beta1'}, 'v1beta1'),
+        ({'priorityClassName': 'v1beta1', 'priorityClassRef': {'name': 'v1beta2'}}, 'v1beta2'),
+    ],
+)
+def test_workload_event_tags_priority_class(instance, spec, priority_class):
+    check = KueueCheck('kueue', {}, [instance])
+
+    tags = check.workload_event_tags('admitted', {'spec': spec}, None)
+
+    assert f'kueue_workload_priority_class:{priority_class}' in tags
+
+
 def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     tagger.reset()
