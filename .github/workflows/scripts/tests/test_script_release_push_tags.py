@@ -7,7 +7,7 @@ import pytest
 import release_push_tags
 
 
-def test_pushes_exact_tags(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_pushes_exact_tags_atomically(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("NEW_TAGS", '["postgres-1.0.0", "mysql-2.0.0"]')
     with patch("release_push_tags.subprocess.run") as mock_run:
         release_push_tags.main()
@@ -17,6 +17,7 @@ def test_pushes_exact_tags(monkeypatch: pytest.MonkeyPatch) -> None:
             [
                 "git",
                 "push",
+                "--atomic",
                 "origin",
                 "refs/tags/postgres-1.0.0:refs/tags/postgres-1.0.0",
                 "refs/tags/mysql-2.0.0:refs/tags/mysql-2.0.0",

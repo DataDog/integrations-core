@@ -15,7 +15,7 @@ def main() -> None:
         sys.exit(1)
 
     refspecs = [f"refs/tags/{tag}:refs/tags/{tag}" for tag in tags]
-    subprocess.run(["git", "push", "origin", *refspecs], check=True)
+    subprocess.run(["git", "push", "--atomic", "origin", *refspecs], check=True)
 
 
 if __name__ == "__main__":
