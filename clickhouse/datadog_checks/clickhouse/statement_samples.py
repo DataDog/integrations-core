@@ -99,7 +99,9 @@ SELECT
     query,
     total_bytes,
     length(entries.query_id) AS entry_count,
-    toUnixTimestamp64Micro(first_update) AS oldest_entry_us
+    -- first_update is the scheduled flush deadline (queued as now + busy_timeout in ClickHouse's
+    -- async insert queue), not the first insert time as the docs claim.
+    toUnixTimestamp64Micro(first_update) AS flush_deadline_us
 FROM {asynchronous_inserts_table}
 ORDER BY total_bytes DESC
 LIMIT {payload_row_limit}
@@ -522,7 +524,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
 
         result = []
         for row in rows:
-            database, table, server_node, format_, query_text, total_bytes, entry_count, oldest_entry_us = row
+            database, table, server_node, format_, query_text, total_bytes, entry_count, flush_deadline_us = row
             result.append(
                 {
                     'database': database,
@@ -532,7 +534,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                     'query': query_text,
                     'total_bytes': total_bytes,
                     'entry_count': entry_count,
-                    'oldest_entry_us': oldest_entry_us,
+                    'flush_deadline_us': flush_deadline_us,
                 }
             )
         return result
@@ -580,7 +582,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                         'server_node': row.get('server_node', ''),
                         'total_bytes': row['total_bytes'],
                         'entry_count': row['entry_count'],
-                        'oldest_entry_us': row['oldest_entry_us'],
+                        'flush_deadline_us': row['flush_deadline_us'],
                     }
                 )
 

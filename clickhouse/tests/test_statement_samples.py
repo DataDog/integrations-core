@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.statement_samples import ClickhouseStatementSamples
+from datadog_checks.clickhouse.statement_samples import DBM_TYPE, ClickhouseStatementSamples
 
 pytestmark = pytest.mark.unit
 
@@ -475,7 +475,7 @@ def test_buffer_snapshot_query_format():
     assert 'query' in BUFFER_SNAPSHOT_QUERY
     assert 'total_bytes' in BUFFER_SNAPSHOT_QUERY
     assert 'entry_count' in BUFFER_SNAPSHOT_QUERY
-    assert 'oldest_entry_us' in BUFFER_SNAPSHOT_QUERY
+    assert 'flush_deadline_us' in BUFFER_SNAPSHOT_QUERY
 
 
 def test_obfuscate_buffer_query(check_with_dbm):
@@ -509,7 +509,7 @@ def test_create_buffer_event(check_with_dbm):
             'query': "INSERT INTO events VALUES (1, 'x')",
             'total_bytes': 2048,
             'entry_count': 5,
-            'oldest_entry_us': 1700000000000000,
+            'flush_deadline_us': 1700000000000000,
         }
     ]
 
@@ -519,7 +519,7 @@ def test_create_buffer_event(check_with_dbm):
 
     # Verify event structure
     assert payload['ddsource'] == 'clickhouse'
-    assert payload['dbm_type'] == 'async_inserts_buffer'
+    assert payload['dbm_type'] == DBM_TYPE
     assert payload['collection_interval'] == samples._buffer_collection_interval
 
     # Verify buffers payload
@@ -530,7 +530,7 @@ def test_create_buffer_event(check_with_dbm):
     assert buffer['table'] == 'events'
     assert buffer['total_bytes'] == 2048
     assert buffer['entry_count'] == 5
-    assert buffer['oldest_entry_us'] == 1700000000000000
+    assert buffer['flush_deadline_us'] == 1700000000000000
     assert 'query_signature' in buffer
 
 
