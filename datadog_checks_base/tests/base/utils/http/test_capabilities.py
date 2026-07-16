@@ -6,6 +6,7 @@ import pytest
 import requests
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 pytestmark = [pytest.mark.unit]
 
@@ -98,3 +99,13 @@ class TestTrustEnv:
         # A duck-typed session without trust_env must fall back to the True default.
         http = RequestsWrapper({}, {}, session=mock.Mock(spec=[]))
         assert http.trust_env is True
+
+
+class TestResponseProtocolSurface:
+    def test_promoted_attributes_declared(self):
+        annotations = HTTPResponse.__annotations__
+        for name in ('encoding', 'elapsed', 'cookies', 'links', 'url', 'history'):
+            assert name in annotations, f'{name} missing from HTTPResponse'
+
+    def test_get_peer_cert_declared(self):
+        assert callable(HTTPResponse.get_peer_cert)

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator, Mapping
+from datetime import timedelta
 from typing import Any, Protocol
 
 # Provisional backend-neutral HTTP surface (stabilizes once the httpx backend lands). RequestsWrapper
@@ -17,6 +18,19 @@ class HTTPResponse(Protocol):
     content: bytes
     text: str
     headers: Mapping[str, str]
+    # Character encoding used to decode ``text``; None until determined. Writable so callers can
+    # force a default (e.g. 'utf-8') before reading text. Present on both requests and httpx.
+    encoding: str | None
+    # Time elapsed between sending the request and finishing parsing of the response headers.
+    elapsed: timedelta
+    # Cookies the server set on this response.
+    cookies: Mapping[str, str]
+    # Parsed ``Link`` header, keyed by ``rel`` (or URL when no rel), matching requests/httpx.
+    links: Mapping[str, Mapping[str, str]]
+    # Final URL of the response (after any redirects).
+    url: str
+    # Redirect responses that led to this one, oldest first.
+    history: list[HTTPResponse]
 
     @property
     def ok(self) -> bool: ...
@@ -26,6 +40,9 @@ class HTTPResponse(Protocol):
     def json(self, **kwargs: Any) -> Any: ...
     def raise_for_status(self) -> None: ...
     def close(self) -> None: ...
+    # Peer TLS certificate of the connection that served this response, or None when the scheme is
+    # not HTTPS or the connection has already been released. binary_form=True returns the DER bytes.
+    def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None: ...
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]: ...
     def iter_lines(
         self,
