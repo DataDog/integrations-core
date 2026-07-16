@@ -317,6 +317,7 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         check: ClickhouseCheck,
         config,
         job_name: str,
+        enabled: bool | None = None,
     ):
         """
         Initialize the query log job.
@@ -325,12 +326,15 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
             check: The parent ClickhouseCheck instance
             config: Job-specific configuration object
             job_name: Name for this job (e.g., "query-metrics", "query-completions")
+            enabled: Override whether the job loop runs. Defaults to config.enabled;
+                subclasses that host additional collections pass their combined enabled state
+                so the shared job still runs when only the collapsed collection is enabled.
         """
         collection_interval = float(config.collection_interval)
         super().__init__(
             check,
             run_sync=config.run_sync,
-            enabled=config.enabled,
+            enabled=config.enabled if enabled is None else enabled,
             expected_db_exceptions=(Exception,),
             min_collection_interval=check.check_interval if hasattr(check, 'check_interval') else 15,
             dbms="clickhouse",
