@@ -187,7 +187,7 @@ class HTTPCheck(AgentCheck):
                 http_status = r.status_code
                 tags_list.append("http_status_code:{}".format(http_status))
             if use_cert_from_response:
-                peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
+                peer_cert = r.get_peer_cert(binary_form=True)
 
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile("^url:").match, tags_list)):
