@@ -11,6 +11,7 @@ import requests
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.weaviate.check import DEFAULT_LIVENESS_ENDPOINT
@@ -37,6 +38,8 @@ def setup_weaviate():
 @pytest.fixture(scope='session')
 def dd_environment():
     with kind_run(conditions=[setup_weaviate]) as kubeconfig, ExitStack() as stack:
+        setup_discovery_agent(kubeconfig)
+
         weaviate_host, weaviate_port = stack.enter_context(
             port_forward(kubeconfig, 'weaviate', 2112, 'statefulset', 'weaviate')
         )
