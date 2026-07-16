@@ -329,9 +329,9 @@ def mock_http(mocker):
     from unittest.mock import PropertyMock, create_autospec
 
     from datadog_checks.base.checks.base import AgentCheck
-    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
+    from datadog_checks.base.utils.http_protocol import HTTPClient
 
-    client = create_autospec(HTTPClientProtocol)
+    client = create_autospec(HTTPClient)
     # Protocol annotations are not picked up by create_autospec, so set options explicitly.
     client.options = {
         'auth': None,

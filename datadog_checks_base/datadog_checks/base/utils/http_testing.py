@@ -56,7 +56,7 @@ class _CaseInsensitiveDict(dict):
 
 
 class MockHTTPResponse:
-    """Library-agnostic mock HTTP response implementing HTTPResponseProtocol."""
+    """Library-agnostic mock HTTP response implementing HTTPResponse."""
 
     # Parameter order differs from MockResponse; not a compatibility concern since all callers use keyword args.
     def __init__(

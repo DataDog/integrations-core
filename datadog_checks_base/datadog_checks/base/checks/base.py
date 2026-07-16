@@ -67,7 +67,7 @@ if TYPE_CHECKING:
 
     from datadog_checks.base.utils.diagnose import Diagnosis
     from datadog_checks.base.utils.discovery import Service
-    from datadog_checks.base.utils.http_protocol import HTTPClientProtocol
+    from datadog_checks.base.utils.http_protocol import HTTPClient
     from datadog_checks.base.utils.metadata import MetadataManager
 
 inspect: _module_inspect = lazy_loader.load('inspect')
@@ -430,7 +430,7 @@ class AgentCheck(object):
         return limit
 
     @property
-    def http(self) -> HTTPClientProtocol:
+    def http(self) -> HTTPClient:
         """
         Provides logic to yield consistent network behavior based on user configuration.
 
@@ -441,7 +441,7 @@ class AgentCheck(object):
 
         return self._http
 
-    def create_http_client(self) -> HTTPClientProtocol:
+    def create_http_client(self) -> HTTPClient:
         """Construct the HTTP client backing self.http.
 
         Override this to build a bespoke wrapper or swap the backend. The default returns a

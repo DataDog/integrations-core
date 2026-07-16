@@ -48,7 +48,7 @@ from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
 if TYPE_CHECKING:
-    from .http_protocol import HTTPClientProtocol, HTTPResponseProtocol  # noqa: F401
+    from .http_protocol import HTTPClient, HTTPResponse  # noqa: F401
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
