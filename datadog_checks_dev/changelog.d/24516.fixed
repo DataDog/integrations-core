@@ -1,0 +1,1 @@
+Enforce the HTTPResponse protocol surface on ``MockHTTPResponse`` and add ``get_peer_cert``.

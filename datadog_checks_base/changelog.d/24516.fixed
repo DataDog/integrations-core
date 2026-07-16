@@ -1,0 +1,1 @@
+Add ``get_peer_cert`` and the ``encoding``, ``elapsed``, ``cookies``, ``links``, ``url``, and ``history`` attributes to the agnostic HTTP response protocol.
