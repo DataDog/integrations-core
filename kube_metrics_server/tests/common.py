@@ -4,8 +4,8 @@
 import os
 from unittest.mock import MagicMock
 
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 

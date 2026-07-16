@@ -5,8 +5,8 @@ import os
 
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.http import MockHTTPResponse
 
 from . import common
 
