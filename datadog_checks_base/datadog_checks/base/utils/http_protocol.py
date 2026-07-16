@@ -18,16 +18,15 @@ class HTTPResponse(Protocol):
     content: bytes
     text: str
     headers: Mapping[str, str]
-    # Character encoding used to decode ``text``; None until determined. Writable so callers can
-    # force a default (e.g. 'utf-8') before reading text. Present on both requests and httpx.
+    # Character encoding used to decode text. None until determined. Writable to force a default.
     encoding: str | None
     # Time elapsed between sending the request and finishing parsing of the response headers.
     elapsed: timedelta
     # Cookies the server set on this response.
     cookies: Mapping[str, str]
-    # Parsed ``Link`` header, keyed by ``rel`` (or URL when no rel), matching requests/httpx.
+    # Parsed Link header, keyed by rel, or by URL when no rel is present.
     links: Mapping[str, Mapping[str, str]]
-    # Final URL of the response (after any redirects).
+    # Final URL of the response, after any redirects.
     url: str
     # Redirect responses that led to this one, oldest first.
     history: list[HTTPResponse]
@@ -40,8 +39,7 @@ class HTTPResponse(Protocol):
     def json(self, **kwargs: Any) -> Any: ...
     def raise_for_status(self) -> None: ...
     def close(self) -> None: ...
-    # Peer TLS certificate of the connection that served this response, or None when the scheme is
-    # not HTTPS or the connection has already been released. binary_form=True returns the DER bytes.
+    # Peer TLS certificate of the connection, or None if not HTTPS or already released.
     def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None: ...
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]: ...
     def iter_lines(
