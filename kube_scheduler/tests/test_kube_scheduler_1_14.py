@@ -8,7 +8,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
 from .common import make_mock_metrics

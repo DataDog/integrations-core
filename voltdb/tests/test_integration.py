@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.base.stubs.aggregator import AggregatorStub  # noqa: F401
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub  # noqa: F401
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.voltdb import VoltDBCheck
 from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.types import Instance  # noqa: F401

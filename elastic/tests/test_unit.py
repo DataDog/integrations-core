@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
 from datadog_checks.elastic.metrics import INDEX_STATS_METRICS

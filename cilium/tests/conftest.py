@@ -6,7 +6,7 @@ import os
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import run_command
 from datadog_checks.dev.conditions import WaitFor

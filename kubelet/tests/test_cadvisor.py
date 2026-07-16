@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck
 
 from .test_kubelet import EXPECTED_METRICS_COMMON, NODE_SPEC, mock_from_file

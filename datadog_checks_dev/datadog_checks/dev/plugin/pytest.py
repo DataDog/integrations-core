@@ -312,7 +312,7 @@ def dd_default_hostname():
 def mock_response():
     global MockHTTPResponse
     if MockHTTPResponse is None:
-        from datadog_checks.base.utils.http_testing import MockHTTPResponse
+        from datadog_checks.dev.http import MockHTTPResponse
 
     yield MockHTTPResponse
 

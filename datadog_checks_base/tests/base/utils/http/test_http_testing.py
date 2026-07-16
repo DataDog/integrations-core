@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 
 
 def test_mock_http_patches_agentcheck(mock_http):

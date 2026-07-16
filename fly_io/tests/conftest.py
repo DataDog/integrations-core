@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here

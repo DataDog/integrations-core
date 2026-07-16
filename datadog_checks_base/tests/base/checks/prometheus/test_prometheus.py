@@ -1964,7 +1964,7 @@ def test_text_filter_input():
 
 
 def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.base.utils.http_testing import MockHTTPResponse
+    from datadog_checks.dev.http import MockHTTPResponse
 
     check = mocked_prometheus_check
 
@@ -1982,7 +1982,7 @@ def test_ssl_verify_not_raise_warning(caplog, mocked_prometheus_check, text_data
 
 
 def test_ssl_verify_not_raise_warning_cert_false(caplog, mocked_prometheus_check, text_data):
-    from datadog_checks.base.utils.http_testing import MockHTTPResponse
+    from datadog_checks.dev.http import MockHTTPResponse
 
     check = mocked_prometheus_check
     check.ssl_ca_cert = False

@@ -10,10 +10,10 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import DEFAULT_EXPIRATION, RequestsWrapper
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
+from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import DEFAULT_OPTIONS, FIXTURE_PATH
 

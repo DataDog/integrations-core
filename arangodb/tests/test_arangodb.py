@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.arangodb import ArangodbCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS

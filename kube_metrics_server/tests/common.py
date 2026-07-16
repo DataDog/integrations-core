@@ -4,7 +4,7 @@
 import os
 from unittest.mock import MagicMock
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev import get_here
 
 HERE = get_here()

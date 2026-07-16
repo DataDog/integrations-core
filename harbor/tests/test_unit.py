@@ -6,7 +6,7 @@ from mock import MagicMock
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import HARBOR_COMPONENTS
 
