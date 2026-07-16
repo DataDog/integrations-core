@@ -23,7 +23,7 @@ def test_check_coverage_e2e(dd_agent_check):
     aggregator = dd_agent_check(CONFIG_E2E)
 
     assert_check_coverage(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def assert_check_coverage(aggregator):

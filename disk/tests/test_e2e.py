@@ -40,4 +40,4 @@ def test_check(dd_agent_check):
             at_least = 0 if device == '/dev/sdb1' else 1
             aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, device=device, at_least=at_least)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

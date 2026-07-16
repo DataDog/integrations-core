@@ -44,7 +44,7 @@ def test_mongo_authdb(aggregator, check, instance_authdb, dd_run_check):
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['dd.mongo.async_job.cancel']
+        get_metadata_metrics(), exclude=['dd.mongo.async_job.cancel']
     )
 
 
@@ -67,7 +67,7 @@ def test_mongo_db_test(aggregator, check, instance_user, dd_run_check):
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['dd.mongo.async_job.cancel']
+        get_metadata_metrics(), exclude=['dd.mongo.async_job.cancel']
     )
 
 
@@ -83,7 +83,7 @@ def test_mongo_old_config(aggregator, check, instance, dd_run_check):
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS_OLD[metric_name](metric.value)
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['dd.mongo.async_job.cancel']
+        get_metadata_metrics(), exclude=['dd.mongo.async_job.cancel']
     )
 
 
@@ -99,7 +99,7 @@ def test_mongo_dbstats_tag(aggregator, check, instance_dbstats_tag_dbname, dd_ru
             metric = aggregator.metrics(metric_name)[0]
             assert METRIC_VAL_CHECKS[metric_name](metric.value)
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=['dd.mongo.async_job.cancel']
+        get_metadata_metrics(), exclude=['dd.mongo.async_job.cancel']
     )
 
     expected_metrics = {

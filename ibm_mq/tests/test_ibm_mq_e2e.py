@@ -15,14 +15,14 @@ def test_e2e_check_all(dd_agent_check, instance_collect_all):
     aggregator = dd_agent_check(instance_collect_all, rate=True)
 
     assert_all_metrics(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def test_e2e_check_all_via_names(dd_agent_check, instance_collect_all_via_names):
     aggregator = dd_agent_check(instance_collect_all_via_names, rate=True)
 
     assert_all_metrics(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 @pytest.mark.skipif(
@@ -32,4 +32,4 @@ def test_e2e_check_ssl(dd_agent_check, instance_ssl):
     aggregator = dd_agent_check(instance_ssl, rate=True)
 
     assert_all_metrics(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

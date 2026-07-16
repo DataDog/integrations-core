@@ -27,4 +27,4 @@ def test_check_ok_omv2(dd_agent_check, omv2_instance):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

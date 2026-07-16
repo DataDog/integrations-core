@@ -70,7 +70,7 @@ def test_check_filters_metrics_config(
 def test_check_emits_metrics_as_in_metadata(ready_check: KrakendCheck, aggregator: AggregatorStub):
     metadata_metrics = get_metrics_from_metadata()
     aggregator.assert_metrics_using_metadata(
-        metadata_metrics, check_submission_type=True, check_symmetric_inclusion=True
+        metadata_metrics, check_symmetric_inclusion=True
     )
 
 

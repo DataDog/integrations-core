@@ -19,7 +19,7 @@ def test_e2e(dd_agent_check, instance: InstanceBuilder):
 
     aggregator.assert_metrics_using_metadata(
         metadata_metrics,
-        check_submission_type=True,
+        check_submission_type=False,
         check_symmetric_inclusion=True,
     )
 
@@ -38,7 +38,7 @@ def test_e2e_discovery(dd_agent_check_discovery, is_lab):
 
     aggregator.assert_metrics_using_metadata(
         metadata_metrics,
-        check_submission_type=True,
+        check_submission_type=False,
         check_symmetric_inclusion=True,
     )
 

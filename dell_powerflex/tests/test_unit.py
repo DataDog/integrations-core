@@ -179,7 +179,7 @@ def test_assert_all_metrics(dd_run_check, aggregator, instance, mock_http_get):
         aggregator.assert_metric(metric['name'], value=metric['value'], tags=BASE_TAGS + metric['tags'])
 
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_symmetric_inclusion=True, check_submission_type=True
+        get_metadata_metrics(), check_symmetric_inclusion=True
     )
 
 

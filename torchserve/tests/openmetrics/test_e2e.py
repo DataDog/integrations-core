@@ -24,7 +24,7 @@ def test_check(dd_agent_check, openmetrics_instance):
         )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
     aggregator.assert_service_check(
         "torchserve.openmetrics.health",

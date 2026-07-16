@@ -201,7 +201,7 @@ def test_e2e(dd_agent_check, master_instance):
 
     assert_optional_slowlog_metrics(aggregator)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def assert_non_cloud_metrics(aggregator, tags):

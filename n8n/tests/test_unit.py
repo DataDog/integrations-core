@@ -41,7 +41,6 @@ def test_check_emits_metrics_as_in_metadata(
 
     aggregator.assert_metrics_using_metadata(
         common.get_openmetrics_metadata_metrics(major=2),
-        check_submission_type=True,
         check_symmetric_inclusion=True,
     )
 

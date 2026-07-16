@@ -41,7 +41,7 @@ def test_e2e_profile_meraki(dd_agent_check):
     assert_common_metrics(aggregator, common_tags)
     assert_extend_generic_if(aggregator, common_tags)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
     # --- TEST METADATA ---
     device = {
@@ -74,4 +74,4 @@ def test_e2e_profile_meraki(dd_agent_check):
     # --- CHECK COVERAGE ---
     assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

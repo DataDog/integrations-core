@@ -90,7 +90,7 @@ VTS_MOCKED_METRICS = {
 
 
 def assert_all_metrics_and_metadata(aggregator):
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     for metric in ALL_PLUS_METRICS:
         aggregator.assert_metric(metric, at_least=0)
 

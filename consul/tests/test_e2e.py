@@ -62,5 +62,5 @@ def test_e2e(dd_agent_check, instance_single_node_install):
     aggregator.assert_service_check(
         'consul.can_connect', ConsulCheck.OK, tags=['url:http://{}:8500/v1/coordinate/nodes'.format(common.HOST)]
     )
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
     aggregator.assert_all_metrics_covered()

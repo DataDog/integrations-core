@@ -14,4 +14,4 @@ pytestmark = pytest.mark.integration
 def test_check(aggregator, check, instance):
     check.check(instance)
     common._test_check(aggregator, instance)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

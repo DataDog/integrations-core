@@ -17,7 +17,7 @@ def test_check_default_metrics(mock_cursor, aggregator, instance, expected_defau
             metric['name'], metric['value'], metric['tags'] + ["foo:bar"], count=1, metric_type=metric['type']
         )
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check(
         'singlestore.can_connect', SinglestoreCheck.OK, tags=['foo:bar', 'singlestore_endpoint:localhost:3306']
     )
@@ -35,7 +35,7 @@ def test_check_extended_system_metrics(
             metric['name'], metric['value'], metric['tags'] + ["foo:bar"], count=1, metric_type=metric['type']
         )
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check(
         'singlestore.can_connect', SinglestoreCheck.OK, tags=['foo:bar', 'singlestore_endpoint:localhost:3306']
     )

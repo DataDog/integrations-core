@@ -41,4 +41,4 @@ def test_statestore_check_integration_assert_service_check(dd_run_check, aggrega
 @pytest.mark.usefixtures("dd_environment")
 def test_statestore_check_integration_assert_metrics_using_metadata(dd_run_check, aggregator, statestore_check):
     dd_run_check(statestore_check)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

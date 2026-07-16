@@ -26,7 +26,7 @@ def test_check(aggregator, instance, dd_run_check):
 
     aggregator.assert_all_metrics_covered()
     metadata_metrics = get_metadata_metrics()
-    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(metadata_metrics)
 
 
 def test_check_invalid_varnishadm(aggregator, instance, dd_run_check):

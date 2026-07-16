@@ -25,4 +25,4 @@ def test(dd_agent_check, instance, global_tags):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(metadata_metrics, check_metric_type=False)
+    aggregator.assert_metrics_using_metadata(metadata_metrics, check_metric_type=False, check_submission_type=False)

@@ -241,7 +241,7 @@ def assert_apc_ups_metrics(dd_agent_check, config):
     aggregator.assert_metric('snmp.upsOutletGroupStatus', metric_type=aggregator.GAUGE, tags=group_state_tags, value=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def test_e2e_memory_cpu_f5_big_ip(dd_agent_check):
@@ -503,7 +503,7 @@ def test_e2e_meraki_cloud_controller(dd_agent_check):
         value=1,
     )
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def test_e2e_core_cisco_csr(dd_agent_check):
@@ -543,7 +543,7 @@ def test_e2e_core_cisco_csr(dd_agent_check):
     aggregator.assert_metric('snmp.peerConnectionByState', metric_type=aggregator.GAUGE, tags=metric_tags, value=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def test_e2e_cisco_nexus(dd_agent_check):
@@ -750,7 +750,7 @@ def test_e2e_cisco_nexus(dd_agent_check):
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=2)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def test_e2e_cisco_legacy_wlc(dd_agent_check):
@@ -869,4 +869,4 @@ def test_e2e_cisco_legacy_wlc(dd_agent_check):
     aggregator.assert_metric('snmp.bsnDot11EssNumberOfMobileStations', metric_type=aggregator.GAUGE, tags=wlan_tags)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

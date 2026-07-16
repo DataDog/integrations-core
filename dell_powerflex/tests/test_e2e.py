@@ -20,4 +20,4 @@ def test_e2e(dd_agent_check):
             aggregator.assert_metric_has_tag(metric['name'], tag)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

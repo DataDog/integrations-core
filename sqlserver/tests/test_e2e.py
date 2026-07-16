@@ -53,7 +53,7 @@ def test_ao_primary_replica(dd_agent_check, init_config, instance_ao_docker_prim
         aggregator.assert_metric(mname, count=0)
 
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
+        get_metadata_metrics(), check_submission_type=False, exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
     )
 
 
@@ -95,7 +95,7 @@ def test_ao_secondary_replica(dd_agent_check, init_config, instance_ao_docker_se
         aggregator.assert_metric(mname, count=0)
 
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
+        get_metadata_metrics(), check_submission_type=False, exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
     )
 
 
@@ -140,5 +140,5 @@ def test_check_docker(dd_agent_check, init_config, instance_e2e):
     aggregator.assert_all_metrics_covered()
 
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
+        get_metadata_metrics(), check_submission_type=False, exclude=CUSTOM_METRICS + E2E_OPERATION_TIME_METRIC_NAME
     )

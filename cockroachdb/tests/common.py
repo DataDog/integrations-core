@@ -1732,7 +1732,7 @@ def assert_metrics(aggregator):
 
     # Custom transformer
     aggregator.assert_metric('cockroachdb.build.timestamp')
-    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(metadata_metrics)
     assert_service_checks(aggregator)
 
 

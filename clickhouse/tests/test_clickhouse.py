@@ -31,7 +31,7 @@ def test_check(aggregator, instance, dd_run_check):
 
     aggregator.assert_service_check("clickhouse.can_connect", count=1)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_custom_queries(aggregator, instance, dd_run_check):

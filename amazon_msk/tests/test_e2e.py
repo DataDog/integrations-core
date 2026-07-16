@@ -72,7 +72,7 @@ def test_node_check(dd_agent_check, instance, mock_e2e_client):
                 )
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def assert_node_metrics_legacy(aggregator, tags):

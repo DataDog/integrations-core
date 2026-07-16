@@ -97,6 +97,7 @@ def _assert_e2e_metrics(aggregator):
     exclude = [k for k in all_metadata if any(m in k for m in cross_check_metrics)]
     aggregator.assert_metrics_using_metadata(
         metadata_metrics,
+        check_submission_type=False,
         check_metric_type=False,
         check_symmetric_inclusion=True,
         exclude=exclude,

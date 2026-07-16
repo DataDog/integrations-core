@@ -33,5 +33,5 @@ def test_check(dd_agent_check, management_instance):
             aggregator.assert_metric_has_tag_prefix(metric["name"], tag)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
     assert len(aggregator.events) == 0

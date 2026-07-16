@@ -19,7 +19,7 @@ def test_metrics(aggregator, instance, dd_run_check):
     assert_metrics(aggregator)
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     assert_service_checks(aggregator)
 

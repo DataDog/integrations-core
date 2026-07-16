@@ -34,4 +34,4 @@ def test_source_controller_metrics(dd_agent_check):
     for metric_name in set(EXPECTED_METRICS['v2']) - ignore:
         aggregator.assert_metric(metric_name)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

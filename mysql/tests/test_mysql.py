@@ -93,7 +93,7 @@ def test_minimal_config(aggregator, dd_run_check, instance_basic):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), check_submission_type=True, exclude=[variables.OPERATION_TIME_METRIC_NAME]
+        get_metadata_metrics(), exclude=[variables.OPERATION_TIME_METRIC_NAME]
     )
 
 
@@ -114,7 +114,6 @@ def test_complex_config(aggregator, dd_run_check, instance_complex):
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        check_submission_type=True,
         exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME],
     )
 
@@ -374,7 +373,7 @@ def test_connection_failure(aggregator, dd_run_check, instance_error):
     aggregator.assert_service_check('mysql.can_connect', status=MySql.CRITICAL, tags=tags.SC_FAILURE_TAGS, count=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @common.requires_classic_replication
@@ -402,7 +401,6 @@ def test_complex_config_replica(aggregator, dd_run_check, instance_complex):
     )
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        check_submission_type=True,
         exclude=['alice.age', 'bob.age', variables.OPERATION_TIME_METRIC_NAME],
     )
 

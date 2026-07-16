@@ -682,7 +682,7 @@ def test_metrics_as_in_metadata(ready_check: PrefectCheck, aggregator: Aggregato
     histogram_suffixes = ('.avg', '.max', '.median', '.95percentile')
     metadata_metrics = {k: v for k, v in get_metadata_metrics().items() if not k.endswith(histogram_suffixes)}
     aggregator.assert_metrics_using_metadata(
-        metadata_metrics, check_submission_type=True, check_metric_type=False, check_symmetric_inclusion=True
+        metadata_metrics, check_metric_type=False, check_symmetric_inclusion=True
     )
 
 

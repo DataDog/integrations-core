@@ -20,4 +20,4 @@ def test_check_e2e(dd_agent_check, instance):
     for metric in expected_metrics:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

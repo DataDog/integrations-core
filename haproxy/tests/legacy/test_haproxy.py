@@ -134,7 +134,6 @@ def test_check(aggregator, check, instance):
     # The assertion below fails due to difference between new and legacy metric types in metadata.
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        check_submission_type=True,
         exclude=[
             'haproxy.frontend.bytes.in.total',
             'haproxy.frontend.bytes.out.total',

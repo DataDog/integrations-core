@@ -109,7 +109,6 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
             'dd.mongo.operation.time',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -203,7 +202,6 @@ def test_integration_replicaset_primary_in_shard(instance_integration, aggregato
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 3
     aggregator.assert_event(
@@ -303,7 +301,6 @@ def test_integration_replicaset_secondary_in_shard(instance_integration, aggrega
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -360,7 +357,6 @@ def test_integration_replicaset_arbiter_in_shard(instance_integration, aggregato
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -425,7 +421,6 @@ def test_integration_configsvr_primary(instance_integration, aggregator, check, 
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 3
     aggregator.assert_event(
@@ -523,7 +518,6 @@ def test_integration_configsvr_secondary(instance_integration, aggregator, check
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -591,7 +585,6 @@ def test_integration_replicaset_primary(instance_integration, aggregator, check,
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 3
     aggregator.assert_event(
@@ -697,7 +690,6 @@ def test_integration_replicaset_primary_config(instance_integration, aggregator,
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 3
     aggregator.assert_event(
@@ -807,7 +799,6 @@ def test_integration_replicaset_secondary(
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -863,7 +854,6 @@ def test_integration_replicaset_arbiter(instance_integration, aggregator, check,
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -920,7 +910,6 @@ def test_standalone(instance_integration, aggregator, check, dd_run_check):
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -987,7 +976,6 @@ def test_db_names_with_nonexistent_database(check, instance_integration, aggrega
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -1023,7 +1011,6 @@ def test_db_names_missing_existent_database(check, instance_integration, aggrega
             'dd.custom.mongo.query_a.el',
             'dd.mongo.async_job.cancel',
         ],
-        check_submission_type=True,
     )
     assert len(aggregator._events) == 0
 
@@ -1190,7 +1177,6 @@ def test_integration_database_autodiscovery(instance_integration_autodiscovery, 
             'dd.custom.mongo.query_a.amount',
             'dd.custom.mongo.query_a.el',
         ],
-        check_submission_type=True,
     )
 
 

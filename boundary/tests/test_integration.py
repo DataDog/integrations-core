@@ -31,7 +31,7 @@ def test(aggregator, dd_run_check, get_check, instance):
         for tag in custom_tags:
             aggregator.assert_metric_has_tag(metric, tag)
 
-    aggregator.assert_metrics_using_metadata(metadata_metrics, check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(metadata_metrics)
     aggregator.assert_all_metrics_covered()
 
 

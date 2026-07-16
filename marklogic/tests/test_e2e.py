@@ -22,4 +22,4 @@ def test_e2e(dd_agent_check):
     # Service checks
     assert_service_checks(aggregator, COMMON_TAGS, count=2)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

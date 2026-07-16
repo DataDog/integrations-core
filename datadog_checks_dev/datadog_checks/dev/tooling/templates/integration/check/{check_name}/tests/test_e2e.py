@@ -14,7 +14,7 @@ def test_e2e(dd_agent_check: Any, instance: InstanceType) -> None:
 
     # Assert every metric emitted is declared in metadata.csv with the correct type and unit,
     # and that every metric in metadata.csv was emitted at least once.
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
     # Assert no metric was emitted that wasn't covered by an assertion above.
     aggregator.assert_all_metrics_covered()

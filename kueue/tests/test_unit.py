@@ -65,7 +65,6 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
             aggregator.assert_metric_has_tag(metric, tag)
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        check_submission_type=True,
         check_symmetric_inclusion=True,
     )
 

@@ -137,4 +137,4 @@ def test_e2e_profile_juniper_variation(dd_agent_check):
     # Checked locally (needs empty juniper-variation.yaml profile)
     # assert_all_profile_metrics_and_tags_covered(profile, aggregator)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

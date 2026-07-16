@@ -36,6 +36,6 @@ def test_statestore_check_e2e_assert_service_check(dd_agent_check, statestore_in
 
 
 @pytest.mark.e2e
-def test_statestore_check_e2e_assert_metrics_using_metadata(dd_agent_check, statestore_instance):
+def test_statestore_check_e2e_assert_metrics_using_metadata(dd_agent_check, statestore_instance, check_submission_type=False):
     aggregator = dd_agent_check(statestore_instance, rate=True)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

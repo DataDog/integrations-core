@@ -11,5 +11,5 @@ def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     for metric in EXPECTED_METRICS:
         aggregator.assert_metric(name=metric)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
     aggregator.assert_all_metrics_covered()
