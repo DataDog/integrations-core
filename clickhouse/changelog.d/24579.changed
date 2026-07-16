@@ -1,0 +1,1 @@
+Emit a per-node ``clickhouse_node`` tag on all node-scoped ClickHouse checks; query metrics are no longer merged across nodes and are emitted per node.
