@@ -12,7 +12,7 @@ from .common import E2E_EXPECTED_METRIC_COUNTS, E2E_EXPECTED_VALUES, EXCLUDED_AP
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
     for metric_name, expected_count in E2E_EXPECTED_METRIC_COUNTS.items():
         aggregator.assert_metric(f'{NS}.{metric_name}', count=expected_count)

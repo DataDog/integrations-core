@@ -41,4 +41,4 @@ def test_catalog_check_integration_assert_service_check(dd_run_check, aggregator
 @pytest.mark.usefixtures("dd_environment")
 def test_catalog_check_integration_assert_metrics_using_metadata(dd_run_check, aggregator, catalog_check):
     dd_run_check(catalog_check)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

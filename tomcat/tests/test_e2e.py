@@ -20,7 +20,7 @@ def test_metrics(dd_agent_check, instance):
             aggregator.assert_metric_has_tag(metric, 'dd.internal.jmx_check_name:tomcat')
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW, check_submission_type=False)
 
 
 def test_service_checks(dd_agent_check, instance):

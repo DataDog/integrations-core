@@ -31,4 +31,4 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=JVM_E2E_METRICS_NEW, check_submission_type=False)

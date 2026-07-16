@@ -28,7 +28,7 @@ def test_check(dd_agent_check, instancev1, prometheus_metrics):
             'haproxy.frontend.bytes.in.total',
             'haproxy.frontend.bytes.out.total',
         ]
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude_metrics)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude_metrics, check_submission_type=False)
 
 
 def test_checkv2(dd_agent_check, instancev2, prometheus_metricsv2):
@@ -39,4 +39,4 @@ def test_checkv2(dd_agent_check, instancev2, prometheus_metricsv2):
         aggregator.assert_metric_has_tag('haproxy.{}'.format(metric), tag="endpoint:" + ENDPOINT_PROMETHEUS)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

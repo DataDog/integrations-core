@@ -36,6 +36,6 @@ def test_daemon_check_e2e_assert_service_check(dd_agent_check, daemon_instance):
 
 
 @pytest.mark.e2e
-def test_daemon_check_e2e_assert_metrics_using_metadata(dd_agent_check, daemon_instance):
+def test_daemon_check_e2e_assert_metrics_using_metadata(dd_agent_check, daemon_instance, check_submission_type=False):
     aggregator = dd_agent_check(daemon_instance, rate=True)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

@@ -57,7 +57,7 @@ def test_aof_loading_metrics(aggregator, redis_instance):
         aggregator.assert_metric('redis.aof.loading_loaded_perc', 44)
         aggregator.assert_metric('redis.aof.loading_eta_seconds', 45)
         aggregator.assert_all_metrics_covered()
-        aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+        aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instance):
@@ -106,7 +106,7 @@ def test_redis_default(aggregator, dd_run_check, check, redis_auth, redis_instan
         assert 'redis.net.instantaneous_ops_per_sec' in aggregator.metric_names
     db.flushdb()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_service_check(aggregator, dd_run_check, check, redis_auth, redis_instance):
@@ -225,7 +225,7 @@ def test__check_key_lengths_single_db(aggregator, redis_instance):
 
     # that single metric should have value=2
     aggregator.assert_metric('redis.key.length', value=2)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test__check_key_lengths_multi_db(aggregator, redis_instance):
@@ -260,4 +260,4 @@ def test__check_key_lengths_multi_db(aggregator, redis_instance):
     aggregator.assert_metric('redis.key.length', value=2, tags=['key:test_foo', 'key_type:list', 'redis_db:db3'])
     aggregator.assert_metric('redis.key.length', value=1, tags=['key:test_bar', 'key_type:list', 'redis_db:db0'])
     aggregator.assert_metric('redis.key.length', value=0, tags=['key:missing_key'])
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

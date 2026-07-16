@@ -36,7 +36,7 @@ def test_e2e_discovery(dd_agent_check_discovery):
     # In discovery mode, the endpoint tag is derived from the runtime-discovered
     # service host, not from the static host-mapped METRICS_URL used by test_check.
     # Validate discovered metrics via metadata instead of asserting a fixed endpoint tag.
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 def test_e2e_discovery_all_candidates(dd_agent_check):

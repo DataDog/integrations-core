@@ -55,7 +55,7 @@ def test_check(aggregator, instance, dd_environment):
     aggregator.assert_service_check('consul.check')
     aggregator.assert_service_check('consul.up', tags=['consul_datacenter:dc1', 'consul_url:{}'.format(common.URL)])
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -72,7 +72,7 @@ def test_single_node_install(aggregator, instance_single_node_install, dd_enviro
     aggregator.assert_service_check('consul.check')
     aggregator.assert_service_check('consul.up', tags=['consul_datacenter:dc1', 'consul_url:{}'.format(common.URL)])
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -143,7 +143,7 @@ def test_prometheus_endpoint(aggregator, dd_environment, instance_prometheus, ca
     # Example with `consul.raft.commitTime.count`:
     #  * It is a rate when submitting metrics with DogStatsD
     #  * It is a rate when submitting metrics with OpenMetricsBaseCheck
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration

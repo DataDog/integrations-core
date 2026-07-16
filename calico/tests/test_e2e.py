@@ -21,4 +21,4 @@ def test_check_ok(dd_agent_check):
             at_least=0 if metric in common.OPTIONAL_METRICS else 1,
         )
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

@@ -301,4 +301,4 @@ def test_e2e(dd_agent_check, exercise_envoy):
             aggregator.assert_metric(metric, at_least=0)
     # We can't assert all covered, as some aren't received every time
     aggregator.assert_service_check('envoy.can_connect', Envoy.OK)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

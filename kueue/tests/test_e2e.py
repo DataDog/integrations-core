@@ -28,7 +28,7 @@ DDEV_CONFIG_PATHS = (
 def test_e2e(dd_agent_check):
     aggregator = dd_agent_check()
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
     for metric, tags in EXPECTED_METRIC_TAGS.items():
         aggregator.assert_metric(metric, at_least=1)

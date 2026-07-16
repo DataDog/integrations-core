@@ -18,7 +18,7 @@ def test_e2e(dd_agent_check, instance):
     for metric in get_metadata_metrics():
         aggregator.assert_metric(name=metric, at_least=0, tags=TAGS)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
     aggregator.assert_all_metrics_covered()
 
 
@@ -34,7 +34,7 @@ def test_e2e_service_checks(dd_agent_check, instance):
 def test_e2e_discovery(dd_agent_check_discovery):
     aggregator = dd_agent_check_discovery(check_rate=True)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
     aggregator.assert_service_check("temporal.server.openmetrics.health", status=TemporalCheck.OK)
 
 

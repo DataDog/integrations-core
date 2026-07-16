@@ -24,7 +24,7 @@ def test_redis_replication_link_metric(aggregator, replica_instance, dd_run_chec
     redis_check = check(replica_instance)
     dd_run_check(redis_check)
     aggregator.assert_metric('redis.replication.master_link_down_since_seconds', value=0)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_redis_replication_link_metric_with_unhealthy_host(aggregator, replica_instance, dd_run_check, check):
@@ -36,7 +36,7 @@ def test_redis_replication_link_metric_with_unhealthy_host(aggregator, replica_i
     assert len(metrics) == 1
     assert metrics[0].value != 0
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(
@@ -79,4 +79,4 @@ def test_redis_repl(aggregator, dd_run_check, check, master_instance):
     for name in REPLICA_METRICS:
         aggregator.assert_metric(name)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

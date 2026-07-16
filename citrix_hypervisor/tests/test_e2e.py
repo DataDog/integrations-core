@@ -26,4 +26,4 @@ def test_e2e(dd_agent_check, instance, custom_tags):
     aggregator = dd_agent_check(instance, rate=True)
     common._assert_standalone_metrics(aggregator, custom_tags, count=2)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

@@ -36,7 +36,7 @@ def test_slowlog(aggregator, dd_run_check, check, redis_instance):
 
     expected_tags = ['foo:bar', 'redis_host:{}'.format(HOST), 'redis_port:6379', 'command:LPUSH']
     aggregator.assert_metric('redis.slowlog.micros', tags=expected_tags)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_custom_slowlog(aggregator, dd_run_check, check, redis_instance):

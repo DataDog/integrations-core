@@ -33,7 +33,7 @@ pytestmark = [
 def test_e2e_legacy(dd_agent_check, legacy_config):
     aggregator = dd_agent_check(legacy_config, rate=True)
     assert_check(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 @pytest.mark.parametrize('use_openmetrics', [True, False], indirect=True)
@@ -42,4 +42,4 @@ def test_e2e(dd_agent_check, get_config, use_openmetrics):
     assert_check(aggregator, use_openmetrics=use_openmetrics)
     # Excluding gitlab.rack.http_requests_total because it is a distribution metric
     # (its sum and count metrics are in the metadata)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=["gitlab.rack.http_requests_total"])
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=["gitlab.rack.http_requests_total"], check_submission_type=False)

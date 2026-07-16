@@ -275,7 +275,6 @@ def test_submitted_metrics_count(aggregator):
     aggregator.all_metrics_asserted()
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        check_submission_type=True,
         exclude=['snmp.snmpEngineTime', 'snmp.tcpInSegs', 'snmp.udpDatagrams'],
     )
 

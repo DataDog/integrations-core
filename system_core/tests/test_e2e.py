@@ -12,4 +12,4 @@ from . import common
 def test_e2e(dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
     common._test_check(aggregator, instance)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

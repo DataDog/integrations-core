@@ -25,7 +25,7 @@ def test_check(cursor_factory, aggregator, instance, dd_run_check, expected_metr
             metric_type=metric['type'],
         )
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check(
         SERVICE_CHECK_CONNECT,
         ServiceCheck.OK,

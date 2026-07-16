@@ -45,7 +45,7 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
     assert_metrics(aggregator)
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     assert_service_checks(aggregator)
 
@@ -77,7 +77,7 @@ def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, m
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     assert_service_checks(aggregator)
 

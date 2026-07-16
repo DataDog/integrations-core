@@ -19,7 +19,7 @@ def test_integration_metrics(aggregator, check, dd_run_check, instance, datadog_
         aggregator.assert_metric(metric)
 
     assert_metrics_covered(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_metadata(aggregator, check, dd_run_check, instance, datadog_agent):

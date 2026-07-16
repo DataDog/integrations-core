@@ -32,7 +32,7 @@ def test_istiod(aggregator, dd_run_check, mock_http_response):
         'istio.go.memstats.alloc_bytes.count', value=1.123329752e09, metric_type=aggregator.MONOTONIC_COUNT
     )
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -47,7 +47,7 @@ def test_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     for metric in common.V2_MESH_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -68,7 +68,7 @@ def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
     # Edited this test since v2 doesn't exclude connectionID
     _assert_tags_excluded(aggregator, common.CONFIG_EXCLUDE_LABELS, exclude_connectionid=False)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -85,7 +85,7 @@ def test_type_override_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     for metric in common.V2_MESH_METRICS + common.V2_MESH_COUNTER_GAUGE:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -132,7 +132,7 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
         metric_type=aggregator.MONOTONIC_COUNT,
     )
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_istio_agent_dns_metrics(aggregator, dd_run_check, mock_http_response):
@@ -154,7 +154,7 @@ def test_istio_agent_dns_metrics(aggregator, dd_run_check, mock_http_response):
     for metric in dns_metrics:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(
@@ -222,7 +222,7 @@ def test_non_conforming_metrics(aggregator, dd_run_check, mock_http_response):
     for metric in common.NON_CONFORMING_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -239,7 +239,7 @@ def test_unverified_metrics(aggregator, dd_run_check, mock_http_response):
     for metric in common.MOCK_TEST_METRICS:
         aggregator.assert_metric(metric)
 
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_all_metrics_covered()
 
 
@@ -270,7 +270,7 @@ def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response, c
 
     for metric in common.V2_ZTUNNEL_METRICS:
         aggregator.assert_metric(metric)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, mock_http_response):

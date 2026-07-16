@@ -41,4 +41,4 @@ def test_daemon_check_integration_assert_service_check(dd_run_check, aggregator,
 @pytest.mark.usefixtures("dd_environment")
 def test_daemon_check_integration_assert_metrics_using_metadata(dd_run_check, aggregator, daemon_check):
     dd_run_check(daemon_check)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())

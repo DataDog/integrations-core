@@ -402,7 +402,6 @@ def test_empty_minute_stats_files_emit_no_metrics(dd_run_check, aggregator, mock
 def test_all_metrics_covered(all_metrics_aggregator):
     all_metrics_aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(),
-        check_submission_type=True,
         check_metric_type=True,
         check_symmetric_inclusion=True,
     )

@@ -30,7 +30,7 @@ def test_check(dd_agent_check):
                 aggregator.assert_metric(expected_metric)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
     for namespace in ("cluster_operator", "topic_operator", "user_operator"):
         aggregator.assert_service_check(

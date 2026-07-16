@@ -20,7 +20,7 @@ def test_e2e(dd_agent_check):
         aggregator.assert_metric(metric, at_least=0)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
     aggregator.assert_service_check(
         'spark.application_master.can_connect',

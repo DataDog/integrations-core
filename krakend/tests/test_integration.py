@@ -25,6 +25,5 @@ def test_all_metadata_metrics_found(aggregator: AggregatorStub):
     metadata_metrics = get_metrics_from_metadata()
     aggregator.assert_metrics_using_metadata(
         metadata_metrics,
-        check_submission_type=True,
         check_symmetric_inclusion=True,
     )

@@ -15,7 +15,7 @@ from . import common
 def _assert_metrics(aggregator):
     aggregator.assert_metrics_using_metadata(
         common.get_metadata_metrics_for_version(exclude_rare=True),
-        check_submission_type=True,
+        check_submission_type=False,
         check_symmetric_inclusion=True,
         exclude=list(common.RARE_EVENT_METRIC_NAMES),
     )

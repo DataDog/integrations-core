@@ -373,7 +373,7 @@ def test_index_metrics(dd_environment, aggregator, instance, cluster_tags):
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:testindex'])
         aggregator.assert_metric(m_name, tags=cluster_tags + ['index_name:.testindex'])
     aggregator.assert_metrics_using_metadata(
-        get_metadata_metrics(), exclude=['elasticsearch.custom.metric'], check_submission_type=True
+        get_metadata_metrics(), exclude=['elasticsearch.custom.metric']
     )
 
 

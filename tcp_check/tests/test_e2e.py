@@ -14,4 +14,4 @@ def test_e2e(dd_agent_check, instance):
     aggregator.assert_service_check('tcp.can_connect', status=TCPCheck.OK, count=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)

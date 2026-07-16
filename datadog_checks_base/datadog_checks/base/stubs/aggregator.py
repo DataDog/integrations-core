@@ -429,7 +429,7 @@ class AggregatorStub(object):
         self,
         metadata_metrics,
         check_metric_type=True,
-        check_submission_type=False,
+        check_submission_type=True,
         exclude=None,
         check_symmetric_inclusion=False,
     ):
@@ -440,10 +440,11 @@ class AggregatorStub(object):
         Pass `check_symmetric_inclusion=True` to assert that both set of metrics, those submitted and
         those in metadata.csv, are the same.
 
-        Checking type: By default we are asserting the in-app metric type (`check_submission_type=False`),
-        asserting this type make sense for e2e (metrics collected from agent).
-        For integrations tests, we can check the submission type with `check_submission_type=True`, or
-        use `check_metric_type=False` not to check types.
+        Checking type: By default we are asserting the submission type (`check_submission_type=True`),
+        which maps each submission method to the expected in-app metric type (e.g. ``rate`` -> ``gauge``).
+        This is correct for unit and integration tests.
+        For E2E tests (metrics collected from the agent), pass `check_submission_type=False` so the
+        raw in-app type is compared directly, or use `check_metric_type=False` not to check types.
 
         Usage:
 

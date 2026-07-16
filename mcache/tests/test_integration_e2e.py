@@ -40,7 +40,7 @@ def test_e2e(client, dd_agent_check, instance):
     aggregator = dd_agent_check(instance, rate=True)
 
     assert_check_coverage(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=False)
 
 
 @pytest.mark.integration
@@ -74,7 +74,7 @@ def test_metrics(client, instance, aggregator, dd_run_check):
     dd_run_check(check)
 
     assert_check_coverage(aggregator)
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.integration
