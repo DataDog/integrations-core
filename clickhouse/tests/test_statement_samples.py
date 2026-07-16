@@ -125,7 +125,11 @@ def test_create_samples_event(check_with_dbm):
 
     with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        event = samples._create_samples_event(rows, active_connections)
+        events = samples._create_samples_events(rows, active_connections)
+
+    # Without node info this is a single cluster-level event
+    assert len(events) == 1
+    event = events[0]
 
     # Verify event structure
     assert event['ddsource'] == 'clickhouse'
@@ -141,6 +145,52 @@ def test_create_samples_event(check_with_dbm):
     # Verify connections payload
     assert 'clickhouse_connections' in event
     assert len(event['clickhouse_connections']) == 1
+
+
+def test_create_samples_events_splits_per_node(check_with_dbm):
+    """Sessions and connections from different nodes are split into one event per node."""
+    samples = check_with_dbm.statement_samples
+    samples._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {'statement': 'SELECT 1', 'query_signature': 'sig1', 'user': 'default', 'server_node': 'node-1'},
+        {'statement': 'SELECT 2', 'query_signature': 'sig2', 'user': 'default', 'server_node': 'node-2'},
+    ]
+    active_connections = [
+        {
+            'user': 'default',
+            'query_kind': 'Select',
+            'current_database': 'default',
+            'connections': 5,
+            'server_node': 'node-1',
+        },
+        {
+            'user': 'default',
+            'query_kind': 'Select',
+            'current_database': 'default',
+            'connections': 3,
+            'server_node': 'node-2',
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        events = samples._create_samples_events(rows, active_connections)
+
+    assert len(events) == 2
+    by_node = {}
+    for event in events:
+        node_tags = [t for t in event['ddtags'] if t.startswith('clickhouse_node:')]
+        assert len(node_tags) == 1, event['ddtags']
+        node = node_tags[0].split(':', 1)[1]
+        by_node[node] = event
+        assert event['database_instance'] == check_with_dbm.database_identifier
+        for session in event['clickhouse_activity']:
+            assert session['server_node'] == node
+        for connection in event['clickhouse_connections']:
+            assert connection['server_node'] == node
+
+    assert set(by_node) == {'node-1', 'node-2'}
 
 
 def test_active_queries_query_format():
@@ -168,6 +218,9 @@ def test_active_queries_query_format():
     assert 'thread_ids' in ACTIVE_QUERIES_QUERY
     assert 'is_cancelled' in ACTIVE_QUERIES_QUERY
 
+    # Per-node identity
+    assert 'hostName() as server_node' in ACTIVE_QUERIES_QUERY
+
 
 def test_active_connections_query_format():
     """Test that the active connections query is properly formatted"""
@@ -179,6 +232,10 @@ def test_active_connections_query_format():
     # Verify aggregation
     assert 'count(*)' in ACTIVE_CONNECTIONS_QUERY
     assert 'GROUP BY' in ACTIVE_CONNECTIONS_QUERY
+
+    # Per-node identity in SELECT and GROUP BY
+    assert 'hostName() as server_node' in ACTIVE_CONNECTIONS_QUERY
+    assert 'GROUP BY user, query_kind, current_database, server_node' in ACTIVE_CONNECTIONS_QUERY
 
 
 def test_get_debug_tags(check_with_dbm):
@@ -195,7 +252,7 @@ def test_normalize_row_with_all_fields(check_with_dbm):
     """Test that all fields are properly normalized from system.processes"""
     samples = check_with_dbm.statement_samples
 
-    # Create a mock row with all 26 fields from ACTIVE_QUERIES_QUERY
+    # Create a mock row with all 27 fields from ACTIVE_QUERIES_QUERY
     mock_row = (
         1.234,  # elapsed
         'abc-123-def',  # query_id
@@ -223,6 +280,7 @@ def test_normalize_row_with_all_fields(check_with_dbm):
         'app-server-01',  # client_hostname
         0,  # is_cancelled
         'python-requests/2.28.0',  # http_user_agent
+        'clickhouse-node-1',  # server_node
     )
 
     normalized_row = samples._normalize_row(mock_row)
@@ -261,6 +319,9 @@ def test_normalize_row_with_all_fields(check_with_dbm):
 
     # Verify HTTP field
     assert normalized_row['http_user_agent'] == 'python-requests/2.28.0'
+
+    # Verify per-node field
+    assert normalized_row['server_node'] == 'clickhouse-node-1'
 
     # Verify obfuscation happened
     assert 'statement' in normalized_row

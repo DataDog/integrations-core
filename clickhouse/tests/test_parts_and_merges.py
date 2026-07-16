@@ -388,6 +388,7 @@ def test_emit_gauges_thresholds(check):
     for _, tags in by_name.values():
         assert not any(t.startswith('database:') or t.startswith('table:') for t in tags)
         assert 'server_node:node-1' in tags
+        assert 'clickhouse_node:node-1' in tags
 
 
 def test_collect_detached_parts_normalizes(check):

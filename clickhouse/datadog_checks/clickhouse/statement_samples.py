@@ -32,6 +32,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.clickhouse.utils import node_tag
 
 # Query to get currently running/active queries from system.processes
 # This is the ClickHouse equivalent of Postgres pg_stat_activity
@@ -66,7 +67,8 @@ SELECT
     port,
     client_hostname,
     is_cancelled,
-    http_user_agent
+    http_user_agent,
+    hostName() as server_node
 FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
   AND query NOT LIKE '%system.query_log%'
@@ -80,10 +82,11 @@ SELECT
     user,
     query_kind,
     current_database,
-    count(*) as connections
+    count(*) as connections,
+    hostName() as server_node
 FROM {processes_table}
 WHERE query NOT LIKE '%system.processes%'
-GROUP BY user, query_kind, current_database
+GROUP BY user, query_kind, current_database, server_node
 """
 
 
@@ -239,6 +242,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 client_hostname,
                 is_cancelled,
                 http_user_agent,
+                server_node,
             ) = row
 
             normalized_row = {
@@ -268,6 +272,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                 'client_hostname': str(client_hostname) if client_hostname else None,
                 'is_cancelled': bool(is_cancelled) if is_cancelled is not None else False,
                 'http_user_agent': str(http_user_agent) if http_user_agent else None,
+                'server_node': str(server_node) if server_node else '',
             }
 
             return self._obfuscate_query(normalized_row)
@@ -347,6 +352,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
                         'query_kind': row[1],
                         'current_database': row[2],
                         'connections': row[3],
+                        'server_node': str(row[4]) if row[4] else '',
                     }
                 )
 
@@ -381,26 +387,47 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             if session_count >= self._payload_row_limit:
                 break
 
-    def _create_samples_event(self, rows, active_connections):
+    def _create_samples_events(self, rows, active_connections):
         """
-        Create a database monitoring samples event payload.
+        Create one database monitoring samples event per ClickHouse node.
+
+        Active sessions and connections are grouped by node so each event carries
+        its own clickhouse_node tag. When there is no data at all, a single
+        cluster-level (untagged) empty snapshot is still emitted.
         """
         active_sessions = list(self._create_active_sessions(rows))
 
-        event = {
-            "host": self._check.reported_hostname,
-            "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
-            "ddsource": "clickhouse",
-            "dbm_type": "activity",
-            "collection_interval": self._collection_interval,
-            "ddtags": self._tags_no_db,
-            "timestamp": time.time() * 1000,
-            "service": getattr(self._check._config, 'service', None),
-            "clickhouse_activity": active_sessions,
-            "clickhouse_connections": active_connections,
-        }
-        return event
+        sessions_by_node = {}
+        for session in active_sessions:
+            sessions_by_node.setdefault(session.get('server_node', ''), []).append(session)
+
+        connections_by_node = {}
+        for connection in active_connections:
+            connections_by_node.setdefault(connection.get('server_node', ''), []).append(connection)
+
+        node_keys = set(sessions_by_node) | set(connections_by_node)
+        if not node_keys:
+            node_keys = {''}  # still emit an empty cluster-level snapshot
+
+        events = []
+        for server_node in sorted(node_keys):
+            ddtags = self._tags_no_db + [node_tag(server_node)] if server_node else self._tags_no_db
+            events.append(
+                {
+                    "host": self._check.reported_hostname,
+                    "database_instance": self._check.database_identifier,
+                    "ddagentversion": datadog_agent.get_version(),
+                    "ddsource": "clickhouse",
+                    "dbm_type": "activity",
+                    "collection_interval": self._collection_interval,
+                    "ddtags": ddtags,
+                    "timestamp": time.time() * 1000,
+                    "service": getattr(self._check._config, 'service', None),
+                    "clickhouse_activity": sessions_by_node.get(server_node, []),
+                    "clickhouse_connections": connections_by_node.get(server_node, []),
+                }
+            )
+        return events
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_samples(self):
@@ -420,10 +447,13 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         # Get active connections aggregation
         active_connections = self._get_active_connections()
 
-        # Create and submit samples event
-        samples_event = self._create_samples_event(rows, active_connections)
+        # Create and submit one samples event per node
+        samples_events = self._create_samples_events(rows, active_connections)
 
-        self._check.database_monitoring_query_activity(json.dumps(samples_event, default=default_json_event_encoding))
+        for samples_event in samples_events:
+            self._check.database_monitoring_query_activity(
+                json.dumps(samples_event, default=default_json_event_encoding)
+            )
 
         elapsed_ms = (time.time() - start_time) * 1000
         self._check.histogram(
@@ -434,9 +464,10 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         )
 
         self._log.debug(
-            "Samples snapshot collected: sessions=%s, connections=%s, elapsed_ms=%.2f",
-            len(samples_event.get('clickhouse_activity', [])),
-            len(samples_event.get('clickhouse_connections', [])),
+            "Samples snapshot collected: events=%s, sessions=%s, connections=%s, elapsed_ms=%.2f",
+            len(samples_events),
+            sum(len(e.get('clickhouse_activity', [])) for e in samples_events),
+            sum(len(e.get('clickhouse_connections', [])) for e in samples_events),
             elapsed_ms,
         )
 

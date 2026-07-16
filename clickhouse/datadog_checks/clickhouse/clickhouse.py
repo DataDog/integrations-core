@@ -292,9 +292,12 @@ class ClickhouseCheck(DatabaseCheck):
                     pick(queries.SystemEventsToDeprecate),
                     pick(queries.SystemEvents),
                     pick(queries.SystemAsynchronousMetrics),
+                    # SystemParts is left plain: it has a GROUP BY, so cluster_aware_query would
+                    # emit hostName() outside the GROUP BY (invalid SQL). Per-node parts data is
+                    # covered by the DBM parts_and_merges check instead.
                     queries.SystemParts,
-                    queries.SystemReplicas,
-                    queries.SystemDictionaries,
+                    pick(queries.SystemReplicas),
+                    pick(queries.SystemDictionaries),
                 ]
             )
 

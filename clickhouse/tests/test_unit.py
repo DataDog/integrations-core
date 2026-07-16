@@ -438,9 +438,14 @@ def test_get_queries_tags_system_tables_per_node_in_single_endpoint_mode(instanc
         assert 'hostName() AS clickhouse_node' in query['query']
         assert query['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
 
-    # system.parts/replicas/dictionaries use GROUP BY and are intentionally left untouched here.
+    # system.parts uses GROUP BY, so cluster_aware_query would put hostName() outside the
+    # GROUP BY (invalid SQL) — it is intentionally left un-wrapped. system.replicas and
+    # system.dictionaries have no GROUP BY and are wrapped for per-node tagging.
     if not use_advanced_queries:
         assert any(q is queries.SystemParts for q in check.get_queries())
+        cluster_aware_tables = ' '.join(q['query'] for q in cluster_aware)
+        assert "clusterAllReplicas('default', system.replicas)" in cluster_aware_tables
+        assert "clusterAllReplicas('default', system.dictionaries)" in cluster_aware_tables
 
 
 @pytest.mark.parametrize('use_advanced_queries', [True, False])
