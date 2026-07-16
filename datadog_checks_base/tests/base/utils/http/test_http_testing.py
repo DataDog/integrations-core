@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
 import pytest
 
 from datadog_checks.base import AgentCheck
@@ -146,6 +144,37 @@ def test_mock_response_links_cleared_after_header_pop():
     assert response.links == {}
 
 
-def test_mock_response_raw_readable():
-    response = MockHTTPResponse(json_data={'key': 'value'})
-    assert json.load(response.raw) == {'key': 'value'}
+def test_mock_response_get_peer_cert():
+    response = MockHTTPResponse()
+    assert response.get_peer_cert(binary_form=True) == b'mock-cert'
+    assert response.get_peer_cert() == {}
+
+
+def test_mock_response_blocks_off_protocol_read():
+    response = MockHTTPResponse(json_data={'k': 'v'})
+    with pytest.raises(AttributeError, match='HTTPResponse protocol'):
+        str(response.raw)
+    with pytest.raises(AttributeError, match='HTTPResponse protocol'):
+        str(response.request)
+
+
+def test_mock_response_blocks_off_protocol_write():
+    response = MockHTTPResponse()
+    with pytest.raises(AttributeError, match='HTTPResponse protocol'):
+        response.raw = object()
+
+
+def test_mock_response_promoted_attributes_delegate():
+    response = MockHTTPResponse(cookies={'c': '1'}, url='http://x', headers={'link': '<u>; rel=next'})
+    assert response.cookies == {'c': '1'}
+    assert response.url == 'http://x'
+    assert response.links['next']['url'] == 'u'
+    response.encoding = 'utf-8'
+    assert response.encoding == 'utf-8'
+
+
+def test_mock_response_raise_for_status_keeps_identity():
+    response = MockHTTPResponse(status_code=500)
+    with pytest.raises(HTTPStatusError) as exc_info:
+        response.raise_for_status()
+    assert exc_info.value.response is response

@@ -5,6 +5,7 @@ import json
 import re
 from collections.abc import Mapping
 from datetime import timedelta
+from functools import lru_cache
 from http.client import responses as http_responses
 from io import BytesIO
 from textwrap import dedent
@@ -93,8 +94,8 @@ class _CaseInsensitiveDict(dict):
         return super().setdefault(key.lower() if isinstance(key, str) else key, default)
 
 
-class MockHTTPResponse:
-    """Library-agnostic mock HTTP response implementing HTTPResponse."""
+class MockHTTPResponseImpl:
+    """Rich agnostic mock response; wrapped by the protocol-enforcing MockHTTPResponse."""
 
     # Parameter order differs from MockResponse; not a compatibility concern since all callers use keyword args.
     def __init__(
@@ -195,6 +196,9 @@ class MockHTTPResponse:
             )
             raise HTTPStatusError(message, response=self)
 
+    def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None:
+        return self.raw.connection.sock.getpeercert(binary_form=binary_form)
+
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
         # chunk_size=None means return the entire content as a single chunk (matches requests behavior)
         chunk_size = chunk_size if chunk_size is not None else len(self._content) or 1
@@ -233,8 +237,56 @@ class MockHTTPResponse:
         # so the same instance can be returned by a mock multiple times.
         pass
 
+    def __enter__(self) -> 'MockHTTPResponseImpl':
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
+        return None
+
+
+@lru_cache(maxsize=1)
+def protocol_members() -> frozenset[str]:
+    """External attribute names allowed on a mock response, derived from HTTPResponse."""
+    from datadog_checks.base.utils.http_protocol import HTTPResponse
+
+    members = set(getattr(HTTPResponse, '__annotations__', {}))
+    members |= {name for name in vars(HTTPResponse) if not name.startswith('_')}
+    members |= {'__enter__', '__exit__', '__iter__'}
+    return frozenset(members)
+
+
+class MockHTTPResponse:
+    """Protocol-enforcing wrapper: delegates HTTPResponse members, raises AttributeError otherwise."""
+
+    __slots__ = ('__wrapped__',)
+
+    def __init__(self, *args: Any, **kwargs: Any):
+        object.__setattr__(self, '__wrapped__', MockHTTPResponseImpl(*args, **kwargs))
+
+    def __getattr__(self, name: str) -> Any:
+        if name not in protocol_members():
+            raise AttributeError(f"{name!r} is not on the HTTPResponse protocol")
+        return getattr(self.__wrapped__, name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name not in protocol_members():
+            raise AttributeError(f"cannot set {name!r}: not on the HTTPResponse protocol")
+        setattr(self.__wrapped__, name, value)
+
+    def raise_for_status(self) -> None:
+        from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+
+        try:
+            self.__wrapped__.raise_for_status()
+        except HTTPStatusError as exc:
+            exc.response = self
+            raise
+
     def __enter__(self) -> 'MockHTTPResponse':
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
         return None
+
+    def __iter__(self) -> Iterator[bytes | str]:
+        return iter(self.__wrapped__)
