@@ -109,6 +109,7 @@ class MockHTTPResponseImpl:
         elapsed_seconds: float = 0.1,
         normalize_content: bool = True,
         url: str = '',
+        history: list | None = None,
     ):
         self.url = url
 
@@ -135,6 +136,7 @@ class MockHTTPResponseImpl:
         self.cookies = cookies or {}
         self.encoding: str | None = None
         self.elapsed = timedelta(seconds=elapsed_seconds)
+        self.history: list = history if history is not None else []
         self._stream = BytesIO(self._content)
 
         self.raw = MagicMock()
