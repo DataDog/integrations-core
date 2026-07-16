@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2020
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
 from datetime import datetime, timedelta, timezone
 
 from datadog_checks.base.checks import AgentCheck
@@ -43,13 +42,13 @@ class KubeletBase(AgentCheck):
             with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
                 if cutoff_date:
                     f = ExpiredPodFilter(cutoff_date)
-                    pod_list = json.load(r.raw, object_hook=f.json_hook)
+                    pod_list = r.json(object_hook=f.json_hook)
                     pod_list['expired_count'] = f.expired_count
                     if pod_list.get('items') is not None:
                         # Filter out None items from the list
                         pod_list['items'] = [p for p in pod_list['items'] if p is not None]
                 else:
-                    pod_list = json.load(r.raw)
+                    pod_list = r.json()
 
             if pod_list.get('items') is None:
                 # Sanitize input: if no pods are running, 'items' is a NoneObject

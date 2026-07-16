@@ -7,8 +7,9 @@ from datetime import datetime, timezone
 
 import mock
 
-from datadog_checks.base.checks.kubelet_base.base import KubeletBase, urljoin
+from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCredentials, urljoin
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 
@@ -32,6 +33,16 @@ def test_retrieve_pod_list_success(monkeypatch, mock_http_response):
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))
     assert json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True)
+
+
+def test_retrieve_pod_list_parses_via_json(mock_http):
+    check = KubeletBase('kubelet', {}, [{}])
+    check.pod_list_url = 'http://kubelet:10255/pods'
+    check.kubelet_credentials = KubeletCredentials({})
+    mock_http.get.return_value = MockHTTPResponse(json_data={'items': [{'name': 'p1'}]})
+
+    pod_list = check.retrieve_pod_list()
+    assert pod_list['items'] == [{'name': 'p1'}]
 
 
 def test_retrieved_pod_list_failure(monkeypatch):
