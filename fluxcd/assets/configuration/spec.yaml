@@ -2,6 +2,12 @@ name: fluxcd
 fleet_configurable: true
 files:
 - name: fluxcd.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_named_ports
+      overrides:
+        port_names:
+        - http-prom
   options:
   - template: init_config
     options:
@@ -15,3 +21,21 @@ files:
         for Flux custom resources (Flux 2.1+).
       value:
         type: string
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - helm-controller
+      - image-automation-controller
+      - kustomize-controller
+      - notification-controller
+      - source-controller
+  - template: auto_conf/cel_selector
+    overrides:
+      cel_selector.value.example:
+        containers:
+        # Narrow down matching containers since the controller names are generic
+        # and don't identify the container as being part of FluxCD.
+        - container.image.reference.contains("fluxcd/")
+  - template: auto_conf/discovery

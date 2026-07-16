@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.fluxcd import FluxcdCheck
@@ -38,9 +39,11 @@ def dd_environment():
     with kind_run(conditions=[setup_fluxcd]) as kubeconfig:
         instances = []
         with ExitStack() as stack:
+            setup_discovery_agent(kubeconfig)
             for controller in (
                 'source-controller',
                 'helm-controller',
+                'image-automation-controller',
                 'kustomize-controller',
                 'notification-controller',
             ):
