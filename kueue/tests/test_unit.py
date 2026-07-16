@@ -6,6 +6,7 @@ import json
 from unittest.mock import Mock
 
 import pytest
+from kubernetes.client.exceptions import ApiException
 
 from datadog_checks.base.stubs import tagger
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -13,7 +14,6 @@ from datadog_checks.kueue import KueueCheck
 from datadog_checks.kueue.check import OTHER_RESOURCE_NAME, RESOURCE_NAME_MAP
 from datadog_checks.kueue.kube_client import KubernetesAPIClient
 from datadog_checks.kueue.metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
-from kubernetes.client.exceptions import ApiException
 
 from .common import EXPECTED_METRIC_TAGS, UNIT_METRICS, get_fixture_path
 
