@@ -116,6 +116,61 @@ class TestLimiter:
         assert limiter.is_reached("dummy1") is False
         assert limiter.get_status() == (1, 10, False)
 
+    def test_on_limit_reached_callback(self):
+        callback = mock.MagicMock()
+        limiter = Limiter("my_check", "names", 2, on_limit_reached_func=callback)
+
+        assert limiter.is_reached() is False
+        assert limiter.is_reached() is False
+        callback.assert_not_called()
+
+        assert limiter.is_reached() is True
+        callback.assert_called_once_with()
+
+        assert limiter.is_reached() is True
+        callback.assert_called_once_with()
+
+    def test_on_limit_reached_callback_with_uid(self):
+        callback = mock.MagicMock()
+        limiter = Limiter("my_check", "names", 2, on_limit_reached_func=callback)
+
+        for _ in range(3):
+            assert limiter.is_reached("dummy1") is False
+        assert limiter.get_status() == (1, 2, False)
+        callback.assert_not_called()
+
+        assert limiter.is_reached("dummy2") is False
+        assert limiter.is_reached("dummy3") is True
+        assert limiter.get_status() == (3, 2, True)
+        callback.assert_called_once_with()
+
+        assert limiter.is_reached("dummy4") is True
+        assert limiter.get_status() == (4, 2, True)
+        callback.assert_called_once_with()
+
+    def test_on_limit_reached_callback_order(self):
+        calls = []
+        limiter = None
+
+        def warning(*args):
+            calls.append(("warning", limiter.reached_limit, args))
+
+        def callback():
+            calls.append(("callback", limiter.reached_limit))
+
+        limiter = Limiter("my_check", "names", 1, warning_func=warning, on_limit_reached_func=callback)
+        assert limiter.is_reached() is False
+        assert limiter.is_reached() is True
+
+        assert calls == [
+            (
+                "warning",
+                False,
+                ("Check %s exceeded limit of %s %s, ignoring next ones", "my_check", 1, "names"),
+            ),
+            ("callback", True),
+        ]
+
 
 class TestRounding:
     def test_round_half_up(self):

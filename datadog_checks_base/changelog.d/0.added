@@ -1,0 +1,1 @@
+Add best-effort OpenMetrics metric-limit Agent telemetry when ``max_returned_metrics`` is reached.

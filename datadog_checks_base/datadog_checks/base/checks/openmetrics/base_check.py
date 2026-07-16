@@ -56,6 +56,7 @@ class OpenMetricsBaseCheck(OpenMetricsScraperMixin, AgentCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 2000
+    OPENMETRICS_MAX_RETURNED_METRICS_TELEMETRY = True
 
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
