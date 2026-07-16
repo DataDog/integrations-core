@@ -101,7 +101,6 @@ def assert_all_discovery_candidates_stable(
         _assert_container_stable(initial_state, current_state, index)
 
         current_stdout, current_stderr = _get_container_logs(current_container_id)
-        current_logs = _get_container_logs(current_container_id)
         previous_stdout = assert_no_new_log_patterns(previous_stdout, current_stdout, log_patterns, index)
         previous_stderr = assert_no_new_log_patterns(previous_stderr, current_stderr, log_patterns, index)
 
