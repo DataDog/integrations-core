@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.query_completions import ClickhouseQueryCompletions
+from datadog_checks.clickhouse.query_completions import DBM_TYPE_FLUSH, ClickhouseQueryCompletions
 
 pytestmark = pytest.mark.unit
 
@@ -375,6 +375,38 @@ def test_flush_log_disabled_by_default(check_with_dbm):
         mock_collect.assert_not_called()
 
 
+def test_flush_only_enables_job_and_skips_completions():
+    """Test that the shared job runs for the flush log when query completions is disabled"""
+    instance = {
+        'server': 'localhost',
+        'port': 9000,
+        'username': 'default',
+        'password': '',
+        'db': 'default',
+        'dbm': True,
+        'query_completions': {'enabled': False, 'collection_interval': 10},
+        'asynchronous_insert_flush_log': {'enabled': True, 'collection_interval': 15},
+        'tags': ['test:clickhouse'],
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    query_completions = check.query_completions
+
+    # The shared job must be enabled so its loop runs and reaches flush collection.
+    assert query_completions._enabled is True
+    assert query_completions._flush_enabled is True
+
+    # run_job should collect the flush log but skip completed-query collection.
+    query_completions._tags = ['test:clickhouse']
+    with (
+        mock.patch.object(query_completions, '_collect_completed_queries') as mock_completions,
+        mock.patch.object(query_completions, '_collect_and_submit_flush') as mock_flush,
+    ):
+        query_completions.run_job()
+
+    mock_completions.assert_not_called()
+    mock_flush.assert_called_once()
+
+
 def test_collect_flush_runs_on_its_own_interval(check_with_flush):
     """Test that flush collection runs once per its own interval, not on every query-completions tick"""
     query_completions = check_with_flush.query_completions
@@ -400,7 +432,7 @@ def test_create_flush_event_structure(check_with_flush):
         payload = query_completions._create_flush_event(records)
 
     assert payload['ddsource'] == 'clickhouse'
-    assert payload['dbm_type'] == 'async_inserts_flush'
+    assert payload['dbm_type'] == DBM_TYPE_FLUSH
     assert payload['collection_interval'] == query_completions._flush_collection_interval
     assert 'timestamp' in payload
     assert 'host' in payload
