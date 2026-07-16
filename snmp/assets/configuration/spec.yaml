@@ -76,7 +76,6 @@ files:
               name: tcpPassiveOpens
               metric_tags:
                 - TCP
-        fleet_configurable: true
       - name: profiles
         description: |
           Specify profiles to be able to reference a set of metrics by name.

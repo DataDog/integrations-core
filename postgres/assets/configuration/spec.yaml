@@ -573,7 +573,6 @@ files:
             type: integer
             example: 600
             display_default: 600
-          fleet_configurable: true
     - name: application_name
       display_priority: 0
       fleet_configurable: true
@@ -770,7 +769,6 @@ files:
           value:
             type: number
             default: 10000
-          fleet_configurable: true
         - name: full_statement_text_cache_max_size
           hidden: true
           description: |
@@ -778,7 +776,6 @@ files:
           value:
             type: number
             default: 10000
-          fleet_configurable: true
         - name: full_statement_text_samples_per_hour_per_query
           hidden: true
           description: |
@@ -786,7 +783,6 @@ files:
           value:
             type: number
             default: 1
-          fleet_configurable: true
         - name: incremental_query_metrics
           hidden: true
           description: |
@@ -797,7 +793,6 @@ files:
             type: boolean
             display_default: true
             example: true
-          fleet_configurable: true
         - name: run_sync
           hidden: true
           description: |
@@ -806,7 +801,6 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: true
         - name: batch_max_content_size
           hidden: true
           description: |
@@ -815,7 +809,6 @@ files:
           value:
             type: integer
             example: 20_000_000
-          fleet_configurable: true
     - name: query_samples
       display_priority: 0
       fleet_configurable: true
@@ -849,7 +842,6 @@ files:
           value:
             type: integer
             example: 60
-          fleet_configurable: true
         - name: samples_per_hour_per_query
           description: |
             Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
@@ -857,7 +849,6 @@ files:
           value:
             type: integer
             example: 15
-          fleet_configurable: true
         - name: explained_queries_cache_maxsize
           description: |
             Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should
@@ -866,7 +857,6 @@ files:
           value:
             type: integer
             example: 5000
-          fleet_configurable: true
         - name: seen_samples_cache_maxsize
           description: |
             Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
@@ -874,7 +864,6 @@ files:
           value:
             type: integer
             example: 10000
-          fleet_configurable: true
         - name: explain_parameterized_queries
           fleet_configurable: true
           description: |
@@ -890,7 +879,6 @@ files:
           value:
             type: integer
             default: 5000
-          fleet_configurable: true
         - name: explain_errors_cache_ttl
           hidden: true
           description: |
@@ -898,7 +886,6 @@ files:
           value:
             type: integer
             default: 86400
-          fleet_configurable: true
         - name: run_sync
           hidden: true
           description: |
@@ -907,7 +894,6 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: true
     - name: query_activity
       display_priority: 0
       fleet_configurable: true
