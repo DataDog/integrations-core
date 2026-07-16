@@ -801,6 +801,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
         - name: batch_max_content_size
           hidden: true
           description: |
@@ -809,6 +810,7 @@ files:
           value:
             type: integer
             example: 20_000_000
+          fleet_configurable: false
     - name: query_samples
       display_priority: 0
       fleet_configurable: true
@@ -894,6 +896,7 @@ files:
           value:
             type: boolean
             example: false
+          fleet_configurable: false
     - name: query_activity
       display_priority: 0
       fleet_configurable: true
