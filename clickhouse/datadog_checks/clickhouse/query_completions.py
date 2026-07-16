@@ -105,6 +105,9 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             check=check,
             config=config,
             job_name="query-completions",
+            # Run the shared job when either collection is enabled, so flush logs are still
+            # collected when query completions is disabled.
+            enabled=config.enabled or flush_config.enabled,
         )
 
         # Rate limiting: limit samples per query signature
@@ -133,6 +136,10 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
         Checkpoint is always advanced after collection to prefer dropped data over duplicates.
         """
+        # The shared job may be running only for the async insert flush log, so skip
+        # completed-query collection when query completions is disabled.
+        if not self._config.enabled:
+            return
         try:
             # Reset pending checkpoints at the start of each collection
             self._current_checkpoint_microseconds = None
