@@ -5,7 +5,7 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 pytestmark = [pytest.mark.unit]
@@ -109,3 +109,18 @@ class TestResponseProtocolSurface:
 
     def test_get_peer_cert_declared(self):
         assert callable(HTTPResponse.get_peer_cert)
+
+
+class TestPeerCert:
+    def test_returns_cert_from_connection_socket(self):
+        response = mock.Mock()
+        response.raw.connection.sock.getpeercert.return_value = b'der-bytes'
+        wrapper = ResponseWrapper(response, 1024)
+        assert wrapper.get_peer_cert(binary_form=True) == b'der-bytes'
+        response.raw.connection.sock.getpeercert.assert_called_once_with(binary_form=True)
+
+    def test_returns_none_when_socket_absent(self):
+        response = mock.Mock()
+        response.raw.connection.sock = None
+        wrapper = ResponseWrapper(response, 1024)
+        assert wrapper.get_peer_cert() is None

@@ -312,6 +312,14 @@ class ResponseWrapper(ObjectProxy):
             except requests_exceptions.JSONDecodeError as exc:
                 raise json.JSONDecodeError(exc.msg, exc.doc, exc.pos) from exc
 
+    def get_peer_cert(self, binary_form=False):
+        raw = getattr(self.__wrapped__, 'raw', None)
+        connection = getattr(raw, 'connection', None)
+        sock = getattr(connection, 'sock', None)
+        if sock is None:
+            return None
+        return sock.getpeercert(binary_form=binary_form)
+
     def __enter__(self):
         return self
 
