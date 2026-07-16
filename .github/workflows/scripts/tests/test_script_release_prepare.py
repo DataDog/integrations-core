@@ -298,14 +298,23 @@ class TestMain:
         assert json.loads(outputs["packages"]) == pkgs
         assert json.loads(outputs["new_tags"]) == ["postgres-1.0.0"]
 
-    def test_no_new_tags_disables_tag_push(self, monkeypatch, tmp_path):
-        github_output, _, _ = self._setup_env(monkeypatch, tmp_path)
-        pkgs = ["postgres"]
-        with patch("release_prepare._tag", return_value=[]), \
-             patch("release_prepare.get_all_packages", return_value=pkgs), \
-             patch("release_prepare.resolve_packages", return_value=(pkgs, "auto-detect from tags at HEAD")), \
-             patch("release_prepare.validate_packages", return_value=_stable_result()):
+    def test_no_new_tags_disables_tag_push(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        about = tmp_path / "dummy" / "datadog_checks" / "dummy" / "__about__.py"
+        about.parent.mkdir(parents=True)
+        about.write_text('__version__ = "1.0.0"\n')
+
+        github_output, _, _ = self._setup_env(
+            monkeypatch,
+            tmp_path,
+            extra={"SELECTED_PACKAGES": '["dummy"]'},
+        )
+        monkeypatch.chdir(tmp_path)
+
+        with patch("release_prepare._tag", return_value=[]):
             release_prepare.main()
+
         outputs = self._read_outputs(github_output)
         assert outputs["has_packages"] == "true"
         assert outputs["has_new_tags"] == "false"
