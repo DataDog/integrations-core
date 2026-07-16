@@ -3,8 +3,6 @@ fleet_configurable: true
 files:
 - name: nginx.yaml
   discovery:
-    ad_identifiers:
-      - nginx
     strategies:
       - strategy: from_ports
         port_hints:
@@ -109,3 +107,11 @@ files:
     - type: file
       path: /var/log/nginx/error.log
       source: nginx
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - nginx
+  - template: auto_conf/discovery
