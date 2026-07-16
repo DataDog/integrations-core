@@ -264,12 +264,16 @@ class MockHTTPResponse:
         object.__setattr__(self, '__wrapped__', MockHTTPResponseImpl(*args, **kwargs))
 
     def __getattr__(self, name: str) -> Any:
-        if name not in protocol_members():
+        # Enforce only the public protocol surface; leading-underscore names are framework/dunder
+        # plumbing (e.g. wrapt/ResponseWrapper bookkeeping).
+        if not name.startswith('_') and name not in protocol_members():
             raise AttributeError(f"{name!r} is not on the HTTPResponse protocol")
         return getattr(self.__wrapped__, name)
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if name not in protocol_members():
+        # Enforce only the public protocol surface; leading-underscore names are framework/dunder
+        # plumbing (e.g. wrapt/ResponseWrapper bookkeeping).
+        if not name.startswith('_') and name not in protocol_members():
             raise AttributeError(f"cannot set {name!r}: not on the HTTPResponse protocol")
         setattr(self.__wrapped__, name, value)
 
