@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
@@ -27,6 +28,7 @@ def setup_argo_wf():
 def dd_environment():
     with kind_run(conditions=[setup_argo_wf]) as kubeconfig:
         with ExitStack() as stack:
+            setup_discovery_agent(kubeconfig)
             controller_host, controller_port = stack.enter_context(
                 # there is no service for workflow-controller
                 port_forward(kubeconfig, 'argo', 9090, 'deployment', 'workflow-controller')
