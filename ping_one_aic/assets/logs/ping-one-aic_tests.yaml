@@ -645,3 +645,145 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1772633184742
+ -
+  sample: |-
+    {
+      "payload": {
+        "_id": "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-2443",
+        "component": "Authentication",
+        "entries": [
+          {
+            "info": {
+              "authLevel": "0",
+              "ipAddress": "73.163.123.67",
+              "nodeExtraLogging": {
+                "failureReason": "User Locked Out."
+              },
+              "treeName": "Login"
+            }
+          }
+        ],
+        "eventName": "AM-TREE-LOGIN-COMPLETED",
+        "level": "INFO",
+        "principal": [
+          "carlamj"
+        ],
+        "realm": "/alpha",
+        "result": "FAILED",
+        "source": "audit",
+        "timestamp": "2026-03-31T18:49:34.855Z",
+        "topic": "authentication",
+        "trackingIds": [
+          "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-2255"
+        ],
+        "transactionId": "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-25/0"
+      },
+      "source": "am-authentication",
+      "timestamp": "2026-03-31T18:49:34.856328449Z",
+      "type": "application/json"
+    }
+  result:
+    custom:
+      evt:
+        category: "am-authentication"
+        name: "AM-TREE-LOGIN-COMPLETED"
+        outcome: "FAILED"
+      info:
+        ipAddress: "73.163.123.67"
+        principal: "carlamj"
+        treeName: "Login"
+      network:
+        client:
+          geoip: {}
+          ip: "73.163.123.67"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "carlamj"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          correlation_uid: "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-25/0"
+          event_code: "Login"
+          product:
+            name: "PingOne Advanced Identity Cloud"
+            vendor_name: "Ping Identity"
+          uid: "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-2443"
+          version: "1.5.0"
+        service:
+          name: "Access Management"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "73.163.123.67"
+        status: "Failure"
+        status_id: 2
+        time: 1774982974856
+        user:
+          name: "carlamj"
+      payload:
+        _id: "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-2443"
+        component: "Authentication"
+        entries:
+         -
+          info:
+            authLevel: "0"
+            ipAddress: "73.163.123.67"
+            nodeExtraLogging:
+              failureReason: "User Locked Out."
+            treeName: "Login"
+        eventName: "AM-TREE-LOGIN-COMPLETED"
+        level: "INFO"
+        principal:
+         - "carlamj"
+        realm: "/alpha"
+        result: "FAILED"
+        source: "audit"
+        timestamp: "2026-03-31T18:49:34.855Z"
+        topic: "authentication"
+        trackingIds:
+         - "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-2255"
+        transactionId: "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-25/0"
+      source: "am-authentication"
+      timestamp: "2026-03-31T18:49:34.856328449Z"
+      type: "application/json"
+      usr:
+        id: "carlamj"
+    message: |-
+      {
+        "payload" : {
+          "level" : "INFO",
+          "source" : "audit",
+          "transactionId" : "0b35609f-7d0e-4105-bc12-c8ac55546e8f-request-25/0",
+          "principal" : [ "carlamj" ],
+          "result" : "FAILED",
+          "component" : "Authentication",
+          "entries" : [ {
+            "info" : {
+              "treeName" : "Login",
+              "ipAddress" : "73.163.123.67",
+              "authLevel" : "0",
+              "nodeExtraLogging" : {
+                "failureReason" : "User Locked Out."
+              }
+            }
+          } ],
+          "eventName" : "AM-TREE-LOGIN-COMPLETED",
+          "topic" : "authentication",
+          "realm" : "/alpha",
+          "_id" : "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-2443",
+          "trackingIds" : [ "46dd2bb7-e31f-4b3b-afa4-6d70c0a5cc2a-2255" ],
+          "timestamp" : "2026-03-31T18:49:34.855Z"
+        },
+        "source" : "am-authentication",
+        "type" : "application/json",
+        "timestamp" : "2026-03-31T18:49:34.856328449Z"
+      }
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1774982974856
