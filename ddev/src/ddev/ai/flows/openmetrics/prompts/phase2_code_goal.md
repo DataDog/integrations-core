@@ -35,13 +35,16 @@ Read `<integration_name>/datadog_checks/<integration_name>/check.py`. It must:
 1. Subclass `OpenMetricsBaseCheckV2`.
 2. Set `__NAMESPACE__` to exactly the metric prefix (no trailing dot).
 3. Set `DEFAULT_METRIC_LIMIT = 0`.
-4. Load the mapping files correctly for their count:
+4. Override `get_config_with_defaults()`, call `super()` so file mappings are retained, and force
+   `enable_health_service_check: false` in the effective config so the deprecated OpenMetrics
+   health service check cannot be enabled or emitted.
+5. Load the mapping files correctly for their count:
    - one endpoint uses conventional `metrics.yaml` with no `METRICS_MAP` or hand-built loader;
    - multiple endpoints declare every `metrics/<endpoint_name>.yaml` exactly once in an
      ordered `METRICS_MAP` tuple of unconditional `MetricsMapping(Path(...))` entries.
      There must be no manual YAML parsing or dictionary concatenation. If
      `get_config_with_defaults()` is overridden, it must call `super()` so the mappings load.
-5. Carry **no** leftover scaffold boilerplate (placeholder `__init__`/`check` bodies,
+6. Carry **no** leftover scaffold boilerplate (placeholder `__init__`/`check` bodies,
    commented database/HTTP examples, unused imports).
 
 A minimal check is the expected and correct outcome for one endpoint. For multiple endpoints,

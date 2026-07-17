@@ -53,6 +53,9 @@ ${prd}
 - **Endpoint fixtures** — use every fixture identified by the build handoff and present under
   `tests/fixtures/`.
 - **`metadata.csv`** — every metric the integration is expected to emit.
+- **Fixture exclusions** — use the exact expanded Datadog names from the handoff for officially
+  sourced metrics absent from all captured catalogs. Apply only these names to the unit
+  metadata assertion; do not exclude observed metrics.
 - **`check.py`** — read it to confirm the custom behavior described above.
 - The package `__init__` gives the check class name to import.
 - The build handoff identifies the complete endpoint set and fixture paths. Treat that complete
@@ -75,6 +78,7 @@ ${prd}
 
 ## Finish
 
-Summarize the files you wrote, any targeted assertions you added (with the custom behavior
-each pins down), any live-service exclusions and why, and the outcome of the format, unit, and
-end-to-end runs. A reviewer will run the full environment against your tests again.
+Summarize the files you wrote, the exact doc-only fixture exclusions applied to the unit metadata
+assertion, any targeted assertions you added (with the custom behavior each pins down), any
+additional live-service exclusions and why, and the outcome of the format, unit, and end-to-end
+runs. A reviewer will run the full environment against your tests again.

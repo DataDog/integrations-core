@@ -82,12 +82,17 @@ the union and that endpoint may expose only its subset.
 ### Symmetric inclusion: the fixture vs. a live service
 
 `check_symmetric_inclusion=True` requires that every metric in `metadata.csv` is emitted
-during the run. The unit fixture is a capture that contains the full metric set, so the
-symmetric check passes offline. A **live** service in `test_integration.py` / `test_e2e.py`
-often does not emit every declared family while it sits idle — counters, histograms, and
-event-gated metrics only appear once the corresponding activity has happened. Against a live
-endpoint that gap makes the symmetric check fail on metrics that are correct but simply have
-no samples yet.
+during the run. The unit fixtures contain every **observed** family, but `metadata.csv` may also
+contain officially documented families that no captured endpoint emitted. The build handoff
+lists the exact expanded Datadog names for those doc-only families. Pass precisely that list as
+`exclude=[...]` to the unit metadata assertion; this is the only valid unit exclusion. Never
+exclude an observed fixture metric, and never infer additional exclusions merely to make a test
+pass.
+
+A **live** service in `test_integration.py` / `test_e2e.py` often does not emit every declared
+family while it sits idle — counters, histograms, and event-gated metrics only appear once the
+corresponding activity has happened. Against a live endpoint that gap makes the symmetric check
+fail on metrics that are correct but simply have no samples yet.
 
 Handle it by getting those samples to exist rather than by weakening the unit check. Two
 complementary levers, used by shipped OpenMetrics integrations:
@@ -97,8 +102,9 @@ complementary levers, used by shipped OpenMetrics integrations:
   excluding it.
 - **Exclude the families that still cannot be produced** from the live assertion with the
   `exclude=[...]` argument of `assert_metrics_using_metadata`, listing the Datadog metric
-  names an idle or minimally-exercised service genuinely never emits. Keep the unit test's
-  cross-check un-excluded — the fixture should cover everything.
+  names an idle or minimally-exercised service genuinely never emits. The live exclusion list
+  includes the doc-only fixture exclusions when the running environment does not expose those
+  families, plus any additional live-only gaps that remain after generating reasonable traffic.
 
 ### Targeted assertions
 
@@ -207,7 +213,8 @@ endpoint-instance list and its matching fixture paths.
 - **`test_unit.py`** — mock every endpoint URL with its matching fixture path. Pass each
   fixture as `file_path=`; passing it positionally sends the path string as the response body.
   Run the check twice for every instance, then make one metadata cross-check over the aggregate
-  union. Add targeted assertions only for custom behavior, if any.
+  union. Pass only the handoff's doc-only expanded metric names as `exclude=[...]`; use no unit
+  exclusion when that list is empty. Add targeted assertions only for custom behavior, if any.
 - **`test_integration.py`** — mark it `@pytest.mark.integration` and use the `dd_environment`
   fixture. Instantiate the check on the **endpoint `dd_environment` actually publishes** —
   read the endpoint from the yielded instance, not from a hardcoded `localhost:<port>` that

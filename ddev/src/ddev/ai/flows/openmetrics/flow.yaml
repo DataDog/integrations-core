@@ -2,12 +2,10 @@ type: flow
 config:
   name: openmetrics
   description: >-
-    Generate an OpenMetrics integration from one or more named endpoints. Enter
-    endpoints as JSON, for example:
-    {"endpoints":[{"name":"api","url":"http://localhost:9090/metrics"}]}.
+    Generate an OpenMetrics integration.
   inputs:
     - name: inspect_input
-      label: Endpoints JSON
+      label: Endpoints JSON ({"endpoints":[{"name":"api","url":"http://localhost:9090/metrics"}]})
       type: string
       required: true
     - name: integration

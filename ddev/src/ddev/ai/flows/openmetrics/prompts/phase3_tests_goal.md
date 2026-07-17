@@ -28,15 +28,22 @@ passes only because it asserts nothing is **not** valid. Check that:
   or every `<endpoint_name>_metrics.txt` for multiple endpoints), runs each endpoint instance
   twice, and then makes one union metadata cross-check with `assert_metrics_using_metadata`
   (submission-type and symmetric-inclusion enabled). That cross-check is the coverage —
-  it must be present and must not have been narrowed or removed to force a pass.
+  it must be present and must not have been removed to force a pass. Its only permitted unit
+  `exclude=[...]` entries are the exact expanded Datadog names listed in the handoff for
+  officially sourced families absent from every captured catalog. Reject missing doc-only
+  exclusions, any exclusion of an observed fixture metric, or any extra name introduced merely
+  to make the assertion pass.
   It must not demand that one endpoint alone emit the integration-wide union. Per-metric
   `assert_metric` calls are **not** required: their absence is fine, and a long
   list of them (or a hardcoded metric-name list) is a sign of a bloated test, not a better
   one. Explicit assertions are warranted only to pin custom behavior (a renamed label or
   an injected tag).
 - `test_integration.py` is marked `@pytest.mark.integration`, uses the real environment,
-  and makes the same metadata cross-check.
-- `test_e2e.py` is marked `@pytest.mark.e2e` and asserts metrics via `dd_agent_check`.
+  and makes the same metadata cross-check. Its live `exclude=[...]` contains the handoff's
+  doc-only names when the environment does not expose them, plus only specifically justified
+  families that remain absent from the live service after reasonable traffic generation.
+- `test_e2e.py` is marked `@pytest.mark.e2e`, asserts metrics via `dd_agent_check`, and uses the
+  same justified live exclusion list as the integration test.
 - `conftest.py`'s `dd_environment` waits for every configured metrics endpoint to be healthy
   before yielding all endpoint instances.
 - `conftest.py` supplies, via `docker_run(env_vars=...)`, **every** variable the copied

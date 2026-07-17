@@ -16,6 +16,9 @@ Keep it tight and factual. Include:
   single `metrics.yaml` or a `METRICS_MAP` tuple loads multiple endpoint YAMLs.
 - Every endpoint URL and copied fixture path the tests must mock, and whether the Docker
   environment exposes all endpoints in one service topology.
+- Repeat the fixture-exclusion list from the rename/metadata handoff exactly: the expanded
+  Datadog names for officially sourced metrics absent from every captured fixture. Do not add
+  observed metrics to this list.
 - Whether the check is the minimal OpenMetrics check, or whether you added behavior beyond
   the minimum. For **each** addition — a `get_default_config` option (`rename_labels`,
   `share_labels`, `exclude_labels`, `raw_metric_prefix`, …), a custom scraper, or a custom

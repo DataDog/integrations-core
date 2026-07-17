@@ -113,4 +113,11 @@ CSV correctness:
 Before finishing, confirm: every distinct effective value across every endpoint mapping is
 represented by its expected row(s) here (correct prefix and per-type suffixes); shared metrics
 are not duplicated; no mapped metric is missing; the header is exact; and the CSV is valid and
-sorted. An independent reviewer verifies this coverage after you finish, so make it correct now.
+sorted.
+
+In your final summary, identify every officially sourced mapping family that is absent from
+**all** inspected catalogs. For each one, list the raw family, effective type, source, and every
+expanded `metric_name` row you added to `metadata.csv`. Those exact Datadog names form the narrow
+fixture-exclusion list used by the test phase; do not include a documented family that appears in
+any captured catalog. If there are none, say so explicitly. An independent reviewer verifies
+this coverage after you finish, so make it correct now.

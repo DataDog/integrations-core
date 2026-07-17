@@ -23,8 +23,8 @@ A real, working Docker environment for this technology lives at:
 
 `${docker_source_path}`
 
-Copy that whole directory to `${integration}/tests/docker/` with a single `copy_path`
-call (source = the path above, destination = `<integration>/tests/docker`). This brings
+Copy that whole directory to `<integration_name>/tests/docker/` with a single `copy_path`
+call (source = the path above, destination = `<integration_name>/tests/docker`). This brings
 the entire tree across verbatim. Do not inspect, rename, or "improve" anything inside it.
 
 ## 2 — Place every endpoint fixture

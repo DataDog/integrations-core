@@ -54,8 +54,10 @@ configuration example.
    `<integration_name>/datadog_checks/<integration_name>/check.py` with an OpenMetrics V2
    check. Import `OpenMetricsBaseCheckV2` from `datadog_checks.base`, subclass it, set
    `__NAMESPACE__` to the metric prefix from the handoff (exactly, no trailing dot), and set
-   `DEFAULT_METRIC_LIMIT = 0`. Remove all placeholder scaffold methods, examples, and unused
-   imports.
+   `DEFAULT_METRIC_LIMIT = 0`. Override `get_config_with_defaults()`, call `super()` to preserve
+   file-based metric mappings and other defaults, and force `enable_health_service_check` to
+   `False` in the returned config so the deprecated OpenMetrics health service check cannot be
+   enabled or emitted. Remove all placeholder scaffold methods, examples, and unused imports.
 
    Then wire the mappings according to their count:
 
@@ -70,7 +72,7 @@ configuration example.
      the scraper. Use a predicate only when an actual config option conditionally enables a
      mapping; endpoint files required for every instance are unconditional.
 
-   If you implement `get_config_with_defaults()`, it must call
+   The required `get_config_with_defaults()` override must call
    `super().get_config_with_defaults(config)` so the file mappings are preserved. Keep all
    other code minimal unless the mapping-and-metadata handoff, the combined metric set, or an
    endpoint's labels justify more. Add `get_default_config()` for declarative scraper options

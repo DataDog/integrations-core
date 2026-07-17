@@ -119,11 +119,11 @@ emit, and never describe features (logs, events, APM) it does not ship.
 ## Sourcing the product description and link
 
 You author the Overview and the product URL from authoritative material, not invention. Read the
-integration on disk first (manifest, `metadata.csv`, check, spec) to ground what it monitors,
-then use `web_search` / `web_fetch` for the product's official site and documentation — **official
-sources only**: the technology's official website, its official documentation, or, when it is
-open source, its official source repository. Never cite blogs, forums, marketing aggregators, or
-other third-party pages. The `[1]` link must point at the product's official home page.
+integration on disk first (`metadata.csv`, check, and spec) to ground what it monitors, then use
+`web_search` / `web_fetch` for the product's official site and documentation — **official sources
+only**: the technology's official website, its official documentation, or, when it is open
+source, its official source repository. Never cite blogs, forums, marketing aggregators, or other
+third-party pages. The `[1]` link must point at the product's official home page.
 
 ## Voice and style
 
