@@ -52,6 +52,9 @@ dynamic = ["version"]
 ai = [
     "prometheus-client",
     "python-frontmatter",
+    "pyperclip>=1.11.0",
+    "textual>=8.2.0",
+    "textual-autocomplete>=4.0.0",
 ]
 
 [project.urls]

@@ -1,0 +1,623 @@
+/* Togo TUI design-system stylesheet */
+
+/* ── Screen / scrollbars ──────────────────────────────────────────────── */
+
+Screen {
+    background: $background;
+    color: $foreground;
+    layout: vertical;
+}
+
+* {
+    scrollbar-color: $primary;
+    scrollbar-color-hover: $accent;
+    scrollbar-background: $surface;
+}
+
+#screen-body {
+    height: 1fr;
+    padding: 1 2;
+    overflow-y: hidden;
+}
+
+/* ── Utility classes ──────────────────────────────────────────────────── */
+
+.eyebrow {
+    color: $text-muted;
+    text-style: bold;
+}
+
+.desc {
+    color: $text-muted;
+}
+
+.panel {
+    background: $surface;
+    border: round $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    padding: 1 2;
+}
+
+.panel.dashed {
+    border: dashed $border;
+}
+
+Button {
+    border: round $border;
+    background: $panel;
+    color: $foreground;
+    min-width: 12;
+}
+
+Button:hover {
+    border: round $primary;
+    background: $panel-lighten-1;
+}
+
+Button:focus {
+    border: round $accent;
+    background: $panel-lighten-1;
+}
+
+Button.-primary {
+    border: round $secondary;
+    background: $panel;
+    color: $secondary;
+}
+
+Button.-primary:hover,
+Button.-primary:focus {
+    border: round $secondary;
+    background: $panel-lighten-1;
+    color: $secondary;
+}
+
+Button.-warning {
+    border: round $warning;
+}
+
+/* ── TogoHeader ───────────────────────────────────────────────────────── */
+
+TogoHeader {
+    layout: horizontal;
+    align-vertical: middle;
+    width: 100%;
+    height: 7;
+    background: $panel;
+    color: $foreground;
+    padding: 1 2;
+}
+
+#header-info {
+    width: 1fr;
+    height: 5;
+    padding-top: 1;
+    margin-left: 2;
+}
+
+#header-info > Static {
+    width: 100%;
+    height: 1;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+}
+
+#header-repo {
+    color: $text-muted;
+}
+
+#header-right {
+    width: auto;
+    color: $status-running;
+    text-style: bold;
+}
+
+#header-badge {
+    color: $status-running;
+    text-style: bold;
+    padding: 0 1;
+}
+
+#header-mascot {
+    width: 11;
+    height: 5;
+    color: $primary;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────── */
+
+Footer {
+    background: $panel;
+    color: $text-muted;
+}
+
+/* ── Flow grid / FlowCard ─────────────────────────────────────────────── */
+
+#flow-grid {
+    layout: grid;
+    grid-size: 3;
+    grid-gutter: 1 2;
+    padding: 1 0;
+    height: 1fr;
+    overflow-y: auto;
+}
+
+FlowCard {
+    background: $panel;
+    border: solid $border;
+    padding: 1 3;
+    height: 10;
+    min-width: 36;
+}
+
+FlowCard:hover {
+    border: solid $primary;
+}
+
+FlowCard:focus {
+    border: solid $accent;
+    background: $panel-lighten-1;
+}
+
+FlowCard.broken {
+    border: solid $error;
+}
+
+FlowCard.broken:hover {
+    border: solid $warning;
+}
+
+FlowCard.broken:focus {
+    border: solid $accent;
+    background: $panel-lighten-1;
+}
+
+FlowCard > .eyebrow {
+    margin-bottom: 1;
+}
+
+/* ── Collapsible / actions ─────────────────────────────────────────────── */
+
+Collapsible {
+    border: none;
+    background: transparent;
+    padding: 0 1;
+    margin: 0 0 1 0;
+}
+
+#configuration {
+    height: 1fr;
+    margin: 0 0 1 0;
+    overflow-y: auto;
+}
+
+#flow-body {
+    layout: horizontal;
+    height: 1fr;
+    margin: 0 0 1 0;
+}
+
+#flow-overview {
+    width: 20%;
+    min-width: 40;
+    height: 1fr;
+    margin: 0 2 0 0;
+}
+
+#flow-description {
+    margin: 0 0 1 0;
+}
+
+#flow-agents {
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+.flow-agent-row {
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+.flow-agent-heading {
+    color: $foreground;
+    text-style: bold;
+}
+
+.flow-agent-tools {
+    color: $status-running;
+}
+
+#flow-inputs {
+    height: auto;
+}
+
+.flow-input-row {
+    color: $text-muted;
+    height: auto;
+}
+
+#flow-pipeline {
+    layers: connectors nodes;
+    width: 1fr;
+    height: 1fr;
+    margin: 0 0 1 0;
+    border: round $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    background: $surface;
+    padding: 1 2;
+    overflow: auto auto;
+}
+
+#phase-configuration {
+    height: 1fr;
+    margin: 0 0 1 0;
+    border: round $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    background: $surface;
+    padding: 1 3;
+    overflow: hidden hidden;
+}
+
+#phase-summary {
+    layout: horizontal;
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+#phase-heading {
+    width: 2fr;
+    height: auto;
+}
+
+#phase-dependencies-summary {
+    width: 1fr;
+    height: auto;
+    border: round $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    background: $panel;
+    padding: 1 2;
+}
+
+#phase-title {
+    color: $foreground;
+    text-style: bold;
+    margin-top: 1;
+}
+
+#phase-config-grid {
+    layout: horizontal;
+    height: 1fr;
+    margin: 1 0;
+}
+
+.phase-config-card {
+    height: 1fr;
+    border: round $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    background: $panel;
+    padding: 1 2;
+    margin: 0 1 1 0;
+    overflow-y: auto;
+}
+
+#phase-tasks-card {
+    width: 2fr;
+}
+
+#phase-tasks {
+    height: 1fr;
+}
+
+.phase-task {
+    height: 1fr;
+    min-height: 3;
+    border: dashed $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    background: $surface;
+    padding: 1 2;
+    margin: 0 0 1 0;
+    overflow: hidden hidden;
+}
+
+.phase-task.-collapsed {
+    height: auto;
+}
+
+Collapsible.phase-task > CollapsibleTitle {
+    width: 1fr;
+}
+
+Collapsible.phase-task > Contents {
+    height: 1fr;
+    overflow: hidden hidden;
+}
+
+.task-prompt-source {
+    margin-bottom: 1;
+}
+
+.task-prompt {
+    color: $foreground;
+    height: auto;
+}
+
+/* Textual's built-in MarkdownH3 defaults to `width: auto`, which stops long
+   headings from wrapping and lets them run off the right edge of the pane
+   (task/agent system prompts render as Markdown and can contain headings of
+   any length). Force it back to a wrapping block like every other level. */
+MarkdownH3 {
+    width: 1fr;
+}
+
+.task-prompt-scroll {
+    height: 1fr;
+    overflow-y: auto;
+}
+
+#phase-agent-card {
+    width: 1fr;
+    margin-top: 0;
+}
+
+#phase-agent-name {
+    color: $foreground;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+#phase-agent-meta {
+    layout: horizontal;
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+#phase-agent-tools {
+    width: 1fr;
+    height: auto;
+    border: round $border;
+    color: $status-running;
+    padding: 1 2;
+    margin: 0 0 1 0;
+    text-style: bold;
+}
+
+#phase-agent-prompt {
+    margin-top: 1;
+}
+
+#actions {
+    layout: horizontal;
+    dock: bottom;
+    height: auto;
+    padding: 1;
+    align-horizontal: right;
+    background: transparent;
+    border: none;
+}
+
+#actions Button {
+    margin-left: 2;
+}
+
+#phase-actions {
+    layout: horizontal;
+    dock: bottom;
+    height: auto;
+    padding: 1;
+    align-horizontal: right;
+    background: transparent;
+    border: none;
+}
+
+/* ── Execution view ───────────────────────────────────────────────────── */
+
+#execution-error {
+    display: none;
+    height: auto;
+    border: round $error;
+    background: $panel;
+    color: $error;
+    text-style: bold;
+    padding: 1 2;
+    margin: 0 0 1 0;
+}
+
+#pipeline {
+    layers: connectors nodes;
+    width: 1fr;
+    height: 1fr;
+    margin: 0 0 1 0;
+    border: round $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    background: $surface;
+    padding: 1 2;
+    overflow: auto auto;
+}
+
+#pipeline-connectors {
+    layer: connectors;
+    color: $text-muted;
+    background: transparent;
+    width: 1fr;
+    height: 1fr;
+}
+
+.phase-node {
+    layer: nodes;
+    width: auto;
+    height: 3;
+    min-width: 16;
+    border: round $border;
+    background: $panel;
+    color: $text-muted;
+    padding: 0 1;
+}
+
+.phase-node.status-running {
+    border: round $status-running;
+    color: $status-running;
+}
+
+.phase-node.status-done {
+    border: round $status-done;
+    color: $status-done;
+}
+
+.phase-node.status-failed {
+    border: round $status-failed;
+    color: $status-failed;
+}
+
+#phase-log-output {
+    width: 1fr;
+    height: 1fr;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.phase-log-block {
+    width: 1fr;
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+.phase-log-block > Static,
+.phase-log-block > Markdown,
+.phase-log-panel,
+.phase-log-panel > Static,
+.phase-log-panel > Markdown {
+    width: 1fr;
+    height: auto;
+}
+
+.phase-log-panel {
+    border: round $border;
+    padding: 0 1;
+}
+
+.phase-log-thinking {
+    color: $status-running;
+    text-style: bold;
+    border: round $status-running;
+    padding: 0 1;
+    background: $surface;
+}
+
+/* ── Modal / dialog / badge / prompt ──────────────────────────────────── */
+
+ModalScreen {
+    align: center middle;
+    background: $background 60%;
+}
+
+#dialog {
+    layout: vertical;
+    background: $surface;
+    border: round $primary;
+    border-title-color: $secondary;
+    border-title-align: left;
+    padding: 1 2;
+    width: 84;
+    min-width: 50%;
+    max-width: 90%;
+    height: auto;
+    min-height: 50%;
+    max-height: 90%;
+    overflow: hidden;
+}
+
+#dialog.launch {
+    width: 96;
+}
+
+#dialog.diagnostics {
+    width: 96;
+}
+
+#diagnostic-errors {
+    height: 1fr;
+    margin-top: 1;
+}
+
+.diagnostic-error {
+    height: auto;
+    border: round $error;
+    background: $panel;
+    padding: 1 2;
+    margin-bottom: 1;
+}
+
+#agent-meta {
+    layout: horizontal;
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+#agent-tools {
+    height: auto;
+    margin: 0 0 1 0;
+}
+
+#agent-tool-list {
+    layout: horizontal;
+    height: auto;
+}
+
+#launch-fields {
+    height: 1fr;
+    overflow-y: auto;
+}
+
+#launch-fields > Label.eyebrow {
+    margin-top: 1;
+}
+
+.badge {
+    border: round $border;
+    color: $foreground;
+    text-style: bold;
+    padding: 0 1;
+    margin-right: 1;
+}
+
+.badge.tool {
+    color: $status-running;
+}
+
+#prompt {
+    border: round $border;
+    background: $panel;
+    padding: 1 2;
+    height: 1fr;
+    max-height: 18;
+    overflow-y: auto;
+}
+
+.modal-actions {
+    dock: bottom;
+    layout: horizontal;
+    align-horizontal: right;
+    height: auto;
+    padding-top: 1;
+}
+
+.modal-actions Button {
+    margin-left: 2;
+}
+
+/* ── Input / Select focus ─────────────────────────────────────────────── */
+
+Input:focus {
+    border: tall $accent;
+}
+
+Select:focus {
+    border: tall $accent;
+}
