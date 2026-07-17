@@ -9,10 +9,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ddev.ai.agent.anthropic_provider import DEFAULT_MODEL
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import ConfigError
-from ddev.ai.config.models import DEFAULT_AGENT_MODEL
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -39,7 +39,8 @@ def file_access_policy(tmp_path) -> FileAccessPolicy:
 def provider_registry() -> AgentProviderRegistry:
     registry = AgentProviderRegistry()
     provider = MagicMock()
-    provider.supported_models.return_value = frozenset({DEFAULT_AGENT_MODEL})
+    provider.default_model.return_value = DEFAULT_MODEL
+    provider.supported_models.return_value = frozenset({DEFAULT_MODEL})
     registry.register("anthropic", provider)
     return registry
 
@@ -48,7 +49,7 @@ def provider_registry() -> AgentProviderRegistry:
 def core_dir(tmp_path) -> Path:
     """A core config dir with a 'writer' agent and a two-phase 'demo' flow ('a' root, 'b' after 'a')."""
     core = tmp_path / "core"
-    write(core / "agents" / "writer.md", "---\ntype: agent\nname: writer\n---\nsystem prompt")
+    write(core / "agents" / "writer.md", "---\ntype: agent\nname: writer\nmodel: sonnet\n---\nsystem prompt")
     write(
         core / "demo.yaml",
         "- type: phase\n  config:\n    name: a\n    agent: writer\n"
@@ -238,7 +239,10 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
     the engine, then driven by the orchestrator.
     """
     failing_core = tmp_path / "failing_core"
-    write(failing_core / "agents" / "writer.md", "---\ntype: agent\nname: writer\n---\nsystem prompt")
+    write(
+        failing_core / "agents" / "writer.md",
+        "---\ntype: agent\nname: writer\nmodel: sonnet\n---\nsystem prompt",
+    )
     write(
         failing_core / "f.yaml",
         "- type: phase\n  config:\n    name: failing\n    class: FailingPhase\n    agent: writer\n"
@@ -266,7 +270,7 @@ def test_run_raises_runtime_error_when_phase_fails(tmp_path, make_orchestrator):
 @pytest.fixture
 def linear_flow(tmp_path):
     """Three-phase linear flow: a -> b -> c."""
-    write(tmp_path / "agents" / "writer.md", "---\ntype: agent\nname: writer\n---\nsystem prompt")
+    write(tmp_path / "agents" / "writer.md", "---\ntype: agent\nname: writer\nmodel: sonnet\n---\nsystem prompt")
     write(
         tmp_path / "f.yaml",
         "- type: phase\n  config:\n    name: a\n    agent: writer\n"
@@ -378,7 +382,7 @@ async def test_resume_corrupt_checkpoints_raises_flow_config_error(linear_flow, 
 
 async def test_resume_closure_independent_of_flow_declaration_order(tmp_path, make_orchestrator):
     """A flow declared dependents-first still resolves the resume closure correctly."""
-    write(tmp_path / "agents" / "writer.md", "---\ntype: agent\nname: writer\n---\nsystem prompt")
+    write(tmp_path / "agents" / "writer.md", "---\ntype: agent\nname: writer\nmodel: sonnet\n---\nsystem prompt")
     write(
         tmp_path / "f.yaml",
         "- type: phase\n  config:\n    name: a\n    agent: writer\n"

@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 from enum import StrEnum, auto
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Any, Final, Literal, Mapping, assert_never
+from typing import TYPE_CHECKING, Annotated, Any, Literal, Mapping, assert_never
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
@@ -32,9 +32,6 @@ def validate_variable_names(variables: dict[str, str]) -> dict[str, str]:
     if invalid:
         raise ValueError(f"Invalid variable names (must match {VARIABLE_NAME_PATTERN}): {invalid}")
     return variables
-
-
-DEFAULT_AGENT_MODEL: Final[str] = "sonnet"
 
 
 class VariableDeclaration(BaseModel):
@@ -166,10 +163,12 @@ class AgentConfig(BaseModel):
         )
         if provider_registry is None:
             raise ValueError("Agent provider registry is required")
-        if self.model is None:
-            self.model = DEFAULT_AGENT_MODEL
         if self.provider is None:
+            if self.model is None:
+                raise ValueError("At least one of 'provider' or 'model' must be set")
             self.provider = provider_registry.provider_for_model(self.model)
+        elif self.model is None:
+            self.model = provider_registry.default_model_for_provider(self.provider)
         provider_registry.validate_config(self)
         return self
 

@@ -13,6 +13,7 @@ from ddev.ai.config.models import AgentConfig
 
 def make_provider(*models: str) -> MagicMock:
     provider = MagicMock()
+    provider.default_model.return_value = models[0] if models else "default-model"
     provider.supported_models.return_value = frozenset(models)
     return provider
 
@@ -84,3 +85,17 @@ def test_provider_for_model_rejects_unknown_model():
 
     with pytest.raises(ValueError, match="Unknown model 'nope'"):
         registry.provider_for_model("nope")
+
+
+def test_default_model_for_provider():
+    registry = AgentProviderRegistry()
+    registry.register("first", make_provider("model-a"))
+
+    assert registry.default_model_for_provider("first") == "model-a"
+
+
+def test_default_model_for_provider_rejects_unavailable_provider():
+    registry = AgentProviderRegistry()
+
+    with pytest.raises(ValueError, match="Agent provider 'unknown' is not available"):
+        registry.default_model_for_provider("unknown")

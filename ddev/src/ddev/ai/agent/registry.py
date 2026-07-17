@@ -45,6 +45,9 @@ class AgentProviderRegistry:
             raise ValueError(f"Model {model!r} is served by multiple providers ({owners}); specify a provider")
         return next(iter(providers))
 
+    def default_model_for_provider(self, name: str) -> str:
+        return self._get_provider(name).default_model()
+
     def _get_provider(self, name: str) -> AgentProvider:
         provider = self._providers.get(name)
         if provider is None:

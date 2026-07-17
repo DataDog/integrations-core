@@ -20,6 +20,7 @@ MODEL_ALIASES: Final[dict[str, str]] = {
     "sonnet": "claude-sonnet-5",
     "haiku": "claude-haiku-4-5",
 }
+DEFAULT_MODEL: Final[str] = "sonnet"
 
 
 class AnthropicProvider:
@@ -32,17 +33,19 @@ class AnthropicProvider:
     def client(self) -> anthropic.AsyncAnthropic:
         return anthropic.AsyncAnthropic(api_key=self._api_key)
 
+    def default_model(self) -> str:
+        return DEFAULT_MODEL
+
     def supported_models(self) -> frozenset[str]:
         """The model aliases this provider handles."""
         return frozenset(MODEL_ALIASES)
 
     def _cast_model(self, model: str) -> str:
         """Resolve a model alias to its concrete Anthropic model string."""
-        try:
-            return MODEL_ALIASES[model.lower()]
-        except KeyError:
-            valid = ", ".join(sorted(MODEL_ALIASES))
-            raise ValueError(f"Unknown model {model!r} for the anthropic provider. Valid models: {valid}") from None
+        if resolved_model := MODEL_ALIASES.get(model.lower()):
+            return resolved_model
+        valid = ", ".join(sorted(MODEL_ALIASES))
+        raise ValueError(f"Unknown model {model!r} for the anthropic provider. Valid models: {valid}")
 
     def validate_config(self, agent_config: AgentConfig):
         """Validate Anthropic-specific agent configuration."""

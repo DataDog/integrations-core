@@ -44,7 +44,7 @@ PHASE_AND_FLOW = (
 
 
 def write_full_flow(root):
-    write(root / "ag.md", "---\ntype: agent\nname: ag\n---\nsys")
+    write(root / "ag.md", "---\ntype: agent\nname: ag\nmodel: sonnet\n---\nsys")
     write(root / "intro.md", "---\ntype: prompt\nname: intro\n---\nDo the thing ${x}")
     write(root / "g.md", "---\ntype: goal\nname: g\n---\ngoal body")
     write(root / "mem.md", "---\ntype: memory_prompt\nname: mem\n---\nRemember ${x}")
@@ -116,7 +116,7 @@ def test_runtime_input_satisfies_eager_variable_resolution(tmp_path):
 
 def test_directory_layout_is_irrelevant(tmp_path):
     """Classification is by type tag, not directory; nesting/naming don't matter."""
-    write(tmp_path / "deeply" / "nested" / "anything.md", "---\ntype: agent\nname: ag\n---\nsys")
+    write(tmp_path / "deeply" / "nested" / "anything.md", "---\ntype: agent\nname: ag\nmodel: sonnet\n---\nsys")
     write(tmp_path / "intro.md", "---\ntype: prompt\nname: intro\n---\np")
     write(tmp_path / "g.md", "---\ntype: goal\nname: g\n---\ng")
     write(tmp_path / "sub" / "mem.md", "---\ntype: memory_prompt\nname: mem\n---\nm")
@@ -129,7 +129,7 @@ def test_directory_layout_is_irrelevant(tmp_path):
 
 def test_markdown_keyed_by_front_matter_name_not_stem(tmp_path):
     """Identity is the front-matter name; the filename stem is organizational only."""
-    write(tmp_path / "unrelated-filename.md", "---\ntype: agent\nname: ag\n---\nsys")
+    write(tmp_path / "unrelated-filename.md", "---\ntype: agent\nname: ag\nmodel: sonnet\n---\nsys")
     write(tmp_path / "intro.md", "---\ntype: prompt\nname: intro\n---\np")
     write(tmp_path / "g.md", "---\ntype: goal\nname: g\n---\ng")
     write(tmp_path / "mem.md", "---\ntype: memory_prompt\nname: mem\n---\nm")
@@ -141,7 +141,7 @@ def test_markdown_keyed_by_front_matter_name_not_stem(tmp_path):
 
 def test_single_mapping_yaml_resource_resolves(tmp_path):
     """A YAML file may hold one resource as a bare mapping, with no list wrapper."""
-    write(tmp_path / "ag.md", "---\ntype: agent\nname: ag\n---\nsys")
+    write(tmp_path / "ag.md", "---\ntype: agent\nname: ag\nmodel: sonnet\n---\nsys")
     write(tmp_path / "phase.yaml", "type: phase\nconfig:\n  name: p\n  agent: ag\n")
     write(tmp_path / "flow.yaml", "type: flow\nconfig:\n  name: demo\n  flow:\n    - phase: p\n")
 
@@ -257,7 +257,7 @@ def test_core_and_user_same_identity_conflict(tmp_path):
 
 def test_cross_type_same_name_coexists(tmp_path):
     """agent:x and flow:x are different identities and both remain usable."""
-    write(tmp_path / "x_agent.md", "---\ntype: agent\nname: x\n---\nsys")
+    write(tmp_path / "x_agent.md", "---\ntype: agent\nname: x\nmodel: sonnet\n---\nsys")
     write(
         tmp_path / "f.yaml",
         "- type: phase\n  config:\n    name: p\n    agent: x\n"

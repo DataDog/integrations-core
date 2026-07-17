@@ -14,6 +14,10 @@ from ddev.ai.tools.registry import ToolRegistry
 class AgentProvider(Protocol):
     """Provider-specific agent construction and configuration validation."""
 
+    def default_model(self) -> str:
+        """The default model alias for this provider."""
+        ...
+
     def supported_models(self) -> frozenset[str]:
         """The model aliases this provider handles."""
         ...

@@ -9,10 +9,10 @@ from typing import Never
 import pytest
 from pydantic import ValidationError
 
+from ddev.ai.agent.anthropic_provider import DEFAULT_MODEL
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config import models
 from ddev.ai.config.models import (
-    DEFAULT_AGENT_MODEL,
     AgentConfig,
     CheckpointConfig,
     FlowConfig,
@@ -90,6 +90,9 @@ def test_agent_requires_provider_registry_context():
 
 def test_agent_runs_provider_config_validation():
     class CustomProvider:
+        def default_model(self) -> str:
+            return "supported-model"
+
         def supported_models(self) -> frozenset[str]:
             return frozenset()
 
@@ -115,6 +118,7 @@ def test_agent_validates_provider_against_registry():
     config = AgentConfig.model_validate({"provider": "custom"}, context={"provider_registry": registry})
 
     assert config.provider == "custom"
+    assert config.model == "default-model"
 
 
 def test_agent_rejects_provider_when_not_configured():
@@ -139,13 +143,20 @@ def test_agent_infers_provider_from_differently_cased_model_alias():
     assert config.provider == "anthropic"
 
 
-def test_agent_defaults_model_and_infers_provider_when_unset():
+def test_agent_uses_provider_default_model_when_model_is_unset():
     registry = make_provider_registry("anthropic")
 
-    config = AgentConfig.model_validate({}, context={"provider_registry": registry})
+    config = AgentConfig.model_validate({"provider": "anthropic"}, context={"provider_registry": registry})
 
     assert config.provider == "anthropic"
-    assert config.model == DEFAULT_AGENT_MODEL
+    assert config.model == DEFAULT_MODEL
+
+
+def test_agent_requires_provider_or_model():
+    registry = make_provider_registry("anthropic")
+
+    with pytest.raises(ValidationError, match="At least one of 'provider' or 'model' must be set"):
+        AgentConfig.model_validate({}, context={"provider_registry": registry})
 
 
 def test_agent_rejects_unknown_tools():
