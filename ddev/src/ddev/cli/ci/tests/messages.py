@@ -5,14 +5,27 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from enum import StrEnum, auto
+from typing import TYPE_CHECKING
 
+from ddev.cli.ci.tests.status import Status
 from ddev.event_bus.orchestrator import BaseMessage
+from ddev.utils.junit import TestStatus
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from ddev.utils.github_async.models import WorkflowJob
+    from ddev.utils.junit import JUnitReport, JUnitTestCase
+
+
+class Platform(StrEnum):
+    """Operating system a test job runs on."""
+
+    LINUX = auto()
+    WINDOWS = auto()
+    MACOS = auto()
+
 
 # Characters GitHub disallows in an artifact name (plus CR/LF).
 ARTIFACT_NAME_DISALLOWED = re.compile(r'["\:<>|*?\\/\r\n]')
@@ -29,7 +42,7 @@ class BatchJob:
     target: str
     runner: str
     environment: str
-    platform: Literal["linux", "windows", "macos"]
+    platform: Platform
     unit_tests: bool
     e2e_tests: bool
 
@@ -45,11 +58,30 @@ class BatchJob:
 
 
 @dataclass
-class FailedCheck:
-    """A single failed test check within a workflow."""
+class JobResult:
+    """In-memory result of a single test job (one integration + environment + platform).
 
-    name: str
-    url: str
+    Carries the full parsed JUnit reports for the job, not just its failures, so the PR-comment
+    layer can report passed/skipped counts as well.
+    """
+
+    integration: str
+    environment: str
+    platform: Platform
+    status: Status
+    failed_steps: list[str] = field(default_factory=list)
+    reports: tuple[JUnitReport, ...] = ()
+
+    @property
+    def failed_tests(self) -> list[JUnitTestCase]:
+        """Every failed/errored test case across this job's reports, flattened for rendering."""
+        return [
+            case
+            for report in self.reports
+            for suite in report.test_suites
+            for case in suite.test_cases
+            if case.status in (TestStatus.FAILED, TestStatus.ERROR)
+        ]
 
 
 @dataclass
@@ -105,13 +137,28 @@ class BatchJobResult:
 
 @dataclass
 class WorkflowStatus:
-    """Status of a single GitHub Actions workflow run."""
+    """Status of a single GitHub Actions workflow run (one batch), with every job's result.
 
+    ``batch_id`` is the human batch identifier (e.g. ``batch-01``) the comment renders; ``id`` is the
+    numeric workflow run id and ``url`` links to the run.
+    """
+
+    batch_id: str
     url: str
     id: int
-    success_count: int | None
-    failed_count: int | None
-    failed_checks: list[FailedCheck]
+    success_count: int
+    failed_count: int
+    skipped_count: int
+    results: list[JobResult]
+
+    @property
+    def status(self) -> Status:
+        """Batch-level label: FAILURE if any job failed, else SUCCESS if any passed, else SKIPPED."""
+        if self.failed_count > 0:
+            return Status.FAILURE
+        if self.success_count > 0:
+            return Status.SUCCESS
+        return Status.SKIPPED
 
 
 @dataclass
@@ -127,7 +174,7 @@ class TestBatch(BaseMessage):
 class BatchFinished(BaseMessage):
     """Emitted when a GitHub Actions test workflow has completed."""
 
-    status: Literal["success", "failure", "skipped"]
+    status: Status
     run_id: int
     workflow_url: str
     artifacts_path: str
@@ -137,7 +184,30 @@ class BatchFinished(BaseMessage):
 
 @dataclass
 class UpdatePRComment(BaseMessage):
-    """Emitted to request a PR comment update."""
+    """Emitted per finished batch to request a PR comment update.
 
+    ``revision`` is the gatherer's monotonic counter (one per consumed ``BatchFinished``); the
+    PR-updater renders the latest and rejects stale revisions. ``done`` is ``True`` only on the
+    revision that completes the final expected batch.
+    """
+
+    revision: int
     done: bool
     workflows: list[WorkflowStatus]
+
+    @property
+    def passed(self) -> int:
+        return sum(workflow.success_count for workflow in self.workflows)
+
+    @property
+    def failed(self) -> int:
+        return sum(workflow.failed_count for workflow in self.workflows)
+
+    @property
+    def skipped(self) -> int:
+        return sum(workflow.skipped_count for workflow in self.workflows)
+
+    @property
+    def complete(self) -> int:
+        """Total jobs finished so far (passed + failed + skipped across all gathered batches)."""
+        return sum(len(workflow.results) for workflow in self.workflows)
