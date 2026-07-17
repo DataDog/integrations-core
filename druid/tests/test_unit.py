@@ -3,10 +3,10 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
 from datadog_checks.druid import DruidCheck
 
 pytestmark = pytest.mark.unit
@@ -36,11 +36,15 @@ def test_service_check_can_connect_success(aggregator, instance, mock_http):
     )
 
 
-@pytest.mark.parametrize("exception_class", [requests.exceptions.ConnectionError, requests.exceptions.Timeout])
-def test_service_check_can_connect_failure(aggregator, instance, mock_http, exception_class):
+@pytest.mark.parametrize(
+    "exception",
+    [HTTPConnectionError('boom'), HTTPTimeoutError('boom')],
+    ids=["connection_error", "timeout"],
+)
+def test_service_check_can_connect_failure(aggregator, instance, mock_http, exception):
     check = DruidCheck('druid', {}, [instance])
 
-    attrs = {'raise_for_status.side_effect': exception_class}
+    attrs = {'raise_for_status.side_effect': exception}
     mock_http.get.side_effect = [mock.MagicMock(status_code=500, **attrs)]
 
     with pytest.raises(CheckException):
