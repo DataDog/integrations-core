@@ -804,6 +804,23 @@ class ClusterMetadataCollector:
             member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
 
+            # Emit the current membership of the group so DSM can reconcile members with infra tags
+            # (members reported by the tracer carry infra tags; this list lets DSM drop departed
+            # members and seed tagless rows for members the tracer has not reported).
+            self.check.event_platform_event(
+                json.dumps(
+                    {
+                        'collection_timestamp': int(time.time() * 1000),
+                        'kafka_cluster_id': cluster_id,
+                        **self.config._original_cluster_id_field(),
+                        'config_type': 'consumer_membership',
+                        'group_id': group_id,
+                        'member_ids': member_ids,
+                    }
+                ),
+                "data-streams-message",
+            )
+
             if prev_member_hashes is not None:
                 prev_hash = prev_member_hashes.get(group_id)
                 if prev_hash is not None and prev_hash != member_hash:

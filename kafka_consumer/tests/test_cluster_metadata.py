@@ -1917,6 +1917,32 @@ def test_malformed_cache_does_not_abort_collection(check, aggregator):
     aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
 
 
+def _consumer_membership_events(check):
+    """Return parsed data-streams-message payloads with config_type 'consumer_membership'."""
+    events = []
+    for call in check.event_platform_event.call_args_list:
+        args = call[0]
+        if len(args) > 1 and args[1] == 'data-streams-message':
+            payload = json.loads(args[0])
+            if payload.get('config_type') == 'consumer_membership':
+                events.append(payload)
+    return events
+
+
+def test_consumer_membership_event_emitted(check):
+    """A consumer_membership event is emitted per group with the cluster id, group id and members."""
+    members = [_make_member(client_id='c1'), _make_member(client_id='c2')]
+    describe_result = _make_group_describe(members=members)
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+
+    events = _consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 1
+    event = events[0]
+    assert event['kafka_cluster_id'] == 'test-cluster-id'
+    assert event['group_id'] == 'test-group'
+    assert event['member_ids'] == ['m-c1', 'm-c2']
+
+
 def test_heartbeat_connect_api_status_present_when_urls_configured(check):
     """connect_api_status appears in heartbeat payload when Connect URLs are configured."""
     instance = {
