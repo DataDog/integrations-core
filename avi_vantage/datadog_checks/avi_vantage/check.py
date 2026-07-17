@@ -72,7 +72,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
     @contextmanager
     def login(self):
-        self.http._session = None
+        self.http.close()
         login_url = self.base_url + "/login"
         logout_url = self.base_url + "/logout"
         try:
@@ -87,7 +87,7 @@ class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.service_check("can_connect", AgentCheck.OK, tags=self.config.tags)
 
         yield
-        csrf_token = self.http.session.cookies.get('csrftoken')
+        csrf_token = self.http.get_cookie('csrftoken')
         if csrf_token:
             logout_resp = self.http.post(
                 logout_url, extra_headers={'X-CSRFToken': csrf_token, 'Referer': self.base_url}
