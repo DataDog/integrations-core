@@ -4,11 +4,17 @@ files:
 - name: nginx.yaml
   discovery:
     strategies:
-      - strategy: from_ports
+      - strategy: local:from_nginx_ports
+        provides:
+          - endpoint
+        inputs:
+          port_hints: array[int]
         port_hints:
           - 80
+          - 443
+          - 8443
         candidates:
-          - nginx_status_url: "http://{service.host}:{port.number}/nginx_status"
+          - nginx_status_url: "{endpoint.scheme}://{service.host}:{endpoint.port.number}/nginx_status"
   options:
   - template: init_config
     options:

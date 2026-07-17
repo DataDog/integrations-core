@@ -12,8 +12,9 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Any
 
-from datadog_checks.base.utils.discovery import Service, candidate_ports
+from datadog_checks.base.utils.discovery import Service
 from datadog_checks.nginx.config_models import discovery_overrides
+from datadog_checks.nginx.config_models.discovery_strategies import from_nginx_ports
 from datadog_checks.nginx.config_models.instance import InstanceConfig
 from datadog_checks.nginx.config_models.shared import SharedConfig
 
@@ -22,11 +23,12 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
     shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
         by_alias=True, mode='json', exclude_none=True
     )
-    # discovery[0]: from_ports
-    for port in candidate_ports(service, [80]):
-        ctx = {'port': port}
+    # discovery[0]: local:from_nginx_ports
+    for ctx in from_nginx_ports(service, port_hints=[80, 443, 8443]):
         instance_data = {
-            'nginx_status_url': 'http://{service.host}:{port.number}/nginx_status'.format(service=service, **ctx),
+            'nginx_status_url': '{endpoint.scheme}://{service.host}:{endpoint.port.number}/nginx_status'.format(
+                service=service, **ctx
+            ),
         }
         instance = InstanceConfig.model_validate(
             instance_data, context={'configured_fields': frozenset(instance_data)}
