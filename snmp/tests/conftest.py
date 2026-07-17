@@ -100,9 +100,6 @@ def _autodiscovery_ready():
 def create_datadog_conf_file(tmp_dir):
     container_ip = get_container_ip(SNMP_CONTAINER_NAME)
     prefix = ".".join(container_ip.split('.')[:3])
-    # Use an IP that differs from the container so ignored_ip_addresses never excludes the simulator.
-    container_last = int(container_ip.split('.')[-1])
-    ignored_ip = '{}.{}'.format(prefix, container_last + 1)
     datadog_conf = {
         # Set check_runners to -1 to avoid checks being run in background when running `agent check` for e2e testing
         # Setting check_runners to a negative number to disable check runners is a workaround,
@@ -149,7 +146,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'des',
                         'context_name': 'public',
-                        'ignored_ip_addresses': [ignored_ip],
+                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
                         'loader': 'core',
                     },
                     {
@@ -165,7 +162,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'AES',
                         'context_name': 'public',
-                        'ignored_ip_addresses': [ignored_ip],
+                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
                         'loader': 'core',
                     },
                 ],

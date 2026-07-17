@@ -34,6 +34,8 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
     snmp_device = container_ip
     subnet_prefix = ".".join(container_ip.split('.')[:3])
+    # The v3 configs ignore .2 (the container IP) so they discover .1 (the gateway) via DNAT instead.
+    gateway_ip = '{}.1'.format(subnet_prefix)
 
     aggregator = common.dd_agent_check_wrapper(
         dd_agent_check,
@@ -122,11 +124,12 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=common_tags)
 
     # ==== test snmp v3 ===
+    # The v3 configs have ignored_ip_addresses=[container_ip], so only the gateway (.1) is discovered.
     for auth_proto in ['sha', 'sha256']:
         common_tags = [
-            'snmp_device:{}'.format(snmp_device),
-            'device_ip:{}'.format(snmp_device),
-            'device_id:test-auth-proto-{}:{}'.format(auth_proto, snmp_device),
+            'snmp_device:{}'.format(gateway_ip),
+            'device_ip:{}'.format(gateway_ip),
+            'device_id:test-auth-proto-{}:{}'.format(auth_proto, gateway_ip),
             'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
             'snmp_host:41ba948911b9',
             'device_hostname:41ba948911b9',
@@ -139,5 +142,16 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         aggregator.assert_metric('snmp.sysUpTimeInstance', tags=common_tags)
         for metric in IF_SCALAR_GAUGE:
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
+
+    # ==== test ignored IPs ====
+    tags = [
+        'snmp_device:{}'.format(snmp_device),
+        'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
+        'snmp_host:41ba948911b9',
+        'device_hostname:41ba948911b9',
+        'snmp_profile:generic-device',
+        'agent_host:' + common.get_agent_hostname(),
+    ]
+    aggregator.assert_metric('snmp.devices_monitored', count=0, tags=tags)
 
     aggregator.assert_all_metrics_covered()
