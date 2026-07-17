@@ -17,6 +17,7 @@ from __future__ import annotations
 import contextlib
 import re
 from dataclasses import dataclass
+from enum import StrEnum, auto
 from typing import TYPE_CHECKING
 
 import click
@@ -415,13 +416,16 @@ def _extract_explicit_pr_number(raw: str) -> int | None:
     return None
 
 
-def _resolve_pr(app: Application, pr_number: int, *, dry_run: bool) -> tuple[PullRequest, str]:
+def _resolve_pr(
+    app: Application, pr_number: int, *, dry_run: bool, missing_token_message: str | None = None
+) -> tuple[PullRequest, str]:
     """Fetch PR #<pr_number> and resolve its squash-merge commit to a full SHA.
 
     Returns `(pull_request, full_sha)`. Raises `_PRNotFound` when GitHub returns 404. Raises
     `_CommitNotResolvable` (wrapped with PR context) when the merge commit can't be resolved locally.
     Aborts on other auth / network / validation errors, or when the PR is not squash-merged, so the
-    user gets a clear, contextual message rather than a stack trace.
+    user gets a clear, contextual message rather than a stack trace. `missing_token_message` lets a
+    caller replace the default no-token abort text with one tailored to its entry point.
     """
     import asyncio
 
@@ -430,8 +434,11 @@ def _resolve_pr(app: Application, pr_number: int, *, dry_run: bool) -> tuple[Pul
 
     if not app.config.github.token:
         app.abort(
-            'GitHub token required to resolve a PR reference. Set `github.token`, or pass the '
-            'full commit SHA directly (--no-pr does not skip this lookup).'
+            missing_token_message
+            or (
+                'GitHub token required to resolve a PR reference. Set `github.token`, or pass the '
+                'full commit SHA directly (--no-pr does not skip this lookup).'
+            )
         )
 
     owner, repo = resolve_owner_repo(app)
@@ -652,6 +659,19 @@ class PortPlan:
     dry_run: bool
 
 
+@dataclass(frozen=True)
+class PortOptions:
+    """Raw user-supplied knobs shared by every port, independent of the specific commit or base."""
+
+    branch_prefix: str
+    branch_suffix: str | None
+    pr_labels: str
+    no_pr: bool
+    draft: bool
+    verify: bool
+    dry_run: bool
+
+
 def confirm_or_abort(app: Application, prompt: str, *, dry_run: bool) -> None:
     """Prompt for confirmation when interactive, aborting if declined; a no-op under dry-run or non-interactive."""
     if not dry_run and app.interactive and not click.confirm(prompt):
@@ -699,18 +719,12 @@ def build_port_plan(
     clean_subject: str,
     original_pr: str | None,
     target_branch: str,
-    branch_prefix: str,
-    branch_suffix: str | None,
-    pr_labels: str,
-    no_pr: bool,
-    draft: bool,
-    verify: bool,
-    dry_run: bool,
+    options: PortOptions,
 ) -> PortPlan:
     """Assemble a `PortPlan` for an already-resolved commit and a single target branch."""
     user = check_github_user(app)
-    suffix = branch_suffix or f'to-{target_branch}'
-    new_branch = f'{user}/{branch_prefix}-{full_sha[:10]}-{suffix}'.lower()
+    suffix = options.branch_suffix or f'to-{target_branch}'
+    new_branch = f'{user}/{options.branch_prefix}-{full_sha[:10]}-{suffix}'.lower()
     owner, repo = resolve_owner_repo(app)
     return PortPlan(
         full_sha=full_sha,
@@ -729,11 +743,11 @@ def build_port_plan(
             owner=owner,
             repo=repo,
         ),
-        labels=parse_labels(pr_labels),
-        draft=draft,
-        create_pr=not no_pr,
-        verify=verify,
-        dry_run=dry_run,
+        labels=parse_labels(options.pr_labels),
+        draft=options.draft,
+        create_pr=not options.no_pr,
+        verify=options.verify,
+        dry_run=options.dry_run,
     )
 
 
@@ -742,18 +756,12 @@ def resolve_port_plan(
     *,
     commit_hash: str | None,
     target_branch: str,
-    branch_prefix: str,
-    branch_suffix: str | None,
-    pr_labels: str,
-    no_pr: bool,
-    draft: bool,
-    verify: bool,
-    dry_run: bool,
+    options: PortOptions,
 ) -> PortPlan:
     """Validate inputs, resolve derived values, and confirm with the user. Aborts on failure."""
     check_github_user(app)
 
-    if not no_pr and not dry_run and not app.config.github.token:
+    if not options.no_pr and not options.dry_run and not app.config.github.token:
         app.abort(
             'No GitHub token configured. Set `github.token` via `ddev config set github.token <token>` '
             'or export DD_GITHUB_TOKEN. Re-run with `--no-pr` to skip pull request creation.'
@@ -762,11 +770,11 @@ def resolve_port_plan(
     if commit_hash is None:
         head_commit = app.repo.git.latest_commit()
         app.display_info(f'No commit specified. Current HEAD: `{head_commit.sha[:10]}` - {head_commit.subject}')
-        confirm_or_abort(app, 'Use this commit?', dry_run=dry_run)
+        confirm_or_abort(app, 'Use this commit?', dry_run=options.dry_run)
         commit_hash = head_commit.sha
 
     try:
-        full_sha = _resolve_input(app, commit_hash, dry_run=dry_run)
+        full_sha = _resolve_input(app, commit_hash, dry_run=options.dry_run)
     except _CommitNotResolvable as exc:
         app.abort(str(exc))
 
@@ -779,18 +787,12 @@ def resolve_port_plan(
         clean_subject=clean_subject,
         original_pr=original_pr,
         target_branch=target_branch,
-        branch_prefix=branch_prefix,
-        branch_suffix=branch_suffix,
-        pr_labels=pr_labels,
-        no_pr=no_pr,
-        draft=draft,
-        verify=verify,
-        dry_run=dry_run,
+        options=options,
     )
 
     app.output(_format_plan_summary(app, plan), stderr=True)
 
-    confirm_or_abort(app, 'Continue?', dry_run=dry_run)
+    confirm_or_abort(app, 'Continue?', dry_run=options.dry_run)
 
     return plan
 
@@ -930,52 +932,85 @@ def execute_port_plan(app: Application, plan: PortPlan) -> PortOutcome:
     return PortOutcome(error=None, pr_url=pr_url)
 
 
+class BackportStatus(StrEnum):
+    PORTED = auto()
+    SKIPPED = auto()
+    FAILED = auto()
+
+
+@dataclass(frozen=True)
+class BackportResult:
+    """Outcome of porting one base. `detail` holds the PR URL (ported), the error text (failed), or None."""
+
+    base: str
+    status: BackportStatus
+    detail: str | None = None
+
+
 def run_backport_from_pr(
     app: Application,
     *,
     pr_number: int,
-    target_branch: str,
-    target_branch_explicit: bool,
-    branch_prefix: str,
-    branch_suffix: str | None,
-    pr_labels: str,
-    no_pr: bool,
-    draft: bool,
-    verify: bool,
-    dry_run: bool,
+    override_base: str | None,
+    options: PortOptions,
 ) -> bool:
     """Backport a merged PR to each of its `backport/<base>` labels.
 
     Resolves the PR's squash-merge commit once, derives the target branches from its
-    `backport/<base>` labels (or the single `--target-branch` when one was given explicitly), and
-    ports to each. A base whose backport PR already exists in any state (open, merged, or closed) is
-    skipped so re-runs are idempotent. Returns True when every base succeeded or was skipped.
+    `backport/<base>` labels (or the single `override_base` when one was given), and ports to each. A
+    base whose backport PR already exists in any state (open, merged, or closed) is skipped so re-runs
+    are idempotent. Returns True when every base succeeded or was skipped.
     """
     check_github_user(app)
-    if not app.config.github.token:
-        app.abort(
-            '`--from-pr` needs a GitHub token to read the pull request. Set `github.token` via '
-            '`ddev config set github.token <token>` or export DD_GITHUB_TOKEN.'
-        )
 
     try:
-        pr, full_sha = _resolve_pr(app, pr_number, dry_run=dry_run)
+        pr, full_sha = _resolve_pr(
+            app,
+            pr_number,
+            dry_run=options.dry_run,
+            missing_token_message=(
+                '`--from-pr` needs a GitHub token to read the pull request. Set `github.token` via '
+                '`ddev config set github.token <token>` or export DD_GITHUB_TOKEN.'
+            ),
+        )
     except _PRNotFound:
         app.abort(f'PR #{pr_number} not found.')
     except _CommitNotResolvable as exc:
         app.abort(str(exc))
 
-    bases = [target_branch] if target_branch_explicit else derive_backport_bases(pr)
+    bases = [override_base] if override_base is not None else derive_backport_bases(pr)
     if not bases:
         app.display_warning(f'PR #{pr_number} has no `{BACKPORT_LABEL_PREFIX}<base>` labels; nothing to backport.')
         return True
 
     clean_subject, original_pr = _read_commit_subject(app, full_sha)
     _warn_about_reset_files(app, full_sha)
-    owner, repo = resolve_owner_repo(app)
     app.display_info(f'Backporting PR #{pr_number} (`{full_sha[:10]}` - {clean_subject}) to: {", ".join(bases)}')
 
-    results: list[tuple[str, str, str | None]] = []
+    results = _port_to_each_base(
+        app,
+        bases=bases,
+        full_sha=full_sha,
+        clean_subject=clean_subject,
+        original_pr=original_pr,
+        options=options,
+    )
+    _display_backport_summary(app, pr_number, results)
+    return all(result.status is not BackportStatus.FAILED for result in results)
+
+
+def _port_to_each_base(
+    app: Application,
+    *,
+    bases: list[str],
+    full_sha: str,
+    clean_subject: str,
+    original_pr: str | None,
+    options: PortOptions,
+) -> list[BackportResult]:
+    """Port one resolved commit to each base in turn, skipping bases that already have a backport PR."""
+    owner, repo = resolve_owner_repo(app)
+    results: list[BackportResult] = []
     for base in bases:
         plan = build_port_plan(
             app,
@@ -983,29 +1018,21 @@ def run_backport_from_pr(
             clean_subject=clean_subject,
             original_pr=original_pr,
             target_branch=base,
-            branch_prefix=branch_prefix,
-            branch_suffix=branch_suffix,
-            pr_labels=pr_labels,
-            no_pr=no_pr,
-            draft=draft,
-            verify=verify,
-            dry_run=dry_run,
+            options=options,
         )
-        if not dry_run and _backport_pr_exists(app, owner, repo, plan.new_branch):
+        if not options.dry_run and _backport_pr_exists(app, owner, repo, plan.new_branch):
             app.display_info(f'Backport to `{base}` already has a PR (branch `{plan.new_branch}`); skipping.')
-            results.append((base, 'skipped', None))
+            results.append(BackportResult(base=base, status=BackportStatus.SKIPPED))
             continue
 
         app.output(Text(f'Backporting to `{base}`', style='bold'), stderr=True)
         outcome = execute_port_plan(app, plan)
         if outcome.error is None:
-            results.append((base, 'ported', outcome.pr_url))
+            results.append(BackportResult(base=base, status=BackportStatus.PORTED, detail=outcome.pr_url))
         else:
             app.display_error(f'Backport to `{base}` failed: {outcome.error}')
-            results.append((base, 'failed', outcome.error))
-
-    _display_backport_summary(app, pr_number, results)
-    return all(status != 'failed' for _, status, _ in results)
+            results.append(BackportResult(base=base, status=BackportStatus.FAILED, detail=outcome.error))
+    return results
 
 
 def _backport_pr_exists(app: Application, owner: str, repo: str, branch: str) -> bool:
@@ -1036,15 +1063,19 @@ async def _any_pr_for_head(token: str, owner: str, repo: str, branch: str) -> bo
         return len(response.data) > 0
 
 
-def _display_backport_summary(app: Application, pr_number: int, results: list[tuple[str, str, str | None]]) -> None:
+def _display_backport_summary(app: Application, pr_number: int, results: list[BackportResult]) -> None:
     """Print a panel summarising the per-base backport outcomes."""
-    icons = {'ported': '✅', 'skipped': '⏭️', 'failed': '❌'}
+    icons = {
+        BackportStatus.PORTED: '✅',
+        BackportStatus.SKIPPED: '⏭️',
+        BackportStatus.FAILED: '❌',
+    }
     rows: list[tuple[str, str]] = []
-    for base, status, detail in results:
-        label = f'{icons.get(status, "")} {status}'.strip()
-        if detail:
-            label = f'{label} - {detail}'
-        rows.append((base, label))
+    for result in results:
+        label = f'{icons[result.status]} {result.status}'
+        if result.detail:
+            label = f'{label} - {result.detail}'
+        rows.append((result.base, label))
     app.output(
         Panel(
             app.labeled_lines(rows),

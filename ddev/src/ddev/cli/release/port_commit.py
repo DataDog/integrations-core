@@ -75,6 +75,7 @@ def port_commit(
     import logging
 
     from ddev.cli.release.port_commit_workflow import (
+        PortOptions,
         display_completion_summary,
         execute_port_plan,
         resolve_port_plan,
@@ -85,6 +86,16 @@ def port_commit(
     # PR-creation steps already print their own status lines; the underlying HTTP traffic is noise.
     logging.getLogger('httpx').setLevel(logging.WARNING)
 
+    options = PortOptions(
+        branch_prefix=branch_prefix,
+        branch_suffix=branch_suffix,
+        pr_labels=pr_labels,
+        no_pr=no_pr,
+        draft=draft,
+        verify=verify,
+        dry_run=dry_run,
+    )
+
     if from_pr is not None:
         if commit_hash is not None:
             app.abort('Pass either COMMIT_OR_PR or --from-pr, not both.')
@@ -92,18 +103,12 @@ def port_commit(
 
         ctx = click.get_current_context()
         target_branch_explicit = ctx.get_parameter_source('target_branch') is not ParameterSource.DEFAULT
+        override_base = target_branch if target_branch_explicit else None
         succeeded = run_backport_from_pr(
             app,
             pr_number=from_pr,
-            target_branch=target_branch,
-            target_branch_explicit=target_branch_explicit,
-            branch_prefix=branch_prefix,
-            branch_suffix=branch_suffix,
-            pr_labels=pr_labels,
-            no_pr=no_pr,
-            draft=draft,
-            verify=verify,
-            dry_run=dry_run,
+            override_base=override_base,
+            options=options,
         )
         if not succeeded:
             app.abort('One or more backports failed.')
@@ -113,13 +118,7 @@ def port_commit(
         app,
         commit_hash=commit_hash,
         target_branch=target_branch,
-        branch_prefix=branch_prefix,
-        branch_suffix=branch_suffix,
-        pr_labels=pr_labels,
-        no_pr=no_pr,
-        draft=draft,
-        verify=verify,
-        dry_run=dry_run,
+        options=options,
     )
 
     outcome = execute_port_plan(app, plan)

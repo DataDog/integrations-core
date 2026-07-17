@@ -1117,6 +1117,40 @@ def test_command_from_pr_aggregates_failures_and_continues(
     assert bases == ['7.62.x', '7.61.x']
 
 
+def test_command_from_pr_summary_reports_every_status(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """The summary panel renders a row per base, covering the ported, skipped, and failed outcomes."""
+    import httpx
+
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x', '7.60.x']),
+    )
+    # 7.62.x already has a backport PR -> skipped.
+    fake_async_github.mock_response(
+        'list_pull_requests',
+        [_merged_pr(number=999)],
+        head='DataDog:alice/port-1234567890-to-7.62.x',
+    )
+    # 7.60.x fails during PR creation -> failed.
+    fake_async_github.mock_response(
+        'create_pull_request',
+        httpx.HTTPStatusError('boom', request=httpx.Request('POST', 'https://x'), response=httpx.Response(500)),
+        base='7.60.x',
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703')
+
+    assert result.exit_code == 1, result.output
+    assert 'Backport summary for PR #23703' in result.output
+    assert 'ported' in result.output
+    assert 'skipped' in result.output
+    assert 'failed' in result.output
+
+
 def test_command_from_pr_no_backport_labels_is_a_noop(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
@@ -1164,8 +1198,16 @@ def test_command_from_pr_requires_token(
 def test_command_from_pr_aborts_when_pr_not_found(
     ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
 ) -> None:
-    """The default get_pull_request mock is a 404, so the lookup surfaces a clear not-found abort."""
+    """A 404 from the PR lookup surfaces a clear not-found abort."""
+    import httpx
+
     _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        httpx.HTTPStatusError(
+            'Not Found', request=httpx.Request('GET', 'https://api.github.com/'), response=httpx.Response(404)
+        ),
+    )
     mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
 
     result = ddev('release', 'port-commit', '--from-pr', '23703')
