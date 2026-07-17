@@ -118,6 +118,50 @@ def test_request_builds_query_params(password_hashed, password_field, absent_fie
     assert absent_field not in params
 
 
+@pytest.mark.parametrize(
+    'password_hashed, password_field, absent_field',
+    [
+        pytest.param(False, 'Password', 'Hashedpassword', id='plain'),
+        pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
+    ],
+)
+def test_check_request_uses_query_credentials_not_basic_auth(password_hashed, password_field, absent_field):
+    # type: (bool, str, str) -> None
+    # Drive the real check against a stand-in that conforms to the backend-neutral HTTPClient surface
+    # (the only members voltdb touches: options and get). Starting options['auth'] non-None proves
+    # the check clears the config-derived basic-auth tuple, and capturing the get call proves voltdb
+    # sends the credentials as request params under the right field with no per-call auth object.
+    instance = {
+        'url': 'http://localhost:8080',
+        'username': 'admin',
+        'password': 'secret',
+        'password_hashed': password_hashed,
+    }
+
+    class FakeHTTPClient:
+        def __init__(self):
+            self.options = {'auth': ('admin', 'secret')}
+            self.captured = {}
+
+        def get(self, url, **options):
+            self.captured = options
+            return mock.MagicMock()
+
+    fake = FakeHTTPClient()
+    with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
+        check = VoltDBCheck('voltdb', {}, [instance])
+        check._client.request('@SystemInformation', parameters=['OVERVIEW'])
+
+    assert fake.options['auth'] is None
+
+    assert 'auth' not in fake.captured
+    params = fake.captured['params']
+    assert params['Procedure'] == '@SystemInformation'
+    assert params['User'] == 'admin'
+    assert params[password_field] == 'secret'
+    assert absent_field not in params
+
+
 def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance_all):
     check = VoltDBCheck('voltdb', {}, [instance_all])
     dd_run_check(check)
