@@ -48,8 +48,8 @@ def test_vts(check, instance_vts, aggregator):
 
 
 @pytest.mark.unit
-def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mock_http):
+    mock_http.get.side_effect = mock_http_responses
     c = check(mocked_instance_vts)
     dd_run_check(c)
 
