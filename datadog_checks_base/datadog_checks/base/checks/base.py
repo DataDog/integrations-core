@@ -172,6 +172,8 @@ class AgentCheck(object):
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
 
+    EMIT_OPENMETRICS_LIMIT_TELEMETRY = False
+
     # Allow tracing for classic integrations
     def __init_subclass__(cls, *args, **kwargs):
         try:
@@ -1610,6 +1612,20 @@ class AgentCheck(object):
             error_report = json.encode([{'message': message, 'traceback': tb}])
         finally:
             if self.metric_limiter:
+                reached_limit = self.metric_limiter.reached_limit
+                if self.EMIT_OPENMETRICS_LIMIT_TELEMETRY and reached_limit:
+                    try:
+                        emit_agent_telemetry = getattr(datadog_agent, 'emit_agent_telemetry', None)
+                        if callable(emit_agent_telemetry):
+                            emit_agent_telemetry(
+                                'openmetrics',
+                                'max_returned_metrics_reached',
+                                1,
+                                'counter',
+                            )
+                    except Exception:
+                        self.log.debug('Failed to emit OpenMetrics metric limit telemetry', exc_info=True)
+
                 if is_affirmative(self.debug_metrics.get('metric_contexts', False)):
                     debug_metrics = self.metric_limiter.get_debug_metrics()
 
