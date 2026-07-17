@@ -522,7 +522,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
     def _flush_error_count(self, error_label):
         self._check.count(
-            "dd.clickhouse.query_completions.error",
+            "dd.clickhouse.async_inserts_flush.error",
             1,
             tags=(self.tags or []) + [f"error:{error_label}"],
             raw=True,
