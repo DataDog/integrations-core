@@ -61,9 +61,10 @@ class ReActProcess:
         self._scope = scope
         self._compact_threshold_pct = compact_threshold_pct
 
-    def reset(self) -> None:
+    async def reset(self) -> None:
         """Clear the agent's conversation history."""
         self._agent.reset()
+        await self._callbacks.fire_context_cleared(self._scope)
 
     async def compact(self, response: AgentResponse | None = None) -> tuple[int, int]:
         """Compact the agent's conversation history unconditionally.

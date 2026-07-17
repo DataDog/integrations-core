@@ -224,7 +224,7 @@ async def _drive_goal_loop(
             )
 
             if attempts > 1:
-                reviewer_process.reset()
+                await reviewer_process.reset()
 
             check = await _run_reviewer_once(reviewer_process, user_message)
             total_in += check.input_tokens

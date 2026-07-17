@@ -106,6 +106,14 @@ class AfterCompact(Message):
         self.scope = scope
 
 
+class ContextCleared(Message):
+    """Fired immediately after the agent's conversation history is cleared."""
+
+    def __init__(self, scope: AgentScope) -> None:
+        super().__init__()
+        self.scope = scope
+
+
 class AgentBeforeSend(Message):
     """Fired just before each agent.send() with the prompt content (sentinel excluded)."""
 

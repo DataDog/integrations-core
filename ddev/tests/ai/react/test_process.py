@@ -86,6 +86,7 @@ class CallbackRecorder:
         self.errors: list[BaseException] = []
         self.before_compacts: int = 0
         self.after_compacts: int = 0
+        self.context_clears: list[AgentScope] = []
 
         self.callback_set = CallbackSet()
 
@@ -120,6 +121,10 @@ class CallbackRecorder:
         @self.callback_set.on_after_compact
         async def _record_after_compact(scope: AgentScope) -> None:
             self.after_compacts += 1
+
+        @self.callback_set.on_context_cleared
+        async def _record_context_cleared(scope: AgentScope) -> None:
+            self.context_clears.append(scope)
 
 
 def make_response(
@@ -748,11 +753,13 @@ async def test_context_usage_propagated(context_usage: ContextUsage | None) -> N
 # ---------------------------------------------------------------------------
 
 
-async def test_reset_delegates_to_agent() -> None:
+async def test_reset_delegates_to_agent_and_fires_callback() -> None:
     agent = MockAgent([])
-    make_process(agent).reset()
+    recorder = CallbackRecorder()
+    await make_process(agent, callbacks=Callbacks([recorder.callback_set])).reset()
     assert agent.reset_calls == 1
     assert agent.history == []
+    assert recorder.context_clears == [DEFAULT_SCOPE]
 
 
 async def test_compact_delegates_to_agent_returns_zero_when_no_op() -> None:

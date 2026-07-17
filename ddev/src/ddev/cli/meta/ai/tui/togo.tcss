@@ -357,6 +357,7 @@ MarkdownH3 {
 
 .task-prompt-scroll {
     height: 1fr;
+    min-height: 13;
     overflow-y: auto;
 }
 

@@ -127,6 +127,10 @@ class AgentLogger:
         async def _on_after_compact(scope: AgentScope) -> None:
             self._emit(scope, {"event": "after_compact"})
 
+        @cb.on_context_cleared
+        async def _on_context_cleared(scope: AgentScope) -> None:
+            self._emit(scope, {"event": "context_cleared"})
+
         @cb.on_agent_finish
         async def _on_agent_finish(scope: AgentScope, result: ReActResult) -> None:
             self._emit(

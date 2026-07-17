@@ -168,7 +168,7 @@ class AgenticPhase(Phase):
         last_result: ReActResult | None,
     ) -> None:
         if task.clear_context_before:
-            process.reset()
+            await process.reset()
             return
 
         if task.compact_context_before:

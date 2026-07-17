@@ -643,6 +643,22 @@ def test_scoped_goal_event_only_mutates_identified_phase() -> None:
     assert screen._task_statuses[("phase_2", "shared_task")] is RunStatus.FAILED
 
 
+def test_context_cleared_notice_is_written_to_scoped_phase_log() -> None:
+    from ddev.ai.agent.scope import AgentRole, AgentScope
+    from ddev.cli.meta.ai.tui.messages import ContextCleared
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    screen = ExecutionScreen(flow)
+    scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
+
+    screen.on_context_cleared(ContextCleared(scope))
+
+    assert len(screen._phase_logs["phase_1"]) == 1
+    assert "context cleared" in screen._phase_logs["phase_1"][0].plain.lower()
+    assert screen._phase_logs["phase_2"] == []
+
+
 async def test_pipeline_phase_running_during_execution():
     """A phase being run by _FakeOrchestrator transitions through 'running'."""
     from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet

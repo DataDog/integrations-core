@@ -25,6 +25,7 @@ from ddev.cli.meta.ai.rendering import (
     render_agent_start_header,
     render_agent_tools_line,
     render_compact_notice,
+    render_context_cleared_notice,
     render_prompt_panel,
     render_response_header,
     render_response_text,
@@ -44,6 +45,7 @@ from ddev.cli.meta.ai.tui.messages import (
     AgentToolCalled,
     BeforeCompact,
     BeforeGoalCheck,
+    ContextCleared,
     ExecutionFailed,
     PhaseFinished,
     PhaseStarted,
@@ -323,6 +325,9 @@ class ExecutionScreen(TogoScreen):
 
     def on_before_compact(self, msg: BeforeCompact) -> None:
         self._write_output(render_compact_notice(), phase_id=msg.scope.phase_id)
+
+    def on_context_cleared(self, msg: ContextCleared) -> None:
+        self._write_output(render_context_cleared_notice(), phase_id=msg.scope.phase_id)
 
     def on_agent_finished(self, msg: AgentFinished) -> None:
         phase_id = msg.scope.phase_id

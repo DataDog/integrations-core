@@ -25,6 +25,7 @@ from ddev.cli.meta.ai.tui.messages import (
     AgentToolCalled,
     BeforeCompact,
     BeforeGoalCheck,
+    ContextCleared,
     PhaseFinished,
     PhaseStarted,
 )
@@ -78,6 +79,7 @@ class StubOrchestrator:
         await self.cb_set.fire_tool_call(SCOPE, tool_call, result, 1)
         await self.cb_set.fire_before_compact(SCOPE)
         await self.cb_set.fire_after_compact(SCOPE)
+        await self.cb_set.fire_context_cleared(SCOPE)
         await self.cb_set.fire_agent_finish(SCOPE, _make_react_result())
         await self.cb_set.fire_agent_error(SCOPE, ValueError("boom"))
         await self.cb_set.fire_before_goal_check("phase1", "task1", 1)
@@ -175,6 +177,12 @@ async def test_after_compact_payload(received_from_stub):
     assert msgs[0].scope is SCOPE
 
 
+async def test_context_cleared_payload(received_from_stub):
+    msgs = [m for m in received_from_stub if isinstance(m, ContextCleared)]
+    assert len(msgs) == 1
+    assert msgs[0].scope is SCOPE
+
+
 async def test_agent_finished_payload(received_from_stub):
     msgs = [m for m in received_from_stub if isinstance(m, AgentFinished)]
     assert len(msgs) == 1
@@ -207,8 +215,8 @@ async def test_after_goal_check_payload(received_from_stub):
     assert msgs[0].reason == "looks good"
 
 
-async def test_all_11_messages_delivered(make_togo_app):
-    """Every one of the 11 bridge event types delivers exactly one message to the sink."""
+async def test_all_12_messages_delivered(make_togo_app):
+    """Every bridge event type delivers exactly one message to the sink."""
     app = make_togo_app([])
     async with app.run_test() as pilot:
         cb = build_app_callback_set(app)
@@ -216,7 +224,7 @@ async def test_all_11_messages_delivered(make_togo_app):
         app.run_flow(stub)
         await pilot.pause(0.3)
 
-    assert len(app.received) == 11
+    assert len(app.received) == 12
 
 
 # ---------------------------------------------------------------------------
