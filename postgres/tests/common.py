@@ -536,4 +536,4 @@ def check_stat_io_metrics(aggregator, expected_tags, count=1):
 
 def check_metrics_metadata(aggregator):
     exclude = ['dd.postgres.operation.time']
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude)
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), exclude=exclude, check_submission_type=True)
