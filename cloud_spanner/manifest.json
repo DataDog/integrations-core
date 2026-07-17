@@ -1,0 +1,50 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "65aa7da6-8c3d-4a2b-91fc-b3d7156d89b3",
+  "app_id": "cloud-spanner",
+  "owner": "database-monitoring",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "description": "Monitor query performance and health of your Cloud Spanner databases.",
+    "title": "Cloud Spanner",
+    "classifier_tags": [
+      "Category::Data Stores",
+      "Category::Google Cloud",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Cloud Spanner",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "spanner.",
+        "check": [
+          "spanner.queries.count"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 10000001
+    }
+  }
+}

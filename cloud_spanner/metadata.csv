@@ -1,0 +1,11 @@
+metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
+spanner.queries.avg_bytes,gauge,,byte,,Average bytes returned per query execution in the last minute.,0,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.avg_cpu,gauge,,nanosecond,,Average CPU time consumed per query execution in the last minute.,0,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.avg_latency,gauge,,nanosecond,,Average end-to-end latency per query execution in the last minute.,-1,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.avg_rows,gauge,,row,,Average rows returned per query execution in the last minute.,0,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.avg_rows_scanned,gauge,,row,,Average rows scanned per query execution in the last minute.,0,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.cancelled_count,gauge,,query,,Number of query executions cancelled or disconnected in the last minute.,-1,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.count,gauge,,query,,Number of query executions in the last minute.,0,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.failed_avg_latency,gauge,,nanosecond,,Average latency of failed query executions in the last minute.,0,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.failed_count,gauge,,query,,Number of failed query executions in the last minute.,-1,cloud_spanner,,,database_instance query_signature db query_type request_tag
+spanner.queries.timedout_count,gauge,,query,,Number of timed-out query executions in the last minute.,-1,cloud_spanner,,,database_instance query_signature db query_type request_tag

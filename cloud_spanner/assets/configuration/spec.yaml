@@ -1,0 +1,67 @@
+name: Cloud Spanner
+fleet_configurable: false
+files:
+- name: cloud_spanner.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: project_id
+      required: true
+      description: |
+        The GCP project ID containing the Cloud Spanner instance.
+      value:
+        type: string
+        example: my-gcp-project
+    - name: instance_id
+      required: true
+      description: |
+        The Cloud Spanner instance ID to monitor.
+      value:
+        type: string
+        example: my-spanner-instance
+    - name: database
+      required: true
+      description: |
+        The name of the Spanner database to monitor. One check instance monitors one database.
+      value:
+        type: string
+        example: my-database
+    - name: dbm
+      description: |
+        Set to `true` to enable Database Monitoring (DBM).
+      value:
+        type: boolean
+        example: false
+        display_default: false
+    - name: credentials_path
+      description: |
+        Path to a Google Cloud service account JSON key file used to authenticate to Spanner.
+        If not provided, Application Default Credentials (ADC) are used. ADC is the recommended
+        authentication method when the agent runs inside GCP (GKE, Cloud Run, Compute Engine, etc.).
+      value:
+        type: string
+        example: /path/to/service-account-key.json
+    - name: query_metrics
+      description: |
+        Configure collection of query metrics (requires `dbm: true`). Metrics are sourced from
+        `SPANNER_SYS.QUERY_STATS_TOP_MINUTE`, which is populated by Cloud Spanner once per minute.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of query metrics.
+          value:
+            type: boolean
+            example: true
+        - name: collection_interval
+          description: |
+            Set the query metrics collection interval in seconds. Cloud Spanner updates
+            `QUERY_STATS_TOP_MINUTE` once per minute, so values below 60 will collect the
+            same data multiple times. The recommended value is 10 seconds to stay in sync
+            with the agent's default metric flush interval.
+          value:
+            type: number
+            example: 10
+    - template: instances/default
