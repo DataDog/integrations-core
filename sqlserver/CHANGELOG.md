@@ -2,7 +2,22 @@
 
 <!-- towncrier release notes start -->
 
-## 23.2.0 / 2026-06-09
+## 23.3.0 / 2026-07-08
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Escape SQL Server passwords when building connection strings. ([#24138](https://github.com/DataDog/integrations-core/pull/24138))
+* Parameterize SQL Server Agent job history collection to avoid plan cache churn. ([#24203](https://github.com/DataDog/integrations-core/pull/24203))
+* Parameterize the SQL Server Agent job history row limit. ([#24206](https://github.com/DataDog/integrations-core/pull/24206))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24271](https://github.com/DataDog/integrations-core/pull/24271))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24274](https://github.com/DataDog/integrations-core/pull/24274))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24279](https://github.com/DataDog/integrations-core/pull/24279))
+
+## 23.2.0 / 2026-06-09 / Agent 7.81.0
 
 ***Added***:
 

@@ -72,7 +72,7 @@ def assert_all_discovery_candidates_stable(
     compose_service = compose_service or _get_default_compose_service()
     container_id = _get_compose_container_id(compose_file, compose_service, project_name=project_name)
     initial_state = _inspect_container(container_id)
-    previous_logs = _get_container_logs(container_id)
+    previous_stdout, previous_stderr = _get_container_logs(container_id)
 
     ports = tuple(SimpleNamespace(number=port, name='') for port in _get_container_ports(initial_state))
     service = SimpleNamespace(
@@ -100,12 +100,15 @@ def assert_all_discovery_candidates_stable(
         current_state = _inspect_container(current_container_id)
         _assert_container_stable(initial_state, current_state, index)
 
-        current_logs = _get_container_logs(current_container_id)
-        new_logs = current_logs[len(previous_logs) :] if current_logs.startswith(previous_logs) else current_logs
+        current_stdout, current_stderr = _get_container_logs(current_container_id)
+        # Diffed separately: stdout/stderr interleaving varies across calls, breaking a combined diff.
+        new_stdout = _diff_logs(previous_stdout, current_stdout)
+        new_stderr = _diff_logs(previous_stderr, current_stderr)
+        new_logs = new_stdout + new_stderr
         for line in new_logs.splitlines():
             logging.debug('New log line: %s', line)
         _assert_no_log_patterns(new_logs, log_patterns, index)
-        previous_logs = current_logs
+        previous_stdout, previous_stderr = current_stdout, current_stderr
 
 
 def _get_compose_container_id(
@@ -188,9 +191,14 @@ def _get_container_ports(inspect_data: Mapping[str, Any]) -> list[int]:
     return sorted(ports)
 
 
-def _get_container_logs(container_id: str) -> str:
+def _get_container_logs(container_id: str) -> tuple[str, str]:
     result = run_command(['docker', 'logs', container_id], capture=True)
-    return result.stdout + result.stderr
+    return result.stdout, result.stderr
+
+
+def _diff_logs(previous: str, current: str) -> str:
+    """Return the portion of `current` appended since `previous`."""
+    return current[len(previous) :] if current.startswith(previous) else current
 
 
 def _assert_container_stable(

@@ -1,3 +1,38 @@
+## Datadog Agent version [7.81.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7811)
+
+* There were no integration updates for this version of the Agent.
+
+## Datadog Agent version [7.81.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7810)
+
+### New Integrations
+* Dell Powerflex [1.0.0](https://github.com/DataDog/integrations-core/blob/master/dell_powerflex/CHANGELOG.md)
+* HPE Aruba EdgeConnect [1.0.0](https://github.com/DataDog/integrations-core/blob/master/hpe_aruba_edgeconnect/CHANGELOG.md)
+### Integration Updates
+* ArgoCD [4.7.0](https://github.com/DataDog/integrations-core/blob/master/argocd/CHANGELOG.md)
+* Datadog Checks Base [37.40.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Datadog Checks Downloader [9.2.2](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+* Cisco ACI [5.0.1](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md)
+* ClickHouse [7.0.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md) **BREAKING CHANGE**
+* Consul [5.6.0](https://github.com/DataDog/integrations-core/blob/master/consul/CHANGELOG.md)
+* External DNS [6.5.0](https://github.com/DataDog/integrations-core/blob/master/external_dns/CHANGELOG.md)
+* GlusterFS [3.5.0](https://github.com/DataDog/integrations-core/blob/master/glusterfs/CHANGELOG.md)
+* HTTP [12.7.1](https://github.com/DataDog/integrations-core/blob/master/http_check/CHANGELOG.md)
+* IBM MQ [8.10.0](https://github.com/DataDog/integrations-core/blob/master/ibm_mq/CHANGELOG.md)
+* Infiniband [1.7.0](https://github.com/DataDog/integrations-core/blob/master/infiniband/CHANGELOG.md)
+* Kafka Actions [2.7.2](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [8.0.0](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md) **BREAKING CHANGE**
+* LiteLLM [2.5.0](https://github.com/DataDog/integrations-core/blob/master/litellm/CHANGELOG.md)
+* MongoDB [10.10.2](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.17.2](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* Nutanix [1.5.0](https://github.com/DataDog/integrations-core/blob/master/nutanix/CHANGELOG.md)
+* Postgres [23.9.1](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* SNMP [13.0.0](https://github.com/DataDog/integrations-core/blob/master/snmp/CHANGELOG.md) **BREAKING CHANGE**
+* SQL Server [23.2.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Supabase [2.5.0](https://github.com/DataDog/integrations-core/blob/master/supabase/CHANGELOG.md)
+* tibco_ems [2.6.0](https://github.com/DataDog/integrations-core/blob/master/tibco_ems/CHANGELOG.md)
+* TLS [5.6.3](https://github.com/DataDog/integrations-core/blob/master/tls/CHANGELOG.md)
+* Windows Service [6.8.0](https://github.com/DataDog/integrations-core/blob/master/windows_service/CHANGELOG.md)
+
 ## Datadog Agent version [7.80.4](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7804)
 
 ### Integration Updates

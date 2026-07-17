@@ -121,10 +121,12 @@ class DockerAgent(AgentInterface):
             else f'/opt/datadog-agent/embedded/bin/python{self.python_version[0]}'
         )
 
-    def _format_command(self, command: list[str]) -> list[str]:
+    def _format_command(self, command: list[str], *, env_vars: dict[str, str] | None = None) -> list[str]:
         cmd = ['docker', 'exec']
         if self._isatty:
             cmd.append('-it')
+        for key, value in (env_vars or {}).items():
+            cmd.extend(['-e', f'{key}={value}'])
         cmd.append(self._container_name)
 
         if command[0] == 'pip':
@@ -364,11 +366,11 @@ class DockerAgent(AgentInterface):
                 f'Unable to restart Agent container `{self._container_name}`: {process.stdout.decode("utf-8")}'
             )
 
-    def invoke(self, args: list[str]) -> None:
-        self.run_command(['agent', *args])
+    def invoke(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
+        self.run_command(['agent', *args], env_vars=env_vars)
 
-    def run_command(self, args: list[str]) -> None:
-        self._run_command(self._format_command([*args]), check=True)
+    def run_command(self, args: list[str], *, env_vars: dict[str, str] | None = None) -> None:
+        self._run_command(self._format_command([*args], env_vars=env_vars), check=True)
 
     def enter_shell(self) -> None:
         self._run_command(self._format_command(['cmd' if self._is_windows_container else 'bash']), check=True)

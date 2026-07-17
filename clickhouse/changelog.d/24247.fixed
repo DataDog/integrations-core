@@ -1,1 +1,0 @@
-Fix the `database_hostname` tag and metadata to always report the resolved database host instead of the `reported_hostname` override.
