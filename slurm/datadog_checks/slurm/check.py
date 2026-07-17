@@ -33,6 +33,13 @@ from .constants import (
     SSHARE_MAP,
     SSHARE_PARAMS,
 )
+from .rest import (
+    SlurmRestAPIClient,
+    iter_node_metrics,
+    iter_partition_gpu_metrics,
+    iter_partition_metrics,
+    iter_sdiag_metrics,
+)
 
 
 def get_subprocess_output(cmd):
@@ -82,6 +89,22 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
         self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
+
+        # REST (slurmrestd) mode. When slurm_rest_api_url is set, collect over the Slurm REST
+        # API instead of the CLI binaries (see rest.py). Works without co-located binaries,
+        # munge/auth, or a login node -- suitable for a cluster check against containerized
+        # Slurm (SUNK/Slinky). slurmrestd is optional and handled gracefully if unreachable.
+        self.rest_api_url = self.instance.get('slurm_rest_api_url')
+        self.use_rest_api = bool(self.rest_api_url)
+        if self.use_rest_api:
+            self.openapi_version = self.instance.get('slurm_openapi_version', 'v0.0.42')
+            self._rest_token = self.instance.get('slurm_rest_api_token')
+            self._rest_token_file = self.instance.get('slurm_rest_api_token_file')
+            self.rest_client = SlurmRestAPIClient(self.http, self.rest_api_url, self.openapi_version, self.log)
+            # Only needed behind an authenticating proxy that reuses one privileged token for
+            # multiple users (https://slurm.schedmd.com/jwt.html); a direct per-user JWT (e.g.
+            # via `scontrol token`) already identifies the user via its own `sun` claim.
+            self.rest_client.user = self.instance.get('slurm_rest_api_user')
 
         # Binary paths
         self.slurm_binaries_dir = self.init_config.get('slurm_binaries_dir', '/usr/bin/')
@@ -133,7 +156,84 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.debug_sacct_stats = is_affirmative(self.instance.get('debug_sacct_stats', False))
         self.debug_scontrol_stats = is_affirmative(self.instance.get('debug_scontrol_stats', False))
 
+    def _get_rest_token(self):
+        if self._rest_token_file:
+            try:
+                with open(self._rest_token_file) as f:
+                    return f.read().strip()
+            except OSError as e:
+                self.log.error("Could not read slurm_rest_api_token_file %s: %s", self._rest_token_file, e)
+                return None
+        return self._rest_token
+
+    def _check_rest(self):
+        base_tags = list(self.tags)
+        # Read the token once per run (rotation-safe without re-reading the file per request).
+        self.rest_client.token = self._get_rest_token()
+
+        connected = self.rest_client.get('ping') is not None
+        self.service_check('rest.can_connect', self.OK if connected else self.CRITICAL, tags=base_tags)
+        if not connected:
+            self.log.warning(
+                "Could not reach slurmrestd at %s. slurmrestd is optional in Slurm; ensure it is "
+                "enabled and the JWT token is valid. Skipping this run.",
+                self.rest_api_url,
+            )
+            return
+
+        if self.collect_sdiag_stats:
+            self.gauge('sdiag.enabled', 1, tags=base_tags)
+            for metric, value, tags in iter_sdiag_metrics(self.rest_client.get('diag')):
+                self.gauge(metric, value, tags=base_tags + tags)
+
+        if self.collect_sinfo_stats:
+            # Mirror CLI semantics: level 1 (default) collects partition metrics; node metrics
+            # require level >= 2.
+            self.gauge('sinfo.partition.enabled', 1, tags=base_tags)
+            for metric, value, tags in iter_partition_metrics(self.rest_client.get('partitions')):
+                self.gauge(metric, value, tags=base_tags + tags)
+
+            # /nodes is needed for node metrics (level >= 2) and, when GPU stats are enabled, for
+            # partition GPU totals (aggregated from nodes, since /partitions has no GPU field).
+            # Fetch it at most once per run and reuse.
+            nodes_payload = None
+            if self.gpu_stats:
+                nodes_payload = self.rest_client.get('nodes')
+                for metric, value, tags in iter_partition_gpu_metrics(nodes_payload):
+                    self.gauge(metric, value, tags=base_tags + tags)
+
+            if self.sinfo_collection_level > 1:
+                self.gauge('sinfo.node.enabled', 1, tags=base_tags)
+                if nodes_payload is None:
+                    nodes_payload = self.rest_client.get('nodes')
+                for metric, value, tags in iter_node_metrics(nodes_payload, collect_gpu=self.gpu_stats):
+                    self.gauge(metric, value, tags=base_tags + tags)
+
+        # These collectors are not (yet) supported over REST. scontrol is node-local OS data not
+        # exposed by slurmrestd; squeue/sacct/sshare REST support is a follow-up. Warn instead of
+        # silently dropping so a CLI user migrating to REST is not surprised by missing data.
+        unsupported = [
+            name
+            for name, enabled in (
+                ('collect_squeue_stats', self.collect_squeue_stats),
+                ('collect_sacct_stats', self.collect_sacct_stats),
+                ('collect_sshare_stats', self.collect_sshare_stats),
+                ('collect_scontrol_stats', self.collect_scontrol_stats),
+            )
+            if enabled
+        ]
+        if unsupported:
+            self.log.warning(
+                "The following collectors are enabled but not supported in REST mode and are "
+                "skipped: %s. scontrol is node-local; squeue/sacct/sshare REST support is a follow-up.",
+                ', '.join(unsupported),
+            )
+
     def check(self, _):
+        if self.use_rest_api:
+            self._check_rest()
+            return
+
         self.collect_metadata()
 
         commands = []
