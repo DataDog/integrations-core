@@ -1,1 +1,0 @@
-Build the keystoneauth session through the backend-neutral HTTP client protocol instead of the raw requests session.
