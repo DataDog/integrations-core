@@ -4,7 +4,7 @@
 
 This check monitors [Apache NiFi][1] through the Datadog Agent.
 
-Apache NiFi is a data integration and automation platform for moving data between systems. This integration collects JVM health, flow throughput, queue backpressure, processor status, and bulletin events from the NiFi REST API, and application logs from `nifi-app.log`, providing visibility into data pipeline health without requiring NiFi-side configuration.
+Apache NiFi is a data integration and automation platform for moving data between systems. This integration uses the NiFi REST API to collect JVM health, flow throughput, queue backpressure, processor status, and bulletin events, and it collects application logs from `nifi-app.log`. Together, this data provides visibility into data pipeline health without requiring NiFi-side configuration.
 
 ## Setup
 
