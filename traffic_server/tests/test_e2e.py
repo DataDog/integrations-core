@@ -10,6 +10,8 @@ from datadog_checks.traffic_server import TrafficServerCheck
 
 from .common import EXPECTED_METRICS
 
+# Discovery applies the example metric pattern from conf.yaml.example, which
+# differ from the default in the check (no filtering).
 DISCOVERY_METRICS_PATTERN = re.compile(
     '|'.join(
         (
