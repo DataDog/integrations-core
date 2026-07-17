@@ -5,8 +5,6 @@ from copy import copy
 from typing import Any  # noqa: F401
 from urllib.parse import urljoin
 
-import requests
-
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError as _HTTPConnectionError
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
@@ -116,14 +114,12 @@ class TraefikMeshCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             resp.raise_for_status()
             return resp.json()
         except (
-            requests.exceptions.HTTPError,
-            requests.exceptions.ConnectionError,
             HTTPStatusError,
             _HTTPConnectionError,
         ) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
-        except (requests.exceptions.Timeout, _HTTPTimeoutError) as e:
+        except _HTTPTimeoutError as e:
             self.warning("Connection timeout when connecting to %s: %s", url, e)
         return None

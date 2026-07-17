@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
@@ -25,10 +25,10 @@ def test_successful_metrics_collection(dd_run_check, mock_http_response_per_endp
     mock_http_response_per_endpoint(
         {
             "https://example.com/service/rest/v1/status/check": [
-                MockResponse(status_code=200, json_data=status_response_data)
+                MockHTTPResponse(status_code=200, json_data=status_response_data)
             ],
             "https://example.com/service/metrics/data": [
-                MockResponse(status_code=200, json_data=analytics_response_data)
+                MockHTTPResponse(status_code=200, json_data=analytics_response_data)
             ],
         }
     )

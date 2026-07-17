@@ -6,10 +6,10 @@ from typing import Any, Callable
 from unittest import mock
 
 import pytest
-import requests
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.stubs.datadog_agent import DatadogAgentStub
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
 from datadog_checks.n8n import N8nCheck
 
 from . import common
@@ -66,14 +66,13 @@ def initialized_check(instance: dict[str, Any]) -> N8nCheck:
 def test_readiness_check(
     aggregator: AggregatorStub,
     initialized_check: N8nCheck,
+    mock_http: Any,
+    mock_response: Callable[..., Any],
     status_code: int,
     expected_value: int,
 ):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.Mock(ok=expected_value == 1, status_code=status_code),
-    ):
-        initialized_check._check_n8n_readiness()
+    mock_http.get.return_value = mock_response(status_code=status_code)
+    initialized_check._check_n8n_readiness()
 
     aggregator.assert_metric(
         'n8n.readiness.check',
@@ -82,9 +81,9 @@ def test_readiness_check(
     )
 
 
-def test_readiness_check_unreachable(aggregator: AggregatorStub, initialized_check: N8nCheck):
-    with mock.patch('requests.Session.get', side_effect=requests.ConnectionError('boom')):
-        initialized_check._check_n8n_readiness()
+def test_readiness_check_unreachable(aggregator: AggregatorStub, initialized_check: N8nCheck, mock_http: Any):
+    mock_http.get.side_effect = HTTPConnectionError('boom')
+    initialized_check._check_n8n_readiness()
 
     aggregator.assert_metric('n8n.readiness.check', value=0, tags=['n8n_process:main', 'status_code:none'])
 
