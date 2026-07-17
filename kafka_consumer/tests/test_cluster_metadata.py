@@ -1917,7 +1917,7 @@ def test_malformed_cache_does_not_abort_collection(check, aggregator):
     aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
 
 
-def _consumer_membership_events(check):
+def consumer_membership_events(check):
     """Return parsed data-streams-message payloads with config_type 'consumer_membership'."""
     events = []
     for call in check.event_platform_event.call_args_list:
@@ -1935,7 +1935,7 @@ def test_consumer_membership_event_emitted(check):
     describe_result = _make_group_describe(members=members)
     kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
 
-    events = _consumer_membership_events(kafka_consumer_check)
+    events = consumer_membership_events(kafka_consumer_check)
     assert len(events) == 1
     event = events[0]
     assert event['kafka_cluster_id'] == 'test-cluster-id'
