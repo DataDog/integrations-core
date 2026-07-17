@@ -39,8 +39,8 @@ license = "BSD-3-Clause"
 
 [project.optional-dependencies]
 deps = [
-    "google-cloud-spanner==3.48.0",
-    "google-auth==2.38.0",
+    "google-cloud-spanner==3.69.0",
+    "google-auth==2.56.0",
 ]
 
 [project.urls]
