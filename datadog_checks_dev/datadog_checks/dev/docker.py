@@ -378,9 +378,9 @@ def docker_run(
             A list of callable objects that will be executed before yielding to check for errors
         env_vars (dict[str, str]):
             A dictionary to update `os.environ` with during execution. When `compose_file` is provided and
-            `COMPOSE_PROJECT_NAME` isn't set here or already in `os.environ`, it defaults to the check's
-            directory name so that concurrent E2E runs sharing a Docker daemon don't collide on Compose's
-            own directory-basename-derived default project name.
+            `COMPOSE_PROJECT_NAME` isn't set here, already in `os.environ`, or saved from a previous E2E
+            start run, it defaults to the check's directory name so that concurrent E2E runs sharing a
+            Docker daemon don't collide on Compose's own directory-basename-derived default project name.
         wrappers (list[callable]):
             A list of context managers to use during execution
         attempts (int):
@@ -398,7 +398,10 @@ def docker_run(
         env_vars = dict(env_vars) if env_vars else {}
         if not env_vars.get('COMPOSE_PROJECT_NAME') and not os.getenv('COMPOSE_PROJECT_NAME'):
             # An extra level deep because of the context manager
-            env_vars['COMPOSE_PROJECT_NAME'] = os.path.basename(find_check_root(depth=2))
+            docker_metadata = get_state('docker_compose_metadata', {})
+            env_vars['COMPOSE_PROJECT_NAME'] = docker_metadata.get('project_name') or os.path.basename(
+                find_check_root(depth=2)
+            )
 
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
