@@ -225,6 +225,7 @@ echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics
 These guidelines apply to automated code review (the Codex review bot). They do not relax any requirement above for code you author.
 
 - Do not raise findings for a missing changelog entry. Changelog files are named `<INTEGRATION>/changelog.d/<PR_NUMBER>.<TYPE>`, so they can only be created after the PR number is assigned; their absence when a PR is first opened is expected rather than a defect. The requirement is already enforced by the `check_changelog` job in `.github/workflows/pr-quick-check.yml`.
+- When a PR changes the `metric_type` column in `metadata.csv`, verify that the new type uses the correct in-app (backend) type, not the submission type. The submission-to-backend mapping is defined in `datadog_checks_base/datadog_checks/base/stubs/aggregator.py` (`METRIC_TYPE_SUBMISSION_TO_BACKEND_MAP`). The valid in-app types for `metadata.csv` are `gauge`, `count`, and `rate`. The full mapping is: `gauge` → `gauge`, `rate` → `gauge`, `count` → `count`, `monotonic_count` → `count`, `counter` → `rate`, `histogram` → `rate`, `historate` → `rate`. For example, a metric submitted as a `rate` should appear as `gauge` in `metadata.csv`, and a metric submitted as a `monotonic_count` should appear as `count`.
 
 ## Pull Requests
 
