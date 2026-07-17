@@ -141,7 +141,7 @@ class CheckpointConfig(BaseModel):
 
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    provider: str = "anthropic"
+    provider: str | None = None
     model: str | None = None
     max_tokens: int | None = Field(default=None, ge=1)
     tools: list[str] = Field(default_factory=list)
@@ -157,12 +157,18 @@ class AgentConfig(BaseModel):
         return tools
 
     @model_validator(mode="after")
-    def provider_must_be_available(self, info: ValidationInfo) -> AgentConfig:
+    def resolve_and_validate_provider(self, info: ValidationInfo) -> AgentConfig:
         provider_registry: AgentProviderRegistry | None = (
             info.context.get("provider_registry") if info.context is not None else None
         )
         if provider_registry is None:
             raise ValueError("Agent provider registry is required")
+        if self.provider is None:
+            if self.model is None:
+                raise ValueError("At least one of 'provider' or 'model' must be set")
+            self.provider = provider_registry.provider_for_model(self.model)
+        elif self.model is None:
+            self.model = provider_registry.default_model_for_provider(self.provider)
         provider_registry.validate_config(self)
         return self
 

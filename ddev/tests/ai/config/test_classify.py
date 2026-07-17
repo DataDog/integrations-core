@@ -34,7 +34,7 @@ def test_markdown_agent_with_unavailable_provider_is_broken_entry():
 
 
 def test_markdown_agent_happy_path():
-    md = MarkdownFile(path=PATH, meta={"type": "agent", "name": "a", "model": "m"}, body="sys")
+    md = MarkdownFile(path=PATH, meta={"type": "agent", "name": "a", "model": "opus"}, body="sys")
     output = classify_file(md)
 
     assert not output.file_errors
@@ -45,7 +45,8 @@ def test_markdown_agent_happy_path():
     assert entry.source_file == PATH
     assert isinstance(entry.config, AgentConfig)
     assert entry.config.system_prompt == "sys"
-    assert entry.config.model == "m"
+    assert entry.config.model == "opus"
+    assert entry.config.provider == "anthropic"
 
 
 @pytest.mark.parametrize("type_", ["prompt", "goal", "memory_prompt"])

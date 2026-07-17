@@ -212,7 +212,7 @@ def flow_dir(tmp_path):
     """Create a minimal flow directory with an agent definition."""
     agents_dir = tmp_path / "agents"
     agents_dir.mkdir()
-    (agents_dir / "writer.md").write_text("---\ntype: agent\n---\n\nYou are a writer for ${phase_name}.")
+    (agents_dir / "writer.md").write_text("---\ntype: agent\nmodel: sonnet\n---\n\nYou are a writer for ${phase_name}.")
     return tmp_path
 
 
