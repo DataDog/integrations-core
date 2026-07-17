@@ -122,10 +122,10 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         self._explain_plans = ClickhouseExplainPlans(check, config, self._execute_query)
 
         # Async insert flush log collection collapses into this job. It keeps its own independent
-        # checkpoint (separate from the query_log completions checkpoint) and only fires on
-        # the ticks that line up with that interval.
+        # checkpoint (separate from the query_log completions checkpoint) and runs on its own interval.
         self._flush_enabled = flush_config.enabled
         self._flush_collection_interval = flush_config.collection_interval
+        self._flush_max_rows = int(flush_config.max_flush_rows)
         self._flush_checkpoint = NodeCheckpoint(self, FLUSH_CHECKPOINT_CACHE_KEY, self._flush_collection_interval)
         self._last_flush_collection_time = 0.0
 
@@ -448,7 +448,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             "{checkpoint_filter}", checkpoint_filter
         )
         params["min_checkpoint_us"] = min_checkpoint
-        params["max_flush_rows"] = self._max_samples_per_collection
+        params["max_flush_rows"] = self._flush_max_rows
 
         rows = self._execute_query(query, parameters=params)
         self._log.debug("Loaded %d async insert flush rows [%s]", len(rows), self.deployment_mode)

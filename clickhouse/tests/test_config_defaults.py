@@ -107,6 +107,7 @@ EXPECTED_DEFAULTS = {
     'asynchronous_insert_flush_log': {
         'enabled': False,
         'collection_interval': 60,
+        'max_flush_rows': 1000,
     },
     # === Tagging ===
     'tags': (),

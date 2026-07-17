@@ -315,6 +315,13 @@ files:
             type: number
             example: 60
           fleet_configurable: false
+        - name: max_flush_rows
+          description: |
+            Set the maximum number of flush records to collect per flush log collection.
+          value:
+            type: integer
+            example: 1000
+          fleet_configurable: false
     - name: query_errors
       description: Configure collection of query errors from system.query_log
       options:

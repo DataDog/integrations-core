@@ -343,7 +343,7 @@ def instance_with_flush():
         'dbm': True,
         'service': 'test-clickhouse-service',
         'query_completions': {'enabled': True, 'collection_interval': 10},
-        'asynchronous_insert_flush_log': {'enabled': True, 'collection_interval': 15},
+        'asynchronous_insert_flush_log': {'enabled': True, 'collection_interval': 15, 'max_flush_rows': 500},
         'tags': ['test:clickhouse'],
     }
 
@@ -362,6 +362,7 @@ def test_flush_log_initialization(check_with_flush):
     query_completions = check_with_flush.query_completions
     assert query_completions._flush_enabled is True
     assert query_completions._flush_collection_interval == 15
+    assert query_completions._flush_max_rows == 500
     assert query_completions._flush_checkpoint is not None
     assert query_completions._flush_checkpoint._cache_key == FLUSH_CHECKPOINT_CACHE_KEY
 

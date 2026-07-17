@@ -100,4 +100,5 @@ def instance_asynchronous_insert_flush_log():
     return instance.AsynchronousInsertFlushLog(
         enabled=False,
         collection_interval=60,
+        max_flush_rows=1000,
     )
