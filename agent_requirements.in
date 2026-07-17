@@ -16,6 +16,8 @@ ddtrace==4.13.2
 dnspython==2.8.0
 fastavro==1.12.2
 foundationdb==6.3.25
+google-auth==2.38.0
+google-cloud-spanner==3.48.0
 hazelcast-python-client==5.7.0
 in-toto==2.0.0
 jellyfish==1.2.1

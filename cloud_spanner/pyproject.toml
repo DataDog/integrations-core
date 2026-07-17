@@ -31,13 +31,17 @@ classifiers = [
 ]
 dependencies = [
     "datadog-checks-base>=37.34.1",
-    "google-cloud-spanner==3.48.0",
-    "google-auth==2.38.0",
 ]
 dynamic = [
     "version",
 ]
 license = "BSD-3-Clause"
+
+[project.optional-dependencies]
+deps = [
+    "google-cloud-spanner==3.48.0",
+    "google-auth==2.38.0",
+]
 
 [project.urls]
 Source = "https://github.com/DataDog/integrations-core"
