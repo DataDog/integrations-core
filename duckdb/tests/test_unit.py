@@ -188,7 +188,10 @@ def test_execute_query_raw_extracts_name_group_from_pattern(caplog):
         check._connection = conn
         rows = list(check._execute_query_raw("select value from duckdb_settings() where name = 'worker_threads';"))
 
-    assert rows == [('16',)]
+    # worker_threads defaults to the host CPU count, which differs across machines and CI
+    # runners. We deliberately assert the result SHAPE (one numeric row) instead of a specific
+    # value; the mutant-killing check is the extracted setting name in the debug log below.
+    assert len(rows) == 1 and rows[0][0].isdigit()
     assert 'From query: "worker_threads"' in caplog.text
 
 
