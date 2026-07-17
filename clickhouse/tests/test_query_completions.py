@@ -478,7 +478,7 @@ def test_flush_log_query_format():
 
 
 def test_collect_flush_rows(check_with_flush):
-    """Test that rows map to flush records, latency is flush_time - event_time, and the node is tracked"""
+    """Test that rows map to flush records, latency clamps to 0 on clock skew, and the node is tracked"""
     query_completions = check_with_flush.query_completions
 
     # Column order matches FLUSH_LOG_QUERY's SELECT.
@@ -495,6 +495,21 @@ def test_collect_flush_rows(check_with_flush):
             'qid-1',  # query_id
             'INSERT INTO events VALUES',  # query
             1_000_000,  # event_time_microseconds
+            1_500_000,  # flush_time_microseconds
+        ),
+        (
+            # flush_time before event_time: cross-node clock skew, latency clamps to 0
+            'default',  # database
+            'events',  # table
+            'Values',  # format
+            'Ok',  # status
+            '',  # exception
+            'node-2',  # server_node
+            50,  # bytes
+            2,  # rows
+            'qid-2',  # query_id
+            'INSERT INTO events VALUES',  # query
+            2_000_000,  # event_time_microseconds
             1_500_000,  # flush_time_microseconds
         ),
     ]
@@ -518,7 +533,7 @@ def test_collect_flush_rows(check_with_flush):
     ):
         records = query_completions._collect_flush_rows()
 
-    assert len(records) == 1
+    assert len(records) == 2
     record = records[0]
     assert record['database'] == 'default'
     assert record['table'] == 'events'
@@ -528,7 +543,12 @@ def test_collect_flush_rows(check_with_flush):
     assert record['query_id'] == 'qid-1'
     assert record['query_signature'] == 'sig-1'
     assert record['flush_latency_us'] == 500_000  # flush_time - event_time
-    mock_track.assert_called_once_with('node-1', 1_000_000)
+
+    # Skewed row: flush_time < event_time (cross-node clock skew) clamps latency to 0
+    assert records[1]['flush_latency_us'] == 0
+
+    mock_track.assert_any_call('node-1', 1_000_000)
+    mock_track.assert_any_call('node-2', 2_000_000)
 
 
 def test_flush_advances_checkpoint_on_success(check_with_flush):

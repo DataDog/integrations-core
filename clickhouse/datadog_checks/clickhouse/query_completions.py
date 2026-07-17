@@ -472,7 +472,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
 
             event_time_int = self.to_microseconds(event_time_microseconds)
             flush_time_int = self.to_microseconds(flush_time_microseconds)
-            flush_latency_us = flush_time_int - event_time_int if event_time_int and flush_time_int else 0
+            flush_latency_us = max(0, flush_time_int - event_time_int) if event_time_int and flush_time_int else 0
 
             if event_time_int > max_event_time:
                 max_event_time = event_time_int
