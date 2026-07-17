@@ -27,6 +27,28 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         ctx = {'port': port}
         instance_data = {
             'traffic_server_url': 'http://{service.host}:{port.number}/_stats'.format(service=service, **ctx),
+            'metric_patterns': {
+                'include': [
+                    'traffic_server.node.*',
+                    'traffic_server.process.http.code.*',
+                    'traffic_server.process.http(s|2)?.*current',
+                    'traffic_server.process.http(s|2)?.*_requests',
+                    'traffic_server.process.http(s|2)?.*_connections',
+                    'traffic_server.process.http.transaction_.*',
+                    'traffic_server.process.hostdb.*',
+                    'traffic_server.process.dns.*',
+                    'traffic_server.process.traffic_server.memory.rss',
+                    'traffic_server.process.eventloop.*',
+                    'traffic_server.process.ssl.user_agent_session.*',
+                    'traffic_server.process.ssl.ssl_error.*',
+                    'traffic_server.process.ssl.user_agent_sessions',
+                    'traffic_server.process.cache.total.*',
+                    'traffic_server.process.cache.volume.dir.*',
+                    'traffic_server.process.cache.volume.percent_full',
+                    'traffic_server.process.cache.volume.bytes.*',
+                    'traffic_server.process.cache.volume.ram_cache.*',
+                ]
+            },
         }
         instance = InstanceConfig.model_validate(
             instance_data, context={'configured_fields': frozenset(instance_data)}
