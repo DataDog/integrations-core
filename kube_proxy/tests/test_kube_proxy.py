@@ -4,9 +4,9 @@
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.kube_proxy import KubeProxyCheck
 
 from .common import make_mock_metrics
@@ -90,7 +90,7 @@ def test_service_check_custom_url():
     'side_effect, expected_status, extra_kwargs',
     [
         (None, AgentCheck.OK, {}),
-        (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, {'message': 'health check failed'}),
+        (HTTPStatusError('health check failed'), AgentCheck.CRITICAL, {'message': 'health check failed'}),
     ],
     ids=['ok', 'http_error'],
 )
