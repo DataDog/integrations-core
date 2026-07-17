@@ -38,7 +38,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import httpx
 
@@ -227,7 +227,7 @@ class FakeAsyncGitHubClient:
         self,
         owner: str,
         repo: str,
-        state: str = 'open',
+        state: Literal['open', 'closed', 'all'] = 'open',
         head: str | None = None,
         base: str | None = None,
         per_page: int = 100,

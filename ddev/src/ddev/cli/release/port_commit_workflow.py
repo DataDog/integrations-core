@@ -678,7 +678,7 @@ def confirm_or_abort(app: Application, prompt: str, *, dry_run: bool) -> None:
         app.abort('Did not get confirmation, aborting.')
 
 
-def check_github_user(app: Application) -> str:
+def require_github_user(app: Application) -> str:
     """Return the configured GitHub user for branch naming, aborting if none is set."""
     user = app.config.github.user
     if not user:
@@ -722,7 +722,7 @@ def build_port_plan(
     options: PortOptions,
 ) -> PortPlan:
     """Assemble a `PortPlan` for an already-resolved commit and a single target branch."""
-    user = check_github_user(app)
+    user = require_github_user(app)
     suffix = options.branch_suffix or f'to-{target_branch}'
     new_branch = f'{user}/{options.branch_prefix}-{full_sha[:10]}-{suffix}'.lower()
     owner, repo = resolve_owner_repo(app)
@@ -759,7 +759,7 @@ def resolve_port_plan(
     options: PortOptions,
 ) -> PortPlan:
     """Validate inputs, resolve derived values, and confirm with the user. Aborts on failure."""
-    check_github_user(app)
+    require_github_user(app)
 
     if not options.no_pr and not options.dry_run and not app.config.github.token:
         app.abort(
@@ -961,7 +961,7 @@ def run_backport_from_pr(
     base whose backport PR already exists in any state (open, merged, or closed) is skipped so re-runs
     are idempotent. Returns True when every base succeeded or was skipped.
     """
-    check_github_user(app)
+    require_github_user(app)
 
     try:
         pr, full_sha = _resolve_pr(
@@ -1042,6 +1042,10 @@ def _backport_pr_exists(app: Application, owner: str, repo: str, branch: str) ->
     keeping re-runs idempotent. A stale branch from a failed run that never opened a PR is not
     detected here; that surfaces later as a loud non-fast-forward push failure for the operator to
     resolve, rather than a silent branch deletion.
+
+    The lookup filters on `head={owner}:{branch}`, which matches only because the backport branch is
+    pushed to `origin` (the same repo `resolve_owner_repo` returns), as `PushStep` does. A fork-based
+    push flow would break this match and silently stop detecting existing PRs.
     """
     import asyncio
 
