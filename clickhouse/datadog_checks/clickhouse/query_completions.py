@@ -400,8 +400,9 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         """
         Run the async insert flush log collection on its own collection interval
         """
-        if self._flush_enabled and time.time() - self._last_flush_collection_time >= self._flush_collection_interval:
-            self._last_flush_collection_time = time.time()
+        now = time.time()
+        if self._flush_enabled and now - self._last_flush_collection_time >= self._flush_collection_interval:
+            self._last_flush_collection_time = now
             self._collect_and_submit_flush()
 
     def _collect_and_submit_flush(self):
