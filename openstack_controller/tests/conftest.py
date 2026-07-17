@@ -213,9 +213,10 @@ def openstack_v3_password(request, mock_responses):
 
 @pytest.fixture
 def openstack_session(openstack_v3_password, microversion_headers):
-    def session(auth, session):
-        microversion_headers[0] = session.headers.get('X-OpenStack-Nova-API-Version')
-        microversion_headers[1] = session.headers.get('X-OpenStack-Ironic-API-Version')
+    def session(auth, verify=None, cert=None, additional_headers=None):
+        headers = additional_headers or {}
+        microversion_headers[0] = headers.get('X-OpenStack-Nova-API-Version')
+        microversion_headers[1] = headers.get('X-OpenStack-Ironic-API-Version')
         return mock.MagicMock(
             project_id=auth.project_id,
             auth=auth,
