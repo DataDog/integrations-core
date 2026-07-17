@@ -1,13 +1,15 @@
 {
-    "title": "CyberArk EPM Overview",
-    "description": "This dashboard provides a unified view of CyberArk EPM activity, combining raw audit events, policy events, and administrative audit events.",
+    "title": "Idira EPM Overview",
+    "description": "This dashboard provides a unified view of Idira EPM activity, combining raw audit events, policy events, and administrative audit events.",
     "widgets": [
         {
             "id": 7582074758442394,
             "definition": {
                 "type": "image",
-                "url": "https://static.datadoghq.com/static/images/logos/cyberark-endpoint-privilege-manager_large.svg",
-                "sizing": "cover",
+                "url": "https://www.paloaltonetworks.com/content/dam/pan/en_US/images/logos/brand/idira/idira_RGB_logo_By-Line_Positive.png",
+                "url_dark_theme": "https://www.paloaltonetworks.com/content/dam/pan/en_US/images/logos/brand/idira/idira_RGB_logo_By-Line_Negative.png",
+                "sizing": "contain",
+                "margin": "md",
                 "has_background": true,
                 "has_border": true,
                 "vertical_align": "center",
@@ -24,7 +26,7 @@
             "id": 7069194611020539,
             "definition": {
                 "type": "note",
-                "content": "[CyberArk Endpoint Privilege Manager](https://www.cyberark.com/products/endpoint-privilege-manager/) enforces least privilege and enables organizations to block and contain attacks on endpoint computers, reducing the risk of information being stolen or encrypted and held for ransom.\n\nThis dashboard provides a unified view of CyberArk EPM activity, combining raw audit events, policy events, and administrative audit events.\n\nFor more information, see the [CyberArk Endpoint Privilege Manager Integration Documentation](https://docs.datadoghq.com/integrations/cyberark_endpoint_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
+                "content": "[Idira Endpoint Privilege Manager](https://www.paloaltonetworks.com/idira/human/endpoint-privilege-manager) enforces least privilege and enables organizations to block and contain attacks on endpoint computers, reducing the risk of information being stolen or encrypted and held for ransom.\n\nThis dashboard provides a unified view of Idira EPM activity, combining raw audit events, policy events, and administrative audit events.\n\nFor more information, see the [Idira Endpoint Privilege Manager Integration Documentation](https://docs.datadoghq.com/integrations/idira_endpoint_privilege_manager/).\n\n**Tips**\n- Use the timeframe selector in the upper-right corner of the dashboard to change the default timeframe.\n- Clone this dashboard to rearrange, modify, and add widgets and visualizations.",
                 "background_color": "blue",
                 "font_size": "14",
                 "text_align": "left",
@@ -86,7 +88,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:raw-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -157,7 +159,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:raw-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:raw-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -203,7 +205,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -274,7 +276,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:policy-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -320,7 +322,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:set-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:set-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -390,7 +392,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:set-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:set-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -435,7 +437,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:account-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:account-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -505,7 +507,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:account-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:account-admin-audit-events $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -548,7 +550,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager @vendor.endpoint:(raw-events OR policy-audit-events OR set-admin-audit-events OR account-admin-audit-events) $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager @vendor.endpoint:(raw-events OR policy-audit-events OR set-admin-audit-events OR account-admin-audit-events) $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -618,7 +620,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager -@usr.name:\"\" $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager -@usr.name:\"\" $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -687,7 +689,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -755,7 +757,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name"
+                                                "query": "source:idira-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name"
                                             },
                                             "indexes": [
                                                 "*"
@@ -821,7 +823,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:cyberark-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name",
+                                        "query_string": "source:idira-endpoint-privilege-manager $vendor_endpoint $user_name $client_ip $set_name",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
@@ -873,7 +875,7 @@
                         "id": 4653857696534002,
                         "definition": {
                             "type": "note",
-                            "content": "Datadog Cloud SIEM analyzes and correlates the CyberArk Endpoint Privilege Manager logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/overview).",
+                            "content": "Datadog Cloud SIEM analyzes and correlates the Idira Endpoint Privilege Manager logs to detect threats to your environment in real time. If you don't see signals please make sure you've enabled [Datadog Cloud SIEM](/security/overview).",
                             "background_color": "blue",
                             "font_size": "14",
                             "text_align": "center",
@@ -916,7 +918,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:critical"
+                                                "query": "source:idira-endpoint-privilege-manager status:critical"
                                             }
                                         }
                                     ],
@@ -966,7 +968,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:high"
+                                                "query": "source:idira-endpoint-privilege-manager status:high"
                                             }
                                         }
                                     ],
@@ -1025,7 +1027,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:critical"
+                                                "query": "source:idira-endpoint-privilege-manager status:critical"
                                             }
                                         }
                                     ],
@@ -1091,7 +1093,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:medium"
+                                                "query": "source:idira-endpoint-privilege-manager status:medium"
                                             }
                                         }
                                     ],
@@ -1142,7 +1144,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:low"
+                                                "query": "source:idira-endpoint-privilege-manager status:low"
                                             }
                                         }
                                     ],
@@ -1193,7 +1195,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:info"
+                                                "query": "source:idira-endpoint-privilege-manager status:info"
                                             }
                                         }
                                     ],
@@ -1252,7 +1254,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:high"
+                                                "query": "source:idira-endpoint-privilege-manager status:high"
                                             }
                                         }
                                     ],
@@ -1326,7 +1328,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:cyberark-endpoint-privilege-manager status:medium"
+                                                "query": "source:idira-endpoint-privilege-manager status:medium"
                                             }
                                         }
                                     ],
