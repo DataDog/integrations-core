@@ -341,6 +341,7 @@ def instance_with_flush():
         'password': '',
         'db': 'default',
         'dbm': True,
+        'service': 'test-clickhouse-service',
         'query_completions': {'enabled': True, 'collection_interval': 10},
         'asynchronous_insert_flush_log': {'enabled': True, 'collection_interval': 15},
         'tags': ['test:clickhouse'],
@@ -437,6 +438,7 @@ def test_create_flush_event_structure(check_with_flush):
     assert 'timestamp' in payload
     assert 'host' in payload
     assert 'database_instance' in payload
+    assert payload['service'] == 'test-clickhouse-service'
     assert payload['clickhouse_async_insert_flushes'] == records
 
 

@@ -515,6 +515,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             'ddtags': self._tags_no_db,
             'timestamp': time.time() * 1000,
             'clickhouse_version': self._check.dbms_version,
+            'service': getattr(self._check._config, 'service', None),
             'clickhouse_async_insert_flushes': records,
         }
 
