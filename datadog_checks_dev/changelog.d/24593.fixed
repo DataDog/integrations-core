@@ -1,0 +1,1 @@
+Anchor ``mount_logs`` shared log files under ``$HOME`` on macOS so container bind mounts resolve to files on Colima.
