@@ -10,6 +10,7 @@ import pytest
 from pydantic import ValidationError
 
 from ddev.ai.agent.registry import AgentProviderRegistry
+from ddev.ai.config import models
 from ddev.ai.config.models import (
     AgentConfig,
     CheckpointConfig,
@@ -157,3 +158,183 @@ def test_flow_variables_reject_non_template_identifiers(bad_key):
 def test_flow_variables_accept_template_identifiers():
     fc = FlowConfig(name="demo", variables={"topic": "cats", "_n": "1", "API_KEY": "v"}, flow=[])
     assert fc.variables == {"topic": "cats", "_n": "1", "API_KEY": "v"}
+
+
+def test_flow_config_accepts_tui_metadata():
+    config = FlowConfig.model_validate(
+        {
+            "name": "demo",
+            "description": "Generate an integration",
+            "inputs": [
+                {
+                    "name": "specification",
+                    "label": "Specification",
+                    "type": "path",
+                    "required": True,
+                    "as_content": True,
+                }
+            ],
+            "flow": [],
+        }
+    )
+
+    assert config.description == "Generate an integration"
+    assert config.inputs[0].input_type is models.InputType.PATH
+    assert config.inputs[0].model_dump(by_alias=True)["type"] == "path"
+    assert config.inputs == [
+        models.FlowInput(
+            name="specification",
+            label="Specification",
+            input_type=models.InputType.PATH,
+            required=True,
+            as_content=True,
+        )
+    ]
+
+
+def test_flow_config_rejects_duplicate_input_names():
+    with pytest.raises(ValidationError, match="Input names must be unique"):
+        FlowConfig.model_validate(
+            {
+                "name": "demo",
+                "inputs": [
+                    {"name": "subject", "label": "Subject", "type": "string"},
+                    {"name": "subject", "label": "Other subject", "type": "string"},
+                ],
+                "flow": [],
+            }
+        )
+
+
+def test_flow_input_rejects_as_content_for_non_path():
+    with pytest.raises(ValidationError, match="'as_content' may only be used with path inputs"):
+        models.FlowInput(name="subject", label="Subject", input_type="string", as_content=True)
+
+
+def resolved_with_inputs(*inputs: models.FlowInput) -> models.ResolvedFlow:
+    return models.ResolvedFlow(
+        name="demo",
+        description=None,
+        inputs=list(inputs),
+        agents={},
+        phases={},
+        flow=[],
+        variables={},
+    )
+
+
+def test_resolved_flow_converts_typed_runtime_inputs(tmp_path):
+    source = tmp_path / "spec.md"
+    source.write_text("specification text", encoding="utf-8")
+    resolved = resolved_with_inputs(
+        models.FlowInput(name="name", label="Name", input_type="string"),
+        models.FlowInput(name="count", label="Count", input_type="number"),
+        models.FlowInput(name="enabled", label="Enabled", input_type="boolean"),
+        models.FlowInput(name="source", label="Source", input_type="path", as_content=True),
+    )
+
+    assert resolved.convert_inputs({"name": "example", "count": 3.5, "enabled": True, "source": source}) == {
+        "name": "example",
+        "count": "3.5",
+        "enabled": "true",
+        "source": "specification text",
+    }
+
+
+def test_resolved_flow_boolean_false_is_lowercase():
+    resolved = resolved_with_inputs(models.FlowInput(name="enabled", label="Enabled", input_type="boolean"))
+
+    assert resolved.convert_inputs({"enabled": False}) == {"enabled": "false"}
+
+
+def test_resolved_flow_boolean_string_false_is_false():
+    resolved = resolved_with_inputs(models.FlowInput(name="enabled", label="Enabled", input_type="boolean"))
+
+    assert resolved.convert_inputs({"enabled": "false"}) == {"enabled": "false"}
+
+
+def test_resolved_flow_rejects_invalid_boolean():
+    resolved = resolved_with_inputs(models.FlowInput(name="enabled", label="Enabled", input_type="boolean"))
+
+    with pytest.raises(ValueError, match="Input 'enabled' must be a boolean"):
+        resolved.convert_inputs({"enabled": "sometimes"})
+
+
+def test_resolved_flow_requires_required_input_even_with_default():
+    resolved = resolved_with_inputs(
+        models.FlowInput(name="topic", label="Topic", input_type="string", default="metrics", required=True)
+    )
+
+    with pytest.raises(ValueError, match="Required input 'topic' is missing"):
+        resolved.convert_inputs({})
+
+
+def test_resolved_flow_uses_optional_default_and_omits_unset_optional():
+    resolved = resolved_with_inputs(
+        models.FlowInput(name="topic", label="Topic", input_type="string", default="metrics", required=False),
+        models.FlowInput(name="count", label="Count", input_type="number", default=3, required=False),
+        models.FlowInput(name="enabled", label="Enabled", input_type="boolean", default="false", required=False),
+        models.FlowInput(name="notes", label="Notes", input_type="string", required=False),
+    )
+
+    assert resolved.convert_inputs({}) == {"topic": "metrics", "count": "3", "enabled": "false"}
+
+
+@pytest.mark.parametrize("default", ["many", True])
+def test_flow_input_rejects_invalid_number_default(default):
+    with pytest.raises(ValidationError, match="Default for number input 'count' must be a number"):
+        models.FlowInput(name="count", label="Count", input_type="number", default=default, required=False)
+
+
+def test_resolved_flow_validates_number_values():
+    resolved = resolved_with_inputs(models.FlowInput(name="count", label="Count", input_type="number"))
+
+    assert resolved.convert_inputs({"count": "3.5"}) == {"count": "3.5"}
+    with pytest.raises(ValueError, match="Input 'count' must be a number"):
+        resolved.convert_inputs({"count": "many"})
+
+
+def test_resolved_flow_reads_optional_path_default_as_content(tmp_path):
+    source = tmp_path / "spec.md"
+    source.write_text("default specification", encoding="utf-8")
+    resolved = resolved_with_inputs(
+        models.FlowInput(
+            name="source",
+            label="Source",
+            input_type="path",
+            default=source,
+            required=False,
+            as_content=True,
+        )
+    )
+
+    assert resolved.convert_inputs({}) == {"source": "default specification"}
+
+
+def test_resolved_flow_path_content_reports_missing_file(tmp_path):
+    resolved = resolved_with_inputs(models.FlowInput(name="source", label="Source", input_type="path", as_content=True))
+
+    with pytest.raises(ValueError, match="Input 'source' path does not exist"):
+        resolved.convert_inputs({"source": tmp_path / "missing.md"})
+
+
+def test_resolved_flow_path_content_rejects_directory(tmp_path):
+    resolved = resolved_with_inputs(models.FlowInput(name="source", label="Source", input_type="path", as_content=True))
+
+    with pytest.raises(ValueError, match="Input 'source' path is not a file"):
+        resolved.convert_inputs({"source": tmp_path})
+
+
+def test_flow_input_path_without_content_accepts_nonexistent_path(tmp_path):
+    missing = tmp_path / "output.md"
+    flow_input = models.FlowInput(name="output", label="Output", input_type="path")
+
+    assert flow_input.convert_runtime_value(missing) == str(missing)
+
+
+def test_flow_input_path_as_content_rejects_nonexistent_path(tmp_path):
+    missing = tmp_path / "missing.md"
+    flow_input = models.FlowInput(name="source", label="Source", input_type="path", as_content=True)
+
+    with pytest.raises(ValueError, match="Input 'source' path does not exist"):
+        flow_input.convert_runtime_value(missing)

@@ -180,6 +180,15 @@ class EventBusOrchestrator(ABC):
         """
         asyncio.run(self._entry_point())
 
+    async def run_async(self) -> None:
+        """Await the orchestrator on an already-running event loop.
+
+        Use this instead of :meth:`run` when the caller already owns a running loop
+        (e.g. inside a Textual application). Semantics are identical to :meth:`run`;
+        only the entry mechanism differs.
+        """
+        await self._entry_point()
+
     async def _entry_point(self):
         exception = None
         try:

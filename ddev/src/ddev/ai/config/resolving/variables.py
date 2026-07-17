@@ -30,8 +30,12 @@ def resolve_variables(
 ) -> tuple[dict[str, str], list[FlowError]]:
     """Gather variable declarations, resolve defaults, and apply ``flow > default``."""
     declared = _gather_variable_declarations(registry, scheduled_phases)
-    defaults, errors = _collect_default_values(declared, supplied=set(flow_config.variables))
-    errors.extend(_find_missing_variables(declared, flow_config))
+    guaranteed_inputs = {
+        flow_input.name for flow_input in flow_config.inputs if flow_input.required or flow_input.default is not None
+    }
+    supplied = set(flow_config.variables) | guaranteed_inputs
+    defaults, errors = _collect_default_values(declared, supplied=supplied)
+    errors.extend(_find_missing_variables(declared, supplied))
     resolved = {**defaults, **flow_config.variables}
     return resolved, errors
 
@@ -82,14 +86,14 @@ def _collect_default_values(declared: list[DeclaredVar], supplied: set[str]) -> 
     return defaults, errors
 
 
-def _find_missing_variables(declared: list[DeclaredVar], flow_config: FlowConfig) -> list[FlowError]:
+def _find_missing_variables(declared: list[DeclaredVar], supplied: set[str]) -> list[FlowError]:
     by_name: dict[str, list[DeclaredVar]] = {}
     for dv in declared:
         by_name.setdefault(dv.name, []).append(dv)
 
     errors: list[FlowError] = []
     for name, entries in by_name.items():
-        if name in flow_config.variables:
+        if name in supplied:
             continue
         if any(dv.default is not None for dv in entries):
             continue

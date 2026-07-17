@@ -17,6 +17,7 @@ from .core.protocol import ToolProtocol
 from .core.types import ToolResult
 
 if TYPE_CHECKING:
+    from ddev.ai.agent.scope import AgentScope
     from ddev.ai.config.models import AgentConfig
     from ddev.ai.react.factory import ReActProcessFactory
 
@@ -26,7 +27,7 @@ class ToolContext:
     """Shared resources passed to every tool factory during construction."""
 
     file_registry: FileRegistry
-    owner_id: str
+    scope: AgentScope
     agent_config: AgentConfig
     process_factory: ReActProcessFactory
 
@@ -40,7 +41,7 @@ def _plain_factory(tool_cls: type[ToolProtocol], ctx: ToolContext) -> ToolProtoc
 
 
 def _file_registry_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
-    return tool_cls(ctx.file_registry, ctx.owner_id)
+    return tool_cls(ctx.file_registry, ctx.scope.owner_id)
 
 
 def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
@@ -48,11 +49,7 @@ def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
 
 
 def _spawn_subagent_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
-    return tool_cls(
-        owner_id=ctx.owner_id,
-        agent_config=ctx.agent_config,
-        process_factory=ctx.process_factory,
-    )
+    return tool_cls(parent_scope=ctx.scope, agent_config=ctx.agent_config, process_factory=ctx.process_factory)
 
 
 @dataclass(frozen=True)
@@ -138,7 +135,7 @@ class ToolRegistry:
         cls,
         tool_names: list[str],
         *,
-        owner_id: str,
+        scope: AgentScope,
         file_registry: FileRegistry,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
@@ -153,7 +150,7 @@ class ToolRegistry:
         """
         ctx = ToolContext(
             file_registry=file_registry,
-            owner_id=owner_id,
+            scope=scope,
             agent_config=agent_config,
             process_factory=process_factory,
         )

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import pytest
 
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.tools.agents.base import SPAWN_IDENTICAL_NAME, SPAWN_SUBAGENT_NAME, BaseSpawnTool
 from ddev.ai.tools.core.base import BaseToolInput
 from ddev.ai.tools.core.types import ToolResult
@@ -21,7 +22,11 @@ class _ConcreteSpawnTool(BaseSpawnTool):
 
 
 def make_tool(tools: list[str]) -> _ConcreteSpawnTool:
-    return _ConcreteSpawnTool(owner_id="p", agent_config=make_agent_config(tools=tools), process_factory=None)
+    return _ConcreteSpawnTool(
+        parent_scope=AgentScope(owner_id="p", role=AgentRole.PHASE, phase_id="p"),
+        agent_config=make_agent_config(tools=tools),
+        process_factory=None,
+    )
 
 
 def test_allowed_tools_excludes_both_spawn_tools():

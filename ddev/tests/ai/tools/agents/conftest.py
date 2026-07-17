@@ -97,7 +97,14 @@ class FakeProcessFactory:
         self.calls: list[dict[str, Any]] = []
 
     def create(self, *, scope: AgentScope, agent_config: AgentConfig, system_prompt: str) -> ReActProcess:
-        self.calls.append({"owner_id": scope.owner_id, "agent_config": agent_config, "system_prompt": system_prompt})
+        self.calls.append(
+            {
+                "owner_id": scope.owner_id,
+                "phase_id": scope.phase_id,
+                "agent_config": agent_config,
+                "system_prompt": system_prompt,
+            }
+        )
         if self._build_error is not None:
             raise self._build_error
         runtime = AgentRuntime(agent=self._agent_factory(), tool_registry=self._tool_registry)

@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.config.models import AgentConfig
+from ddev.ai.tools.agents.spawn_identical_subagents import SpawnIdenticalSubagentsTool
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
@@ -152,18 +154,23 @@ def test_available_tool_names_returns_fresh_copy():
 
 
 OWNER_ID = "test-agent"
-# Exclude spawn_subagent (needs process_factory wiring) and native tools (no ToolProtocol instance).
+SCOPE = AgentScope(owner_id=OWNER_ID, role=AgentRole.PHASE, phase_id=OWNER_ID)
+SPAWN_TOOL_TYPES = (
+    ("spawn_subagent", SpawnSubagentTool),
+    ("spawn_identical_subagents", SpawnIdenticalSubagentsTool),
+)
+# Spawn tools have dedicated runtime-context coverage; native tools have no ToolProtocol instance.
 TOOLS_WITHOUT_EXTRA_DEPS = [
-    n for n in ToolRegistry.available_tool_names() if n not in ("spawn_subagent", *NATIVE_TOOL_NAMES)
+    name for name in ToolRegistry.available_tool_names() if name not in {*dict(SPAWN_TOOL_TYPES), *NATIVE_TOOL_NAMES}
 ]
 
 PROCESS_FACTORY = object()  # opaque sentinel — from_names only stores it on the spawn tool
 
 
-def from_names(tool_names: list[str], tmp_path, *, owner_id: str = OWNER_ID) -> ToolRegistry:
+def from_names(tool_names: list[str], tmp_path, *, scope: AgentScope = SCOPE) -> ToolRegistry:
     return ToolRegistry.from_names(
         tool_names,
-        owner_id=owner_id,
+        scope=scope,
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path)),
         agent_config=AgentConfig.model_construct(tools=tool_names),
         process_factory=PROCESS_FACTORY,
@@ -194,12 +201,14 @@ def test_from_names_all_at_once(tmp_path):
     assert built_names == set(all_names)
 
 
-def test_from_names_spawn_subagent_gets_runtime_context(tmp_path):
-    registry = from_names(["read_file", "spawn_subagent"], tmp_path)
+@pytest.mark.parametrize(("name", "tool_type"), SPAWN_TOOL_TYPES)
+def test_from_names_spawn_tools_get_runtime_context(name, tool_type, tmp_path):
+    registry = from_names(["read_file", name], tmp_path)
 
-    tool = registry._tools["spawn_subagent"]
-    assert isinstance(tool, SpawnSubagentTool)
-    assert tool._agent_config == make_agent_config(tools=["read_file", "spawn_subagent"])
+    tool = registry._tools[name]
+    assert isinstance(tool, tool_type)
+    assert tool._parent_scope is SCOPE
+    assert tool._agent_config == make_agent_config(tools=["read_file", name])
     assert tool._process_factory is PROCESS_FACTORY
     assert tool._allowed_tools == {"read_file"}
 
@@ -303,14 +312,14 @@ def test_from_names_reuses_supplied_file_registry(tmp_path):
     shared = FileRegistry(policy=FileAccessPolicy(write_root=tmp_path))
     reg_a = ToolRegistry.from_names(
         ["read_file", "create_file"],
-        owner_id="a",
+        scope=AgentScope(owner_id="a", role=AgentRole.PHASE, phase_id="a"),
         file_registry=shared,
         agent_config=make_agent_config(tools=["read_file", "create_file"]),
         process_factory=PROCESS_FACTORY,
     )
     reg_b = ToolRegistry.from_names(
         ["read_file", "create_file"],
-        owner_id="b",
+        scope=AgentScope(owner_id="b", role=AgentRole.PHASE, phase_id="b"),
         file_registry=shared,
         agent_config=make_agent_config(tools=["read_file", "create_file"]),
         process_factory=PROCESS_FACTORY,

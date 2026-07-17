@@ -24,7 +24,7 @@ class OnBeforeAgentSendCallback(Protocol):
     """Called immediately before each agent.send() request is issued.
 
     ``prompt`` is the content sent to the agent. When the agent is fed tool
-    results it is a fixed ``"Tool results"`` sentinel."""
+    results it is the tool-results sentinel emitted by ``ReActProcess``."""
 
     async def __call__(self, scope: AgentScope, prompt: str, iteration: int) -> None: ...
 
@@ -85,13 +85,13 @@ class OnPhaseFinishCallback(Protocol):
 class OnBeforeGoalCheckCallback(Protocol):
     """Called immediately before each reviewer agent run for a task with a goal."""
 
-    async def __call__(self, task_name: str, attempt: int) -> None: ...
+    async def __call__(self, phase_id: str, task_name: str, attempt: int) -> None: ...
 
 
 class OnAfterGoalCheckCallback(Protocol):
     """Called after each reviewer agent run, with the parsed verdict."""
 
-    async def __call__(self, task_name: str, attempt: int, valid: bool, reason: str) -> None: ...
+    async def __call__(self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str) -> None: ...
 
 
 # ---------------------------------------------------------------------------
@@ -210,15 +210,17 @@ class CallbackSet:
         self._on_before_goal_check.append(func)
         return func
 
-    async def fire_before_goal_check(self, task_name: str, attempt: int) -> None:
-        await self._fire(self._on_before_goal_check, task_name, attempt)
+    async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
+        await self._fire(self._on_before_goal_check, phase_id, task_name, attempt)
 
     def on_after_goal_check(self, func: OnAfterGoalCheckCallback) -> OnAfterGoalCheckCallback:
         self._on_after_goal_check.append(func)
         return func
 
-    async def fire_after_goal_check(self, task_name: str, attempt: int, valid: bool, reason: str) -> None:
-        await self._fire(self._on_after_goal_check, task_name, attempt, valid, reason)
+    async def fire_after_goal_check(
+        self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str
+    ) -> None:
+        await self._fire(self._on_after_goal_check, phase_id, task_name, attempt, valid, reason)
 
 
 class Callbacks:
@@ -271,10 +273,12 @@ class Callbacks:
         for s in self._sets:
             await s.fire_phase_finish(phase_id)
 
-    async def fire_before_goal_check(self, task_name: str, attempt: int) -> None:
+    async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
         for s in self._sets:
-            await s.fire_before_goal_check(task_name, attempt)
+            await s.fire_before_goal_check(phase_id, task_name, attempt)
 
-    async def fire_after_goal_check(self, task_name: str, attempt: int, valid: bool, reason: str) -> None:
+    async def fire_after_goal_check(
+        self, phase_id: str, task_name: str, attempt: int, valid: bool, reason: str
+    ) -> None:
         for s in self._sets:
-            await s.fire_after_goal_check(task_name, attempt, valid, reason)
+            await s.fire_after_goal_check(phase_id, task_name, attempt, valid, reason)

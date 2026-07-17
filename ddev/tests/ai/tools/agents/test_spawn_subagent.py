@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from ddev.ai.agent.exceptions import AgentError
+from ddev.ai.agent.scope import AgentRole, AgentScope
 from ddev.ai.agent.types import StopReason, ToolCall
 from ddev.ai.config.models import AgentConfig
 from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentInput, SpawnSubagentTool
@@ -35,10 +36,11 @@ def make_tool(
     factory: FakeProcessFactory,
     parent_tools: list[str] | None = None,
     owner_id: str = "parent",
+    phase_id: str = "parent",
     agent_config: AgentConfig | None = None,
 ) -> SpawnSubagentTool:
     return SpawnSubagentTool(
-        owner_id=owner_id,
+        parent_scope=AgentScope(owner_id=owner_id, role=AgentRole.PHASE, phase_id=phase_id),
         agent_config=agent_config or make_agent_config(tools=parent_tools or ["read_file", "edit_file"]),
         process_factory=factory,
     )
@@ -131,6 +133,20 @@ async def test_child_runtime_config_inherits_parent_settings_and_requested_tools
     assert child_config.tools == ["read_file"]
     assert factory.calls[0]["system_prompt"] == "child system"
     assert factory.calls[0]["owner_id"] == "parent.sub.001-child"
+
+
+async def test_child_scope_inherits_parent_phase_id(
+    process_factory: ProcessFactoryBuilder,
+    mock_agent: type[MockAgent],
+    make_response: ResponseFactory,
+):
+    factory = process_factory(lambda: mock_agent([make_response(text="ok")]))
+    tool = make_tool(factory, phase_id="phase_a")
+
+    result = await tool(SpawnSubagentInput(system_prompt="sys", prompt="go", tools=[], name="child"))
+
+    assert result.success is True
+    assert factory.calls[0]["phase_id"] == "phase_a"
 
 
 async def test_max_tokens_response_prefixed(

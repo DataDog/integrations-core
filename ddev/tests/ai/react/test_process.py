@@ -149,17 +149,20 @@ def make_tool_call(
     return ToolCall(id=call_id, name=name, input=tool_input or {})
 
 
+DEFAULT_SCOPE = AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test")
+
+
 def make_process(
     agent: MockAgent,
     registry: ToolRegistry | None = None,
     callbacks: Callbacks | None = None,
     compact_threshold_pct: float | None = None,
-    scope: AgentScope | None = None,
+    scope: AgentScope = DEFAULT_SCOPE,
 ) -> ReActProcess:
     return ReActProcess(
         AgentRuntime(agent=agent, tool_registry=registry or ToolRegistry([])),
         callbacks=callbacks,
-        scope=scope or AgentScope(owner_id="test", role=AgentRole.PHASE),
+        scope=scope,
         compact_threshold_pct=compact_threshold_pct,
     )
 
@@ -508,7 +511,7 @@ async def test_callbacks_invoked_correct_counts(fake_tool: FakeToolFactory) -> N
     )
     recorder = CallbackRecorder()
     agent = MockAgent(responses)
-    scope = AgentScope(owner_id="owner-loop", role=AgentRole.SUBAGENT)
+    scope = AgentScope(owner_id="owner-loop", role=AgentRole.SUBAGENT, phase_id="phase")
 
     result = await make_process(
         agent, registry=registry, callbacks=Callbacks([recorder.callback_set]), scope=scope
@@ -542,7 +545,7 @@ async def test_agent_start_fires_first_with_scope_and_metadata() -> None:
     agent = MockAgent([make_response(StopReason.END_TURN)])
     agent._system_prompt = "you are a tester"
     recorder = CallbackRecorder()
-    scope = AgentScope(owner_id="owner-1", role=AgentRole.SUBAGENT)
+    scope = AgentScope(owner_id="owner-1", role=AgentRole.SUBAGENT, phase_id="phase")
 
     await make_process(agent, callbacks=Callbacks([recorder.callback_set]), scope=scope).start("do it")
 
@@ -562,7 +565,7 @@ async def test_agent_start_fires_first_with_scope_and_metadata() -> None:
 async def test_run_once_sends_with_no_tools_and_fires_scoped_callbacks() -> None:
     agent = MockAgent([make_response(StopReason.END_TURN, input_tokens=7, output_tokens=3)])
     recorder = CallbackRecorder()
-    scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE)
+    scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE, phase_id="owner-1")
 
     process = make_process(agent, callbacks=Callbacks([recorder.callback_set]), scope=scope)
     response = await process.run_once("summarize")
@@ -579,7 +582,7 @@ async def test_run_once_sends_with_no_tools_and_fires_scoped_callbacks() -> None
 
 async def test_run_once_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
-    scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE)
+    scope = AgentScope(owner_id="owner-1", role=AgentRole.PHASE, phase_id="owner-1")
     process = ReActProcess(
         AgentRuntime(agent=ErrorAgent(), tool_registry=ToolRegistry([])),
         scope=scope,
@@ -615,7 +618,7 @@ async def test_agent_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
         AgentRuntime(agent=ErrorAgent(), tool_registry=ToolRegistry([])),
-        scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
+        scope=AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test"),
         callbacks=Callbacks([recorder.callback_set]),
     )
 
@@ -642,7 +645,7 @@ async def test_keyboard_interrupt_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
         AgentRuntime(agent=InterruptAgent(), tool_registry=ToolRegistry([])),
-        scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
+        scope=AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test"),
         callbacks=Callbacks([recorder.callback_set]),
     )
 
@@ -668,7 +671,7 @@ async def test_cancelled_error_notifies_and_reraises() -> None:
     recorder = CallbackRecorder()
     process = ReActProcess(
         AgentRuntime(agent=CancelledAgent(), tool_registry=ToolRegistry([])),
-        scope=AgentScope(owner_id="test", role=AgentRole.PHASE),
+        scope=AgentScope(owner_id="test", role=AgentRole.PHASE, phase_id="test"),
         callbacks=Callbacks([recorder.callback_set]),
     )
 

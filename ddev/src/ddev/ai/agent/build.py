@@ -14,6 +14,7 @@ from ddev.ai.tools.fs.file_registry import FileRegistry
 from ddev.ai.tools.registry import ToolRegistry
 
 if TYPE_CHECKING:
+    from ddev.ai.agent.scope import AgentScope
     from ddev.ai.react.factory import ReActProcessFactory
 
 
@@ -31,8 +32,8 @@ class AgentRuntimeFactoryProtocol(Protocol):
         *,
         agent_config: AgentConfig,
         system_prompt: str,
-        owner_id: str,
         process_factory: ReActProcessFactory,
+        scope: AgentScope,
     ) -> AgentRuntime: ...
 
 
@@ -44,8 +45,8 @@ class AgentRuntimeBuilder(Protocol):
         *,
         agent_config: AgentConfig,
         system_prompt: str,
-        owner_id: str,
         process_factory: ReActProcessFactory,
+        scope: AgentScope,
     ) -> AgentRuntime: ...
 
 
@@ -66,13 +67,13 @@ class AgentRuntimeFactory:
         *,
         agent_config: AgentConfig,
         system_prompt: str,
-        owner_id: str,
         process_factory: ReActProcessFactory,
+        scope: AgentScope,
     ) -> AgentRuntime:
         """Build an AgentRuntime from the given configuration."""
         tool_registry = ToolRegistry.from_names(
             agent_config.tools,
-            owner_id=owner_id,
+            scope=scope,
             file_registry=self._file_registry,
             agent_config=agent_config,
             # forwarded untouched to tools that spawn child agents
@@ -82,6 +83,6 @@ class AgentRuntimeFactory:
             agent_config,
             tools=tool_registry,
             system_prompt=system_prompt,
-            owner_id=owner_id,
+            owner_id=scope.owner_id,
         )
         return AgentRuntime(agent=agent, tool_registry=tool_registry)
