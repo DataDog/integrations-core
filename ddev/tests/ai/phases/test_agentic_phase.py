@@ -628,7 +628,7 @@ async def test_clear_context_before_resets_history(flow_dir, monkeypatch, messag
             make_response("summary", 10, 5),
         ]
     )
-    phase, _ = make_agent_phase(
+    phase, mgr = make_agent_phase(
         flow_dir,
         mock_agent,
         monkeypatch,
@@ -643,6 +643,8 @@ async def test_clear_context_before_resets_history(flow_dir, monkeypatch, messag
 
     assert mock_agent.reset_call_count == 1
     assert mock_agent.compact_call_count == 0
+    events = read_jsonl(mgr.root / "phase" / "p1.jsonl")
+    assert "context_cleared" in {event["event"] for event in events}
 
 
 async def test_clear_context_before_skips_auto_compact(flow_dir, monkeypatch, message_queue):

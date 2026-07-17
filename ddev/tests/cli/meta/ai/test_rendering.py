@@ -38,6 +38,7 @@ from ddev.cli.meta.ai.rendering import (
     render_agent_start_header,
     render_agent_tools_line,
     render_compact_notice,
+    render_context_cleared_notice,
     render_prompt_panel,
     render_response_header,
     render_response_text,
@@ -439,6 +440,12 @@ def test_render_compact_notice_returns_text():
     result = render_compact_notice()
     assert isinstance(result, Text)
     assert "compact" in result.plain.lower()
+
+
+def test_render_context_cleared_notice_returns_text():
+    result = render_context_cleared_notice()
+    assert isinstance(result, Text)
+    assert "context cleared" in result.plain.lower()
 
 
 # ---------------------------------------------------------------------------

@@ -29,6 +29,7 @@ from ddev.cli.meta.ai.tui.messages import (
     AgentToolCalled,
     BeforeCompact,
     BeforeGoalCheck,
+    ContextCleared,
     PhaseFinished,
     PhaseStarted,
 )
@@ -89,6 +90,10 @@ def build_app_callback_set(app: BridgeApp) -> CallbackSet:
     @cb.on_after_compact
     async def _(scope: AgentScope) -> None:
         _target().post_message(AfterCompact(scope))
+
+    @cb.on_context_cleared
+    async def _(scope: AgentScope) -> None:
+        _target().post_message(ContextCleared(scope))
 
     @cb.on_agent_finish
     async def _(scope: AgentScope, result: ReActResult) -> None:

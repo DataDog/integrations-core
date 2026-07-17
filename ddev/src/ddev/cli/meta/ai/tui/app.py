@@ -30,6 +30,7 @@ from ddev.cli.meta.ai.tui.messages import (
     AgentToolCalled,
     BeforeCompact,
     BeforeGoalCheck,
+    ContextCleared,
     PhaseFinished,
     PhaseStarted,
 )
@@ -166,6 +167,9 @@ class TogoApp(App):
         self._record(msg)
 
     async def on_after_compact(self, msg: AfterCompact) -> None:
+        self._record(msg)
+
+    async def on_context_cleared(self, msg: ContextCleared) -> None:
         self._record(msg)
 
     async def on_before_goal_check(self, msg: BeforeGoalCheck) -> None:

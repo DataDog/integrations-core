@@ -119,6 +119,16 @@ async def test_compact_events_recorded(tmp_path):
     assert [e["event"] for e in events] == ["before_compact", "after_compact"]
 
 
+async def test_context_cleared_event_recorded(tmp_path):
+    logger = AgentLogger(tmp_path)
+    cb = logger.as_callback_set()
+
+    await cb.fire_context_cleared(PHASE)
+
+    events = read_events(tmp_path / "phase" / "p1.jsonl")
+    assert [e["event"] for e in events] == ["context_cleared"]
+
+
 async def test_reused_scope_appends_to_same_file(tmp_path):
     logger = AgentLogger(tmp_path)
     cb = logger.as_callback_set()

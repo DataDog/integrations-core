@@ -53,6 +53,12 @@ class AfterCompactCallback(Protocol):
     async def __call__(self, scope: AgentScope) -> None: ...
 
 
+class OnContextClearedCallback(Protocol):
+    """Called immediately after the agent's conversation history is cleared."""
+
+    async def __call__(self, scope: AgentScope) -> None: ...
+
+
 class OnAgentFinishCallback(Protocol):
     """Called when the ReAct loop exits cleanly."""
 
@@ -122,6 +128,7 @@ class CallbackSet:
         self._on_tool_call: list[OnToolCallCallback] = []
         self._before_compact: list[BeforeCompactCallback] = []
         self._after_compact: list[AfterCompactCallback] = []
+        self._on_context_cleared: list[OnContextClearedCallback] = []
         self._on_agent_finish: list[OnAgentFinishCallback] = []
         self._on_agent_error: list[OnAgentErrorCallback] = []
         self._on_phase_start: list[OnPhaseStartCallback] = []
@@ -177,6 +184,13 @@ class CallbackSet:
 
     async def fire_after_compact(self, scope: AgentScope) -> None:
         await self._fire(self._after_compact, scope)
+
+    def on_context_cleared(self, func: OnContextClearedCallback) -> OnContextClearedCallback:
+        self._on_context_cleared.append(func)
+        return func
+
+    async def fire_context_cleared(self, scope: AgentScope) -> None:
+        await self._fire(self._on_context_cleared, scope)
 
     def on_agent_finish(self, func: OnAgentFinishCallback) -> OnAgentFinishCallback:
         self._on_agent_finish.append(func)
@@ -256,6 +270,10 @@ class Callbacks:
     async def fire_after_compact(self, scope: AgentScope) -> None:
         for s in self._sets:
             await s.fire_after_compact(scope)
+
+    async def fire_context_cleared(self, scope: AgentScope) -> None:
+        for s in self._sets:
+            await s.fire_context_cleared(scope)
 
     async def fire_agent_finish(self, scope: AgentScope, result: ReActResult) -> None:
         for s in self._sets:

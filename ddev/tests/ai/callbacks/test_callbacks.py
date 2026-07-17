@@ -237,6 +237,34 @@ async def test_after_compact_registered_and_fired(scope: AgentScope) -> None:
     assert fired == [scope]
 
 
+async def test_context_cleared_registered_and_fired(scope: AgentScope) -> None:
+    cb = CallbackSet()
+    fired: list[AgentScope] = []
+
+    @cb.on_context_cleared
+    async def h(scope: AgentScope) -> None:
+        fired.append(scope)
+
+    await cb.fire_context_cleared(scope)
+    assert fired == [scope]
+
+
+async def test_context_cleared_callback_exception_is_swallowed(scope: AgentScope) -> None:
+    cb = CallbackSet()
+    fired: list[bool] = []
+
+    @cb.on_context_cleared
+    async def bad(scope: AgentScope) -> None:
+        raise RuntimeError("boom")
+
+    @cb.on_context_cleared
+    async def good(scope: AgentScope) -> None:
+        fired.append(True)
+
+    await cb.fire_context_cleared(scope)
+    assert fired == [True]
+
+
 async def test_compact_callback_exception_is_swallowed(scope: AgentScope) -> None:
     cb = CallbackSet()
     fired: list[bool] = []
@@ -553,6 +581,7 @@ async def test_callbacks_empty_is_noop(
     await callbacks.fire_agent_error(scope, RuntimeError("boom"))
     await callbacks.fire_before_compact(scope)
     await callbacks.fire_after_compact(scope)
+    await callbacks.fire_context_cleared(scope)
     await callbacks.fire_before_agent_send(scope, "p", 1)
     await callbacks.fire_phase_start("p")
     await callbacks.fire_phase_finish("p")

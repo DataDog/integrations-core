@@ -277,6 +277,11 @@ def render_compact_notice() -> Text:
     return Text("  ⋯ compacting context", style="dim")
 
 
+def render_context_cleared_notice() -> Text:
+    """Build the context-cleared notice line."""
+    return Text("  ↻ context cleared", style="dim")
+
+
 def render_agent_finish_line(scope: AgentScope, result: ReActResult) -> Text:
     """Build the ``✓ <owner_id> — N iters, X in / Y out`` summary line."""
     return Text(
