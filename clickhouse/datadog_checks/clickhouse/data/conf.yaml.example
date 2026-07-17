@@ -210,6 +210,11 @@ instances:
         #
         # collection_interval: 60
 
+        ## @param max_flush_rows - integer - optional - default: 1000
+        ## Set the maximum number of flush records to collect per flush log collection.
+        #
+        # max_flush_rows: 1000
+
     ## Configure collection of query errors from system.query_log
     #
     # query_errors:

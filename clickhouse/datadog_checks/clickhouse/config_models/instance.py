@@ -30,6 +30,7 @@ class AsynchronousInsertFlushLog(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
+    max_flush_rows: Optional[int] = None
 
 
 class CollectSchemas(BaseModel):
