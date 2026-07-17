@@ -453,7 +453,7 @@ def docker_run(
             'docker_compose_metadata',
             {
                 'compose_file': compose_file,
-                'project_name': env_vars.get('COMPOSE_PROJECT_NAME'),
+                'project_name': env_vars.get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
                 'service_name': service_name,
             },
         )

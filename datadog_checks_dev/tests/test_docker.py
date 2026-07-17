@@ -10,6 +10,7 @@ import mock
 import pytest
 import tenacity
 
+from datadog_checks.dev._env import get_state
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import (
     ComposeFileUp,
@@ -342,12 +343,14 @@ def test_docker_run_respects_compose_project_name_env_var(monkeypatch):
         yield None
 
     monkeypatch.setenv('COMPOSE_PROJECT_NAME', 'from_environ')
+    monkeypatch.delenv('DDEV_E2E_ENV_docker_compose_metadata', raising=False)
 
     with mock.patch('datadog_checks.dev.docker.environment_run', fake_environment_run):
         with docker_run('/tmp/docker-compose.yml', service_name='service'):
             pass
 
     assert 'COMPOSE_PROJECT_NAME' not in captured_env_vars
+    assert get_state('docker_compose_metadata')['project_name'] == 'from_environ'
 
 
 def test_assert_all_discovery_candidates_stable_reports_incremental_logs(caplog):
