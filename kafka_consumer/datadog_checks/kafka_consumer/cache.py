@@ -31,12 +31,7 @@ class CacheHelper:
         current_time = time.time()
         items_to_fetch = []
 
-        try:
-            cached_str = self._check.read_persistent_cache(cache_key)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self._log.debug("Could not read cache %s: %s", cache_key, e)
-            cache_dict = {}
+        cache_dict = self.get_cached_json(cache_key)
 
         for item_key in item_keys:
             expire_at = cache_dict.get(item_key, 0)
@@ -62,12 +57,7 @@ class CacheHelper:
 
         current_time = time.time()
 
-        try:
-            cached_str = self._check.read_persistent_cache(cache_key)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self._log.debug("Could not read cache %s for update: %s", cache_key, e)
-            cache_dict = {}
+        cache_dict = self.get_cached_json(cache_key)
 
         for item_key in item_keys:
             ttl = ttl_base + random.uniform(0, ttl_jitter)
@@ -78,10 +68,7 @@ class CacheHelper:
             for key in sorted_keys[: len(cache_dict) - max_cache_size]:
                 del cache_dict[key]
 
-        try:
-            self._check.write_persistent_cache(cache_key, json.dumps(cache_dict))
-        except Exception as e:
-            self._log.debug("Could not write cache %s: %s", cache_key, e)
+        self.set_cached_json(cache_key, cache_dict)
 
     def get_cached_json(self, cache_key: str) -> dict:
         """Read and JSON-decode a persistent cache entry, defaulting to {} on any failure."""
@@ -111,12 +98,7 @@ class CacheHelper:
         current_time = time.time()
         events_to_send = []
 
-        try:
-            cached_str = self._check.read_persistent_cache(cache_key)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self._log.debug("Could not read cache %s: %s", cache_key, e)
-            cache_dict = {}
+        cache_dict = self.get_cached_json(cache_key)
 
         for item_key, event_content in items.items():
             current_hash = hashlib.sha256(event_content.encode('utf-8')).hexdigest()
@@ -138,9 +120,6 @@ class CacheHelper:
                 sorted_keys = sorted(cache_dict, key=lambda k: cache_dict[k].get('expire_at', 0))
                 for key in sorted_keys[: len(cache_dict) - max_cache_size]:
                     del cache_dict[key]
-            try:
-                self._check.write_persistent_cache(cache_key, json.dumps(cache_dict))
-            except Exception as e:
-                self._log.debug("Could not write cache %s: %s", cache_key, e)
+            self.set_cached_json(cache_key, cache_dict)
 
         return events_to_send

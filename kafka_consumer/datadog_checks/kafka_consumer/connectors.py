@@ -10,216 +10,10 @@ from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
 from datadog_checks.kafka_consumer.cache import CacheHelper
+from datadog_checks.kafka_consumer.connector_config_keys import is_allowed_config_key
 
 if TYPE_CHECKING:
     from datadog_checks.kafka_consumer.config import KafkaConfig
-
-# Config keys known to be safe to surface as-is: Kafka Connect framework-level settings plus
-# non-sensitive settings from popular official/OSS connector plugins (JDBC, Debezium, S3/GCS/
-# BigQuery/Snowflake/Elasticsearch sinks, HTTP Sink, MirrorMaker2). This can't be truly exhaustive —
-# plugins are free to define arbitrary keys we've never seen — so anything not listed here, plus
-# anything matching SENSITIVE_KEY_SUBSTRINGS even if listed here, is hidden by default.
-ALLOWED_CONFIG_KEYS = frozenset(
-    {
-        # Kafka Connect framework
-        'connector.class',
-        'name',
-        'tasks.max',
-        'topics',
-        'topics.regex',
-        'key.converter',
-        'value.converter',
-        'key.converter.schemas.enable',
-        'value.converter.schemas.enable',
-        'header.converter',
-        'transforms',
-        'predicates',
-        'errors.tolerance',
-        'errors.log.enable',
-        'errors.log.include.messages',
-        'errors.retry.timeout',
-        'errors.retry.delay.max.ms',
-        'errors.deadletterqueue.topic.name',
-        'errors.deadletterqueue.topic.replication.factor',
-        'errors.deadletterqueue.context.headers.enable',
-        'config.action.reload',
-        # JDBC Source/Sink
-        'table.whitelist',
-        'table.blacklist',
-        'table.types',
-        'table.poll.interval.ms',
-        'poll.interval.ms',
-        'batch.max.rows',
-        'numeric.mapping',
-        'dialect.name',
-        'topic.prefix',
-        'validate.non.null',
-        'timestamp.delay.interval.ms',
-        'timestamp.column.name',
-        'incrementing.column.name',
-        'db.timezone',
-        'quote.sql.identifiers',
-        'catalog.pattern',
-        'schema.pattern',
-        'mode',
-        'table.name.format',
-        'insert.mode',
-        'batch.size',
-        'delete.enabled',
-        'pk.mode',
-        'pk.fields',
-        'fields.whitelist',
-        'auto.create',
-        'auto.evolve',
-        # S3 / GCS sinks
-        's3.bucket.name',
-        's3.region',
-        's3.part.size',
-        's3.compression.type',
-        's3.acl.canned',
-        'gcs.bucket.name',
-        'gcs.part.size',
-        'flush.size',
-        'rotate.interval.ms',
-        'rotate.schedule.interval.ms',
-        'topics.dir',
-        'storage.class',
-        'format.class',
-        'partitioner.class',
-        'path.format',
-        'locale',
-        'timezone',
-        'schema.compatibility',
-        'behavior.on.null.values',
-        'parquet.codec',
-        # BigQuery sink
-        'project',
-        'datasets',
-        'defaultDataset',
-        'autoCreateTables',
-        'sanitizeTopics',
-        'autoUpdateSchemas',
-        'allowNewBigQueryFields',
-        'allowSchemaUnionization',
-        'allowBigQueryRequiredFieldRelaxation',
-        'bigQueryRetry',
-        'bigQueryRetryWait',
-        'tableWriteWait',
-        'mergeIntervalMs',
-        'upsertEnabled',
-        'deleteEnabled',
-        'kafkaKeyFieldName',
-        'kafkaDataFieldName',
-        # Snowflake sink
-        'snowflake.url.name',
-        'snowflake.database.name',
-        'snowflake.schema.name',
-        'snowflake.role.name',
-        'snowflake.topic2table.map',
-        'buffer.count.records',
-        'buffer.flush.time',
-        'buffer.size.bytes',
-        # Elasticsearch sink
-        'type.name',
-        'key.ignore',
-        'schema.ignore',
-        'topic.index.map',
-        'drop.invalid.message',
-        'behavior.on.malformed.documents',
-        'max.buffered.records',
-        'flush.timeout.ms',
-        'max.retries',
-        'retry.backoff.ms',
-        'linger.ms',
-        'read.timeout.ms',
-        # HTTP sink
-        'request.method',
-        'batch.max.size',
-        'batch.prefix',
-        'batch.suffix',
-        'batch.separator',
-        'request.body.format',
-        # MirrorMaker2
-        'topics.exclude',
-        'groups',
-        'groups.exclude',
-        'replication.factor',
-        'sync.topic.acls.enabled',
-        'sync.topic.configs.enabled',
-        'refresh.topics.enabled',
-        'refresh.topics.interval.seconds',
-        'refresh.groups.interval.seconds',
-        'emit.heartbeats.enabled',
-        'emit.checkpoints.enabled',
-        'sync.group.offsets.enabled',
-        'source.cluster.alias',
-        'target.cluster.alias',
-        # Debezium (common across MySQL/Postgres/SQL Server/Oracle/MongoDB connectors)
-        'database.hostname',
-        'database.port',
-        'database.dbname',
-        'database.server.id',
-        'database.server.name',
-        'table.include.list',
-        'table.exclude.list',
-        'database.include.list',
-        'database.exclude.list',
-        'column.include.list',
-        'column.exclude.list',
-        'snapshot.mode',
-        'snapshot.locking.mode',
-        'snapshot.fetch.size',
-        'snapshot.include.collection.list',
-        'max.batch.size',
-        'max.queue.size',
-        'heartbeat.interval.ms',
-        'heartbeat.topics.prefix',
-        'skipped.operations',
-        'signal.data.collection',
-        'signal.enabled.channels',
-        'provide.transaction.metadata',
-        'tombstones.on.delete',
-        'decimal.handling.mode',
-        'time.precision.mode',
-        'binary.handling.mode',
-        'include.schema.changes',
-        'schema.include.list',
-        'schema.exclude.list',
-        'plugin.name',
-        'slot.name',
-        'publication.name',
-        'publication.autocreate.mode',
-    }
-)
-
-SENSITIVE_KEY_SUBSTRINGS = (
-    'password',
-    'passwd',
-    'secret',
-    'token',
-    'credential',
-    'apikey',
-    'api_key',
-    'api-key',
-    'access_key',
-    'access-key',
-    'accesskey',
-    'private_key',
-    'private-key',
-    'privatekey',
-    'client_secret',
-    'client-secret',
-    'clientsecret',
-)
-
-
-def is_allowed_config_key(key: str) -> bool:
-    key_lower = key.lower()
-    if any(substring in key_lower for substring in SENSITIVE_KEY_SUBSTRINGS):
-        return False
-    if key in ALLOWED_CONFIG_KEYS:
-        return True
-    return (key.startswith('transforms.') or key.startswith('predicates.')) and key.endswith('.type')
 
 
 def _build_http_kwargs(
@@ -482,22 +276,34 @@ class KafkaConnectCollector:
         response.raise_for_status()
         return sorted((response.json().get(name) or {}).get('topics', []))
 
+    @staticmethod
+    def _is_unsupported_topics_endpoint(exc: Exception) -> bool:
+        """True if the error means the worker doesn't serve /topics at all (404/405), as opposed to a
+        transient failure. A pre-2.5 worker (or one with topic tracking disabled) 404s the endpoint."""
+        response = getattr(exc, 'response', None)
+        return response is not None and getattr(response, 'status_code', None) in (404, 405)
+
     def _fetch_connector_topics(self, url: str, connector_names: list[str]) -> dict[str, list[str]]:
         """Return each connector's tracked topics, refreshing entries whose TTL has expired.
 
-        A connector is backed off on the same TTL whether its fetch succeeds or fails,
-        so a connector with topic tracking permanently unavailable doesn't get re-requested
-        on every check run. Refreshes are capped per run so a Connect worker with many expired
-        connectors (or a slow/unsupported topics endpoint) can't stall config/plugin event
-        emission for the rest of the run; any leftover names are picked up on a later run since
-        they remain expired and get_items_to_fetch returns oldest-expiry-first.
+        A successful fetch and a permanently-unsupported endpoint (HTTP 404/405, e.g. a pre-2.5
+        worker) are both backed off for the full TTL so we don't re-request them every run. A
+        transient failure (network/timeout/5xx) is left expired so it retries on the next run,
+        matching the sibling _collect_plugins behaviour. Refreshes are capped per run so a Connect
+        worker with many expired connectors (or a slow topics endpoint) can't stall config/plugin
+        event emission for the rest of the run; any leftover names are picked up on a later run
+        since they remain expired and get_items_to_fetch returns oldest-expiry-first. The data
+        cache is only rewritten when a fetch changed it or a stale connector was pruned.
         """
         fetch_cache_key = self._url_cache_key(CONNECTOR_TOPICS_FETCH_CACHE_KEY, url)
         data_cache_key = self._url_cache_key(CONNECTOR_TOPICS_DATA_CACHE_KEY, url)
 
         topics_by_connector: dict[str, list[str]] = self.cache.get_cached_json(data_cache_key)
+        original_size = len(topics_by_connector)
 
         names_to_refresh = self.cache.get_items_to_fetch(fetch_cache_key, connector_names)[:TOPICS_FETCH_MAX_PER_RUN]
+        names_to_back_off: list[str] = []
+        data_changed = False
         if names_to_refresh:
             with ThreadPoolExecutor(max_workers=TOPICS_FETCH_CONCURRENCY) as executor:
                 future_to_name = {
@@ -507,13 +313,21 @@ class KafkaConnectCollector:
                     name = future_to_name[future]
                     try:
                         topics_by_connector[name] = future.result()
+                        names_to_back_off.append(name)
+                        data_changed = True
                     except Exception as e:
+                        if self._is_unsupported_topics_endpoint(e):
+                            names_to_back_off.append(name)
                         self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
 
-            self.cache.mark_items_fetched(fetch_cache_key, names_to_refresh, max_cache_size=CONNECTOR_CACHE_MAX_SIZE)
+            if names_to_back_off:
+                self.cache.mark_items_fetched(
+                    fetch_cache_key, names_to_back_off, max_cache_size=CONNECTOR_CACHE_MAX_SIZE
+                )
 
         pruned_topics = {name: topics_by_connector[name] for name in connector_names if name in topics_by_connector}
-        self.cache.set_cached_json(data_cache_key, pruned_topics)
+        if data_changed or len(pruned_topics) != original_size:
+            self.cache.set_cached_json(data_cache_key, pruned_topics)
 
         return {name: topics_by_connector.get(name, []) for name in connector_names}
 
@@ -539,7 +353,7 @@ class KafkaConnectCollector:
                 for task in tasks
                 if task.get('state') == 'FAILED' and task.get('trace')
             ),
-            key=lambda t: t['task_id'],
+            key=lambda t: (t['task_id'] is None, t['task_id'] or 0),
         )
 
         return {
