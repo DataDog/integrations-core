@@ -112,7 +112,7 @@ def test_invalid_controller_service_check(aggregator, mock_http_response):
 
 
 def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoint):
-    from datadog_checks.base.utils.http_testing import MockHTTPResponse
+    from datadog_checks.dev.http import MockHTTPResponse
 
     instance = {
         'openmetrics_endpoint': 'http://localhost:8080/metrics',

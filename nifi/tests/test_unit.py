@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.nifi import NifiCheck
 
 
