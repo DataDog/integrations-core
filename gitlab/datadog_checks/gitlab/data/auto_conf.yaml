@@ -5,6 +5,7 @@
 #
 ad_identifiers:
   - gitlab-ce
+  - gitlab-ee
 
 ## Enables configuration discovery
 #

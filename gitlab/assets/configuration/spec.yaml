@@ -169,4 +169,5 @@ files:
     overrides:
       value.example:
       - gitlab-ce
+      - gitlab-ee
   - template: auto_conf/discovery
