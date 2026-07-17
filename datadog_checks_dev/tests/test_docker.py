@@ -294,60 +294,49 @@ def test_docker_run_saves_compose_metadata(monkeypatch):
     assert os.environ['DDEV_E2E_ENV_docker_compose_metadata']
 
 
-def test_docker_run_defaults_compose_project_name(monkeypatch):
-    captured_env_vars = {}
+@pytest.fixture
+def captured_env_vars():
+    captured = {}
 
     @contextmanager
     def fake_environment_run(**kwargs):
-        captured_env_vars.update(kwargs['env_vars'])
+        captured.update(kwargs['env_vars'])
         yield None
 
+    with mock.patch('datadog_checks.dev.docker.environment_run', fake_environment_run):
+        yield captured
+
+
+def test_docker_run_defaults_compose_project_name(monkeypatch, captured_env_vars):
     monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
     monkeypatch.delenv('DDEV_E2E_ENV_docker_compose_metadata', raising=False)
 
-    with mock.patch('datadog_checks.dev.docker.environment_run', fake_environment_run):
-        with docker_run('/tmp/docker-compose.yml', service_name='service'):
-            pass
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
 
     assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'datadog_checks_dev'
-    assert os.environ['DDEV_E2E_ENV_docker_compose_metadata']
+    assert get_state('docker_compose_metadata')['project_name'] == 'datadog_checks_dev'
 
 
-def test_docker_run_respects_explicit_compose_project_name(monkeypatch):
-    captured_env_vars = {}
-
-    @contextmanager
-    def fake_environment_run(**kwargs):
-        captured_env_vars.update(kwargs['env_vars'])
-        yield None
-
+def test_docker_run_respects_explicit_compose_project_name(monkeypatch, captured_env_vars):
     monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
 
-    with mock.patch('datadog_checks.dev.docker.environment_run', fake_environment_run):
-        with docker_run(
-            '/tmp/docker-compose.yml',
-            env_vars={'COMPOSE_PROJECT_NAME': 'custom'},
-            service_name='service',
-        ):
-            pass
+    with docker_run(
+        '/tmp/docker-compose.yml',
+        env_vars={'COMPOSE_PROJECT_NAME': 'custom'},
+        service_name='service',
+    ):
+        pass
 
     assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'custom'
 
 
-def test_docker_run_respects_compose_project_name_env_var(monkeypatch):
-    captured_env_vars = {}
-
-    @contextmanager
-    def fake_environment_run(**kwargs):
-        captured_env_vars.update(kwargs['env_vars'])
-        yield None
-
+def test_docker_run_respects_compose_project_name_env_var(monkeypatch, captured_env_vars):
     monkeypatch.setenv('COMPOSE_PROJECT_NAME', 'from_environ')
     monkeypatch.delenv('DDEV_E2E_ENV_docker_compose_metadata', raising=False)
 
-    with mock.patch('datadog_checks.dev.docker.environment_run', fake_environment_run):
-        with docker_run('/tmp/docker-compose.yml', service_name='service'):
-            pass
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
 
     assert 'COMPOSE_PROJECT_NAME' not in captured_env_vars
     assert get_state('docker_compose_metadata')['project_name'] == 'from_environ'
