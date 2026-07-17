@@ -39,7 +39,7 @@ No additional installation is needed on your server.
    logs_enabled: true
    ```
 
-2. Add this configuration block to your `nifi.d/conf.yaml` file to start collecting your NiFi logs:
+2. Add the following configuration block to your `nifi.d/conf.yaml` file to start collecting your NiFi logs:
 
    ```yaml
    logs:
