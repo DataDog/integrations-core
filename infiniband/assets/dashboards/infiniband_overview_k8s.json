@@ -1,5 +1,5 @@
 {
-    "title": "InfiniBand Overview",
+    "title": "InfiniBand Overview - Kubernetes Version",
     "description": "This dashboard provides critical visibility into the health and performance of your InfiniBand fabric infrastructure. The metrics displayed reveal both physical layer issues (like signal integrity problems and link failures) and RDMA protocol-specific errors (such as timeout events and buffer constraints). By monitoring these key indicators, you can quickly identify connectivity failures, congestion points, and resource limitations before they impact application performance. The dashboard focuses on actionable metrics that help pinpoint the root cause of performance degradation - whether it's at the physical link level, within port buffers, or in the RDMA transport layer. This comprehensive visibility enables proactive maintenance and faster troubleshooting, helping maintain the high-throughput, low-latency connectivity that your data-intensive applications depend on.\n\n**Further reading:**\n\n-   [Datadog InfiniBand Integration Documentation](https://docs.datadoghq.com/integrations/infiniband/)\n-   [Infiniband Port Counters](https://docs.nvidia.com/networking/display/ibdiagnetusermanualv290/port+counters)",
     "widgets": [
         {
@@ -125,7 +125,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$env,$host,$device,$port,$link_layer} by {port_state}"
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer} by {port_state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -174,7 +174,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_phys_state{$env,$host,$device,$port,$link_layer} by {port_phys_state}"
+                                            "query": "count:infiniband.port_phys_state{$env,$cluster,$host,$device,$port,$link_layer} by {port_phys_state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -219,7 +219,7 @@
                             "hide_zero_counts": true,
                             "show_status": true,
                             "last_triggered_format": "relative",
-                            "query": "tag:(integration:infiniband) $host $env",
+                            "query": "tag:(integration:infiniband) $host $env $cluster",
                             "sort": "status,asc",
                             "count": 50,
                             "start": 0,
@@ -247,7 +247,7 @@
         {
             "id": 5000000000000024,
             "definition": {
-                "title": "Fleet Triage - Host",
+                "title": "Fleet Triage - Cluster & Host",
                 "background_color": "vivid_green",
                 "show_title": true,
                 "type": "group",
@@ -257,7 +257,7 @@
                         "id": 5000000000000010,
                         "definition": {
                             "type": "note",
-                            "content": "**Start here.** Use the template variables at the top (env, host, device, port, link_layer) to move from a fleet-wide view down to a single node's NIC ports. The KPIs and top-offender lists below show which host and port to investigate \u2014 click a row to drill into that host's detail. These are node/host-level fabric counters, per device and port.",
+                            "content": "**Start here.** Use the template variables at the top (env, cluster, host, device, port, link_layer) to move from a fleet-wide view down to a single node's NIC ports. The KPIs and top-offender lists below show which cluster, host, and port to investigate \u2014 click a row to drill into that host's detail. In Kubernetes, `host` is the node: these are node-level fabric counters and are not attributable to a pod.",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
@@ -293,7 +293,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$env,$host,$device,$port,$link_layer}"
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -328,7 +328,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$env,$host,$device,$port,$link_layer,port_state:active}"
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer,port_state:active}"
                                         }
                                     ],
                                     "response_format": "scalar"
@@ -363,7 +363,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$env,$host,$device,$port,$link_layer,!port_state:active}"
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer,!port_state:active}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -410,7 +410,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_phys_state{$env,$host,$device,$port,$link_layer,!port_phys_state:linkup}"
+                                            "query": "count:infiniband.port_phys_state{$env,$cluster,$host,$device,$port,$link_layer,!port_phys_state:linkup}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -441,7 +441,7 @@
                     {
                         "id": 5000000000000015,
                         "definition": {
-                            "title": "Port State by Host",
+                            "title": "Port State by Cluster",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -452,7 +452,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$env,$host,$device,$port,$link_layer} by {host,port_state}"
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,port_state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -478,7 +478,7 @@
                             "custom_links": [
                                 {
                                     "label": "Filter to this cluster",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}"
                                 }
                             ]
                         },
@@ -492,7 +492,7 @@
                     {
                         "id": 5000000000000016,
                         "definition": {
-                            "title": "Physical State by Host",
+                            "title": "Physical State by Cluster",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_table",
@@ -503,7 +503,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_phys_state{$env,$host,$device,$port,$link_layer} by {host,port_phys_state}"
+                                            "query": "count:infiniband.port_phys_state{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,port_phys_state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -529,7 +529,7 @@
                             "custom_links": [
                                 {
                                     "label": "Filter to this cluster",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}"
                                 }
                             ]
                         },
@@ -554,7 +554,7 @@
                                             "aggregator": "last",
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "count:infiniband.port_state{$env,$host,$device,$port,$link_layer,!port_state:active} by {host,device,port,port_state}"
+                                            "query": "count:infiniband.port_state{$env,$cluster,$host,$device,$port,$link_layer,!port_state:active} by {kube_cluster_name,host,device,port,port_state}"
                                         }
                                     ],
                                     "response_format": "scalar",
@@ -580,7 +580,7 @@
                             "custom_links": [
                                 {
                                     "label": "Drill into host detail",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
                                 }
                             ]
                         },
@@ -605,7 +605,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.symbol_error{$env,$host,$device,$port,$link_layer} by {host,device,port}",
+                                            "query": "sum:infiniband.symbol_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -632,7 +632,7 @@
                             "custom_links": [
                                 {
                                     "label": "Drill into host detail",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
                                 }
                             ]
                         },
@@ -657,7 +657,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}",
+                                            "query": "sum:infiniband.port_rcv_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -684,7 +684,7 @@
                             "custom_links": [
                                 {
                                     "label": "Drill into host detail",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
                                 }
                             ]
                         },
@@ -709,7 +709,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_xmit_discards{$env,$host,$device,$port,$link_layer} by {host,device,port}",
+                                            "query": "sum:infiniband.port_xmit_discards{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -736,7 +736,7 @@
                             "custom_links": [
                                 {
                                     "label": "Drill into host detail",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
                                 }
                             ]
                         },
@@ -761,7 +761,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.np_ecn_marked_roce_packets{$env,$host,$device,$port,$link_layer} by {host,device,port}",
+                                            "query": "sum:infiniband.rdma.np_ecn_marked_roce_packets{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -788,7 +788,7 @@
                             "custom_links": [
                                 {
                                     "label": "Drill into host detail",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
                                 }
                             ]
                         },
@@ -813,7 +813,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.link_downed{$env,$host,$device,$port,$link_layer} by {host,device,port}",
+                                            "query": "sum:infiniband.link_downed{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -840,7 +840,7 @@
                             "custom_links": [
                                 {
                                     "label": "Drill into host detail",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
                                 }
                             ]
                         },
@@ -865,7 +865,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.out_of_buffer{$env,$host,$device,$port,$link_layer} by {host,device,port}",
+                                            "query": "sum:infiniband.rdma.out_of_buffer{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}",
                                             "aggregator": "sum"
                                         }
                                     ],
@@ -892,7 +892,7 @@
                             "custom_links": [
                                 {
                                     "label": "Drill into host detail",
-                                    "link": "/screen/integration/InfiniBand%20Overview?tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
+                                    "link": "/screen/integration/InfiniBand%20Overview%20-%20Kubernetes%20Version?tpl_var_cluster={{kube_cluster_name.value}}&tpl_var_host={{host.value}}&tpl_var_device={{device.value}}&tpl_var_port={{port.value}}"
                                 }
                             ]
                         },
@@ -925,7 +925,7 @@
                         "id": 5000000000000025,
                         "definition": {
                             "type": "note",
-                            "content": "These metrics monitor the physical health and performance of your InfiniBand fabric, tracking link stability, error patterns, congestion points, and traffic volumes. By observing these foundational metrics, you can identify hardware failures, signal integrity issues, and network bottlenecks before they cascade into application-level problems. Grouped by host, device, and port; narrow with the template variables above.",
+                            "content": "These metrics monitor the physical health and performance of your InfiniBand fabric, tracking link stability, error patterns, congestion points, and traffic volumes. By observing these foundational metrics, you can identify hardware failures, signal integrity issues, and network bottlenecks before they cascade into application-level problems. Grouped by cluster, host, device, and port; narrow with the template variables above.",
                             "background_color": "blue",
                             "font_size": "16",
                             "text_align": "center",
@@ -970,7 +970,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.symbol_error{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.symbol_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1019,7 +1019,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.link_downed{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.link_downed{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1067,7 +1067,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.link_error_recovery{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.link_error_recovery{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1116,7 +1116,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_rcv_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1165,7 +1165,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_remote_physical_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_rcv_remote_physical_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1214,7 +1214,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.local_link_integrity_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.local_link_integrity_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1263,7 +1263,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_discards{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_rcv_discards{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1312,7 +1312,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_xmit_discards{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_xmit_discards{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1360,7 +1360,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_xmit_wait{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_xmit_wait{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1408,7 +1408,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_data_64{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_rcv_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1457,7 +1457,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_xmit_data_64{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_xmit_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1506,7 +1506,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_packets_64{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_rcv_packets_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1554,7 +1554,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.excessive_buffer_overrun_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.excessive_buffer_overrun_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1603,7 +1603,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_switch_relay_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_rcv_switch_relay_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1652,7 +1652,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.port_rcv_constraint_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.port_rcv_constraint_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1695,7 +1695,7 @@
                         "id": 5000000000000042,
                         "definition": {
                             "type": "note",
-                            "content": "These metrics reveal the operational health of RDMA communications running over your InfiniBand fabric, exposing protocol errors, congestion events, resource limitations, and message-handling issues. Grouped by host, device, and port; narrow with the template variables above.",
+                            "content": "These metrics reveal the operational health of RDMA communications running over your InfiniBand fabric, exposing protocol errors, congestion events, resource limitations, and message-handling issues. Grouped by cluster, host, device, and port; narrow with the template variables above.",
                             "background_color": "purple",
                             "font_size": "16",
                             "text_align": "center",
@@ -1740,7 +1740,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.local_ack_timeout_err{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.local_ack_timeout_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1789,7 +1789,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.packet_seq_err{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.packet_seq_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1838,7 +1838,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rnr_nak_retry_err{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rnr_nak_retry_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1886,7 +1886,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.np_cnp_sent{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.np_cnp_sent{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1933,7 +1933,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.np_ecn_marked_roce_packets{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.np_ecn_marked_roce_packets{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1980,7 +1980,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.roce_adp_retrans{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.roce_adp_retrans{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2027,7 +2027,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.out_of_buffer{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.out_of_buffer{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2075,7 +2075,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.out_of_sequence{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.out_of_sequence{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2123,7 +2123,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.duplicate_request{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.duplicate_request{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2171,7 +2171,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.req_cqe_error{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.req_cqe_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2219,7 +2219,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.resp_cqe_error{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.resp_cqe_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2267,7 +2267,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.resp_remote_access_errors{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.resp_remote_access_errors{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2315,7 +2315,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.resp_local_length_error{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.resp_local_length_error{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2363,7 +2363,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.req_remote_invalid_request{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.req_remote_invalid_request{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2411,7 +2411,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rx_wqe_err{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rx_wqe_err{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2459,7 +2459,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.roce_slow_restart{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.roce_slow_restart{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2506,7 +2506,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rp_cnp_ignored{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rp_cnp_ignored{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2554,7 +2554,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rp_cnp_handled{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rp_cnp_handled{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2596,7 +2596,7 @@
                         "id": 5000000000000062,
                         "definition": {
                             "type": "note",
-                            "content": "These metrics monitor AWS Elastic Fabric Adapter (EFA) performance, tracking packet transmission, RDMA operations, and buffer utilization specific to this cloud-optimized interconnect. They populate only on EFA-backed hosts. Grouped by host, device, and port; narrow with the template variables above.",
+                            "content": "These metrics monitor AWS Elastic Fabric Adapter (EFA) performance, tracking packet transmission, RDMA operations, and buffer utilization specific to this cloud-optimized interconnect. They populate only on EFA-backed hosts. Grouped by cluster, host, device, and port; narrow with the template variables above.",
                             "background_color": "orange",
                             "font_size": "16",
                             "text_align": "center",
@@ -2640,7 +2640,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rdma_write_wrs{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rdma_write_wrs{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2687,7 +2687,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.tx_bytes{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.tx_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2734,7 +2734,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rx_bytes{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rx_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2781,7 +2781,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rx_pkts{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rx_pkts{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2828,7 +2828,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.rx_drops{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.rx_drops{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2875,7 +2875,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.tx_pkts{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.tx_pkts{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2922,7 +2922,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.send_wrs{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.send_wrs{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2969,7 +2969,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.recv_bytes{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.recv_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3016,7 +3016,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.send_bytes{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.send_bytes{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3063,7 +3063,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:infiniband.rdma.recv_wrs{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                            "query": "sum:infiniband.rdma.recv_wrs{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -3097,6 +3097,12 @@
         {
             "name": "env",
             "prefix": "env",
+            "available_values": [],
+            "default": "*"
+        },
+        {
+            "name": "cluster",
+            "prefix": "kube_cluster_name",
             "available_values": [],
             "default": "*"
         },
