@@ -133,8 +133,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             enabled_intervals.append(samples_collection_interval)
         if buffer_config.enabled:
             enabled_intervals.append(buffer_config.collection_interval)
+        # Floor at 1s: gcd truncates sub-second intervals to 0, which would make rate_limit divide by zero.
         collection_interval = (
-            math.gcd(*(int(i) for i in enabled_intervals)) if enabled_intervals else samples_collection_interval
+            max(math.gcd(*(int(i) for i in enabled_intervals)), 1) if enabled_intervals else samples_collection_interval
         )
 
         super(ClickhouseStatementSamples, self).__init__(
@@ -486,8 +487,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """
         Run the async insert buffer snapshot on its own collection interval
         """
-        if self._buffer_enabled and time.time() - self._last_buffer_snapshot_time >= self._buffer_collection_interval:
-            self._last_buffer_snapshot_time = time.time()
+        now = time.time()
+        if self._buffer_enabled and now - self._last_buffer_snapshot_time >= self._buffer_collection_interval:
+            self._last_buffer_snapshot_time = now
             buffer_snapshot = self._query_buffer_snapshot()
             self._emit_buffer_events(buffer_snapshot)
 
