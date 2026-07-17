@@ -4,12 +4,14 @@
 import json
 import os
 from typing import Optional  # noqa: F401
+from unittest import mock
 
 import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.check import VoltDBCheck
+from datadog_checks.voltdb.client import Client
 from datadog_checks.voltdb.config import Config
 from datadog_checks.voltdb.types import Instance  # noqa: F401
 
@@ -71,6 +73,49 @@ def test_default_port(url, netloc):
     # type: (str, tuple) -> None
     config = Config({'url': url, 'username': 'doggo', 'password': 'doggopass'})
     assert config.netloc == netloc
+
+
+def test_check_clears_wrapper_basic_auth():
+    # type: () -> None
+    # VoltDB authenticates via User/Password query params, so the check must clear the basic-auth
+    # tuple the shared HTTP config builds from username/password. Otherwise the request would carry
+    # a conflicting Authorization header alongside the query credentials.
+    instance = {'url': 'http://localhost:8080', 'username': 'doggo', 'password': 'doggopass'}
+    check = VoltDBCheck('voltdb', {}, [instance])
+
+    assert check.http.options['auth'] is None
+
+
+@pytest.mark.parametrize(
+    'password_hashed, password_field, absent_field',
+    [
+        pytest.param(False, 'Password', 'Hashedpassword', id='plain'),
+        pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
+    ],
+)
+def test_request_builds_query_params(password_hashed, password_field, absent_field):
+    # type: (bool, str, str) -> None
+    captured = {}
+
+    def fake_get(url, **options):
+        captured['params'] = options['params']
+        return mock.MagicMock()
+
+    client = Client(
+        url='http://localhost:8080',
+        http_get=fake_get,
+        username='admin',
+        password='secret',
+        password_hashed=password_hashed,
+    )
+    client.request('Hero.insert', parameters=[0, 'Bits'])
+
+    params = captured['params']
+    assert params['Procedure'] == 'Hero.insert'
+    assert params['Parameters'] == '[0, "Bits"]'
+    assert params['User'] == 'admin'
+    assert params[password_field] == 'secret'
+    assert absent_field not in params
 
 
 def test_metrics_with_fixtures(mock_results, aggregator, dd_run_check, instance_all):
