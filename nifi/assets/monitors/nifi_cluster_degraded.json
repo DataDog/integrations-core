@@ -2,7 +2,7 @@
   "version": 2,
   "created_at": "2026-07-14",
   "last_updated_at": "2026-07-14",
-  "title": "NiFi cluster degraded",
+  "title": "NiFi cluster is degraded",
   "description": "Alerts when a monitored NiFi instance reports that one or more cluster nodes have disconnected from the cluster coordinator (nifi.cluster.is_healthy = 0). This metric is emitted only in clustered mode, so the monitor ignores missing data and never fires for standalone deployments.",
   "tags": [
     "integration:nifi"
