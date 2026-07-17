@@ -1,1 +1,0 @@
-Access the HTTP client through the backend-neutral protocol instead of the underlying requests session.
