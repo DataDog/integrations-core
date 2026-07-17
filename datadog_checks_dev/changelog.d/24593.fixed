@@ -1,1 +1,1 @@
-Anchor ``mount_logs`` shared log files under ``$HOME`` on macOS so container bind mounts resolve to files on Colima.
+Fix test environments that mount logs (``mount_logs``) failing to start on macOS when Docker runs through Colima.

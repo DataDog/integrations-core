@@ -281,11 +281,7 @@ def using_windows_containers():
 
 
 def shared_logs_base_dir():
-    # On macOS the Docker daemon runs inside a VM. Colima shares only the user's home directory
-    # by default, so files created under $TMPDIR (/var/folders) are invisible to the daemon and a
-    # bind mount of such a file silently becomes an empty directory instead. Anchor shared log
-    # files under $HOME (shared by both Colima and Docker Desktop) so the bind source stays a real
-    # file. On Linux the daemon is local, so the default temp location works and we return None.
+    # macOS runs the daemon in a VM; Colima shares only $HOME, so keep bind sources there.
     if sys.platform != 'darwin':
         return None
 
