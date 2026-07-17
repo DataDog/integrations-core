@@ -1,1 +1,0 @@
-Use the renamed backend-agnostic ``HTTPResponse`` protocol type hint.
