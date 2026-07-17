@@ -35,6 +35,22 @@ async def test_launch_modal_occupies_at_least_half_viewport(make_launch_modal_ap
         assert launch_button.region.right == dialog.content_region.right
 
 
+async def test_input_labels_show_declared_types(make_launch_modal_app, all_flow_inputs) -> None:
+    app = make_launch_modal_app(all_flow_inputs)
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+
+        labels = [label.render().plain for label in app.screen.query("#launch-fields > Label.eyebrow")]
+
+        assert labels == [
+            "MY STRING (string)",
+            "MY NUMBER (number)",
+            "MY BOOL (boolean)",
+            "MY PATH (path)",
+        ]
+
+
 @pytest.mark.parametrize(
     "flow_input,widget_type,expected_value",
     [

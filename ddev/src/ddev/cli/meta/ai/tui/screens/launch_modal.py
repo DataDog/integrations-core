@@ -107,7 +107,7 @@ class LaunchModal(ModalScreen):
 
     def _compose_inputs(self) -> Iterator[Widget]:
         for inp in self.flow.inputs:
-            yield Label(inp.label.upper(), classes="eyebrow")
+            yield Label(f"{inp.label.upper()} ({inp.input_type.value})", classes="eyebrow")
             yield from self._widget_for(inp)
 
     def _widget_for(self, inp: FlowInput) -> Iterator[Widget]:
