@@ -1085,9 +1085,32 @@ VM_INVALID_GATEWAY_PROPERTIES_EX = mock.MagicMock(
 )
 
 
+# Tag associations returned by the REST mock. Object IDs must match the moIds of the
+# SOAP inventory the consuming test drives: the historical fixtures use vm1/host1/ds1,
+# the realtime fixtures use VM4-4-1/10.0.0.104-1/NFS-Share-1.
+HISTORICAL_TAG_ASSOCIATIONS = [
+    {"object_id": {"id": "vm1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
+    {"object_id": {"id": "host1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
+    {"object_id": {"id": "ds1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
+]
+REALTIME_TAG_ASSOCIATIONS = [
+    {"object_id": {"id": "VM4-4-1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
+    {"object_id": {"id": "10.0.0.104-1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
+    {"object_id": {"id": "NFS-Share-1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
+]
+
+
 class MockHttpV6:
-    def __init__(self):
+    def __init__(self, tag_associations=None):
         self.exceptions = {}
+        self.headers = {}
+        self.tag_associations = HISTORICAL_TAG_ASSOCIATIONS if tag_associations is None else tag_associations
+
+    def set_header(self, name, value):
+        self.headers[name] = value
+
+    def get_header(self, name, default=None):
+        return self.headers.get(name, default)
 
     def get(self, url, *args, **kwargs):
         if '/api/' in url:
@@ -1133,7 +1156,7 @@ class MockHttpV6:
     def post(self, url, *args, **kwargs):
         if '/api/' in url:
             return MockHTTPResponse(json_data={}, status_code=404)
-        assert kwargs['headers']['Content-Type'] == 'application/json'
+        assert kwargs['extra_headers']['Content-Type'] == 'application/json'
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')
@@ -1147,21 +1170,23 @@ class MockHttpV6:
             )
         elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
             return MockHTTPResponse(
-                json_data={
-                    "value": [
-                        {"object_id": {"id": "vm1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
-                        {"object_id": {"id": "host1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
-                        {"object_id": {"id": "ds1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
-                    ]
-                },
+                json_data={"value": self.tag_associations},
                 status_code=200,
             )
         raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))
 
 
 class MockHttpV7:
-    def __init__(self):
+    def __init__(self, tag_associations=None):
         self.exceptions = []
+        self.headers = {}
+        self.tag_associations = HISTORICAL_TAG_ASSOCIATIONS if tag_associations is None else tag_associations
+
+    def set_header(self, name, value):
+        self.headers[name] = value
+
+    def get_header(self, name, default=None):
+        return self.headers.get(name, default)
 
     def get(self, url, *args, **kwargs):
         parsed_url = urlparse(url)
@@ -1199,7 +1224,7 @@ class MockHttpV7:
         raise Exception("Rest api mock request not matched: method={}, url={}".format('get', url))
 
     def post(self, url, *args, **kwargs):
-        assert kwargs['headers']['Content-Type'] == 'application/json'
+        assert kwargs['extra_headers']['Content-Type'] == 'application/json'
         parsed_url = urlparse(url)
         path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
         path_parts = path_and_args.split('/')
@@ -1213,11 +1238,7 @@ class MockHttpV7:
             )
         elif re.match(r'.*/tagging/tag-association\?action=list-attached-tags-on-objects$', url):
             return MockHTTPResponse(
-                json_data=[
-                    {'tag_ids': ['tag_id_1', 'tag_id_2'], 'object_id': {'id': 'vm1', 'type': 'VirtualMachine'}},
-                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': 'ds1', 'type': 'Datastore'}},
-                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': 'host1', 'type': 'HostSystem'}},
-                ],
+                json_data=self.tag_associations,
                 status_code=200,
             )
         raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))

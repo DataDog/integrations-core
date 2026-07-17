@@ -277,13 +277,17 @@ def test_tag_prefix(aggregator, dd_run_check, realtime_instance):
 
 
 @pytest.mark.usefixtures('mock_type', 'mock_threadpool', 'mock_api')
-def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_instance):
+def test_continue_if_tag_collection_fail(aggregator, dd_run_check, realtime_instance, mock_rest_api):
     realtime_instance.update({'collect_tags': True})
     check = VSphereCheck('vsphere', {}, [realtime_instance])
     check.log = MagicMock()
 
-    with mock.patch('requests.Session.post', side_effect=Exception, autospec=True):
-        dd_run_check(check)
+    # Fail session creation on both API versions so the check exhausts its v7->v6 fallback.
+    mock_rest_api.exceptions = {
+        'api/session': Exception(),
+        'rest/com/vmware/cis/session': Exception(),
+    }
+    dd_run_check(check)
 
     aggregator.assert_metric('vsphere.cpu.usage.avg', tags=['vcenter_server:FAKE'], hostname='10.0.0.104')
 

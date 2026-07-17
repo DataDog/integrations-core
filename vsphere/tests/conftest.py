@@ -23,6 +23,7 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
+    REALTIME_TAG_ASSOCIATIONS,
     VM_INVALID_GATEWAY_PROPERTIES_EX,
     VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
@@ -30,7 +31,7 @@ from .common import (
     MockHttpV6,
     MockHttpV7,
 )
-from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
+from .mocked_api import MockedAPI
 
 try:
     from contextlib import ExitStack
@@ -244,34 +245,21 @@ def service_instance(
         yield mock_si
 
 
+def _inject_rest_http_client(tag_associations):
+    mock_cls = MockHttpV7 if VSPHERE_VERSION.startswith('7.') else MockHttpV6
+    http = mock_cls(tag_associations=tag_associations)
+    return patch('datadog_checks.vsphere.api_rest.RequestsWrapper', return_value=http), http
+
+
 @pytest.fixture
-def mock_http_api(monkeypatch):
-    if VSPHERE_VERSION.startswith('7.'):
-        http = MockHttpV7()
-    else:
-        http = MockHttpV6()
-
-    def mock_get(*args, **kwargs):
-        return http.get(*args, **kwargs)
-
-    def mock_post(*args, **kwargs):
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.warning(args)
-
-        return http.post(*args, **kwargs)
-
-    monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=mock_get))
-    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=mock_post))
-    yield http
+def mock_http_api():
+    ctx, http = _inject_rest_http_client(tag_associations=None)
+    with ctx:
+        yield http
 
 
 @pytest.fixture
 def mock_rest_api():
-    if VSPHERE_VERSION.startswith('7.'):
-        with patch('requests.Session.request', mock_http_rest_api_v7):
-            yield
-    else:
-        with patch('requests.Session.request', mock_http_rest_api_v6):
-            yield
+    ctx, http = _inject_rest_http_client(tag_associations=REALTIME_TAG_ASSOCIATIONS)
+    with ctx:
+        yield http

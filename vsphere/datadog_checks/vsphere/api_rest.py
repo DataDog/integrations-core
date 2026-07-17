@@ -31,11 +31,11 @@ class VSphereRestAPI(object):
     Abstraction class over the vSphere REST api
     """
 
-    def __init__(self, config, log, deprecated_api=True):
-        # type: (VSphereConfig, CheckLoggingAdapter, bool) -> None
+    def __init__(self, config, log, deprecated_api=True, http_client=None):
+        # type: (VSphereConfig, CheckLoggingAdapter, bool, Any) -> None
         self.config = config
         self.log = log
-        self._client = VSphereRestClient(config, log, deprecated_api)
+        self._client = VSphereRestClient(config, log, deprecated_api, http_client)
         self.smart_connect()
 
     def smart_connect(self):
@@ -158,8 +158,8 @@ class VSphereRestClient(object):
         },
     }
 
-    def __init__(self, config, log, deprecated_api):
-        # type: (VSphereConfig, CheckLoggingAdapter, bool) -> None
+    def __init__(self, config, log, deprecated_api, http_client=None):
+        # type: (VSphereConfig, CheckLoggingAdapter, bool, Any) -> None
         self.log = log
         self.deprecated_api = deprecated_api
         self._api_base_url = "https://{}/api/".format(config.hostname)
@@ -167,7 +167,7 @@ class VSphereRestClient(object):
         if deprecated_api:
             self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
             self.endpoints = self.API_ENDPOINTS['deprecated']
-        self._http = RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
+        self._http = http_client or RequestsWrapper(config.rest_api_options, config.shared_rest_api_options)
 
     def connect_session(self):
         # type: () -> None
@@ -176,7 +176,7 @@ class VSphereRestClient(object):
         if not session_token:
             raise APIResponseError("Failed to retrieve session token")
 
-        self._http.options['headers']['vmware-api-session-id'] = session_token
+        self._http.set_header('vmware-api-session-id', session_token)
 
     def session_create(self):
         # type: () -> str

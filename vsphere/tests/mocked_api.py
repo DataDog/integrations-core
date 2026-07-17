@@ -4,11 +4,9 @@
 import datetime as dt
 import json
 import os
-import re
 
 from mock import MagicMock
 from pyVmomi import vim
-from requests import Response
 
 from datadog_checks.vsphere.api import VersionInfo
 from tests.common import HERE, VSPHERE_VERSION
@@ -181,117 +179,3 @@ class MockedAPI(object):
         ]
         self.vsan_metrics_data = [mock_health_data, mock_performance_data]
         return self.vsan_metrics_data
-
-
-class MockResponse(Response):
-    def __init__(self, json_data, status_code):
-        super(MockResponse, self).__init__()
-        self.json_data = json_data
-        self.status_code = status_code
-
-    def json(self):
-        return self.json_data
-
-
-def mock_http_rest_api_v6(self, method, url, **kwargs):
-    if '/api/' in url:
-        return MockResponse({}, 404)
-    if method.lower() == 'get':
-        if re.match(r'.*/category/id:.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockResponse(
-                {
-                    "value": {
-                        "name": "my_cat_name_{}".format(num),
-                        "description": "",
-                        "id": "cat_id_{}".format(num),
-                        "used_by": [],
-                        "cardinality": "SINGLE",
-                    }
-                },
-                200,
-            )
-        elif re.match(r'.*/tagging/tag/id:.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockResponse(
-                {
-                    "value": {
-                        "category_id": "cat_id_{}".format(num),
-                        "name": "my_tag_name_{}".format(num),
-                        "description": "",
-                        "id": "xxx",
-                        "used_by": [],
-                    }
-                },
-                200,
-            )
-    elif method.lower() == 'post':
-        assert kwargs['headers']['Content-Type'] == 'application/json'
-        if re.match(r'.*/session$', url):
-            return MockResponse(
-                {"value": "dummy-token"},
-                200,
-            )
-        elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
-            return MockResponse(
-                {
-                    "value": [
-                        {"object_id": {"id": "VM4-4-1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
-                        {"object_id": {"id": "10.0.0.104-1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
-                        {"object_id": {"id": "NFS-Share-1", "type": "Datastore"}, "tag_ids": ["tag_id_2"]},
-                    ]
-                },
-                200,
-            )
-    raise Exception("Rest api mock request not matched: method={}, url={}".format(method, url))
-
-
-def mock_http_rest_api_v7(self, method, url, **kwargs):
-    if method.lower() == 'get':
-        if re.match(r'.*/category/.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockResponse(
-                {
-                    'name': 'my_cat_name_{}'.format(num),
-                    'description': 'VM category description',
-                    'id': 'cat_id_{}'.format(num),
-                    'used_by': [],
-                    'cardinality': 'SINGLE',
-                },
-                200,
-            )
-
-        elif re.match(r'.*/tagging/tag/.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockResponse(
-                {
-                    'category_id': 'cat_id_{}'.format(num),
-                    'name': 'my_tag_name_{}'.format(num),
-                    'description': '',
-                    'id': 'tag_id_{}'.format(num),
-                    'used_by': [],
-                },
-                200,
-            )
-    elif method.lower() == 'post':
-        assert kwargs['headers']['Content-Type'] == 'application/json'
-        if re.match(r'.*/session$', url):
-            return MockResponse(
-                "dummy-token",
-                200,
-            )
-        elif re.match(r'.*/tagging/tag-association\?action=list-attached-tags-on-objects$', url):
-            return MockResponse(
-                [
-                    {'tag_ids': ['tag_id_1', 'tag_id_2'], 'object_id': {'id': 'VM4-4-1', 'type': 'VirtualMachine'}},
-                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': 'NFS-Share-1', 'type': 'Datastore'}},
-                    {'tag_ids': ['tag_id_2'], 'object_id': {'id': '10.0.0.104-1', 'type': 'HostSystem'}},
-                ],
-                200,
-            )
-
-    raise Exception("Rest api mock request not matched: method={}, url={}".format(method, url))
