@@ -1,0 +1,77 @@
+- type: phase
+  config:
+    name: inspect_endpoint
+    class: InspectEndpointPhase
+    variables:
+      - name: inspect_input
+
+- type: phase
+  config:
+    name: rename_metrics
+    class: AgenticPhase
+    agent: metrics_renamer
+    variables:
+      - name: integration
+    context_compact_threshold_pct: 75
+    tasks:
+      - name: rename
+        prompt_ref: phase1_rename
+        goal_ref: phase1_rename_goal
+        max_goal_attempts: 3
+      - name: metadata
+        prompt_ref: phase1_metadata
+        clear_context_before: true
+        goal_ref: phase1_metadata_goal
+        max_goal_attempts: 3
+    checkpoint:
+      memory_prompt_ref: phase1_memory
+
+- type: phase
+  config:
+    name: build_integration
+    class: AgenticPhase
+    agent: integration_coder
+    variables:
+      - name: integration
+      - name: docker_source_path
+      - name: prd
+    context_compact_threshold_pct: 75
+    tasks:
+      - name: materialize_assets
+        prompt_ref: phase2_materialize
+      - name: write_code
+        prompt_ref: phase2_code
+        clear_context_before: true
+        goal_ref: phase2_code_goal
+        max_goal_attempts: 3
+    checkpoint:
+      memory_prompt_ref: phase2_memory
+
+- type: phase
+  config:
+    name: write_tests
+    class: AgenticPhase
+    agent: integration_tester
+    variables:
+      - name: integration
+      - name: prd
+    context_compact_threshold_pct: 75
+    tasks:
+      - name: write_tests
+        prompt_ref: phase3_tests
+        goal_ref: phase3_tests_goal
+        max_goal_attempts: 3
+    checkpoint:
+      memory_prompt_ref: phase3_memory
+
+- type: phase
+  config:
+    name: write_readme
+    class: AgenticPhase
+    agent: readme_writer
+    variables:
+      - name: integration
+    context_compact_threshold_pct: 75
+    tasks:
+      - name: write_readme
+        prompt_ref: phase4_readme
