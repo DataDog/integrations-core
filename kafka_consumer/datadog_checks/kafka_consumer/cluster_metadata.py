@@ -804,6 +804,20 @@ class ClusterMetadataCollector:
             member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
 
+            # Per-member detail. client_id and host come back on the describe response for free, so
+            # include them alongside the member id for DSM to correlate.
+            members_detail = sorted(
+                (
+                    {
+                        'member_id': getattr(m, 'member_id', '') or '',
+                        'client_id': getattr(m, 'client_id', '') or '',
+                        'member_host': getattr(m, 'host', '') or '',
+                    }
+                    for m in members
+                ),
+                key=lambda m: m['member_id'],
+            )
+
             # Emit the current membership of the group so DSM can reconcile members with infra tags
             # (members reported by the tracer carry infra tags; this list lets DSM drop departed
             # members and seed tagless rows for members the tracer has not reported).
@@ -816,6 +830,7 @@ class ClusterMetadataCollector:
                         'config_type': 'consumer_membership',
                         'group_id': group_id,
                         'member_ids': member_ids,
+                        'members': members_detail,
                     }
                 ),
                 "data-streams-message",

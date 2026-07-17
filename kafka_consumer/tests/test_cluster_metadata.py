@@ -1931,7 +1931,7 @@ def _consumer_membership_events(check):
 
 def test_consumer_membership_event_emitted(check):
     """A consumer_membership event is emitted per group with the cluster id, group id and members."""
-    members = [_make_member(client_id='c1'), _make_member(client_id='c2')]
+    members = [_make_member(client_id='c1', host='h1'), _make_member(client_id='c2', host='h2')]
     describe_result = _make_group_describe(members=members)
     kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
 
@@ -1941,6 +1941,11 @@ def test_consumer_membership_event_emitted(check):
     assert event['kafka_cluster_id'] == 'test-cluster-id'
     assert event['group_id'] == 'test-group'
     assert event['member_ids'] == ['m-c1', 'm-c2']
+    # Per-member detail includes client_id and member_host (captured for free from describe).
+    assert event['members'] == [
+        {'member_id': 'm-c1', 'client_id': 'c1', 'member_host': 'h1'},
+        {'member_id': 'm-c2', 'client_id': 'c2', 'member_host': 'h2'},
+    ]
 
 
 def test_heartbeat_connect_api_status_present_when_urls_configured(check):
