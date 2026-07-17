@@ -5,7 +5,7 @@ import json
 from typing import Callable, Union  # noqa: F401
 from urllib.parse import urljoin
 
-import requests
+from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
 
 
 class Client(object):
@@ -16,15 +16,16 @@ class Client(object):
     """
 
     def __init__(self, url, http_get, username, password, password_hashed=False):
-        # type: (str, Callable[..., requests.Response], str, str, bool) -> None
+        # type: (str, Callable[..., HTTPResponse], str, str, bool) -> None
         self._api_url = urljoin(url, '/api/1.0/')
-        self._auth = VoltDBAuth(username, password, password_hashed)
+        self._username = username
+        self._password = password
+        self._password_field = 'Hashedpassword' if password_hashed else 'Password'
         self._http_get = http_get
 
     def request(self, procedure, parameters=None):
-        # type: (str, Union[str, list]) -> requests.Response
+        # type: (str, Union[str, list]) -> HTTPResponse
         url = self._api_url
-        auth = self._auth
         params = {'Procedure': procedure}
 
         if parameters:
@@ -32,19 +33,9 @@ class Client(object):
                 parameters = json.dumps(parameters)
             params['Parameters'] = parameters
 
-        return self._http_get(url, auth=auth, params=params)  # SKIP_HTTP_VALIDATION
-
-
-class VoltDBAuth(requests.auth.AuthBase):
-    def __init__(self, username, password, password_hashed):
-        # type: (str, str, bool) -> None
-        self._username = username
-        self._password = password
-        self._password_hashed = password_hashed
-
-    def __call__(self, r):
-        # type: (requests.PreparedRequest) -> requests.PreparedRequest
+        # VoltDB expects credentials as query params.
         # See: https://docs.voltdb.com/UsingVoltDB/ProgLangJson.php
-        params = {'User': self._username, 'Hashedpassword' if self._password_hashed else 'Password': self._password}
-        r.prepare_url(r.url, params)
-        return r
+        params['User'] = self._username
+        params[self._password_field] = self._password
+
+        return self._http_get(url, params=params)  # SKIP_HTTP_VALIDATION

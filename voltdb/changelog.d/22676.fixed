@@ -1,0 +1,1 @@
+Migrate the VoltDB client auth off the ``requests`` library. Credentials are sent as query parameters and configured during check initialization.
