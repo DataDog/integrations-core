@@ -35,6 +35,8 @@ if TYPE_CHECKING:
         ToolResultBlockParam,
     )
 
+    from ddev.ai.tools.core.types import ToolResult
+
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-6"
 DEFAULT_MAX_TOKENS: Final[int] = 8192  # max tokens per response
 MAX_CONTINUATIONS: Final[int] = 10
@@ -249,23 +251,43 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             messages = [*messages, paused_turn]
         raise AgentError(f"pause_turn did not resolve after {MAX_CONTINUATIONS} continuations")
 
+    @staticmethod
+    def _tool_result_content(result: ToolResult) -> str | list[TextBlockParam] | None:
+        """Build the tool_result content: primary data/error plus a hint block when present.
+
+        Returns a bare string when there is no hint, a list of text blocks when a hint must
+        be surfaced alongside the result, or None to omit content.
+        """
+        if result.data is not None:
+            primary = result.data
+        elif not result.success:
+            primary = result.error or "(unknown error)"
+        else:
+            primary = None
+
+        if not result.hint:
+            return primary
+
+        blocks: list[TextBlockParam] = []
+        if primary is not None:
+            blocks.append({"type": "text", "text": primary})
+        blocks.append({"type": "text", "text": f"Hint: {result.hint}"})
+        return blocks
+
     def _to_tool_result_params(self, messages: list[ToolResultMessage]) -> list[ToolResultBlockParam]:
         """Convert model-agnostic ToolResultMessages to Anthropic SDK ToolResultBlockParams."""
-        return [
-            {
-                "type": "tool_result",
-                "tool_use_id": msg.tool_call_id,
-                "is_error": not msg.result.success,
-                **(
-                    {"content": msg.result.data}
-                    if msg.result.data is not None
-                    else {"content": msg.result.error or "(unknown error)"}
-                    if not msg.result.success
-                    else {}
-                ),
-            }
-            for msg in messages
-        ]
+        params: list[ToolResultBlockParam] = []
+        for msg in messages:
+            content = self._tool_result_content(msg.result)
+            params.append(
+                {
+                    "type": "tool_result",
+                    "tool_use_id": msg.tool_call_id,
+                    "is_error": not msg.result.success,
+                    **({"content": content} if content is not None else {}),
+                }
+            )
+        return params
 
     @overload
     @staticmethod

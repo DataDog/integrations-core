@@ -1064,6 +1064,62 @@ async def test_failed_tool_result_without_error_text_falls_back_to_placeholder()
 
 
 # ---------------------------------------------------------------------------
+# Hints are surfaced to the model as a distinct text block inside tool_result.content
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "success, data, error, hint, is_error, expected_text",
+    [
+        pytest.param(
+            False,
+            None,
+            "File exists.",
+            "Set overwrite=True to replace it.",
+            True,
+            "File exists.",
+            id="failed_result",
+        ),
+        pytest.param(
+            True,
+            "partial output",
+            None,
+            "Output truncated: showing 100 of 500.",
+            False,
+            "partial output",
+            id="successful_result",
+        ),
+    ],
+)
+async def test_tool_result_with_hint_appends_hint_block(
+    success: bool,
+    data: str | None,
+    error: str | None,
+    hint: str,
+    is_error: bool,
+    expected_text: str,
+) -> None:
+    resp = make_response("end_turn", [make_text_block("ok")])
+    agent, create_mock = make_agent(mock_response=resp)
+
+    await agent.send(
+        [
+            ToolResultMessage(
+                tool_call_id="tc_01",
+                result=ToolResult(success=success, data=data, error=error, hint=hint),
+            )
+        ]
+    )
+
+    block = create_mock.call_args.kwargs["messages"][-1]["content"][0]
+    assert block["is_error"] is is_error
+    assert block["content"] == [
+        {"type": "text", "text": expected_text},
+        {"type": "text", "text": f"Hint: {hint}"},
+    ]
+
+
+# ---------------------------------------------------------------------------
 # Prompt caching: history must not retain cache_control markers
 # (otherwise multi-turn requests would exceed the 4-marker limit)
 # ---------------------------------------------------------------------------
