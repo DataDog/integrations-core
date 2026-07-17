@@ -1,1 +1,0 @@
-Migrate off requests-specific exceptions to the HTTP-agnostic exception library.
