@@ -1400,8 +1400,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Received Data"
+                                            "alias": "Port Received Data (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Data",
+                                            "formula": "monotonic_diff(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -1409,6 +1413,11 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:infiniband.port_rcv_data_64{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_rcv_data{$env,$host,$device,$port,$link_layer} by {host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1449,8 +1458,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Transmit Data"
+                                            "alias": "Port Transmit Data (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Transmit Data",
+                                            "formula": "monotonic_diff(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -1458,6 +1471,11 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:infiniband.port_xmit_data_64{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_xmit_data{$env,$host,$device,$port,$link_layer} by {host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1498,8 +1516,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Received Packets"
+                                            "alias": "Port Received Packets (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Packets",
+                                            "formula": "monotonic_diff(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -1507,6 +1529,11 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:infiniband.port_rcv_packets_64{$env,$host,$device,$port,$link_layer} by {host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_rcv_packets{$env,$host,$device,$port,$link_layer} by {host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",

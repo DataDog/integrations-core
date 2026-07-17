@@ -1,6 +1,6 @@
 {
     "title": "InfiniBand Overview - Kubernetes Version",
-    "description": "This dashboard provides critical visibility into the health and performance of your InfiniBand fabric infrastructure. The metrics displayed reveal both physical layer issues (like signal integrity problems and link failures) and RDMA protocol-specific errors (such as timeout events and buffer constraints). By monitoring these key indicators, you can quickly identify connectivity failures, congestion points, and resource limitations before they impact application performance. The dashboard focuses on actionable metrics that help pinpoint the root cause of performance degradation - whether it's at the physical link level, within port buffers, or in the RDMA transport layer. This comprehensive visibility enables proactive maintenance and faster troubleshooting, helping maintain the high-throughput, low-latency connectivity that your data-intensive applications depend on.\n\n**Further reading:**\n\n-   [Datadog InfiniBand Integration Documentation](https://docs.datadoghq.com/integrations/infiniband/)\n-   [Infiniband Port Counters](https://docs.nvidia.com/networking/display/ibdiagnetusermanualv290/port+counters)",
+    "description": "This dashboard provides critical visibility into the health and performance of your InfiniBand fabric infrastructure. The metrics displayed reveal both physical layer issues (like signal integrity problems and link failures) and RDMA protocol-specific errors (such as timeout events and buffer constraints). By monitoring these key indicators, you can quickly identify connectivity failures, congestion points, and resource limitations before they impact application performance. The dashboard focuses on actionable metrics that help pinpoint the root cause of performance degradation - whether it's at the physical link level, within port buffers, or in the RDMA transport layer. This comprehensive visibility enables proactive maintenance and faster troubleshooting, helping maintain the high-throughput, low-latency connectivity that your data-intensive applications depend on.\n\nThis Kubernetes view scopes every widget by cluster (`kube_cluster_name`) and `env` so you can triage InfiniBand fabric health across clusters, then narrow to a single node's NIC ports with the template variables.\n\n**Further reading:**\n\n-   [Datadog InfiniBand Integration Documentation](https://docs.datadoghq.com/integrations/infiniband/)\n-   [Infiniband Port Counters](https://docs.nvidia.com/networking/display/ibdiagnetusermanualv290/port+counters)",
     "widgets": [
         {
             "id": 5000000000000004,
@@ -257,7 +257,7 @@
                         "id": 5000000000000010,
                         "definition": {
                             "type": "note",
-                            "content": "**Start here.** Use the template variables at the top (env, cluster, host, device, port, link_layer) to move from a fleet-wide view down to a single node's NIC ports. The KPIs and top-offender lists below show which cluster, host, and port to investigate \u2014 click a row to drill into that host's detail. In Kubernetes, `host` is the node: these are node-level fabric counters and are not attributable to a pod.",
+                            "content": "**Start here.** Use the template variables at the top (env, cluster, host, device, port, link_layer) to move from a fleet-wide view down to a single node's NIC ports. The KPIs and top-offender lists below show which cluster, host, and port to investigate \u2014 click a row to investigate that host's detail. In Kubernetes, `host` is the node: these are node-level fabric counters and are not attributable to a pod.",
                             "background_color": "gray",
                             "font_size": "14",
                             "text_align": "left",
@@ -1400,8 +1400,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Received Data"
+                                            "alias": "Port Received Data (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Data",
+                                            "formula": "monotonic_diff(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -1409,6 +1413,11 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:infiniband.port_rcv_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_rcv_data{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1449,8 +1458,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Transmit Data"
+                                            "alias": "Port Transmit Data (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Transmit Data",
+                                            "formula": "monotonic_diff(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -1458,6 +1471,11 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:infiniband.port_xmit_data_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_xmit_data{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1498,8 +1516,12 @@
                                 {
                                     "formulas": [
                                         {
-                                            "formula": "monotonic_diff(query1)",
-                                            "alias": "Port Received Packets"
+                                            "alias": "Port Received Packets (64-bit)",
+                                            "formula": "monotonic_diff(query1)"
+                                        },
+                                        {
+                                            "alias": "Port Received Packets",
+                                            "formula": "monotonic_diff(query2)"
                                         }
                                     ],
                                     "queries": [
@@ -1507,6 +1529,11 @@
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "query": "sum:infiniband.port_rcv_packets_64{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:infiniband.port_rcv_packets{$env,$cluster,$host,$device,$port,$link_layer} by {kube_cluster_name,host,device,port}"
                                         }
                                     ],
                                     "response_format": "timeseries",
