@@ -337,6 +337,10 @@ integration/cloud_foundry_api:
 - changed-files:
   - any-glob-to-any-file:
     - cloud_foundry_api/**/*
+integration/cloud_spanner:
+- changed-files:
+  - any-glob-to-any-file:
+    - cloud_spanner/**/*
 integration/cloudera:
 - changed-files:
   - any-glob-to-any-file:
@@ -897,10 +901,6 @@ integration/langchain:
 - changed-files:
   - any-glob-to-any-file:
     - langchain/**/*
-integration/lparstats:
-- changed-files:
-  - any-glob-to-any-file:
-    - lparstats/**/*
 integration/lastpass:
 - changed-files:
   - any-glob-to-any-file:
@@ -925,6 +925,10 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
+integration/lparstats:
+- changed-files:
+  - any-glob-to-any-file:
+    - lparstats/**/*
 integration/lustre:
 - changed-files:
   - any-glob-to-any-file:
@@ -1009,10 +1013,6 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
-integration/nifi:
-- changed-files:
-  - any-glob-to-any-file:
-    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:
@@ -1033,6 +1033,10 @@ integration/nginx_ingress_controller:
 - changed-files:
   - any-glob-to-any-file:
     - nginx_ingress_controller/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
