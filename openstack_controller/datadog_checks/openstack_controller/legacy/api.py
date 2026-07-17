@@ -6,10 +6,9 @@ import copy
 from os import environ
 from urllib.parse import urljoin
 
-import requests
 from openstack import connection
 
-from datadog_checks.base.utils.http_exceptions import HTTPStatusError, HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
 
 from .exceptions import (
     AuthenticationNeeded,
@@ -502,12 +501,7 @@ class Authenticator(object):
             logger.debug("url: %s || response: %s", auth_url, resp.json())
             return resp
 
-        except (
-            requests.exceptions.HTTPError,
-            requests.exceptions.Timeout,
-            requests.exceptions.ConnectionError,
-            HTTPTimeoutError,
-        ):
+        except (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError):
             safe_identity = copy.deepcopy(identity)
             safe_identity['password']['user']['password'] = '********'
             msg = "Failed Keystone auth with identity:{identity} scope:{scope} @{url}".format(
@@ -527,12 +521,7 @@ class Authenticator(object):
             logger.debug("url: %s || response: %s", auth_url, jresp)
             projects = jresp.get('projects')
             return projects
-        except (
-            requests.exceptions.HTTPError,
-            requests.exceptions.Timeout,
-            requests.exceptions.ConnectionError,
-            HTTPTimeoutError,
-        ) as e:
+        except (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError) as e:
             msg = "unable to retrieve project list from Keystone auth with identity: @{url}: {ex}".format(
                 url=auth_url, ex=e
             )

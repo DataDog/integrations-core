@@ -8,12 +8,11 @@ import re
 from collections import defaultdict
 from datetime import datetime, timezone
 
-import requests
 from openstack.config.loader import OpenStackConfig
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.common import pattern_filter
-from datadog_checks.base.utils.http_exceptions import HTTPTimeoutError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
 
 from .api import ApiFactory
 from .exceptions import (
@@ -412,7 +411,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         except InstancePowerOffFailure as e:  # 409 response code came back for nova
             self.log.debug("Server %s is powered off and cannot be monitored: %s", server_id, e)
             return
-        except requests.exceptions.HTTPError as e:
+        except HTTPStatusError as e:
             if e.response.status_code == 404:
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
             else:
@@ -570,9 +569,9 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             self.get_nova_endpoint()
             self.service_check(self.COMPUTE_API_SC, AgentCheck.OK, tags=service_check_tags)
         except (
-            requests.exceptions.HTTPError,
-            requests.exceptions.Timeout,
-            requests.exceptions.ConnectionError,
+            HTTPStatusError,
+            HTTPTimeoutError,
+            HTTPConnectionError,
             AuthenticationNeeded,
             InstancePowerOffFailure,
         ):
@@ -583,9 +582,9 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             self.get_neutron_endpoint()
             self.service_check(self.NETWORK_API_SC, AgentCheck.OK, tags=service_check_tags)
         except (
-            requests.exceptions.HTTPError,
-            requests.exceptions.Timeout,
-            requests.exceptions.ConnectionError,
+            HTTPStatusError,
+            HTTPTimeoutError,
+            HTTPConnectionError,
             AuthenticationNeeded,
             InstancePowerOffFailure,
         ):
@@ -765,13 +764,8 @@ class OpenStackControllerLegacyCheck(AgentCheck):
         except AuthenticationNeeded:
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()
-        except (
-            requests.exceptions.HTTPError,
-            requests.exceptions.Timeout,
-            requests.exceptions.ConnectionError,
-            HTTPTimeoutError,
-        ) as e:
-            if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code < 500:
+        except (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError) as e:
+            if isinstance(e, HTTPStatusError) and e.response.status_code < 500:
                 self.warning("Error reaching Nova API: %s", e)
             else:
                 # exponential backoff

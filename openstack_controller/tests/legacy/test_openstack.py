@@ -10,9 +10,9 @@ from copy import deepcopy
 import mock
 import pytest
 from mock import ANY
-from requests.exceptions import HTTPError
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.openstack_controller.legacy.api import AbstractApi, Authenticator, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import IncompleteConfig, KeystoneUnreachable
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
@@ -39,7 +39,7 @@ def test_parse_uptime_string(aggregator):
 
 
 def test_api_error_log_no_password(check, instance, caplog, mock_http):
-    mock_http.post.side_effect = HTTPError(mock.Mock(status=404), 'not found')
+    mock_http.post.side_effect = HTTPStatusError('not found')
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(KeystoneUnreachable):
             check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)
