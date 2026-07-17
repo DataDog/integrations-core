@@ -17,7 +17,9 @@ def test_tool_name(registry: FileRegistry) -> None:
 
 
 async def test_edit_file_replaces_string(edit_tool: EditFileTool, known_file) -> None:
-    result = await edit_tool.run({"path": str(known_file), "old_string": "line two", "new_string": "line TWO"})
+    result = await edit_tool.run(
+        {"path": str(known_file), "edits": [{"old_string": "line two", "new_string": "line TWO"}]}
+    )
 
     assert result.success is True
     content = known_file.read_text(encoding="utf-8")
@@ -26,29 +28,87 @@ async def test_edit_file_replaces_string(edit_tool: EditFileTool, known_file) ->
 
 
 async def test_edit_file_deletes_line(edit_tool: EditFileTool, known_file) -> None:
-    result = await edit_tool.run({"path": str(known_file), "old_string": "line two\n", "new_string": ""})
+    result = await edit_tool.run({"path": str(known_file), "edits": [{"old_string": "line two\n", "new_string": ""}]})
 
     assert result.success is True
     assert "line two" not in known_file.read_text(encoding="utf-8")
+
+
+async def test_edit_file_applies_multiple_edits_in_one_write(edit_tool: EditFileTool, known_file) -> None:
+    with patch("pathlib.Path.write_text", wraps=known_file.write_text) as write_text:
+        result = await edit_tool.run(
+            {
+                "path": str(known_file),
+                "edits": [
+                    {"old_string": "line one", "new_string": "LINE ONE"},
+                    {"old_string": "line three", "new_string": "LINE THREE"},
+                ],
+            }
+        )
+
+    assert result.success is True
+    assert known_file.read_text(encoding="utf-8") == "LINE ONE\nline two\nLINE THREE\n"
+    assert write_text.call_count == 1
+
+
+async def test_edit_file_applies_edits_regardless_of_order(edit_tool: EditFileTool, known_file) -> None:
+    # A later-in-file edit listed first must still land in the right place.
+    result = await edit_tool.run(
+        {
+            "path": str(known_file),
+            "edits": [
+                {"old_string": "line three", "new_string": "LINE THREE"},
+                {"old_string": "line one", "new_string": "LINE ONE"},
+            ],
+        }
+    )
+
+    assert result.success is True
+    assert known_file.read_text(encoding="utf-8") == "LINE ONE\nline two\nLINE THREE\n"
 
 
 async def test_edit_file_fails_for_unregistered_file(edit_tool: EditFileTool, tmp_path) -> None:
     f = tmp_path / "unread.txt"
     f.write_text("content", encoding="utf-8")
 
-    result = await edit_tool.run({"path": str(f), "old_string": "content", "new_string": "new"})
+    result = await edit_tool.run({"path": str(f), "edits": [{"old_string": "content", "new_string": "new"}]})
 
     assert result.success is False
     assert "Not authorized" in result.error
 
 
-@pytest.mark.parametrize("old_string", ["does not exist", ""])
-async def test_edit_file_fails_if_old_string_not_found_or_empty(
-    edit_tool: EditFileTool, known_file, old_string
-) -> None:
-    result = await edit_tool.run({"path": str(known_file), "old_string": old_string, "new_string": "x"})
+async def test_edit_file_rejects_duplicate_old_strings(edit_tool: EditFileTool, known_file) -> None:
+    result = await edit_tool.run(
+        {
+            "path": str(known_file),
+            "edits": [
+                {"old_string": "line one", "new_string": "A"},
+                {"old_string": "line one", "new_string": "B"},
+            ],
+        }
+    )
 
     assert result.success is False
+    assert "duplicate" in result.error
+    # Nothing is written on input-validation failure.
+    assert known_file.read_text(encoding="utf-8") == "line one\nline two\nline three\n"
+
+
+async def test_edit_file_fails_if_old_string_not_found(edit_tool: EditFileTool, known_file) -> None:
+    result = await edit_tool.run(
+        {
+            "path": str(known_file),
+            "edits": [
+                {"old_string": "line one", "new_string": "LINE ONE"},
+                {"old_string": "does not exist", "new_string": "x"},
+            ],
+        }
+    )
+
+    assert result.success is False
+    assert "edits[1]" in result.error
+    # All-or-nothing: the found edit must not be applied.
+    assert known_file.read_text(encoding="utf-8") == "line one\nline two\nline three\n"
 
 
 async def test_edit_file_fails_if_old_string_ambiguous(
@@ -57,24 +117,42 @@ async def test_edit_file_fails_if_old_string_ambiguous(
     f = tmp_path / "dup.txt"
     await create_tool.run({"path": str(f), "content": "foo\nfoo\nfoo\n"})
 
-    result = await edit_tool.run({"path": str(f), "old_string": "foo", "new_string": "bar"})
+    result = await edit_tool.run({"path": str(f), "edits": [{"old_string": "foo", "new_string": "bar"}]})
 
     assert result.success is False
+    assert "edits[0]" in result.error
     assert "3" in result.error
     assert result.hint is not None
+    assert f.read_text(encoding="utf-8") == "foo\nfoo\nfoo\n"
+
+
+async def test_edit_file_fails_if_edits_overlap(edit_tool: EditFileTool, known_file) -> None:
+    result = await edit_tool.run(
+        {
+            "path": str(known_file),
+            "edits": [
+                {"old_string": "line one\nline two", "new_string": "A"},
+                {"old_string": "line two\nline three", "new_string": "B"},
+            ],
+        }
+    )
+
+    assert result.success is False
+    assert "overlap" in result.error
+    assert known_file.read_text(encoding="utf-8") == "line one\nline two\nline three\n"
 
 
 async def test_edit_file_fails_if_file_changed_externally(edit_tool: EditFileTool, known_file) -> None:
     known_file.write_text("externally modified\n", encoding="utf-8")
 
-    result = await edit_tool.run({"path": str(known_file), "old_string": "line one", "new_string": "x"})
+    result = await edit_tool.run({"path": str(known_file), "edits": [{"old_string": "line one", "new_string": "x"}]})
 
     assert result.success is False
     assert "Re-read and retry" in result.error
 
 
 async def test_edit_file_updates_registry(edit_tool: EditFileTool, registry: FileRegistry, known_file) -> None:
-    await edit_tool.run({"path": str(known_file), "old_string": "line one", "new_string": "LINE ONE"})
+    await edit_tool.run({"path": str(known_file), "edits": [{"old_string": "line one", "new_string": "LINE ONE"}]})
 
     new_content = known_file.read_text(encoding="utf-8")
     assert registry.verify(OWNER_ID, str(known_file), new_content) is True
@@ -94,7 +172,7 @@ async def test_edit_file_normalizes_crlf(
     f = tmp_path / "file.txt"
     await create_tool.run({"path": str(f), "content": file_content})
 
-    result = await edit_tool.run({"path": str(f), "old_string": old_string, "new_string": new_string})
+    result = await edit_tool.run({"path": str(f), "edits": [{"old_string": old_string, "new_string": new_string}]})
 
     assert result.success is True
     assert f.read_text(encoding="utf-8") == expected
@@ -104,7 +182,9 @@ async def test_edit_file_oserror_on_write(edit_tool: EditFileTool, registry: Fil
     original_content = known_file.read_text(encoding="utf-8")
 
     with patch("pathlib.Path.write_text", side_effect=PermissionError("permission denied")):
-        result = await edit_tool.run({"path": str(known_file), "old_string": "line one", "new_string": "x"})
+        result = await edit_tool.run(
+            {"path": str(known_file), "edits": [{"old_string": "line one", "new_string": "x"}]}
+        )
 
     assert result.success is False
     assert result.error is not None

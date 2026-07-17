@@ -60,7 +60,7 @@ async def test_edit_file_refuses_outside_write_root(tmp_path, sandboxed_registry
     sandboxed_registry.record(OWNER_ID, str(outside), "old")
 
     tool = EditFileTool(sandboxed_registry, OWNER_ID)
-    result = await tool.run({"path": str(outside), "old_string": "old", "new_string": "new"})
+    result = await tool.run({"path": str(outside), "edits": [{"old_string": "old", "new_string": "new"}]})
     assert result.success is False
     assert "outside write root" in result.error
     assert outside.read_text() == "old"
@@ -164,7 +164,7 @@ async def test_read_by_one_agent_does_not_authorize_another_to_edit(sandbox) -> 
     assert result.success is True
 
     editor_b = EditFileTool(registry, "agent-b")
-    result = await editor_b.run({"path": str(target), "old_string": "hello", "new_string": "world"})
+    result = await editor_b.run({"path": str(target), "edits": [{"old_string": "hello", "new_string": "world"}]})
     assert result.success is False
     assert "Not authorized" in result.error
     assert target.read_text() == "hello"
@@ -179,14 +179,14 @@ async def test_each_agent_can_edit_after_its_own_read(sandbox) -> None:
     # Agent A reads, then edits — ok.
     await ReadFileTool(registry, "agent-a").run({"path": str(target)})
     result = await EditFileTool(registry, "agent-a").run(
-        {"path": str(target), "old_string": "one", "new_string": "two"}
+        {"path": str(target), "edits": [{"old_string": "one", "new_string": "two"}]}
     )
     assert result.success is True
 
     # Agent B must read first to refresh its own view, then may edit.
     await ReadFileTool(registry, "agent-b").run({"path": str(target)})
     result = await EditFileTool(registry, "agent-b").run(
-        {"path": str(target), "old_string": "two", "new_string": "three"}
+        {"path": str(target), "edits": [{"old_string": "two", "new_string": "three"}]}
     )
     assert result.success is True
     assert target.read_text() == "three"

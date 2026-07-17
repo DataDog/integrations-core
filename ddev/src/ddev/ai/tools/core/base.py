@@ -25,15 +25,30 @@ class BaseToolInput(BaseModel):
     def to_input_schema(cls) -> dict[str, object]:
         schema = cls.model_json_schema()
         schema.pop('title', None)
-        for prop in schema.get('properties', {}).values():
+        cls._clean_properties(schema.get('properties', {}), schema.get('required', []))
+        for definition in schema.get('$defs', {}).values():
+            definition.pop('title', None)
+            cls._clean_properties(definition.get('properties', {}), definition.get('required', []))
+        return schema
+
+    @staticmethod
+    def _clean_properties(properties: dict[str, dict], required: list[str]):
+        for name, prop in properties.items():
             prop.pop('title', None)
             prop.pop('default', None)
-            if 'anyOf' in prop:
-                non_null = [t for t in prop['anyOf'] if t != {'type': 'null'}]
-                if len(non_null) == 1:
-                    prop.update(non_null[0])
-                    del prop['anyOf']
-        return schema
+            if 'anyOf' not in prop:
+                continue
+            # Only drop the redundant null branch for optional fields.
+            if name in required:
+                continue
+            non_null = [t for t in prop['anyOf'] if t != {'type': 'null'}]
+            if not non_null or len(non_null) == len(prop['anyOf']):
+                continue
+            del prop['anyOf']
+            if len(non_null) == 1:
+                prop.update(non_null[0])
+            else:
+                prop['anyOf'] = non_null
 
 
 def _get_input_type(cls: type) -> type[BaseToolInput]:

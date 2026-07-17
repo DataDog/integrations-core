@@ -99,6 +99,30 @@ def test_to_input_schema_anyof_flattened_for_optional_int():
     assert prop["type"] == "integer"
 
 
+def test_to_input_schema_keeps_null_for_required_nullable_field():
+    class RequiredNullable(BaseToolInput):
+        value: Annotated[int | None, Field(description="A required, nullable value")]
+
+    schema = RequiredNullable.to_input_schema()
+    assert schema["required"] == ["value"]
+    assert schema["properties"]["value"] == {
+        "anyOf": [{"type": "integer"}, {"type": "null"}],
+        "description": "A required, nullable value",
+    }
+
+
+def test_to_input_schema_drops_null_but_keeps_multiple_types():
+    class MultiType(BaseToolInput):
+        value: Annotated[str | int | None, Field(description="A string or an int")] = None
+
+    schema = MultiType.to_input_schema()
+    assert "required" not in schema
+    assert schema["properties"]["value"] == {
+        "anyOf": [{"type": "string"}, {"type": "integer"}],
+        "description": "A string or an int",
+    }
+
+
 def test_to_input_schema_all_optional_no_required_key():
     class AllOptional(BaseToolInput):
         x: Annotated[str, Field(description="x")] = "default"
@@ -106,6 +130,40 @@ def test_to_input_schema_all_optional_no_required_key():
 
     schema = AllOptional.to_input_schema()
     assert "required" not in schema
+
+
+def test_to_input_schema_nested_model_shape():
+    # A tool input with a nested model emits a $defs block.
+    class Item(BaseToolInput):
+        name: Annotated[str, Field(description="Item name")]
+        note: Annotated[str | None, Field(description="Optional note")] = None
+
+    class NestedInput(BaseToolInput):
+        items: Annotated[list[Item], Field(description="A list of items")]
+
+    assert NestedInput.to_input_schema() == {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["items"],
+        "properties": {
+            "items": {
+                "type": "array",
+                "description": "A list of items",
+                "items": {"$ref": "#/$defs/Item"},
+            },
+        },
+        "$defs": {
+            "Item": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["name"],
+                "properties": {
+                    "name": {"type": "string", "description": "Item name"},
+                    "note": {"type": "string", "description": "Optional note"},
+                },
+            },
+        },
+    }
 
 
 # ---------------------------------------------------------------------------
