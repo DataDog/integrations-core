@@ -32,9 +32,11 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     The assertions match `snmp_listener` configuration in `datadog.yaml`.
     See `dd_environment` setup in `conftest.py`.
     """
-    snmp_device = container_ip
     subnet_prefix = ".".join(container_ip.split('.')[:3])
-    # The v3 configs ignore .2 (the container IP) so they discover .1 (the gateway) via DNAT instead.
+    # Docker DNAT makes both the gateway (.1) and the container (.2) respond to SNMP.
+    # The configs ignore the gateway so only the container IP is discovered for /29 and /28.
+    # The v3 configs ignore the container IP so only the gateway is discovered there.
+    snmp_device = container_ip
     gateway_ip = '{}.1'.format(subnet_prefix)
 
     aggregator = common.dd_agent_check_wrapper(
@@ -124,7 +126,6 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
         aggregator.assert_metric(metric, value=value, metric_type=aggregator.GAUGE, count=2, tags=common_tags)
 
     # ==== test snmp v3 ===
-    # The v3 configs have ignored_ip_addresses=[container_ip], so only the gateway (.1) is discovered.
     for auth_proto in ['sha', 'sha256']:
         common_tags = [
             'snmp_device:{}'.format(gateway_ip),
@@ -144,8 +145,9 @@ def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
             aggregator.assert_metric('snmp.{}'.format(metric), metric_type=aggregator.GAUGE, tags=common_tags, count=2)
 
     # ==== test ignored IPs ====
+    # container_ip (.2) is in ignored_ip_addresses for the v3 configs, so it should not be monitored.
     tags = [
-        'snmp_device:{}'.format(snmp_device),
+        'snmp_device:{}'.format(container_ip),
         'autodiscovery_subnet:{}.0/27'.format(subnet_prefix),
         'snmp_host:41ba948911b9',
         'device_hostname:41ba948911b9',
