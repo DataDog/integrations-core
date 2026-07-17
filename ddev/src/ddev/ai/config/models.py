@@ -55,6 +55,7 @@ class FlowInput(BaseModel):
     label: str
     input_type: InputType = Field(alias="type")
     default: Any | None = None
+    placeholder: str | None = None
     required: bool = True
     as_content: bool = False
 
@@ -62,6 +63,8 @@ class FlowInput(BaseModel):
     def validate_input_options(self) -> FlowInput:
         if self.as_content and self.input_type is not InputType.PATH:
             raise ValueError("'as_content' may only be used with path inputs")
+        if self.placeholder is not None and self.input_type is InputType.BOOLEAN:
+            raise ValueError("'placeholder' may not be used with boolean inputs")
         if self.default is not None:
             match self.input_type:
                 case InputType.STRING | InputType.PATH:
@@ -90,6 +93,17 @@ class FlowInput(BaseModel):
                 return str(value)
             case unexpected:
                 assert_never(unexpected)
+
+
+BUILT_IN_FLOW_INPUTS = (
+    FlowInput(
+        name="prd",
+        label="Product requirements file",
+        input_type=InputType.PATH,
+        required=True,
+        as_content=True,
+    ),
+)
 
 
 class TaskConfig(BaseModel):
@@ -204,6 +218,9 @@ class FlowConfig(BaseModel):
         names = [flow_input.name for flow_input in inputs]
         if len(names) != len(set(names)):
             raise ValueError("Input names must be unique")
+        reserved_names = {flow_input.name for flow_input in BUILT_IN_FLOW_INPUTS}
+        if conflicts := sorted(set(names) & reserved_names):
+            raise ValueError(f"Input names are reserved for built-in launch inputs: {conflicts}")
         return inputs
 
 

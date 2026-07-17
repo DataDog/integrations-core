@@ -103,6 +103,17 @@ def test_required_runtime_input_satisfies_required_variable_without_static_value
     assert diagnostics.resolved.variables == {}
 
 
+def test_built_in_prd_input_satisfies_required_variable():
+    entries = [
+        phase_entry("p", variables=[VariableDeclaration(name="prd")]),
+        flow_entry("demo", [FlowEntry(phase="p")]),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.OK
+    assert diagnostics.resolved.variables == {}
+
+
 def test_required_runtime_input_resolves_default_conflict_without_static_value():
     entries = [
         agent_entry("writer", variables=[VariableDeclaration(name="topic", default="agent")]),

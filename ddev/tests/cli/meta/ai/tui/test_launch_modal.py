@@ -13,6 +13,7 @@ from textual.containers import Horizontal
 from textual.widgets import Button, Input, Static, Switch
 
 from ddev.ai.config.models import FlowInput, InputType
+from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchResult
 
 # ---------------------------------------------------------------------------
 # Widget rendering per InputType
@@ -43,12 +44,13 @@ async def test_input_labels_show_declared_types(make_launch_modal_app, all_flow_
 
         labels = [label.render().plain for label in app.screen.query("#launch-fields > Label.eyebrow")]
 
-        assert labels == [
+        assert labels[:4] == [
             "MY STRING (string)",
             "MY NUMBER (number)",
             "MY BOOL (boolean)",
             "MY PATH (path)",
         ]
+        assert labels[-2:] == ["PRODUCT REQUIREMENTS FILE (path)", "MAX TIMEOUT (SECONDS)"]
 
 
 @pytest.mark.parametrize(
@@ -79,6 +81,28 @@ async def test_number_input_has_number_validator(make_launch_modal_app) -> None:
         modal = app.screen
         inp = modal.query_one("#input-n", Input)
         assert len(inp.validators) >= 1
+
+
+@pytest.mark.parametrize("input_type", [InputType.STRING, InputType.NUMBER, InputType.PATH])
+async def test_declared_input_placeholder_is_rendered_without_becoming_a_value(
+    make_launch_modal_app, input_type: InputType
+) -> None:
+    """Custom placeholders remain visual hints and leave the input value empty."""
+    flow_input = FlowInput(
+        name="example",
+        label="Example",
+        input_type=input_type,
+        placeholder="Example value",
+        required=False,
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        widget = app.screen.query_one("#input-example", Input)
+
+        assert widget.placeholder == "Example value"
+        assert widget.value == ""
 
 
 async def test_text_input_accepts_terminal_paste(make_launch_modal_app) -> None:
@@ -125,6 +149,7 @@ async def test_escape_dismisses_with_none(make_launch_modal_app, all_flow_inputs
     app = make_launch_modal_app(all_flow_inputs)
     async with app.run_test() as pilot:
         await pilot.pause()
+        app.screen.query_one("#btn-cancel", Button).focus()
         await pilot.press("escape")
         await pilot.pause()
         assert app.dismiss_result is None
@@ -221,7 +246,10 @@ async def test_valid_submission_dismisses_with_payload(make_launch_modal_app, la
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == {"s": "world", "b": "false"}
+        assert app.dismiss_result == LaunchResult(
+            runtime_variables={"s": "world", "b": "false", "prd": "Required product behavior.\n"},
+            max_timeout=None,
+        )
 
 
 async def test_valid_number_submission_dismisses(make_launch_modal_app, large_terminal) -> None:
@@ -235,7 +263,10 @@ async def test_valid_number_submission_dismisses(make_launch_modal_app, large_te
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == {"n": "99"}
+        assert app.dismiss_result == LaunchResult(
+            runtime_variables={"n": "99", "prd": "Required product behavior.\n"},
+            max_timeout=None,
+        )
 
 
 @pytest.mark.parametrize(
@@ -262,7 +293,65 @@ async def test_optional_empty_field_is_omitted(make_launch_modal_app, large_term
         await pilot.click("#btn-launch")
         await pilot.pause()
 
-        assert app.dismiss_result == {}
+        assert app.dismiss_result == LaunchResult(
+            runtime_variables={"prd": "Required product behavior.\n"},
+            max_timeout=None,
+        )
+
+
+async def test_built_in_inputs_are_always_rendered(make_launch_modal_app) -> None:
+    """PRD and max timeout render even when the flow declares no inputs."""
+    app = make_launch_modal_app([])
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+
+        assert app.screen.query_one("#input-prd", Input)
+        max_timeout = app.screen.query_one("#input-max_timeout", Input)
+        assert max_timeout.value == ""
+        assert max_timeout.placeholder == "Leave empty for unbounded"
+
+
+async def test_prd_is_required(make_launch_modal_app, large_terminal) -> None:
+    """The built-in PRD path cannot be empty."""
+    app = make_launch_modal_app([])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        app.screen.query_one("#input-prd", Input).value = ""
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == "NOT_SET"
+        assert "required field cannot be empty" in str(app.screen.query_one("#launch-error", Static).render())
+
+
+async def test_max_timeout_is_forwarded(make_launch_modal_app, large_terminal) -> None:
+    """A populated timeout is converted to seconds in the launch result."""
+    app = make_launch_modal_app([])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        app.screen.query_one("#input-max_timeout", Input).value = "120.5"
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result.max_timeout == 120.5
+
+
+@pytest.mark.parametrize("value", ["invalid", "NaN", "0", "10"])
+async def test_invalid_max_timeout_stays_inline(make_launch_modal_app, large_terminal, value: str) -> None:
+    """Invalid timeout values do not leave the launch modal."""
+    app = make_launch_modal_app([])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        app.screen.query_one("#input-max_timeout", Input).value = value
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == "NOT_SET"
+        assert "Max timeout" in str(app.screen.query_one("#launch-error", Static).render())
 
 
 # ---------------------------------------------------------------------------

@@ -77,6 +77,7 @@ class ExecutionScreen(TogoScreen):
         self,
         flow: ResolvedFlow,
         runtime_variables: dict[str, str] | None = None,
+        max_timeout: float | None = None,
         resume: bool = False,
         runs_dir: Path | None = None,
         orchestrator_builder: OrchestratorBuilder | None = None,
@@ -84,6 +85,7 @@ class ExecutionScreen(TogoScreen):
         super().__init__()
         self.flow = flow
         self.runtime_variables = runtime_variables
+        self.max_timeout = max_timeout
         self.resume = resume
         self._runs_dir = runs_dir
         self._orchestrator_builder = orchestrator_builder
@@ -198,6 +200,7 @@ class ExecutionScreen(TogoScreen):
             file_access_policy=FileAccessPolicy(write_root=write_root),
             callbacks=callbacks,
             resume=self.resume,
+            max_timeout=self.max_timeout,
         )
 
     # ── Display helpers ──────────────────────────────────────────────────

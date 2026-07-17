@@ -18,6 +18,8 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
+DEFAULT_GRACE_PERIOD = 10.0
+
 
 class PhaseOrchestrator(EventBusOrchestrator):
     def __init__(
@@ -30,8 +32,8 @@ class PhaseOrchestrator(EventBusOrchestrator):
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,
         resume: bool = False,
-        grace_period: float = 10,
-        max_timeout: float = 600,
+        grace_period: float = DEFAULT_GRACE_PERIOD,
+        max_timeout: float | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
         """Initialize the orchestrator.
@@ -47,7 +49,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         output directory so that agent writes are confined to that path.
 
         ``max_timeout`` is the maximum time in seconds to wait for the whole run of the
-        orchestrator to complete.
+        orchestrator to complete. ``None`` runs without an overall time limit.
         """
         super().__init__(
             logger=logger or logging.getLogger(__name__),

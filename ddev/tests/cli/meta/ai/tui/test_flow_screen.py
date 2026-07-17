@@ -10,7 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from textual.containers import Horizontal
-from textual.widgets import Button
+from textual.widgets import Button, Input
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import (
@@ -89,6 +89,15 @@ def _app() -> TogoApp:
         provider_registry=AgentProviderRegistry(),
         ddev_app=ddev_app,
     )
+
+
+def _provide_prd(screen, tmp_path: Path) -> str:
+    """Populate the required built-in PRD input and return its content."""
+    content = "Required product behavior.\n"
+    prd_path = tmp_path / "prd.md"
+    prd_path.write_text(content, encoding="utf-8")
+    screen.query_one("#input-prd", Input).value = str(prd_path)
+    return content
 
 
 def _incomplete_checkpoints_yaml(flow: ResolvedFlow) -> str:
@@ -542,13 +551,12 @@ async def test_launch_button_opens_launch_modal() -> None:
         assert isinstance(pilot.app.screen, LaunchModal)
 
 
-async def test_valid_launch_dismissal_pushes_execution_screen() -> None:
+async def test_valid_launch_dismissal_pushes_execution_screen(tmp_path: Path) -> None:
     """After LaunchModal dismisses with values, ExecutionScreen is pushed."""
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
     from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
 
-    # Flow with no inputs so LaunchModal dismisses immediately on click
     flow = _make_flow()
     app = _app()
     async with app.run_test(size=(120, 50)) as pilot:
@@ -558,18 +566,18 @@ async def test_valid_launch_dismissal_pushes_execution_screen() -> None:
         await pilot.click("#launch-btn")
         await pilot.pause()
         assert isinstance(pilot.app.screen, LaunchModal)
-        # Flow has no inputs → clicking Launch ▶ dismisses immediately
+        _provide_prd(pilot.app.screen, tmp_path)
         await pilot.click("#btn-launch")
         await pilot.pause()
         assert isinstance(pilot.app.screen, ExecutionScreen)
 
 
-async def test_launch_dismissal_passes_runtime_variables() -> None:
+async def test_launch_dismissal_passes_runtime_variables_and_timeout(tmp_path: Path) -> None:
     """ExecutionScreen receives runtime_variables from the dismissed LaunchModal."""
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
 
-    flow = _make_flow()  # no inputs → runtime_variables will be {}
+    flow = _make_flow()
     app = _app()
     async with app.run_test(size=(120, 50)) as pilot:
         await pilot.pause()
@@ -577,10 +585,13 @@ async def test_launch_dismissal_passes_runtime_variables() -> None:
         await pilot.pause()
         await pilot.click("#launch-btn")
         await pilot.pause()
+        prd = _provide_prd(pilot.app.screen, tmp_path)
+        pilot.app.screen.query_one("#input-max_timeout", Input).value = "120"
         await pilot.click("#btn-launch")
         await pilot.pause()
         screen: ExecutionScreen = pilot.app.screen  # type: ignore[assignment]
-        assert screen.runtime_variables is not None
+        assert screen.runtime_variables == {"prd": prd}
+        assert screen.max_timeout == 120
 
 
 # ---------------------------------------------------------------------------
@@ -589,9 +600,10 @@ async def test_launch_dismissal_passes_runtime_variables() -> None:
 
 
 async def test_resume_pushes_execution_screen_with_resume_flag(tmp_path: Path) -> None:
-    """Pressing Resume pushes ExecutionScreen with resume=True."""
+    """Resume recollects built-in inputs before pushing ExecutionScreen."""
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
 
     flow = _make_flow(n_phases=2)
     _write_incomplete_run(tmp_path, flow)
@@ -601,6 +613,11 @@ async def test_resume_pushes_execution_screen_with_resume_flag(tmp_path: Path) -
         await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
         await pilot.pause()
         await pilot.click("#resume")
+        await pilot.pause()
+
+        assert isinstance(pilot.app.screen, LaunchModal)
+        _provide_prd(pilot.app.screen, tmp_path)
+        await pilot.click("#btn-launch")
         await pilot.pause()
         screen = pilot.app.screen
         assert isinstance(screen, ExecutionScreen)
@@ -627,9 +644,10 @@ async def test_resume_with_inputs_reopens_modal_and_passes_converted_values(tmp_
         await pilot.pause()
 
         assert isinstance(pilot.app.screen, LaunchModal)
+        prd = _provide_prd(pilot.app.screen, tmp_path)
         await pilot.click("#btn-launch")
         await pilot.pause()
         screen = pilot.app.screen
         assert isinstance(screen, ExecutionScreen)
         assert screen.resume is True
-        assert screen.runtime_variables == {"token": "fresh-value"}
+        assert screen.runtime_variables == {"token": "fresh-value", "prd": prd}

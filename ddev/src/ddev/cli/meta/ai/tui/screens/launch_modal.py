@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
@@ -20,10 +22,21 @@ from textual.widget import Widget
 from textual.widgets import Button, Input, Label, Static, Switch
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
-from ddev.ai.config.models import FlowInput, InputType, ResolvedFlow
+from ddev.ai.config.models import BUILT_IN_FLOW_INPUTS, FlowInput, InputType, ResolvedFlow
+from ddev.ai.runtime.orchestrator import DEFAULT_GRACE_PERIOD
 
 type LaunchInputValue = str | bool
-type LaunchInputValues = dict[str, str]
+
+PRD_INPUT = BUILT_IN_FLOW_INPUTS[0]
+MAX_TIMEOUT_INPUT_ID = "input-max_timeout"
+
+
+@dataclass(frozen=True)
+class LaunchResult:
+    """Values collected when launching or resuming a flow."""
+
+    runtime_variables: dict[str, str]
+    max_timeout: float | None
 
 
 class TogoPathAutoComplete(PathAutoComplete):
@@ -100,6 +113,10 @@ class LaunchModal(ModalScreen):
             yield Static("Provide inputs for this run, then start.", classes="desc")
             with Widget(id="launch-fields"):
                 yield from self._compose_inputs()
+                yield Label(f"{PRD_INPUT.label.upper()} ({PRD_INPUT.input_type.value})", classes="eyebrow")
+                yield from self._widget_for(PRD_INPUT)
+                yield Label("MAX TIMEOUT (SECONDS)", classes="eyebrow")
+                yield Input(placeholder="Leave empty for unbounded", id=MAX_TIMEOUT_INPUT_ID)
             yield Static("", id="launch-error")
             with Horizontal(classes="modal-actions"):
                 yield Button("Cancel", id="btn-cancel")
@@ -117,16 +134,16 @@ class LaunchModal(ModalScreen):
             yield Switch(value=default_enabled, id=widget_id)
         elif inp.input_type == InputType.NUMBER:
             default_text = str(inp.default) if inp.default is not None else ""
-            yield Input(value=default_text, id=widget_id, validators=[Number()])
+            yield Input(value=default_text, placeholder=inp.placeholder or "", id=widget_id, validators=[Number()])
         elif inp.input_type == InputType.PATH:
             default_text = str(inp.default) if inp.default is not None else ""
-            path_input = Input(value=default_text, id=widget_id)
+            path_input = Input(value=default_text, placeholder=inp.placeholder or "", id=widget_id)
             yield path_input
             yield TogoPathAutoComplete(target=f"#{widget_id}")
         else:
             # STRING (default)
             default_text = str(inp.default) if inp.default is not None else ""
-            yield Input(value=default_text, id=widget_id)
+            yield Input(value=default_text, placeholder=inp.placeholder or "", id=widget_id)
 
     # ------------------------------------------------------------------
     # Actions
@@ -150,6 +167,14 @@ class LaunchModal(ModalScreen):
     # ------------------------------------------------------------------
 
     def _try_launch(self) -> None:
+        ok, prd_path = self._read_value(PRD_INPUT, f"input-{PRD_INPUT.name}")
+        if not ok or prd_path is None:
+            return
+
+        timeout_valid, max_timeout = self._read_max_timeout()
+        if not timeout_valid:
+            return
+
         values: dict[str, LaunchInputValue] = {}
         for inp in self.flow.inputs:
             widget_id = f"input-{inp.name}"
@@ -161,10 +186,31 @@ class LaunchModal(ModalScreen):
             values[inp.name] = value
         try:
             converted = self.flow.convert_inputs(values)
+            converted[PRD_INPUT.name] = PRD_INPUT.convert_runtime_value(prd_path)
         except ValueError as error:
             self._show_error(str(error))
             return
-        self.dismiss(converted)
+        self.dismiss(LaunchResult(runtime_variables=converted, max_timeout=max_timeout))
+
+    def _read_max_timeout(
+        self,
+    ) -> tuple[Literal[True], float | None] | tuple[Literal[False], None]:
+        """Return the timeout, using ``None`` for an empty unbounded value."""
+        text = self.query_one(f"#{MAX_TIMEOUT_INPUT_ID}", Input).value.strip()
+        if not text:
+            return True, None
+        try:
+            max_timeout = float(text)
+        except ValueError:
+            self._show_error("Max timeout: must be a valid number of seconds or left empty for unbounded.")
+            return False, None
+        if not math.isfinite(max_timeout):
+            self._show_error("Max timeout: must be finite or left empty for unbounded.")
+            return False, None
+        if max_timeout <= DEFAULT_GRACE_PERIOD:
+            self._show_error(f"Max timeout: must be greater than the {DEFAULT_GRACE_PERIOD:g}-second grace period.")
+            return False, None
+        return True, max_timeout
 
     def _read_value(
         self, inp: FlowInput, widget_id: str

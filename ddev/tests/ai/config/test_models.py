@@ -218,6 +218,7 @@ def test_flow_config_accepts_tui_metadata():
                     "name": "specification",
                     "label": "Specification",
                     "type": "path",
+                    "placeholder": "/path/to/spec.md",
                     "required": True,
                     "as_content": True,
                 }
@@ -234,6 +235,7 @@ def test_flow_config_accepts_tui_metadata():
             name="specification",
             label="Specification",
             input_type=models.InputType.PATH,
+            placeholder="/path/to/spec.md",
             required=True,
             as_content=True,
         )
@@ -254,9 +256,25 @@ def test_flow_config_rejects_duplicate_input_names():
         )
 
 
+def test_flow_config_rejects_built_in_input_names():
+    with pytest.raises(ValidationError, match="reserved for built-in launch inputs"):
+        FlowConfig.model_validate(
+            {
+                "name": "demo",
+                "inputs": [{"name": "prd", "label": "PRD", "type": "path"}],
+                "flow": [],
+            }
+        )
+
+
 def test_flow_input_rejects_as_content_for_non_path():
     with pytest.raises(ValidationError, match="'as_content' may only be used with path inputs"):
         models.FlowInput(name="subject", label="Subject", input_type="string", as_content=True)
+
+
+def test_flow_input_rejects_placeholder_for_boolean():
+    with pytest.raises(ValidationError, match="'placeholder' may not be used with boolean inputs"):
+        models.FlowInput(name="enabled", label="Enabled", input_type="boolean", placeholder="Enabled")
 
 
 def resolved_with_inputs(*inputs: models.FlowInput) -> models.ResolvedFlow:

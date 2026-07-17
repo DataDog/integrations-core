@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+import math
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -105,6 +106,12 @@ def make_orchestrator(file_access_policy, provider_registry, tmp_path):
 # ---------------------------------------------------------------------------
 # PhaseOrchestrator.on_message_received
 # ---------------------------------------------------------------------------
+
+
+def test_default_max_timeout_is_unbounded(core_dir, make_orchestrator):
+    orchestrator, _, _ = make_orchestrator(core_dir)
+
+    assert math.isinf(orchestrator._max_timeout)
 
 
 async def test_on_message_received_fatal_on_phase_failed(core_dir, make_orchestrator):
