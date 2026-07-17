@@ -332,7 +332,8 @@ def mock_http(mocker):
     from datadog_checks.base.utils.http_protocol import HTTPClient
 
     client = create_autospec(HTTPClient)
-    # Protocol annotations are not picked up by create_autospec, so set options explicitly.
+    # Protocol annotations are not picked up by create_autospec, so set data attributes explicitly;
+    # otherwise reading them off the mock raises AttributeError. Defaults mirror RequestsWrapper.
     client.options = {
         'auth': None,
         'cert': None,
@@ -342,6 +343,9 @@ def mock_http(mocker):
         'verify': True,
         'allow_redirects': True,
     }
+    client.trust_env = True
+    client.ignore_tls_warning = False
+    client.persist_connections = False
 
     def _get_header(name, default=None):
         for key, value in client.options['headers'].items():
@@ -381,7 +385,6 @@ def mock_openmetrics_http(mock_http, mocker):
 @pytest.fixture
 def mock_prometheus_http(mock_http, mocker):
     """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
-    mock_http.ignore_tls_warning = False
     mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
         return_value=mock_http,

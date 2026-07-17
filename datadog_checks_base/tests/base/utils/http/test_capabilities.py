@@ -41,6 +41,20 @@ class TestClose:
         http.close()
         assert http._session is None
 
+    def test_request_succeeds_after_close(self):
+        # The documented contract is that the client stays usable after close(): a subsequent request
+        # transparently rebuilds the session and goes through.
+        http = RequestsWrapper({}, {})
+        http.persist_connections = True
+        with mock.patch('requests.Session.get') as get:
+            http.get('http://example.com')
+            first = http.session
+            http.close()
+            http.get('http://example.com')
+            second = http.session
+        assert get.call_count == 2
+        assert second is not first
+
 
 class TestCookies:
     def test_get_cookie_missing_returns_default(self):
@@ -157,8 +171,53 @@ class TestPeerCert:
         assert wrapper.get_peer_cert(binary_form=True) == b'der-bytes'
         response.raw.connection.sock.getpeercert.assert_called_once_with(binary_form=True)
 
+    def test_returns_decoded_cert_with_default_binary_form(self):
+        response = mock.Mock()
+        response.raw.connection.sock.getpeercert.return_value = {'subject': ()}
+        wrapper = ResponseWrapper(response, 1024)
+        assert wrapper.get_peer_cert() == {'subject': ()}
+        response.raw.connection.sock.getpeercert.assert_called_once_with(binary_form=False)
+
     def test_returns_none_when_socket_absent(self):
         response = mock.Mock()
         response.raw.connection.sock = None
         wrapper = ResponseWrapper(response, 1024)
         assert wrapper.get_peer_cert() is None
+
+    def test_returns_none_for_non_tls_socket(self):
+        # A plain http:// connection exposes a bare socket with no getpeercert; must return None, not raise.
+        response = mock.Mock()
+        response.raw.connection.sock = object()
+        wrapper = ResponseWrapper(response, 1024)
+        assert wrapper.get_peer_cert() is None
+
+
+class TestHistory:
+    def test_history_items_are_wrapped(self):
+        redirect = mock.Mock()
+        redirect.status_code = 301
+        final = mock.Mock()
+        final.history = [redirect]
+        wrapper = ResponseWrapper(final, 1024)
+        history = wrapper.history
+        assert len(history) == 1
+        assert isinstance(history[0], ResponseWrapper)
+        assert history[0].status_code == 301
+
+    def test_history_item_translates_raise_for_status(self):
+        from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+
+        redirect = mock.Mock()
+        redirect.raise_for_status.side_effect = requests.exceptions.HTTPError('boom')
+        final = mock.Mock()
+        final.history = [redirect]
+        wrapper = ResponseWrapper(final, 1024)
+        # A raw requests error on a history item must surface as the translated agnostic exception.
+        with pytest.raises(HTTPStatusError):
+            wrapper.history[0].raise_for_status()
+
+    def test_empty_history(self):
+        response = mock.Mock()
+        response.history = []
+        wrapper = ResponseWrapper(response, 1024)
+        assert wrapper.history == []

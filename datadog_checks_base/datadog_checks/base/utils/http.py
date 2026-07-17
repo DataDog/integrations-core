@@ -316,9 +316,17 @@ class ResponseWrapper(ObjectProxy):
         raw = getattr(self.__wrapped__, 'raw', None)
         connection = getattr(raw, 'connection', None)
         sock = getattr(connection, 'sock', None)
-        if sock is None:
+        # sock is None once the connection is released, and a bare (non-TLS) socket has no getpeercert,
+        # so a plain http:// request lands here. Either way there is no peer certificate to report.
+        getpeercert = getattr(sock, 'getpeercert', None)
+        if getpeercert is None:
             return None
-        return sock.getpeercert(binary_form=binary_form)
+        return getpeercert(binary_form=binary_form)
+
+    @property
+    def history(self):
+        # Wrap redirect responses so history items satisfy the protocol too, never leaking a raw backend object.
+        return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
 
     def __enter__(self):
         return self
@@ -556,13 +564,19 @@ class RequestsWrapper(object):
             self._session.trust_env = value
 
     def close(self) -> None:
-        """Close any open connections. Idempotent; the client stays usable afterwards."""
+        """Close any open connections. Idempotent; the client stays usable and lazily rebuilds a default
+        session on the next request. An injected session is not restored after being closed."""
         if self._session is not None:
             self._session.close()
             self._session = None
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
-        """Look up a persisted cookie by name, returning its value, or default if absent or ambiguous."""
+        """Look up a cookie by name on the persistent session, returning its value, or default if absent or ambiguous.
+
+        Only cookies retained on the persistent session are visible. Requests made without persistence
+        (the default unless persist_connections is set or persist=True is passed) use a throwaway session
+        whose cookies are discarded, so a cookie set by such a request is not found here.
+        """
         try:
             return self.session.cookies.get(name, default)
         except requests_cookies.CookieConflictError:

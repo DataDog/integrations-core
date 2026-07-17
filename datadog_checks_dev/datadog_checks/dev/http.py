@@ -3,13 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from datetime import timedelta
 from functools import lru_cache
 from http.client import responses as http_responses
 from io import BytesIO
 from textwrap import dedent
-from typing import Any, Iterator
+from typing import Any
 from unittest.mock import MagicMock
 
 from requests import Response
@@ -55,8 +55,8 @@ class MockResponse(Response):
             self.cookies.update(cookies)
 
 
-class _CaseInsensitiveDict(dict):
-    """Case-insensitive dict for HTTP headers. Keys are stored lowercased."""
+class CaseInsensitiveDict(dict):
+    """Case-insensitive header dict storing keys lowercased, mirroring httpx's decoded-key semantics."""
 
     def __init__(self, data=None):
         super().__init__()
@@ -109,7 +109,7 @@ class MockHTTPResponseImpl:
         elapsed_seconds: float = 0.1,
         normalize_content: bool = True,
         url: str = '',
-        history: list | None = None,
+        history: list[Any] | None = None,
     ):
         self.url = url
 
@@ -132,11 +132,11 @@ class MockHTTPResponseImpl:
 
         self._content = content.encode('utf-8') if isinstance(content, str) else content
         self.status_code = status_code
-        self.headers = _CaseInsensitiveDict(headers or {})
+        self.headers = CaseInsensitiveDict(headers or {})
         self.cookies = cookies or {}
         self.encoding: str | None = None
         self.elapsed = timedelta(seconds=elapsed_seconds)
-        self.history: list = history if history is not None else []
+        self.history: list[Any] = history if history is not None else []
         self._stream = BytesIO(self._content)
 
         self.raw = MagicMock()
@@ -253,7 +253,6 @@ def protocol_members() -> frozenset[str]:
 
     members = set(getattr(HTTPResponse, '__annotations__', {}))
     members |= {name for name in vars(HTTPResponse) if not name.startswith('_')}
-    members |= {'__enter__', '__exit__', '__iter__'}
     return frozenset(members)
 
 
