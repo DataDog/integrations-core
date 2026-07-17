@@ -1,0 +1,40 @@
+type: flow
+config:
+  name: openmetrics
+  description: >-
+    Generate an OpenMetrics integration from one or more named endpoints. Enter
+    endpoints as JSON, for example:
+    {"endpoints":[{"name":"api","url":"http://localhost:9090/metrics"}]}.
+  inputs:
+    - name: inspect_input
+      label: Endpoints JSON
+      type: string
+      required: true
+    - name: integration
+      label: Integration name
+      type: string
+      required: true
+    - name: docker_source_path
+      label: Docker folder
+      type: path
+      required: true
+    - name: prd
+      label: Product requirements file
+      type: path
+      required: true
+      as_content: true
+    - name: fanout_threshold
+      label: Metric fan-out threshold
+      type: number
+      required: false
+      default: 100
+  flow:
+    - phase: inspect_endpoint
+    - phase: rename_metrics
+      dependencies: [inspect_endpoint]
+    - phase: build_integration
+      dependencies: [rename_metrics]
+    - phase: write_tests
+      dependencies: [build_integration]
+    - phase: write_readme
+      dependencies: [write_tests]
