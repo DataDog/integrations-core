@@ -804,17 +804,23 @@ class ClusterMetadataCollector:
             member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
 
-            members_detail = sorted(
-                (
+            members_detail = []
+            for m in members:
+                assignment = getattr(m, 'assignment', None)
+                topic_partitions = (
+                    [{'topic': tp.topic, 'partition': tp.partition} for tp in assignment.topic_partitions]
+                    if assignment
+                    else []
+                )
+                members_detail.append(
                     {
                         'member_id': getattr(m, 'member_id', '') or '',
                         'client_id': getattr(m, 'client_id', '') or '',
                         'member_host': getattr(m, 'host', '') or '',
+                        'topic_partitions': topic_partitions,
                     }
-                    for m in members
-                ),
-                key=lambda m: m['member_id'],
-            )
+                )
+            members_detail.sort(key=lambda x: x['member_id'])
 
             self.check.event_platform_event(
                 json.dumps(

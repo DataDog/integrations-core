@@ -1941,10 +1941,20 @@ def test_consumer_membership_event_emitted(check):
     assert event['kafka_cluster_id'] == 'test-cluster-id'
     assert event['group_id'] == 'test-group'
     assert event['member_ids'] == ['m-c1', 'm-c2']
-    # Per-member detail includes client_id and member_host (captured for free from describe).
+    # Per-member detail includes client_id, member_host and the assigned topic-partitions.
     assert event['members'] == [
-        {'member_id': 'm-c1', 'client_id': 'c1', 'member_host': 'h1'},
-        {'member_id': 'm-c2', 'client_id': 'c2', 'member_host': 'h2'},
+        {
+            'member_id': 'm-c1',
+            'client_id': 'c1',
+            'member_host': 'h1',
+            'topic_partitions': [{'topic': 'test-topic', 'partition': 0}],
+        },
+        {
+            'member_id': 'm-c2',
+            'client_id': 'c2',
+            'member_host': 'h2',
+            'topic_partitions': [{'topic': 'test-topic', 'partition': 0}],
+        },
     ]
 
 
