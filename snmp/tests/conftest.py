@@ -152,7 +152,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'des',
                         'context_name': 'public',
-                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
+                        'ignored_ip_addresses': [container_ip],
                         'loader': 'core',
                     },
                     {
@@ -168,7 +168,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'AES',
                         'context_name': 'public',
-                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
+                        'ignored_ip_addresses': [container_ip],
                         'loader': 'core',
                     },
                 ],
