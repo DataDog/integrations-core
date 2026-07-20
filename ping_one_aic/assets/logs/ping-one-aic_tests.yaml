@@ -130,10 +130,6 @@ tests:
         category: "am-authentication"
         name: "AM-TREE-LOGIN-COMPLETED"
         outcome: "SUCCESSFUL"
-      info:
-        ipAddress: "73.163.123.67"
-        principal: "test.user@example.com"
-        treeName: "FRLogin"
       network:
         client:
           geoip: {}
@@ -264,11 +260,6 @@ tests:
         category: "am-authentication"
         name: "AM-NODE-LOGIN-COMPLETED"
         outcome: "FALSE"
-      info:
-        nodeOutcome: "FALSE"
-        nodeType: "IdentityStoreDecisionNode"
-        principal: "carlamj"
-        treeName: "Login"
       ocsf:
         activity_id: 1
         activity_name: "Logon"
@@ -393,11 +384,6 @@ tests:
         category: "am-authentication"
         name: "AM-NODE-LOGIN-COMPLETED"
         outcome: "false"
-      info:
-        nodeOutcome: "false"
-        nodeType: "OneTimePasswordCollectorDecisionNode"
-        principal: "appraisal"
-        treeName: "Login Public - MFA"
       ocsf:
         activity_id: 1
         activity_name: "Logon"
@@ -538,13 +524,13 @@ tests:
         name: "AM-ACCESS-OUTCOME"
       network:
         client:
-          geoip: { }
+          geoip: {}
           ip: "73.163.123.67"
       ocsf:
         activity_id: 0
         activity_name: "Unknown"
         category_uid: 0
-        class_name: "Base event"
+        class_name: "Base Event"
         class_uid: 0
         metadata:
           correlation_uid: "a38ce90f-54d1-47db-9f2a-db1a6e5a1455/0"
@@ -688,10 +674,6 @@ tests:
         category: "am-authentication"
         name: "AM-TREE-LOGIN-COMPLETED"
         outcome: "FAILED"
-      info:
-        ipAddress: "73.163.123.67"
-        principal: "carlamj"
-        treeName: "Login"
       network:
         client:
           geoip: {}

@@ -57,26 +57,21 @@ facets:
     name: User ID
     path: usr.id
     source: log
-  - description: ''
-    facetType: list
-    groups:
+  - groups:
       - PingOne Advanced Identity Cloud
     name: Journey
     path: payload.entries.info.treeName
     source: log
-    type: string
   - groups:
       - PingOne Advanced Identity Cloud
     name: Realm
     path: payload.realm
     source: log
-    type: string
   - groups:
       - OCSF
     name: Activity ID
     path: ocsf.activity_id
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -92,7 +87,6 @@ facets:
     name: Category ID
     path: ocsf.category_uid
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Class
@@ -103,7 +97,6 @@ facets:
     name: Class ID
     path: ocsf.class_uid
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Severity
@@ -114,13 +107,11 @@ facets:
     name: Type ID
     path: ocsf.type_uid
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Severity ID
     path: ocsf.severity_id
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Unique ID
@@ -136,7 +127,6 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
-    type: integer
   - groups:
       - OCSF
     name: Event Code
@@ -353,12 +343,12 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
         - type: schema-processor
-          name: Apply OCSF common mappings
+          name: Apply OCSF schema for 0
           enabled: true
           schema:
             schemaType: ocsf
             version: 1.5.0
-            className: Base event
+            className: Base Event
             classUid: 0
             extensions: []
             profiles: []
@@ -445,8 +435,12 @@ pipeline:
                 name: ocsf.status
                 id: ocsf.status_id
               fallback:
-                values: {}
-                sources: {}
+                values:
+                  ocsf.status_id: "99"
+                  ocsf.status: Other
+                sources:
+                  ocsf.status:
+                    - ocsf.status
               type: schema-category-mapper
             - name: Map `payload.transactionId` to `ocsf.metadata.correlation_uid`
               sources:
@@ -460,6 +454,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Account Change [3001]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@source:idm-activity"
       processors:
@@ -474,6 +470,55 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.status` to `ocsf.status`
+              sources:
+                - ocsf.status
+              target: ocsf.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              sources:
+                - ocsf.metadata.correlation_uid
+              target: ocsf.metadata.correlation_uid
+              preserveSource: true
+              overrideOnConflict: true
             - name: ocsf.activity_id
               categories:
                 - filter:
@@ -535,6 +580,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Authentication [3002]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: (@source:am-authentication (@evt.name:AM-TREE-LOGIN-COMPLETED OR
           @payload.entries.info.nodeType:(IdentityStoreDecisionNode OR
@@ -558,6 +605,55 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.status` to `ocsf.status`
+              sources:
+                - ocsf.status
+              target: ocsf.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              sources:
+                - ocsf.metadata.correlation_uid
+              target: ocsf.metadata.correlation_uid
+              preserveSource: true
+              overrideOnConflict: true
             - name: ocsf.activity_id
               categories:
                 - filter:
@@ -653,6 +749,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Entity Management [3004]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "@source:am-config @payload.eventName:AM-CONFIG-CHANGE"
       processors:
@@ -667,6 +765,55 @@ pipeline:
             extensions: []
             profiles: []
           mappers:
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+              sources:
+                - ocsf.metadata.event_code
+              target: ocsf.metadata.event_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.status` to `ocsf.status`
+              sources:
+                - ocsf.status
+              target: ocsf.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              sources:
+                - ocsf.metadata.correlation_uid
+              target: ocsf.metadata.correlation_uid
+              preserveSource: true
+              overrideOnConflict: true
             - name: ocsf.activity_id
               categories:
                 - filter:
@@ -727,6 +874,8 @@ pipeline:
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
+      ocsf:
+        isOcsf: true
       filter:
         query: "-@ocsf.category_uid:*"
       processors:
@@ -736,7 +885,7 @@ pipeline:
           schema:
             schemaType: ocsf
             version: 1.5.0
-            className: Base event
+            className: Base Event
             classUid: 0
             extensions: []
             profiles: []
@@ -763,17 +912,31 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `id` to `ocsf.metadata.uid`
-              sources:
-                - id
-              target: ocsf.metadata.uid
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `ocsf.time` to `ocsf.time`
               sources:
                 - ocsf.time
               target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.status` to `ocsf.status`
+              sources:
+                - ocsf.status
+              target: ocsf.status
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+              sources:
+                - ocsf.metadata.uid
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.correlation_uid` to `ocsf.metadata.correlation_uid`
+              sources:
+                - ocsf.metadata.correlation_uid
+              target: ocsf.metadata.correlation_uid
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -813,3 +976,7 @@ pipeline:
               targets:
                 name: ocsf.status
                 id: ocsf.status_id
+    - type: exclude-attribute
+      name: Exclude `info` intermediate attributes
+      enabled: true
+      attributeToExclude: info
