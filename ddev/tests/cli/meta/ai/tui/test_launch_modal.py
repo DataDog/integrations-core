@@ -13,7 +13,6 @@ from textual.containers import Horizontal
 from textual.widgets import Button, Input, Static, Switch
 
 from ddev.ai.config.models import FlowInput, InputType
-from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchResult
 
 # ---------------------------------------------------------------------------
 # Widget rendering per InputType
@@ -44,13 +43,14 @@ async def test_input_labels_show_declared_types(make_launch_modal_app, all_flow_
 
         labels = [label.render().plain for label in app.screen.query("#launch-fields > Label.eyebrow")]
 
-        assert labels[:4] == [
+        assert labels == [
             "MY STRING (string)",
             "MY NUMBER (number)",
             "MY BOOL (boolean)",
             "MY PATH (path)",
+            "PRODUCT REQUIREMENTS FILE (path)",
+            "MAX TIMEOUT (SECONDS) (number)",
         ]
-        assert labels[-2:] == ["PRODUCT REQUIREMENTS FILE (path)", "MAX TIMEOUT (SECONDS)"]
 
 
 @pytest.mark.parametrize(
@@ -246,10 +246,7 @@ async def test_valid_submission_dismisses_with_payload(make_launch_modal_app, la
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == LaunchResult(
-            runtime_variables={"s": "world", "b": "false", "prd": "Required product behavior.\n"},
-            max_timeout=None,
-        )
+        assert app.dismiss_result == {"s": "world", "b": "false", "prd": "Required product behavior.\n"}
 
 
 async def test_valid_number_submission_dismisses(make_launch_modal_app, large_terminal) -> None:
@@ -263,10 +260,7 @@ async def test_valid_number_submission_dismisses(make_launch_modal_app, large_te
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == LaunchResult(
-            runtime_variables={"n": "99", "prd": "Required product behavior.\n"},
-            max_timeout=None,
-        )
+        assert app.dismiss_result == {"n": "99", "prd": "Required product behavior.\n"}
 
 
 @pytest.mark.parametrize(
@@ -293,10 +287,7 @@ async def test_optional_empty_field_is_omitted(make_launch_modal_app, large_term
         await pilot.click("#btn-launch")
         await pilot.pause()
 
-        assert app.dismiss_result == LaunchResult(
-            runtime_variables={"prd": "Required product behavior.\n"},
-            max_timeout=None,
-        )
+        assert app.dismiss_result == {"prd": "Required product behavior.\n"}
 
 
 async def test_built_in_inputs_are_always_rendered(make_launch_modal_app) -> None:
@@ -327,7 +318,7 @@ async def test_prd_is_required(make_launch_modal_app, large_terminal) -> None:
 
 
 async def test_max_timeout_is_forwarded(make_launch_modal_app, large_terminal) -> None:
-    """A populated timeout is converted to seconds in the launch result."""
+    """A populated timeout is converted like any other runtime input."""
     app = make_launch_modal_app([])
 
     async with app.run_test(size=large_terminal) as pilot:
@@ -336,10 +327,10 @@ async def test_max_timeout_is_forwarded(make_launch_modal_app, large_terminal) -
         await pilot.click("#btn-launch")
         await pilot.pause()
 
-        assert app.dismiss_result.max_timeout == 120.5
+        assert app.dismiss_result["max_timeout"] == "120.5"
 
 
-@pytest.mark.parametrize("value", ["invalid", "NaN", "0", "10"])
+@pytest.mark.parametrize("value", ["invalid", "NaN"])
 async def test_invalid_max_timeout_stays_inline(make_launch_modal_app, large_terminal, value: str) -> None:
     """Invalid timeout values do not leave the launch modal."""
     app = make_launch_modal_app([])
@@ -351,7 +342,7 @@ async def test_invalid_max_timeout_stays_inline(make_launch_modal_app, large_ter
         await pilot.pause()
 
         assert app.dismiss_result == "NOT_SET"
-        assert "Max timeout" in str(app.screen.query_one("#launch-error", Static).render())
+        assert "timeout" in str(app.screen.query_one("#launch-error", Static).render()).lower()
 
 
 # ---------------------------------------------------------------------------

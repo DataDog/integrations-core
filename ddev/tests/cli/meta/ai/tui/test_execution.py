@@ -16,7 +16,7 @@ from textual.widget import Widget
 from textual.widgets import Input
 
 from ddev.ai.agent.registry import AgentProviderRegistry
-from ddev.ai.config.models import AgentConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
+from ddev.ai.config.models import AgentConfig, FlowConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
@@ -53,6 +53,7 @@ def _make_flow(
     return ResolvedFlow(
         name=name,
         description="A test flow",
+        inputs=FlowConfig(name="test", flow=[]).inputs,
         agents=agents,
         phases=phase_configs,
         flow=flow_entries,
@@ -1559,7 +1560,7 @@ async def test_default_builder_max_timeout_forwarded(tmp_path: Path) -> None:
         togo_app = _app_with_repo(flow, fake_ddev_app)
         async with togo_app.run_test() as pilot:
             await pilot.pause()
-            screen = ExecutionScreen(flow, max_timeout=120)
+            screen = ExecutionScreen(flow, runtime_variables={"max_timeout": "120"})
             await togo_app.push_screen(screen)
             await pilot.pause(0.3)
 

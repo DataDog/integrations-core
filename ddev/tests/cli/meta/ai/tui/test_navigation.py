@@ -97,7 +97,6 @@ async def test_execution_screen_accepts_flow_and_defaults(make_flow):
     screen = ExecutionScreen(flow)
     assert screen.flow is flow
     assert screen.runtime_variables is None
-    assert screen.max_timeout is None
     assert screen.resume is False
 
 
@@ -118,15 +117,6 @@ async def test_execution_screen_accepts_resume_flag(make_flow):
     flow = make_flow("Exec Resume", n_phases=1)
     screen = ExecutionScreen(flow, resume=True)
     assert screen.resume is True
-
-
-async def test_execution_screen_accepts_max_timeout(make_flow):
-    """ExecutionScreen stores a configured overall timeout."""
-    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
-
-    flow = make_flow("Exec Timeout", n_phases=1)
-    screen = ExecutionScreen(flow, max_timeout=120)
-    assert screen.max_timeout == 120
 
 
 async def test_execution_screen_mounts_with_placeholder_regions(make_flow, make_togo_app):

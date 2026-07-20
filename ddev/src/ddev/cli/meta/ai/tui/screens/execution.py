@@ -77,7 +77,6 @@ class ExecutionScreen(TogoScreen):
         self,
         flow: ResolvedFlow,
         runtime_variables: dict[str, str] | None = None,
-        max_timeout: float | None = None,
         resume: bool = False,
         runs_dir: Path | None = None,
         orchestrator_builder: OrchestratorBuilder | None = None,
@@ -85,7 +84,6 @@ class ExecutionScreen(TogoScreen):
         super().__init__()
         self.flow = flow
         self.runtime_variables = runtime_variables
-        self.max_timeout = max_timeout
         self.resume = resume
         self._runs_dir = runs_dir
         self._orchestrator_builder = orchestrator_builder
@@ -191,16 +189,18 @@ class ExecutionScreen(TogoScreen):
                 shutil.rmtree(run_dir)
         run_dir.mkdir(parents=True, exist_ok=True)
 
+        runtime_variables = self.runtime_variables or {}
+        max_timeout = runtime_variables.get("max_timeout")
         return PhaseOrchestrator(
             resolved_flow=self.flow,
             phase_registry=self.togo_app.phase_registry,
             checkpoint_path=run_dir / "checkpoints.yaml",
-            runtime_variables=self.runtime_variables or {},
+            runtime_variables=runtime_variables,
             provider_registry=self.togo_app.provider_registry,
             file_access_policy=FileAccessPolicy(write_root=write_root),
             callbacks=callbacks,
             resume=self.resume,
-            max_timeout=self.max_timeout,
+            max_timeout=float(max_timeout) if max_timeout is not None else None,
         )
 
     # ── Display helpers ──────────────────────────────────────────────────

@@ -15,6 +15,7 @@ from textual.widgets import Button, Input
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import (
     AgentConfig,
+    FlowConfig,
     FlowEntry,
     FlowInput,
     InputType,
@@ -47,6 +48,7 @@ def _make_flow(name: str = "Test Flow", n_phases: int = 2) -> ResolvedFlow:
     return ResolvedFlow(
         name=name,
         description=f"Description for {name}",
+        inputs=FlowConfig(name="test", flow=[]).inputs,
         agents=agents,
         phases=phases,
         flow=flow,
@@ -590,8 +592,7 @@ async def test_launch_dismissal_passes_runtime_variables_and_timeout(tmp_path: P
         await pilot.click("#btn-launch")
         await pilot.pause()
         screen: ExecutionScreen = pilot.app.screen  # type: ignore[assignment]
-        assert screen.runtime_variables == {"prd": prd}
-        assert screen.max_timeout == 120
+        assert screen.runtime_variables == {"prd": prd, "max_timeout": "120"}
 
 
 # ---------------------------------------------------------------------------
@@ -632,7 +633,11 @@ async def test_resume_with_inputs_reopens_modal_and_passes_converted_values(tmp_
 
     flow = replace(
         _make_flow(n_phases=2),
-        inputs=[FlowInput(name="token", label="Token", input_type=InputType.STRING, default="fresh-value")],
+        inputs=FlowConfig(
+            name="test",
+            inputs=[FlowInput(name="token", label="Token", input_type=InputType.STRING, default="fresh-value")],
+            flow=[],
+        ).inputs,
     )
     _write_incomplete_run(tmp_path, flow)
     app = _app()

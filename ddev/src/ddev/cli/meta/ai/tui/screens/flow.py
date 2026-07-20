@@ -15,7 +15,7 @@ from textual.widgets import Button, Static
 
 from ddev.ai.config.models import AgentConfig, ResolvedFlow
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
-from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchResult
+from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchInputValues
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.status import RunStatus
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineGraph
@@ -111,16 +111,9 @@ class FlowScreen(TogoScreen):
         from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
         from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
 
-        def _on_dismiss(result: LaunchResult | None) -> None:
-            if result is not None:
-                self.app.push_screen(
-                    ExecutionScreen(
-                        self.flow,
-                        runtime_variables=result.runtime_variables,
-                        max_timeout=result.max_timeout,
-                        runs_dir=self._runs_dir,
-                    )
-                )
+        def _on_dismiss(values: LaunchInputValues | None) -> None:
+            if values is not None:
+                self.app.push_screen(ExecutionScreen(self.flow, runtime_variables=values, runs_dir=self._runs_dir))
 
         self.app.push_screen(LaunchModal(self.flow), _on_dismiss)
 
@@ -128,13 +121,12 @@ class FlowScreen(TogoScreen):
         from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
         from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
 
-        def _on_dismiss(result: LaunchResult | None) -> None:
-            if result is not None:
+        def _on_dismiss(values: LaunchInputValues | None) -> None:
+            if values is not None:
                 self.app.push_screen(
                     ExecutionScreen(
                         self.flow,
-                        runtime_variables=result.runtime_variables,
-                        max_timeout=result.max_timeout,
+                        runtime_variables=values,
                         resume=True,
                         runs_dir=self._runs_dir,
                     )

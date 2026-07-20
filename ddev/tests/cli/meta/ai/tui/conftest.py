@@ -16,6 +16,7 @@ from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import (
     AgentConfig,
     ConfigStatus,
+    FlowConfig,
     FlowEntry,
     FlowInput,
     FlowResult,
@@ -122,7 +123,7 @@ def make_flow() -> Callable[..., ResolvedFlow]:
         return ResolvedFlow(
             name=name,
             description=f"Description for {name}",
-            inputs=inputs or [],
+            inputs=FlowConfig(name="test", inputs=inputs or [], flow=[]).inputs,
             agents=flow_agents,
             phases=phases,
             flow=flow,
@@ -148,6 +149,7 @@ def make_flow_with_tools() -> Callable[..., ResolvedFlow]:
         return ResolvedFlow(
             name=name,
             description="Tool flow",
+            inputs=FlowConfig(name="test", flow=[]).inputs,
             agents=agents,
             phases=phases,
             flow=[FlowEntry(phase="analyse")],

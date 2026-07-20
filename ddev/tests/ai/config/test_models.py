@@ -238,7 +238,8 @@ def test_flow_config_accepts_tui_metadata():
             placeholder="/path/to/spec.md",
             required=True,
             as_content=True,
-        )
+        ),
+        *models.BUILT_IN_FLOW_INPUTS,
     ]
 
 
@@ -256,15 +257,18 @@ def test_flow_config_rejects_duplicate_input_names():
         )
 
 
-def test_flow_config_rejects_built_in_input_names():
-    with pytest.raises(ValidationError, match="reserved for built-in launch inputs"):
-        FlowConfig.model_validate(
-            {
-                "name": "demo",
-                "inputs": [{"name": "prd", "label": "PRD", "type": "path"}],
-                "flow": [],
-            }
-        )
+def test_flow_config_injects_missing_built_in_inputs():
+    config = FlowConfig(name="demo", flow=[])
+
+    assert config.inputs == list(models.BUILT_IN_FLOW_INPUTS)
+
+
+def test_flow_config_does_not_replace_declared_built_in_input():
+    prd = models.FlowInput(name="prd", label="Custom PRD", input_type="path", as_content=True)
+
+    config = FlowConfig(name="demo", inputs=[prd], flow=[])
+
+    assert config.inputs == [prd, models.BUILT_IN_FLOW_INPUTS[1]]
 
 
 def test_flow_input_rejects_as_content_for_non_path():

@@ -103,6 +103,13 @@ BUILT_IN_FLOW_INPUTS = (
         required=True,
         as_content=True,
     ),
+    FlowInput(
+        name="max_timeout",
+        label="Max timeout (seconds)",
+        input_type=InputType.NUMBER,
+        placeholder="Leave empty for unbounded",
+        required=False,
+    ),
 )
 
 
@@ -208,20 +215,17 @@ class FlowConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=NAME_PATTERN)
     description: str | None = None
-    inputs: list[FlowInput] = Field(default_factory=list)
+    inputs: list[FlowInput] = Field(default_factory=list, validate_default=True)
     variables: Annotated[dict[str, str], AfterValidator(validate_variable_names)] = Field(default_factory=dict)
     flow: list[FlowEntry]
 
     @field_validator("inputs", mode="after")
     @classmethod
-    def input_names_must_be_unique(cls, inputs: list[FlowInput]) -> list[FlowInput]:
+    def inject_built_in_inputs(cls, inputs: list[FlowInput]) -> list[FlowInput]:
         names = [flow_input.name for flow_input in inputs]
         if len(names) != len(set(names)):
             raise ValueError("Input names must be unique")
-        reserved_names = {flow_input.name for flow_input in BUILT_IN_FLOW_INPUTS}
-        if conflicts := sorted(set(names) & reserved_names):
-            raise ValueError(f"Input names are reserved for built-in launch inputs: {conflicts}")
-        return inputs
+        return [*inputs, *(flow_input for flow_input in BUILT_IN_FLOW_INPUTS if flow_input.name not in names)]
 
 
 class PhaseEnvelope(BaseModel):

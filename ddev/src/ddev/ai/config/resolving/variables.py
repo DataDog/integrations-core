@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ddev.ai.config.errors import ErrorKind, FlowError
-from ddev.ai.config.models import BUILT_IN_FLOW_INPUTS
 from ddev.ai.config.registry import ResourceKind
 
 if TYPE_CHECKING:
@@ -31,7 +30,7 @@ def resolve_variables(
 ) -> tuple[dict[str, str], list[FlowError]]:
     """Gather variable declarations, resolve defaults, and apply ``flow > default``."""
     declared = _gather_variable_declarations(registry, scheduled_phases)
-    guaranteed_inputs = {flow_input.name for flow_input in BUILT_IN_FLOW_INPUTS} | {
+    guaranteed_inputs = {
         flow_input.name for flow_input in flow_config.inputs if flow_input.required or flow_input.default is not None
     }
     supplied = set(flow_config.variables) | guaranteed_inputs
