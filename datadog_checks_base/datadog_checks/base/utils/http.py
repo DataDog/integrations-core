@@ -833,9 +833,9 @@ class RequestsWrapper(object):
 
 
 def create_http_client(
-    instance: dict, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
+    instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
 ) -> HTTPClient:
-    """Build the agnostic HTTP client from explicit config. The single seam that names the backend."""
+    """Build the agnostic HTTP client from explicit config, confining the concrete backend to one place."""
     return RequestsWrapper(instance or {}, init_config, remapper, logger)
 
 
