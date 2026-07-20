@@ -22,6 +22,10 @@ from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
 CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
 
 
+def _str_attr(obj, attr):
+    return getattr(obj, attr, '') or ''
+
+
 class SchemaDefinition(TypedDict):
     schema: str
     schema_type: str
@@ -800,27 +804,9 @@ class ClusterMetadataCollector:
                 tags=group_meta_tags,
             )
 
-            member_ids = sorted(getattr(m, 'member_id', '') or '' for m in members)
+            member_ids = sorted(_str_attr(member, 'member_id') for member in members)
             member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
             current_member_hashes[group_id] = member_hash
-
-            members_detail = []
-            for m in members:
-                assignment = getattr(m, 'assignment', None)
-                topic_partitions = (
-                    [{'topic': tp.topic, 'partition': tp.partition} for tp in assignment.topic_partitions]
-                    if assignment
-                    else []
-                )
-                members_detail.append(
-                    {
-                        'member_id': getattr(m, 'member_id', '') or '',
-                        'client_id': getattr(m, 'client_id', '') or '',
-                        'member_host': getattr(m, 'host', '') or '',
-                        'topic_partitions': topic_partitions,
-                    }
-                )
-            members_detail.sort(key=lambda x: x['member_id'])
 
             self.check.event_platform_event(
                 json.dumps(
@@ -831,7 +817,7 @@ class ClusterMetadataCollector:
                         'config_type': 'consumer_membership',
                         'group_id': group_id,
                         'member_ids': member_ids,
-                        'members': members_detail,
+                        'members': self._build_members_detail(members),
                     }
                 ),
                 "data-streams-message",
@@ -861,6 +847,26 @@ class ClusterMetadataCollector:
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
         self._save_member_hashes_cache(current_member_hashes)
+
+    def _build_members_detail(self, members):
+        members_detail = []
+        for member in members:
+            assignment = getattr(member, 'assignment', None)
+            topic_partitions = (
+                [{'topic': tp.topic, 'partition': tp.partition} for tp in assignment.topic_partitions]
+                if assignment
+                else []
+            )
+            members_detail.append(
+                {
+                    'member_id': _str_attr(member, 'member_id'),
+                    'client_id': _str_attr(member, 'client_id'),
+                    'member_host': _str_attr(member, 'host'),
+                    'topic_partitions': topic_partitions,
+                }
+            )
+        members_detail.sort(key=lambda x: x['member_id'])
+        return members_detail
 
     def _load_member_hashes_cache(self) -> dict[str, str] | None:
         """Return the previous member-hash map, or None if unreadable."""

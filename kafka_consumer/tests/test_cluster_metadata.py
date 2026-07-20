@@ -227,16 +227,20 @@ def mock_compatibility_methods(collector, global_compat='BACKWARD', subject_comp
     collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=subject_compat)
 
 
-def schema_ds_events(check):
-    """Return the parsed data-streams-message payloads with config_type 'schema' emitted by the check."""
+def ds_events_of_type(check, config_type):
+    """Return the parsed data-streams-message payloads with the given config_type emitted by the check."""
     events = []
     for call in check.event_platform_event.call_args_list:
         args = call[0]
         if len(args) > 1 and args[1] == 'data-streams-message':
             payload = json.loads(args[0])
-            if payload.get('config_type') == 'schema':
+            if payload.get('config_type') == config_type:
                 events.append(payload)
     return events
+
+
+def schema_ds_events(check):
+    return ds_events_of_type(check, 'schema')
 
 
 def _make_schema_registry_check(check, instance_overrides=None):
@@ -1918,15 +1922,7 @@ def test_malformed_cache_does_not_abort_collection(check, aggregator):
 
 
 def consumer_membership_events(check):
-    """Return parsed data-streams-message payloads with config_type 'consumer_membership'."""
-    events = []
-    for call in check.event_platform_event.call_args_list:
-        args = call[0]
-        if len(args) > 1 and args[1] == 'data-streams-message':
-            payload = json.loads(args[0])
-            if payload.get('config_type') == 'consumer_membership':
-                events.append(payload)
-    return events
+    return ds_events_of_type(check, 'consumer_membership')
 
 
 def test_consumer_membership_event_emitted(check):
@@ -1955,6 +1951,19 @@ def test_consumer_membership_event_emitted(check):
             'member_host': 'h2',
             'topic_partitions': [{'topic': 'test-topic', 'partition': 0}],
         },
+    ]
+
+
+def test_consumer_membership_event_member_without_assignment(check):
+    """A member with no assignment yields an empty topic_partitions list."""
+    members = [_make_member(client_id='c1', host='h1', assignment_tps=None)]
+    describe_result = _make_group_describe(members=members)
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['members'] == [
+        {'member_id': 'm-c1', 'client_id': 'c1', 'member_host': 'h1', 'topic_partitions': []},
     ]
 
 
