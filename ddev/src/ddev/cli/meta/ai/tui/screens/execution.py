@@ -106,7 +106,6 @@ class ExecutionScreen(TogoScreen):
         self._active_thinking: dict[str, dict[str, str]] = {entry.phase: {} for entry in flow.flow}
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
-        self._run_error_reported = False
         self._phase_errors: dict[str, BaseException] = {}
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
@@ -172,8 +171,8 @@ class ExecutionScreen(TogoScreen):
             self.query_one(TogoHeader).running = True
             await orchestrator.run_async()
         except Exception as error:
-            failed_phase = orchestrator.failed_phase if orchestrator is not None else None
-            self.post_message(ExecutionFailed(error, failed_phase))
+            if orchestrator is None or orchestrator.failed_phase is None:
+                self.post_message(ExecutionFailed(error))
         finally:
             try:
                 self.query_one(TogoHeader).running = False
@@ -331,27 +330,17 @@ class ExecutionScreen(TogoScreen):
         self._write_output(render_phase_error_line(msg.phase_id, msg.error), phase_id=msg.phase_id)
         if msg.phase_id in self._phase_statuses:
             self._mark_phase_failed(msg.phase_id)
-        if self._run_error_reported:
-            self._show_phase_error_summary()
+        self._show_phase_error_summary()
         self._update_display()
 
     def on_run_errored(self, msg: RunErrored) -> None:
-        self._run_error_reported = True
         if self._phase_errors:
             self._show_phase_error_summary()
         else:
-            self._show_run_error(msg.error, msg.phase_id)
+            self._show_error_banner("Run failed.")
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
-        if not self._run_error_reported:
-            self._run_error_reported = True
-            if self._phase_errors:
-                self._show_phase_error_summary()
-            else:
-                self._show_run_error(msg.error, msg.phase_id)
-        if msg.phase_id in self._phase_statuses:
-            self._mark_phase_failed(msg.phase_id)
-            self._update_display()
+        self._show_run_error(msg.error)
 
     def on_phase_selected(self, msg: PhaseSelected) -> None:
         status = self._phase_statuses.get(msg.phase_id, RunStatus.PENDING)

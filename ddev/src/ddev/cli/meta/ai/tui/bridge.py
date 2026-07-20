@@ -74,8 +74,8 @@ def build_app_callback_set(app: BridgeApp) -> CallbackSet:
         _target().post_message(PhaseErrored(phase_id, error))
 
     @cb.on_run_error
-    async def _(error: BaseException, phase_id: str | None) -> None:
-        _target().post_message(RunErrored(error, phase_id))
+    async def _() -> None:
+        _target().post_message(RunErrored())
 
     @cb.on_before_agent_send
     async def _(scope: AgentScope, prompt: str, iteration: int) -> None:

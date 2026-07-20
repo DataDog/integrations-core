@@ -42,21 +42,15 @@ class PhaseErrored(Message):
 
 
 class RunErrored(Message):
-    """Fired when orchestration terminates a run with an exception."""
-
-    def __init__(self, error: BaseException, phase_id: str | None) -> None:
-        super().__init__()
-        self.error = error
-        self.phase_id = phase_id
+    """Fired when orchestration stops because a phase failed."""
 
 
 class ExecutionFailed(Message):
-    """Fired when orchestration exits with an exception."""
+    """Fired when execution exits through an unexpected exception."""
 
-    def __init__(self, error: BaseException, phase_id: str | None) -> None:
+    def __init__(self, error: BaseException) -> None:
         super().__init__()
         self.error = error
-        self.phase_id = phase_id
 
 
 class AgentStarted(Message):

@@ -126,12 +126,11 @@ class PhaseOrchestrator(EventBusOrchestrator):
             self._failed_phase = message.phase_id
             self._failed_error = message.error
             error = FatalProcessingError(f"Phase '{message.phase_id}' failed: {message.error}")
-            await self._callbacks.fire_run_error(error, message.phase_id)
+            await self._callbacks.fire_run_error()
             raise error
 
     async def on_error(self, error: OrchestratorHookError) -> None:
-        """Publish unexpected orchestrator failures and stop the run."""
-        await self._callbacks.fire_run_error(error.original_exception, None)
+        """Stop the run after an unexpected orchestrator failure."""
         raise FatalProcessingError(str(error)) from error.original_exception
 
     async def on_finalize(self, exception: Exception | None) -> None:

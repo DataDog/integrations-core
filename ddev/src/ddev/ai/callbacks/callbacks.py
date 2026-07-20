@@ -95,9 +95,9 @@ class OnPhaseErrorCallback(Protocol):
 
 
 class OnRunErrorCallback(Protocol):
-    """Called when the orchestrator terminates a run with an error."""
+    """Called when the orchestrator stops a run because a phase failed."""
 
-    async def __call__(self, error: BaseException, phase_id: str | None) -> None: ...
+    async def __call__(self) -> None: ...
 
 
 class OnBeforeGoalCheckCallback(Protocol):
@@ -245,8 +245,8 @@ class CallbackSet:
         self._on_run_error.append(func)
         return func
 
-    async def fire_run_error(self, error: BaseException, phase_id: str | None) -> None:
-        await self._fire(self._on_run_error, error, phase_id)
+    async def fire_run_error(self) -> None:
+        await self._fire(self._on_run_error)
 
     def on_before_goal_check(self, func: OnBeforeGoalCheckCallback) -> OnBeforeGoalCheckCallback:
         self._on_before_goal_check.append(func)
@@ -323,9 +323,9 @@ class Callbacks:
         for s in self._sets:
             await s.fire_phase_error(phase_id, error)
 
-    async def fire_run_error(self, error: BaseException, phase_id: str | None) -> None:
+    async def fire_run_error(self) -> None:
         for s in self._sets:
-            await s.fire_run_error(error, phase_id)
+            await s.fire_run_error()
 
     async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
         for s in self._sets:
