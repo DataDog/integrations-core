@@ -150,7 +150,7 @@ RUN Get-RemoteFile `
     Add-ToPath -Append 'C:\winflexbison'
 # Meson + Ninja for building PostgreSQL 18+ on Windows
 # renovate: datasource=pypi depName=meson
-ENV MESON_VERSION="1.11.1"
+ENV MESON_VERSION="1.11.2"
 # renovate: datasource=pypi depName=ninja
 ENV NINJA_VERSION="1.13.0"
 RUN python -m pip install --no-warn-script-location meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION && `
