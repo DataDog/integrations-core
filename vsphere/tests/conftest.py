@@ -248,7 +248,7 @@ def service_instance(
 def _inject_rest_http_client(tag_associations):
     mock_cls = MockHttpV7 if VSPHERE_VERSION.startswith('7.') else MockHttpV6
     http = mock_cls(tag_associations=tag_associations)
-    return patch('datadog_checks.vsphere.api_rest.RequestsWrapper', return_value=http), http
+    return patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=http), http
 
 
 @pytest.fixture
