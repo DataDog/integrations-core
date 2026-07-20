@@ -15,10 +15,10 @@ pytestmark = [pytest.mark.e2e, pytest.mark.usefixtures("dd_environment")]
 
 
 def test_e2e_discovery(dd_agent_check_discovery):
-    # Discovery is scoped to the OpenMetrics endpoint only: the runtime accepts the
-    # first candidate that submits metrics, and the Inference/Management API checks
-    # only submit service checks, so they can never be discovered. Those APIs remain
-    # manually configurable but are not part of this discovered instance.
+    # Discovery is intentionally scoped to OpenMetrics. The runtime returns the first
+    # successful configuration for a service, and the Inference API cannot qualify
+    # because it only submits a service check. Inference and Management remain
+    # manually configurable.
     aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=1)
 
     for expected_metric in OPENMETRICS_METRICS.keys():
