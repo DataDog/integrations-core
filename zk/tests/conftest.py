@@ -110,7 +110,7 @@ def get_version():
 
 
 def get_tls():
-    return os.environ.get("SSL") == 'True'
+    return os.environ.get("SSL", "").lower() == 'true'
 
 
 @pytest.fixture(scope="session")
