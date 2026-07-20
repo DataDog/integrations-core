@@ -14,7 +14,6 @@ import pytest
 import yaml
 
 import tests.configs as configs
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
@@ -987,22 +986,19 @@ def get_url_path(url):
 
 
 @pytest.fixture
-def mock_http_get(request, monkeypatch, mock_http_call):
+def mock_http_get(request, mock_http_call, mock_http):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
     data = param.pop('mock_data', {})
     elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
-    mock_get = mock.MagicMock()
-
-    def get(wrapper, url, **options):
-        mock_get(url, **options)
+    def get(url, **options):
         path = get_url_path(url)
         if http_error and path in http_error:
             return http_error[path]
         if data and path in data:
             return MockHTTPResponse(json_data=data[path], status_code=200)
-        headers = {**wrapper.options.get('headers', {}), **(options.get('headers') or {})}
+        headers = {**mock_http.options.get('headers', {}), **(options.get('headers') or {})}
         params = options.get('params')
         return MockHTTPResponse(
             json_data=mock_http_call('GET', path, headers=headers, params=params),
@@ -1010,20 +1006,17 @@ def mock_http_get(request, monkeypatch, mock_http_call):
             elapsed_seconds=elapsed_total_seconds.get(path, 0.0),
         )
 
-    monkeypatch.setattr(RequestsWrapper, 'get', get)
-    return mock_get
+    mock_http.get.side_effect = get
+    return mock_http.get
 
 
 @pytest.fixture
-def mock_http_post(request, monkeypatch, mock_http_call):
+def mock_http_post(request, mock_http_call, mock_http):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     replace = param.get('replace')
     http_error = param.get('http_error')
 
-    mock_post = mock.MagicMock()
-
-    def post(wrapper, url, **options):
-        mock_post(url, **options)
+    def post(url, **options):
         method = 'POST'
         path = get_url_path(url)
         if http_error and path in http_error:
@@ -1037,7 +1030,7 @@ def mock_http_post(request, monkeypatch, mock_http_call):
                     file = 'system'
                 else:
                     file = file.get('project', {}).get('id')
-            json_data = mock_http_call(method, path, file, headers=wrapper.options.get('headers'))
+            json_data = mock_http_call(method, path, file, headers=mock_http.options.get('headers'))
             headers = {'X-Subject-Token': f'token_{file}'}
         else:
             json_data = mock_http_call(method, path)
@@ -1045,5 +1038,5 @@ def mock_http_post(request, monkeypatch, mock_http_call):
             json_data = replace[path](json_data)
         return MockHTTPResponse(json_data=json_data, status_code=200, headers=headers)
 
-    monkeypatch.setattr(RequestsWrapper, 'post', post)
-    return mock_post
+    mock_http.post.side_effect = post
+    return mock_http.post
