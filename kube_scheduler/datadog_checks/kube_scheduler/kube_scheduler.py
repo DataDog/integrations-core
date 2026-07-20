@@ -5,13 +5,12 @@ from __future__ import division
 
 import re
 
-import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPError
 
 from .sli_metrics import SliMetricsScraperMixin
 
@@ -238,7 +237,7 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMe
             response = http_handler.get(url)
             response.raise_for_status()
             self.service_check(service_check_name, AgentCheck.OK, tags=tags)
-        except requests.exceptions.RequestException as e:
+        except HTTPError as e:
             message = str(e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, message=message, tags=tags)
 
