@@ -23,26 +23,6 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
         by_alias=True, mode='json', exclude_none=True
     )
     # discovery[0]: from_ports
-    for port in candidate_ports(service, [8080]):
-        ctx = {'port': port}
-        instance_data = {
-            'inference_api_url': 'http://{service.host}:{port.number}'.format(service=service, **ctx),
-        }
-        instance = InstanceConfig.model_validate(
-            instance_data, context={'configured_fields': frozenset(instance_data)}
-        ).model_dump(by_alias=True, mode='json', exclude_none=True)
-        yield {'init_config': shared, 'instances': [instance]}
-    # discovery[1]: from_ports
-    for port in candidate_ports(service, [8081]):
-        ctx = {'port': port}
-        instance_data = {
-            'management_api_url': 'http://{service.host}:{port.number}'.format(service=service, **ctx),
-        }
-        instance = InstanceConfig.model_validate(
-            instance_data, context={'configured_fields': frozenset(instance_data)}
-        ).model_dump(by_alias=True, mode='json', exclude_none=True)
-        yield {'init_config': shared, 'instances': [instance]}
-    # discovery[2]: from_ports
     for port in candidate_ports(service, [8082]):
         ctx = {'port': port}
         instance_data = {

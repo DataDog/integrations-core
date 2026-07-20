@@ -6,16 +6,6 @@ files:
     strategies:
     - strategy: from_ports
       port_hints:
-      - 8080
-      candidates:
-      - inference_api_url: "http://{service.host}:{port.number}"
-    - strategy: from_ports
-      port_hints:
-      - 8081
-      candidates:
-      - management_api_url: "http://{service.host}:{port.number}"
-    - strategy: from_ports
-      port_hints:
       - 8082
       candidates:
       - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
@@ -42,6 +32,8 @@ files:
             overrides:
               openmetrics_endpoint.required: false
               openmetrics_endpoint.value.example: http://localhost:8082/metrics
+              openmetrics_endpoint.value.default: null
+              openmetrics_endpoint.value.display_default: http://localhost:8082/metrics
               exclude_labels.value.example:
                 - hostname
                 - Hostname
@@ -80,6 +72,8 @@ files:
             value:
               example: "http://localhost:8080"
               type: string
+              default: null
+              display_default: "http://localhost:8080"
           - template: instances/http
           - template: instances/default
       - name: Management API
@@ -93,6 +87,8 @@ files:
             value:
               example: "http://localhost:8081"
               type: string
+              default: null
+              display_default: "http://localhost:8081"
           - name: limit
             description: |
               Maximum number of models to be 'autodiscovered'.

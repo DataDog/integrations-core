@@ -544,6 +544,118 @@ def test_discovery_candidate_field_cross_check():
     ) in spec.errors
 
 
+def test_discovery_candidate_field_cross_check_multiple_instances_defined():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - name: instances
+            description: instances
+            multiple_instances_defined: true
+            options:
+            - name: OpenMetrics
+              description: OpenMetrics mode
+              options:
+              - name: openmetrics_endpoint
+                description: endpoint
+                value:
+                  type: string
+            - name: Management API
+              description: Management API mode
+              options:
+              - name: management_api_url
+                description: management url
+                value:
+                  type: string
+        """
+    )
+    spec.load()
+
+    assert not spec.errors
+
+
+def test_discovery_candidate_field_cross_check_multiple_instances_defined_rejects_unknown():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - unknown_field: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - name: instances
+            multiple_instances_defined: true
+            options:
+            - name: OpenMetrics
+              options:
+              - name: openmetrics_endpoint
+                description: endpoint
+                value:
+                  type: string
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, unknown_field: Not a recognized instance option'
+    ) in spec.errors
+
+
+def test_discovery_candidate_field_cross_check_does_not_recurse_past_one_level():
+    """A mode group's own options are not flattened further, matching the normal (non-grouped) case."""
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints:
+              - 9090
+              candidates:
+              - nested_field: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - name: instances
+            multiple_instances_defined: true
+            options:
+            - name: OpenMetrics
+              options:
+              - name: advanced
+                options:
+                - name: nested_field
+                  description: nested
+                  value:
+                    type: string
+        """
+    )
+    spec.load()
+
+    assert (
+        'test, test.yaml, discovery, strategy #1, candidate #1, nested_field: Not a recognized instance option'
+    ) in spec.errors
+
+
 def test_discovery_candidate_accepts_literal_values():
     spec = get_spec(
         """

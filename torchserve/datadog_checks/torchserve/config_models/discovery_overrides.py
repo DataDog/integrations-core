@@ -2,11 +2,25 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Override the generated discovery candidates() for this integration.
-#
-# Define a candidates(service, default) function to wrap or replace the generated
-# candidate generation. `default` is the generated generator; call it to reuse
-# the spec-driven candidates, or ignore it to replace them entirely.
-#
-# def candidates(service, default):
-#     yield from default(service)
+from __future__ import annotations
+
+from collections.abc import Iterator
+from typing import Any
+
+from datadog_checks.base.utils.discovery import Service
+
+# TorchServe exposes Inference (8080), Management (8081), and OpenMetrics (8082)
+# APIs as separate ports on one container. `candidate_ports()` yields the hinted
+# 8082 port first, then falls back to every other exposed port, so the generated
+# `from_ports` strategy would also probe 8080/8081 as OpenMetrics endpoints. Drop
+# those two known non-metrics ports, but keep every other port as a fallback
+# candidate in case OpenMetrics is exposed on a custom port.
+NON_METRICS_PORTS = frozenset({8080, 8081})
+
+
+def candidates(service: Service, default) -> Iterator[dict[str, Any]]:
+    excluded_endpoints = {f'http://{service.host}:{port}/metrics' for port in NON_METRICS_PORTS}
+    for candidate in default(service):
+        endpoint = candidate['instances'][0].get('openmetrics_endpoint')
+        if endpoint not in excluded_endpoints:
+            yield candidate
