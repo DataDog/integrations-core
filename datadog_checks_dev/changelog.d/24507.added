@@ -1,0 +1,1 @@
+Add ``kube_discovery`` e2e test helpers, install local base code in helper Agent pods, and add a named-port discovery strategy for generated candidates.
