@@ -2,11 +2,30 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from urllib.parse import urlsplit
+
 # Override the generated discovery candidates() for this integration.
 #
-# Define a candidates(service, default) function to wrap or replace the generated
-# candidate generation. `default` is the generated generator; call it to reuse
-# the spec-driven candidates, or ignore it to replace them entirely.
+# candidate_ports() yields every exposed port, hinted ports first, so the
+# generated stats_url candidate would otherwise be probed against any port on
+# the container. The legacy check also calls /server_info before scraping
+# /stats, so letting that run against arbitrary ports risks hitting an
+# unrelated upstream and misidentifying it as Envoy's admin endpoint. Restrict
+# stats_url to the hinted admin port only; openmetrics_endpoint keeps the
+# default fallback across all candidate ports.
 #
-# def candidates(service, default):
-#     yield from default(service)
+# Known limitation: this only discovers the legacy /stats endpoint when the
+# admin port matches one of the hinted ports used by this integration's
+# discovery strategy (8001, the port used in Datadog's own example configs and
+# test fixtures, and 9901, Envoy's own documented default). Envoy deployments
+# exposing admin on a different port still require a hand-written static
+# config.
+ADMIN_PORTS = {8001, 9901}
+
+
+def candidates(service, default):
+    for candidate in default(service):
+        instance = candidate['instances'][0]
+        if 'stats_url' in instance and urlsplit(instance['stats_url']).port not in ADMIN_PORTS:
+            continue
+        yield candidate

@@ -1,0 +1,1 @@
+Fix generated discovery candidates leaking default values into sibling fields when a spec declares more than one candidate, including across separate strategy stanzas.
