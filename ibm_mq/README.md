@@ -306,6 +306,38 @@ you can potentially reduce the scope of the check by trying the following:
 
 - `Error getting [...]: MQI Error. Comp: 2, Reason 2085: FAILED: MQRC_UNKNOWN_OBJECT_NAME`: If you're seeing messages like this, it is because the integration is trying to collect metrics from a queue that doesn't exist. This can be either due to misconfiguration or, if you're using `auto_discover_queues`, the integration can discover a [dynamic queue][16] and then, when it tries to gather its metrics, the queue no longer exists. In this case you can mitigate the issue by providing a stricter `queue_patterns` or `queue_regex`, or just ignore the warning.
 
+### `channel_desc` tag not appearing on all channel metrics
+
+When `add_description_tags: true` is enabled, `channel_desc` appears on only some `ibm_mq.channel.*` metrics. This is expected behavior.
+
+The integration uses two separate PCF commands to collect channel data. `MQCMD_INQUIRE_CHANNEL` collects channel definition data, and IBM MQ includes the description field in these responses. `MQCMD_INQUIRE_CHANNEL_STATUS` collects runtime status data, and IBM MQ does not include the description field in status responses.
+
+Metrics that receive `channel_desc`:
+
+- `ibm_mq.channel.batch_size`
+- `ibm_mq.channel.batch_interval`
+- `ibm_mq.channel.sharing_conversations`
+- `ibm_mq.channel.long_retry`
+- Other channel definition metrics
+
+Metrics that do not receive `channel_desc`:
+
+- `ibm_mq.channel.channel_status`
+- `ibm_mq.channel.msgs`
+- `ibm_mq.channel.bytes_sent`
+- `ibm_mq.channel.bytes_rcvd`
+- `ibm_mq.channel.buffers_rcvd`
+- `ibm_mq.channel.buffers_sent`
+- `ibm_mq.channel.batches`
+- `ibm_mq.channel.current_msgs`
+- `ibm_mq.channel.count`
+- `ibm_mq.channel.connections_active`
+- Other runtime status metrics
+
+This behavior cannot be changed through configuration, because the constraint is in IBM MQ's PCF protocol.
+
+**Note**: `queue_desc` does not have this limitation. All `ibm_mq.queue.*` metrics receive `queue_desc` when `add_description_tags: true`.
+
 ### Other
 
 Need help? Contact [Datadog support][12].
