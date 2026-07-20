@@ -1370,6 +1370,80 @@ async def test_unmount_cancels_worker():
         assert pilot.app.is_running
 
 
+async def test_back_requires_confirmation_before_cancelling_active_run():
+    """Back keeps an active run alive until the destructive action is confirmed."""
+    import asyncio
+
+    from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.main import MainScreen
+
+    cancelled = asyncio.Event()
+
+    class _InfiniteDemo:
+        failed_phase = None
+
+        async def run_async(self) -> None:
+            try:
+                await asyncio.sleep(999)
+            except asyncio.CancelledError:
+                cancelled.set()
+                raise
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _InfiniteDemo())
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.action_back()
+        await pilot.pause()
+        assert isinstance(app.screen, CancelRunModal)
+        assert app.screen_stack[-2] is screen
+        assert not cancelled.is_set()
+
+        screen_stack_size = len(app.screen_stack)
+        screen.action_back()
+        assert len(app.screen_stack) == screen_stack_size
+
+        await pilot.press("escape")
+        await pilot.pause()
+        assert app.screen is screen
+        assert not cancelled.is_set()
+
+        screen.action_back()
+        await pilot.pause()
+        await pilot.click("#btn-cancel-flow")
+        await pilot.pause()
+        assert isinstance(app.screen, MainScreen)
+        assert cancelled.is_set()
+
+
+async def test_back_pops_immediately_after_run_finishes():
+    """Back does not prompt once the worker has finished."""
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.main import MainScreen
+
+    class _FinishedDemo:
+        failed_phase = None
+
+        async def run_async(self) -> None:
+            return
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _FinishedDemo())
+        await app.push_screen(screen)
+        await pilot.pause()
+        screen.action_back()
+        await pilot.pause()
+        assert isinstance(app.screen, MainScreen)
+
+
 # ---------------------------------------------------------------------------
 # ExecutionScreen: failing orchestrator does not crash the app
 # ---------------------------------------------------------------------------

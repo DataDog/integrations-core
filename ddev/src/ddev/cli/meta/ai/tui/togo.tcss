@@ -73,6 +73,18 @@ Button.-primary:focus {
     color: $secondary;
 }
 
+Button.-error {
+    border: round $error;
+    color: $error;
+}
+
+Button.-error:hover,
+Button.-error:focus {
+    border: round $error;
+    background: $panel-lighten-1;
+    color: $error;
+}
+
 Button.-warning {
     border: round $warning;
 }
@@ -559,6 +571,10 @@ ModalScreen {
 
 #phase-error-message {
     height: auto;
+}
+
+#dialog.cancel-run {
+    min-height: 11;
 }
 
 #diagnostic-errors {

@@ -107,6 +107,8 @@ class ExecutionScreen(TogoScreen):
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
+        self._run_active = False
+        self._cancel_confirmation_open = False
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -130,6 +132,7 @@ class ExecutionScreen(TogoScreen):
                     if task_phase == phase_id:
                         self._task_statuses[(task_phase, task_name)] = RunStatus.DONE
         self._update_display()
+        self._run_active = True
         self._run_worker = self._run_orchestrator()
 
     def on_unmount(self) -> None:
@@ -140,6 +143,7 @@ class ExecutionScreen(TogoScreen):
 
     def action_cancel_run(self) -> None:
         """Cancel the running orchestrator worker."""
+        self._run_active = False
         if self._run_worker is not None:
             self._run_worker.cancel()
 
@@ -148,7 +152,23 @@ class ExecutionScreen(TogoScreen):
             self.action_cancel_run()
 
     def action_back(self) -> None:
-        self.app.pop_screen()
+        if not self._run_active:
+            self.app.pop_screen()
+            return
+        if self._cancel_confirmation_open:
+            return
+
+        from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
+
+        self._cancel_confirmation_open = True
+
+        def on_dismiss(confirmed: bool) -> None:
+            self._cancel_confirmation_open = False
+            if confirmed:
+                self.action_cancel_run()
+                self.app.pop_screen()
+
+        self.app.push_screen(CancelRunModal(), on_dismiss)
 
     def on_key(self, event: events.Key) -> None:
         if event.key == "escape":
@@ -174,6 +194,7 @@ class ExecutionScreen(TogoScreen):
             if orchestrator is None or orchestrator.failed_phase is None:
                 self.post_message(ExecutionFailed(error))
         finally:
+            self._run_active = False
             try:
                 self.query_one(TogoHeader).running = False
             except Exception:
