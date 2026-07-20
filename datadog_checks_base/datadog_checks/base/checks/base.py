@@ -442,11 +442,7 @@ class AgentCheck(object):
         return self._http
 
     def create_http_client(self, instance: dict | None = None) -> HTTPClient:
-        """Construct the HTTP client backing self.http.
-
-        Override this to build a bespoke wrapper or swap the backend. Pass ``instance`` to build a
-        client from a config other than this check's own instance, for example a per-endpoint config.
-        """
+        """Construct the HTTP client backing self.http, optionally from a given instance config."""
         # See Performance Optimizations in this package's README.md.
         from datadog_checks.base.utils.http import create_http_client
 
