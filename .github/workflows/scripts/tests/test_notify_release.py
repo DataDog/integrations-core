@@ -49,13 +49,21 @@ def test_build_text_escapes_dynamic_slack_text():
     )
 
 
-def test_main_no_op_without_credentials(monkeypatch):
-    monkeypatch.delenv("DD_API_KEY", raising=False)
+@pytest.mark.parametrize("missing", ["DD_API_KEY", "DD_APP_KEY", "DD_WORKFLOW_ID"])
+def test_main_fails_without_required_config(missing, monkeypatch, capsys, tmp_path):
+    summary = tmp_path / "summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    monkeypatch.setenv("DD_API_KEY", "api")
     monkeypatch.setenv("DD_APP_KEY", "app")
     monkeypatch.setenv("DD_WORKFLOW_ID", "wf-id")
+    monkeypatch.delenv(missing)
     with patch.object(notify_release, "post") as post:
-        notify_release.main()
+        with pytest.raises(SystemExit) as excinfo:
+            notify_release.main()
+    assert excinfo.value.code == 1
     post.assert_not_called()
+    assert "::error::" in capsys.readouterr().out
+    assert missing in summary.read_text()
 
 
 def test_main_sends_rendered_text(monkeypatch):

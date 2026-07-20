@@ -86,9 +86,14 @@ def main() -> None:
     api_key = os.environ.get("DD_API_KEY", "").strip()
     app_key = os.environ.get("DD_APP_KEY", "").strip()
     workflow_id = os.environ.get("DD_WORKFLOW_ID", "").strip()
-    if not (api_key and app_key and workflow_id):
-        print("Datadog workflow credentials not configured; skipping notification.")
-        return
+    missing_config = [
+        name
+        for name, value in (("DD_API_KEY", api_key), ("DD_APP_KEY", app_key), ("DD_WORKFLOW_ID", workflow_id))
+        if not value
+    ]
+    if missing_config:
+        report_config_error(f"missing required configuration: {', '.join(missing_config)}")
+        sys.exit(1)
     site = os.environ.get("DD_SITE", "").strip() or "datadoghq.com"
     text = build_text(
         os.environ.get("SOURCE_REPO", "integrations-core"),
