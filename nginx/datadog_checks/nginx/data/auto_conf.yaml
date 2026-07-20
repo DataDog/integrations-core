@@ -4,13 +4,7 @@
 ## https://docs.datadoghq.com/agent/guide/ad_identifiers/
 #
 ad_identifiers:
-  - krakend
-
-## CEL selector for autodiscovery.
-#
-cel_selector:
-  processes:
-  - process.name == 'krakend'
+  - nginx
 
 ## Enables configuration discovery
 #
