@@ -2,6 +2,23 @@ name: TorchServe
 fleet_configurable: true
 files:
 - name: torchserve.yaml
+  discovery:
+    strategies:
+    - strategy: from_ports
+      port_hints:
+      - 8080
+      candidates:
+      - inference_api_url: "http://{service.host}:{port.number}"
+    - strategy: from_ports
+      port_hints:
+      - 8081
+      candidates:
+      - management_api_url: "http://{service.host}:{port.number}"
+    - strategy: from_ports
+      port_hints:
+      - 8082
+      candidates:
+      - openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"
   options:
   - template: init_config
     options:
@@ -131,3 +148,10 @@ files:
       path: /var/log/torchserve/access_log.log
       source: torchserve
       service: <SERVICE>
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - torchserve
+  - template: auto_conf/discovery
