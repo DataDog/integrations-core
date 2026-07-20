@@ -17,7 +17,7 @@ from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import find_check_root
+from .utils import find_check_root, get_current_check_name
 
 try:
     from contextlib import ExitStack
@@ -397,11 +397,9 @@ def docker_run(
 
         env_vars = dict(env_vars) if env_vars else {}
         if not env_vars.get('COMPOSE_PROJECT_NAME') and not os.getenv('COMPOSE_PROJECT_NAME'):
-            # An extra level deep because of the context manager
             docker_metadata = get_state('docker_compose_metadata', {})
-            env_vars['COMPOSE_PROJECT_NAME'] = docker_metadata.get('project_name') or os.path.basename(
-                find_check_root(depth=2)
-            )
+            # An extra level deep because of the context manager
+            env_vars['COMPOSE_PROJECT_NAME'] = docker_metadata.get('project_name') or get_current_check_name(depth=2)
 
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
