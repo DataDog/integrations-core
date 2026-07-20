@@ -77,9 +77,7 @@ def test_default_port(url, netloc):
 
 def test_check_clears_wrapper_basic_auth():
     # type: () -> None
-    # VoltDB authenticates via User/Password query params, so the check must clear the basic-auth
-    # tuple the shared HTTP config builds from username/password. Otherwise the request would carry
-    # a conflicting Authorization header alongside the query credentials.
+    # VoltDB authenticates via query params, so the check must clear the config-derived basic-auth tuple.
     instance = {'url': 'http://localhost:8080', 'username': 'doggo', 'password': 'doggopass'}
     check = VoltDBCheck('voltdb', {}, [instance])
 
@@ -127,10 +125,7 @@ def test_request_builds_query_params(password_hashed, password_field, absent_fie
 )
 def test_check_request_uses_query_credentials_not_basic_auth(password_hashed, password_field, absent_field):
     # type: (bool, str, str) -> None
-    # Drive the real check against a stand-in that conforms to the backend-neutral HTTPClient surface
-    # (the only members voltdb touches: options and get). Starting options['auth'] non-None proves
-    # the check clears the config-derived basic-auth tuple, and capturing the get call proves voltdb
-    # sends the credentials as request params under the right field with no per-call auth object.
+    # Drive the real check against a backend-neutral HTTPClient stand-in to prove query-param auth, not basic auth.
     instance = {
         'url': 'http://localhost:8080',
         'username': 'admin',

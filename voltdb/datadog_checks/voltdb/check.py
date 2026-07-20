@@ -22,9 +22,7 @@ class VoltDBCheck(AgentCheck):
         self._config = Config(cast(Instance, self.instance), debug=self.log.debug)
         self.register_secret(self._config.password)
 
-        # VoltDB authenticates via User/Password query params, not HTTP Basic. The shared HTTP
-        # config builds a basic-auth tuple from the required username/password fields, which would
-        # add an Authorization header. Clear it so only the query-param credentials are sent.
+        # VoltDB uses query-param auth, so clear the config-derived basic-auth tuple to avoid an Authorization header.
         self.http.options['auth'] = None
 
         self._client = Client(
