@@ -9,11 +9,13 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import mock
+import openstack.exceptions
 import pytest
-import requests
 import yaml
 
 import tests.configs as configs
+from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
@@ -173,11 +175,7 @@ def mock_http_call(mock_responses):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
-        http_response = requests.models.Response()
-        http_response.status_code = 404
-        http_response.reason = "Not Found"
-        http_response.url = url
-        raise requests.exceptions.HTTPError(response=http_response)
+        raise HTTPStatusError("404 Not Found", response=MockHTTPResponse(status_code=404, url=url))
 
     yield call
 
@@ -233,7 +231,7 @@ def connection_authorize(request, mock_responses):
 
     def authorize():
         if http_error is not None:
-            raise requests.exceptions.HTTPError(response=http_error)
+            raise openstack.exceptions.HttpException(response=http_error)
 
     return mock.MagicMock(side_effect=authorize)
 
@@ -245,7 +243,7 @@ def connection_identity(request, mock_responses):
 
     def regions():
         if http_error and 'regions' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['regions'])
+            raise openstack.exceptions.HttpException(response=http_error['regions'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -257,7 +255,7 @@ def connection_identity(request, mock_responses):
 
     def domains():
         if http_error and 'domains' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['domains'])
+            raise openstack.exceptions.HttpException(response=http_error['domains'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -269,7 +267,7 @@ def connection_identity(request, mock_responses):
 
     def projects():
         if http_error and 'projects' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['projects'])
+            raise openstack.exceptions.HttpException(response=http_error['projects'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -281,7 +279,7 @@ def connection_identity(request, mock_responses):
 
     def users():
         if http_error and 'users' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['users'])
+            raise openstack.exceptions.HttpException(response=http_error['users'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -293,7 +291,7 @@ def connection_identity(request, mock_responses):
 
     def groups():
         if http_error and 'groups' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['groups'])
+            raise openstack.exceptions.HttpException(response=http_error['groups'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -305,7 +303,7 @@ def connection_identity(request, mock_responses):
 
     def group_users(group_id):
         if http_error and 'group_users' in http_error and group_id in http_error['group_users']:
-            raise requests.exceptions.HTTPError(response=http_error['group_users'][group_id])
+            raise openstack.exceptions.HttpException(response=http_error['group_users'][group_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -317,7 +315,7 @@ def connection_identity(request, mock_responses):
 
     def services():
         if http_error and 'services' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['services'])
+            raise openstack.exceptions.HttpException(response=http_error['services'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -329,7 +327,7 @@ def connection_identity(request, mock_responses):
 
     def registered_limits():
         if http_error and 'registered_limits' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['registered_limits'])
+            raise openstack.exceptions.HttpException(response=http_error['registered_limits'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -341,7 +339,7 @@ def connection_identity(request, mock_responses):
 
     def limits():
         if http_error and 'limits' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['limits'])
+            raise openstack.exceptions.HttpException(response=http_error['limits'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -371,7 +369,7 @@ def connection_block_storage(request, mock_responses):
 
     def volumes(project_id, limit=None):
         if http_error and 'volumes' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['volumes'])
+            raise openstack.exceptions.HttpException(response=http_error['volumes'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -383,7 +381,7 @@ def connection_block_storage(request, mock_responses):
 
     def transfers(project_id, details):
         if http_error and 'transfers' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['transfers'])
+            raise openstack.exceptions.HttpException(response=http_error['transfers'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -395,7 +393,7 @@ def connection_block_storage(request, mock_responses):
 
     def snapshots(project_id, limit=None):
         if http_error and 'snapshots' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['snapshots'])
+            raise openstack.exceptions.HttpException(response=http_error['snapshots'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -407,7 +405,7 @@ def connection_block_storage(request, mock_responses):
 
     def pools(project_id, details):
         if http_error and 'pools' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['pools'])
+            raise openstack.exceptions.HttpException(response=http_error['pools'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -419,7 +417,7 @@ def connection_block_storage(request, mock_responses):
 
     def clusters(project_id, details):
         if http_error and 'clusters' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['clusters'])
+            raise openstack.exceptions.HttpException(response=http_error['clusters'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -445,7 +443,7 @@ def connection_compute(request, mock_responses):
 
     def get_limits(tenant_id):
         if http_error and 'limits' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['limits'])
+            raise openstack.exceptions.HttpException(response=http_error['limits'])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses('GET', f'/compute/v2.1/limits?tenant_id={tenant_id}')['limits'],
@@ -454,7 +452,7 @@ def connection_compute(request, mock_responses):
 
     def services():
         if http_error and 'services' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['services'])
+            raise openstack.exceptions.HttpException(response=http_error['services'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -466,7 +464,7 @@ def connection_compute(request, mock_responses):
 
     def aggregates():
         if http_error and 'aggregates' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['aggregates'])
+            raise openstack.exceptions.HttpException(response=http_error['aggregates'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -478,7 +476,7 @@ def connection_compute(request, mock_responses):
 
     def flavors(details):
         if http_error and 'flavors' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['flavors'])
+            raise openstack.exceptions.HttpException(response=http_error['flavors'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -490,7 +488,7 @@ def connection_compute(request, mock_responses):
 
     def hypervisors(details):
         if http_error and 'hypervisors' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['hypervisors'])
+            raise openstack.exceptions.HttpException(response=http_error['hypervisors'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -502,7 +500,7 @@ def connection_compute(request, mock_responses):
 
     def get_hypervisor_uptime(hypervisor_id):
         if http_error and 'hypervisor_uptime' in http_error and hypervisor_id in http_error['hypervisor_uptime']:
-            raise requests.exceptions.HTTPError(response=http_error['hypervisor_uptime'][hypervisor_id])
+            raise openstack.exceptions.HttpException(response=http_error['hypervisor_uptime'][hypervisor_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses('GET', f'/compute/v2.1/os-hypervisors/{hypervisor_id}/uptime')[
@@ -513,7 +511,7 @@ def connection_compute(request, mock_responses):
 
     def get_quota_set(project_id):
         if http_error and 'quota_sets' in http_error and project_id in http_error['quota_sets']:
-            raise requests.exceptions.HTTPError(response=http_error['quota_sets'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['quota_sets'][project_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses('GET', f'/compute/v2.1/os-quota-sets/{project_id}')['quota_set']
@@ -522,7 +520,7 @@ def connection_compute(request, mock_responses):
 
     def servers(project_id, details=True, all_tenants=False, limit=None):
         if http_error and 'servers' in http_error and project_id in http_error['servers']:
-            raise requests.exceptions.HTTPError(response=http_error['servers'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['servers'][project_id])
         return (
             [
                 mock.MagicMock(
@@ -551,14 +549,14 @@ def connection_compute(request, mock_responses):
 
     def get_flavor(flavor_id):
         if http_error and 'flavors' in http_error and flavor_id in http_error['flavors']:
-            raise requests.exceptions.HTTPError(response=http_error['flavors'][flavor_id])
+            raise openstack.exceptions.HttpException(response=http_error['flavors'][flavor_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(return_value=mock_responses('GET', f'/compute/v2.1/flavors/{flavor_id}')['flavor'])
         )
 
     def get_server_diagnostics(server_id):
         if http_error and 'server_diagnostics' in http_error and server_id in http_error['server_diagnostics']:
-            raise requests.exceptions.HTTPError(response=http_error['server_diagnostics'][server_id])
+            raise openstack.exceptions.HttpException(response=http_error['server_diagnostics'][server_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses('GET', f'/compute/v2.1/servers/{server_id}/diagnostics'),
@@ -586,7 +584,7 @@ def connection_network(request, mock_responses):
 
     def agents():
         if http_error and 'agents' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['agents'])
+            raise openstack.exceptions.HttpException(response=http_error['agents'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -598,7 +596,7 @@ def connection_network(request, mock_responses):
 
     def networks(project_id, limit=None):
         if http_error and 'networks' in http_error and project_id in http_error['networks']:
-            raise requests.exceptions.HTTPError(response=http_error['networks'])
+            raise openstack.exceptions.HttpException(response=http_error['networks'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -610,7 +608,7 @@ def connection_network(request, mock_responses):
 
     def get_quota(project_id, details):
         if http_error and 'quotas' in http_error and project_id in http_error['quotas']:
-            raise requests.exceptions.HTTPError(response=http_error['quotas'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['quotas'][project_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses('GET', f'/networking/v2.0/quotas/{project_id}')['quota'],
@@ -631,7 +629,7 @@ def connection_baremetal(request, mock_responses):
 
     def nodes(details, limit=None):
         if http_error and 'nodes' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['nodes'])
+            raise openstack.exceptions.HttpException(response=http_error['nodes'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -643,7 +641,7 @@ def connection_baremetal(request, mock_responses):
 
     def portgroups(node_id, limit=None):
         if http_error and 'portgroups' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['portgroups'])
+            raise openstack.exceptions.HttpException(response=http_error['portgroups'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -655,7 +653,7 @@ def connection_baremetal(request, mock_responses):
 
     def ports(limit=None):
         if http_error and 'ports' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['ports'])
+            raise openstack.exceptions.HttpException(response=http_error['ports'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -667,7 +665,7 @@ def connection_baremetal(request, mock_responses):
 
     def conductors(limit=None):
         if http_error and 'conductors' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['conductors'])
+            raise openstack.exceptions.HttpException(response=http_error['conductors'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -679,7 +677,7 @@ def connection_baremetal(request, mock_responses):
 
     def volume_connectors(limit=None):
         if http_error and 'connectors' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['connectors'])
+            raise openstack.exceptions.HttpException(response=http_error['connectors'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -691,7 +689,7 @@ def connection_baremetal(request, mock_responses):
 
     def volume_targets(limit=None):
         if http_error and 'targets' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['targets'])
+            raise openstack.exceptions.HttpException(response=http_error['targets'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -703,7 +701,7 @@ def connection_baremetal(request, mock_responses):
 
     def drivers():
         if http_error and 'drivers' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['drivers'])
+            raise openstack.exceptions.HttpException(response=http_error['drivers'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -715,7 +713,7 @@ def connection_baremetal(request, mock_responses):
 
     def allocations(limit=None):
         if http_error and 'allocations' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['allocations'])
+            raise openstack.exceptions.HttpException(response=http_error['allocations'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -744,7 +742,7 @@ def connection_image(request, mock_responses):
 
     def images(limit=None):
         if http_error and 'images' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['images'])
+            raise openstack.exceptions.HttpException(response=http_error['images'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -756,7 +754,7 @@ def connection_image(request, mock_responses):
 
     def members(image_id):
         if http_error and 'members' in http_error:
-            raise requests.exceptions.HTTPError(response=http_error['members'])
+            raise openstack.exceptions.HttpException(response=http_error['members'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -779,7 +777,7 @@ def connection_load_balancer(request, mock_responses):
 
     def load_balancers(project_id, limit=None):
         if http_error and 'load_balancers' in http_error and project_id in http_error['load_balancers']:
-            raise requests.exceptions.HTTPError(response=http_error['load_balancers'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['load_balancers'][project_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -797,7 +795,7 @@ def connection_load_balancer(request, mock_responses):
             and 'load_balancer_statistics' in http_error
             and loadbalancer_id in http_error['load_balancer_statistics']
         ):
-            raise requests.exceptions.HTTPError(response=http_error['load_balancer_statistics'][loadbalancer_id])
+            raise openstack.exceptions.HttpException(response=http_error['load_balancer_statistics'][loadbalancer_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses(
@@ -808,7 +806,7 @@ def connection_load_balancer(request, mock_responses):
 
     def listeners(project_id, limit=None):
         if http_error and 'listeners' in http_error and project_id in http_error['listeners']:
-            raise requests.exceptions.HTTPError(response=http_error['listeners'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['listeners'][project_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -822,7 +820,7 @@ def connection_load_balancer(request, mock_responses):
 
     def get_listener_statistics(listener_id):
         if http_error and 'listener_statistics' in http_error and listener_id in http_error['listener_statistics']:
-            raise requests.exceptions.HTTPError(response=http_error['listener_statistics'][listener_id])
+            raise openstack.exceptions.HttpException(response=http_error['listener_statistics'][listener_id])
         return mock.MagicMock(
             to_dict=mock.MagicMock(
                 return_value=mock_responses('GET', f'/load-balancer/v2/lbaas/listeners/{listener_id}/stats').get(
@@ -833,7 +831,7 @@ def connection_load_balancer(request, mock_responses):
 
     def pools(project_id, limit=None):
         if http_error and 'pools' in http_error and project_id in http_error['pools']:
-            raise requests.exceptions.HTTPError(response=http_error['pools'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['pools'][project_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -845,7 +843,7 @@ def connection_load_balancer(request, mock_responses):
 
     def members(pool_id, project_id):
         if http_error and 'pool_members' in http_error and pool_id in http_error['pool_members']:
-            raise requests.exceptions.HTTPError(response=http_error['pool_members'][pool_id])
+            raise openstack.exceptions.HttpException(response=http_error['pool_members'][pool_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -859,7 +857,7 @@ def connection_load_balancer(request, mock_responses):
 
     def health_monitors(project_id):
         if http_error and 'health_monitors' in http_error and project_id in http_error['health_monitors']:
-            raise requests.exceptions.HTTPError(response=http_error['health_monitors'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['health_monitors'][project_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -873,7 +871,7 @@ def connection_load_balancer(request, mock_responses):
 
     def quotas(project_id):
         if http_error and 'quotas' in http_error and project_id in http_error['quotas']:
-            raise requests.exceptions.HTTPError(response=http_error['quotas'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['quotas'][project_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -885,7 +883,7 @@ def connection_load_balancer(request, mock_responses):
 
     def amphorae(project_id, limit=None):
         if http_error and 'amphorae' in http_error and project_id in http_error['amphorae']:
-            raise requests.exceptions.HTTPError(response=http_error['amphorae'][project_id])
+            raise openstack.exceptions.HttpException(response=http_error['amphorae'][project_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -917,7 +915,7 @@ def connection_heat(request, mock_responses):
 
     def stacks(project_id, limit=None):
         if http_error and 'stacks' in http_error and project_id in http_error['stacks']:
-            raise requests.exceptions.HTTPError(response=http_error['stacks'])
+            raise openstack.exceptions.HttpException(response=http_error['stacks'])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -937,7 +935,7 @@ def connection_swift(request, mock_responses):
 
     def containers(account_id, limit=None):
         if http_error and 'containers' in http_error and account_id in http_error['containers']:
-            raise requests.exceptions.HTTPError(response=http_error['containers'][account_id])
+            raise openstack.exceptions.HttpException(response=http_error['containers'][account_id])
         return [
             mock.MagicMock(
                 to_dict=mock.MagicMock(
@@ -995,22 +993,24 @@ def mock_http_get(request, monkeypatch, mock_http_call):
     data = param.pop('mock_data', {})
     elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
-    def get(url, *args, **kwargs):
-        method = 'GET'
-        url = get_url_path(url)
-        if http_error and url in http_error:
-            return http_error[url]
-        if data and url in data:
-            return MockHTTPResponse(json_data=data[url], status_code=200)
-        headers = kwargs.get('headers')
-        params = kwargs.get('params')
-        mock_elapsed = mock.MagicMock(total_seconds=mock.MagicMock(return_value=elapsed_total_seconds.get(url, 0.0)))
-        mock_json = mock.MagicMock(return_value=mock_http_call(method, url, headers=headers, params=params))
-        mock_status_code = mock.MagicMock(return_value=200)
-        return mock.MagicMock(elapsed=mock_elapsed, json=mock_json, status_code=mock_status_code)
+    mock_get = mock.MagicMock()
 
-    mock_get = mock.MagicMock(side_effect=get)
-    monkeypatch.setattr('requests.Session.get', mock_get)
+    def get(wrapper, url, **options):
+        mock_get(url, **options)
+        path = get_url_path(url)
+        if http_error and path in http_error:
+            return http_error[path]
+        if data and path in data:
+            return MockHTTPResponse(json_data=data[path], status_code=200)
+        headers = {**wrapper.options.get('headers', {}), **(options.get('headers') or {})}
+        params = options.get('params')
+        return MockHTTPResponse(
+            json_data=mock_http_call('GET', path, headers=headers, params=params),
+            status_code=200,
+            elapsed_seconds=elapsed_total_seconds.get(path, 0.0),
+        )
+
+    monkeypatch.setattr(RequestsWrapper, 'get', get)
     return mock_get
 
 
@@ -1020,28 +1020,30 @@ def mock_http_post(request, monkeypatch, mock_http_call):
     replace = param.get('replace')
     http_error = param.get('http_error')
 
-    def post(url, *args, **kwargs):
+    mock_post = mock.MagicMock()
+
+    def post(wrapper, url, **options):
+        mock_post(url, **options)
         method = 'POST'
-        url = get_url_path(url)
-        if http_error and url in http_error:
-            return http_error[url]
+        path = get_url_path(url)
+        if http_error and path in http_error:
+            return http_error[path]
         headers = None
-        if url == '/identity/v3/auth/tokens':
-            data = kwargs['json']
+        if path == '/identity/v3/auth/tokens':
+            data = options['json']
             file = data.get('auth', {}).get('scope', 'unscoped')
             if isinstance(file, dict):
                 if 'system' in file:
                     file = 'system'
                 else:
                     file = file.get('project', {}).get('id')
-            json_data = mock_http_call(method, url, file, headers=kwargs.get('headers'))
+            json_data = mock_http_call(method, path, file, headers=wrapper.options.get('headers'))
             headers = {'X-Subject-Token': f'token_{file}'}
         else:
-            json_data = mock_http_call(method, url)
-        if replace and url in replace:
-            json_data = replace[url](json_data)
+            json_data = mock_http_call(method, path)
+        if replace and path in replace:
+            json_data = replace[path](json_data)
         return MockHTTPResponse(json_data=json_data, status_code=200, headers=headers)
 
-    mock_post = mock.MagicMock(side_effect=post)
-    monkeypatch.setattr('requests.Session.post', mock_post)
+    monkeypatch.setattr(RequestsWrapper, 'post', post)
     return mock_post
