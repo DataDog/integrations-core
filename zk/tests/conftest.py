@@ -97,6 +97,8 @@ def get_conn_failure_config():
 @pytest.fixture
 def get_multiple_expected_modes_config():
     config = deepcopy(VALID_CONFIG)
+    if get_tls():
+        config = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
     config.update({'expected_mode': ['standalone', 'leader']})
     return config
 
