@@ -412,7 +412,7 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             self.log.debug("Server %s is powered off and cannot be monitored: %s", server_id, e)
             return
         except HTTPStatusError as e:
-            if e.response.status_code == 404:
+            if getattr(e.response, 'status_code', None) == 404:
                 self.log.debug("Server %s is not in an ACTIVE state and cannot be monitored, %s", server_id, e)
             else:
                 self.warning(
@@ -765,7 +765,8 @@ class OpenStackControllerLegacyCheck(AgentCheck):
             # Delete the scope, we'll populate a new one on the next run for this instance
             self.delete_api_cache()
         except (HTTPStatusError, HTTPTimeoutError, HTTPConnectionError) as e:
-            if isinstance(e, HTTPStatusError) and e.response.status_code < 500:
+            status_code = getattr(e.response, 'status_code', None) if isinstance(e, HTTPStatusError) else None
+            if status_code is not None and status_code < 500:
                 self.warning("Error reaching Nova API: %s", e)
             else:
                 # exponential backoff
