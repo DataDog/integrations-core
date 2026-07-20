@@ -508,7 +508,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             self._log.warning("Database connection error in buffer snapshot, will reconnect: %s", e)
             self._close_db_client()
             self._check.count(
-                "dd.clickhouse.samples.error",
+                "dd.clickhouse.async_inserts_buffer.error",
                 1,
                 tags=self.tags + ["error:collect-buffer-snapshot", "error_type:connection"] + self._get_debug_tags(),
                 raw=True,
@@ -517,7 +517,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         except Exception as e:
             self._log.exception("Failed to collect buffer snapshot: %s", e)
             self._check.count(
-                "dd.clickhouse.samples.error",
+                "dd.clickhouse.async_inserts_buffer.error",
                 1,
                 tags=self.tags + ["error:collect-buffer-snapshot"] + self._get_debug_tags(),
                 raw=True,
@@ -556,7 +556,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         except Exception as e:
             self._log.debug("Failed to obfuscate buffer query: %s", e)
             self._check.count(
-                "dd.clickhouse.samples.error",
+                "dd.clickhouse.async_inserts_buffer.error",
                 1,
                 tags=self.tags + ["error:obfuscate-query"] + self._get_debug_tags(),
                 raw=True,
@@ -634,7 +634,7 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         except Exception as e:
             self._log.exception("Failed to collect buffer snapshot: %s", e)
             self._check.count(
-                "dd.clickhouse.samples.error",
+                "dd.clickhouse.async_inserts_buffer.error",
                 1,
                 tags=self.tags + ["error:collect-buffer-snapshot"] + self._get_debug_tags(),
                 raw=True,
