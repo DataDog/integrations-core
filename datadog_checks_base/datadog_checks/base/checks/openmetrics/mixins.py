@@ -18,6 +18,7 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
 
 
@@ -391,7 +392,9 @@ class OpenMetricsScraperMixin(object):
         if scraper_config['ssl_verify'] is False:
             scraper_config.setdefault('tls_ignore_warning', True)
 
-        http_handler = self._http_handlers[prometheus_url] = self.create_http_client(scraper_config)
+        http_handler = self._http_handlers[prometheus_url] = create_http_client(
+            scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
+        )
 
         headers = http_handler.options['headers']
 

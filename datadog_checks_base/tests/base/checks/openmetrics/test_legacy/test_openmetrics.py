@@ -2739,8 +2739,11 @@ def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_c
     scraper_config = check.get_scraper_config(instance)
     sentinel = mock.MagicMock()
 
-    with mock.patch.object(check, 'create_http_client', return_value=sentinel):
+    with mock.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.create_http_client', return_value=sentinel
+    ) as factory:
         assert check.get_http_handler(scraper_config) is sentinel
+        factory.assert_called_once_with(scraper_config, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
 
 
 def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
