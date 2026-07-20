@@ -10,9 +10,16 @@ from . import common
 
 
 def _assert_nginx_metrics(aggregator):
-    for m in ('nginx.net.conn_dropped_per_s', 'nginx.net.conn_opened_per_s', 'nginx.net.request_per_s'):
-        aggregator.assert_metric(m, at_least=1)
-    for m in ('nginx.net.writing', 'nginx.net.reading', 'nginx.net.waiting', 'nginx.net.connections'):
+    metrics = (
+        'nginx.net.conn_dropped_per_s',
+        'nginx.net.conn_opened_per_s',
+        'nginx.net.request_per_s',
+        'nginx.net.writing',
+        'nginx.net.reading',
+        'nginx.net.waiting',
+        'nginx.net.connections',
+    )
+    for m in metrics:
         aggregator.assert_metric(m, at_least=1)
     aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK)
 
