@@ -35,8 +35,8 @@ license = "BSD-3-Clause"
 deps = [
     "in-toto==2.0.0",
     "packaging==26.2",
-    "securesystemslib[crypto,pynacl]==0.28.0",
-    "tuf==4.0.0",
+    "securesystemslib[crypto,pynacl]==1.4.0",
+    "tuf==7.0.0",
 ]
 
 [project.urls]
