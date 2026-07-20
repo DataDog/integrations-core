@@ -6,7 +6,7 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_exceptions import HTTPStatusError
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
 from datadog_checks.kube_metrics_server import KubeMetricsServerCheck
 
 from .common import make_mock_metrics
@@ -59,8 +59,9 @@ def test_check_metrics(aggregator, mock_metrics, mock_healthcheck_wrapper):
     [
         (None, AgentCheck.OK, {}),
         (HTTPStatusError('health check failed'), AgentCheck.CRITICAL, {'message': 'health check failed'}),
+        (HTTPConnectionError('connection refused'), AgentCheck.CRITICAL, {'message': 'connection refused'}),
     ],
-    ids=['ok', 'http_error'],
+    ids=['ok', 'http_error', 'http_connection_error'],
 )
 def test_service_check(monkeypatch, side_effect, expected_status, extra_kwargs):
     instance_tags = []
