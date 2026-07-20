@@ -2,13 +2,73 @@
 
 <!-- towncrier release notes start -->
 
+## 37.42.0 / 2026-07-08
+
+***Added***:
+
+* Add a `DBMS` class attribute to `DatabaseCheck` so integrations can declare their DBM platform identifier explicitly. The `dbms` property now returns `DBMS` when set and only falls back to the deprecated class-name derivation (with a warning) when it is not. ([#24297](https://github.com/DataDog/integrations-core/pull/24297))
+
+## 37.41.0 / 2026-06-30
+
+***Added***:
+
+* Lazy load the validation package (core, security, utils) on import of datadog_checks.checks. ([#23936](https://github.com/DataDog/integrations-core/pull/23936))
+* Add configuration discovery runtime (Service/Port types, candidate_ports, probing harness, and discovery entry points). ([#23963](https://github.com/DataDog/integrations-core/pull/23963))
+* Add ``include_internal`` and ``include_db`` options to ``TagManager.get_tags`` so DBM checks can exclude internal resource tags (``dd.internal.*``) and the per-database ``db`` tag from tag views that should not carry them. ([#23976](https://github.com/DataDog/integrations-core/pull/23976))
+* Add report_issue and resolve_issue for Agent Health reporting from integrations. ([#24016](https://github.com/DataDog/integrations-core/pull/24016))
+* Implement the ``agent_hostname`` property on the ``DatabaseCheck`` base class. ([#24243](https://github.com/DataDog/integrations-core/pull/24243))
+* Implement the `DatabaseCheck.tags` property backed by a shared `TagManager` so DBM integrations can consolidate tag handling. ([#24244](https://github.com/DataDog/integrations-core/pull/24244))
+* Provide a default `database_identifier` implementation on the `DatabaseCheck` base class that is built (and cached) from the `database_identifier_template` and `database_identifier_params` hooks, so integrations no longer need to reimplement the database identifier templating logic. ([#24250](https://github.com/DataDog/integrations-core/pull/24250))
+
+## 37.40.1 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+* Bump PyJWT to 2.13.0. ([#24074](https://github.com/DataDog/integrations-core/pull/24074))
+
+## 37.40.0 / 2026-06-09
+
+***Added***:
+
+* Add ``AgentCheck.submit_generic_resource`` to submit resource snapshots on the ``genresources`` event-platform track with allow-list field selection. ([#23905](https://github.com/DataDog/integrations-core/pull/23905))
+
+***Fixed***:
+
+* Fix ``resolve_db_host`` treating loopback IP literals (e.g. ``::1``) as DNS resolution failures, which caused database checks to submit metrics with the wrong host tag and miss agent host tags. ([#23849](https://github.com/DataDog/integrations-core/pull/23849))
+
+## 37.39.1 / 2026-06-08
+
+***Fixed***:
+
+* Send each logical database as its own independent schema snapshot, so an error or partial collection for one database does not affect others. ([#23913](https://github.com/DataDog/integrations-core/pull/23913))
+
+## 37.39.0 / 2026-05-29
+
+***Added***:
+
+* Add file-based YAML metrics loading for OpenMetrics V2 checks with composable predicates ([#22750](https://github.com/DataDog/integrations-core/pull/22750))
+* Add ``CronExpression`` and ``CronScheduler`` utilities for cron-style scheduling inside check methods. ([#23741](https://github.com/DataDog/integrations-core/pull/23741))
+
+## 37.38.0 / 2026-05-22 / Agent 7.80.0
+
+***Security***:
+
+* Bump urllib3 to 2.7.0 to address CVE-2026-44431 and CVE-2026-44432. ([#23767](https://github.com/DataDog/integrations-core/pull/23767))
+
+## 37.37.0 / 2026-05-14
+
+***Added***:
+
+* Add a per-performance-object `include_total` option (default `false`) to the Windows perf-counter framework. When set to `true`, the `_Total` aggregate instance is collected instead of being excluded by default. ([#23530](https://github.com/DataDog/integrations-core/pull/23530))
+
 ## 37.36.0 / 2026-04-24
 
 ***Added***:
 
 * Add parameterized query support to QueryExecutor. ([#23469](https://github.com/DataDog/integrations-core/pull/23469))
 
-## 37.35.1 / 2026-04-28
+## 37.35.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

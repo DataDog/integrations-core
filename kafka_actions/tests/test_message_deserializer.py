@@ -270,9 +270,11 @@ class TestMessageDeserializer:
         assert result[1] is None, "Should have no schema ID"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 2: uses_schema_registry=True with plain Avro message - should fail (missing magic byte)
+        # Test 2: uses_schema_registry=True with plain Avro message - falls back to string (non-UTF-8 bytes → error)
         result = deserializer.deserialize_message(avro_message_no_sr, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when uses_schema_registry=True"
+        assert result[0].startswith("<deserialization error:"), (
+            "Non-UTF-8 avro bytes produce error after string fallback"
+        )
         assert result[1] is None
 
         # Test 3: uses_schema_registry=True with Schema Registry format - should succeed
@@ -281,17 +283,18 @@ class TestMessageDeserializer:
         assert result[1] == 350, "Should extract schema ID 350"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 4: Wrong magic byte - should fail
+        # Test 4: Wrong magic byte - falls back to string (non-UTF-8 bytes → error)
         wrong_magic_byte = (
             b'\x01\x00\x00\x01\x5e\xd0\xf5\xe4\xd6\xa3\xb9\x046The Go Programming Language\x18Alan Donovan'
         )
         result = deserializer.deserialize_message(wrong_magic_byte, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail with wrong magic byte"
+        assert result[0].startswith("<deserialization error:"), "Non-UTF-8 bytes produce error after string fallback"
 
-        # Test 5: Message too short (less than 5 bytes) - should fail
+        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - falls back to string
         too_short = b'\x00\x00\x01'
         result = deserializer.deserialize_message(too_short, 'avro', avro_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        assert result[0] is not None, "Too-short message falls back to string, not an error"
+        assert result[1] is None
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=avro_message_no_sr)
@@ -406,10 +409,10 @@ class TestMessageDeserializer:
         assert result[1] is None, "Should have no schema ID"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 2: uses_schema_registry=True with plain Protobuf message - should fail
+        # Test 2: uses_schema_registry=True with plain Protobuf message - falls back to string (non-UTF-8 → error)
         result = deserializer.deserialize_message(protobuf_message_no_sr, 'protobuf', protobuf_schema, True)
         assert result[0].startswith("<deserialization error:"), (
-            "Protobuf should fail when uses_schema_registry=True but no SR format"
+            "Non-UTF-8 protobuf bytes produce error after string fallback"
         )
         assert result[1] is None
 
@@ -419,15 +422,16 @@ class TestMessageDeserializer:
         assert result[1] == 350, "Should extract schema ID 350"
         assert 'The Go Programming Language' in result[0]
 
-        # Test 4: Wrong magic byte - should fail
+        # Test 4: Wrong magic byte - falls back to string (non-UTF-8 bytes → error)
         wrong_magic_byte = b'\x01\x00\x00\x01\x5e' + protobuf_message_no_sr
         result = deserializer.deserialize_message(wrong_magic_byte, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail with wrong magic byte"
+        assert result[0].startswith("<deserialization error:"), "Non-UTF-8 bytes produce error after string fallback"
 
-        # Test 5: Message too short (less than 5 bytes) - should fail
+        # Test 5: Magic byte 0x00 present but message too short (< 5 bytes) - falls back to string
         too_short = b'\x00\x00\x01'
         result = deserializer.deserialize_message(too_short, 'protobuf', protobuf_schema, True)
-        assert result[0].startswith("<deserialization error:"), "Should fail when message too short"
+        assert result[0] is not None, "Too-short message falls back to string, not an error"
+        assert result[1] is None
 
         # Test 6: Test through DeserializedMessage wrapper
         kafka_msg = MockKafkaMessage(key=key_bytes, value=protobuf_message_no_sr)
@@ -564,6 +568,138 @@ class TestMessageDeserializer:
 
         assert msg.value == '1234', "raw base64 '1234' must stay as string, not become int"
         assert isinstance(msg.value, str)
+
+    def test_skip_bytes_strips_prefix_before_json_decode(self):
+        """skip_bytes drops a producer-side prefix before deserialization."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # 1-byte version flag prepended to a JSON payload — common shape for
+        # producers that route by version on the same topic.
+        prefixed = b'\x03' + b'{"order_id": "12345"}'
+
+        result, schema_id = deserializer.deserialize_message(prefixed, 'json', skip_bytes=1)
+
+        assert json.loads(result) == {'order_id': '12345'}
+        assert schema_id is None
+
+    def test_skip_bytes_zero_is_default_behavior(self):
+        """skip_bytes=0 (the default) leaves the message untouched."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        message = b'{"order_id": "12345"}'
+        baseline, _ = deserializer.deserialize_message(message, 'json')
+        with_zero, _ = deserializer.deserialize_message(message, 'json', skip_bytes=0)
+
+        assert baseline == with_zero
+        assert json.loads(with_zero) == {'order_id': '12345'}
+
+    def test_skip_bytes_with_raw_format(self):
+        """skip_bytes is applied before raw base64 encoding."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        prefix = b'\xde\xad\xbe\xef'
+        payload = b'\x00\x01\x02'
+        result, schema_id = deserializer.deserialize_message(prefix + payload, 'raw', skip_bytes=4)
+
+        expected = base64.b64encode(payload).decode('ascii')
+        assert json.loads(result) == expected
+        assert schema_id is None
+
+    def test_skip_bytes_negative_returns_error(self):
+        """A negative skip_bytes is rejected with a clear error."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        result, schema_id = deserializer.deserialize_message(b'whatever', 'json', skip_bytes=-1)
+
+        assert result.startswith('<deserialization error: skip_bytes must be non-negative')
+        assert schema_id is None
+
+    def test_skip_bytes_exceeds_message_length_returns_error(self):
+        """skip_bytes greater than the message length returns a clear error."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        result, schema_id = deserializer.deserialize_message(b'abc', 'json', skip_bytes=10)
+
+        assert result.startswith('<deserialization error: skip_bytes=10 exceeds message length 3')
+        assert schema_id is None
+
+    def test_skip_bytes_equal_to_message_length_returns_none(self):
+        """Skipping exactly the whole message yields an empty result, not an error."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        result, schema_id = deserializer.deserialize_message(b'abc', 'json', skip_bytes=3)
+
+        assert result is None
+        assert schema_id is None
+
+    def test_value_skip_bytes_via_deserialized_message(self):
+        """DeserializedMessage routes value_skip_bytes / key_skip_bytes through to the deserializer."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # 4-byte tenant id prefix on the value, no prefix on the key.
+        value_with_prefix = b'\x00\x00\x00\x07' + b'{"price": 99.95}'
+        key = b'order-42'
+
+        kafka_msg = MockKafkaMessage(key=key, value=value_with_prefix)
+        config = {
+            'key_format': 'string',
+            'key_skip_bytes': 0,
+            'value_format': 'json',
+            'value_skip_bytes': 4,
+        }
+
+        msg = DeserializedMessage(kafka_msg, deserializer, config)
+        assert msg.value == {'price': 99.95}
+        assert msg.key == 'order-42'
+
+    def test_schema_registry_wrong_magic_byte_falls_back_to_string(self):
+        """When uses_schema_registry=True but first byte is not 0x00, fall back to string decoding."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # A plain UTF-8 string message — no schema registry framing.
+        plain_text = b'hello-world'
+        result, schema_id = deserializer.deserialize_message(plain_text, 'avro', uses_schema_registry=True)
+
+        assert result == json.dumps('hello-world')
+        assert schema_id is None
+        log.debug.assert_called()
+
+    def test_schema_registry_wrong_magic_byte_non_utf8_returns_error(self):
+        """When fallback-to-string is triggered but bytes are not valid UTF-8, return error string."""
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # Bytes that are not valid UTF-8 and don't start with 0x00.
+        invalid_utf8 = b'\xff\xfe\xfd'
+        result, schema_id = deserializer.deserialize_message(invalid_utf8, 'json', uses_schema_registry=True)
+
+        assert result.startswith("<deserialization error:")
+        assert schema_id is None
+
+    def test_skip_bytes_runs_before_schema_registry_detection(self):
+        """skip_bytes is applied before the Confluent SR magic-byte check.
+
+        Lets a caller strip a custom outer envelope and then have the rest
+        decoded as a normal Confluent SR-framed message.
+        """
+        log = MagicMock()
+        deserializer = MessageDeserializer(log)
+
+        # Outer 1-byte env flag, then Confluent SR framing: 0x00 + schema_id=42 + JSON body.
+        sr_framed = b'\x00' + (42).to_bytes(4, 'big') + b'{"v": 1}'
+        prefixed = b'\xfe' + sr_framed
+
+        result, schema_id = deserializer.deserialize_message(prefixed, 'json', uses_schema_registry=True, skip_bytes=1)
+        assert json.loads(result) == {'v': 1}
+        assert schema_id == 42
 
 
 class TestSchemaRegistryIntegration:

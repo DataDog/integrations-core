@@ -2,6 +2,51 @@
 
 <!-- towncrier release notes start -->
 
+## 8.1.0 / 2026-07-08
+
+***Added***:
+
+* Add consumer group rebalance detection and membership-change counting metrics, plus partition assignor, group type, simple-group, and static-membership tags, when cluster monitoring is enabled. (DSM only) ([#23915](https://github.com/DataDog/integrations-core/pull/23915))
+* Add Kafka Connect connector monitoring via the Kafka Connect REST API, including connector health metrics and configuration events. ([#24013](https://github.com/DataDog/integrations-core/pull/24013))
+* Support monitoring Confluent Cloud managed connectors by pointing kafka_connect_url at the Confluent Cloud Connect REST API. ([#24033](https://github.com/DataDog/integrations-core/pull/24033))
+
+***Fixed***:
+
+* Fix kafka.broker_offset and kafka.topic.message_rate not being collected when enable_cluster_monitoring is true and the consumer context count exceeds max_partition_contexts. ([#24149](https://github.com/DataDog/integrations-core/pull/24149))
+* Improve the accuracy of ``estimated_consumer_lag`` for consumers that are far behind: cap interpolation for offsets older than the cached broker history, use the low watermark as a floor for the lag offset when cluster monitoring is enabled, and retain a longer broker-timestamp history by compacting the cache (Visvalingam-Whyatt) and pruning samples below the lowest readable offset (the low watermark, or the earliest consumer offset when cluster monitoring is disabled) instead of evicting the oldest one. ([#24167](https://github.com/DataDog/integrations-core/pull/24167))
+* Continue collecting high-watermark offsets for healthy partitions when an individual partition's offset lookup fails, instead of aborting the check. ([#24263](https://github.com/DataDog/integrations-core/pull/24263))
+
+## 8.0.0 / 2026-06-09 / Agent 7.81.0
+
+***Removed***:
+
+* Remove the Data Streams live messages reading feature, which has moved to the kafka_actions integration. ([#23842](https://github.com/DataDog/integrations-core/pull/23842))
+
+***Added***:
+
+* Schema Registry: emit per-subject and global compatibility on the Data Streams schema payload, and stop emitting Datadog Events for broker, topic, and schema registry configurations (those payloads continue to flow to the Data Streams intake). ([#23778](https://github.com/DataDog/integrations-core/pull/23778))
+* Add broker list to the cluster monitoring heartbeat payload. ([#23898](https://github.com/DataDog/integrations-core/pull/23898))
+* Emit connection_error DSM event when the integration cannot connect to Kafka. ([#23902](https://github.com/DataDog/integrations-core/pull/23902))
+
+## 7.3.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Add an `out_of_sync_broker_id` tag to the `kafka.partition.*` metrics (when `enable_cluster_monitoring` is true) identifying each assigned replica that is not in the partition's ISR. Use it to attribute under-replicated partitions to specific broker IDs. ([#23428](https://github.com/DataDog/integrations-core/pull/23428))
+* Include `bootstrap_servers` in the Kafka consumer cluster monitoring heartbeat payload. ([#23475](https://github.com/DataDog/integrations-core/pull/23475))
+
+***Fixed***:
+
+* Filter out errored partitions from offsets_for_times results to prevent invalid offset reporting ([#23242](https://github.com/DataDog/integrations-core/pull/23242))
+* Lower log level from WARN to DEBUG for the message emitted when a consumer group has offsets for a partition but no stored highwater offset (typically during leader failover). ([#23388](https://github.com/DataDog/integrations-core/pull/23388))
+* When a topic's highwater offset decreases (retention wipe, topic recreation, or offset reset), purge cached (offset, timestamp) pairs whose offset is above the new highwater and switch eviction to oldest-timestamp instead of smallest-offset. Previously, stale pre-reset entries poisoned interpolation and pinned `kafka.estimated_consumer_lag` to a wall-clock value equal to how long ago the reset happened. ([#23409](https://github.com/DataDog/integrations-core/pull/23409))
+
+## 7.2.1 / 2026-05-12 / Agent 7.79.0
+
+***Fixed***:
+
+* Switch cluster monitoring's earliest-offset fetch to AdminClient.list_offsets(earliest), and isolate its failures so an earliest-offset error no longer drops topic.message_rate, partition.isr, topic.config.*, and other unrelated topic-metadata metrics. ([#23580](https://github.com/DataDog/integrations-core/pull/23580))
+
 ## 7.2.0 / 2026-04-15
 
 ***Added***:

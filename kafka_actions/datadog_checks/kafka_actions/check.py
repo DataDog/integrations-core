@@ -267,7 +267,7 @@ class KafkaActionsCheck(AgentCheck):
         start_timestamp = config.get('start_timestamp')
         n_messages_retrieved = config.get('n_messages_retrieved', 10)
         max_scanned_messages = config.get('max_scanned_messages', 1000)
-        timeout_ms = config.get('timeout_ms', 20000)
+        timeout_ms = config.get('timeout_ms', 5000)
         filter_expression = config.get('filter', '')
         consumer_group_id = config.get('consumer_group_id') or f"datadog-agent-{self.remote_config_id}"
 
@@ -275,9 +275,11 @@ class KafkaActionsCheck(AgentCheck):
             'value_format': config.get('value_format', 'json'),
             'value_schema': config.get('value_schema'),
             'value_uses_schema_registry': config.get('value_uses_schema_registry', False),
+            'value_skip_bytes': config.get('value_skip_bytes', 0),
             'key_format': config.get('key_format', 'string'),
             'key_schema': config.get('key_schema'),
             'key_uses_schema_registry': config.get('key_uses_schema_registry', False),
+            'key_skip_bytes': config.get('key_skip_bytes', 0),
         }
 
         self.log.debug(
@@ -324,6 +326,8 @@ class KafkaActionsCheck(AgentCheck):
         if scanned_count >= max_scanned_messages and sent_count < n_messages_retrieved:
             hit_scan_limit = True
 
+        hit_timeout = self.kafka_client.hit_timeout and not hit_retrieved_limit and not hit_scan_limit
+
         elapsed_time = time.time() - start_time
 
         stats = {
@@ -335,6 +339,7 @@ class KafkaActionsCheck(AgentCheck):
             'messages_filtered_out': filtered_out_count,
             'hit_scan_limit': hit_scan_limit,
             'hit_retrieved_limit': hit_retrieved_limit,
+            'hit_timeout': hit_timeout,
             'elapsed_time_seconds': round(elapsed_time, 3),
             'n_messages_retrieved': n_messages_retrieved,
             'max_scanned_messages': max_scanned_messages,
@@ -353,6 +358,14 @@ class KafkaActionsCheck(AgentCheck):
                 "Hit max_scanned_messages limit (%d) before retrieving %d messages. Only found %d matching messages.",
                 max_scanned_messages,
                 n_messages_retrieved,
+                sent_count,
+            )
+
+        if hit_timeout:
+            self.log.warning(
+                "Hit the %dms timeout after scanning %d messages and retrieving %d. Result may be incomplete.",
+                timeout_ms,
+                scanned_count,
                 sent_count,
             )
 
@@ -730,10 +743,12 @@ class KafkaActionsCheck(AgentCheck):
                 offsets:
                     - topic: orders
                       partition: 0
-                      offset: 1000
+                      offset: 1000       # explicit offset
                     - topic: orders
                       partition: 1
-                      offset: 1500
+                      offset: -2         # earliest
+                    - topic: payments
+                      timestamp: 1735689600000   # all partitions at/after this timestamp
         """
         config = self.config.update_consumer_group_offsets
 
@@ -742,10 +757,14 @@ class KafkaActionsCheck(AgentCheck):
         consumer_group = config['consumer_group']
         offsets = config['offsets']
 
+        self.kafka_client.check_consumer_group_inactive(consumer_group)
+
         self.log.warning(
-            "Updating offsets for consumer group '%s' on cluster '%s' - may cause duplicate processing or data loss",
+            "Updating offsets for consumer group '%s' on cluster '%s' - may cause duplicate processing or data loss. "
+            "Offsets: %s",
             consumer_group,
             self.cluster,
+            offsets,
         )
 
         success = self.kafka_client.update_consumer_group_offsets(consumer_group=consumer_group, offsets=offsets)

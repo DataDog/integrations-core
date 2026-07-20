@@ -23,6 +23,7 @@ EXPECTED_DEFAULTS = {
     'password': '',
     'connect_timeout': 10,
     'read_timeout': 10,
+    'reported_hostname': None,
     'compression': None,
     'tls_verify': False,
     'tls_ca_cert': None,
@@ -69,6 +70,25 @@ EXPECTED_DEFAULTS = {
         'max_samples_per_collection': 1000,
         'run_sync': False,
     },
+    # === DBM: Schema metrics ===
+    'schema_metrics': {
+        'enabled': False,
+        'collection_interval': 60,
+        'run_sync': False,
+    },
+    # === DBM: Schema collector ===
+    'collect_schemas': {
+        'enabled': False,
+        'collection_interval': 600,
+        'max_tables': 300,
+        'max_columns': 1000,
+        'max_query_duration': 60,
+        'include_databases': (),
+        'exclude_databases': (),
+        'include_tables': (),
+        'exclude_tables': (),
+        'run_sync': False,
+    },
     # === DBM: Parts and merges ===
     'parts_and_merges': {
         'enabled': True,
@@ -91,6 +111,9 @@ EXPECTED_DEFAULTS = {
     'custom_queries': None,
     'only_custom_queries': False,
     'use_global_custom_queries': 'true',
+    # === Query set selection (legacy vs advanced) ===
+    'use_legacy_queries': True,
+    'use_advanced_queries': True,
     # === Agent standard fields ===
     'min_collection_interval': 15,
     'empty_default_hostname': False,

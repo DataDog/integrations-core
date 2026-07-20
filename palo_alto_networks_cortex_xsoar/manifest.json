@@ -1,0 +1,102 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "e4f68beb-6472-490c-ba02-72ded5b9c203",
+  "app_id": "palo-alto-networks-cortex-xsoar",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Gain insights into Palo Alto Networks Cortex XSOAR audit logs, incidents, and metrics.",
+    "title": "Palo Alto Networks Cortex XSOAR",
+    "media": [
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Overview",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_overview_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Overview",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_overview_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Audit Logs",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_audit_logs_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Audit Logs",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_audit_logs_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Incidents",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_incidents_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Incidents",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_incidents_light.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Metrics",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_metrics_dark.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Palo Alto Networks Cortex XSOAR Metrics",
+        "image_url": "images/palo_alto_networks_cortex_xsoar_metrics_light.png",
+        "media_type": "image"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Security",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Category::Automation",
+      "Category::Cloud",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 74861768,
+      "source_type_name": "Palo Alto Networks Cortex XSOAR",
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "palo_alto_networks_cortex_xsoar.",
+        "check": "palo_alto_networks_cortex_xsoar.playbook_execution.count",
+        "metadata_path": "metadata.csv"
+      }
+    },
+    "dashboards": {
+      "Palo Alto Networks Cortex XSOAR Overview": "assets/dashboards/palo_alto_networks_cortex_xsoar_overview.json",
+      "Palo Alto Networks Cortex XSOAR Audit Logs": "assets/dashboards/palo_alto_networks_cortex_xsoar_audit_logs.json",
+      "Palo Alto Networks Cortex XSOAR Incidents": "assets/dashboards/palo_alto_networks_cortex_xsoar_incidents.json",
+      "Palo Alto Networks Cortex XSOAR Metrics": "assets/dashboards/palo_alto_networks_cortex_xsoar_metrics.json"
+    },
+    "monitors": {
+      "Anomalous spikes in playbook execution failure": "assets/monitors/anomalous_spikes_in_playbook_execution_failure.json",
+      "Connectivity errors per integration": "assets/monitors/connectivity_errors_per_integration.json",
+      "High integration error rate": "assets/monitors/high_integration_error_rate.json"
+    },
+    "logs": {
+      "source": "palo-alto-networks-cortex-xsoar"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

@@ -7,6 +7,7 @@ from __future__ import annotations
 import copy
 from typing import TYPE_CHECKING, Optional, Tuple
 
+from datadog_checks.postgres.azure import AZURE_AUTH_TYPES, AZURE_DEFAULT_AUTH_TYPE
 from datadog_checks.postgres.config_models import InstanceConfig, defaults, dict_defaults
 from datadog_checks.postgres.config_models.instance import (
     Aws,
@@ -159,6 +160,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
                 **dict_defaults.instance_collect_schemas().model_dump(),
                 **(instance.get('collect_schemas', {})),
             },
+            "collect_column_statistics": {
+                **dict_defaults.instance_collect_column_statistics().model_dump(),
+                **(instance.get('collect_column_statistics', {})),
+            },
             # Cloud
             "aws": {
                 **Aws(managed_authentication=ManagedAuthentication()).model_dump(),
@@ -184,6 +189,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
             "locks_idle_in_transaction": {
                 **dict_defaults.instance_locks_idle_in_transaction().model_dump(),
                 **(instance.get('locks_idle_in_transaction', {})),
+            },
+            "automatic_diagnostics": {
+                **dict_defaults.instance_automatic_diagnostics().model_dump(),
+                **(instance.get('automatic_diagnostics') or {}),
             },
             "propagate_agent_tags": should_propagate_agent_tags(instance=instance, init_config=init_config),
             "service": instance.get('service', init_config.get('service', None)),
@@ -314,6 +323,13 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
             f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
+    if safefloat(args['automatic_diagnostics']['interval']) <= 0:
+        default_value = dict_defaults.instance_automatic_diagnostics().interval
+        args['automatic_diagnostics']['interval'] = default_value
+        validation_result.add_warning(
+            f"automatic_diagnostics.interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
     if args.get('collect_default_database'):
         args['ignore_databases'] = [d for d in args['ignore_databases'] if d != 'postgres']
 
@@ -360,10 +376,16 @@ def apply_cloud_defaults(args: dict, instance: dict, validation_result: Validati
             'managed_authentication': {**args.get('azure', {}).get('managed_authentication', {}), 'enabled': True},
         }
 
-    if args.get('azure', {}).get('managed_authentication', {}).get('enabled') and not args.get('azure', {}).get(
-        'managed_authentication', {}
-    ).get('client_id'):
-        validation_result.add_error('Azure client_id must be set when using Azure managed authentication')
+    azure_managed_auth = args.get('azure', {}).get('managed_authentication', {})
+    if azure_managed_auth.get('enabled'):
+        azure_auth_type = azure_managed_auth.get('auth_type') or AZURE_DEFAULT_AUTH_TYPE
+        if azure_auth_type not in AZURE_AUTH_TYPES:
+            validation_result.add_error(
+                f"Invalid azure.managed_authentication.auth_type '{azure_auth_type}'. "
+                f"Must be one of {AZURE_AUTH_TYPES}."
+            )
+        if azure_auth_type == 'managed_identity' and not azure_managed_auth.get('client_id'):
+            validation_result.add_error('Azure client_id must be set when using managed_identity authentication')
 
 
 def deprecation_warning(option: str, replacement: str):
@@ -417,7 +439,14 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
                 validation_result.add_warning(f'Invalid regex pattern in autodiscovery exclude: {exclude_pattern}')
 
     # If the user provided config explicitly enables these features, we add a warning if dbm is not enabled
-    dbm_required = ['query_activity', 'query_samples', 'query_metrics', 'collect_settings', 'collect_schemas']
+    dbm_required = [
+        'query_activity',
+        'query_samples',
+        'query_metrics',
+        'collect_settings',
+        'collect_schemas',
+        'collect_column_statistics',
+    ]
     for feature in dbm_required:
         if instance.get(feature, {}).get('enabled') and not config.dbm:
             validation_result.add_warning(f'The `{feature}` feature requires the `dbm` option to be enabled.')
@@ -436,6 +465,9 @@ def apply_features(config: InstanceConfig, validation_result: ValidationResult):
     validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.DATA_OBSERVABILITY, config.data_observability.enabled)
+    validation_result.add_feature(
+        FeatureKey.COLLECT_COLUMN_STATISTICS, config.collect_column_statistics.enabled and config.dbm
+    )
 
 
 METRIC_TYPES = {

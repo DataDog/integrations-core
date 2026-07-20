@@ -59,6 +59,7 @@
       "Category::Security",
       "Category::OS & System",
       "Category::Automation",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]

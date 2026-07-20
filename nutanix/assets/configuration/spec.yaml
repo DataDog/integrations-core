@@ -19,6 +19,7 @@ files:
             value:
               type: string
               example: prism-central.example.com
+            fleet_configurable: false
           - name: pc_port
             description: |
               The port of the Prism Central API.
@@ -30,6 +31,7 @@ files:
             value:
               type: integer
               example: 9440
+            fleet_configurable: false
           - name: pc_username
             description: |
               The username to authenticate with Prism Central.
@@ -37,6 +39,7 @@ files:
             display_priority: 3
             value:
               type: string
+            fleet_configurable: false
           - name: pc_password
             description: |
               The password to authenticate with Prism Central.
@@ -44,6 +47,7 @@ files:
             display_priority: 2
             value:
               type: string
+            fleet_configurable: false
           - name: page_limit
             description: |
               The maximum number of items to retrieve per page when making paginated API requests.
@@ -53,6 +57,7 @@ files:
             value:
               type: integer
               example: 100
+            fleet_configurable: false
           - name: pc_max_retries
             description: |
               The maximum number of retry attempts for API requests when rate limited by Prism Central API.
@@ -60,6 +65,7 @@ files:
             value:
               type: integer
               example: 3
+            fleet_configurable: false
           - name: pc_base_backoff_seconds
             description: |
               The initial backoff duration in seconds when retrying rate-limited requests.
@@ -68,6 +74,7 @@ files:
             value:
               type: integer
               example: 1
+            fleet_configurable: false
           - name: pc_max_backoff_seconds
             description: |
               The maximum backoff duration in seconds when retrying rate-limited requests.
@@ -76,6 +83,7 @@ files:
             value:
               type: integer
               example: 30
+            fleet_configurable: false
           - name: resource_filters
             description: |
               Filter which resources are collected using regex patterns on resource properties.
@@ -146,6 +154,7 @@ files:
                 - resource: alert
                   property: severity
                   patterns: ['^WARNING$', '^CRITICAL$']
+            fleet_configurable: false
           - name: prefix_category_tags
             description: |
               Whether to prefix Nutanix category tags with 'ntnx_'.
@@ -155,6 +164,18 @@ files:
             value:
               type: boolean
               example: false
+            fleet_configurable: false
+          - name: collect_resource_ids_as_tags
+            description: |
+              Whether to collect Nutanix resource extId values as tags on infrastructure metrics.
+              When true, cluster metrics get 'ntnx_cluster_id', host metrics get 'ntnx_host_id',
+              and VM metrics get 'ntnx_vm_id', 'ntnx_host_id', and 'ntnx_cluster_id'.
+              These tags are high cardinality (one unique value per resource).
+              Default is false.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
           - name: collect_events
             description: |
               Whether to collect events from Prism Central.
@@ -162,6 +183,7 @@ files:
             value:
               type: boolean
               example: true
+            fleet_configurable: false
           - name: collect_tasks
             description: |
               Whether to collect tasks from Prism Central.
@@ -169,6 +191,7 @@ files:
             value:
               type: boolean
               example: true
+            fleet_configurable: false
           - name: collect_audits
             description: |
               Whether to collect audit logs from Prism Central.
@@ -176,6 +199,7 @@ files:
             value:
               type: boolean
               example: true
+            fleet_configurable: false
           - name: collect_alerts
             description: |
               Whether to collect alerts from Prism Central.
@@ -183,6 +207,7 @@ files:
             value:
               type: boolean
               example: true
+            fleet_configurable: false
           - name: collect_subtasks
             description: |
               Whether to collect subtasks in addition to parent tasks.
@@ -191,6 +216,7 @@ files:
             value:
               type: boolean
               example: false
+            fleet_configurable: false
           - name: exclude_filtered_resources_from_cluster_capacity
             description: |
               Whether to exclude filtered resources (hosts and VMs excluded by power state or
@@ -202,6 +228,7 @@ files:
             value:
               type: boolean
               example: false
+            fleet_configurable: false
           - name: batch_vm_collection
             description: |
               Whether to fetch all VMs in a single paginated API call instead of per-host.
@@ -212,6 +239,21 @@ files:
             value:
               type: boolean
               example: true
+            fleet_configurable: false
+          - name: hostname_transform
+            description: |
+              Should be either 'upper' or 'lower' or 'default'.
+              If 'upper', the check will convert the Nutanix hostname to uppercase.
+              If 'lower', the check will convert the Nutanix hostname to lowercase.
+              If 'default', the check will not transform the Nutanix hostname (the default option).
+              Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
+            fleet_configurable: false
+            value:
+              type: string
+              enum:
+              - upper
+              - lower
+              - default
           - template: instances/http
           - template: instances/default
             overrides:

@@ -2,7 +2,22 @@
 
 <!-- towncrier release notes start -->
 
-## 6.7.1 / 2026-04-15
+## 6.8.0 / 2026-06-25 / Agent 7.81.0
+
+***Added***:
+
+* Add the `group_per_user_services` option to report Windows per-user service instances under their template name, reducing `windows_service` tag cardinality. ([#24087](https://github.com/DataDog/integrations-core/pull/24087))
+* Add a `per_user` services filter criterion to select or exclude Windows per-user services (use `per_user: false` to exclude them from collection). ([#24088](https://github.com/DataDog/integrations-core/pull/24088))
+
+## 6.7.2 / 2026-06-26 / Agent 7.80.4
+_Backported from 6.8.0_
+
+***Added***:
+
+* Add the `group_per_user_services` option to report Windows per-user service instances under their template name, reducing `windows_service` tag cardinality. ([#24087](https://github.com/DataDog/integrations-core/pull/24087))
+* Add a `per_user` services filter criterion to select or exclude Windows per-user services (use `per_user: false` to exclude them from collection). ([#24088](https://github.com/DataDog/integrations-core/pull/24088))
+
+## 6.7.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

@@ -24,7 +24,7 @@ def test_fixture(benchmark, fixture_path, mock_http_response):
     instance = INSTANCES['main']
     c = Envoy('envoy', {}, [instance])
 
-    mock_http_response(file_path=fixture_path('multiple_services'))
+    mock_http_response(file_path=fixture_path('legacy/multiple_services'))
 
     # Run once to get logging of unknown metrics out of the way.
     c.check(instance)

@@ -12,7 +12,7 @@ Let's say we are building an integration for an API provided by *ACME Inc.*
 Run the following command to create the scaffolding for our integration:
 
 ```
-ddev create ACME
+ddev create logs ACME --display-name="ACME" --metrics-prefix=acme. --platforms=linux,windows,mac_os
 ```
 
 This adds a folder called `acme` in our `integrations-core` folder.

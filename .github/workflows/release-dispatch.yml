@@ -20,6 +20,10 @@ on:
         description: "Commit SHA or ref to build from"
         required: false
         type: string
+      source-repo-branch:
+        description: "Branch that contains source-repo-ref, used to determine stable vs pre-release behavior"
+        required: false
+        type: string
       dry-run:
         description: >-
           When true, print what would be released and where without pushing tags
@@ -38,12 +42,13 @@ on:
 
 permissions:
   id-token: write
-  contents: write # ddev needs to push tags
+  contents: read
 
 env:
   # Default ddev version when callers don't pass `ddev-version`. Tracked by Renovate.
   # renovate: datasource=pypi depName=ddev
-  DEFAULT_DDEV_VERSION: "14.3.2"
+  DEFAULT_DDEV_VERSION: "16.1.1"
+  PYTHON_VERSION: "3.13"
 
 jobs:
   prepare:
@@ -55,48 +60,121 @@ jobs:
       batches: ${{ steps.release-dispatch.outputs.batches }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      # Workflow tooling (composite actions + release scripts) always comes from
+      # integrations-core at the workflow's own commit. When called from another
+      # repo we don't have that commit available locally, so we fall back to
+      # master. This is decoupled from inputs.source-repo-ref on purpose so the
+      # release pipeline can build older refs without losing recent tooling.
+      - name: Checkout workflow tooling
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          repository: DataDog/integrations-core
+          ref: ${{ github.repository == 'DataDog/integrations-core' && github.sha || 'master' }}
+          fetch-depth: 1
+          sparse-checkout: .github
+          path: tooling
+
+      # Source tree to tag and validate. ddev release tag operates on HEAD of
+      # this checkout, so it must be at the ref the caller asked to release.
+      - name: Checkout source repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.source-repo-ref || github.sha }}
           fetch-depth: 0 # ddev needs full tag history
+          path: source
+
+      - name: Verify source ref is on release branch
+        if: inputs.source-repo-branch != ''
+        working-directory: source
+        env:
+          SOURCE_REF: ${{ inputs.source-repo-ref || github.sha }}
+          SOURCE_BRANCH: ${{ inputs.source-repo-branch }}
+        run: |
+          branch="${SOURCE_BRANCH#refs/heads/}"
+          git fetch --no-tags origin "+refs/heads/${branch}:refs/remotes/origin/${branch}"
+          if ! git merge-base --is-ancestor HEAD "refs/remotes/origin/${branch}"; then
+            echo "::error::source-repo-ref '${SOURCE_REF}' is not contained in source-repo-branch '${SOURCE_BRANCH}'"
+            exit 1
+          fi
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
 
       - name: Install ddev
-        run: pip install "ddev==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
+        uses: ./tooling/.github/actions/setup-ddev
+        with:
+          install-mode: pypi
+          ddev-version: "==${{ inputs.ddev-version || env.DEFAULT_DDEV_VERSION }}"
 
       - name: Configure ddev
+        working-directory: source
         env:
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
         run: |
           REPO_SHORT="${SOURCE_REPO#integrations-}"
           ddev config set upgrade_check false
-          ddev config set repos.${REPO_SHORT} .
+          ddev config set repos.${REPO_SHORT} "$PWD"
           ddev config set repo ${REPO_SHORT}
 
       - name: Prepare dispatch
         id: prepare
+        working-directory: source
         env:
           DRY_RUN: ${{ inputs.dry-run }}
           SELECTED_PACKAGES: ${{ inputs.packages }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
           IS_STABLE_RELEASE: ${{ inputs.is-stable-release }}
-        run: python .github/workflows/scripts/release_prepare.py
+        run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_prepare.py"
+
+      # Only mint a write token when validated local tags need to be pushed.
+      # Dry runs and no-op reruns therefore do not consume App token quota.
+      - name: Get source tag token via dd-octo-sts
+        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        id: source-octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        with:
+          scope: DataDog/${{ inputs.source-repo || 'integrations-core' }}
+          policy: self.release.tag-push
+
+      - name: Configure source tag credentials
+        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.source-repo-ref || github.sha }}
+          fetch-depth: 1 # An all-tags fetch would prune locally prepared tags
+          fetch-tags: false
+          path: source
+          token: ${{ steps.source-octo-sts.outputs.token }}
+          persist-credentials: true
+          clean: false # Preserve the local tags created during preparation
+
+      - name: Push release tags
+        if: steps.prepare.outputs.has_new_tags == 'true' && !inputs.dry-run
+        working-directory: source
+        env:
+          NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
+        run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_push_tags.py"
 
       - name: Build dispatch batches
         id: release-dispatch
         if: steps.prepare.outputs.has_packages == 'true'
+        working-directory: source
         env:
           PACKAGES: ${{ steps.prepare.outputs.packages }}
+          NEW_TAGS: ${{ steps.prepare.outputs.new_tags }}
           SOURCE_REPO: ${{ inputs.source-repo || 'integrations-core' }}
           REF: ${{ inputs.source-repo-ref || github.sha }}
           DRY_RUN: ${{ inputs.dry-run }}
-        run: python .github/workflows/scripts/release_dispatch.py
+        run: python "$GITHUB_WORKSPACE/tooling/.github/workflows/scripts/release_dispatch.py"
 
   dispatch:
-    name: Dispatch wheel builds (batch ${{ strategy.job-index + 1 }})
+    name: Dispatch wheel builds (batch ${{ strategy.job-index }})
     needs: prepare
     if: needs.prepare.outputs.has_packages == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
-    environment: release
 
     strategy:
       matrix:
@@ -108,7 +186,7 @@ jobs:
         uses: DataDog/dd-octo-sts-action@08f2144903ced3254a3dafec2592563409ba2aa0 # v1.0.1
         with:
           scope: DataDog/agent-integration-wheels-release
-          policy: integrations-core.dispatch-wheel-builds
+          policy: ${{ inputs.source-repo || 'integrations-core' }}.dispatch-wheel-builds
 
       - name: Dispatch release
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0

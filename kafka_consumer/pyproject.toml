@@ -37,10 +37,8 @@ license = "BSD-3-Clause"
 [project.optional-dependencies]
 deps = [
     "aws-msk-iam-sasl-signer-python==1.0.2",
-    "boto3==1.42.72",
+    "boto3==1.43.40",
     "confluent-kafka==2.13.2",
-    "fastavro==1.12.1",
-    "protobuf==7.34.0",
 ]
 
 [project.urls]

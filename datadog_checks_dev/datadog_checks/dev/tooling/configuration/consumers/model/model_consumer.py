@@ -2,20 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import warnings
-from pathlib import Path
-from typing import Dict, List, Tuple
+from pprint import pformat
+from typing import Any, Dict, List, Tuple
 
 import yaml
 from datamodel_code_generator import DataModelType
-from datamodel_code_generator.format import CodeFormatter, PythonVersion
+from datamodel_code_generator.format import PythonVersion
 from datamodel_code_generator.model import get_data_model_types
 from datamodel_code_generator.parser import LiteralType
 from datamodel_code_generator.parser.openapi import OpenAPIParser
 
+from datadog_checks.dev.tooling.configuration.consumers.model.code_formatter import format_with_ruff
 from datadog_checks.dev.tooling.configuration.consumers.model.model_file import build_model_file
 from datadog_checks.dev.tooling.configuration.consumers.model.model_info import ModelInfo
 from datadog_checks.dev.tooling.configuration.consumers.openapi_document import build_openapi_document
-from datadog_checks.dev.tooling.constants import get_root
 
 PYTHON_VERSION = PythonVersion.PY_39
 
@@ -30,11 +30,36 @@ VALIDATORS_DOCUMENTATION = '''# Here you can include additional config validator
 #     return values
 '''
 
+DISCOVERY_STRATEGIES_DOCUMENTATION = '''# Here you can define custom (local:) discovery strategies for this integration.
+#
+# Decorate a generator with @discovery_strategy (imported from
+# datadog_checks.base.utils.discovery) and reference it from the spec discovery
+# stanza as `strategy: local:<function_name>`. The function receives the
+# discovered Service plus the inputs declared in the spec and yields one context
+# (ctx) mapping per candidate, exposing the keys listed in `provides`.
+#
+# from datadog_checks.base.utils.discovery import discovery_strategy
+#
+# @discovery_strategy(provides=('svc',))
+# def from_some_config(service, config_path):
+#     ...
+#     yield {'svc': ...}
+'''
+
+DISCOVERY_OVERRIDES_DOCUMENTATION = '''# Override the generated discovery candidates() for this integration.
+#
+# Define a candidates(service, default) function to wrap or replace the generated
+# candidate generation. `default` is the generated generator; call it to reuse
+# the spec-driven candidates, or ignore it to replace them entirely.
+#
+# def candidates(service, default):
+#     yield from default(service)
+'''
+
 
 class ModelConsumer:
-    def __init__(self, spec: dict, code_formatter: CodeFormatter = None):
+    def __init__(self, spec: dict):
         self.spec = spec
-        self.code_formatter = code_formatter or self.create_code_formatter()
 
     def render(self) -> Dict[str, Dict[str, str]]:
         """
@@ -56,7 +81,7 @@ class ModelConsumer:
                     section_package_info,
                     section_model_files,
                     section_model_info,
-                ) = self._process_section(section)
+                ) = self._process_section(section, spec_file['name'])
                 package_info.extend(section_package_info)
                 model_files.update(section_model_files)
                 model_info.update(section_model_info)
@@ -66,11 +91,21 @@ class ModelConsumer:
                 continue
 
             model_files.update(self._build_model_files(model_info, package_info))
+            if 'discovery' in spec_file:
+                pkg_name = spec_file['name'].removesuffix('.yaml')
+                has_shared = any(s['name'] == 'init_config' for s in spec_file.get('options', []))
+                model_files['discovery.py'] = (
+                    self._build_discovery_file(spec_file['discovery'], pkg_name, has_shared=has_shared),
+                    [],
+                )
+                # Custom (written once, preserved across regens; see CUSTOM_FILES)
+                model_files['discovery_strategies.py'] = (DISCOVERY_STRATEGIES_DOCUMENTATION, [])
+                model_files['discovery_overrides.py'] = (DISCOVERY_OVERRIDES_DOCUMENTATION, [])
             rendered_files[spec_file['name']] = {file_name: model_files[file_name] for file_name in sorted(model_files)}
 
         return rendered_files
 
-    def _process_section(self, section) -> (List[Tuple[str, str]], dict, ModelInfo):
+    def _process_section(self, section, spec_file_name: str = '') -> (List[Tuple[str, str]], dict, ModelInfo):
         # Values to return
         # [(model_id, schema_name)]
         package_info: List[Tuple[str, str]] = []
@@ -88,6 +123,10 @@ class ModelConsumer:
             model_id = 'instance'
             model_file_name = f'{model_id}.py'
             schema_name = 'InstanceConfig'
+            # auto_conf.yaml files may define instances as a leaf (no sub-options) to
+            # emit `instances: []` without providing a model schema.
+            if 'options' not in section and spec_file_name == 'auto_conf.yaml':
+                return (package_info, model_files, model_info)
             if section['multiple_instances_defined']:
                 section = self._merge_instances(section, errors)
         # Skip anything checks don't use directly
@@ -137,7 +176,6 @@ class ModelConsumer:
             model_id,
             section_name,
             model_info,
-            self.code_formatter,
         )
         # instance.py or shared.py
         model_files[model_file_name] = (model_file_contents, errors)
@@ -207,11 +245,6 @@ class ModelConsumer:
 
         return new_section
 
-    @staticmethod
-    def create_code_formatter():
-        path = Path(get_root())
-        return CodeFormatter(PYTHON_VERSION, settings_path=path if path.is_dir() else None)
-
     def _build_deprecation_file(self, deprecation_data):
         file_needs_formatting = False
         deprecations_file_lines = []
@@ -226,7 +259,7 @@ class ModelConsumer:
         deprecations_file_lines.append('')
         deprecations_file_contents = '\n'.join(deprecations_file_lines)
         if file_needs_formatting:
-            deprecations_file_contents = self.code_formatter.apply_black(deprecations_file_contents)
+            deprecations_file_contents = format_with_ruff(deprecations_file_contents)
         return deprecations_file_contents
 
     @staticmethod
@@ -255,5 +288,131 @@ class ModelConsumer:
         model_info.defaults_file_lines.append('')
         defaults_file_contents = '\n'.join(model_info.defaults_file_lines)
         if model_info.defaults_file_needs_value_normalization:
-            defaults_file_contents = self.code_formatter.apply_black(defaults_file_contents)
+            defaults_file_contents = format_with_ruff(defaults_file_contents)
         return defaults_file_contents
+
+    def _build_discovery_file(self, discovery: dict[str, Any], pkg_name: str, *, has_shared: bool = True) -> str:
+        import datadog_checks.dev.tooling.configuration.discovery.core_strategies  # noqa: F401
+        from datadog_checks.dev.tooling.configuration.discovery.registry import REGISTRY
+
+        strategies = discovery.get('strategies', [])
+
+        # `Service` is always needed for the signature; each strategy contributes
+        # its own runtime imports (`candidate_ports` for core strategies, the
+        # discovery_strategies function for local: ones) plus the section models.
+        import_lines = [
+            'from datadog_checks.base.utils.discovery import Service',
+            f'from datadog_checks.{pkg_name}.config_models import discovery_overrides',
+            f'from datadog_checks.{pkg_name}.config_models.instance import InstanceConfig',
+        ]
+        if has_shared:
+            import_lines.append(f'from datadog_checks.{pkg_name}.config_models.shared import SharedConfig')
+        for stanza in strategies:
+            strategy_name = stanza['strategy']
+            if strategy_name.startswith('local:'):
+                func = strategy_name.split(':', 1)[1]
+                import_lines.append(f'from datadog_checks.{pkg_name}.config_models.discovery_strategies import {func}')
+            else:
+                import_lines.extend(REGISTRY[strategy_name].runtime_imports)
+
+        if has_shared:
+            shared_line = [
+                "    shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(",
+                "        by_alias=True, mode='json', exclude_none=True",
+                "    )",
+            ]
+        else:
+            shared_line = ['    shared = {}']
+
+        lines = [
+            'from __future__ import annotations',
+            '',
+            'from collections.abc import Iterator',
+            'from typing import Any',
+            '',
+            *self._merge_import_lines(import_lines),
+            '',
+            '',
+            'def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:',
+            *shared_line,
+        ]
+
+        for index, stanza in enumerate(strategies):
+            strategy_name = stanza['strategy']
+            lines.append(f'    # discovery[{index}]: {strategy_name}')
+            lines.extend(self._emit_strategy_loop(stanza, strategy_name))
+            for candidate in stanza.get('candidates', []):
+                lines.extend(self._emit_candidate_body(candidate))
+
+        lines.extend(
+            [
+                '',
+                '',
+                'def candidates(service: Service) -> Iterator[dict[str, Any]]:',
+                "    override = getattr(discovery_overrides, 'candidates', None)",
+                '    if override is None:',
+                '        yield from _generated_candidates(service)',
+                '    else:',
+                '        yield from override(service, default=_generated_candidates)',
+                '',
+            ]
+        )
+        return format_with_ruff('\n'.join(lines))
+
+    @staticmethod
+    def _merge_import_lines(import_lines: list[str]) -> list[str]:
+        """Group `from M import N` lines by module into canonical isort order.
+
+        Mirrors ruff/isort so the generated file is stable under `ddev test -fs`:
+        modules sorted alphabetically, names within a module ordered by type
+        (classes/constants before lowercase functions), deduped.
+        """
+        modules: dict[str, set[str]] = {}
+        for line in import_lines:
+            module, _, names = line.removeprefix('from ').partition(' import ')
+            modules.setdefault(module, set()).update(name.strip() for name in names.split(','))
+
+        merged = []
+        for module in sorted(modules):
+            names = sorted(modules[module], key=lambda name: (name[:1].islower(), name))
+            merged.append(f'from {module} import {", ".join(names)}')
+        return merged
+
+    @staticmethod
+    def _emit_strategy_loop(stanza: dict[str, Any], strategy_name: str) -> list[str]:
+        """Emit the per-candidate loop header that binds `ctx`."""
+        from datadog_checks.dev.tooling.configuration.discovery.registry import REGISTRY
+
+        if strategy_name.startswith('local:'):
+            func = strategy_name.split(':', 1)[1]
+            reserved = {'strategy', 'candidates', 'provides', 'inputs'}
+            kwargs = ', '.join(f'{key}={value!r}' for key, value in stanza.items() if key not in reserved)
+            call = f'{func}(service, {kwargs})' if kwargs else f'{func}(service)'
+            return [f'    for ctx in {call}:']
+
+        return REGISTRY[strategy_name].emit_context(stanza)
+
+    @staticmethod
+    def _emit_candidate_body(candidate: dict[str, Any]) -> list[str]:
+        """Emit the model-backed candidate construction for one candidate mapping."""
+        lines = ['        instance_data = {']
+        for field_name, value in candidate.items():
+            rendered = ModelConsumer._render_candidate_value(value)
+            lines.append(f'            {field_name!r}: {rendered},')
+        lines.append('        }')
+        lines.append('        instance = InstanceConfig.model_validate(')
+        lines.append("            instance_data, context={'configured_fields': frozenset(instance_data)}")
+        lines.append("        ).model_dump(by_alias=True, mode='json', exclude_none=True)")
+        lines.append("        yield {'init_config': shared, 'instances': [instance]}")
+        return lines
+
+    @staticmethod
+    def _render_candidate_value(value: Any) -> str:
+        """Render a discovery candidate value as a Python expression."""
+        if isinstance(value, str):
+            if '{' in value:
+                return f'{value!r}.format(service=service, **ctx)'
+
+            return repr(value)
+
+        return pformat(value, width=120, sort_dicts=False)

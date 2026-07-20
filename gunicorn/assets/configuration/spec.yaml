@@ -13,6 +13,7 @@ files:
           type: string
           require_trusted_provider: true
           example: gunicorn
+        fleet_configurable: false
       - template: init_config/default
   - template: instances
     options:
@@ -35,6 +36,7 @@ files:
         type: string
         require_trusted_provider: true
         example: gunicorn
+      fleet_configurable: false
     - template: instances/default
   - template: logs
     example:

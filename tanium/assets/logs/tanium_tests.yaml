@@ -109,11 +109,11 @@ tests:
         mitreAttack:
           techniques:
            -
-            name: "System Binary Proxy Execution"
             id: "T1218"
+            name: "System Binary Proxy Execution"
            -
-            name: "System Binary Proxy Execution: Control Panel"
             id: "T1218.002"
+            name: "System Binary Proxy Execution: Control Panel"
         name: "Control Panel Items"
         platforms:
          - "windows"

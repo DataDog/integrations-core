@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.9.1 / 2026-04-15
+## 8.10.0 / 2026-06-10 / Agent 7.81.0
+
+***Added***:
+
+* Added config `filter_queue_statistics_metrics`  so `ibm_mq.stats.queue.*` metrics can be limited to queues discovered with `queue_patterns` or `queue_regex`. ([#23933](https://github.com/DataDog/integrations-core/pull/23933))
+
+## 8.9.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

@@ -9,6 +9,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
 from .common import (
+    ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS,
     CONNECTION_LIMIT_METRICS,
     DEFAULT_INSTANCE,
     ENVOY_VERSION,
@@ -22,7 +23,7 @@ from .common import (
 pytestmark = [
     requires_new_environment,
     pytest.mark.integration,
-    pytest.mark.usefixtures('dd_environment'),
+    pytest.mark.usefixtures('dd_environment', 'exercise_envoy'),
     pytest.mark.flaky,
 ]
 
@@ -38,7 +39,13 @@ def test_check(aggregator, dd_run_check, check):
     dd_run_check(c)
     dd_run_check(c)
 
-    for metric in PROMETHEUS_METRICS + LOCAL_RATE_LIMIT_METRICS + CONNECTION_LIMIT_METRICS + TLS_INSPECTOR_METRICS:
+    for metric in (
+        PROMETHEUS_METRICS
+        + LOCAL_RATE_LIMIT_METRICS
+        + CONNECTION_LIMIT_METRICS
+        + TLS_INSPECTOR_METRICS
+        + ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS
+    ):
         formatted_metric = "envoy.{}".format(metric)
         if metric in FLAKY_METRICS:
             aggregator.assert_metric(formatted_metric, at_least=0)
@@ -58,6 +65,35 @@ def test_check(aggregator, dd_run_check, check):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check(
         'envoy.openmetrics.health', AgentCheck.OK, tags=['endpoint:{}'.format(DEFAULT_INSTANCE['openmetrics_endpoint'])]
+    )
+
+
+def test_adaptive_concurrency_symmetric(aggregator, dd_run_check, check):
+    """Verify both collection directions for adaptive concurrency metrics.
+
+    Uses a scoped metadata subset to avoid the ~650 exclusions a global
+    check_symmetric_inclusion=True would need.
+    """
+    c = check(DEFAULT_INSTANCE)
+    dd_run_check(c)
+    dd_run_check(c)
+
+    # The legacy check emits 'rq_blocked'; OpenMetrics emits 'rq_blocked.count'. This test scrapes /stats/prometheus.
+    legacy_only = 'envoy.http.adaptive_concurrency.gradient_controller.rq_blocked'
+    adaptive_metadata = {
+        k: v for k, v in get_metadata_metrics().items() if 'adaptive_concurrency' in k and k != legacy_only
+    }
+
+    # Guard against a vacuous pass: the controller needs real traffic to emit stats.
+    assert any('adaptive_concurrency' in m for m in aggregator.metric_names)
+
+    # Restrict the forward direction to adaptive concurrency metrics.
+    non_adaptive = [m for m in aggregator.metric_names if 'adaptive_concurrency' not in m]
+
+    aggregator.assert_metrics_using_metadata(
+        adaptive_metadata,
+        check_symmetric_inclusion=True,
+        exclude=non_adaptive,
     )
 
 

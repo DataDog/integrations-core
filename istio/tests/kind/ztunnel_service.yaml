@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ztunnel-metrics
+  namespace: istio-system
+spec:
+  selector:
+    app: ztunnel
+  ports:
+    - name: stats
+      port: 15020
+      targetPort: 15020

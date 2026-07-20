@@ -23,6 +23,15 @@ from . import defaults, validators
 SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
 
 
+class AutomaticDiagnostics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    interval: Optional[float] = None
+
+
 class ManagedAuthentication(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -47,9 +56,25 @@ class ManagedAuthentication1(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    client_id: Optional[str] = None
+    auth_type: Optional[str] = Field(
+        None,
+        description='The authentication method. Use `managed_identity` (default) or `workload_identity` for AKS.\n',
+        examples=['managed_identity'],
+    )
+    client_id: Optional[str] = Field(
+        None,
+        description='The client ID of the managed identity or application registration.\nRequired for `managed_identity` auth. Optional for `workload_identity`,\nwhere it defaults to the `AZURE_CLIENT_ID` environment variable.\n',
+    )
     enabled: Optional[bool] = Field(None, examples=[False])
-    identity_scope: Optional[str] = Field(None, examples=['https://ossrdbms-aad.database.windows.net/.default'])
+    identity_scope: Optional[str] = Field(
+        None,
+        description='The permission scope from where to access the identity token.\n',
+        examples=['https://ossrdbms-aad.database.windows.net/.default'],
+    )
+    tenant_id: Optional[str] = Field(
+        None,
+        description='The Azure AD tenant ID. Only used for `workload_identity` auth.\nDefaults to the `AZURE_TENANT_ID` environment variable.\n',
+    )
 
 
 class Azure(BaseModel):
@@ -60,6 +85,22 @@ class Azure(BaseModel):
     deployment_type: Optional[str] = None
     fully_qualified_domain_name: Optional[str] = None
     managed_authentication: Optional[ManagedAuthentication1] = None
+
+
+class CollectColumnStatistics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    exclude_schemas: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    include_schemas: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
+    max_tables: Optional[float] = None
 
 
 class CollectRawQueryStatement(BaseModel):
@@ -140,9 +181,20 @@ class Query(BaseModel):
     custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
     dbname: str
     entity: Entity
-    interval_seconds: int
+    interval_seconds: Optional[int] = Field(
+        None,
+        description='How often (in seconds) to run this query. Ignored when schedule is set\n(see schedule for the precedence rule).\n',
+    )
     monitor_id: int
     query: str
+    query_timeout: int = Field(
+        ...,
+        description='Statement timeout for this query in milliseconds. Overrides the instance-level\nquery_timeout for this query only.\n',
+    )
+    schedule: Optional[str] = Field(
+        None,
+        description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
+    )
     type: Optional[str] = None
 
 
@@ -244,7 +296,6 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    baseline_metrics_expiry: Optional[float] = None
     batch_max_content_size: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
@@ -293,12 +344,14 @@ class InstanceConfig(BaseModel):
     )
     activity_metrics_excluded_aggregations: Optional[tuple[str, ...]] = None
     application_name: Optional[str] = None
+    automatic_diagnostics: Optional[AutomaticDiagnostics] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     collect_activity_metrics: Optional[bool] = None
     collect_bloat_metrics: Optional[bool] = None
     collect_buffercache_metrics: Optional[bool] = None
     collect_checksum_metrics: Optional[bool] = None
+    collect_column_statistics: Optional[CollectColumnStatistics] = None
     collect_count_metrics: Optional[bool] = None
     collect_database_size_metrics: Optional[bool] = None
     collect_default_database: Optional[bool] = None

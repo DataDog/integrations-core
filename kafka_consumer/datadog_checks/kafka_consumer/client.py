@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures import as_completed
 
-from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
-from confluent_kafka.admin import AdminClient
+from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, IsolationLevel, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient, OffsetSpec
 
 # AWS MSK IAM authentication support
 try:
@@ -42,6 +42,9 @@ class KafkaClient:
         return self._kafka_client
 
     def open_consumer(self, consumer_group):
+        if self._consumer is not None:
+            return
+
         config = {
             "bootstrap.servers": self.config._kafka_connect_str,
             "group.id": consumer_group,
@@ -55,8 +58,11 @@ class KafkaClient:
         self.log.debug("Consumer instance %s created for group %s", self._consumer, consumer_group)
 
     def close_consumer(self):
+        if self._consumer is None:
+            return
         self.log.debug("Closing consumer instance %s", self._consumer)
         self._consumer.close()
+        self._consumer = None
 
     def __get_authentication_config(self):
         config = {
@@ -147,18 +153,31 @@ class KafkaClient:
             return "", []
         return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
 
-    def consumer_offsets_for_times(self, partitions, offset=-1):
-        topicpartitions_for_querying = [
-            # -1: latest; 0: earliest (timestamp 0)
-            TopicPartition(topic=topic, partition=partition, offset=offset)
-            for topic, partition in partitions
-        ]
-        return [
-            (tp.topic, tp.partition, tp.offset)
-            for tp in self._consumer.offsets_for_times(
-                partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
-            )
-        ]
+    def get_partition_offsets(self, partitions, offset=-1):
+        """Return (topic, partition, offset) tuples, skipping partitions that can't be queried.
+
+        A request-level failure (the batched list_offsets call itself raising, as opposed to an
+        individual partition's future) is not swallowed here: it propagates so the caller aborts
+        highwater collection instead of silently treating every partition as missing.
+        """
+        offset_spec = OffsetSpec.earliest() if offset == 0 else OffsetSpec.latest()
+        request = {TopicPartition(topic=topic, partition=partition): offset_spec for topic, partition in partitions}
+        if not request:
+            return []
+
+        futures = self.kafka_client.list_offsets(
+            request,
+            isolation_level=IsolationLevel.READ_UNCOMMITTED,
+            request_timeout=self.config._request_timeout,
+        )
+
+        results = []
+        for tp, future in futures.items():
+            try:
+                results.append((tp.topic, tp.partition, future.result().offset))
+            except Exception as e:
+                self.log.debug("Skipping offsets for %s/%s: %s", tp.topic, tp.partition, e)
+        return results
 
     def _list_topics(self):
         if self._cluster_metadata:
@@ -261,22 +280,6 @@ class KafkaClient:
                 tpo.append((tp.topic, tp.partition, tp.offset))
             offsets.append((response_offset_info.group_id, tpo))
         return offsets
-
-    def start_collecting_messages(self, start_offsets, consumer_group):
-        self.open_consumer(consumer_group)
-        self._consumer.assign(start_offsets)
-
-    def get_next_message(self):
-        return self._consumer.poll(timeout=1)
-
-    def delete_consumer_group(self, consumer_group):
-        """Delete a consumer group using the AdminClient."""
-        try:
-            future = self.kafka_client.delete_consumer_groups([consumer_group])
-            future[consumer_group].result(timeout=self.config._request_timeout)
-            self.log.debug("Successfully deleted consumer group: %s", consumer_group)
-        except Exception as e:
-            self.log.warning("Failed to delete consumer group %s: %s", consumer_group, e)
 
     def describe_consumer_group(self, consumer_group):
         desc = self.kafka_client.describe_consumer_groups([consumer_group])[consumer_group].result()

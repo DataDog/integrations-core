@@ -61,6 +61,7 @@ files:
         value:
           type: string
           example: <LABEL>
+        fleet_configurable: false
       - name: label_joins
         description: Allows the targeting of a metric to retrieve its label with a 1:1 mapping.
         value:
@@ -81,6 +82,7 @@ files:
                   type: array
                   items:
                     type: string
+        fleet_configurable: false
       - name: labels_mapper
         description: |
           The label mapper allows you to rename labels.
@@ -89,6 +91,7 @@ files:
           example:
             flavor: origin
           type: object
+        fleet_configurable: false
       - name: type_overrides
         description: |
           Override a type in the Prometheus payload or type an untyped metric (ignored by default).
@@ -97,6 +100,7 @@ files:
           example:
             <METRIC_NAME>: <METRIC_TYPE>
           type: object
+        fleet_configurable: false
       - name: send_histograms_buckets
         description: Set send_histograms_buckets to true to send the histograms bucket.
         fleet_configurable: true
@@ -149,10 +153,12 @@ files:
         value:
           example: 10
           type: integer
+        fleet_configurable: false
       - name: max_returned_metrics
         description: |
           The check limits itself to 2000 metrics by default, increase this limit if needed.
         value:
           example: 2000
           type: integer
+        fleet_configurable: false
       - template: instances/default

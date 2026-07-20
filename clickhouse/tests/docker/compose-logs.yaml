@@ -1,0 +1,21 @@
+# https://datadoghq.dev/integrations-core/ddev/test/#logs
+
+# To start an environment with log collection enabled you can use the `MOUNT_LOGS=true` env variable.
+# Example: `MOUNT_LOGS=true ddev env start clickhouse "py3.13-25.8"`
+
+services:
+  clickhouse:
+    extends:
+      file: compose.yaml
+      service: clickhouse
+    volumes:
+      - ${DD_LOG_1}:/var/log/clickhouse-server/clickhouse-server.log
+      - ${DD_LOG_2}:/var/log/clickhouse-server/clickhouse-server.err.log
+
+  clickhouse-keeper:
+    extends:
+      file: compose.yaml
+      service: clickhouse-keeper
+
+networks:
+  clickhouse-network: {}

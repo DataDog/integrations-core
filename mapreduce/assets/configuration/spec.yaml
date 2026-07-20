@@ -27,6 +27,7 @@ files:
               type: array
               items:
                 type: object
+            fleet_configurable: false
 
           - name: job_specific_counters
             description: |
@@ -55,6 +56,7 @@ files:
               type: array
               items:
                 type: object
+            fleet_configurable: false
 
           - template: init_config/http
           - template: init_config/default

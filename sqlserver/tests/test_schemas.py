@@ -15,9 +15,12 @@ from . import common
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
+SCHEMA_DATABASE = 'datadog_test_schemas'
+
 
 @pytest.fixture
 def dbm_instance(instance_docker):
+    instance_docker['database'] = SCHEMA_DATABASE
     instance_docker['dbm'] = True
     instance_docker['min_collection_interval'] = 0.1
     instance_docker['query_samples'] = {'enabled': False}
@@ -47,11 +50,17 @@ def integration_check() -> Callable[[dict, Optional[dict]], SQLServer]:
         c.cancel()
 
 
+def create_schema_collector(check: SQLServer) -> SQLServerSchemaCollector:
+    collector = SQLServerSchemaCollector(check)
+    collector._get_databases()
+    return collector
+
+
 def test_get_cursor(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    collector = SQLServerSchemaCollector(check)
+    collector = create_schema_collector(check)
 
-    with collector._get_cursor('datadog_test_schemas') as cursor:
+    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
         assert cursor is not None
         schemas = []
         rows = cursor.fetchall_dict()
@@ -65,9 +74,9 @@ def test_get_cursor(dbm_instance, integration_check):
 
 def test_tables(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    collector = SQLServerSchemaCollector(check)
+    collector = create_schema_collector(check)
 
-    with collector._get_cursor('datadog_test_schemas') as cursor:
+    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
         assert cursor is not None
         tables = []
         rows = cursor.fetchall_dict()
@@ -80,13 +89,12 @@ def test_tables(dbm_instance, integration_check):
 
 def test_columns(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    collector = SQLServerSchemaCollector(check)
+    collector = create_schema_collector(check)
 
-    with collector._get_cursor('datadog_test_schemas') as cursor:
+    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
         assert cursor is not None
         # Assert that at least one row has columns
         rows = cursor.fetchall_dict()
-        print(rows)
         assert any(row['columns'] for row in rows)
         for row in rows:
             if row['columns']:
@@ -101,9 +109,9 @@ def test_columns(dbm_instance, integration_check):
 
 def test_indexes(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    collector = SQLServerSchemaCollector(check)
+    collector = create_schema_collector(check)
 
-    with collector._get_cursor('datadog_test_schemas') as cursor:
+    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
         assert cursor is not None
         # Assert that at least one row has indexes
         rows = cursor.fetchall_dict()

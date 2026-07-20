@@ -5,7 +5,7 @@ import contextlib
 import copy
 import functools
 import os
-from string import Template
+import threading
 from time import time
 
 import psycopg
@@ -44,9 +44,11 @@ from datadog_checks.postgres.relationsmanager import (
 )
 from datadog_checks.postgres.statement_samples import PostgresStatementSamples
 from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 
 from .__about__ import __version__
 from .config import build_config, sanitize
+from .diagnose import run_diagnostics
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -99,7 +101,7 @@ except ImportError:
 
 MAX_CUSTOM_RESULTS = 100
 
-PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s)"
+PG_SETTINGS_QUERY = "SELECT name, setting FROM pg_settings WHERE name IN (%s, %s, %s, %s)"
 
 
 class PostgreSql(DatabaseCheck):
@@ -117,8 +119,6 @@ class PostgreSql(DatabaseCheck):
         super(PostgreSql, self).__init__(name, init_config, instances)
         self.health = PostgresHealth(self)
         self._resolved_hostname = None
-        self._database_identifier = None
-        self._agent_hostname = None
         self._database_hostname = None
         self._db = None
         self._cloud_metadata: dict[str, dict] = None
@@ -129,6 +129,7 @@ class PostgreSql(DatabaseCheck):
         self.is_aurora = None
         self.wal_level = None
         self._version_utils = VersionUtils()
+        self._last_automatic_diagnostics_run = 0
 
         config, validation_result = build_config(self)
         self._config = config
@@ -139,7 +140,7 @@ class PostgreSql(DatabaseCheck):
         for warning in validation_result.warnings:
             self.log.warning(warning)
 
-        self._tags = list(self._config.tags)
+        self.tag_manager.set_tags_from_list(self._config.tags, replace=True)
         self.add_core_tags()
 
         # Submit the initialization health event in case the `check` method is never called
@@ -150,9 +151,6 @@ class PostgreSql(DatabaseCheck):
             self.log.error("Configuration validation failed: %s", validation_result.errors)
             raise validation_result.errors[0]
 
-        # Keep a copy of the tags without the internal resource tags so they can be used for paths that don't
-        # go through the agent internal metrics submission processing those tags
-        self._non_internal_tags = copy.deepcopy(self.tags)
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
@@ -164,6 +162,7 @@ class PostgreSql(DatabaseCheck):
             token_provider=self.build_token_provider(),
         )
         self.metrics_cache = PostgresMetricsCache(self._config)
+        # Initialize statement metrics collector before server version is known.
         self.statement_metrics = PostgresStatementMetrics(self, self._config)
         self.statement_samples = PostgresStatementSamples(self, self._config)
         self.metadata_samples = PostgresMetadata(self, self._config)
@@ -175,13 +174,14 @@ class PostgreSql(DatabaseCheck):
             lambda: RelationsManager.validate_relations_config(list(self._config.relations))
         )
         self.check_initializations.append(self.set_resolved_hostname_metadata)
+        self.check_initializations.append(self._run_automatic_diagnostics)
         self.check_initializations.append(self._connect)
         self.check_initializations.append(self.load_cluster_name)
         self.check_initializations.append(self.load_version)
+        self.check_initializations.append(self._initialize_statement_metrics)
         self.check_initializations.append(self.load_system_identifier)
         self.check_initializations.append(self.initialize_is_aurora)
         self.check_initializations.append(self._query_manager.compile_queries)
-        self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
         self.autodiscovery = self._build_autodiscovery()
         self._dynamic_queries = []
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
@@ -189,6 +189,15 @@ class PostgreSql(DatabaseCheck):
             maxsize=1,
             ttl=self._config.database_instance_collection_interval,
         )  # type: TTLCache
+
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
+
+        self._cancel_lock = threading.Lock()
+        self._is_running = False
+        self._cancelled = False
+
+    def database_monitoring_column_statistics(self, raw_event: str):
+        self.event_platform_event(raw_event, "dbm-column-statistics")
 
     def _submit_initialization_health_event(self):
         try:
@@ -233,8 +242,8 @@ class PostgreSql(DatabaseCheck):
         return discovery
 
     @property
-    def tags(self):
-        return self._tags
+    def tags_without_db(self):
+        return self.tag_manager.get_tags(include_db=False)
 
     @property
     def dbms(self):
@@ -245,40 +254,41 @@ class PostgreSql(DatabaseCheck):
         """
         Add tags that should be attached to every metric/event but which require check calculations outside the config.
         """
-        self.tags.append("database_hostname:{}".format(self.database_hostname))
-        self.tags.append("database_instance:{}".format(self.database_identifier))
+        self.tag_manager.set_tag("database_hostname", self.database_hostname, replace=True)
+        self.tag_manager.set_tag("database_instance", self.database_identifier, replace=True)
 
     def set_resource_tags(self):
         if self._config.gcp.project_id and self._config.gcp.instance_id:
-            self.tags.append(
-                "dd.internal.resource:gcp_sql_database_instance:{}:{}".format(
-                    self._config.gcp.project_id, self._config.gcp.instance_id
-                )
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "gcp_sql_database_instance:{}:{}".format(self._config.gcp.project_id, self._config.gcp.instance_id),
             )
         if self._config.aws.instance_endpoint:
-            self.tags.append(
-                "dd.internal.resource:aws_rds_instance:{}".format(
-                    self._config.aws.instance_endpoint,
-                )
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "aws_rds_instance:{}".format(self._config.aws.instance_endpoint),
             )
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tags.append("dd.internal.resource:aws_rds_instance:{}".format(self.resolved_hostname))
+            self.tag_manager.set_tag(
+                "dd.internal.resource",
+                "aws_rds_instance:{}".format(self.resolved_hostname),
+            )
         if self._config.azure.deployment_type and self._config.azure.fully_qualified_domain_name:
             deployment_type = self._config.azure.deployment_type
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
-                self.tags.append(
-                    "dd.internal.resource:{}:{}".format(resource_type, self._config.azure.fully_qualified_domain_name)
+                self.tag_manager.set_tag(
+                    "dd.internal.resource",
+                    "{}:{}".format(resource_type, self._config.azure.fully_qualified_domain_name),
                 )
         # finally, tag the `database_instance` resource for this instance
         # metrics intake will use this tag to add all the tags for the instance
-        self.tags.append(
-            "dd.internal.resource:database_instance:{}".format(
-                self.database_identifier,
-            )
+        self.tag_manager.set_tag(
+            "dd.internal.resource",
+            "database_instance:{}".format(self.database_identifier),
         )
 
     def _new_query_executor(self, queries, db):
@@ -297,6 +307,15 @@ class PostgreSql(DatabaseCheck):
                 cursor.execute(query)
                 rows = cursor.fetchall()
                 return rows
+
+    def _close_db(self):
+        if self._db:
+            try:
+                self._db.close()
+            except Exception:
+                pass
+            finally:
+                self._db = None
 
     @contextlib.contextmanager
     def db(self):
@@ -318,12 +337,7 @@ class PostgreSql(DatabaseCheck):
             self.log.warning(
                 "Connection to the database %s has been interrupted, closing connection", self._config.dbname
             )
-            try:
-                self._db.close()
-            except Exception:
-                pass
-            finally:
-                self._db = None
+            self._close_db()
             raise
         except Exception:
             self.log.exception("Unhandled exception while using database connection %s", self._config.dbname)
@@ -465,29 +479,87 @@ class PostgreSql(DatabaseCheck):
 
         return self._dynamic_queries
 
+    def run(self):
+        # TODO: move this lock into the base class
+        with self._cancel_lock:
+            if self._cancelled:
+                self.log.debug("run() skipped, check already cancelled")
+                return ''
+            self._is_running = True
+        try:
+            return super().run()
+        finally:
+            needs_finalize = False
+            with self._cancel_lock:
+                self._is_running = False
+                if self._cancelled:
+                    needs_finalize = True
+            if needs_finalize:
+                self.log.debug("Check cancel has been signaled, finalizing now that run() is complete")
+                self._finalize()
+
     def cancel(self):
+        """Signal that the check is being unscheduled.
+
+        This method can be called while check() is running on another thread
+        (the GIL is released during psycopg I/O). It must not perform any
+        destructive operations — closing connections or nulling attributes that
+        check() depends on — because that causes a SIGSEGV in libpq when
+        check() resumes.
+
+        Destructive cleanup is deferred to _finalize(), which is called either
+        here (if the check is idle) or by run()'s finally block (if the check
+        is in-flight). The Agent guarantees it will not call run() again after
+        cancel().
         """
-        Cancels and sends cancel signal to all threads.
-        """
+        self.log.debug("Marking check as cancelled")
+        self._cancel_async_jobs()
+        needs_finalize = False
+        with self._cancel_lock:
+            self._cancelled = True
+            if not self._is_running:
+                needs_finalize = True
+        if needs_finalize:
+            self.log.debug("cancel() finalizing immediately, check is idle")
+            self._finalize()
+        else:
+            self.log.debug("cancel() deferred finalize, check is still running")
+
+    @property
+    def _async_jobs(self):
+        """Return the async jobs active for this check's configuration."""
+        jobs = []
         if self._config.dbm:
-            self.statement_samples.cancel()
-            self.statement_metrics.cancel()
-            self.metadata_samples.cancel()
-            if self.statement_metrics._job_loop_future:
-                self.statement_metrics._job_loop_future.result()
-            if self.statement_samples._job_loop_future:
-                self.statement_samples._job_loop_future.result()
-            if self.metadata_samples._job_loop_future:
-                self.metadata_samples._job_loop_future.result()
+            jobs.extend([self.statement_metrics, self.statement_samples, self.metadata_samples])
         elif self._config.data_observability.enabled:
-            self.metadata_samples.cancel()
-            if self.metadata_samples._job_loop_future:
-                self.metadata_samples._job_loop_future.result()
+            jobs.append(self.metadata_samples)
         if self._config.data_observability.enabled:
-            self.data_observability.cancel()
-            if self.data_observability._job_loop_future:
-                self.data_observability._job_loop_future.result()
+            jobs.append(self.data_observability)
+        return jobs
+
+    def _cancel_async_jobs(self):
+        """Signal async jobs to stop. Safe to call while check() is running."""
+        for job in self._async_jobs:
+            job.cancel()
+
+    def _finalize(self):
+        """Tear down check state. Must not run while check() is executing."""
+        self.log.debug("Finalizing check: closing connections and clearing state")
+        for job in self._async_jobs:
+            if job._job_loop_future:
+                job._job_loop_future.result()
+                job._job_loop_future = None
+            job._shutdown()
+        self._clean_state()
+        self.check_initializations.clear()
+        # TODO: move diagnosis cleanup into AgentCheck.cancel() in the base class
+        self._diagnosis = None
+        self.log.check = None
+        self._query_manager = None
+        self.health = None
+        self._close_db()
         self._close_db_pool()
+        self.log.debug("Check cleanup complete")
 
     def _clean_state(self):
         self.log.debug("Cleaning state")
@@ -565,6 +637,30 @@ class PostgreSql(DatabaseCheck):
         self.version = self._version_utils.parse_version(self.raw_version)
         self.set_metadata('version', self.raw_version)
 
+    def _initialize_statement_metrics(self):
+        custom_pgss_view = self._config.pg_stat_statements_view != 'pg_stat_statements'
+        if self._config.query_metrics.incremental_query_metrics and self.version < V10:
+            self.log.warning(
+                "incremental_query_metrics requires PostgreSQL 10 or later (detected version: %s). "
+                "Falling back to the legacy query metrics collector.",
+                self.version,
+            )
+        elif self._config.query_metrics.incremental_query_metrics and custom_pgss_view:
+            self.log.warning(
+                "incremental_query_metrics requires calling the pg_stat_statements extension function directly "
+                "and cannot be used with a custom configured pg_stat_statements_view (%s). "
+                "Falling back to the legacy query metrics collector.",
+                self._config.pg_stat_statements_view,
+            )
+
+        if self._config.query_metrics.incremental_query_metrics and self.version >= V10 and not custom_pgss_view:
+            self.log.info("Using incremental query metrics collector")
+            self.statement_metrics = PostgresStatementMetricsV2(self, self._config)
+        else:
+            if not self._config.query_metrics.incremental_query_metrics:
+                self.log.info("Using legacy query metrics collector (full pg_stat_statements load)")
+            self.statement_metrics = PostgresStatementMetrics(self, self._config)
+
     def initialize_is_aurora(self):
         if self.is_aurora is None:
             self.is_aurora = self._version_utils.is_aurora(self.db())
@@ -595,26 +691,16 @@ class PostgreSql(DatabaseCheck):
         return self._resolved_hostname
 
     @property
-    def database_identifier(self):
-        # type: () -> str
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.template)
-            tag_dict = {}
-            tags = self.tags.copy()
-            # sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            tag_dict['resolved_hostname'] = self.resolved_hostname
-            tag_dict['host'] = str(self._config.host)
-            tag_dict['port'] = str(self._config.port)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.template
+
+    @property
+    def database_identifier_params(self) -> dict:
+        return {
+            'resolved_hostname': self.resolved_hostname,
+            'host': str(self._config.host),
+            'port': str(self._config.port),
+        }
 
     @property
     def cloud_metadata(self):
@@ -634,13 +720,6 @@ class PostgreSql(DatabaseCheck):
         sets the check_id after initialization has completed.
         """
         self.set_metadata('resolved_hostname', self._resolved_hostname)
-
-    @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
 
     @property
     def database_hostname(self):
@@ -976,8 +1055,11 @@ class PostgreSql(DatabaseCheck):
                 role_arn=self._config.aws.managed_authentication.role_arn,
             )
         elif self._config.azure.managed_authentication.enabled:
+            auth_type = self._config.azure.managed_authentication.auth_type
             return AzureTokenProvider(
+                auth_type=auth_type,
                 client_id=self._config.azure.managed_authentication.client_id,
+                tenant_id=self._config.azure.managed_authentication.tenant_id,
                 identity_scope=self._config.azure.managed_authentication.identity_scope,
             )
         else:
@@ -1014,7 +1096,11 @@ class PostgreSql(DatabaseCheck):
             kwargs["token_provider"] = self.db_pool.token_provider
 
         conn = TokenAwareConnection.connect(**kwargs)
-        self.db_pool._configure_connection(conn)
+        try:
+            self.db_pool._configure_connection(conn)
+        except Exception:
+            conn.close()
+            raise
         return conn
 
     def _connect(self):
@@ -1033,7 +1119,12 @@ class PostgreSql(DatabaseCheck):
                 self.log.debug("Running query [%s]", PG_SETTINGS_QUERY)
                 cursor.execute(
                     PG_SETTINGS_QUERY,
-                    ("pg_stat_statements.max", "track_activity_query_size", "track_io_timing"),
+                    (
+                        "pg_stat_statements.max",
+                        "track_activity_query_size",
+                        "track_io_timing",
+                        "shared_preload_libraries",
+                    ),
                 )
                 rows = cursor.fetchall()
                 self.pg_settings.clear()
@@ -1097,7 +1188,7 @@ class PostgreSql(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.dbms_version,
                 'integration_version': __version__,
-                "tags": [t for t in self._non_internal_tags if not t.startswith('db:')],
+                "tags": self.tag_manager.get_tags(include_internal=False, include_db=False),
                 "timestamp": time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {
@@ -1119,11 +1210,9 @@ class PostgreSql(DatabaseCheck):
         # Resend the initialization event. The submitter will debounce it
         self._submit_initialization_health_event()
 
-        tags = copy.copy(self.tags)
-        self.tags_without_db = [t for t in copy.copy(self.tags) if not t.startswith("db:")]
-        # Reset _non_internal_tags to prevent stale dynamic tags (e.g., replication_role) from accumulating
-        self._non_internal_tags = [t for t in copy.copy(self.tags) if not t.startswith("dd.internal")]
-        tags_to_add = []
+        # Tags computed before connecting, used for the service check if an early failure occurs.
+        # Recomputed below once the dynamic tags (version, cluster name, etc.) have been set.
+        tags = self.tag_manager.get_tags()
         try:
             # Check version
             self._connect()
@@ -1134,24 +1223,20 @@ class PostgreSql(DatabaseCheck):
             self.wal_level = self._get_wal_level()
 
             # Add raw version as a tag
-            tags.append(f'postgresql_version:{self.raw_version}')
-            tags_to_add.append(f'postgresql_version:{self.raw_version}')
+            self.tag_manager.set_tag('postgresql_version', self.raw_version, replace=True)
 
             # Add system identifier as a tag
             if self.system_identifier:
-                tags.append(f'system_identifier:{self.system_identifier}')
-                tags_to_add.append(f'system_identifier:{self.system_identifier}')
+                self.tag_manager.set_tag('system_identifier', str(self.system_identifier), replace=True)
 
             # Add cluster name if it was set
             if self.cluster_name:
-                tags.append(f'postgresql_cluster_name:{self.cluster_name}')
-                tags_to_add.append(f'postgresql_cluster_name:{self.cluster_name}')
+                self.tag_manager.set_tag('postgresql_cluster_name', self.cluster_name, replace=True)
 
             if self._config.tag_replication_role:
-                replication_role_tag = "replication_role:{}".format(self._get_replication_role())
-                tags.append(replication_role_tag)
-                tags_to_add.append(replication_role_tag)
-            self._update_tag_sets(tags_to_add)
+                self.tag_manager.set_tag('replication_role', self._get_replication_role(), replace=True)
+
+            tags = self.tag_manager.get_tags()
             self._send_database_instance_metadata()
 
             self.log.debug("Running check against version %s: is_aurora: %s", str(self.version), str(self.is_aurora))
@@ -1159,14 +1244,15 @@ class PostgreSql(DatabaseCheck):
 
             if not self._config.only_custom_queries:
                 self._collect_stats(tags)
-                if self._config.dbm:
-                    self.statement_metrics.run_job_loop(tags)
-                    self.statement_samples.run_job_loop(tags)
-                    self.metadata_samples.run_job_loop(tags)
-                elif self._config.data_observability.enabled:
-                    self.metadata_samples.run_job_loop(tags)
-                if self._config.data_observability.enabled:
-                    self.data_observability.run_job_loop(tags)
+                if not self._cancelled:
+                    if self._config.dbm:
+                        self.statement_metrics.run_job_loop(tags)
+                        self.statement_samples.run_job_loop(tags)
+                        self.metadata_samples.run_job_loop(tags)
+                    elif self._config.data_observability.enabled:
+                        self.metadata_samples.run_job_loop(tags)
+                    if self._config.data_observability.enabled:
+                        self.data_observability.run_job_loop(tags)
                 if self._config.collect_wal_metrics is True:
                     # collect wal metrics for pg < 10 only when explicitly enabled
                     # (requires local filesystem access to the WAL directory)
@@ -1190,6 +1276,7 @@ class PostgreSql(DatabaseCheck):
                 hostname=self.reported_hostname,
                 raw=True,
             )
+
             raise e
         else:
             self.service_check(
@@ -1202,7 +1289,21 @@ class PostgreSql(DatabaseCheck):
         finally:
             # Add the warnings saved during the execution of the check
             self._report_warnings()
+            # Periodically run setup diagnostics (gated by automatic_diagnostics.interval)
+            self._run_automatic_diagnostics()
 
-    def _update_tag_sets(self, tags):
-        self._non_internal_tags = list(set(self._non_internal_tags) | set(tags))
-        self.tags_without_db = list(set(self.tags_without_db) | set(tags))
+    def _run_automatic_diagnostics(self):
+        if not self._config.automatic_diagnostics.enabled:
+            return
+        now = time()
+        if now - self._last_automatic_diagnostics_run < self._config.automatic_diagnostics.interval:
+            return
+        self._last_automatic_diagnostics_run = now
+        try:
+            self.diagnosis.clear()
+            run_diagnostics(self)
+            self.health.submit_diagnoses()
+        except Exception as e:
+            self.log.exception("Error during automatic diagnostics: %s", e)
+        finally:
+            self.log.info("Automatic diagnostics completed")

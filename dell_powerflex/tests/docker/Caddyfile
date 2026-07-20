@@ -1,0 +1,31 @@
+{
+    debug
+    admin :2019
+}
+:8080 {
+    root * /usr/share/caddy/
+
+    # Auth endpoint - return mock OAuth2 token
+    @post_token {
+        method POST
+        path /auth/realms/powerflex/protocol/openid-connect/token
+    }
+    handle @post_token {
+        header Content-Type application/json
+        respond `{"access_token":"fake-token","expires_in":300}` 200
+    }
+
+    # All GET requests - serve fixture files
+    # Converts :: to __ in paths (stats endpoints use Type::id format)
+    # and maps to GET/{path}/response.json fixture files
+    @get_request {
+        method GET
+    }
+    handle @get_request {
+        route {
+            uri replace :: __
+            rewrite * /GET{path}/response.json
+            file_server
+        }
+    }
+}

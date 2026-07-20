@@ -1,16 +1,21 @@
-# Content hashes of the inputs that determine each builder image.
+# Content hashes of the inputs that determine the resolution pipeline and each
+# builder image.
 #
-# The `Resolve Dependencies and Build Wheels` workflow compares these
-# hashes against hashes computed from the working tree (via
-# .builders/inputs_hash.py) to decide whether to rebuild a builder image
-# from scratch or pull the existing one by digest from image_digests.json.
+# The `Resolve Dependencies and Build Wheels` workflow uses these hashes to
+# gate the full pipeline (resolution.hash) and to decide whether to rebuild a
+# builder image from scratch or pull the existing one by digest (images.*).
+# The `verify-deps-pin` workflow checks resolution.hash on merge-queue refs.
 #
-# This file is rewritten by .builders/upload.py whenever dependency
-# resolution publishes new artifacts and should not be edited by hand.
-# The set of files covered by each hash is defined by COMMON_INPUTS in
-# .builders/inputs_hash.py plus everything under .builders/images/<target>/.
+# This file is rewritten by .builders/upload.py whenever dependency resolution
+# publishes new artifacts and should not be edited by hand.
+# Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
+# RESOLUTION_INPUTS).
+[resolution]
+hash = "b7dda45f6304bb08a905e62cc80d09cac7741001658185e7a52e50b58caa6e57"
 
-[inputs]
-linux-aarch64 = "e3b9a63fa95c9d58a54926fd42d1a20ae738a6c05ff8338d995b8cd9c5497ef2"
-linux-x86_64 = "58a8e70bf5f870e210d586662843cdc9948b5d90638e3487f1e07a2b10f27f19"
-windows-x86_64 = "130572854fdcd9ca5d021af13087afa7384b1e659959087db21c77ac144ad313"
+[images]
+linux-aarch64 = "12d028af4a7aaead88c4947dc4996df85eb57f09ac6f0430f3ed640290418e85"
+linux-x86_64 = "947d461418c4dbc246db29b08ae4ff9fd7ebee7081b1e36500990c5d1f0aad99"
+macos-aarch64 = "78e6a48da3021de05ea531e272e5e2ebab7b5e09888144460586602f39368fbc"
+macos-x86_64 = "d27dd57c87253060744c2e1584b17348a921cbf7c343f1bb55005665fa5c61fb"
+windows-x86_64 = "e016f1da3aab33685b9e791535baebec81e6c28e8926a6503fbbee8daf43a2d1"

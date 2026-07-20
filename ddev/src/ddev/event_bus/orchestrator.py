@@ -6,11 +6,12 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import logging
+import math
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from concurrent.futures import Executor, ThreadPoolExecutor
 from dataclasses import dataclass
-from typing import assert_never
+from typing import assert_never, cast
 
 from .exceptions import (
     FatalProcessingError,
@@ -22,7 +23,18 @@ from .exceptions import (
     SkipMessageError,
 )
 
-ErrorHandler = Callable[[Exception], Awaitable[None]]
+type ErrorHandler[E: Exception] = Callable[[E], Awaitable[None]]
+
+DEFAULT_ORCHESTRATOR_MAX_TIMEOUT = 300.0
+
+
+class OrchestratorTimeout(Exception):
+    """Internal signal raised when ``max_timeout`` is exceeded.
+
+    Caught by :meth:`EventBusOrchestrator.process_messages` so the timeout reason can be
+    handed to the single cancellation loop in its ``finally`` block, instead of cancelling
+    tasks from two places.
+    """
 
 
 @dataclass
@@ -44,7 +56,7 @@ class BaseProcessor[T: BaseMessage]:
     async def on_success(self, message: T) -> None:
         pass
 
-    async def on_error(self, error: Exception) -> None:
+    async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
         """
         Handle a processor-scoped failure.
 
@@ -93,7 +105,7 @@ class EventBusOrchestrator(ABC):
     def __init__(
         self,
         logger: logging.Logger,
-        max_timeout: float = 300,
+        max_timeout: float | None = DEFAULT_ORCHESTRATOR_MAX_TIMEOUT,
         grace_period: float = 10,
         executor: Executor | None = None,
         fail_fast: bool = False,
@@ -102,6 +114,12 @@ class EventBusOrchestrator(ABC):
         Args:
             logger: The logger to use for the orchestrator.
             max_timeout: The maximum time in seconds to wait for the orchestrator to complete.
+                Defaults to 300 seconds. Pass ``None`` to run with no overall time limit; only
+                the idle ``grace_period`` check can stop it.
+
+                Running unbounded removes the only safety net against a hung or
+                deadlocked processor and only external cancellation (e.g. Ctrl+C
+                or killing the process) will stop it.
             grace_period: The timeout in seconds to wait for a new message to be submitted after all
                 messages have been processed.
             executor: The executor to use for running sync processors.
@@ -111,9 +129,10 @@ class EventBusOrchestrator(ABC):
                        and processing continues. ``FatalProcessingError`` always stops the
                        orchestrator regardless of this flag.
         """
-        self.__validate_parameters(max_timeout, grace_period)
+        resolved_max_timeout = max_timeout if max_timeout is not None else math.inf
+        self.__validate_parameters(resolved_max_timeout, grace_period)
         self._logger = logger
-        self._max_timeout = max_timeout
+        self._max_timeout = resolved_max_timeout
         self._grace_period = grace_period
         self._executor = executor or ThreadPoolExecutor(max_workers=4)
         self._fail_fast = fail_fast
@@ -232,7 +251,7 @@ class EventBusOrchestrator(ABC):
         """
         pass
 
-    async def on_error(self, error: Exception) -> None:
+    async def on_error(self, error: OrchestratorHookError) -> None:
         """
         Handle an orchestrator-scoped failure.
 
@@ -251,7 +270,7 @@ class EventBusOrchestrator(ABC):
         """
         raise error
 
-    async def _apply_error_policy(self, wrapped_error: Exception, handler: ErrorHandler) -> None:
+    async def _apply_error_policy[E: Exception](self, wrapped_error: E, handler: ErrorHandler[E]) -> None:
         """
         Routes ``wrapped_error`` through ``handler`` and applies the orchestrator's policy.
 
@@ -276,6 +295,8 @@ class EventBusOrchestrator(ABC):
     def _remaining_time(self, start_time: float) -> float:
         """
         Calculates the remaining time until the max timeout is reached.
+
+        Returns ``math.inf`` when running unbounded.
         """
         elapsed = asyncio.get_running_loop().time() - start_time
         return self._max_timeout - elapsed
@@ -294,6 +315,7 @@ class EventBusOrchestrator(ABC):
         get_task = asyncio.create_task(self._queue.get())
 
         start_time = asyncio.get_running_loop().time()
+        cancel_reason: str | None = None
 
         try:
             while not await self.__should_stop(start_time, running_tasks, get_task):
@@ -309,13 +331,17 @@ class EventBusOrchestrator(ABC):
                         break
 
                 self.__process_finished_tasks(done, current_get_task, running_tasks)
+        except OrchestratorTimeout as timeout:
+            cancel_reason = str(timeout)
         finally:
             # If we exit the loop and tasks are still running (e.g. timeout or forced break),
             # we must clean them up before returning to ensure finalize() runs in a safe state.
+            # This is the single place that cancels ``running_tasks``, so every remaining task
+            # is cancelled exactly once, with the reason (if any) attached.
             if running_tasks:
                 self._logger.info("Cancelling %s remaining tasks...", len(running_tasks))
                 for task in running_tasks:
-                    task.cancel()
+                    task.cancel(cancel_reason)
 
                 # Wait for them to actually finish cancelling
                 await asyncio.wait(running_tasks)
@@ -340,7 +366,7 @@ class EventBusOrchestrator(ABC):
                 len(running_tasks),
             )
             get_task.cancel()
-            return True
+            raise OrchestratorTimeout(f"Orchestrator exceeded max_timeout of {self._max_timeout}s")
 
         # Check exit condition: empty queue (implied by get_task not done) and no running processors
         if not running_tasks and not get_task.done() and self._queue.empty():
@@ -460,7 +486,7 @@ class EventBusOrchestrator(ABC):
         try:
             match processor:
                 case AsyncProcessor():
-                    await processor.process_message(message)
+                    await cast(AsyncProcessor, processor).process_message(message)
                 case SyncProcessor():
                     await asyncio.get_running_loop().run_in_executor(self._executor, processor.process_message, message)
                 case _:

@@ -7,12 +7,23 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy.metrics import METRIC_PREFIX, METRICS
 
-from .common import ENVOY_VERSION, EXT_AUTHZ_METRICS, INSTANCES, RBAC_METRICS
+from .common import (
+    ADAPTIVE_CONCURRENCY_METRICS,
+    ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG,
+    ENVOY_VERSION,
+    EXT_AUTHZ_METRICS,
+    INSTANCES,
+    RBAC_METRICS,
+)
 
 CHECK_NAME = 'envoy'
 UNIQUE_METRICS = EXT_AUTHZ_METRICS + RBAC_METRICS
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment'), pytest.mark.flaky]
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.usefixtures('dd_environment', 'exercise_envoy'),
+    pytest.mark.flaky,
+]
 
 
 def test_success(aggregator, check, dd_run_check):
@@ -47,6 +58,20 @@ def test_success(aggregator, check, dd_run_check):
     metadata_metrics['envoy.cluster.upstream_cx_tx_bytes_total']['metric_type'] = 'count'
 
     aggregator.assert_metrics_using_metadata(metadata_metrics)
+
+
+def test_adaptive_concurrency_metrics(aggregator, check, dd_run_check):
+    instance = INSTANCES['main']
+    c = check(instance)
+    dd_run_check(c)
+
+    # Guard against a vacuous pass: the controller needs real traffic to emit stats.
+    assert any(metric in aggregator.metric_names for metric in ADAPTIVE_CONCURRENCY_METRICS)
+
+    for metric in ADAPTIVE_CONCURRENCY_METRICS:
+        aggregator.assert_metric(metric)
+        for tag in ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG:
+            aggregator.assert_metric_has_tag(metric, tag)
 
 
 def test_metadata_integration(datadog_agent, check):

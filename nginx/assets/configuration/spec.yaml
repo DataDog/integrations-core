@@ -79,6 +79,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - template: instances/http
     - template: instances/default
       overrides:

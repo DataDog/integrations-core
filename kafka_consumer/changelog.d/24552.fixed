@@ -1,0 +1,1 @@
+Allow reusing the Kafka AdminClient and Consumer across check runs (via close_admin_client: false) to avoid unbounded agent memory growth from librdkafka thread churn.

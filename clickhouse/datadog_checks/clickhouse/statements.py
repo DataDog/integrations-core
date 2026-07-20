@@ -57,6 +57,8 @@ SELECT
     sum(result_rows) as total_result_rows,
     sum(result_bytes) as total_result_bytes,
     sum(memory_usage) as total_memory_usage,
+    sum(ProfileEvents['OSCPUVirtualTimeMicroseconds']) as total_cpu_us,
+    sum(ProfileEvents['OSCPUWaitMicroseconds']) as total_cpu_wait_us,
     max(memory_usage) as peak_memory_usage,
     max(event_time_microseconds) as max_event_time_microseconds
 FROM {query_log_table}
@@ -256,6 +258,8 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     total_result_rows,
                     total_result_bytes,
                     total_memory_usage,
+                    total_cpu_us,
+                    total_cpu_wait_us,
                     peak_memory_usage,
                     max_event_time_microseconds,
                 ) = row
@@ -287,6 +291,8 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                     'written_bytes': int(total_written_bytes) if total_written_bytes else 0,
                     'result_bytes': int(total_result_bytes) if total_result_bytes else 0,
                     'memory_usage': int(total_memory_usage) if total_memory_usage else 0,
+                    'cpu_us': int(total_cpu_us) if total_cpu_us else 0,
+                    'cpu_wait_us': int(total_cpu_wait_us) if total_cpu_wait_us else 0,
                     'peak_memory_usage': int(peak_memory_usage) if peak_memory_usage else 0,
                 }
                 result_rows.append(result_row)
@@ -343,6 +349,8 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 'result_rows',
                 'result_bytes',
                 'memory_usage',
+                'cpu_us',
+                'cpu_wait_us',
             ]
             for field in sum_fields:
                 merged[field] = sum(r.get(field, 0) for r in rows)

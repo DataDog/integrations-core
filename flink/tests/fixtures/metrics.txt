@@ -1,0 +1,60 @@
+# HELP flink_jobmanager_Status_JVM_CPU_Load Status_JVM_CPU_Load (scope: jobmanager)
+# TYPE flink_jobmanager_Status_JVM_CPU_Load gauge
+flink_jobmanager_Status_JVM_CPU_Load{host="jobmanager-0",} 0.05
+# HELP flink_jobmanager_Status_JVM_CPU_Time Status_JVM_CPU_Time (scope: jobmanager)
+# TYPE flink_jobmanager_Status_JVM_CPU_Time gauge
+flink_jobmanager_Status_JVM_CPU_Time{host="jobmanager-0",} 123456.0
+# HELP flink_jobmanager_Status_JVM_Memory_Heap_Used Memory_Heap_Used (scope: jobmanager)
+# TYPE flink_jobmanager_Status_JVM_Memory_Heap_Used gauge
+flink_jobmanager_Status_JVM_Memory_Heap_Used{host="jobmanager-0",} 1.23456789E8
+# HELP flink_jobmanager_Status_JVM_Memory_Heap_Max Memory_Heap_Max (scope: jobmanager)
+# TYPE flink_jobmanager_Status_JVM_Memory_Heap_Max gauge
+flink_jobmanager_Status_JVM_Memory_Heap_Max{host="jobmanager-0",} 5.36870912E8
+# HELP flink_jobmanager_Status_JVM_Memory_NonHeap_Used Memory_NonHeap_Used (scope: jobmanager)
+# TYPE flink_jobmanager_Status_JVM_Memory_NonHeap_Used gauge
+flink_jobmanager_Status_JVM_Memory_NonHeap_Used{host="jobmanager-0",} 8.5e7
+# HELP flink_jobmanager_Status_JVM_Threads_Count Threads_Count (scope: jobmanager)
+# TYPE flink_jobmanager_Status_JVM_Threads_Count gauge
+flink_jobmanager_Status_JVM_Threads_Count{host="jobmanager-0",} 48
+# HELP flink_jobmanager_numRegisteredTaskManagers numRegisteredTaskManagers (scope: jobmanager)
+# TYPE flink_jobmanager_numRegisteredTaskManagers gauge
+flink_jobmanager_numRegisteredTaskManagers{host="jobmanager-0",} 2.0
+# HELP flink_jobmanager_numRunningJobs numRunningJobs (scope: jobmanager)
+# TYPE flink_jobmanager_numRunningJobs gauge
+flink_jobmanager_numRunningJobs{host="jobmanager-0",} 1.0
+# HELP flink_jobmanager_taskSlotsTotal taskSlotsTotal (scope: jobmanager)
+# TYPE flink_jobmanager_taskSlotsTotal gauge
+flink_jobmanager_taskSlotsTotal{host="jobmanager-0",} 4.0
+# HELP flink_jobmanager_job_numberOfCompletedCheckpoints numberOfCompletedCheckpoints (scope: jobmanager_job)
+# TYPE flink_jobmanager_job_numberOfCompletedCheckpoints gauge
+flink_jobmanager_job_numberOfCompletedCheckpoints{host="jobmanager-0",job_name="wordcount",} 42.0
+# HELP flink_jobmanager_job_numberOfFailedCheckpoints numberOfFailedCheckpoints (scope: jobmanager_job)
+# TYPE flink_jobmanager_job_numberOfFailedCheckpoints gauge
+flink_jobmanager_job_numberOfFailedCheckpoints{host="jobmanager-0",job_name="wordcount",} 0.0
+# HELP flink_jobmanager_job_lastCheckpointDuration lastCheckpointDuration (scope: jobmanager_job)
+# TYPE flink_jobmanager_job_lastCheckpointDuration gauge
+flink_jobmanager_job_lastCheckpointDuration{host="jobmanager-0",job_name="wordcount",} 256.0
+# HELP flink_taskmanager_Status_JVM_CPU_Load Status_JVM_CPU_Load (scope: taskmanager)
+# TYPE flink_taskmanager_Status_JVM_CPU_Load gauge
+flink_taskmanager_Status_JVM_CPU_Load{host="taskmanager-0",tm_id="tm-1",} 0.12
+# HELP flink_taskmanager_Status_JVM_Memory_Heap_Used Memory_Heap_Used (scope: taskmanager)
+# TYPE flink_taskmanager_Status_JVM_Memory_Heap_Used gauge
+flink_taskmanager_Status_JVM_Memory_Heap_Used{host="taskmanager-0",tm_id="tm-1",} 8.7654321E7
+# HELP flink_taskmanager_Status_JVM_Threads_Count Threads_Count (scope: taskmanager)
+# TYPE flink_taskmanager_Status_JVM_Threads_Count gauge
+flink_taskmanager_Status_JVM_Threads_Count{host="taskmanager-0",tm_id="tm-1",} 64.0
+# HELP flink_taskmanager_job_task_numRecordsIn numRecordsIn (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numRecordsIn gauge
+flink_taskmanager_job_task_numRecordsIn{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 12345.0
+# HELP flink_taskmanager_job_task_numRecordsOut numRecordsOut (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numRecordsOut gauge
+flink_taskmanager_job_task_numRecordsOut{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 12345.0
+# HELP flink_taskmanager_job_task_numRecordsOutPerSecond numRecordsOutPerSecond (scope: taskmanager_job_task)
+# TYPE flink_taskmanager_job_task_numRecordsOutPerSecond gauge
+flink_taskmanager_job_task_numRecordsOutPerSecond{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",task_name="Source: KafkaSource",subtask_index="0",} 42.5
+# HELP flink_taskmanager_job_task_operator_numRecordsIn numRecordsIn (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_numRecordsIn gauge
+flink_taskmanager_job_task_operator_numRecordsIn{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 12345.0
+# HELP flink_taskmanager_job_task_operator_currentInputWatermark currentInputWatermark (scope: taskmanager_job_task_operator)
+# TYPE flink_taskmanager_job_task_operator_currentInputWatermark gauge
+flink_taskmanager_job_task_operator_currentInputWatermark{host="taskmanager-0",tm_id="tm-1",job_name="wordcount",operator_name="Source",subtask_index="0",} 1735689600000.0

@@ -108,6 +108,7 @@ files:
       value:
         example: true
         type: boolean
+      fleet_configurable: false
     - name: countonly
       description: When true the stats only count the number of files matching the pattern.
       fleet_configurable: true
@@ -125,4 +126,5 @@ files:
       value:
         example: true
         type: boolean
+      fleet_configurable: false
     - template: instances/default

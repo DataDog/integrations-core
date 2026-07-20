@@ -1,0 +1,46 @@
+[
+  {
+    "mappedSdcInfo": null,
+    "name": "volumee-snap-01",
+    "storagePoolId": "25155ba600000000",
+    "volumeType": "Snapshot",
+    "ancestorVolumeId": "c58b06e700000000",
+    "id": "c58b06e900000002"
+  },
+  {
+    "mappedSdcInfo": null,
+    "name": "volumee-snap-02",
+    "storagePoolId": "25155ba600000000",
+    "volumeType": "Snapshot",
+    "ancestorVolumeId": "c58b06e900000002",
+    "id": "c58b06ea00000003"
+  },
+  {
+    "mappedSdcInfo": [
+      {
+        "sdcId": "1b8659fd00000001",
+        "sdcIp": "10.0.1.250",
+        "accessMode": "ReadWrite"
+      }
+    ],
+    "name": "bigvolume",
+    "storagePoolId": "25155ba600000000",
+    "volumeType": "ThinProvisioned",
+    "ancestorVolumeId": null,
+    "id": "c58b06e800000001"
+  },
+  {
+    "mappedSdcInfo": [
+      {
+        "sdcId": "1b8659fd00000001",
+        "sdcIp": "10.0.1.250",
+        "accessMode": "ReadWrite"
+      }
+    ],
+    "name": "volumee",
+    "storagePoolId": "25155ba600000000",
+    "volumeType": "ThinProvisioned",
+    "ancestorVolumeId": null,
+    "id": "c58b06e700000000"
+  }
+]

@@ -27,6 +27,10 @@ on:
         description: "Commit SHA or ref to build from"
         required: true
         type: string
+      source-repo-branch:
+        description: "Branch that contains source-repo-ref, used to determine stable vs pre-release behavior"
+        required: true
+        type: string
       dry-run:
         description: "Print what would be released without pushing tags or starting builds"
         required: false
@@ -45,26 +49,63 @@ jobs:
       is-stable-release: ${{ steps.detect.outputs.is-stable-release }}
     steps:
       - id: detect
-        # Sets is-stable-release based on the branch: true for master/X.Y.x, false otherwise.
-        # Manual runs on master get "true", which blocks pre-release packages — conservative and intentional.
+        # Stable for master/X.Y.x, pre-release for alpha/beta/rc branches.
+        # Manual dispatches use source-repo-branch instead of GITHUB_REF so the
+        # release behavior follows the branch that contains source-repo-ref.
+        env:
+          RELEASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-branch || github.ref_name }}
         run: |
-          if [[ "$GITHUB_REF" =~ ^refs/heads/(master|[0-9]+\.[0-9]+\.x)$ ]]; then
+          branch="${RELEASE_BRANCH#refs/heads/}"
+          if [[ "$branch" =~ ^(master|[0-9]+\.[0-9]+\.x)$ ]]; then
             echo "is-stable-release=true" >> "$GITHUB_OUTPUT"
           else
             echo "is-stable-release=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # TODO: this notification currently runs before the approval gate, so it
+  # announces a *pending* release. Once the `release` environment gate is removed
+  # the release starts immediately — switch `needs` back to the release step and
+  # update the wording in notify_slack.py to "release starting".
+  notify:
+    name: Notify pending release
+    needs: context
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout notification script
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          sparse-checkout: .github/workflows/scripts
+      - name: Notify Slack of pending release
+        env:
+          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_RELEASE }}
+          SOURCE_REPO: integrations-core
+          REF: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
+          PACKAGES: ${{ inputs.packages || '' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 .github/workflows/scripts/notify_slack.py
+
+  approve:
+    name: Await release approval
+    needs: context
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - run: echo "Release approved"
+
   dispatch:
     name: Release
-    needs: context
+    needs: [context, approve]
     uses: ./.github/workflows/release-dispatch.yml
     with:
       source-repo: integrations-core
       packages: ${{ inputs.packages || '' }}
       source-repo-ref: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
+      source-repo-branch: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-branch || github.ref_name }}
       dry-run: ${{ inputs.dry-run || false }}
       ddev-version: ${{ inputs.ddev-version || '' }}
       is-stable-release: ${{ needs.context.outputs.is-stable-release }}
     permissions:
       id-token: write
-      contents: write
+      contents: read

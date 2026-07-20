@@ -1,3 +1,4 @@
+# bypass-global-date-remapper-parse-failure-checks
 id: plivo
 tests:
   - sample: >-
@@ -290,13 +291,13 @@ tests:
             ip: ""
         plivo:
           carrier_fees: "0.00000"
-          total_amount: "00.00000"
           error:
             message: ""
             type: "000"
           messaging:
             conversation_id: "db344585-2890-38g8-rmu5-cc5f03187127"
             message_id: "db344858-6436-45b9-9f42-cc5f03fa2do2"
+          total_amount: "00.00000"
         replaced_sender: "18763009800"
         resource_uri: "/v1/Account/MOWTXTOIZONQSONGQONS/Message/db344858-6436-45b9-9f42-cc5f03fa2do2/"
         status: "info"

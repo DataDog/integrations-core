@@ -46,6 +46,7 @@ files:
         value:
           example: 10
           type: integer
+        fleet_configurable: false
       - name: min_collection_interval
         value:
           example: 15
@@ -54,6 +55,7 @@ files:
           This changes the collection interval of the check. For more information, see:
           https://docs.datadoghq.com/developers/write_agent_check/#collection-interval
           Only available using corecheck SNMP integration with `loader: core` config.
+        fleet_configurable: false
 
       - name: global_metrics
         description: |
@@ -74,6 +76,7 @@ files:
               name: tcpPassiveOpens
               metric_tags:
                 - TCP
+        fleet_configurable: false
       - name: profiles
         description: |
           Specify profiles to be able to reference a set of metrics by name.
@@ -92,6 +95,16 @@ files:
             cisco-asr:
               definition_file: cisco-asr.yaml
         hidden: true
+        fleet_configurable: false
+      - name: use_remote_config_profiles
+        description: |
+          Whether to apply device profiles from the SNMP Profile Manager, managed through Remote Configuration.
+          When enabled, any locally defined profiles are ignored in favor of the remotely-managed profiles.
+        value:
+          type: boolean
+          example: true
+          display_default: false
+        fleet_configurable: true
       - name: refresh_oids_cache_interval
         legacy: true
         description: |
@@ -113,6 +126,7 @@ files:
           type: integer
           example: 3600
           display_default: 0
+        fleet_configurable: false
       - name: optimize_mib_memory_usage
         description: |
           **Experimental** - Setting this flag to true attempts to optimize memory usage related to
@@ -122,12 +136,14 @@ files:
         value:
           type: boolean
           example: false
+        fleet_configurable: false
       - name: mibs_folder
         description: |
           Specify an additional folder for your custom MIB files (python format).
           Only available using python SNMP integration.
         value:
           type: string
+        fleet_configurable: false
       - name: ignore_nonincreasing_oid
         description: |
           Set to true to ignore non increasing OID.
@@ -136,6 +152,7 @@ files:
         value:
           type: boolean
           example: false
+        fleet_configurable: false
       - name: collect_device_metadata
         description: |
           Enable device metadata collection for all instances.
@@ -144,6 +161,7 @@ files:
         value:
           type: boolean
           example: true
+        fleet_configurable: false
       - name: ping
         description: |
           Configure ICMP pings.
@@ -347,24 +365,28 @@ files:
           SNMP v3 specific configuration.
         value:
           type: string
+        fleet_configurable: false
       - name: context_name
         description: |
           Name of your context (optional SNMP v3-only parameter).
           SNMP v3 specific configuration.
         value:
           type: string
+        fleet_configurable: false
       - name: use_global_metrics
         description: |
           Whether or not `global_metrics` should be included for this instance.
         value:
           type: boolean
           example: true
+        fleet_configurable: false
       - name: profile
         description: |
           Name of the profile to use, if any.
         value:
           type: string
           example: <PROFILE_NAME>
+        fleet_configurable: false
       - name: metrics
         fleet_configurable: true
         description: |
@@ -503,18 +525,21 @@ files:
         value:
           type: boolean
           example: true
+        fleet_configurable: false
       - name: collect_topology
         description: Enable the collection of topology (LLDP/CDP) data
         value:
           type: boolean
           example: true
           display_default: true
+        fleet_configurable: false
       - name: collect_vpn
         description: Enable collection of VPN tunnels and route table data.
         value:
           type: boolean
           example: true
           display_default: false
+        fleet_configurable: false
 
       - name: interface_configs
         description: |
@@ -550,6 +575,7 @@ files:
             - match_field: name
               match_value: eth5
               disabled: true
+        fleet_configurable: false
       - name: ping
         fleet_configurable: true
         description: |
@@ -597,6 +623,7 @@ files:
           value:
             type: integer
             example: 20
+          fleet_configurable: false
         - name: linux
           description: Linux-specific configuration
           options:

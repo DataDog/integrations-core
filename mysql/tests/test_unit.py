@@ -704,6 +704,20 @@ def test_collect_replication_metrics_returns_vars_when_has_replicas_connected():
     assert results.get('Replicas_connected') == 2
 
 
+def test_get_replica_stats_tags_each_mariadb_connection():
+    """Each MariaDB Connection_name maps to its own channel tag in _get_replica_stats."""
+    mysql_check = MySql(common.CHECK_NAME, {}, instances=[{'server': 'localhost', 'user': 'datadog'}])
+    mysql_check._config.replication_enabled = True
+    mysql_check._get_replica_replication_status = mock.MagicMock(
+        return_value=[
+            {'Connection_name': 'conn_a', 'Seconds_Behind_Master': 1},
+            {'Connection_name': 'conn_b', 'Seconds_Behind_Master': 2},
+        ]
+    )
+    results = mysql_check._get_replica_stats(mock.MagicMock())
+    assert results['Seconds_Behind_Master'] == {'channel:conn_a': 1, 'channel:conn_b': 2}
+
+
 def test_source_with_zero_replicas_emits_warning_service_check(aggregator, instance_basic):
     """Test that a source with 0 connected replicas emits WARNING for replica-loss detection."""
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance_basic])
@@ -742,3 +756,157 @@ def test_debug_stats_kwargs_respects_exclude_hostname(exclude_hostname, expected
     with mock.patch('datadog_checks.mysql.MySql.resolve_db_host', return_value='resolved.hostname'):
         mysql_check = MySql(common.CHECK_NAME, {}, instances=[instance])
     assert mysql_check.debug_stats_kwargs()['hostname'] == expected_hostname
+
+
+class TestShowReplicaStatusQuery:
+    """Tests for show_replica_status_query ensuring parameterized query construction."""
+
+    @pytest.mark.parametrize(
+        'raw_version,version_comment,is_mariadb,channel,expected_query,expected_params',
+        [
+            pytest.param('5.7.30', 'MySQL', False, '', 'SHOW SLAVE STATUS', (), id='mysql_legacy_no_channel'),
+            pytest.param('8.0.22', 'MySQL', False, '', 'SHOW REPLICA STATUS', (), id='mysql_modern_no_channel'),
+            pytest.param(
+                '5.7.30',
+                'MySQL',
+                False,
+                'my-channel',
+                'SHOW SLAVE STATUS FOR CHANNEL %s',
+                ('my-channel',),
+                id='mysql_legacy_with_channel',
+            ),
+            pytest.param(
+                '8.0.22',
+                'MySQL',
+                False,
+                'my-channel',
+                'SHOW REPLICA STATUS FOR CHANNEL %s',
+                ('my-channel',),
+                id='mysql_modern_with_channel',
+            ),
+            pytest.param(
+                '10.5.1-MariaDB',
+                'MariaDB',
+                True,
+                'my-channel',
+                'SHOW REPLICA STATUS',
+                (),
+                id='mariadb_modern_with_channel',
+            ),
+            pytest.param(
+                '10.5.1-MariaDB',
+                'MariaDB',
+                True,
+                '',
+                'SHOW ALL REPLICAS STATUS',
+                (),
+                id='mariadb_modern_no_channel',
+            ),
+            pytest.param(
+                '10.4.0-MariaDB', 'MariaDB', True, '', 'SHOW ALL SLAVES STATUS', (), id='mariadb_legacy_no_channel'
+            ),
+            pytest.param(
+                '10.4.0-MariaDB',
+                'MariaDB',
+                True,
+                'my-channel',
+                'SHOW SLAVE STATUS',
+                (),
+                id='mariadb_legacy_with_channel',
+            ),
+        ],
+    )
+    def test_query_construction(
+        self, raw_version, version_comment, is_mariadb, channel, expected_query, expected_params
+    ):
+        from datadog_checks.mysql.queries import show_replica_status_query
+
+        version = parse_version(raw_version, version_comment)
+        query, params = show_replica_status_query(version, is_mariadb=is_mariadb, channel=channel)
+        assert query == expected_query
+        assert params == expected_params
+        if is_mariadb:
+            assert 'CHANNEL' not in query
+
+
+class TestReplicaReplicationStatusParameterized:
+    """Tests that _get_replica_replication_status uses parameterized queries."""
+
+    def _make_check(self, replication_channel=None):
+        options = {'replication': True}
+        if replication_channel:
+            options['replication_channel'] = replication_channel
+        instance = {'server': 'localhost', 'user': 'datadog', 'options': options}
+        check = MySql(common.CHECK_NAME, {}, instances=[instance])
+        return check
+
+    def _make_mock_db(self):
+        mock_cursor = mock.MagicMock()
+        mock_cursor.fetchall.return_value = []
+        mock_db = mock.MagicMock()
+        mock_db.cursor.return_value = mock_cursor
+        return mock_db, mock_cursor
+
+    @pytest.mark.parametrize(
+        'channel,raw_version,version_comment,is_mariadb,expected_query,expected_params,call_index',
+        [
+            pytest.param(
+                'test-channel',
+                '10.5.1-MariaDB',
+                'MariaDB',
+                True,
+                'SET @@default_master_connection = %s',
+                ('test-channel',),
+                0,
+                id='mariadb_set_connection',
+            ),
+            pytest.param(
+                'test-channel',
+                '8.0.22',
+                'MySQL',
+                False,
+                'SHOW REPLICA STATUS FOR CHANNEL %s',
+                ('test-channel',),
+                0,
+                id='mysql_for_channel',
+            ),
+        ],
+    )
+    def test_channel_uses_parameterized_query(
+        self, channel, raw_version, version_comment, is_mariadb, expected_query, expected_params, call_index
+    ):
+        check = self._make_check(replication_channel=channel)
+        check.is_mariadb = is_mariadb
+        check.version = parse_version(raw_version, version_comment)
+
+        mock_db, mock_cursor = self._make_mock_db()
+        check._get_replica_replication_status(mock_db)
+
+        call = mock_cursor.execute.call_args_list[call_index]
+        assert call[0][0] == expected_query
+        assert call[0][1] == expected_params
+
+    def test_mariadb_set_connection_not_called_without_channel(self):
+        check = self._make_check()
+        check.is_mariadb = True
+        check.version = parse_version('10.5.1-MariaDB', 'MariaDB')
+
+        mock_db, mock_cursor = self._make_mock_db()
+        check._get_replica_replication_status(mock_db)
+
+        assert mock_cursor.execute.call_count == 1
+        assert 'default_master_connection' not in mock_cursor.execute.call_args_list[0][0][0]
+
+    def test_special_characters_in_channel_stay_in_params(self):
+        """Channel values with special characters must be passed as params, not interpolated."""
+        channel = "'; SELECT 1; --"
+        check = self._make_check(replication_channel=channel)
+        check.is_mariadb = True
+        check.version = parse_version('10.11.0-MariaDB', 'MariaDB')
+
+        mock_db, mock_cursor = self._make_mock_db()
+        check._get_replica_replication_status(mock_db)
+
+        for call in mock_cursor.execute.call_args_list:
+            query_str = call[0][0]
+            assert channel not in query_str

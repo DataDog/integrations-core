@@ -3,27 +3,27 @@ name: Master
 on:
   push:
     branches:
-    - master
+      - master
     paths:
       # List of files/paths that should trigger the run. The intention is to avoid running all tests if the commit only includes changes on assets or README
-    - '*/datadog_checks/**'
-    - '*/tests/**'
-    - 'ddev/**'
-    - 'datadog_checks_base/**'
-    - 'datadog_checks_dev/**'
-    # Contains overrides for testing
-    - '.ddev/**'
-    # Want to ensure any change in workflows is validated
-    - '.github/workflows/**'
-    # Test matrices and dependencies
-    - '*/hatch.toml'
-    - '*/pyproject.toml'
-    # Some integrations might use this file to validate metrics emission
-    - '*/metadata.csv'
-    # In case some linting formatting config has changed
-    - 'pyproject.toml'
+      - "*/datadog_checks/**"
+      - "*/tests/**"
+      - "ddev/**"
+      - "datadog_checks_base/**"
+      - "datadog_checks_dev/**"
+      # Contains overrides for testing
+      - ".ddev/**"
+      # Want to ensure any change in workflows is validated
+      - ".github/workflows/**"
+      # Test matrices and dependencies
+      - "*/hatch.toml"
+      - "*/pyproject.toml"
+      # Some integrations might use this file to validate metrics emission
+      - "*/metadata.csv"
+      # In case some linting formatting config has changed
+      - "pyproject.toml"
   schedule:
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 jobs:
   cache:
@@ -31,7 +31,7 @@ jobs:
 
   test:
     needs:
-    - cache
+      - cache
 
     uses: ./.github/workflows/test-all.yml
     with:
@@ -48,12 +48,14 @@ jobs:
     secrets: inherit
 
     permissions:
-       # needed for compute-matrix in test-target.yml
-       contents: read
+      # needed for compute-matrix in test-target.yml
+      contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
 
   publish-test-results:
     needs:
-    - test
+      - test
 
     if: success() || failure()
     concurrency:
@@ -69,38 +71,39 @@ jobs:
 
   upload-coverage:
     needs:
-    - test
+      - test
     if: >
       !github.event.repository.private &&
       (success() || failure())
     runs-on: ubuntu-latest
     permissions:
-      # needed for codecov, allows the action to get a JWT signed by Github
-      id-token: write
       contents: read
+      # needed for dd-sts
+      id-token: write
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-    - name: Download all coverage artifacts
-      uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
-      with:
-        pattern: coverage-*
-        path: coverage-reports
-        merge-multiple: false
+      - name: Get Datadog credentials
+        id: dd-sts
+        # Coverage upload is optional; keep non-blocking so fork PRs and OIDC outages don't fail the job
+        continue-on-error: true
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-coverage-api-key
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
-      with:
-        use_oidc: true
-        directory: coverage-reports
-        fail_ci_if_error: false
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
+        with:
+          pattern: coverage-*
+          path: coverage-reports
+          merge-multiple: false
 
-    - name: Upload coverage to Datadog
-      if: always()
-      continue-on-error: true
-      uses: DataDog/coverage-upload-github-action@9bbbf86d16f7db1b14c5b885e61cf0d96053686a # v1.0.0
-      with:
-        api_key: ${{ secrets.DD_API_KEY }}
-        files: coverage-reports
-        format: cobertura
+      - name: Upload coverage to Datadog
+        if: always()
+        continue-on-error: true
+        uses: DataDog/coverage-upload-github-action@6c4bd935248daa6f0ef94e3e6ba71ad5ad079998 # v1.0.3
+        with:
+          api_key: ${{ steps.dd-sts.outputs.api_key }}
+          files: coverage-reports
+          format: cobertura

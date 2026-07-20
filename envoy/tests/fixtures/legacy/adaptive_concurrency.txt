@@ -1,0 +1,7 @@
+http.ingress_http.adaptive_concurrency.gradient_controller.rq_blocked: 5
+http.ingress_http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active: 1
+http.ingress_http.adaptive_concurrency.gradient_controller.concurrency_limit: 30
+http.ingress_http.adaptive_concurrency.gradient_controller.gradient: 1000
+http.ingress_http.adaptive_concurrency.gradient_controller.burst_queue_size: 22
+http.ingress_http.adaptive_concurrency.gradient_controller.min_rtt_msecs: 100
+http.ingress_http.adaptive_concurrency.gradient_controller.sample_rtt_msecs: 95

@@ -60,6 +60,7 @@
       "Category::Security",
       "Category::Metrics",
       "Category::Log Collection",
+      "Category::SIEM",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
       "Offering::Integration"

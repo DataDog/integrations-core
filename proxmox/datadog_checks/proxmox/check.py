@@ -15,6 +15,7 @@ from .constants import (
     ALLOWED_FILTER_PROPERTIES,
     ALLOWED_FILTER_TYPES,
     EVENT_TYPE_TO_TITLE,
+    INFRA_MODE_METRIC,
     NODE_RESOURCE,
     OK_STATUS,
     PERF_METRIC_NAME,
@@ -138,7 +139,11 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
             metric_value = resource.get(metric_name)
             metric_method = self.count if metric_name in RESOURCE_COUNT_METRICS else self.gauge
             if metric_value is not None:
-                metric_method(f'{metric_name_remapped}', metric_value, tags=tags, hostname=hostname)
+                metric_tags = tags
+                infra_mode = self.config.infrastructure_mode
+                if metric_name_remapped == INFRA_MODE_METRIC and hostname and infra_mode != 'full':
+                    metric_tags = list(tags) + [f'infra_mode:{infra_mode}']
+                metric_method(f'{metric_name_remapped}', metric_value, tags=metric_tags, hostname=hostname)
 
     def _get_vm_hostname(self, vm_id, vm_name, node):
         try:

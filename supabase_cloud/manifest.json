@@ -11,7 +11,23 @@
     "changelog": "CHANGELOG.md",
     "description": "Monitor the activity, health, and performance of your Supabase Cloud projects.",
     "title": "Supabase Cloud",
-    "media": [],
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Supabase Cloud Overview",
+        "image_url": "images/supabase_cloud_overview_1.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Supabase Cloud Overview",
+        "image_url": "images/supabase_cloud_overview_2.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Supabase Cloud Overview",
+        "image_url": "images/supabase_cloud_overview_3.png"
+      }
+    ],
     "classifier_tags": [
       "Category::Cloud",
       "Category::Developer Tools",

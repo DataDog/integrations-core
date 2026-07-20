@@ -1,7 +1,7 @@
 FROM registry.ddbuild.io/images/mirror/ubuntu:25.04
 
 # Get uv — manages Python installations on demand, no system Python pinning needed
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.11.16@sha256:440fd6477af86a2f1b38080c539f1672cd22acb1b1a47e321dba5158ab08864d /uv /usr/local/bin/uv
 
 # Update sources and install required packages
 RUN apt-get update \
@@ -30,8 +30,6 @@ RUN mkdir -p ~/.ssh \
  && ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
 # dd-octo-sts CLI for GitHub token exchange (replaces SSH deploy key)
-# To update: crane ls registry.ddbuild.io/dd-octo-sts | sort -V | tail -1
-#            crane digest registry.ddbuild.io/dd-octo-sts:<version>
 COPY --from=registry.ddbuild.io/dd-octo-sts:v1.10.4@sha256:20edc79b3fc3f9cd58eb0aeba7391a8e63ccb79c0b969a4a62a745cf5b2e39c2 /usr/local/bin/dd-octo-sts /usr/local/bin/dd-octo-sts
 
 # Locales are required to be set to use click

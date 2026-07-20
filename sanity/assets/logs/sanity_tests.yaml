@@ -77,14 +77,14 @@ tests:
           tool: ""
         message:
          -
+          _key: "ea0b25ee8e22"
+          _type: "block"
           children:
            -
+            _key: "74830e586545"
             _type: "span"
             text: "commentn1"
-            _key: "74830e586545"
-          _type: "block"
           style: "normal"
-          _key: "ea0b25ee8e22"
         status: "open"
         target:
           document:
@@ -243,14 +243,14 @@ tests:
           tool: ""
         message:
          -
+          _key: "ea0b25ee8e22"
+          _type: "block"
           children:
            -
+            _key: "74830e586545"
             _type: "span"
             text: "commentn1"
-            _key: "74830e586545"
-          _type: "block"
           style: "normal"
-          _key: "ea0b25ee8e22"
         status: "open"
         target:
           document:
@@ -444,14 +444,14 @@ tests:
         createdByUser: "2025-01-01T04:30:32.513Z"
         description:
          -
+          _key: "76570d367036"
+          _type: "block"
           children:
            -
+            _key: "ea8e16ae3083"
             _type: "span"
             text: "task_2_screening"
-            _key: "ea8e16ae3083"
-          _type: "block"
           style: "normal"
-          _key: "76570d367036"
         status: "open"
         subscribers:
          - "ppZaIKjRJ"
@@ -481,14 +481,14 @@ tests:
         createdByUser: "2025-01-01T04:30:32.513Z"
         description:
          -
+          _key: "76570d367036"
+          _type: "block"
           children:
            -
+            _key: "ea8e16ae3083"
             _type: "span"
             text: "task_2_screening"
-            _key: "ea8e16ae3083"
-          _type: "block"
           style: "normal"
-          _key: "76570d367036"
         status: "open"
         subscribers:
          - "ppZaIKjRJ"

@@ -112,12 +112,12 @@ tests:
               name: "abc"
               uid: "SOMEKEY"
           auth_factors:
-            - factor_type: "Push Notification"
-              device:
-                uid: "SOMEKEY"
-                type_id: 0
+            - device:
                 ip: "185.64.148.0"
                 type: "Unknown"
+                type_id: 0
+                uid: "SOMEKEY"
+              factor_type: "Push Notification"
               factor_type_id: 5
           category_name: "Identity & Access Management"
           category_uid: 3
@@ -330,9 +330,9 @@ tests:
             uid: "some-activity-id"
             version: "1.5.0"
           resources:
-            - uid: "SOMEKEY"
-              name: "+1 123 456 7890"
+            - name: "+1 123 456 7890"
               type: "phone"
+              uid: "SOMEKEY"
           severity: "Informational"
           severity_id: 1
           src_endpoint:

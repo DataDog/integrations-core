@@ -8,7 +8,7 @@ services:
       - ./ca.key:/etc/ssl/private/server.key
     command: ["/usr/local/bin/start-server.sh", "ECDHE-RSA-AES128-SHA256"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost:443"]
+      test: ["CMD-SHELL", "printf '' | timeout 5 openssl s_client -connect localhost:443 -brief"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -22,7 +22,7 @@ services:
       - ./ca.key:/etc/ssl/private/server.key
     command: ["/usr/local/bin/start-server.sh", "ECDHE-RSA-CHACHA20-POLY1305"]
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost:443"]
+      test: ["CMD-SHELL", "printf '' | timeout 5 openssl s_client -connect localhost:443 -brief"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -7,3 +7,9 @@ litellm_input_tokens_metric_total 0.0
 # HELP litellm_output_tokens_metric_total Total number of output tokens from LLM requests
 # TYPE litellm_output_tokens_metric_total counter
 litellm_output_tokens_metric_total 0.0
+# HELP litellm_remaining_requests_metric LLM Deployment Analytics - remaining requests for model, returned from LLM API Provider
+# TYPE litellm_remaining_requests_metric gauge
+litellm_remaining_requests_metric 0.0
+# HELP litellm_remaining_tokens_metric remaining tokens for model, returned from LLM API Provider
+# TYPE litellm_remaining_tokens_metric gauge
+litellm_remaining_tokens_metric 0.0

@@ -73,9 +73,11 @@ files:
       value:
         type: string
         example: "%%host%%"
+      fleet_configurable: false
     - name: port
       description: Port to use when connecting to `url`.
       enabled: true
       value:
         type: integer
         example: 11211
+      fleet_configurable: false

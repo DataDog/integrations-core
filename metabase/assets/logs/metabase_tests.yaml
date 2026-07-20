@@ -26,9 +26,9 @@ tests:
       details:
         dashcards:
          -
-          name: "Client, Filtered by Client ID is abc"
-          id: 118
           card_id: 120
+          id: 118
+          name: "Client, Filtered by Client ID is abc"
         id: 11
         name: "Views"
       entity_id: 11

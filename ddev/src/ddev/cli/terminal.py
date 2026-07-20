@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from functools import cached_property
 from textwrap import indent as indent_text
 from time import monotonic, sleep
@@ -173,6 +174,41 @@ class Terminal:
 
     def style_debug(self, text: str) -> Text:
         return Text(text, style=self._style_level_debug)
+
+    def labeled_text(self, label: str, value: str | Text = '', *, width: int | None = None) -> Text:
+        """Return a rich label/value line using the terminal's info style for the label."""
+        text = Text()
+        prefix = f'{label}:'
+        if width is None:
+            prefix = f'{prefix} '
+        else:
+            prefix = prefix.ljust(width + 2)
+
+        text.append(prefix, style=self._style_level_info)
+        if isinstance(value, Text):
+            text.append_text(value)
+        else:
+            text.append(value)
+        return text
+
+    def labeled_lines(
+        self,
+        rows: Sequence[tuple[str, str | Text]],
+        *,
+        indent: str = '',
+        align: bool = True,
+    ) -> Text:
+        """Return aligned rich label/value lines."""
+        text = Text()
+        width = max((len(label) for label, _ in rows), default=0) if align else None
+
+        for i, (label, value) in enumerate(rows):
+            if i:
+                text.append('\n')
+            text.append(indent)
+            text.append_text(self.labeled_text(label, value, width=width))
+
+        return text
 
     def initialize_styles(self, styles: dict):  # no cov
         # Lazily display errors so that they use the correct style

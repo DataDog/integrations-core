@@ -58,12 +58,14 @@ files:
       description: If authentication is needed, specify a `username` here.
       value:
         type: string
+      fleet_configurable: false
     - name: password
       required: false
       description: If authentication is needed, specify a `password` here.
       secret: true
       value:
         type: string
+      fleet_configurable: false
     - name: namespace
       description: The optional WMI namespace to connect to.
       fleet_configurable: true

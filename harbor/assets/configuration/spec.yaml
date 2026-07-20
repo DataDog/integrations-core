@@ -31,33 +31,3 @@ files:
       type: file
       path: /var/log/harbor/*.log
       source: harbor
-- name: auto_conf.yaml
-  options:
-  - template: ad_identifiers
-    overrides:
-      value.example:
-        - nginx-photon
-  - template: init_config
-    options: []
-  - template: instances
-    options:
-      - name: url
-        required: true
-        description: The Harbor HTTP url.
-        value:
-          example: 'http://%%host%%/'
-          type: string
-      - name: username
-        required: true
-        description: |
-          The username to use for authentication against the Harbor API.
-          Note: Some metrics and service checks requires an admin account to be collected.
-          This includes chartmuseum.status, replication registries data, volume information.
-        value:
-          type: string
-      - name: password
-        required: true
-        description: The password used together with the username for authentication against the Harbor API.
-        secret: true
-        value:
-          type: string

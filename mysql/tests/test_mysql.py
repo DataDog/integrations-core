@@ -339,7 +339,7 @@ def _assert_complex_config(
     aggregator.assert_metric('alice.age', value=25)
     aggregator.assert_metric('bob.age', value=20)
 
-    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags)
+    _test_index_metrics(aggregator, variables.INDEX_USAGE_VARS + variables.INDEX_SIZE_VARS, metric_tags, e2e=e2e)
     # test optional metrics
     optional_metrics = (
         variables.TRADITIONAL_REPLICATION_METRICS
@@ -599,28 +599,35 @@ def test_correct_hostname(dbm_enabled, reported_hostname, expected_hostname, agg
         aggregator.assert_metric(mname, hostname=expected_hostname, at_least=0)
 
 
-def _test_index_metrics(aggregator, index_metrics, metric_tags):
+def _test_index_metrics(aggregator, index_metrics, metric_tags, e2e=False):
+    # In E2E, monotonic_count metrics with collection_interval=300 aren't emitted:
+    # check_rate=True runs the check twice but the second run skips the query (interval not elapsed),
+    # so no delta is ever flushed. Use at_least=0 to avoid false failures in E2E.
+    usage_count = 0 if e2e else 1
     for mname in index_metrics:
         if mname in ['mysql.index.reads', 'mysql.index.updates', 'mysql.index.deletes']:
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:testdb', 'table:users', 'index:id'),
-                count=1,
+                at_least=usage_count,
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags
                 + (
                     'db:datadog_test_schemas',
                     'table:cities',
                     'index:single_column_index',
                 ),
-                count=1,
+                at_least=usage_count,
             )
             aggregator.assert_metric(
                 mname,
+                metric_type=aggregator.MONOTONIC_COUNT,
                 tags=metric_tags + ('db:datadog_test_schemas', 'table:cities', 'index:two_columns_index'),
-                count=1,
+                at_least=usage_count,
             )
         if mname == 'mysql.index.size':
             aggregator.assert_metric(mname, tags=metric_tags + ('db:testdb', 'table:users', 'index:id'), count=1)
@@ -1065,3 +1072,44 @@ def test_errors_raised_metric_with_dbm(aggregator, dd_run_check, instance_basic,
     else:
         # In all other cases the metric should not be present
         aggregator.assert_metric('mysql.performance.errors_raised', count=0)
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'dbm_enabled',
+    [
+        pytest.param(True, id="dbm_enabled"),
+        pytest.param(False, id="dbm_disabled"),
+    ],
+)
+def test_wait_event_summary_metrics_with_dbm(aggregator, dd_run_check, instance_basic, dbm_enabled):
+    instance_basic['dbm'] = dbm_enabled
+    if dbm_enabled:
+        instance_basic['collect_settings'] = {'enabled': False}
+        instance_basic['query_activity'] = {'enabled': False}
+        instance_basic['query_samples'] = {'enabled': False}
+        instance_basic['query_metrics'] = {'enabled': False}
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [instance_basic])
+    dd_run_check(mysql_check)
+
+    aggregator.assert_service_check('mysql.can_connect', status=MySql.OK, count=1)
+
+    wait_event_metrics = [
+        'mysql.performance.wait_event.count',
+        'mysql.performance.wait_event.time',
+        'mysql.performance.wait_event.avg_time',
+        'mysql.performance.wait_event.max_time',
+    ]
+    if dbm_enabled:
+        for metric in wait_event_metrics:
+            aggregator.assert_metric(metric, at_least=1)
+        # Verify wait_event tag is present on submitted metrics
+        for metric in wait_event_metrics:
+            for m in aggregator.metrics(metric):
+                wait_event_tags = [t for t in m.tags if t.startswith('wait_event:')]
+                assert len(wait_event_tags) == 1, "Expected exactly one wait_event tag on {}".format(metric)
+    else:
+        for metric in wait_event_metrics:
+            aggregator.assert_metric(metric, count=0)

@@ -85,7 +85,7 @@ def instance_persist_connections():
 
 
 def instance_raw_metric_prefix():
-    return 'n8n'
+    return 'n8n_'
 
 
 def instance_request_size():

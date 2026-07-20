@@ -271,7 +271,7 @@ class TableColumnHasTagValidator(ProfileValidator):
                     if not all_metric_tags_are_valid:
                         self.fail(
                             "metric_tables defined in lines {} are not valid. \
-                        \nmetric_tags must have 'column' or 'index' value".format(lines)
+                        \nmetric_tags must have 'symbol', 'column' or 'index' value".format(lines)
                         )
 
         if not self.result.failed:
@@ -281,7 +281,7 @@ class TableColumnHasTagValidator(ProfileValidator):
         all_tags_are_valid = True
         lines = []
         for metric_tag in metric_tags:
-            if not (metric_tag.get('column') or metric_tag.get('index')):
+            if not (metric_tag.get('symbol') or metric_tag.get('column') or metric_tag.get('index')):
                 all_tags_are_valid = False
                 lines.append(metric_tag.get('__line__'))
 

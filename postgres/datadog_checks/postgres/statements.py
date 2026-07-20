@@ -19,20 +19,18 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.postgres.config_models import InstanceConfig
 
-from .query_calls_cache import QueryCallsCache
-from .util import DatabaseConfigurationError, payload_pg_version, warning_with_tags
-from .version_utils import V9_4, V10, V14
+from .util import (
+    DatabaseConfigurationError,
+    parse_shared_preload_libraries,
+    payload_pg_version,
+    warning_with_tags,
+)
+from .version_utils import V9_4, V14
 
 try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
-
-QUERYID_TO_CALLS_QUERY = """
-SELECT queryid, calls
-  FROM {pg_stat_statements_view}
-  WHERE queryid IS NOT NULL
-"""
 
 STATEMENTS_QUERY = """
 SELECT {cols}
@@ -54,19 +52,13 @@ def statements_query(**kwargs):
     cols = kwargs.get('cols', '*')
     filters = kwargs.get('filters', '')
     extra_clauses = kwargs.get('extra_clauses', '')
-    called_queryids = kwargs.get('called_queryids', [])
-
-    queryid_filter = ""
-    if len(called_queryids) > 0:
-        queryid_filter = f"AND queryid = ANY('{{ {called_queryids} }}'::bigint[])"
 
     return STATEMENTS_QUERY.format(
         cols=cols,
         pg_stat_statements_view=pg_stat_statements_view,
         filters=filters,
         extra_clauses=extra_clauses,
-        queryid_filter=queryid_filter,
-        called_queryids=called_queryids,
+        queryid_filter="",
     )
 
 
@@ -181,21 +173,24 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self.tags = None
         self._state = StatementMetrics()
         self._stat_column_cache = []
-        self._query_calls_cache = QueryCallsCache()
-        self._baseline_metrics = {}
-        self._last_baseline_metrics_expiry = None
         self._track_io_timing_cache = None
         obfuscate_options = self._config.obfuscator_options.model_dump()
         # Backfill old keys used in the agent obfuscator
         obfuscate_options['table_names'] = self._config.obfuscator_options.collect_tables
         obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
         obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
+        obfuscate_options['dbms'] = 'postgresql'
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
             maxsize=config.query_metrics.full_statement_text_cache_max_size,
             ttl=60 * 60 / config.query_metrics.full_statement_text_samples_per_hour_per_query,
         )
+
+    def _shutdown(self):
+        self._check = None
+        self._full_statement_text_cache = None
+        self._state = None
 
     def _execute_query(self, query, params=(), binary=False, row_factory=None) -> Tuple[list, list]:
         if self._cancel_event.is_set():
@@ -235,28 +230,6 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self._stat_column_cache = col_names
         self._log.debug("Fetched columns %s", col_names)
         return col_names
-
-    def _check_called_queries(self):
-        pgss_view_without_query_text = self._config.pg_stat_statements_view
-        if pgss_view_without_query_text == "pg_stat_statements":
-            # Passing false for the showtext argument leads to a huge performance increase. This
-            # allows the engine to avoid retrieving the potentially large amount of text data.
-            # The query count query does not depend on the statement text, so it's safe for this use case.
-            # For more info: https://www.postgresql.org/docs/current/pgstatstatements.html#PGSTATSTATEMENTS-FUNCS
-            pgss_view_without_query_text = "pg_stat_statements(false)"
-
-            query = QUERYID_TO_CALLS_QUERY.format(pg_stat_statements_view=pgss_view_without_query_text)
-            rows, _ = self._execute_query(query, row_factory=dict_row)
-            self._query_calls_cache.set_calls(rows)
-            self._check.gauge(
-                "dd.postgresql.pg_stat_statements.calls_changed",
-                len(self._query_calls_cache.called_queryids),
-                tags=self.tags,
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-
-            return self._query_calls_cache.called_queryids
 
     def run_job(self):
         # do not emit any dd.internal metrics for DBM specific check code
@@ -396,63 +369,48 @@ class PostgresStatementMetrics(DBMAsyncJob):
                     "pg_database.datname NOT ILIKE %s" for _ in self._config.ignore_databases
                 )
                 params = params + tuple(self._config.ignore_databases)
-            if len(self._query_calls_cache.cache) > 0:
-                rows, _ = self._execute_query(
-                    statements_query(
-                        cols=', '.join(query_columns),
-                        pg_stat_statements_view=self._config.pg_stat_statements_view,
-                        filters=filters,
-                        called_queryids=', '.join([str(i) for i in self._query_calls_cache.called_queryids]),
-                    ),
-                    params=params,
-                    row_factory=dict_row,
-                )
-                return rows
-            else:
-                rows, _ = self._execute_query(
-                    statements_query(
-                        cols=', '.join(query_columns),
-                        pg_stat_statements_view=self._config.pg_stat_statements_view,
-                        filters=filters,
-                    ),
-                    params=params,
-                    row_factory=dict_row,
-                )
-                return rows
+            rows, _ = self._execute_query(
+                statements_query(
+                    cols=', '.join(query_columns),
+                    pg_stat_statements_view=self._config.pg_stat_statements_view,
+                    filters=filters,
+                ),
+                params=params,
+                row_factory=dict_row,
+            )
+            return rows
         except psycopg.Error as e:
             error_tag = "error:database-{}".format(type(e).__name__)
 
             if (isinstance(e, psycopg.errors.ObjectNotInPrerequisiteState)) and 'pg_stat_statements' in str(e):
                 error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
-                self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statements_not_loaded,
-                    warning_with_tags(
-                        "Unable to collect statement metrics because pg_stat_statements "
-                        "extension is not loaded in database '%s'. "
-                        "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                        "troubleshooting#%s for more details",
-                        self._config.dbname,
-                        DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
-                        host=self._check.reported_hostname,
-                        dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statements_not_loaded.value,
-                    ),
-                )
+                self._record_pg_stat_statements_not_loaded()
             elif isinstance(e, psycopg.errors.UndefinedTable) and 'pg_stat_statements' in str(e):
-                error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
-                self._check.record_warning(
-                    DatabaseConfigurationError.pg_stat_statements_not_created,
-                    warning_with_tags(
-                        "Unable to collect statement metrics because pg_stat_statements is not created "
-                        "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
-                        "troubleshooting#%s for more details",
-                        self._config.dbname,
-                        DatabaseConfigurationError.pg_stat_statements_not_created.value,
-                        host=self._check.reported_hostname,
-                        dbname=self._config.dbname,
-                        code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
-                    ),
-                )
+                # UndefinedTable fires whether the extension was never CREATEd OR the library was
+                # never loaded via shared_preload_libraries (you can't CREATE EXTENSION without SPL).
+                # Inspect pg_settings (populated at connect time) to attribute correctly -- otherwise
+                # we'd tell the user to `CREATE EXTENSION` when that command will fail until SPL is
+                # fixed and the server restarted. pg_settings returns an empty string when the
+                # datadog user lacks pg_monitor and can't read SPL; fall back to `not_created` then.
+                spl = self._check.pg_settings.get("shared_preload_libraries", "") or ""
+                if spl and "pg_stat_statements" not in parse_shared_preload_libraries(spl):
+                    error_tag = "error:database-{}-pg_stat_statements_not_loaded".format(type(e).__name__)
+                    self._record_pg_stat_statements_not_loaded()
+                else:
+                    error_tag = "error:database-{}-pg_stat_statements_not_created".format(type(e).__name__)
+                    self._check.record_warning(
+                        DatabaseConfigurationError.pg_stat_statements_not_created,
+                        warning_with_tags(
+                            "Unable to collect statement metrics because pg_stat_statements is not created "
+                            "in database '%s'. See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                            "troubleshooting#%s for more details",
+                            self._config.dbname,
+                            DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                            host=self._check.reported_hostname,
+                            dbname=self._config.dbname,
+                            code=DatabaseConfigurationError.pg_stat_statements_not_created.value,
+                        ),
+                    )
             else:
                 self._check.warning(
                     warning_with_tags(
@@ -475,6 +433,23 @@ class PostgresStatementMetrics(DBMAsyncJob):
             )
 
             return []
+
+    def _record_pg_stat_statements_not_loaded(self):
+        code = DatabaseConfigurationError.pg_stat_statements_not_loaded
+        self._check.record_warning(
+            code,
+            warning_with_tags(
+                "Unable to collect statement metrics because pg_stat_statements "
+                "extension is not loaded in database '%s'. "
+                "See https://docs.datadoghq.com/database_monitoring/setup_postgres/"
+                "troubleshooting#%s for more details",
+                self._config.dbname,
+                code.value,
+                host=self._check.reported_hostname,
+                dbname=self._config.dbname,
+                code=code.value,
+            ),
+        )
 
     def _emit_pg_stat_statements_dealloc(self):
         if self._check.version < V14:
@@ -519,82 +494,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
         except psycopg.Error as e:
             self._log.warning("Failed to query for pg_stat_statements count: %s", e)
 
-    def _baseline_metrics_query_key(self, row):
-        return _row_key(row) + (row['queryid'],)
-
-    # _apply_called_queries expects normalized rows before any merging of duplicates.
-    # It takes the incremental pg_stat_statements rows and constructs the full set of rows
-    # by adding the existing values in the baseline_metrics cache. This is equivalent to
-    # fetching the full set of rows from pg_stat_statements, but we avoid paying the price of
-    # actually querying the rows.
-    def _apply_called_queries(self, rows):
-        # Apply called queries to baseline_metrics
-        for row in rows:
-            baseline_row = copy.copy(row)
-            key = self._baseline_metrics_query_key(row)
-
-            # To avoid high memory usage, don't cache the query text since it can be large.
-            del baseline_row['query']
-            self._baseline_metrics[key] = baseline_row
-
-        # Apply query text for called queries since it is not cached and uncalled queries won't get result
-        # in sent metrics.
-        query_text = {row['query_signature']: row['query'] for row in rows}
-        applied_rows = []
-        for row in self._baseline_metrics.values():
-            query_signature = row['query_signature']
-            if query_signature in query_text:
-                applied_rows.append({**row, 'query': query_text[query_signature]})
-            else:
-                applied_rows.append(copy.copy(row))
-
-        return applied_rows
-
-    # To prevent the baseline metrics cache from growing indefinitely (as can happen) because of
-    # pg_stat_statements eviction), we clear it out periodically to force a full refetch.
-    def _check_baseline_metrics_expiry(self):
-        if (
-            self._last_baseline_metrics_expiry is None
-            or self._last_baseline_metrics_expiry + self._config.query_metrics.baseline_metrics_expiry < time.time()
-            or len(self._baseline_metrics) > 3 * int(self._check.pg_settings.get("pg_stat_statements.max", 10000))
-        ):
-            self._baseline_metrics = {}
-            self._query_calls_cache = QueryCallsCache()
-            self._last_baseline_metrics_expiry = time.time()
-
-            self._check.count(
-                "dd.postgres.statement_metrics.baseline_metrics_cache_reset",
-                1,
-                tags=self.tags + self._check._get_debug_tags(),
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
         self._emit_pg_stat_statements_metrics()
         self._emit_pg_stat_statements_dealloc()
 
-        self._check_baseline_metrics_expiry()
-        rows = []
-        if (not self._config.query_metrics.incremental_query_metrics) or self._check.version < V10:
-            rows = self._load_pg_stat_statements()
-            rows = self._normalize_queries(rows)
-        elif len(self._baseline_metrics) == 0:
-            # When we don't have baseline metrics (either on the first run or after cache expiry),
-            # we fetch all rows from pg_stat_statements, and update the initial state of relevant
-            # caches.
-            rows = self._load_pg_stat_statements()
-            rows = self._normalize_queries(rows)
-            self._query_calls_cache.set_calls(rows)
-            self._apply_called_queries(rows)
-        else:
-            # When we do have baseline metrics, use them to construct the full set of rows
-            # so that compute_derivative_rows can merge duplicates and calculate deltas.
-            self._check_called_queries()
-            rows = self._load_pg_stat_statements()
-            rows = self._normalize_queries(rows)
-            rows = self._apply_called_queries(rows)
+        rows = self._load_pg_stat_statements()
+        rows = self._normalize_queries(rows)
 
         if not rows:
             return []

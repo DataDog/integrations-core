@@ -50,14 +50,14 @@ def dd_environment():
         compose_file,
         build=True,
         service_name=common.CASSANDRA_CONTAINER_NAME,
-        waith_for_health=True,
+        wait_for_health=True,
     ):
         cassandra_seed = get_container_ip("{}".format(common.CASSANDRA_CONTAINER_NAME))
         env['CASSANDRA_SEEDS'] = cassandra_seed
         with docker_run(
             compose_file,
             service_name=common.CASSANDRA_CONTAINER_NAME_2,
-            waith_for_health=True,
+            wait_for_health=True,
             conditions=[WaitFor(create_keyspace, attempts=10, wait=10)],
         ):
             yield common.CONFIG_INSTANCE, E2E_METADATA

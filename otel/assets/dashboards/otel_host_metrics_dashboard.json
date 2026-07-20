@@ -1,2121 +1,2424 @@
 {
-    "title": "OpenTelemetry Host Metrics Dashboard",
-    "description": "Default dashboard to visualize OpenTelemetry host metrics from the hostmetrics receiver.\n\nFor additional details, see the [specification (https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/).",
-    "widgets": [
-        {
-            "id": 3310659042452680,
+  "title": "OpenTelemetry Host Metrics Dashboard",
+  "description": "Default dashboard to visualize OpenTelemetry host metrics from the hostmetrics receiver.\n\nFor additional details, see the [specification (https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/).",
+  "widgets": [
+    {
+      "id": 3310659042452680,
+      "definition": {
+        "title": "About",
+        "banner_img": "/static/images/integration_dashboard/otel_hero_1.png",
+        "show_title": false,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 87360381994124,
             "definition": {
-                "title": "About",
-                "banner_img": "/static/images/integration_dashboard/otel_hero_1.png",
-                "show_title": false,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 87360381994124,
-                        "definition": {
-                            "type": "note",
-                            "content": "This is a default dashboard to visualize OpenTelemetry host metrics. These metrics come from the OpenTelemetry hostmetrics receiver. [See the documentation](https://docs.datadoghq.com/opentelemetry/integrations/host_metrics/?tab=host) for configuration instructions. \n\n##### [**Semantic Conventions for System Metrics&nbsp;↗**](https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/)",
-                            "background_color": "transparent",
-                            "font_size": "18",
-                            "text_align": "left",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 8,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 490124618425900,
-                        "definition": {
-                            "type": "note",
-                            "content": "**OpenTelemetry guides**\n\n[Datadog Open Standards&nbsp;↗](https://docs.datadoghq.com/tracing/trace_collection/open_standards/)",
-                            "background_color": "transparent",
-                            "font_size": "14",
-                            "text_align": "left",
-                            "vertical_align": "top",
-                            "show_tick": false,
-                            "tick_pos": "50%",
-                            "tick_edge": "left",
-                            "has_padding": true
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    }
-                ]
+              "type": "note",
+              "content": "This is a default dashboard to visualize OpenTelemetry host metrics. These metrics come from the OpenTelemetry hostmetrics receiver. [See the documentation](https://docs.datadoghq.com/opentelemetry/integrations/host_metrics/?tab=host) for configuration instructions. \n\n##### [**Semantic Conventions for System Metrics&nbsp;↗**](https://opentelemetry.io/docs/reference/specification/metrics/semantic_conventions/system-metrics/)",
+              "background_color": "transparent",
+              "font_size": "18",
+              "text_align": "left",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
             "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 5
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 2
             }
-        },
-        {
-            "id": 5166725083596150,
+          },
+          {
+            "id": 490124618425900,
             "definition": {
-                "title": "Overall Health",
-                "background_color": "vivid_blue",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
-                    {
-                        "id": 2443069551086632,
-                        "definition": {
-                            "title": "System load",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Load avg 1 min",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Load avg 5 min",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Load avg 15 min",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.cpu.load_average.1m{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.load_average.5m{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.load_average.15m{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 7698973718492276,
-                        "definition": {
-                            "title": "CPU usage",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "state: system",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "state: user",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "state: idle",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.cpu.utilization{$host,state:system}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.utilization{$host,state:user}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.utilization{$host,state:idle}",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 7663055175198514,
-                        "definition": {
-                            "title": "CPU time I/O wait",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.cpu.utilization{$host,state:wait}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 2181667549032528,
-                        "definition": {
-                            "title": "System memory",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Used memory",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Free memory",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Cached memory",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:used}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:free}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:cached}",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 7849923776453466,
-                        "definition": {
-                            "title": "Network traffic (per sec)",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "received",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "transmitted",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.network.io{$host, direction:receive}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "native"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.network.io{$host, direction:transmit}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "native"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8080968102292910,
-                        "definition": {
-                            "title": "Network errors",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.network.errors{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    }
-                ]
+              "type": "note",
+              "content": "**OpenTelemetry guides**\n\n[Datadog Open Standards&nbsp;↗](https://docs.datadoghq.com/tracing/trace_collection/open_standards/)",
+              "background_color": "transparent",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
             },
             "layout": {
-                "x": 0,
-                "y": 5,
-                "width": 12,
-                "height": 5
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 209253370509184,
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 5166725083596150,
+      "definition": {
+        "title": "Overall Health",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2443069551086632,
             "definition": {
-                "title": "CPU",
-                "background_color": "white",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "System load",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 633114491621342,
-                        "definition": {
-                            "title": "CPU time per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.cpu.time{$host} by {state}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "Load avg 1 min",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
                     },
                     {
-                        "id": 8563305632796434,
-                        "definition": {
-                            "title": "CPU usage",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "state: system",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "state: user",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "state: idle",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.cpu.utilization{$host,state:system}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.utilization{$host,state:user}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.utilization{$host,state:idle}",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "Load avg 5 min",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
                     },
                     {
-                        "id": 2014978148955484,
-                        "definition": {
-                            "title": "System load",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Load avg 1 min",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Load avg 5 min",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Load avg 15 min",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.cpu.load_average.1m{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.load_average.5m{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.cpu.load_average.15m{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "Load avg 15 min",
+                      "formula": "max(default_zero(query3_otel), default_zero(query3_plain))"
                     }
-                ]
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.cpu.load_average.1m{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.load_average.1m{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.load_average.5m{$host}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.load_average.5m{$host}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.load_average.15m{$host}",
+                      "data_source": "metrics",
+                      "name": "query3_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.load_average.15m{$host}",
+                      "data_source": "metrics",
+                      "name": "query3_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
             },
             "layout": {
-                "x": 0,
-                "y": 10,
-                "width": 12,
-                "height": 3
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 8217119782896554,
+          },
+          {
+            "id": 7698973718492276,
             "definition": {
-                "title": "Memory",
-                "background_color": "white",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "CPU usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 5482042435213120,
-                        "definition": {
-                            "title": "System memory",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Used memory",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Free memory",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Cached memory",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:used}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:free}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:cached}",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "state: system",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
                     },
                     {
-                        "id": 7566930121181664,
-                        "definition": {
-                            "title": "System memory utilization",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "Used memory utilization",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "Free memory utilization",
-                                            "formula": "query2"
-                                        },
-                                        {
-                                            "alias": "Cached memory utilization",
-                                            "formula": "query3"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.memory.utilization{$host,state:used}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.memory.utilization{$host,state:free}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.memory.utilization{$host,state:cached}",
-                                            "data_source": "metrics",
-                                            "name": "query3",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "state: user",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
                     },
                     {
-                        "id": 3540428702383206,
-                        "definition": {
-                            "title": "Evolution of used system memory in the last hour",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query2 - hour_before(query1)"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:used}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.memory.usage{$host,state:used}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "state: idle",
+                      "formula": "max(default_zero(query3_otel), default_zero(query3_plain))"
                     }
-                ]
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.cpu.utilization{$host,state:system}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.utilization{$host,state:system}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.utilization{$host,state:user}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.utilization{$host,state:user}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.utilization{$host,state:idle}",
+                      "data_source": "metrics",
+                      "name": "query3_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.utilization{$host,state:idle}",
+                      "data_source": "metrics",
+                      "name": "query3_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
             },
             "layout": {
-                "x": 0,
-                "y": 13,
-                "width": 12,
-                "height": 3
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 8371241475700303,
+          },
+          {
+            "id": 7663055175198514,
             "definition": {
-                "title": "Network",
-                "background_color": "white",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "CPU time I/O wait",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 8080188239720616,
-                        "definition": {
-                            "title": "Network traffic per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "time": {},
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "alias": "transmitted",
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "alias": "received",
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.network.io{$host,direction:transmit}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "native"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.network.io{$host,direction:receive}",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "native"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 5641499832373014,
-                        "definition": {
-                            "title": "Open TCP connections per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.network.connections{$host,protocol:tcp}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 1364745577065042,
-                        "definition": {
-                            "title": "Network errors",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.network.errors{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3873353869828727,
-                        "definition": {
-                            "title": "Packets transferred per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.network.packets{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 5322274880165808,
-                        "definition": {
-                            "title": "Packets dropped per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.network.dropped{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "bars"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
                     }
-                ]
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.cpu.utilization{$host,state:wait}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.utilization{$host,state:wait}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
             },
             "layout": {
-                "x": 0,
-                "y": 0,
-                "width": 12,
-                "height": 5,
-                "is_column_break": true
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 4304012414124568,
+          },
+          {
+            "id": 2181667549032528,
             "definition": {
-                "title": "Processes",
-                "background_color": "white",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "System memory",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 5619784256576312,
-                        "definition": {
-                            "title": "Running processes",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.processes.count{$host,status:running}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "Used memory",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
                     },
                     {
-                        "id": 1489928321032288,
-                        "definition": {
-                            "title": "Blocked processes",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.processes.count{$host,status:blocked}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "Free memory",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
                     },
                     {
-                        "id": 7301604301072668,
-                        "definition": {
-                            "title": "Created processes",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.processes.created{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "Cached memory",
+                      "formula": "max(default_zero(query3_otel), default_zero(query3_plain))"
                     }
-                ]
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:free}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:free}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:cached}",
+                      "data_source": "metrics",
+                      "name": "query3_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:cached}",
+                      "data_source": "metrics",
+                      "name": "query3_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
             },
             "layout": {
-                "x": 0,
-                "y": 5,
-                "width": 12,
-                "height": 3
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 7872989657604364,
+          },
+          {
+            "id": 7849923776453466,
             "definition": {
-                "title": "Disk",
-                "background_color": "white",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "Network traffic (per sec)",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 2706477813444026,
-                        "definition": {
-                            "title": "Disk IO per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        },
-                                        {
-                                            "formula": "query2"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.disk.io{$host,direction:write}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        },
-                                        {
-                                            "query": "avg:otel.system.disk.io{$host,direction:read}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query2",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "received",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
                     },
                     {
-                        "id": 4379965605397834,
-                        "definition": {
-                            "title": "Disk IO time per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.disk.io_time{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 4593387228919746,
-                        "definition": {
-                            "title": "Disk weighted IO time per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.disk.weighted_io_time{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 2906177235185528,
-                        "definition": {
-                            "title": "Disk operations per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.disk.operations{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3583280623429380,
-                        "definition": {
-                            "title": "Disk operations time per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.disk.operation_time{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 6319645120178570,
-                        "definition": {
-                            "title": "Pending IO operations",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.disk.pending_operations{$host}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 2,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 2831897696985210,
-                        "definition": {
-                            "title": "Merged disk reads",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.disk.merged{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 4,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "alias": "transmitted",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
                     }
-                ]
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.network.io{$host, direction:receive}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.network.io{$host, direction:receive}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.network.io{$host, direction:transmit}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.network.io{$host, direction:transmit}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
             },
             "layout": {
-                "x": 0,
-                "y": 8,
-                "width": 12,
-                "height": 7
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 1009551840177744,
+          },
+          {
+            "id": 8080968102292910,
             "definition": {
-                "title": "Filesystem",
-                "background_color": "white",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "Network errors",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 3143538657022881,
-                        "definition": {
-                            "title": "Used space by device",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.filesystem.usage{$host,state:used} by {device}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 8298931931082682,
-                        "definition": {
-                            "title": "Used inodes by device",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.filesystem.inodes.usage{$host} by {device}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 3617093409981236,
-                        "definition": {
-                            "title": "Filesystem utilization by device",
-                            "title_size": "16",
-                            "title_align": "left",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "avg:otel.system.filesystem.utilization{$host} by {device}",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ]
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
                     }
-                ]
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.network.errors{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.network.errors{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
             },
             "layout": {
-                "x": 0,
-                "y": 15,
-                "width": 12,
-                "height": 3
+              "x": 8,
+              "y": 2,
+              "width": 4,
+              "height": 2
             }
-        },
-        {
-            "id": 7826461271566965,
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 209253370509184,
+      "definition": {
+        "title": "CPU",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 633114491621342,
             "definition": {
-                "title": "Swap memory",
-                "background_color": "white",
-                "show_title": true,
-                "type": "group",
-                "layout_type": "ordered",
-                "widgets": [
+              "title": "CPU time per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
                     {
-                        "id": 332159214405472,
-                        "definition": {
-                            "title": "Swap page faults per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.paging.faults{$host}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 0,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 5987633477466212,
-                        "definition": {
-                            "title": "Swap page outs per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.paging.operations{$host,direction:page_out}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 4,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
-                    },
-                    {
-                        "id": 80671494141202,
-                        "definition": {
-                            "title": "Swap page ins per second",
-                            "show_legend": true,
-                            "legend_layout": "auto",
-                            "legend_columns": [
-                                "avg",
-                                "min",
-                                "max",
-                                "value",
-                                "sum"
-                            ],
-                            "type": "timeseries",
-                            "requests": [
-                                {
-                                    "formulas": [
-                                        {
-                                            "formula": "query1"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "queries": [
-                                        {
-                                            "query": "sum:otel.system.paging.operations{$host,direction:page_in}.as_count()",
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "semantic_mode": "combined"
-                                        }
-                                    ],
-                                    "style": {
-                                        "palette": "dog_classic",
-                                        "line_type": "solid",
-                                        "line_width": "normal"
-                                    },
-                                    "display_type": "line"
-                                }
-                            ],
-                            "yaxis": {
-                                "include_zero": true,
-                                "scale": "linear",
-                                "label": "",
-                                "min": "auto",
-                                "max": "auto"
-                            }
-                        },
-                        "layout": {
-                            "x": 8,
-                            "y": 0,
-                            "width": 4,
-                            "height": 2
-                        }
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
                     }
-                ]
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.cpu.time{$host} by {state}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.time{$host} by {state}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
             },
             "layout": {
-                "x": 0,
-                "y": 18,
-                "width": 12,
-                "height": 3
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
             }
-        }
-    ],
-    "template_variables": [
-        {
-            "name": "host",
-            "prefix": "host",
-            "available_values": [],
-            "default": "*"
-        }
-    ],
-    "layout_type": "ordered",
-    "is_read_only": false,
-    "notify_list": [],
-    "reflow_type": "fixed"
+          },
+          {
+            "id": 8563305632796434,
+            "definition": {
+              "title": "CPU usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "state: system",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    },
+                    {
+                      "alias": "state: user",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
+                    },
+                    {
+                      "alias": "state: idle",
+                      "formula": "max(default_zero(query3_otel), default_zero(query3_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.cpu.utilization{$host,state:system}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.utilization{$host,state:system}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.utilization{$host,state:user}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.utilization{$host,state:user}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.utilization{$host,state:idle}",
+                      "data_source": "metrics",
+                      "name": "query3_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.utilization{$host,state:idle}",
+                      "data_source": "metrics",
+                      "name": "query3_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2014978148955484,
+            "definition": {
+              "title": "System load",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Load avg 1 min",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    },
+                    {
+                      "alias": "Load avg 5 min",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
+                    },
+                    {
+                      "alias": "Load avg 15 min",
+                      "formula": "max(default_zero(query3_otel), default_zero(query3_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.cpu.load_average.1m{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.load_average.1m{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.load_average.5m{$host}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.load_average.5m{$host}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.cpu.load_average.15m{$host}",
+                      "data_source": "metrics",
+                      "name": "query3_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.cpu.load_average.15m{$host}",
+                      "data_source": "metrics",
+                      "name": "query3_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 8217119782896554,
+      "definition": {
+        "title": "Memory",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5482042435213120,
+            "definition": {
+              "title": "System memory",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Used memory",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    },
+                    {
+                      "alias": "Free memory",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
+                    },
+                    {
+                      "alias": "Cached memory",
+                      "formula": "max(default_zero(query3_otel), default_zero(query3_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:free}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:free}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:cached}",
+                      "data_source": "metrics",
+                      "name": "query3_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:cached}",
+                      "data_source": "metrics",
+                      "name": "query3_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7566930121181664,
+            "definition": {
+              "title": "System memory utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Used memory utilization",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    },
+                    {
+                      "alias": "Free memory utilization",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
+                    },
+                    {
+                      "alias": "Cached memory utilization",
+                      "formula": "max(default_zero(query3_otel), default_zero(query3_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.memory.utilization{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.utilization{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.memory.utilization{$host,state:free}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.utilization{$host,state:free}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.memory.utilization{$host,state:cached}",
+                      "data_source": "metrics",
+                      "name": "query3_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.utilization{$host,state:cached}",
+                      "data_source": "metrics",
+                      "name": "query3_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3540428702383206,
+            "definition": {
+              "title": "Evolution of used system memory in the last hour",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain)) - hour_before(max(default_zero(query1_otel), default_zero(query1_plain)))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.memory.usage{$host,state:used}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 13,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 8371241475700303,
+      "definition": {
+        "title": "Network",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8080188239720616,
+            "definition": {
+              "title": "Network traffic per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "transmitted",
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    },
+                    {
+                      "alias": "received",
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.network.io{$host,direction:transmit}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.network.io{$host,direction:transmit}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.network.io{$host,direction:receive}",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.network.io{$host,direction:receive}",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 5641499832373014,
+            "definition": {
+              "title": "Open TCP connections per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.network.connections{$host,protocol:tcp}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.network.connections{$host,protocol:tcp}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1364745577065042,
+            "definition": {
+              "title": "Network errors",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.network.errors{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.network.errors{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3873353869828727,
+            "definition": {
+              "title": "Packets transferred per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.network.packets{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.network.packets{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 5322274880165808,
+            "definition": {
+              "title": "Packets dropped per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.network.dropped{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.network.dropped{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 32,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 4304012414124568,
+      "definition": {
+        "title": "Processes",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 5619784256576312,
+            "definition": {
+              "title": "Running processes",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.processes.count{$host,status:running}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.processes.count{$host,status:running}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 1489928321032288,
+            "definition": {
+              "title": "Blocked processes",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.processes.count{$host,status:blocked}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.processes.count{$host,status:blocked}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7301604301072668,
+            "definition": {
+              "title": "Created processes",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.processes.created{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.processes.created{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 37,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 7872989657604364,
+      "definition": {
+        "title": "Disk",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2706477813444026,
+            "definition": {
+              "title": "Disk IO per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    },
+                    {
+                      "formula": "max(default_zero(query2_otel), default_zero(query2_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.disk.io{$host,direction:write}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.disk.io{$host,direction:write}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:otel.system.disk.io{$host,direction:read}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.disk.io{$host,direction:read}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query2_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4379965605397834,
+            "definition": {
+              "title": "Disk IO time per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.disk.io_time{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.disk.io_time{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 4593387228919746,
+            "definition": {
+              "title": "Disk weighted IO time per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.disk.weighted_io_time{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.disk.weighted_io_time{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2906177235185528,
+            "definition": {
+              "title": "Disk operations per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.disk.operations{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.disk.operations{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3583280623429380,
+            "definition": {
+              "title": "Disk operations time per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.disk.operation_time{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.disk.operation_time{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 6319645120178570,
+            "definition": {
+              "title": "Pending IO operations",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.disk.pending_operations{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.disk.pending_operations{$host}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 2831897696985210,
+            "definition": {
+              "title": "Merged disk reads",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.disk.merged{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.disk.merged{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 40,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "id": 1009551840177744,
+      "definition": {
+        "title": "Filesystem",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3143538657022881,
+            "definition": {
+              "title": "Used space by device",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.filesystem.usage{$host,state:used} by {device}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.filesystem.usage{$host,state:used} by {device}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 8298931931082682,
+            "definition": {
+              "title": "Used inodes by device",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.filesystem.inodes.usage{$host} by {device}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.filesystem.inodes.usage{$host} by {device}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 3617093409981236,
+            "definition": {
+              "title": "Filesystem utilization by device",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:otel.system.filesystem.utilization{$host} by {device}",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "avg:system.filesystem.utilization{$host} by {device}",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 47,
+        "width": 12,
+        "height": 3
+      }
+    },
+    {
+      "id": 7826461271566965,
+      "definition": {
+        "title": "Swap memory",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 332159214405472,
+            "definition": {
+              "title": "Swap page faults per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.paging.faults{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.paging.faults{$host}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 5987633477466212,
+            "definition": {
+              "title": "Swap page outs per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.paging.operations{$host,direction:page_out}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.paging.operations{$host,direction:page_out}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 80671494141202,
+            "definition": {
+              "title": "Swap page ins per second",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "max(default_zero(query1_otel), default_zero(query1_plain))"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:otel.system.paging.operations{$host,direction:page_in}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_otel",
+                      "semantic_mode": "native"
+                    },
+                    {
+                      "query": "sum:system.paging.operations{$host,direction:page_in}.as_count()",
+                      "data_source": "metrics",
+                      "name": "query1_plain",
+                      "semantic_mode": "native"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "label": "",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 50,
+        "width": 12,
+        "height": 3
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
 }

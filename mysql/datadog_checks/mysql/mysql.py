@@ -9,7 +9,6 @@ import time
 import traceback
 from collections import defaultdict
 from contextlib import closing, contextmanager
-from string import Template
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pymysql
@@ -19,7 +18,6 @@ from datadog_checks.base import AgentCheck, DatabaseCheck, is_affirmative
 from datadog_checks.base.utils.db import QueryExecutor, QueryManager
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import (
-    TagManager,
     default_json_event_encoding,
     tracked_query,
 )
@@ -67,6 +65,7 @@ from .queries import (
     QUERY_DEADLOCKS,
     QUERY_ERRORS_RAISED,
     QUERY_USER_CONNECTIONS,
+    QUERY_WAIT_EVENT_SUMMARY,
     SQL_95TH_PERCENTILE,
     SQL_AVG_QUERY_RUN_TIME,
     SQL_GROUP_REPLICATION_MEMBER,
@@ -119,15 +118,12 @@ class MySql(DatabaseCheck):
         self.server_uuid = None
         self.cluster_uuid = None
         self._resolved_hostname = None
-        self._database_identifier = None
-        self._agent_hostname = None
         self._database_hostname = None
         self._events_wait_current_enabled = None
         self._group_replication_active = None
         self._replication_role = None
         self._initialized_at = int(time.time() * 1000)
         self._config = MySQLConfig(self.instance, init_config)
-        self.tag_manager = TagManager()
         self.tag_manager.set_tags_from_list(self._config.tags, replace=True)  # Initialize from static config tags
         self.add_core_tags()
         self._cloud_metadata = self._config.cloud_metadata
@@ -199,10 +195,6 @@ class MySql(DatabaseCheck):
         self.set_metadata('resolved_hostname', self.resolved_hostname)
 
     @property
-    def tags(self):
-        return self.tag_manager.get_tags()
-
-    @property
     def reported_hostname(self):
         # type: () -> str
         if self._config.exclude_hostname:
@@ -224,34 +216,17 @@ class MySql(DatabaseCheck):
         return self._cloud_metadata
 
     @property
-    def database_identifier(self):
-        # type: () -> str
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
-            tag_dict = {}
-            tags = self.tag_manager.get_tags()
-            # sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            tag_dict['resolved_hostname'] = self.resolved_hostname
-            tag_dict['host'] = str(self._config.host)
-            tag_dict['port'] = str(self._config.port)
-            tag_dict['mysql_sock'] = str(self._config.mysql_sock)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.get('template') or '$resolved_hostname'
 
     @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
+    def database_identifier_params(self) -> dict:
+        return {
+            'resolved_hostname': self.resolved_hostname,
+            'host': str(self._config.host),
+            'port': str(self._config.port),
+            'mysql_sock': str(self._config.mysql_sock),
+        }
 
     @property
     def database_hostname(self):
@@ -468,8 +443,10 @@ class MySql(DatabaseCheck):
 
         if self.global_variables.performance_schema_enabled:
             queries.extend([QUERY_USER_CONNECTIONS])
-            if not self.is_mariadb and self.version.version_compatible((8, 0, 0)) and self._config.dbm_enabled:
-                queries.extend([QUERY_ERRORS_RAISED])
+            if self._config.dbm_enabled:
+                queries.extend([QUERY_WAIT_EVENT_SUMMARY])
+                if not self.is_mariadb and self.version.version_compatible((8, 0, 0)):
+                    queries.extend([QUERY_ERRORS_RAISED])
         if self._index_metrics.include_index_metrics:
             queries.extend(self._index_metrics.queries)
         self._runtime_queries_cached = self._new_query_executor(queries)
@@ -563,6 +540,18 @@ class MySql(DatabaseCheck):
                 self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.reported_hostname
             )
             yield db
+        except pymysql.err.OperationalError as e:
+            self.service_check(
+                self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
+            )
+            if e.args[0] == 1045 and not self._config.ssl:
+                self.log.warning(
+                    "Access denied error (1045) with no SSL configuration. If your MySQL instance requires SSL "
+                    "connections, configure the 'ssl' option in the check configuration "
+                    "(e.g. 'ssl.check_hostname: false' for connections without certificate verification). "
+                    "See https://docs.datadoghq.com/database_monitoring/setup_mysql/ for more details."
+                )
+            raise
         except Exception:
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
@@ -1155,7 +1144,12 @@ class MySql(DatabaseCheck):
             for replica in replica_status:
                 # MySQL <5.7 does not have Channel_Name.
                 # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
+                channel = (
+                    self._config.replication_channel
+                    or replica.get('Channel_Name')
+                    or replica.get('Connection_name')
+                    or 'default'
+                )
                 for key, value in replica.items():
                     if value is not None:
                         replica_results[key]['channel:{0}'.format(channel)] = value
@@ -1169,10 +1163,11 @@ class MySql(DatabaseCheck):
         try:
             with closing(db.cursor(CommenterDictCursor)) as cursor:
                 if self.is_mariadb and self._config.replication_channel:
-                    cursor.execute("SET @@default_master_connection = '{0}';".format(self._config.replication_channel))
-                cursor.execute(
-                    show_replica_status_query(self.version, self.is_mariadb, self._config.replication_channel)
+                    cursor.execute("SET @@default_master_connection = %s", (self._config.replication_channel,))
+                query, params = show_replica_status_query(
+                    self.version, self.is_mariadb, self._config.replication_channel
                 )
+                cursor.execute(query, params)
 
                 results = cursor.fetchall()
                 self.log.debug("Getting replication status: %s", results)

@@ -535,6 +535,8 @@ Then, [instrument your application container][8] and set `DD_AGENT_HOST` to the 
 
 ## Data Collected
 
+Some of the metrics listed below require additional configuration, see the [sample mongo.d/conf.yaml][5] for all configurable options. Query metrics for MongoDB require Datadog Agent v7.78 or later.
+
 ### Metrics
 
 See [metadata.csv][22] for a list of metrics provided by this check.
