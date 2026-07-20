@@ -441,16 +441,17 @@ class AgentCheck(object):
 
         return self._http
 
-    def create_http_client(self) -> HTTPClient:
-        """Construct the HTTP client backing self.http.
-
-        Override this to build a bespoke wrapper or swap the backend. The default returns a
-        RequestsWrapper configured from this check's instance and init config.
-        """
+    def create_http_client(self, instance: dict | None = None) -> HTTPClient:
+        """Construct the HTTP client backing self.http, optionally from a given instance config."""
         # See Performance Optimizations in this package's README.md.
-        from datadog_checks.base.utils.http import RequestsWrapper
+        from datadog_checks.base.utils.http import create_http_client
 
-        return RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+        return create_http_client(
+            self.instance if instance is None else instance,
+            self.init_config,
+            self.HTTP_CONFIG_REMAPPER,
+            self.log,
+        )
 
     @property
     def logs_enabled(self):

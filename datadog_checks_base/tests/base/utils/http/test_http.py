@@ -100,11 +100,46 @@ class TestAttribute:
         sentinel = object()
 
         class CustomCheck(AgentCheck):
-            def create_http_client(self):
+            def create_http_client(self, instance=None):
                 return sentinel
 
         check = CustomCheck('test', {}, [{}])
         assert check.http is sentinel
+
+    def test_factory_default_uses_instance_config(self):
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        assert check.create_http_client().options['timeout'] == (7.0, 7.0)
+
+    def test_factory_instance_override(self):
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        client = check.create_http_client({'timeout': 42})
+
+        assert client.options['timeout'] == (42.0, 42.0)
+
+    def test_factory_empty_instance_override_is_honored(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        # {} is an explicit override, distinct from None, so self.instance's timeout must not leak in.
+        empty_default = create_http_client({}, {}).options['timeout']
+        assert check.create_http_client({}).options['timeout'] == empty_default
+
+    def test_module_factory_builds_from_given_config(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        client = create_http_client({'timeout': 24.5}, {})
+
+        assert client.options['timeout'] == (24.5, 24.5)
+
+    def test_module_factory_applies_remapper(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        client = create_http_client({'prometheus_timeout': 9}, {}, {'prometheus_timeout': {'name': 'timeout'}})
+
+        assert client.options['timeout'] == (9, 9)
 
 
 class TestTLSCiphers:

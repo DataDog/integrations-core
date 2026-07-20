@@ -2729,6 +2729,23 @@ def test_http_handler(mocked_openmetrics_check_factory):
     assert http_handler.options['headers']['accept'] == 'text/plain'
 
 
+def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_check_factory):
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+    sentinel = mock.MagicMock()
+
+    with mock.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.create_http_client', return_value=sentinel
+    ) as factory:
+        assert check.get_http_handler(scraper_config) is sentinel
+        factory.assert_called_once_with(scraper_config, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
+
+
 def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):
     """
     Test that metric type is overridden correctly.

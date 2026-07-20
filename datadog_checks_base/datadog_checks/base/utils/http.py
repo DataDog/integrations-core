@@ -832,6 +832,13 @@ class RequestsWrapper(object):
         session.mount('https://', https_adapter)
 
 
+def create_http_client(
+    instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
+) -> HTTPClient:
+    """Build the agnostic HTTP client from explicit config, confining the concrete backend to one place."""
+    return RequestsWrapper(instance or {}, init_config, remapper, logger)
+
+
 @contextmanager
 def handle_kerberos_keytab(keytab_file):
     # There are no keytab options in any wrapper libs. The env var will be
