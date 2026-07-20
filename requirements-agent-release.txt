@@ -120,7 +120,7 @@ datadog-jboss-wildfly==3.4.0
 datadog-journald==3.2.0
 datadog-juniper-srx-firewall==1.3.0
 datadog-kafka-actions==2.8.0
-datadog-kafka-consumer==8.1.0
+datadog-kafka-consumer==8.1.1
 datadog-kafka==4.6.0
 datadog-karpenter==3.4.1
 datadog-keda==2.4.1
@@ -140,7 +140,7 @@ datadog-kubernetes-state==10.5.0
 datadog-kubevirt-api==2.5.1
 datadog-kubevirt-controller==2.4.1
 datadog-kubevirt-handler==2.5.1
-datadog-kueue==1.0.0
+datadog-kueue==1.0.1
 datadog-kuma==2.4.1
 datadog-kyototycoon==4.5.0
 datadog-kyverno==3.4.1
