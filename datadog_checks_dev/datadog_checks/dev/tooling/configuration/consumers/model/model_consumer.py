@@ -400,10 +400,10 @@ class ModelConsumer:
     def _emit_candidate_body(candidate: dict[str, Any], sibling_keys: set[str] = frozenset()) -> list[str]:
         """Emit the model-backed candidate construction for one candidate mapping.
 
-        `sibling_keys` are field names set by *other* candidates in the same strategy. Those
-        fields still get filled with their own default by `InstanceConfig`'s validator (it fills
-        any field not in `configured_fields`), so they must be popped explicitly or a candidate
-        would carry a phantom default for a field it never set.
+        `sibling_keys` are field names set by *other* candidates anywhere in the discovery spec,
+        across all strategy stanzas. Those fields still get filled with their own default by
+        `InstanceConfig`'s validator (it fills any field not in `configured_fields`), so they must
+        be popped explicitly or a candidate would carry a phantom default for a field it never set.
         """
         lines = ['        instance_data = {']
         for field_name, template in candidate.items():
