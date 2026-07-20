@@ -1,16 +1,16 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import mock
 import pytest
 
 from datadog_checks.silk import SilkCheck
 
 from .common import BASE_TAGS, BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS, SYSTEM_TAGS
 
-pytestmark = [pytest.mark.integration, pytest.mark.usefixtures("dd_environment")]
+pytestmark = [pytest.mark.integration]
 
 
+@pytest.mark.usefixtures("dd_environment")
 @pytest.mark.parametrize(
     'enable_rw, enable_bs, expected_metrics',
     [
@@ -33,17 +33,17 @@ def test_check(dd_run_check, aggregator, instance, enable_rw, enable_bs, expecte
             aggregator.assert_metric_has_tag(metric, tag)
 
 
-def test_error_msg_response(dd_run_check, aggregator, instance):
+def test_error_msg_response(dd_run_check, aggregator, instance, mock_http_response):
     error_response = {"error_msg": "Statistics data is unavailable while system is OFFLINE"}
-    with mock.patch('datadog_checks.base.utils.http.requests.Response.json') as g:
-        g.return_value = error_response
-        check = SilkCheck('silk', {}, [instance])
-        dd_run_check(check)
-        aggregator.assert_service_check(
-            'silk.can_connect', SilkCheck.WARNING, message="Received error message: " + error_response["error_msg"]
-        )
+    mock_http_response(json_data=error_response)
+    check = SilkCheck('silk', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_service_check(
+        'silk.can_connect', SilkCheck.WARNING, message="Received error message: " + error_response["error_msg"]
+    )
 
 
+@pytest.mark.usefixtures("dd_environment")
 def test_submit_system_state(instance, datadog_agent):
     check = SilkCheck('silk', {}, [instance])
     check.check_id = 'test:123'
