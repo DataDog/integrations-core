@@ -6,8 +6,8 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
 HERE = get_here()

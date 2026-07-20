@@ -11,7 +11,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper
 
 from .appliance_models import Appliance, Appliances
 from .client import ApplianceClient, OrchestratorClient
@@ -169,7 +168,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         cached = self._appliance_clients.get(app_ip)
         if cached is not None:
             return cached
-        http = RequestsWrapper(self.instance or {}, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
+        http = self.create_http_client()
         http.persist_connections = True
         client = ApplianceClient(http, app_ip, self.log)
         client.login(username, password)

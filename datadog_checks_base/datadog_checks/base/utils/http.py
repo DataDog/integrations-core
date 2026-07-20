@@ -20,6 +20,7 @@ import lazy_loader
 import requests
 from binary import KIBIBYTE
 from requests import auth as requests_auth
+from requests import cookies as requests_cookies
 from requests import exceptions as requests_exceptions
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
@@ -47,7 +48,7 @@ from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
 if TYPE_CHECKING:
-    from .http_protocol import HTTPClientProtocol, HTTPResponseProtocol  # noqa: F401
+    from .http_protocol import HTTPClient, HTTPResponse  # noqa: F401
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -311,6 +312,22 @@ class ResponseWrapper(ObjectProxy):
             except requests_exceptions.JSONDecodeError as exc:
                 raise json.JSONDecodeError(exc.msg, exc.doc, exc.pos) from exc
 
+    def get_peer_cert(self, binary_form=False):
+        raw = getattr(self.__wrapped__, 'raw', None)
+        connection = getattr(raw, 'connection', None)
+        sock = getattr(connection, 'sock', None)
+        # sock is None once the connection is released, and a bare (non-TLS) socket has no getpeercert,
+        # so a plain http:// request lands here. Either way there is no peer certificate to report.
+        getpeercert = getattr(sock, 'getpeercert', None)
+        if getpeercert is None:
+            return None
+        return getpeercert(binary_form=binary_form)
+
+    @property
+    def history(self):
+        # Wrap redirect responses so history items satisfy the protocol too, never leaking a raw backend object.
+        return [ResponseWrapper(response, self.__default_chunk_size) for response in self.__wrapped__.history]
+
     def __enter__(self):
         return self
 
@@ -318,6 +335,7 @@ class ResponseWrapper(ObjectProxy):
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
+        '_trust_env',
         '_https_adapters',
         'tls_use_host_header',
         'ignore_tls_warning',
@@ -509,6 +527,11 @@ class RequestsWrapper(object):
         self.persist_connections = self.tls_use_host_header or is_affirmative(config['persist_connections'])
         self._session = session
 
+        # Whether to trust environment configuration (proxies, auth, CA bundles).
+        # Mirrors requests.Session.trust_env, which defaults to True. Adopt an injected session's
+        # value so the reported state matches it.
+        self._trust_env = getattr(session, 'trust_env', True) if session is not None else True
+
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
@@ -528,6 +551,40 @@ class RequestsWrapper(object):
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
+
+    @property
+    def trust_env(self) -> bool:
+        """Whether the client trusts environment config (proxies, auth, CA bundles)."""
+        return self._trust_env
+
+    @trust_env.setter
+    def trust_env(self, value: bool) -> None:
+        self._trust_env = value
+        if self._session is not None:
+            self._session.trust_env = value
+
+    def close(self) -> None:
+        """Close any open connections. Idempotent; the client stays usable and lazily rebuilds a default
+        session on the next request. An injected session is not restored after being closed."""
+        if self._session is not None:
+            self._session.close()
+            self._session = None
+
+    def get_cookie(self, name: str, default: str | None = None) -> str | None:
+        """Look up a cookie by name on the persistent session, returning its value, or default if absent or ambiguous.
+
+        Only cookies retained on the persistent session are visible. Requests made without persistence
+        (the default unless persist_connections is set or persist=True is passed) use a throwaway session
+        whose cookies are discarded, so a cookie set by such a request is not found here.
+        """
+        try:
+            return self.session.cookies.get(name, default)
+        except requests_cookies.CookieConflictError:
+            return default
+
+    def should_bypass_proxy(self, url: str) -> bool:
+        """Whether url should bypass any configured proxy under the client's no_proxy rules."""
+        return should_bypass_proxy(url, self.no_proxy_uris or [])
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
         """Look up a request header by name. Lookup is case-insensitive."""
@@ -718,6 +775,7 @@ class RequestsWrapper(object):
         # but can be set as attributes on an initialized Session instance.
         for option, value in self.options.items():
             setattr(session, option, value)
+        session.trust_env = self._trust_env
         return session
 
     @property
@@ -772,6 +830,13 @@ class RequestsWrapper(object):
         # Cache the adapter for reuse
         self._https_adapters[tls_config_key] = https_adapter
         session.mount('https://', https_adapter)
+
+
+def create_http_client(
+    instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
+) -> HTTPClient:
+    """Build the agnostic HTTP client from explicit config, confining the concrete backend to one place."""
+    return RequestsWrapper(instance or {}, init_config, remapper, logger)
 
 
 @contextmanager

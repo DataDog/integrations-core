@@ -1,13 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import json
-
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 
 
 def test_mock_http_patches_agentcheck(mock_http):
@@ -146,6 +144,88 @@ def test_mock_response_links_cleared_after_header_pop():
     assert response.links == {}
 
 
-def test_mock_response_raw_readable():
-    response = MockHTTPResponse(json_data={'key': 'value'})
-    assert json.load(response.raw) == {'key': 'value'}
+def test_mock_response_get_peer_cert():
+    response = MockHTTPResponse()
+    assert response.get_peer_cert(binary_form=True) == b'mock-cert'
+    assert response.get_peer_cert() == {}
+
+
+def test_mock_response_blocks_off_protocol_read():
+    response = MockHTTPResponse(json_data={'k': 'v'})
+    with pytest.raises(AttributeError, match='HTTPResponse protocol'):
+        str(response.raw)
+    with pytest.raises(AttributeError, match='HTTPResponse protocol'):
+        str(response.request)
+
+
+def test_mock_response_blocks_off_protocol_write():
+    response = MockHTTPResponse()
+    with pytest.raises(AttributeError, match='HTTPResponse protocol'):
+        response.raw = object()
+
+
+def test_mock_response_promoted_attributes_delegate():
+    response = MockHTTPResponse(cookies={'c': '1'}, url='http://x', headers={'link': '<u>; rel=next'})
+    assert response.cookies == {'c': '1'}
+    assert response.url == 'http://x'
+    assert response.links['next']['url'] == 'u'
+    response.encoding = 'utf-8'
+    assert response.encoding == 'utf-8'
+
+
+def test_mock_response_raise_for_status_keeps_identity():
+    response = MockHTTPResponse(status_code=500)
+    with pytest.raises(HTTPStatusError) as exc_info:
+        response.raise_for_status()
+    assert exc_info.value.response is response
+
+
+def test_mock_response_reason():
+    assert MockHTTPResponse(status_code=200).reason == 'OK'
+    assert MockHTTPResponse(status_code=404).reason == 'Not Found'
+    # An unknown status code has no canonical reason phrase.
+    assert MockHTTPResponse(status_code=599).reason == ''
+
+
+def test_mock_response_iter_content_whole_content():
+    # chunk_size=None yields the entire body as a single chunk.
+    assert list(MockHTTPResponse(content='hello world').iter_content()) == [b'hello world']
+
+
+def test_mock_response_iter_content_empty():
+    # Empty content yields nothing and must not hang on a zero-length read.
+    assert list(MockHTTPResponse(content='').iter_content()) == []
+
+
+def test_mock_response_iter_content_decode_unicode():
+    assert list(MockHTTPResponse(content='ab').iter_content(chunk_size=1, decode_unicode=True)) == ['a', 'b']
+
+
+def test_mock_response_default_iteration():
+    # __iter__ mirrors requests.Response: delegates to iter_content(128).
+    assert list(MockHTTPResponse(content='abc')) == [b'abc']
+
+
+def test_mock_response_iter_lines_custom_delimiter():
+    response = MockHTTPResponse(content='a|b|c')
+    assert list(response.iter_lines(delimiter='|')) == [b'a', b'b', b'c']
+
+
+def test_mock_response_iter_lines_decode_unicode():
+    response = MockHTTPResponse(content='line1\nline2')
+    assert list(response.iter_lines(decode_unicode=True)) == ['line1', 'line2']
+
+
+def test_mock_response_history_passthrough():
+    inner = MockHTTPResponse(status_code=301)
+    response = MockHTTPResponse(history=[inner])
+    assert response.history == [inner]
+
+
+def test_mock_response_satisfies_full_protocol_surface():
+    from datadog_checks.dev.http import protocol_members
+
+    response = MockHTTPResponse(json_data={'k': 'v'})
+    # Every declared protocol member must be reachable through the enforcing wrapper.
+    for name in protocol_members():
+        getattr(response, name)

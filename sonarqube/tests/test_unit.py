@@ -6,7 +6,7 @@ import os
 import mock
 
 from datadog_checks.base.utils.http_exceptions import HTTPError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import HERE
 from .metrics import WEB_METRICS

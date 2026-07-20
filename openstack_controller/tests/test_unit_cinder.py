@@ -10,7 +10,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 

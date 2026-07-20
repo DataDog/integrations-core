@@ -4,12 +4,12 @@
 
 # ABOUTME: Unit tests for the NiFi integration.
 # ABOUTME: Tests API auth, health metrics, system diagnostics, and cluster health.
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-from requests.exceptions import ConnectionError as RequestsConnectionError
-from requests.exceptions import HTTPError
 
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.nifi import NifiCheck
 
 
@@ -25,17 +25,9 @@ def _make_instance(**overrides):
 
 
 def _mock_response(status_code=200, json_data=None, text=''):
-    resp = MagicMock()
-    resp.status_code = status_code
-    resp.json.return_value = json_data or {}
-    resp.text = text
-    resp.headers = {}
-    resp.content = b'content'
-    if status_code >= 400:
-        resp.raise_for_status.side_effect = HTTPError(f'{status_code}')
-    else:
-        resp.raise_for_status.return_value = None
-    return resp
+    if json_data is not None:
+        return MockHTTPResponse(status_code=status_code, json_data=json_data)
+    return MockHTTPResponse(status_code=status_code, content=text)
 
 
 ABOUT_RESPONSE = {'about': {'title': 'NiFi', 'version': '2.8.0'}}
@@ -195,80 +187,84 @@ def _standard_responses(
     }
 
 
-def _build_request_side_effect(responses_by_url):
-    """Build a side_effect for requests.Session.request that dispatches by URL substring."""
+def dispatch(responses_by_url):
+    """Build a mock_http side_effect that dispatches by URL substring."""
 
-    def side_effect(method, url, **kwargs):
+    def side_effect(url, *args, **kwargs):
         for url_part, resp in responses_by_url.items():
             if url_part in url:
                 return resp
-        raise ValueError(f'Unmocked URL: {method} {url}')
+        raise ValueError(f'Unmocked URL: {url}')
 
     return side_effect
 
 
+def mock_http_responses(mock_http, responses_by_url):
+    """Route mock_http GET and POST through a URL-substring dispatch."""
+    mock_http.get.side_effect = dispatch(responses_by_url)
+    mock_http.post.side_effect = dispatch(responses_by_url)
+
+
 class TestAuth:
-    def test_auth_success(self):
+    def test_auth_success(self, mock_http):
         """Token endpoint returns 201 with raw JWT string."""
         check = NifiCheck('nifi', {}, [_make_instance()])
         api = check._get_api()
 
-        with patch('requests.Session.request', return_value=_mock_response(201, text='jwt-token-string')):
-            api._authenticate()
+        mock_http.post.return_value = _mock_response(201, text='jwt-token-string')
+        api._authenticate()
 
         assert api._token == 'jwt-token-string'
 
-    def test_auth_failure(self):
+    def test_auth_failure(self, mock_http):
         """Token endpoint returns 403 on bad credentials."""
         check = NifiCheck('nifi', {}, [_make_instance()])
         api = check._get_api()
 
-        with patch('requests.Session.request', return_value=_mock_response(403)):
-            with pytest.raises(HTTPError):
-                api._authenticate()
+        mock_http.post.return_value = _mock_response(403)
+        with pytest.raises(HTTPStatusError):
+            api._authenticate()
 
-    def test_token_refresh_on_401(self):
+    def test_token_refresh_on_401(self, mock_http):
         """First GET returns 401, re-auth succeeds, retry succeeds."""
         check = NifiCheck('nifi', {}, [_make_instance()])
         api = check._get_api()
         api._token = 'expired-token'
 
-        responses = iter(
-            [
-                _mock_response(401),
-                _mock_response(201, text='new-token'),
-                _mock_response(200, json_data=ABOUT_RESPONSE),
-            ]
-        )
+        mock_http.get.side_effect = [
+            _mock_response(401),
+            _mock_response(200, json_data=ABOUT_RESPONSE),
+        ]
+        mock_http.post.return_value = _mock_response(201, text='new-token')
 
-        with patch('requests.Session.request', side_effect=lambda *a, **kw: next(responses)):
-            result = api._request('/flow/about')
+        result = api._request('/flow/about')
 
         assert result == ABOUT_RESPONSE
         assert api._token == 'new-token'
 
 
 class TestCanConnect:
-    def test_can_connect_success(self, dd_run_check, aggregator):
+    def test_can_connect_success(self, dd_run_check, aggregator, mock_http):
         """Full check run emits can_connect=1 on success."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses())
+        dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
 
-    def test_can_connect_failure(self, dd_run_check, aggregator):
+    def test_can_connect_failure(self, dd_run_check, aggregator, mock_http):
         """Connection error emits can_connect=0."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=RequestsConnectionError('refused')):
-            with pytest.raises(Exception):
-                dd_run_check(check)
+        mock_http.get.side_effect = HTTPConnectionError('refused')
+        mock_http.post.side_effect = HTTPConnectionError('refused')
+        with pytest.raises(Exception):
+            dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=0)
 
-    def test_no_auth_mode(self, dd_run_check, aggregator):
+    def test_no_auth_mode(self, dd_run_check, aggregator, mock_http):
         """Check works without credentials when NiFi has no auth configured."""
         check = NifiCheck('nifi', {}, [_make_instance(username=None, password=None)])
 
@@ -281,59 +277,53 @@ class TestCanConnect:
             '/flow/bulletin-board': _mock_response(200, json_data=EMPTY_BULLETIN_BOARD),
         }
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1, tags=['nifi_version:2.8.0'])
 
 
 class TestClusterHealth:
-    def test_cluster_healthy(self, dd_run_check, aggregator):
+    def test_cluster_healthy(self, dd_run_check, aggregator, mock_http):
         """Clustered mode with all nodes connected: is_healthy=1."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch(
-            'requests.Session.request',
-            side_effect=_build_request_side_effect(_standard_responses(cluster=CLUSTER_SUMMARY_CLUSTERED)),
-        ):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses(cluster=CLUSTER_SUMMARY_CLUSTERED))
+        dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
         aggregator.assert_metric('nifi.cluster.connected_node_count', value=3, tags=tags)
         aggregator.assert_metric('nifi.cluster.total_node_count', value=3, tags=tags)
         aggregator.assert_metric('nifi.cluster.is_healthy', value=1, tags=tags)
 
-    def test_cluster_degraded(self, dd_run_check, aggregator):
+    def test_cluster_degraded(self, dd_run_check, aggregator, mock_http):
         """Clustered mode with missing node: is_healthy=0."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch(
-            'requests.Session.request',
-            side_effect=_build_request_side_effect(_standard_responses(cluster=CLUSTER_SUMMARY_DEGRADED)),
-        ):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses(cluster=CLUSTER_SUMMARY_DEGRADED))
+        dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
         aggregator.assert_metric('nifi.cluster.is_healthy', value=0, tags=tags)
 
-    def test_standalone_no_cluster_metrics(self, dd_run_check, aggregator):
+    def test_standalone_no_cluster_metrics(self, dd_run_check, aggregator, mock_http):
         """Standalone mode: no cluster metrics emitted."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses())
+        dd_run_check(check)
 
         aggregator.assert_metric('nifi.can_connect', value=1)
         assert not aggregator.metrics('nifi.cluster.connected_node_count')
 
 
 class TestSystemDiagnostics:
-    def test_jvm_metrics(self, dd_run_check, aggregator):
+    def test_jvm_metrics(self, dd_run_check, aggregator, mock_http):
         """System diagnostics emits JVM heap, threads, and CPU metrics."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses())
+        dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
         aggregator.assert_metric('nifi.system.jvm.heap_used', value=217252040, tags=tags)
@@ -345,12 +335,12 @@ class TestSystemDiagnostics:
         aggregator.assert_metric('nifi.system.cpu.load_average', value=1.73, tags=tags)
         aggregator.assert_metric('nifi.system.cpu.available_processors', value=16, tags=tags)
 
-    def test_gc_metrics(self, dd_run_check, aggregator):
+    def test_gc_metrics(self, dd_run_check, aggregator, mock_http):
         """GC metrics are tagged per garbage collector."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses())
+        dd_run_check(check)
 
         young_tags = ['nifi_version:2.8.0', 'gc_name:G1 Young Generation']
         aggregator.assert_metric('nifi.system.gc.collection_count', value=12, tags=young_tags)
@@ -360,12 +350,12 @@ class TestSystemDiagnostics:
         aggregator.assert_metric('nifi.system.gc.collection_count', value=0, tags=old_tags)
         aggregator.assert_metric('nifi.system.gc.collection_time', value=0, tags=old_tags)
 
-    def test_repository_metrics(self, dd_run_check, aggregator):
+    def test_repository_metrics(self, dd_run_check, aggregator, mock_http):
         """Repository metrics include flowfile, content, and provenance repos."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses())
+        dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
         aggregator.assert_metric('nifi.system.flowfile_repo.used_space', value=86076280832, tags=tags)
@@ -393,12 +383,12 @@ class TestSystemDiagnostics:
 
 
 class TestFlowStatus:
-    def test_flow_status_metrics(self, dd_run_check, aggregator):
+    def test_flow_status_metrics(self, dd_run_check, aggregator, mock_http):
         """Controller-level flow status metrics are emitted."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses())
+        dd_run_check(check)
 
         tags = ['nifi_version:2.8.0']
         aggregator.assert_metric('nifi.flow.active_threads', value=2, tags=tags)
@@ -411,12 +401,12 @@ class TestFlowStatus:
 
 
 class TestProcessGroup:
-    def test_root_process_group(self, dd_run_check, aggregator):
+    def test_root_process_group(self, dd_run_check, aggregator, mock_http):
         """Root process group metrics are emitted with correct tags."""
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(_standard_responses())):
-            dd_run_check(check)
+        mock_http_responses(mock_http, _standard_responses())
+        dd_run_check(check)
 
         pg_tags = ['nifi_version:2.8.0', 'process_group_name:NiFi Flow', 'process_group_id:root-pg-id']
         aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=10, tags=pg_tags)
@@ -428,7 +418,7 @@ class TestProcessGroup:
         aggregator.assert_metric('nifi.process_group.flowfiles_transferred', value=8, tags=pg_tags)
         aggregator.assert_metric('nifi.process_group.active_threads', value=2, tags=pg_tags)
 
-    def test_nested_process_groups(self, dd_run_check, aggregator):
+    def test_nested_process_groups(self, dd_run_check, aggregator, mock_http):
         """Nested process groups are recursively flattened."""
         nested_response = {
             'processGroupStatus': {
@@ -475,8 +465,8 @@ class TestProcessGroup:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=nested_response)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         root_tags = ['nifi_version:2.8.0', 'process_group_name:Root', 'process_group_id:root-id']
         aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=10, tags=root_tags)
@@ -486,7 +476,7 @@ class TestProcessGroup:
         aggregator.assert_metric('nifi.process_group.bytes_read', value=512, tags=child_tags)
         aggregator.assert_metric('nifi.process_group.active_threads', value=1, tags=child_tags)
 
-    def test_overlapping_process_groups_no_duplicates(self, dd_run_check, aggregator):
+    def test_overlapping_process_groups_no_duplicates(self, dd_run_check, aggregator, mock_http):
         """Configuring both a parent and child group ID does not emit duplicate metrics."""
         child_snapshot = {
             'id': 'child-id',
@@ -524,34 +514,26 @@ class TestProcessGroup:
         }
         child_response = {'processGroupStatus': {'aggregateSnapshot': child_snapshot}}
 
-        def side_effect(method, url, **kwargs):
-            if '/access/token' in url:
-                return _mock_response(201, text='test-token')
-            if '/flow/about' in url:
-                return _mock_response(200, json_data=ABOUT_RESPONSE)
-            if '/system-diagnostics' in url:
-                return _mock_response(200, json_data=SYSTEM_DIAGNOSTICS_RESPONSE)
-            if '/flow/status' in url:
-                return _mock_response(200, json_data=FLOW_STATUS_RESPONSE)
-            if 'root-id' in url:
-                return _mock_response(200, json_data=parent_response)
-            if 'child-id' in url:
-                return _mock_response(200, json_data=child_response)
-            if '/flow/cluster/summary' in url:
-                return _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE)
-            if '/flow/bulletin-board' in url:
-                return _mock_response(200, json_data=EMPTY_BULLETIN_BOARD)
-            raise ValueError(f'Unmocked URL: {method} {url}')
+        responses = {
+            '/access/token': _mock_response(201, text='test-token'),
+            '/flow/about': _mock_response(200, json_data=ABOUT_RESPONSE),
+            '/system-diagnostics': _mock_response(200, json_data=SYSTEM_DIAGNOSTICS_RESPONSE),
+            '/flow/status': _mock_response(200, json_data=FLOW_STATUS_RESPONSE),
+            'root-id': _mock_response(200, json_data=parent_response),
+            'child-id': _mock_response(200, json_data=child_response),
+            '/flow/cluster/summary': _mock_response(200, json_data=CLUSTER_SUMMARY_STANDALONE),
+            '/flow/bulletin-board': _mock_response(200, json_data=EMPTY_BULLETIN_BOARD),
+        }
+        mock_http_responses(mock_http, responses)
 
         check = NifiCheck('nifi', {}, [_make_instance(process_groups=['root-id', 'child-id'])])
-        with patch('requests.Session.request', side_effect=side_effect):
-            dd_run_check(check)
+        dd_run_check(check)
 
         child_tags = ['nifi_version:2.8.0', 'process_group_name:Child Group', 'process_group_id:child-id']
         # Child group should only appear once even though it's reachable via both root and direct listing
         aggregator.assert_metric('nifi.process_group.flowfiles_queued', value=5, tags=child_tags, count=1)
 
-    def test_missing_id_does_not_block_other_groups(self, dd_run_check, aggregator):
+    def test_missing_id_does_not_block_other_groups(self, dd_run_check, aggregator, mock_http):
         """Process groups with missing IDs are still emitted and don't block each other via visited set."""
         no_id_child_a = {
             'name': 'Child A',
@@ -607,8 +589,8 @@ class TestProcessGroup:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=root_response)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         # Both children should emit metrics even though neither has an 'id' field
         tags_a = ['nifi_version:2.8.0', 'process_group_name:Child A', 'process_group_id:unknown']
@@ -678,25 +660,25 @@ PG_WITH_CONNECTIONS_AND_PROCESSORS = {
 
 
 class TestConnectionMetrics:
-    def test_disabled_by_default(self, dd_run_check, aggregator):
+    def test_disabled_by_default(self, dd_run_check, aggregator, mock_http):
         """Connection metrics are not emitted when collect_connection_metrics is false."""
         responses = _standard_responses()
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         assert not aggregator.metrics('nifi.connection.queued_count')
 
-    def test_enabled(self, dd_run_check, aggregator):
+    def test_enabled(self, dd_run_check, aggregator, mock_http):
         """Connection metrics are emitted with correct tags when enabled."""
         responses = _standard_responses()
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_connection_metrics=True)])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         conn_tags = [
             'nifi_version:2.8.0',
@@ -712,38 +694,38 @@ class TestConnectionMetrics:
         aggregator.assert_metric('nifi.connection.flowfiles_in', value=10, tags=conn_tags)
         aggregator.assert_metric('nifi.connection.flowfiles_out', value=5, tags=conn_tags)
 
-    def test_truncation_warning(self, dd_run_check, aggregator, caplog):
+    def test_truncation_warning(self, dd_run_check, aggregator, mock_http, caplog):
         """Truncation warning is logged when connections exceed max_connections."""
         responses = _standard_responses()
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_connection_metrics=True, max_connections=0)])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         assert 'Truncated connections from 1 to 0' in caplog.text
 
 
 class TestProcessorMetrics:
-    def test_disabled_by_default(self, dd_run_check, aggregator):
+    def test_disabled_by_default(self, dd_run_check, aggregator, mock_http):
         """Processor metrics are not emitted when collect_processor_metrics is false."""
         responses = _standard_responses()
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance()])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         assert not aggregator.metrics('nifi.processor.flowfiles_in')
 
-    def test_enabled(self, dd_run_check, aggregator):
+    def test_enabled(self, dd_run_check, aggregator, mock_http):
         """Processor metrics are emitted with correct tags when enabled."""
         responses = _standard_responses()
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True)])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         proc_tags = [
             'nifi_version:2.8.0',
@@ -760,14 +742,14 @@ class TestProcessorMetrics:
         aggregator.assert_metric('nifi.processor.active_threads', value=1, tags=proc_tags)
         aggregator.assert_metric('nifi.processor.run_status', value=1, tags=proc_tags)
 
-    def test_truncation_warning(self, dd_run_check, aggregator, caplog):
+    def test_truncation_warning(self, dd_run_check, aggregator, mock_http, caplog):
         """Truncation warning is logged when processors exceed max_processors."""
         responses = _standard_responses()
         responses['/flow/process-groups/'] = _mock_response(200, json_data=PG_WITH_CONNECTIONS_AND_PROCESSORS)
         check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True, max_processors=0)])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         assert 'Truncated processors from 1 to 0' in caplog.text
 
@@ -782,7 +764,7 @@ class TestProcessorMetrics:
             ('SomeFutureState', -1),
         ],
     )
-    def test_run_status_mapping(self, dd_run_check, aggregator, run_status, expected_value):
+    def test_run_status_mapping(self, dd_run_check, aggregator, mock_http, run_status, expected_value):
         """Each runStatus string maps to a distinct numeric value; unknown states map to -1."""
         pg_data = {
             'processGroupStatus': {
@@ -824,8 +806,8 @@ class TestProcessorMetrics:
         responses['/flow/process-groups/'] = _mock_response(200, json_data=pg_data)
         check = NifiCheck('nifi', {}, [_make_instance(collect_processor_metrics=True)])
 
-        with patch('requests.Session.request', side_effect=_build_request_side_effect(responses)):
-            dd_run_check(check)
+        mock_http_responses(mock_http, responses)
+        dd_run_check(check)
 
         proc_tags = [
             'nifi_version:2.8.0',
@@ -838,13 +820,13 @@ class TestProcessorMetrics:
 
 class TestBulletins:
     @staticmethod
-    def _run_bulletin_check(dd_run_check, responses, cache_state='', **instance_overrides):
+    def _run_bulletin_check(dd_run_check, mock_http, responses, cache_state='', **instance_overrides):
         """Run a check with mocked persistent cache for bulletin dedup isolation."""
         check = NifiCheck('nifi', {}, [_make_instance(**instance_overrides)])
         cache = {'last_bulletin_id': cache_state}
 
+        mock_http_responses(mock_http, responses)
         with (
-            patch('requests.Session.request', side_effect=_build_request_side_effect(responses)),
             patch.object(check, 'read_persistent_cache', side_effect=lambda k: cache.get(k, '')),
             patch.object(check, 'write_persistent_cache', side_effect=lambda k, v: cache.__setitem__(k, v)),
         ):
@@ -852,10 +834,10 @@ class TestBulletins:
 
         return check, cache
 
-    def test_first_run_emits_events(self, dd_run_check, aggregator):
+    def test_first_run_emits_events(self, dd_run_check, aggregator, mock_http):
         """First run with no cached ID emits all readable bulletins above min level."""
         responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
-        _, cache = self._run_bulletin_check(dd_run_check, responses)
+        _, cache = self._run_bulletin_check(dd_run_check, mock_http, responses)
 
         # Should emit 2 events: id=0 (ERROR, canRead=True) and id=1 (WARNING, canRead=True)
         # id=2 is skipped because canRead=False
@@ -865,7 +847,7 @@ class TestBulletins:
         assert aggregator.events[1]['msg_title'] == 'NiFi Bulletin: Fail Writer [WARNING]'
         assert aggregator.events[1]['alert_type'] == 'warning'
 
-    def test_info_bulletin_alert_type(self, dd_run_check, aggregator):
+    def test_info_bulletin_alert_type(self, dd_run_check, aggregator, mock_http):
         """INFO bulletins get alert_type 'info', not 'warning'."""
         info_bulletins = {
             'bulletinBoard': {
@@ -885,47 +867,47 @@ class TestBulletins:
             }
         }
         responses = _standard_responses(bulletins=info_bulletins)
-        _, cache = self._run_bulletin_check(dd_run_check, responses, bulletin_min_level='INFO')
+        _, cache = self._run_bulletin_check(dd_run_check, mock_http, responses, bulletin_min_level='INFO')
         assert len(aggregator.events) == 1
         assert aggregator.events[0]['alert_type'] == 'info'
         assert cache['last_bulletin_id'] == '0'
 
-    def test_dedup_by_cached_id(self, dd_run_check, aggregator):
+    def test_dedup_by_cached_id(self, dd_run_check, aggregator, mock_http):
         """Bulletins with id <= cached last_bulletin_id are skipped."""
         responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
-        self._run_bulletin_check(dd_run_check, responses, cache_state='0')
+        self._run_bulletin_check(dd_run_check, mock_http, responses, cache_state='0')
 
         # Only id=1 should be emitted (id=0 is <= cached, id=2 is unreadable)
         assert len(aggregator.events) == 1
         assert aggregator.events[0]['msg_title'] == 'NiFi Bulletin: Fail Writer [WARNING]'
 
-    def test_min_level_filtering(self, dd_run_check, aggregator):
+    def test_min_level_filtering(self, dd_run_check, aggregator, mock_http):
         """Bulletins below min level are filtered out."""
         responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
-        self._run_bulletin_check(dd_run_check, responses, bulletin_min_level='ERROR')
+        self._run_bulletin_check(dd_run_check, mock_http, responses, bulletin_min_level='ERROR')
 
         # Only id=0 (ERROR) should be emitted; id=1 (WARNING) is below ERROR level
         assert len(aggregator.events) == 1
         assert aggregator.events[0]['alert_type'] == 'error'
 
-    def test_empty_bulletin_board(self, dd_run_check, aggregator):
+    def test_empty_bulletin_board(self, dd_run_check, aggregator, mock_http):
         """No events emitted when bulletin board is empty."""
-        self._run_bulletin_check(dd_run_check, _standard_responses())
+        self._run_bulletin_check(dd_run_check, mock_http, _standard_responses())
         assert len(aggregator.events) == 0
 
-    def test_bulletins_disabled(self, dd_run_check, aggregator):
+    def test_bulletins_disabled(self, dd_run_check, aggregator, mock_http):
         """No bulletin collection when collect_bulletins is false."""
         responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
-        self._run_bulletin_check(dd_run_check, responses, collect_bulletins=False)
+        self._run_bulletin_check(dd_run_check, mock_http, responses, collect_bulletins=False)
         assert len(aggregator.events) == 0
 
-    def test_max_bulletins_per_cycle(self, dd_run_check, aggregator):
+    def test_max_bulletins_per_cycle(self, dd_run_check, aggregator, mock_http):
         """Only max_bulletins_per_cycle events are emitted."""
         responses = _standard_responses(bulletins=BULLETIN_BOARD_RESPONSE)
-        self._run_bulletin_check(dd_run_check, responses, max_bulletins_per_cycle=1)
+        self._run_bulletin_check(dd_run_check, mock_http, responses, max_bulletins_per_cycle=1)
         assert len(aggregator.events) == 1
 
-    def test_id_reset_after_nifi_restart(self, dd_run_check, aggregator):
+    def test_id_reset_after_nifi_restart(self, dd_run_check, aggregator, mock_http):
         """Bulletin IDs reset to 0 on NiFi restart; cached high-water mark must be cleared."""
         post_restart_bulletins = {
             'bulletinBoard': {
@@ -947,7 +929,7 @@ class TestBulletins:
         responses = _standard_responses(bulletins=post_restart_bulletins)
         # Cached last_id=500 simulates a pre-restart high-water mark.
         # New bulletin id=0 should still be emitted after reset detection.
-        _, cache = self._run_bulletin_check(dd_run_check, responses, cache_state='500')
+        _, cache = self._run_bulletin_check(dd_run_check, mock_http, responses, cache_state='500')
 
         assert len(aggregator.events) == 1
         assert aggregator.events[0]['msg_title'] == 'NiFi Bulletin: Post-Restart Proc [ERROR]'

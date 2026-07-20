@@ -9,13 +9,12 @@ from collections import defaultdict
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletCredentials
 from datadog_checks.base.errors import SkipInstanceError
 from datadog_checks.base.utils.date import parse_rfc3339
-from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kubelet import KubeletCheck, PodListUtils
 
 # Skip the whole tests module on Windows
@@ -1073,16 +1072,16 @@ def test_report_node_metrics_kubernetes1_18(monkeypatch, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
-def test_report_node_metrics_kubernetes1_18_requests_httperror(monkeypatch, aggregator):
-    # In production, self.http.get returns a ResponseWrapper over requests.Response,
-    # whose raise_for_status() raises requests.HTTPError (not HTTPStatusError).
+def test_report_node_metrics_kubernetes1_18_httpstatuserror(monkeypatch, aggregator):
+    # In production, self.http.get returns a ResponseWrapper whose raise_for_status()
+    # raises the agnostic HTTPStatusError.
     check = KubeletCheck('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials({'verify_tls': 'false'})
     check.node_spec_url = "http://localhost:10255/spec"
 
     mock_resp = mock.Mock()
     mock_resp.status_code = 404
-    mock_resp.raise_for_status.side_effect = requests.HTTPError('404 Not Found')
+    mock_resp.raise_for_status.side_effect = HTTPStatusError('404 Not Found')
     monkeypatch.setattr(check, '_retrieve_node_spec', mock.Mock(return_value=mock_resp))
     check._report_node_metrics(['foo:bar'])
     aggregator.assert_all_metrics_covered()

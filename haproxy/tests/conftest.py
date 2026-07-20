@@ -14,8 +14,8 @@ import pytest
 import requests
 from packaging import version
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import TempDir, WaitFor, docker_run
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 

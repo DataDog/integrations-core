@@ -10,7 +10,7 @@ from packaging import version
 
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.types import ServiceCheck
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.rabbitmq import RabbitMQ
 
@@ -232,7 +232,7 @@ def mock_http_responses(url, **_params):
         ),
     ],
 )
-def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, mocker):
+def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd_run_check, mock_openmetrics_http):
     """Detailed and aggregated endpoints queried together.
 
     We will drop duplicate metrics coming from both endpoints in favor of the
@@ -245,7 +245,7 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
             'include_aggregated_endpoint': True,
         }
     )
-    mocker.patch('requests.Session.get', wraps=mock_http_responses)
+    mock_openmetrics_http.get.side_effect = mock_http_responses
     dd_run_check(check)
 
     meta_metrics = {'rabbitmq.build_info', 'rabbitmq.identity_info'}
@@ -274,7 +274,7 @@ def test_aggregated_and_unaggregated_endpoints(endpoint, metrics, aggregator, dd
     _common_assertions(aggregator)
 
 
-def test_detailed_only_metrics(aggregator, dd_run_check, mocker):
+def test_detailed_only_metrics(aggregator, dd_run_check, mock_openmetrics_http):
     """Metrics that only appear in detailed endpoint.
 
     Most metric families have metrics that are both in per-obj and detailed endpoints.
@@ -289,7 +289,7 @@ def test_detailed_only_metrics(aggregator, dd_run_check, mocker):
             'include_aggregated_endpoint': True,
         }
     )
-    mocker.patch('requests.Session.get', wraps=mock_http_responses)
+    mock_openmetrics_http.get.side_effect = mock_http_responses
     dd_run_check(check)
 
     detailed_only_metrics = (

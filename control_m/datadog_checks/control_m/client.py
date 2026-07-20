@@ -11,9 +11,8 @@ from datadog_checks.base.errors import ConfigurationError
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from requests import Response
-
     from datadog_checks.base import AgentCheck
+    from datadog_checks.base.utils.http_protocol import HTTPResponse
 
 
 class ControlMClient:
@@ -116,7 +115,7 @@ class ControlMClient:
         self._log.info("Refreshing Control-M API token")
         self.login()
 
-    def request(self, method: str, url: str, **kwargs: Any) -> Response:
+    def request(self, method: str, url: str, **kwargs: Any) -> HTTPResponse:
         # Route the request through static token or session login, with 401 fallback.
         request_fn = getattr(self._http, method)
 
@@ -141,7 +140,7 @@ class ControlMClient:
         self._static_token_retry_after = time.monotonic() + self._static_token_retry_interval
         return self._session_request(request_fn, url, **kwargs)
 
-    def _session_request(self, request_fn: Callable[..., Response], url: str, **kwargs: Any) -> Response:
+    def _session_request(self, request_fn: Callable[..., HTTPResponse], url: str, **kwargs: Any) -> HTTPResponse:
         # Used in session login mode only. Make a request to the API using the session token.
         self.ensure_token()
         extra = {"Authorization": f"Bearer {self._token}"}

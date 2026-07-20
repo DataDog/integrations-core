@@ -112,7 +112,7 @@ def test_invalid_controller_service_check(aggregator, mock_http_response):
 
 
 def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoint):
-    from datadog_checks.dev.http import MockResponse
+    from datadog_checks.dev.http import MockHTTPResponse
 
     instance = {
         'openmetrics_endpoint': 'http://localhost:8080/metrics',
@@ -124,8 +124,10 @@ def test_get_version(datadog_agent, dd_run_check, mock_http_response_per_endpoin
 
     mock_http_response_per_endpoint(
         {
-            'http://localhost:8080/metrics': [MockResponse(file_path=get_fixture_path('traefik_proxy.txt'))],
-            'http://localhost:8080/api/version': [MockResponse(file_path=get_fixture_path('mesh_proxy_version.json'))],
+            'http://localhost:8080/metrics': [MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))],
+            'http://localhost:8080/api/version': [
+                MockHTTPResponse(file_path=get_fixture_path('mesh_proxy_version.json'))
+            ],
         }
     )
     dd_run_check(check)

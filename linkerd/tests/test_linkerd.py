@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.linkerd import LinkerdCheck
 
 from .common import (

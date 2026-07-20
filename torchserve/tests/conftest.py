@@ -7,10 +7,10 @@ from contextlib import contextmanager
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.torchserve import TorchserveCheck
 
 from .common import (

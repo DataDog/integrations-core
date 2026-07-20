@@ -4,6 +4,7 @@
 
 import mock
 
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.http_check import HTTPCheck, http_check
 
 
@@ -79,3 +80,16 @@ def test_message_when_content_is_disabled():
 
     assert message == error_message
     assert content not in message
+
+
+def test_use_cert_from_response_reads_peer_cert(aggregator, dd_run_check):
+    instance = {'name': 'cert', 'url': 'https://example.com', 'use_cert_from_response': True}
+    with mock.patch('datadog_checks.http_check.http_check.get_ca_certs_path', return_value='bar'):
+        check = HTTPCheck('http_check', {}, [instance])
+    with mock.patch.object(type(check.http), 'get', return_value=MockHTTPResponse(status_code=200)):
+        dd_run_check(check)
+
+    # The mock's `get_peer_cert` return value isn't a parsable certificate, so cert inspection
+    # reports UNKNOWN rather than raising. The point here is that no AttributeError is raised
+    # from accessing `.raw`, which the protocol-enforcing mock no longer exposes.
+    aggregator.assert_service_check(HTTPCheck.SC_SSL_CERT, status=HTTPCheck.UNKNOWN, count=1)

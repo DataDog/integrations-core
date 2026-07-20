@@ -13,7 +13,7 @@ from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPSSLError, HTTPStatusError
 from datadog_checks.base.utils.prometheus import metrics_pb2
 
@@ -464,7 +464,7 @@ class PrometheusScraperMixin(object):
             http_config['ssl_ignore_warning'] = True
             http_config['ssl_verify'] = False
 
-        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
+        http_handler = self._http_handlers[endpoint] = create_http_client(
             http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
 

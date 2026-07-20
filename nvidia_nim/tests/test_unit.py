@@ -2,29 +2,24 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-from unittest import mock
-
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nvidia_nim import NvidiaNIMCheck
 
 from .common import METRICS_MOCK, get_fixture_path
 
 
-def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance):
+def test_check_nvidia_nim(dd_run_check, aggregator, datadog_agent, instance, mock_http):
     check = NvidiaNIMCheck("nvidia_nim", {}, [instance])
     check.check_id = "test:123"
-    with mock.patch(
-        'requests.Session.get',
-        side_effect=[
-            MockHTTPResponse(file_path=get_fixture_path("nim_metrics.txt")),
-            MockHTTPResponse(file_path=get_fixture_path("nim_version.json")),
-        ],
-    ):
-        dd_run_check(check)
+    mock_http.get.side_effect = [
+        MockHTTPResponse(file_path=get_fixture_path("nim_metrics.txt")),
+        MockHTTPResponse(file_path=get_fixture_path("nim_version.json")),
+    ]
+    dd_run_check(check)
 
     for metric in METRICS_MOCK:
         aggregator.assert_metric(metric)

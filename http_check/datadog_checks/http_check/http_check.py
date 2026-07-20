@@ -115,7 +115,7 @@ class HTTPCheck(AgentCheck):
         try:
             parsed_uri = urlparse(addr)
             self.log.debug("Connecting to %s", addr)
-            self.http.session.trust_env = False
+            self.http.trust_env = False
 
             # Add 'Content-Type' for non GET requests when they have not been specified in custom headers
             if method.upper() in DATA_METHODS and not headers.get("Content-Type"):
@@ -187,7 +187,7 @@ class HTTPCheck(AgentCheck):
                 http_status = r.status_code
                 tags_list.append("http_status_code:{}".format(http_status))
             if use_cert_from_response:
-                peer_cert = r.raw.connection.sock.getpeercert(binary_form=True)
+                peer_cert = r.get_peer_cert(binary_form=True)
 
             # Only add the URL tag if it's not already present
             if not any(filter(re.compile("^url:").match, tags_list)):
@@ -253,8 +253,7 @@ class HTTPCheck(AgentCheck):
             if r is not None:
                 r.close()
             # resets the wrapper Session object
-            self.http._session.close()
-            self.http._session = None
+            self.http.close()
 
         # Report status metrics as well
         if service_checks:

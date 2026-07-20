@@ -7,8 +7,8 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
 from .common import FIXTURE_DIR, HERE, INSTANCE_INTEGRATION

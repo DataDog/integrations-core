@@ -5,11 +5,9 @@
 import re
 from copy import deepcopy
 
-import requests
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPError
 
 
 class KubeDNSCheck(OpenMetricsBaseCheck):
@@ -147,7 +145,7 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
             response = http_handler.get(url)
             response.raise_for_status()
             self.service_check(service_check_name, AgentCheck.OK, tags=tags)
-        except requests.exceptions.RequestException as e:
+        except HTTPError as e:
             message = str(e)
             self.service_check(service_check_name, AgentCheck.CRITICAL, message=message, tags=tags)
 
@@ -166,8 +164,6 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
             config['tls_ignore_warning'] = True
             config['tls_verify'] = False
 
-        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
-            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-        )
+        http_handler = self._http_handlers[endpoint] = self.create_http_client(config)
 
         return http_handler

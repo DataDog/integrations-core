@@ -9,8 +9,8 @@ import requests_kerberos
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import EnvVars
+from datadog_checks.dev.http import MockHTTPResponse
 
 pytestmark = [pytest.mark.unit]
 

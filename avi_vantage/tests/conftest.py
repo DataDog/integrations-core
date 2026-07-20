@@ -9,9 +9,9 @@ from urllib.parse import urlparse
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 

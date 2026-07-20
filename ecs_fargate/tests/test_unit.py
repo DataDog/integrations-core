@@ -8,7 +8,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
 from .conftest import (
@@ -37,44 +37,36 @@ def test_no_config(aggregator, dd_run_check):
 
 
 @pytest.mark.unit
-def test_failing_check(check, aggregator, dd_run_check):
+def test_failing_check(check, aggregator, dd_run_check, mock_http):
     """
     Testing fargate metadata endpoint error.
     """
-    with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get',
-        return_value=MockHTTPResponse('{}', status_code=500),
-    ):
-        dd_run_check(check)
+    mock_http.get.return_value = MockHTTPResponse('{}', status_code=500)
+    dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_invalid_response_check(check, aggregator, dd_run_check):
+def test_invalid_response_check(check, aggregator, dd_run_check, mock_http):
     """
     Testing invalid fargate metadata payload.
     """
-    with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get',
-        return_value=MockHTTPResponse('{}', status_code=200),
-    ):
-        dd_run_check(check)
+    mock_http.get.return_value = MockHTTPResponse('{}', status_code=200)
+    dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.integration
-def test_successful_check_linux(check, aggregator, dd_run_check):
+def test_successful_check_linux(check, aggregator, dd_run_check, mock_http):
     """
     Testing successful fargate check on Linux.
     """
-    with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_linux
-    ):
-        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
-            with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
-                dd_run_check(check)
+    mock_http.get.side_effect = mocked_requests_get_linux
+    with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
+        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
+            dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
 
@@ -146,16 +138,14 @@ def test_successful_check_linux(check, aggregator, dd_run_check):
 
 
 @pytest.mark.integration
-def test_successful_check_windows(check, aggregator, dd_run_check):
+def test_successful_check_windows(check, aggregator, dd_run_check, mock_http):
     """
     Testing successful fargate check on Windows.
     """
-    with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_windows
-    ):
-        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
-            with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
-                dd_run_check(check)
+    mock_http.get.side_effect = mocked_requests_get_windows
+    with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
+        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
+            dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
 
@@ -206,16 +196,14 @@ def test_successful_check_windows(check, aggregator, dd_run_check):
 
 
 @pytest.mark.integration
-def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check):
+def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check, mock_http):
     """
     Testing successful fargate check.
     """
-    with mock.patch(
-        'datadog_checks.ecs_fargate.ecs_fargate.requests.Session.get', side_effect=mocked_requests_get_sys_delta
-    ):
-        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
-            with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
-                dd_run_check(check)
+    mock_http.get.side_effect = mocked_requests_get_sys_delta
+    with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
+        with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
+            dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
 

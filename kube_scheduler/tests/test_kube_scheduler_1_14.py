@@ -4,11 +4,11 @@
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
 from .common import make_mock_metrics
@@ -100,9 +100,10 @@ def test_check_metrics_1_14(aggregator, mock_metrics, mock_leader, mock_healthch
     'side_effect, expected_status, expected_message',
     [
         (None, AgentCheck.OK, None),
-        (requests.HTTPError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+        (HTTPStatusError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+        (HTTPConnectionError('connection refused'), AgentCheck.CRITICAL, 'connection refused'),
     ],
-    ids=['ok', 'http_error'],
+    ids=['ok', 'http_error', 'http_connection_error'],
 )
 def test_service_check(monkeypatch, mock_openmetrics_http, side_effect, expected_status, expected_message):
     instance = {'prometheus_url': 'http://localhost:10251/metrics'}

@@ -8,8 +8,8 @@ import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from datadog_checks.base import ensure_unicode
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run, get_docker_hostname
+from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

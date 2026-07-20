@@ -8,7 +8,7 @@ import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError, is_affirmative
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.elastic import ESCheck
 from datadog_checks.elastic.elastic import AuthenticationError, get_value_from_path
 from datadog_checks.elastic.metrics import INDEX_STATS_METRICS
@@ -175,33 +175,27 @@ def test_run_custom_queries_root_data_path(aggregator, instance, dd_run_check, m
     aggregator.assert_metric('elasticsearch.custom.count', value=42, count=1)
 
 
-def test__get_data_throws_authentication_error(instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=MockHTTPResponse(status_code=400),
-    ):
-        check = ESCheck('elastic', {}, instances=[instance])
+def test__get_data_throws_authentication_error(instance, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(status_code=400)
+    check = ESCheck('elastic', {}, instances=[instance])
 
-        with pytest.raises(AuthenticationError):
-            check._get_data(url='test.com')
+    with pytest.raises(AuthenticationError):
+        check._get_data(url='test.com')
 
 
-def test__get_data_creates_critical_service_alert(aggregator, instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=MockHTTPResponse(status_code=500),
-    ):
-        check = ESCheck('elastic', {}, instances=[instance])
+def test__get_data_creates_critical_service_alert(aggregator, instance, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(status_code=500)
+    check = ESCheck('elastic', {}, instances=[instance])
 
-        with pytest.raises(Exception):
-            check._get_data(url='test.com')
+    with pytest.raises(Exception):
+        check._get_data(url='test.com')
 
-        aggregator.assert_service_check(
-            check.SERVICE_CHECK_CONNECT_NAME,
-            status=check.CRITICAL,
-            tags=check._config.service_check_tags,
-            message="Error 500 Server Error when hitting test.com",
-        )
+    aggregator.assert_service_check(
+        check.SERVICE_CHECK_CONNECT_NAME,
+        status=check.CRITICAL,
+        tags=check._config.service_check_tags,
+        message="Error 500 Server Error when hitting test.com",
+    )
 
 
 @pytest.mark.parametrize(
@@ -217,27 +211,24 @@ def test__get_data_creates_critical_service_alert(aggregator, instance):
         ),
     ],
 )
-def test_disable_legacy_sc_tags(aggregator, es_instance):
-    with mock.patch(
-        'requests.Session.get',
-        return_value=MockHTTPResponse(status_code=500),
-    ):
-        check = ESCheck('elastic', {}, instances=[es_instance])
+def test_disable_legacy_sc_tags(aggregator, es_instance, mock_http):
+    mock_http.get.return_value = MockHTTPResponse(status_code=500)
+    check = ESCheck('elastic', {}, instances=[es_instance])
 
-        with pytest.raises(Exception):
-            check._get_data(url='test.com')
+    with pytest.raises(Exception):
+        check._get_data(url='test.com')
 
-        if is_affirmative(es_instance['disable_legacy_service_check_tags']):
-            expected_tags = ['url:http://localhost:9200']
-        else:
-            expected_tags = ['host:localhost', 'port:9200']
+    if is_affirmative(es_instance['disable_legacy_service_check_tags']):
+        expected_tags = ['url:http://localhost:9200']
+    else:
+        expected_tags = ['host:localhost', 'port:9200']
 
-        aggregator.assert_service_check(
-            check.SERVICE_CHECK_CONNECT_NAME,
-            status=check.CRITICAL,
-            tags=expected_tags,
-            message="Error 500 Server Error when hitting test.com",
-        )
+    aggregator.assert_service_check(
+        check.SERVICE_CHECK_CONNECT_NAME,
+        status=check.CRITICAL,
+        tags=expected_tags,
+        message="Error 500 Server Error when hitting test.com",
+    )
 
 
 @pytest.mark.parametrize(

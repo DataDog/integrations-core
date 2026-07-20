@@ -53,9 +53,9 @@ class OrchestratorClient(_BaseClient):
             json={'user': username, 'password': password},
         )
         resp.raise_for_status()
-        csrf_token = self._http.session.cookies.get('orchCsrfToken')
+        csrf_token = self._http.get_cookie('orchCsrfToken')
         if csrf_token:
-            self._http.session.headers.update({'X-XSRF-TOKEN': csrf_token})
+            self._http.set_header('X-XSRF-TOKEN', csrf_token)
 
     def get_appliances(self) -> list[dict[str, Any]]:
         resp = self._request('get', '/gms/rest/appliance')
@@ -99,13 +99,13 @@ class ApplianceClient(_BaseClient):
             json={'user': username, 'password': password},
         )
         resp.raise_for_status()
-        csrf_token = self._http.session.cookies.get('edgeosCsrfToken')
+        csrf_token = self._http.get_cookie('edgeosCsrfToken')
         if csrf_token:
-            self._http.session.headers.update({'X-XSRF-TOKEN': csrf_token})
+            self._http.set_header('X-XSRF-TOKEN', csrf_token)
         else:
-            session_id = self._http.session.cookies.get('vxoaSessionID')
+            session_id = self._http.get_cookie('vxoaSessionID')
             if session_id:
-                self._http.session.headers.update({'vxoaSessionID': session_id})
+                self._http.set_header('vxoaSessionID', session_id)
 
     def get_newest_timestamp(self) -> int:
         resp = self._request('get', '/rest/json/stats/minuteRange')

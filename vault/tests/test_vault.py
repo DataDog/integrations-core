@@ -8,7 +8,7 @@ import mock
 import pytest
 import requests
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.vault import Vault
 from datadog_checks.vault.common import DEFAULT_API_VERSION
 from datadog_checks.vault.errors import ApiUnreachable

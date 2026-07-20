@@ -5,8 +5,8 @@ import os
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
+from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 HOST = get_docker_hostname()

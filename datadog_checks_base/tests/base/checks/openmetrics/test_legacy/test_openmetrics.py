@@ -20,9 +20,9 @@ from prometheus_client.samples import Sample
 
 from datadog_checks.base import ensure_bytes
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
+from datadog_checks.dev.http import MockHTTPResponse
 
 text_content_type = 'text/plain; version=0.0.4'
 FIXTURE_PATH = os.path.abspath(os.path.join(get_here(), '..', '..', '..', '..', 'fixtures', 'prometheus'))
@@ -2727,6 +2727,23 @@ def test_http_handler(mocked_openmetrics_check_factory):
 
     assert http_handler.options['headers']['accept-encoding'] == 'gzip'
     assert http_handler.options['headers']['accept'] == 'text/plain'
+
+
+def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_check_factory):
+    instance = {
+        'prometheus_url': 'https://www.example.com',
+        'metrics': [{'foo': 'bar'}],
+        'namespace': 'openmetrics',
+    }
+    check = mocked_openmetrics_check_factory(instance)
+    scraper_config = check.get_scraper_config(instance)
+    sentinel = mock.MagicMock()
+
+    with mock.patch(
+        'datadog_checks.base.checks.openmetrics.mixins.create_http_client', return_value=sentinel
+    ) as factory:
+        assert check.get_http_handler(scraper_config) is sentinel
+        factory.assert_called_once_with(scraper_config, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
 
 
 def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):

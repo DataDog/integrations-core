@@ -8,9 +8,9 @@ from urllib.parse import urljoin
 
 import pytest
 
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
 

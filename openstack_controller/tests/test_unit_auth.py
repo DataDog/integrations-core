@@ -8,7 +8,7 @@ import os
 import pytest
 
 import tests.configs as configs
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 
 pytestmark = [
     pytest.mark.unit,

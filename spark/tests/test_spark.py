@@ -14,7 +14,7 @@ import pytest
 import urllib3
 
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPRequestError
-from datadog_checks.base.utils.http_testing import MockHTTPResponse
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
 
