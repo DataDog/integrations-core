@@ -1,1 +1,0 @@
-Add opt-in streaming of Argo CD Application changes for near real-time generic resource collection, configurable per-resource-type collection intervals, and a `collect_openmetrics` option to collect generic resources without scraping metrics.

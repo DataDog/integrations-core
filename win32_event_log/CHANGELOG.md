@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.6.1 / 2026-07-08
+
+***Fixed***:
+
+* Reformat auto-generated `config_models` files following the migration of the model formatter from black to ruff. No behavior or type-contract change. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+
 ## 5.6.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

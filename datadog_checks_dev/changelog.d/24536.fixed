@@ -1,0 +1,1 @@
+Fix false-positive discovery-candidate stability failures caused by incorrectly diffing concatenated stdout/stderr container logs.

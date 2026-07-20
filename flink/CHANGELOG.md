@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.3.0 / 2026-07-08
+
+***Added***:
+
+* Add OpenMetrics-based collection mode that scrapes Flink's flink-metrics-prometheus reporter, as an alternative to the existing Datadog HTTP Reporter push-based mode. Keeps the Datadog API key with the Agent rather than in Flink configuration, making the integration usable in GitOps/Kubernetes deployments where flink-conf.yaml is mounted read-only from a ConfigMap. ([#23857](https://github.com/DataDog/integrations-core/pull/23857))
+
 ## 3.2.0 / 2025-11-26 / Agent 7.74.0
 
 ***Added***:
