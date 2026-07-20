@@ -196,7 +196,7 @@ class MockHTTPResponseImpl:
             message = (
                 f'{self.status_code} Client Error' if self.status_code < 500 else f'{self.status_code} Server Error'
             )
-            raise HTTPStatusError(message, response=self)
+            raise HTTPStatusError(message, response=self, status_code=self.status_code)
 
     def get_peer_cert(self, binary_form: bool = False) -> bytes | dict | None:
         return self.raw.connection.sock.getpeercert(binary_form=binary_form)

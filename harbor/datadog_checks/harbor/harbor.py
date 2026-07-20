@@ -30,7 +30,7 @@ class HarborCheck(AgentCheck):
             registries = api.registries()
             self.log.debug("Found %d registries", len(registries))
         except HTTPStatusError as e:
-            if e.response is not None and e.response.status_code in (401, 403):
+            if e.status_code in (401, 403):
                 # Forbidden, user is not admin
                 self.log.info(
                     "Provided user in harbor integration config is not an admin user. Ignoring registries health checks"
@@ -62,7 +62,7 @@ class HarborCheck(AgentCheck):
         try:
             volume_info = api.volume_info()
         except HTTPStatusError as e:
-            if e.response is not None and e.response.status_code in (401, 403):
+            if e.status_code in (401, 403):
                 # Forbidden, user is not admin
                 self.log.warning(
                     "Provided user in harbor integration config is not an admin user. Ignoring volume metrics"

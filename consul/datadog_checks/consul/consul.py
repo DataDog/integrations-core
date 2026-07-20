@@ -723,7 +723,7 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 str(e),
             )
         except HTTPStatusError as e:
-            if e.response.status_code == 404:
+            if e.status_code == 404:
                 self.log.warning(
                     "This Consul version (< 1.1.0) does not support the prometheus endpoint. "
                     "Update Consul or set back `use_prometheus_endpoint` to false to remove this warning. %s",

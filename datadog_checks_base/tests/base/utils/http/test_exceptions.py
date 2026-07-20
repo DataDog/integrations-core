@@ -47,6 +47,7 @@ def test_ssl_error_maps_to_http_ssl_error():
 
 def test_raise_for_status_maps_to_status_error():
     response = mock.MagicMock()
+    response.status_code = 404
     response.raise_for_status.side_effect = requests.exceptions.HTTPError('404 Client Error')
     http = RequestsWrapper({}, {})
     with mock.patch('requests.Session.get', return_value=response):
@@ -55,6 +56,8 @@ def test_raise_for_status_maps_to_status_error():
             wrapped.raise_for_status()
     # .response carries the agnostic wrapper, never the raw backend response
     assert exc_info.value.response is wrapped
+    # status_code is exposed on the exception, translated from the backend
+    assert exc_info.value.status_code == 404
 
 
 # Group A: the translator as a pure function, over the full mapping table.
@@ -87,6 +90,22 @@ def test_translate_does_not_leak_raw_response():
     result = _translate_requests_exception(err)
     assert isinstance(result, HTTPStatusError)
     assert result.response is None
+
+
+def test_translate_exposes_status_code_from_backend_response():
+    # status_code is a clean scalar, translated from the backend response, not a raw-response leak.
+    err = requests.exceptions.HTTPError('404 Client Error')
+    err.response = mock.MagicMock(status_code=404)
+    result = _translate_requests_exception(err)
+    assert isinstance(result, HTTPStatusError)
+    assert result.status_code == 404
+
+
+def test_translate_status_code_defaults_to_none_without_response():
+    err = requests.exceptions.HTTPError('500 Server Error')
+    result = _translate_requests_exception(err)
+    assert isinstance(result, HTTPStatusError)
+    assert result.status_code is None
 
 
 # Group B: the streaming seam. The failure surfaces only when the generator is consumed.

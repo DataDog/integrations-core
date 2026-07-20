@@ -176,7 +176,7 @@ class CouchDB1:
                     db_stats = self.agent_check.get(url, tags)
                 except HTTPStatusError as e:
                     couchdb['databases'][dbName] = None
-                    if (e.response.status_code == 403) or (e.response.status_code == 401):
+                    if (e.status_code == 403) or (e.status_code == 401):
                         self.db_exclude[server].append(dbName)
 
                         self.agent_check.warning(

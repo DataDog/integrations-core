@@ -87,7 +87,7 @@ def test_acl_forbidden(instance_bad_token, dd_environment):
     try:
         consul_check.check(None)
     except HTTPStatusError as e:
-        if e.response.status_code == 403:
+        if e.status_code == 403:
             got_error_403 = True
 
     assert got_error_403
