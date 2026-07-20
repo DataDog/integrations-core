@@ -4,10 +4,9 @@
 from subprocess import PIPE, STDOUT, Popen
 
 from datadog_checks.base.utils.common import ensure_bytes
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.errors import SubprocessError
 from datadog_checks.dev.structures import LazyFunction
-from datadog_checks.voltdb.client import Client
+from datadog_checks.voltdb.check import VoltDBCheck
 from datadog_checks.voltdb.types import Instance  # noqa: F401
 
 from . import common
@@ -56,12 +55,11 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
 
     def __init__(self, instance):
         # type: (Instance) -> None
-        http = RequestsWrapper(instance, {})
-        # VoltDB authenticates via User/Password query params. Clear the wrapper's basic-auth tuple
-        # (built from the instance's own credentials) so it doesn't add a conflicting Authorization
-        # header on top of the admin query params below. Mirrors VoltDBCheck.
-        http.options['auth'] = None
-        self._client = Client(url=instance['url'], http_get=http.get, username='admin', password='admin')
+        # Reuse the check's own HTTP client factory rather than constructing a concrete
+        # RequestsWrapper, so this stays backend-neutral. Admin creds are required to insert
+        # data and create snapshots; the check itself runs as the monitoring user.
+        admin_instance = dict(instance, username='admin', password='admin')
+        self._client = VoltDBCheck('voltdb', {}, [admin_instance])._client
 
     def __call__(self):
         # type: () -> None
