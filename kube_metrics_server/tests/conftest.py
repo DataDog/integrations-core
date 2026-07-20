@@ -26,6 +26,6 @@ def instance():
 
 @pytest.fixture
 def mock_healthcheck_wrapper():
-    # _healthcheck_http_handler builds its own RequestsWrapper outside self.http
-    with mock.patch('datadog_checks.kube_metrics_server.kube_metrics_server.RequestsWrapper'):
+    # _healthcheck_http_handler builds its own client via create_http_client, outside self.http
+    with mock.patch('datadog_checks.base.checks.base.AgentCheck.create_http_client'):
         yield

@@ -9,7 +9,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import KubeLeaderElectionMixin
 from datadog_checks.base.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import HTTPError
 
 from .sli_metrics import SliMetricsScraperMixin
@@ -256,8 +255,6 @@ class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMe
             config['tls_ignore_warning'] = True
             config['tls_verify'] = False
 
-        http_handler = self._http_handlers[endpoint] = RequestsWrapper(
-            config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
-        )
+        http_handler = self._http_handlers[endpoint] = self.create_http_client(config)
 
         return http_handler
