@@ -8,7 +8,6 @@ import os
 
 import mock
 import pytest
-import requests
 import simplejson as json
 
 from datadog_checks.base.utils.http_exceptions import HTTPStatusError
@@ -771,8 +770,8 @@ def test__make_request_failure(requests_wrapper):
         api = ApiFactory.create(log, instance, requests_wrapper)
 
     response_mock = mock.MagicMock()
-    with mock.patch("requests.Session.get", return_value=response_mock):
-        response_mock.raise_for_status.side_effect = requests.exceptions.HTTPError
+    with mock.patch.object(type(requests_wrapper), "get", return_value=response_mock):
+        response_mock.raise_for_status.side_effect = HTTPStatusError("mocked HTTP error")
         response_mock.status_code = 401
         with pytest.raises(AuthenticationNeeded):
             api._make_request("", {})
