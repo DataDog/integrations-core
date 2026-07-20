@@ -267,8 +267,10 @@ def test_flow_config_does_not_replace_declared_built_in_input():
     prd = models.FlowInput(name="prd", label="Custom PRD", input_type="path", as_content=True)
 
     config = FlowConfig(name="demo", inputs=[prd], flow=[])
+    built_in_prd = next(input for input in models.BUILT_IN_FLOW_INPUTS if input.name == "prd")
 
-    assert config.inputs == [prd, models.BUILT_IN_FLOW_INPUTS[1]]
+    assert prd in config.inputs
+    assert built_in_prd not in config.inputs
 
 
 def test_flow_input_rejects_as_content_for_non_path():

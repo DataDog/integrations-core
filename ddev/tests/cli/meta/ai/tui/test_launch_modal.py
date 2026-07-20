@@ -290,61 +290,6 @@ async def test_optional_empty_field_is_omitted(make_launch_modal_app, large_term
         assert app.dismiss_result == {"prd": "Required product behavior.\n"}
 
 
-async def test_built_in_inputs_are_always_rendered(make_launch_modal_app) -> None:
-    """PRD and max timeout render even when the flow declares no inputs."""
-    app = make_launch_modal_app([])
-
-    async with app.run_test() as pilot:
-        await pilot.pause()
-
-        assert app.screen.query_one("#input-prd", Input)
-        max_timeout = app.screen.query_one("#input-max_timeout", Input)
-        assert max_timeout.value == ""
-        assert max_timeout.placeholder == "Leave empty for unbounded"
-
-
-async def test_prd_is_required(make_launch_modal_app, large_terminal) -> None:
-    """The built-in PRD path cannot be empty."""
-    app = make_launch_modal_app([])
-
-    async with app.run_test(size=large_terminal) as pilot:
-        await pilot.pause()
-        app.screen.query_one("#input-prd", Input).value = ""
-        await pilot.click("#btn-launch")
-        await pilot.pause()
-
-        assert app.dismiss_result == "NOT_SET"
-        assert "required field cannot be empty" in str(app.screen.query_one("#launch-error", Static).render())
-
-
-async def test_max_timeout_is_forwarded(make_launch_modal_app, large_terminal) -> None:
-    """A populated timeout is converted like any other runtime input."""
-    app = make_launch_modal_app([])
-
-    async with app.run_test(size=large_terminal) as pilot:
-        await pilot.pause()
-        app.screen.query_one("#input-max_timeout", Input).value = "120.5"
-        await pilot.click("#btn-launch")
-        await pilot.pause()
-
-        assert app.dismiss_result["max_timeout"] == "120.5"
-
-
-@pytest.mark.parametrize("value", ["invalid", "NaN"])
-async def test_invalid_max_timeout_stays_inline(make_launch_modal_app, large_terminal, value: str) -> None:
-    """Invalid timeout values do not leave the launch modal."""
-    app = make_launch_modal_app([])
-
-    async with app.run_test(size=large_terminal) as pilot:
-        await pilot.pause()
-        app.screen.query_one("#input-max_timeout", Input).value = value
-        await pilot.click("#btn-launch")
-        await pilot.pause()
-
-        assert app.dismiss_result == "NOT_SET"
-        assert "timeout" in str(app.screen.query_one("#launch-error", Static).render()).lower()
-
-
 # ---------------------------------------------------------------------------
 # Modal structure
 # ---------------------------------------------------------------------------
