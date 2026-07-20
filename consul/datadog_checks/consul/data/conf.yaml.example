@@ -131,6 +131,12 @@ instances:
     #   - <SERVICE_1>
     #   - <SERVICE_2>
 
+    ## @param services_tags_include_service_name - boolean - optional - default: true
+    ## Whether to produce additional service tags, which include the service
+    ## name in the tag key, for each service.
+    #
+    # services_tags_include_service_name: true
+
     ## @param max_services - number - optional - default: 50
     ## Increase the maximum number of queried services.
     #

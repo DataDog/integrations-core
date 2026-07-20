@@ -54,6 +54,25 @@ def test_get_nodes_with_service(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
+def test_get_nodes_with_service_remove_service_tagkey(aggregator):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
+    consul_check.services_tags_include_service_name = False
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check.check(None)
+
+    expected_tags = [
+        'consul_datacenter:dc1',
+        'consul_service_id:service-1',
+        'consul_service_tag:active',
+        'consul_service_tag:standby',
+    ]
+
+    aggregator.assert_metric('consul.catalog.nodes_up', value=4, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_passing', value=4, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_warning', value=0, tags=expected_tags)
+    aggregator.assert_metric('consul.catalog.nodes_critical', value=0, tags=expected_tags)
+
+
 def test_get_peers_in_cluster(aggregator):
     my_mocks = consul_mocks._get_consul_mocks()
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
