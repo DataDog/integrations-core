@@ -1967,6 +1967,18 @@ def test_consumer_membership_event_member_without_assignment(check):
     ]
 
 
+def test_consumer_membership_members_sorted_by_member_id(check):
+    """members and member_ids are sorted by member_id regardless of broker order."""
+    members = [_make_member(client_id='c2', host='h2'), _make_member(client_id='c1', host='h1')]
+    describe_result = _make_group_describe(members=members)
+    kafka_consumer_check = _collect_groups_with_cache(check, describe_result)
+
+    events = consumer_membership_events(kafka_consumer_check)
+    assert len(events) == 1
+    assert events[0]['member_ids'] == ['m-c1', 'm-c2']
+    assert [m['member_id'] for m in events[0]['members']] == ['m-c1', 'm-c2']
+
+
 def test_heartbeat_connect_api_status_present_when_urls_configured(check):
     """connect_api_status appears in heartbeat payload when Connect URLs are configured."""
     instance = {
