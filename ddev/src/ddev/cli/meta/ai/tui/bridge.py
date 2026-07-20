@@ -30,8 +30,10 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeCompact,
     BeforeGoalCheck,
     ContextCleared,
+    PhaseErrored,
     PhaseFinished,
     PhaseStarted,
+    RunErrored,
 )
 
 
@@ -66,6 +68,14 @@ def build_app_callback_set(app: BridgeApp) -> CallbackSet:
     @cb.on_phase_finish
     async def _(phase_id: str) -> None:
         _target().post_message(PhaseFinished(phase_id))
+
+    @cb.on_phase_error
+    async def _(phase_id: str, error: BaseException) -> None:
+        _target().post_message(PhaseErrored(phase_id, error))
+
+    @cb.on_run_error
+    async def _(error: BaseException, phase_id: str | None) -> None:
+        _target().post_message(RunErrored(error, phase_id))
 
     @cb.on_before_agent_send
     async def _(scope: AgentScope, prompt: str, iteration: int) -> None:

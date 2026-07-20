@@ -166,25 +166,31 @@ class Phase(AsyncProcessor[PhaseTrigger]):
             )
         )
 
+    def build_failed_checkpoint(self, error: BaseException) -> FailedCheckpoint:
+        """Build the checkpoint persisted when this phase fails."""
+        return FailedCheckpoint(
+            started_at=self._started_at.isoformat() if self._started_at else None,
+            finished_at=datetime.now(UTC).isoformat(),
+            error=str(error),
+            tokens=CheckpointTokenInfo(total_input=0, total_output=0),
+        )
+
     async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
-        """Write failed checkpoint and emit PhaseFailedMessage."""
+        """Persist and publish a phase failure."""
+        original_error = error.original_exception
         try:
             self._checkpoint_manager.write_phase_checkpoint(
                 self._phase_id,
-                FailedCheckpoint(
-                    started_at=self._started_at.isoformat() if self._started_at else None,
-                    finished_at=datetime.now(UTC).isoformat(),
-                    error=str(error.original_exception),
-                    tokens=CheckpointTokenInfo(total_input=0, total_output=0),
-                ),
+                self.build_failed_checkpoint(original_error),
             )
         except Exception:
             self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)
         finally:
+            await self._callbacks.fire_phase_error(self._phase_id, original_error)
             self.submit_message(
                 PhaseFailedMessage(
                     id=f"{self._phase_id}_failed",
                     phase_id=self._phase_id,
-                    error=str(error.original_exception),
+                    error=str(original_error),
                 )
             )

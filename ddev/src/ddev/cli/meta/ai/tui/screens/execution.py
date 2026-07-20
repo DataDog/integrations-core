@@ -26,6 +26,7 @@ from ddev.cli.meta.ai.rendering import (
     render_agent_tools_line,
     render_compact_notice,
     render_context_cleared_notice,
+    render_phase_error_line,
     render_prompt_panel,
     render_response_header,
     render_response_text,
@@ -47,12 +48,15 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeGoalCheck,
     ContextCleared,
     ExecutionFailed,
+    PhaseErrored,
     PhaseFinished,
     PhaseStarted,
+    RunErrored,
 )
 from ddev.cli.meta.ai.tui.runs import ai_runs_dir, flow_slug, resume_completed_phases
 from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
 from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogEntry, PhaseLogScreen
 from ddev.cli.meta.ai.tui.status import RunStatus
 from ddev.cli.meta.ai.tui.widgets.header import TogoHeader
@@ -63,6 +67,8 @@ if TYPE_CHECKING:
 
 
 type OrchestratorBuilder = Callable[[Callbacks], OrchestratorLike]
+
+BANNER_ERROR_MAX_CHARS = 200
 
 
 class ExecutionScreen(TogoScreen):
@@ -100,6 +106,8 @@ class ExecutionScreen(TogoScreen):
         self._active_thinking: dict[str, dict[str, str]] = {entry.phase: {} for entry in flow.flow}
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
+        self._run_error_reported = False
+        self._phase_errors: dict[str, BaseException] = {}
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -208,14 +216,47 @@ class ExecutionScreen(TogoScreen):
         except Exception:
             pass
 
-    def _show_execution_error(self, error: BaseException) -> None:
-        message = f"Execution failed: {type(error).__name__}: {error}"
+    def _compact_error_detail(self, error: BaseException, phase_id: str | None = None) -> str:
+        detail = next((line.strip() for line in str(error).splitlines() if line.strip()), type(error).__name__)
+        if phase_id is not None:
+            detail = detail.removeprefix(f"Phase '{phase_id}' failed: ")
+            detail = detail.removeprefix(f"Phase '{phase_id}': ")
+        if len(detail) > BANNER_ERROR_MAX_CHARS:
+            detail = f"{detail[: BANNER_ERROR_MAX_CHARS - 1].rstrip()}…"
+        return detail
+
+    def _show_error_banner(self, message: str) -> None:
         try:
             widget = self.query_one("#execution-error", Static)
             widget.update(message)
             widget.display = True
         except Exception:
             pass
+
+    def _show_run_error(self, error: BaseException, phase_id: str | None = None) -> None:
+        detail = self._compact_error_detail(error, phase_id)
+        title = f"Run failed in {phase_id}" if phase_id is not None else "Run failed"
+        hint = f"Select {phase_id} to view the full error." if phase_id is not None else ""
+        message = f"{title}: {detail}"
+        if hint:
+            message = f"{message}\n{hint}"
+        self._show_error_banner(message)
+
+    def _show_phase_error_summary(self) -> None:
+        ordered_errors = [
+            (phase_id, self._phase_errors[phase_id])
+            for phase_id in self._phase_statuses
+            if phase_id in self._phase_errors
+        ]
+        if len(ordered_errors) == 1:
+            phase_id, error = ordered_errors[0]
+            self._show_run_error(error, phase_id)
+            return
+
+        lines = [f"Run failed — {len(ordered_errors)} phases failed"]
+        lines.extend(f"{phase_id}: {self._compact_error_detail(error, phase_id)}" for phase_id, error in ordered_errors)
+        lines.append("Select a failed phase to view its full error.")
+        self._show_error_banner("\n".join(lines))
 
     def _mark_phase_failed(self, phase_id: str) -> None:
         self._phase_statuses[phase_id] = RunStatus.FAILED
@@ -267,6 +308,10 @@ class ExecutionScreen(TogoScreen):
             if key.startswith(prefix):
                 self._stop_thinking(phase_id, key)
 
+    def _stop_phase_thinking(self, phase_id: str) -> None:
+        for key in list(self._active_thinking.setdefault(phase_id, {})):
+            self._stop_thinking(phase_id, key)
+
     # ── Bridge message handlers ──────────────────────────────────────────
 
     def on_phase_started(self, msg: PhaseStarted) -> None:
@@ -280,15 +325,39 @@ class ExecutionScreen(TogoScreen):
                 self._task_statuses[(p, t)] = RunStatus.DONE
         self._update_display()
 
+    def on_phase_errored(self, msg: PhaseErrored) -> None:
+        self._phase_errors[msg.phase_id] = msg.error
+        self._stop_phase_thinking(msg.phase_id)
+        self._write_output(render_phase_error_line(msg.phase_id, msg.error), phase_id=msg.phase_id)
+        if msg.phase_id in self._phase_statuses:
+            self._mark_phase_failed(msg.phase_id)
+        if self._run_error_reported:
+            self._show_phase_error_summary()
+        self._update_display()
+
+    def on_run_errored(self, msg: RunErrored) -> None:
+        self._run_error_reported = True
+        if self._phase_errors:
+            self._show_phase_error_summary()
+        else:
+            self._show_run_error(msg.error, msg.phase_id)
+
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
-        self._show_execution_error(msg.error)
+        if not self._run_error_reported:
+            self._run_error_reported = True
+            if self._phase_errors:
+                self._show_phase_error_summary()
+            else:
+                self._show_run_error(msg.error, msg.phase_id)
         if msg.phase_id in self._phase_statuses:
             self._mark_phase_failed(msg.phase_id)
             self._update_display()
 
     def on_phase_selected(self, msg: PhaseSelected) -> None:
         status = self._phase_statuses.get(msg.phase_id, RunStatus.PENDING)
-        if status.has_started:
+        if status is RunStatus.FAILED and (error := self._phase_errors.get(msg.phase_id)) is not None:
+            self.app.push_screen(PhaseErrorModal(msg.phase_id, error))
+        elif status.has_started:
             self.app.push_screen(PhaseLogScreen(self.flow, msg.phase_id, self._phase_logs[msg.phase_id], source=self))
         else:
             self.app.push_screen(PhaseConfigScreen(self.flow, msg.phase_id))
@@ -339,6 +408,7 @@ class ExecutionScreen(TogoScreen):
         self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
         self._write_output(render_agent_error_line(msg.scope, msg.error), phase_id=phase_id)
         if phase_id is not None:
+            self._phase_errors.setdefault(phase_id, msg.error)
             self._mark_phase_failed(phase_id)
         self._update_display()
 

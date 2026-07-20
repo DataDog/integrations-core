@@ -31,8 +31,10 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeCompact,
     BeforeGoalCheck,
     ContextCleared,
+    PhaseErrored,
     PhaseFinished,
     PhaseStarted,
+    RunErrored,
 )
 from ddev.cli.meta.ai.tui.theme import togo_markdown_theme, togo_theme
 
@@ -146,6 +148,12 @@ class TogoApp(App):
         self._record(msg)
 
     async def on_phase_finished(self, msg: PhaseFinished) -> None:
+        self._record(msg)
+
+    async def on_phase_errored(self, msg: PhaseErrored) -> None:
+        self._record(msg)
+
+    async def on_run_errored(self, msg: RunErrored) -> None:
         self._record(msg)
 
     async def on_agent_started(self, msg: AgentStarted) -> None:

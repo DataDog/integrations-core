@@ -331,11 +331,11 @@ class InspectEndpointPhase(Phase):
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
         raw = context.get("inspect_input")
         if not raw:
-            raise ConfigError(f"Phase {self._phase_id!r}: 'inspect_input' runtime variable is required")
+            raise ConfigError("'inspect_input' runtime variable is required")
         try:
             endpoints = InspectInput.model_validate_json(raw).endpoints
         except ValidationError as e:
-            raise ConfigError(f"Phase {self._phase_id!r}: invalid 'inspect_input': {e}") from e
+            raise ConfigError(f"invalid 'inspect_input': {e}") from e
 
         memory_dir = self._checkpoint_manager.memory_dir
         memory_dir.mkdir(parents=True, exist_ok=True)

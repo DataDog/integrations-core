@@ -4,6 +4,7 @@
 
 from datetime import UTC, datetime
 
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.models import PhaseConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -141,6 +142,28 @@ async def test_on_error_writes_failed_checkpoint_after_start(flow_dir, flow_cont
     checkpoint = mgr.read()["p1"]
     assert isinstance(checkpoint, FailedCheckpoint)
     assert checkpoint.started_at is not None
+
+
+async def test_on_error_fires_phase_error_callback(flow_dir, message_queue):
+    callback_set = CallbackSet()
+    received: list[tuple[str, BaseException]] = []
+
+    @callback_set.on_phase_error
+    async def handler(phase_id: str, error: BaseException) -> None:
+        received.append((phase_id, error))
+
+    context = FlowContext(
+        runtime_variables={},
+        flow_variables={},
+        callbacks=Callbacks([callback_set]),
+    )
+    phase, _ = _make_stub_phase(flow_dir, context, message_queue)
+    original_error = RuntimeError("boom")
+    wrapped = MessageProcessingError("p1", PhaseTrigger(id="start", phase_id=None), original_error)
+
+    await phase.on_error(wrapped)
+
+    assert received == [("p1", original_error)]
 
 
 # ---------------------------------------------------------------------------

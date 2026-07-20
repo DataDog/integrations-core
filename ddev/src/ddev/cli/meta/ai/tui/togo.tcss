@@ -542,6 +542,25 @@ ModalScreen {
     width: 96;
 }
 
+#dialog.phase-error {
+    width: 96;
+    min-height: 12;
+    max-height: 70%;
+}
+
+#phase-error-details {
+    height: auto;
+    max-height: 24;
+    margin-top: 1;
+    border: round $error;
+    background: $panel;
+    padding: 1 2;
+}
+
+#phase-error-message {
+    height: auto;
+}
+
 #diagnostic-errors {
     height: 1fr;
     margin-top: 1;

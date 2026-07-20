@@ -15,7 +15,7 @@ from ddev.ai.runtime.agent_log import AgentLogger
 from ddev.ai.runtime.checkpoints import CheckpointManager, resolve_resume_state
 from ddev.ai.runtime.resources import RunResources
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
-from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.event_bus.exceptions import FatalProcessingError, OrchestratorHookError
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator
 
 
@@ -125,7 +125,14 @@ class PhaseOrchestrator(EventBusOrchestrator):
         if isinstance(message, PhaseFailedMessage):
             self._failed_phase = message.phase_id
             self._failed_error = message.error
-            raise FatalProcessingError(f"Phase '{message.phase_id}' failed: {message.error}")
+            error = FatalProcessingError(f"Phase '{message.phase_id}' failed: {message.error}")
+            await self._callbacks.fire_run_error(error, message.phase_id)
+            raise error
+
+    async def on_error(self, error: OrchestratorHookError) -> None:
+        """Publish unexpected orchestrator failures and stop the run."""
+        await self._callbacks.fire_run_error(error.original_exception, None)
+        raise FatalProcessingError(str(error)) from error.original_exception
 
     async def on_finalize(self, exception: Exception | None) -> None:
         if self._agent_logger is not None:

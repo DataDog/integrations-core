@@ -32,6 +32,24 @@ class PhaseFinished(Message):
         self.phase_id = phase_id
 
 
+class PhaseErrored(Message):
+    """Fired when a phase terminates with an exception."""
+
+    def __init__(self, phase_id: str, error: BaseException) -> None:
+        super().__init__()
+        self.phase_id = phase_id
+        self.error = error
+
+
+class RunErrored(Message):
+    """Fired when orchestration terminates a run with an exception."""
+
+    def __init__(self, error: BaseException, phase_id: str | None) -> None:
+        super().__init__()
+        self.error = error
+        self.phase_id = phase_id
+
+
 class ExecutionFailed(Message):
     """Fired when orchestration exits with an exception."""
 
