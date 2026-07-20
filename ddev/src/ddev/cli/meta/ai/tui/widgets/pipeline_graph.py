@@ -339,6 +339,13 @@ class PhaseNode(Static):
     def action_select(self) -> None:
         self.post_message(PhaseSelected(self.phase_id))
 
+    def update_status(self, status: RunStatus, label: str) -> None:
+        """Update the displayed status without replacing the focused widget."""
+        self.status = status
+        self.update(label)
+        self.remove_class(*(f"status-{old_status.value}" for old_status in RunStatus))
+        self.add_class(f"status-{status.value}")
+
     def on_click(self) -> None:
         if self.screen.get_selected_text():
             return
@@ -408,4 +415,7 @@ class PipelineGraph(Widget):
 
     def update_statuses(self, statuses: dict[str, RunStatus]) -> None:
         self._statuses = dict(statuses)
-        self.refresh(recompose=True, layout=True)
+        labels = _pad_labels({entry.phase: _phase_label(entry.phase, self._statuses) for entry in self.flow.flow})
+        for phase_node in self.query(PhaseNode):
+            status = self._statuses.get(phase_node.phase_id, RunStatus.PENDING)
+            phase_node.update_status(status, labels[phase_node.phase_id][0])

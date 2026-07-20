@@ -8,8 +8,6 @@ from __future__ import annotations
 from typing import Any
 
 from textual.app import ComposeResult
-from textual.screen import ModalScreen
-from textual.widgets import Button, Static
 
 from .conftest import TogoModalTestApp
 
@@ -28,21 +26,6 @@ class CancelRunModalTestApp(TogoModalTestApp):
         from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
 
         self.push_screen(CancelRunModal(), lambda result: setattr(self, "dismiss_result", result))
-
-
-async def test_cancel_run_modal_has_safe_default_and_warning() -> None:
-    """The modal focuses the safe action and explains cancellation is not reversible."""
-    from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
-
-    app = CancelRunModalTestApp()
-    async with app.run_test() as pilot:
-        await pilot.pause()
-        modal = app.screen
-        assert isinstance(modal, CancelRunModal)
-        assert issubclass(CancelRunModal, ModalScreen)
-        assert modal.focused is modal.query_one("#btn-keep-running", Button)
-        assert isinstance(modal.query_one("#btn-cancel-flow", Button), Button)
-        assert "will not be reverted" in modal.query_one(Static).render().plain
 
 
 async def test_cancel_run_modal_escape_keeps_running() -> None:

@@ -1370,8 +1370,8 @@ async def test_unmount_cancels_worker():
         assert pilot.app.is_running
 
 
-async def test_back_requires_confirmation_before_cancelling_active_run():
-    """Back keeps an active run alive until the destructive action is confirmed."""
+async def test_escape_requires_confirmation_before_cancelling_active_run():
+    """Escape keeps an active run alive until the destructive action is confirmed."""
     import asyncio
 
     from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
@@ -1397,8 +1397,12 @@ async def test_back_requires_confirmation_before_cancelling_active_run():
         screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _InfiniteDemo())
         await app.push_screen(screen)
         await pilot.pause()
+        assert screen._run_active
+        assert "escape" in app.active_bindings, [
+            (type(node).__name__, list(bindings.key_to_bindings)) for node, bindings in screen._binding_chain
+        ]
 
-        screen.action_back()
+        await pilot.press("escape")
         await pilot.pause()
         assert isinstance(app.screen, CancelRunModal)
         assert app.screen_stack[-2] is screen
