@@ -1,0 +1,1 @@
+Default `COMPOSE_PROJECT_NAME` in `docker_run()` to the check's directory name to avoid Compose project-name collisions between concurrent E2E test runs.

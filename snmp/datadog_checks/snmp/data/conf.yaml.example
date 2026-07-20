@@ -55,6 +55,12 @@ init_config:
     #     metric_tags:
     #     - TCP
 
+    ## @param use_remote_config_profiles - boolean - optional - default: false
+    ## Whether to apply device profiles from the SNMP Profile Manager, managed through Remote Configuration.
+    ## When enabled, any locally defined profiles are ignored in favor of the remotely-managed profiles.
+    #
+    # use_remote_config_profiles: true
+
     ## @param refresh_oids_cache_interval - integer - optional - default: 0
     ## Note: Beta feature, only available using python SNMP integration.
     ## Set this option to enable caching of OIDs. The value is the number of seconds before the

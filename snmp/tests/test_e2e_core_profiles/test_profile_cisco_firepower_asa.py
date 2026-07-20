@@ -49,7 +49,7 @@ def test_e2e_profile_cisco_firepower_asa(dd_agent_check):
     aggregator.assert_metric('snmp.crasNumSetupFailInsufResources', metric_type=aggregator.COUNT, tags=common_tags)
     aggregator.assert_metric('snmp.crasNumUsers', metric_type=aggregator.GAUGE, tags=common_tags)
     mem_tag_rows = [
-        ['mem_pool_index:1', 'mem_pool_name:System memory'],
+        ['mem:1', 'mem_pool_name:System memory'],
     ]
     for tag_row in mem_tag_rows:
         aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags + tag_row)
