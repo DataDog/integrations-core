@@ -1,1 +1,0 @@
-Handle request errors with backend-agnostic HTTP exceptions when collecting data.

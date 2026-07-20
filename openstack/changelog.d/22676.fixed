@@ -1,1 +1,0 @@
-Handle OpenStack and Keystone API errors with backend-agnostic HTTP exceptions.

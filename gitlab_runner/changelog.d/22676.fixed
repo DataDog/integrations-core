@@ -1,1 +1,0 @@
-Handle scrape and master-check errors with backend-agnostic HTTP exceptions.

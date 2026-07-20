@@ -1,1 +1,0 @@
-Catch the backend-agnostic ``HTTPError`` when collecting metadata and metrics so the check keeps working after the httpx migration.

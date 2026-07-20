@@ -1,1 +1,0 @@
-Handle management API errors with backend-agnostic HTTP exceptions.

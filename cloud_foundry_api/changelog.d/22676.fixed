@@ -1,1 +1,0 @@
-Catch the backend-agnostic ``HTTPError`` and ``HTTPStatusError`` types when querying the Cloud Foundry and UAA APIs so the check keeps working after the httpx migration.

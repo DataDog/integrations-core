@@ -1,2 +1,0 @@
-Preserve Vault authentication headers when scraping OpenMetrics endpoints.
-Handle Vault API errors with backend-agnostic HTTP exceptions.

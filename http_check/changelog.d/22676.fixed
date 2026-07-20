@@ -1,1 +1,0 @@
-Handle connection errors with backend-agnostic HTTP exceptions.

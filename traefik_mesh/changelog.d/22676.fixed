@@ -1,1 +1,0 @@
-Remove unused ``url`` parameter from ``get_version``.
