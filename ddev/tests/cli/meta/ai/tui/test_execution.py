@@ -788,7 +788,11 @@ async def test_execution_failed_phase_activation_opens_error_modal() -> None:
         assert pilot.app.screen is screen
 
 
-async def test_execution_failed_phase_without_error_falls_back_to_log() -> None:
+async def test_execution_cancelled_phase_falls_back_to_log() -> None:
+    import asyncio
+
+    from ddev.ai.agent.scope import AgentRole, AgentScope
+    from ddev.cli.meta.ai.tui.messages import AgentErrored
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
     from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected
@@ -800,7 +804,11 @@ async def test_execution_failed_phase_without_error_falls_back_to_log() -> None:
         screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
         await app.push_screen(screen)
         await pilot.pause()
-        screen._phase_statuses["phase_1"] = RunStatus.FAILED
+        scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
+        screen.on_agent_errored(AgentErrored(scope, asyncio.CancelledError()))
+
+        assert screen._phase_statuses["phase_1"] is RunStatus.FAILED
+        assert "phase_1" not in screen._phase_errors
 
         screen.on_phase_selected(PhaseSelected("phase_1"))
         await pilot.pause()

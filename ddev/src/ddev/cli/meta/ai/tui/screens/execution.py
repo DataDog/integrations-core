@@ -408,7 +408,6 @@ class ExecutionScreen(TogoScreen):
         self._stop_agent_thinking(phase_id, msg.scope.owner_id, msg.scope.role.value)
         self._write_output(render_agent_error_line(msg.scope, msg.error), phase_id=phase_id)
         if phase_id is not None:
-            self._phase_errors.setdefault(phase_id, msg.error)
             self._mark_phase_failed(phase_id)
         self._update_display()
 
