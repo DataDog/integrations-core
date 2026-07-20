@@ -56,7 +56,7 @@ METRICS_COLUMNS = {
     'sum_select_range_check',
 }
 
-INTERNAL_COLUMNS = {'_dd_statement_id', '_dd_statement_source'}
+INTERNAL_COLUMNS = {'_dd_statement_id'}
 DIGEST_STATEMENT_SOURCE = 'events_statements_summary_by_digest'
 PREPARED_STATEMENT_SOURCE = 'prepared_statements_instances'
 
@@ -74,15 +74,16 @@ def _row_state_key(row):
     :param row: a normalized row from a MySQL statement metrics source
     :return: a tuple uniquely identifying the cumulative database counter
     """
-    statement_source = row.get('_dd_statement_source', DIGEST_STATEMENT_SOURCE)
-    if statement_source == PREPARED_STATEMENT_SOURCE:
+    # Prepared-statement rows carry a non-null `object_instance_begin` as `_dd_statement_id`;
+    # digest rows leave it null. That presence check is what tells the two sources apart.
+    if row.get('_dd_statement_id') is not None:
         # `object_instance_begin` is a memory address that MySQL can reuse for a
         # different prepared statement once the old one is deallocated. Include
         # the query_signature so a reused address doesn't merge two different
         # statements' cumulative counters before diffing.
-        return statement_source, row['schema_name'], row['_dd_statement_id'], row['query_signature']
+        return PREPARED_STATEMENT_SOURCE, row['schema_name'], row['_dd_statement_id'], row['query_signature']
 
-    return statement_source, row['schema_name'], row['digest']
+    return DIGEST_STATEMENT_SOURCE, row['schema_name'], row['digest']
 
 
 def _strip_internal_columns(row):
@@ -268,12 +269,11 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         condition = (
             "WHERE `last_seen` >= %s"
             if only_query_recent_statements
-            else "WHERE `digest_text` NOT LIKE 'EXPLAIN %%' OR `digest_text` IS NULL"
+            else "WHERE `digest_text` NOT LIKE 'EXPLAIN %' OR `digest_text` IS NULL"
         )
 
         sql_statement_summary = """\
-            SELECT %s AS `_dd_statement_source`,
-                   NULL AS `_dd_statement_id`,
+            SELECT NULL AS `_dd_statement_id`,
                    `schema_name`,
                    `digest`,
                    `digest_text`,
@@ -307,8 +307,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             # MySQL documents `object_instance_begin` as the table's primary key:
             # https://dev.mysql.com/doc/refman/8.4/en/performance-schema-prepared-statements-instances-table.html
             prepared_sql_statement_summary = """\
-                SELECT  %s AS `_dd_statement_source`,
-                        `object_instance_begin` AS `_dd_statement_id`,
+                SELECT  `object_instance_begin` AS `_dd_statement_id`,
                         `owner_object_schema` AS `schema_name`,
                         NULL AS `digest`,
                         `sql_text` AS `digest_text`,
@@ -334,7 +333,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                         `sum_select_range_check` AS `sum_select_range_check`,
                         NOW() AS `last_seen`
                 FROM performance_schema.prepared_statements_instances
-                WHERE `sql_text` NOT LIKE 'EXPLAIN %%' OR `sql_text` IS NULL
+                WHERE `sql_text` NOT LIKE 'EXPLAIN %' OR `sql_text` IS NULL
                 """
 
             sql_statement_summary = f"""\
@@ -350,12 +349,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 """
 
         with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
-            if only_query_recent_statements:
-                args = [DIGEST_STATEMENT_SOURCE, self._last_seen]
-            elif collect_prepared_statements:
-                args = [DIGEST_STATEMENT_SOURCE, PREPARED_STATEMENT_SOURCE]
-            else:
-                args = [DIGEST_STATEMENT_SOURCE]
+            args = [self._last_seen] if only_query_recent_statements else None
             cursor.execute(sql_statement_summary, args)
 
             rows = cursor.fetchall() or []  # type: ignore

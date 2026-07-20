@@ -289,7 +289,6 @@ def test_statement_metrics_baselines_new_digest_before_merging_query_signature(d
 
     def row(digest, digest_text, count_star):
         return {
-            '_dd_statement_source': statements.DIGEST_STATEMENT_SOURCE,
             '_dd_statement_id': None,
             'schema_name': 'personio',
             'digest': digest,
@@ -325,7 +324,6 @@ def test_statement_metrics_baselines_new_digest_before_merging_query_signature(d
     assert rows[0]['query_signature'] == query_signature
     assert rows[0]['count_star'] == 10
     assert '_dd_statement_id' not in rows[0]
-    assert '_dd_statement_source' not in rows[0]
 
 
 @pytest.mark.unit
@@ -342,7 +340,6 @@ def test_statement_metrics_baselines_new_prepared_statement_instance_before_merg
 
     def row(object_instance_begin, count_star):
         return {
-            '_dd_statement_source': statements.PREPARED_STATEMENT_SOURCE,
             '_dd_statement_id': object_instance_begin,
             'schema_name': 'personio',
             'digest': None,
@@ -379,7 +376,6 @@ def test_statement_metrics_baselines_new_prepared_statement_instance_before_merg
     # Only instance 1001's delta (10) is counted; the newly-seen instance 2002 is baselined, not dumped.
     assert rows[0]['count_star'] == 10
     assert '_dd_statement_id' not in rows[0]
-    assert '_dd_statement_source' not in rows[0]
 
 
 @pytest.mark.unit
@@ -394,7 +390,6 @@ def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(d
 
     def row(object_instance_begin, digest_text, count_star):
         return {
-            '_dd_statement_source': statements.PREPARED_STATEMENT_SOURCE,
             '_dd_statement_id': object_instance_begin,
             'schema_name': 'personio',
             'digest': None,
