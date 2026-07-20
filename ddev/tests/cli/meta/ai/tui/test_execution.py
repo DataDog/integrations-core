@@ -1259,48 +1259,129 @@ async def test_output_contains_agent_start_header():
 
 
 # ---------------------------------------------------------------------------
-# ExecutionScreen: header running badge
+# ExecutionScreen: execution lifecycle
 # ---------------------------------------------------------------------------
 
 
-async def test_header_shows_running_badge_during_run():
-    """Header running badge is shown while the orchestrator runs."""
+async def test_execution_finishes_phases_before_reporting_success() -> None:
+    """All-green phases show finishing until the orchestrator returns cleanly."""
     import asyncio
 
-    from textual.widgets import Static
-
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
 
-    started = asyncio.Event()
     release = asyncio.Event()
 
-    class _BlockedDemo:
+    class ControlledOrchestrator:
         failed_phase = None
 
+        def __init__(self, callbacks: Any) -> None:
+            self.callbacks = callbacks
+
         async def run_async(self) -> None:
-            started.set()
+            for phase_id, _ in DEMO_PHASES:
+                await self.callbacks.fire_phase_finish(phase_id)
             await release.wait()
 
     flow = _make_flow()
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _BlockedDemo())
+        screen = ExecutionScreen(flow, orchestrator_builder=ControlledOrchestrator)
         await app.push_screen(screen)
-        await asyncio.wait_for(started.wait(), timeout=5)
         await pilot.pause()
 
-        from ddev.cli.meta.ai.tui.widgets.header import TogoHeader
-
-        header = screen.query_one(TogoHeader)
-        badge = header.query_one("#header-right", Static)
-        assert str(badge.content) in {"● running", "○ running"}
+        badge = screen.query_one(ExecutionStatusBadge)
+        assert str(badge.render()) == "◌ finishing"
 
         release.set()
-        await screen.workers.wait_for_complete()
         await pilot.pause()
 
-        assert str(badge.content) == ""
+        assert str(badge.render()) == "✓ completed"
+
+
+async def test_execution_failure_during_finalization_never_reports_success() -> None:
+    """A failure after all phases finish replaces finishing with a failed result."""
+    import asyncio
+
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
+
+    release = asyncio.Event()
+
+    class FailingFinalizer:
+        failed_phase = None
+
+        def __init__(self, callbacks: Any) -> None:
+            self.callbacks = callbacks
+
+        async def run_async(self) -> None:
+            for phase_id, _ in DEMO_PHASES:
+                await self.callbacks.fire_phase_finish(phase_id)
+            await release.wait()
+            raise RuntimeError("finalization failed")
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=FailingFinalizer)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        badge = screen.query_one(ExecutionStatusBadge)
+        assert str(badge.render()) == "◌ finishing"
+
+        release.set()
+        await pilot.pause()
+
+        error = screen.query_one("#execution-error", Static)
+        assert str(badge.render()) == "✕ failed"
+        assert "finalization failed" in str(error.render())
+
+
+async def test_phase_log_header_keeps_running_status() -> None:
+    """Opening a phase log keeps the active flow status visible."""
+    import asyncio
+
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
+    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
+
+    release = asyncio.Event()
+
+    class RunningPhase:
+        failed_phase = None
+
+        def __init__(self, callbacks: Any) -> None:
+            self.callbacks = callbacks
+
+        async def run_async(self) -> None:
+            await self.callbacks.fire_phase_start("phase_1")
+            await release.wait()
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=RunningPhase)
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.query_one(PhaseNode).focus()
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert isinstance(app.screen, PhaseLogScreen)
+        badge = app.screen.query_one(ExecutionStatusBadge)
+        assert str(badge.render()) in {"● running", "○ running"}
+
+        release.set()
+        await pilot.pause()
+        assert str(badge.render()) == "✓ completed"
 
 
 # ---------------------------------------------------------------------------
@@ -1309,11 +1390,14 @@ async def test_header_shows_running_badge_during_run():
 
 
 async def test_cancel_stops_worker_without_crash():
-    """Pressing ctrl+c cancels the worker without crashing the app."""
+    """Ctrl+C cancels the run without reporting successful completion."""
     import asyncio
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
+    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
+
+    cancelled = asyncio.Event()
 
     class _InfiniteDemo:
         failed_phase = None
@@ -1322,7 +1406,11 @@ async def test_cancel_stops_worker_without_crash():
             self._cb = cb
 
         async def run_async(self) -> None:
-            await asyncio.sleep(999)
+            try:
+                await asyncio.sleep(999)
+            except asyncio.CancelledError:
+                cancelled.set()
+                raise
 
     flow = _make_flow()
     app = _app(flow)
@@ -1333,8 +1421,11 @@ async def test_cancel_stops_worker_without_crash():
         await app.push_screen(screen)
         await pilot.pause(0.05)
         await pilot.press("ctrl+c")
-        await pilot.pause(0.1)
+        await pilot.pause()
+
         assert pilot.app.is_running
+        assert cancelled.is_set()
+        assert str(screen.query_one(ExecutionStatusBadge).render()) == ""
 
 
 async def test_execution_ctrl_c_copies_selection_before_cancelling(monkeypatch):
@@ -1435,7 +1526,7 @@ async def test_escape_requires_confirmation_before_cancelling_active_run():
         assert app.screen is screen
         assert not cancelled.is_set()
 
-        screen.action_back()
+        await pilot.press("escape")
         await pilot.pause()
         await pilot.click("#btn-cancel-flow")
         await pilot.pause()
@@ -1447,6 +1538,7 @@ async def test_back_pops_immediately_after_run_finishes():
     """Back does not prompt once the worker has finished."""
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
+    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
 
     class _FinishedDemo:
         failed_phase = None
@@ -1461,9 +1553,11 @@ async def test_back_pops_immediately_after_run_finishes():
         screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _FinishedDemo())
         await app.push_screen(screen)
         await pilot.pause()
-        screen.action_back()
+        await pilot.press("escape")
         await pilot.pause()
+
         assert isinstance(app.screen, MainScreen)
+        assert str(app.screen.query_one(ExecutionStatusBadge).render()) == ""
 
 
 # ---------------------------------------------------------------------------
@@ -1475,6 +1569,7 @@ async def test_failing_orchestrator_no_app_crash():
     """A raising orchestrator surfaces failure in UI without crashing the app."""
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
+    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
 
     flow = _make_flow()
     app = _app(flow)
@@ -1486,8 +1581,7 @@ async def test_failing_orchestrator_no_app_crash():
         await pilot.pause(0.5)
         assert pilot.app.is_running
         assert isinstance(pilot.app.screen, ExecutionScreen)
-
-    assert screen._phase_statuses["phase_1"] is RunStatus.FAILED
+        assert str(screen.query_one(ExecutionStatusBadge).render()) == "✕ failed"
 
 
 async def test_orchestrator_build_failure_is_visible_and_screen_stays_stable() -> None:
@@ -1495,6 +1589,7 @@ async def test_orchestrator_build_failure_is_visible_and_screen_stays_stable() -
     from textual.widgets import Static
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
 
     def fail_to_build(_callbacks: Any) -> Any:
         raise RuntimeError("constructor exploded")
@@ -1510,6 +1605,7 @@ async def test_orchestrator_build_failure_is_visible_and_screen_stays_stable() -
         error = screen.query_one("#execution-error", Static)
         assert error.display
         assert "constructor exploded" in str(error.render())
+        assert str(screen.query_one(ExecutionStatusBadge).render()) == "✕ failed"
         assert app.screen is screen
         assert app.is_running
 
@@ -1721,6 +1817,57 @@ final_review:
 
         assert screen._phase_statuses["research"] is RunStatus.DONE
         assert screen._phase_statuses["final_review"] is RunStatus.PENDING
+
+
+async def test_resume_transitions_to_finishing_after_remaining_phase(tmp_path: Path) -> None:
+    """A resumed done phase participates in the all-green finishing check."""
+    import asyncio
+
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    run_dir = tmp_path / flow_slug(flow)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text(
+        """phase_1:
+  status: success
+  started_at: '2024-01-01T00:00:00'
+  finished_at: '2024-01-01T00:01:00'
+  tokens: {total_input: 1, total_output: 1}
+  memory_path: phase_1_memory.md
+"""
+    )
+    release = asyncio.Event()
+
+    class ResumeOrchestrator:
+        failed_phase = None
+
+        def __init__(self, callbacks: Any) -> None:
+            self.callbacks = callbacks
+
+        async def run_async(self) -> None:
+            await self.callbacks.fire_phase_finish("phase_2")
+            await release.wait()
+
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(
+            flow,
+            resume=True,
+            runs_dir=tmp_path,
+            orchestrator_builder=ResumeOrchestrator,
+        )
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
+
+        assert str(screen.query_one(ExecutionStatusBadge).render()) == "◌ finishing"
+        release.set()
+        await pilot.pause()
+        assert str(screen.query_one(ExecutionStatusBadge).render()) == "✓ completed"
 
 
 # ---------------------------------------------------------------------------

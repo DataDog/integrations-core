@@ -8,6 +8,21 @@ from __future__ import annotations
 from enum import StrEnum
 
 
+class ExecutionStatus(StrEnum):
+    """Whole-flow execution lifecycle states."""
+
+    IDLE = "idle"
+    RUNNING = "running"
+    FINISHING = "finishing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+    @property
+    def is_active(self) -> bool:
+        """Return whether the orchestrator is still active."""
+        return self in (ExecutionStatus.RUNNING, ExecutionStatus.FINISHING)
+
+
 class RunStatus(StrEnum):
     """Finite phase/task execution states shown in the TUI."""
 
