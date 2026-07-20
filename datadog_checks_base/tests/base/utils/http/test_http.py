@@ -106,6 +106,32 @@ class TestAttribute:
         check = CustomCheck('test', {}, [{}])
         assert check.http is sentinel
 
+    def test_factory_default_uses_instance_config(self):
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        assert check.create_http_client().options['timeout'] == (7.0, 7.0)
+
+    def test_factory_instance_override(self):
+        check = AgentCheck('test', {}, [{'timeout': 7}])
+
+        client = check.create_http_client({'timeout': 42})
+
+        assert client.options['timeout'] == (42.0, 42.0)
+
+    def test_module_factory_builds_from_given_config(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        client = create_http_client({'timeout': 24.5}, {})
+
+        assert client.options['timeout'] == (24.5, 24.5)
+
+    def test_module_factory_applies_remapper(self):
+        from datadog_checks.base.utils.http import create_http_client
+
+        client = create_http_client({'prometheus_timeout': 9}, {}, {'prometheus_timeout': {'name': 'timeout'}})
+
+        assert client.options['timeout'] == (9, 9)
+
 
 class TestTLSCiphers:
     @pytest.mark.parametrize(
