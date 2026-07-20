@@ -17,7 +17,7 @@ from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import find_check_root
+from .utils import find_check_root, get_current_check_name
 
 try:
     from contextlib import ExitStack
@@ -401,7 +401,10 @@ def docker_run(
         conditions (callable):
             A list of callable objects that will be executed before yielding to check for errors
         env_vars (dict[str, str]):
-            A dictionary to update `os.environ` with during execution
+            A dictionary to update `os.environ` with during execution. When `compose_file` is provided and
+            `COMPOSE_PROJECT_NAME` isn't set here, already in `os.environ`, or saved from a previous E2E
+            start run, it defaults to the check's directory name so that concurrent E2E runs sharing a
+            Docker daemon don't collide on Compose's own directory-basename-derived default project name.
         wrappers (list[callable]):
             A list of context managers to use during execution
         attempts (int):
@@ -415,6 +418,12 @@ def docker_run(
     if compose_file is not None:
         if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
+
+        env_vars = dict(env_vars) if env_vars else {}
+        if not env_vars.get('COMPOSE_PROJECT_NAME') and not os.getenv('COMPOSE_PROJECT_NAME'):
+            docker_metadata = get_state('docker_compose_metadata', {})
+            # An extra level deep because of the context manager
+            env_vars['COMPOSE_PROJECT_NAME'] = docker_metadata.get('project_name') or get_current_check_name(depth=2)
 
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
@@ -469,7 +478,7 @@ def docker_run(
             'docker_compose_metadata',
             {
                 'compose_file': compose_file,
-                'project_name': (env_vars or {}).get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
+                'project_name': env_vars.get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
                 'service_name': service_name,
             },
         )

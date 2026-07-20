@@ -10,6 +10,7 @@ import mock
 import pytest
 import tenacity
 
+from datadog_checks.dev._env import get_state, serialize_data
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import (
     ComposeFileUp,
@@ -270,6 +271,70 @@ def test_docker_run_saves_compose_metadata(monkeypatch):
             pass
 
     assert os.environ['DDEV_E2E_ENV_docker_compose_metadata']
+
+
+@pytest.fixture
+def captured_env_vars():
+    captured = {}
+
+    @contextmanager
+    def fake_environment_run(**kwargs):
+        captured.update(kwargs['env_vars'])
+        yield None
+
+    with mock.patch('datadog_checks.dev.docker.environment_run', fake_environment_run):
+        yield captured
+
+
+def test_docker_run_defaults_compose_project_name(monkeypatch, captured_env_vars):
+    monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
+    monkeypatch.delenv('DDEV_E2E_ENV_docker_compose_metadata', raising=False)
+
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
+
+    assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'datadog_checks_dev'
+    assert get_state('docker_compose_metadata')['project_name'] == 'datadog_checks_dev'
+
+
+def test_docker_run_respects_explicit_compose_project_name(monkeypatch, captured_env_vars):
+    monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
+
+    with docker_run(
+        '/tmp/docker-compose.yml',
+        env_vars={'COMPOSE_PROJECT_NAME': 'custom'},
+        service_name='service',
+    ):
+        pass
+
+    assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'custom'
+
+
+def test_docker_run_respects_compose_project_name_env_var(monkeypatch, captured_env_vars):
+    monkeypatch.setenv('COMPOSE_PROJECT_NAME', 'from_environ')
+    monkeypatch.delenv('DDEV_E2E_ENV_docker_compose_metadata', raising=False)
+
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
+
+    assert 'COMPOSE_PROJECT_NAME' not in captured_env_vars
+    assert get_state('docker_compose_metadata')['project_name'] == 'from_environ'
+
+
+def test_docker_run_reuses_saved_compose_project_name(monkeypatch, captured_env_vars):
+    monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
+    monkeypatch.setenv(
+        'DDEV_E2E_ENV_docker_compose_metadata',
+        serialize_data(
+            {'compose_file': '/tmp/docker-compose.yml', 'project_name': 'saved_project', 'service_name': 'service'}
+        ),
+    )
+
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
+
+    assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'saved_project'
+    assert get_state('docker_compose_metadata')['project_name'] == 'saved_project'
 
 
 def test_assert_all_discovery_candidates_stable_reports_incremental_logs(caplog):
