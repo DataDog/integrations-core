@@ -181,6 +181,7 @@ SystemMetrics = {
                 'LocalThreadScheduled': {'name': 'thread.local.scheduled', 'type': 'gauge'},
                 'MMappedFileBytes': {'name': 'mmapped.file.size', 'type': 'gauge'},
                 'MMappedFiles': {'name': 'mmapped.file.current', 'type': 'gauge'},
+                'MarkCacheBytes': {'name': 'table.mergetree.storage.mark.cache', 'type': 'gauge'},
                 'MarksLoaderThreads': {'name': 'threads.marks_loader.total', 'type': 'gauge'},
                 'MarksLoaderThreadsActive': {'name': 'threads.marks_loader.active', 'type': 'gauge'},
                 'MarksLoaderThreadsScheduled': {'name': 'threads.marks_loader.scheduled', 'type': 'gauge'},
