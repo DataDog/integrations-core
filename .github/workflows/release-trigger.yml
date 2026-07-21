@@ -62,6 +62,30 @@ jobs:
             echo "is-stable-release=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # TODO: this notification currently runs before the approval gate, so it
+  # announces a *pending* release. Once the `release` environment gate is removed
+  # the release starts immediately — switch `needs` back to the release step and
+  # update the wording in notify_slack.py to "release starting".
+  notify:
+    name: Notify pending release
+    needs: context
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout notification script
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          sparse-checkout: .github/workflows/scripts
+      - name: Notify Slack of pending release
+        env:
+          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_RELEASE }}
+          SOURCE_REPO: integrations-core
+          REF: ${{ github.event_name == 'workflow_dispatch' && inputs.source-repo-ref || github.sha }}
+          PACKAGES: ${{ inputs.packages || '' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 .github/workflows/scripts/notify_slack.py
+
   approve:
     name: Await release approval
     needs: context
@@ -84,4 +108,4 @@ jobs:
       is-stable-release: ${{ needs.context.outputs.is-stable-release }}
     permissions:
       id-token: write
-      contents: write
+      contents: read

@@ -10,13 +10,13 @@ import mock
 import pytest
 import tenacity
 
+from datadog_checks.dev._env import get_state, serialize_data
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import (
     ComposeFileUp,
     assert_all_discovery_candidates_stable,
     compose_file_active,
     docker_run,
-    get_e2e_discovery_metadata,
 )
 from datadog_checks.dev.subprocess import run_command
 
@@ -47,26 +47,6 @@ def _container_inspect(*, restart_count=0, running=True, health='healthy', ports
         },
         'RestartCount': restart_count,
         'State': state,
-    }
-
-
-def test_get_e2e_discovery_metadata(tmp_path):
-    check_root = tmp_path / 'test_check'
-    check_package_root = check_root / 'datadog_checks' / 'test_check'
-    data_dir = check_package_root / 'data'
-    data_dir.mkdir(parents=True)
-    (data_dir / 'auto_conf.yaml').write_text(
-        'ad_identifiers:\n  - test\ndiscovery: {}\ninit_config:\ninstances: []\n',
-        encoding='utf-8',
-    )
-
-    metadata = get_e2e_discovery_metadata(check_root)
-
-    assert metadata == {
-        'docker_volumes': [
-            f'{check_package_root}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/test_check.d/auto_conf.yaml:ro',
-            '/var/run/docker.sock:/var/run/docker.sock:ro',
-        ],
     }
 
 
@@ -293,6 +273,70 @@ def test_docker_run_saves_compose_metadata(monkeypatch):
     assert os.environ['DDEV_E2E_ENV_docker_compose_metadata']
 
 
+@pytest.fixture
+def captured_env_vars():
+    captured = {}
+
+    @contextmanager
+    def fake_environment_run(**kwargs):
+        captured.update(kwargs['env_vars'])
+        yield None
+
+    with mock.patch('datadog_checks.dev.docker.environment_run', fake_environment_run):
+        yield captured
+
+
+def test_docker_run_defaults_compose_project_name(monkeypatch, captured_env_vars):
+    monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
+    monkeypatch.delenv('DDEV_E2E_ENV_docker_compose_metadata', raising=False)
+
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
+
+    assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'datadog_checks_dev'
+    assert get_state('docker_compose_metadata')['project_name'] == 'datadog_checks_dev'
+
+
+def test_docker_run_respects_explicit_compose_project_name(monkeypatch, captured_env_vars):
+    monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
+
+    with docker_run(
+        '/tmp/docker-compose.yml',
+        env_vars={'COMPOSE_PROJECT_NAME': 'custom'},
+        service_name='service',
+    ):
+        pass
+
+    assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'custom'
+
+
+def test_docker_run_respects_compose_project_name_env_var(monkeypatch, captured_env_vars):
+    monkeypatch.setenv('COMPOSE_PROJECT_NAME', 'from_environ')
+    monkeypatch.delenv('DDEV_E2E_ENV_docker_compose_metadata', raising=False)
+
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
+
+    assert 'COMPOSE_PROJECT_NAME' not in captured_env_vars
+    assert get_state('docker_compose_metadata')['project_name'] == 'from_environ'
+
+
+def test_docker_run_reuses_saved_compose_project_name(monkeypatch, captured_env_vars):
+    monkeypatch.delenv('COMPOSE_PROJECT_NAME', raising=False)
+    monkeypatch.setenv(
+        'DDEV_E2E_ENV_docker_compose_metadata',
+        serialize_data(
+            {'compose_file': '/tmp/docker-compose.yml', 'project_name': 'saved_project', 'service_name': 'service'}
+        ),
+    )
+
+    with docker_run('/tmp/docker-compose.yml', service_name='service'):
+        pass
+
+    assert captured_env_vars['COMPOSE_PROJECT_NAME'] == 'saved_project'
+    assert get_state('docker_compose_metadata')['project_name'] == 'saved_project'
+
+
 def test_assert_all_discovery_candidates_stable_reports_incremental_logs(caplog):
     class DiscoveryCheck:
         @classmethod
@@ -394,3 +438,35 @@ def test_assert_all_discovery_candidates_stable_detects_new_crash_logs():
                 '/tmp/docker-compose.yml',
                 'service',
             )
+
+
+def test_assert_all_discovery_candidates_stable_ignores_old_stderr_when_new_stdout_arrives():
+    # Regression test: new stdout previously shifted unchanged stderr, replaying it as new.
+    class DiscoveryCheck:
+        @classmethod
+        def generate_configs(cls, service):
+            yield {'init_config': {}, 'instances': [{'url': f'http://{service.host}:8080/metrics'}]}
+
+    logs = iter(
+        [
+            _docker_result(stdout='', stderr='old startup error\n'),
+            _docker_result(stdout='new access log line\n', stderr='old startup error\n'),
+        ]
+    )
+
+    def fake_run_command(command, **kwargs):
+        if command[:2] == ['docker', 'compose']:
+            return _docker_result(stdout='container-id\n')
+        if command[:2] == ['docker', 'inspect']:
+            return _docker_result(stdout=json.dumps([_container_inspect()]))
+        if command[:2] == ['docker', 'logs']:
+            return next(logs)
+        raise AssertionError(f'Unexpected command: {command}')
+
+    with mock.patch('datadog_checks.dev.docker.run_command', side_effect=fake_run_command):
+        assert_all_discovery_candidates_stable(
+            mock.Mock(),
+            DiscoveryCheck,
+            '/tmp/docker-compose.yml',
+            'service',
+        )

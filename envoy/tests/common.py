@@ -398,6 +398,28 @@ CONNECTION_LIMIT_METRICS = [
 
 CONNECTION_LIMIT_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
 
+ADAPTIVE_CONCURRENCY_PROMETHEUS_COUNTER_METRIC = "http.adaptive_concurrency.gradient_controller.rq_blocked.count"
+
+ADAPTIVE_CONCURRENCY_PROMETHEUS_VALUES = {
+    ADAPTIVE_CONCURRENCY_PROMETHEUS_COUNTER_METRIC: 5,
+    "http.adaptive_concurrency.gradient_controller.min_rtt_calculation_active": 0,
+    "http.adaptive_concurrency.gradient_controller.concurrency_limit": 30,
+    "http.adaptive_concurrency.gradient_controller.gradient": 1000,
+    "http.adaptive_concurrency.gradient_controller.burst_queue_size": 22,
+    "http.adaptive_concurrency.gradient_controller.min_rtt_msecs": 100,
+    "http.adaptive_concurrency.gradient_controller.sample_rtt_msecs": 95,
+}
+
+ADAPTIVE_CONCURRENCY_PROMETHEUS_METRICS = list(ADAPTIVE_CONCURRENCY_PROMETHEUS_VALUES.keys())
+
+ADAPTIVE_CONCURRENCY_PROMETHEUS_STAT_PREFIX_TAG = 'stat_prefix:ingress_http'
+
+ADAPTIVE_CONCURRENCY_PROMETHEUS_GAUGE_VALUES = {
+    metric: value
+    for metric, value in ADAPTIVE_CONCURRENCY_PROMETHEUS_VALUES.items()
+    if metric != ADAPTIVE_CONCURRENCY_PROMETHEUS_COUNTER_METRIC
+}
+
 TLS_INSPECTOR_METRICS = [
     "tls_inspector.client_hello_too_large.count",
     "tls_inspector.tls.found.count",

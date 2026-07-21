@@ -23,6 +23,15 @@ from . import defaults, validators
 SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
 
 
+class AutomaticDiagnostics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    interval: Optional[float] = None
+
+
 class ManagedAuthentication(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -335,6 +344,7 @@ class InstanceConfig(BaseModel):
     )
     activity_metrics_excluded_aggregations: Optional[tuple[str, ...]] = None
     application_name: Optional[str] = None
+    automatic_diagnostics: Optional[AutomaticDiagnostics] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     collect_activity_metrics: Optional[bool] = None

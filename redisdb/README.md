@@ -54,6 +54,8 @@ To configure this check for an Agent running on a host:
        # password: <PASSWORD>
    ```
 
+   **Note**: The Redis check does not support Amazon ElastiCache IAM authentication. Use the `username` and `password` parameters for Redis-level authentication instead.
+
 2. If using Redis 6+ and ACLs, ensure that the user has at least `DB  Viewer` permissions at the Database level, `Cluster Viewer` permissions if operating in a cluster environment, and `+config|get +info +slowlog|get` ACL rules. For more details, see [Database access control][4].
 
 3. [Restart the Agent][5].

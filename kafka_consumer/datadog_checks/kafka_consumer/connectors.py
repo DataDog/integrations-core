@@ -138,8 +138,7 @@ class KafkaConnectCollector:
     def collect(self, cluster_id: str) -> dict[str, bool]:
         """Collect connector data and return connectivity status per endpoint.
 
-        Returns a mapping of endpoint identifier to connection success (True/False).
-        REST URL endpoints use the URL as key; Confluent Cloud uses 'confluent_cloud:<env>:<cluster>'.
+        Returns a mapping of endpoint URL to connection success (True/False).
         """
         if self.config._kafka_connect_oauth_token_provider:
             try:
@@ -164,18 +163,28 @@ class KafkaConnectCollector:
         return connectivity
 
     def _collect_rest(self, url: str, cluster_id: str) -> None:
-        response = self.http.get(
-            f'{url.rstrip("/")}/connectors',
-            params={'expand': ['info', 'status']},
-            timeout=self.config._request_timeout,
-            **self._get_request_kwargs(),
-        )
-        response.raise_for_status()
-        connectors_data = response.json()
+        endpoint = f'{url.rstrip("/")}/connectors'
+
+        def _fetch(expand: str | list[str]) -> Any:
+            response = self.http.get(
+                endpoint,
+                params={'expand': expand},
+                timeout=self.config._request_timeout,
+                **self._get_request_kwargs(),
+            )
+            response.raise_for_status()
+            return response.json()
+
+        connectors_data = _fetch(['info', 'status'])
 
         if not isinstance(connectors_data, dict):
-            # Older Connect workers (pre-Kafka 2.3 / CP 5.3) ignore the expand parameter
-            # and return a plain list of connector names instead of the expanded dict.
+            # A combined expand list is serialized as repeated query params (expand=info&expand=status),
+            # which Confluent Cloud's expansions endpoint doesn't honor — it returns the unexpanded
+            # connector-name list instead. Retry with a single expand value before concluding the
+            # worker predates Kafka 2.3 / CP 5.3 and doesn't support expand at all.
+            connectors_data = _fetch('info')
+
+        if not isinstance(connectors_data, dict):
             self.log.warning(
                 "Unexpected response shape from %s/connectors (got %s, expected dict). "
                 "The Connect worker may not support the expand parameter — Kafka 2.3+ / CP 5.3+ is required.",
@@ -184,17 +193,43 @@ class KafkaConnectCollector:
             )
             return
 
+        # Confluent Cloud honors only one expand value per request; fetch any missing section separately and merge.
+        for section in ('info', 'status'):
+            if any((entry or {}).get(section) is None for entry in connectors_data.values()):
+                try:
+                    self._merge_expand(connectors_data, _fetch(section), section)
+                except Exception as e:
+                    self.log.warning(
+                        "Failed to fetch supplementary '%s' section from %s/connectors, emitting partial data: %s",
+                        section,
+                        url,
+                        e,
+                    )
+
         tags_base = self.config._get_tags(cluster_id) + [f'connect_url:{url}']
         self.check.gauge('connector.count', len(connectors_data), tags=tags_base)
-
         self._emit_connector_metrics(connectors_data, tags_base)
         self._emit_connector_config_events(connectors_data, cluster_id, url)
         self._collect_plugins(url, cluster_id)
 
+    @staticmethod
+    def _merge_expand(connectors_data: dict[str, Any], expanded: Any, section: str) -> None:
+        if not isinstance(expanded, dict):
+            return
+        for name, entry in connectors_data.items():
+            if entry is None:
+                continue
+            if entry.get(section) is None and isinstance(expanded.get(name), dict):
+                val = expanded[name].get(section)
+                if val is not None:
+                    entry[section] = val
+
     def _emit_connector_metrics(self, connectors_data: dict[str, Any], tags_base: list[str]) -> None:
         for name, data in connectors_data.items():
-            info = data.get('info', {})
-            status = data.get('status', {})
+            if data is None:
+                continue
+            info = data.get('info') or {}
+            status = data.get('status') or {}
 
             connector_type = info.get('type', 'unknown')
             full_class = (info.get('config') or {}).get('connector.class', '')
@@ -230,8 +265,10 @@ class KafkaConnectCollector:
         connector_contents: dict[str, str] = {}
 
         for name, data in connectors_data.items():
-            info = data.get('info', {})
-            status = data.get('status', {})
+            if data is None:
+                continue
+            info = data.get('info') or {}
+            status = data.get('status') or {}
 
             connector_type = info.get('type', 'unknown')
             connector_state = (status.get('connector') or {}).get('state', 'UNKNOWN')

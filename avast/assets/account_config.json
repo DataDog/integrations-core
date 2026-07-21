@@ -1,0 +1,27 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "key": "client_id",
+      "label": "Client ID",
+      "help": "Your Avast Business Hub client ID",
+      "required": true,
+      "editable": true,
+      "text": {}
+    },
+    {
+      "key": "client_secret",
+      "label": "Client Secret",
+      "help": "Your Avast Business Hub client secret",
+      "required": true,
+      "editable": true,
+      "password": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "avast-logs",
+      "additional_config_fields": []
+    }
+  ]
+}

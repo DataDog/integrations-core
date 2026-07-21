@@ -7,7 +7,6 @@ from __future__ import division
 import functools
 import time
 from collections import defaultdict
-from string import Template
 
 from cachetools import TTLCache
 
@@ -146,9 +145,7 @@ class SQLServer(DatabaseCheck):
         )
 
         self._resolved_hostname = None
-        self._agent_hostname = None
         self._database_hostname = None
-        self._database_identifier = None
         self._connection = None
         self.failed_connections = {}
         self.instance_metrics = []
@@ -338,10 +335,6 @@ class SQLServer(DatabaseCheck):
         return agent_host_resolver(self.host)
 
     @property
-    def tags(self):
-        return self.tag_manager.get_tags()
-
-    @property
     def cloud_metadata(self):
         return self._cloud_metadata
 
@@ -363,38 +356,28 @@ class SQLServer(DatabaseCheck):
         return self._resolved_hostname
 
     @property
-    def database_identifier(self):
-        # type: () -> str
-        if self._database_identifier is None:
-            template = Template(self._config.database_identifier.get('template') or '$resolved_hostname')
-            # Copy self.tag_manager._tags and map values to single values instead of lists
-            tag_dict = {}
-            tags = self.tag_manager.get_tags()
-            # sort tags to ensure consistent ordering
-            tags.sort()
-            for t in tags:
-                if ':' in t:
-                    key, value = t.split(':', 1)
-                    if key in tag_dict:
-                        tag_dict[key] += f",{value}"
-                    else:
-                        tag_dict[key] = value
-            tag_dict['resolved_hostname'] = self.resolved_hostname
-            tag_dict['host'] = str(self.host)
-            tag_dict['port'] = str(self.port) if self.port is not None else None
-            database = self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
-            if database is not None:
-                tag_dict['database'] = database
-            if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
-                tag_dict['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
-            if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
-                tag_dict['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
-            if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
-                tag_dict['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
-            if self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME) is not None:
-                tag_dict['full_server_name'] = self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME)
-            self._database_identifier = template.safe_substitute(**tag_dict)
-        return self._database_identifier
+    def database_identifier_template(self) -> str:
+        return self._config.database_identifier.get('template') or '$resolved_hostname'
+
+    @property
+    def database_identifier_params(self) -> dict:
+        params = {
+            'resolved_hostname': self.resolved_hostname,
+            'host': str(self.host),
+            'port': str(self.port) if self.port is not None else None,
+        }
+        database = self.instance.get('database', self.connection.DEFAULT_DATABASE if self.connection else None)
+        if database is not None:
+            params['database'] = database
+        if self.resolved_hostname.endswith(AZURE_SERVER_SUFFIX):
+            params['azure_name'] = self.resolved_hostname[: -len(AZURE_SERVER_SUFFIX)]
+        if self.static_info_cache.get(STATIC_INFO_SERVERNAME) is not None:
+            params['server_name'] = self.static_info_cache.get(STATIC_INFO_SERVERNAME)
+        if self.static_info_cache.get(STATIC_INFO_INSTANCENAME) is not None:
+            params['instance_name'] = self.static_info_cache.get(STATIC_INFO_INSTANCENAME)
+        if self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME) is not None:
+            params['full_server_name'] = self.static_info_cache.get(STATIC_INFO_FULL_SERVERNAME)
+        return params
 
     @property
     def database_hostname(self):
@@ -503,13 +486,6 @@ class SQLServer(DatabaseCheck):
             "hostname": self.reported_hostname,
             "raw": True,
         }
-
-    @property
-    def agent_hostname(self):
-        # type: () -> str
-        if self._agent_hostname is None:
-            self._agent_hostname = datadog_agent.get_hostname()
-        return self._agent_hostname
 
     @property
     def connection(self):
