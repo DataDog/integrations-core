@@ -50,6 +50,14 @@
     },
     "dashboards": {
       "ClickHouse Overview": "assets/dashboards/overview.json"
+    },
+    "monitors": {
+      "ClickHouse cannot connect": "assets/monitors/clickhouse_can_connect.json",
+      "ClickHouse query failure rate is high": "assets/monitors/clickhouse_high_query_failure_rate.json",
+      "ClickHouse active query count is high": "assets/monitors/clickhouse_high_active_queries.json",
+      "ClickHouse replica delay is high": "assets/monitors/clickhouse_replica_delay.json",
+      "ClickHouse background merge pool is saturated": "assets/monitors/clickhouse_merge_pool_saturation.json",
+      "ClickHouse thread CPU scheduling wait is high": "assets/monitors/clickhouse_high_thread_cpu_wait.json"
     }
   }
 }

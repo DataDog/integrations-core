@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "created_at": "2026-03-23",
+  "last_updated_at": "2026-03-23",
+  "title": "ClickHouse cannot connect",
+  "tags": [
+    "integration:clickhouse"
+  ],
+  "description": "The Datadog Agent is unable to connect to the monitored ClickHouse instance. This may indicate that ClickHouse is down, unreachable, or that the Agent's credentials are misconfigured.",
+  "definition": {
+    "message": "The Datadog Agent cannot connect to ClickHouse on {{host.name}}. Verify that the ClickHouse server is running and that the Agent configuration is correct.",
+    "name": "[ClickHouse] Cannot connect to {{host.name}}",
+    "options": {
+      "new_host_delay": 300,
+      "no_data_timeframe": 2,
+      "notify_audit": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "thresholds": {
+        "critical": 1,
+        "ok": 1,
+        "warning": 1
+      },
+      "timeout_h": 0
+    },
+    "query": "\"clickhouse.can_connect\".over(\"*\").by(\"*\").last(2).count_by_status()",
+    "tags": [
+      "integration:clickhouse"
+    ],
+    "type": "service check"
+  }
+}
