@@ -2,6 +2,19 @@ name: "ArgoCD"
 fleet_configurable: true
 files:
 - name: argocd.yaml
+  discovery:
+    strategies:
+    - strategy: local:from_argocd_kube_app_name
+      provides:
+      - endpoints
+      inputs: {}
+      candidates:
+      - app_controller_endpoint: "{endpoints.app_controller_endpoint}"
+        appset_controller_endpoint: "{endpoints.appset_controller_endpoint}"
+        api_server_endpoint: "{endpoints.api_server_endpoint}"
+        repo_server_endpoint: "{endpoints.repo_server_endpoint}"
+        notifications_controller_endpoint: "{endpoints.notifications_controller_endpoint}"
+        commit_server_endpoint: "{endpoints.commit_server_endpoint}"
   options:
   - template: init_config
     options:
@@ -252,3 +265,10 @@ files:
       overrides:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.hidden: true
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - argocd
+  - template: auto_conf/discovery

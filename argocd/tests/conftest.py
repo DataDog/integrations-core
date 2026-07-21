@@ -8,6 +8,7 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
@@ -40,6 +41,8 @@ def setup_argocd():
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_argocd]) as kubeconfig:
+        setup_discovery_agent(kubeconfig)
+
         with ExitStack() as stack:
             app_controller_host, app_controller_port = stack.enter_context(
                 port_forward(kubeconfig, 'argocd', 8082, 'service', 'argocd-metrics')
