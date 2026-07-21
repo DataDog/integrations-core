@@ -12,10 +12,10 @@ from textual.screen import ModalScreen
 from textual.widget import Widget
 from textual.widgets import Button, Static
 
-from ddev.ai.config.models import ResolvedFlow
+from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.cli.meta.ai.tui.widgets.launch_flow_input import LaunchFlowInput
 
-type LaunchInputValues = dict[str, str]
+type LaunchInputValues = RuntimeVariables
 
 
 class LaunchModal(ModalScreen):

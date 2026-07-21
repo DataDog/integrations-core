@@ -15,6 +15,22 @@ from textual.widgets import Button, Input, Static, Switch
 
 from ddev.ai.config.models import FlowInput, InputType
 
+
+def object_flow_input(**overrides: object) -> FlowInput:
+    data = {
+        "name": "endpoint",
+        "label": "Endpoint",
+        "type": "object",
+        "fields": [
+            {"name": "url", "label": "URL", "type": "string"},
+            {"name": "retries", "label": "Retries", "type": "number", "required": False},
+            {"name": "enabled", "label": "Enabled", "type": "boolean"},
+        ],
+    }
+    data.update(overrides)
+    return FlowInput.model_validate(data)
+
+
 # ---------------------------------------------------------------------------
 # Widget rendering per InputType
 # ---------------------------------------------------------------------------
@@ -110,6 +126,89 @@ async def test_boolean_switch_prefilled(make_launch_modal_app, default, expected
         modal = app.screen
         sw = modal.query_one("#input-b", Switch)
         assert sw.value is expected
+
+
+async def test_object_input_prefills_and_submits_object_level_default(make_launch_modal_app, large_terminal) -> None:
+    flow_input = object_flow_input(
+        required=False,
+        default={"url": "https://default.test", "enabled": True},
+        fields=[
+            {"name": "url", "label": "URL", "type": "string", "default": "https://child.test"},
+            {"name": "retries", "label": "Retries", "type": "number", "required": False, "default": 3},
+            {"name": "enabled", "label": "Enabled", "type": "boolean"},
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == {
+            "endpoint": {
+                "url": "https://default.test",
+                "retries": "3",
+                "enabled": "true",
+            },
+            "prd": "Required product behavior.\n",
+        }
+
+
+async def test_object_null_parent_default_uses_child_default(make_launch_modal_app, large_terminal) -> None:
+    flow_input = object_flow_input(
+        required=False,
+        default={"enabled": None},
+        fields=[
+            {"name": "enabled", "label": "Enabled", "type": "boolean", "required": False, "default": True},
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+
+        assert app.screen.query_one("#input-endpoint-enabled", Switch).value is True
+
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == {
+            "endpoint": {"enabled": "true"},
+            "prd": "Required product behavior.\n",
+        }
+
+
+async def test_object_path_default_stays_raw_until_launch(make_launch_modal_app, large_terminal, tmp_path) -> None:
+    source = tmp_path / "endpoint.txt"
+    source.write_text("configuration-time content", encoding="utf-8")
+    flow_input = object_flow_input(
+        required=False,
+        default={"source": source},
+        fields=[
+            {
+                "name": "source",
+                "label": "Source",
+                "type": "path",
+                "as_content": True,
+            }
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+
+        assert app.screen.query_one("#input-endpoint-source", Input).value == str(source)
+
+        source.write_text("launch-time content", encoding="utf-8")
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == {
+            "endpoint": {"source": "launch-time content"},
+            "prd": "Required product behavior.\n",
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -244,6 +343,109 @@ async def test_valid_number_submission_dismisses(make_launch_modal_app, large_te
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
         assert app.dismiss_result == {"n": "99", "prd": "Required product behavior.\n"}
+
+
+async def test_object_submission_dismisses_with_canonical_nested_payload(make_launch_modal_app, large_terminal) -> None:
+    app = make_launch_modal_app([object_flow_input()])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        app.screen.query_one("#input-endpoint-url", Input).value = "https://example.test"
+        app.screen.query_one("#input-endpoint-retries", Input).value = "2"
+        app.screen.query_one("#input-endpoint-enabled", Switch).value = False
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == {
+            "endpoint": {
+                "url": "https://example.test",
+                "retries": "2",
+                "enabled": "false",
+            },
+            "prd": "Required product behavior.\n",
+        }
+
+
+async def test_missing_required_object_field_stays_inline(make_launch_modal_app, large_terminal) -> None:
+    app = make_launch_modal_app([object_flow_input()])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == "NOT_SET"
+        assert "URL: required field cannot be empty" in str(app.screen.query_one("#launch-error", Static).render())
+
+
+async def test_optional_object_with_every_child_empty_is_omitted(make_launch_modal_app, large_terminal) -> None:
+    """An empty object means no parent value only when the parent itself is optional."""
+    flow_input = object_flow_input(
+        required=False,
+        fields=[
+            {"name": "url", "label": "URL", "type": "string"},
+            {"name": "retries", "label": "Retries", "type": "number", "required": False},
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == {"prd": "Required product behavior.\n"}
+
+
+async def test_optional_object_with_any_child_value_validates_required_children(
+    make_launch_modal_app, large_terminal
+) -> None:
+    """Once an optional object has content, it is present and required child rules apply."""
+    flow_input = object_flow_input(
+        required=False,
+        fields=[
+            {"name": "url", "label": "URL", "type": "string"},
+            {"name": "retries", "label": "Retries", "type": "number", "required": False},
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        app.screen.query_one("#input-endpoint-retries", Input).value = "2"
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == "NOT_SET"
+        assert "URL: required field cannot be empty" in str(app.screen.query_one("#launch-error", Static).render())
+
+
+async def test_optional_object_with_boolean_field_is_present(make_launch_modal_app, large_terminal) -> None:
+    """Boolean switches always supply true or false, matching top-level boolean inputs."""
+    flow_input = object_flow_input(
+        required=False,
+        fields=[
+            {
+                "name": "enabled",
+                "label": "Enabled",
+                "type": "boolean",
+                "required": False,
+            }
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        assert app.screen.query_one("#input-endpoint-enabled", Switch).value is False
+
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == {
+            "endpoint": {"enabled": "false"},
+            "prd": "Required product behavior.\n",
+        }
 
 
 @pytest.mark.parametrize(

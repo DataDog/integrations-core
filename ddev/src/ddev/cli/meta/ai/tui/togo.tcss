@@ -630,6 +630,17 @@ ModalScreen {
     height: auto;
 }
 
+.object-field {
+    height: auto;
+    margin-bottom: 1;
+}
+
+.object-field-label {
+    height: auto;
+    color: $text-muted;
+    text-style: bold;
+}
+
 .badge {
     border: round $border;
     color: $foreground;
