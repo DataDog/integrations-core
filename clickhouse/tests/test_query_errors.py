@@ -152,9 +152,10 @@ def test_create_batched_payload_error_fields(check_with_dbm):
 
     with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        payload = query_errors._create_batched_payload(rows)
+        payloads = query_errors._create_batched_payloads(rows)
 
-    assert payload is not None
+    assert len(payloads) == 1
+    payload = payloads[0]
     assert len(payload['clickhouse_query_errors']) == 1
 
     query_details = payload['clickhouse_query_errors'][0]['query_details']
@@ -185,8 +186,10 @@ def test_create_batched_payload_structure(check_with_dbm):
 
     with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        payload = query_errors._create_batched_payload(rows)
+        payloads = query_errors._create_batched_payloads(rows)
 
+    assert len(payloads) == 1
+    payload = payloads[0]
     assert payload['ddsource'] == 'clickhouse'
     assert payload['dbm_type'] == 'query_error'
     assert 'clickhouse_query_errors' in payload
@@ -198,6 +201,46 @@ def test_create_batched_payload_structure(check_with_dbm):
     assert payload['collection_interval'] == query_errors._collection_interval
     assert 'clickhouse_version' in payload
     assert 'service' in payload
+
+
+def test_create_batched_payloads_splits_per_node(check_with_dbm):
+    """Errors from different nodes are split into one payload per node, each node-tagged."""
+    query_errors = check_with_dbm.query_errors
+    query_errors._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM t1',
+            'query_signature': 'sig-node-1',
+            'exception': 'boom',
+            'exception_code': 60,
+            'hostname': 'node-1',
+        },
+        {
+            'statement': 'SELECT * FROM t2',
+            'query_signature': 'sig-node-2',
+            'exception': 'boom',
+            'exception_code': 60,
+            'hostname': 'node-2',
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_errors.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payloads = query_errors._create_batched_payloads(rows)
+
+    assert len(payloads) == 2
+    by_node = {}
+    for payload in payloads:
+        node_tags = [t for t in payload['ddtags'] if t.startswith('clickhouse_node:')]
+        assert len(node_tags) == 1, payload['ddtags']
+        node = node_tags[0].split(':', 1)[1]
+        by_node[node] = payload
+        assert payload['database_instance'] == check_with_dbm.database_identifier
+        for error in payload['clickhouse_query_errors']:
+            assert error['query_details']['hostname'] == node
+
+    assert set(by_node) == {'node-1', 'node-2'}
 
 
 def test_query_errors_sql_query_format():
@@ -278,7 +321,7 @@ def test_collect_and_submit_no_rows(check_with_dbm):
     with (
         mock.patch.object(query_errors, '_collect_query_errors', return_value=[]) as mock_collect,
         mock.patch.object(query_errors, '_advance_checkpoint') as mock_advance,
-        mock.patch.object(query_errors, '_create_batched_payload') as mock_payload,
+        mock.patch.object(query_errors, '_create_batched_payloads') as mock_payload,
     ):
         query_errors._collect_and_submit()
 
@@ -294,7 +337,7 @@ def test_collect_and_submit_all_rate_limited(check_with_dbm):
 
     with (
         mock.patch.object(query_errors, '_collect_query_errors', return_value=rows),
-        mock.patch.object(query_errors, '_create_batched_payload', return_value=None) as mock_payload,
+        mock.patch.object(query_errors, '_create_batched_payloads', return_value=[]) as mock_payload,
         mock.patch.object(query_errors, '_advance_checkpoint') as mock_advance,
         mock.patch.object(query_errors._check, 'database_monitoring_query_activity') as mock_submit,
     ):

@@ -20,6 +20,7 @@ from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_jso
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
+from datadog_checks.clickhouse.utils import node_tag
 
 # Query to fetch failed queries from system.query_log.
 # Collects ExceptionBeforeStart (type=3) and ExceptionWhileProcessing (type=4) events.
@@ -110,21 +111,22 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                 self._log.debug("No new query errors")
                 return
 
-            payload = self._create_batched_payload(rows)
+            payloads = self._create_batched_payloads(rows)
 
-            if not payload or not payload.get('clickhouse_query_errors'):
+            if not payloads:
                 self._log.debug("No query errors after rate limiting")
                 return
 
             try:
-                payload_data = json.dumps(payload, default=default_json_event_encoding)
-                num_errors = len(payload.get('clickhouse_query_errors', []))
-                self._log.debug(
-                    "Submitting query errors payload: %d bytes, %d errors",
-                    len(payload_data),
-                    num_errors,
-                )
-                self._check.database_monitoring_query_activity(payload_data)
+                for payload in payloads:
+                    payload_data = json.dumps(payload, default=default_json_event_encoding)
+                    num_errors = len(payload.get('clickhouse_query_errors', []))
+                    self._log.debug(
+                        "Submitting query errors payload: %d bytes, %d errors",
+                        len(payload_data),
+                        num_errors,
+                    )
+                    self._check.database_monitoring_query_activity(payload_data)
                 self._log.debug(
                     "Successfully submitted. Checkpoint: %d microseconds", self._current_checkpoint_microseconds
                 )
@@ -261,9 +263,13 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
 
             raise
 
-    def _create_batched_payload(self, rows: list) -> dict | None:
-        """Create a batched payload with rate limiting applied."""
-        query_errors = []
+    def _create_batched_payloads(self, rows: list) -> list[dict]:
+        """Create one batched payload per node, with rate limiting applied.
+
+        Errors are grouped by node so each payload carries its own
+        ``clickhouse_node`` tag. Returns an empty list if nothing to submit.
+        """
+        errors_by_node = {}
 
         for row in rows:
             query_signature = row.get('query_signature')
@@ -308,23 +314,26 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                 },
             }
 
-            query_errors.append({'query_details': query_details})
+            server_node = row.get('hostname', '')
+            errors_by_node.setdefault(server_node, []).append({'query_details': query_details})
 
-        if not query_errors:
-            return None
+        payloads = []
+        for server_node, query_errors in errors_by_node.items():
+            ddtags = self._tags_no_db + [node_tag(server_node)] if server_node else self._tags_no_db
+            payloads.append(
+                {
+                    'host': self._check.reported_hostname,
+                    'database_instance': self._check.database_identifier,
+                    'ddagentversion': datadog_agent.get_version(),
+                    'ddsource': 'clickhouse',
+                    'dbm_type': 'query_error',
+                    'collection_interval': self._collection_interval,
+                    'ddtags': ddtags,
+                    'timestamp': time.time() * 1000,
+                    'clickhouse_version': self._check.dbms_version,
+                    'service': self._check._config.service,
+                    'clickhouse_query_errors': query_errors,
+                }
+            )
 
-        payload = {
-            'host': self._check.reported_hostname,
-            'database_instance': self._check.database_identifier,
-            'ddagentversion': datadog_agent.get_version(),
-            'ddsource': 'clickhouse',
-            'dbm_type': 'query_error',
-            'collection_interval': self._collection_interval,
-            'ddtags': self._tags_no_db,
-            'timestamp': time.time() * 1000,
-            'clickhouse_version': self._check.dbms_version,
-            'service': self._check._config.service,
-            'clickhouse_query_errors': query_errors,
-        }
-
-        return payload
+        return payloads

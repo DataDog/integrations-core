@@ -298,8 +298,10 @@ def test_samples_event_structure(instance):
 
     with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        event = samples._create_samples_event(rows, active_connections)
+        events = samples._create_samples_events(rows, active_connections)
 
+    assert len(events) == 1
+    event = events[0]
     assert event['ddsource'] == 'clickhouse'
     assert event['dbm_type'] == 'activity'
     assert 'host' in event

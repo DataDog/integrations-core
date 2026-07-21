@@ -19,6 +19,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.clickhouse.explain_plans import ClickhouseExplainPlans
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
+from datadog_checks.clickhouse.utils import node_tag
 
 # Query to fetch individual completed queries from system.query_log.
 # Unlike statements.py which aggregates, this returns individual query executions.
@@ -118,22 +119,23 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             except Exception:
                 self._log.exception("Failed to collect explain plans")
 
-            # Step 3: Apply rate limiting and create payload
-            payload = self._create_batched_payload(rows)
+            # Step 3: Apply rate limiting and create one payload per node
+            payloads = self._create_batched_payloads(rows)
 
-            if not payload or not payload.get('clickhouse_query_completions'):
+            if not payloads:
                 self._log.debug("No query completions after rate limiting")
                 return
 
-            # Step 4: Submit payload
-            payload_data = json.dumps(payload, default=default_json_event_encoding)
-            num_completions = len(payload.get('clickhouse_query_completions', []))
-            self._log.debug(
-                "Submitting query completions payload: %d bytes, %d completions",
-                len(payload_data),
-                num_completions,
-            )
-            self._check.database_monitoring_query_activity(payload_data)
+            # Step 4: Submit one payload per node
+            for payload in payloads:
+                payload_data = json.dumps(payload, default=default_json_event_encoding)
+                num_completions = len(payload.get('clickhouse_query_completions', []))
+                self._log.debug(
+                    "Submitting query completions payload: %d bytes, %d completions",
+                    len(payload_data),
+                    num_completions,
+                )
+                self._check.database_monitoring_query_activity(payload_data)
 
             if self._current_checkpoint_microseconds is not None:
                 self._log.debug(
@@ -269,15 +271,19 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Checkpoint will still advance to avoid duplicates on retry.
             raise
 
-    def _create_batched_payload(self, rows):
+    def _create_batched_payloads(self, rows):
         """
-        Create a batched payload following SQL Server query_completion pattern.
-        Apply rate limiting and filter out rate-limited queries.
+        Create one batched payload per ClickHouse node, following the SQL Server
+        query_completion pattern.
+
+        Applies rate limiting, filters out rate-limited queries, and groups the
+        surviving completions by node so each payload carries its own
+        ``clickhouse_node`` tag.
 
         Returns:
-            dict: Batched payload with array of query completion details
+            list[dict]: one payload per node (empty list if nothing to submit)
         """
-        query_completions = []
+        completions_by_node = {}
 
         for row in rows:
             query_signature = row.get('query_signature')
@@ -320,24 +326,27 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 },
             }
 
-            query_completions.append({'query_details': query_details})
+            server_node = row.get('hostname', '')
+            completions_by_node.setdefault(server_node, []).append({'query_details': query_details})
 
-        if not query_completions:
-            return None
+        payloads = []
+        for server_node, query_completions in completions_by_node.items():
+            ddtags = self._tags_no_db + [node_tag(server_node)] if server_node else self._tags_no_db
+            # Create payload following SQL Server pattern
+            payloads.append(
+                {
+                    'host': self._check.reported_hostname,
+                    'database_instance': self._check.database_identifier,
+                    'ddagentversion': datadog_agent.get_version(),
+                    'ddsource': 'clickhouse',
+                    'dbm_type': 'query_completion',
+                    'collection_interval': self._collection_interval,
+                    'ddtags': ddtags,
+                    'timestamp': time.time() * 1000,
+                    'clickhouse_version': self._check.dbms_version,
+                    'service': getattr(self._check, 'service', None),
+                    'clickhouse_query_completions': query_completions,
+                }
+            )
 
-        # Create payload following SQL Server pattern
-        payload = {
-            'host': self._check.reported_hostname,
-            'database_instance': self._check.database_identifier,
-            'ddagentversion': datadog_agent.get_version(),
-            'ddsource': 'clickhouse',
-            'dbm_type': 'query_completion',
-            'collection_interval': self._collection_interval,
-            'ddtags': self._tags_no_db,
-            'timestamp': time.time() * 1000,
-            'clickhouse_version': self._check.dbms_version,
-            'service': getattr(self._check, 'service', None),
-            'clickhouse_query_completions': query_completions,
-        }
-
-        return payload
+        return payloads

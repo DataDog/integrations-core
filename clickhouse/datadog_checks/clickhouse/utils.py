@@ -31,6 +31,11 @@ def compact_query(query):
 CLUSTER_NODE_TAG = 'clickhouse_node'
 
 
+def node_tag(node: str) -> str:
+    """Build the per-node tag (``clickhouse_node:<node>``) attached to node-scoped data."""
+    return f"{CLUSTER_NODE_TAG}:{node}"
+
+
 def cluster_aware_query(base: dict) -> dict:
     """Build a cluster-aware variant that reads all replicas and tags each row per node.
 

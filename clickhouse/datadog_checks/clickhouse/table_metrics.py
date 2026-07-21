@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.clickhouse.utils import node_tag
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
@@ -140,7 +141,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         # per-view series carries exactly one `db:` tag — the view's own database.
         base_tags = [t for t in self._check.tags if not t.startswith('db:')]
         for database, view_name, host, status, _exception, last_time, next_time, written_rows, written_bytes in rows:
-            view_tags = base_tags + [f'db:{database}', f'view:{view_name}', f'host:{host}']
+            view_tags = base_tags + [f'db:{database}', f'view:{view_name}', f'host:{host}', node_tag(host)]
             refresh_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
             self._check.gauge('view.refresh.status', refresh_status, tags=view_tags)
             self._check.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)

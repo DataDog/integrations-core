@@ -34,3 +34,40 @@ class TestErrorSanitizer:
 )
 def test_parse_version(version: str, expected: list[int]):
     expected == utils.parse_version(version)
+
+
+@pytest.mark.unit
+def test_node_tag():
+    assert utils.node_tag('node-1') == 'clickhouse_node:node-1'
+    assert utils.CLUSTER_NODE_TAG == 'clickhouse_node'
+
+
+@pytest.mark.unit
+def test_cluster_aware_query_adds_node_tag():
+    base = {
+        'name': 'system.metrics',
+        'query': 'SELECT value, metric FROM system.metrics',
+        'columns': [{'name': 'value', 'type': 'gauge'}, {'name': 'metric', 'type': 'tag'}],
+    }
+
+    result = utils.cluster_aware_query(base)
+
+    # Reads all replicas and selects hostName() as the per-node tag
+    assert "clusterAllReplicas('default', system.metrics)" in result['query']
+    assert 'hostName() AS clickhouse_node' in result['query']
+    # The node column is appended as a tag column
+    assert result['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+
+
+@pytest.mark.unit
+def test_cluster_aware_query_preserves_trailing_clause():
+    base = {
+        'name': 'system.errors',
+        'query': 'SELECT value, name FROM system.errors WHERE value > 0',
+        'columns': [{'name': 'value', 'type': 'gauge'}, {'name': 'name', 'type': 'tag'}],
+    }
+
+    result = utils.cluster_aware_query(base)
+
+    assert "clusterAllReplicas('default', system.errors)" in result['query']
+    assert 'WHERE value > 0' in result['query']

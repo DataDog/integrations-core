@@ -21,6 +21,7 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
+from datadog_checks.clickhouse.utils import node_tag
 
 # Query to fetch aggregated metrics from system.query_log using checkpoint-based collection.
 #
@@ -82,7 +83,7 @@ def _row_key(row):
     :param row: a normalized row from system.query_log
     :return: a tuple uniquely identifying this row
     """
-    return row['query_signature'], row.get('user', ''), row.get('databases', '')
+    return row['query_signature'], row.get('user', ''), row.get('databases', ''), row.get('server_node', '')
 
 
 class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
@@ -138,30 +139,38 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             for event in self._rows_to_fqt_events(rows):
                 self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
 
-            # Prepare metrics payload wrapper
-            payload_wrapper = {
+            # Base metrics payload wrapper; the per-node clickhouse_node tag is added per group below.
+            base_wrapper = {
                 'host': self._check.reported_hostname,
                 'database_instance': self._check.database_identifier,
                 'timestamp': time.time() * 1000,
                 'min_collection_interval': self._collection_interval,
-                'tags': self._tags_no_db,
                 'ddagentversion': datadog_agent.get_version(),
                 'clickhouse_version': self._check.dbms_version,
             }
 
-            # Get query metrics payloads (may be split into multiple if too large)
-            payloads = self._get_query_metrics_payloads(payload_wrapper, rows)
-
-            for payload in payloads:
-                payload_data = json.loads(payload)
-                num_rows = len(payload_data.get('clickhouse_rows', []))
-                self._log.info(
-                    "Submitting query metrics payload: %d bytes, %d rows, database_instance=%s",
-                    len(payload),
-                    num_rows,
-                    payload_data.get('database_instance', 'MISSING'),
+            # Emit one payload set per node so each carries its own clickhouse_node tag.
+            # In single-node deployments this is a single group with no node tag.
+            for server_node, node_rows in self._group_rows_by_node(rows).items():
+                payload_wrapper = dict(base_wrapper)
+                payload_wrapper['tags'] = (
+                    self._tags_no_db + [node_tag(server_node)] if server_node else self._tags_no_db
                 )
-                self._check.database_monitoring_query_metrics(payload)
+
+                # Get query metrics payloads (may be split into multiple if too large)
+                payloads = self._get_query_metrics_payloads(payload_wrapper, node_rows)
+
+                for payload in payloads:
+                    payload_data = json.loads(payload)
+                    num_rows = len(payload_data.get('clickhouse_rows', []))
+                    self._log.info(
+                        "Submitting query metrics payload: %d bytes, %d rows, database_instance=%s, node=%s",
+                        len(payload),
+                        num_rows,
+                        payload_data.get('database_instance', 'MISSING'),
+                        server_node or 'N/A',
+                    )
+                    self._check.database_monitoring_query_metrics(payload)
 
             if self._current_checkpoint_microseconds is not None:
                 self._log.info("Collection complete. Checkpoint saved: %d", self._current_checkpoint_microseconds)
@@ -275,6 +284,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
 
                 result_row = {
                     'normalized_query_hash': str(normalized_query_hash),
+                    'server_node': str(server_node) if server_node else '',
                     'query': str(query_text) if query_text else '',
                     'user': str(query_user) if query_user else '',
                     'query_type': str(query_type) if query_type else '',
@@ -299,9 +309,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
 
             self._set_checkpoint_from_event_time(global_max_event_time)
 
-            if result_rows:
-                result_rows = self._merge_rows_across_nodes(result_rows)
-
+            # Rows are kept per (query, node); node grouping/tagging happens at emit time.
             return result_rows
 
         except Exception as e:
@@ -315,57 +323,17 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             raise
 
     @staticmethod
-    def _merge_rows_across_nodes(node_rows):
+    def _group_rows_by_node(rows):
         """
-        Merge per-(query, node) rows into per-query rows.
+        Group query-metric rows by their ClickHouse node (``server_node``).
 
-        Summable metrics (count, total_time, …) are summed.
-        peak_memory_usage takes the max.
-        Non-metric fields are taken from the node with the highest execution count.
+        Each group is emitted as its own payload tagged with ``clickhouse_node``.
+        Rows without a node value are grouped under '' (single-node / direct connection).
         """
         groups = {}
-        for row in node_rows:
-            key = row['normalized_query_hash']
-            if key not in groups:
-                groups[key] = []
-            groups[key].append(row)
-
-        result = []
-        for rows in groups.values():
-            if len(rows) == 1:
-                result.append(rows[0])
-                continue
-
-            base = max(rows, key=lambda r: r.get('count', 0))
-            merged = dict(base)
-
-            sum_fields = [
-                'count',
-                'total_time',
-                'read_rows',
-                'read_bytes',
-                'written_rows',
-                'written_bytes',
-                'result_rows',
-                'result_bytes',
-                'memory_usage',
-                'cpu_us',
-                'cpu_wait_us',
-            ]
-            for field in sum_fields:
-                merged[field] = sum(r.get(field, 0) for r in rows)
-
-            merged['peak_memory_usage'] = max(r.get('peak_memory_usage', 0) for r in rows)
-
-            total_count = merged['count']
-            if total_count > 0:
-                merged['mean_time'] = merged['total_time'] / total_count
-            else:
-                merged['mean_time'] = 0.0
-
-            result.append(merged)
-
-        return result
+        for row in rows:
+            groups.setdefault(row.get('server_node', ''), []).append(row)
+        return groups
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _collect_metrics_rows(self):
@@ -448,6 +416,9 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
                 "db:{}".format(db),
                 "user:{}".format(user),
             ]
+            server_node = row.get('server_node')
+            if server_node:
+                row_tags.append(node_tag(server_node))
 
             yield {
                 "timestamp": time.time() * 1000,

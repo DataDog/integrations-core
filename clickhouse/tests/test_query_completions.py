@@ -151,10 +151,11 @@ def test_create_batched_payload_query_details(check_with_dbm):
 
     with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        payload = query_completions._create_batched_payload(rows)
+        payloads = query_completions._create_batched_payloads(rows)
 
-    # Verify payload has completions
-    assert payload is not None
+    # Single-node collection produces exactly one payload
+    assert len(payloads) == 1
+    payload = payloads[0]
     assert len(payload['clickhouse_query_completions']) == 1
 
     # Verify query_details structure
@@ -199,7 +200,10 @@ def test_create_batched_payload_structure(check_with_dbm):
 
     with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
         mock_agent.get_version.return_value = '7.64.0'
-        payload = query_completions._create_batched_payload(rows)
+        payloads = query_completions._create_batched_payloads(rows)
+
+    assert len(payloads) == 1
+    payload = payloads[0]
 
     # Verify payload structure
     assert payload['ddsource'] == 'clickhouse'
@@ -212,6 +216,48 @@ def test_create_batched_payload_structure(check_with_dbm):
     assert len(payload['clickhouse_query_completions']) == 2
     assert payload['clickhouse_query_completions'][0]['query_details']['statement'] == 'SELECT * FROM users'
     assert payload['clickhouse_query_completions'][1]['query_details']['statement'] == 'INSERT INTO events VALUES (?)'
+
+
+def test_create_batched_payloads_splits_per_node(check_with_dbm):
+    """Completions from different nodes are split into one payload per node, each node-tagged."""
+    query_completions = check_with_dbm.query_completions
+    query_completions._tags_no_db = ['test:clickhouse']
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM users',
+            'query_signature': 'sig-node-1',
+            'query_duration_ms': 100.0,
+            'databases': 'default',
+            'user': 'default',
+            'hostname': 'node-1',
+        },
+        {
+            'statement': 'SELECT * FROM events',
+            'query_signature': 'sig-node-2',
+            'query_duration_ms': 200.0,
+            'databases': 'default',
+            'user': 'default',
+            'hostname': 'node-2',
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payloads = query_completions._create_batched_payloads(rows)
+
+    assert len(payloads) == 2
+    by_node = {}
+    for payload in payloads:
+        node_tags = [t for t in payload['ddtags'] if t.startswith('clickhouse_node:')]
+        assert len(node_tags) == 1, payload['ddtags']
+        node = node_tags[0].split(':', 1)[1]
+        by_node[node] = payload
+        assert payload['database_instance'] == check_with_dbm.database_identifier
+        for completion in payload['clickhouse_query_completions']:
+            assert completion['query_details']['hostname'] == node
+
+    assert set(by_node) == {'node-1', 'node-2'}
 
 
 def test_rate_limiting(check_with_dbm):
