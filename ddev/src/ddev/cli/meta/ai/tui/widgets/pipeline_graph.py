@@ -14,6 +14,7 @@ from textual.binding import Binding
 from textual.css.query import NoMatches
 from textual.geometry import Offset
 from textual.message import Message
+from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Static
 
@@ -330,11 +331,20 @@ class PhaseNode(Static):
 
     can_focus = True
     BINDINGS = [Binding("enter", "select", "Select phase")]
+    status: reactive[RunStatus] = reactive(RunStatus.PENDING, init=False)
 
-    def __init__(self, phase_id: str, status: RunStatus, label: str) -> None:
-        super().__init__(label, classes=f"phase-node status-{status.value}")
+    def __init__(self, phase_id: str, status: RunStatus, label_width: int) -> None:
+        super().__init__(classes=f"phase-node status-{status.value}")
         self.phase_id = phase_id
-        self.status = status
+        self.label_width = label_width
+        self.set_reactive(PhaseNode.status, status)
+
+    def render(self) -> str:
+        label, _ = _phase_label(self.phase_id, {self.phase_id: self.status})
+        return label.ljust(self.label_width)
+
+    def watch_status(self, old_status: RunStatus, new_status: RunStatus) -> None:
+        self.toggle_class(f"status-{old_status.value}", f"status-{new_status.value}")
 
     def action_select(self) -> None:
         self.post_message(PhaseSelected(self.phase_id))
@@ -368,7 +378,7 @@ class PipelineGraph(Widget):
         yield connectors
 
         for node in self._layout.nodes:
-            phase_node = PhaseNode(node.phase_id, node.status, node.label)
+            phase_node = PhaseNode(node.phase_id, node.status, len(node.label))
             phase_node.styles.position = "absolute"
             phase_node.styles.layer = "nodes"
             yield phase_node
@@ -408,4 +418,5 @@ class PipelineGraph(Widget):
 
     def update_statuses(self, statuses: dict[str, RunStatus]) -> None:
         self._statuses = dict(statuses)
-        self.refresh(recompose=True, layout=True)
+        for phase_node in self.query(PhaseNode):
+            phase_node.status = self._statuses.get(phase_node.phase_id, RunStatus.PENDING)

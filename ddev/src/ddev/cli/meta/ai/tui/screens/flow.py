@@ -24,6 +24,7 @@ from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineG
 class FlowScreen(TogoScreen):
     """Show resolved flow details and controls for launching or resuming execution."""
 
+    AUTO_FOCUS = "#launch-btn"
     BINDINGS = [
         Binding("escape", "app.pop_screen", "Back"),
         Binding("l", "launch", "Launch"),
