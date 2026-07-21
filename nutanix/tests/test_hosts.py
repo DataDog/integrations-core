@@ -102,3 +102,47 @@ def test_external_tags_for_host(dd_run_check, aggregator, mock_instance, mock_ht
         HOST_NAME,
         {'nutanix': HOST_TAGS},
     )
+
+
+def test_hostname_transform_upper_applies_to_host(dd_run_check, aggregator, mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'upper'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.host.count", value=1, tags=HOST_TAGS, hostname=HOST_NAME.upper())
+
+
+def test_hostname_transform_lower_applies_to_host(dd_run_check, aggregator, mock_instance, mock_http_get, mocker):
+    cluster_id = "00064715-c043-5d8f-ee4b-176ec875554d"
+    uppercase_host = {
+        "extId": "d8787814-4fe8-4ba5-931f-e1ee31c294a6",
+        "hostName": "UPPER-HOST-10-0-0-103",
+        "hostType": "HYPER_CONVERGED",
+        "maintenanceState": "NORMAL",
+        "hypervisor": {
+            "type": "AHV",
+            "acropolisConnectionState": "CONNECTED",
+            "fullName": "AHV 10.3",
+        },
+        "nodeStatus": "NORMAL",
+    }
+    mocker.patch(
+        "datadog_checks.nutanix.infrastructure_monitor.InfrastructureMonitor._list_hosts_by_cluster",
+        side_effect=lambda cid: [uppercase_host] if cid == cluster_id else [],
+    )
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'lower'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.host.count", value=1, hostname="upper-host-10-0-0-103")
+
+
+def test_hostname_transform_default_leaves_host_unchanged(dd_run_check, aggregator, mock_instance, mock_http_get):
+    instance = mock_instance.copy()
+    instance['hostname_transform'] = 'default'
+    check = NutanixCheck('nutanix', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric("nutanix.host.count", value=1, tags=HOST_TAGS, hostname=HOST_NAME)

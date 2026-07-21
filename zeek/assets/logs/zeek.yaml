@@ -395,6 +395,7 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -405,6 +406,7 @@ facets:
     name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Category
@@ -415,6 +417,7 @@ facets:
     name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Class
@@ -430,6 +433,7 @@ facets:
     name: Severity ID
     path: ocsf.severity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Status
@@ -440,6 +444,7 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Source IP Address
@@ -1710,6 +1715,33 @@ pipeline:
             supportRules: ""
             matchRules: "to_bool %{boolean(\"true\",\"false\"):ocsf.is_alert}"
         - type: attribute-remapper
+          name: Map `proto` to `ocsf.evidence.connection_info.protocol_name`
+          enabled: true
+          sources:
+            - proto
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.protocol_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Set evidence connection_info.direction_id to 0 (Unknown)
+          enabled: true
+          template: "0"
+          target: ocsf.evidence.connection_info.direction_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
+          enabled: true
+          sources:
+            - ocsf.evidence.connection_info.direction_id
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.direction_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
+        - type: attribute-remapper
           name: Map `id.orig_h` to `ocsf.evidence.src_endpoint.ip`
           enabled: true
           sources:
@@ -1831,23 +1863,23 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: "@severity.id:1"
+                    query: "@severity.level:1 OR @severity.id:1"
                   name: Informational
                   id: 1
                 - filter:
-                    query: "@severity.id:2"
+                    query: "@severity.level:2 OR @severity.id:2"
                   name: Low
                   id: 2
                 - filter:
-                    query: "@severity.id:3"
+                    query: "@severity.level:3 OR @severity.id:3"
                   name: Medium
                   id: 3
                 - filter:
-                    query: "@severity.id:4"
+                    query: "@severity.level:4 OR @severity.id:4"
                   name: High
                   id: 4
                 - filter:
-                    query: "@severity.id:5"
+                    query: "@severity.level:5 OR @severity.id:5"
                   name: Critical
                   id: 5
                 - filter:
@@ -1925,6 +1957,33 @@ pipeline:
             supportRules: ""
             matchRules: "to_bool %{boolean(\"true\",\"false\"):ocsf.is_alert}"
         - type: attribute-remapper
+          name: Map `service` to `ocsf.evidence.connection_info.protocol_name`
+          enabled: true
+          sources:
+            - service
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.protocol_name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: string-builder-processor
+          name: Set evidence connection_info.direction_id to 0 (Unknown)
+          enabled: true
+          template: "0"
+          target: ocsf.evidence.connection_info.direction_id
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `ocsf.evidence.connection_info.direction_id` to `ocsf.evidence.connection_info.direction_id`
+          enabled: true
+          sources:
+            - ocsf.evidence.connection_info.direction_id
+          sourceType: attribute
+          target: ocsf.evidence.connection_info.direction_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
+        - type: attribute-remapper
           name: Map `id.orig_h` to `ocsf.evidence.src_endpoint.ip`
           enabled: true
           sources:
@@ -1972,6 +2031,37 @@ pipeline:
             target: ocsf.evidences
             preserveSource: false
             type: append
+        - type: array-processor
+          name: Append alert.category to ocsf.finding_info.types
+          enabled: true
+          operation:
+            source: alert.category
+            target: ocsf.finding_info.types
+            preserveSource: true
+            type: append
+        - type: string-builder-processor
+          name: Add ocsf.metadata.event_code from alert.metadata
+          enabled: true
+          template: "%{alert.metadata}"
+          target: ocsf.metadata.event_code
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse ocsf.metadata.event_code to MITRE tactic and technique fields
+          enabled: true
+          source: ocsf.metadata.event_code
+          samples:
+            - "[attack_target:Client_Endpoint, confidence:High, created_at:2026_04_01, deployment:Internal, deployment:Perimeter, mitre_tactic_id:TA0011, mitre_tactic_name:Command_And_Control, mitre_technique_id:T1071, mitre_technique_name:Application_Layer_Protocol, performance_impact:Low, signature_severity:Major, updated_at:2026_04_09]"
+          grok:
+            supportRules: ""
+            matchRules: 'rule .*?mitre_tactic_id:%{regex("[^,\\]]+"):ocsf.finding_info.attack.tactic.uid},\s*mitre_tactic_name:%{regex("[^,\\]]+"):ocsf.finding_info.attack.tactic.name},\s*mitre_technique_id:%{regex("[^,\\]]+"):ocsf.finding_info.attack.technique.uid},\s*mitre_technique_name:%{regex("[^,\\]]+"):ocsf.finding_info.attack.technique.name}%{data}'
+        - type: array-processor
+          name: Move ocsf.finding_info.attack into ocsf.finding_info.attacks array
+          enabled: true
+          operation:
+            source: ocsf.finding_info.attack
+            target: ocsf.finding_info.attacks
+            preserveSource: false
+            type: append
         - type: schema-processor
           name: Apply OCSF schema for 2004
           enabled: true
@@ -2004,6 +2094,42 @@ pipeline:
               targets:
                 name: ocsf.confidence
                 id: ocsf.confidence_id
+            - type: schema-category-mapper
+              name: ocsf.risk_level_id
+              categories:
+                - filter:
+                    query: "@alert.metadata:\"signature_severity:Informational\""
+                  name: Info
+                  id: 0
+                - filter:
+                    query: "@alert.metadata:\"signature_severity:Minor\""
+                  name: Low
+                  id: 1
+                - filter:
+                    query: "@alert.metadata:\"signature_severity:Major\""
+                  name: High
+                  id: 3
+                - filter:
+                    query: "@alert.metadata:\"signature_severity:Critical\""
+                  name: Critical
+                  id: 4
+              targets:
+                name: ocsf.risk_level
+                id: ocsf.risk_level_id
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.attacks` to `ocsf.finding_info.attacks`
+              sources:
+                - ocsf.finding_info.attacks
+              target: ocsf.finding_info.attacks
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.finding_info.types` to `ocsf.finding_info.types`
+              sources:
+                - ocsf.finding_info.types
+              target: ocsf.finding_info.types
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `ocsf.evidences` to `ocsf.evidences`
               sources:
@@ -2344,6 +2470,20 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
+              name: Map `id.orig_h_name.vals.0` to `ocsf.src_endpoint.hostname`
+              sources:
+                - id.orig_h_name.vals.0
+              target: ocsf.src_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `orig_l2_addr` to `ocsf.src_endpoint.mac`
+              sources:
+                - orig_l2_addr
+              target: ocsf.src_endpoint.mac
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
               name: Map `id.orig_p` to `ocsf.src_endpoint.port`
               sources:
                 - id.orig_p
@@ -2351,6 +2491,20 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               targetFormat: integer
+            - type: schema-remapper
+              name: Map `resp_l2_addr` to `ocsf.dst_endpoint.mac`
+              sources:
+                - resp_l2_addr
+              target: ocsf.dst_endpoint.mac
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `id.resp_h_name.vals.0` to `ocsf.dst_endpoint.hostname`
+              sources:
+                - id.resp_h_name.vals.0
+              target: ocsf.dst_endpoint.hostname
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `conn_state` to `ocsf.status_detail`
               sources:
@@ -3445,119 +3599,125 @@ pipeline:
             supportRules: ""
             matchRules: 'g %{ip:ocsf.dst_endpoint.ip}(,%{data})?'
         - type: string-builder-processor
-          name: Set MD5 algorithm name
+          name: Add MD5 algorithm name
           enabled: true
           template: MD5
-          target: tmp_md5.algorithm
+          target: ocsf.file.hash_md5.algorithm
           replaceMissing: false
         - type: string-builder-processor
-          name: Set MD5 algorithm id
+          name: Add MD5 algorithm id
           enabled: true
           template: "1"
-          target: tmp_md5.algorithm_id
+          target: ocsf.file.hash_md5.algorithm_id
           replaceMissing: false
-        - type: grok-parser
-          name: Coerce tmp_md5.algorithm_id to integer
-          enabled: true
-          source: tmp_md5.algorithm_id
-          samples:
-            - "1"
-          grok:
-            supportRules: ""
-            matchRules: "to_int %{integer:tmp_md5.algorithm_id}"
         - type: attribute-remapper
-          name: Map `md5` to `tmp_md5.value`
+          name: Map `md5` to `ocsf.file.hash_md5.value`
           enabled: true
           sources:
             - md5
           sourceType: attribute
-          target: tmp_md5.value
+          target: ocsf.file.hash_md5.value
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: array-processor
-          name: Append tmp_md5 to ocsf.file.hashes
-          enabled: true
-          operation:
-            source: tmp_md5
-            target: ocsf.file.hashes
-            preserveSource: false
-            type: append
         - type: string-builder-processor
-          name: Set SHA1 algorithm name
+          name: Add SHA1 algorithm name
           enabled: true
           template: SHA-1
-          target: tmp_sha1.algorithm
+          target: ocsf.file.hash_sha1.algorithm
           replaceMissing: false
         - type: string-builder-processor
-          name: Set SHA1 algorithm id
+          name: Add SHA1 algorithm id
           enabled: true
           template: "2"
-          target: tmp_sha1.algorithm_id
+          target: ocsf.file.hash_sha1.algorithm_id
           replaceMissing: false
-        - type: grok-parser
-          name: Coerce tmp_sha1.algorithm_id to integer
-          enabled: true
-          source: tmp_sha1.algorithm_id
-          samples:
-            - "2"
-          grok:
-            supportRules: ""
-            matchRules: "to_int %{integer:tmp_sha1.algorithm_id}"
         - type: attribute-remapper
-          name: Map `sha1` to `tmp_sha1.value`
+          name: Map `sha1` to `ocsf.file.hash_sha1.value`
           enabled: true
           sources:
             - sha1
           sourceType: attribute
-          target: tmp_sha1.value
+          target: ocsf.file.hash_sha1.value
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
-        - type: array-processor
-          name: Append tmp_sha1 to ocsf.file.hashes
-          enabled: true
-          operation:
-            source: tmp_sha1
-            target: ocsf.file.hashes
-            preserveSource: false
-            type: append
         - type: string-builder-processor
-          name: Set SHA256 algorithm name
+          name: Add SHA256 algorithm name
           enabled: true
           template: SHA-256
-          target: tmp_sha256.algorithm
+          target: ocsf.file.hash_sha256.algorithm
           replaceMissing: false
         - type: string-builder-processor
-          name: Set SHA256 algorithm id
+          name: Add SHA256 algorithm id
           enabled: true
           template: "3"
-          target: tmp_sha256.algorithm_id
+          target: ocsf.file.hash_sha256.algorithm_id
           replaceMissing: false
-        - type: grok-parser
-          name: Coerce tmp_sha256.algorithm_id to integer
-          enabled: true
-          source: tmp_sha256.algorithm_id
-          samples:
-            - "3"
-          grok:
-            supportRules: ""
-            matchRules: "to_int %{integer:tmp_sha256.algorithm_id}"
         - type: attribute-remapper
-          name: Map `sha256` to `tmp_sha256.value`
+          name: Map `sha256` to `ocsf.file.hash_sha256.value`
           enabled: true
           sources:
             - sha256
           sourceType: attribute
-          target: tmp_sha256.value
+          target: ocsf.file.hash_sha256.value
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.file.hash_md5.algorithm_id` to `ocsf.file.hash_md5.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.file.hash_md5.algorithm_id
+          sourceType: attribute
+          target: ocsf.file.hash_md5.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
+        - type: attribute-remapper
+          name: Map `ocsf.file.hash_sha1.algorithm_id` to `ocsf.file.hash_sha1.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.file.hash_sha1.algorithm_id
+          sourceType: attribute
+          target: ocsf.file.hash_sha1.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
+        - type: attribute-remapper
+          name: Map `ocsf.file.hash_sha256.algorithm_id` to `ocsf.file.hash_sha256.algorithm_id`
+          enabled: true
+          sources:
+            - ocsf.file.hash_sha256.algorithm_id
+          sourceType: attribute
+          target: ocsf.file.hash_sha256.algorithm_id
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+          targetFormat: integer
         - type: array-processor
-          name: Append tmp_sha256 to ocsf.file.hashes
+          name: Append ocsf.file.hash_md5 to ocsf.file.hashes
           enabled: true
           operation:
-            source: tmp_sha256
+            source: ocsf.file.hash_md5
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Append ocsf.file.hash_sha1 to ocsf.file.hashes
+          enabled: true
+          operation:
+            source: ocsf.file.hash_sha1
+            target: ocsf.file.hashes
+            preserveSource: false
+            type: append
+        - type: array-processor
+          name: Append ocsf.file.hash_sha256 to ocsf.file.hashes
+          enabled: true
+          operation:
+            source: ocsf.file.hash_sha256
             target: ocsf.file.hashes
             preserveSource: false
             type: append

@@ -246,7 +246,7 @@ spec:
     # (...)
 
   - name: datadog-agent-injected
-    image: gcr.io/datadoghq/agent:7.64.0
+    image: registry.datadoghq.com/agent:7.64.0
     env:
       - name: DD_API_KEY
         valueFrom:
@@ -328,7 +328,7 @@ spec:
     # (...)
 
   - name: datadog-agent-injected
-    image: gcr.io/datadoghq/agent:7.64.0
+    image: registry.datadoghq.com/agent:7.64.0
     env:
       - name: DD_API_KEY
         valueFrom:
@@ -418,7 +418,7 @@ spec:
     # (...)
 
   - name: datadog-agent-injected
-    image: gcr.io/datadoghq/agent:7.64.0
+    image: registry.datadoghq.com/agent:7.64.0
     env:
       - name: DD_API_KEY
         valueFrom:
@@ -498,7 +498,7 @@ spec:
     # (...)
 
   - name: datadog-agent-injected
-    image: gcr.io/datadoghq/agent:7.64.0
+    image: registry.datadoghq.com/agent:7.64.0
     env:
       - name: DD_API_KEY
         valueFrom:
@@ -556,7 +556,7 @@ spec:
 
         # Running the Agent as a sidecar
         - name: datadog-agent
-          image: gcr.io/datadoghq/agent:7
+          image: registry.datadoghq.com/agent:7
           env:
             - name: DD_API_KEY
               valueFrom:
@@ -634,7 +634,7 @@ In both cases, you need to change the Datadog Agent sidecar manifest in order to
     containers:
     #(...)
     - name: datadog-agent
-      image: gcr.io/datadoghq/agent:7
+      image: registry.datadoghq.com/agent:7
       env:
         #(...)
         - name: DD_CLUSTER_NAME
@@ -693,7 +693,7 @@ spec:
 
       # Running the Agent as a sidecar
       - name: datadog-agent
-        image: gcr.io/datadoghq/agent:7
+        image: registry.datadoghq.com/agent:7
         env:
           - name: DD_API_KEY
             valueFrom:
@@ -856,7 +856,7 @@ spec:
 
       # Running the Agent as a sidecar
       - name: datadog-agent
-        image: gcr.io/datadoghq/agent:7
+        image: registry.datadoghq.com/agent:7
         env:
           - name: DD_API_KEY
             valueFrom:
@@ -959,7 +959,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
 
           # Running the Agent as a sidecar
           - name: datadog-agent
-            image: gcr.io/datadoghq/agent:7
+            image: registry.datadoghq.com/agent:7
             # Mount the empty dir to the Agent
             volumeMounts:
               - name: agent-option
@@ -1038,7 +1038,7 @@ Monitor EKS Fargate logs using the Datadog Agent to collect logs from the kubele
           containers:
             # Running the Agent as a sidecar
             - name: datadog-agent
-              image: gcr.io/datadoghq/agent:7
+              image: registry.datadoghq.com/agent:7
               env:
                 # Collect all container logs
                 - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
@@ -1106,7 +1106,7 @@ spec:
 
       # Running the Agent as a sidecar
       - name: datadog-agent
-        image: gcr.io/datadoghq/agent:7
+        image: registry.datadoghq.com/agent:7
         # (...)
 ```
 

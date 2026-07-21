@@ -61,7 +61,8 @@ jobs:
             exit 0
           fi
           if ! git ls-remote --exit-code --heads https://github.com/DataDog/datadog-agent.git "$BRANCH" >/dev/null 2>&1; then
-            echo "::warning::Agent branch '$BRANCH' does not exist in DataDog/datadog-agent yet. Creating the PR anyway."
+            echo "::error::Agent branch '$BRANCH' does not exist in DataDog/datadog-agent. Refusing to open a PR pointing to a missing upstream branch. Re-dispatch this workflow once the upstream branch is cut."
+            exit 1
           fi
           echo "needs_update=true" >> "$GITHUB_ENV"
 

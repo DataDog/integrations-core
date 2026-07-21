@@ -2,13 +2,29 @@
 
 <!-- towncrier release notes start -->
 
-## 12.4.0 / 2026-05-14
+## 13.1.0 / 2026-07-08
+
+***Added***:
+
+* Route Cisco Catalyst 1200/1300/1300X and Cisco Business 350 (CBS350) devices to the ``cisco-sb`` SNMP profile, and add ``serial_number`` device metadata for them through ``entPhysicalSerialNum.67109120``. ([#23939](https://github.com/DataDog/integrations-core/pull/23939))
+
+***Fixed***:
+
+* Fix Cisco ASAv memory coverage in the `cisco-firepower-asa` SNMP profile by replacing hardcoded single-pool scalar OIDs with a full table walk of `cempMemPoolTable` tagged by pool name. ([#24107](https://github.com/DataDog/integrations-core/pull/24107))
+
+## 13.0.0 / 2026-06-09 / Agent 7.81.0
+
+***Changed***:
+
+* Breaking change: Fixed metric type for `snmp.cppmSystemMemoryFree`, `snmp.cppmSystemMemoryTotal`, `snmp.cppmSystemDiskSpaceFree`, and `snmp.cppmSystemDiskSpaceTotal` in the aruba-clearpass profile. These were previously submitted as rates due to their underlying `Counter64` SNMP type, producing incorrect values. They are now submitted as gauges. Customers with existing dashboards or monitors on these metrics will see a discontinuity between historical rate datapoints and new gauge datapoints; please rebuild any affected widgets or monitors. ([#23791](https://github.com/DataDog/integrations-core/pull/23791))
+
+## 12.4.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
 * Add Cisco Catalyst CW9800H1 (OID 1.3.6.1.4.1.9.1.3324) to cisco-catalyst-wlc SNMP profile. ([#23551](https://github.com/DataDog/integrations-core/pull/23551))
 
-## 12.3.2 / 2026-04-15
+## 12.3.2 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

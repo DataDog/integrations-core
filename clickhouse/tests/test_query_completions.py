@@ -136,6 +136,8 @@ def test_create_batched_payload_query_details(check_with_dbm):
             'result_rows': 100,
             'result_bytes': 10240,
             'memory_usage': 5242880,
+            'cpu_us': 1872000,
+            'cpu_wait_us': 35000,
             'event_time_microseconds': 1746205423150500,
             'query_start_time_microseconds': 1746205423000000,
             'initial_query_id': 'test-query-id-123',
@@ -165,6 +167,8 @@ def test_create_batched_payload_query_details(check_with_dbm):
     assert query_details['query_id'] == 'test-query-id-123'
     assert query_details['read_rows'] == 1000
     assert query_details['memory_usage'] == 5242880
+    assert query_details['cpu_us'] == 1872000
+    assert query_details['cpu_wait_us'] == 35000
 
     # Verify metadata is included
     assert query_details['metadata']['tables'] == ['users']
@@ -252,6 +256,10 @@ def test_completed_queries_query_format():
     assert 'memory_usage' in COMPLETED_QUERIES_QUERY
     assert 'event_time_microseconds' in COMPLETED_QUERIES_QUERY
     assert 'query_start_time_microseconds' in COMPLETED_QUERIES_QUERY
+
+    # CPU fields read from the ProfileEvents map
+    assert "ProfileEvents['OSCPUVirtualTimeMicroseconds']" in COMPLETED_QUERIES_QUERY
+    assert "ProfileEvents['OSCPUWaitMicroseconds']" in COMPLETED_QUERIES_QUERY
 
 
 def test_normalize_query_with_obfuscation(check_with_dbm):

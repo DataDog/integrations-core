@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Tests for Kafka cluster metadata collection."""
 
+import hashlib
 import json
 import time
 from unittest import mock
@@ -10,6 +11,7 @@ from unittest import mock
 import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
+from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
 
 pytestmark = [pytest.mark.unit]
@@ -119,11 +121,20 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
     state_mock.name = 'STABLE'
     describe_result.state = state_mock
 
+    # Group-level metadata used for dimensional tags
+    describe_result.partition_assignor = 'range'
+    describe_result.is_simple_consumer_group = False
+    type_mock = mock.MagicMock()
+    type_mock.name = 'CLASSIC'
+    describe_result.type = type_mock
+
     # Mock member
     member = mock.MagicMock()
     member.member_id = 'm1'
     member.client_id = 'c1'
     member.host = 'h1'
+    member.group_instance_id = None
+    member.target_assignment = None
 
     # Mock assignment with topic_partitions
     assignment = mock.MagicMock()
@@ -146,6 +157,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
 
     # Set kafka_client as an attribute (not a property mock)
     client.kafka_client = mock_admin_client
+    client._cluster_metadata = metadata
     client.get_topic_partitions.return_value = {'test-topic': [0, 1]}
 
     def mock_offsets_for_times(partitions, offset=-1):
@@ -154,7 +166,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
         else:
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
-    client.consumer_offsets_for_times = mock_offsets_for_times
+    client.get_partition_offsets = mock_offsets_for_times
 
     def mock_list_offsets(requests, **_kwargs):
         result = {}
@@ -175,7 +187,7 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
     return client
 
 
-def mock_schema_registry_methods(metadata_collector):
+def mock_schema_registry_methods(metadata_collector, global_compat='BACKWARD', subject_compat='BACKWARD'):
     """Mock Schema Registry methods on the metadata collector."""
     metadata_collector._get_schema_registry_subjects = mock.Mock(return_value=['test-topic-value'])
 
@@ -205,6 +217,57 @@ def mock_schema_registry_methods(metadata_collector):
             'schemaType': 'AVRO',
         }
     )
+
+    mock_compatibility_methods(metadata_collector, global_compat=global_compat, subject_compat=subject_compat)
+
+
+def mock_compatibility_methods(collector, global_compat='BACKWARD', subject_compat='BACKWARD'):
+    """Mock the global and per-subject compatibility fetches on the collector."""
+    collector._get_schema_registry_global_compatibility = mock.Mock(return_value=global_compat)
+    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=subject_compat)
+
+
+def schema_ds_events(check):
+    """Return the parsed data-streams-message payloads with config_type 'schema' emitted by the check."""
+    events = []
+    for call in check.event_platform_event.call_args_list:
+        args = call[0]
+        if len(args) > 1 and args[1] == 'data-streams-message':
+            payload = json.loads(args[0])
+            if payload.get('config_type') == 'schema':
+                events.append(payload)
+    return events
+
+
+def _make_schema_registry_check(check, instance_overrides=None):
+    """Return a check instance wired with a mock Kafka client and persistent cache mocks."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'schema_registry_url': 'http://localhost:8081',
+        'monitor_unlisted_consumer_groups': True,
+    }
+    if instance_overrides:
+        instance.update(instance_overrides)
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    return kafka_consumer_check
+
+
+def _wire_cache(kafka_consumer_check, seed=None):
+    """Wire persistent-cache and event mocks on the check, returning the backing cache_storage dict.
+
+    Each test only declares its seed cache entries; reads and writes go through this in-memory dict.
+    """
+    cache_storage = dict(seed or {})
+    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=cache_storage.get)
+    kafka_consumer_check.write_persistent_cache = mock.Mock(
+        side_effect=lambda key, value: cache_storage.__setitem__(key, value)
+    )
+    kafka_consumer_check.event_platform_event = mock.Mock()
+    return cache_storage
 
 
 @pytest.fixture
@@ -243,7 +306,7 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     kafka_consumer_check.metadata_collector.client = mock_kafka_client
 
     # Mock schema registry methods on metadata collector
-    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector, subject_compat='FULL')
 
     # Mock persistent cache for throughput calculation and schema registry events
     # Using per-partition format: partition 0 was at 75, partition 1 was at 175
@@ -454,6 +517,24 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
             'consumer_group:test-group',
             'consumer_group_state:STABLE',
             'coordinator:1',
+            'partition_assignor:range',
+            'consumer_group_type:CLASSIC',
+            'is_simple_consumer_group:false',
+        ],
+    )
+
+    aggregator.assert_metric(
+        'kafka.consumer_group.rebalancing',
+        value=0,
+        tags=[
+            'test_tag:test_value',
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'partition_assignor:range',
+            'consumer_group_type:CLASSIC',
+            'is_simple_consumer_group:false',
         ],
     )
 
@@ -478,129 +559,12 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
         tags=['test_tag:test_value', 'kafka_cluster_id:test-cluster-id'],
     )
 
-    # Verify broker configuration event structure and content
-    broker_config_events = [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
-    assert broker_config_events, f"Expected at least 1 broker config event, found {len(broker_config_events)}"
+    # Broker, topic, and schema configs are emitted only to the Data Streams intake.
+    assert not [e for e in aggregator.events if 'event_type:broker_config' in e.get('tags', [])]
+    assert not [e for e in aggregator.events if 'event_type:topic_config' in e.get('tags', [])]
+    assert not [e for e in aggregator.events if 'event_type:schema_registry' in e.get('tags', [])]
 
-    # Check broker event structure and content
-    broker_event = broker_config_events[0]
-    assert broker_event['event_type'] == 'config_change', "Broker event type should be 'config_change'"
-    assert broker_event['source_type_name'] == 'kafka', "Broker event source should be 'kafka'"
-    assert broker_event['msg_title'] == 'Broker 1 Configuration', "Broker event title mismatch"
-    assert broker_event['alert_type'] == 'info', "Broker event alert type should be 'info'"
-    assert broker_event['aggregation_key'] == 'kafka_broker_config_1', "Broker event aggregation key mismatch"
-
-    # Verify broker event tags
-    expected_broker_tags = [
-        'test_tag:test_value',
-        'kafka_cluster_id:test-cluster-id',
-        'broker_id:1',
-        'broker_host:broker1',
-        'broker_port:9092',
-        'event_type:broker_config',
-    ]
-    for tag in expected_broker_tags:
-        assert tag in broker_event['tags'], f"Missing broker event tag: {tag}"
-
-    # Verify broker config content (msg_text should be JSON with realistic config data)
-    broker_config_json = json.loads(broker_event['msg_text'])
-    expected_broker_config = {
-        'log.retention.bytes': '1073741824',
-        'log.retention.ms': '604800000',
-        'log.segment.bytes': '1073741824',
-        'num.partitions': '3',
-        'num.network.threads': '3',
-        'num.io.threads': '8',
-        'default.replication.factor': '2',
-        'min.insync.replicas': '1',
-        'compression.type': 'producer',
-    }
-    assert broker_config_json == expected_broker_config, (
-        f"Broker config mismatch. Expected {expected_broker_config}, got {broker_config_json}"
-    )
-
-    # Verify topic configuration event structure and content
-    topic_config_events = [e for e in aggregator.events if 'event_type:topic_config' in e.get('tags', [])]
-    assert topic_config_events, f"Expected at least 1 topic config event, found {len(topic_config_events)}"
-
-    # Check topic event structure and content
-    topic_event = topic_config_events[0]
-    assert topic_event['event_type'] == 'info', "Topic event type should be 'info'"
-    assert topic_event['source_type_name'] == 'kafka', "Topic event source should be 'kafka'"
-    assert topic_event['msg_title'] == 'Topic: test-topic (custom config)', "Topic event title mismatch"
-    assert topic_event['alert_type'] == 'info', "Topic event alert type should be 'info'"
-    assert topic_event['aggregation_key'] == 'kafka_topic_config_test-topic', "Topic event aggregation key mismatch"
-
-    # Verify topic event tags
-    expected_topic_tags = [
-        'test_tag:test_value',
-        'kafka_cluster_id:test-cluster-id',
-        'topic:test-topic',
-        'event_type:topic_config',
-    ]
-    for tag in expected_topic_tags:
-        assert tag in topic_event['tags'], f"Missing topic event tag: {tag}"
-
-    # Verify topic config content (msg_text should be JSON with realistic config data)
-    topic_config_json = json.loads(topic_event['msg_text'])
-    expected_topic_config = {
-        'retention.ms': '604800000',
-        'retention.bytes': '-1',
-        'max.message.bytes': '1048588',
-        'compression.type': 'producer',
-        'cleanup.policy': 'delete',
-    }
-    assert topic_config_json == expected_topic_config, (
-        f"Topic config mismatch. Expected {expected_topic_config}, got {topic_config_json}"
-    )
-
-    # Verify schema registry event - check complete structure and content
-    schema_events = [e for e in aggregator.events if 'event_type:schema_registry' in e.get('tags', [])]
-    assert len(schema_events) == 1, f"Expected 1 schema registry event, found {len(schema_events)}"
-
-    schema_event = schema_events[0]
-
-    # Verify event structure
-    assert schema_event['event_type'] == 'info', "Schema event type should be 'info'"
-    assert schema_event['source_type_name'] == 'kafka', "Schema event source should be 'kafka'"
-    assert schema_event['msg_title'] == 'test-topic (value) - Schema v2', "Schema event title mismatch"
-    assert schema_event['alert_type'] == 'info', "Schema event alert type should be 'info'"
-    assert schema_event['aggregation_key'] == 'kafka_schema_test-topic-value_2', "Schema event aggregation key mismatch"
-
-    # Verify schema content (msg_text should be a valid Avro schema JSON)
-    schema_json = json.loads(schema_event['msg_text'])
-    expected_schema = {
-        "type": "record",
-        "name": "User",
-        "namespace": "com.example",
-        "fields": [
-            {"name": "id", "type": "long"},
-            {"name": "username", "type": "string"},
-            {"name": "email", "type": ["null", "string"], "default": None},
-        ],
-    }
-    assert schema_json == expected_schema, f"Schema mismatch. Expected {expected_schema}, got {schema_json}"
-
-    # Verify the event has a timestamp
-    assert 'timestamp' in schema_event, "Schema event should have a timestamp"
-    assert isinstance(schema_event['timestamp'], int), "Schema event timestamp should be an integer"
-
-    # Verify all expected tags are present
-    expected_schema_tags = [
-        'test_tag:test_value',
-        'kafka_cluster_id:test-cluster-id',
-        'subject:test-topic-value',
-        'schema_id:1',
-        'schema_version:2',
-        'schema_type:AVRO',
-        'topic:test-topic',
-        'schema_for:value',
-        'event_type:schema_registry',
-    ]
-    for tag in expected_schema_tags:
-        assert tag in schema_event['tags'], f"Missing schema event tag: {tag}"
-
-    # Verify events are also sent to Data Streams intake
+    # Verify events are sent to Data Streams intake
     ds_calls = kafka_consumer_check.event_platform_event.call_args_list
     ds_events = [
         json.loads(call[0][0]) for call in ds_calls if len(call[0]) > 1 and call[0][1] == "data-streams-message"
@@ -617,6 +581,17 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     assert broker_ds['broker_host'] == 'broker1'
     assert broker_ds['broker_port'] == 9092
     assert 'collection_timestamp' in broker_ds
+    expected_broker_config = {
+        'log.retention.bytes': '1073741824',
+        'log.retention.ms': '604800000',
+        'log.segment.bytes': '1073741824',
+        'num.partitions': '3',
+        'num.network.threads': '3',
+        'num.io.threads': '8',
+        'default.replication.factor': '2',
+        'min.insync.replicas': '1',
+        'compression.type': 'producer',
+    }
     assert broker_ds['config'] == expected_broker_config
 
     topic_ds_events = [e for e in ds_events if e.get('config_type') == 'topic']
@@ -625,11 +600,18 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     assert topic_ds['kafka_cluster_id'] == 'test-cluster-id'
     assert topic_ds['topic'] == 'test-topic'
     assert 'collection_timestamp' in topic_ds
+    expected_topic_config = {
+        'retention.ms': '604800000',
+        'retention.bytes': '-1',
+        'max.message.bytes': '1048588',
+        'compression.type': 'producer',
+        'cleanup.policy': 'delete',
+    }
     assert topic_ds['config'] == expected_topic_config
 
-    schema_ds_events = [e for e in ds_events if e.get('config_type') == 'schema']
-    assert len(schema_ds_events) >= 1, "Expected at least 1 schema Data Streams event"
-    schema_ds = schema_ds_events[0]
+    schema_events = [e for e in ds_events if e.get('config_type') == 'schema']
+    assert len(schema_events) >= 1, "Expected at least 1 schema Data Streams event"
+    schema_ds = schema_events[0]
     assert schema_ds['kafka_cluster_id'] == 'test-cluster-id'
     assert schema_ds['subject'] == 'test-topic-value'
     assert schema_ds['schema_id'] == 1
@@ -637,6 +619,19 @@ def test_collect_cluster_metadata(check, dd_run_check, aggregator):
     assert schema_ds['schema_type'] == 'AVRO'
     assert 'collection_timestamp' in schema_ds
     assert 'schema' in schema_ds
+    assert schema_ds['compatibility'] == 'FULL'
+    assert schema_ds['global_compatibility'] == 'BACKWARD'
+    expected_schema = {
+        "type": "record",
+        "name": "User",
+        "namespace": "com.example",
+        "fields": [
+            {"name": "id", "type": "long"},
+            {"name": "username", "type": "string"},
+            {"name": "email", "type": ["null", "string"], "default": None},
+        ],
+    }
+    assert json.loads(schema_ds['schema']) == expected_schema
 
 
 def test_throughput_with_offset_decrease(check, dd_run_check, aggregator):
@@ -661,7 +656,7 @@ def test_throughput_with_offset_decrease(check, dd_run_check, aggregator):
         else:
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
-    mock_kafka_client.consumer_offsets_for_times = mock_offsets
+    mock_kafka_client.get_partition_offsets = mock_offsets
 
     # Mock cache with previous offsets
     baseline_cache = {
@@ -726,7 +721,7 @@ def test_throughput_with_partition_unavailable(check, dd_run_check, aggregator):
         else:
             return [(topic, partition, 10 if partition == 0 else 20) for topic, partition in partitions]
 
-    mock_kafka_client.consumer_offsets_for_times = mock_offsets_run2
+    mock_kafka_client.get_partition_offsets = mock_offsets_run2
 
     prev_cache = json.dumps(baseline_cache)
     kafka_consumer_check.read_persistent_cache = mock.Mock(return_value=prev_cache)
@@ -773,7 +768,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # First call at t=1000: no cache, event should be sent
     with mock.patch('time.time', return_value=1000.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' in events_to_send, "First call should send event (no cache)"
 
     # Get the expire_at from first call (should be 1000 + 3600 = 4600)
@@ -783,7 +778,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # Second call at t=1100: cache exists and valid (1100 < 4600), event should NOT be sent
     with mock.patch('time.time', return_value=1100.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' not in events_to_send, "Second call should NOT send event (cache valid)"
 
     # Verify expire_at was NOT updated (this is the bug fix!)
@@ -793,7 +788,7 @@ def test_event_cache_ttl_not_reset_on_subsequent_calls(check):
 
     # Third call at t=4601: cache expired (4601 >= 4600), event should be sent
     with mock.patch('time.time', return_value=4601.0):
-        events_to_send = collector._get_events_to_send(cache_key, items)
+        events_to_send = collector.cache.get_events_to_send(cache_key, items)
         assert 'item1' in events_to_send, "Third call should send event (cache expired)"
 
     # Verify expire_at WAS updated after sending event (should be 4601 + 3600 = 8201)
@@ -808,17 +803,7 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
     With thousands of subjects, only a limited batch should be checked per check run
     to avoid overwhelming the registry.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
     # Set a small batch size for testing
@@ -836,17 +821,9 @@ def test_schema_registry_batching(check, dd_run_check, aggregator):
         return_value={'id': 1, 'version': 1, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
-    cache_storage = {}
+    _wire_cache(kafka_consumer_check)
 
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    mock_compatibility_methods(collector)
 
     # Run 1: first batch of 2 subjects
     dd_run_check(kafka_consumer_check)
@@ -895,17 +872,7 @@ def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
     Schema IDs in the registry are immutable, so once we fetch the content for a
     given ID we should never need to fetch it again.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
 
@@ -919,17 +886,9 @@ def test_schema_registry_schema_id_cache(check, dd_run_check, aggregator):
         return_value={'id': 42, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
-    cache_storage = {}
+    cache_storage = _wire_cache(kafka_consumer_check)
 
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    mock_compatibility_methods(collector)
 
     dd_run_check(kafka_consumer_check)
 
@@ -959,10 +918,10 @@ def test_schema_registry_two_tier_ttl(check):
     collector = kafka_consumer_check.metadata_collector
 
     # Schema version checks reuse the same refresh interval as broker/topic configs
-    assert collector.CONFIGS_REFRESH_INTERVAL == 180  # default 3 min
+    assert collector.cache.refresh_interval == 180  # default 3 min
 
     # All events (broker, topic, schema) share the same re-emission TTL
-    assert collector.EVENT_CACHE_TTL == 3600  # 1 hour
+    assert EVENT_CACHE_TTL == 3600  # 1 hour
 
 
 def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, aggregator):
@@ -971,17 +930,7 @@ def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, a
     The two-tier approach checks version numbers first (lightweight). If the max version
     matches what's cached, no full fetch (/versions/latest) should be made.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
 
@@ -1000,19 +949,9 @@ def test_schema_registry_two_tier_no_fetch_when_unchanged(check, dd_run_check, a
         'other-topic-key': {'version': 2, 'schema_id': 11},
     }
 
-    cache_storage = {
-        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-    }
+    _wire_cache(kafka_consumer_check, {'kafka_schema_latest_version_cache': json.dumps(latest_version_cache)})
 
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    mock_compatibility_methods(collector)
 
     dd_run_check(kafka_consumer_check)
 
@@ -1032,17 +971,7 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
     When a subject has a new version (e.g., max goes from 2 to 3), only that subject
     should trigger a full /versions/latest fetch.
     """
-    instance = {
-        'kafka_connect_str': 'localhost:9092',
-        'enable_cluster_monitoring': True,
-        'schema_registry_url': 'http://localhost:8081',
-        'monitor_unlisted_consumer_groups': True,
-    }
-
-    kafka_consumer_check = check(instance)
-    mock_kafka_client = seed_mock_kafka_client()
-    kafka_consumer_check.client = mock_kafka_client
-    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    kafka_consumer_check = _make_schema_registry_check(check)
 
     collector = kafka_consumer_check.metadata_collector
 
@@ -1061,25 +990,17 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
         return_value={'id': 99, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
     )
 
+    mock_compatibility_methods(collector)
+
     # Pre-populate: both subjects were last seen at version 2
     latest_version_cache = {
         'unchanged-topic-value': {'version': 2, 'schema_id': 50},
         'changed-topic-value': {'version': 2, 'schema_id': 50},
     }
 
-    cache_storage = {
-        'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
-    }
-
-    def mock_read(key):
-        return cache_storage.get(key)
-
-    def mock_write(key, value):
-        cache_storage[key] = value
-
-    kafka_consumer_check.read_persistent_cache = mock.Mock(side_effect=mock_read)
-    kafka_consumer_check.write_persistent_cache = mock.Mock(side_effect=mock_write)
-    kafka_consumer_check.event_platform_event = mock.Mock()
+    cache_storage = _wire_cache(
+        kafka_consumer_check, {'kafka_schema_latest_version_cache': json.dumps(latest_version_cache)}
+    )
 
     dd_run_check(kafka_consumer_check)
 
@@ -1092,8 +1013,102 @@ def test_schema_registry_two_tier_fetch_on_new_version(check, dd_run_check, aggr
 
     # Latest version cache should be updated for the changed subject
     updated_cache = json.loads(cache_storage['kafka_schema_latest_version_cache'])
-    assert updated_cache['changed-topic-value'] == {'version': 3, 'schema_id': 99}
-    assert updated_cache['unchanged-topic-value'] == {'version': 2, 'schema_id': 50}  # unchanged
+    assert updated_cache['changed-topic-value'] == {'version': 3, 'schema_id': 99, 'compatibility': 'BACKWARD'}
+    # Compatibility is refreshed on its own cadence, so the unchanged subject also picks it up.
+    assert updated_cache['unchanged-topic-value'] == {'version': 2, 'schema_id': 50, 'compatibility': 'BACKWARD'}
+
+
+def test_schema_registry_compat_not_refetched_when_cache_fresh(check, dd_run_check, aggregator):
+    """A subject with a fresh compat-fetch cache and no version bump must not refetch compatibility.
+
+    This guards the cadence-skip path: SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY + remaining_slots logic
+    should keep _get_schema_registry_subject_compatibility from being called every run.
+    """
+    kafka_consumer_check = _make_schema_registry_check(check)
+    collector = kafka_consumer_check.metadata_collector
+
+    subject = 'my-topic-value'
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+    collector._get_schema_registry_latest_version = mock.Mock()
+    mock_compatibility_methods(collector)
+
+    # Subject is already at version 2 (no bump) and its compat fetch cache is unexpired.
+    latest_version_cache = {subject: {'version': 2, 'schema_id': 50, 'compatibility': 'BACKWARD'}}
+    compat_fetch_cache = {subject: time.time() + 3600}
+    _wire_cache(
+        kafka_consumer_check,
+        {
+            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+            'kafka_schema_compatibility_fetch_cache': json.dumps(compat_fetch_cache),
+        },
+    )
+
+    dd_run_check(kafka_consumer_check)
+
+    # No version bump → no full fetch, and a fresh compat cache → no compat fetch.
+    collector._get_schema_registry_latest_version.assert_not_called()
+    collector._get_schema_registry_subject_compatibility.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "global_compat, subject_compat, expected_compat, expected_global",
+    [
+        pytest.param('BACKWARD', 'FULL', 'FULL', 'BACKWARD', id='subject_flip'),
+        pytest.param('FULL', 'BACKWARD', 'BACKWARD', 'FULL', id='global_flip'),
+    ],
+)
+def test_schema_registry_compatibility_flip_triggers_reemission(
+    check, dd_run_check, aggregator, global_compat, subject_compat, expected_compat, expected_global
+):
+    """A compatibility change without a version bump (subject or global) triggers schema re-emission.
+
+    The cache_content key includes both compatibility fields, so flipping either one causes
+    re-emission even when the schema version and content are identical and the subject is served
+    entirely from cache.
+    """
+    kafka_consumer_check = _make_schema_registry_check(check)
+    collector = kafka_consumer_check.metadata_collector
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 50
+
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    mock_compatibility_methods(collector, global_compat=global_compat, subject_compat=subject_compat)
+
+    # Pre-populate caches as if a previous run emitted this subject under BACKWARD/BACKWARD.
+    old_cache_content = f"{schema_id}:2:BACKWARD:BACKWARD:{avro_schema}"
+    old_hash = hashlib.sha256(old_cache_content.encode()).hexdigest()
+
+    latest_version_cache = {subject: {'version': 2, 'schema_id': schema_id, 'compatibility': 'BACKWARD'}}
+    schema_id_cache = {str(schema_id): {'schema': avro_schema, 'schema_type': 'AVRO'}}
+    schema_emit_cache = {subject: {'hash': old_hash, 'expire_at': time.time() + 3600}}
+
+    _wire_cache(
+        kafka_consumer_check,
+        {
+            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+            'kafka_schema_id_cache': json.dumps(schema_id_cache),
+            'kafka_schema_cache': json.dumps(schema_emit_cache),
+        },
+    )
+
+    dd_run_check(kafka_consumer_check)
+
+    # No version bump — full schema fetch should be skipped (subject served from cache).
+    collector._get_schema_registry_latest_version.assert_not_called()
+
+    # Flipping either compatibility field should have triggered exactly one re-emission.
+    schema_events = schema_ds_events(kafka_consumer_check)
+    assert len(schema_events) == 1, f"Expected exactly 1 schema re-emission, got {len(schema_events)}"
+    assert schema_events[0]['subject'] == subject
+    assert schema_events[0]['compatibility'] == expected_compat
+    assert schema_events[0]['global_compatibility'] == expected_global
 
 
 @pytest.mark.parametrize(
@@ -1116,8 +1131,59 @@ def test_kafka_configs_refresh_interval(check, interval, expected_interval, expe
     kafka_consumer_check = check(instance)
     collector = kafka_consumer_check.metadata_collector
 
-    assert collector.CONFIGS_REFRESH_INTERVAL == expected_interval
-    assert collector.CONFIGS_REFRESH_JITTER == expected_jitter
+    assert collector.cache.refresh_interval == expected_interval
+    assert collector.cache.refresh_jitter == expected_jitter
+
+
+def test_fetch_earliest_offsets_cached_across_calls(check):
+    """fetch_earliest_offsets should hit the broker once, then serve later calls from cache."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+    }
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    _wire_cache(kafka_consumer_check)
+
+    collector = kafka_consumer_check.metadata_collector
+    topic_partitions = {'test-topic': [0, 1]}
+
+    first = collector.fetch_earliest_offsets(topic_partitions)
+    second = collector.fetch_earliest_offsets(topic_partitions)
+
+    expected = {('test-topic', 0): 10, ('test-topic', 1): 20}
+    assert first == expected
+    assert second == expected
+    assert mock_kafka_client.kafka_client.list_offsets.call_count == 1
+
+
+def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
+    """A fresh cache that doesn't cover every requested partition triggers a full refetch, keeping the same TTL."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+    }
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    collector = kafka_consumer_check.metadata_collector
+    expire_at = time.time() + 300
+    seed_payload = json.dumps({'expire_at': expire_at, 'offsets': [['test-topic', 0, 10]]})
+    _wire_cache(kafka_consumer_check, seed={collector.EARLIEST_OFFSETS_CACHE_KEY: seed_payload})
+
+    topic_partitions = {'test-topic': [0, 1]}
+    result = collector.fetch_earliest_offsets(topic_partitions)
+
+    assert result == {('test-topic', 0): 10, ('test-topic', 1): 20}
+    assert mock_kafka_client.kafka_client.list_offsets.call_count == 1
+
+    saved = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
+    assert saved['expire_at'] == expire_at
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
@@ -1171,9 +1237,10 @@ def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
     assert call_args[1]['data'] == {'grant_type': 'client_credentials', 'scope': 'schema-registry'}
     assert call_args[1]['auth'] == ('my-client-id', 'my-client-secret')
 
-    # Verify Bearer header was set on the HTTP client
-    headers = kafka_consumer_check.metadata_collector.http.options.get('headers', {})
-    assert headers.get('Authorization') == 'Bearer oidc-test-token-123'
+    # Verify Bearer token is stored and included in per-request kwargs
+    assert kafka_consumer_check.metadata_collector._schema_registry_oauth_token == 'oidc-test-token-123'
+    request_kwargs = kafka_consumer_check.metadata_collector._get_schema_registry_request_kwargs()
+    assert request_kwargs.get('extra_headers', {}).get('Authorization') == 'Bearer oidc-test-token-123'
 
     # Verify schema registry still works (subjects metric emitted)
     aggregator.assert_metric('kafka.schema_registry.subjects', value=1)
@@ -1227,10 +1294,9 @@ def test_schema_registry_oauth_token_refresh_on_expiry(check, dd_run_check, aggr
     dd_run_check(kafka_consumer_check)
     mock_http.post.assert_called_once()
 
-    # Verify new token was set
-    headers = collector.http.options.get('headers', {})
-    assert headers.get('Authorization') == 'Bearer new-refreshed-token'
     assert collector._schema_registry_oauth_token == 'new-refreshed-token'
+    request_kwargs = collector._get_schema_registry_request_kwargs()
+    assert request_kwargs.get('extra_headers', {}).get('Authorization') == 'Bearer new-refreshed-token'
 
 
 def test_schema_registry_oauth_token_not_refreshed_when_valid(check):
@@ -1356,12 +1422,23 @@ def test_schema_registry_url_encodes_subject_names(check):
     subject = 'google/protobuf/timestamp.proto'
 
     collector._get_schema_registry_versions(subject)
-    collector.http.get.assert_called_with('http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions')
+    collector.http.get.assert_called_with(
+        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions', verify=True
+    )
 
     collector.http.get.reset_mock()
     collector._get_schema_registry_latest_version(subject)
     collector.http.get.assert_called_with(
-        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest'
+        'http://localhost:8081/subjects/google%2Fprotobuf%2Ftimestamp.proto/versions/latest', verify=True
+    )
+
+    collector.http.get.reset_mock()
+    mock_response.json.return_value = {'compatibilityLevel': 'BACKWARD'}
+    collector._get_schema_registry_subject_compatibility(subject)
+    collector.http.get.assert_called_with(
+        'http://localhost:8081/config/google%2Fprotobuf%2Ftimestamp.proto',
+        params={'defaultToGlobal': 'true'},
+        verify=True,
     )
 
 
@@ -1419,3 +1496,494 @@ def test_partition_out_of_sync_broker_id_tag(
         'kafka.partition.offline',
     ):
         aggregator.assert_metric(metric, tags=expected_tags)
+
+
+def test_heartbeat_brokers_populated(check):
+    """Heartbeat payload includes the broker list when metadata is available."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=5, cluster_id='test-cluster-id')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert hb_events[0]['brokers'] == [
+        {'id': '1', 'host': 'broker1', 'port': 9092},
+        {'id': '2', 'host': 'broker2', 'port': 9092},
+    ]
+
+
+def test_heartbeat_brokers_empty_when_no_metadata(check):
+    """Heartbeat payload has an empty broker list when _cluster_metadata is None."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    mock_kafka_client._cluster_metadata = None
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=0, cluster_id='test-cluster-id')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert hb_events[0]['brokers'] == []
+
+
+def test_schema_registry_subject_compat_failure_on_version_bump_preserves_cached_compat(
+    check, dd_run_check, aggregator
+):
+    """When compat fetch raises for a version-bumped subject, the previous cached value is preserved."""
+    kafka_consumer_check = _make_schema_registry_check(check)
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 42
+
+    collector = kafka_consumer_check.metadata_collector
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2, 3])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 3, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    collector._get_schema_registry_global_compatibility = mock.Mock(return_value='BACKWARD')
+    collector._get_schema_registry_subject_compatibility = mock.Mock(side_effect=Exception("registry down"))
+
+    # Previous run had version 2 with FULL compatibility cached.
+    latest_version_cache = {subject: {'version': 2, 'schema_id': 10, 'compatibility': 'FULL'}}
+    cache_storage = _wire_cache(
+        kafka_consumer_check,
+        {
+            'kafka_schema_latest_version_cache': json.dumps(latest_version_cache),
+            'kafka_schema_id_cache': json.dumps({}),
+        },
+    )
+
+    dd_run_check(kafka_consumer_check)
+
+    # The new cache entry must preserve the previously known compatibility, not write None.
+    saved_cache = json.loads(cache_storage.get('kafka_schema_latest_version_cache', '{}'))
+    assert saved_cache[subject]['compatibility'] == 'FULL'
+
+    # The emitted payload must also carry the preserved compatibility.
+    schema_events = schema_ds_events(kafka_consumer_check)
+    assert len(schema_events) == 1
+    assert schema_events[0]['compatibility'] == 'FULL'
+
+
+def test_schema_registry_global_compat_failure_uses_last_known_value(check, dd_run_check, aggregator):
+    """When the global compatibility fetch fails, the last successfully fetched value is used."""
+    kafka_consumer_check = _make_schema_registry_check(check)
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 77
+
+    collector = kafka_consumer_check.metadata_collector
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 1, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    collector._get_schema_registry_global_compatibility = mock.Mock(side_effect=Exception("registry down"))
+    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value='BACKWARD')
+
+    # Simulate a previously cached global compatibility of 'FULL'.
+    _wire_cache(kafka_consumer_check, {'kafka_schema_global_compatibility_cache': 'FULL'})
+
+    dd_run_check(kafka_consumer_check)
+
+    schema_events = schema_ds_events(kafka_consumer_check)
+    assert len(schema_events) == 1
+    assert schema_events[0]['global_compatibility'] == 'FULL'
+
+
+def test_schema_registry_none_compat_in_cache_omits_field(check, dd_run_check, aggregator):
+    """A cached entry with compatibility=None must not include the field in the DS payload."""
+    kafka_consumer_check = _make_schema_registry_check(check)
+
+    subject = 'my-topic-value'
+    avro_schema = json.dumps({"type": "string"})
+    schema_id = 99
+
+    collector = kafka_consumer_check.metadata_collector
+    collector._get_schema_registry_subjects = mock.Mock(return_value=[subject])
+    collector._get_schema_registry_versions = mock.Mock(return_value=[1, 2])
+    collector._get_schema_registry_latest_version = mock.Mock(
+        return_value={'id': schema_id, 'version': 2, 'schema': avro_schema, 'schemaType': 'AVRO'}
+    )
+    collector._get_schema_registry_global_compatibility = mock.Mock(return_value=None)
+    collector._get_schema_registry_subject_compatibility = mock.Mock(return_value=None)
+
+    _wire_cache(kafka_consumer_check)
+
+    dd_run_check(kafka_consumer_check)
+
+    schema_events = schema_ds_events(kafka_consumer_check)
+    assert len(schema_events) == 1
+    assert 'compatibility' not in schema_events[0]
+    assert 'global_compatibility' not in schema_events[0]
+
+
+def _tp(topic, partition):
+    tp = mock.MagicMock()
+    tp.topic = topic
+    tp.partition = partition
+    return tp
+
+
+def _make_assignment(tps):
+    if tps is None:
+        return None
+    assignment = mock.MagicMock()
+    assignment.topic_partitions = [_tp(t, p) for t, p in tps]
+    return assignment
+
+
+def _make_member(
+    client_id='c1', host='h1', assignment_tps=(('test-topic', 0),), target_tps=None, group_instance_id=None
+):
+    member = mock.MagicMock()
+    member.member_id = f'm-{client_id}'
+    member.client_id = client_id
+    member.host = host
+    member.group_instance_id = group_instance_id
+    member.assignment = _make_assignment(assignment_tps)
+    member.target_assignment = _make_assignment(target_tps)
+    return member
+
+
+def _make_group_describe(
+    state_name='STABLE', assignor='range', is_simple=False, group_type='CONSUMER', members=(), coordinator_id=1
+):
+    describe_result = mock.MagicMock()
+    state_mock = mock.MagicMock()
+    state_mock.name = state_name
+    describe_result.state = state_mock
+    describe_result.partition_assignor = assignor
+    describe_result.is_simple_consumer_group = is_simple
+    if group_type is None:
+        describe_result.type = None
+    else:
+        type_mock = mock.MagicMock()
+        type_mock.name = group_type
+        describe_result.type = type_mock
+    coordinator_mock = mock.MagicMock()
+    coordinator_mock.id = coordinator_id
+    describe_result.coordinator = coordinator_mock
+    describe_result.members = list(members)
+    return describe_result
+
+
+def _stub_consumer_groups(admin, describe_by_group):
+    """Wire list_consumer_groups + describe_consumer_groups futures on a mock admin client."""
+    list_result = mock.MagicMock()
+    list_result.errors = []
+    list_result.valid = [mock.MagicMock(group_id=gid) for gid in describe_by_group]
+    list_future = mock.MagicMock()
+    list_future.result.return_value = list_result
+    admin.list_consumer_groups.return_value = list_future
+
+    futures = {}
+    for gid, describe_result in describe_by_group.items():
+        future = mock.MagicMock()
+        future.result.return_value = describe_result
+        futures[gid] = future
+    admin.describe_consumer_groups.return_value = futures
+
+
+def _collect_groups(check, describe_result, group_id='test-group'):
+    """Run _collect_consumer_group_metadata against a single mocked consumer group.
+
+    Reuses the shared seed_mock_kafka_client wiring and only swaps in the
+    consumer-group futures, so the admin-client mock setup is not duplicated.
+    """
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+
+    mock_client = seed_mock_kafka_client()
+    _stub_consumer_groups(mock_client.kafka_client, {group_id: describe_result})
+    kafka_consumer_check.metadata_collector.client = mock_client
+
+    metadata = mock.MagicMock()
+    metadata.cluster_id = 'test-cluster-id'
+    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    return kafka_consumer_check
+
+
+def _collect_groups_with_cache(check, describe_result, seed=None, group_id='test-group'):
+    """Like _collect_groups but wires the persistent cache so membership-change logic is exercised."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+
+    mock_client = seed_mock_kafka_client()
+    _stub_consumer_groups(mock_client.kafka_client, {group_id: describe_result})
+    kafka_consumer_check.metadata_collector.client = mock_client
+    _wire_cache(kafka_consumer_check, seed)
+
+    metadata = mock.MagicMock()
+    metadata.cluster_id = 'test-cluster-id'
+    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    return kafka_consumer_check
+
+
+def test_consumer_group_rebalancing_state_based(check, aggregator):
+    """A group in a rebalancing state reports rebalancing=1 (classic protocol)."""
+    describe_result = _make_group_describe(state_name='PREPARING_REBALANCING', members=[_make_member()])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.rebalancing',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:PREPARING_REBALANCING',
+            'coordinator:1',
+            'partition_assignor:range',
+            'consumer_group_type:CONSUMER',
+            'is_simple_consumer_group:false',
+        ],
+    )
+
+
+def test_consumer_group_rebalancing_target_assignment(check, aggregator):
+    """A stable group whose assignment != target_assignment reports rebalancing=1 (KIP-848)."""
+    member = _make_member(assignment_tps=[('test-topic', 0)], target_tps=[('test-topic', 0), ('test-topic', 1)])
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=1)
+
+
+def test_consumer_group_not_rebalancing_when_assignment_matches_target(check, aggregator):
+    """A stable group whose assignment == target_assignment reports rebalancing=0."""
+    member = _make_member(assignment_tps=[('test-topic', 0)], target_tps=[('test-topic', 0)])
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=0)
+
+
+def test_consumer_group_not_rebalancing_when_no_target_assignment(check, aggregator):
+    """A stable classic-protocol member (no target_assignment) is skipped, reporting rebalancing=0."""
+    member = _make_member(assignment_tps=[('test-topic', 0)], target_tps=None)
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=0)
+
+
+def test_consumer_group_dimensional_tags(check, aggregator):
+    """Group-level metadata is attached as tags on consumer_group.members."""
+    describe_result = _make_group_describe(
+        state_name='STABLE',
+        assignor='cooperative-sticky',
+        is_simple=True,
+        group_type='CONSUMER',
+        members=[_make_member()],
+    )
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.members',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'partition_assignor:cooperative-sticky',
+            'consumer_group_type:CONSUMER',
+            'is_simple_consumer_group:true',
+        ],
+    )
+
+
+@pytest.mark.parametrize('assignor', [None, ''], ids=['none', 'empty_string'])
+def test_consumer_group_dimensional_tags_absent_when_unset(check, aggregator, assignor):
+    """When the broker reports no assignor (None or empty for KIP-848 groups), no dimensional tags are attached."""
+    describe_result = _make_group_describe(
+        state_name='STABLE', assignor=assignor, is_simple=None, group_type=None, members=[_make_member()]
+    )
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.members',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+        ],
+    )
+
+
+def test_consumer_group_member_static_membership_tag(check, aggregator):
+    """A member with a group_instance_id is tagged as a static member."""
+    member = _make_member(group_instance_id='static-1')
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric(
+        'kafka.consumer_group.member.partitions',
+        value=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'client_id:c1',
+            'member_host:h1',
+            'group_instance_id:static-1',
+        ],
+    )
+
+
+def test_membership_changes_not_emitted_on_first_run(check, aggregator):
+    """No membership_changes on first run — no prior cache to compare against."""
+    describe_result = _make_group_describe(members=[_make_member()])
+    _collect_groups_with_cache(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def test_membership_changes_not_emitted_when_members_unchanged(check, aggregator):
+    """No membership_changes when the member set is identical to the previous run."""
+    member = _make_member(client_id='c1')
+    prev_hash = hashlib.sha256(b'["m-c1"]').hexdigest()
+    cache_key = 'kafka_consumer_group_members_cache'
+    describe_result = _make_group_describe(members=[member])
+    _collect_groups_with_cache(
+        check,
+        describe_result,
+        seed={cache_key: json.dumps({'test-group': prev_hash})},
+    )
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def test_membership_changes_emitted_when_members_differ(check, aggregator):
+    """membership_changes fires exactly once when the member set differs from the prior run."""
+    cache_key = 'kafka_consumer_group_members_cache'
+    old_hash = hashlib.sha256(b'["m-old"]').hexdigest()
+    describe_result = _make_group_describe(members=[_make_member(client_id='new')])
+    _collect_groups_with_cache(
+        check,
+        describe_result,
+        seed={cache_key: json.dumps({'test-group': old_hash})},
+    )
+    aggregator.assert_metric(
+        'kafka.consumer_group.membership_changes',
+        value=1,
+        count=1,
+        tags=[
+            'kafka_cluster_id:test-cluster-id',
+            'consumer_group:test-group',
+            'consumer_group_state:STABLE',
+            'coordinator:1',
+            'partition_assignor:range',
+            'consumer_group_type:CONSUMER',
+            'is_simple_consumer_group:false',
+        ],
+    )
+
+
+def test_consumer_group_rebalancing_when_assignment_none_but_target_present(check, aggregator):
+    """A KIP-848 member with no current assignment but a non-empty target reports rebalancing=1."""
+    member = _make_member(assignment_tps=None, target_tps=[('orders', 0)])
+    describe_result = _make_group_describe(state_name='STABLE', members=[member])
+    _collect_groups(check, describe_result)
+    aggregator.assert_metric('kafka.consumer_group.rebalancing', value=1)
+
+
+def test_membership_hash_delimiter_collision(check, aggregator):
+    """Member IDs that share characters with the delimiter produce distinct hashes."""
+    ids_a = ['a,b', 'c']
+    ids_b = ['a', 'b,c']
+    hash_a = hashlib.sha256(json.dumps(sorted(ids_a), separators=(',', ':')).encode()).hexdigest()
+    hash_b = hashlib.sha256(json.dumps(sorted(ids_b), separators=(',', ':')).encode()).hexdigest()
+    assert hash_a != hash_b
+
+
+def test_malformed_cache_does_not_abort_collection(check, aggregator):
+    """A non-dict cache value is silently discarded and group gauges are still emitted."""
+    cache_key = 'kafka_consumer_group_members_cache'
+    describe_result = _make_group_describe(members=[_make_member()])
+    _collect_groups_with_cache(
+        check,
+        describe_result,
+        seed={cache_key: json.dumps([])},  # list instead of dict
+    )
+    aggregator.assert_metric('kafka.consumer_group.members', count=1)
+    aggregator.assert_metric('kafka.consumer_group.membership_changes', count=0)
+
+
+def test_heartbeat_connect_api_status_present_when_urls_configured(check):
+    """connect_api_status appears in heartbeat payload when Connect URLs are configured."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'kafka_connect_url': 'http://connect:8083',
+    }
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    with mock.patch.object(
+        kafka_consumer_check._connector_collector,
+        'collect',
+        return_value={'http://connect:8083': True},
+    ):
+        kafka_consumer_check._send_cluster_monitoring_heartbeat(
+            total_contexts=0,
+            cluster_id='test-cluster',
+            connect_status={'http://connect:8083': True},
+        )
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert 'connect_api_status' in hb_events[0]
+    assert hb_events[0]['connect_api_status'] == {'http://connect:8083': True}
+
+
+def test_heartbeat_connect_api_status_absent_when_no_urls(check):
+    """connect_api_status is absent from heartbeat payload when no Connect URLs are configured."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+    kafka_consumer_check.event_platform_event = mock.Mock()
+
+    kafka_consumer_check._send_cluster_monitoring_heartbeat(total_contexts=0, cluster_id='test-cluster')
+
+    calls = kafka_consumer_check.event_platform_event.call_args_list
+    hb_events = [json.loads(c[0][0]) for c in calls if c[0][1] == 'data-streams-message']
+    hb_events = [e for e in hb_events if e.get('config_type') == 'heartbeat']
+    assert len(hb_events) == 1
+    assert 'connect_api_status' not in hb_events[0]
+
+
+def test_collect_connect_status_returns_none_when_unconfigured(check):
+    """_collect_connect_status returns None when no Connect URLs are configured."""
+    instance = {'kafka_connect_str': 'localhost:9092', 'enable_cluster_monitoring': True}
+    kafka_consumer_check = check(instance)
+
+    result = kafka_consumer_check._collect_connect_status('test-cluster')
+    assert result is None
+
+
+def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
+    """_collect_connect_status returns {} when the collector raises, instead of propagating."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'kafka_connect_url': 'http://connect:8083',
+    }
+    kafka_consumer_check = check(instance)
+
+    with mock.patch.object(
+        kafka_consumer_check._connector_collector,
+        'collect',
+        side_effect=Exception("connection refused"),
+    ):
+        result = kafka_consumer_check._collect_connect_status('test-cluster')
+
+    assert result == {}

@@ -205,6 +205,15 @@ files:
         value:
           example: false
           type: boolean
+      - name: filter_queue_statistics_metrics
+        description: |
+          When enabled, queue statistics metrics (`ibm_mq.stats.queue.*`) are only emitted for queues that the check
+          monitors via `queue_patterns` or `queue_regex`.
+        fleet_configurable: true
+        value:
+          example: true
+          default: false
+          type: boolean
       - name: collect_reset_queue_metrics
         description: |
           Collect metrics from Reset Queue Statistics. Statistics collected are:
@@ -240,6 +249,7 @@ files:
         value:
           example: false
           type: boolean
+        fleet_configurable: false
       - name: normalize_description_tags
         description: |
           Normalize description tag values when add_description_tags is enabled.
@@ -252,6 +262,7 @@ files:
         value:
           example: true
           type: boolean
+        fleet_configurable: false
       - name: mqcd_version
         description: |
           Which channel definition version to use. Supported values are 1 to 9 including.
@@ -270,6 +281,7 @@ files:
         value:
           example: false
           type: boolean
+        fleet_configurable: false
       - name: queue_manager_timezone
         description: |
           Time zone of the queue manager in IANA/Olson timezone format, if it differs from Etc/UTC. Canonical IANA
@@ -281,6 +293,7 @@ files:
           example: Etc/UTC
           type: string
           minLength: 1
+        fleet_configurable: false
       - name: use_qm_tz_for_metrics
         description: |
           Use the `queue_manager_timezone` parameter to collect metrics. Metrics can be skipped sometimes if the 
@@ -289,17 +302,20 @@ files:
         value:
           example: false
           type: boolean
+        fleet_configurable: false
       - name: timeout
         description: |
           The number of seconds to wait for IBM MQ to respond.
         value:
           example: 5
           type: integer
+        fleet_configurable: false
       - name: ssl_auth
         description: Whether or not to use SSL auth while connecting to the channel.
         value:
           example: False
           type: boolean
+        fleet_configurable: false
       - name: try_basic_auth
         description: |
           Whether or not to try connecting with just username and password before SSL when `ssl_auth` is enabled.
@@ -313,12 +329,14 @@ files:
           example: false
           type: boolean
           display_default: true
+        fleet_configurable: false
       - name: ssl_cipher_spec
         description: |
           The TLS/SSL cipher to use. It should match the value of the channels SSLCIPH attribute. For an enumeration
           see: https://www.ibm.com/docs/en/ibm-mq/9.3?topic=jms-tls-cipherspecs-ciphersuites-in-mq-classes
         value:
           type: string
+        fleet_configurable: false
       - name: ssl_key_repository_location
         description: |
           It specifies the location of the key database file in which keys and certificates are stored.
@@ -332,10 +350,12 @@ files:
           example: '/var/mqm/ssl-db/client/KeyringClient'
           type: string
           minLength: 1
+        fleet_configurable: false
       - name: ssl_certificate_label
         description: Certificate label used for SSL connection.
         value:
           type: string
+        fleet_configurable: false
       - name: queue_tag_re
         description: |
           Instruct the check to apply additional tags to matching
@@ -348,6 +368,7 @@ files:
             'SYSTEM.*': queue_type:system
             'DEV.*': role:dev,queue_type:default
           type: object
+        fleet_configurable: false
       - name: queue_manager_process
         description: |
           A regular expression that must match the command line of a running process in
@@ -363,6 +384,7 @@ files:
           display_default: null
           example: amqpcsea <queue_manager>
           type: string
+        fleet_configurable: false
       - template: instances/default
   - template: logs
     example:

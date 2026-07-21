@@ -81,6 +81,7 @@ class InstanceConfig(BaseModel):
     collect_alerts: Optional[bool] = None
     collect_audits: Optional[bool] = None
     collect_events: Optional[bool] = None
+    collect_resource_ids_as_tags: Optional[bool] = None
     collect_subtasks: Optional[bool] = None
     collect_tasks: Optional[bool] = None
     connect_timeout: Optional[float] = None
@@ -90,6 +91,7 @@ class InstanceConfig(BaseModel):
     exclude_filtered_resources_from_cluster_capacity: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
+    hostname_transform: Optional[Literal['upper', 'lower', 'default']] = None
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
     kerberos_cache: Optional[str] = None
     kerberos_delegate: Optional[bool] = None

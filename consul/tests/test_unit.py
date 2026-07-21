@@ -331,6 +331,39 @@ def test_health_checks(aggregator, collect_health_checks, expected_metric_count,
     aggregator.assert_event(exact_match=False, count=expected_metric_count, **event)
 
 
+@pytest.mark.parametrize(
+    'health_check_warning_events, expected_warning_events',
+    [
+        pytest.param(True, 1, id="warning events enabled"),
+        pytest.param(False, 0, id="warning events disabled"),
+    ],
+)
+def test_health_check_warning_events(aggregator, health_check_warning_events, expected_warning_events):
+    config = consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG.copy()
+    config['collect_health_checks'] = True
+    config['health_check_warning_events'] = health_check_warning_events
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    my_mocks = consul_mocks._get_consul_mocks()
+    my_mocks['consul_request'] = consul_mocks.mock_get_health_check_with_warning
+    consul_mocks.mock_check(consul_check, my_mocks)
+    consul_check.check(None)
+
+    warning_events = [e for e in aggregator.events if e['event_type'] == 'consul.check_warning']
+    assert len(warning_events) == expected_warning_events
+    if expected_warning_events:
+        assert warning_events[0]['alert_type'] == 'warning'
+        assert warning_events[0]['msg_title'] == "Service 'server-loadbalancer' check Warning"
+        assert (
+            warning_events[0]['msg_text']
+            == "Check server-loadbalancer for service server-loadbalancer, id: server-loadbalancerwarning "
+            "on node node-2: disk usage high"
+        )
+
+        consul_check.check(None)
+        warning_events = [e for e in aggregator.events if e['event_type'] == 'consul.check_warning']
+        assert len(warning_events) == 1
+
+
 def test_service_checks_disable_service_tag(aggregator):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_DISABLE_SERVICE_TAG])
     my_mocks = consul_mocks._get_consul_mocks()

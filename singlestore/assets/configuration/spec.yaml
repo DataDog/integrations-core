@@ -47,6 +47,7 @@ files:
       required: false
       value:
         type: integer
+      fleet_configurable: false
     - template: instances/db
     - name: collect_system_metrics
       description: |

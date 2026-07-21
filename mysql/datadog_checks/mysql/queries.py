@@ -288,13 +288,17 @@ QUERY_WAIT_EVENT_SUMMARY = {
 
 def show_replica_status_query(version, is_mariadb: bool, channel: str = '') -> tuple[str, tuple[str, ...]]:
     if version.version_compatible((10, 5, 1)) or not is_mariadb and version.version_compatible((8, 0, 22)):
-        base_query = "SHOW REPLICA STATUS"
+        replica_keyword = "REPLICA"
     else:
-        base_query = "SHOW SLAVE STATUS"
+        replica_keyword = "SLAVE"
+    base_query = "SHOW {0} STATUS".format(replica_keyword)
     if channel and not is_mariadb:
         return ("{0} FOR CHANNEL %s".format(base_query), (channel,))
+    elif is_mariadb and not channel:
+        # MariaDB uses Connection_name (not Channel_Name) to identify channels.
+        return ("SHOW ALL {0}S STATUS".format(replica_keyword), ())
     else:
-        return ("{0}".format(base_query), ())
+        return (base_query, ())
 
 
 def get_indexes_query(version, is_mariadb, placeholders):

@@ -17,12 +17,12 @@ tests:
         argument:
          -
           arg-num: "1"
-          value: "0x1"
           desc: "name"
+          value: "0x1"
          -
           arg-num: "1"
-          value: "0xb"
           desc: "name"
+          value: "0xb"
         event: "AUE_SYSCTL_NONADMIN"
         identity:
           cdhash: "0x4a21fe7d1588f7dea2909b5d490d45dbd6d61ed7"

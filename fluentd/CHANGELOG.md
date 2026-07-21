@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 5.6.0 / 2026-05-14
+## 5.7.0 / 2026-07-08
+
+***Added***:
+
+* Add the ``fluentd.tracked_file_count`` gauge from the in_tail plugin. ([#24159](https://github.com/DataDog/integrations-core/pull/24159))
+
+## 5.6.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
 * Add support for security validation in models for the `fluentd` configuration option. ([#23629](https://github.com/DataDog/integrations-core/pull/23629))
 
-## 5.5.1 / 2026-04-15
+## 5.5.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

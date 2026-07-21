@@ -80,8 +80,7 @@ EXPECTED_DEFAULTS = {
         'enabled': True,
         'collection_interval': 10,
         'pg_stat_statements_max_warning_threshold': 10000,
-        'incremental_query_metrics': False,
-        'baseline_metrics_expiry': 300,
+        'incremental_query_metrics': True,
         'full_statement_text_cache_max_size': 10000,
         'full_statement_text_samples_per_hour_per_query': 1,
         'run_sync': False,
@@ -236,6 +235,11 @@ EXPECTED_DEFAULTS = {
     # === Agent standard fields ===
     'min_collection_interval': 15.0,  # Standard Agent field
     'empty_default_hostname': False,  # Deprecated field
+    # === Health ===
+    'automatic_diagnostics': {
+        'enabled': False,
+        'interval': 600,
+    },
 }
 
 

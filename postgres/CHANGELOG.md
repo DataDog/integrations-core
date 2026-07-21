@@ -2,6 +2,50 @@
 
 <!-- towncrier release notes start -->
 
+## 23.10.0 / 2026-07-08
+
+***Added***:
+
+* Run `diagnose` on check initialization, then emit any warnings and failures as Agent Health events. ([#23645](https://github.com/DataDog/integrations-core/pull/23645))
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Update the relations config comment to reflect the current number of metrics generated per relation. ([#24096](https://github.com/DataDog/integrations-core/pull/24096))
+* Cache parameterized-query explain failures caused by unresolvable parameter types so they aren't re-attempted on every collection. ([#24102](https://github.com/DataDog/integrations-core/pull/24102))
+* Migrate the Postgres check's tag handling to the shared `TagManager`. ([#24265](https://github.com/DataDog/integrations-core/pull/24265))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24270](https://github.com/DataDog/integrations-core/pull/24270))
+* Remove duplicated `database_identifier` logic now provided by the DatabaseCheck base class. ([#24278](https://github.com/DataDog/integrations-core/pull/24278))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 23.9.1 / 2026-06-16 / Agent 7.81.0
+
+***Fixed***:
+
+* Move cursor yield for Postgres schemas outside transaction. This should avoid creating a broken pool connection on timeout ([#24051](https://github.com/DataDog/integrations-core/pull/24051))
+* Cache ignored ``/* DDIGNORE */`` queries in incremental query metrics collector to avoid repeated lookups. ([#24056](https://github.com/DataDog/integrations-core/pull/24056))
+
+## 23.9.0 / 2026-06-09
+
+***Added***:
+
+* Support cron `schedule` field for Data Observability queries. ([#23529](https://github.com/DataDog/integrations-core/pull/23529))
+* Add V2 statement metrics collection pipeline with change detection and cached obfuscation, reducing collection latency and memory allocations on the Python and Go runtimes. ([#23823](https://github.com/DataDog/integrations-core/pull/23823))
+* Collect ``relkind`` for Postgres tables in DBM schema metadata. ([#23888](https://github.com/DataDog/integrations-core/pull/23888))
+* Honor the per-query ``query_timeout`` for Data Observability queries. ([#23896](https://github.com/DataDog/integrations-core/pull/23896))
+
+***Fixed***:
+
+* Set dbms=postgresql in obfuscation options to align query_signature with dbm-logs-processor. ([#23926](https://github.com/DataDog/integrations-core/pull/23926))
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+* Make statement_timeout local for Postgres schemas collection ([#23954](https://github.com/DataDog/integrations-core/pull/23954))
+
+## 23.8.1 / 2026-05-20 / Agent 7.80.0
+
+***Fixed***:
+
+* Fix a crash caused by cancel closing database connections while the check is still running. ([#23728](https://github.com/DataDog/integrations-core/pull/23728))
+
 ## 23.8.0 / 2026-05-14
 
 ***Added***:
@@ -23,7 +67,7 @@
 * Close dangling connections and break reference cycles on check cancel to reduce memory retention when checks are restarted or rescheduled. ([#23640](https://github.com/DataDog/integrations-core/pull/23640))
 * Eliminate reference cycle in diagnostic instrumentation. ([#23647](https://github.com/DataDog/integrations-core/pull/23647))
 
-## 23.7.0 / 2026-04-15
+## 23.7.0 / 2026-04-15 / Agent 7.79.0
 
 ***Added***:
 

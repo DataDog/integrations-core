@@ -8,6 +8,19 @@ services:
       timeout: 3s
       retries: 5
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: n8n-test-postgres
+    environment:
+      - POSTGRES_USER=n8n
+      - POSTGRES_PASSWORD=n8n
+      - POSTGRES_DB=n8n
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n -d n8n"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   n8n:
     image: n8nio/n8n:${N8N_VERSION:-1.118.1}
     container_name: n8n-test
@@ -17,6 +30,13 @@ services:
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_BULL_REDIS_PORT=6379
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=n8n
+      - N8N_ENCRYPTION_KEY=test-encryption-key-not-a-secret
       - N8N_LOG_LEVEL=debug
       - N8N_LOG_OUTPUT=console
       - N8N_HOST=0.0.0.0
@@ -45,6 +65,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:5678/healthz"]
       interval: 10s
@@ -62,6 +84,13 @@ services:
       - EXECUTIONS_MODE=queue
       - QUEUE_BULL_REDIS_HOST=redis
       - QUEUE_BULL_REDIS_PORT=6379
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=n8n
+      - DB_POSTGRESDB_PASSWORD=n8n
+      - N8N_ENCRYPTION_KEY=test-encryption-key-not-a-secret
       - N8N_LOG_LEVEL=info
       - N8N_LOG_OUTPUT=console
       - N8N_RUNNERS_ENABLED=false
@@ -75,8 +104,6 @@ services:
       - N8N_METRICS_INCLUDE_WORKFLOW_STATISTICS=true
       - QUEUE_HEALTH_CHECK_ACTIVE=true
       - QUEUE_HEALTH_CHECK_PORT=5680
-    volumes:
-      - n8n_data:/home/node/.n8n
     depends_on:
       n8n:
         condition: service_healthy

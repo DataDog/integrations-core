@@ -19,5 +19,19 @@ MOCK_STATUS_DATA = {
     'phys_state': '5: LinkUp',
 }
 
+MOCK_RATE_DATA = '100 Gb/sec (4X EDR)'
+MOCK_DEVICE_METADATA = {
+    'fw_ver': '16.35.4030',
+    'hca_type': 'MT4129',
+    'board_id': 'MT_0000000438',
+    'node_type': '1: CA',
+}
+MOCK_GID_ATTRS = {
+    '0': {
+        'netdev': 'ens5f0',
+        'type': 'RoCE v2',
+    },
+}
+
 MOCK_DEVICE = 'mlx5_0'
 MOCK_PORT = '1'

@@ -76,6 +76,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
+    health_check_warning_events: Optional[bool] = None
     health_checks_cache_size: Optional[int] = Field(None, ge=1)
     health_checks_cache_ttl: Optional[int] = Field(None, ge=1)
     kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None

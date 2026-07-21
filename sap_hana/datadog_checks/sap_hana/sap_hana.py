@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import division
 
+import functools
+import time
 from collections import defaultdict
 from contextlib import closing
 from datetime import datetime
@@ -25,7 +27,11 @@ from datadog_checks.base.utils.constants import MICROSECOND
 from datadog_checks.base.utils.containers import iter_unique
 
 from . import queries
+from .config_models.instance import CollectSchemas, DataObservability
+from .data_observability import SapHanaDataObservability
+from .diagnose import run_diagnostics
 from .exceptions import OperationalError, QueryExecutionError
+from .schemas import HanaSchemaCollector
 from .utils import compute_percent, positive
 
 
@@ -85,8 +91,20 @@ class SapHanaCheck(AgentCheck):
         # Save master database hostname to act as the default if `use_hana_hostnames` is true
         self._master_hostname = None
 
+        # Schema collection (DBM)
+        collect_schemas = CollectSchemas(**(self.instance.get('collect_schemas') or {}))
+        self._schema_collector = HanaSchemaCollector(self, collect_schemas) if collect_schemas.enabled else None
+        self._schema_collection_interval = int(collect_schemas.collection_interval or 600)
+        self._last_schema_collection_time = 0
+        self._dbms_version = None
+
+        # Data Observability async job (RC-delivered queries)
+        self._do_config = DataObservability(**(self.instance.get('data_observability') or {}))
+        self.data_observability = SapHanaDataObservability(self, self._do_config)
+
         self.check_initializations.append(self.parse_config)
         self.check_initializations.append(self.set_default_methods)
+        self.diagnosis.register(functools.partial(run_diagnostics, self))
 
     def check(self, _):
         if self._only_custom_queries:
@@ -111,6 +129,9 @@ class SapHanaCheck(AgentCheck):
                 except Exception as e:
                     self.log.exception('Unexpected error running `%s`: %s', query_method.__name__, str(e))
                     continue
+            self._maybe_collect_schemas()
+            if self._do_config.enabled:
+                self.data_observability.run_job_loop(self._tags)
         finally:
             if self._connection_lost:
                 self.service_check(
@@ -138,6 +159,12 @@ class SapHanaCheck(AgentCheck):
                 )
                 self._connection_flaked = False
 
+    def cancel(self):
+        # Signal the Data Observability async job to stop so its executor thread is
+        # released when the check is unscheduled (e.g. cluster-agent flavor or one-off
+        # check invocations), instead of leaking the DBMAsyncJob thread pool.
+        self.data_observability.cancel()
+
     def set_default_methods(self):
         self._default_methods.extend(
             [
@@ -158,6 +185,51 @@ class SapHanaCheck(AgentCheck):
 
         if self.logs_enabled:
             self._default_methods.append(self.query_audit_logs)
+
+    # Properties required by SchemaCollector base class
+
+    @property
+    def reported_hostname(self):
+        return self._server
+
+    @property
+    def database_identifier(self):
+        return '{}:{}'.format(self._server, self._port)
+
+    @property
+    def dbms(self):
+        return 'saphana'
+
+    @property
+    def dbms_version(self):
+        if self._dbms_version is None and self._conn is not None:
+            try:
+                with closing(self._conn.cursor()) as cursor:
+                    cursor.execute("SELECT VERSION FROM SYS.M_DATABASE")
+                    row = cursor.fetchone()
+                    self._dbms_version = str(row[0]).split()[0] if row else 'unknown'
+            except Exception:
+                self._dbms_version = 'unknown'
+        return self._dbms_version or 'unknown'
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @property
+    def cloud_metadata(self):
+        return {}
+
+    def _maybe_collect_schemas(self):
+        if not self._schema_collector or not self._conn:
+            return
+        if time.time() - self._last_schema_collection_time < self._schema_collection_interval:
+            return
+        try:
+            self._schema_collector.collect_schemas()
+            self._last_schema_collection_time = time.time()
+        except Exception as e:
+            self.log.error('Error collecting HANA schemas: %s', e)
 
     def query_master_database(self):
         # https://help.sap.com/viewer/4fe29514fd584807ac9f2a04f6754767/2.0.02/en-US/20ae63aa7519101496f6b832ec86afbd.html
@@ -647,39 +719,43 @@ class SapHanaCheck(AgentCheck):
         if password:
             self.register_secret(password)
 
+    def _get_connection_properties(self):
+        """Build hdbcli connection kwargs from instance config, including TLS.
+
+        Extracted so the Data Observability async job can open its own connection
+        (needed for per-query statementTimeout) with the same TLS settings as the
+        main check connection, instead of silently ignoring use_tls/tls_* options.
+        """
+        # https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
+        props = self.instance.get('connection_properties', {}).copy()
+        props.setdefault('address', self._server)
+        props.setdefault('port', self._port)
+        props.setdefault('user', self._username)
+        props.setdefault('password', self._password)
+        timeout_milliseconds = int(self._timeout * 1000)
+        props.setdefault('communicationTimeout', timeout_milliseconds)
+        props.setdefault('nodeConnectTimeout', timeout_milliseconds)
+        if self._use_tls:
+            props.setdefault('encrypt', True)
+            props.setdefault('sslHostNameInCertificate', self._server)
+            props.setdefault('sslSNIHostname', self._server)
+            tls_verify = self.instance.get('tls_verify', True)
+            if not tls_verify:
+                props.setdefault('sslValidateCertificate', False)
+            tls_cert = self.instance.get('tls_cert')
+            if tls_cert:
+                props.setdefault('sslKeyStore', tls_cert)
+            tls_ca_cert = self.instance.get('tls_ca_cert')
+            if tls_ca_cert:
+                props.setdefault('sslTrustStore', tls_ca_cert)
+            elif not props.get('sslUseDefaultTrustStore', True):
+                props.setdefault('sslTrustStore', certifi.where())
+        return props
+
     def get_connection(self):
         if HanaConnection is None:
             raise CheckException("hdbcli is not installed. Check the integration documentation to install it.")
-        # https://help.sap.com/viewer/f1b440ded6144a54ada97ff95dac7adf/2.10/en-US/ee592e89dcce4480a99571a4ae7a702f.html
-        connection_properties = self.instance.get('connection_properties', {}).copy()
-
-        connection_properties.setdefault('address', self._server)
-        connection_properties.setdefault('port', self._port)
-        connection_properties.setdefault('user', self._username)
-        connection_properties.setdefault('password', self._password)
-
-        timeout_milliseconds = int(self._timeout * 1000)
-        connection_properties.setdefault('communicationTimeout', timeout_milliseconds)
-        connection_properties.setdefault('nodeConnectTimeout', timeout_milliseconds)
-
-        if self._use_tls:
-            connection_properties.setdefault('encrypt', True)
-            connection_properties.setdefault('sslHostNameInCertificate', self._server)
-            connection_properties.setdefault('sslSNIHostname', self._server)
-
-            tls_verify = self.instance.get('tls_verify', True)
-            if not tls_verify:
-                connection_properties.setdefault('sslValidateCertificate', False)
-
-            tls_cert = self.instance.get('tls_cert')
-            if tls_cert:
-                connection_properties.setdefault('sslKeyStore', tls_cert)
-
-            tls_ca_cert = self.instance.get('tls_ca_cert')
-            if tls_ca_cert:
-                connection_properties.setdefault('sslTrustStore', tls_ca_cert)
-            elif not connection_properties.get('sslUseDefaultTrustStore', True):
-                connection_properties.setdefault('sslTrustStore', certifi.where())
+        connection_properties = self._get_connection_properties()
 
         try:
             connection = HanaConnection(**connection_properties)

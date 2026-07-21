@@ -22,6 +22,7 @@
       "Category::Log Collection",
       "Category::Security",
       "Category::Cloud",
+      "Category::SIEM",
       "Offering::Integration",
       "Submitted Data Type::Logs"
     ]

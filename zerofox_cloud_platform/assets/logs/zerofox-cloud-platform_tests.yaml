@@ -93,18 +93,18 @@ tests:
       last_modified: "2025-02-26T14:27:56Z"
       logs:
        -
-        actor: "ZeroFox Platform Specialist"
-        subject: ""
         action: "modify tags"
-        id: 1234567890
+        actor: "ZeroFox Platform Specialist"
         detail: ""
+        id: 1234567890
+        subject: ""
         timestamp: "2023-01-25T00:40:24+00:00"
        -
-        actor: ""
-        subject: ""
         action: "open"
-        id: 1234567290
+        actor: ""
         detail: ""
+        id: 1234567290
+        subject: ""
         timestamp: "2023-01-25T00:40:24+00:00"
       network: "domains"
       notes: ""
@@ -299,25 +299,25 @@ tests:
       last_modified: "2025-02-26T14:27:56Z"
       logs:
        -
-        actor: ""
-        subject: ""
         action: "review"
-        id: 1234567390
-        detail: ""
-        timestamp: "2023-01-25T00:40:24+00:00"
-       -
-        actor: "ZeroFox Platform Specialist"
-        subject: ""
-        action: "modify tags"
-        id: 1234567890
-        detail: ""
-        timestamp: "2023-01-25T00:40:24+00:00"
-       -
         actor: ""
-        subject: ""
-        action: "open"
-        id: 1234567490
         detail: ""
+        id: 1234567390
+        subject: ""
+        timestamp: "2023-01-25T00:40:24+00:00"
+       -
+        action: "modify tags"
+        actor: "ZeroFox Platform Specialist"
+        detail: ""
+        id: 1234567890
+        subject: ""
+        timestamp: "2023-01-25T00:40:24+00:00"
+       -
+        action: "open"
+        actor: ""
+        detail: ""
+        id: 1234567490
+        subject: ""
         timestamp: "2023-01-25T00:40:24+00:00"
       network: "twitter"
       notes: ""

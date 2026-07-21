@@ -1,0 +1,160 @@
+# This file contains a mapping of DataDog Github teams to slack channels.
+# Each team has a 'notification' channel (for CI/pipeline alerts) and a 'review' channel (for PR reviews).
+# The DEFAULT_SLACK_CHANNEL value is interpreted as '#agent-devx-ops'.
+# Note that the values must be quoted if they contain a '#' symbol, because
+# YAML interprets that as the beginning of a comment. Keys must also be quoted
+# because the '@' symbol is reserved in YAML.
+'@datadog/agent-build':
+  notification:
+    name: '#agent-build-ops'
+    id: 'C08T0U0079Q'
+  review:
+    name: '#agent-build-reviews'
+    id: 'C08SK57TL1M'
+'@datadog/agent-integrations':
+  notification:
+    name: '#agent-integrations'
+    id: 'C9WBCH0AF'
+  review:
+    name: '#agent-integrations-reviews'
+    id: 'C06E366NH2B'
+'@datadog/container-ecosystems':
+  notification:
+    name: '#telemetry-onboarding'
+    id: 'C0ACU5FGE3H'
+  review:
+    name: '#telemetry-onboarding'
+    id: 'C0ACU5FGE3H'
+'@datadog/container-integrations':
+  notification:
+    name: '#container-integrations'
+    id: 'C4TQDFK1P'
+  review:
+    name: '#container-integrations'
+    id: 'C4TQDFK1P'
+'@datadog/container-platform':
+  notification:
+    name: '#container-platform'
+    id: 'C0702JHC7G8'
+  review:
+    name: '#container-platform'
+    id: 'C0702JHC7G8'
+'@datadog/data-observability':
+  notification:
+    name: '#data-observability-ops'
+    id: 'C08KJQRNRJ6'
+  review:
+    name: '#data-observability-dev'
+    id: 'C05VB5B6U1H'
+'@datadog/data-streams-monitoring':
+  notification:
+    name: '#data-streams-monitoring'
+    id: 'C02FFNF9VN0'
+  review:
+    name: '#data-streams-monitoring'
+    id: 'C02FFNF9VN0'
+'@datadog/database-monitoring':
+  notification:
+    name: '#database-monitoring'
+    id: 'C011QG8MJBA'
+  review:
+    name: '#database-monitoring'
+    id: 'C011QG8MJBA'
+'@datadog/database-monitoring-agent':
+  notification:
+    name: '#database-monitoring'
+    id: 'C011QG8MJBA'
+  review:
+    name: '#database-monitoring'
+    id: 'C011QG8MJBA'
+'@datadog/documentation':
+  notification:
+    name: 'DEFAULT_SLACK_CHANNEL'
+    id: 'C0795C1C2AE'
+  review:
+    name: '#documentation'
+    id: 'C0DESMBQU'
+'@datadog/ebpf-platform':
+  notification:
+    name: '#ebpf-platform-ops'
+    id: 'C04NAC0JVMM'
+  review:
+    name: '#ebpf-platform'
+    id: 'C0424HA1SJK'
+'@datadog/logs-backend':
+  notification:
+    name: '#logs-core'
+    id: 'C03A4P0207Q'
+  review:
+    name: '#logs-core'
+    id: 'C03A4P0207Q'
+'@datadog/logs-core':
+  notification:
+    name: '#logs-core'
+    id: 'C03A4P0207Q'
+  review:
+    name: '#logs-core'
+    id: 'C03A4P0207Q'
+'@datadog/logs-integrations-reviewers':
+  notification:
+    name: '#agent-integrations'
+    id: 'C9WBCH0AF'
+  review:
+    name: '#agent-integrations-reviews'
+    id: 'C06E366NH2B'
+'@datadog/ml-observability':
+  notification:
+    name: '#ml-obs'
+    id: 'C05BF5NSM5Z'
+  review:
+    name: '#ml-obs'
+    id: 'C05BF5NSM5Z'
+'@datadog/ndm-integrations':
+  notification:
+    name: '#ndm-integrations'
+    id: 'C07S0UH4R0C'
+  review:
+    name: '#ndm-integrations'
+    id: 'C07S0UH4R0C'
+'@datadog/network-device-monitoring-core':
+  notification:
+    name: '#ndm-core'
+    id: 'C07RHJTEFRD'
+  review:
+    name: '#ndm-core'
+    id: 'C07RHJTEFRD'
+'@datadog/network-path':
+  notification:
+    name: '#network-path-dev'
+    id: 'C06GLJ7SHM3'
+  review:
+    name: '#network-path-dev'
+    id: 'C06GLJ7SHM3'
+'@datadog/new-workloads':
+  notification:
+    name: '#new-workloads'
+    id: 'C07KTCNTMU4'
+  review:
+    name: '#new-workloads'
+    id: 'C07KTCNTMU4'
+'@datadog/opentelemetry':
+  notification:
+    name: '#opentelemetry-ops'
+    id: 'C045DGB1V39'
+  review:
+    name: '#opentelemetry-ops'
+    id: 'C045DGB1V39'
+'@datadog/saas-integrations':
+  notification:
+    name: '#saas-integrations'
+    id: 'C4V2P3SUB'
+  review:
+    name: '#saas-integrations'
+    id: 'C4V2P3SUB'
+'@datadog/windows-products':
+  notification:
+    name: '#windows-products-ops'
+    id: 'C097S0V4KHR'
+  review:
+    name: '#windows-products-reviews'
+    id: 'C0983QTJJJ0'

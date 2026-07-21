@@ -1,0 +1,2745 @@
+id: "anthropic-compliance-logs"
+tests:
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+      },
+      "claude_artifact_id" : "claude_artifact_01EXAMPLEARTIFACT0",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:25:13.701734Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_artifact_viewed"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_artifact_id: "claude_artifact_01EXAMPLEARTIFACT0"
+      created_at: "2026-05-22T15:25:13.701734Z"
+      evt:
+        name: "claude_artifact_viewed"
+      http:
+        useragent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+        useragent_details:
+          browser:
+            family: "Chrome"
+            major: "148"
+            minor: "0"
+            patch: "0"
+            patch_minor: "0"
+          device:
+            brand: "Apple"
+            category: "Desktop"
+            family: "Mac"
+            model: "Mac"
+          os:
+            family: "Mac OS X"
+            major: "10"
+            minor: "15"
+            patch: "7"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 2
+        activity_name: "Read"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+        metadata:
+          event_code: "claude_artifact_viewed"
+          original_time: "2026-05-22T15:25:13.701734Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463513701
+        web_resources:
+          - uid: "claude_artifact_01EXAMPLEARTIFACT0"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_artifact_viewed"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
+        },
+        "claude_artifact_id" : "claude_artifact_01EXAMPLEARTIFACT0",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:25:13.701734Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_artifact_viewed"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463513701
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:54.358426Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_chat_created",
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0 Claude/1.3883.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
+      created_at: "2026-05-22T15:21:54.358426Z"
+      evt:
+        name: "claude_chat_created"
+      http:
+        useragent: "Mozilla/5.0 Claude/1.3883.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0 Claude/1.3883.0"
+        metadata:
+          event_code: "claude_chat_created"
+          original_time: "2026-05-22T15:21:54.358426Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463314358
+        web_resources:
+          - uid: "claude_chat_01EXAMPLECHATID000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_chat_created"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:54.358426Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_chat_created",
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463314358
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 Claude/1.5354.0"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:03.415347Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_chat_deleted",
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0 Claude/1.5354.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
+      created_at: "2026-05-22T15:21:03.415347Z"
+      evt:
+        name: "claude_chat_deleted"
+      http:
+        useragent: "Mozilla/5.0 Claude/1.5354.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 4
+        activity_name: "Delete"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0 Claude/1.5354.0"
+        metadata:
+          event_code: "claude_chat_deleted"
+          original_time: "2026-05-22T15:21:03.415347Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463263415
+        web_resources:
+          - uid: "claude_chat_01EXAMPLECHATID000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_chat_deleted"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 Claude/1.5354.0"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:03.415347Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_chat_deleted",
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463263415
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:44.621308Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_chat_updated",
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
+      claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
+      created_at: "2026-05-22T15:21:44.621308Z"
+      evt:
+        name: "claude_chat_updated"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 3
+        activity_name: "Update"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_chat_updated"
+          original_time: "2026-05-22T15:21:44.621308Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463304621
+        web_resources:
+          - uid: "claude_chat_01EXAMPLECHATID000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_chat_updated"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:44.621308Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_chat_updated",
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463304621
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:53.556370Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_chat_viewed",
+      "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_chat_id: "claude_chat_01EXAMPLECHATID000000"
+      created_at: "2026-05-22T15:21:53.556370Z"
+      evt:
+        name: "claude_chat_viewed"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 2
+        activity_name: "Read"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_chat_viewed"
+          original_time: "2026-05-22T15:21:53.556370Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463313556
+        web_resources:
+          - uid: "claude_chat_01EXAMPLECHATID000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_chat_viewed"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:53.556370Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_chat_viewed",
+        "claude_chat_id" : "claude_chat_01EXAMPLECHATID000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463313556
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "filename" : "example-image.png",
+      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:32.702968Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_file_uploaded"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_file_id: "claude_file_01EXAMPLEFILEID000000"
+      created_at: "2026-05-22T15:21:32.702968Z"
+      evt:
+        name: "claude_file_uploaded"
+      filename: "example-image.png"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_file_uploaded"
+          original_time: "2026-05-22T15:21:32.702968Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463292702
+        web_resources:
+          - name: "example-image.png"
+            uid: "claude_file_01EXAMPLEFILEID000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_file_uploaded"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "filename" : "example-image.png",
+        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:32.702968Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_file_uploaded"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463292702
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
+      },
+      "filename" : "example-screenshot.png",
+      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:50.616332Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_file_viewed"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0 Claude/1.3883.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_file_id: "claude_file_01EXAMPLEFILEID000000"
+      created_at: "2026-05-22T15:21:50.616332Z"
+      evt:
+        name: "claude_file_viewed"
+      filename: "example-screenshot.png"
+      http:
+        useragent: "Mozilla/5.0 Claude/1.3883.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 2
+        activity_name: "Read"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0 Claude/1.3883.0"
+        metadata:
+          event_code: "claude_file_viewed"
+          original_time: "2026-05-22T15:21:50.616332Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463310616
+        web_resources:
+          - name: "example-screenshot.png"
+            uid: "claude_file_01EXAMPLEFILEID000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_file_viewed"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
+        },
+        "filename" : "example-screenshot.png",
+        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:50.616332Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_file_viewed"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463310616
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:10.594873Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_project_created"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
+      created_at: "2026-05-22T15:21:10.594873Z"
+      evt:
+        name: "claude_project_created"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_project_created"
+          original_time: "2026-05-22T15:21:10.594873Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463270594
+        web_resources:
+          - uid: "claude_proj_01EXAMPLEPROJECT00000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_project_created"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:10.594873Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_project_created"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463270594
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "filename" : "example-document.pdf",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:23:05.845058Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_project_document_uploaded",
+      "claude_project_document_id" : "claude_proj_doc_01EXAMPLEDOC0000000000"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_project_document_id: "claude_proj_doc_01EXAMPLEDOC0000000000"
+      claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
+      created_at: "2026-05-22T15:23:05.845058Z"
+      evt:
+        name: "claude_project_document_uploaded"
+      filename: "example-document.pdf"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_project_document_uploaded"
+          original_time: "2026-05-22T15:23:05.845058Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463385845
+        web_resources:
+          - name: "example-document.pdf"
+            uid: "claude_proj_doc_01EXAMPLEDOC0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_project_document_uploaded"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "filename" : "example-document.pdf",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:23:05.845058Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_project_document_uploaded",
+        "claude_project_document_id" : "claude_proj_doc_01EXAMPLEDOC0000000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463385845
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "filename" : "example-file.txt",
+      "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:20:23.462825Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_project_file_uploaded"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_file_id: "claude_file_01EXAMPLEFILEID000000"
+      claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
+      created_at: "2026-05-22T15:20:23.462825Z"
+      evt:
+        name: "claude_project_file_uploaded"
+      filename: "example-file.txt"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_project_file_uploaded"
+          original_time: "2026-05-22T15:20:23.462825Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463223462
+        web_resources:
+          - name: "example-file.txt"
+            uid: "claude_file_01EXAMPLEFILEID000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "claude_project_file_uploaded"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "filename" : "example-file.txt",
+        "claude_file_id" : "claude_file_01EXAMPLEFILEID000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:20:23.462825Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_project_file_uploaded"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463223462
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "preview_only" : false,
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:48.506301Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_project_viewed"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      claude_project_id: "claude_proj_01EXAMPLEPROJECT00000"
+      created_at: "2026-05-22T15:21:48.506301Z"
+      evt:
+        name: "claude_project_viewed"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 2
+        activity_name: "Read"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_project_viewed"
+          original_time: "2026-05-22T15:21:48.506301Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463308506
+        web_resources:
+          - uid: "claude_proj_01EXAMPLEPROJECT00000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      preview_only: false
+      type: "claude_project_viewed"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "claude_project_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "preview_only" : false,
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:48.506301Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_project_viewed"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463308506
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "skill_name" : "example-skill-name",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:44.267747Z",
+      "skill_id" : "skill_01EXAMPLESKILLID00000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_skill_created"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0 Claude/1.3883.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-05-22T15:21:44.267747Z"
+      evt:
+        name: "claude_skill_created"
+      http:
+        useragent: "Mozilla/5.0 Claude/1.3883.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0 Claude/1.3883.0"
+        metadata:
+          event_code: "claude_skill_created"
+          original_time: "2026-05-22T15:21:44.267747Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463304267
+        web_resources:
+          - name: "example-skill-name"
+            uid: "skill_01EXAMPLESKILLID00000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      skill_id: "skill_01EXAMPLESKILLID00000000"
+      skill_name: "example-skill-name"
+      type: "claude_skill_created"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 Claude/1.3883.0"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "skill_name" : "example-skill-name",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:44.267747Z",
+        "skill_id" : "skill_01EXAMPLESKILLID00000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_skill_created"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463304267
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 Claude/1.7196.1"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "skill_name" : "example-skill-name",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:17.287525Z",
+      "skill_id" : "skill_01EXAMPLESKILLID00000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_skill_replaced"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0 Claude/1.7196.1"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-05-22T15:21:17.287525Z"
+      evt:
+        name: "claude_skill_replaced"
+      http:
+        useragent: "Mozilla/5.0 Claude/1.7196.1"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 3
+        activity_name: "Update"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "Web Resources Activity"
+        class_uid: 6001
+        http_request:
+          user_agent: "Mozilla/5.0 Claude/1.7196.1"
+        metadata:
+          event_code: "claude_skill_replaced"
+          original_time: "2026-05-22T15:21:17.287525Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+          owner:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        status: "Success"
+        status_id: 1
+        time: 1779463277287
+        web_resources:
+          - name: "example-skill-name"
+            uid: "skill_01EXAMPLESKILLID00000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      skill_id: "skill_01EXAMPLESKILLID00000000"
+      skill_name: "example-skill-name"
+      type: "claude_skill_replaced"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 Claude/1.7196.1"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "skill_name" : "example-skill-name",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:17.287525Z",
+        "skill_id" : "skill_01EXAMPLESKILLID00000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_skill_replaced"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463277287
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "created_at" : "2026-05-22T15:21:50.371418Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "claude_user_settings_updated",
+      "updates" : [ {
+        "previous_value" : {
+          "example_tool" : false
+        },
+        "type" : "mcp_tools_enabled",
+        "current_value" : {
+          "example_tool" : true
+        }
+      } ]
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-05-22T15:21:50.371418Z"
+      evt:
+        name: "claude_user_settings_updated"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 99
+        activity_name: "claude_user_settings_updated"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "claude_user_settings_updated"
+          original_time: "2026-05-22T15:21:50.371418Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Success"
+        status_id: 1
+        time: 1779463310371
+        user:
+          email_addr: "user@example.com"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      type: "claude_user_settings_updated"
+      updates:
+        - current_value:
+            example_tool: true
+          previous_value:
+            example_tool: false
+          type: "mcp_tools_enabled"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "created_at" : "2026-05-22T15:21:50.371418Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "claude_user_settings_updated",
+        "updates" : [ {
+          "previous_value" : {
+            "example_tool" : false
+          },
+          "type" : "mcp_tools_enabled",
+          "current_value" : {
+            "example_tool" : true
+          }
+        } ]
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463310371
+ -
+  sample: |-
+    {
+      "actor" : {
+        "ip_address" : "192.0.2.1",
+        "type" : "api_actor",
+        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
+        "user_agent" : "example-client/1.0"
+      },
+      "status_code" : 200,
+      "created_at" : "2026-05-22T15:21:38.920308Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "request_method" : "GET",
+      "type" : "compliance_api_accessed",
+      "request_id" : "req_011CbEXAMPLEREQUEST00000",
+      "url" : "https://api.anthropic.com/v1/compliance/activities?<query-redacted>"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        api_key_id: "apikey_01EXAMPLEAPIKEY000000000"
+        ip_address: "192.0.2.1"
+        type: "api_actor"
+        user_agent: "example-client/1.0"
+      created_at: "2026-05-22T15:21:38.920308Z"
+      evt:
+        name: "compliance_api_accessed"
+      http:
+        useragent: "example-client/1.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 2
+        activity_name: "Read"
+        actor:
+          app_uid: "apikey_01EXAMPLEAPIKEY000000000"
+          user:
+            type: "api_actor"
+            type_id: 99
+            uid: "apikey_01EXAMPLEAPIKEY000000000"
+        api:
+          operation: "GET"
+          request:
+            uid: "req_011CbEXAMPLEREQUEST00000"
+          response:
+            code: 200
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "API Activity"
+        class_uid: 6003
+        http_request:
+          http_method: "GET"
+          uid: "req_011CbEXAMPLEREQUEST00000"
+          url:
+            url_string: "https://api.anthropic.com/v1/compliance/activities?<query-redacted>"
+          user_agent: "example-client/1.0"
+        http_response:
+          code: 200
+        metadata:
+          event_code: "compliance_api_accessed"
+          original_time: "2026-05-22T15:21:38.920308Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Success"
+        status_id: 1
+        time: 1779463298920
+      request_id: "req_011CbEXAMPLEREQUEST00000"
+      request_method: "GET"
+      status_code: 200
+      type: "compliance_api_accessed"
+      url: "https://api.anthropic.com/v1/compliance/activities?<query-redacted>"
+    message: |-
+      {
+        "actor" : {
+          "ip_address" : "192.0.2.1",
+          "type" : "api_actor",
+          "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000",
+          "user_agent" : "example-client/1.0"
+        },
+        "status_code" : 200,
+        "created_at" : "2026-05-22T15:21:38.920308Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "request_method" : "GET",
+        "type" : "compliance_api_accessed",
+        "request_id" : "req_011CbEXAMPLEREQUEST00000",
+        "url" : "https://api.anthropic.com/v1/compliance/activities?<query-redacted>"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463298920
+ -
+  sample: |-
+    {
+      "actor" : {
+        "admin_api_key_id" : "admin_api_key_01EXAMPLEADMIN0000",
+        "ip_address" : "192.0.2.1",
+        "type" : "admin_api_key_actor",
+        "user_agent" : "python-requests/2.32.5"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:07:03.419782Z",
+      "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "org_user_deleted"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        admin_api_key_id: "admin_api_key_01EXAMPLEADMIN0000"
+        ip_address: "192.0.2.1"
+        type: "admin_api_key_actor"
+        user_agent: "python-requests/2.32.5"
+      created_at: "2026-05-22T15:07:03.419782Z"
+      deleted_user_id: "user_01EXAMPLEUSERID0000000000"
+      evt:
+        name: "org_user_deleted"
+      http:
+        useragent: "python-requests/2.32.5"
+        useragent_details:
+          browser:
+            family: "Python Requests"
+            major: "2"
+            minor: "32"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 6
+        activity_name: "Delete"
+        actor:
+          user:
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "Admin"
+            type_id: 2
+            uid: "admin_api_key_01EXAMPLEADMIN0000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        http_request:
+          user_agent: "python-requests/2.32.5"
+        metadata:
+          event_code: "org_user_deleted"
+          original_time: "2026-05-22T15:07:03.419782Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Success"
+        status_id: 1
+        time: 1779462423419
+        user:
+          uid: "user_01EXAMPLEUSERID0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "org_user_deleted"
+    message: |-
+      {
+        "actor" : {
+          "admin_api_key_id" : "admin_api_key_01EXAMPLEADMIN0000",
+          "ip_address" : "192.0.2.1",
+          "type" : "admin_api_key_actor",
+          "user_agent" : "python-requests/2.32.5"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:07:03.419782Z",
+        "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "org_user_deleted"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779462423419
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "deleted_user_email" : "user@example.com",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-04-22T12:38:58.658822Z",
+      "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "org_user_deleted"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-04-22T12:38:58.658822Z"
+      deleted_user_email: "user@example.com"
+      deleted_user_id: "user_01EXAMPLEUSERID0000000000"
+      evt:
+        name: "org_user_deleted"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 6
+        activity_name: "Delete"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "org_user_deleted"
+          original_time: "2026-04-22T12:38:58.658822Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Success"
+        status_id: 1
+        time: 1776861538658
+        user:
+          email_addr: "user@example.com"
+          name: "user@example.com"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "org_user_deleted"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "deleted_user_email" : "user@example.com",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-04-22T12:38:58.658822Z",
+        "deleted_user_id" : "user_01EXAMPLEUSERID0000000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "org_user_deleted"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1776861538658
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "invite_id" : "invite_01EXAMPLEINVITE0000000000",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-15T15:22:37.490878Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "org_user_invite_accepted"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-05-15T15:22:37.490878Z"
+      evt:
+        name: "org_user_invite_accepted"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      invite_id: "invite_01EXAMPLEINVITE0000000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "org_user_invite_accepted"
+          original_time: "2026-05-15T15:22:37.490878Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Success"
+        status_id: 1
+        time: 1778858557490
+        user:
+          email_addr: "user@example.com"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "org_user_invite_accepted"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "invite_id" : "invite_01EXAMPLEINVITE0000000000",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-15T15:22:37.490878Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "org_user_invite_accepted"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1778858557490
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "invited_role" : "owner",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-15T15:22:11.738584Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "invited_email" : "invitee@example.com",
+      "type" : "org_user_invite_sent"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-05-15T15:22:11.738584Z"
+      evt:
+        name: "org_user_invite_sent"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      invited_email: "invitee@example.com"
+      invited_role: "owner"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "org_user_invite_sent"
+          original_time: "2026-05-15T15:22:11.738584Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+        status: "Success"
+        status_id: 1
+        time: 1778858531738
+        user:
+          email_addr: "invitee@example.com"
+          name: "invitee@example.com"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "org_user_invite_sent"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "invited_role" : "owner",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-15T15:22:11.738584Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "invited_email" : "invitee@example.com",
+        "type" : "org_user_invite_sent"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1778858531738
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:21:23.115384Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "platform_api_key_created",
+      "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      api_key_id: "apikey_01EXAMPLEAPIKEY000000000"
+      created_at: "2026-05-22T15:21:23.115384Z"
+      evt:
+        name: "platform_api_key_created"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "platform_api_key_created"
+          original_time: "2026-05-22T15:21:23.115384Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+        status: "Success"
+        status_id: 1
+        time: 1779463283115
+        user:
+          email_addr: "user@example.com"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "platform_api_key_created"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:21:23.115384Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "platform_api_key_created",
+        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463283115
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "created_at" : "2026-05-22T15:23:11.707169Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "platform_api_key_updated",
+      "updates" : [ {
+        "previous_value" : "active",
+        "type" : "status",
+        "current_value" : "archived"
+      } ],
+      "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      api_key_id: "apikey_01EXAMPLEAPIKEY000000000"
+      created_at: "2026-05-22T15:23:11.707169Z"
+      evt:
+        name: "platform_api_key_updated"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 5
+        activity_name: "Disable"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            org:
+              uid: "org_01EXAMPLEORGID00000000000"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Account Change"
+        class_uid: 3001
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "platform_api_key_updated"
+          original_time: "2026-05-22T15:23:11.707169Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+        status: "Success"
+        status_id: 1
+        time: 1779463391707
+        user:
+          email_addr: "user@example.com"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      type: "platform_api_key_updated"
+      updates:
+        - current_value: "archived"
+          previous_value: "active"
+          type: "status"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "created_at" : "2026-05-22T15:23:11.707169Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "platform_api_key_updated",
+        "updates" : [ {
+          "previous_value" : "active",
+          "type" : "status",
+          "current_value" : "archived"
+        } ],
+        "api_key_id" : "apikey_01EXAMPLEAPIKEY000000000"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463391707
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "2001:db8::1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "role" : "chat_project:owner",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "resource_type" : "chat_project",
+      "target_type" : "organization_member",
+      "created_at" : "2026-05-22T15:21:10.596119Z",
+      "resource_id" : "claude_proj_01EXAMPLEPROJECT00000",
+      "target_id" : "user_01EXAMPLEUSERID0000000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "role_assignment_granted"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "2001:db8::1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-05-22T15:21:10.596119Z"
+      evt:
+        name: "role_assignment_granted"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "2001:db8::1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Assign Privileges"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "User Access Management"
+        class_uid: 3005
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "role_assignment_granted"
+          original_time: "2026-05-22T15:21:10.596119Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        privileges:
+         - "chat_project:owner"
+        resources:
+          - type: "chat_project"
+            uid: "claude_proj_01EXAMPLEPROJECT00000"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "2001:db8::1"
+        status: "Success"
+        status_id: 1
+        time: 1779463270596
+        user:
+          org:
+            uid: "org_01EXAMPLEORGID00000000000"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      resource_id: "claude_proj_01EXAMPLEPROJECT00000"
+      resource_type: "chat_project"
+      role: "chat_project:owner"
+      target_id: "user_01EXAMPLEUSERID0000000000"
+      target_type: "organization_member"
+      type: "role_assignment_granted"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "2001:db8::1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "role" : "chat_project:owner",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "resource_type" : "chat_project",
+        "target_type" : "organization_member",
+        "created_at" : "2026-05-22T15:21:10.596119Z",
+        "resource_id" : "claude_proj_01EXAMPLEPROJECT00000",
+        "target_id" : "user_01EXAMPLEUSERID0000000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "role_assignment_granted"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463270596
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0 Claude/1.6259.0"
+      },
+      "role" : "skill:viewer",
+      "organization_id" : "org_01EXAMPLEORGID00000000000",
+      "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+      "resource_type" : "skill",
+      "target_type" : "organization_member",
+      "created_at" : "2026-05-21T20:47:11.194821Z",
+      "resource_id" : "skill_01EXAMPLESKILLID00000000",
+      "target_id" : "user_01EXAMPLEUSERID0000000000",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "role_assignment_revoked"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0 Claude/1.6259.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      created_at: "2026-05-21T20:47:11.194821Z"
+      evt:
+        name: "role_assignment_revoked"
+      http:
+        useragent: "Mozilla/5.0 Claude/1.6259.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 2
+        activity_name: "Revoke Privileges"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "User Access Management"
+        class_uid: 3005
+        http_request:
+          user_agent: "Mozilla/5.0 Claude/1.6259.0"
+        metadata:
+          event_code: "role_assignment_revoked"
+          original_time: "2026-05-21T20:47:11.194821Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        privileges:
+         - "skill:viewer"
+        resources:
+          - type: "skill"
+            uid: "skill_01EXAMPLESKILLID00000000"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Success"
+        status_id: 1
+        time: 1779396431194
+        user:
+          org:
+            uid: "org_01EXAMPLEORGID00000000000"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      organization_id: "org_01EXAMPLEORGID00000000000"
+      organization_uuid: "00000000-0000-0000-0000-000000000000"
+      resource_id: "skill_01EXAMPLESKILLID00000000"
+      resource_type: "skill"
+      role: "skill:viewer"
+      target_id: "user_01EXAMPLEUSERID0000000000"
+      target_type: "organization_member"
+      type: "role_assignment_revoked"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0 Claude/1.6259.0"
+        },
+        "role" : "skill:viewer",
+        "organization_id" : "org_01EXAMPLEORGID00000000000",
+        "organization_uuid" : "00000000-0000-0000-0000-000000000000",
+        "resource_type" : "skill",
+        "target_type" : "organization_member",
+        "created_at" : "2026-05-21T20:47:11.194821Z",
+        "resource_id" : "skill_01EXAMPLESKILLID00000000",
+        "target_id" : "user_01EXAMPLEUSERID0000000000",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "role_assignment_revoked"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779396431194
+ -
+  sample: |-
+    {
+      "actor" : {
+        "unauthenticated_email_address" : "user@example.com",
+        "ip_address" : "192.0.2.1",
+        "type" : "unauthenticated_user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "created_at" : "2026-05-22T15:19:09.946100Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "sso_login_initiated"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        ip_address: "192.0.2.1"
+        type: "unauthenticated_user_actor"
+        unauthenticated_email_address: "user@example.com"
+        user_agent: "Mozilla/5.0"
+      created_at: "2026-05-22T15:19:09.946100Z"
+      evt:
+        name: "sso_login_initiated"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            name: "user@example.com"
+            type: "unauthenticated_user_actor"
+            type_id: 99
+        auth_protocol: "SAML"
+        auth_protocol_id: 5
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "sso_login_initiated"
+          original_time: "2026-05-22T15:19:09.946100Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        service:
+          name: "Claude"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Unknown"
+        status_id: 0
+        time: 1779463149946
+        user:
+          email_addr: "user@example.com"
+          name: "user@example.com"
+      type: "sso_login_initiated"
+    message: |-
+      {
+        "actor" : {
+          "unauthenticated_email_address" : "user@example.com",
+          "ip_address" : "192.0.2.1",
+          "type" : "unauthenticated_user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "created_at" : "2026-05-22T15:19:09.946100Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "sso_login_initiated"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463149946
+ -
+  sample: |-
+    {
+      "actor" : {
+        "email_address" : "user@example.com",
+        "user_id" : "user_01EXAMPLEUSERID0000000000",
+        "ip_address" : "192.0.2.1",
+        "type" : "user_actor",
+        "user_agent" : "Mozilla/5.0"
+      },
+      "auth_method" : "sso",
+      "created_at" : "2026-05-22T15:19:14.445010Z",
+      "id" : "activity_01EXAMPLEACTIVITY0000000",
+      "type" : "sso_login_succeeded"
+    }
+  tags:
+   - "source:LOGS_SOURCE"
+  result:
+    custom:
+      actor:
+        email_address: "user@example.com"
+        ip_address: "192.0.2.1"
+        type: "user_actor"
+        user_agent: "Mozilla/5.0"
+        user_id: "user_01EXAMPLEUSERID0000000000"
+      auth_method: "sso"
+      created_at: "2026-05-22T15:19:14.445010Z"
+      evt:
+        name: "sso_login_succeeded"
+      http:
+        useragent: "Mozilla/5.0"
+        useragent_details:
+          browser:
+            family: "Other"
+          device:
+            category: "Other"
+            family: "Other"
+          os:
+            family: "Other"
+      id: "activity_01EXAMPLEACTIVITY0000000"
+      network:
+        client:
+          geoip: {}
+          ip: "192.0.2.1"
+      ocsf:
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            email_addr: "user@example.com"
+            name: "user@example.com"
+            type: "User"
+            type_id: 1
+            uid: "user_01EXAMPLEUSERID0000000000"
+        auth_protocol: "SAML"
+        auth_protocol_id: 5
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        http_request:
+          user_agent: "Mozilla/5.0"
+        metadata:
+          event_code: "sso_login_succeeded"
+          original_time: "2026-05-22T15:19:14.445010Z"
+          product:
+            name: "Claude"
+            vendor_name: "Anthropic"
+          uid: "activity_01EXAMPLEACTIVITY0000000"
+          version: "1.5.0"
+        service:
+          name: "Claude"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "192.0.2.1"
+        status: "Success"
+        status_id: 1
+        time: 1779463154445
+        user:
+          email_addr: "user@example.com"
+          name: "user@example.com"
+          uid: "user_01EXAMPLEUSERID0000000000"
+      type: "sso_login_succeeded"
+      usr:
+        email: "user@example.com"
+        id: "user_01EXAMPLEUSERID0000000000"
+    message: |-
+      {
+        "actor" : {
+          "email_address" : "user@example.com",
+          "user_id" : "user_01EXAMPLEUSERID0000000000",
+          "ip_address" : "192.0.2.1",
+          "type" : "user_actor",
+          "user_agent" : "Mozilla/5.0"
+        },
+        "auth_method" : "sso",
+        "created_at" : "2026-05-22T15:19:14.445010Z",
+        "id" : "activity_01EXAMPLEACTIVITY0000000",
+        "type" : "sso_login_succeeded"
+      }
+    tags:
+     - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
+    timestamp: 1779463154445

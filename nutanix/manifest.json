@@ -62,7 +62,9 @@
         "Nutanix - Overview": "assets/dashboards/nutanix_overview.json",
         "Nutanix - Activity Monitoring": "assets/dashboards/nutanix_activity_monitoring.json"
     },
-    "monitors": {},
+    "monitors": {
+        "Nutanix alert is open": "assets/monitors/alerts.json"
+    },
     "saved_views": {}
   },
   "author": {

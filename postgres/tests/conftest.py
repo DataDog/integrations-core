@@ -175,7 +175,7 @@ def e2e_instance():
 def reset_pg_stat_statements(pg_instance):
     """
     Resets pg_stat_statements before each test to ensure clean state.
-    This prevents test isolation issues when incremental_query_metrics is enabled.
+    This prevents test isolation issues when the optimized query metrics collector is enabled.
 
     Usage: Add this fixture as a parameter to any test that needs a clean pg_stat_statements state.
     """

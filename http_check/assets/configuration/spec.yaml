@@ -167,12 +167,14 @@ files:
         the warning threshold for the HTTP check in second
       value:
         type: integer
+      fleet_configurable: false
     - name: seconds_critical
       description: |
         Alternatively to days_critical, seconds_warning expresses
         the critical threshold for the HTTP check in second
       value:
         type: integer
+      fleet_configurable: false
     - name: ssl_server_name
       description: |
         If necessary and check_hostname is set to true,
@@ -187,6 +189,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: include_default_headers
       description: |
         The (optional) include_default_headers parameter instructs the check to include the default headers.

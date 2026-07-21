@@ -228,6 +228,7 @@ files:
             type: string
             example: aws_msk_iam
             display_default: oidc
+          fleet_configurable: false
         - name: aws_region
           description: |
             AWS region for MSK IAM authentication. Required when method is `aws_msk_iam` and the region
@@ -237,6 +238,7 @@ files:
           value:
             type: string
             example: us-west-2
+          fleet_configurable: false
         - name: url
           fleet_configurable: true
           formats:
@@ -265,6 +267,7 @@ files:
             For example, a custom scope like 'kafka' or 'api://default'.
           value:
             type: string
+          fleet_configurable: false
         - name: extensions
           enabled: false
           description: |
@@ -274,6 +277,7 @@ files:
             Format: 'logicalCluster=lkc-xxxxx' or 'logicalCluster=lkc-xxxxx,identityPoolId=pool-xxxxx'
           value:
             type: string
+          fleet_configurable: false
         - name: tls_ca_cert
           enabled: false
           description: |
@@ -283,6 +287,7 @@ files:
           value:
             type: string
             example: /path/to/oauth_ca_cert.pem
+          fleet_configurable: false
       - template: instances/tls
       - name: tls_crlfile
         description: |
@@ -311,6 +316,7 @@ files:
           cluster ID is preserved as an original_kafka_cluster_id tag.
         value:
           type: string
+        fleet_configurable: false
       - name: enable_cluster_monitoring
         description: |
           (PREVIEW) Enable cluster monitoring to collect cluster-wide metrics for Data Streams
@@ -436,6 +442,7 @@ files:
             The OAuth scope to request.
           value:
             type: string
+          fleet_configurable: false
         - name: custom_headers
           enabled: false
           description: |
@@ -449,6 +456,7 @@ files:
             type: object
             additionalProperties:
               type: string
+          fleet_configurable: false
         - name: tls_ca_cert
           enabled: false
           description: |
@@ -456,3 +464,126 @@ files:
           value:
             type: string
             example: /path/to/oauth_ca_cert.pem
+          fleet_configurable: false
+      - name: kafka_connect_url
+        description: |
+          Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
+          collects connector metrics and configuration events from the Kafka Connect REST API.
+          Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
+          For Confluent Cloud, set this to
+          ``https://api.confluent.cloud/connect/v1/environments/<env>/clusters/<cluster>`` and supply the
+          Cloud API key (the key ID) as ``kafka_connect_username`` and its API secret as
+          ``kafka_connect_password``.
+        fleet_configurable: true
+        formats:
+          - url
+        value:
+          anyOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          example: http://localhost:8083
+      - name: kafka_connect_username
+        description: |
+          Username for Kafka Connect basic authentication.
+          Used in combination with kafka_connect_password.
+        fleet_configurable: true
+        value:
+          type: string
+          example: <USERNAME>
+      - name: kafka_connect_password
+        description: |
+          Password for Kafka Connect basic authentication.
+          Used in combination with kafka_connect_username.
+        fleet_configurable: true
+        secret: true
+        value:
+          type: string
+          example: <PASSWORD>
+      - name: kafka_connect_tls_verify
+        description: |
+          Whether to verify the Kafka Connect TLS certificate.
+          Set to `false` to skip TLS certificate verification, which is not recommended for production.
+        fleet_configurable: true
+        value:
+          type: boolean
+          example: true
+          display_default: true
+      - name: kafka_connect_tls_ca_cert
+        description: |
+          Path to a custom CA certificate file for Kafka Connect TLS verification.
+          If not specified, uses the system's default CA bundle.
+        fleet_configurable: true
+        value:
+          type: string
+      - name: kafka_connect_tls_cert
+        description: |
+          Path to the client certificate file for Kafka Connect mutual TLS authentication.
+          Must be used in combination with kafka_connect_tls_key.
+        fleet_configurable: true
+        value:
+          type: string
+      - name: kafka_connect_tls_key
+        description: |
+          Path to the client private key file for Kafka Connect mutual TLS authentication.
+          Must be used in combination with kafka_connect_tls_cert.
+        fleet_configurable: true
+        value:
+          type: string
+      - name: kafka_connect_oauth_token_provider
+        description: |
+          OAuth token provider settings for Kafka Connect authentication.
+          When configured, the check will fetch an OAuth token and use it as a Bearer token
+          for Kafka Connect HTTP requests.
+        fleet_configurable: true
+        options:
+        - name: url
+          fleet_configurable: true
+          required: true
+          enabled: false
+          description: |
+            The token endpoint.
+          value:
+            type: string
+        - name: client_id
+          fleet_configurable: true
+          required: true
+          enabled: false
+          description: |
+            The client identifier.
+          value:
+            type: string
+        - name: client_secret
+          fleet_configurable: true
+          secret: true
+          required: true
+          enabled: false
+          description: |
+            The client secret.
+          value:
+            type: string
+        - name: scope
+          enabled: false
+          description: |
+            The OAuth scope to request.
+          value:
+            type: string
+          fleet_configurable: false
+        - name: custom_headers
+          enabled: false
+          description: |
+            Additional HTTP headers to include in Kafka Connect requests.
+          value:
+            type: object
+            additionalProperties:
+              type: string
+          fleet_configurable: false
+        - name: tls_ca_cert
+          enabled: false
+          description: |
+            Path to a CA certificate file used to verify the OIDC token endpoint's TLS certificate.
+          value:
+            type: string
+            example: /path/to/oauth_ca_cert.pem
+          fleet_configurable: false

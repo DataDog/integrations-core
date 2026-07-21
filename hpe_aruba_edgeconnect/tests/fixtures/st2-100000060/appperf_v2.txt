@@ -1,0 +1,2 @@
+3.NE,0,microsoft,bondedTunnel_16,Backhaul,5.0,12.1,17.1,8.2,8.9,60,0,0,0,0,0,0,0,0,1772622540
+3.NE,1,salesforce,pass-through-unshaped,Passthrough,3.3,8.0,11.3,4.7,5.4,45,0,0,0,0,0,0,0,0,1772622540

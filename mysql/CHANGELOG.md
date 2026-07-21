@@ -2,7 +2,34 @@
 
 <!-- towncrier release notes start -->
 
-## 15.17.0 / 2026-05-14
+## 15.18.0 / 2026-07-08
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Fix `mysql.index.reads`, `mysql.index.updates`, and `mysql.index.deletes` metrics by submitting them as monotonic counts instead of gauges, so they correctly reflect per-interval operations rather than cumulative `performance_schema` lifetime totals. ([#24125](https://github.com/DataDog/integrations-core/pull/24125))
+* Fix MariaDB multi-channel replication reporting 0 channels by using `SHOW ALL REPLICAS STATUS` when no specific channel is configured. ([#24178](https://github.com/DataDog/integrations-core/pull/24178))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24269](https://github.com/DataDog/integrations-core/pull/24269))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24273](https://github.com/DataDog/integrations-core/pull/24273))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24277](https://github.com/DataDog/integrations-core/pull/24277))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 15.17.2 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 15.17.1 / 2026-06-09
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 15.17.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
@@ -18,7 +45,7 @@
 * Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled. ([#23593](https://github.com/DataDog/integrations-core/pull/23593))
 * Log a warning when a 1045 access denied error occurs with no SSL configuration, hinting that SSL may be required by the MySQL instance. ([#23607](https://github.com/DataDog/integrations-core/pull/23607))
 
-## 15.16.1 / 2026-04-28
+## 15.16.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

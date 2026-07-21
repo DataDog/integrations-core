@@ -28,6 +28,7 @@ files:
             value:
               type: boolean
               example: false
+            fleet_configurable: false
 
           - name: statistics_components
             fleet_configurable: true

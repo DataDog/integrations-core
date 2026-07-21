@@ -23,6 +23,15 @@ from . import defaults, validators
 SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
 
 
+class AutomaticDiagnostics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    interval: Optional[float] = None
+
+
 class ManagedAuthentication(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -172,9 +181,20 @@ class Query(BaseModel):
     custom_sql_select_fields: Optional[CustomSqlSelectFields] = None
     dbname: str
     entity: Entity
-    interval_seconds: int
+    interval_seconds: Optional[int] = Field(
+        None,
+        description='How often (in seconds) to run this query. Ignored when schedule is set\n(see schedule for the precedence rule).\n',
+    )
     monitor_id: int
     query: str
+    query_timeout: int = Field(
+        ...,
+        description='Statement timeout for this query in milliseconds. Overrides the instance-level\nquery_timeout for this query only.\n',
+    )
+    schedule: Optional[str] = Field(
+        None,
+        description='A standard 5-field cron expression (minute hour dom month dow) specifying\nwhen to run this query. When both schedule and interval_seconds are set,\nschedule wins and interval_seconds is ignored. If neither is set, the\nquery is skipped at runtime with a warning.\n',
+    )
     type: Optional[str] = None
 
 
@@ -276,7 +296,6 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    baseline_metrics_expiry: Optional[float] = None
     batch_max_content_size: Optional[int] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
@@ -325,6 +344,7 @@ class InstanceConfig(BaseModel):
     )
     activity_metrics_excluded_aggregations: Optional[tuple[str, ...]] = None
     application_name: Optional[str] = None
+    automatic_diagnostics: Optional[AutomaticDiagnostics] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     collect_activity_metrics: Optional[bool] = None

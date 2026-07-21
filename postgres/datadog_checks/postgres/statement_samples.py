@@ -53,6 +53,16 @@ TRACK_ACTIVITY_QUERY_SIZE_SUGGESTED_VALUE = 4096
 
 SUPPORTED_EXPLAIN_STATEMENTS = frozenset({'select', 'table', 'delete', 'insert', 'replace', 'update', 'with'})
 
+# Deterministic parameterized-query explain failures that will not succeed on retry for a given query signature
+# (e.g. a type mismatch caused by untyped parameters).
+PARAMETERIZED_EXPLAIN_ERRORS_TO_CACHE = frozenset(
+    {
+        DBExplainError.undefined_function,
+        DBExplainError.indeterminate_datatype,
+        DBExplainError.datatype_mismatch,
+    }
+)
+
 # columns from pg_stat_activity which correspond to attributes common to all databases and are therefore stored in
 # under other standard keys
 pg_stat_activity_sample_exclude_keys = {
@@ -176,6 +186,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         obfuscate_options['table_names'] = self._config.obfuscator_options.collect_tables
         obfuscate_options['dollar_quoted_func'] = self._config.obfuscator_options.keep_dollar_quoted_func
         obfuscate_options['return_json_metadata'] = self._config.obfuscator_options.collect_metadata
+        obfuscate_options['dbms'] = 'postgresql'
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
         self._collect_raw_query_statement = config.collect_raw_query_statement.enabled
@@ -805,9 +816,13 @@ class PostgresStatementSamples(DBMAsyncJob):
             # instead of trying to explain it then failing
             if self._explain_parameterized_queries._is_parameterized_query(statement):
                 if is_affirmative(self._config.query_samples.explain_parameterized_queries):
-                    return self._explain_parameterized_queries.explain_statement(
+                    plan, explain_err_code, err_msg = self._explain_parameterized_queries.explain_statement(
                         dbname, statement, obfuscated_statement, query_signature
                     )
+                    # Cache deterministic failures (e.g. type mismatches from untyped parameters)
+                    if explain_err_code in PARAMETERIZED_EXPLAIN_ERRORS_TO_CACHE:
+                        self._explain_errors_cache[query_signature] = (plan, explain_err_code, err_msg)
+                    return plan, explain_err_code, err_msg
                 e = psycopg.errors.UndefinedParameter("Unable to explain parameterized query")
                 self._log.debug(
                     "Unable to collect execution plan, clients using the extended query protocol or prepared statements"

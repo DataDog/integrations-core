@@ -105,30 +105,28 @@ def test_validate_config_models_not_in_sync(repo, expect_failure):
     ],
 )
 def test_validate_no_config_models(repo, expect_failure):
-    # Some integrations do not have config models, for instance tokumx because it's py2 only
+    # Some integrations do not have config models, for instance snmp because it's deprecated
     runner = CliRunner()
 
     with runner.isolated_filesystem():
         # Generate the check structure
         working_repo = 'integrations-{}'.format(repo)
-        shutil.copytree(
-            os.path.dirname(os.path.realpath(__file__)) + "/data/tokumx", "./{}/tokumx".format(working_repo)
-        )
+        shutil.copytree(os.path.dirname(os.path.realpath(__file__)) + "/data/snmp", "./{}/snmp".format(working_repo))
         os.chdir(working_repo)
 
         result = run_command(
-            [sys.executable, '-m', 'datadog_checks.dev', '--here', 'validate', 'models', 'tokumx'],
+            [sys.executable, '-m', 'datadog_checks.dev', '--here', 'validate', 'models', 'snmp'],
             capture=True,
         )
 
         if expect_failure:
             assert 1 == result.code
             assert 'Validating data models for 1 checks ...' in result.stdout
-            assert 'File `__init__.py` is not in sync, run "ddev validate models tokumx -s"' in result.stdout
-            assert 'File `defaults.py` is not in sync, run "ddev validate models tokumx -s"' in result.stdout
-            assert 'File `instance.py` is not in sync, run "ddev validate models tokumx -s"' in result.stdout
-            assert 'File `shared.py` is not in sync, run "ddev validate models tokumx -s"' in result.stdout
-            assert 'File `validators.py` is not in sync, run "ddev validate models tokumx -s"' in result.stdout
+            assert 'File `__init__.py` is not in sync, run "ddev validate models snmp -s"' in result.stdout
+            assert 'File `defaults.py` is not in sync, run "ddev validate models snmp -s"' in result.stdout
+            assert 'File `instance.py` is not in sync, run "ddev validate models snmp -s"' in result.stdout
+            assert 'File `shared.py` is not in sync, run "ddev validate models snmp -s"' in result.stdout
+            assert 'File `validators.py` is not in sync, run "ddev validate models snmp -s"' in result.stdout
             assert '' == result.stderr
         else:
             assert 0 == result.code
