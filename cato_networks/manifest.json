@@ -3,7 +3,7 @@
   "app_uuid": "4139f2e2-ba87-4e17-bcda-73bdade3ed8f",
   "app_id": "cato-networks",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
