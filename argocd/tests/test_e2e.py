@@ -5,8 +5,13 @@ from typing import Any
 
 import pytest
 
+from datadog_checks.argocd import ArgocdCheck
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.kube_discovery import run_discovery_check_kubernetes
+from datadog_checks.base.stubs import tagger
+from datadog_checks.dev.kube_discovery import (
+    assert_all_discovery_candidates_stable_kubernetes,
+    run_discovery_check_kubernetes,
+)
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
@@ -17,6 +22,14 @@ from .common import (
     NOT_EXPOSED_METRICS,
     NOTIFICATIONS_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
+)
+
+ARGOCD_DISCOVERY_ROLES = (
+    'argocd-application-controller',
+    'argocd-applicationset-controller',
+    'argocd-server',
+    'argocd-repo-server',
+    'argocd-notifications-controller',
 )
 
 
@@ -45,6 +58,24 @@ def test_e2e_openmetrics_v1(dd_agent_check):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.e2e
+@pytest.mark.parametrize('role', ARGOCD_DISCOVERY_ROLES)
+def test_e2e_discovery_all_candidates(aggregator: Any, datadog_agent: Any, role: str) -> None:
+    service_id = f'docker://{role}'
+    tagger.set_tags({f'container_id://{role}': [f'kube_app_name:{role}']})
+    try:
+        assert_all_discovery_candidates_stable_kubernetes(
+            ArgocdCheck,
+            aggregator,
+            datadog_agent,
+            namespace='argocd',
+            pod_selector=f'app.kubernetes.io/name={role}',
+            service_id=service_id,
+        )
+    finally:
+        tagger.reset()
 
 
 @pytest.mark.e2e
