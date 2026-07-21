@@ -12,11 +12,11 @@ from urllib.parse import urlparse
 
 import socks
 from cryptography import x509
-from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.http import should_bypass_proxy
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPTimeoutError
+from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
 
 from .config import DEFAULT_EXPECTED_CODE, from_instance
 from .utils import get_ca_certs_path, parse_proxy_url
