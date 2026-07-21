@@ -1408,10 +1408,6 @@ async def test_escape_requires_confirmation_before_cancelling_active_run():
         assert app.screen_stack[-2] is screen
         assert not cancelled.is_set()
 
-        screen_stack_size = len(app.screen_stack)
-        screen.action_back()
-        assert len(app.screen_stack) == screen_stack_size
-
         await pilot.press("escape")
         await pilot.pause()
         assert app.screen is screen

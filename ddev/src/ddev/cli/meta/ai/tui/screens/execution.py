@@ -108,7 +108,6 @@ class ExecutionScreen(TogoScreen):
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
         self._run_active = False
-        self._cancel_confirmation_open = False
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -155,15 +154,9 @@ class ExecutionScreen(TogoScreen):
         if not self._run_active:
             self.app.pop_screen()
             return
-        if self._cancel_confirmation_open:
-            return
-
         from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
 
-        self._cancel_confirmation_open = True
-
         def on_dismiss(confirmed: bool) -> None:
-            self._cancel_confirmation_open = False
             if confirmed:
                 self.action_cancel_run()
                 self.app.pop_screen()
