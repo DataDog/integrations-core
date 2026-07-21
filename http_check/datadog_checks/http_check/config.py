@@ -3,12 +3,62 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import namedtuple
 
-from requests.structures import CaseInsensitiveDict
-
 from datadog_checks.base import ConfigurationError, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.headers import headers as agent_headers
 
 DEFAULT_EXPECTED_CODE = r'(1|2|3)\d\d'
+
+
+class CaseInsensitiveDict(dict):
+    """Dict that merges header names case-insensitively, keeping the most recently set casing."""
+
+    def __init__(self, data=None):
+        super().__init__()
+        if data:
+            self.update(data)
+
+    def __setitem__(self, key, value):
+        existing_key = self.matching_key(key)
+        if existing_key is not None and existing_key != key:
+            super().__delitem__(existing_key)
+        super().__setitem__(key, value)
+
+    def __getitem__(self, key):
+        existing_key = self.matching_key(key)
+        if existing_key is None:
+            raise KeyError(key)
+        return super().__getitem__(existing_key)
+
+    def __contains__(self, key):
+        return self.matching_key(key) is not None
+
+    def get(self, key, default=None):
+        existing_key = self.matching_key(key)
+        return super().get(existing_key, default) if existing_key is not None else default
+
+    def update(self, data=(), **kwargs):
+        for key, value in dict(data, **kwargs).items():
+            self[key] = value
+
+    def matching_key(self, key):
+        lowered = key.lower()
+        for existing in self:
+            if existing.lower() == lowered:
+                return existing
+        return None
+
+    def __eq__(self, other):
+        if isinstance(other, dict):
+            return {key.lower(): value for key, value in self.items()} == {
+                key.lower(): value for key, value in other.items()
+            }
+        return NotImplemented
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
 
 
 Config = namedtuple(

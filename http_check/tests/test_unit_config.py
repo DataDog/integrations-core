@@ -58,6 +58,18 @@ def test_from_instance():
     assert expected_headers == headers.get('User-Agent'), headers
 
 
+def test_from_instance_header_override_is_case_insensitive():
+    """
+    A user-supplied header should override the matching default header regardless of case,
+    instead of being sent alongside it as a duplicate.
+    """
+    config = from_instance({'url': 'https://example.com', 'name': 'UpService', 'headers': {'user-agent': 'Custom-UA'}})
+
+    headers = config.headers
+    assert headers.get('User-Agent') == 'Custom-UA'
+    assert len(headers) == len(agent_headers({}))
+
+
 def test_instance_ca_cert():
     """
     `instance_ca_cert` should default to the trusted ca_cert of the system
