@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
 
-from .common import PORT, TIMEOUT
+from .common import PORT, SERVER, TIMEOUT
 
 pytestmark = pytest.mark.unit
 
@@ -191,58 +191,35 @@ def test_custom_query_configuration(instance):
     gauge.assert_not_called()
 
 
-class TestReportedHostname:
-    def test_default_falls_back_to_server(self, instance):
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.reported_hostname == instance['server']
-
-    def test_override(self, instance):
-        instance['reported_hostname'] = 'my-prod-hana'
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.reported_hostname == 'my-prod-hana'
+def test_reported_hostname_is_server(instance):
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    assert check.reported_hostname == instance['server']
 
 
-class TestDatabaseIdentifier:
-    def test_default_equals_reported_hostname(self, instance):
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.database_identifier == instance['server']
+@pytest.mark.parametrize(
+    'database_identifier, tags, expected',
+    [
+        pytest.param(None, [], SERVER, id='unset-defaults-to-host'),
+        pytest.param({}, [], SERVER, id='empty-defaults-to-host'),
+        pytest.param({'template': None}, [], SERVER, id='null-template-defaults-to-host'),
+        pytest.param({'template': '$host'}, [], SERVER, id='host'),
+        pytest.param({'template': '$host:$port'}, [], f'{SERVER}:{PORT}', id='host-and-port'),
+        pytest.param({'template': 'saphana_myorg_$dev'}, ['dev:team-a'], 'saphana_myorg_team-a', id='tag'),
+        pytest.param({'template': 'saphana_myorg_$dev'}, [], 'saphana_myorg_$dev', id='missing-tag-left-literal'),
+        pytest.param({'template': '$env'}, ['env:prod', 'env:staging'], 'prod,staging', id='multi-value-tag'),
+    ],
+)
+def test_database_identifier(instance, database_identifier, tags, expected):
+    instance['tags'] = tags
+    if database_identifier is not None:
+        instance['database_identifier'] = database_identifier
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    assert check.database_identifier == expected
 
-    def test_reported_hostname_override_flows_through(self, instance):
-        instance['reported_hostname'] = 'my-prod-hana'
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.database_identifier == 'my-prod-hana'
 
-    @pytest.mark.parametrize(
-        'template, expected, tags',
-        [
-            ('$reported_hostname', 'my-hana', ['env:prod']),
-            ('$env-$reported_hostname', 'prod-my-hana', ['env:prod']),
-            ('$env-$reported_hostname', '$env-my-hana', []),
-            ('$env-$reported_hostname', 'prod,staging-my-hana', ['env:prod', 'env:staging']),
-        ],
-    )
-    def test_template(self, instance, template, expected, tags):
-        instance['reported_hostname'] = 'my-hana'
-        instance['database_identifier'] = {'template': template}
-        instance['tags'] = tags
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.database_identifier == expected
-
-    def test_template_port_variable(self, instance):
-        instance['reported_hostname'] = 'my-hana'
-        instance['database_identifier'] = {'template': '$reported_hostname:$port'}
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.database_identifier == f'my-hana:{PORT}'
-
-    def test_template_host_variable(self, instance):
-        instance['database_identifier'] = {'template': '$host:$port'}
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.database_identifier == f"{instance['server']}:{PORT}"
-
-    def test_result_is_cached(self, instance):
-        instance['reported_hostname'] = 'my-hana'
-        check = SapHanaCheck('sap_hana', {}, [instance])
-        assert check.database_identifier is check.database_identifier
+def test_database_identifier_is_cached(instance):
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    assert check.database_identifier is check.database_identifier
 
 
 class TestConnectionProperties:
