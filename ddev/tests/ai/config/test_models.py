@@ -263,14 +263,16 @@ def test_flow_config_injects_missing_built_in_inputs():
     assert config.inputs == list(models.BUILT_IN_FLOW_INPUTS)
 
 
-def test_flow_config_does_not_replace_declared_built_in_input():
-    prd = models.FlowInput(name="prd", label="Custom PRD", input_type="path", as_content=True)
-
-    config = FlowConfig(name="demo", inputs=[prd], flow=[])
-    built_in_prd = next(input for input in models.BUILT_IN_FLOW_INPUTS if input.name == "prd")
-
-    assert prd in config.inputs
-    assert built_in_prd not in config.inputs
+@pytest.mark.parametrize("reserved_name", [flow_input.name for flow_input in models.BUILT_IN_FLOW_INPUTS])
+def test_flow_config_rejects_reserved_input_names(reserved_name: str) -> None:
+    with pytest.raises(ValidationError, match="Input names cannot use reserved names.*added to every flow"):
+        FlowConfig.model_validate(
+            {
+                "name": "demo",
+                "inputs": [{"name": reserved_name, "label": "Custom input", "type": "string"}],
+                "flow": [],
+            }
+        )
 
 
 def test_flow_input_rejects_as_content_for_non_path():

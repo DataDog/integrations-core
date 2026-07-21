@@ -128,6 +128,12 @@ async def test_on_message_received_ignores_other_messages(core_dir, make_orchest
 # ---------------------------------------------------------------------------
 
 
+def test_max_timeout_comes_from_runtime_variables(core_dir: Path, make_orchestrator: Any):
+    orchestrator, _, _ = make_orchestrator(core_dir, runtime_variables={"max_timeout": "120"})
+
+    assert orchestrator._max_timeout == 120
+
+
 async def test_on_initialize_registers_all_flow_phases(core_dir, make_orchestrator):
     orchestrator, _, _ = make_orchestrator(core_dir)
     await orchestrator.on_initialize()

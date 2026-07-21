@@ -1516,7 +1516,6 @@ async def test_default_builder_constructs_real_phase_orchestrator(tmp_path: Path
     assert call_kwargs["phase_registry"] is togo_app.phase_registry
     assert call_kwargs["provider_registry"] is togo_app.provider_registry
     assert call_kwargs["resume"] is False
-    assert call_kwargs["max_timeout"] is None
 
     from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 
@@ -1546,8 +1545,8 @@ async def test_default_builder_resume_flag_forwarded(tmp_path: Path) -> None:
     assert call_kwargs["resume"] is True
 
 
-async def test_default_builder_max_timeout_forwarded(tmp_path: Path) -> None:
-    """Default builder forwards a configured max timeout to PhaseOrchestrator."""
+async def test_default_builder_forwards_runtime_variables(tmp_path: Path) -> None:
+    """Default builder forwards runtime variables to PhaseOrchestrator unchanged."""
     from unittest.mock import patch
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
@@ -1564,7 +1563,8 @@ async def test_default_builder_max_timeout_forwarded(tmp_path: Path) -> None:
             await togo_app.push_screen(screen)
             await pilot.pause(0.3)
 
-    assert MockOrch.call_args.kwargs["max_timeout"] == 120
+    call_kwargs = MockOrch.call_args.kwargs
+    assert call_kwargs["runtime_variables"] == {"max_timeout": "120"}
 
 
 async def test_fresh_real_run_clears_only_computed_flow_directory(tmp_path: Path) -> None:

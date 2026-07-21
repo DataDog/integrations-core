@@ -223,9 +223,15 @@ class FlowConfig(BaseModel):
     @classmethod
     def inject_built_in_inputs(cls, inputs: list[FlowInput]) -> list[FlowInput]:
         names = [flow_input.name for flow_input in inputs]
+        reserved_names = {flow_input.name for flow_input in BUILT_IN_FLOW_INPUTS}
+        collisions = sorted(reserved_names.intersection(names))
+        if collisions:
+            raise ValueError(
+                f"Input names cannot use reserved names {collisions}; reserved inputs are added to every flow"
+            )
         if len(names) != len(set(names)):
             raise ValueError("Input names must be unique")
-        return [*inputs, *(flow_input for flow_input in BUILT_IN_FLOW_INPUTS if flow_input.name not in names)]
+        return [*inputs, *BUILT_IN_FLOW_INPUTS]
 
 
 class PhaseEnvelope(BaseModel):

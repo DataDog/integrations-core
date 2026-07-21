@@ -189,18 +189,15 @@ class ExecutionScreen(TogoScreen):
                 shutil.rmtree(run_dir)
         run_dir.mkdir(parents=True, exist_ok=True)
 
-        runtime_variables = self.runtime_variables or {}
-        max_timeout = runtime_variables.get("max_timeout")
         return PhaseOrchestrator(
             resolved_flow=self.flow,
             phase_registry=self.togo_app.phase_registry,
             checkpoint_path=run_dir / "checkpoints.yaml",
-            runtime_variables=runtime_variables,
+            runtime_variables=self.runtime_variables or {},
             provider_registry=self.togo_app.provider_registry,
             file_access_policy=FileAccessPolicy(write_root=write_root),
             callbacks=callbacks,
             resume=self.resume,
-            max_timeout=float(max_timeout) if max_timeout is not None else None,
         )
 
     # ── Display helpers ──────────────────────────────────────────────────
