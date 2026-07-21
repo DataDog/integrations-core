@@ -67,6 +67,123 @@ facets:
     name: User ID
     path: usr.id
     source: log
+  - groups:
+      - OCSF
+    name: Activity ID
+    path: ocsf.activity_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Activity Name
+    path: ocsf.activity_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category
+    path: ocsf.category_name
+    source: log
+  - groups:
+      - OCSF
+    name: Category ID
+    path: ocsf.category_uid
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Class
+    path: ocsf.class_name
+    source: log
+  - groups:
+      - OCSF
+    name: Class ID
+    path: ocsf.class_uid
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Disposition
+    path: ocsf.disposition
+    source: log
+  - groups:
+      - OCSF
+    name: Disposition ID
+    path: ocsf.disposition_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Severity
+    path: ocsf.severity
+    source: log
+  - groups:
+      - OCSF
+    name: Severity ID
+    path: ocsf.severity_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Status
+    path: ocsf.status
+    source: log
+  - groups:
+      - OCSF
+    name: Status ID
+    path: ocsf.status_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Status Code
+    path: ocsf.status_code
+    source: log
+  - groups:
+      - OCSF
+    name: Response Code
+    path: ocsf.rcode
+    source: log
+  - groups:
+      - OCSF
+    name: Response Code ID
+    path: ocsf.rcode_id
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: DNS Query Hostname
+    path: ocsf.query.hostname
+    source: log
+  - groups:
+      - OCSF
+    name: Query Resource Record Type
+    path: ocsf.query.type
+    source: log
+  - groups:
+      - OCSF
+    name: Source IP Address
+    path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Protocol Name
+    path: ocsf.connection_info.protocol_name
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Owner UID
+    path: ocsf.src_endpoint.owner.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Product Name
+    path: ocsf.metadata.product.name
+    source: log
+  - groups:
+      - OCSF
+    name: Vendor Name
+    path: ocsf.metadata.product.vendor_name
+    source: log
 pipeline:
   type: pipeline
   name: BlueCat Edge
@@ -87,7 +204,7 @@ pipeline:
       sourceType: attribute
       target: network.client.ip
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `query_log.query` to `dns.question.name`
@@ -97,7 +214,7 @@ pipeline:
       sourceType: attribute
       target: dns.question.name
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `query_log.queryType` to `dns.question.type`
@@ -107,7 +224,7 @@ pipeline:
       sourceType: attribute
       target: dns.question.type
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `query_log.response` to `dns.flags.rcode`
@@ -117,7 +234,7 @@ pipeline:
       sourceType: attribute
       target: dns.flags.rcode
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `query_log.queryId` to `dns.id`
@@ -127,7 +244,7 @@ pipeline:
       sourceType: attribute
       target: dns.id
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: attribute-remapper
       name: Map `query_log.identity.userId` to `usr.id`
@@ -137,7 +254,7 @@ pipeline:
       sourceType: attribute
       target: usr.id
       targetType: attribute
-      preserveSource: false
+      preserveSource: true
       overrideOnConflict: false
     - type: geo-ip-parser
       name: Extract Geolocation information from Client IP
@@ -146,3 +263,377 @@ pipeline:
         - network.client.ip
       target: network.client.geoip
       ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: OCSF sub pipeline for class DNS Activity [4003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "*"
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: "Edge"
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: "BlueCat"
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: attribute-remapper
+          name: Map `query_log.answers.0.rdata` to `ocsf.answer.rdata`
+          enabled: true
+          sources:
+            - query_log.answers.0.rdata
+          sourceType: attribute
+          target: ocsf.answer.rdata
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: attribute-remapper
+          name: Map `query_log.answers.0.recordType` to `ocsf.answer.type`
+          enabled: true
+          sources:
+            - query_log.answers.0.recordType
+          sourceType: attribute
+          target: ocsf.answer.type
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: true
+        - type: array-processor
+          name: Append ocsf.answer into ocsf.answers array
+          enabled: true
+          operation:
+            source: ocsf.answer
+            target: ocsf.answers
+            preserveSource: false
+            type: append
+        - type: schema-processor
+          name: Apply OCSF schema for 4003
+          enabled: true
+          mappers:
+            - type: schema-remapper
+              name: Map `query_log.time` to `ocsf.time`
+              sources:
+                - query_log.time
+              target: ocsf.time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `query_log.time` to `ocsf.query_time`
+              sources:
+                - query_log.time
+              target: ocsf.query_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `query_log.query` to `ocsf.query.hostname`
+              sources:
+                - query_log.query
+              target: ocsf.query.hostname
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.queryType` to `ocsf.query.type`
+              sources:
+                - query_log.queryType
+              target: ocsf.query.type
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.queryId` to `ocsf.query.packet_uid`
+              sources:
+                - query_log.queryId
+              target: ocsf.query.packet_uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `query_log.source` to `ocsf.src_endpoint.ip`
+              sources:
+                - query_log.source
+              target: ocsf.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.queryProtocol` to `ocsf.connection_info.protocol_name`
+              sources:
+                - query_log.queryProtocol
+              target: ocsf.connection_info.protocol_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.id` to `ocsf.metadata.uid`
+              sources:
+                - query_log.id
+              target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `vendor.endpoint` to `ocsf.metadata.log_name`
+              sources:
+                - vendor.endpoint
+              target: ocsf.metadata.log_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.identity.userId` to `ocsf.src_endpoint.owner.uid`
+              sources:
+                - query_log.identity.userId
+              target: ocsf.src_endpoint.owner.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.appliedPolicyId` to `ocsf.policy.uid`
+              sources:
+                - query_log.appliedPolicyId
+              target: ocsf.policy.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.response` to `ocsf.status_code`
+              sources:
+                - query_log.response
+              target: ocsf.status_code
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `query_log.latency` to `ocsf.duration`
+              sources:
+                - query_log.latency
+              target: ocsf.duration
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              target: ocsf.metadata.product.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              target: ocsf.metadata.product.vendor_name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Query
+                  id: 1
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+            - type: schema-category-mapper
+              name: ocsf.connection_info.direction_id
+              categories:
+                - filter:
+                    query: "*"
+                  name: Outbound
+                  id: 2
+              targets:
+                name: ocsf.connection_info.direction
+                id: ocsf.connection_info.direction_id
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: '@query_log.actionTaken:(allow OR "query-response")'
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@query_log.actionTaken:block"
+                  name: Blocked
+                  id: 2
+                - filter:
+                    query: "@query_log.actionTaken:monitor"
+                  name: Observed
+                  id: 3
+                - filter:
+                    query: "@query_log.actionTaken:redirect"
+                  name: Modified
+                  id: 4
+                - filter:
+                    query: "@query_log.actionTaken:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
+              fallback:
+                values:
+                  ocsf.disposition: Other
+                  ocsf.disposition_id: "99"
+                sources:
+                  ocsf.disposition:
+                    - query_log.actionTaken
+            - type: schema-category-mapper
+              name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@query_log.actionTaken:(block OR redirect)"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@query_log.actionTaken:*"
+                  name: Informational
+                  id: 1
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - query_log.actionTaken
+            - type: schema-category-mapper
+              name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@query_log.response:NOERROR"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@query_log.response:(NXDOMAIN OR SERVFAIL OR REFUSED)"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: "@query_log.response:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - query_log.response
+            - type: schema-category-mapper
+              name: ocsf.rcode_id
+              categories:
+                - filter:
+                    query: "@query_log.response:NOERROR"
+                  name: NoError
+                  id: 0
+                - filter:
+                    query: "@query_log.response:FORMERR"
+                  name: FormError
+                  id: 1
+                - filter:
+                    query: "@query_log.response:SERVFAIL"
+                  name: ServError
+                  id: 2
+                - filter:
+                    query: "@query_log.response:NXDOMAIN"
+                  name: NXDomain
+                  id: 3
+                - filter:
+                    query: "@query_log.response:NOTIMP"
+                  name: NotImp
+                  id: 4
+                - filter:
+                    query: "@query_log.response:REFUSED"
+                  name: Refused
+                  id: 5
+                - filter:
+                    query: "@query_log.response:YXDOMAIN"
+                  name: YXDomain
+                  id: 6
+                - filter:
+                    query: "@query_log.response:YXRRSET"
+                  name: YXRRSet
+                  id: 7
+                - filter:
+                    query: "@query_log.response:NXRRSET"
+                  name: NXRRSet
+                  id: 8
+                - filter:
+                    query: "@query_log.response:NOTAUTH"
+                  name: NotAuth
+                  id: 9
+                - filter:
+                    query: "@query_log.response:NOTZONE"
+                  name: NotZone
+                  id: 10
+                - filter:
+                    query: "@query_log.response:DSOTYPENI"
+                  name: DSOTYPENI
+                  id: 11
+                - filter:
+                    query: "@query_log.response:(BADSIG OR BADVERS)"
+                  name: BADSIG_VERS
+                  id: 16
+                - filter:
+                    query: "@query_log.response:BADKEY"
+                  name: BADKEY
+                  id: 17
+                - filter:
+                    query: "@query_log.response:BADTIME"
+                  name: BADTIME
+                  id: 18
+                - filter:
+                    query: "@query_log.response:BADMODE"
+                  name: BADMODE
+                  id: 19
+                - filter:
+                    query: "@query_log.response:BADNAME"
+                  name: BADNAME
+                  id: 20
+                - filter:
+                    query: "@query_log.response:BADALG"
+                  name: BADALG
+                  id: 21
+                - filter:
+                    query: "@query_log.response:BADTRUNC"
+                  name: BADTRUNC
+                  id: 22
+                - filter:
+                    query: "@query_log.response:BADCOOKIE"
+                  name: BADCOOKIE
+                  id: 23
+                - filter:
+                    query: "@query_log.response:UNASSIGNED"
+                  name: Unassigned
+                  id: 24
+                - filter:
+                    query: "@query_log.response:RESERVED"
+                  name: Reserved
+                  id: 25
+                - filter:
+                    query: "@query_log.response:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.rcode
+                id: ocsf.rcode_id
+              fallback:
+                values:
+                  ocsf.rcode: Other
+                  ocsf.rcode_id: "99"
+                sources:
+                  ocsf.rcode:
+                    - query_log.response
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: DNS Activity
+            classUid: 4003
+            extensions: []
+            profiles:
+              - security_control
