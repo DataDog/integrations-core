@@ -72,8 +72,7 @@ class TestDisableAuth:
         assert http.trust_env is True
 
     def test_netrc_header_injected_without_disable_auth(self):
-        # Guards the regression: with auth=None and trust_env on, a matching .netrc entry
-        # injects an Authorization header. This proves the suppression test below is meaningful.
+        # Guards the regression: with auth=None and trust_env on, a matching .netrc entry injects Authorization.
         http = RequestsWrapper({}, {})
         http.options['auth'] = None
         captured = {}

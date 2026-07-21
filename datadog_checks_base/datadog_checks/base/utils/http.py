@@ -607,8 +607,7 @@ class RequestsWrapper(object):
 
     def disable_auth(self) -> None:
         """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
-        # A truthy no-op auth callable overrides the config Basic-auth tuple and short-circuits requests'
-        # .netrc lookup (`if self.trust_env and not auth and not self.auth`), without touching trust_env.
+        # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
         self.options['auth'] = suppress_default_auth
 
     def get(self, url, **options):

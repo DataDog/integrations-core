@@ -77,9 +77,7 @@ class HTTPClient(Protocol):
     def get_header(self, name: str, default: str | None = None) -> str | None: ...
     def set_header(self, name: str, value: str) -> None: ...
 
-    # Suppress all HTTP-level auth for subsequent requests: the config-derived credentials and any
-    # environment or .netrc credentials the backend would otherwise apply. trust_env is left intact,
-    # so env proxy and CA bundle resolution keep working.
+    # Suppress all HTTP-level auth (config-derived and environment/.netrc) for later requests, leaving trust_env intact.
     def disable_auth(self) -> None: ...
 
     # Close any open connections. Idempotent (safe to call repeatedly or before any connection was
