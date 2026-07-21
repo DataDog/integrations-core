@@ -20,6 +20,7 @@ from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
 class MainScreen(TogoScreen):
     """Main dashboard screen listing all available flows."""
 
+    AUTO_FOCUS = "FlowCard"
     TITLE = "Flows"
 
     @property

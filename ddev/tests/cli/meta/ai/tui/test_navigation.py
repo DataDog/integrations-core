@@ -11,20 +11,37 @@ from __future__ import annotations
 
 
 async def test_enter_on_flow_card_pushes_flow_screen(make_flow, make_togo_app):
-    """Pressing Enter on a focused FlowCard pushes FlowScreen."""
+    """Pressing Enter when the app starts opens the first flow."""
     from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
-    from ddev.cli.meta.ai.tui.widgets.flow_card import FlowCard
 
-    app = make_togo_app([make_flow("Alpha Flow", n_phases=3), make_flow("Beta Flow", n_phases=1)])
+    alpha_flow = make_flow("Alpha Flow", n_phases=3)
+    app = make_togo_app([make_flow("Beta Flow", n_phases=1), alpha_flow])
     async with app.run_test() as pilot:
         await pilot.pause()
         assert isinstance(pilot.app.screen, MainScreen)
-        card = pilot.app.screen.query(FlowCard).first()
-        card.focus()
+        await pilot.press("enter")
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert isinstance(flow_screen, FlowScreen)
+        assert flow_screen.flow is alpha_flow
+
+
+async def test_enter_on_opened_flow_pushes_launch_modal(make_flow, make_togo_app):
+    """Pressing Enter immediately after opening a flow opens its launch modal."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
+
+    app = make_togo_app([make_flow("Alpha Flow", n_phases=3)])
+    async with app.run_test() as pilot:
+        await pilot.pause()
         await pilot.press("enter")
         await pilot.pause()
         assert isinstance(pilot.app.screen, FlowScreen)
+
+        await pilot.press("enter")
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, LaunchModal)
 
 
 async def test_flow_screen_receives_correct_flow(make_flow, make_togo_app):
