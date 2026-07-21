@@ -480,6 +480,25 @@ def test_sinfo_gpu_gres_slurm_2505(instance, aggregator):
     aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=node2)
 
 
+def test_sinfo_gpu_gres_multi_type(instance, aggregator):
+    # A node advertising multiple GPU models renders a comma-separated GRES list, e.g.
+    # 'gpu:tesla:2,gpu:kepler:2'. Every type must be counted, not just the first entry.
+    check = SlurmCheck('slurm', {}, [instance])
+    check.process_sinfo_node(mock_output('sinfo_gres_multi_2505.txt'))
+
+    base = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-mixed-gpu-001',
+        'slurm_cluster_name:N/A',
+    ]
+    tesla = base + ['slurm_node_gpu_type:tesla']
+    kepler = base + ['slurm_node_gpu_type:kepler']
+    aggregator.assert_metric('slurm.node.gpu_total', value=2, tags=tesla)
+    aggregator.assert_metric('slurm.node.gpu_used', value=1, tags=tesla)
+    aggregator.assert_metric('slurm.node.gpu_total', value=2, tags=kepler)
+    aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=kepler)
+
+
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_process_seff_normalizes_kilobytes(mock_get_subprocess_output, instance, aggregator):
     # Slurm 25.05 seff reports small jobs in KB (and large ones in GB); memory must still

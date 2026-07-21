@@ -491,30 +491,44 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge(f'{namespace}.cpu.total', total, tags)
 
     def _parse_gpu_gres(self, gres):
-        # Parse a sinfo GRES/GRES_USED gpu field into (gpu_type, count, detail). Tolerates the
-        # modern suffixes 'gpu:<type>:8(S:0-1)' / 'gpu:<type>:3(IDX:0,4-5)', the legacy
-        # 'gpu:<type>:4', typeless 'gpu:8', and '(null)'. count/detail are None when absent.
-        match = GPU_GRES_RE.search(gres) if gres else None
-        if not match:
-            return "null", None, None
-        return match.group('type') or "null", int(match.group('count')), match.group('detail')
+        # Parse every gpu entry in a sinfo GRES/GRES_USED field into a list of
+        # (gpu_type, count, detail). Handles comma-separated multi-model nodes
+        # ('gpu:tesla:2,gpu:kepler:2'), the modern suffixes 'gpu:<type>:8(S:0-1)' /
+        # 'gpu:<type>:3(IDX:0,4-5)', legacy 'gpu:<type>:4', typeless 'gpu:8', and '(null)'.
+        if not gres:
+            return []
+        return [
+            (match.group('type') or "null", int(match.group('count')), match.group('detail'))
+            for match in GPU_GRES_RE.finditer(gres)
+        ]
 
     def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
-        gpu_type, total_gpu, _ = self._parse_gpu_gres(gres)
-        used_gpu_count = None
-        used_gpu_used_idx = "null"
+        totals = self._parse_gpu_gres(gres)
+        used_by_type = {}
         if gres_used is not None:
-            _, used_gpu_count, used_detail = self._parse_gpu_gres(gres_used)
-            if used_detail and used_detail.startswith("IDX:"):
-                used_gpu_used_idx = used_detail[len("IDX:") :]
+            for gpu_type, count, detail in self._parse_gpu_gres(gres_used):
+                used_by_type[gpu_type] = (count, detail)
 
-        gpu_tags = [f"slurm_{namespace}_gpu_type:{gpu_type}"]
-        gpu_info_tags = [f"slurm_{namespace}_gpu_used_idx:{used_gpu_used_idx}"]
-        _tags = tags + gpu_tags
-        if total_gpu is not None:
-            self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
-        if used_gpu_count is not None:
-            self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
+        if not totals:
+            return [f"slurm_{namespace}_gpu_type:null"], [f"slurm_{namespace}_gpu_used_idx:null"]
+
+        gpu_tags = []
+        gpu_info_tags = []
+        for gpu_type, total_gpu, _ in totals:
+            type_tag = f"slurm_{namespace}_gpu_type:{gpu_type}"
+            gpu_tags.append(type_tag)
+            metric_tags = tags + [type_tag]
+            if total_gpu is not None:
+                self.gauge(f'{namespace}.gpu_total', total_gpu, metric_tags)
+
+            used_count, used_detail = used_by_type.get(gpu_type, (None, None))
+            if used_count is not None:
+                self.gauge(f'{namespace}.gpu_used', used_count, metric_tags)
+
+            used_idx = "null"
+            if used_detail and used_detail.startswith("IDX:"):
+                used_idx = used_detail[len("IDX:") :]
+            gpu_info_tags.append(f"slurm_{namespace}_gpu_used_idx:{used_idx}")
 
         return gpu_tags, gpu_info_tags
 
