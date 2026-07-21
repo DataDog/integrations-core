@@ -3201,6 +3201,7 @@ jobs:
         - py3.13-16.0-UTF8
         - py3.13-17.0-UTF8
         - py3.13-18.0-UTF8
+        - py3.13-19.0-UTF8
         - py3.13-10.0-C
         - py3.13-11.0-C
         - py3.13-12.17-C
@@ -3210,6 +3211,7 @@ jobs:
         - py3.13-16.0-C
         - py3.13-17.0-C
         - py3.13-18.0-C
+        - py3.13-19.0-C
       fail-fast: false
   j8e38a40:
     uses: ./.github/workflows/test-target.yml
