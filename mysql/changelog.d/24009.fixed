@@ -1,0 +1,1 @@
+Default `read_timeout` to 10 seconds to ensure `mysql.can_connect` fires CRITICAL when MySQL accepts TCP connections but hangs on queries.

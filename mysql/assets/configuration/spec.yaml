@@ -173,12 +173,12 @@ files:
             display_priority: 0
             description: |
               The timeout for reading from the connection in seconds.
-              By default, no read timeout is set.
+              Defaults to 10 seconds.
             fleet_configurable: true
             value:
               type: number
               example: 10
-              display_default: null
+              display_default: 10
 
           - name: ssl
             display_priority: 0
