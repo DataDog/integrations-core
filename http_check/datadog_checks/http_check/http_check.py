@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 import socks
 from cryptography import x509
-from requests import Response  # noqa: F401
+from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
 
 from datadog_checks.base import AgentCheck, ensure_unicode, is_affirmative
 from datadog_checks.base.utils.http import should_bypass_proxy
@@ -110,7 +110,7 @@ class HTTPCheck(AgentCheck):
         tags_list.append("instance:{}".format(instance_name))
         service_checks = []
         service_checks_tags = self._get_service_checks_tags(instance)
-        r = None  # type: Response
+        r = None  # type: HTTPResponse
         peer_cert = None  # type: bytes | None
         try:
             parsed_uri = urlparse(addr)
