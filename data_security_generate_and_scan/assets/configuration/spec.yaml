@@ -1,0 +1,19 @@
+name: Data Security Generate And Scan
+files:
+- name: data_security_generate_and_scan.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: data
+      description: |
+        Arbitrary JSON-serializable data to run through the Sensitive Data
+        Scanner on every check run. The value is JSON-encoded before scanning,
+        and any matches found are emitted as a single event whose text is the
+        JSON-encoded array of matches.
+      value:
+        type: object
+        additionalProperties: true
+    - template: instances/default

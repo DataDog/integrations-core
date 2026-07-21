@@ -1,0 +1,8 @@
+init_config:
+
+instances:
+  - data:
+      - {"id": 9, "name": "movie3", "box_office": 3, "realized_by": 106, "created_at": "2026-06-05T12:42:50.864401+00:00", "updated_at": "2026-06-05T12:42:50.864401+00:00"}
+      - {"id": 10, "name": "movie2", "box_office": 2, "realized_by": 104, "created_at": "2026-06-05T12:42:50.866761+00:00", "updated_at": "2026-06-05T12:42:50.866761+00:00"}
+      - {"id": 11, "name": "movie1", "box_office": 1, "realized_by": 105, "created_at": "2026-06-05T12:42:50.87361+00:00", "updated_at": "2026-06-05T12:42:50.87361+00:00"}
+      - {"id": 12, "name": "127.0.0.1", "box_office": 836800000, "realized_by": 105, "created_at": "2026-06-07T16:29:36.410128+00:00", "updated_at": "2026-06-07T16:29:36.410128+00:00"}
