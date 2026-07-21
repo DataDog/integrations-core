@@ -14,9 +14,9 @@ On worker nodes, the check can also collect metrics using [`scontrol`][13], whic
 
 ## Setup
 
-Follow the instructions below to install and configure this check for an Agent running on a host. Since the Agent requires direct access to the various Slurm binaries, monitoring Slurm in containerized environments is not recommended.
+Follow the instructions below to install and configure this check for an Agent running on a host. The Agent requires direct access to the various Slurm binaries, so in containerized environments (for example, Slurm-on-Kubernetes) run the Agent where those binaries are reachable, such as alongside the `slurmd` or `slurmctld` process.
 
-**Note**: This check was tested on Slurm version 21.08.0.
+**Note**: This check is tested against Slurm versions 21.08 and 25.05.
 
 ### Installation
 
@@ -93,7 +93,7 @@ instances:
 
 #### Worker Nodes
 
-The `slurm.scontrol.job.info` metric can only be collected from worker nodes. This metric enables the submission of important tags
+The `slurm.scontrol.jobs.info` metric can only be collected from worker nodes. This metric enables the submission of important tags
 that can be used to monitor the resource consumption of specific job steps.
 
 1. Ensure that the dd-agent user has execute permissions on the relevant `scontrol` binaries and the necessary permissions to access the directories where these binaries are located.

@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import time
 from unittest.mock import patch
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.slurm import SlurmCheck
-from datadog_checks.slurm.check import ProcessPidMatch
+from datadog_checks.slurm.check import ProcessPidMatch, parse_duration
 from datadog_checks.slurm.constants import SACCT_PARAMS
 
 from .common import (
@@ -28,6 +28,8 @@ from .common import (
     SSHARE_MAP,
     mock_output,
 )
+
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.parametrize(
@@ -55,21 +57,24 @@ def test_sinfo_command_params(collection_level, gpu_stats, expected_params, inst
         assert check.sinfo_partition_cmd == expected_params
 
 
-def test_acct_command_params(instance):
-    # Mock the instance configuration
+@patch('datadog_checks.slurm.check.get_timestamp')
+def test_acct_command_params(mock_get_timestamp, instance):
     instance['collect_sacct_stats'] = True
-
     check = SlurmCheck('slurm', {}, [instance])
     base_cmd = ['/usr/bin/sacct'] + SACCT_PARAMS
 
-    # Test to ensure that the sacct is being constructed correctly
-    loops = [0, 1, 2]
-    for loop in loops:
-        if loop > 0:
-            time.sleep(loop)
-        check._update_sacct_params()
-        expected_cmd = base_cmd + ([f'--starttime=now-{loop}seconds'] if loop > 0 else [])
-        assert check.sacct_cmd == expected_cmd
+    # No prior run: no --starttime window, and _update_sacct_params leaves last_run_time untouched.
+    mock_get_timestamp.return_value = 100
+    assert check._update_sacct_params() == 100
+    assert check.sacct_cmd == base_cmd
+
+    # With a prior run 30s earlier the window is now-30seconds. _update_sacct_params returns the
+    # window end but must NOT advance last_run_time (the caller does that, only after sacct succeeds).
+    check.last_run_time = 100
+    mock_get_timestamp.return_value = 130
+    assert check._update_sacct_params() == 130
+    assert check.sacct_cmd == base_cmd + ['--starttime=now-30seconds']
+    assert check.last_run_time == 100
 
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
@@ -147,6 +152,7 @@ def test_sinfo_error_logs(mock_get_subprocess_output, instance, caplog):
         assert "out of range for metric" in caplog.text
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_squeue_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_squeue_stats'] = True
@@ -159,6 +165,7 @@ def test_squeue_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_sacct_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sacct_stats'] = True
@@ -173,6 +180,7 @@ def test_sacct_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_sshare_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sshare_stats'] = True
@@ -185,16 +193,16 @@ def test_sshare_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_sdiag_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sdiag_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
     mock_output_main = (mock_output('sdiag.txt'), "", 0)
     mock_get_subprocess_output.side_effect = [mock_output_main]
-    from unittest.mock import patch as patch_time
 
     # Patch time.time only for sdiag to make the test deterministic
-    with patch_time('datadog_checks.slurm.check.time') as mock_time:
+    with patch('datadog_checks.slurm.check.time') as mock_time:
         # The epoch in sdiag.txt is 1726207912, mocking current time to 1726208912 (diff = 1000)
         mock_time.time.return_value = 1726208912
         check.check(None)
@@ -203,6 +211,7 @@ def test_sdiag_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_scontrol_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_scontrol_stats'] = True
@@ -228,6 +237,7 @@ def test_scontrol_processing(mock_get_subprocess_output, instance, aggregator):
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_scontrol_processing_resolves_host_pid(mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path):
     instance['collect_scontrol_stats'] = True
@@ -300,6 +310,7 @@ def test_scontrol_processing_resolves_host_pid(mock_get_subprocess_output, insta
     aggregator.assert_all_metrics_covered()
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_scontrol_processing_does_not_resolve_host_pid_by_default(
     mock_get_subprocess_output, instance, aggregator, monkeypatch, tmp_path
@@ -341,6 +352,7 @@ def test_resolve_scontrol_host_pid_returns_match_without_nspids_when_missing(ins
     assert check._resolve_scontrol_host_pid("3771", {}) == ProcessPidMatch(host_pid="3771", namespace_pids=[])
 
 
+@pytest.mark.usefixtures('no_metadata')
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 @patch('datadog_checks.slurm.check.SlurmCheck._get_process_tags')
 def test_scontrol_processing_gets_process_tags_for_host_pid_only(
@@ -438,11 +450,7 @@ def test_enrich_scontrol_tags_unexpected_parts(mock_get_subprocess_output, insta
 
 @patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_process_seff_metric_submission(mock_get_subprocess_output, instance, aggregator):
-    # Load the seff fixture
-    with open('tests/fixtures/seff.txt') as f:
-        seff_output = f.read()
-
-    mock_get_subprocess_output.return_value = (seff_output, '', 0)
+    mock_get_subprocess_output.return_value = (mock_output('seff.txt'), '', 0)
     instance['collect_seff_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
     tags = ["slurm_job_id:101", "custom:tag"]
@@ -453,3 +461,181 @@ def test_process_seff_metric_submission(mock_get_subprocess_output, instance, ag
     aggregator.assert_metric('slurm.seff.memory_utilized_mb', value=0.0, tags=tags)
     aggregator.assert_metric('slurm.seff.memory_efficiency', value=0.0, tags=tags)
     aggregator.assert_all_metrics_covered()
+
+
+def test_sinfo_gpu_gres_slurm_2505(instance, aggregator):
+    # Slurm 25.05 sinfo appends a socket-affinity suffix, e.g. 'gpu:<type>:8(S:0-1)', to GRES.
+    # The count parser must ignore the suffix so gpu_total is still emitted (regression).
+    check = SlurmCheck('slurm', {}, [instance])
+    check.process_sinfo_node(mock_output('sinfo_gres_2505.txt'))
+
+    gpu_type = 'slurm_node_gpu_type:nvidia_rtx_pro_6000_blackwell_server_edition'
+    node1 = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-rtx-pro-129-015',
+        'slurm_cluster_name:N/A',
+        gpu_type,
+    ]
+    node2 = [
+        'slurm_partition_name:rtx-pro',
+        'slurm_node_name:slurm-rtx-pro-134-237',
+        'slurm_cluster_name:N/A',
+        gpu_type,
+    ]
+    aggregator.assert_metric('slurm.node.gpu_total', value=8, tags=node1)
+    aggregator.assert_metric('slurm.node.gpu_used', value=3, tags=node1)
+    aggregator.assert_metric('slurm.node.gpu_total', value=8, tags=node2)
+    aggregator.assert_metric('slurm.node.gpu_used', value=0, tags=node2)
+    # (IDX:N/A) normalizes to the check's null convention; a real range passes through unchanged.
+    aggregator.assert_metric_has_tag('slurm.node.info', 'slurm_node_gpu_used_idx:null')
+    aggregator.assert_metric_has_tag('slurm.node.info', 'slurm_node_gpu_used_idx:0,4-5')
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ("00:12:34", 754.0),
+        ("1-02:30:00", 95400.0),
+        ("2-03:00:00", 183600.0),
+        ("", None),
+        ("garbage", None),
+    ],
+)
+def test_parse_duration_handles_day_prefix(value, expected):
+    # Slurm switches Elapsed/AveCPU to 'D-HH:MM:SS' past 24h; the parser must not lose those.
+    assert parse_duration(value) == expected
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_process_seff_normalizes_kilobytes(mock_get_subprocess_output, instance, aggregator):
+    # Slurm 25.05 seff reports small jobs in KB (and large ones in GB); memory must still
+    # normalize to MB rather than being dropped (regression for the hardcoded 'MB').
+    mock_get_subprocess_output.return_value = (mock_output('seff_2505.txt'), '', 0)
+    instance['collect_seff_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    tags = ["slurm_job_id:317"]
+    check.process_seff("317", tags)
+
+    aggregator.assert_metric('slurm.seff.memory_utilized_mb', value=0.7578125, tags=tags)
+    aggregator.assert_metric('slurm.seff.cpu_utilized', value=0.0, tags=tags)
+
+
+def test_sacct_running_job_skips_none_avgcpu(instance, aggregator):
+    # RUNNING jobs report an empty AveCPU; avgcpu must be skipped rather than submitted as
+    # None (regression: previously only duration had a None guard).
+    check = SlurmCheck('slurm', {}, [instance])
+    running_job = (
+        "315|dd-fix-run|rtx-pro|cw-sup|12|billing=12,cpu=12,gres/gpu=1,mem=93585408K,node=1|"
+        "00:00:12|144|||||RUNNING|0:0|2026-07-10T18:45:32|Unknown|slurm-rtx-pro-129-015|||"
+    )
+    check.process_sacct(running_job)
+
+    aggregator.assert_metric('slurm.sacct.slurm_job_avgcpu', count=0)
+    aggregator.assert_metric('slurm.sacct.job.duration', value=12, count=1)
+    aggregator.assert_metric('slurm.sacct.job.info', value=1, count=1)
+
+
+@patch('datadog_checks.slurm.check.get_timestamp')
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_sacct_window_advances_only_on_success(mock_get_subprocess_output, mock_get_timestamp, instance):
+    # A failed sacct call must not advance the window (otherwise those jobs are dropped forever);
+    # a successful call advances it.
+    instance['collect_sacct_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    check.last_run_time = 100
+
+    mock_get_timestamp.return_value = 200
+    mock_get_subprocess_output.return_value = (None, "boom", 1)
+    check.check(None)
+    assert check.last_run_time == 100
+
+    mock_get_timestamp.return_value = 260
+    mock_get_subprocess_output.return_value = (mock_output('sacct.txt'), "", 0)
+    check.check(None)
+    assert check.last_run_time == 260
+
+
+def test_process_tags_strips_all_state_flags(instance):
+    # A node can carry multiple state-code suffixes (e.g. 'idle*~'); all must be decoded and stripped.
+    check = SlurmCheck('slurm', {}, [instance])
+    tags = check._process_tags(['idle*~'], [{'name': 'slurm_node_state', 'index': 0}], [])
+    assert 'slurm_node_state:idle' in tags
+    assert 'sinfo_state_code:non_responsive' in tags
+    assert 'sinfo_state_code:powered_off' in tags
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_metadata_collected_when_sinfo_disabled(mock_get_subprocess_out, instance, datadog_agent, dd_run_check):
+    # collect_metadata must resolve the sinfo binary independently of collect_sinfo_stats
+    # (worker-only deploys disable sinfo); it previously raised AttributeError every interval.
+    instance['collect_sinfo_stats'] = False
+    check = SlurmCheck('slurm', {}, [instance])
+    check.check_id = 'test:456'
+    mock_get_subprocess_out.return_value = (mock_output('sinfo_version.txt'), "", 0)
+
+    dd_run_check(check)
+
+    major, minor, mod = SLURM_VERSION.split('.')
+    datadog_agent.assert_metadata(
+        'test:456',
+        {
+            'version.scheme': 'slurm',
+            'version.major': major,
+            'version.minor': minor,
+            'version.mod': mod,
+            'version.raw': SLURM_VERSION,
+        },
+    )
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_failed_command_emits_no_metrics_and_does_not_raise(mock_get_subprocess_output, instance, aggregator):
+    # Every command failing must not raise and must emit no metrics.
+    instance['collect_sinfo_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.return_value = (None, "boom", 1)
+
+    check.check(None)
+
+    assert not aggregator.metric_names
+
+
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_emitted_metrics_are_documented(mock_get_subprocess_output, instance, aggregator):
+    # Every metric the check emits must have a metadata.csv entry (guards against name drift),
+    # including the seff path whose emitters this work touched.
+    instance['collect_gpu_stats'] = True
+    instance['sinfo_collection_level'] = 3
+    instance['collect_seff_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    mock_get_subprocess_output.return_value = (mock_output('seff.txt'), '', 0)
+    check.process_sinfo_partition(mock_output('sinfo_partition_cluster.txt'))
+    check.process_sinfo_partition_info(mock_output('sinfo_partition_info.txt'))
+    check.process_sinfo_node(mock_output('sinfo.txt'))
+    check.process_squeue(mock_output('squeue.txt'))
+    check.process_sacct(mock_output('sacct.txt'))
+    check.process_sdiag(mock_output('sdiag.txt'))
+    check.process_sshare(mock_output('sshare.txt'))
+    check.process_seff('101', ['slurm_job_id:101'])
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.usefixtures('no_metadata')
+@patch('datadog_checks.slurm.check.get_timestamp')
+@patch('datadog_checks.slurm.check.get_subprocess_output')
+@patch('datadog_checks.slurm.check.SlurmCheck.process_sacct')
+def test_sacct_window_not_advanced_on_parse_error(
+    mock_process_sacct, mock_get_subprocess_output, mock_get_timestamp, instance
+):
+    # ret==0 but a parse exception must NOT advance the window (otherwise those jobs are dropped).
+    instance['collect_sacct_stats'] = True
+    check = SlurmCheck('slurm', {}, [instance])
+    check.last_run_time = 100
+    mock_get_timestamp.return_value = 200
+    mock_get_subprocess_output.return_value = ("some sacct output", "", 0)
+    mock_process_sacct.side_effect = ValueError("boom")
+
+    check.check(None)
+
+    assert check.last_run_time == 100

@@ -646,8 +646,8 @@ SQUEUE_MAP = {
             'value': 1,
             'tags': [],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
-        #    42 |root |wrap    |RUNNING |c1       |   1 |c1               |300M       | foo       # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |TRES_PER_NODE | PARTITION # noqa: E501
+        #    42 |root |wrap    |RUNNING |c1       |   1 |c1               |gres/gpu:1    | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -658,13 +658,13 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:c1',
                 'slurm_job_reason:c1',
                 'slurm_job_state:RUNNING',
-                'slurm_job_tres_per_node:300M',
+                'slurm_job_tres_per_node:gres/gpu:1',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
-        #    44 |root |wrap    |RUNNING |c2       |   1 |c2               |400M       | foo       # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |TRES_PER_NODE | PARTITION # noqa: E501
+        #    44 |root |wrap    |RUNNING |c2       |   1 |c2               |gres/gpu:2    | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -675,13 +675,13 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:c2',
                 'slurm_job_reason:c2',
                 'slurm_job_state:RUNNING',
-                'slurm_job_tres_per_node:400M',
+                'slurm_job_tres_per_node:gres/gpu:2',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
-        #    45 |root |test.py |PENDING |         |   1 |(Resources)      |100M       | foo       # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |TRES_PER_NODE | PARTITION # noqa: E501
+        #    45 |root |test.py |PENDING |         |   1 |(Resources)      |gres/gpu:1    | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -692,13 +692,13 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:null',
                 'slurm_job_reason:Resources',
                 'slurm_job_state:PENDING',
-                'slurm_job_tres_per_node:100M',
+                'slurm_job_tres_per_node:gres/gpu:1',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],
         },
-        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |MIN_MEMORY | PARTITION # noqa: E501
-        #    46 |root |test.py |PENDING |         |   1 |(Priority)       |200M       | foo       # noqa: E501
+        # JOBID |USER |NAME    |STATE   |NODELIST |CPUS |NODELIST(REASON) |TRES_PER_NODE | PARTITION # noqa: E501
+        #    46 |root |test.py |PENDING |         |   1 |(Priority)       |gres/gpu:1    | foo       # noqa: E501
         {
             'name': 'slurm.squeue.job.info',
             'value': 1,
@@ -709,7 +709,7 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:null',
                 'slurm_job_reason:Priority',
                 'slurm_job_state:PENDING',
-                'slurm_job_tres_per_node:200M',
+                'slurm_job_tres_per_node:gres/gpu:1',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],

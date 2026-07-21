@@ -2,8 +2,17 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from unittest.mock import patch
 
 import pytest
+
+
+@pytest.fixture
+def no_metadata():
+    # Metadata collection shells out to `sinfo --version`; stub it so per-command tests own the
+    # get_subprocess_output side_effect sequence. Metadata itself is covered by test_metadata.
+    with patch('datadog_checks.slurm.check.SlurmCheck.collect_metadata'):
+        yield
 
 
 @pytest.fixture(scope='session')

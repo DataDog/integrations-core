@@ -430,17 +430,17 @@
                     {
                       "name": "query1",
                       "data_source": "metrics",
-                      "query": "avg:slurm.partition.cpu.allocated{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
+                      "query": "avg:slurm.partition.node.allocated{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
                     },
                     {
                       "name": "query3",
                       "data_source": "metrics",
-                      "query": "avg:slurm.partition.cpu.other{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
+                      "query": "avg:slurm.partition.node.other{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
                     },
                     {
                       "name": "query2",
                       "data_source": "metrics",
-                      "query": "avg:slurm.partition.cpu.idle{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
+                      "query": "avg:slurm.partition.node.idle{$partition_name,$slurmctld_host,$slurm_partition_node_list} by {host,slurm_partition_name,slurm_partition_node_list}.fill(null)"
                     }
                   ],
                   "response_format": "timeseries",

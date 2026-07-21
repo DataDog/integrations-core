@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import time
+from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import timedelta
 
@@ -34,22 +35,38 @@ from .constants import (
     SSHARE_PARAMS,
 )
 
+# Upper bound (seconds) on any Slurm CLI call so a hung binary can't wedge the check.
+SUBPROCESS_TIMEOUT = 120
+
 
 def get_subprocess_output(cmd):
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=SUBPROCESS_TIMEOUT)
         return result.stdout, result.stderr, result.returncode
     except Exception as e:
         return None, f"Error running {cmd}: {e}", 1
 
 
 def parse_duration(time_str):
+    # Slurm renders durations as '[DD-]HH:MM:SS'; the day prefix appears once a job runs >= 24h.
     try:
+        days = 0
+        if '-' in time_str:
+            days_str, time_str = time_str.split('-', 1)
+            days = int(days_str)
         hours, minutes, seconds = map(int, time_str.split(':'))
-        duration = timedelta(hours=hours, minutes=minutes, seconds=seconds)
-        return duration.total_seconds()
+        return timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds).total_seconds()
     except Exception:
         return None
+
+
+# Matches a sinfo GRES/GRES_USED gpu entry: legacy 'gpu:tesla:4', modern
+# 'gpu:<type>:8(S:0-1)' (socket affinity) and 'gpu:<type>:3(IDX:0,4-5)' (used indices),
+# and typeless 'gpu:8'. The trailing '(...)' is optional; '(null)' simply won't match.
+GPU_GRES_RE = re.compile(r'gpu:(?:(?P<type>[^:(]+):)?(?P<count>\d+)(?:\((?P<detail>[^)]*)\))?')
+
+# seff prints memory in whichever unit fits; normalize everything to MB for the metric.
+MEMORY_UNIT_TO_MB = {"B": 1 / 1024 / 1024, "KB": 1 / 1024, "MB": 1, "GB": 1024, "TB": 1024 * 1024}
 
 
 @dataclass
@@ -90,7 +107,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         if self.collect_sinfo_stats:
             self.sinfo_partition_cmd = self.get_slurm_command('sinfo', SINFO_PARTITION_PARAMS)
             self.sinfo_partition_info_cmd = self.get_slurm_command('sinfo', SINFO_PARTITION_INFO_PARAMS)
-            self.sinfo_collection_level = self.instance.get('sinfo_collection_level', 1)
             if self.sinfo_collection_level > 1:
                 self.sinfo_node_cmd = self.get_slurm_command('sinfo', SINFO_NODE_PARAMS)
                 if self.sinfo_collection_level > 2:
@@ -153,8 +169,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         if self.collect_sshare_stats:
             commands.append(('sshare', self.sshare_cmd, self.process_sshare))
 
+        sacct_window_end = None
         if self.collect_sacct_stats and self.last_run_time is not None:
-            self._update_sacct_params()
+            sacct_window_end = self._update_sacct_params()
             commands.append(('sacct', self.sacct_cmd, self.process_sacct))
         elif self.last_run_time is None:
             # Set timestamp here so we can use it for the next run and collect sacct stats only
@@ -167,27 +184,29 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         for name, cmd, process_func in commands:
             self.log.debug("Running %s command: %s", name, cmd)
             out, err, ret = get_subprocess_output(cmd)
+            processed = False
             if ret != 0:
                 self.log.error("Error running %s: %s", name, err)
             elif out:
                 self.log.debug("Processing %s output", name)
-                process_func(out)
+                try:
+                    process_func(out)
+                    processed = True
+                except Exception:
+                    self.log.exception("Error processing %s output", name)
             else:
+                # A successful command with no output (e.g. no completed jobs in the window) is not a failure.
                 self.log.debug("No output from %s", name)
+                processed = True
+
+            # Advance the sacct window only after a fully successful sacct call (ran AND parsed), so
+            # neither a command failure nor a parse error silently drops that window's jobs.
+            if name == 'sacct' and processed and sacct_window_end is not None:
+                self.last_run_time = sacct_window_end
 
     def process_sinfo_partition(self, output):
         # test-queue*|N/A|1/2/0/3
-        lines = output.strip().split('\n')
-
-        if self.debug_sinfo_stats:
-            self.log.debug("Processing sinfo partition line: %s", lines)
-
-        for line in lines:
-            partition_data = line.split('|')
-
-            tags = []
-            tags.extend(self.tags)
-
+        for partition_data, tags in self._iter_rows(output, self.debug_sinfo_stats, 'sinfo partition'):
             tags = self._process_tags(partition_data, PARTITION_MAP["tags"], tags)
 
             if self.gpu_stats:
@@ -198,17 +217,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
     def process_sinfo_partition_info(self, output):
         # test-queue*|N/A|c[1-2]|up|1|972|allocated|10
-        lines = output.strip().split('\n')
-
-        if self.debug_sinfo_stats:
-            self.log.debug("Processing sinfo partition line: %s", lines)
-
-        for line in lines:
-            partition_data = line.split('|')
-
-            tags = []
-            tags.extend(self.tags)
-
+        for partition_data, tags in self._iter_rows(output, self.debug_sinfo_stats, 'sinfo partition info'):
             tags = self._process_tags(partition_data, PARTITION_MAP["tags"], tags)
 
             if self.gpu_stats:
@@ -229,17 +238,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def process_sinfo_node(self, output):
         # PARTITION |AVAIL |NODELIST |NODES(A/I/O/T) |MEMORY |CLUSTER |CPU_LOAD |FREE_MEM |TMP_DISK |STATE |REASON |ACTIVE_FEATURES |THREADS |GRES      |GRES_USED  # noqa: E501
         # normal    |up    |c1       |0/1/0/1        |  1000 |N/A     |    1.84 |    5440 |       0 |idle  |none   |(null)          |      1 |(null)    |(null)     # noqa: E501
-        lines = output.strip().split('\n')
-
-        if self.debug_sinfo_stats:
-            self.log.trace("Processing sinfo node payload: %s", lines)
-
-        for line in lines:
-            node_data = line.split('|')
-
-            tags = []
-            tags.extend(self.tags)
-
+        for node_data, tags in self._iter_rows(output, self.debug_sinfo_stats, 'sinfo node'):
             tags = self._process_tags(node_data, NODE_MAP["tags"], tags)
 
             if self.gpu_stats:
@@ -266,17 +265,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def process_squeue(self, output):
         # JOBID |      USER |      NAME |   STATE |            NODELIST |      CPUS |   NODELIST(REASON) | MIN_MEMORY | Partition # noqa: E501
         #    31 |      root |      wrap | PENDING |                     |         1 |        (Resources) |       500M | foo       # noqa: E501
-        lines = output.strip().split('\n')
-
-        if self.debug_squeue_stats:
-            self.log.debug("Processing squeue output: %s", lines)
-
-        for line in lines:
-            job_data = line.split('|')
-
-            tags = []
-            tags.extend(self.tags)
-
+        for job_data, tags in self._iter_rows(output, self.debug_squeue_stats, 'squeue'):
             tags = self._process_tags(job_data, SQUEUE_MAP["tags"], tags)
 
             self.gauge('squeue.job.info', 1, tags=tags)
@@ -287,15 +276,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # JobID    |JobName |Partition|Account|AllocCPUS|AllocTRES                       |Elapsed  |CPUTimeRAW|MaxRSS|MaxVMSize|AveCPU|AveRSS |State   |ExitCode|Start               |End     |NodeList   | AveDiskRead | MaxDiskRead # noqa: E501
         # 36       |test.py |normal   |root   |1        |billing=1,cpu=1,mem=500M,node=1 |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | 0.000000    | 0.000000     # noqa: E501
         # 36.batch |batch   |         |root   |1        |cpu=1,mem=500M,node=1           |00:00:03 |3         |      |         |      |       |RUNNING |0:0     |2024-09-24T12:00:01 |Unknown |c1         | 0.000000    | 0.000000     # noqa: E501
-        lines = output.strip().split('\n')
-
-        if self.debug_sacct_stats:
-            self.log.debug("Processing sacct output: %s", lines)
-
-        for line in lines:
-            job_data = line.split('|')
-            tags = []
-            tags.extend(self.tags)
+        for job_data, tags in self._iter_rows(output, self.debug_sacct_stats, 'sacct'):
+            if len(job_data) <= 12:
+                self.log.debug("Skipping malformed sacct line (%d fields): %s", len(job_data), job_data)
+                continue
 
             # Process the JobID
             job_id_full = job_data[0].strip()
@@ -315,12 +299,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
             duration = parse_duration(job_data[6])
             ave_cpu = parse_duration(job_data[10])
-            if not duration:
-                self.log.debug("Invalid duration for job '%s'. Skipping. Assigning duration as 0.", job_id)
-                duration = 0
 
-            self.gauge('sacct.job.duration', duration, tags=tags)
-            self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
+            if duration is not None:
+                self.gauge('sacct.job.duration', duration, tags=tags)
+            else:
+                self.log.debug("Invalid duration '%s' for job '%s'. Skipping.", job_data[6], job_id)
+            if ave_cpu is not None:
+                self.gauge('sacct.slurm_job_avgcpu', ave_cpu, tags=tags)
             self.gauge('sacct.job.info', 1, tags=tags)
             if self.collect_seff_stats:
                 job_state = job_data[12].strip().upper()
@@ -358,10 +343,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 cpu_eff = float(match.group(1))
                 continue
 
-            # Memory Utilized: 0.00 MB (estimated maximum)
-            match = re.match(r'Memory Utilized: ([\d.]+) MB', line)
+            # Memory Utilized: 0.00 MB / 776.00 KB / 1.50 GB — normalize whatever unit to MB.
+            match = re.match(r'Memory Utilized: ([\d.]+)\s*([KMGT]?B)', line)
             if match:
-                mem_utilized = float(match.group(1))
+                mem_utilized = float(match.group(1)) * MEMORY_UNIT_TO_MB.get(match.group(2), 1)
                 continue
 
             # Memory Efficiency: 0.00% of 16.00 B (16.00 B/node)
@@ -382,22 +367,12 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def process_sshare(self, output):
         # Account |User |RawShares |NormShares |RawUsage |NormUsage |EffectvUsage |FairShare |LevelFS  |GrpTRESMins |TRESRunMins                                                     # noqa: E501
         # root    |root |        1 |           |       0 |          |    0.000000 | 0.000000 |0.000000 |            |cpu=0,mem=0,energy=0,node=0,billing=0,fs/disk=0,vmem=0,pages=0  # noqa: E501
-        lines = output.strip().split('\n')
-
-        if self.debug_sshare_stats:
-            self.log.debug("Processing sshare output: %s", lines)
-
-        for line in lines:
-            sshare_data = line.split('|')
-
-            tags = []
-            tags.extend(self.tags)
-
+        for sshare_data, tags in self._iter_rows(output, self.debug_sshare_stats, 'sshare'):
             tags = self._process_tags(sshare_data, SSHARE_MAP["tags"], tags)
 
             self._process_metrics(sshare_data, SSHARE_MAP["metrics"], tags)
 
-        self.gauge('sshare.enabled', 1, tags=tags)
+        self.gauge('sshare.enabled', 1, tags=self.tags)
 
     def process_sdiag(self, output):
         metrics = {}
@@ -447,25 +422,27 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.gauge('sdiag.enabled', 1)
 
     def _update_sacct_params(self):
+        # Build the windowed sacct command and return the window-end timestamp. The caller advances
+        # last_run_time only after sacct succeeds, so a failed call doesn't permanently drop that window.
         sacct_params = SACCT_PARAMS.copy()
+        now = get_timestamp()
         if self.last_run_time is not None:
-            now = get_timestamp()
-            delta = now - self.last_run_time
+            # Guard against a backward clock correction (NTP) producing a negative, malformed window.
+            delta = max(0, now - self.last_run_time)
             start_time_param = f"--starttime=now-{int(delta)}seconds"
 
             sacct_params = [param for param in sacct_params if not param.startswith('--starttime')]
             sacct_params.append(start_time_param)
             self.log.debug("Updating sacct command with new timestamp: %s", start_time_param)
 
-        self.last_run_time = get_timestamp()
-
         # Update the sacct command with the dynamic SACCT_PARAMS
         self.sacct_cmd = self.get_slurm_command('sacct', sacct_params)
+        return now
 
     def _process_sinfo_aiot_state(self, aiot_state, namespace, tags):
         # "0/2/0/2"
         try:
-            allocated, idle, other, total = aiot_state.split('/')
+            allocated, idle, other, total = map(int, aiot_state.split('/'))
         except ValueError as e:
             self.log.debug("Invalid CPU state '%s'. Skipping. Error: %s", aiot_state, e)
             return
@@ -480,46 +457,45 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.gauge(f'{namespace}.cpu.other', other, tags)
             self.gauge(f'{namespace}.cpu.total', total, tags)
 
+    def _parse_gpu_gres(self, gres):
+        # Parse a sinfo GRES/GRES_USED gpu field into (gpu_type, count, detail). Tolerates the
+        # modern suffixes 'gpu:<type>:8(S:0-1)' / 'gpu:<type>:3(IDX:0,4-5)', the legacy
+        # 'gpu:<type>:4', typeless 'gpu:8', and '(null)'. count/detail are None when absent.
+        match = GPU_GRES_RE.search(gres) if gres else None
+        if not match:
+            return "null", None, None
+        return match.group('type') or "null", int(match.group('count')), match.group('detail')
+
     def _process_sinfo_gpu(self, gres, gres_used, namespace, tags):
-        used_gpu_used_idx = "null"
-        gpu_type = "null"
-        total_gpu = None
+        gpu_type, total_gpu, _ = self._parse_gpu_gres(gres)
         used_gpu_count = None
-
-        try:
-            # Always parse total GPU info
-            gres_total_parts = gres.split(':')
-            if len(gres_total_parts) == 3 and gres_total_parts[0] == "gpu":
-                _, gpu_type, total_gpu_part = gres_total_parts
-                total_gpu = int(total_gpu_part)
-
-            # Only parse used GPU info if gres_used is not None
-            if gres_used is not None:
-                gres_used_parts = gres_used.split(':')
-                if len(gres_used_parts) == 4 and gres_used_parts[0] == "gpu":
-                    _, _, used_gpu_count_part, used_gpu_used_idx = gres_used_parts
-                    used_gpu_count = int(used_gpu_count_part.split('(')[0])
-                    used_gpu_used_idx = used_gpu_used_idx.rstrip(')')
-        except (ValueError, IndexError) as e:
-            self.log.debug(
-                "Invalid GPU data: gres:'%s', gres_used:'%s'. Skipping GPU metric submission. Error: %s",
-                gres,
-                gres_used,
-                e,
-            )
+        used_gpu_used_idx = "null"
+        if gres_used is not None:
+            _, used_gpu_count, used_detail = self._parse_gpu_gres(gres_used)
+            if used_detail and used_detail.startswith("IDX:"):
+                idx = used_detail[len("IDX:") :]
+                used_gpu_used_idx = idx if idx and idx != "N/A" else "null"
 
         gpu_tags = [f"slurm_{namespace}_gpu_type:{gpu_type}"]
         gpu_info_tags = [f"slurm_{namespace}_gpu_used_idx:{used_gpu_used_idx}"]
         _tags = tags + gpu_tags
         if total_gpu is not None:
             self.gauge(f'{namespace}.gpu_total', total_gpu, _tags)
-        if used_gpu_count is not None and gres_used is not None:
+        if used_gpu_count is not None:
             self.gauge(f'{namespace}.gpu_used', used_gpu_count, _tags)
 
         return gpu_tags, gpu_info_tags
 
-    def _process_tags(self, data, map, tags):
-        for tag_info in map:
+    def _iter_rows(self, output, debug=False, name="") -> Iterator[tuple[list[str], list[str]]]:
+        # Yield (fields, base_tags) for each pipe-delimited row of a command's output.
+        lines = output.strip().split('\n')
+        if debug:
+            self.log.debug("Processing %s output: %s", name, lines)
+        for line in lines:
+            yield line.split('|'), list(self.tags)
+
+    def _process_tags(self, data, tag_map, tags):
+        for tag_info in tag_map:
             index = tag_info['index']
             if index >= len(data):
                 self.log.debug("Index %d out of range for tag '%s'. Skipping.", index, tag_info['name'])
@@ -546,9 +522,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             if tag_info["name"] in ["slurm_partition_state", "slurm_node_state"]:
                 for key, mapped_value in SINFO_STATE_CODE.items():
                     if key in value:
-                        value = value.replace(key, '').strip()
+                        value = value.replace(key, '')
                         tags.append(f'sinfo_state_code:{mapped_value}')
-                        break
+                value = value.strip()
 
             tags.append(f'{tag_info["name"]}:{value}')
 
@@ -591,8 +567,15 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # 3772     14       batch    -       -
         base_cmd = self.scontrol_cmd[:-1]
         hostname = os.uname()[1]
-        slurm_node, _, _ = get_subprocess_output(base_cmd + ["show", "hostname", hostname])
+        slurm_node, _, ret = get_subprocess_output(base_cmd + ["show", "hostname", hostname])
+        if ret != 0 or not slurm_node:
+            self.log.error("Unable to resolve Slurm node name for host '%s'. Skipping scontrol.", hostname)
+            return
+        slurm_node = slurm_node.strip()
         lines = output.strip().splitlines()
+        if not lines:
+            self.log.debug("No scontrol listpid output to process")
+            return
         headers = lines[0].split()
 
         # Cache for job details to avoid duplicate calls
@@ -602,7 +585,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         )
 
         for line in lines[1:]:
-            tags = [f"slurm_node_name:{slurm_node.strip()}"]
+            tags = [f"slurm_node_name:{slurm_node}"]
             fields = line.split()
             job_id = None
 
@@ -731,12 +714,13 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # even if it fails and thus should not stop the check from running.
         try:
             # slurm 21.08.6\n
-            out, err, ret = get_subprocess_output([self.sinfo_partition_cmd[0], '--version'])
+            out, err, ret = get_subprocess_output(self.get_slurm_command('sinfo', ['--version']))
             if ret != 0:
                 self.log.error("Error running sinfo --version: %s", err)
             elif out:
                 self.log.debug("Processing sinfo --version output: %s", out)
-                version_out = out.split(' ')[1].strip()
+                parts = out.split(' ')
+                version_out = parts[1].strip() if len(parts) > 1 else ''
                 if version_out:
                     version_parts = version_out.split('.')
                     version = {
