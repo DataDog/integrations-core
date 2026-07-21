@@ -14,6 +14,8 @@ def get_service(host="1.2.3.4"):
         id="svc1",
         host=host,
         ports=[
+            Port(number=7070, protocol="tcp"),
+            Port(number=7071, protocol="tcp"),
             Port(number=8080, protocol="tcp"),
             Port(number=8081, protocol="tcp"),
             Port(number=8082, protocol="tcp"),
@@ -31,7 +33,7 @@ def test_candidates_yields_only_openmetrics_port():
 
 
 def test_candidates_ignores_known_non_metrics_ports():
-    """Probing the Inference (8080) or Management (8081) APIs as OpenMetrics endpoints logs an error."""
+    """Probing the Inference/Management HTTP (8080/8081) or gRPC (7070/7071) ports as OpenMetrics logs an error."""
     service = get_service()
 
     result = list(candidates(service))
@@ -39,6 +41,8 @@ def test_candidates_ignores_known_non_metrics_ports():
     endpoints = [instance["openmetrics_endpoint"] for candidate in result for instance in candidate["instances"]]
     assert "http://1.2.3.4:8080/metrics" not in endpoints
     assert "http://1.2.3.4:8081/metrics" not in endpoints
+    assert "http://1.2.3.4:7070/metrics" not in endpoints
+    assert "http://1.2.3.4:7071/metrics" not in endpoints
 
 
 def test_candidates_empty_without_openmetrics_port():
