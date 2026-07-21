@@ -47,7 +47,7 @@ def disable_integration_before_install(config_file):
 
 def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
     if not agent_build:
-        return 'registry.datadoghq.com/agent-dev:master-py3'
+        return 'registry.datadoghq.com/agent-dev:sarah-parse-bridge-go-update-py3'
 
     if match := re.match(AGENT_IMAGE_REGEX, agent_build):
         org, image, tag = match.groups()
