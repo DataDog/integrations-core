@@ -56,7 +56,7 @@ on:
         type: boolean
       agent-image:
         required: false
-        default: "registry.datadoghq.com/agent-dev:master-py3"
+        default: "registry.datadoghq.com/agent-dev:sarah-parse-bridge-go-update-py3"
         type: string
       agent-image-py2:
         required: false
