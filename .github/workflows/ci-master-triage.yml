@@ -1,0 +1,106 @@
+name: CI Master Triage
+
+# Detects failing master test-matrix runs (Master / Master Windows), groups them
+# so one root cause produces one alert, optionally enriches with a Claude
+# root-cause summary, and posts to #agent-integrations-ops.
+#
+# Rollout is gated by the CI_TRIAGE_ENABLED repo variable: scheduled ticks are
+# no-ops until it is set to "true", so merging this file is safe. Use
+# workflow_dispatch to shadow-test (point CI_TRIAGE_SLACK_CHANNEL_ID at a private
+# channel first), then set CI_TRIAGE_ENABLED=true and the ops channel to go live.
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # realtime sweep — emits only on HIGH severity
+    - cron: "0 14,22 * * *"  # twice-daily digest — emits HIGH + NORMAL
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Triage mode"
+        type: choice
+        options: [realtime, digest]
+        default: digest
+      explicit_run_ids:
+        description: "Comma-separated run IDs to triage (for testing; bypasses dedup state)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ci-master-triage-${{ github.event.schedule || github.event.inputs.mode || 'dispatch' }}
+  cancel-in-progress: false
+
+jobs:
+  triage:
+    runs-on: ubuntu-22.04
+    # Scheduled runs only fire on the default branch; gate them behind a repo
+    # variable so go-live is deliberate. Manual dispatches always run.
+    if: github.event_name == 'workflow_dispatch' || vars.CI_TRIAGE_ENABLED == 'true'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 14,22 * * *" ]; then
+            echo "mode=digest" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=realtime" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore triage dedup state
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        with:
+          path: ci_triage_state.json
+          key: ci-master-triage-state-${{ github.run_id }}
+          restore-keys: |
+            ci-master-triage-state-
+
+      - name: Detect failing master runs
+        id: detect
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          MODE: ${{ steps.mode.outputs.mode }}
+          REPO_ROOT: ${{ github.workspace }}
+          STATE_FILE: ci_triage_state.json
+          EXPLICIT_RUN_IDS: ${{ github.event.inputs.explicit_run_ids }}
+        run: python3 .github/workflows/scripts/ci_master_triage/detect.py
+
+      - name: Check enrichment availability
+        id: enrich_gate
+        if: steps.detect.outputs.should_alert == 'true'
+        run: echo "enabled=${{ secrets.ANTHROPIC_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Enrich root cause with Claude (best-effort)
+        if: steps.detect.outputs.should_alert == 'true' && steps.enrich_gate.outputs.enabled == 'true'
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          TRIAGE_OUTPUT: triage_output.json
+          ENRICHMENT_FILE: enrichment.json
+        run: |
+          pip install --quiet anthropic
+          python3 .github/workflows/scripts/ci_master_triage/enrich.py
+
+      - name: Post Slack alert
+        if: steps.detect.outputs.should_alert == 'true'
+        env:
+          SLACK_API_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+          # Override with a private channel during shadow mode; falls back to the
+          # #agent-integrations-ops default in notify.py when unset.
+          SLACK_CHANNEL_ID: ${{ vars.CI_TRIAGE_SLACK_CHANNEL_ID }}
+          TRIAGE_OUTPUT: triage_output.json
+          ENRICHMENT_FILE: enrichment.json
+        run: python3 .github/workflows/scripts/ci_master_triage/notify.py
