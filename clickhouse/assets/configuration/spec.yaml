@@ -295,12 +295,12 @@ files:
             type: boolean
             example: false
           fleet_configurable: false
-    - name: asynchronous_insert_flush_log
-      description: Configure asynchronous insert flush log monitoring
+    - name: async_insert_flushes
+      description: Configure async insert flush collection
       options:
         - name: enabled
           description: |
-            Enable collection of asynchronous insert flush health from system.asynchronous_insert_log.
+            Enable collection of async insert flush events from system.asynchronous_insert_log.
             Requires `dbm: true`. Sends per-flush records as DBM events (dbm_type="async_inserts_flush")
             including flush status, exception (if any), bytes, and row count per flush.
           value:
@@ -315,9 +315,9 @@ files:
             type: number
             example: 60
           fleet_configurable: false
-        - name: max_flush_rows
+        - name: max_samples_per_collection
           description: |
-            Set the maximum number of flush records to collect per flush log collection.
+            Maximum number of flush records to collect in a single run (applies LIMIT in SQL).
           value:
             type: integer
             example: 1000
