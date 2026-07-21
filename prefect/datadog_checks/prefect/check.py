@@ -24,7 +24,7 @@ from .metrics import METRICS_SPEC
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
-    from datadog_checks.base.utils.http import RequestsWrapper
+    from datadog_checks.base.utils.http_protocol import HTTPClient
 
 
 class PrefectCheck(AgentCheck, ConfigMixin):
@@ -669,7 +669,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 class PrefectClient:
     """HTTP client wrapping GET/POST requests and pagination for the Prefect API."""
 
-    def __init__(self, url: str, http: RequestsWrapper, log: CheckLoggingAdapter):
+    def __init__(self, url: str, http: HTTPClient, log: CheckLoggingAdapter):
         self.http_exceptions = (
             HTTPStatusError,
             HTTPInvalidURLError,
