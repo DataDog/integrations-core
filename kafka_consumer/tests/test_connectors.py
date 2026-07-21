@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer import KafkaCheck
-from datadog_checks.kafka_consumer.connectors import TOPICS_FETCH_MAX_PER_RUN
+from datadog_checks.kafka_consumer.connectors import CONNECTOR_EVENT_TOPICS_MAX, TOPICS_FETCH_MAX_PER_RUN
 
 from .common import CONNECT_URL
 from .conftest import SAMPLE_CONNECTORS_RESPONSE
@@ -225,6 +225,18 @@ def test_connector_topics_included_in_config_event(run_connect_check, aggregator
     heartbeat_event = next(event for event in events if event['connector'] == 'demo-heartbeat')
     assert source_event['topics'] == ['demo-orders']
     assert heartbeat_event['topics'] == []
+
+
+def test_connector_topics_truncated_in_config_event(run_connect_check, aggregator):
+    topics = [f'topic-{i:04d}' for i in range(CONNECTOR_EVENT_TOPICS_MAX + 50)]
+    run_connect_check(
+        connectors_response=SAMPLE_CONNECTORS_RESPONSE,
+        topics_response={'demo-source': topics, 'demo-heartbeat': []},
+    )
+
+    events = dsm_events(aggregator, 'connector')
+    source_event = next(event for event in events if event['connector'] == 'demo-source')
+    assert source_event['topics'] == sorted(topics)[:CONNECTOR_EVENT_TOPICS_MAX]
 
 
 def test_connector_topics_requested_per_connector(run_connect_check):

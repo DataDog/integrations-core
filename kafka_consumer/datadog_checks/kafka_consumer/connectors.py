@@ -49,6 +49,7 @@ CONNECTOR_TOPICS_DATA_CACHE_KEY = 'kafka_connector_topics_data_cache'
 CONNECTOR_CACHE_MAX_SIZE = 5_000
 TOPICS_FETCH_CONCURRENCY = 10
 TOPICS_FETCH_MAX_PER_RUN = 100
+CONNECTOR_EVENT_TOPICS_MAX = 500
 
 
 def _short_class_name(full_class: str) -> str:
@@ -318,7 +319,9 @@ class KafkaConnectCollector:
                     except Exception as e:
                         if self._is_unsupported_topics_endpoint(e):
                             names_to_back_off.append(name)
-                        self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
+                            self.log.debug("Topics endpoint not supported for connector %s from %s: %s", name, url, e)
+                        else:
+                            self.log.warning("Error fetching topics for connector %s from %s: %s", name, url, e)
 
             if names_to_back_off:
                 self.cache.mark_items_fetched(
@@ -365,7 +368,7 @@ class KafkaConnectCollector:
             'connector_trace': connector_trace,
             'task_count': len(tasks),
             'task_traces': task_traces,
-            'topics': topics,
+            'topics': topics[:CONNECTOR_EVENT_TOPICS_MAX],
             'connect_url': url,
             'config_type': 'connector',
             'config': redacted_config,
