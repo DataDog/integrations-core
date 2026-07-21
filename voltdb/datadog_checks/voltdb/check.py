@@ -22,8 +22,8 @@ class VoltDBCheck(AgentCheck):
         self._config = Config(cast(Instance, self.instance), debug=self.log.debug)
         self.register_secret(self._config.password)
 
-        # VoltDB uses query-param auth, so clear the config-derived basic-auth tuple to avoid an Authorization header.
-        self.http.options['auth'] = None
+        # VoltDB authenticates via query params, so suppress all HTTP-level auth including .netrc credentials.
+        self.http.disable_auth()
 
         self._client = Client(
             url=self._config.url,

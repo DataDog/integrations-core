@@ -7,6 +7,7 @@ from typing import Optional  # noqa: F401
 from unittest import mock
 
 import pytest
+import requests
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.http import MockHTTPResponse
@@ -82,13 +83,27 @@ CREDENTIAL_CASES = [
 ]
 
 
-def test_check_clears_wrapper_basic_auth():
+def test_check_suppresses_authorization_header():
     # type: () -> None
-    # VoltDB authenticates via query params, so the check must clear the config-derived basic-auth tuple.
+    # VoltDB authenticates via query params. Even with a matching .netrc entry, no Authorization header goes out.
     instance = {'url': 'http://localhost:8080', 'username': 'doggo', 'password': 'doggopass'}
     check = VoltDBCheck('voltdb', {}, [instance])
+    captured = {}
 
-    assert check.http.options['auth'] is None
+    def fake_send(session_self, request, **kwargs):
+        captured['headers'] = dict(request.headers)
+        response = requests.Response()
+        response.status_code = 200
+        response._content = b'{}'
+        return response
+
+    with (
+        mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
+        mock.patch('requests.sessions.Session.send', new=fake_send),
+    ):
+        check._client.request('@SystemInformation', parameters=['OVERVIEW'])
+
+    assert 'Authorization' not in captured['headers']
 
 
 def test_raise_for_status_includes_response_details():
@@ -169,6 +184,9 @@ def test_check_wires_credentials_into_query_params(password_hashed, password_fie
         def __init__(self):
             self.options = {'auth': ('admin', 'secret')}
             self.captured = {}
+
+        def disable_auth(self):
+            self.options['auth'] = None
 
         def get(self, url, **options):
             self.captured = options
