@@ -7,8 +7,12 @@ import string
 from enum import Enum
 from typing import Any, List, Tuple  # noqa: F401
 
+from semver import VersionInfo
+
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.errors import CheckException
+
+from .version_utils import V18, VersionRange, build_versioned_query
 
 
 class PartialFormatter(string.Formatter):
@@ -1061,42 +1065,26 @@ EXTRACT (EPOCH FROM now() - min(modification))
     ],
 }
 
-STAT_WAL_METRICS_LT_18 = {
-    'name': 'stat_wal_metrics',
-    'query': """
-SELECT wal_records, wal_fpi,
-       wal_bytes, wal_buffers_full,
-       wal_write, wal_sync,
-       wal_write_time, wal_sync_time
-  FROM pg_stat_wal
-""",
-    'columns': [
-        {'name': 'wal.records', 'type': 'monotonic_count'},
-        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
-        {'name': 'wal.bytes', 'type': 'monotonic_count'},
-        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
-        {'name': 'wal.write', 'type': 'monotonic_count'},
-        {'name': 'wal.sync', 'type': 'monotonic_count'},
-        {'name': 'wal.write_time', 'type': 'monotonic_count'},
-        {'name': 'wal.sync_time', 'type': 'monotonic_count'},
-    ],
-}
+# pg_stat_wal columns, collected on PG 14+. The I/O timing columns (wal_write/wal_sync and their
+# *_time counterparts) were removed from pg_stat_wal in PG 18, where the equivalent counters moved to
+# pg_stat_io, so they are gated to servers below 18 with a VersionRange.
+# TODO: re-source the removed I/O timing metrics from pg_stat_io on PG 18+.
+STAT_WAL_COLUMNS = [
+    ('wal_records', {'name': 'wal.records', 'type': 'monotonic_count'}),
+    ('wal_fpi', {'name': 'wal.full_page_images', 'type': 'monotonic_count'}),
+    ('wal_bytes', {'name': 'wal.bytes', 'type': 'monotonic_count'}),
+    ('wal_buffers_full', {'name': 'wal.buffers_full', 'type': 'monotonic_count'}),
+    ('wal_write', {'name': 'wal.write', 'type': 'monotonic_count'}, VersionRange(max_version=V18)),
+    ('wal_sync', {'name': 'wal.sync', 'type': 'monotonic_count'}, VersionRange(max_version=V18)),
+    ('wal_write_time', {'name': 'wal.write_time', 'type': 'monotonic_count'}, VersionRange(max_version=V18)),
+    ('wal_sync_time', {'name': 'wal.sync_time', 'type': 'monotonic_count'}, VersionRange(max_version=V18)),
+]
 
-# TODO: Handle missing wal IO metrics for PG18
-STAT_WAL_METRICS = {
-    'name': 'stat_wal_metrics',
-    'query': """
-SELECT wal_records, wal_fpi,
-       wal_bytes, wal_buffers_full
-  FROM pg_stat_wal
-""",
-    'columns': [
-        {'name': 'wal.records', 'type': 'monotonic_count'},
-        {'name': 'wal.full_page_images', 'type': 'monotonic_count'},
-        {'name': 'wal.bytes', 'type': 'monotonic_count'},
-        {'name': 'wal.buffers_full', 'type': 'monotonic_count'},
-    ],
-}
+
+def get_stat_wal_query(version: VersionInfo) -> dict:
+    """Build the pg_stat_wal query for `version` (PG 14+); its I/O timing columns were removed in PG 18."""
+    return build_versioned_query('stat_wal_metrics', STAT_WAL_COLUMNS, '\n  FROM pg_stat_wal\n', version)
+
 
 FUNCTION_METRICS = {
     'descriptors': [('schemaname', 'schema'), ('funcname', 'function')],
