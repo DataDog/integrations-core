@@ -11,9 +11,9 @@ import pytest
 import yaml
 
 from datadog_checks.argocd.config_models import discovery
-from datadog_checks.argocd.config_models.discovery_strategies import from_kube_app_name
+from datadog_checks.argocd.config_models.discovery_strategies import from_argocd_kube_app_name
 from datadog_checks.base.stubs import tagger
-from datadog_checks.base.utils.discovery import Port, Service
+from datadog_checks.base.utils.discovery import Service
 
 KIND_MANIFEST = Path(__file__).parent / 'kind' / 'argocd_install.yaml'
 DISCOVERY_ROLE_ENDPOINTS: dict[str, tuple[str, int]] = {
@@ -73,15 +73,19 @@ def kind_workload_app_names() -> set[str]:
 
 def assert_candidate_endpoint(candidate: dict[str, Any], endpoint_field: str, host: str, port: int) -> None:
     instance = candidate['instances'][0]
+    non_empty_endpoint_fields = {field for field in DISCOVERY_ENDPOINT_FIELDS if instance.get(field)}
 
     assert instance[endpoint_field] == f'http://{host}:{port}/metrics'
-    assert DISCOVERY_ENDPOINT_FIELDS.intersection(instance) == {endpoint_field}
+    assert non_empty_endpoint_fields == {endpoint_field}
 
 
-def test_from_kube_app_name_yields_fixed_port_on_matching_role() -> None:
+def test_from_argocd_kube_app_name_yields_role_endpoint_on_matching_role() -> None:
     tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
 
-    assert list(from_kube_app_name(build_service(), 'argocd-server', 8083)) == [{'port': Port(number=8083)}]
+    contexts = list(from_argocd_kube_app_name(build_service(host='10.0.0.8')))
+
+    assert len(contexts) == 1
+    assert contexts[0]['endpoints'].api_server_endpoint == 'http://10.0.0.8:8083/metrics'
 
 
 @pytest.mark.parametrize(
@@ -92,10 +96,10 @@ def test_from_kube_app_name_yields_fixed_port_on_matching_role() -> None:
         pytest.param(['pod_name:argocd-server'], id='no_role_tag'),
     ],
 )
-def test_from_kube_app_name_ignores_missing_or_different_role_tags(tags: list[str]) -> None:
+def test_from_argocd_kube_app_name_ignores_missing_or_different_role_tags(tags: list[str]) -> None:
     tagger.set_tags({'container_id://abc': tags})
 
-    assert list(from_kube_app_name(build_service(), 'argocd-server', 8083)) == []
+    assert list(from_argocd_kube_app_name(build_service())) == []
 
 
 @pytest.mark.parametrize(
@@ -107,12 +111,10 @@ def test_from_kube_app_name_ignores_missing_or_different_role_tags(tags: list[st
         pytest.param('container_id://abc', id='container_id'),
     ],
 )
-def test_from_kube_app_name_queries_tagger_container_entity(service_id: str) -> None:
+def test_from_argocd_kube_app_name_queries_tagger_container_entity(service_id: str) -> None:
     tagger.set_tags({'container_id://abc': ['kube_app_name:argocd-server']})
 
-    assert list(from_kube_app_name(build_service(service_id=service_id), 'argocd-server', 8083)) == [
-        {'port': Port(number=8083)}
-    ]
+    assert len(list(from_argocd_kube_app_name(build_service(service_id=service_id)))) == 1
     tagger.assert_called('container_id://abc', tagger.LOW)
 
 

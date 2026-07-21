@@ -4,66 +4,17 @@ files:
 - name: argocd.yaml
   discovery:
     strategies:
-    - strategy: local:from_kube_app_name
+    - strategy: local:from_argocd_kube_app_name
       provides:
-      - port
-      inputs:
-        kube_app_name: string
-        port: integer
-      kube_app_name: argocd-application-controller
-      port: 8082
+      - endpoints
+      inputs: {}
       candidates:
-      - app_controller_endpoint: "http://{service.host}:{port.number}/metrics"
-    - strategy: local:from_kube_app_name
-      provides:
-      - port
-      inputs:
-        kube_app_name: string
-        port: integer
-      kube_app_name: argocd-applicationset-controller
-      port: 8080
-      candidates:
-      - appset_controller_endpoint: "http://{service.host}:{port.number}/metrics"
-    - strategy: local:from_kube_app_name
-      provides:
-      - port
-      inputs:
-        kube_app_name: string
-        port: integer
-      kube_app_name: argocd-server
-      port: 8083
-      candidates:
-      - api_server_endpoint: "http://{service.host}:{port.number}/metrics"
-    - strategy: local:from_kube_app_name
-      provides:
-      - port
-      inputs:
-        kube_app_name: string
-        port: integer
-      kube_app_name: argocd-repo-server
-      port: 8084
-      candidates:
-      - repo_server_endpoint: "http://{service.host}:{port.number}/metrics"
-    - strategy: local:from_kube_app_name
-      provides:
-      - port
-      inputs:
-        kube_app_name: string
-        port: integer
-      kube_app_name: argocd-notifications-controller
-      port: 9001
-      candidates:
-      - notifications_controller_endpoint: "http://{service.host}:{port.number}/metrics"
-    - strategy: local:from_kube_app_name
-      provides:
-      - port
-      inputs:
-        kube_app_name: string
-        port: integer
-      kube_app_name: argocd-commit-server
-      port: 8087
-      candidates:
-      - commit_server_endpoint: "http://{service.host}:{port.number}/metrics"
+      - app_controller_endpoint: "{endpoints.app_controller_endpoint}"
+        appset_controller_endpoint: "{endpoints.appset_controller_endpoint}"
+        api_server_endpoint: "{endpoints.api_server_endpoint}"
+        repo_server_endpoint: "{endpoints.repo_server_endpoint}"
+        notifications_controller_endpoint: "{endpoints.notifications_controller_endpoint}"
+        commit_server_endpoint: "{endpoints.commit_server_endpoint}"
   options:
   - template: init_config
     options:
