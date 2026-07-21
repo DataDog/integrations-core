@@ -1,1 +1,0 @@
-Add ``disable_auth`` to the HTTP client to suppress config-derived and environment/``.netrc`` credentials.

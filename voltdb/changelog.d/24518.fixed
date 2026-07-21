@@ -1,1 +1,0 @@
-Stop consulting ``.netrc`` for HTTP auth so no spurious ``Authorization`` header is sent.
