@@ -218,6 +218,7 @@ def test_flow_config_accepts_tui_metadata():
                     "name": "specification",
                     "label": "Specification",
                     "type": "path",
+                    "placeholder": "/path/to/spec.md",
                     "required": True,
                     "as_content": True,
                 }
@@ -234,9 +235,11 @@ def test_flow_config_accepts_tui_metadata():
             name="specification",
             label="Specification",
             input_type=models.InputType.PATH,
+            placeholder="/path/to/spec.md",
             required=True,
             as_content=True,
-        )
+        ),
+        *models.BUILT_IN_FLOW_INPUTS,
     ]
 
 
@@ -254,9 +257,32 @@ def test_flow_config_rejects_duplicate_input_names():
         )
 
 
+def test_flow_config_injects_missing_built_in_inputs():
+    config = FlowConfig(name="demo", flow=[])
+
+    assert config.inputs == list(models.BUILT_IN_FLOW_INPUTS)
+
+
+@pytest.mark.parametrize("reserved_name", [flow_input.name for flow_input in models.BUILT_IN_FLOW_INPUTS])
+def test_flow_config_rejects_reserved_input_names(reserved_name: str) -> None:
+    with pytest.raises(ValidationError, match="Input names cannot use reserved names.*added to every flow"):
+        FlowConfig.model_validate(
+            {
+                "name": "demo",
+                "inputs": [{"name": reserved_name, "label": "Custom input", "type": "string"}],
+                "flow": [],
+            }
+        )
+
+
 def test_flow_input_rejects_as_content_for_non_path():
     with pytest.raises(ValidationError, match="'as_content' may only be used with path inputs"):
         models.FlowInput(name="subject", label="Subject", input_type="string", as_content=True)
+
+
+def test_flow_input_rejects_placeholder_for_boolean():
+    with pytest.raises(ValidationError, match="'placeholder' may not be used with boolean inputs"):
+        models.FlowInput(name="enabled", label="Enabled", input_type="boolean", placeholder="Enabled")
 
 
 def resolved_with_inputs(*inputs: models.FlowInput) -> models.ResolvedFlow:

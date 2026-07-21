@@ -55,6 +55,7 @@ class FlowInput(BaseModel):
     label: str
     input_type: InputType = Field(alias="type")
     default: Any | None = None
+    placeholder: str | None = None
     required: bool = True
     as_content: bool = False
 
@@ -62,6 +63,8 @@ class FlowInput(BaseModel):
     def validate_input_options(self) -> FlowInput:
         if self.as_content and self.input_type is not InputType.PATH:
             raise ValueError("'as_content' may only be used with path inputs")
+        if self.placeholder is not None and self.input_type is InputType.BOOLEAN:
+            raise ValueError("'placeholder' may not be used with boolean inputs")
         if self.default is not None:
             match self.input_type:
                 case InputType.STRING | InputType.PATH:
@@ -90,6 +93,24 @@ class FlowInput(BaseModel):
                 return str(value)
             case unexpected:
                 assert_never(unexpected)
+
+
+BUILT_IN_FLOW_INPUTS = (
+    FlowInput(
+        name="prd",
+        label="Product requirements file",
+        input_type=InputType.PATH,
+        required=True,
+        as_content=True,
+    ),
+    FlowInput(
+        name="max_timeout",
+        label="Max timeout (seconds)",
+        input_type=InputType.NUMBER,
+        placeholder="Leave empty for unbounded",
+        required=False,
+    ),
+)
 
 
 class TaskConfig(BaseModel):
@@ -194,17 +215,23 @@ class FlowConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(pattern=NAME_PATTERN)
     description: str | None = None
-    inputs: list[FlowInput] = Field(default_factory=list)
+    inputs: list[FlowInput] = Field(default_factory=list, validate_default=True)
     variables: Annotated[dict[str, str], AfterValidator(validate_variable_names)] = Field(default_factory=dict)
     flow: list[FlowEntry]
 
     @field_validator("inputs", mode="after")
     @classmethod
-    def input_names_must_be_unique(cls, inputs: list[FlowInput]) -> list[FlowInput]:
+    def inject_built_in_inputs(cls, inputs: list[FlowInput]) -> list[FlowInput]:
         names = [flow_input.name for flow_input in inputs]
+        reserved_names = {flow_input.name for flow_input in BUILT_IN_FLOW_INPUTS}
+        collisions = sorted(reserved_names.intersection(names))
+        if collisions:
+            raise ValueError(
+                f"Input names cannot use reserved names {collisions}; reserved inputs are added to every flow"
+            )
         if len(names) != len(set(names)):
             raise ValueError("Input names must be unique")
-        return inputs
+        return [*inputs, *BUILT_IN_FLOW_INPUTS]
 
 
 class PhaseEnvelope(BaseModel):

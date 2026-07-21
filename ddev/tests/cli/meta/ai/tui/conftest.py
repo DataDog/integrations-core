@@ -10,11 +10,13 @@ from typing import Any
 
 import pytest
 from textual.app import App, ComposeResult
+from textual.widgets import Input
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import (
     AgentConfig,
     ConfigStatus,
+    FlowConfig,
     FlowEntry,
     FlowInput,
     FlowResult,
@@ -62,9 +64,10 @@ class TogoModalTestApp(App):
 class LaunchModalTestApp(TogoModalTestApp):
     """Minimal app that pushes LaunchModal immediately on mount."""
 
-    def __init__(self, flow: ResolvedFlow) -> None:
+    def __init__(self, flow: ResolvedFlow, prd_path: Path) -> None:
         super().__init__()
         self.flow = flow
+        self.prd_path = prd_path
         self.dismiss_result: Any = "NOT_SET"
 
     def compose(self) -> ComposeResult:
@@ -80,6 +83,10 @@ class LaunchModalTestApp(TogoModalTestApp):
             self.dismiss_result = result
 
         self.push_screen(LaunchModal(self.flow), on_dismiss)
+        self.call_after_refresh(self._populate_prd)
+
+    def _populate_prd(self) -> None:
+        self.screen.query_one("#input-prd", Input).value = str(self.prd_path)
 
 
 @pytest.fixture
@@ -116,7 +123,7 @@ def make_flow() -> Callable[..., ResolvedFlow]:
         return ResolvedFlow(
             name=name,
             description=f"Description for {name}",
-            inputs=inputs or [],
+            inputs=FlowConfig(name="test", inputs=inputs or [], flow=[]).inputs,
             agents=flow_agents,
             phases=phases,
             flow=flow,
@@ -142,6 +149,7 @@ def make_flow_with_tools() -> Callable[..., ResolvedFlow]:
         return ResolvedFlow(
             name=name,
             description="Tool flow",
+            inputs=FlowConfig(name="test", flow=[]).inputs,
             agents=agents,
             phases=phases,
             flow=[FlowEntry(phase="analyse")],
@@ -179,8 +187,11 @@ def make_togo_app(make_flow: Callable[..., ResolvedFlow], ddev_app: SimpleNamesp
 
 
 @pytest.fixture
-def make_launch_modal_app(make_flow: Callable[..., ResolvedFlow]) -> Callable[..., LaunchModalTestApp]:
+def make_launch_modal_app(make_flow: Callable[..., ResolvedFlow], tmp_path: Path) -> Callable[..., LaunchModalTestApp]:
+    prd_path = tmp_path / "prd.md"
+    prd_path.write_text("Required product behavior.\n", encoding="utf-8")
+
     def factory(inputs: list[FlowInput]) -> LaunchModalTestApp:
-        return LaunchModalTestApp(make_flow(name="Test Flow", n_phases=1, inputs=inputs))
+        return LaunchModalTestApp(make_flow(name="Test Flow", n_phases=1, inputs=inputs), prd_path)
 
     return factory

@@ -121,10 +121,6 @@ class FlowScreen(TogoScreen):
         from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
         from ddev.cli.meta.ai.tui.screens.launch_modal import LaunchModal
 
-        if not self.flow.inputs:
-            self.app.push_screen(ExecutionScreen(self.flow, runtime_variables={}, resume=True, runs_dir=self._runs_dir))
-            return
-
         def _on_dismiss(values: LaunchInputValues | None) -> None:
             if values is not None:
                 self.app.push_screen(
