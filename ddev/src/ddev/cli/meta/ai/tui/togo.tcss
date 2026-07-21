@@ -488,6 +488,11 @@ MarkdownH3 {
     color: $status-failed;
 }
 
+.phase-node:focus {
+    border: round $accent;
+    background: $panel-lighten-1;
+}
+
 #phase-log-output {
     width: 1fr;
     height: 1fr;

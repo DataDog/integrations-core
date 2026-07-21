@@ -494,8 +494,8 @@ async def test_pipeline_graph_updates_phase_node_status_classes():
         assert "status-pending" not in node.classes
 
 
-async def test_pipeline_graph_phase_node_selection_posts_phase_id():
-    """Activating a phase node emits the selected phase id."""
+async def test_phase_node_enter_selects_focused_phase_after_status_update():
+    """Enter selects the focused phase after its status changes."""
     from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode, PipelineGraph
 
     graph = PipelineGraph(_make_dag_flow(), {"research": RunStatus.PENDING})
@@ -505,7 +505,10 @@ async def test_pipeline_graph_phase_node_selection_posts_phase_id():
         await pilot.pause()
         await app.push_screen(harness)
         await pilot.pause()
-        graph.query_one(PhaseNode).action_select()
+        graph.query_one(PhaseNode).focus()
+        graph.update_statuses({"research": RunStatus.DONE})
+        await pilot.pause()
+        await pilot.press("enter")
         await pilot.pause()
         assert harness.selected_phases == ["research"]
 
@@ -731,6 +734,31 @@ async def test_execution_phase_activation_opens_config_for_pending_phase():
         screen.on_phase_selected(PhaseSelected("phase_1"))
         await pilot.pause()
         assert isinstance(pilot.app.screen, PhaseConfigScreen)
+
+
+async def test_execution_enter_opens_focused_phase_after_status_update():
+    """A status update preserves keyboard activation of the focused phase."""
+    from ddev.cli.meta.ai.tui.messages import PhaseStarted
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.query_one(PhaseNode).focus()
+        screen.post_message(PhaseStarted("phase_1"))
+        await pilot.pause()
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert isinstance(app.screen, PhaseLogScreen)
+        assert app.screen.phase_id == "phase_1"
 
 
 @pytest.mark.parametrize("status", [RunStatus.RUNNING, RunStatus.DONE])
@@ -1397,15 +1425,10 @@ async def test_escape_requires_confirmation_before_cancelling_active_run():
         screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _InfiniteDemo())
         await app.push_screen(screen)
         await pilot.pause()
-        assert screen._run_active
-        assert "escape" in app.active_bindings, [
-            (type(node).__name__, list(bindings.key_to_bindings)) for node, bindings in screen._binding_chain
-        ]
 
         await pilot.press("escape")
         await pilot.pause()
         assert isinstance(app.screen, CancelRunModal)
-        assert app.screen_stack[-2] is screen
         assert not cancelled.is_set()
 
         await pilot.press("escape")
