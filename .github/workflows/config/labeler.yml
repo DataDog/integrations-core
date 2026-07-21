@@ -97,6 +97,10 @@ integration/ambari:
 - changed-files:
   - any-glob-to-any-file:
     - ambari/**/*
+integration/anomali_threatstream:
+- changed-files:
+  - any-glob-to-any-file:
+    - anomali_threatstream/**/*
 integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
@@ -409,10 +413,10 @@ integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
-integration/cyberark_endpoint_privilege_manager:
+integration/idira_endpoint_privilege_manager:
 - changed-files:
   - any-glob-to-any-file:
-    - cyberark_endpoint_privilege_manager/**/*
+    - idira_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:

@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.aerospike import AerospikeCheck
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
@@ -71,26 +72,49 @@ def test_e2e(dd_agent_check, instance):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-@pytest.mark.e2e
-def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
-    version_parts = [int(p) for p in VERSION.split('.')]
-
-    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
-
-    tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
-    tags = instance_openmetrics_v2.get('tags').append(tags)
-
+def assert_openmetrics(aggregator, tags=None):
     aggregator.assert_service_check('aerospike.openmetrics.health', AgentCheck.OK, tags=tags)
 
     for metric in EXPECTED_PROMETHEUS_METRICS:
-        aggregator.assert_metric(metric, tags=tags)
+        aggregator.assert_metric(metric)
+        if tags:
+            # Some metrics have additional tags than the ones in `tags`, so we
+            # use `assert_metric_has_tags` instead of passing the tags to
+            # `assert_metric`.
+            aggregator.assert_metric_has_tags(metric, tags)
 
+    version_parts = [int(p) for p in VERSION.split('.')]
     if version_parts >= [5, 6]:
         for metric in EXPECTED_PROMETHEUS_METRICS_5_6:
-            aggregator.assert_metric(metric, tags=tags)
+            aggregator.assert_metric(metric)
+            if tags:
+                aggregator.assert_metric_has_tags(metric, tags)
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+@pytest.mark.e2e
+def test_openmetrics_e2e(dd_agent_check, instance_openmetrics_v2):
+    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
+
+    endpoint_tag = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
+    tags = instance_openmetrics_v2.get('tags') + [endpoint_tag]
+
+    assert_openmetrics(aggregator, tags)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(rate=True)
+    assert_openmetrics(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(
+        dd_agent_check, AerospikeCheck, compose_service='aerospike-prometheus-exporter'
+    )
 
 
 @pytest.mark.integration

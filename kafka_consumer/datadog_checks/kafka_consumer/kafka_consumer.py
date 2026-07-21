@@ -2,9 +2,12 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import base64
+import ctypes
+import ctypes.util
 import heapq
 import json
 import marshal
+import platform
 from collections import defaultdict
 from time import time
 
@@ -27,6 +30,31 @@ MAX_TIMESTAMP_ENTRIES = 6_000_000
 
 LAG_EXTRAPOLATION_LIMIT_SECONDS = 600
 
+BROKER_TIMESTAMPS_SAVE_INTERVAL = 300
+
+
+def load_malloc_trim():
+    """Return glibc's ``malloc_trim`` on Linux, or ``None`` where it is unavailable (macOS, musl)."""
+    if platform.system() != 'Linux':
+        return None
+    try:
+        libc = ctypes.CDLL(ctypes.util.find_library('c') or 'libc.so.6', use_errno=True)
+        trim = libc.malloc_trim
+    except (OSError, AttributeError):
+        return None
+    trim.argtypes = [ctypes.c_size_t]
+    trim.restype = ctypes.c_int
+    return trim
+
+
+MALLOC_TRIM = load_malloc_trim()
+
+
+def malloc_trim():
+    """Return glibc per-arena free memory to the OS after a run; no-op where unavailable."""
+    if MALLOC_TRIM is not None:
+        MALLOC_TRIM(0)
+
 
 class KafkaCheck(AgentCheck):
     __NAMESPACE__ = 'kafka'
@@ -39,6 +67,8 @@ class KafkaCheck(AgentCheck):
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
         self.topic_partition_cache = {}
+        self.broker_timestamps = None
+        self.broker_timestamps_last_save = 0
         self.check_initializations.insert(0, self.config.validate_config)
 
         # Initialize cluster metadata collector
@@ -49,6 +79,12 @@ class KafkaCheck(AgentCheck):
 
     def check(self, _):
         """The main entrypoint of the check."""
+        try:
+            self._run_check()
+        finally:
+            malloc_trim()
+
+    def _run_check(self):
         # Fetch Kafka consumer offsets
 
         consumer_offsets = {}
@@ -284,13 +320,17 @@ class KafkaCheck(AgentCheck):
         return self.client.list_consumer_group_offsets(groups)
 
     def _load_broker_timestamps(self, persistent_cache_key):
-        """Loads broker timestamps from persistent cache."""
+        """Return the in-memory broker timestamps, loading from persistent cache once on first run."""
+        if self.broker_timestamps is not None:
+            return self.broker_timestamps
+
         broker_timestamps = defaultdict(dict)
         try:
             broker_timestamps.update(marshal.loads(base64.b64decode(self.read_persistent_cache(persistent_cache_key))))
         except Exception as e:
             self.log.warning('Could not read broker timestamps from cache: %s', str(e))
-        return broker_timestamps
+        self.broker_timestamps = broker_timestamps
+        return self.broker_timestamps
 
     def _earliest_consumer_offsets(self, consumer_offsets):
         """Return the lowest committed offset per (topic, partition) across all consumer groups."""
@@ -324,9 +364,13 @@ class KafkaCheck(AgentCheck):
                 _visvalingam_whyatt(timestamps, max(2, max_history // 2))
 
     def _save_broker_timestamps(self, broker_timestamps, persistent_cache_key):
-        """Saves broker timestamps to persistent cache."""
+        """Persist broker timestamps to disk, but only periodically to avoid per-run marshal churn."""
+        now = time()
+        if now - self.broker_timestamps_last_save < BROKER_TIMESTAMPS_SAVE_INTERVAL:
+            return
         blob = marshal.dumps(dict(broker_timestamps))
         self.write_persistent_cache(persistent_cache_key, base64.b64encode(blob).decode('ascii'))
+        self.broker_timestamps_last_save = now
 
     def report_highwater_offsets(self, highwater_offsets, contexts_limit, cluster_id):
         """Report the broker highwater offsets."""
@@ -499,7 +543,8 @@ class KafkaCheck(AgentCheck):
             ):
                 result[(topic, partition)] = offset
         finally:
-            self.client.close_consumer()
+            if self.config._close_admin_client:
+                self.client.close_consumer()
 
         self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id

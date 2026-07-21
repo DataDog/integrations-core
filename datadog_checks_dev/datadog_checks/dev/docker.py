@@ -17,7 +17,7 @@ from .fs import create_file, file_exists
 from .spec import load_spec
 from .structures import EnvVars, LazyFunction, TempDir
 from .subprocess import run_command
-from .utils import find_check_root
+from .utils import find_check_root, get_current_check_name
 
 try:
     from contextlib import ExitStack
@@ -72,7 +72,7 @@ def assert_all_discovery_candidates_stable(
     compose_service = compose_service or _get_default_compose_service()
     container_id = _get_compose_container_id(compose_file, compose_service, project_name=project_name)
     initial_state = _inspect_container(container_id)
-    previous_logs = _get_container_logs(container_id)
+    previous_stdout, previous_stderr = _get_container_logs(container_id)
 
     ports = tuple(SimpleNamespace(number=port, name='') for port in _get_container_ports(initial_state))
     service = SimpleNamespace(
@@ -100,12 +100,15 @@ def assert_all_discovery_candidates_stable(
         current_state = _inspect_container(current_container_id)
         _assert_container_stable(initial_state, current_state, index)
 
-        current_logs = _get_container_logs(current_container_id)
-        new_logs = current_logs[len(previous_logs) :] if current_logs.startswith(previous_logs) else current_logs
+        current_stdout, current_stderr = _get_container_logs(current_container_id)
+        # Diffed separately: stdout/stderr interleaving varies across calls, breaking a combined diff.
+        new_stdout = _diff_logs(previous_stdout, current_stdout)
+        new_stderr = _diff_logs(previous_stderr, current_stderr)
+        new_logs = new_stdout + new_stderr
         for line in new_logs.splitlines():
             logging.debug('New log line: %s', line)
         _assert_no_log_patterns(new_logs, log_patterns, index)
-        previous_logs = current_logs
+        previous_stdout, previous_stderr = current_stdout, current_stderr
 
 
 def _get_compose_container_id(
@@ -188,9 +191,14 @@ def _get_container_ports(inspect_data: Mapping[str, Any]) -> list[int]:
     return sorted(ports)
 
 
-def _get_container_logs(container_id: str) -> str:
+def _get_container_logs(container_id: str) -> tuple[str, str]:
     result = run_command(['docker', 'logs', container_id], capture=True)
-    return result.stdout + result.stderr
+    return result.stdout, result.stderr
+
+
+def _diff_logs(previous: str, current: str) -> str:
+    """Return the portion of `current` appended since `previous`."""
+    return current[len(previous) :] if current.startswith(previous) else current
 
 
 def _assert_container_stable(
@@ -229,28 +237,52 @@ def _assert_no_log_patterns(logs: str, patterns: Sequence[str], candidate_index:
             )
 
 
+def _get_auto_conf_volume(check_root: str | os.PathLike[str] | None = None) -> str:
+    check_root = os.fspath(check_root or find_check_root(depth=2))
+    check_name = os.path.basename(check_root)
+    check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
+    return f'{check_pkg}/data/auto_conf.yaml:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro'
+
+
 def get_e2e_discovery_metadata(
     check_root: str | os.PathLike[str] | None = None,
-) -> dict[str, list[str]]:
-    """Return Docker volume metadata for an e2e discovery run.
+    *,
+    process: bool = False,
+) -> dict[str, list[str] | dict[str, str]]:
+    """Return metadata for an e2e discovery run.
 
-    Mounts the integration's ``auto_conf.yaml`` into the agent container.
+    Mounts the integration's ``auto_conf.yaml`` into the agent container. Pass
+    ``process=True`` to also grant the capabilities needed for process-based
+    autodiscovery to see processes running in sibling containers (on top of the
+    container-based autodiscovery already enabled via the Docker socket mount).
 
     Use ``dd_agent_check_discovery`` alongside this metadata so that the static
     per-env config is temporarily replaced with an empty-instances file, leaving
     ``auto_conf.yaml`` as the sole AD template driving config-discovery.
     """
-    check_root = os.fspath(check_root or find_check_root(depth=1))
-    check_name = os.path.basename(check_root)
-    check_pkg = os.path.join(check_root, 'datadog_checks', check_name)
-    auto_conf = os.path.join(check_pkg, 'data', 'auto_conf.yaml')
-
-    return {
+    metadata: dict[str, list[str] | dict[str, str]] = {
         'docker_volumes': [
-            f'{auto_conf}:/etc/datadog-agent/conf.d/{check_name}.d/auto_conf.yaml:ro',
+            _get_auto_conf_volume(check_root),
             '/var/run/docker.sock:/var/run/docker.sock:ro',
         ],
     }
+
+    if process:
+        metadata['env_vars'] = {
+            # Reduce the default service collection interval and minimum process
+            # age to speed up tests. This needs to be set on the container
+            # instead of being passed in to `agent check` since it's read by the
+            # system-probe(-lite) daemon.
+            'DD_DISCOVERY_SERVICE_COLLECTION_INTERVAL': '5s',
+            'DD_DISCOVERY_SERVICE_COLLECTION_MIN_PROCESS_AGE': '1s',
+        }
+        # system-probe(-lite) needs these capabilities to read /proc entries of
+        # other processes for service discovery. Without them it falls back to
+        # only scanning the agent's own PID namespace, which finds no host
+        # processes.
+        metadata['cap_add'] = ['SYS_PTRACE', 'DAC_READ_SEARCH']
+
+    return metadata
 
 
 def compose_file_active(compose_file):
@@ -369,7 +401,10 @@ def docker_run(
         conditions (callable):
             A list of callable objects that will be executed before yielding to check for errors
         env_vars (dict[str, str]):
-            A dictionary to update `os.environ` with during execution
+            A dictionary to update `os.environ` with during execution. When `compose_file` is provided and
+            `COMPOSE_PROJECT_NAME` isn't set here, already in `os.environ`, or saved from a previous E2E
+            start run, it defaults to the check's directory name so that concurrent E2E runs sharing a
+            Docker daemon don't collide on Compose's own directory-basename-derived default project name.
         wrappers (list[callable]):
             A list of context managers to use during execution
         attempts (int):
@@ -383,6 +418,12 @@ def docker_run(
     if compose_file is not None:
         if not isinstance(compose_file, str):
             raise TypeError('The path to the compose file is not a string: {}'.format(repr(compose_file)))
+
+        env_vars = dict(env_vars) if env_vars else {}
+        if not env_vars.get('COMPOSE_PROJECT_NAME') and not os.getenv('COMPOSE_PROJECT_NAME'):
+            docker_metadata = get_state('docker_compose_metadata', {})
+            # An extra level deep because of the context manager
+            env_vars['COMPOSE_PROJECT_NAME'] = docker_metadata.get('project_name') or get_current_check_name(depth=2)
 
         composeFileArgs = {'compose_file': compose_file, 'build': build, 'service_name': service_name}
         if capture is not None:
@@ -437,7 +478,7 @@ def docker_run(
             'docker_compose_metadata',
             {
                 'compose_file': compose_file,
-                'project_name': (env_vars or {}).get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
+                'project_name': env_vars.get('COMPOSE_PROJECT_NAME') or os.getenv('COMPOSE_PROJECT_NAME'),
                 'service_name': service_name,
             },
         )
