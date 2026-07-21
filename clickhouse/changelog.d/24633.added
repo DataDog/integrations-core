@@ -1,0 +1,1 @@
+Emit the ClickHouse node identity (`server_node`) as a query metrics row field.
