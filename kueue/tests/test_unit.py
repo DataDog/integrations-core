@@ -264,16 +264,19 @@ def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_ht
         'Workload team-a/training-job quota reserved. Quota reserved in ClusterQueue default',
         source_type_name='kueue',
         tags=[*expected_tags, 'kueue_transition:quota_reserved'],
+        attributes={'workload_time_until_transition': 5.0},
     )
     aggregator.assert_event(
         'Workload team-a/training-job admitted. The workload is admitted Queued wait time was 8s.',
         source_type_name='kueue',
         tags=[*expected_tags, 'kueue_transition:admitted'],
+        attributes={'workload_time_until_transition': 3.0},
     )
     aggregator.assert_event(
         'Workload team-a/training-job running. All pods are ready',
         source_type_name='kueue',
         tags=[*expected_tags, 'kueue_transition:running'],
+        attributes={'workload_time_until_transition': 12.0},
     )
 
 
@@ -347,10 +350,12 @@ def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance
         'Preemption reason: InClusterQueue.',
         alert_type='warning',
         tags=expected_evicted_tags,
+        attributes={'workload_time_until_transition': 40.0},
     )
     aggregator.assert_event(
         'Workload team-a/training-job finished. Reached expected number of succeeded pods Finished reason: Succeeded.',
         alert_type='info',
+        attributes={'workload_time_until_transition': 30.0},
     )
 
 
