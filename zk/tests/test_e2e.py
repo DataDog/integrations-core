@@ -11,13 +11,19 @@ from . import common
 from .conftest import get_tls
 from .metrics import METRICS_36_E2E_SKIPS
 
-# Zookeeper logs a benign ERROR-level line at startup ("Invalid configuration, only one server
-# specified (ignoring)") because the test fixture's zoo.cfg defines a single `server.1` entry even
-# in standalone mode. Only that specific message is excluded (rather than dropping the generic
-# "error" pattern outright), so a genuinely new error-level log line from a bad candidate still
-# fails the check.
+# Zookeeper logs a couple of benign ERROR-level lines while probing discovery candidates:
+# - "Invalid configuration, only one server specified (ignoring)" at startup, because the test
+#   fixture's zoo.cfg defines a single `server.1` entry even in standalone mode.
+# - "Unsuccessful handshake with session" when a plaintext candidate probes the TLS-only client
+#   port, since discovery doesn't generate a TLS candidate for it.
+# Only those specific messages are excluded (rather than dropping the generic "error" pattern
+# outright), so a genuinely new error-level log line from a bad candidate still fails the check.
+BENIGN_DISCOVERY_ERRORS = (
+    r'Invalid configuration, only one server specified',
+    r'Unsuccessful handshake with session',
+)
 DISCOVERY_STABILITY_LOG_PATTERNS = tuple(
-    r'error(?!.*Invalid configuration, only one server specified)' if pattern == 'error' else pattern
+    rf'error(?!.*(?:{"|".join(BENIGN_DISCOVERY_ERRORS)}))' if pattern == 'error' else pattern
     for pattern in CONTAINER_STABILITY_LOG_PATTERNS
 )
 
@@ -59,9 +65,6 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
 @pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check):
-    if get_tls():
-        pytest.skip('discovery does not configure the TLS-only Zookeeper client port')
-
     assert_all_discovery_candidates_stable(
         dd_agent_check, ZookeeperCheck, log_patterns=DISCOVERY_STABILITY_LOG_PATTERNS
     )
