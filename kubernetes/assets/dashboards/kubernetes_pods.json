@@ -85,13 +85,13 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_state.pod.status_phase{$scope AND $cluster AND $namespace AND $deployment AND $statefulset AND $daemonset AND $job AND $cronjob AND (pod_phase:succeeded OR pod_phase:running)} by {pod_phase}",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$scope AND $cluster AND $namespace AND $deployment AND $statefulset AND $daemonset AND $job AND $cronjob AND (pod_phase:succeeded OR pod_phase:running)} by {pod_phase}.weighted()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "semantic_mode": "combined"
                                         },
                                         {
-                                            "query": "sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,!pod_phase:succeeded,!pod_phase:running} by {pod_phase}",
+                                            "query": "sum:kubernetes_state.pod.status_phase{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,!pod_phase:succeeded,!pod_phase:running} by {pod_phase}.weighted()",
                                             "data_source": "metrics",
                                             "name": "query2",
                                             "semantic_mode": "combined"
@@ -138,14 +138,14 @@
                                     ],
                                     "queries": [
                                         {
-                                            "query": "sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,condition:true,!pod_phase:succeeded,!pod_phase:failed}",
+                                            "query": "sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,condition:true,!pod_phase:succeeded,!pod_phase:failed}.weighted()",
                                             "data_source": "metrics",
                                             "name": "query1",
                                             "semantic_mode": "combined",
                                             "aggregator": "last"
                                         },
                                         {
-                                            "query": "sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,!pod_phase:succeeded,!pod_phase:failed}",
+                                            "query": "sum:kubernetes_state.pod.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,!pod_phase:succeeded,!pod_phase:failed}.weighted()",
                                             "data_source": "metrics",
                                             "name": "query2",
                                             "semantic_mode": "combined",
@@ -174,6 +174,11 @@
                             "title": "Issues by Namespace (changed weekly)",
                             "title_size": "16",
                             "title_align": "left",
+                            "time": {
+                                "type": "live",
+                                "unit": "week",
+                                "value": 1
+                            },
                             "type": "change",
                             "custom_links": [],
                             "requests": [
@@ -185,7 +190,7 @@
                                     "response_format": "scalar",
                                     "formulas": [
                                         {
-                                            "formula": "week_before(query1)"
+                                            "formula": "calendar_shift(query1, '-1w', 'UTC')"
                                         },
                                         {
                                             "formula": "query1"
@@ -927,8 +932,8 @@
                         "layout": {
                             "x": 0,
                             "y": 6,
-                            "width": 6,
-                            "height": 3
+                            "width": 4,
+                            "height": 2
                         }
                     },
                     {
@@ -998,10 +1003,67 @@
                             ]
                         },
                         "layout": {
-                            "x": 6,
+                            "x": 4,
                             "y": 6,
-                            "width": 6,
-                            "height": 3
+                            "width": 4,
+                            "height": 2
+                        }
+                    },
+                    {
+                        "id": 5594150827125000,
+                        "definition": {
+                            "title": "Disk I/O",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": false,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:kubernetes.io.write_bytes{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query2",
+                                            "query": "sum:kubernetes.io.read_bytes{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "alias": "Write Bytes",
+                                            "formula": "query1"
+                                        },
+                                        {
+                                            "alias": "Read Bytes",
+                                            "formula": "query2"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "grey",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "x": 8,
+                            "y": 6,
+                            "width": 4,
+                            "height": 2
                         }
                     }
                 ]
@@ -1010,7 +1072,7 @@
                 "x": 0,
                 "y": 13,
                 "width": 12,
-                "height": 10
+                "height": 9
             }
         }
     ],
