@@ -9,7 +9,16 @@ import time
 from unittest import mock
 
 import pytest
-from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
+from confluent_kafka.admin import (
+    AclBinding,
+    AclOperation,
+    AclPermissionType,
+    BrokerMetadata,
+    PartitionMetadata,
+    ResourcePatternType,
+    ResourceType,
+    TopicMetadata,
+)
 
 from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
@@ -104,6 +113,11 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
     cluster_future = mock.MagicMock()
     cluster_future.result.return_value = cluster_info
     mock_admin_client.describe_cluster.return_value = cluster_future
+
+    # Default: no ACLs. Individual ACL tests override describe_acls as needed.
+    acl_future = mock.MagicMock()
+    acl_future.result.return_value = []
+    mock_admin_client.describe_acls.return_value = acl_future
 
     list_result = mock.MagicMock()
     list_result.errors = []
@@ -1987,3 +2001,152 @@ def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
         result = kafka_consumer_check._collect_connect_status('test-cluster')
 
     assert result == {}
+
+
+def make_acl_binding(
+    restype='TOPIC',
+    name='my-topic',
+    pattern_type='LITERAL',
+    principal='User:alice',
+    host='*',
+    operation='READ',
+    permission_type='ALLOW',
+):
+    """Build an AclBinding from string enum names for ACL collection tests."""
+    return AclBinding(
+        ResourceType[restype],
+        name,
+        ResourcePatternType[pattern_type],
+        principal,
+        host,
+        AclOperation[operation],
+        AclPermissionType[permission_type],
+    )
+
+
+def acl_ds_events(check):
+    """Return the parsed data-streams-message payloads with config_type 'acl' emitted by the check."""
+    events = []
+    for call in check.event_platform_event.call_args_list:
+        args = call[0]
+        if len(args) > 1 and args[1] == 'data-streams-message':
+            payload = json.loads(args[0])
+            if payload.get('config_type') == 'acl':
+                events.append(payload)
+    return events
+
+
+def _make_acl_check(check, acl_result, instance_overrides=None):
+    """Wire a cluster-monitoring check whose AdminClient.describe_acls returns acl_result.
+
+    acl_result may be a list of AclBinding (returned through a future) or an Exception to raise.
+    """
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'monitor_unlisted_consumer_groups': True,
+        'tags': ['test_tag:test_value'],
+    }
+    if instance_overrides:
+        instance.update(instance_overrides)
+
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    mock_schema_registry_methods(kafka_consumer_check.metadata_collector)
+
+    if isinstance(acl_result, Exception):
+        mock_kafka_client.kafka_client.describe_acls.side_effect = acl_result
+    else:
+        acl_future = mock.MagicMock()
+        acl_future.result.return_value = acl_result
+        mock_kafka_client.kafka_client.describe_acls.return_value = acl_future
+
+    _wire_cache(kafka_consumer_check)
+    return kafka_consumer_check
+
+
+def test_collect_acls_emits_events(check, dd_run_check, aggregator):
+    """ACL bindings produce one config event per binding, carrying the full ACL detail."""
+    bindings = [
+        make_acl_binding(operation='READ', principal='User:alice'),
+        make_acl_binding(operation='WRITE', principal='User:bob', host='10.0.0.1'),
+        make_acl_binding(operation='READ', principal='User:carol'),
+    ]
+    kafka_consumer_check = _make_acl_check(check, bindings)
+
+    dd_run_check(kafka_consumer_check)
+
+    # One config event per distinct binding, carrying the full ACL detail.
+    acl_events = acl_ds_events(kafka_consumer_check)
+    assert len(acl_events) == 3
+    bob_events = [e for e in acl_events if e['principal'] == 'User:bob']
+    assert len(bob_events) == 1
+    bob = bob_events[0]
+    assert bob['config_type'] == 'acl'
+    assert bob['kafka_cluster_id'] == 'test-cluster-id'
+    assert bob['resource_type'] == 'TOPIC'
+    assert bob['resource_name'] == 'my-topic'
+    assert bob['pattern_type'] == 'LITERAL'
+    assert bob['host'] == '10.0.0.1'
+    assert bob['acl_operation'] == 'WRITE'
+    assert bob['permission_type'] == 'ALLOW'
+    assert 'collection_timestamp' in bob
+
+
+def test_collect_acls_unchanged_not_reemitted(check, dd_run_check, aggregator):
+    """A second run with the same ACL bindings emits config events only on the first run."""
+    bindings = [
+        make_acl_binding(operation='READ', principal='User:alice'),
+        make_acl_binding(operation='WRITE', principal='User:bob', host='10.0.0.1'),
+    ]
+    kafka_consumer_check = _make_acl_check(check, bindings)
+
+    dd_run_check(kafka_consumer_check)
+    assert len(acl_ds_events(kafka_consumer_check)) == 2
+
+    # Unchanged bindings on the next run are change-tracked away: no new events.
+    events_after_first = len(acl_ds_events(kafka_consumer_check))
+    dd_run_check(kafka_consumer_check)
+    assert len(acl_ds_events(kafka_consumer_check)) == events_after_first
+
+
+def test_collect_acls_empty(check, dd_run_check, aggregator):
+    """No ACLs means no acl config events, without erroring."""
+    kafka_consumer_check = _make_acl_check(check, [])
+
+    dd_run_check(kafka_consumer_check)
+
+    assert acl_ds_events(kafka_consumer_check) == []
+
+
+def test_collect_acls_skipped_when_authorizer_unavailable(check, dd_run_check, aggregator):
+    """describe_acls raising KafkaException is logged and skipped without failing the check."""
+    from confluent_kafka import KafkaException
+
+    kafka_consumer_check = _make_acl_check(check, KafkaException("SECURITY_DISABLED"))
+
+    # Must not raise: ACL unavailability cannot break the rest of metadata collection.
+    dd_run_check(kafka_consumer_check)
+
+    assert acl_ds_events(kafka_consumer_check) == []
+    # Other cluster metadata is still collected.
+    aggregator.assert_metric('kafka.broker.count', value=2)
+
+
+def test_collect_acls_skipped_when_describe_times_out(check, dd_run_check, aggregator):
+    """A describe_acls future timing out is logged and skipped without failing the check."""
+    import concurrent.futures
+
+    kafka_consumer_check = _make_acl_check(check, [])
+    acl_future = mock.MagicMock()
+    acl_future.result.side_effect = concurrent.futures.TimeoutError("timed out")
+    kafka_consumer_check.client.kafka_client.describe_acls.return_value = acl_future
+
+    # Must not raise: an ACL describe timeout cannot break the rest of metadata collection.
+    dd_run_check(kafka_consumer_check)
+
+    assert acl_ds_events(kafka_consumer_check) == []
+    # Other cluster metadata is still collected.
+    aggregator.assert_metric('kafka.broker.count', value=2)

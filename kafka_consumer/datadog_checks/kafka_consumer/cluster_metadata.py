@@ -4,6 +4,7 @@
 
 """Kafka Cluster Metadata Collection."""
 
+import concurrent.futures
 import hashlib
 import json
 import time
@@ -12,8 +13,16 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, NotRequired, TypedDict
 from urllib.parse import quote
 
-from confluent_kafka import IsolationLevel, TopicPartition
-from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
+from confluent_kafka import IsolationLevel, KafkaException, TopicPartition
+from confluent_kafka.admin import (
+    AclBindingFilter,
+    AclOperation,
+    AclPermissionType,
+    ConfigResource,
+    OffsetSpec,
+    ResourcePatternType,
+    ResourceType,
+)
 
 from datadog_checks.kafka_consumer.cache import CacheHelper
 from datadog_checks.kafka_consumer.connectors import _build_http_kwargs
@@ -67,6 +76,7 @@ class ClusterMetadataCollector:
         self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
+        self.ACL_CACHE_MAX_SIZE = 20_000
 
         self.EARLIEST_OFFSETS_DEFAULT_TTL = 300  # 5 minutes, matches Kafka's own broker default
         self.EARLIEST_OFFSETS_MIN_TTL = 60
@@ -86,6 +96,7 @@ class ClusterMetadataCollector:
         self.SCHEMA_LATEST_VERSION_CACHE_KEY = 'kafka_schema_latest_version_cache'
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
         self.GLOBAL_COMPATIBILITY_CACHE_KEY = 'kafka_schema_global_compatibility_cache'
+        self.ACL_CACHE_KEY = 'kafka_acl_cache'
 
         self._schema_registry_oauth_token: str | None = None
         self._schema_registry_oauth_token_expiry: float = 0.0
@@ -236,6 +247,11 @@ class ClusterMetadataCollector:
             self._collect_schema_registry_info(shared_metadata)
         except Exception as e:
             self.log.error("Error collecting schema registry info: %s", e)
+
+        try:
+            self._collect_acls(shared_metadata)
+        except Exception as e:
+            self.log.error("Error collecting ACLs: %s", e)
 
     def _collect_broker_metadata(self, metadata=None):
         self.log.debug("Collecting broker metadata")
@@ -828,6 +844,103 @@ class ClusterMetadataCollector:
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
         self._save_member_hashes_cache(current_member_hashes)
+
+    def _collect_acls(self, metadata) -> None:
+        """Collect the cluster ACL inventory as config events.
+
+        Many clusters run without an authorizer (for example AWS MSK Serverless or a security
+        protocol with no ACL support); describe_acls raises a KafkaException in that case, which
+        is logged at debug and skipped so the rest of metadata collection is unaffected. A
+        describe_acls future that times out is likewise logged at debug and skipped.
+        """
+        self.log.debug("Collecting ACLs")
+
+        any_filter = AclBindingFilter(
+            ResourceType.ANY,
+            None,
+            ResourcePatternType.ANY,
+            None,
+            None,
+            AclOperation.ANY,
+            AclPermissionType.ANY,
+        )
+
+        try:
+            future = self.client.kafka_client.describe_acls(any_filter)
+            acl_bindings = future.result(timeout=self.config._request_timeout)
+        except (KafkaException, concurrent.futures.TimeoutError) as e:
+            self.log.debug("Skipping ACL collection (authorizer unavailable, unsupported, or timed out): %s", e)
+            return
+
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        )
+
+        self.log.debug("Found %d ACL bindings in cluster %s", len(acl_bindings), cluster_id)
+
+        acl_payloads: list[dict[str, str]] = [
+            {
+                'resource_type': self._enum_name(binding.restype),
+                'resource_name': binding.name,
+                'pattern_type': self._enum_name(binding.resource_pattern_type),
+                'principal': binding.principal,
+                'host': binding.host,
+                'acl_operation': self._enum_name(binding.operation),
+                'permission_type': self._enum_name(binding.permission_type),
+            }
+            for binding in acl_bindings
+        ]
+
+        self._emit_acl_events(acl_payloads, cluster_id)
+
+    def _emit_acl_events(self, acl_payloads: list[dict[str, str]], cluster_id: str) -> None:
+        """Emit a data-streams-message config event per ACL binding, change-tracked by content."""
+        acl_contents: dict[str, str] = {}
+        payloads_by_key: dict[str, dict[str, str]] = {}
+        for payload in acl_payloads:
+            key = self._acl_event_key(payload)
+            acl_contents[key] = json.dumps(payload, sort_keys=True)
+            payloads_by_key[key] = payload
+
+        acls_to_emit = self.cache.get_events_to_send(
+            self.ACL_CACHE_KEY, acl_contents, max_cache_size=self.ACL_CACHE_MAX_SIZE
+        )
+
+        for acl_key in acls_to_emit:
+            payload = payloads_by_key[acl_key]
+            self.check.event_platform_event(
+                json.dumps(
+                    {
+                        'collection_timestamp': int(time.time() * 1000),
+                        'kafka_cluster_id': cluster_id,
+                        **self.config._original_cluster_id_field(),
+                        'config_type': 'acl',
+                        **payload,
+                    }
+                ),
+                "data-streams-message",
+            )
+
+    @staticmethod
+    def _acl_event_key(payload: dict[str, str]) -> str:
+        """Build a stable per-ACL change-tracking key from the binding's identifying fields."""
+        return json.dumps(
+            [
+                payload['resource_type'],
+                payload['resource_name'],
+                payload['pattern_type'],
+                payload['principal'],
+                payload['host'],
+                payload['acl_operation'],
+                payload['permission_type'],
+            ],
+            separators=(',', ':'),
+        )
+
+    @staticmethod
+    def _enum_name(value) -> str:
+        """Return the enum's name, falling back to its string form for non-enum values."""
+        return value.name if hasattr(value, 'name') else str(value)
 
     def _load_member_hashes_cache(self) -> dict[str, str] | None:
         """Return the previous member-hash map, or None if unreadable."""
