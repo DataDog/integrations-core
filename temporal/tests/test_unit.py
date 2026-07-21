@@ -48,3 +48,8 @@ def test_metadata(dd_run_check, datadog_agent, check, mock_metrics):
     }
 
     datadog_agent.assert_metadata(check.check_id, expected_version_metadata)
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:12 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert TemporalCheck.DEFAULT_METRIC_LIMIT == 0
