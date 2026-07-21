@@ -9,6 +9,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.base import ConfigurationError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.check import VoltDBCheck
 from datadog_checks.voltdb.client import Client
@@ -75,6 +76,12 @@ def test_default_port(url, netloc):
     assert config.netloc == netloc
 
 
+CREDENTIAL_CASES = [
+    pytest.param(False, 'Password', 'Hashedpassword', id='plain'),
+    pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
+]
+
+
 def test_check_clears_wrapper_basic_auth():
     # type: () -> None
     # VoltDB authenticates via query params, so the check must clear the config-derived basic-auth tuple.
@@ -84,13 +91,18 @@ def test_check_clears_wrapper_basic_auth():
     assert check.http.options['auth'] is None
 
 
-@pytest.mark.parametrize(
-    'password_hashed, password_field, absent_field',
-    [
-        pytest.param(False, 'Password', 'Hashedpassword', id='plain'),
-        pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
-    ],
-)
+def test_raise_for_status_includes_response_details():
+    # type: () -> None
+    # HTTP errors are enriched with VoltDB's statusstring detail from the response body.
+    instance = {'url': 'http://localhost:8080', 'username': 'admin', 'password': 'secret'}
+    check = VoltDBCheck('voltdb', {}, [instance])
+    response = MockHTTPResponse(status_code=400, json_data={'statusstring': 'Bad procedure'})
+
+    with pytest.raises(Exception, match='details: Bad procedure'):
+        check._raise_for_status_with_details(response)
+
+
+@pytest.mark.parametrize('password_hashed, password_field, absent_field', CREDENTIAL_CASES)
 def test_request_builds_query_params(password_hashed, password_field, absent_field):
     # type: (bool, str, str) -> None
     captured = {}
@@ -110,22 +122,42 @@ def test_request_builds_query_params(password_hashed, password_field, absent_fie
 
     params = captured['params']
     assert params['Procedure'] == 'Hero.insert'
-    assert params['Parameters'] == '[0, "Bits"]'
     assert params['User'] == 'admin'
     assert params[password_field] == 'secret'
     assert absent_field not in params
 
 
 @pytest.mark.parametrize(
-    'password_hashed, password_field, absent_field',
+    'parameters, expected_value',
     [
-        pytest.param(False, 'Password', 'Hashedpassword', id='plain'),
-        pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
+        pytest.param([0, 'Bits'], '[0, "Bits"]', id='list-json-encoded'),
+        pytest.param('[MEMORY]', '[MEMORY]', id='str-passthrough'),
+        pytest.param(None, None, id='none-omitted'),
+        pytest.param([], None, id='empty-omitted'),
     ],
 )
-def test_check_request_uses_query_credentials_not_basic_auth(password_hashed, password_field, absent_field):
+def test_request_encodes_parameters(parameters, expected_value):
+    # type: (object, Optional[str]) -> None
+    captured = {}
+
+    def fake_get(url, **options):
+        captured['params'] = options['params']
+        return mock.MagicMock()
+
+    client = Client(url='http://localhost:8080', http_get=fake_get, username='admin', password='secret')
+    client.request('Hero.insert', parameters=parameters)
+
+    params = captured['params']
+    if expected_value is None:
+        assert 'Parameters' not in params
+    else:
+        assert params['Parameters'] == expected_value
+
+
+@pytest.mark.parametrize('password_hashed, password_field, absent_field', CREDENTIAL_CASES)
+def test_check_wires_credentials_into_query_params(password_hashed, password_field, absent_field):
     # type: (bool, str, str) -> None
-    # Drive the real check against a backend-neutral HTTPClient stand-in to prove query-param auth, not basic auth.
+    # Only the through-the-check path proves config.password_hashed selects the right field, with no per-call auth.
     instance = {
         'url': 'http://localhost:8080',
         'username': 'admin',
@@ -147,11 +179,8 @@ def test_check_request_uses_query_credentials_not_basic_auth(password_hashed, pa
         check = VoltDBCheck('voltdb', {}, [instance])
         check._client.request('@SystemInformation', parameters=['OVERVIEW'])
 
-    assert fake.options['auth'] is None
-
     assert 'auth' not in fake.captured
     params = fake.captured['params']
-    assert params['Procedure'] == '@SystemInformation'
     assert params['User'] == 'admin'
     assert params[password_field] == 'secret'
     assert absent_field not in params
