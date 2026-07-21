@@ -59,6 +59,9 @@ def test_e2e_discovery(dd_agent_check_discovery):
 
 @pytest.mark.e2e
 def test_e2e_discovery_all_candidates(dd_agent_check):
+    if get_tls():
+        pytest.skip('discovery does not configure the TLS-only Zookeeper client port')
+
     assert_all_discovery_candidates_stable(
         dd_agent_check, ZookeeperCheck, log_patterns=DISCOVERY_STABILITY_LOG_PATTERNS
     )
