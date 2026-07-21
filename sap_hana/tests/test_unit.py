@@ -204,8 +204,8 @@ def test_reported_hostname_is_server(instance):
         pytest.param({'template': None}, [], SERVER, id='null-template-defaults-to-host'),
         pytest.param({'template': '$host'}, [], SERVER, id='host'),
         pytest.param({'template': '$host:$port'}, [], f'{SERVER}:{PORT}', id='host-and-port'),
-        pytest.param({'template': 'saphana_myorg_$dev'}, ['dev:team-a'], 'saphana_myorg_team-a', id='tag'),
-        pytest.param({'template': 'saphana_myorg_$dev'}, [], 'saphana_myorg_$dev', id='missing-tag-left-literal'),
+        pytest.param({'template': 'saphana_myorg_$env'}, ['env:team-a'], 'saphana_myorg_team-a', id='tag'),
+        pytest.param({'template': 'saphana_myorg_$env'}, [], 'saphana_myorg_$env', id='missing-tag-left-literal'),
         pytest.param({'template': '$env'}, ['env:prod', 'env:staging'], 'prod,staging', id='multi-value-tag'),
     ],
 )

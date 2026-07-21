@@ -88,7 +88,7 @@ instances:
         ## - port: The port number of the instance.
         ## In addition, you can use any key from the `tags` section of the configuration.
         #
-        # template: saphana_myorg_$dev
+        # template: saphana_myorg_$env
 
     ## @param batch_size - integer - optional - default: 1000
     ## The number of rows to return with each query result.

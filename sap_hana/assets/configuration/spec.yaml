@@ -83,7 +83,7 @@ files:
             value:
               type: string
               display_default: "$host"
-              example: "saphana_myorg_$dev"
+              example: "saphana_myorg_$env"
             description: |
               The template to use for the database identifier. The default value is `$host`.
               You can use the following variables, prefixed by `$` in the template:
