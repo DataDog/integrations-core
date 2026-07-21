@@ -101,6 +101,8 @@ def test_e2e_discovery(aggregator: Any, datadog_agent: Any) -> None:
         # the collector then drops because metrics collection excludes non-running
         # containers.
         discovery_min_instances=6,
+        # Fresh kind runs can take longer than the default 30s for Kubernetes
+        # Autodiscovery to observe and resolve all six raw candidates.
         discovery_timeout=60,
     )
     assert_argocd_e2e_telemetry(aggregator)
