@@ -584,7 +584,7 @@
                                 {
                                     "formulas": [
                                         {
-                                            "alias": "Committed Memory Bytes Bytes",
+                                            "alias": "Committed Memory Bytes",
                                             "formula": "query1"
                                         },
                                         {
