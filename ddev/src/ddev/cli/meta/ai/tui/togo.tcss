@@ -300,6 +300,17 @@ Collapsible {
     margin-top: 1;
 }
 
+#phase-description {
+    height: auto;
+    max-height: 4;
+    margin-top: 1;
+    overflow-y: auto;
+}
+
+#phase-description > Markdown {
+    height: auto;
+}
+
 #phase-config-grid {
     layout: horizontal;
     height: 1fr;
@@ -384,10 +395,9 @@ MarkdownH3 {
     margin-bottom: 1;
 }
 
-#phase-agent-meta {
-    layout: horizontal;
-    height: auto;
-    margin: 0 0 1 0;
+#phase-agent-model {
+    width: 1fr;
+    margin-bottom: 1;
 }
 
 #phase-agent-tools {

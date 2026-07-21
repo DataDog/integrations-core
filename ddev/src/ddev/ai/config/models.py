@@ -197,6 +197,7 @@ class AgentConfig(BaseModel):
 class PhaseConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
     name: str = Field(pattern=NAME_PATTERN)
+    description: str | None = None
     class_: str = Field(default="AgenticPhase", alias="class")
     agent: str | None = None
     tasks: list[TaskConfig] = Field(default_factory=list)
