@@ -484,6 +484,45 @@ class AsyncGitHubClient:
         response = await self._request("GET", f"/repos/{owner}/{repo}/pulls/{pull_number}", timeout=timeout)
         return self._parse_response(response, PullRequest)
 
+    async def list_pull_requests(
+        self,
+        owner: str,
+        repo: str,
+        state: Literal["open", "closed", "all"] = "open",
+        head: str | None = None,
+        base: str | None = None,
+        per_page: int = 100,
+        timeout: float | None = None,
+    ) -> GitHubResponse[list[PullRequest]]:
+        """
+        Calls the GitHub API to list pull requests in a repository.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/pulls/pulls#list-pull-requests
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            state: Filter by pull request state. One of "open", "closed", or "all".
+            head: Filter by head branch in the format "user:ref-name" (or "org:ref-name"). GitHub
+                matches this against the stored head ref, so a closed PR is still returned even after
+                its head branch has been deleted.
+            base: Filter by base branch name.
+            per_page: Number of results per page (max 100). Only the first page is fetched.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            GitHubResponse[list[PullRequest]]: The validated pull requests on the first result page.
+        """
+        params: dict[str, Any] = {"state": state, "per_page": per_page}
+        if head is not None:
+            params["head"] = head
+        if base is not None:
+            params["base"] = base
+        response = await self._request("GET", f"/repos/{owner}/{repo}/pulls", timeout=timeout, params=params)
+        pulls = [PullRequest.model_validate(item) for item in response.json()]
+        return GitHubResponse[list[PullRequest]].model_validate({"data": pulls, "headers": dict(response.headers)})
+
     async def create_pull_request(
         self,
         owner: str,

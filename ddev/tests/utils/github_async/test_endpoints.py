@@ -306,6 +306,52 @@ async def test_get_pull_request_unexpected_state_raises() -> None:
         await client.get_pull_request("o", "r", 5)
 
 
+async def test_list_pull_requests_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/pulls"
+        assert request.url.params.get("state") == "all"
+        assert request.url.params.get("head") == "owner:alice/backport-123-to-7.62.x"
+        return json_response(
+            [
+                full_pull_request_payload(number=5, state="closed", merged=True),
+                full_pull_request_payload(number=6, state="closed", merged=True),
+            ]
+        )
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.list_pull_requests("owner", "repo", state="all", head="owner:alice/backport-123-to-7.62.x")
+    assert [pr.number for pr in result.data] == [5, 6]
+    assert all(isinstance(pr, PullRequest) for pr in result.data)
+
+
+async def test_list_pull_requests_empty_result() -> None:
+    client = make_client(httpx.MockTransport(lambda r: json_response([])))
+    result = await client.list_pull_requests("o", "r")
+    assert result.data == []
+
+
+async def test_list_pull_requests_defaults_to_open_and_omits_optional_filters() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params.get("state") == "open"
+        assert "head" not in request.url.params
+        assert "base" not in request.url.params
+        return json_response([])
+
+    client = make_client(httpx.MockTransport(handler))
+    await client.list_pull_requests("o", "r")
+
+
+async def test_list_pull_requests_forwards_base_filter() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.url.params.get("base") == "7.62.x"
+        return json_response([pull_request_payload(number=1)])
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.list_pull_requests("o", "r", base="7.62.x")
+    assert result.data[0].number == 1
+
+
 async def test_add_labels_to_issue_success() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         assert request.method == "POST"
