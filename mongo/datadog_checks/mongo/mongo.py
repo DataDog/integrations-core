@@ -9,6 +9,7 @@ from copy import deepcopy
 
 from cachetools import TTLCache
 from packaging.version import Version
+from pymongo.errors import NotPrimaryError
 
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
@@ -295,6 +296,13 @@ class MongoDb(AgentCheck):
                 self._slow_operations.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._schemas.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
                 self._query_metrics.run_job_loop(tags=self._get_tags(include_internal_resource_tags=True))
+        except NotPrimaryError as e:
+            # The node is reachable but not in a readable (primary/secondary) state, so reads fail.
+            # This is usually a transient condition (e.g. recovering, rollback), not a connection failure.
+            self.log.warning(
+                "Node is not in a readable (primary/secondary) state, skipping collection for this run: %s", e
+            )
+            self.service_check(SERVICE_CHECK_NAME, AgentCheck.OK, tags=self._get_service_check_tags())
         except CRITICAL_FAILURE as e:
             self.service_check(SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=self._get_service_check_tags())
             self._unset_metadata()
@@ -333,6 +341,11 @@ class MongoDb(AgentCheck):
         for collector in self.collectors:
             try:
                 collector.collect(self.api_client)
+            except NotPrimaryError:
+                self.log.warning(
+                    "Skipping collector %s because the node is not in a readable (primary/secondary) state.",
+                    collector,
+                )
             except CRITICAL_FAILURE as e:
                 self.log.info(
                     "Unable to collect logs from collector %s. Some metrics will be missing.", collector, exc_info=True
