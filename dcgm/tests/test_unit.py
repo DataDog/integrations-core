@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 
+from types import SimpleNamespace
+from unittest import mock
+
 import pytest
 
 from datadog_checks.base.errors import ConfigurationError
@@ -10,6 +13,21 @@ from datadog_checks.dcgm import DcgmCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import EXPECTED_METRICS
+
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    # Kills the core/NumberReplacer mutant at check.py:11 (DEFAULT_METRIC_LIMIT 0 -> -1).
+    assert DcgmCheck.DEFAULT_METRIC_LIMIT == 0
+
+
+def test_add_build_version_to_metadata_iterates_sample_data(check):
+    # Kills the core/ZeroIterationForLoop mutant at check.py:29 (sample_data -> []).
+    sample = SimpleNamespace(labels={'build_version': '2_1_3'})
+    with mock.patch.object(check, 'set_metadata') as set_metadata:
+        check._add_build_version_to_metadata(None, [(sample, [], None)], None)
+    set_metadata.assert_called_once_with('version', '2.1.3')
 
 
 def test_critical_service_check(dd_run_check, aggregator, mock_http_response, check):
