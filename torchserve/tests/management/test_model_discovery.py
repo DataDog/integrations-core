@@ -4,11 +4,10 @@
 import json
 import os
 
-import mock
 import pytest
-from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.torchserve.model_discovery import ModelDiscovery
 
 from ..common import get_fixture_path
@@ -104,10 +103,7 @@ def test_get_models(check, mocked_management_instance, expected_models, fixture_
             # We only mock the number of calls we have in the status_code list
             if len(status_codes) > index:
                 status_code = status_codes[index]
-                mock_resp = mock.MagicMock(status_code=status_code, headers={'Content-Type': "application/json"})
-                mock_resp.json.return_value = json.loads(f.read())
-                mock_resp.raise_for_status.side_effect = HTTPError() if status_code != 200 else None
-                responses.append(mock_resp)
+                responses.append(MockHTTPResponse(json_data=json.loads(f.read()), status_code=status_code))
 
     mock_http.get.side_effect = responses
     discovery = ModelDiscovery(check(mocked_management_instance), include=[".*"])
@@ -121,7 +117,7 @@ def test_get_models(check, mocked_management_instance, expected_models, fixture_
         # The nextPageToken from the call n comes from the answer n-1
         assert mock_http.get.call_args_list[index].kwargs["params"] == {
             "limit": 100,
-            "nextPageToken": responses[index - 1].json.return_value["nextPageToken"],
+            "nextPageToken": responses[index - 1].json()["nextPageToken"],
         }
 
     assert discovery.api_status == (AgentCheck.CRITICAL if status_codes[0] != 200 else AgentCheck.OK)
