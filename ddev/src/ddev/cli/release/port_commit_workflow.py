@@ -934,6 +934,7 @@ def execute_port_plan(app: Application, plan: PortPlan) -> PortOutcome:
 
 class BackportStatus(StrEnum):
     PORTED = auto()
+    PLANNED = auto()
     SKIPPED = auto()
     FAILED = auto()
 
@@ -961,6 +962,13 @@ def run_backport_from_pr(
     base whose backport PR already exists in any state (open, merged, or closed) is skipped so re-runs
     are idempotent. Returns True when every base succeeded or was skipped.
     """
+    if options.branch_suffix is not None and override_base is None:
+        app.abort(
+            '`--branch-suffix` cannot be combined with `--from-pr` unless `--target-branch` is also '
+            'given: the suffix is shared across every derived base, so all bases would resolve to the '
+            'same head branch and only the first would be ported. Pass `--target-branch` to port to a '
+            'single base, or drop `--branch-suffix` to use the per-base `to-<base>` default.'
+        )
     require_github_user(app)
 
     try:
@@ -1028,7 +1036,8 @@ def _port_to_each_base(
         app.output(Text(f'Backporting to `{base}`', style='bold'), stderr=True)
         outcome = execute_port_plan(app, plan)
         if outcome.error is None:
-            results.append(BackportResult(base=base, status=BackportStatus.PORTED, detail=outcome.pr_url))
+            status = BackportStatus.PLANNED if options.dry_run else BackportStatus.PORTED
+            results.append(BackportResult(base=base, status=status, detail=outcome.pr_url))
         else:
             app.display_error(f'Backport to `{base}` failed: {outcome.error}')
             results.append(BackportResult(base=base, status=BackportStatus.FAILED, detail=outcome.error))
@@ -1071,6 +1080,7 @@ def _display_backport_summary(app: Application, pr_number: int, results: list[Ba
     """Print a panel summarising the per-base backport outcomes."""
     icons = {
         BackportStatus.PORTED: '✅',
+        BackportStatus.PLANNED: '📋',
         BackportStatus.SKIPPED: '⏭️',
         BackportStatus.FAILED: '❌',
     }

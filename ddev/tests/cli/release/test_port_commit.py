@@ -1214,4 +1214,36 @@ def test_command_from_pr_aborts_when_pr_not_found(
 
     assert result.exit_code == 1, result.output
     assert 'PR #23703 not found.' in result.output
+
+
+def test_command_from_pr_rejects_branch_suffix_without_explicit_target(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A suffix shared across derived bases would collide, so it's rejected before any PR lookup."""
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703', '--branch-suffix', 'custom')
+
+    assert result.exit_code == 1, result.output
+    assert '`--branch-suffix` cannot be combined with `--from-pr`' in result.output
+    fake_async_github.assert_not_called('get_pull_request')
+
+
+def test_command_from_pr_dry_run_reports_planned_not_ported(
+    ddev: CliRunner, mocker: MockerFixture, fake_async_github: FakeAsyncGitHubClient
+) -> None:
+    """A dry run records each base as planned (not ported) and makes no PR-creating calls."""
+    _setup_command_mocks(mocker, commit_sha=FULL_SHA_FOR_TESTS)
+    fake_async_github.mock_response(
+        'get_pull_request',
+        _merged_pr(number=23703, backport_bases=['7.62.x', '7.61.x']),
+    )
+    mocker.patch.dict('os.environ', {'DD_GITHUB_USER': 'alice'})
+
+    result = ddev('release', 'port-commit', '--from-pr', '23703', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert 'Backport summary for PR #23703' in result.output
+    assert 'planned' in result.output
+    fake_async_github.assert_not_called('create_pull_request')
     fake_async_github.assert_not_called('create_pull_request')
