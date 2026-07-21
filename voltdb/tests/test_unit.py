@@ -185,7 +185,8 @@ def test_check_wires_credentials_into_query_params(password_hashed, password_fie
         check = VoltDBCheck('voltdb', {}, [instance])
         check._client.request('@SystemInformation', parameters=['OVERVIEW'])
 
-    assert 'auth' not in fake.captured
+    assert fake.options['auth'] is None  # disable_auth() cleared the config Basic-auth tuple
+    assert 'auth' not in fake.captured  # and no per-call auth override is sent
     params = fake.captured['params']
     assert params['User'] == 'admin'
     assert params[password_field] == 'secret'
