@@ -7,7 +7,6 @@ from typing import Optional  # noqa: F401
 from unittest import mock
 
 import pytest
-import requests
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.http import MockHTTPResponse
@@ -83,27 +82,16 @@ CREDENTIAL_CASES = [
 ]
 
 
-def test_check_suppresses_authorization_header():
+def test_check_disables_http_auth():
     # type: () -> None
-    # VoltDB authenticates via query params. Even with a matching .netrc entry, no Authorization header goes out.
+    # VoltDB authenticates via query params, so the check disables HTTP-level auth (config-derived and .netrc).
     instance = {'url': 'http://localhost:8080', 'username': 'doggo', 'password': 'doggopass'}
-    check = VoltDBCheck('voltdb', {}, [instance])
-    captured = {}
+    fake = mock.MagicMock()
 
-    def fake_send(session_self, request, **kwargs):
-        captured['headers'] = dict(request.headers)
-        response = requests.Response()
-        response.status_code = 200
-        response._content = b'{}'
-        return response
+    with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
+        VoltDBCheck('voltdb', {}, [instance])
 
-    with (
-        mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
-        mock.patch('requests.sessions.Session.send', new=fake_send),
-    ):
-        check._client.request('@SystemInformation', parameters=['OVERVIEW'])
-
-    assert 'Authorization' not in captured['headers']
+    fake.disable_auth.assert_called_once_with()
 
 
 def test_raise_for_status_includes_response_details():
