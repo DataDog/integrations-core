@@ -29,12 +29,36 @@ class CaseInsensitiveDict(dict):
             raise KeyError(key)
         return super().__getitem__(existing_key)
 
+    def __delitem__(self, key):
+        existing_key = self.matching_key(key)
+        if existing_key is None:
+            raise KeyError(key)
+        super().__delitem__(existing_key)
+
     def __contains__(self, key):
         return self.matching_key(key) is not None
 
     def get(self, key, default=None):
         existing_key = self.matching_key(key)
         return super().get(existing_key, default) if existing_key is not None else default
+
+    def pop(self, key, *args):
+        existing_key = self.matching_key(key)
+        if existing_key is None:
+            if args:
+                return args[0]
+            raise KeyError(key)
+        return super().pop(existing_key)
+
+    def setdefault(self, key, default=None):
+        existing_key = self.matching_key(key)
+        if existing_key is not None:
+            return super().__getitem__(existing_key)
+        self[key] = default
+        return default
+
+    def copy(self):
+        return CaseInsensitiveDict(self)
 
     def update(self, data=(), **kwargs):
         for key, value in dict(data, **kwargs).items():
@@ -53,12 +77,6 @@ class CaseInsensitiveDict(dict):
                 key.lower(): value for key, value in other.items()
             }
         return NotImplemented
-
-    def __ne__(self, other):
-        result = self.__eq__(other)
-        if result is NotImplemented:
-            return result
-        return not result
 
 
 Config = namedtuple(

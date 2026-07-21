@@ -5,7 +5,7 @@ import pytest
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.headers import headers as agent_headers
-from datadog_checks.http_check.config import DEFAULT_EXPECTED_CODE, from_instance
+from datadog_checks.http_check.config import DEFAULT_EXPECTED_CODE, CaseInsensitiveDict, from_instance
 
 
 def test_from_instance():
@@ -68,6 +68,71 @@ def test_from_instance_header_override_is_case_insensitive():
     headers = config.headers
     assert headers.get('User-Agent') == 'Custom-UA'
     assert len(headers) == len(agent_headers({}))
+
+
+def test_case_insensitive_dict_setdefault_matches_existing_key_regardless_of_case():
+    headers = CaseInsensitiveDict({'User-Agent': 'Original'})
+
+    result = headers.setdefault('user-agent', 'Fallback')
+
+    assert result == 'Original'
+    assert len(headers) == 1
+
+
+def test_case_insensitive_dict_setdefault_inserts_when_key_absent():
+    headers = CaseInsensitiveDict()
+
+    result = headers.setdefault('user-agent', 'Fallback')
+
+    assert result == 'Fallback'
+    assert headers['User-Agent'] == 'Fallback'
+
+
+def test_case_insensitive_dict_delitem_matches_existing_key_regardless_of_case():
+    headers = CaseInsensitiveDict({'User-Agent': 'Original'})
+
+    del headers['USER-AGENT']
+
+    assert 'user-agent' not in headers
+    assert len(headers) == 0
+
+
+def test_case_insensitive_dict_delitem_raises_key_error_when_absent():
+    headers = CaseInsensitiveDict()
+
+    with pytest.raises(KeyError):
+        del headers['user-agent']
+
+
+def test_case_insensitive_dict_pop_matches_existing_key_regardless_of_case():
+    headers = CaseInsensitiveDict({'User-Agent': 'Original'})
+
+    value = headers.pop('user-agent')
+
+    assert value == 'Original'
+    assert len(headers) == 0
+
+
+def test_case_insensitive_dict_pop_returns_default_when_absent():
+    headers = CaseInsensitiveDict()
+
+    assert headers.pop('user-agent', 'Fallback') == 'Fallback'
+
+
+def test_case_insensitive_dict_pop_raises_key_error_when_absent_without_default():
+    headers = CaseInsensitiveDict()
+
+    with pytest.raises(KeyError):
+        headers.pop('user-agent')
+
+
+def test_case_insensitive_dict_copy_preserves_case_insensitivity():
+    headers = CaseInsensitiveDict({'User-Agent': 'Original'})
+
+    copied = headers.copy()
+
+    assert isinstance(copied, CaseInsensitiveDict)
+    assert copied.get('user-agent') == 'Original'
 
 
 def test_instance_ca_cert():
