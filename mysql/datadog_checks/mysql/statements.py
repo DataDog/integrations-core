@@ -74,8 +74,6 @@ def _row_state_key(row):
     :param row: a normalized row from a MySQL statement metrics source
     :return: a tuple uniquely identifying the cumulative database counter
     """
-    # Prepared-statement rows carry a non-null `object_instance_begin` as `_dd_statement_id`;
-    # digest rows leave it null. That presence check is what tells the two sources apart.
     if row.get('_dd_statement_id') is not None:
         # `object_instance_begin` is a memory address that MySQL can reuse for a
         # different prepared statement once the old one is deallocated. Include
