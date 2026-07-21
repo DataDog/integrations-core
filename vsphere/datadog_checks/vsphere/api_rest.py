@@ -9,7 +9,6 @@ from pyVmomi import vim
 
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.base.utils.http import create_http_client
-from datadog_checks.base.utils.http_protocol import HTTPClient  # noqa: F401
 from datadog_checks.vsphere.config import VSphereConfig  # noqa: F401
 from datadog_checks.vsphere.constants import ALL_RESOURCES_WITH_METRICS
 from datadog_checks.vsphere.types import ResourceTags, TagAssociation  # noqa: F401
@@ -32,11 +31,11 @@ class VSphereRestAPI(object):
     Abstraction class over the vSphere REST api
     """
 
-    def __init__(self, config, log, deprecated_api=True, http_client=None):
-        # type: (VSphereConfig, CheckLoggingAdapter, bool, HTTPClient | None) -> None
+    def __init__(self, config, log, deprecated_api=True):
+        # type: (VSphereConfig, CheckLoggingAdapter, bool) -> None
         self.config = config
         self.log = log
-        self._client = VSphereRestClient(config, log, deprecated_api, http_client)
+        self._client = VSphereRestClient(config, log, deprecated_api)
         self.smart_connect()
 
     def smart_connect(self):
@@ -159,8 +158,8 @@ class VSphereRestClient(object):
         },
     }
 
-    def __init__(self, config, log, deprecated_api, http_client=None):
-        # type: (VSphereConfig, CheckLoggingAdapter, bool, HTTPClient | None) -> None
+    def __init__(self, config, log, deprecated_api):
+        # type: (VSphereConfig, CheckLoggingAdapter, bool) -> None
         self.log = log
         self.deprecated_api = deprecated_api
         self._api_base_url = "https://{}/api/".format(config.hostname)
@@ -168,11 +167,7 @@ class VSphereRestClient(object):
         if deprecated_api:
             self._api_base_url = "https://{}/rest/com/vmware/cis/".format(config.hostname)
             self.endpoints = self.API_ENDPOINTS['deprecated']
-        self._http = (
-            http_client
-            if http_client is not None
-            else create_http_client(config.rest_api_options, config.shared_rest_api_options)
-        )
+        self._http = create_http_client(config.rest_api_options, config.shared_rest_api_options)
 
     def connect_session(self):
         # type: () -> None

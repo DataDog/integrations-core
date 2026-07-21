@@ -245,7 +245,7 @@ def service_instance(
         yield mock_si
 
 
-def _inject_rest_http_client(tag_associations):
+def inject_rest_http_client(tag_associations):
     mock_cls = MockHttpV7 if VSPHERE_VERSION.startswith('7.') else MockHttpV6
     http = mock_cls(tag_associations=tag_associations)
     return patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=http), http
@@ -253,13 +253,13 @@ def _inject_rest_http_client(tag_associations):
 
 @pytest.fixture
 def mock_http_api():
-    ctx, http = _inject_rest_http_client(tag_associations=None)
+    ctx, http = inject_rest_http_client(tag_associations=None)
     with ctx:
         yield http
 
 
 @pytest.fixture
 def mock_rest_api():
-    ctx, http = _inject_rest_http_client(tag_associations=REALTIME_TAG_ASSOCIATIONS)
+    ctx, http = inject_rest_http_client(tag_associations=REALTIME_TAG_ASSOCIATIONS)
     with ctx:
         yield http
