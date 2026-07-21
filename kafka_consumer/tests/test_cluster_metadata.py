@@ -11,6 +11,7 @@ from unittest import mock
 import pytest
 from confluent_kafka.admin import BrokerMetadata, PartitionMetadata, TopicMetadata
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kafka_consumer.cache import EVENT_CACHE_TTL
 from datadog_checks.kafka_consumer.client import KafkaClient
 
@@ -1987,3 +1988,139 @@ def test_collect_connect_status_degrades_to_empty_dict_on_exception(check):
         result = kafka_consumer_check._collect_connect_status('test-cluster')
 
     assert result == {}
+
+
+def _make_scram_description(user, credentials):
+    """Build a mock UserScramCredentialsDescription with the given (ScramMechanism, iterations) pairs."""
+    description = mock.MagicMock()
+    description.user = user
+    infos = []
+    for mechanism, iterations in credentials:
+        info = mock.MagicMock()
+        info.mechanism = mechanism
+        info.iterations = iterations
+        infos.append(info)
+    description.scram_credential_infos = infos
+    return description
+
+
+def _stub_scram_credentials(admin, descriptions=None, exception=None):
+    """Stub describe_user_scram_credentials on a mock AdminClient with a result dict or an exception."""
+    future = mock.MagicMock()
+    if exception is not None:
+        future.result.side_effect = exception
+    else:
+        future.result.return_value = descriptions or {}
+    admin.describe_user_scram_credentials.return_value = future
+
+
+def _make_scram_check(check, descriptions=None, exception=None):
+    """Wire a cluster-monitoring check whose mock Kafka client serves the given SCRAM descriptions."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_cluster_monitoring': True,
+        'monitor_unlisted_consumer_groups': True,
+    }
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+    _stub_scram_credentials(mock_kafka_client.kafka_client, descriptions=descriptions, exception=exception)
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+    return kafka_consumer_check, mock_kafka_client
+
+
+def scram_ds_events(check):
+    """Return the parsed data-streams-message payloads with config_type 'scram_credential'."""
+    events = []
+    for call in check.event_platform_event.call_args_list:
+        args = call[0]
+        if len(args) > 1 and args[1] == 'data-streams-message':
+            payload = json.loads(args[0])
+            if payload.get('config_type') == 'scram_credential':
+                events.append(payload)
+    return events
+
+
+def test_scram_credentials_present(check, dd_run_check, aggregator):
+    """Credentials present: per-mechanism counts and per-(user, mechanism) events, with no user in metric tags."""
+    from confluent_kafka.admin import ScramMechanism
+
+    descriptions = {
+        'alice': _make_scram_description('alice', [(ScramMechanism.SCRAM_SHA_256, 8192)]),
+        'bob': _make_scram_description(
+            'bob',
+            [(ScramMechanism.SCRAM_SHA_256, 4096), (ScramMechanism.SCRAM_SHA_512, 16384)],
+        ),
+    }
+    kafka_consumer_check, _ = _make_scram_check(check, descriptions=descriptions)
+    _wire_cache(kafka_consumer_check)
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric(
+        'kafka.scram_credentials.count',
+        value=2,
+        tags=['kafka_cluster_id:test-cluster-id', 'mechanism:scram_sha_256'],
+    )
+    aggregator.assert_metric(
+        'kafka.scram_credentials.count',
+        value=1,
+        tags=['kafka_cluster_id:test-cluster-id', 'mechanism:scram_sha_512'],
+    )
+
+    # No user/principal must leak into metric tags.
+    for metric in aggregator.metrics('kafka.scram_credentials.count'):
+        assert not any(tag.startswith('user:') for tag in metric.tags)
+
+    events = scram_ds_events(kafka_consumer_check)
+    # One event per (user, credential): alice has 1, bob has 2.
+    assert len(events) == 3
+    by_user = {}
+    for event in events:
+        by_user.setdefault(event['user'], []).append((event['mechanism'], event['iterations']))
+        assert event['kafka_cluster_id'] == 'test-cluster-id'
+    assert by_user['alice'] == [('scram_sha_256', 8192)]
+    assert sorted(by_user['bob']) == [('scram_sha_256', 4096), ('scram_sha_512', 16384)]
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+def test_scram_credentials_empty(check, dd_run_check, aggregator):
+    """Empty result: no metric and no events, no error."""
+    kafka_consumer_check, _ = _make_scram_check(check, descriptions={})
+    _wire_cache(kafka_consumer_check)
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric('kafka.scram_credentials.count', count=0)
+    assert scram_ds_events(kafka_consumer_check) == []
+
+
+def test_scram_credentials_api_unsupported_skips_gracefully(check, dd_run_check, aggregator):
+    """A KafkaException from the API is swallowed; other cluster metadata is still collected."""
+    from confluent_kafka import KafkaException
+
+    kafka_consumer_check, _ = _make_scram_check(check, exception=KafkaException("RESOURCE_NOT_FOUND"))
+    _wire_cache(kafka_consumer_check)
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric('kafka.scram_credentials.count', count=0)
+    assert scram_ds_events(kafka_consumer_check) == []
+    # Other metadata collection is unaffected.
+    aggregator.assert_metric('kafka.broker.count', value=2)
+
+
+def test_scram_credentials_skipped_when_describe_times_out(check, dd_run_check, aggregator):
+    """A TimeoutError from the API is swallowed; other cluster metadata is still collected."""
+    import concurrent.futures
+
+    kafka_consumer_check, _ = _make_scram_check(check, exception=concurrent.futures.TimeoutError())
+    _wire_cache(kafka_consumer_check)
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric('kafka.scram_credentials.count', count=0)
+    assert scram_ds_events(kafka_consumer_check) == []
+    # Other metadata collection is unaffected.
+    aggregator.assert_metric('kafka.broker.count', value=2)

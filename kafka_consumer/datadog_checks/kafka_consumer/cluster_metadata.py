@@ -4,6 +4,7 @@
 
 """Kafka Cluster Metadata Collection."""
 
+import concurrent.futures
 import hashlib
 import json
 import time
@@ -12,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, NotRequired, TypedDict
 from urllib.parse import quote
 
-from confluent_kafka import IsolationLevel, TopicPartition
+from confluent_kafka import IsolationLevel, KafkaException, TopicPartition
 from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
 from datadog_checks.kafka_consumer.cache import CacheHelper
@@ -86,6 +87,8 @@ class ClusterMetadataCollector:
         self.SCHEMA_LATEST_VERSION_CACHE_KEY = 'kafka_schema_latest_version_cache'
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
         self.GLOBAL_COMPATIBILITY_CACHE_KEY = 'kafka_schema_global_compatibility_cache'
+        self.SCRAM_CREDENTIAL_CACHE_KEY = 'kafka_scram_credential_cache'
+        self.SCRAM_CREDENTIAL_CACHE_MAX_SIZE = 20_000
 
         self._schema_registry_oauth_token: str | None = None
         self._schema_registry_oauth_token_expiry: float = 0.0
@@ -236,6 +239,11 @@ class ClusterMetadataCollector:
             self._collect_schema_registry_info(shared_metadata)
         except Exception as e:
             self.log.error("Error collecting schema registry info: %s", e)
+
+        try:
+            self._collect_scram_credentials(shared_metadata)
+        except Exception as e:
+            self.log.error("Error collecting SCRAM credentials: %s", e)
 
     def _collect_broker_metadata(self, metadata=None):
         self.log.debug("Collecting broker metadata")
@@ -828,6 +836,69 @@ class ClusterMetadataCollector:
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
         self._save_member_hashes_cache(current_member_hashes)
+
+    def _collect_scram_credentials(self, metadata) -> None:
+        """Collect the SASL/SCRAM credential inventory: a per-mechanism count metric and per-credential events."""
+        self.log.debug("Collecting SCRAM credentials")
+
+        try:
+            future = self.client.kafka_client.describe_user_scram_credentials()
+            descriptions = future.result(timeout=self.config._request_timeout)
+        except (KafkaException, concurrent.futures.TimeoutError) as e:
+            # Clusters without SCRAM configured, or brokers that don't support the API, raise here.
+            # This is expected, so skip gracefully without failing other metadata collection.
+            self.log.debug("Could not collect SCRAM credentials: %s", e)
+            return
+
+        cluster_id = self.config._kafka_cluster_id_override or (
+            metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
+        )
+
+        mechanism_counts: dict[str, int] = {}
+        credential_events: dict[str, str] = {}
+        credential_payloads: dict[str, dict[str, Any]] = {}
+
+        for user, description in descriptions.items():
+            for credential_info in description.scram_credential_infos:
+                mechanism = credential_info.mechanism
+                mechanism_name = (mechanism.name if hasattr(mechanism, 'name') else str(mechanism)).lower()
+                mechanism_counts[mechanism_name] = mechanism_counts.get(mechanism_name, 0) + 1
+                payload = {
+                    'user': user,
+                    'mechanism': mechanism_name,
+                    'iterations': credential_info.iterations,
+                }
+                cache_key = f'{user}:{mechanism_name}'
+                credential_payloads[cache_key] = payload
+                credential_events[cache_key] = json.dumps(payload, sort_keys=True)
+
+        for mechanism_name, count in mechanism_counts.items():
+            self.check.gauge(
+                'scram_credentials.count',
+                count,
+                tags=self.config._get_tags(cluster_id) + [f'mechanism:{mechanism_name}'],
+            )
+
+        credentials_to_emit = self.cache.get_events_to_send(
+            self.SCRAM_CREDENTIAL_CACHE_KEY, credential_events, max_cache_size=self.SCRAM_CREDENTIAL_CACHE_MAX_SIZE
+        )
+
+        for cache_key in credentials_to_emit:
+            payload = credential_payloads[cache_key]
+            self.check.event_platform_event(
+                json.dumps(
+                    {
+                        'collection_timestamp': int(time.time() * 1000),
+                        'kafka_cluster_id': cluster_id,
+                        **self.config._original_cluster_id_field(),
+                        'user': payload['user'],
+                        'mechanism': payload['mechanism'],
+                        'iterations': payload['iterations'],
+                        'config_type': 'scram_credential',
+                    }
+                ),
+                "data-streams-message",
+            )
 
     def _load_member_hashes_cache(self) -> dict[str, str] | None:
         """Return the previous member-hash map, or None if unreadable."""
