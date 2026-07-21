@@ -20,7 +20,7 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.mysql.cursor import CommenterDictCursor
 
-from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, warning_with_tags
+from .util import DatabaseConfigurationError, warning_with_tags
 
 try:
     import datadog_agent
@@ -65,13 +65,13 @@ def _row_key(row):
     return row['schema_name'], row['query_signature']
 
 
-class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
+class MySQLStatementMetrics(DBMAsyncJob):
     """
     MySQLStatementMetrics collects database metrics per normalized MySQL statement
     """
 
-    def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
-        # (MySql, MySQLConfig, Callable, bool) -> None
+    def __init__(self, check, config):
+        # (MySql, MySQLConfig) -> None
         collection_interval = float(config.statement_metrics_config.get('collection_interval', 10))
         if collection_interval <= 0:
             collection_interval = 10
@@ -84,15 +84,11 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             min_collection_interval=config.min_collection_interval,
             dbms="mysql",
             job_name="statement-metrics",
-            shutdown_callback=self._close_db_conn,
+            shutdown_callback=lambda: check._connection_manager.close("statement-metrics"),
         )
         self._check = check
         self._collect_prepared_statements = None
         self._metric_collection_interval = collection_interval
-        self._connection_args_provider = connection_args_provider
-        self._uses_managed_auth = uses_managed_auth
-        self._db_created_at = 0
-        self._db = None
         self._config = config
         self.log = get_check_logger()
         self._state = StatementMetrics()
@@ -112,15 +108,6 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             maxsize=self._config.statement_rows_cache_max_size,
             ttl=self._config.statement_rows_cache_ttl,
         )
-
-    def _close_db_conn(self):
-        if self._db:
-            try:
-                self._db.close()
-            except Exception:
-                self._log.debug("Failed to close db connection", exc_info=1)
-            finally:
-                self._db = None
 
     def run_job(self):
         start = time.time()
@@ -201,7 +188,10 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
         return rows
 
     def _get_statement_count(self, tags):
-        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterDictCursor)) as cursor,
+        ):
             cursor.execute("SELECT count(*) AS count from performance_schema.events_statements_summary_by_digest")
 
             rows = cursor.fetchall() or []  # type: ignore
@@ -306,7 +296,10 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 LIMIT 10000
                 """
 
-        with closing(self._get_db_connection().cursor(CommenterDictCursor)) as cursor:
+        with (
+            self._check._connection_manager.get_connection(self._job_name) as db,
+            closing(db.cursor(CommenterDictCursor)) as cursor,
+        ):
             args = [self._last_seen] if only_query_recent_statements else None
             cursor.execute(sql_statement_summary, args)
 

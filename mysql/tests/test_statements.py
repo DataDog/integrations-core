@@ -549,7 +549,7 @@ def test_statement_samples_collect(
 
     # we avoid closing these in a try/finally block in order to maintain the connections in case we want to
     # debug the test with --pdb
-    mysql_check._statement_samples._close_db_conn()
+    mysql_check._connection_manager.close("statement-samples")
 
 
 @pytest.mark.parametrize(
@@ -819,7 +819,10 @@ def test_statement_samples_failed_explain_handling(
     dd_run_check(mysql_check)
 
     total_error_states = []
-    with closing(mysql_check._statement_samples._get_db_connection().cursor()) as cursor:
+    with (
+        mysql_check._connection_manager.get_connection("statement-samples") as db,
+        closing(db.cursor()) as cursor,
+    ):
         if optimal_strategy_cached:
             # run a query in that schema which we know will succeed to ensure the optimal strategy is cached
             _, error_states = mysql_check._statement_samples._explain_statement(

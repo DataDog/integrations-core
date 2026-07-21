@@ -25,7 +25,6 @@ from datadog_checks.base.utils.db.utils import (
     resolve_db_host as agent_host_resolver,
 )
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.mysql import aws
 from datadog_checks.mysql.cursor import CommenterCursor, CommenterDictCursor, CommenterSSCursor
 from datadog_checks.mysql.health import MySqlHealth
 
@@ -33,6 +32,7 @@ from .__about__ import __version__
 from .activity import MySQLActivity
 from .collection_utils import collect_all_scalars, collect_scalar, collect_string, collect_type
 from .config import MySQLConfig, sanitize
+from .connections import AWSTokenProvider, MySQLConnectionArgs, MySQLConnectionManager
 from .const import (
     AWS_RDS_HOSTNAME_SUFFIX,
     AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE,
@@ -85,7 +85,7 @@ from .queries import (
 )
 from .statement_samples import MySQLStatementSamples
 from .statements import MySQLStatementMetrics
-from .util import DatabaseConfigurationError, connect_with_session_variables  # noqa: F401
+from .util import DatabaseConfigurationError  # noqa: F401
 from .version_utils import parse_version
 
 try:
@@ -147,15 +147,15 @@ class MySql(DatabaseCheck):
             and self.cloud_metadata['aws']['managed_authentication'].get('enabled', False)
         )
 
-        # Pass function reference and managed auth flag to async jobs
-        self._statement_metrics = MySQLStatementMetrics(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
-        self._statement_samples = MySQLStatementSamples(
-            self, self._config, self._get_connection_args, self._uses_aws_managed_auth
-        )
-        self._mysql_metadata = MySQLMetadata(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
-        self._query_activity = MySQLActivity(self, self._config, self._get_connection_args, self._uses_aws_managed_auth)
+        # Single shared connection authority for the main check and all async jobs
+        self._token_provider = self._build_token_provider()
+        self._connection_manager = MySQLConnectionManager(self, self.build_connection_args())
+
+        # Async jobs acquire their own connection from the shared manager, keyed by job name
+        self._statement_metrics = MySQLStatementMetrics(self, self._config)
+        self._statement_samples = MySQLStatementSamples(self, self._config)
+        self._mysql_metadata = MySQLMetadata(self, self._config)
+        self._query_activity = MySQLActivity(self, self._config)
         self._index_metrics = MySqlIndexMetrics(self._config)
         # _database_instance_emitted: limit the collection and transmission of the database instance metadata
         self._database_instance_emitted = TTLCache(
@@ -419,6 +419,7 @@ class MySql(DatabaseCheck):
         self._statement_metrics.cancel()
         self._query_activity.cancel()
         self._mysql_metadata.cancel()
+        self._connection_manager.close_all()
 
     def _new_query_executor(self, queries):
         return QueryExecutor(
@@ -478,43 +479,33 @@ class MySql(DatabaseCheck):
 
         return hostkey
 
-    def _get_connection_args(self):
-        ssl = dict(self._config.ssl) if self._config.ssl else None
-        connection_args = {
-            'ssl': ssl,
-            'connect_timeout': self._config.connect_timeout,
-            'read_timeout': self._config.read_timeout,
-            'autocommit': True,
-        }
-        if self._config.charset:
-            connection_args['charset'] = self._config.charset
+    def _build_token_provider(self):
+        if not self._uses_aws_managed_auth:
+            return None
+        aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
+        region = self.cloud_metadata['aws']['region']
+        return AWSTokenProvider(
+            host=self._config.host,
+            port=self._config.port,
+            username=self._config.user,
+            region=region,
+            role_arn=aws_managed_authentication.get('role_arn'),
+        )
 
-        if self._config.defaults_file != '':
-            connection_args['read_default_file'] = self._config.defaults_file
-            return connection_args
-
-        connection_args.update({'user': self._config.user, 'passwd': self._config.password})
-        if self._uses_aws_managed_auth:
-            # Generate AWS IAM auth token
-            aws_managed_authentication = self.cloud_metadata['aws']['managed_authentication']
-            region = self.cloud_metadata['aws']['region']
-            password = aws.generate_rds_iam_token(
-                host=self._config.host,
-                username=self._config.user,
-                port=self._config.port,
-                region=region,
-                role_arn=aws_managed_authentication.get('role_arn'),
-            )
-            connection_args.update({'user': self._config.user, 'passwd': password})
-        if self._config.mysql_sock != '':
-            self.service_check_tags = self._service_check_tags(self._config.mysql_sock)
-            connection_args.update({'unix_socket': self._config.mysql_sock})
-        else:
-            connection_args.update({'host': self._config.host})
-
-        if self._config.port:
-            connection_args.update({'port': self._config.port})
-        return connection_args
+    def build_connection_args(self):
+        return MySQLConnectionArgs(
+            host=self._config.host,
+            port=self._config.port,
+            user=self._config.user,
+            password=self._config.password,
+            unix_socket=self._config.mysql_sock,
+            defaults_file=self._config.defaults_file,
+            ssl=dict(self._config.ssl) if self._config.ssl else None,
+            connect_timeout=self._config.connect_timeout,
+            read_timeout=self._config.read_timeout,
+            charset=self._config.charset,
+            token_provider=self._token_provider,
+        )
 
     def _service_check_tags(self, server=None):
         # type: (Optional[str]) -> List[str]
@@ -530,16 +521,13 @@ class MySql(DatabaseCheck):
     @contextmanager
     def _connect(self):
         service_check_tags = self._service_check_tags()
-        db = None
         try:
-            connect_args = self._get_connection_args()
-            db = connect_with_session_variables(**connect_args)
-            self.log.debug("Connected to MySQL")
-            self.service_check_tags = list(set(service_check_tags))
-            self.service_check(
-                self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.reported_hostname
-            )
-            yield db
+            with self._connection_manager.get_connection("main") as db:
+                self.service_check_tags = list(set(service_check_tags))
+                self.service_check(
+                    self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags, hostname=self.reported_hostname
+                )
+                yield db
         except pymysql.err.OperationalError as e:
             self.service_check(
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
@@ -557,9 +545,6 @@ class MySql(DatabaseCheck):
                 self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, hostname=self.reported_hostname
             )
             raise
-        finally:
-            if db:
-                db.close()
 
     def _collect_metrics(self, db, tags):
         # Get aggregate of all VARS we want to collect
