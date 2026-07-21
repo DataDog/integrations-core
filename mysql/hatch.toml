@@ -42,6 +42,8 @@ version = [
   "10.6",  # EOL 06 July 2026 (LTS version)
   "10.11", # EOL 16 Feb 2028 (LTS version)
   "11.4",  # EOL 29 May 2029 (LTS version)
+  "12.0",  # newest major on the bitnamilegacy image
+  "13",    # RC-only; official mariadb image, pinned to 13.0-rc (see overrides)
 ]
 
 [[envs.default.matrix]]
@@ -56,6 +58,10 @@ version = [
 matrix.version.env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.0.18", "8.0.36"] },
   { key = "COMPOSE_FILE", value = "mysql8.yaml", if = ["8.4.0"] },
+  # MariaDB 13 is RC-only and not on the bitnamilegacy image: use the official
+  # `mariadb` image (routed in conftest) with an explicit RC tag + its own compose.
+  { key = "COMPOSE_FILE", value = "mariadb-official.yaml", if = ["13"] },
+  { key = "MYSQL_IMAGE_TAG", value = "13.0-rc", if = ["13"] },
 ]
 name."8.0-group".env-vars = [
   { key = "COMPOSE_FILE", value = "mysql8-group.yaml" },
