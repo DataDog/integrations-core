@@ -1271,39 +1271,36 @@ async def test_header_shows_running_badge_during_run():
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
-    running_states: list[bool] = []
-    badge_states: list[str] = []
+    started = asyncio.Event()
+    release = asyncio.Event()
 
-    class _SlowDemo:
+    class _BlockedDemo:
         failed_phase = None
 
-        def __init__(self, cb: Any) -> None:
-            self._cb = cb
-
         async def run_async(self) -> None:
-            await asyncio.sleep(0.2)
+            started.set()
+            await release.wait()
 
     flow = _make_flow()
     app = _app(flow)
     async with app.run_test() as pilot:
         await pilot.pause()
-        screen = ExecutionScreen(flow, orchestrator_builder=lambda cb: _SlowDemo(cb))
+        screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _BlockedDemo())
         await app.push_screen(screen)
-        await pilot.pause(0.05)
+        await asyncio.wait_for(started.wait(), timeout=5)
+        await pilot.pause()
+
         from ddev.cli.meta.ai.tui.widgets.header import TogoHeader
 
         header = screen.query_one(TogoHeader)
         badge = header.query_one("#header-right", Static)
-        running_states.append(header.running)
-        badge_states.append(str(badge.content))
-        await pilot.pause(0.3)
-        running_states.append(header.running)
-        badge_states.append(str(badge.content))
+        assert str(badge.content) in {"● running", "○ running"}
 
-    assert True in running_states
-    assert running_states[-1] is False
-    assert any(state in {"● running", "○ running"} for state in badge_states)
-    assert badge_states[-1] == ""
+        release.set()
+        await screen.workers.wait_for_complete()
+        await pilot.pause()
+
+        assert str(badge.content) == ""
 
 
 # ---------------------------------------------------------------------------

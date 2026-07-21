@@ -616,8 +616,18 @@ ModalScreen {
     overflow-y: auto;
 }
 
-#launch-fields > Label.eyebrow {
+.launch-flow-input {
+    height: auto;
+    border: round $border;
+    border-title-color: $secondary;
+    border-title-align: left;
+    background: $panel;
+    padding: 0 1;
     margin-top: 1;
+}
+
+.launch-value-editor {
+    height: auto;
 }
 
 .badge {
