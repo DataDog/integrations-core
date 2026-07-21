@@ -83,13 +83,21 @@ class ProduceMessage(BaseModel):
     cluster: str = Field(..., description='Kafka cluster identifier', examples=['prod-kafka-1'])
     headers: Optional[MappingProxyType[str, Any]] = Field(
         None,
-        description='Message headers (metadata). Values must be base64-encoded.\nExample: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="\n',
+        description='Message headers (metadata). Values must be base64-encoded.\nExample: `source: "datadog-agent"` -> base64 -> `"ZGF0YWRvZy1hZ2VudA=="`\n',
         examples=[{'source': 'ZGF0YWRvZy1hZ2VudA=='}],
     )
     key: Optional[str] = Field(
         None,
-        description='Message key (optional), base64-encoded.\nIf not provided, the message will have a null key in Kafka.\nExample: "12345" -> base64 -> "MTIzNDU="\n',
+        description='Message key (optional). Base64-encoded, unless `key_uses_schema_registry` is set,\nin which case it\'s JSON text matching the schema registered for the subject.\nIf not provided, the message will have a null key in Kafka.\nExample (base64): `"12345"` -> base64 -> `"MTIzNDU="`\n',
         examples=['MTIzNDU='],
+    )
+    key_schema_subject: Optional[str] = Field(
+        None,
+        description='Schema Registry subject to use for the key instead of the default `<topic>-key`\n(Confluent TopicNameStrategy). Set this when the registry uses a different naming\nstrategy, such as RecordNameStrategy or TopicRecordNameStrategy. Ignored when\n`key_uses_schema_registry` is false.\n',
+    )
+    key_uses_schema_registry: Optional[bool] = Field(
+        False,
+        description="Whether to fetch the key's schema from the Schema Registry and frame the serialized\nkey with the Confluent Schema Registry wire format. The schema used is always the\nlatest version registered for the `<topic>-key` subject, unless `key_schema_subject`\nis set.\n",
     )
     partition: Optional[int] = Field(
         -1,
@@ -99,8 +107,16 @@ class ProduceMessage(BaseModel):
     topic: str = Field(..., description='Topic to produce to', examples=['test-topic'])
     value: str = Field(
         ...,
-        description='Message value, base64-encoded.\nExample: \'{"order_id": "12345"}\' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"\n',
+        description='Message value. Base64-encoded, unless `value_uses_schema_registry` is set,\nin which case it\'s JSON text matching the schema registered for the subject.\nAvro fields of type `bytes` or `fixed` aren\'t supported this way, since JSON\nhas no native binary type.\nExample (base64): `{"order_id": "12345"}` -> base64 -> `"eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"`\n',
         examples=['eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9'],
+    )
+    value_schema_subject: Optional[str] = Field(
+        None,
+        description='Schema Registry subject to use for the value instead of the default `<topic>-value`\n(Confluent TopicNameStrategy). Set this when the registry uses a different naming\nstrategy, such as RecordNameStrategy or TopicRecordNameStrategy. Ignored when\n`value_uses_schema_registry` is false.\n',
+    )
+    value_uses_schema_registry: Optional[bool] = Field(
+        False,
+        description="Whether to fetch the value's schema from the Schema Registry and frame the serialized\nvalue with the Confluent Schema Registry wire format. The schema used is always the\nlatest version registered for the `<topic>-value` subject, unless `value_schema_subject`\nis set.\n",
     )
 
 

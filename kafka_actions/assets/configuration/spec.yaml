@@ -577,9 +577,12 @@ files:
     # ========================================================================
     - name: produce_message
       description: |
-        Configuration for producing a message to a Kafka topic.
-        All values (key, value, headers) must be base64-encoded to ensure
-        safe transmission via YAML and support for binary data.
+        Configuration for producing a message to a Kafka topic. Headers are always
+        base64-encoded. Key and value are base64-encoded too, unless
+        `value_uses_schema_registry` or `key_uses_schema_registry` is set, in which
+        case that side is JSON text serialized against the latest schema registered
+        for the topic's subject and framed with the Confluent Schema Registry wire
+        format (Avro, Protobuf, or JSON, whichever the registry reports).
       value:
         type: object
         required:
@@ -606,15 +609,19 @@ files:
         - name: key
           type: string
           description: |
-            Message key (optional), base64-encoded.
+            Message key (optional). Base64-encoded, unless `key_uses_schema_registry` is set,
+            in which case it's JSON text matching the schema registered for the subject.
             If not provided, the message will have a null key in Kafka.
-            Example: "12345" -> base64 -> "MTIzNDU="
+            Example (base64): `"12345"` -> base64 -> `"MTIzNDU="`
           example: "MTIzNDU="
         - name: value
           type: string
           description: |
-            Message value, base64-encoded.
-            Example: '{"order_id": "12345"}' -> base64 -> "eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"
+            Message value. Base64-encoded, unless `value_uses_schema_registry` is set,
+            in which case it's JSON text matching the schema registered for the subject.
+            Avro fields of type `bytes` or `fixed` aren't supported this way, since JSON
+            has no native binary type.
+            Example (base64): `{"order_id": "12345"}` -> base64 -> `"eyJvcmRlcl9pZCI6ICIxMjM0NSJ9"`
           example: "eyJvcmRlcl9pZCI6ICIxMjM0NSIsICJzdGF0dXMiOiAicGVuZGluZyJ9"
         - name: partition
           type: integer
@@ -625,9 +632,39 @@ files:
           type: object
           description: |
             Message headers (metadata). Values must be base64-encoded.
-            Example: source: "datadog-agent" -> base64 -> "ZGF0YWRvZy1hZ2VudA=="
+            Example: `source: "datadog-agent"` -> base64 -> `"ZGF0YWRvZy1hZ2VudA=="`
           example:
             source: "ZGF0YWRvZy1hZ2VudA=="
+        - name: value_uses_schema_registry
+          type: boolean
+          description: |
+            Whether to fetch the value's schema from the Schema Registry and frame the serialized
+            value with the Confluent Schema Registry wire format. The schema used is always the
+            latest version registered for the `<topic>-value` subject, unless `value_schema_subject`
+            is set.
+          default: false
+        - name: value_schema_subject
+          type: string
+          description: |
+            Schema Registry subject to use for the value instead of the default `<topic>-value`
+            (Confluent TopicNameStrategy). Set this when the registry uses a different naming
+            strategy, such as RecordNameStrategy or TopicRecordNameStrategy. Ignored when
+            `value_uses_schema_registry` is false.
+        - name: key_uses_schema_registry
+          type: boolean
+          description: |
+            Whether to fetch the key's schema from the Schema Registry and frame the serialized
+            key with the Confluent Schema Registry wire format. The schema used is always the
+            latest version registered for the `<topic>-key` subject, unless `key_schema_subject`
+            is set.
+          default: false
+        - name: key_schema_subject
+          type: string
+          description: |
+            Schema Registry subject to use for the key instead of the default `<topic>-key`
+            (Confluent TopicNameStrategy). Set this when the registry uses a different naming
+            strategy, such as RecordNameStrategy or TopicRecordNameStrategy. Ignored when
+            `key_uses_schema_registry` is false.
       fleet_configurable: false
     
     # ========================================================================
