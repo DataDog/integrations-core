@@ -1085,9 +1085,7 @@ VM_INVALID_GATEWAY_PROPERTIES_EX = mock.MagicMock(
 )
 
 
-# Tag associations returned by the REST mock. Object IDs must match the moIds of the
-# SOAP inventory the consuming test drives: the historical fixtures use vm1/host1/ds1,
-# the realtime fixtures use VM4-4-1/10.0.0.104-1/NFS-Share-1.
+# REST mock tag associations; object IDs must match the moIds of the SOAP inventory each consuming test drives.
 HISTORICAL_TAG_ASSOCIATIONS = [
     {"object_id": {"id": "vm1", "type": "VirtualMachine"}, "tag_ids": ["tag_id_1", "tag_id_2"]},
     {"object_id": {"id": "host1", "type": "HostSystem"}, "tag_ids": ["tag_id_2"]},
