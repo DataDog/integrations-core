@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from unittest import mock
+
 import pytest
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -238,6 +240,8 @@ def test_row_key():
     assert key1 != key3
     # Same inputs should produce same key
     assert key1 == _row_key(row1)
+    # Same query on different nodes should produce different keys
+    assert _row_key({**row1, 'server_node': 'node-1'}) != _row_key({**row1, 'server_node': 'node-2'})
 
 
 def test_rows_to_fqt_events(check_with_dbm):
@@ -512,127 +516,68 @@ def test_statements_query_format():
     assert "ProfileEvents['OSCPUWaitMicroseconds']" in STATEMENTS_QUERY
 
 
-def test_merge_rows_across_nodes_single_node():
-    """When a query only appears on one node, it should pass through unchanged."""
-    from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
-
+def test_group_rows_by_node():
+    """Rows are grouped by their server_node value."""
     rows = [
-        {
-            'normalized_query_hash': 'hash1',
-            'query': 'SELECT 1',
-            'count': 10,
-            'total_time': 100.0,
-            'mean_time': 10.0,
-            'read_rows': 100,
-            'read_bytes': 1000,
-            'written_rows': 0,
-            'written_bytes': 0,
-            'result_rows': 10,
-            'result_bytes': 500,
-            'memory_usage': 5000,
-            'peak_memory_usage': 8000,
-            'cpu_us': 80000,
-            'cpu_wait_us': 8000,
-        }
+        {'server_node': 'node-1', 'normalized_query_hash': 'hash1'},
+        {'server_node': 'node-2', 'normalized_query_hash': 'hash1'},
+        {'server_node': 'node-1', 'normalized_query_hash': 'hash2'},
     ]
 
-    result = ClickhouseStatementMetrics._merge_rows_across_nodes(rows)
-    assert len(result) == 1
-    assert result[0]['count'] == 10
-    assert result[0]['total_time'] == 100.0
-    assert result[0]['cpu_us'] == 80000
-    assert result[0]['cpu_wait_us'] == 8000
+    groups = ClickhouseStatementMetrics._group_rows_by_node(rows)
+    assert set(groups.keys()) == {'node-1', 'node-2'}
+    assert len(groups['node-1']) == 2
+    assert len(groups['node-2']) == 1
 
 
-def test_merge_rows_across_nodes_sums_counts():
-    """Summable metrics should be added across nodes."""
-    from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
+def test_group_rows_by_node_missing_node():
+    """Rows without a server_node fall into the empty-string group."""
+    rows = [{'normalized_query_hash': 'hash1'}, {'server_node': '', 'normalized_query_hash': 'hash2'}]
 
-    rows = [
-        {
-            'normalized_query_hash': 'hash1',
-            'query': 'SELECT 1',
-            'count': 100,
-            'total_time': 500.0,
-            'mean_time': 5.0,
-            'read_rows': 1000,
-            'read_bytes': 10000,
-            'written_rows': 0,
-            'written_bytes': 0,
-            'result_rows': 100,
-            'result_bytes': 5000,
-            'memory_usage': 50000,
-            'peak_memory_usage': 80000,
-            'cpu_us': 500000,
-            'cpu_wait_us': 50000,
-        },
-        {
-            'normalized_query_hash': 'hash1',
-            'query': 'SELECT 1',
-            'count': 50,
-            'total_time': 300.0,
-            'mean_time': 6.0,
-            'read_rows': 500,
-            'read_bytes': 5000,
-            'written_rows': 10,
-            'written_bytes': 100,
-            'result_rows': 50,
-            'result_bytes': 2500,
-            'memory_usage': 30000,
-            'peak_memory_usage': 90000,
-            'cpu_us': 300000,
-            'cpu_wait_us': 30000,
-        },
-    ]
-
-    result = ClickhouseStatementMetrics._merge_rows_across_nodes(rows)
-    assert len(result) == 1
-
-    merged = result[0]
-    assert merged['count'] == 150
-    assert merged['total_time'] == 800.0
-    assert merged['read_rows'] == 1500
-    assert merged['read_bytes'] == 15000
-    assert merged['written_rows'] == 10
-    assert merged['written_bytes'] == 100
-    assert merged['result_rows'] == 150
-    assert merged['result_bytes'] == 7500
-    assert merged['memory_usage'] == 80000
-    assert merged['peak_memory_usage'] == 90000
-    assert merged['cpu_us'] == 800000
-    assert merged['cpu_wait_us'] == 80000
-    assert merged['mean_time'] == 800.0 / 150
+    groups = ClickhouseStatementMetrics._group_rows_by_node(rows)
+    assert set(groups.keys()) == {''}
+    assert len(groups['']) == 2
 
 
-def test_merge_rows_across_nodes_different_queries():
-    """Rows with different query hashes should not be merged."""
-    from datadog_checks.clickhouse.statements import ClickhouseStatementMetrics
+def test_collect_and_submit_emits_one_payload_per_node(check_with_dbm):
+    """Each node gets its own query-metrics payload tagged with clickhouse_node."""
+    metrics = check_with_dbm.statement_metrics
+    metrics._tags_no_db = ['test:clickhouse']
 
-    base = {
-        'query': 'q',
-        'count': 10,
-        'total_time': 100.0,
-        'mean_time': 10.0,
-        'read_rows': 0,
-        'read_bytes': 0,
-        'written_rows': 0,
-        'written_bytes': 0,
-        'result_rows': 0,
-        'result_bytes': 0,
-        'memory_usage': 0,
-        'peak_memory_usage': 0,
-        'cpu_us': 80000,
-        'cpu_wait_us': 8000,
+    base_row = {
+        'query': 'SELECT 1',
+        'query_signature': 'sig1',
+        'normalized_query_hash': 'hash1',
+        'user': 'default',
+        'databases': 'db',
+        'dd_tables': [],
+        'dd_commands': [],
+        'dd_comments': [],
+        'count': 5,
     }
-
     rows = [
-        {**base, 'normalized_query_hash': 'hash1'},
-        {**base, 'normalized_query_hash': 'hash2'},
-        {**base, 'normalized_query_hash': 'hash3'},
+        {**base_row, 'server_node': 'node-1'},
+        {**base_row, 'server_node': 'node-2'},
     ]
 
-    result = ClickhouseStatementMetrics._merge_rows_across_nodes(rows)
-    assert len(result) == 3
+    submitted = []
+    with (
+        mock.patch.object(metrics, '_collect_metrics_rows', return_value=rows),
+        mock.patch.object(metrics._check, 'database_monitoring_query_metrics', side_effect=submitted.append),
+        mock.patch.object(metrics._check, 'database_monitoring_query_sample'),
+    ):
+        metrics._collect_and_submit()
+
+    payloads = [json.loads(p) for p in submitted]
+    node_tags = set()
+    for payload in payloads:
+        matches = [t for t in payload['tags'] if t.startswith('clickhouse_node:')]
+        assert len(matches) == 1
+        node_tags.add(matches[0])
+        # The base instance tags are preserved on every per-node payload
+        assert 'test:clickhouse' in payload['tags']
+
+    assert node_tags == {'clickhouse_node:node-1', 'clickhouse_node:node-2'}
 
 
 def test_metrics_row_with_empty_values(check_with_dbm):
