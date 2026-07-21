@@ -437,6 +437,65 @@ async def test_phase_finish_exception_is_swallowed() -> None:
 
 
 # ---------------------------------------------------------------------------
+# on_phase_error and on_run_error
+# ---------------------------------------------------------------------------
+
+
+async def test_phase_error_registered_and_fired() -> None:
+    cb = CallbackSet()
+    received: list[tuple[str, BaseException]] = []
+    error = RuntimeError("boom")
+
+    @cb.on_phase_error
+    async def handler(phase_id: str, error: BaseException) -> None:
+        received.append((phase_id, error))
+
+    await cb.fire_phase_error("inspect", error)
+
+    assert received == [("inspect", error)]
+
+
+async def test_run_error_registered_and_fired() -> None:
+    cb = CallbackSet()
+    received: list[bool] = []
+
+    @cb.on_run_error
+    async def handler() -> None:
+        received.append(True)
+
+    await cb.fire_run_error()
+
+    assert received == [True]
+
+
+async def test_error_callback_exceptions_are_swallowed() -> None:
+    cb = CallbackSet()
+    fired: list[str] = []
+
+    @cb.on_phase_error
+    async def bad_phase(phase_id: str, error: BaseException) -> None:
+        raise RuntimeError("callback failed")
+
+    @cb.on_phase_error
+    async def good_phase(phase_id: str, error: BaseException) -> None:
+        fired.append(f"phase:{phase_id}")
+
+    @cb.on_run_error
+    async def bad_run() -> None:
+        raise RuntimeError("callback failed")
+
+    @cb.on_run_error
+    async def good_run() -> None:
+        fired.append("run")
+
+    error = RuntimeError("boom")
+    await cb.fire_phase_error("inspect", error)
+    await cb.fire_run_error()
+
+    assert fired == ["phase:inspect", "run"]
+
+
+# ---------------------------------------------------------------------------
 # on_before_agent_send
 # ---------------------------------------------------------------------------
 
@@ -585,6 +644,8 @@ async def test_callbacks_empty_is_noop(
     await callbacks.fire_before_agent_send(scope, "p", 1)
     await callbacks.fire_phase_start("p")
     await callbacks.fire_phase_finish("p")
+    await callbacks.fire_phase_error("p", RuntimeError("boom"))
+    await callbacks.fire_run_error()
     await callbacks.fire_before_goal_check("p", "t", 1)
     await callbacks.fire_after_goal_check("p", "t", 1, True, "")
 

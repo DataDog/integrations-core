@@ -191,6 +191,8 @@ class _FakeOrchestrator:
             error = RuntimeError(f"Simulated failure in phase {phase_id!r}")
             await self._callbacks.fire_agent_error(scope, error)
             self.failed_phase = phase_id
+            await self._callbacks.fire_phase_error(phase_id, error)
+            await self._callbacks.fire_run_error()
             raise error
 
         # Goal validation for each task
@@ -620,6 +622,22 @@ def test_interleaved_phase_error_only_mutates_scoped_phase() -> None:
     assert not any("phase A failed" in str(entry) for entry in screen._phase_logs["phase_2"])
 
 
+def test_phase_error_is_written_in_full_to_failed_phase_log() -> None:
+    from ddev.cli.meta.ai.tui.messages import PhaseErrored
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    screen = ExecutionScreen(_make_flow())
+    error = RuntimeError("first line\nfull validation detail\nhttps://errors.example.test/noise")
+
+    screen.on_phase_errored(PhaseErrored("phase_1", error))
+
+    assert screen._phase_statuses["phase_1"] is RunStatus.FAILED
+    rendered = str(screen._phase_logs["phase_1"][-1])
+    assert "first line" in rendered
+    assert "full validation detail" in rendered
+    assert "https://errors.example.test/noise" in rendered
+
+
 def test_scoped_goal_event_only_mutates_identified_phase() -> None:
     """A goal verdict for phase A cannot update the same-named task in phase B."""
     from ddev.cli.meta.ai.tui.messages import AfterGoalCheck, BeforeGoalCheck, PhaseStarted
@@ -715,7 +733,7 @@ async def test_execution_phase_activation_opens_config_for_pending_phase():
         assert isinstance(pilot.app.screen, PhaseConfigScreen)
 
 
-@pytest.mark.parametrize("status", [RunStatus.RUNNING, RunStatus.DONE, RunStatus.FAILED])
+@pytest.mark.parametrize("status", [RunStatus.RUNNING, RunStatus.DONE])
 async def test_execution_phase_activation_opens_log_for_started_phase(status: RunStatus):
     """Started phase activation opens a full-screen phase log."""
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
@@ -736,6 +754,68 @@ async def test_execution_phase_activation_opens_log_for_started_phase(status: Ru
         await pilot.pause()
         assert isinstance(pilot.app.screen, PhaseLogScreen)
         assert pilot.app.screen.phase_id == "phase_1"
+
+
+async def test_execution_failed_phase_activation_opens_error_modal() -> None:
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import PhaseErrored
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.main import MainScreen
+    from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        assert isinstance(pilot.app.screen, MainScreen)
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+        error = RuntimeError("first line\nfull validation detail")
+        screen.on_phase_errored(PhaseErrored("phase_1", error))
+
+        screen.on_phase_selected(PhaseSelected("phase_1"))
+        await pilot.pause()
+
+        assert isinstance(pilot.app.screen, PhaseErrorModal)
+        assert pilot.app.screen.phase_id == "phase_1"
+        rendered = str(pilot.app.screen.query_one("#phase-error-message", Static).render())
+        assert "RuntimeError: first line" in rendered
+        assert "full validation detail" in rendered
+
+        await pilot.press("escape")
+        await pilot.pause()
+        assert pilot.app.screen is screen
+
+
+async def test_execution_cancelled_phase_falls_back_to_log() -> None:
+    import asyncio
+
+    from ddev.ai.agent.scope import AgentRole, AgentScope
+    from ddev.cli.meta.ai.tui.messages import AgentErrored
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+    from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+        scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
+        screen.on_agent_errored(AgentErrored(scope, asyncio.CancelledError()))
+
+        assert screen._phase_statuses["phase_1"] is RunStatus.FAILED
+        assert "phase_1" not in screen._phase_errors
+
+        screen.on_phase_selected(PhaseSelected("phase_1"))
+        await pilot.pause()
+
+        assert isinstance(pilot.app.screen, PhaseLogScreen)
 
 
 async def test_phase_log_screen_ctrl_c_pushes_config_screen():
@@ -1338,8 +1418,10 @@ async def test_orchestrator_build_failure_is_visible_and_screen_stays_stable() -
         assert app.is_running
 
 
-async def test_orchestrator_exception_only_marks_reported_failed_phase() -> None:
-    """A concurrent sibling stays running when the orchestrator identifies the failed phase."""
+async def test_phase_error_callback_only_marks_reported_failed_phase() -> None:
+    """A phase callback fails its phase without attributing the error to a concurrent sibling."""
+    from textual.widgets import Static
+
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
 
     class ConcurrentFailure:
@@ -1351,7 +1433,10 @@ async def test_orchestrator_exception_only_marks_reported_failed_phase() -> None
         async def run_async(self) -> None:
             await self.callbacks.fire_phase_start("phase_1")
             await self.callbacks.fire_phase_start("phase_2")
-            raise RuntimeError("phase 1 crashed")
+            error = RuntimeError("phase 1 crashed")
+            await self.callbacks.fire_phase_error("phase_1", error)
+            await self.callbacks.fire_run_error()
+            raise error
 
     flow = _make_flow()
     app = _app(flow)
@@ -1365,6 +1450,7 @@ async def test_orchestrator_exception_only_marks_reported_failed_phase() -> None
         assert screen._task_statuses[("phase_1", "task_one")] is RunStatus.FAILED
         assert screen._phase_statuses["phase_2"] is RunStatus.RUNNING
         assert screen._task_statuses[("phase_2", "task_two")] is RunStatus.PENDING
+        assert "Run failed in phase_1: phase 1 crashed" in str(screen.query_one("#execution-error", Static).render())
 
 
 async def test_orchestrator_exception_without_failed_phase_is_not_attributed() -> None:
@@ -1397,6 +1483,85 @@ async def test_orchestrator_exception_without_failed_phase_is_not_attributed() -
         assert screen._task_statuses[("phase_1", "task_one")] is RunStatus.PENDING
         assert screen._task_statuses[("phase_2", "task_two")] is RunStatus.PENDING
         assert "scheduler crashed" in str(screen.query_one("#execution-error", Static).render())
+
+
+async def test_run_error_banner_is_compact_and_points_to_phase_log() -> None:
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import PhaseErrored, RunErrored
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.on_phase_errored(
+            PhaseErrored(
+                "phase_1",
+                RuntimeError("invalid input\nfull validation detail\nhttps://errors.example"),
+            )
+        )
+        screen.on_run_errored(RunErrored())
+
+        banner = str(screen.query_one("#execution-error", Static).render())
+        assert "Run failed in phase_1: invalid input" in banner
+        assert "Select phase_1 to view the full error." in banner
+        assert "full validation detail" not in banner
+        assert "https://errors.example" not in banner
+
+
+async def test_run_error_banner_aggregates_parallel_phase_errors() -> None:
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import PhaseErrored, RunErrored
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.on_phase_errored(PhaseErrored("phase_1", RuntimeError("alpha failed\nalpha details")))
+        screen.on_phase_errored(PhaseErrored("phase_2", RuntimeError("beta failed\nbeta details")))
+        screen.on_run_errored(RunErrored())
+
+        banner = str(screen.query_one("#execution-error", Static).render())
+        assert "Run failed — 2 phases failed" in banner
+        assert "phase_1: alpha failed" in banner
+        assert "phase_2: beta failed" in banner
+        assert "alpha details" not in banner
+        assert "beta details" not in banner
+
+
+async def test_late_parallel_phase_error_updates_existing_banner() -> None:
+    from textual.widgets import Static
+
+    from ddev.cli.meta.ai.tui.messages import PhaseErrored, RunErrored
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = ExecutionScreen(flow, orchestrator_builder=_make_builder(phases=[]))
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        screen.on_phase_errored(PhaseErrored("phase_1", RuntimeError("alpha failed")))
+        screen.on_run_errored(RunErrored())
+        screen.on_phase_errored(PhaseErrored("phase_2", RuntimeError("beta failed")))
+
+        banner = str(screen.query_one("#execution-error", Static).render())
+        assert "Run failed — 2 phases failed" in banner
+        assert "phase_1: alpha failed" in banner
+        assert "phase_2: beta failed" in banner
 
 
 # ---------------------------------------------------------------------------

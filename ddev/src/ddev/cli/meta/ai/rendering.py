@@ -294,3 +294,8 @@ def render_agent_finish_line(scope: AgentScope, result: ReActResult) -> Text:
 def render_agent_error_line(scope: AgentScope, error: BaseException) -> Text:
     """Build the ``✗ <owner_id> — ErrorType: message`` error line."""
     return Text(f"✗ {scope.owner_id} — {describe_agent_error(error)}", style=ERROR)
+
+
+def render_phase_error_line(phase_id: str, error: BaseException) -> Text:
+    """Build the full error recorded when a phase terminates."""
+    return Text(f"✗ {phase_id} failed — {type(error).__name__}: {error}", style=ERROR)

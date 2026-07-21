@@ -11,6 +11,7 @@ import pytest
 
 from ddev.ai.agent.anthropic_provider import DEFAULT_MODEL
 from ddev.ai.agent.registry import AgentProviderRegistry
+from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import ConfigError
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
@@ -20,7 +21,7 @@ from ddev.ai.phases.registry import PhaseRegistry
 from ddev.ai.runtime.checkpoints import CheckpointManager, CheckpointStatus
 from ddev.ai.runtime.orchestrator import PhaseOrchestrator
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
-from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.event_bus.exceptions import FatalProcessingError, HookName, OrchestratorHookError
 
 from .helpers import make_checkpoint
 
@@ -121,6 +122,41 @@ async def test_on_message_received_ignores_other_messages(core_dir, make_orchest
     orchestrator, _, _ = make_orchestrator(core_dir)
     await orchestrator.on_message_received(PhaseTrigger(id="start", phase_id=None))
     await orchestrator.on_message_received(PhaseTrigger(id="f1", phase_id="p1"))
+
+
+async def test_on_message_received_fires_run_error_callback(core_dir, make_orchestrator):
+    callback_set = CallbackSet()
+    received: list[bool] = []
+
+    @callback_set.on_run_error
+    async def handler() -> None:
+        received.append(True)
+
+    orchestrator, _, _ = make_orchestrator(core_dir, callbacks=Callbacks([callback_set]))
+    msg = PhaseFailedMessage(id="f1", phase_id="p1", error="something broke")
+
+    with pytest.raises(FatalProcessingError):
+        await orchestrator.on_message_received(msg)
+
+    assert received == [True]
+
+
+async def test_on_error_does_not_fire_phase_failure_callback(core_dir, make_orchestrator):
+    callback_set = CallbackSet()
+    received: list[bool] = []
+
+    @callback_set.on_run_error
+    async def handler() -> None:
+        received.append(True)
+
+    orchestrator, _, _ = make_orchestrator(core_dir, callbacks=Callbacks([callback_set]))
+    original_error = RuntimeError("scheduler broke")
+    wrapped = OrchestratorHookError(HookName.ON_INITIALIZE, original_error)
+
+    with pytest.raises(FatalProcessingError):
+        await orchestrator.on_error(wrapped)
+
+    assert received == []
 
 
 # ---------------------------------------------------------------------------

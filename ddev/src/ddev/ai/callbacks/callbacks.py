@@ -88,6 +88,18 @@ class OnPhaseFinishCallback(Protocol):
     async def __call__(self, phase_id: str) -> None: ...
 
 
+class OnPhaseErrorCallback(Protocol):
+    """Called once when a phase terminates with an error."""
+
+    async def __call__(self, phase_id: str, error: BaseException) -> None: ...
+
+
+class OnRunErrorCallback(Protocol):
+    """Called when the orchestrator stops a run because a phase failed."""
+
+    async def __call__(self) -> None: ...
+
+
 class OnBeforeGoalCheckCallback(Protocol):
     """Called immediately before each reviewer agent run for a task with a goal."""
 
@@ -133,6 +145,8 @@ class CallbackSet:
         self._on_agent_error: list[OnAgentErrorCallback] = []
         self._on_phase_start: list[OnPhaseStartCallback] = []
         self._on_phase_finish: list[OnPhaseFinishCallback] = []
+        self._on_phase_error: list[OnPhaseErrorCallback] = []
+        self._on_run_error: list[OnRunErrorCallback] = []
         self._on_before_goal_check: list[OnBeforeGoalCheckCallback] = []
         self._on_after_goal_check: list[OnAfterGoalCheckCallback] = []
 
@@ -220,6 +234,20 @@ class CallbackSet:
     async def fire_phase_finish(self, phase_id: str) -> None:
         await self._fire(self._on_phase_finish, phase_id)
 
+    def on_phase_error(self, func: OnPhaseErrorCallback) -> OnPhaseErrorCallback:
+        self._on_phase_error.append(func)
+        return func
+
+    async def fire_phase_error(self, phase_id: str, error: BaseException) -> None:
+        await self._fire(self._on_phase_error, phase_id, error)
+
+    def on_run_error(self, func: OnRunErrorCallback) -> OnRunErrorCallback:
+        self._on_run_error.append(func)
+        return func
+
+    async def fire_run_error(self) -> None:
+        await self._fire(self._on_run_error)
+
     def on_before_goal_check(self, func: OnBeforeGoalCheckCallback) -> OnBeforeGoalCheckCallback:
         self._on_before_goal_check.append(func)
         return func
@@ -290,6 +318,14 @@ class Callbacks:
     async def fire_phase_finish(self, phase_id: str) -> None:
         for s in self._sets:
             await s.fire_phase_finish(phase_id)
+
+    async def fire_phase_error(self, phase_id: str, error: BaseException) -> None:
+        for s in self._sets:
+            await s.fire_phase_error(phase_id, error)
+
+    async def fire_run_error(self) -> None:
+        for s in self._sets:
+            await s.fire_run_error()
 
     async def fire_before_goal_check(self, phase_id: str, task_name: str, attempt: int) -> None:
         for s in self._sets:

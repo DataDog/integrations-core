@@ -26,8 +26,10 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeCompact,
     BeforeGoalCheck,
     ContextCleared,
+    PhaseErrored,
     PhaseFinished,
     PhaseStarted,
+    RunErrored,
 )
 
 # ---------------------------------------------------------------------------
@@ -74,6 +76,8 @@ class StubOrchestrator:
 
         await self.cb_set.fire_phase_start("phase1")
         await self.cb_set.fire_phase_finish("phase1")
+        await self.cb_set.fire_phase_error("phase1", ValueError("phase boom"))
+        await self.cb_set.fire_run_error()
         await self.cb_set.fire_agent_start(SCOPE, "sys_prompt", ["bash", "python"])
         await self.cb_set.fire_agent_response(SCOPE, _make_response(), 1)
         await self.cb_set.fire_tool_call(SCOPE, tool_call, result, 1)
@@ -139,6 +143,18 @@ async def test_phase_finished_payload(received_from_stub):
     msgs = [m for m in received_from_stub if isinstance(m, PhaseFinished)]
     assert len(msgs) == 1
     assert msgs[0].phase_id == "phase1"
+
+
+async def test_phase_errored_payload(received_from_stub):
+    msgs = [m for m in received_from_stub if isinstance(m, PhaseErrored)]
+    assert len(msgs) == 1
+    assert msgs[0].phase_id == "phase1"
+    assert str(msgs[0].error) == "phase boom"
+
+
+async def test_run_errored_signal(received_from_stub):
+    msgs = [m for m in received_from_stub if isinstance(m, RunErrored)]
+    assert len(msgs) == 1
 
 
 async def test_agent_started_payload(received_from_stub):
@@ -215,7 +231,7 @@ async def test_after_goal_check_payload(received_from_stub):
     assert msgs[0].reason == "looks good"
 
 
-async def test_all_12_messages_delivered(make_togo_app):
+async def test_all_14_messages_delivered(make_togo_app):
     """Every bridge event type delivers exactly one message to the sink."""
     app = make_togo_app([])
     async with app.run_test() as pilot:
@@ -224,7 +240,7 @@ async def test_all_12_messages_delivered(make_togo_app):
         app.run_flow(stub)
         await pilot.pause(0.3)
 
-    assert len(app.received) == 12
+    assert len(app.received) == 14
 
 
 # ---------------------------------------------------------------------------

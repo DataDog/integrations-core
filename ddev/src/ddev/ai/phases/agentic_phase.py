@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, cast
 
 from ddev.ai.agent.scope import AgentRole, AgentScope
@@ -12,7 +11,6 @@ from ddev.ai.config.errors import ConfigError
 from ddev.ai.config.models import AgentConfig, PhaseConfig, TaskConfig
 from ddev.ai.phases.base import FlowContext, Phase, PhaseOutcome
 from ddev.ai.phases.goal import GOAL_TASK_SUFFIX, GoalValidationError, run_goal_loop
-from ddev.ai.phases.messages import PhaseFailedMessage
 from ddev.ai.phases.template import render_inline
 from ddev.ai.react.process import ReActProcess
 from ddev.ai.runtime.checkpoints import (
@@ -22,7 +20,6 @@ from ddev.ai.runtime.checkpoints import (
     FailedCheckpoint,
     GoalValidationRecord,
 )
-from ddev.event_bus.exceptions import MessageProcessingError, ProcessorHookError
 
 if TYPE_CHECKING:
     from ddev.ai.phases.goal import GoalLoopOutcome
@@ -311,28 +308,12 @@ class AgenticPhase(Phase):
             goal_validations=self._goal_attempt_log or None,
         )
 
-    async def on_error(self, error: MessageProcessingError | ProcessorHookError) -> None:
-        try:
-            self._checkpoint_manager.write_phase_checkpoint(
-                self._phase_id,
-                FailedCheckpoint(
-                    started_at=self._started_at.isoformat() if self._started_at else None,
-                    finished_at=datetime.now(UTC).isoformat(),
-                    error=str(error.original_exception),
-                    tokens=CheckpointTokenInfo(
-                        total_input=self._total_input_tokens,
-                        total_output=self._total_output_tokens,
-                    ),
-                    goal_validations=self._goal_attempt_log or None,
-                ),
-            )
-        except Exception:
-            self._logger.exception("Failed to write failure checkpoint for phase %s", self._phase_id)
-        finally:
-            self.submit_message(
-                PhaseFailedMessage(
-                    id=f"{self._phase_id}_failed",
-                    phase_id=self._phase_id,
-                    error=str(error.original_exception),
-                )
-            )
+    def build_failed_checkpoint(self, error: BaseException) -> FailedCheckpoint:
+        """Include partial token and goal progress in a failed checkpoint."""
+        checkpoint = super().build_failed_checkpoint(error)
+        checkpoint.tokens = CheckpointTokenInfo(
+            total_input=self._total_input_tokens,
+            total_output=self._total_output_tokens,
+        )
+        checkpoint.goal_validations = self._goal_attempt_log or None
+        return checkpoint
