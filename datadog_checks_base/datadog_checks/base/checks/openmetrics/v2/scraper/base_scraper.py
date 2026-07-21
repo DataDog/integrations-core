@@ -12,8 +12,6 @@ from math import isinf, isnan
 from typing import List  # noqa: F401
 
 from prometheus_client import Metric
-from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
-from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
@@ -354,42 +352,12 @@ class OpenMetricsScraper:
         if self.raw_line_filter is not None:
             line_streamer = self.filter_connection_lines(line_streamer)
 
-        # Since we determine `self.parse_metric_families` dynamically from the response and that's done as a
-        # side effect inside the `line_streamer` generator, we need to consume the first line in order to
-        # trigger that side effect.
-        try:
-            first_line = next(line_streamer)
-        except StopIteration:
-            # If line_streamer is an empty iterator, next(line_streamer) fails.
+        raw_text = '\n'.join(line_streamer)
+        if not raw_text:
             return
 
-        # Use Go bridge when available (faster native parsing).
-        # Supports both Prometheus text and OpenMetrics formats.
-        _go_parse = getattr(datadog_agent, 'parse_prometheus_metrics', None)
-        use_bridge = _go_parse is not None
-
-        if use_bridge:
-            all_lines = [first_line] + list(line_streamer)
-            raw_text = '\n'.join(all_lines)
-            try:
-                for family_data in json.loads(_go_parse(raw_text, self._content_type)):
-                    metric = _GoMetric(family_data)
-                    self.submit_telemetry_number_of_total_metric_samples(metric)
-
-                    # It is critical that the prefix is removed immediately so that
-                    # all other configuration may reference the trimmed metric name
-                    if self.raw_metric_prefix and metric.name.startswith(self.raw_metric_prefix):
-                        metric.name = metric.name[len(self.raw_metric_prefix) :]
-
-                    yield metric
-                return
-            except Exception as e:
-                self.log.warning('Go Prometheus bridge failed, falling back to Python parser: %s', e)
-                line_streamer = iter(all_lines)
-        else:
-            line_streamer = chain([first_line], line_streamer)
-
-        for metric in self.parse_metric_families(line_streamer):
+        for family_data in json.loads(datadog_agent.parse_prometheus_metrics(raw_text, self._content_type)):
+            metric = _GoMetric(family_data)
             self.submit_telemetry_number_of_total_metric_samples(metric)
 
             # It is critical that the prefix is removed immediately so that
@@ -398,19 +366,6 @@ class OpenMetricsScraper:
                 metric.name = metric.name[len(self.raw_metric_prefix) :]
 
             yield metric
-
-    @property
-    def parse_metric_families(self):
-        media_type = self._content_type.split(';')[0]
-        # Setting `use_latest_spec` forces the use of the OpenMetrics format, otherwise
-        # the format will be chosen based on the media type specified in the response's content-header.
-        # The selection is based on what Prometheus does:
-        # https://github.com/prometheus/prometheus/blob/v2.43.0/model/textparse/interface.go#L83-L90
-        return (
-            parse_openmetrics
-            if self._use_latest_spec or media_type == 'application/openmetrics-text'
-            else parse_prometheus
-        )
 
     def generate_sample_data(self, metric):
         """
