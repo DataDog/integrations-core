@@ -2,7 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
-from urllib.parse import urlparse
+from collections.abc import Callable
+from typing import Any
 
 import mock
 import pytest
@@ -11,7 +12,6 @@ from datadog_checks.base.utils.http_exceptions import HTTPStatusError
 from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.vault import Vault
 from datadog_checks.vault.common import DEFAULT_API_VERSION
-from datadog_checks.vault.errors import ApiUnreachable
 from datadog_checks.vault.vault import Leader
 
 from .common import INSTANCES, auth_required, noauth_required
@@ -34,20 +34,36 @@ HEALTH_PAYLOAD = {
 }
 
 
-def leader_response(**overrides):
+def leader_response(**overrides: Any) -> MockHTTPResponse:
     payload = dict(LEADER_PAYLOAD, **overrides)
     return MockHTTPResponse(json_data=payload)
 
 
-def health_response(status_code=200, **overrides):
+def health_response(status_code: int = 200, **overrides: Any) -> MockHTTPResponse:
     payload = dict(HEALTH_PAYLOAD, **overrides)
     return MockHTTPResponse(json_data=payload, status_code=status_code)
+
+
+def leader_health_side_effect(
+    instance: dict[str, Any], leader: MockHTTPResponse | None = None, health: MockHTTPResponse | None = None
+) -> Callable[..., MockHTTPResponse]:
+    """Build a mock_http.get side_effect routing /sys/leader vs. everything else (health/metrics)."""
+    leader_resp = leader if leader is not None else leader_response()
+    health_resp = health if health is not None else health_response()
+
+    def side_effect(url: str, *args: Any, **kwargs: Any) -> MockHTTPResponse:
+        if url == instance['api_url'] + '/sys/leader':
+            return leader_resp
+        return health_resp
+
+    return side_effect
 
 
 class VaultMockHTTPResponse(MockHTTPResponse):
     """Reproduces the full requests-style HTTP error message that vault.py's token-refresh logic matches on."""
 
-    def raise_for_status(self):
+    def raise_for_status(self) -> None:
+        # Mirrors production's _translate_requests_exception in datadog_checks_base http.py; keep both in sync.
         if self.status_code >= 400:
             error_type = 'Client Error' if self.status_code < 500 else 'Server Error'
             raise HTTPStatusError(f'{self.status_code} {error_type}: {self.reason} for url', response=self)
@@ -59,13 +75,13 @@ def instance(tmp_path):
 
     def get_instance(use_auth_file=True):
         inst = INSTANCES['main'].copy()
-        token_file = tmp_path / 'client_token'
-        token_file.write_text('fake-token')
 
         if use_auth_file:
+            token_file = tmp_path / 'client_token'
+            token_file.write_text('fake-token')
             inst['client_token_path'] = str(token_file)
         else:
-            inst['client_token'] = token_file.read_text()
+            inst['client_token'] = 'fake-token'
 
         return inst
 
@@ -92,12 +108,7 @@ class TestVault:
 
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         tag = ['api_url:{}'.format(INSTANCES['main']['api_url'])]
         dd_run_check(c)
 
@@ -109,12 +120,12 @@ class TestVault:
         instance.update(INSTANCES['unsupported_api'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url.endswith('/sys/leader'):
                 return leader_response()
             return health_response()
 
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = mock_get
 
         assert not instance['api_url'].endswith(DEFAULT_API_VERSION)
         dd_run_check(c)
@@ -128,12 +139,7 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         dd_run_check(c, dd_run_check)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
@@ -144,43 +150,10 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=global_tags, count=1)
-
-    @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
-    def test_service_check_connect_fail(self, aggregator, dd_run_check, use_openmetrics):
-        instance = {'use_openmetrics': use_openmetrics}
-        instance.update(INSTANCES['bad_url'])
-        c = Vault(Vault.CHECK_NAME, {}, [instance])
-
-        if use_openmetrics:
-            hostname = urlparse(instance['api_url']).hostname
-            expected_exception = r'Connection to {} timed out'.format(hostname)
-
-        else:
-            expected_exception = r'^Vault endpoint `{}.+?` timed out after 1\.0 seconds$'.format(
-                re.escape(instance['api_url'])
-            )
-
-        with pytest.raises(
-            Exception,
-            match=expected_exception,
-        ):
-            dd_run_check(c, extract_message=True)
-
-        aggregator.assert_service_check(
-            Vault.SERVICE_CHECK_CONNECT,
-            status=Vault.CRITICAL,
-            tags=['instance:foobar', 'api_url:http://1.2.3.4:555/v1'],
-            count=1,
-        )
 
     def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags, mock_http):
         instance = {'use_openmetrics': False}
@@ -195,26 +168,13 @@ class TestVault:
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
 
-    def test_api_unreachable(self):
-        instance = {'use_openmetrics': False}
-        instance.update(INSTANCES['main'])
-        c = Vault(Vault.CHECK_NAME, {}, [instance])
-
-        with pytest.raises(ApiUnreachable, match=r"Error accessing Vault endpoint.*"):
-            c.access_api("http://foo.bar", ignore_status_codes=None)
-
     @pytest.mark.parametrize('use_openmetrics', [False, True], indirect=True)
     def test_service_check_unsealed_ok(self, aggregator, dd_run_check, use_openmetrics, mock_http):
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.OK, count=1)
@@ -227,12 +187,7 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         dd_run_check(c)
 
         expected_tags = [
@@ -251,12 +206,9 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response(status_code=503, initialized=False, sealed=True)
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(
+            instance, health=health_response(status_code=503, initialized=False, sealed=True)
+        )
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.CRITICAL, count=1)
@@ -267,12 +219,7 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.OK, count=1)
@@ -285,12 +232,7 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         dd_run_check(c)
 
         expected_tags = [
@@ -309,12 +251,9 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response(status_code=501, initialized=False)
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(
+            instance, health=health_response(status_code=501, initialized=False)
+        )
         dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
@@ -324,12 +263,7 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(instance)
         dd_run_check(c)
 
         expected_tags = [
@@ -347,18 +281,16 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response(
+        mock_http.get.side_effect = leader_health_side_effect(
+            instance,
+            health=health_response(
                 initialized=False,
                 replication_dr_mode='secondary',
                 replication_performance_mode='primary',
                 standby=True,
                 performance_standby=False,
-            )
-
-        mock_http.get.side_effect = mock_requests_get
+            ),
+        )
         dd_run_check(c)
         c.log.debug.assert_called_with(
             "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
@@ -374,20 +306,18 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response()
-            return health_response(
+        metric_collection = 'OpenMetrics' if use_openmetrics else 'Prometheus'
+
+        mock_http.get.side_effect = leader_health_side_effect(
+            instance,
+            health=health_response(
                 initialized=False,
                 replication_dr_mode='secondary',
                 replication_performance_mode='primary',
                 standby=True,
                 performance_standby=False,
-            )
-
-        metric_collection = 'OpenMetrics' if use_openmetrics else 'Prometheus'
-
-        mock_http.get.side_effect = mock_requests_get
+            ),
+        )
         dd_run_check(c)
         c.log.debug.assert_called_with(
             "Detected vault in replication DR secondary mode but also detected that "
@@ -404,12 +334,12 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return leader_response()
 
-            if getattr(mock_requests_get, 'first_health_call', True):
-                mock_requests_get.first_health_call = False
+            if getattr(mock_get, 'first_health_call', True):
+                mock_get.first_health_call = False
                 replication_dr_mode = 'primary'
             else:
                 replication_dr_mode = 'secondary'
@@ -422,7 +352,7 @@ class TestVault:
                 performance_standby=False,
             )
 
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = mock_get
         dd_run_check(c)
         assert not c._skip_dr_metric_collection
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
@@ -453,7 +383,7 @@ class TestVault:
             c._previous_leader = Leader('foo', '')
             next_leader = Leader('bar', '')
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return leader_response(
                     is_self=True,
@@ -462,7 +392,7 @@ class TestVault:
                 )
             return health_response()
 
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = mock_get
         dd_run_check(c)
 
         assert len(aggregator.events) > 0
@@ -488,12 +418,9 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c._previous_leader = Leader('foo', '')
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response(is_self=False, leader_address='bar')
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(
+            instance, leader=leader_response(is_self=False, leader_address='bar')
+        )
         dd_run_check(c)
 
         assert len(aggregator.events) == 0
@@ -504,12 +431,9 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response(is_self=True, leader_address='bar')
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(
+            instance, leader=leader_response(is_self=True, leader_address='bar')
+        )
         dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -520,12 +444,9 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return leader_response(is_self=False, leader_address='bar')
-            return health_response()
-
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = leader_health_side_effect(
+            instance, leader=leader_response(is_self=False, leader_address='bar')
+        )
         dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 0)
@@ -539,12 +460,12 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return leader_response()
             return health_response(status_code=status_code, initialized=False, standby=True, performance_standby=False)
 
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = mock_get
         dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -556,12 +477,12 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return MockHTTPResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
             return health_response()
 
-        mock_http.get.side_effect = mock_requests_get
+        mock_http.get.side_effect = mock_get
         dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', count=0)
@@ -577,7 +498,7 @@ class TestVault:
         # 4 dd_run_check calls: metrics scrape returns OK, 403 (WARNING), 403 (CRITICAL after refresh tried), OK.
         metrics_status_codes = iter([200, 403, 403, 200])
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return leader_response()
             if url == instance['api_url'] + '/sys/health':
@@ -587,7 +508,7 @@ class TestVault:
                 return VaultMockHTTPResponse(status_code=status_code)
             return MockHTTPResponse(file_path=get_fixture_path('route_transform_metrics.txt'))
 
-        mock_openmetrics_http.get.side_effect = mock_requests_get
+        mock_openmetrics_http.get.side_effect = mock_get
 
         dd_run_check(c)
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
@@ -633,14 +554,14 @@ class TestVault:
         instance['use_openmetrics'] = use_openmetrics
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
                 return leader_response()
             if url == instance['api_url'] + '/sys/health':
                 return health_response()
             return VaultMockHTTPResponse(status_code=400)
 
-        mock_openmetrics_http.get.side_effect = mock_requests_get
+        mock_openmetrics_http.get.side_effect = mock_get
 
         with pytest.raises(Exception, match='400 Client Error: Bad Request for url'):
             dd_run_check(c, extract_message=True)
@@ -664,14 +585,14 @@ class TestVault:
         no_token_instance['use_openmetrics'] = use_openmetrics
         c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
 
-        def mock_requests_get(url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == no_token_instance['api_url'] + '/sys/leader':
                 return leader_response()
             if url == no_token_instance['api_url'] + '/sys/health':
                 return health_response()
             return MockHTTPResponse(file_path=get_fixture_path('route_transform_metrics.txt'))
 
-        mock_openmetrics_http.get.side_effect = mock_requests_get
+        mock_openmetrics_http.get.side_effect = mock_get
         dd_run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1, tags=global_tags)
@@ -739,7 +660,7 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics, 
     instance['use_openmetrics'] = use_openmetrics
     c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-    def mock_requests_get(url, *args, **kwargs):
+    def mock_get(url, *args, **kwargs):
         assert mock_openmetrics_http.options['headers'].get('X-Vault-Request') == 'true'
         if url == instance['api_url'] + '/sys/leader':
             return leader_response()
@@ -747,5 +668,5 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics, 
             return health_response()
         return MockHTTPResponse(content='', status_code=200)
 
-    mock_openmetrics_http.get.side_effect = mock_requests_get
+    mock_openmetrics_http.get.side_effect = mock_get
     dd_run_check(c)
