@@ -4,11 +4,20 @@ config:
   description: >-
     Generate an OpenMetrics integration.
   inputs:
-    - name: inspect_input
-      label: Endpoints JSON
-      type: string
-      placeholder: '{"endpoints":[{"name":"api","url":"http://localhost:9090/metrics"}]}'
+    - name: endpoints
+      label: Endpoints
+      type: object
+      multi: true
       required: true
+      fields:
+        - name: name
+          label: Name
+          type: string
+          required: true
+        - name: url
+          label: URL
+          type: string
+          required: true
     - name: integration
       label: Integration name
       type: string

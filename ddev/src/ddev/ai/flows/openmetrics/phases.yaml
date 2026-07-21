@@ -3,7 +3,7 @@
     name: inspect_endpoint
     class: InspectEndpointPhase
     variables:
-      - name: inspect_input
+      - name: endpoints
 
 - type: phase
   config:

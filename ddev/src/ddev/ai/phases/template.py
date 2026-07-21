@@ -25,6 +25,8 @@ class _SafeMapping(Mapping[str, str]):
             if object_name not in self._context:
                 raise ValueError(f"Object variable {object_name!r} is missing")
             value = self._context[object_name]
+            if isinstance(value, list):
+                raise ValueError(f"List variable {object_name!r} cannot be rendered")
             if not isinstance(value, Mapping):
                 raise ValueError(f"Variable {object_name!r} is not an object")
             if field_name not in value:
@@ -32,6 +34,8 @@ class _SafeMapping(Mapping[str, str]):
             return str(value[field_name])
         if key in self._context:
             value = self._context[key]
+            if isinstance(value, list):
+                raise ValueError(f"List variable {key!r} cannot be rendered")
             if isinstance(value, Mapping):
                 return json.dumps(dict(value), separators=(",", ":"), ensure_ascii=False)
             return str(value)
