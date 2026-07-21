@@ -10,18 +10,25 @@ This check monitors the kernel OOM (out of memory) kill process through the Data
 
 The OOM Kill check is included in the [Datadog Agent][1] package. It relies on an eBPF program implemented in the System Probe.
 
-The eBPF program used by the System Probe is compiled at runtime and requires you to have access to the proper kernel headers.
+The eBPF program used by the System Probe is compiled at runtime and requires either a kernel with BTF (BPF Type Format) built in, or access to the proper kernel headers.
 
-On Debian-like distributions, install the kernel headers like this:
+To check if your kernel has BTF built in, run:
 ```sh
-apt install -y linux-headers-$(uname -r)
+ls /sys/kernel/btf/vmlinux
 ```
 
-On RHEL-like distributions, install the kernel headers like this:
-```sh
-yum install -y kernel-headers-$(uname -r)
-yum install -y kernel-devel-$(uname -r)
-```
+If that file exists, no further action is required. If it does not exist, install the kernel headers using the command for your distribution:
+
+| Distribution | BTF built in | Kernel headers install command |
+|---|---|---|
+| Amazon Linux 2 | No | `yum install -y kernel-headers-$(uname -r) kernel-devel-$(uname -r)` |
+| Amazon Linux 2023 | Yes | N/A |
+| Debian 10 | No | `apt install -y linux-headers-$(uname -r)` |
+| Debian 11+ | Yes | N/A |
+| RHEL/CentOS 8 | No | `yum install -y kernel-headers-$(uname -r) kernel-devel-$(uname -r)` |
+| RHEL/CentOS 9+ | Yes | N/A |
+| Ubuntu 18.04 | No | `apt install -y linux-headers-$(uname -r)` |
+| Ubuntu 20.04+ | Yes | N/A |
 
 **Note**: Kernel version 4.9 or later is required for the OOM Kill check to work.
 In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
@@ -57,7 +64,7 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
     --privileged
     ```
 
-    From kernel version 5.8, the `--privileged` parameter can be replaces by `--cap-add CAP_BPF`.
+    From kernel version 5.8, the `--privileged` parameter can be replaced by `--cap-add CAP_BPF`.
 
 **Note**: `--privileged` mode is not supported in Docker swarm.
 
