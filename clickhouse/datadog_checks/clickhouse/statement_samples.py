@@ -617,8 +617,9 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
         try:
-            if self._config.enabled and time.time() - self._last_samples_time >= self._collection_interval:
-                self._last_samples_time = time.time()
+            now = time.time()
+            if self._config.enabled and now - self._last_samples_time >= self._collection_interval:
+                self._last_samples_time = now
                 self._collect_samples()
         except Exception as e:
             self._log.exception("Failed to collect samples snapshot: %s", e)
