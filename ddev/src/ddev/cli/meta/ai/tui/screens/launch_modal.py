@@ -117,16 +117,16 @@ class LaunchModal(ModalScreen):
             yield Switch(value=default_enabled, id=widget_id)
         elif inp.input_type == InputType.NUMBER:
             default_text = str(inp.default) if inp.default is not None else ""
-            yield Input(value=default_text, id=widget_id, validators=[Number()])
+            yield Input(value=default_text, placeholder=inp.placeholder or "", id=widget_id, validators=[Number()])
         elif inp.input_type == InputType.PATH:
             default_text = str(inp.default) if inp.default is not None else ""
-            path_input = Input(value=default_text, id=widget_id)
+            path_input = Input(value=default_text, placeholder=inp.placeholder or "", id=widget_id)
             yield path_input
             yield TogoPathAutoComplete(target=f"#{widget_id}")
         else:
             # STRING (default)
             default_text = str(inp.default) if inp.default is not None else ""
-            yield Input(value=default_text, id=widget_id)
+            yield Input(value=default_text, placeholder=inp.placeholder or "", id=widget_id)
 
     # ------------------------------------------------------------------
     # Actions

@@ -48,6 +48,8 @@ async def test_input_labels_show_declared_types(make_launch_modal_app, all_flow_
             "MY NUMBER (number)",
             "MY BOOL (boolean)",
             "MY PATH (path)",
+            "PRODUCT REQUIREMENTS FILE (path)",
+            "MAX TIMEOUT (SECONDS) (number)",
         ]
 
 
@@ -79,6 +81,28 @@ async def test_number_input_has_number_validator(make_launch_modal_app) -> None:
         modal = app.screen
         inp = modal.query_one("#input-n", Input)
         assert len(inp.validators) >= 1
+
+
+@pytest.mark.parametrize("input_type", [InputType.STRING, InputType.NUMBER, InputType.PATH])
+async def test_declared_input_placeholder_is_rendered_without_becoming_a_value(
+    make_launch_modal_app, input_type: InputType
+) -> None:
+    """Custom placeholders remain visual hints and leave the input value empty."""
+    flow_input = FlowInput(
+        name="example",
+        label="Example",
+        input_type=input_type,
+        placeholder="Example value",
+        required=False,
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        widget = app.screen.query_one("#input-example", Input)
+
+        assert widget.placeholder == "Example value"
+        assert widget.value == ""
 
 
 async def test_text_input_accepts_terminal_paste(make_launch_modal_app) -> None:
@@ -125,6 +149,7 @@ async def test_escape_dismisses_with_none(make_launch_modal_app, all_flow_inputs
     app = make_launch_modal_app(all_flow_inputs)
     async with app.run_test() as pilot:
         await pilot.pause()
+        app.screen.query_one("#btn-cancel", Button).focus()
         await pilot.press("escape")
         await pilot.pause()
         assert app.dismiss_result is None
@@ -221,7 +246,7 @@ async def test_valid_submission_dismisses_with_payload(make_launch_modal_app, la
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == {"s": "world", "b": "false"}
+        assert app.dismiss_result == {"s": "world", "b": "false", "prd": "Required product behavior.\n"}
 
 
 async def test_valid_number_submission_dismisses(make_launch_modal_app, large_terminal) -> None:
@@ -235,7 +260,7 @@ async def test_valid_number_submission_dismisses(make_launch_modal_app, large_te
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == {"n": "99"}
+        assert app.dismiss_result == {"n": "99", "prd": "Required product behavior.\n"}
 
 
 @pytest.mark.parametrize(
@@ -262,7 +287,7 @@ async def test_optional_empty_field_is_omitted(make_launch_modal_app, large_term
         await pilot.click("#btn-launch")
         await pilot.pause()
 
-        assert app.dismiss_result == {}
+        assert app.dismiss_result == {"prd": "Required product behavior.\n"}
 
 
 # ---------------------------------------------------------------------------

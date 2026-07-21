@@ -13,9 +13,10 @@ import pytest
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widget import Widget
+from textual.widgets import Input
 
 from ddev.ai.agent.registry import AgentProviderRegistry
-from ddev.ai.config.models import AgentConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
+from ddev.ai.config.models import AgentConfig, FlowConfig, FlowEntry, PhaseConfig, ResolvedFlow, TaskConfig
 from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
@@ -52,6 +53,7 @@ def _make_flow(
     return ResolvedFlow(
         name=name,
         description="A test flow",
+        inputs=FlowConfig(name="test", flow=[]).inputs,
         agents=agents,
         phases=phase_configs,
         flow=flow_entries,
@@ -1805,6 +1807,28 @@ async def test_default_builder_resume_flag_forwarded(tmp_path: Path) -> None:
     assert call_kwargs["resume"] is True
 
 
+async def test_default_builder_forwards_runtime_variables(tmp_path: Path) -> None:
+    """Default builder forwards runtime variables to PhaseOrchestrator unchanged."""
+    from unittest.mock import patch
+
+    from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
+
+    flow = _make_flow()
+    fake_ddev_app, mock_orch_instance = _setup_default_builder_mocks(tmp_path)
+
+    with patch("ddev.ai.runtime.orchestrator.PhaseOrchestrator") as MockOrch:
+        MockOrch.return_value = mock_orch_instance
+        togo_app = _app_with_repo(flow, fake_ddev_app)
+        async with togo_app.run_test() as pilot:
+            await pilot.pause()
+            screen = ExecutionScreen(flow, runtime_variables={"max_timeout": "120"})
+            await togo_app.push_screen(screen)
+            await pilot.pause(0.3)
+
+    call_kwargs = MockOrch.call_args.kwargs
+    assert call_kwargs["runtime_variables"] == {"max_timeout": "120"}
+
+
 async def test_fresh_real_run_clears_only_computed_flow_directory(tmp_path: Path) -> None:
     """A fresh run removes stale state for its flow without touching sibling runs."""
     from unittest.mock import patch
@@ -1913,6 +1937,9 @@ async def test_launch_from_flow_screen_no_runtime_error(tmp_path: Path) -> None:
             await pilot.pause()
             await pilot.click("#launch-btn")
             await pilot.pause()
+            prd = tmp_path / "prd.md"
+            prd.write_text("Required product behavior.\n", encoding="utf-8")
+            pilot.app.screen.query_one("#input-prd", Input).value = str(prd)
             await pilot.click("#btn-launch")
             await pilot.pause(0.3)
             assert isinstance(pilot.app.screen, ExecutionScreen)

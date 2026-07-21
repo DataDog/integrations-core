@@ -5,8 +5,9 @@ config:
     Generate an OpenMetrics integration.
   inputs:
     - name: inspect_input
-      label: Endpoints JSON ({"endpoints":[{"name":"api","url":"http://localhost:9090/metrics"}]})
+      label: Endpoints JSON
       type: string
+      placeholder: '{"endpoints":[{"name":"api","url":"http://localhost:9090/metrics"}]}'
       required: true
     - name: integration
       label: Integration name
@@ -16,11 +17,6 @@ config:
       label: Docker folder
       type: path
       required: true
-    - name: prd
-      label: Product requirements file
-      type: path
-      required: true
-      as_content: true
     - name: fanout_threshold
       label: Metric fan-out threshold
       type: number
