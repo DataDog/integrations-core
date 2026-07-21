@@ -1,5 +1,3 @@
-# Same coverage as generic-device.yaml except _generic-ospf.yaml, which triggers
-# DuplicateOIDValidator failures (constant_value_one symbols without OID).
 extends:
   - _base.yaml
   - _generic-if.yaml
