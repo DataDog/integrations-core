@@ -1,0 +1,1 @@
+Fix changed-file detection ignoring the PR's actual base branch when computing the license-headers validation scope.
