@@ -28,8 +28,7 @@ from .common import (
     VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
     VSPHERE_VERSION,
-    MockHttpV6,
-    MockHttpV7,
+    configure_vsphere_rest_mock_http,
 )
 from .mocked_api import MockedAPI
 
@@ -245,21 +244,17 @@ def service_instance(
         yield mock_si
 
 
-def inject_rest_http_client(tag_associations):
-    mock_cls = MockHttpV7 if VSPHERE_VERSION.startswith('7.') else MockHttpV6
-    http = mock_cls(tag_associations=tag_associations)
-    return patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=http), http
+def inject_rest_http_client(mock_http, mocker, tag_associations):
+    http = configure_vsphere_rest_mock_http(mock_http, tag_associations=tag_associations)
+    mocker.patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=http)
+    return http
 
 
 @pytest.fixture
-def mock_http_api():
-    ctx, http = inject_rest_http_client(tag_associations=None)
-    with ctx:
-        yield http
+def mock_http_api(mock_http, mocker):
+    return inject_rest_http_client(mock_http, mocker, tag_associations=None)
 
 
 @pytest.fixture
-def mock_rest_api():
-    ctx, http = inject_rest_http_client(tag_associations=REALTIME_TAG_ASSOCIATIONS)
-    with ctx:
-        yield http
+def mock_rest_api(mock_http, mocker):
+    return inject_rest_http_client(mock_http, mocker, tag_associations=REALTIME_TAG_ASSOCIATIONS)
