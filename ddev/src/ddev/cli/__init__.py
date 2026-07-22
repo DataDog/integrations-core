@@ -30,7 +30,7 @@ from ddev.utils.fs import Path
 from ddev.utils.github_errors import GitHubAuthenticationError
 
 
-def _display_registered_exception(app: Application, error: Exception) -> None:
+def display_registered_exception(app: Application, error: Exception) -> None:
     app.display_error(str(error))
 
 
@@ -98,7 +98,7 @@ def ddev(
         interactive = not running_in_ci()
 
     app = Application(ctx.exit, verbose - quiet, color, interactive)
-    app.register_exception_handler(GitHubAuthenticationError, _display_registered_exception)
+    app.register_exception_handler(GitHubAuthenticationError, display_registered_exception)
 
     if config_file:
         app.config_file.path = Path(config_file).resolve()
