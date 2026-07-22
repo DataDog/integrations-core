@@ -198,7 +198,7 @@ class SapHanaCheck(AgentCheck):
     def database_identifier(self):
         if self._database_identifier is None:
             db_id_config = self.instance.get('database_identifier') or {}
-            template = Template(db_id_config.get('template') or '$host')
+            template = Template(db_id_config.get('template') or '$host:$port')
             tag_dict = {}
             tags = self._tags.copy()
             tags.sort()

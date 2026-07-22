@@ -70,10 +70,9 @@ instances:
     #
     # use_hana_hostnames: false
 
-    ## Controls how the database is identified in Data Observability. Each unique value appears as a
-    ## separate billable instance.
+    ## Controls how the database is identified in Data Observability.
     ##
-    ## The default value is the host of the instance.
+    ## The default value is the host and port of the instance (`$host:$port`).
     ##
     ## This value will be used as-is for the display name of the instance but will be normalized
     ## when applied as the `database_instance` tag. See https://docs.datadoghq.com/getting_started/tagging/
@@ -81,8 +80,8 @@ instances:
     #
     # database_identifier:
 
-        ## @param template - string - optional - default: $host
-        ## The template to use for the database identifier. The default value is `$host`.
+        ## @param template - string - optional - default: $host:$port
+        ## The template to use for the database identifier. The default value is `$host:$port`.
         ## You can use the following variables, prefixed by `$` in the template:
         ## - host: The provided host of the instance.
         ## - port: The port number of the instance.

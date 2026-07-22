@@ -199,9 +199,9 @@ def test_reported_hostname_is_server(instance):
 @pytest.mark.parametrize(
     'database_identifier, tags, expected',
     [
-        pytest.param(None, [], SERVER, id='unset-defaults-to-host'),
-        pytest.param({}, [], SERVER, id='empty-defaults-to-host'),
-        pytest.param({'template': None}, [], SERVER, id='null-template-defaults-to-host'),
+        pytest.param(None, [], f'{SERVER}:{PORT}', id='unset-defaults-to-host-and-port'),
+        pytest.param({}, [], f'{SERVER}:{PORT}', id='empty-defaults-to-host-and-port'),
+        pytest.param({'template': None}, [], f'{SERVER}:{PORT}', id='null-template-defaults-to-host-and-port'),
         pytest.param({'template': '$host'}, [], SERVER, id='host'),
         pytest.param({'template': '$host:$port'}, [], f'{SERVER}:{PORT}', id='host-and-port'),
         pytest.param({'template': 'saphana_myorg_$env'}, ['env:team-a'], 'saphana_myorg_team-a', id='tag'),
