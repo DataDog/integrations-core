@@ -121,8 +121,27 @@ TogoHeader {
 
 #header-right {
     width: auto;
-    color: $status-running;
     text-style: bold;
+}
+
+#header-right.status-idle {
+    display: none;
+}
+
+#header-right.status-running {
+    color: $status-running;
+}
+
+#header-right.status-finishing {
+    color: $warning;
+}
+
+#header-right.status-completed {
+    color: $status-done;
+}
+
+#header-right.status-failed {
+    color: $status-failed;
 }
 
 #header-badge {

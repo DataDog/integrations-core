@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import shutil
 from collections.abc import Callable, Iterator
 from pathlib import Path
@@ -12,6 +13,7 @@ from typing import TYPE_CHECKING
 
 from textual import events, work
 from textual.binding import Binding
+from textual.css.query import NoMatches
 from textual.widget import Widget
 from textual.widgets import Static
 from textual.worker import Worker
@@ -58,8 +60,7 @@ from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
 from ddev.cli.meta.ai.tui.screens.phase_error_modal import PhaseErrorModal
 from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogEntry, PhaseLogScreen
-from ddev.cli.meta.ai.tui.status import RunStatus
-from ddev.cli.meta.ai.tui.widgets.header import TogoHeader
+from ddev.cli.meta.ai.tui.status import ExecutionStatus, RunStatus
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseSelected, PipelineGraph
 
 if TYPE_CHECKING:
@@ -107,7 +108,6 @@ class ExecutionScreen(TogoScreen):
         self._orchestrator: OrchestratorLike | None = None
         self._run_worker: Worker[None] | None = None
         self._phase_errors: dict[str, BaseException] = {}
-        self._run_active = False
         # Records every renderable produced by the run — used by tests and to
         # populate phase log screens opened after the fact.
         self._output_renders: list[PhaseLogEntry] = []
@@ -131,27 +131,32 @@ class ExecutionScreen(TogoScreen):
                     if task_phase == phase_id:
                         self._task_statuses[(task_phase, task_name)] = RunStatus.DONE
         self._update_display()
-        self._run_active = True
+        self.togo_app.execution_status = ExecutionStatus.RUNNING
+        self._transition_to_finishing_if_phases_done()
         self._run_worker = self._run_orchestrator()
 
     def on_unmount(self) -> None:
-        if self._run_worker is not None:
-            self._run_worker.cancel()
+        self._cancel_run_worker()
         if self.togo_app.bridge_target is self:
+            self.togo_app.execution_status = ExecutionStatus.IDLE
             self.togo_app.bridge_target = self.togo_app
 
     def action_cancel_run(self) -> None:
         """Cancel the running orchestrator worker."""
-        self._run_active = False
+        self._cancel_run_worker()
+
+    def _cancel_run_worker(self) -> None:
         if self._run_worker is not None:
             self._run_worker.cancel()
+        if self.togo_app.bridge_target is self and self.togo_app.execution_status.is_active:
+            self.togo_app.execution_status = ExecutionStatus.IDLE
 
     def action_copy_or_cancel_run(self) -> None:
         if not self.copy_selection():
             self.action_cancel_run()
 
     def action_back(self) -> None:
-        if not self._run_active:
+        if not self.togo_app.execution_status.is_active:
             self.app.pop_screen()
             return
         from ddev.cli.meta.ai.tui.screens.cancel_run_modal import CancelRunModal
@@ -181,17 +186,15 @@ class ExecutionScreen(TogoScreen):
             else:
                 orchestrator = self._build_real_orchestrator(callbacks)
             self._orchestrator = orchestrator
-            self.query_one(TogoHeader).running = True
             await orchestrator.run_async()
+            self.togo_app.execution_status = ExecutionStatus.COMPLETED
+        except asyncio.CancelledError:
+            if self.togo_app.bridge_target is self:
+                self.togo_app.execution_status = ExecutionStatus.IDLE
+            raise
         except Exception as error:
             if orchestrator is None or orchestrator.failed_phase is None:
                 self.post_message(ExecutionFailed(error))
-        finally:
-            self._run_active = False
-            try:
-                self.query_one(TogoHeader).running = False
-            except Exception:
-                pass
 
     def _build_real_orchestrator(self, callbacks: Callbacks) -> PhaseOrchestrator:
         """Construct the real PhaseOrchestrator for production use."""
@@ -226,7 +229,7 @@ class ExecutionScreen(TogoScreen):
     def _update_display(self) -> None:
         try:
             self.query_one("#pipeline", PipelineGraph).update_statuses(self._phase_statuses)
-        except Exception:
+        except NoMatches:
             pass
 
     def _compact_error_detail(self, error: BaseException, phase_id: str | None = None) -> str:
@@ -241,10 +244,10 @@ class ExecutionScreen(TogoScreen):
     def _show_error_banner(self, message: str) -> None:
         try:
             widget = self.query_one("#execution-error", Static)
-            widget.update(message)
-            widget.display = True
-        except Exception:
-            pass
+        except NoMatches:
+            return
+        widget.update(message)
+        widget.display = True
 
     def _show_run_error(self, error: BaseException, phase_id: str | None = None) -> None:
         detail = self._compact_error_detail(error, phase_id)
@@ -337,6 +340,13 @@ class ExecutionScreen(TogoScreen):
             if p == msg.phase_id and status in (RunStatus.RUNNING, RunStatus.PENDING):
                 self._task_statuses[(p, t)] = RunStatus.DONE
         self._update_display()
+        self._transition_to_finishing_if_phases_done()
+
+    def _transition_to_finishing_if_phases_done(self) -> None:
+        if self.togo_app.execution_status is ExecutionStatus.RUNNING and all(
+            status is RunStatus.DONE for status in self._phase_statuses.values()
+        ):
+            self.togo_app.execution_status = ExecutionStatus.FINISHING
 
     def on_phase_errored(self, msg: PhaseErrored) -> None:
         self._phase_errors[msg.phase_id] = msg.error
@@ -348,12 +358,14 @@ class ExecutionScreen(TogoScreen):
         self._update_display()
 
     def on_run_errored(self, msg: RunErrored) -> None:
+        self.togo_app.execution_status = ExecutionStatus.FAILED
         if self._phase_errors:
             self._show_phase_error_summary()
         else:
             self._show_error_banner("Run failed.")
 
     def on_execution_failed(self, msg: ExecutionFailed) -> None:
+        self.togo_app.execution_status = ExecutionStatus.FAILED
         self._show_run_error(msg.error)
 
     def on_phase_selected(self, msg: PhaseSelected) -> None:

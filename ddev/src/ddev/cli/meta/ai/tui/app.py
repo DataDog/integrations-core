@@ -15,6 +15,7 @@ from textual.app import App
 from textual.binding import Binding
 from textual.message import Message
 from textual.message_pump import MessagePump
+from textual.reactive import reactive
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.phases.registry import PhaseRegistry
@@ -36,6 +37,7 @@ from ddev.cli.meta.ai.tui.messages import (
     PhaseStarted,
     RunErrored,
 )
+from ddev.cli.meta.ai.tui.status import ExecutionStatus
 from ddev.cli.meta.ai.tui.theme import togo_markdown_theme, togo_theme
 
 if TYPE_CHECKING:
@@ -58,6 +60,7 @@ class TogoApp(App):
     Registers and activates the ``togo`` theme on mount.  Exposes:
 
     - ``engine``: the configuration engine whose validated flow results are displayed.
+    - ``execution_status``: the app-wide reactive lifecycle of the active flow.
     - ``bridge_target``: the MessagePump that bridge callbacks post to.
       Defaults to the app itself; later phases can swap in a screen.
     - ``run_flow(orchestrator)``: async worker that awaits
@@ -68,6 +71,8 @@ class TogoApp(App):
 
     CSS_PATH = str(Path(__file__).parent / "togo.tcss")
     ENABLE_COMMAND_PALETTE = False
+
+    execution_status: reactive[ExecutionStatus] = reactive(ExecutionStatus.IDLE)
 
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit"),
