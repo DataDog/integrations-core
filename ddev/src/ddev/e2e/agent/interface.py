@@ -8,6 +8,8 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from ddev.cli.application import Application
     from ddev.integration.core import Integration
     from ddev.utils.fs import Path
@@ -15,6 +17,9 @@ if TYPE_CHECKING:
 
 
 class AgentInterface(ABC):
+    build_config_keys: tuple[str, ...] = ()
+    supports_ci = True
+
     def __init__(
         self, app: Application, integration: Integration, env: str, metadata: dict[str, Any], config_file: Path
     ) -> None:
@@ -62,6 +67,16 @@ class AgentInterface(ABC):
 
     def get_id(self) -> str:
         return f'{self.integration.name}_{self.env}'
+
+    def prepare_start(self) -> None:
+        """Populate backend state that must be persisted before startup."""
+
+    def get_configured_build(self, config: Mapping[str, str]) -> str | None:
+        for key in self.build_config_keys:
+            if agent_build := config.get(key):
+                return agent_build
+
+        return None
 
     @abstractmethod
     def start(self, *, agent_build: str, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None: ...

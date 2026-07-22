@@ -79,9 +79,8 @@ def agent(
     """
     import subprocess
 
-    from ddev.e2e.agent import get_agent_interface
+    from ddev.e2e.agent import create_agent
     from ddev.e2e.config import EnvDataStorage
-    from ddev.e2e.constants import DEFAULT_AGENT_TYPE, E2EMetadata
     from ddev.utils.fs import Path
 
     integration = app.repo.integrations.get(intg_name)
@@ -91,8 +90,7 @@ def agent(
         app.abort(f'Environment `{environment}` for integration `{integration.name}` is not running')
 
     metadata = env_data.read_metadata()
-    agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-    agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
+    agent = create_agent(app, integration, environment, metadata, env_data.config_file)
 
     full_args = list(args)
     trigger_run = False

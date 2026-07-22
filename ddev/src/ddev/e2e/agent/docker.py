@@ -82,6 +82,8 @@ def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_
 
 
 class DockerAgent(AgentInterface):
+    build_config_keys = ('docker',)
+
     @cached_property
     def _isatty(self) -> bool:
         isatty: Callable[[], bool] | None = getattr(sys.stdout, 'isatty', None)
