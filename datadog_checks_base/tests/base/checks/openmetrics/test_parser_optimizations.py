@@ -1,216 +1,233 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the optimized _next_unquoted_char replacement.
+"""Tests for the v0.21.1 parser optimizations."""
 
-Verifies that the optimized version produces the same results as the
-original prometheus_client implementation across representative inputs.
-"""
+import pytest
 
 from datadog_checks.base.checks.openmetrics.parser_optimizations import (
     _next_unquoted_char,
+    _parse_labels,
+    _parse_sample,
 )
 
 
-class TestNextUnquotedChar:
-    """Tests for the optimized _next_unquoted_char function."""
-
-    def test_find_single_char(self):
-        assert _next_unquoted_char('foo{bar="baz"} 1', '{') == 3
-
-    def test_find_closing_brace(self):
-        assert _next_unquoted_char('bar="baz"} 1', '}') == 9
-
-    def test_find_equals(self):
-        assert _next_unquoted_char('label="value"', '=') == 5
-
-    def test_find_comma(self):
-        assert _next_unquoted_char('a="1",b="2"', ',') == 5
-
-    def test_find_space(self):
-        assert _next_unquoted_char('metric{l="v"} 42', ' ') == 13
-
-    def test_find_multiple_targets(self):
-        assert _next_unquoted_char('label=value,next', '=,}') == 5
-
-    def test_find_multiple_targets_comma_first(self):
-        assert _next_unquoted_char('value,next=foo', '=,}') == 5
-
-    def test_find_multiple_targets_brace(self):
-        assert _next_unquoted_char('value}', '=,}') == 5
-
-    def test_not_found(self):
-        assert _next_unquoted_char('no_special_chars', '{') == -1
-
-    def test_empty_string(self):
-        assert _next_unquoted_char('', '{') == -1
-
-    def test_startidx(self):
-        assert _next_unquoted_char('a{b{c', '{', 2) == 3
-
-    def test_startidx_at_target(self):
-        assert _next_unquoted_char('a{b', '{', 1) == 1
-
-    def test_startidx_past_end(self):
-        assert _next_unquoted_char('abc', '{', 10) == -1
-
-    def test_whitespace_default(self):
-        assert _next_unquoted_char('foo bar', None) == 3
-
-    def test_whitespace_tab(self):
-        assert _next_unquoted_char('foo\tbar', None) == 3
-
-    def test_first_char_is_target(self):
-        assert _next_unquoted_char('{foo}', '{') == 0
-
-    def test_last_char_is_target(self):
-        assert _next_unquoted_char('foo}', '}') == 3
-
-    def test_multiple_occurrences_returns_first(self):
-        assert _next_unquoted_char('a{b{c', '{') == 1
-
-    def test_skip_target_char_inside_quotes(self):
-        # comma inside quoted value must not be returned
-        assert _next_unquoted_char('a="apn,gw",b', ',') == 10
-
-    def test_skip_brace_inside_quotes(self):
-        assert _next_unquoted_char('label="val}ue"}', '}') == 14
-
-    def test_skip_equals_inside_quotes(self):
-        assert _next_unquoted_char('label="a=b"} 1', '}') == 11
-
-    def test_escaped_quote_not_treated_as_delimiter(self):
-        # backslash-escaped quote does not close the quoted region
-        assert _next_unquoted_char(r'label="val\"still,inside",next', ',') == 25
+@pytest.mark.parametrize(
+    'text, chs, startidx, expected',
+    [
+        pytest.param('foo{bar="baz"} 1', '{', 0, 3, id='open_brace'),
+        pytest.param('bar="baz"} 1', '}', 0, 9, id='close_brace'),
+        pytest.param('label="value"', '=', 0, 5, id='equals'),
+        pytest.param('a="1",b="2"', ',', 0, 5, id='comma'),
+        pytest.param('metric{l="v"} 42', ' ', 0, 13, id='space'),
+        pytest.param('label=value,next', '=,}', 0, 5, id='multi_target_equals_first'),
+        pytest.param('value,next=foo', '=,}', 0, 5, id='multi_target_comma_first'),
+        pytest.param('value}', '=,}', 0, 5, id='multi_target_brace'),
+        pytest.param('no_special_chars', '{', 0, -1, id='not_found'),
+        pytest.param('', '{', 0, -1, id='empty_string'),
+        pytest.param('a{b{c', '{', 2, 3, id='startidx'),
+        pytest.param('a{b', '{', 1, 1, id='startidx_at_target'),
+        pytest.param('abc', '{', 10, -1, id='startidx_past_end'),
+        pytest.param('foo bar', None, 0, 3, id='whitespace_default'),
+        pytest.param('foo\tbar', None, 0, 3, id='whitespace_tab'),
+        pytest.param('{foo}', '{', 0, 0, id='first_char'),
+        pytest.param('foo}', '}', 0, 3, id='last_char'),
+        pytest.param('a{b{c', '{', 0, 1, id='multiple_returns_first'),
+    ],
+)
+def test_next_unquoted_char(text, chs, startidx, expected):
+    assert _next_unquoted_char(text, chs, startidx) == expected
 
 
-class TestNextUnquotedCharWithRealMetrics:
-    """Tests using real Prometheus metric line patterns."""
+@pytest.mark.parametrize(
+    'line, find_char, startidx, expected',
+    [
+        pytest.param('envoy_server_live 1', '{', 0, -1, id='simple_gauge_no_brace'),
+        pytest.param('envoy_server_live 1', ' ', 0, 17, id='simple_gauge_space'),
+        pytest.param(
+            'envoy_cluster_upstream_cx_active{envoy_cluster_name="service1"} 0',
+            '{', 0, 32, id='labeled_open_brace',
+        ),
+        pytest.param(
+            'envoy_cluster_upstream_cx_active{envoy_cluster_name="service1"} 0',
+            '}', 33, 62, id='labeled_close_brace',
+        ),
+        pytest.param(
+            'http_request_duration_seconds_bucket{le="0.5"} 24054',
+            '{', 0, 36, id='histogram_open_brace',
+        ),
+        pytest.param(
+            'http_request_duration_seconds_bucket{le="0.5"} 24054',
+            '}', 37, 45, id='histogram_close_brace',
+        ),
+        pytest.param(
+            '# HELP http_requests_total The total number of HTTP requests.',
+            None, 0, 1, id='help_line',
+        ),
+        pytest.param(
+            '# TYPE http_requests_total counter',
+            None, 0, 1, id='type_line',
+        ),
+    ],
+)
+def test_next_unquoted_char_real_metrics(line, find_char, startidx, expected):
+    assert _next_unquoted_char(line, find_char, startidx) == expected
 
-    def test_simple_gauge(self):
-        line = 'envoy_server_live 1'
-        assert _next_unquoted_char(line, '{') == -1
-        assert _next_unquoted_char(line, ' ') == 17
 
-    def test_labeled_metric(self):
-        line = 'envoy_cluster_upstream_cx_active{envoy_cluster_name="service1"} 0'
-        assert _next_unquoted_char(line, '{') == 32
-        assert _next_unquoted_char(line, '}', 33) == 62
-
-    def test_multi_label_metric(self):
-        line = 'http_requests_total{method="GET",code="200"} 1027'
-        assert _next_unquoted_char(line, '{') == 19
-        assert _next_unquoted_char(line, '=', 20) == 26
-        labels_text = 'method="GET",code="200"'
-        assert _next_unquoted_char(labels_text, '=,}') == 6
-        assert _next_unquoted_char(labels_text, ',}', 12) == 12
-
-    def test_histogram_bucket(self):
-        line = 'http_request_duration_seconds_bucket{le="0.5"} 24054'
-        assert _next_unquoted_char(line, '{') == 36
-        assert _next_unquoted_char(line, '}', 37) == 45
-
-    def test_help_line_split(self):
-        line = '# HELP http_requests_total The total number of HTTP requests.'
-        assert _next_unquoted_char(line, None) == 1
-
-    def test_type_line_split(self):
-        line = '# TYPE http_requests_total counter'
-        assert _next_unquoted_char(line, None) == 1
+@pytest.mark.parametrize(
+    'labels_string, expected',
+    [
+        pytest.param('method="GET"', {'method': 'GET'}, id='single'),
+        pytest.param('method="GET",code="200"', {'method': 'GET', 'code': '200'}, id='multiple'),
+        pytest.param('label=""', {'label': ''}, id='empty_value'),
+        pytest.param('nolabels', {}, id='no_equals'),
+        pytest.param('label="val\\"ue"', {'label': 'val"ue'}, id='escaped_quote'),
+        pytest.param('label="line1\\nline2"', {'label': 'line1\nline2'}, id='escaped_newline'),
+        pytest.param('label="a\\\\b"', {'label': 'a\\b'}, id='escaped_backslash'),
+        pytest.param('func="apn,gw",proto="tcp"', {'func': 'apn,gw', 'proto': 'tcp'}, id='comma_in_value'),
+        pytest.param(' method ="GET"', {'method': 'GET'}, id='spaces_around_name'),
+    ],
+)
+def test_parse_labels(labels_string, expected):
+    assert _parse_labels(labels_string) == expected
 
 
-class TestParseFullMetricText:
-    """Integration tests that parse complete metric text through the patched parser."""
+@pytest.mark.parametrize(
+    'text, expected_name, expected_labels, expected_value',
+    [
+        pytest.param('test_gauge 42', 'test_gauge', {}, 42, id='simple'),
+        pytest.param(
+            'http_requests_total{method="GET",code="200"} 1027',
+            'http_requests_total', {'method': 'GET', 'code': '200'}, 1027,
+            id='labeled',
+        ),
+        pytest.param(
+            'http_request_duration_seconds_bucket{le="0.5"} 24054',
+            'http_request_duration_seconds_bucket', {'le': '0.5'}, 24054,
+            id='histogram_bucket',
+        ),
+        pytest.param(
+            'temperature{location="outside"} 28.5',
+            'temperature', {'location': 'outside'}, 28.5,
+            id='float_value',
+        ),
+        pytest.param('test_metric\t42', 'test_metric', {}, 42, id='tab_separator'),
+        pytest.param(
+            'metric{label="val}ue"} 1',
+            'metric', {'label': 'val}ue'}, 1,
+            id='brace_in_value',
+        ),
+        pytest.param(
+            'metric{func="apn,gw",proto="tcp"} 8',
+            'metric', {'func': 'apn,gw', 'proto': 'tcp'}, 8,
+            id='comma_in_value',
+        ),
+    ],
+)
+def test_parse_sample(text, expected_name, expected_labels, expected_value):
+    sample = _parse_sample(text)
+    assert sample.name == expected_name
+    assert sample.labels == expected_labels
+    assert sample.value == expected_value
 
-    def test_parse_simple_metrics(self):
-        from prometheus_client.parser import text_string_to_metric_families
 
-        text = '# HELP test_gauge A test gauge.\n# TYPE test_gauge gauge\ntest_gauge 42\n'
-        families = list(text_string_to_metric_families(text))
-        assert len(families) == 1
-        assert families[0].name == 'test_gauge'
-        assert families[0].samples[0].value == 42
+def test_parse_sample_with_timestamp():
+    sample = _parse_sample('test_metric 1.0 1234567890000')
+    assert sample.name == 'test_metric'
+    assert sample.value == 1.0
+    assert sample.timestamp == 1234567890.0
 
-    def test_parse_labeled_metrics(self):
-        from prometheus_client.parser import text_string_to_metric_families
 
-        text = (
-            '# HELP http_requests_total Total requests.\n'
-            '# TYPE http_requests_total counter\n'
-            'http_requests_total{method="GET",code="200"} 1027\n'
-            'http_requests_total{method="POST",code="200"} 3\n'
-        )
-        families = list(text_string_to_metric_families(text))
-        assert len(families) == 1
-        assert len(families[0].samples) == 2
-        assert families[0].samples[0].labels == {'method': 'GET', 'code': '200'}
-        assert families[0].samples[0].value == 1027
-        assert families[0].samples[1].labels == {'method': 'POST', 'code': '200'}
+@pytest.mark.parametrize(
+    'text, expected_count',
+    [
+        pytest.param(
+            '# HELP test_gauge A test gauge.\n# TYPE test_gauge gauge\ntest_gauge 42\n',
+            1, id='simple',
+        ),
+        pytest.param(
+            '# HELP gauge_one First.\n# TYPE gauge_one gauge\ngauge_one 1\n'
+            '# HELP gauge_two Second.\n# TYPE gauge_two gauge\ngauge_two{env="prod"} 2\n',
+            2, id='multiple_families',
+        ),
+    ],
+)
+def test_parse_full_metric_text(text, expected_count):
+    from prometheus_client.parser import text_string_to_metric_families
 
-    def test_parse_histogram(self):
-        from prometheus_client.parser import text_string_to_metric_families
+    families = list(text_string_to_metric_families(text))
+    assert len(families) == expected_count
 
-        text = (
-            '# HELP rpc_duration_seconds RPC duration.\n'
-            '# TYPE rpc_duration_seconds histogram\n'
-            'rpc_duration_seconds_bucket{le="0.5"} 2000\n'
-            'rpc_duration_seconds_bucket{le="1.0"} 2500\n'
-            'rpc_duration_seconds_bucket{le="+Inf"} 3000\n'
-            'rpc_duration_seconds_sum 5000\n'
-            'rpc_duration_seconds_count 3000\n'
-        )
-        families = list(text_string_to_metric_families(text))
-        assert len(families) == 1
-        assert families[0].type == 'histogram'
-        assert len(families[0].samples) == 5
 
-    def test_parse_escaped_label_value(self):
-        from prometheus_client.parser import text_string_to_metric_families
+def test_parse_full_labeled_metrics():
+    from prometheus_client.parser import text_string_to_metric_families
 
-        text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="value with \\"quotes\\""} 1\n'
-        families = list(text_string_to_metric_families(text))
-        assert len(families) == 1
-        assert families[0].samples[0].labels == {'label': 'value with "quotes"'}
+    text = (
+        '# HELP http_requests_total Total requests.\n'
+        '# TYPE http_requests_total counter\n'
+        'http_requests_total{method="GET",code="200"} 1027\n'
+        'http_requests_total{method="POST",code="200"} 3\n'
+    )
+    families = list(text_string_to_metric_families(text))
+    assert len(families) == 1
+    assert len(families[0].samples) == 2
+    assert families[0].samples[0].labels == {'method': 'GET', 'code': '200'}
+    assert families[0].samples[0].value == 1027
+    assert families[0].samples[1].labels == {'method': 'POST', 'code': '200'}
 
-    def test_parse_multiple_families(self):
-        from prometheus_client.parser import text_string_to_metric_families
 
-        text = (
-            '# HELP gauge_one First.\n'
-            '# TYPE gauge_one gauge\n'
-            'gauge_one 1\n'
-            '# HELP gauge_two Second.\n'
-            '# TYPE gauge_two gauge\n'
-            'gauge_two{env="prod"} 2\n'
-        )
-        families = list(text_string_to_metric_families(text))
-        assert len(families) == 2
-        assert families[0].name == 'gauge_one'
-        assert families[1].name == 'gauge_two'
+def test_parse_full_histogram():
+    from prometheus_client.parser import text_string_to_metric_families
 
-    def test_parse_empty_label_value(self):
-        from prometheus_client.parser import text_string_to_metric_families
+    text = (
+        '# HELP rpc_duration_seconds RPC duration.\n'
+        '# TYPE rpc_duration_seconds histogram\n'
+        'rpc_duration_seconds_bucket{le="0.5"} 2000\n'
+        'rpc_duration_seconds_bucket{le="1.0"} 2500\n'
+        'rpc_duration_seconds_bucket{le="+Inf"} 3000\n'
+        'rpc_duration_seconds_sum 5000\n'
+        'rpc_duration_seconds_count 3000\n'
+    )
+    families = list(text_string_to_metric_families(text))
+    assert len(families) == 1
+    assert families[0].type == 'histogram'
+    assert len(families[0].samples) == 5
 
-        text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label=""} 1\n'
-        families = list(text_string_to_metric_families(text))
-        assert families[0].samples[0].labels == {'label': ''}
 
-    def test_parse_newline_in_label_value(self):
-        from prometheus_client.parser import text_string_to_metric_families
+def test_parse_full_escaped_label_value():
+    from prometheus_client.parser import text_string_to_metric_families
 
-        text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="line1\\nline2"} 1\n'
-        families = list(text_string_to_metric_families(text))
-        assert families[0].samples[0].labels == {'label': 'line1\nline2'}
+    text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="value with \\"quotes\\""} 1\n'
+    families = list(text_string_to_metric_families(text))
+    assert len(families) == 1
+    assert families[0].samples[0].labels == {'label': 'value with "quotes"'}
 
-    def test_parse_comma_in_label_value(self):
-        from prometheus_client.parser import text_string_to_metric_families
 
-        text = (
-            '# HELP apn_active_connections Active connections.\n'
-            '# TYPE apn_active_connections gauge\n'
-            'apn_active_connections{func="apn,gw",proto="tcp"} 8\n'
-        )
-        families = list(text_string_to_metric_families(text))
-        assert len(families) == 1
-        assert families[0].samples[0].labels == {'func': 'apn,gw', 'proto': 'tcp'}
-        assert families[0].samples[0].value == 8
+def test_parse_full_empty_label_value():
+    from prometheus_client.parser import text_string_to_metric_families
+
+    text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label=""} 1\n'
+    families = list(text_string_to_metric_families(text))
+    assert families[0].samples[0].labels == {'label': ''}
+
+
+def test_parse_full_newline_in_label_value():
+    from prometheus_client.parser import text_string_to_metric_families
+
+    text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="line1\\nline2"} 1\n'
+    families = list(text_string_to_metric_families(text))
+    assert families[0].samples[0].labels == {'label': 'line1\nline2'}
+
+
+def test_parse_full_comma_in_label_value():
+    from prometheus_client.parser import text_string_to_metric_families
+
+    text = (
+        '# HELP apn_active_connections Active connections.\n'
+        '# TYPE apn_active_connections gauge\n'
+        'apn_active_connections{func="apn,gw",proto="tcp"} 8\n'
+    )
+    families = list(text_string_to_metric_families(text))
+    assert len(families) == 1
+    assert families[0].samples[0].labels == {'func': 'apn,gw', 'proto': 'tcp'}
+    assert families[0].samples[0].value == 8
