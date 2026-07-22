@@ -1,0 +1,29 @@
+{
+  "name": "NiFi Overview",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:nifi",
+  "timerange": {
+    "interval_ms": 3600000
+  },
+  "visible_facets": [
+    "source",
+    "host",
+    "service",
+    "status",
+    "@logger.name",
+    "@logger.thread_name"
+  ],
+  "options": {
+    "columns": [
+      "status",
+      "host",
+      "service",
+      "@logger.name"
+    ],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

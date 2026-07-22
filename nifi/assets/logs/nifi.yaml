@@ -1,0 +1,49 @@
+id: nifi
+metric_id: nifi
+backend_only: false
+facets:
+  - groups:
+      - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
+  - groups:
+      - Source Code
+    name: Thread Name
+    path: logger.thread_name
+    source: log
+pipeline:
+  type: pipeline
+  name: NiFi
+  enabled: true
+  filter:
+    query: source:nifi
+  processors:
+    - type: grok-parser
+      name: Parsing NiFi application logs
+      enabled: true
+      source: message
+      samples:
+        - "2026-05-01 12:00:00,123 INFO [main] o.a.nifi.NiFi Launched NiFi"
+        - "2026-05-01 12:03:11,884 WARN [Timer-Driven Process Thread-1] o.a.n.processors.standard.PutFile PutFile[id=8f1c9e2a-3b4d-4e5f-9a1b-2c3d4e5f6a7b] failed to process session"
+        - "2026-05-01 12:05:22,001 ERROR [Timer-Driven Process Thread-2] o.a.n.processors.standard.GetFile GetFile[id=2d3e4f5a-6b7c-4d8e-9f0a-1b2c3d4e5f6a] unable to read from source directory"
+        - "2026-05-01 12:10:05,432 INFO [NiFi Web Server-19] o.a.n.audit.ProcessorAuditor admin updated the name of Processor GenerateFlowFile"
+      grok:
+        supportRules: ""
+        matchRules: |
+          nifi %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}\s+%{word:level}\s+\[%{regex("[^\\]]*"):logger.thread_name}\]\s+%{notSpace:logger.name}\s+%{data:message}
+    - type: message-remapper
+      name: Define `message` as the official message of the log
+      enabled: true
+      sources:
+        - message
+    - type: date-remapper
+      name: Define `timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+    - type: status-remapper
+      name: Define `level` as the official status of the log
+      enabled: true
+      sources:
+        - level
