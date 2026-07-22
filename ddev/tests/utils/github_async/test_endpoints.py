@@ -30,6 +30,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
+from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.utils.github_async.helpers import ENDPOINT_CALLS, json_response, make_client
 from tests.utils.github_async.payloads import (
     artifact,
@@ -411,6 +412,17 @@ async def test_endpoint_http_error_raises(case: EndpointCase) -> None:
     with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await case.call(client)
     assert exc_info.value.response.status_code == 422
+
+
+@pytest.mark.parametrize("status_code", [401, 403])
+@pytest.mark.parametrize("case", ENDPOINT_CALLS, ids=[case.id for case in ENDPOINT_CALLS])
+async def test_endpoint_authentication_error_is_actionable(case: EndpointCase, status_code: int) -> None:
+    client = make_client(httpx.MockTransport(lambda r: httpx.Response(status_code)))
+
+    with pytest.raises(GitHubAuthenticationError, match="ddev config set github.token") as exc_info:
+        await case.call(client)
+
+    assert exc_info.value.response.status_code == status_code
 
 
 @pytest.mark.parametrize("case", ENDPOINT_CALLS, ids=[case.id for case in ENDPOINT_CALLS])

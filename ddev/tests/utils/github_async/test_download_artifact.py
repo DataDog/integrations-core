@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import AsyncGitHubClient
+from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.utils.github_async.helpers import TOKEN, make_client, make_zip, patch_signed_download
 
 
@@ -35,6 +36,13 @@ async def test_download_artifact_non_302_raises(tmp_path) -> None:
 
     client = make_client(httpx.MockTransport(handler))
     with pytest.raises(httpx.HTTPError, match="Expected 302"):
+        await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
+
+
+async def test_download_artifact_authentication_error_remains_actionable(tmp_path) -> None:
+    client = make_client(httpx.MockTransport(lambda request: httpx.Response(403)))
+
+    with pytest.raises(GitHubAuthenticationError, match="ddev config set github.token"):
         await client.download_artifact("/repos/o/r/actions/artifacts/1/zip", tmp_path / "out")
 
 

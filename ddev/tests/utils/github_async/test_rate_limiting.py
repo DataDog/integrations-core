@@ -13,6 +13,7 @@ from ddev.utils.github_async import AsyncGitHubClient, async_github_client
 from ddev.utils.github_async.client import github_rate_limit_snapshot
 from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
 from ddev.utils.github_async.models import WorkflowRun
+from ddev.utils.github_errors import GitHubAuthenticationError
 from ddev.utils.rate_limiting import (
     BucketEvent,
     BudgetGovernor,
@@ -139,6 +140,33 @@ async def test_retry_on_secondary_limit_returns_success(monkeypatch: pytest.Monk
     assert secondary_index < pacing_index
 
 
+@pytest.mark.parametrize(
+    "rate_limited_response",
+    [
+        pytest.param(
+            httpx.Response(403, json={"message": "You have exceeded a secondary rate limit."}),
+            id="response_message",
+        ),
+        pytest.param(httpx.Response(403, headers={"retry-after": "0"}), id="zero_retry_after"),
+        pytest.param(httpx.Response(403, headers={"retry-after": "-1"}), id="negative_retry_after"),
+    ],
+)
+async def test_retry_on_secondary_limit_without_valid_wait_returns_success(
+    monkeypatch: pytest.MonkeyPatch, rate_limited_response: httpx.Response
+) -> None:
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    events: list[RateLimitEvent] = []
+    transport, calls = recording_transport([rate_limited_response, httpx.Response(200)])
+    client = governed_client(clock, transport, on_event=events.append)
+
+    response = await client._request("GET", "/x")
+
+    assert response.status_code == 200
+    assert len(calls) == 2
+    assert any(isinstance(event, SecondaryLimitEvent) and event.retry_after_seconds == 60 for event in events)
+
+
 async def test_retry_on_primary_exhaustion_waits_until_reset(monkeypatch: pytest.MonkeyPatch) -> None:
     """A 403 with x-ratelimit-remaining=0 is retried, and the retry waits until the window reset."""
     clock = FakeClock()
@@ -165,15 +193,18 @@ async def test_retry_on_primary_exhaustion_waits_until_reset(monkeypatch: pytest
     assert any(isinstance(e, PacingEvent) and e.reason is PacingReason.EXHAUSTED for e in events)
 
 
-async def test_no_retry_on_permission_denied_403() -> None:
-    """A 403 with no retry-after and nonzero remaining is a permission denial: raise on first attempt."""
-    transport, calls = recording_transport([httpx.Response(403, headers={"x-ratelimit-remaining": "5"})])
+@pytest.mark.parametrize("status_code", [401, 403])
+async def test_authentication_error_is_actionable_and_not_retried(status_code: int) -> None:
+    """Authentication failures are actionable and raise on the first attempt."""
+    transport, calls = recording_transport([httpx.Response(status_code, headers={"x-ratelimit-remaining": "5"})])
     client = AsyncGitHubClient(token=TOKEN, transport=transport)
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(GitHubAuthenticationError) as exc_info:
         await client._request("GET", "/x")
 
     assert len(calls) == 1
+    assert exc_info.value.response.status_code == status_code
+    assert "ddev config set github.token" in str(exc_info.value)
 
 
 async def test_no_retry_on_transport_error() -> None:
@@ -196,10 +227,11 @@ async def test_retries_exhausted_raises_after_max(monkeypatch: pytest.MonkeyPatc
     )
     client = governed_client(clock, transport, max_rate_limit_retries=1)
 
-    with pytest.raises(httpx.HTTPStatusError):
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
         await client._request("GET", "/x")
 
     assert len(calls) == 2
+    assert type(exc_info.value) is httpx.HTTPStatusError
 
 
 async def test_download_redirect_302_is_not_retried(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
