@@ -10,11 +10,15 @@ scanning function (_next_unquoted_char). This caused a ~3-5x performance regress
 
 This module restores the pre-v0.22.0 parsing approach by replacing _parse_sample
 and _parse_labels with their v0.21.1 implementations that use C-level str.index()
-and str.rindex() for fast delimiter lookup.
+and str.rindex() for fast delimiter lookup. For the OpenMetrics parser (which has
+no v0.21.1 equivalent), _next_unquoted_char is replaced with a str.find()-based
+version that avoids character-by-character iteration.
 
 The original v0.21.1 source:
 https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parser.py
 """
+
+import string
 
 import prometheus_client.parser as _prom_parser
 from prometheus_client.samples import Sample
@@ -99,13 +103,42 @@ def _parse_sample(text):
         return Sample(name, {}, value, timestamp)
 
 
+def _next_unquoted_char(text, chs, startidx=0):
+    """str.find()-based replacement for the character-by-character _next_unquoted_char.
+
+    Used for the OpenMetrics parser path which has no v0.21.1 equivalent to copy.
+    """
+    if chs is None:
+        chs = string.whitespace
+
+    best = -1
+    for ch in chs:
+        p = text.find(ch, startidx)
+        if p != -1 and (best == -1 or p < best):
+            best = p
+    return best
+
+
 def apply():
-    """Monkey-patch prometheus_client parser with v0.21.1 hot-path functions."""
+    """Monkey-patch prometheus_client parsers with optimized hot-path functions."""
     if getattr(_prom_parser, '_dd_optimized', False):
         return
 
+    # Prometheus text format: replace _parse_sample with v0.21.1 implementation
     _prom_parser._parse_sample = _parse_sample
     _prom_parser._dd_optimized = True
+
+    # OpenMetrics format: replace _next_unquoted_char with str.find() version.
+    # The OpenMetrics parser imports _next_unquoted_char, parse_labels, and
+    # _split_quoted from prometheus_client.parser via `from ..parser import`,
+    # so we must patch both modules' bindings.
+    _prom_parser._next_unquoted_char = _next_unquoted_char
+    try:
+        import prometheus_client.openmetrics.parser as _om_parser
+
+        _om_parser._next_unquoted_char = _next_unquoted_char
+    except (ImportError, AttributeError):
+        pass
 
 
 apply()
