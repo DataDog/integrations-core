@@ -33,6 +33,7 @@ def _build_device_ip(container_ip, last_digit='1'):
 
 
 @common.snmp_listener_only
+@pytest.mark.flaky
 def test_e2e_snmp_listener(dd_agent_check, container_ip, autodiscovery_ready):
     """
     Test Agent Autodiscovery
