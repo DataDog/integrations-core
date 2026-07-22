@@ -645,17 +645,17 @@ def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved():
         check._resource_collector._fetch("/api/v1/applications")
 
     kwargs = get.call_args.kwargs
-    assert kwargs.get("extra_headers") == {"Authorization": "Bearer tok"}  # merged into the wrapper's headers
-    assert "headers" not in kwargs  # never pass `headers`; it would shadow the wrapper's configured auth
+    assert kwargs.get("extra_headers") == {"Authorization": "Bearer tok"}  # merged into configured headers
+    assert "headers" not in kwargs  # never pass `headers`; it would shadow the HTTP client's configured auth
 
 
-def test_fetch_inherits_wrapper_auth_when_no_genresources_token():
+def test_fetch_inherits_http_client_auth_when_no_genresources_token():
     check = build_check(genresources_auth_token=None)  # rely on the instance's HTTP auth (headers / auth_token)
     with patch.object(RequestsWrapper, "get", return_value=MockResponse(json_data={"items": []})) as get:
         check._resource_collector._fetch("/api/v1/applications")
 
     kwargs = get.call_args.kwargs
-    assert "headers" not in kwargs  # must not clobber the wrapper's configured headers
+    assert "headers" not in kwargs  # must not clobber the HTTP client's configured headers
     assert (
         "extra_headers" not in kwargs
     )  # omit entirely -- even empty extra_headers would drop the inherited auth_token
