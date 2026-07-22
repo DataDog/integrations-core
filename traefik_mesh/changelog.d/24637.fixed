@@ -1,0 +1,1 @@
+Fix a bug where an unset optional endpoint field could crash the check with an invalid URL error.
