@@ -110,7 +110,6 @@ def _next_unquoted_char(text, chs, startidx=0):
     """
     if chs is None:
         chs = string.whitespace
-
     best = -1
     for ch in chs:
         p = text.find(ch, startidx)

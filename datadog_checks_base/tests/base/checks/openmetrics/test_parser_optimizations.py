@@ -6,6 +6,7 @@
 import pytest
 
 from datadog_checks.base.checks.openmetrics.parser_optimizations import (
+    _next_unquoted_char,
     _parse_labels,
     _parse_sample,
 )
@@ -166,6 +167,38 @@ def test_parse_full_newline_in_label_value():
     text = '# HELP test_metric A test.\n# TYPE test_metric gauge\ntest_metric{label="line1\\nline2"} 1\n'
     families = list(text_string_to_metric_families(text))
     assert families[0].samples[0].labels == {'label': 'line1\nline2'}
+
+
+@pytest.mark.parametrize(
+    'text, chs, startidx, expected',
+    [
+        pytest.param('metric{label="value"} 1', ['{'], 0, 6, id='open_brace'),
+        pytest.param('metric{label="value"} 1', ['}'], 6, 20, id='close_brace'),
+        pytest.param('a="b" c', [' '], 0, 5, id='space_unquoted'),
+        pytest.param('nope', ['{'], 0, -1, id='not_found'),
+    ],
+)
+def test_next_unquoted_char(text, chs, startidx, expected):
+    assert _next_unquoted_char(text, chs, startidx) == expected
+
+
+def test_parse_full_closing_brace_in_label_value():
+    """Regression test: '}' inside a quoted label value must not be mistaken for
+    the label block end. Reproduces the cilium/azure_iot_edge CI failures."""
+    from prometheus_client.parser import text_string_to_metric_families
+
+    text = (
+        '# HELP k8s_api_calls Total API calls.\n'
+        '# TYPE k8s_api_calls counter\n'
+        'k8s_api_calls{method="DELETE",path="/apis/v1/namespaces/{namespace}/pods"} 5\n'
+    )
+    families = list(text_string_to_metric_families(text))
+    assert len(families) == 1
+    assert families[0].samples[0].labels == {
+        'method': 'DELETE',
+        'path': '/apis/v1/namespaces/{namespace}/pods',
+    }
+    assert families[0].samples[0].value == 5
 
 
 def test_parse_full_comma_in_label_value():
