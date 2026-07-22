@@ -50,7 +50,6 @@ from ddev.cli.meta.ai.tui.messages import (
     BeforeGoalCheck,
     ContextCleared,
     ExecutionFailed,
-    ExecutionSucceeded,
     PhaseErrored,
     PhaseFinished,
     PhaseStarted,
@@ -188,7 +187,7 @@ class ExecutionScreen(TogoScreen):
                 orchestrator = self._build_real_orchestrator(callbacks)
             self._orchestrator = orchestrator
             await orchestrator.run_async()
-            self.post_message(ExecutionSucceeded())
+            self.togo_app.execution_status = ExecutionStatus.COMPLETED
         except asyncio.CancelledError:
             if self.togo_app.bridge_target is self:
                 self.togo_app.execution_status = ExecutionStatus.IDLE
@@ -348,9 +347,6 @@ class ExecutionScreen(TogoScreen):
             status is RunStatus.DONE for status in self._phase_statuses.values()
         ):
             self.togo_app.execution_status = ExecutionStatus.FINISHING
-
-    def on_execution_succeeded(self, msg: ExecutionSucceeded) -> None:
-        self.togo_app.execution_status = ExecutionStatus.COMPLETED
 
     def on_phase_errored(self, msg: PhaseErrored) -> None:
         self._phase_errors[msg.phase_id] = msg.error

@@ -41,10 +41,6 @@ class PhaseErrored(Message):
         self.error = error
 
 
-class ExecutionSucceeded(Message):
-    """Fired when orchestration exits successfully."""
-
-
 class RunErrored(Message):
     """Fired when orchestration stops because a phase failed."""
 
