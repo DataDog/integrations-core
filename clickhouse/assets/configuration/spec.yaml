@@ -296,13 +296,13 @@ files:
             example: false
           fleet_configurable: false
     - name: async_insert_flushes
-      description: Configure async insert flush collection
+      description: Configure collection of async insert flush events from system.asynchronous_insert_log.
       options:
         - name: enabled
           description: |
-            Enable collection of async insert flush events from system.asynchronous_insert_log.
-            Requires `dbm: true`. Sends per-flush records as DBM events (dbm_type="async_inserts_flush")
-            including flush status, exception (if any), bytes, and row count per flush.
+            Enable collection of async insert flushes. Requires `dbm: true`.
+            These records represent individual flush events (dbm_type="async_inserts_flush"), including flush
+            status, exception (if any), bytes, and row count per flush.
           value:
             type: boolean
             example: false
