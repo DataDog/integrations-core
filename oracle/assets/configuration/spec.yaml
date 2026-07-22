@@ -6,12 +6,12 @@ files:
     options:
     - name: use_instant_client
       description: |
-          Determines whether the Agent uses the Oracle Instant Client to connect instead of the Oracle native client. 
+          Determines whether the Agent uses the Oracle Instant Client to connect instead of the Oracle native client.
           This option cannot be used at the same time as `jdbc_driver_path`.
       value:
         example: false
         type: boolean
-      fleet_configurable: false
+      fleet_configurable: true
     - template: init_config/db
     - template: init_config/default
   - template: instances
@@ -22,7 +22,7 @@ files:
       value:
         type: string
         example: localhost:1521
-      fleet_configurable: false
+      fleet_configurable: true
     - name: service_name
       description: |
         The Oracle Database service name. To view the services available on your server,
@@ -30,7 +30,7 @@ files:
       required: true
       value:
         type: string
-      fleet_configurable: false
+      fleet_configurable: true
     - name: protocol
       description: |
         The protocol to connect to the Oracle Database Server. Valid protocols include TCP and TCPS.
@@ -43,20 +43,20 @@ files:
       value:
         type: string
         example: TCP
-      fleet_configurable: false
+      fleet_configurable: true
     - name: username
       description: The username for the Datadog user account.
       required: true
       value:
         type: string
-      fleet_configurable: false
+      fleet_configurable: true
     - name: password
       description: The password for the Datadog user account.
       required: true
       secret: true
       value:
         type: string
-      fleet_configurable: false
+      fleet_configurable: true
     - name: jdbc_driver_path
       description: |
         Set this parameter if you are not using the Oracle native client or Instant Client.
