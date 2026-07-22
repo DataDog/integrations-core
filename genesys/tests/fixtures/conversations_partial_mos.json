@@ -1,0 +1,18 @@
+{
+  "conversations": [
+    {
+      "conversationId": "9c8d5e4f-3a6b-7c8d-1e0f-4a5b6c7d8e9f",
+      "conversationStart": "2024-01-15T11:00:00.000Z",
+      "conversationEnd": "2024-01-15T11:04:18.220Z",
+      "originatingDirection": "inbound",
+      "mediaStatsMinConversationMos": 4.30
+    },
+    {
+      "conversationId": "0d9e6f5a-4b7c-8d9e-2f10-5b6c7d8e9f01",
+      "conversationStart": "2024-01-15T11:05:00.000Z",
+      "conversationEnd": "2024-01-15T11:06:02.000Z",
+      "originatingDirection": "outbound"
+    }
+  ],
+  "totalHits": 2
+}

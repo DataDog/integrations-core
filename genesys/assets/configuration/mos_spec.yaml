@@ -1,0 +1,51 @@
+name: Genesys Cloud MOS
+files:
+- name: genesys_mos.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: region
+      description: |
+        The Genesys Cloud region host for your organization, without the `api.` prefix
+        or scheme. For example: mypurecloud.com, usw2.pure.cloud, mypurecloud.ie.
+      required: true
+      value:
+        type: string
+        example: mypurecloud.com
+    - name: client_id
+      description: |
+        The Client ID of a Genesys Cloud OAuth client using the Client Credentials grant.
+        The client's role must grant the "Analytics > Conversation Detail > View" permission.
+      required: true
+      value:
+        type: string
+    - name: client_secret
+      description: The Client Secret for the OAuth client above.
+      required: true
+      secret: true
+      value:
+        type: string
+    - name: mos_threshold
+      description: |
+        Conversations with a MOS at or below this value are counted in
+        genesys_mos.conversation.below_threshold.count. MOS ranges ~1.0-4.9.
+      value:
+        type: number
+        example: 4.2
+    - name: collection_lag_seconds
+      description: |
+        How far back to offset the trailing query window, giving Genesys time to index
+        ended conversations before they are queried.
+      value:
+        type: integer
+        example: 60
+    - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 300
+        min_collection_interval.description: |
+          The interval in seconds between check runs. This also sets the length of the
+          trailing query window, so consecutive runs cover approximately disjoint
+          windows and the MOS distribution is not double-counted.

@@ -1,0 +1,31 @@
+{
+  "conversations": [
+    {
+      "conversationId": "6f5a2b1c-0d3e-4f5a-8b7c-1d2e3f4a5b6c",
+      "conversationStart": "2024-01-15T10:00:01.123Z",
+      "conversationEnd": "2024-01-15T10:05:23.456Z",
+      "originatingDirection": "inbound",
+      "mediaStatsMinConversationMos": 4.42,
+      "participants": [
+        {
+          "participantId": "a1b2c3d4-1111-2222-3333-444455556666",
+          "purpose": "customer"
+        }
+      ]
+    },
+    {
+      "conversationId": "7a6b3c2d-1e4f-5a6b-9c8d-2e3f4a5b6c7d",
+      "conversationStart": "2024-01-15T10:01:10.000Z",
+      "conversationEnd": "2024-01-15T10:03:47.900Z",
+      "originatingDirection": "outbound",
+      "mediaStatsMinConversationMos": 4.05,
+      "participants": [
+        {
+          "participantId": "b2c3d4e5-2222-3333-4444-555566667777",
+          "purpose": "agent"
+        }
+      ]
+    }
+  ],
+  "totalHits": 3
+}
