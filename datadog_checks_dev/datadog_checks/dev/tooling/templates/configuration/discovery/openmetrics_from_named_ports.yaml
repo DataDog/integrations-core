@@ -1,5 +1,0 @@
-strategy: from_named_ports
-port_names:
-- metrics
-candidates:
-- openmetrics_endpoint: "http://{service.host}:{port.number}/metrics"

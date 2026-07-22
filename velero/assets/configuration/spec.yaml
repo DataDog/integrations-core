@@ -2,13 +2,6 @@ name: Velero
 fleet_configurable: true
 files:
 - name: velero.yaml
-  discovery:
-    strategies:
-    - template: discovery/openmetrics_from_named_ports
-      overrides:
-        port_names:
-        - http-monitoring
-        - metrics
   options:
   - template: init_config
     options:
@@ -21,10 +14,3 @@ files:
     - type: docker
       source: velero
       service: <SERVICE>
-- name: auto_conf.yaml
-  options:
-  - template: ad_identifiers
-    overrides:
-      value.example:
-      - velero
-  - template: auto_conf/discovery

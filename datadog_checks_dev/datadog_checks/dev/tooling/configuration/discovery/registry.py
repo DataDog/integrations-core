@@ -20,7 +20,7 @@ PORT_FIELDS = frozenset({'number', 'name'})
 class Input:
     """A declared strategy input, validated against the spec stanza."""
 
-    type: str  # "array[int]" | "array[string]" | "string" | "integer" | "boolean"
+    type: str  # "array[int]" | "string" | "integer" | "boolean"
     required: bool = True
 
 
