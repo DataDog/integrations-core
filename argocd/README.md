@@ -161,6 +161,16 @@ See the [Autodiscovery Integration Templates][3] for guidance on applying the pa
 | -------------- | ---------------------------------------------------- |
 | `<LOG_CONFIG>` | `{"source": "argocd", "service": "<SERVICE_NAME>"}`  |
 
+### Webhook Configuration
+
+Configure the Argo CD [Notifications controller][1] to forward application sync and health events to Datadog through a webhook.
+
+1. {{< integration-api-key-picker >}}
+2. Add a `webhook.datadog` service to the `argocd-notifications-cm` ConfigMap, using the webhook URL generated above as the `url`.
+3. Define a template and trigger in the same ConfigMap for the application events you want to send to Datadog (for example, sync or health status changes).
+4. Subscribe the target `Application` resources to the trigger by adding the corresponding `notifications.argoproj.io/subscribe.<trigger>.datadog` annotation.
+5. Apply the updated ConfigMap. Argo CD sends a notification to the endpoint the next time the trigger condition is met.
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `argocd` under the Checks section.
@@ -173,7 +183,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 ### Events
 
-The Argo CD integration does not include any events.
+The Argo CD integration submits application sync and health status events to Datadog when the Argo CD [Notifications controller][1] is configured to forward them through the webhook described in [Webhook Configuration](#webhook-configuration).
 
 ### Service Checks
 
