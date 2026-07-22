@@ -37,6 +37,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import httpx
@@ -48,8 +49,13 @@ from ddev.utils.github_async.models import (
     Label,
     PullRequest,
     WorkflowDispatchResult,
+    WorkflowJobsList,
     WorkflowRun,
 )
+
+# Stable URL baked into the default `create_workflow_dispatch` response. Exported so tests
+# that assert on the URL can reference the helper rather than duplicating the literal.
+DEFAULT_DISPATCH_HTML_URL = 'https://github.com/test/repo/actions/runs/1'
 
 
 @dataclass
@@ -86,7 +92,11 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
             response=httpx.Response(404),
         ),
         'create_workflow_dispatch': lambda: GitHubResponse(
-            data=WorkflowDispatchResult(workflow_run_id=123),
+            data=WorkflowDispatchResult(
+                workflow_run_id=123,
+                run_url='https://api.github.com/repos/test/repo/actions/runs/123',
+                html_url=DEFAULT_DISPATCH_HTML_URL,
+            ),
             headers={},
         ),
         # Default to a completed/successful run so happy-path tests don't have to register one.
@@ -125,6 +135,11 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         # An empty page; tests that need artifacts register their own ArtifactsList.
         'list_workflow_run_artifacts': lambda: GitHubResponse(
             data=ArtifactsList(total_count=0, artifacts=[]),
+            headers={},
+        ),
+        # An empty page; tests that need jobs register their own WorkflowJobsList.
+        'list_workflow_jobs': lambda: GitHubResponse(
+            data=WorkflowJobsList(total_count=0, jobs=[]),
             headers={},
         ),
         # Download is a side-effecting no-op by default; per-URL failures are registered explicitly.
@@ -253,7 +268,9 @@ class FakeAsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-    ) -> GitHubResponse[WorkflowDispatchResult]:
+        *,
+        return_run_details: bool = False,
+    ) -> GitHubResponse[Any]:
         return self._call(
             'create_workflow_dispatch',
             owner=owner,
@@ -262,6 +279,7 @@ class FakeAsyncGitHubClient:
             ref=ref,
             inputs=inputs,
             timeout=timeout,
+            return_run_details=return_run_details,
         )
 
     async def get_workflow_run(
@@ -357,6 +375,36 @@ class FakeAsyncGitHubClient:
             else:
                 yield GitHubResponse.model_validate({'data': page, 'headers': {}})
 
+    async def list_workflow_jobs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowJobsList]]:
+        """Async-generator mirror. A registered response may be a single page or a list of pages."""
+        self._record(
+            'list_workflow_jobs',
+            owner=owner,
+            repo=repo,
+            run_id=run_id,
+            per_page=per_page,
+            timeout=timeout,
+        )
+        response = self._resolve_response(
+            'list_workflow_jobs',
+            {'owner': owner, 'repo': repo, 'run_id': run_id, 'per_page': per_page, 'timeout': timeout},
+        )
+        if isinstance(response, BaseException):
+            raise response
+        pages = response if isinstance(response, list) else [response]
+        for page in pages:
+            if isinstance(page, GitHubResponse):
+                yield page
+            else:
+                yield GitHubResponse.model_validate({'data': page, 'headers': {}})
+
     async def download_artifact(
         self,
         archive_download_url: str,
@@ -376,6 +424,7 @@ class FakeAsyncGitHubClient:
         )
         if isinstance(response, BaseException):
             raise response
+        Path(dest_path).mkdir(parents=True, exist_ok=True)
         return None
 
     async def aclose(self) -> None:

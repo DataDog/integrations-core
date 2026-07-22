@@ -582,7 +582,9 @@ class MySql(DatabaseCheck):
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
         # Binary log statistics
-        if self.global_variables.log_bin_enabled:
+        if self.global_variables.log_bin_enabled and is_affirmative(
+            self._config.options.get('binlog_size_metrics', True)
+        ):
             with tracked_query(self, operation="binary_log_metrics"):
                 results['Binlog_space_usage_bytes'] = self._get_binary_log_stats(db)
 
@@ -1144,7 +1146,12 @@ class MySql(DatabaseCheck):
             for replica in replica_status:
                 # MySQL <5.7 does not have Channel_Name.
                 # For MySQL >=5.7 'Channel_Name' is set to an empty string by default
-                channel = self._config.replication_channel or replica.get('Channel_Name') or 'default'
+                channel = (
+                    self._config.replication_channel
+                    or replica.get('Channel_Name')
+                    or replica.get('Connection_name')
+                    or 'default'
+                )
                 for key, value in replica.items():
                     if value is not None:
                         replica_results[key]['channel:{0}'.format(channel)] = value

@@ -9,9 +9,9 @@ def initialize_instance(values, **kwargs):
     if 'custom_queries' in values:
         custom_queries = values['custom_queries']
         for custom_query in custom_queries:
-            # Each custom query must have `endpoint`, `data_path`, and 'columns`
-            if not (custom_query.get('endpoint') and custom_query.get('data_path') and custom_query.get('columns')):
-                raise ValueError('Each custom query must have an `endpoint`, `data_path`, and `columns` values')
+            # Each custom query must have `endpoint` and `columns`; `data_path` is optional
+            if not (custom_query.get('endpoint') and custom_query.get('columns')):
+                raise ValueError('Each custom query must have an `endpoint` and `columns` values')
 
             columns = custom_query.get('columns')
             for column in columns:

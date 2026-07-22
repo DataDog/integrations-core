@@ -8,23 +8,28 @@ from __future__ import annotations
 import io
 import re
 import zipfile
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator, Callable
+from contextlib import asynccontextmanager, suppress
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal, Self
+from typing import Any, Literal, Self, overload
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field
 
+from ddev.utils.rate_limiting import NULL_SNAPSHOT, BudgetSnapshot, InstrumentedAsyncLimiter
+
+from .defaults import default_github_rate_limiter
 from .models import (
     ArtifactsList,
     CheckRun,
+    CheckRunConclusion,
     IssueComment,
     Label,
     PullRequest,
     PullRequestReviewComment,
     WorkflowDispatchResult,
+    WorkflowJobsList,
     WorkflowRun,
 )
 
@@ -73,24 +78,80 @@ class GitHubResponse[T](BaseModel):
     headers: dict[str, str] = Field(default_factory=dict)
 
 
+def parse_header[T](headers: httpx.Headers, key: str, cast: Callable[[str], T]) -> T | None:
+    """Return the header at *key* run through *cast*, or None if it is absent or unparseable."""
+    raw = headers.get(key)
+    if raw is None:
+        return None
+    with suppress(ValueError, TypeError):
+        return cast(raw)
+    return None
+
+
+def github_rate_limit_snapshot(headers: httpx.Headers) -> BudgetSnapshot | None:
+    """Parse GitHub's `x-ratelimit-*` / `retry-after` response headers into a BudgetSnapshot."""
+    snapshot = BudgetSnapshot(
+        limit=parse_header(headers, "x-ratelimit-limit", int),
+        remaining=parse_header(headers, "x-ratelimit-remaining", int),
+        reset_at=parse_header(headers, "x-ratelimit-reset", float),
+        retry_after=parse_header(headers, "retry-after", lambda raw: float(int(raw))),
+    )
+    return snapshot if snapshot != NULL_SNAPSHOT else None
+
+
 class AsyncGitHubClient:
     """
     Async HTTP client for the GitHub REST API.
 
     Uses a shared httpx.AsyncClient for connection pooling. Call `aclose()` when
     finished to release resources, or use the `async_github_client` context manager.
+
+    Rate-limit protection is on by default: requests are paced and, when GitHub signals a
+    rate-limit rejection, retried in reaction to the response headers. The governor supplies the
+    backoff, so there is no sleeping or backoff arithmetic in this client. The default protection
+    logs through the ``ddev.utils.github_async.defaults`` logger.
+
+    Args:
+        token: GitHub token; must be non-empty.
+        rate_limiter: Overrides the default rate limiter; it does not enable protection, which is
+            already on. None builds the default (a permissive local bucket fronting a reactive
+            BudgetGovernor). There is deliberately no way to disable protection: GitHub requires
+            clients to honor ``retry-after``, and persistent violations risk the shared token being
+            throttled harder or banned. Because octo-sts mints the token against one installation
+            for the whole company, a single unprotected client instance degrades every other
+            consumer of that token. Callers with special needs pass their own limiter; they do not
+            turn protection off.
+        default_timeout: Default per-request HTTP timeout in seconds. Bounds individual HTTP
+            requests only; it does not bound governor waits. To bound total wait, pass a limiter
+            whose governor sets ``max_wait_seconds``.
+        max_rate_limit_retries: Extra attempts for a header-confirmed rate-limit response (403/429).
+            Each retry is a full fresh acquisition (governor wait plus bucket token); the default of
+            2 covers the common "hit a secondary limit once, wait, succeed" case plus one repeat.
+            Only rate-limit responses are retried: transport errors and non-rate-limit statuses
+            propagate immediately, and RateLimitWaitAbandoned (the governor's ``max_wait_seconds``
+            killswitch) propagates to the caller.
+        transport: Optional custom HTTPX transport (useful for testing with MockTransport).
     """
 
     def __init__(
         self,
         token: str,
+        *,
+        rate_limiter: InstrumentedAsyncLimiter | None = None,
         default_timeout: float = 30.0,
+        max_rate_limit_retries: int = 2,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         if not token:
             raise ValueError("GitHub token must not be empty.")
 
+        # A None limiter means "use the default protection," not "no protection." The local bucket
+        # is deliberately permissive because the governor is the protection; with a healthy budget
+        # and no secondary limits the governor adds zero wait, so this default is invisible to
+        # well-behaved callers and engages only once GitHub has already signaled backpressure.
+        self._rate_limiter = rate_limiter if rate_limiter is not None else default_github_rate_limiter()
         self._default_timeout = default_timeout
+        self._max_rate_limit_retries = max_rate_limit_retries
         self._headers = {
             "Authorization": f"Bearer {token}",
             "X-GitHub-Api-Version": GITHUB_API_VERSION,
@@ -114,6 +175,39 @@ class AsyncGitHubClient:
     def _effective_timeout(self, timeout: float | None) -> float:
         return timeout if timeout is not None else self._default_timeout
 
+    @staticmethod
+    def _is_rate_limit_response(response: httpx.Response) -> bool:
+        """Whether *response* is a retryable rate-limit rejection, by GitHub's own discrimination rule.
+
+        A 403 is also used for plain permission denials, which waiting cannot fix; retrying one would
+        sleep out a pause (up to a full window) and then fail identically. Only header-confirmed
+        rate-limit responses are retryable.
+        """
+        if response.status_code not in (403, 429):
+            return False
+        return "retry-after" in response.headers or response.headers.get("x-ratelimit-remaining") == "0"
+
+    async def _execute_request(
+        self,
+        method: str,
+        endpoint: str,
+        timeout: float,
+        **kwargs: Any,
+    ) -> httpx.Response:
+        try:
+            response = await self._client.request(method, endpoint, timeout=timeout, **kwargs)
+        except httpx.TransportError as exc:
+            raise type(exc)(f"{method} {endpoint}: {exc}") from exc
+        # Observe before raise_for_status, never after: learning must not be gated on success. A
+        # failed response's rate-limit headers arm the shared pause even if the caller swallows the
+        # exception, so one request's 403 protects every other in-flight and future request in this
+        # process.
+        snapshot = github_rate_limit_snapshot(response.headers)
+        if snapshot is not None:
+            self._rate_limiter.observe(snapshot)
+        response.raise_for_status()
+        return response
+
     async def _request(
         self,
         method: str,
@@ -122,12 +216,29 @@ class AsyncGitHubClient:
         **kwargs: Any,
     ) -> httpx.Response:
         effective_timeout = self._effective_timeout(timeout)
-        try:
-            response = await self._client.request(method, endpoint, timeout=effective_timeout, **kwargs)
-        except httpx.TransportError as exc:
-            raise type(exc)(f"{method} {endpoint}: {exc}") from exc
-        response.raise_for_status()
-        return response
+        # Rate-limit-aware retry lives here, not in _execute_request: re-entering the limiter IS the
+        # backoff. The failed response's headers were observed inside _execute_request before the
+        # exception propagated, so the governor already holds the pause this very 403 armed;
+        # re-acquiring waits it out exactly (retry-after plus buffer for secondary limits, until
+        # reset for an exhausted window). Hence no sleeps or backoff math. A loop inside
+        # _execute_request would be wrong: it would retry while still holding the acquisition,
+        # without re-consulting the governor. Concurrent retries also serialize behind the same
+        # shared pause instead of stampeding, which is what GitHub's secondary-limit guidance asks
+        # for. RateLimitWaitAbandoned raised while (re-)acquiring propagates untouched from here: it
+        # is the caller-configured killswitch, and counting it as an attempt would defeat it.
+        for attempt in range(self._max_rate_limit_retries + 1):
+            async with self._rate_limiter:
+                try:
+                    return await self._execute_request(method, endpoint, effective_timeout, **kwargs)
+                except httpx.HTTPStatusError as exc:
+                    # A rate-limit 403/429 is safe to retry for every endpoint, including
+                    # non-idempotent POSTs, precisely because GitHub rejected it without performing
+                    # the action. (Transport errors are never retried, and are not caught here: after
+                    # one we cannot know whether the action executed.) Give up on the last attempt or
+                    # on a non-rate-limit status, which waiting cannot fix.
+                    if attempt == self._max_rate_limit_retries or not self._is_rate_limit_response(exc.response):
+                        raise
+        raise RuntimeError("unreachable: the retry loop always returns or raises")  # pragma: no cover
 
     async def _paginated_request(
         self,
@@ -161,6 +272,7 @@ class AsyncGitHubClient:
     # Endpoint methods
     # ------------------------------------------------------------------
 
+    @overload
     async def create_workflow_dispatch(
         self,
         owner: str,
@@ -169,7 +281,34 @@ class AsyncGitHubClient:
         ref: str,
         inputs: dict[str, str] | None = None,
         timeout: float | None = None,
-    ) -> GitHubResponse[WorkflowDispatchResult]:
+        *,
+        return_run_details: Literal[True],
+    ) -> GitHubResponse[WorkflowDispatchResult]: ...
+
+    @overload
+    async def create_workflow_dispatch(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        inputs: dict[str, str] | None = None,
+        timeout: float | None = None,
+        *,
+        return_run_details: Literal[False] = False,
+    ) -> GitHubResponse[None]: ...
+
+    async def create_workflow_dispatch(
+        self,
+        owner: str,
+        repo: str,
+        workflow_id: str | int,
+        ref: str,
+        inputs: dict[str, str] | None = None,
+        timeout: float | None = None,
+        *,
+        return_run_details: bool = False,
+    ) -> GitHubResponse[WorkflowDispatchResult] | GitHubResponse[None]:
         """
         Calls the GitHub API to trigger a workflow dispatch event.
 
@@ -183,20 +322,29 @@ class AsyncGitHubClient:
             ref: Branch or tag name to run the workflow on.
             inputs: Optional key/value inputs forwarded to the workflow.
             timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            return_run_details: When True, requests a 200 response with the new run's metadata
+                (workflow_run_id, run_url, html_url) instead of the default 204 No Content.
+                See https://github.blog/changelog/2026-02-19-workflow-dispatch-api-now-returns-run-ids/.
 
         Returns:
-            GitHubResponse[WorkflowDispatchResult]: The dispatched run id and headers.
+            When ``return_run_details=False`` (default): ``GitHubResponse[None]`` wrapping the 204.
+            When ``return_run_details=True``: ``GitHubResponse[WorkflowDispatchResult]`` with the new run's
+            IDs and URLs.
         """
-        body: dict[str, Any] = {"ref": ref, "return_run_details": True}
+        body: dict[str, Any] = {"ref": ref}
         if inputs is not None:
             body["inputs"] = inputs
+        if return_run_details:
+            body["return_run_details"] = True
         response = await self._request(
             "POST",
             f"/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches",
             timeout=timeout,
             json=body,
         )
-        return self._parse_response(response, WorkflowDispatchResult)
+        if return_run_details:
+            return self._parse_response(response, WorkflowDispatchResult)
+        return GitHubResponse[None].model_validate({"data": None, "headers": dict(response.headers)})
 
     async def get_workflow_run(
         self,
@@ -250,6 +398,34 @@ class AsyncGitHubClient:
         endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/artifacts"
         async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
             yield self._parse_response(response, ArtifactsList)
+
+    async def list_workflow_jobs(
+        self,
+        owner: str,
+        repo: str,
+        run_id: int,
+        per_page: int = 30,
+        timeout: float | None = None,
+    ) -> AsyncIterator[GitHubResponse[WorkflowJobsList]]:
+        """
+        Calls the GitHub API to list jobs for a workflow run (paginated).
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/actions/workflow-jobs#list-jobs-for-a-workflow-run
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            run_id: Numeric ID of the workflow run.
+            per_page: Number of jobs per page (default 30, max 100).
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+
+        Returns:
+            AsyncIterator[GitHubResponse[WorkflowJobsList]]: One page of jobs per iteration.
+        """
+        endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
+        async for response in self._paginated_request("GET", endpoint, timeout=timeout, params={"per_page": per_page}):
+            yield self._parse_response(response, WorkflowJobsList)
 
     async def create_issue_comment(
         self,
@@ -482,7 +658,7 @@ class AsyncGitHubClient:
         repo: str,
         check_run_id: int,
         status: Literal["queued", "in_progress", "completed"] | None = None,
-        conclusion: str | None = None,
+        conclusion: CheckRunConclusion | None = None,
         details_url: str | None = None,
         output: dict[str, Any] | None = None,
         timeout: float | None = None,
@@ -531,13 +707,17 @@ class AsyncGitHubClient:
         timeout: float | None = None,
     ) -> str:
         """Authenticated GET; return the unauthenticated signed URL from the 302 Location header."""
-        effective_timeout = self._effective_timeout(timeout)
-        redirect_response = await self._client.request(
-            "GET",
-            archive_download_url,
-            timeout=effective_timeout,
-            follow_redirects=False,
-        )
+        try:
+            redirect_response = await self._request(
+                "GET", archive_download_url, timeout=timeout, follow_redirects=False
+            )
+        except httpx.HTTPStatusError as exc:
+            # httpx.raise_for_status() treats the expected 302 as an error since it isn't a 2xx;
+            # recover the response from the exception so the redirect can still be inspected below.
+            # The retry layer in _request is deliberately transparent here: a 302 is not a rate-limit
+            # response by _is_rate_limit_response, so it is never retried and surfaces on the first
+            # attempt exactly as before.
+            redirect_response = exc.response
         if redirect_response.status_code != 302:
             redirect_response.raise_for_status()
             raise httpx.HTTPError(
@@ -611,21 +791,41 @@ class AsyncGitHubClient:
 @asynccontextmanager
 async def async_github_client(
     token: str,
+    *,
+    rate_limiter: InstrumentedAsyncLimiter | None = None,
     default_timeout: float = 30.0,
+    max_rate_limit_retries: int = 2,
     transport: httpx.AsyncBaseTransport | None = None,
 ) -> AsyncIterator[AsyncGitHubClient]:
     """
     Async context manager that creates an AsyncGitHubClient and ensures it is closed on exit.
 
+    Rate-limit protection is on by default; the governor paces requests and supplies the backoff for
+    retries. Header-confirmed rate-limit responses (403/429) are retried, transport errors and
+    non-rate-limit statuses are not, and RateLimitWaitAbandoned propagates to the caller when the
+    governor is configured with a wait budget. The default protection logs through the
+    ``ddev.utils.github_async.defaults`` logger.
+
     Args:
         token: GitHub personal access token or app token.
-        default_timeout: Default request timeout in seconds.
+        rate_limiter: Overrides the default rate limiter; None uses the built-in default. This
+            selects which limiter to use, it does not enable or disable protection (protection is
+            always on).
+        default_timeout: Default per-request HTTP timeout in seconds. Bounds individual HTTP
+            requests only, not governor waits.
+        max_rate_limit_retries: Extra attempts for a header-confirmed rate-limit response.
         transport: Optional custom HTTPX transport (useful for testing with MockTransport).
 
     Yields:
         AsyncGitHubClient: A ready-to-use async GitHub client.
     """
-    client = AsyncGitHubClient(token=token, default_timeout=default_timeout, transport=transport)
+    client = AsyncGitHubClient(
+        token=token,
+        rate_limiter=rate_limiter,
+        default_timeout=default_timeout,
+        max_rate_limit_retries=max_rate_limit_retries,
+        transport=transport,
+    )
     try:
         yield client
     finally:

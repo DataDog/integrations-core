@@ -10,7 +10,7 @@ import pytest
 import requests
 
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
-from datadog_checks.dev.docker import docker_run, get_docker_hostname
+from datadog_checks.dev.docker import docker_run, get_docker_hostname, get_e2e_discovery_metadata
 from datadog_checks.dev.utils import find_free_port
 from datadog_checks.prefect import PrefectCheck
 
@@ -65,7 +65,7 @@ def dd_environment(instance: Callable[[str], dict[str, str | dict[str, list[str]
     ):
         yield (
             {"instances": [instance(prefect_url)]},
-            E2E_METADATA,
+            {**E2E_METADATA, **get_e2e_discovery_metadata()},
         )
 
 

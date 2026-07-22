@@ -7,7 +7,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.envoy import Envoy
 
-from .common import FLAVOR, HOST
+from .common import ADAPTIVE_CONCURRENCY_METRICS, ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG, FLAVOR, HOST
 
 pytestmark = [pytest.mark.e2e]
 
@@ -287,6 +287,11 @@ def test_e2e(dd_agent_check, exercise_envoy):
     aggregator = dd_agent_check(instance, rate=True)
     for metric in METRICS:
         aggregator.assert_metric(metric)
+
+    for metric in ADAPTIVE_CONCURRENCY_METRICS:
+        aggregator.assert_metric(metric)
+        for tag in ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG:
+            aggregator.assert_metric_has_tag(metric, tag)
 
     if FLAVOR == 'api_v2':
         for metric in METRICS_V2:

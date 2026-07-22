@@ -4,19 +4,76 @@
 
 from abc import abstractmethod
 from string import Template
+from typing import TYPE_CHECKING, Dict, List
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.utils.db.utils import TagManager
 
 from . import AgentCheck
 
+if TYPE_CHECKING:
+    from datadog_checks.base.utils.db.utils import DBMAsyncJob
+
 
 class DatabaseCheck(AgentCheck):
+    """
+    Base class for Database Monitoring (DBM) integrations.
+    """
+
+    #: Authoritative DBM platform identifier for this integration.
+    #: Subclasses should set this explicitly; it is the value surfaced by
+    #: :attr:`dbms` and used across DBM payloads, metric name prefixes and async jobs.
+    DBMS: str | None = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._agent_hostname = None
         self._database_identifier = None
+        self._dbms_fallback_warning_logged = False
         self.tag_manager = TagManager()
+        #: Async jobs owned by this check, keyed by job name, populated via
+        #: :meth:`register_async_job`.
+        self._async_job_registry: Dict[str, "DBMAsyncJob"] = {}
+
+    def register_async_job(self, job: "DBMAsyncJob") -> "DBMAsyncJob":
+        """
+        Register ``job`` under its ``job_name`` so the check manages its lifecycle, and return it
+        unchanged.
+
+        Registering a job whose name matches an already-registered job replaces it. Raises
+        ``ValueError`` if the job has no name.
+        """
+        if job.job_name is None:
+            raise ValueError("Cannot register an async job without a job_name")
+        self._async_job_registry[job.job_name] = job
+        return job
+
+    def run_async_jobs(self, tags: List[str]) -> None:
+        """Run each registered job's loop, forwarding ``tags`` to every job."""
+        for job in self._async_job_registry.values():
+            job.run_job_loop(tags)
+
+    def cancel_async_jobs(self) -> None:
+        """
+        Signal every registered job to stop, without waiting for loops to finish or releasing
+        resources.
+
+        Safe to call while ``check()`` is running. Follow with :meth:`shutdown_async_jobs` to wait
+        for the loops and release resources.
+        """
+        for job in self._async_job_registry.values():
+            job.cancel()
+
+    def shutdown_async_jobs(self) -> None:
+        """
+        Wait for every registered job's loop to finish (:meth:`~DBMAsyncJob.wait_for_completion`)
+        and run its teardown (:meth:`~DBMAsyncJob.shutdown`).
+
+        Must not run concurrently with ``check()``.
+        """
+        for job in self._async_job_registry.values():
+            job.wait_for_completion()
+            job.shutdown()
 
     def database_monitoring_query_sample(self, raw_event: str):
         self.event_platform_event(raw_event, "dbm-samples")
@@ -110,6 +167,22 @@ class DatabaseCheck(AgentCheck):
 
     @property
     def dbms(self) -> str:
+        """
+        The DBM platform identifier for this integration.
+
+        Returns the :attr:`DBMS` class attribute when set. Integrations that have not yet declared
+        ``DBMS`` fall back to a deprecated derivation from the class name; that fallback is
+        unreliable (it only matches for some integrations) and will be removed in a future version.
+        """
+        if self.DBMS is not None:
+            return self.DBMS
+        if not self._dbms_fallback_warning_logged:
+            self.log.warning(
+                "%s does not set the `DBMS` class attribute; falling back to a name-derived value. "
+                "This fallback is deprecated and will be removed; set `DBMS` explicitly.",
+                type(self).__name__,
+            )
+            self._dbms_fallback_warning_logged = True
         return self.__class__.__name__.lower()
 
     @property
