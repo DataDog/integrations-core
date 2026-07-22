@@ -94,3 +94,11 @@ def instance_parts_and_merges():
         stalled_merge_elapsed_threshold_seconds=3600,
         stuck_replication_num_tries=3,
     )
+
+
+def instance_asynchronous_insert_buffer_snapshot():
+    return instance.AsynchronousInsertBufferSnapshot(
+        enabled=False,
+        collection_interval=10,
+        payload_row_limit=1000,
+    )

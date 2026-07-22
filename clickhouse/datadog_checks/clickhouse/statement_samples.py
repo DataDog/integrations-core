@@ -9,6 +9,7 @@ This module provides real-time visibility into currently executing queries,
 
 from __future__ import annotations
 
+import math
 import time
 from typing import TYPE_CHECKING
 
@@ -16,7 +17,7 @@ from clickhouse_connect.driver.exceptions import OperationalError
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
-    from datadog_checks.clickhouse.config_models.instance import QuerySamples
+    from datadog_checks.clickhouse.config_models.instance import AsynchronousInsertBufferSnapshot, QuerySamples
 
 try:
     import datadog_agent
@@ -86,6 +87,26 @@ WHERE query NOT LIKE '%system.processes%'
 GROUP BY user, query_kind, current_database
 """
 
+DBM_TYPE = "async_inserts_buffer"
+
+# Query to get pending async insert buffers from system.asynchronous_inserts
+BUFFER_SNAPSHOT_QUERY = """
+SELECT
+    database,
+    table,
+    hostName() AS server_node,
+    format,
+    query,
+    total_bytes,
+    length(entries.query_id) AS entry_count,
+    -- first_update is the scheduled flush deadline (queued as now + busy_timeout in ClickHouse's
+    -- async insert queue), not the first insert time as the docs claim.
+    toUnixTimestamp64Micro(first_update) AS flush_deadline_us
+FROM {asynchronous_inserts_table}
+ORDER BY total_bytes DESC
+LIMIT {payload_row_limit}
+"""
+
 
 def agent_check_getter(self):
     return self._check
@@ -99,14 +120,29 @@ class ClickhouseStatementSamples(DBMAsyncJob):
     and emits samples events for the DBM Samples page.
     """
 
-    def __init__(self, check: ClickhouseCheck, config: QuerySamples):
-        collection_interval = config.collection_interval
+    def __init__(
+        self,
+        check: ClickhouseCheck,
+        config: QuerySamples,
+        buffer_config: AsynchronousInsertBufferSnapshot,
+    ):
+        samples_collection_interval = config.collection_interval
+
+        enabled_intervals = []
+        if config.enabled:
+            enabled_intervals.append(samples_collection_interval)
+        if buffer_config.enabled:
+            enabled_intervals.append(buffer_config.collection_interval)
+        # Floor at 1s: gcd truncates sub-second intervals to 0, which would make rate_limit divide by zero.
+        collection_interval = (
+            max(math.gcd(*(int(i) for i in enabled_intervals)), 1) if enabled_intervals else samples_collection_interval
+        )
 
         super(ClickhouseStatementSamples, self).__init__(
             check,
             rate_limit=1 / collection_interval,
             run_sync=config.run_sync,
-            enabled=config.enabled,
+            enabled=config.enabled or buffer_config.enabled,
             dbms="clickhouse",
             min_collection_interval=check.check_interval if hasattr(check, 'check_interval') else 15,
             expected_db_exceptions=(Exception,),
@@ -129,8 +165,15 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         }
         self._obfuscate_options = to_native_string(json.dumps(obfuscate_options))
 
-        self._collection_interval = collection_interval
+        self._collection_interval = samples_collection_interval
+        self._last_samples_time = 0.0
         self._payload_row_limit = config.payload_row_limit
+
+        # Async insert buffer snapshot collapses into this job
+        self._buffer_enabled = buffer_config.enabled
+        self._buffer_collection_interval = buffer_config.collection_interval
+        self._buffer_payload_row_limit = buffer_config.payload_row_limit
+        self._last_buffer_snapshot_time = 0.0
 
     def cancel(self):
         """Cancel the job and clean up the dedicated client."""
@@ -440,6 +483,131 @@ class ClickhouseStatementSamples(DBMAsyncJob):
             elapsed_ms,
         )
 
+    def _collect_buffer_snapshot(self):
+        """
+        Run the async insert buffer snapshot on its own collection interval
+        """
+        now = time.time()
+        if self._buffer_enabled and now - self._last_buffer_snapshot_time >= self._buffer_collection_interval:
+            self._last_buffer_snapshot_time = now
+            buffer_snapshot = self._query_buffer_snapshot()
+            self._emit_buffer_events(buffer_snapshot)
+
+    @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
+    def _query_buffer_snapshot(self):
+        """Query system.asynchronous_inserts for pending buffers."""
+        query = BUFFER_SNAPSHOT_QUERY.format(
+            asynchronous_inserts_table=self._check.get_system_table('asynchronous_inserts'),
+            payload_row_limit=self._buffer_payload_row_limit,
+        )
+        try:
+            if self._db_client is None:
+                self._db_client = self._check.create_dbm_client()
+            rows = self._db_client.query(query).result_rows
+        except OperationalError as e:
+            self._log.warning("Database connection error in buffer snapshot, will reconnect: %s", e)
+            self._close_db_client()
+            self._check.count(
+                "dd.clickhouse.async_inserts_buffer.error",
+                1,
+                tags=self.tags + ["error:collect-buffer-snapshot", "error_type:connection"] + self._get_debug_tags(),
+                raw=True,
+            )
+            return []
+        except Exception as e:
+            self._log.exception("Failed to collect buffer snapshot: %s", e)
+            self._check.count(
+                "dd.clickhouse.async_inserts_buffer.error",
+                1,
+                tags=self.tags + ["error:collect-buffer-snapshot"] + self._get_debug_tags(),
+                raw=True,
+            )
+            return []
+
+        result = []
+        for row in rows:
+            database, table, server_node, format_, query_text, total_bytes, entry_count, flush_deadline_us = row
+            result.append(
+                {
+                    'database': database,
+                    'table': table,
+                    'server_node': server_node,
+                    'format': format_,
+                    'query': query_text,
+                    'total_bytes': total_bytes,
+                    'entry_count': entry_count,
+                    'flush_deadline_us': flush_deadline_us,
+                }
+            )
+        return result
+
+    def _obfuscate_buffer_query(self, query_text):
+        try:
+            statement = obfuscate_sql_with_metadata(query_text, self._obfuscate_options)
+            obfuscated_query = statement['query']
+            metadata = statement['metadata']
+            return {
+                'query': obfuscated_query,
+                'query_signature': compute_sql_signature(obfuscated_query),
+                'dd_tables': metadata.get('tables'),
+                'dd_commands': metadata.get('commands'),
+                'dd_comments': metadata.get('comments'),
+            }
+        except Exception as e:
+            self._log.debug("Failed to obfuscate buffer query: %s", e)
+            self._check.count(
+                "dd.clickhouse.async_inserts_buffer.error",
+                1,
+                tags=self.tags + ["error:obfuscate-query"] + self._get_debug_tags(),
+                raw=True,
+            )
+            return None
+
+    def _create_buffer_event(self, buffer_snapshot):
+        """
+        Create a database monitoring buffer snapshot event payload.
+        """
+        buffers = []
+        for row in buffer_snapshot:
+            obfuscated = self._obfuscate_buffer_query(row['query'])
+            if obfuscated:
+                buffers.append(
+                    {
+                        'database': row['database'],
+                        'table': row['table'],
+                        'format': row['format'],
+                        'query': obfuscated['query'],
+                        'query_signature': obfuscated['query_signature'],
+                        'dd_tables': obfuscated['dd_tables'],
+                        'dd_commands': obfuscated['dd_commands'],
+                        'dd_comments': obfuscated['dd_comments'],
+                        'server_node': row.get('server_node', ''),
+                        'total_bytes': row['total_bytes'],
+                        'entry_count': row['entry_count'],
+                        'flush_deadline_us': row['flush_deadline_us'],
+                    }
+                )
+
+        return {
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
+            "ddagentversion": datadog_agent.get_version(),
+            "ddsource": "clickhouse",
+            "dbm_type": DBM_TYPE,
+            "collection_interval": self._buffer_collection_interval,
+            "ddtags": self._tags_no_db,
+            "timestamp": time.time() * 1000,
+            "clickhouse_version": self._check.dbms_version,
+            "clickhouse_async_insert_buffers": buffers,
+        }
+
+    def _emit_buffer_events(self, buffer_snapshot):
+        if not buffer_snapshot:
+            return
+
+        buffer_event = self._create_buffer_event(buffer_snapshot)
+        self._check.database_monitoring_query_activity(json.dumps(buffer_event, default=default_json_event_encoding))
+
     def run_job(self):
         """
         Main job execution method called by DBMAsyncJob.
@@ -449,12 +617,26 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
 
         try:
-            self._collect_samples()
+            now = time.time()
+            if self._config.enabled and now - self._last_samples_time >= self._collection_interval:
+                self._last_samples_time = now
+                self._collect_samples()
         except Exception as e:
             self._log.exception("Failed to collect samples snapshot: %s", e)
             self._check.count(
                 "dd.clickhouse.samples.error",
                 1,
                 tags=self.tags + ["error:collect-samples"] + self._get_debug_tags(),
+                raw=True,
+            )
+
+        try:
+            self._collect_buffer_snapshot()
+        except Exception as e:
+            self._log.exception("Failed to collect buffer snapshot: %s", e)
+            self._check.count(
+                "dd.clickhouse.async_inserts_buffer.error",
+                1,
+                tags=self.tags + ["error:collect-buffer-snapshot"] + self._get_debug_tags(),
                 raw=True,
             )

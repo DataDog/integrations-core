@@ -379,6 +379,29 @@ instances:
         #
         # stuck_replication_num_tries: 3
 
+    ## Configure asynchronous insert buffer snapshot monitoring
+    #
+    # asynchronous_insert_buffer_snapshot:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of asynchronous insert buffer snapshots from system.asynchronous_inserts.
+        ## Requires `dbm: true`. Sends per-buffer records as DBM events (dbm_type="async_inserts_buffer")
+        ## including the query text, showing bytes pending, pending entry count, and oldest
+        ## entry age per buffer.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 10
+        ## Set the buffer snapshot collection interval (in seconds). Each collection runs a single
+        ## query against system.asynchronous_inserts.
+        #
+        # collection_interval: 10
+
+        ## @param payload_row_limit - integer - optional - default: 1000
+        ## Set the maximum number of buffers to include in each buffer snapshot.
+        #
+        # payload_row_limit: 1000
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.

@@ -570,6 +570,34 @@ files:
             type: boolean
             example: false
           fleet_configurable: false
+    - name: asynchronous_insert_buffer_snapshot
+      description: Configure asynchronous insert buffer snapshot monitoring
+      options:
+        - name: enabled
+          description: |
+            Enable collection of asynchronous insert buffer snapshots from system.asynchronous_inserts.
+            Requires `dbm: true`. Sends per-buffer records as DBM events (dbm_type="async_inserts_buffer")
+            including the query text, showing bytes pending, pending entry count, and oldest
+            entry age per buffer.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
+        - name: collection_interval
+          description: |
+            Set the buffer snapshot collection interval (in seconds). Each collection runs a single
+            query against system.asynchronous_inserts.
+          value:
+            type: number
+            example: 10
+          fleet_configurable: false
+        - name: payload_row_limit
+          description: |
+            Set the maximum number of buffers to include in each buffer snapshot.
+          value:
+            type: integer
+            example: 1000
+          fleet_configurable: false
     - template: instances/db
       overrides:
         custom_queries.value.example:

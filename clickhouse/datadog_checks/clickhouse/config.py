@@ -128,6 +128,10 @@ def build_config(check: ClickhouseCheck) -> Tuple[InstanceConfig, ValidationResu
                 **dict_defaults.instance_parts_and_merges().model_dump(),
                 **(instance.get('parts_and_merges', {})),
             },
+            "asynchronous_insert_buffer_snapshot": {
+                **dict_defaults.instance_asynchronous_insert_buffer_snapshot().model_dump(),
+                **(instance.get('asynchronous_insert_buffer_snapshot', {})),
+            },
             "schema_metrics": {
                 **dict_defaults.instance_schema_metrics().model_dump(),
                 **(instance.get('schema_metrics', {})),
@@ -230,6 +234,14 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
         args['parts_and_merges']['collection_interval'] = default_value
         validation_result.add_warning(
             f"parts_and_merges.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if _safefloat(args.get('asynchronous_insert_buffer_snapshot', {}).get('collection_interval')) <= 0:
+        default_value = dict_defaults.instance_asynchronous_insert_buffer_snapshot().collection_interval
+        args['asynchronous_insert_buffer_snapshot']['collection_interval'] = default_value
+        validation_result.add_warning(
+            f"asynchronous_insert_buffer_snapshot.collection_interval must be greater than 0, "
+            f"defaulting to {default_value} seconds."
         )
 
     if _safefloat(args.get('collect_schemas', {}).get('collection_interval')) <= 0:
