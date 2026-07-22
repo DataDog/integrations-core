@@ -21,7 +21,7 @@ from ddev.ai.phases.registry import PhaseRegistry
 from ddev.cli.meta.ai.tui.app import TogoApp
 from ddev.cli.meta.ai.tui.status import RunStatus
 
-from .conftest import StaticConfigurationEngine
+from .conftest import StaticConfigurationEngine, export_screenshot_text
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -1348,7 +1348,6 @@ async def test_phase_log_header_keeps_running_status() -> None:
 
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
     from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen
-    from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge
     from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
 
     release = asyncio.Event()
@@ -1365,6 +1364,7 @@ async def test_phase_log_header_keeps_running_status() -> None:
 
     flow = _make_flow()
     app = _app(flow)
+    app.animation_level = "none"
     async with app.run_test() as pilot:
         await pilot.pause()
         screen = ExecutionScreen(flow, orchestrator_builder=RunningPhase)
@@ -1376,12 +1376,11 @@ async def test_phase_log_header_keeps_running_status() -> None:
         await pilot.pause()
 
         assert isinstance(app.screen, PhaseLogScreen)
-        badge = app.screen.query_one(ExecutionStatusBadge)
-        assert str(badge.render()) in {"● running", "○ running"}
+        assert "● running" in export_screenshot_text(app)
 
         release.set()
         await pilot.pause()
-        assert str(badge.render()) == "✓ completed"
+        assert "✓ completed" in export_screenshot_text(app)
 
 
 # ---------------------------------------------------------------------------
@@ -1510,6 +1509,7 @@ async def test_escape_requires_confirmation_before_cancelling_active_run():
 
     flow = _make_flow()
     app = _app(flow)
+    app.animation_level = "none"
     async with app.run_test() as pilot:
         await pilot.pause()
         screen = ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _InfiniteDemo())

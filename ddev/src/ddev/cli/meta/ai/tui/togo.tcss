@@ -124,6 +124,10 @@ TogoHeader {
     text-style: bold;
 }
 
+#header-right.status-idle {
+    display: none;
+}
+
 #header-right.status-running {
     color: $status-running;
 }

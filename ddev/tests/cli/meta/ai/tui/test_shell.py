@@ -19,7 +19,7 @@ from ddev.cli.meta.ai.tui.screens.base import TogoScreen
 from ddev.cli.meta.ai.tui.status import ExecutionStatus
 from ddev.cli.meta.ai.tui.widgets.header import ExecutionStatusBadge, TogoHeader
 
-from .conftest import StaticConfigurationEngine
+from .conftest import StaticConfigurationEngine, export_screenshot_text
 
 
 def _app_kwargs(ddev_app):
@@ -111,13 +111,13 @@ async def test_togo_header_displays_husky_mascot(ddev_app):
     """The application header visibly identifies Togo and its repository."""
     async with _DummyApp(**_app_kwargs(ddev_app)).run_test(size=(120, 40)) as pilot:
         await pilot.pause()
-        screenshot = pilot.app.export_screenshot()
+        screenshot = export_screenshot_text(pilot.app)
 
         assert "█▀▄" in screenshot
         assert "▀▀███▀▀" in screenshot
         assert "Togo" in screenshot
-        assert "Agent&#160;Integrations" in screenshot
-        assert "0&#160;Flows&#160;Discovered" in screenshot
+        assert "Agent Integrations" in screenshot
+        assert "0 Flows Discovered" in screenshot
         assert str(ddev_app.repo.path) in screenshot
 
 
@@ -137,24 +137,41 @@ async def test_togo_header_calls_attention_to_broken_flows(ddev_app):
     async with _DummyApp(**kwargs).run_test(size=(120, 40)) as pilot:
         await pilot.pause()
 
-        assert "1&#160;flows&#160;need&#160;attention" in pilot.app.export_screenshot()
+        assert "1 flows need attention" in export_screenshot_text(pilot.app)
 
 
-async def test_togo_header_running_badge_pulses(ddev_app):
-    """The running badge is visible and alternates its marker."""
+async def test_togo_header_running_badge_pulses_and_restores_full_opacity(ddev_app: Any) -> None:
+    """The running status breathes smoothly and the completed status is fully visible."""
     async with _DummyApp(**_app_kwargs(ddev_app)).run_test() as pilot:
         await pilot.pause()
         badge = pilot.app.screen.query_one(ExecutionStatusBadge)
+        pilot.app.animation_level = "full"
+
+        pilot.app.execution_status = ExecutionStatus.RUNNING
+        await pilot.pause(0.4)
+
+        assert "● running" in export_screenshot_text(pilot.app)
+        assert badge.styles.text_opacity < 1.0
+
+        pilot.app.execution_status = ExecutionStatus.COMPLETED
+        await pilot.pause(0.3)
+
+        assert "✓ completed" in export_screenshot_text(pilot.app)
+        assert badge.styles.text_opacity == 1.0
+
+
+async def test_togo_header_running_badge_respects_disabled_animations(ddev_app: Any) -> None:
+    """The running status remains readable when the user disables animations."""
+    async with _DummyApp(**_app_kwargs(ddev_app)).run_test() as pilot:
+        await pilot.pause()
+        badge = pilot.app.screen.query_one(ExecutionStatusBadge)
+        pilot.app.animation_level = "none"
 
         pilot.app.execution_status = ExecutionStatus.RUNNING
         await pilot.pause(0.1)
-        first = str(badge.render())
-        await pilot.pause(0.7)
-        second = str(badge.render())
 
-    assert first in {"● running", "○ running"}
-    assert second in {"● running", "○ running"}
-    assert first != second
+        assert "● running" in export_screenshot_text(pilot.app)
+        assert badge.styles.text_opacity == 1.0
 
 
 async def test_togo_header_idle_badge_is_empty(ddev_app: Any) -> None:
@@ -163,7 +180,7 @@ async def test_togo_header_idle_badge_is_empty(ddev_app: Any) -> None:
         await pilot.pause()
         badge = pilot.app.screen.query_one(ExecutionStatusBadge)
 
-        assert str(badge.render()) == ""
+        assert not badge.display
 
 
 @pytest.mark.parametrize(
@@ -183,7 +200,8 @@ async def test_togo_header_stable_execution_badges(ddev_app: Any, status: Execut
         pilot.app.execution_status = status
         await pilot.pause()
 
-        assert str(badge.render()) == label
+        assert badge.display
+        assert label in export_screenshot_text(pilot.app)
 
 
 async def test_new_screen_header_shows_current_execution_status(ddev_app: Any) -> None:
@@ -194,5 +212,4 @@ async def test_new_screen_header_shows_current_execution_status(ddev_app: Any) -
         await pilot.app.push_screen(_DummyScreen())
         await pilot.pause()
 
-        badge = pilot.app.screen.query_one(ExecutionStatusBadge)
-        assert str(badge.render()) == "◌ finishing"
+        assert "◌ finishing" in export_screenshot_text(pilot.app)

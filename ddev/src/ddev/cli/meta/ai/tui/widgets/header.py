@@ -27,48 +27,57 @@ TOGO_HUSKY = """█▀▄     ▄▀█
 █▀▄▄▄█▄▄▄▀█
   ▀▀███▀▀"""
 
-EXECUTION_STATUS_CLASSES = (
-    "status-running",
-    "status-finishing",
-    "status-completed",
-    "status-failed",
-)
+EXECUTION_STATUS_TEXT = {
+    ExecutionStatus.IDLE: "",
+    ExecutionStatus.RUNNING: "● running",
+    ExecutionStatus.FINISHING: "◌ finishing",
+    ExecutionStatus.COMPLETED: "✓ completed",
+    ExecutionStatus.FAILED: "✕ failed",
+}
 
 
 class ExecutionStatusBadge(Static):
     """Render the current app-wide execution status."""
 
-    _pulse_on: reactive[bool] = reactive(True)
+    execution_status: reactive[ExecutionStatus] = reactive(ExecutionStatus.IDLE)
 
     def on_mount(self) -> None:
-        self.watch(self.app, "execution_status", self._watch_execution_status)
-        self.set_interval(0.6, self._tick_pulse)
+        self.watch(cast("TogoApp", self.app), "execution_status", self._sync_execution_status)
 
-    def render(self) -> str:
-        status = cast("TogoApp", self.app).execution_status
-        if status is ExecutionStatus.IDLE:
-            return ""
-        if status is ExecutionStatus.RUNNING:
-            marker = "●" if self._pulse_on else "○"
-            return f"{marker} running"
-        return {
-            ExecutionStatus.FINISHING: "◌ finishing",
-            ExecutionStatus.COMPLETED: "✓ completed",
-            ExecutionStatus.FAILED: "✕ failed",
-        }[status]
+    def watch_execution_status(self, old_status: ExecutionStatus, new_status: ExecutionStatus) -> None:
+        self.remove_class(f"status-{old_status.value}")
+        self.add_class(f"status-{new_status.value}")
+        self.update(EXECUTION_STATUS_TEXT[new_status])
 
-    def watch__pulse_on(self) -> None:
-        self.refresh()
+        if new_status is ExecutionStatus.RUNNING:
+            self._pulse_down()
+        else:
+            self.styles.animate("text_opacity", 1.0, duration=0.2)
 
-    def _watch_execution_status(self, status: ExecutionStatus) -> None:
-        self.remove_class(*EXECUTION_STATUS_CLASSES)
-        if status is not ExecutionStatus.IDLE:
-            self.add_class(f"status-{status.value}")
-        self.refresh(layout=True)
+    def _sync_execution_status(self, status: ExecutionStatus) -> None:
+        self.execution_status = status
 
-    def _tick_pulse(self) -> None:
-        if cast("TogoApp", self.app).execution_status is ExecutionStatus.RUNNING:
-            self._pulse_on = not self._pulse_on
+    def _pulse_down(self) -> None:
+        if self.execution_status is not ExecutionStatus.RUNNING or self.app.animation_level != "full":
+            return
+        self.styles.animate(
+            "text_opacity",
+            0.35,
+            duration=0.8,
+            easing="in_out_sine",
+            on_complete=self._pulse_up,
+        )
+
+    def _pulse_up(self) -> None:
+        if self.execution_status is not ExecutionStatus.RUNNING or self.app.animation_level != "full":
+            return
+        self.styles.animate(
+            "text_opacity",
+            1.0,
+            duration=0.8,
+            easing="in_out_sine",
+            on_complete=self._pulse_down,
+        )
 
 
 class TogoHeader(Widget):
@@ -88,7 +97,7 @@ class TogoHeader(Widget):
             yield Static(product, id="header-product")
             yield Static("", id="header-flow-summary")
             yield Static("", id="header-repo")
-        yield ExecutionStatusBadge(id="header-right")
+        yield ExecutionStatusBadge(id="header-right", classes="status-idle")
 
     def on_mount(self) -> None:
         self._update_context()

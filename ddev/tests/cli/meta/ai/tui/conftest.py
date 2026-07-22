@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from html import unescape
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -31,6 +32,11 @@ from ddev.cli.meta.ai.tui.theme import togo_theme
 
 LARGE_TERMINAL = (120, 50)
 STATUS_VARIABLE_KEYS = ("status-running", "status-pending", "status-done", "status-failed")
+
+
+def export_screenshot_text(app: App[Any]) -> str:
+    """Return Textual's exported screenshot with HTML spaces normalized."""
+    return unescape(app.export_screenshot()).replace("\N{NO-BREAK SPACE}", " ")
 
 
 def make_test_ddev_app(api_key: str | None = None, repo_path: Path | None = None) -> SimpleNamespace:
