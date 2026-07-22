@@ -52,7 +52,7 @@ metrics:
         symbol:
           OID: 1.3.6.1.4.1.9.9.221.1.1.1.1.3
           name: cempMemPoolName
-      - tag: mem_pool_index
+      - tag: mem
         index: 1
   - MIB: CISCO-REMOTE-ACCESS-MONITOR-MIB
     symbol:
