@@ -35,6 +35,15 @@ class KubernetesAgent(AgentInterface):
     provisioner (for example, ``kind_run``), not this backend.
     """
 
+    build_config_keys = ('kubernetes', 'docker')
+
+    def prepare_start(self) -> None:
+        from secrets import token_hex
+
+        # Persist a unique owner before backend startup so error cleanup cannot
+        # delete resources belonging to another environment with the same name.
+        self.metadata[_OWNER_ID_METADATA] = token_hex(16)
+
     @cached_property
     def _kubernetes_metadata(self) -> dict[str, Any]:
         metadata = self.metadata.get('kubernetes')
