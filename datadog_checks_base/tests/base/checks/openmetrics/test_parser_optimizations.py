@@ -35,28 +35,38 @@ def test_parse_labels(labels_string, expected):
         pytest.param('test_gauge 42', 'test_gauge', {}, 42, id='simple'),
         pytest.param(
             'http_requests_total{method="GET",code="200"} 1027',
-            'http_requests_total', {'method': 'GET', 'code': '200'}, 1027,
+            'http_requests_total',
+            {'method': 'GET', 'code': '200'},
+            1027,
             id='labeled',
         ),
         pytest.param(
             'http_request_duration_seconds_bucket{le="0.5"} 24054',
-            'http_request_duration_seconds_bucket', {'le': '0.5'}, 24054,
+            'http_request_duration_seconds_bucket',
+            {'le': '0.5'},
+            24054,
             id='histogram_bucket',
         ),
         pytest.param(
             'temperature{location="outside"} 28.5',
-            'temperature', {'location': 'outside'}, 28.5,
+            'temperature',
+            {'location': 'outside'},
+            28.5,
             id='float_value',
         ),
         pytest.param('test_metric\t42', 'test_metric', {}, 42, id='tab_separator'),
         pytest.param(
             'metric{label="val}ue"} 1',
-            'metric', {'label': 'val}ue'}, 1,
+            'metric',
+            {'label': 'val}ue'},
+            1,
             id='brace_in_value',
         ),
         pytest.param(
             'metric{func="apn,gw",proto="tcp"} 8',
-            'metric', {'func': 'apn,gw', 'proto': 'tcp'}, 8,
+            'metric',
+            {'func': 'apn,gw', 'proto': 'tcp'},
+            8,
             id='comma_in_value',
         ),
     ],
@@ -80,12 +90,14 @@ def test_parse_sample_with_timestamp():
     [
         pytest.param(
             '# HELP test_gauge A test gauge.\n# TYPE test_gauge gauge\ntest_gauge 42\n',
-            1, id='simple',
+            1,
+            id='simple',
         ),
         pytest.param(
             '# HELP gauge_one First.\n# TYPE gauge_one gauge\ngauge_one 1\n'
             '# HELP gauge_two Second.\n# TYPE gauge_two gauge\ngauge_two{env="prod"} 2\n',
-            2, id='multiple_families',
+            2,
+            id='multiple_families',
         ),
     ],
 )

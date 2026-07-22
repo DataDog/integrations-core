@@ -40,7 +40,7 @@ def _parse_labels(labels_string):
             # The label name is before the equal
             value_start = sub_labels.index("=")
             label_name = sub_labels[:value_start]
-            sub_labels = sub_labels[value_start + 1:].lstrip()
+            sub_labels = sub_labels[value_start + 1 :].lstrip()
             # Find the first quote after the equal
             quote_start = sub_labels.index('"') + 1
             value_substr = sub_labels[quote_start:]
@@ -62,7 +62,7 @@ def _parse_labels(labels_string):
             labels[label_name.strip()] = label_value
 
             # Remove the processed label from the sub-slice for next iteration
-            sub_labels = sub_labels[quote_end + 1:]
+            sub_labels = sub_labels[quote_end + 1 :]
             next_comma = sub_labels.find(",") + 1
             sub_labels = sub_labels[next_comma:].lstrip()
 
@@ -81,9 +81,9 @@ def _parse_sample(text):
         # The name is before the labels
         name = text[:label_start].strip()
         # We ignore the starting curly brace
-        label = text[label_start + 1:label_end]
+        label = text[label_start + 1 : label_end]
         # The value is after the label end (ignoring curly brace)
-        value, timestamp = _prom_parser._parse_value_and_timestamp(text[label_end + 1:])
+        value, timestamp = _prom_parser._parse_value_and_timestamp(text[label_end + 1 :])
         return Sample(name, _parse_labels(label), value, timestamp)
 
     # We don't have labels
