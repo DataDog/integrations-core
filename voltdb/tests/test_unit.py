@@ -91,7 +91,7 @@ def test_check_disables_http_auth():
     with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
         VoltDBCheck('voltdb', {}, [instance])
 
-    fake.disable_auth.assert_called_once_with()
+    fake.set_auth.assert_called_once_with(auth_type='none')
 
 
 def test_raise_for_status_includes_response_details():
@@ -173,7 +173,8 @@ def test_check_wires_credentials_into_query_params(password_hashed, password_fie
             self.options = {'auth': ('admin', 'secret')}
             self.captured = {}
 
-        def disable_auth(self):
+        def set_auth(self, **options):
+            assert options == {'auth_type': 'none'}
             self.options['auth'] = None
 
         def get(self, url, **options):
@@ -185,7 +186,7 @@ def test_check_wires_credentials_into_query_params(password_hashed, password_fie
         check = VoltDBCheck('voltdb', {}, [instance])
         check._client.request('@SystemInformation', parameters=['OVERVIEW'])
 
-    assert fake.options['auth'] is None  # disable_auth() cleared the config Basic-auth tuple
+    assert fake.options['auth'] is None  # set_auth(auth_type='none') cleared the config Basic-auth tuple
     assert 'auth' not in fake.captured  # and no per-call auth override is sent
     params = fake.captured['params']
     assert params['User'] == 'admin'

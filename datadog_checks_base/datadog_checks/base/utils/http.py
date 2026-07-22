@@ -10,10 +10,10 @@ import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote, urlparse, urlunparse
 
 import lazy_loader
@@ -104,6 +104,25 @@ STANDARD_FIELDS = {
     'username': None,
     **TlsConfig().__dict__,  # This will include all TLS-related fields
 }
+AUTH_CONFIG_FIELDS = (
+    'auth_token',
+    'auth_type',
+    'aws_host',
+    'aws_region',
+    'aws_service',
+    'kerberos_auth',
+    'kerberos_cache',
+    'kerberos_delegate',
+    'kerberos_force_initiate',
+    'kerberos_hostname',
+    'kerberos_keytab',
+    'kerberos_principal',
+    'ntlm_domain',
+    'password',
+    'use_legacy_auth_encoding',
+    'username',
+)
+AUTH_DISABLED_TYPES = {'none', 'disabled'}
 # For any known legacy fields that may be widespread
 DEFAULT_REMAPPED_FIELDS = {
     'kerberos': {'name': 'kerberos_auth'},
@@ -332,11 +351,6 @@ class ResponseWrapper(ObjectProxy):
         return self
 
 
-def suppress_default_auth(request):
-    """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
-    return request
-
-
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
@@ -431,27 +445,7 @@ class RequestsWrapper(object):
         # https://toolbelt.readthedocs.io/en/latest/adapters.html#hostheaderssladapter
         self.tls_use_host_header = is_affirmative(config['tls_use_host_header']) and 'Host' in headers
 
-        # https://requests.readthedocs.io/en/latest/user/authentication/
-        auth_type = config['auth_type'].lower()
-        if auth_type not in AUTH_TYPES:
-            self.logger.warning('auth_type %s is not supported, defaulting to basic', auth_type)
-            auth_type = 'basic'
-
-        if auth_type == 'basic':
-            if config['kerberos_auth']:
-                self.logger.warning(
-                    'The ability to use Kerberos auth without explicitly setting auth_type to '
-                    '`kerberos` is deprecated and will be removed in Agent 8'
-                )
-                auth_type = 'kerberos'
-            elif config['ntlm_domain']:
-                self.logger.warning(
-                    'The ability to use NTLM auth without explicitly setting auth_type to '
-                    '`ntlm` is deprecated and will be removed in Agent 8'
-                )
-                auth_type = 'ntlm'
-
-        auth = AUTH_TYPES[auth_type](config)
+        auth = create_auth_from_config(config, self.logger)
 
         allow_redirects = is_affirmative(config['allow_redirects'])
 
@@ -540,19 +534,9 @@ class RequestsWrapper(object):
         # Whether or not to log request information like method and url
         self.log_requests = is_affirmative(config['log_requests'])
 
-        # Set up any auth token handlers
-        if config['auth_token'] is not None:
-            self.auth_token_handler = create_auth_token_handler(config['auth_token'])
-        else:
-            self.auth_token_handler = None
+        self.auth_token_handler = create_auth_token_handler_from_config(config)
 
-        # Context managers that should wrap all requests
-        self.request_hooks = []
-
-        if config['kerberos_keytab']:
-            self.request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
-        if config['kerberos_cache']:
-            self.request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
+        self.request_hooks = create_auth_request_hooks(config)
 
         self.tls_config = {key: value for key, value in config.items() if key.startswith('tls_')}
         self._https_adapters = {}
@@ -605,10 +589,16 @@ class RequestsWrapper(object):
                 return
         self.options['headers'][name] = value
 
+    def set_auth(self, auth_type: str | Mapping[str, Any] | None = 'basic', **options: Any) -> None:
+        """Configure HTTP-level auth for future requests."""
+        config = build_auth_config(auth_type, options)
+        self.options['auth'] = create_auth_from_config(config, self.logger)
+        self.auth_token_handler = create_auth_token_handler_from_config(config)
+        self.request_hooks = create_auth_request_hooks(config)
+
     def disable_auth(self) -> None:
         """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
-        # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
-        self.options['auth'] = suppress_default_auth
+        self.set_auth(auth_type='none')
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -923,6 +913,87 @@ def should_bypass_proxy(url, no_proxy_uris):
             if no_proxy_uri == parsed_uri or parsed_uri.endswith(dot_no_proxy_uri):
                 return True
     return False
+
+
+def build_auth_config(
+    auth_type: str | Mapping[str, Any] | None = 'basic', options: Mapping[str, Any] | None = None
+) -> dict[str, Any]:
+    config = {field: STANDARD_FIELDS[field] for field in AUTH_CONFIG_FIELDS}
+
+    if isinstance(auth_type, Mapping):
+        for field in AUTH_CONFIG_FIELDS:
+            if field in auth_type:
+                config[field] = auth_type[field]
+    else:
+        config['auth_type'] = auth_type
+
+    if options:
+        unknown_options = sorted(set(options) - set(AUTH_CONFIG_FIELDS))
+        if unknown_options:
+            raise ConfigurationError('Unsupported auth option(s): {}'.format(', '.join(unknown_options)))
+
+        config.update(options)
+
+    return config
+
+
+def resolve_auth_type(config: Mapping[str, Any], logger: logging.Logger) -> str:
+    auth_type = config['auth_type']
+    if auth_type is None:
+        return 'none'
+    if not isinstance(auth_type, str):
+        raise ConfigurationError('auth_type must be a string')
+
+    auth_type = auth_type.lower()
+    if auth_type in AUTH_DISABLED_TYPES:
+        return auth_type
+
+    if auth_type not in AUTH_TYPES:
+        logger.warning('auth_type %s is not supported, defaulting to basic', auth_type)
+        auth_type = 'basic'
+
+    if auth_type == 'basic':
+        if config['kerberos_auth']:
+            logger.warning(
+                'The ability to use Kerberos auth without explicitly setting auth_type to '
+                '`kerberos` is deprecated and will be removed in Agent 8'
+            )
+            auth_type = 'kerberos'
+        elif config['ntlm_domain']:
+            logger.warning(
+                'The ability to use NTLM auth without explicitly setting auth_type to '
+                '`ntlm` is deprecated and will be removed in Agent 8'
+            )
+            auth_type = 'ntlm'
+
+    return auth_type
+
+
+def create_auth_from_config(config: Mapping[str, Any], logger: logging.Logger) -> Any:
+    auth_type = resolve_auth_type(config, logger)
+    if auth_type in AUTH_DISABLED_TYPES:
+        # Truthy no-op auth short-circuits requests' .netrc lookup without changing the prepared request.
+        return lambda request: request
+
+    return AUTH_TYPES[auth_type](config)
+
+
+def create_auth_token_handler_from_config(config: Mapping[str, Any]) -> Any | None:
+    if config['auth_token'] is not None:
+        return create_auth_token_handler(config['auth_token'])
+
+    return None
+
+
+def create_auth_request_hooks(config: Mapping[str, Any]) -> list[Any]:
+    request_hooks = []
+
+    if config['kerberos_keytab']:
+        request_hooks.append(lambda: handle_kerberos_keytab(config['kerberos_keytab']))
+    if config['kerberos_cache']:
+        request_hooks.append(lambda: handle_kerberos_cache(config['kerberos_cache']))
+
+    return request_hooks
 
 
 def create_basic_auth(config):

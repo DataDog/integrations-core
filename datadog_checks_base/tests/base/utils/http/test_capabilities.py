@@ -1,10 +1,13 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import mock
 import pytest
 import requests
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 from datadog_checks.base.utils.http_protocol import HTTPResponse
 
@@ -110,6 +113,92 @@ class TestDisableAuth:
 
         # The truthy no-op auth short-circuits requests' .netrc lookup, so no Authorization header goes out.
         assert 'Authorization' not in captured['headers']
+
+
+class TestSetAuth:
+    def test_set_auth_basic_with_keyword_options(self):
+        http = RequestsWrapper({}, {})
+        http.set_auth(username='user', password='pass')
+        assert http.options['auth'] == ('user', 'pass')
+
+    def test_set_auth_basic_with_mapping(self):
+        http = RequestsWrapper({}, {})
+        http.set_auth({'username': 'user', 'password': 'pass', 'use_legacy_auth_encoding': False})
+        assert http.options['auth'] == (b'user', b'pass')
+
+    def test_set_auth_digest(self):
+        http = RequestsWrapper({}, {})
+        with mock.patch('datadog_checks.base.utils.http.requests_auth.HTTPDigestAuth') as digest:
+            http.set_auth('digest', username='user', password='pass')
+
+        digest.assert_called_once_with('user', 'pass')
+        assert http.options['auth'] is digest.return_value
+
+    def test_set_auth_ntlm(self):
+        http = RequestsWrapper({}, {})
+        with mock.patch('datadog_checks.base.utils.http.requests_ntlm.HttpNtlmAuth') as ntlm:
+            http.set_auth('ntlm', ntlm_domain='domain\\user', password='pass')
+
+        ntlm.assert_called_once_with('domain\\user', 'pass')
+        assert http.options['auth'] is ntlm.return_value
+
+    def test_set_auth_aws(self):
+        http = RequestsWrapper({}, {})
+        with mock.patch('datadog_checks.base.utils.http._http_utils.BotoAWSRequestsAuth') as aws:
+            http.set_auth('aws', aws_host='uri', aws_region='earth', aws_service='saas')
+
+        aws.assert_called_once_with(aws_host='uri', aws_region='earth', aws_service='saas')
+        assert http.options['auth'] is aws.return_value
+
+    def test_set_auth_kerberos_updates_request_hooks(self):
+        http = RequestsWrapper({'auth_type': 'kerberos', 'kerberos_keytab': '/old/keytab'}, {})
+        assert len(http.request_hooks) == 1
+
+        with mock.patch('datadog_checks.base.utils.http.requests_kerberos.HTTPKerberosAuth'):
+            http.set_auth('kerberos', kerberos_cache='/new/cache')
+
+        assert len(http.request_hooks) == 1
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with http.request_hooks[0]():
+                assert os.environ['KRB5CCNAME'] == '/new/cache'
+                assert 'KRB5_CLIENT_KTNAME' not in os.environ
+
+    def test_set_auth_token_handler(self):
+        http = RequestsWrapper({}, {})
+        http.set_auth(
+            auth_token={
+                'reader': {'type': 'file', 'path': '/tmp/token'},
+                'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+            }
+        )
+        assert http.auth_token_handler is not None
+
+        http.set_auth(auth_type='none')
+        assert http.auth_token_handler is None
+
+    def test_set_auth_none_suppresses_netrc_header(self):
+        http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
+        captured = {}
+
+        def fake_send(session_self, request, **kwargs):
+            captured['headers'] = dict(request.headers)
+            response = requests.Response()
+            response.status_code = 200
+            return response
+
+        with (
+            mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
+            mock.patch('requests.sessions.Session.send', new=fake_send),
+        ):
+            http.set_auth(auth_type='none')
+            http.get('http://example.com')
+
+        assert 'Authorization' not in captured['headers']
+
+    def test_set_auth_rejects_unknown_options(self):
+        http = RequestsWrapper({}, {})
+        with pytest.raises(ConfigurationError, match='^Unsupported auth option\\(s\\): token$'):
+            http.set_auth(token='secret')
 
 
 class TestCookies:
