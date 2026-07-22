@@ -285,10 +285,8 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 @pytest.mark.usefixtures('dd_environment')
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics_new_digest_does_not_inflate(aggregator, dd_run_check, dbm_instance, datadog_agent):
-    # Two structurally distinct queries (different WHERE columns -> two distinct MySQL digests on every version)
-    # are forced by obfuscation to the same normalized query, so DBM aggregates them under one query_signature.
-    # A digest first seen AFTER the signature is already baselined must be baselined itself (contribute 0), not
-    # have its full first-seen count dumped into a single interval. Exercises the real per-statement SQL end to end.
+    # Two distinct queries obfuscated to the same signature => two digests under one signature. A digest first
+    # seen after the signature is baselined must itself be baselined, not have its full count dumped in one interval.
     query_one = "select * from information_schema.processlist where state = 'starting'"
     query_two = "select * from information_schema.processlist where command = 'Sleep'"
     normalized_query = 'SELECT * FROM `information_schema` . `processlist`'
@@ -308,20 +306,17 @@ def test_statement_metrics_new_digest_does_not_inflate(aggregator, dd_run_check,
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = obfuscate_sql
-        # Baseline: only query_one exists, so its digest baselines the shared signature.
-        run_query(query_one)
+        run_query(query_one)  # baseline the signature with query_one's digest
         dd_run_check(mysql_check)
-        # query_one runs once more (a real +1 delta); query_two appears for the first time (5 executions).
-        run_query(query_one)
+        run_query(query_one)  # +1 real delta
         for _ in range(5):
-            run_query(query_two)
+            run_query(query_two)  # query_two: a new digest for the same signature
         dd_run_check(mysql_check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
     assert len(matching_rows) == 1
-    # Only query_one's incremental execution (1) is counted; query_two is a newly-seen digest that gets
-    # baselined, so its 5 first-seen executions are not dumped. The pre-fix code reported 6.
+    # only query_one's +1 is counted; query_two is baselined, not dumped (pre-fix: 6)
     assert matching_rows[0]['count_star'] == 1
 
 
@@ -340,15 +335,13 @@ def test_statement_metrics_new_prepared_statement_instance_does_not_inflate(
     prepared_sql = DEFAULT_FQ_SUCCESS_QUERY
     query_signature = compute_sql_signature(prepared_sql)
 
-    # Keep the session open so both prepared-statement instances persist across the two checks.
+    # one session so both instances stay live across the checks
     with closing(bob_conn.cursor()) as cursor:
-        # Baseline: one instance (ps1) exists and executes once.
         cursor.execute("PREPARE ps1 FROM '{}'".format(prepared_sql))
         cursor.execute("EXECUTE ps1")
-        dd_run_check(mysql_check)
-        # A second instance of the same statement text (ps2, distinct object_instance_begin) appears and
-        # executes several times; ps1 executes once more.
-        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)  # baseline the signature with ps1
+        cursor.execute("EXECUTE ps1")  # +1 real delta
+        # ps2: second instance, same sql_text, distinct object_instance_begin
         cursor.execute("PREPARE ps2 FROM '{}'".format(prepared_sql))
         for _ in range(5):
             cursor.execute("EXECUTE ps2")
@@ -359,8 +352,7 @@ def test_statement_metrics_new_prepared_statement_instance_does_not_inflate(
     events = aggregator.get_event_platform_events("dbm-metrics")
     matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
     assert len(matching_rows) == 1
-    # ps1 contributed 1 execution this interval; ps2 is a newly-seen instance -> baselined, not dumped.
-    # The pre-fix SUM(count_execute) GROUP BY sql_text would have reported 6.
+    # only ps1's +1 is counted; ps2 is baselined, not dumped (pre-fix SUM-by-sql_text: 6)
     assert matching_rows[0]['count_star'] == 1
 
 
@@ -413,10 +405,8 @@ def test_statement_metrics_baselines_new_digest_before_merging_query_signature(d
 def test_statement_metrics_baselines_new_prepared_statement_instance_before_merging_query_signature(
     dbm_instance, datadog_agent
 ):
-    # Two prepared-statement instances (distinct object_instance_begin) share the same sql_text and therefore
-    # the same query_signature. `prepared_statements_instances` rows have a NULL digest, so they must be baselined
-    # and diffed by their instance identity (object_instance_begin) rather than merged by signature before diffing.
-    # Otherwise a newly-prepared instance dumps its full count_execute into a single interval.
+    # Two instances (distinct object_instance_begin), same sql_text => same signature. Prepared rows have a NULL
+    # digest, so they must be diffed per instance; a newly-seen instance is baselined, not dumped.
     normalized_query = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
     query_signature = compute_sql_signature(normalized_query)
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
@@ -456,17 +446,15 @@ def test_statement_metrics_baselines_new_prepared_statement_instance_before_merg
 
     assert len(rows) == 1
     assert rows[0]['query_signature'] == query_signature
-    # Only instance 1001's delta (10) is counted; the newly-seen instance 2002 is baselined, not dumped.
+    # only 1001's delta (10) is counted; new instance 2002 is baselined, not dumped
     assert rows[0]['count_star'] == 10
     assert '_dd_statement_id' not in rows[0]
 
 
 @pytest.mark.unit
 def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(dbm_instance, datadog_agent):
-    # object_instance_begin is a memory address MySQL can reuse for a different prepared statement once the
-    # previous one is deallocated. The deallocated row lingers in the _statement_rows cache until its TTL, so a
-    # reused id must not collapse the stale row and the new statement onto the same state key; otherwise the new
-    # statement's first execution is reported as a delta for the old query.
+    # object_instance_begin is a reusable memory address: after a statement is deallocated its id can be handed to
+    # a different one. A recycled id (different sql_text/signature) must not merge with the stale cached row.
     normalized_a = 'SELECT `id` FROM `dbm_order` WHERE `id` = ?'
     normalized_b = 'SELECT `name` FROM `dbm_user` WHERE `id` = ?'
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
@@ -484,7 +472,7 @@ def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(d
     rows_by_run = iter(
         [
             [row(1001, 'SELECT id FROM dbm_order WHERE id = ?', 100)],
-            # id 1001 was deallocated; a different statement reuses the same object_instance_begin
+            # 1001 deallocated, then reused by a different statement
             [row(1001, 'SELECT name FROM dbm_user WHERE id = ?', 5000)],
         ]
     )
@@ -503,8 +491,7 @@ def test_statement_metrics_reused_prepared_statement_instance_id_is_not_merged(d
         assert mysql_check._statement_metrics._collect_per_statement_metrics([]) == []
         rows = mysql_check._statement_metrics._collect_per_statement_metrics([])
 
-    # The reused id belongs to a different statement, so it is baselined instead of being merged with the stale
-    # row. Without keying on the SQL identity the two rows would merge and emit a spurious 5000 delta.
+    # the reused id is a different statement => baselined, not merged with the stale row (pre-fix: spurious 5000)
     assert rows == []
 
 
