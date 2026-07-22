@@ -218,7 +218,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             run_sync=is_affirmative(config.statement_samples_config.get('run_sync', False)),
             enabled=is_affirmative(config.statement_samples_config.get('enabled', True)),
             min_collection_interval=config.min_collection_interval,
-            dbms="mysql",
+            dbms=check.dbms,
             expected_db_exceptions=(pymysql.err.DatabaseError,),
             job_name="statement-samples",
             shutdown_callback=self._close_db_conn,

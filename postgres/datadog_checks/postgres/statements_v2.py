@@ -98,7 +98,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             enabled=config.query_metrics.enabled,
             expected_db_exceptions=(psycopg.errors.DatabaseError,),
             min_collection_interval=config.min_collection_interval,
-            dbms="postgres",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name="query-metrics",
         )
