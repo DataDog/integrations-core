@@ -27,19 +27,12 @@ def from_ports(stanza: dict[str, Any]) -> list[str]:
     'from_named_ports',
     provides=('port',),
     inputs={'port_names': Input('array[string]')},
+    runtime_imports=('from datadog_checks.base.utils.discovery import candidate_ports_by_name',),
 )
 def from_named_ports(stanza: dict[str, Any]) -> list[str]:
     """Open a loop over explicitly named service ports and bind a `ctx` exposing the current `port`."""
     port_names = stanza['port_names']
-    # Keep generated integrations compatible with the base version that first
-    # introduced discovery while preserving the requested name order and
-    # deduplicating ports by number.
     return [
-        '    seen_ports = set()',
-        f'    for port in (port for port_name in dict.fromkeys({port_names!r}) if port_name '
-        'for port in service.ports if port.name == port_name):',
-        '        if port.number in seen_ports:',
-        '            continue',
-        '        seen_ports.add(port.number)',
+        f'    for port in candidate_ports_by_name(service, {port_names!r}):',
         "        ctx = {'port': port}",
     ]
