@@ -281,6 +281,89 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
     assert row['count_star'] == 2
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
+def test_statement_metrics_new_digest_does_not_inflate(aggregator, dd_run_check, dbm_instance, datadog_agent):
+    # Two structurally distinct queries (different WHERE columns -> two distinct MySQL digests on every version)
+    # are forced by obfuscation to the same normalized query, so DBM aggregates them under one query_signature.
+    # A digest first seen AFTER the signature is already baselined must be baselined itself (contribute 0), not
+    # have its full first-seen count dumped into a single interval. Exercises the real per-statement SQL end to end.
+    query_one = "select * from information_schema.processlist where state = 'starting'"
+    query_two = "select * from information_schema.processlist where command = 'Sleep'"
+    normalized_query = 'SELECT * FROM `information_schema` . `processlist`'
+    query_signature = compute_sql_signature(normalized_query)
+
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def obfuscate_sql(query, options=None):
+        if 'processlist' in query:
+            return normalized_query
+        return query
+
+    def run_query(q):
+        with mysql_check._connect() as db:
+            with closing(db.cursor()) as cursor:
+                cursor.execute(q)
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = obfuscate_sql
+        # Baseline: only query_one exists, so its digest baselines the shared signature.
+        run_query(query_one)
+        dd_run_check(mysql_check)
+        # query_one runs once more (a real +1 delta); query_two appears for the first time (5 executions).
+        run_query(query_one)
+        for _ in range(5):
+            run_query(query_two)
+        dd_run_check(mysql_check)
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
+    assert len(matching_rows) == 1
+    # Only query_one's incremental execution (1) is counted; query_two is a newly-seen digest that gets
+    # baselined, so its 5 first-seen executions are not dumped. The pre-fix code reported 6.
+    assert matching_rows[0]['count_star'] == 1
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_statement_metrics_new_prepared_statement_instance_does_not_inflate(
+    aggregator, dd_run_check, dbm_instance, bob_conn, datadog_agent
+):
+    if MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION_PARSED < parse_version('10.5.0'):
+        pytest.skip("prepared_statements_instances is unavailable on MariaDB < 10.5")
+
+    dbm_instance['query_metrics']['only_query_recent_statements'] = False
+    dbm_instance['query_metrics']['collect_prepared_statements'] = True
+    mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    prepared_sql = DEFAULT_FQ_SUCCESS_QUERY
+    query_signature = compute_sql_signature(prepared_sql)
+
+    # Keep the session open so both prepared-statement instances persist across the two checks.
+    with closing(bob_conn.cursor()) as cursor:
+        # Baseline: one instance (ps1) exists and executes once.
+        cursor.execute("PREPARE ps1 FROM '{}'".format(prepared_sql))
+        cursor.execute("EXECUTE ps1")
+        dd_run_check(mysql_check)
+        # A second instance of the same statement text (ps2, distinct object_instance_begin) appears and
+        # executes several times; ps1 executes once more.
+        cursor.execute("EXECUTE ps1")
+        cursor.execute("PREPARE ps2 FROM '{}'".format(prepared_sql))
+        for _ in range(5):
+            cursor.execute("EXECUTE ps2")
+        dd_run_check(mysql_check)
+        cursor.execute("DEALLOCATE PREPARE ps1")
+        cursor.execute("DEALLOCATE PREPARE ps2")
+
+    events = aggregator.get_event_platform_events("dbm-metrics")
+    matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
+    assert len(matching_rows) == 1
+    # ps1 contributed 1 execution this interval; ps2 is a newly-seen instance -> baselined, not dumped.
+    # The pre-fix SUM(count_execute) GROUP BY sql_text would have reported 6.
+    assert matching_rows[0]['count_star'] == 1
+
+
 @pytest.mark.unit
 def test_statement_metrics_baselines_new_digest_before_merging_query_signature(dbm_instance, datadog_agent):
     normalized_query = 'SELECT * FROM `employees` WHERE `id` = ?'
