@@ -17,7 +17,9 @@ from .common import MOCKED_INSTANCE, PORT
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHECK_ROOT = os.path.dirname(HERE)
 KIND_DIR = os.path.join(HERE, 'kind')
+KUBECONFIG_STATE = 'velero_kubeconfig'
 NODE_AGENT_IP_STATE = 'velero_node_agent_ip'
+NODE_AGENT_NAME_STATE = 'velero_node_agent_name'
 
 
 @contextmanager
@@ -59,10 +61,12 @@ def setup_velero():
         ],
         check=True,
     )
-    save_state(NODE_AGENT_IP_STATE, get_node_agent_ip())
+    node_agent = get_node_agent()
+    save_state(NODE_AGENT_IP_STATE, node_agent['status']['podIP'])
+    save_state(NODE_AGENT_NAME_STATE, node_agent['metadata']['name'])
 
 
-def get_node_agent_ip():
+def get_node_agent():
     result = run_command(
         ['kubectl', 'get', 'pods', '--namespace', 'velero', '--output', 'json'],
         capture='out',
@@ -78,7 +82,7 @@ def get_node_agent_ip():
     ]
     if len(node_agent_pods) != 1 or not node_agent_pods[0].get('status', {}).get('podIP'):
         raise RuntimeError(f'Expected one ready Velero node-agent pod, found {len(node_agent_pods)}')
-    return node_agent_pods[0]['status']['podIP']
+    return node_agent_pods[0]
 
 
 def get_instances(node_agent_ip):
@@ -109,6 +113,7 @@ def dd_environment():
                 "HELM_CONFIG_HOME": path_join(helm_dir, 'Preferences'),
             },
         ) as kubeconfig:
+            save_state(KUBECONFIG_STATE, kubeconfig)
             instances = get_instances(get_state(NODE_AGENT_IP_STATE))
             metadata = {
                 'agent_type': 'kubernetes',
@@ -119,6 +124,16 @@ def dd_environment():
             }
 
             yield instances, metadata
+
+
+@pytest.fixture(scope='session')
+def velero_kubeconfig():
+    return get_state(KUBECONFIG_STATE)
+
+
+@pytest.fixture(scope='session')
+def velero_node_agent_name():
+    return get_state(NODE_AGENT_NAME_STATE)
 
 
 @pytest.fixture
