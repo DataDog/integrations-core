@@ -1,0 +1,1 @@
+Restore prometheus_client v0.21.1 parsing behavior to fix a ~3-5x CPU regression introduced in v0.22.0; this drops support for UTF-8 metric names and for structural characters ({, }, =, ,) inside quoted label values.
