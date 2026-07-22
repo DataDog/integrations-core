@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from ddev.e2e.config import EnvDataStorage
 
 
@@ -44,6 +46,24 @@ def test_basic(ddev, helpers, data_dir, mocker):
     assert not env_data.exists()
 
     stop.assert_called_once()
+
+
+def test_failed_agent_cleanup_preserves_environment_state(ddev, data_dir, mocker):
+    teardown = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+    stop = mocker.patch('ddev.e2e.agent.docker.DockerAgent.stop', side_effect=RuntimeError('cleanup failed'))
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+    metadata = {'owner': 'retry-me'}
+    env_data.write_metadata(metadata)
+
+    with pytest.raises(RuntimeError, match='cleanup failed'):
+        ddev('env', 'stop', integration, environment)
+
+    assert env_data.read_metadata() == metadata
+    stop.assert_called_once_with()
+    teardown.assert_called_once()
 
 
 def test_stop_all(ddev, helpers, data_dir, mocker):

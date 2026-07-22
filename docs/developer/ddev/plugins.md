@@ -137,8 +137,9 @@ is desired. This fixture is responsible for starting and stopping environments a
 
 #### Metadata
 
-- `env_type` - This is the type of interface that will be used to interact with the Agent. Currently, we support `docker` (default), `vagrant` and `local`.
+- `agent_type` - The interface used to interact with the Agent. Supported values are `docker` (default), `vagrant`, and `kubernetes`.
 - `env_vars` - A `dict` of environment variables and their values that will be present when starting the Agent.
-- `docker_volumes` - A `list` of `str` representing [Docker volume mounts][docker-volume-docs] if `env_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
-- `docker_platform` - The container architecture to use if `env_type` is `docker`. Currently, we support `linux` (default) and `windows`.
+- `docker_volumes` - A `list` of `str` representing [Docker volume mounts][docker-volume-docs] if `agent_type` is `docker` e.g. `/local/path:/agent/container/path:ro`.
+- `docker_platform` - The container architecture to use if `agent_type` is `docker`. Currently, we support `linux` (default) and `windows`.
+- `kubernetes` - Configuration used when `agent_type` is `kubernetes`. It requires `kubeconfig` and optionally accepts `namespace`, `auto_conf`, `pod_labels`, `image_pull_policy`, and `wait_timeout`. The backend owns the namespace, which must not already exist.
 - `logs_config` - A `list` of configs that will be used by the Logs Agent. You will never need to use this directly, but rather via [higher level abstractions](test.md#logs).

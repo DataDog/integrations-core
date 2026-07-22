@@ -77,3 +77,10 @@ class AgentInterface(ABC):
 
     @abstractmethod
     def enter_shell(self) -> None: ...
+
+    def sync_config(self) -> None:
+        """Synchronize the persisted host configuration with the Agent."""
+
+    def show_logs(self) -> None:
+        """Show backend-specific diagnostics for the running Agent."""
+        self.invoke(['status'])

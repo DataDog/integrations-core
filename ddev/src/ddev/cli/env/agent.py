@@ -131,6 +131,7 @@ def agent(
             app.abort(str(e))
         finally:
             env_data.config_file.unlink()
+            agent.sync_config()
     else:
         temp_config_file = env_data.config_file.parent / f'{env_data.config_file.name}.bak.example'
         env_data.config_file.replace(temp_config_file)
@@ -141,3 +142,4 @@ def agent(
             app.abort(str(e))
         finally:
             temp_config_file.replace(env_data.config_file)
+            agent.sync_config()

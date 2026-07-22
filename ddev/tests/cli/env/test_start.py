@@ -175,6 +175,31 @@ def test_agent_build_config(ddev, config_file, helpers, data_dir, write_result_f
     )
 
 
+def test_kubernetes_agent_build_uses_configured_docker_image(ddev, config_file, data_dir, write_result_file, mocker):
+    config_file.model.agent = '7'
+    config_file.save()
+
+    metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': '/tmp/kubeconfig'}}
+    config = {}
+    mocker.patch('secrets.token_hex', return_value='test-owner')
+    mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
+    start = mocker.patch('ddev.e2e.agent.kubernetes.KubernetesAgent.start')
+
+    integration = 'postgres'
+    environment = 'py3.12'
+    env_data = EnvDataStorage(data_dir).get(integration, environment)
+
+    result = ddev('env', 'start', integration, environment)
+
+    assert result.exit_code == 0, result.output
+    assert env_data.read_metadata() == {**metadata, '_kubernetes_owner_id': 'test-owner'}
+    start.assert_called_once_with(
+        agent_build='registry.datadoghq.com/agent:7',
+        local_packages={},
+        env_vars={'DD_DD_URL': 'https://app.datadoghq.com', 'DD_SITE': 'datadoghq.com'},
+    )
+
+
 def test_agent_build_env_var(ddev, config_file, helpers, data_dir, write_result_file, mocker):
     config_file.model.agent = '7'
     config_file.save()

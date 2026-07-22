@@ -132,6 +132,13 @@ def start(
         result = json.loads(result_file.read_text())
 
     metadata = result['metadata']
+    agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
+    if agent_type == 'kubernetes':
+        from secrets import token_hex
+
+        # Persist a unique owner before backend startup so error cleanup cannot
+        # delete resources belonging to another environment with the same name.
+        metadata['_kubernetes_owner_id'] = token_hex(16)
 
     # TODO Remove once we have migrated the `docker_run` function
     if serialized_volumes := metadata.get(E2EMetadata.ENV_VARS, {}).get(E2EEnvVars.DOCKER_VOLUMES):
@@ -144,17 +151,19 @@ def start(
     config = result['config']
     env_data.write_config(config)
 
-    agent_type = metadata.get(E2EMetadata.AGENT_TYPE, DEFAULT_AGENT_TYPE)
-
     if agent_type == "vagrant" and running_on_ci():
         app.abort(text="Vagrant is not supported on CI", code=0)
 
     agent = get_agent_interface(agent_type)(app, integration, environment, metadata, env_data.config_file)
 
     if not agent_build:
+        configured_agent_build = app.config.agent.config.get(agent_type)
+        if configured_agent_build is None and agent_type == 'kubernetes':
+            # Kubernetes uses the same container image as the Docker backend.
+            configured_agent_build = app.config.agent.config.get('docker')
         agent_build = (
             os.getenv(E2EEnvVars.AGENT_BUILD_PY2 if agent.python_version[0] == 2 else E2EEnvVars.AGENT_BUILD)
-            or app.config.agent.config.get(agent_type)
+            or configured_agent_build
             or ''
         )
 
@@ -162,6 +171,8 @@ def start(
 
     try:
         agent.start(agent_build=agent_build, local_packages=local_packages, env_vars=agent_env_vars)
+        # Backends may add runtime metadata needed by later ddev processes.
+        env_data.write_metadata(metadata)
     except Exception as e:
         from ddev.cli.env.stop import stop
 

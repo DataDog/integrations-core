@@ -176,6 +176,9 @@ class DockerAgent(AgentInterface):
     def _show_logs(self) -> None:
         self._run_command(['docker', 'logs', self._container_name])
 
+    def show_logs(self) -> None:
+        self._run_command(['docker', 'logs', self._container_name], check=True)
+
     def get_id(self) -> str:
         return self._container_name
 

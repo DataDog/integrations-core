@@ -20,4 +20,9 @@ def get_agent_interface(agent_type: str) -> type[AgentInterface]:
 
         return VagrantAgent
 
+    if agent_type == "kubernetes":
+        from ddev.e2e.agent.kubernetes import KubernetesAgent
+
+        return KubernetesAgent
+
     raise NotImplementedError(f"Unsupported Agent type: {agent_type}")
