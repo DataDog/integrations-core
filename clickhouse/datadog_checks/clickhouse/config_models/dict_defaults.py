@@ -96,9 +96,9 @@ def instance_parts_and_merges():
     )
 
 
-def instance_asynchronous_insert_flush_log():
-    return instance.AsynchronousInsertFlushLog(
+def instance_async_insert_flushes():
+    return instance.AsyncInsertFlushes(
         enabled=False,
         collection_interval=60,
-        max_flush_rows=1000,
+        max_samples_per_collection=1000,
     )
