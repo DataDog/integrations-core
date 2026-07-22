@@ -1,0 +1,1 @@
+Set event host from EvtSystemComputer so forwarded events report the originating machine rather than the Agent host.
