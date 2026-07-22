@@ -6,6 +6,7 @@ import pytest
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.http_exceptions import HTTPInvalidURLError
+from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.prefect import PrefectCheck
 from datadog_checks.prefect.check import PrefectClient
@@ -603,24 +604,13 @@ class EventCase(NamedTuple):
 pytestmark = [pytest.mark.usefixtures("mock_prefect_client"), pytest.mark.unit]
 
 
-class MockResponse:
-    def __init__(self, payload: dict):
-        self.payload = payload
-
-    def raise_for_status(self):
-        return None
-
-    def json(self) -> dict:
-        return self.payload
-
-
 def test_paginate_events_rejects_external_next_page():
     http = Mock()
-    http.post.return_value = MockResponse(
-        {
+    http.post.return_value = MockHTTPResponse(
+        json_data={
             "events": [{"id": "event-1"}],
             "next_page": "http://attacker.example/evil",
-        }
+        },
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)
@@ -638,17 +628,17 @@ def test_paginate_events_rejects_external_next_page():
 
 def test_paginate_events_allows_same_host_absolute_next_page():
     http = Mock()
-    http.post.return_value = MockResponse(
-        {
+    http.post.return_value = MockHTTPResponse(
+        json_data={
             "events": [{"id": "event-1"}],
             "next_page": "http://prefect.local/api/events/filter?page=2",
-        }
+        },
     )
-    http.get.return_value = MockResponse(
-        {
+    http.get.return_value = MockHTTPResponse(
+        json_data={
             "events": [{"id": "event-2"}],
             "next_page": None,
-        }
+        },
     )
     log = Mock()
     client = PrefectClient("http://prefect.local/api", http, log)

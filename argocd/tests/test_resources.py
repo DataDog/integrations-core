@@ -14,7 +14,7 @@ from datadog_checks.argocd.resources_constants import (
     GENRESOURCES_API_UP_METRIC,
     REPOSITORY_INCLUDE,
 )
-from datadog_checks.dev.http import MockHTTPResponse, MockResponse
+from datadog_checks.dev.http import MockHTTPResponse
 
 from . import common
 
@@ -52,8 +52,8 @@ def _repository(repo: str, *, username: str = "", password: str = "", ssh_key: s
     return {"repo": repo, "username": username, "password": password, "sshPrivateKey": ssh_key, "type": "git"}
 
 
-def _items_response(items: list[dict], status_code: int = 200) -> MockResponse:
-    return MockResponse(json_data={"items": items}, status_code=status_code)
+def _items_response(items: list[dict], status_code: int = 200) -> MockHTTPResponse:
+    return MockHTTPResponse(json_data={"items": items}, status_code=status_code)
 
 
 def build_check(**overrides):
