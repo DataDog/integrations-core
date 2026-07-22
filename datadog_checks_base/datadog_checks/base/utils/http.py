@@ -332,6 +332,11 @@ class ResponseWrapper(ObjectProxy):
         return self
 
 
+def suppress_default_auth(request):
+    """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
+    return request
+
+
 class RequestsWrapper(object):
     __slots__ = (
         '_session',
@@ -599,6 +604,11 @@ class RequestsWrapper(object):
                 self.options['headers'][key] = value
                 return
         self.options['headers'][name] = value
+
+    def disable_auth(self) -> None:
+        """Suppress config-derived and environment/.netrc auth, leaving trust_env (proxy, CA) intact."""
+        # Truthy no-op auth overrides the config Basic-auth tuple and short-circuits requests' .netrc lookup.
+        self.options['auth'] = suppress_default_auth
 
     def get(self, url, **options):
         return self._request('get', url, options)

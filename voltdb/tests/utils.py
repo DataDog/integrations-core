@@ -4,10 +4,9 @@
 from subprocess import PIPE, STDOUT, Popen
 
 from datadog_checks.base.utils.common import ensure_bytes
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev.errors import SubprocessError
 from datadog_checks.dev.structures import LazyFunction
-from datadog_checks.voltdb.client import Client
+from datadog_checks.voltdb.check import VoltDBCheck
 from datadog_checks.voltdb.types import Instance  # noqa: F401
 
 from . import common
@@ -56,8 +55,9 @@ class EnsureExpectedMetricsShowUp(LazyFunction):
 
     def __init__(self, instance):
         # type: (Instance) -> None
-        http = RequestsWrapper(instance, {})
-        self._client = Client(url=instance['url'], http_get=http.get, username='admin', password='admin')
+        # Reuse the check's backend-neutral HTTP client factory. Admin creds are needed to seed data and snapshots.
+        admin_instance = dict(instance, username='admin', password='admin')
+        self._client = VoltDBCheck('voltdb', {}, [admin_instance])._client
 
     def __call__(self):
         # type: () -> None

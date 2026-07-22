@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any, List, Optional, cast  # noqa: F401
 
-import requests  # noqa: F401
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.http_protocol import HTTPResponse  # noqa: F401
 
 from .client import Client
 from .config import Config
@@ -22,6 +21,10 @@ class VoltDBCheck(AgentCheck):
 
         self._config = Config(cast(Instance, self.instance), debug=self.log.debug)
         self.register_secret(self._config.password)
+
+        # VoltDB authenticates via query params, so suppress all HTTP-level auth including .netrc credentials.
+        self.http.disable_auth()
+
         self._client = Client(
             url=self._config.url,
             http_get=self.http.get,
@@ -39,7 +42,7 @@ class VoltDBCheck(AgentCheck):
         self.check_initializations.append(self._query_manager.compile_queries)
 
     def _raise_for_status_with_details(self, response):
-        # type: (requests.Response) -> None
+        # type: (HTTPResponse) -> None
         try:
             response.raise_for_status()
         except Exception as exc:

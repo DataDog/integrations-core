@@ -56,6 +56,62 @@ class TestClose:
         assert second is not first
 
 
+class TestDisableAuth:
+    def test_disable_auth_overrides_config_basic_auth(self):
+        http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
+        assert http.options['auth'] == ('user', 'pass')
+        http.disable_auth()
+        # A truthy sentinel replaces the config-derived tuple so no Basic header is derived from config.
+        assert http.options['auth'] is not None
+        assert http.options['auth'] != ('user', 'pass')
+
+    def test_disable_auth_preserves_trust_env(self):
+        http = RequestsWrapper({}, {})
+        http.disable_auth()
+        # Only auth is suppressed. Env proxy and CA bundle resolution must stay on.
+        assert http.trust_env is True
+
+    def test_netrc_header_injected_without_disable_auth(self):
+        # Guards the regression: with auth=None and trust_env on, a matching .netrc entry injects Authorization.
+        http = RequestsWrapper({}, {})
+        http.options['auth'] = None
+        captured = {}
+
+        def fake_send(session_self, request, **kwargs):
+            captured['headers'] = dict(request.headers)
+            response = requests.Response()
+            response.status_code = 200
+            return response
+
+        with (
+            mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
+            mock.patch('requests.sessions.Session.send', new=fake_send),
+        ):
+            http.get('http://example.com')
+
+        assert 'Authorization' in captured['headers']
+
+    def test_disable_auth_suppresses_netrc_header(self):
+        http = RequestsWrapper({}, {})
+        captured = {}
+
+        def fake_send(session_self, request, **kwargs):
+            captured['headers'] = dict(request.headers)
+            response = requests.Response()
+            response.status_code = 200
+            return response
+
+        with (
+            mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
+            mock.patch('requests.sessions.Session.send', new=fake_send),
+        ):
+            http.disable_auth()
+            http.get('http://example.com')
+
+        # The truthy no-op auth short-circuits requests' .netrc lookup, so no Authorization header goes out.
+        assert 'Authorization' not in captured['headers']
+
+
 class TestCookies:
     def test_get_cookie_missing_returns_default(self):
         http = RequestsWrapper({}, {})
