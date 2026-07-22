@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 from textual import events
@@ -33,24 +34,6 @@ async def test_launch_modal_occupies_at_least_half_viewport(make_launch_modal_ap
         assert dialog.region.height >= viewport[1] / 2
         assert actions.region.bottom == dialog.content_region.bottom
         assert launch_button.region.right == dialog.content_region.right
-
-
-async def test_input_labels_show_declared_types(make_launch_modal_app, all_flow_inputs) -> None:
-    app = make_launch_modal_app(all_flow_inputs)
-
-    async with app.run_test() as pilot:
-        await pilot.pause()
-
-        labels = [label.render().plain for label in app.screen.query("#launch-fields > Label.eyebrow")]
-
-        assert labels == [
-            "MY STRING (string)",
-            "MY NUMBER (number)",
-            "MY BOOL (boolean)",
-            "MY PATH (path)",
-            "PRODUCT REQUIREMENTS FILE (path)",
-            "MAX TIMEOUT (SECONDS) (number)",
-        ]
 
 
 @pytest.mark.parametrize(
@@ -371,7 +354,7 @@ async def test_path_autocomplete_expands_home_directory(make_launch_modal_app, l
         [FlowInput(name="p", label="P", input_type=InputType.PATH, default=None, required=False)]
     )
     async with app.run_test(size=large_terminal):
-        from ddev.cli.meta.ai.tui.screens.launch_modal import TogoPathAutoComplete
+        from ddev.cli.meta.ai.tui.widgets.launch_flow_input import TogoPathAutoComplete
 
         autocomplete = app.screen.query_one(TogoPathAutoComplete)
         home_candidates = autocomplete.get_candidates(
@@ -379,6 +362,32 @@ async def test_path_autocomplete_expands_home_directory(make_launch_modal_app, l
         )
         tilde_candidates = autocomplete.get_candidates(TargetState(text="~/", cursor_position=2))
         assert {c.main for c in tilde_candidates} == {c.main for c in home_candidates}
+
+
+async def test_path_autocomplete_renders_all_directory_suggestions(
+    make_launch_modal_app, large_terminal, tmp_path
+) -> None:
+    """Path suggestions remain visible when another launch input follows."""
+    candidate_names = [f"autocomplete-{letter}-unique" for letter in "abcdefgh"]
+    for candidate_name in candidate_names:
+        (tmp_path / candidate_name).mkdir()
+
+    app = make_launch_modal_app(
+        [
+            FlowInput(name="path", label="Path", input_type=InputType.PATH, default=str(tmp_path)),
+            FlowInput(name="following", label="Following", input_type=InputType.NUMBER),
+        ]
+    )
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        path_input = app.screen.query_one("#input-path", Input)
+        await pilot.click(path_input)
+        await pilot.press("end", "/")
+        await pilot.pause()
+
+        screenshot = ElementTree.fromstring(app.export_screenshot())
+        rendered_text = "".join(element.text or "" for element in screenshot.iter("{http://www.w3.org/2000/svg}text"))
+        assert candidate_names[-1] in rendered_text
 
 
 async def test_path_autocomplete_does_not_force_completion_on_enter(

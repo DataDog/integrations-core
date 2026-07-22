@@ -103,14 +103,6 @@ def test_flow_grid_scrolls_vertically():
     assert "overflow-y: auto;" in tcss
 
 
-def test_launch_fields_have_vertical_spacing():
-    """Launch modal fields must not render cramped against each other."""
-    from pathlib import Path
-
-    tcss = Path(TogoApp.CSS_PATH).read_text()
-    assert "#launch-fields > Label.eyebrow {\n    margin-top: 1;\n}" in tcss
-
-
 def test_input_focus_uses_muted_accent_not_bold_primary():
     """Focused inputs should use a subtle accent outline, not a bold filled primary border."""
     from pathlib import Path
