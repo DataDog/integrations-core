@@ -1,10 +1,60 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from ...utils import get_model_consumer, get_spec, normalize_yaml
+import sys
+from types import ModuleType, SimpleNamespace
+from unittest.mock import Mock
+
+from ...utils import get_model_consumer, get_spec
 
 
-def test():
+class _Model:
+    def __init__(self, data):
+        self.data = data
+
+    @classmethod
+    def model_validate(cls, data, *, context):
+        return cls(data)
+
+    def model_dump(self, **kwargs):
+        return self.data
+
+
+def _load_discovery(contents, monkeypatch, **strategy_helpers):
+    discovery_utils = ModuleType('datadog_checks.base.utils.discovery')
+    discovery_utils.Service = object
+    for name, helper in strategy_helpers.items():
+        setattr(discovery_utils, name, helper)
+
+    integration_package = ModuleType('datadog_checks.test')
+    integration_package.__path__ = []
+    config_models = ModuleType('datadog_checks.test.config_models')
+    config_models.__path__ = []
+    discovery_overrides = ModuleType('datadog_checks.test.config_models.discovery_overrides')
+    instance = ModuleType('datadog_checks.test.config_models.instance')
+    instance.InstanceConfig = _Model
+    shared = ModuleType('datadog_checks.test.config_models.shared')
+    shared.SharedConfig = _Model
+
+    integration_package.config_models = config_models
+    config_models.discovery_overrides = discovery_overrides
+    modules = {
+        discovery_utils.__name__: discovery_utils,
+        integration_package.__name__: integration_package,
+        config_models.__name__: config_models,
+        discovery_overrides.__name__: discovery_overrides,
+        instance.__name__: instance,
+        shared.__name__: shared,
+    }
+    for name, module in modules.items():
+        monkeypatch.setitem(sys.modules, name, module)
+
+    namespace = {}
+    exec(compile(contents, 'discovery.py', 'exec'), namespace)
+    return namespace
+
+
+def test_generated_candidates(monkeypatch):
     consumer = get_model_consumer(
         """
         name: test
@@ -31,51 +81,20 @@ def test():
         """
     )
 
-    model_definitions = consumer.render()
-    files = model_definitions['test.yaml']
-
-    discovery_contents, discovery_errors = files['discovery.py']
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
     assert not discovery_errors
-    assert discovery_contents == normalize_yaml(
-        """
-        from __future__ import annotations
 
-        from collections.abc import Iterator
-        from typing import Any
+    candidate_ports = Mock(return_value=[SimpleNamespace(number=9090)])
+    candidates = _load_discovery(discovery_contents, monkeypatch, candidate_ports=candidate_ports)['candidates']
+    service = SimpleNamespace(host='example.com')
 
-        from datadog_checks.base.utils.discovery import Service, candidate_ports
-        from datadog_checks.test.config_models import discovery_overrides
-        from datadog_checks.test.config_models.instance import InstanceConfig
-        from datadog_checks.test.config_models.shared import SharedConfig
+    assert list(candidates(service)) == [
+        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:9090/m'}]},
+    ]
+    candidate_ports.assert_called_once_with(service, [9090])
 
 
-        def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
-            shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
-                by_alias=True, mode='json', exclude_none=True
-            )
-            # discovery[0]: from_ports
-            for port in candidate_ports(service, [9090]):
-                ctx = {'port': port}
-                instance_data = {
-                    'endpoint': 'http://{service.host}:{port.number}/m'.format(service=service, **ctx),
-                }
-                instance = InstanceConfig.model_validate(
-                    instance_data, context={'configured_fields': frozenset(instance_data)}
-                ).model_dump(by_alias=True, mode='json', exclude_none=True)
-                yield {'init_config': shared, 'instances': [instance]}
-
-
-        def candidates(service: Service) -> Iterator[dict[str, Any]]:
-            override = getattr(discovery_overrides, 'candidates', None)
-            if override is None:
-                yield from _generated_candidates(service)
-            else:
-                yield from override(service, default=_generated_candidates)
-        """
-    )
-
-
-def test_literal_candidate_values():
+def test_literal_candidate_values(monkeypatch):
     consumer = get_model_consumer(
         """
         name: test
@@ -112,47 +131,26 @@ def test_literal_candidate_values():
 
     discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
     assert not discovery_errors
-    assert discovery_contents == normalize_yaml(
-        """
-        from __future__ import annotations
 
-        from collections.abc import Iterator
-        from typing import Any
+    candidate_ports = Mock(return_value=[SimpleNamespace(number=9090)])
+    candidates = _load_discovery(discovery_contents, monkeypatch, candidate_ports=candidate_ports)['candidates']
+    service = SimpleNamespace(host='example.com')
 
-        from datadog_checks.base.utils.discovery import Service, candidate_ports
-        from datadog_checks.test.config_models import discovery_overrides
-        from datadog_checks.test.config_models.instance import InstanceConfig
-        from datadog_checks.test.config_models.shared import SharedConfig
-
-
-        def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
-            shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
-                by_alias=True, mode='json', exclude_none=True
-            )
-            # discovery[0]: from_ports
-            for port in candidate_ports(service, [9090]):
-                ctx = {'port': port}
-                instance_data = {
-                    'endpoint': 'http://{service.host}:{port.number}/m'.format(service=service, **ctx),
+    assert list(candidates(service)) == [
+        {
+            'init_config': {},
+            'instances': [
+                {
+                    'endpoint': 'http://example.com:9090/m',
                     'metric_patterns': {'include': ['test.metric.{2}']},
                 }
-                instance = InstanceConfig.model_validate(
-                    instance_data, context={'configured_fields': frozenset(instance_data)}
-                ).model_dump(by_alias=True, mode='json', exclude_none=True)
-                yield {'init_config': shared, 'instances': [instance]}
+            ],
+        }
+    ]
+    candidate_ports.assert_called_once_with(service, [9090])
 
 
-        def candidates(service: Service) -> Iterator[dict[str, Any]]:
-            override = getattr(discovery_overrides, 'candidates', None)
-            if override is None:
-                yield from _generated_candidates(service)
-            else:
-                yield from override(service, default=_generated_candidates)
-        """
-    )
-
-
-def test_from_named_ports():
+def test_from_named_ports(monkeypatch):
     consumer = get_model_consumer(
         """
         name: test
@@ -182,8 +180,17 @@ def test_from_named_ports():
 
     discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
     assert not discovery_errors
-    assert 'from datadog_checks.base.utils.discovery import Service, candidate_ports_by_name' in discovery_contents
-    assert "for port in candidate_ports_by_name(service, ['metrics', 'http-monitoring']):" in discovery_contents
+
+    candidate_ports_by_name = Mock(return_value=[SimpleNamespace(number=8085)])
+    candidates = _load_discovery(discovery_contents, monkeypatch, candidate_ports_by_name=candidate_ports_by_name)[
+        'candidates'
+    ]
+    service = SimpleNamespace(host='example.com')
+
+    assert list(candidates(service)) == [
+        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:8085/m'}]},
+    ]
+    candidate_ports_by_name.assert_called_once_with(service, ['metrics', 'http-monitoring'])
 
 
 def test_local_strategy():
