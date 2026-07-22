@@ -24,6 +24,7 @@
             }
         ],
         "classifier_tags": [
+            "Category::Cloud",
             "Category::Security",
             "Offering::Integration"
         ]
