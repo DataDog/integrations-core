@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datadog_checks.clickhouse import ClickhouseCheck
-    from datadog_checks.clickhouse.config_models.instance import AsynchronousInsertFlushLog
+    from datadog_checks.clickhouse.config_models.instance import AsyncInsertFlushes
 
 try:
     import datadog_agent
@@ -100,7 +100,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
     # Persistent cache key for storing the last collection timestamp
     CHECKPOINT_CACHE_KEY = "query_completions_last_checkpoint_microseconds"
 
-    def __init__(self, check: ClickhouseCheck, config, flush_config: AsynchronousInsertFlushLog):
+    def __init__(self, check: ClickhouseCheck, config, flush_config: AsyncInsertFlushes):
         super().__init__(
             check=check,
             config=config,
@@ -125,7 +125,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
         # checkpoint (separate from the query_log completions checkpoint) and runs on its own interval.
         self._flush_enabled = flush_config.enabled
         self._flush_collection_interval = flush_config.collection_interval
-        self._flush_max_rows = int(flush_config.max_flush_rows)
+        self._flush_max_rows = int(flush_config.max_samples_per_collection)
         self._flush_checkpoint = NodeCheckpoint(self, FLUSH_CHECKPOINT_CACHE_KEY, self._flush_collection_interval)
         self._last_flush_collection_time = 0.0
 

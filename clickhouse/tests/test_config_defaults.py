@@ -103,11 +103,11 @@ EXPECTED_DEFAULTS = {
         'stalled_merge_elapsed_threshold_seconds': 3600,
         'stuck_replication_num_tries': 3,
     },
-    # === DBM: Async insert flush log ===
-    'asynchronous_insert_flush_log': {
+    # === DBM: Async insert flushes ===
+    'async_insert_flushes': {
         'enabled': False,
         'collection_interval': 60,
-        'max_flush_rows': 1000,
+        'max_samples_per_collection': 1000,
     },
     # === Tagging ===
     'tags': (),
