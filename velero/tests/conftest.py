@@ -98,14 +98,12 @@ def get_instances(node_agent_ip):
 
 @pytest.fixture(scope='session')
 def dd_environment():
-    kind_config = os.path.join(KIND_DIR, 'kind-config.yaml')
     custom_kubectl_image_tag = "custom-kubectl:latest"
 
     with TempDir('helm_dir') as helm_dir:
         with kind_run(
             wrappers=[build_and_load_kubectl_image(custom_kubectl_image_tag)],
             conditions=[KindLoad(custom_kubectl_image_tag), setup_velero],
-            kind_config=kind_config,
             env_vars={
                 "HELM_CACHE_HOME": path_join(helm_dir, 'Caches'),
                 "HELM_CONFIG_HOME": path_join(helm_dir, 'Preferences'),
