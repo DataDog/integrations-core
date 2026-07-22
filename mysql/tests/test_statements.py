@@ -285,17 +285,18 @@ def test_statement_metrics_with_duplicates(aggregator, dd_run_check, dbm_instanc
 @pytest.mark.usefixtures('dd_environment')
 @mock.patch.dict('os.environ', {'DDEV_SKIP_GENERIC_TAGS_CHECK': 'true'})
 def test_statement_metrics_new_digest_does_not_inflate(aggregator, dd_run_check, dbm_instance, datadog_agent):
-    # Two distinct queries obfuscated to the same signature => two digests under one signature. A digest first
-    # seen after the signature is baselined must itself be baselined, not have its full count dumped in one interval.
+    # Two processlist queries with distinct WHERE `state` shapes (=> two digests on every version) obfuscated to
+    # one signature. A digest first seen after the signature is baselined must itself be baselined, not dumped.
+    # Matching only `WHERE `state`` keeps the collapse off the check's own processlist queries.
     query_one = "select * from information_schema.processlist where state = 'starting'"
-    query_two = "select * from information_schema.processlist where command = 'Sleep'"
-    normalized_query = 'SELECT * FROM `information_schema` . `processlist`'
+    query_two = "select * from information_schema.processlist where state = 'starting' or state = 'suspended'"
+    normalized_query = 'SELECT * FROM `information_schema` . `processlist` WHERE `state` = ?'
     query_signature = compute_sql_signature(normalized_query)
 
     mysql_check = MySql(common.CHECK_NAME, {}, [dbm_instance])
 
     def obfuscate_sql(query, options=None):
-        if 'processlist' in query:
+        if 'WHERE `state`' in query:
             return normalized_query
         return query
 
@@ -306,17 +307,17 @@ def test_statement_metrics_new_digest_does_not_inflate(aggregator, dd_run_check,
 
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = obfuscate_sql
-        run_query(query_one)  # baseline the signature with query_one's digest
+        run_query(query_one)  # digest A -> baseline the signature
         dd_run_check(mysql_check)
         run_query(query_one)  # +1 real delta
         for _ in range(5):
-            run_query(query_two)  # query_two: a new digest for the same signature
+            run_query(query_two)  # digest B: new, same signature
         dd_run_check(mysql_check)
 
     events = aggregator.get_event_platform_events("dbm-metrics")
     matching_rows = [r for e in events for r in e['mysql_rows'] if r['query_signature'] == query_signature]
     assert len(matching_rows) == 1
-    # only query_one's +1 is counted; query_two is baselined, not dumped (pre-fix: 6)
+    # only digest A's +1 is counted; digest B is baselined, not dumped (pre-fix: 6)
     assert matching_rows[0]['count_star'] == 1
 
 
