@@ -1703,7 +1703,7 @@ def _stub_consumer_groups(admin, describe_by_group):
 
 
 def _collect_groups(check, describe_result, group_id='test-group'):
-    """Run _collect_consumer_group_metadata against a single mocked consumer group.
+    """Run collect_all_metadata against a single mocked consumer group.
 
     Reuses the shared seed_mock_kafka_client wiring and only swaps in the
     consumer-group futures, so the admin-client mock setup is not duplicated.
@@ -1715,9 +1715,7 @@ def _collect_groups(check, describe_result, group_id='test-group'):
     _stub_consumer_groups(mock_client.kafka_client, {group_id: describe_result})
     kafka_consumer_check.metadata_collector.client = mock_client
 
-    metadata = mock.MagicMock()
-    metadata.cluster_id = 'test-cluster-id'
-    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    kafka_consumer_check.metadata_collector.collect_all_metadata({}, {}, {})
     return kafka_consumer_check
 
 
@@ -1731,9 +1729,7 @@ def _collect_groups_with_cache(check, describe_result, seed=None, group_id='test
     kafka_consumer_check.metadata_collector.client = mock_client
     _wire_cache(kafka_consumer_check, seed)
 
-    metadata = mock.MagicMock()
-    metadata.cluster_id = 'test-cluster-id'
-    kafka_consumer_check.metadata_collector._collect_consumer_group_metadata(metadata)
+    kafka_consumer_check.metadata_collector.collect_all_metadata({}, {}, {})
     return kafka_consumer_check
 
 
