@@ -36,6 +36,7 @@ files:
       Note: All '%' characters must be escaped as '%%'.
     options:
     - name: host
+      display_priority: 3
       description: |
         Host and port of your SQL server. If a port is ommitted, a default port of 1433 will be used.
         If you use Sql Server Browser Service or a similar port autodiscovery service, pass in a port
@@ -47,11 +48,13 @@ files:
         type: string
         example: <HOST>,<PORT>
     - name: username
+      display_priority: 2
       description: Username for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       fleet_configurable: true
       value:
         type: string
     - name: password
+      display_priority: 1
       description: Password for the Datadog-SQL server check user. It will be ignored if using Windows authentication.
       fleet_configurable: true
       secret: true
@@ -609,7 +612,6 @@ files:
             type: boolean
             example: false
           hidden: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the query metric collection interval (in seconds). Each collection involves one or more queries to
@@ -618,14 +620,12 @@ files:
           value:
             type: number
             example: 60
-          fleet_configurable: false
         - name: dm_exec_query_stats_row_limit
           description: |
             Set the maximum number of query stats rows that can be retrieved in a single check run.
           value:
             type: integer
             example: 10000
-          fleet_configurable: false
         - name: samples_per_hour_per_query
           description: |
             Set the rate limit for the number of query sample events that are ingested per hour and per normalized
@@ -633,7 +633,6 @@ files:
           value:
             type: integer
             example: 4
-          fleet_configurable: false
         - name: enforce_collection_interval_deadline
           description: |
             By default, plan collection stops if it is time for the next run of the query metrics & plans loop. This
@@ -644,7 +643,6 @@ files:
             type: boolean
             example: True
           hidden: true
-          fleet_configurable: false
         - name: max_queries
           description: |
             Limit the number of queries sent to the backend.
@@ -655,7 +653,6 @@ files:
             example: 250
             display_default: 250
           hidden: true
-          fleet_configurable: false
         - name: lookback_window
           description: |
             Queries whose last execution completed after the lookback window are excluded from
@@ -665,6 +662,14 @@ files:
             type: integer
             display_default: 2 * collection_interval
             example: 600
+        - name: collect_plans
+          description: |
+            Set to `false` to disable collection of query execution plans while keeping query
+            metrics collection running. Note that when `enabled` is set to `false`, plan
+            collection is also disabled regardless of this setting.
+          value:
+            type: boolean
+            example: true
           fleet_configurable: false
     - name: procedure_metrics
       description: Configure collection of procedure metrics
@@ -714,7 +719,6 @@ files:
           value:
             type: boolean
             example: true
-          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the activity collection interval in seconds. Each collection involves querying several
@@ -725,7 +729,6 @@ files:
             type: number
             example: 10
           hidden: true
-          fleet_configurable: false
     - name: stored_procedure_characters_limit
       description: |
         Limit the number of characters of the text of a stored procedure that is collected.

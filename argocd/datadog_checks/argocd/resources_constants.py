@@ -14,6 +14,15 @@ import re
 KEY_SEPARATOR = "|"
 
 GENRESOURCES_API_UP_METRIC = "argocd.genresources.api.up"
+GENRESOURCES_STREAM_UP_METRIC = "argocd.genresources.stream.up"
+GENRESOURCES_STREAM_EVENTS_METRIC = "argocd.genresources.stream.events_received"
+GENRESOURCES_STREAM_RECONNECTS_METRIC = "argocd.genresources.stream.reconnects"
+
+
+def auth_headers(token: str | None) -> dict[str, str]:
+    """Bearer auth header for Argo CD API requests, or empty when no token is configured."""
+    return {"Authorization": f"Bearer {token}"} if token else {}
+
 
 APPLICATION_INCLUDE: dict[str, tuple[str, ...]] = {
     "paths": (

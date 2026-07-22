@@ -214,6 +214,28 @@ def test_create_batched_payload_structure(check_with_dbm):
     assert payload['clickhouse_query_completions'][1]['query_details']['statement'] == 'INSERT INTO events VALUES (?)'
 
 
+@pytest.mark.parametrize('service', [None, 'test-clickhouse-service'])
+def test_create_batched_payload_service_field(check_with_dbm, service):
+    """The completions payload carries the configured service, or None when unset."""
+    check_with_dbm._config = check_with_dbm._config.model_copy(update={'service': service})
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM users',
+            'query_signature': 'abc123',
+            'query_duration_ms': 100.0,
+            'databases': 'default',
+            'user': 'default',
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = check_with_dbm.query_completions._create_batched_payload(rows)
+
+    assert payload['service'] == service
+
+
 def test_rate_limiting(check_with_dbm):
     """Test that query sample rate limiting works correctly"""
     query_completions = check_with_dbm.query_completions

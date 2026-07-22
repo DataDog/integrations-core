@@ -100,7 +100,7 @@ The Lustre integration requires elevated privileges to run Lustre commands. Ensu
 
 ```bash
 # Check if the Agent user can run Lustre commands
-sudo -u dd-agent lctl dl
+sudo -u dd-agent sudo lctl dl
 sudo -u dd-agent sudo lnetctl net show
 ```
 

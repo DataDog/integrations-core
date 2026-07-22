@@ -291,6 +291,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._last_stats_query_time = None
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
 
+        self._collect_execution_plans = is_affirmative(self._config.statement_metrics_config.get('collect_plans', True))
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
 
     def _init_caches(self):
@@ -541,9 +542,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
                 payload = self._to_metrics_payload(rows, self._max_query_metrics)
                 self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
-                for event in self._collect_plans(rows, cursor, deadline):
-                    self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
-                    plans_submitted += 1
+                if self._collect_execution_plans:
+                    for event in self._collect_plans(rows, cursor, deadline):
+                        self._check.database_monitoring_query_sample(
+                            json.dumps(event, default=default_json_event_encoding)
+                        )
+                        plans_submitted += 1
 
         self._check.count(
             "dd.sqlserver.statements.plans_submitted.count", plans_submitted, **self._check.debug_stats_kwargs()
