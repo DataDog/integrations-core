@@ -386,6 +386,9 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: Response
+        answers:
+          - rdata: 185.64.148.0
+          - rdata: 8.8.8.8
         category_name: Network Activity
         category_uid: 4
         class_name: DNS Activity
@@ -1057,6 +1060,8 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: Response
+        answers:
+          - rdata: 185.64.148.0
         category_name: Network Activity
         category_uid: 4
         class_name: DNS Activity
