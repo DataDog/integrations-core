@@ -39,7 +39,7 @@ In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 3. [Restart the Agent][3].
 
-**Note**:It is not necessary to enable any other functions in the system_probe.yaml file for the OOM kill integration to work. 
+**Note**: It is not necessary to enable any other functions in the system_probe.yaml file for the OOM kill integration to work. 
 
 ### Configuration with Docker
 
