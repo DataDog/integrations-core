@@ -1,0 +1,1 @@
+Add `disable_status_code_tag` option to omit the `http_status_code` tag added in 12.7.0, for users whose existing monitors are affected by the resulting change in metric cardinality.

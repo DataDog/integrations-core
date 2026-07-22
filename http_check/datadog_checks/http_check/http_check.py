@@ -88,6 +88,7 @@ class HTTPCheck(AgentCheck):
             check_hostname,
             stream,
             use_cert_from_response,
+            disable_status_code_tag,
         ) = from_instance(instance, self.ca_certs)
         timeout = self.http.options["timeout"][0]
         start = time.time()
@@ -183,7 +184,7 @@ class HTTPCheck(AgentCheck):
             raise
 
         else:
-            if r is not None:
+            if r is not None and not disable_status_code_tag:
                 http_status = r.status_code
                 tags_list.append("http_status_code:{}".format(http_status))
             if use_cert_from_response:

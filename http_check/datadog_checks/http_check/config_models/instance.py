@@ -74,6 +74,7 @@ class InstanceConfig(BaseModel):
     days_critical: Optional[int] = None
     days_warning: Optional[int] = None
     disable_generic_tags: Optional[bool] = None
+    disable_status_code_tag: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
