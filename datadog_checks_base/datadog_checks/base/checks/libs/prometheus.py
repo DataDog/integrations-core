@@ -5,9 +5,9 @@
 from itertools import tee
 
 from prometheus_client.metrics_core import Metric
-from prometheus_client.parser import _parse_sample, _replace_help_escaping
+from prometheus_client.parser import _replace_help_escaping
 
-import datadog_checks.base.checks.openmetrics.parser_optimizations  # noqa: F401
+from datadog_checks.base.checks.openmetrics.parser_optimizations import _parse_sample
 
 
 def text_fd_to_metric_families(fd):
