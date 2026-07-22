@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Any
 
 import mock
 import pytest
@@ -10,8 +11,29 @@ import requests
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 from datadog_checks.base.utils.http_protocol import HTTPResponse
+from datadog_checks.dev import TempDir
+from datadog_checks.dev.fs import write_file
 
 pytestmark = [pytest.mark.unit]
+
+
+def capture_request_headers(http: RequestsWrapper, netrc_auth: tuple[str, str] | None = None) -> dict[str, str]:
+    captured: dict[str, str] = {}
+
+    def fake_send(session_self: object, request: requests.PreparedRequest, **kwargs: Any) -> requests.Response:
+        captured['headers'] = dict(request.headers)
+        response = requests.Response()
+        response.status_code = 200
+        return response
+
+    with mock.patch('requests.sessions.Session.send', new=fake_send):
+        if netrc_auth is None:
+            http.get('http://example.com')
+        else:
+            with mock.patch('requests.sessions.get_netrc_auth', return_value=netrc_auth):
+                http.get('http://example.com')
+
+    return captured['headers']
 
 
 class TestClose:
@@ -116,17 +138,17 @@ class TestDisableAuth:
 
 
 class TestSetAuth:
-    def test_set_auth_basic_with_keyword_options(self):
+    def test_set_auth_basic_with_keyword_options(self) -> None:
         http = RequestsWrapper({}, {})
         http.set_auth(username='user', password='pass')
         assert http.options['auth'] == ('user', 'pass')
 
-    def test_set_auth_basic_with_mapping(self):
+    def test_set_auth_basic_with_mapping(self) -> None:
         http = RequestsWrapper({}, {})
         http.set_auth({'username': 'user', 'password': 'pass', 'use_legacy_auth_encoding': False})
         assert http.options['auth'] == (b'user', b'pass')
 
-    def test_set_auth_digest(self):
+    def test_set_auth_digest(self) -> None:
         http = RequestsWrapper({}, {})
         with mock.patch('datadog_checks.base.utils.http.requests_auth.HTTPDigestAuth') as digest:
             http.set_auth('digest', username='user', password='pass')
@@ -134,7 +156,7 @@ class TestSetAuth:
         digest.assert_called_once_with('user', 'pass')
         assert http.options['auth'] is digest.return_value
 
-    def test_set_auth_ntlm(self):
+    def test_set_auth_ntlm(self) -> None:
         http = RequestsWrapper({}, {})
         with mock.patch('datadog_checks.base.utils.http.requests_ntlm.HttpNtlmAuth') as ntlm:
             http.set_auth('ntlm', ntlm_domain='domain\\user', password='pass')
@@ -142,7 +164,7 @@ class TestSetAuth:
         ntlm.assert_called_once_with('domain\\user', 'pass')
         assert http.options['auth'] is ntlm.return_value
 
-    def test_set_auth_aws(self):
+    def test_set_auth_aws(self) -> None:
         http = RequestsWrapper({}, {})
         with mock.patch('datadog_checks.base.utils.http._http_utils.BotoAWSRequestsAuth') as aws:
             http.set_auth('aws', aws_host='uri', aws_region='earth', aws_service='saas')
@@ -150,7 +172,7 @@ class TestSetAuth:
         aws.assert_called_once_with(aws_host='uri', aws_region='earth', aws_service='saas')
         assert http.options['auth'] is aws.return_value
 
-    def test_set_auth_kerberos_updates_request_hooks(self):
+    def test_set_auth_kerberos_updates_request_hooks(self) -> None:
         http = RequestsWrapper({'auth_type': 'kerberos', 'kerberos_keytab': '/old/keytab'}, {})
         assert len(http.request_hooks) == 1
 
@@ -163,7 +185,7 @@ class TestSetAuth:
                 assert os.environ['KRB5CCNAME'] == '/new/cache'
                 assert 'KRB5_CLIENT_KTNAME' not in os.environ
 
-    def test_set_auth_token_handler(self):
+    def test_set_auth_token_handler(self) -> None:
         http = RequestsWrapper({}, {})
         http.set_auth(
             auth_token={
@@ -176,11 +198,24 @@ class TestSetAuth:
         http.set_auth(auth_type='none')
         assert http.auth_token_handler is None
 
-    def test_set_auth_none_suppresses_netrc_header(self):
+    @pytest.mark.parametrize('auth_type', ['none', 'NoNe', 'disabled', 'DISABLED', None])
+    def test_set_auth_disabled_types_suppress_netrc_header(self, auth_type: str | None) -> None:
+        http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
+        http.set_auth(auth_type=auth_type)
+        headers = capture_request_headers(http, netrc_auth=('netrc-user', 'netrc-pass'))
+        assert 'Authorization' not in headers
+
+    @pytest.mark.parametrize('auth_type', ['none', 'NoNe', 'disabled', 'DISABLED', None])
+    def test_init_disabled_auth_types_suppress_netrc_header(self, auth_type: str | None) -> None:
+        http = RequestsWrapper({'auth_type': auth_type, 'username': 'user', 'password': 'pass'}, {})
+        headers = capture_request_headers(http, netrc_auth=('netrc-user', 'netrc-pass'))
+        assert 'Authorization' not in headers
+
+    def test_set_auth_none_suppresses_netrc_header(self) -> None:
         http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
         captured = {}
 
-        def fake_send(session_self, request, **kwargs):
+        def fake_send(session_self: object, request: requests.PreparedRequest, **kwargs: Any) -> requests.Response:
             captured['headers'] = dict(request.headers)
             response = requests.Response()
             response.status_code = 200
@@ -195,10 +230,68 @@ class TestSetAuth:
 
         assert 'Authorization' not in captured['headers']
 
-    def test_set_auth_rejects_unknown_options(self):
+    def test_set_auth_updates_existing_persistent_session(self) -> None:
+        http = RequestsWrapper({'persist_connections': True, 'username': 'user', 'password': 'pass'}, {})
+        session = http.session
+        http.set_auth(auth_type='none')
+
+        headers = capture_request_headers(http, netrc_auth=('netrc-user', 'netrc-pass'))
+
+        assert http.session is session
+        assert 'Authorization' not in headers
+
+    def test_set_auth_removes_token_header_when_disabled(self) -> None:
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            http = RequestsWrapper(
+                {
+                    'auth_token': {
+                        'reader': {'type': 'file', 'path': token_file},
+                        'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                    }
+                },
+                {},
+            )
+
+            write_file(token_file, '\nsecret\n')
+            headers = capture_request_headers(http)
+            assert headers['Authorization'] == 'Bearer secret'
+
+            http.set_auth(auth_type='none')
+            headers = capture_request_headers(http, netrc_auth=('netrc-user', 'netrc-pass'))
+
+        assert 'Authorization' not in headers
+
+    def test_set_auth_restores_user_header_when_disabling_token_handler(self) -> None:
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            http = RequestsWrapper(
+                {
+                    'headers': {'Authorization': 'Bearer configured'},
+                    'auth_token': {
+                        'reader': {'type': 'file', 'path': token_file},
+                        'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                    },
+                },
+                {},
+            )
+
+            write_file(token_file, '\nsecret\n')
+            headers = capture_request_headers(http)
+            assert headers['Authorization'] == 'Bearer secret'
+
+            http.set_auth(username='user', password='pass')
+            assert http.options['headers']['Authorization'] == 'Bearer configured'
+
+    def test_set_auth_rejects_unknown_options(self) -> None:
         http = RequestsWrapper({}, {})
         with pytest.raises(ConfigurationError, match='^Unsupported auth option\\(s\\): token$'):
             http.set_auth(token='secret')
+
+    def test_set_auth_mapping_rejects_unknown_options(self) -> None:
+        http = RequestsWrapper({}, {})
+        with pytest.raises(ConfigurationError, match='^Unsupported auth option\\(s\\): usernmae$'):
+            http.set_auth({'usernmae': 'user', 'password': 'pass'})
 
 
 class TestCookies:

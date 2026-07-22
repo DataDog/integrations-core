@@ -23,7 +23,7 @@ class VoltDBCheck(AgentCheck):
         self.register_secret(self._config.password)
 
         # VoltDB authenticates via query params, so suppress all HTTP-level auth including .netrc credentials.
-        self.http.set_auth(auth_type='none')
+        self.http.disable_auth()
 
         self._client = Client(
             url=self._config.url,

@@ -591,6 +591,9 @@ class RequestsWrapper(object):
 
     def set_auth(self, auth_type: str | Mapping[str, Any] | None = 'basic', **options: Any) -> None:
         """Configure HTTP-level auth for future requests."""
+        if self.auth_token_handler is not None:
+            self.auth_token_handler.clear(default_options=self.options)
+
         config = build_auth_config(auth_type, options)
         self.options['auth'] = create_auth_from_config(config, self.logger)
         self.auth_token_handler = create_auth_token_handler_from_config(config)
@@ -921,6 +924,7 @@ def build_auth_config(
     config = {field: STANDARD_FIELDS[field] for field in AUTH_CONFIG_FIELDS}
 
     if isinstance(auth_type, Mapping):
+        validate_auth_options(auth_type)
         for field in AUTH_CONFIG_FIELDS:
             if field in auth_type:
                 config[field] = auth_type[field]
@@ -928,13 +932,16 @@ def build_auth_config(
         config['auth_type'] = auth_type
 
     if options:
-        unknown_options = sorted(set(options) - set(AUTH_CONFIG_FIELDS))
-        if unknown_options:
-            raise ConfigurationError('Unsupported auth option(s): {}'.format(', '.join(unknown_options)))
-
+        validate_auth_options(options)
         config.update(options)
 
     return config
+
+
+def validate_auth_options(options: Mapping[str, Any]) -> None:
+    unknown_options = sorted(set(options) - set(AUTH_CONFIG_FIELDS))
+    if unknown_options:
+        raise ConfigurationError('Unsupported auth option(s): {}'.format(', '.join(unknown_options)))
 
 
 def resolve_auth_type(config: Mapping[str, Any], logger: logging.Logger) -> str:
@@ -1108,6 +1115,11 @@ class AuthTokenHandler(object):
         token = self.reader.read(**request)
         if token is not None:
             self.writer.write(token, **request)
+
+    def clear(self, **request: Any) -> None:
+        clear_writer = getattr(self.writer, 'clear', None)
+        if clear_writer is not None:
+            clear_writer(**request)
 
 
 class AuthTokenFileReader(object):
@@ -1298,8 +1310,32 @@ class AuthTokenHeaderWriter(object):
                 )
             )
 
+        self.had_original_header = False
+        self.original_header_value = None
+        self.last_header_value = None
+
     def write(self, token, **request):
-        request['default_options']['headers'][self._name] = self._value.replace(self._placeholder, token, 1)
+        headers = request['default_options']['headers']
+        if self.last_header_value is None or headers.get(self._name) != self.last_header_value:
+            self.had_original_header = self._name in headers
+            self.original_header_value = headers.get(self._name)
+
+        self.last_header_value = self._value.replace(self._placeholder, token, 1)
+        headers[self._name] = self.last_header_value
+
+    def clear(self, **request: Any) -> None:
+        headers = request['default_options']['headers']
+        if self.last_header_value is None or headers.get(self._name) != self.last_header_value:
+            return
+
+        if self.had_original_header:
+            headers[self._name] = self.original_header_value
+        else:
+            headers.pop(self._name, None)
+
+        self.had_original_header = False
+        self.original_header_value = None
+        self.last_header_value = None
 
 
 AUTH_TOKEN_READERS = {

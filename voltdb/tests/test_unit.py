@@ -3,10 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from typing import Optional  # noqa: F401
+from typing import Any, Optional  # noqa: F401
 from unittest import mock
+from urllib.parse import parse_qs, urlparse
 
 import pytest
+import requests
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.dev.http import MockHTTPResponse
@@ -91,7 +93,34 @@ def test_check_disables_http_auth():
     with mock.patch.object(VoltDBCheck, 'create_http_client', return_value=fake):
         VoltDBCheck('voltdb', {}, [instance])
 
-    fake.set_auth.assert_called_once_with(auth_type='none')
+    fake.disable_auth.assert_called_once_with()
+
+
+def test_check_suppresses_netrc_auth_with_real_http_client():
+    # type: () -> None
+    instance = {'url': 'http://localhost:8080', 'username': 'admin', 'password': 'secret'}
+    check = VoltDBCheck('voltdb', {}, [instance])
+    captured = {}
+
+    def fake_send(session_self: object, request: requests.PreparedRequest, **kwargs: Any) -> requests.Response:
+        captured['headers'] = dict(request.headers)
+        captured['url'] = request.url
+        response = requests.Response()
+        response.status_code = 200
+        return response
+
+    with (
+        mock.patch('requests.sessions.get_netrc_auth', return_value=('netrc-user', 'netrc-pass')),
+        mock.patch('requests.sessions.Session.send', new=fake_send),
+    ):
+        check._client.request('@SystemInformation', parameters=['OVERVIEW'])
+
+    query = parse_qs(urlparse(captured['url']).query)
+    assert 'Authorization' not in captured['headers']
+    assert query['Procedure'] == ['@SystemInformation']
+    assert query['Parameters'] == ['["OVERVIEW"]']
+    assert query['User'] == ['admin']
+    assert query['Password'] == ['secret']
 
 
 def test_raise_for_status_includes_response_details():
@@ -173,8 +202,8 @@ def test_check_wires_credentials_into_query_params(password_hashed, password_fie
             self.options = {'auth': ('admin', 'secret')}
             self.captured = {}
 
-        def set_auth(self, **options):
-            assert options == {'auth_type': 'none'}
+        def disable_auth(self):
+            # type: () -> None
             self.options['auth'] = None
 
         def get(self, url, **options):
@@ -186,7 +215,7 @@ def test_check_wires_credentials_into_query_params(password_hashed, password_fie
         check = VoltDBCheck('voltdb', {}, [instance])
         check._client.request('@SystemInformation', parameters=['OVERVIEW'])
 
-    assert fake.options['auth'] is None  # set_auth(auth_type='none') cleared the config Basic-auth tuple
+    assert fake.options['auth'] is None  # disable_auth() cleared the config Basic-auth tuple
     assert 'auth' not in fake.captured  # and no per-call auth override is sent
     params = fake.captured['params']
     assert params['User'] == 'admin'
