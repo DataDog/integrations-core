@@ -1,12 +1,12 @@
 # evalya init configuration.
 # Regenerate with: evalya init --force
 version: v0.15.0
-registry: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core
+registry: registry.ddbuild.io/ci/integrations-core
 ci:
   labels:
     - e2e
-  generateStage: evalya
-  testStage: evalya
-  publishStage: evalya
+  generateStage: validate
+  testStage: validate
+  publishStage: release
   publishMeta: true
   evalyaTag: main
