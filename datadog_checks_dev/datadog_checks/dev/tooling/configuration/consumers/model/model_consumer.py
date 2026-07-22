@@ -93,7 +93,10 @@ class ModelConsumer:
             model_files.update(self._build_model_files(model_info, package_info))
             if 'discovery' in spec_file:
                 pkg_name = spec_file['name'].removesuffix('.yaml')
-                has_shared = any(s['name'] == 'init_config' for s in spec_file.get('options', []))
+                has_shared = any(
+                    section['name'] == 'init_config' and section.get('options')
+                    for section in spec_file.get('options', [])
+                )
                 model_files['discovery.py'] = (
                     self._build_discovery_file(spec_file['discovery'], pkg_name, has_shared=has_shared),
                     [],
