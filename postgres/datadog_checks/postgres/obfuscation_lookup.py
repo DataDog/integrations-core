@@ -25,11 +25,22 @@ class ObfuscationResult:
 
 
 class ObfuscationLookup:
-    """Two-tier LRU cache: (queryid, dbid, userid) -> query_signature -> ObfuscationResult.
+    """LRU cache mapping pg_stat_statements keys to obfuscated query results.
 
-    Cache hit avoids both PG text fetch and FFI obfuscation. On miss the
-    caller supplies raw text; we obfuscate, store both mappings, and discard
-    the raw text. Multiple pgss keys sharing a query_signature share one result.
+    A lookup resolves a (queryid, dbid, userid) key to one of three outcomes:
+
+    - hit: the obfuscated result is cached, avoiding both PG text fetch and FFI
+      obfuscation. Stored as two tiers, key -> query_signature -> result, so
+      multiple keys sharing a query_signature share one result.
+    - miss: nothing is cached for the key; the caller must fetch its text and
+      pass it to :meth:`populate` to obfuscate, store, and discard the raw text.
+    - ignored: the key's text is known to be non-cacheable (e.g. the agent's own
+      /* DDIGNORE */ queries). These are neither hit nor miss; lookup skips them
+      so they never trigger a repeated text fetch.
+
+    The caller decides what is non-cacheable (via :meth:`mark_ignored`); the
+    cache only owns storage and lifecycle. All three tiers are LRU-bounded by
+    ``maxsize`` and cleared for a key by :meth:`evict` when it leaves pgss.
     """
 
     def __init__(self, maxsize: int, obfuscate_options: str, log_unobfuscated_queries: bool = False):
@@ -39,6 +50,8 @@ class ObfuscationLookup:
 
         self._key_to_sig: OrderedDict[PgssKey, str] = OrderedDict()
         self._sig_to_result: OrderedDict[str, ObfuscationResult] = OrderedDict()
+        # Negative cache: keys we have learned resolve to nothing cacheable.
+        self._ignored_keys: OrderedDict[PgssKey, None] = OrderedDict()
 
         self._hits = 0
         self._misses = 0
@@ -50,6 +63,10 @@ class ObfuscationLookup:
     @property
     def signature_map_size(self) -> int:
         return len(self._sig_to_result)
+
+    @property
+    def ignored_map_size(self) -> int:
+        return len(self._ignored_keys)
 
     @property
     def hits(self) -> int:
@@ -64,11 +81,20 @@ class ObfuscationLookup:
         self._misses = 0
 
     def lookup(self, keys: set[PgssKey]) -> tuple[dict[PgssKey, ObfuscationResult], set[PgssKey]]:
-        """Return (hits, misses) for the given pg_stat_statements row keys."""
+        """Return (hits, misses) for the given pg_stat_statements row keys.
+
+        Keys in the negative cache are excluded from both: they are neither a hit
+        (no result to return) nor a miss (must not be re-fetched).
+        """
         hits: dict[PgssKey, ObfuscationResult] = {}
         misses: set[PgssKey] = set()
+        ignored = 0
 
         for pgss_key in keys:
+            if pgss_key in self._ignored_keys:
+                self._ignored_keys.move_to_end(pgss_key)
+                ignored += 1
+                continue
             sig = self._key_to_sig.get(pgss_key)
             if sig is not None:
                 self._key_to_sig.move_to_end(pgss_key)
@@ -82,14 +108,34 @@ class ObfuscationLookup:
             misses.add(pgss_key)
 
         logger.debug(
-            "lookup: requested=%d hits=%d misses=%d key_map=%d sig_map=%d",
+            "lookup: requested=%d hits=%d misses=%d ignored=%d key_map=%d sig_map=%d ignored_map=%d",
             len(keys),
             len(hits),
             len(misses),
+            ignored,
             len(self._key_to_sig),
             len(self._sig_to_result),
+            len(self._ignored_keys),
         )
         return hits, misses
+
+    def mark_ignored(self, keys: set[PgssKey]) -> None:
+        """Record keys whose text is non-cacheable so future lookups skip them.
+
+        The caller is responsible for deciding what is non-cacheable (e.g. the
+        agent's own /* DDIGNORE */ queries). Entries are forgotten via
+        :meth:`evict` when their key disappears from pg_stat_statements.
+        """
+        for pgss_key in keys:
+            # Drop any stale positive mapping so an ignored key can never resurface as a
+            # hit (e.g. if its signature is later repopulated by another key after this
+            # negative entry is LRU-trimmed).
+            self._key_to_sig.pop(pgss_key, None)
+            self._ignored_keys[pgss_key] = None
+            self._ignored_keys.move_to_end(pgss_key)
+        if keys:
+            self._trim_ignored()
+            logger.debug("mark_ignored: added=%d ignored_map=%d", len(keys), len(self._ignored_keys))
 
     def populate(self, raw_texts: dict[PgssKey, str]) -> dict[PgssKey, ObfuscationResult]:
         """Obfuscate raw texts, store results, and return pgss_key -> ObfuscationResult."""
@@ -121,11 +167,17 @@ class ObfuscationLookup:
         return results
 
     def evict(self, keys: set[PgssKey]) -> None:
-        """Remove tier-1 entries for keys evicted from pgss."""
+        """Forget all state (positive and negative) for keys evicted from pgss."""
         for pgss_key in keys:
             self._key_to_sig.pop(pgss_key, None)
+            self._ignored_keys.pop(pgss_key, None)
         if keys:
-            logger.debug("evict: removed=%d key_map=%d", len(keys), len(self._key_to_sig))
+            logger.debug(
+                "evict: removed=%d key_map=%d ignored_map=%d",
+                len(keys),
+                len(self._key_to_sig),
+                len(self._ignored_keys),
+            )
 
     def _obfuscate_single(self, raw_text: str) -> ObfuscationResult | None:
         try:
@@ -154,3 +206,7 @@ class ObfuscationLookup:
     def _trim_sig(self):
         while len(self._sig_to_result) > self._maxsize:
             self._sig_to_result.popitem(last=False)
+
+    def _trim_ignored(self):
+        while len(self._ignored_keys) > self._maxsize:
+            self._ignored_keys.popitem(last=False)

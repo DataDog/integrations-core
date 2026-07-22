@@ -119,6 +119,39 @@ class KafkaConfig:
         self._schema_registry_tls_ca_cert = instance.get('schema_registry_tls_ca_cert')
         self._schema_registry_oauth_token_provider = instance.get('schema_registry_oauth_token_provider')
 
+        # Kafka Connect
+        self._kafka_connect_urls = self._parse_connect_urls(instance.get('kafka_connect_url'))
+        self._kafka_connect_username = instance.get('kafka_connect_username')
+        self._kafka_connect_password = instance.get('kafka_connect_password')
+        self._kafka_connect_tls_verify = is_affirmative(instance.get('kafka_connect_tls_verify', True))
+        self._kafka_connect_tls_cert = instance.get('kafka_connect_tls_cert')
+        self._kafka_connect_tls_key = instance.get('kafka_connect_tls_key')
+        self._kafka_connect_tls_ca_cert = instance.get('kafka_connect_tls_ca_cert')
+        self._kafka_connect_oauth_token_provider = instance.get('kafka_connect_oauth_token_provider')
+
+    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
+        """Build metric tags, appending cluster ID tags when provided."""
+        tags = list(self._custom_tags)
+        if cluster_id:
+            tags.append(f'kafka_cluster_id:{cluster_id}')
+            if self._kafka_cluster_id_override:
+                tags.append(f'original_kafka_cluster_id:{self._auto_detected_cluster_id}')
+        return tags
+
+    def _original_cluster_id_field(self) -> dict[str, str]:
+        """Return the original cluster ID event field when a cluster ID override is active."""
+        if self._kafka_cluster_id_override:
+            return {'original_kafka_cluster_id': self._auto_detected_cluster_id}
+        return {}
+
+    @staticmethod
+    def _parse_connect_urls(value: str | list[str] | tuple[str, ...] | None) -> list[str]:
+        if not value:
+            return []
+        if isinstance(value, str):
+            return [value]
+        return list(value)
+
     def validate_config(self):
         if not self._kafka_connect_str:
             raise ConfigurationError('`kafka_connect_str` is required')

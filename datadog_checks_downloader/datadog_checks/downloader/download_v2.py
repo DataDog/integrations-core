@@ -10,8 +10,11 @@ import hashlib
 import importlib.resources
 import json
 import logging
+import posixpath
+import re
 import tempfile
 import urllib.request
+from collections.abc import Mapping
 from pathlib import Path
 
 from tuf.ngclient import Updater
@@ -27,12 +30,16 @@ from .exceptions import (
 
 logger = logging.getLogger(__name__)
 
-V2_REPOSITORY_URL = "https://agent-integration-wheels-prod.s3.amazonaws.com"
+V2_REPOSITORY_URL = "https://agent-integration-wheels.datadoghq.com"
 
 # tuf.ngclient sets its own fetcher timeout; this applies only to the raw wheel urlopen().
 WHEEL_FETCH_TIMEOUT_SECONDS = 60
 
 REQUIRED_POINTER_KEYS = ('digest', 'length', 'wheel_path')
+V2_POINTER_TARGET_DELEGATION = 'wheelsmith'
+V2_POINTER_TARGET_SCHEMA_VERSION = 'v1'
+V2_POINTER_TARGET_PREFIX = f'{V2_POINTER_TARGET_DELEGATION}/{V2_POINTER_TARGET_SCHEMA_VERSION}'
+SHA256_HEX_RE = re.compile(r'^[0-9a-f]{64}$')
 
 
 class TUFPointerDownloader:
@@ -62,7 +69,7 @@ class TUFPointerDownloader:
     @staticmethod
     def _target_path(project: str, version: str | None) -> str:
         name = version if version is not None else 'latest'
-        return f'{project}/{name}.json'
+        return f'{V2_POINTER_TARGET_PREFIX}/{project}/{name}.json'
 
     @staticmethod
     def _wheel_filename(project: str, version: str) -> str:
@@ -74,10 +81,26 @@ class TUFPointerDownloader:
 
     @staticmethod
     def _validate_pointer(project: str, pointer: dict) -> None:
+        if not isinstance(pointer, Mapping):
+            raise MalformedPointerError(project, 'pointer')
+
         for key in REQUIRED_POINTER_KEYS:
             if key not in pointer:
                 raise MalformedPointerError(project, key)
-        if not pointer['wheel_path'].startswith('/'):
+
+        digest = pointer['digest']
+        if not isinstance(digest, str) or not SHA256_HEX_RE.match(digest):
+            raise MalformedPointerError(project, 'digest')
+
+        length = pointer['length']
+        if not isinstance(length, int) or isinstance(length, bool) or length < 0:
+            raise MalformedPointerError(project, 'length')
+
+        wheel_path = pointer['wheel_path']
+        if not isinstance(wheel_path, str) or not wheel_path.startswith('/') or wheel_path.startswith('//'):
+            raise MalformedPointerError(project, 'wheel_path')
+        normalized = posixpath.normpath(wheel_path)
+        if normalized != wheel_path:
             raise MalformedPointerError(project, 'wheel_path')
 
     @staticmethod

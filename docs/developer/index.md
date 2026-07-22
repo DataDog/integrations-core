@@ -4,7 +4,7 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/DataDog/integrations-core)](https://github.com/DataDog/integrations-core)
 [![Downloads](https://pepy.tech/badge/datadog-checks-dev)](https://pepy.tech/project/datadog-checks-dev)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/datadog-checks-dev)](https://pypi.org/project/datadog-checks-dev)
-[![Code style - black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Linting - Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License - BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-9400d3.svg)](https://choosealicense.com/licenses/bsd-3-clause)
 
 -----

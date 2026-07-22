@@ -4,6 +4,7 @@
 """Fake HPE Aruba EdgeConnect orchestrator for E2E tests."""
 
 import os
+import socket
 import ssl
 
 from flask import Flask, jsonify, request
@@ -16,9 +17,12 @@ KEY_FILE = "/app/certs/key.pem"
 ORCH_USERNAME = os.environ.get("ORCH_USERNAME", "admin")
 ORCH_PASSWORD = os.environ.get("ORCH_PASSWORD", "")
 
-APPLIANCE_IP = os.environ.get("APPLIANCE_IP", "172.16.3.21")
 PEER_NEWYORK_IP = "10.0.0.2"
 PEER_SANFRAN_IP = "10.0.0.3"
+
+
+def _appliance_ip():
+    return socket.gethostbyname("dd-appliance")
 
 
 def _appliance(ip, ne_pk, host_name, site, startup_time=None):
@@ -60,13 +64,6 @@ def _appliance(ip, ne_pk, host_name, site, startup_time=None):
     }
 
 
-APPLIANCE_LIST = [
-    _appliance(APPLIANCE_IP, "1.NE", "SydneySP01", "SYD", startup_time=86400),
-    _appliance(PEER_NEWYORK_IP, "4.NE", "NewYorkSP01", "NYC"),
-    _appliance(PEER_SANFRAN_IP, "5.NE", "SanFranSP02", "SFO"),
-]
-
-
 @app.route("/gms/rest/authentication/login", methods=["POST"])
 def login():
     data = request.get_json(silent=True) or {}
@@ -77,7 +74,13 @@ def login():
 
 @app.route("/gms/rest/appliance")
 def appliances():
-    return jsonify(APPLIANCE_LIST)
+    return jsonify(
+        [
+            _appliance(_appliance_ip(), "1.NE", "SydneySP01", "SYD", startup_time=86400),
+            _appliance(PEER_NEWYORK_IP, "4.NE", "NewYorkSP01", "NYC"),
+            _appliance(PEER_SANFRAN_IP, "5.NE", "SanFranSP02", "SFO"),
+        ]
+    )
 
 
 @app.route("/gms/rest/gms/overlays/config")

@@ -5,10 +5,24 @@
 
 from __future__ import annotations
 
+from enum import StrEnum, auto
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from .label import Label
 from .user import GitHubUser
+
+
+class PullRequestState(StrEnum):
+    """The state of a pull request.
+
+    The `pull-request` schema declares `state` as `enum: [open, closed]`.
+    Reference:
+    https://docs.github.com/en/rest/pulls/pulls#get-a-pull-request
+    """
+
+    OPEN = auto()
+    CLOSED = auto()
 
 
 class PullRequestRef(BaseModel):
@@ -50,7 +64,7 @@ class PullRequest(BaseModel):
     patch_url: str | None = None
 
     # State
-    state: str | None = None  # 'open' or 'closed'
+    state: PullRequestState | None = None
     draft: bool = False
     merged: bool | None = None
     locked: bool = False

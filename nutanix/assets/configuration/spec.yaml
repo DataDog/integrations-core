@@ -165,6 +165,17 @@ files:
               type: boolean
               example: false
             fleet_configurable: false
+          - name: collect_resource_ids_as_tags
+            description: |
+              Whether to collect Nutanix resource extId values as tags on infrastructure metrics.
+              When true, cluster metrics get 'ntnx_cluster_id', host metrics get 'ntnx_host_id',
+              and VM metrics get 'ntnx_vm_id', 'ntnx_host_id', and 'ntnx_cluster_id'.
+              These tags are high cardinality (one unique value per resource).
+              Default is false.
+            value:
+              type: boolean
+              example: false
+            fleet_configurable: false
           - name: collect_events
             description: |
               Whether to collect events from Prism Central.

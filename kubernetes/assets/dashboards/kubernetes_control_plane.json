@@ -1,6 +1,6 @@
 {
     "title": "Kubernetes Control Plane Overview",
-    "description": "Kubernetes Control-Plane monitoring\n\nThis dashboard show different metrics/logs from kubernetes control-plane components (kube-api server, kube-scheduler, etcd).\n\nThis dashboard helps you monitor kubernetes control-plane.\n\nIt requires the control-plane monitoring checks to be enabled using [this tutorial](https://docs.datadoghq.com/containers/kubernetes/control_plane/?tab=datadogoperator).\n\nFind more detailed monitoring for each component on their dedicated dashboards:\n\n- Kubernetes API server - [here](https://app.datadoghq.com/dash/integration/Kubernetes%20API%20Server%20-%20Overview)\n- Etcd - [here](https://app.datadoghq.com/dash/integration/Etcd%20Overview)\n- Kubernetes Scheduler - [here](https://app.datadoghq.com/dash/integration/kube_scheduler)\n- Kubernetes Controller manager - [here](https://app.datadoghq.com/dash/integration/kube_controller_manager)",
+    "description": "Kubernetes Control-Plane monitoring\n\nThis dashboard shows different metrics/logs from kubernetes control-plane components (kube-api server, kube-scheduler, etcd).\n\nThis dashboard helps you monitor kubernetes control-plane.\n\nIt requires the control-plane monitoring checks to be enabled using [this tutorial](https://docs.datadoghq.com/containers/kubernetes/control_plane/?tab=datadogoperator).\n\nFind more detailed monitoring for each component on their dedicated dashboards:\n\n- Kubernetes API server - [here](https://app.datadoghq.com/dash/integration/Kubernetes%20API%20Server%20-%20Overview)\n- Etcd - [here](https://app.datadoghq.com/dash/integration/Etcd%20Overview)\n- Kubernetes Scheduler - [here](https://app.datadoghq.com/dash/integration/kube_scheduler)\n- Kubernetes Controller manager - [here](https://app.datadoghq.com/dash/integration/kube_controller_manager)",
     "widgets": [
         {
             "id": 7973807627760301,
@@ -15,7 +15,7 @@
                         "id": 1396413511120281,
                         "definition": {
                             "type": "note",
-                            "content": "## Kubernetes Control-Plane monitoring\n\nThis dashboard show different metrics/logs from kubernetes control-plane components (kube-api server, kube-scheduler, etcd).\n\nThis dashboard helps you monitor kubernetes control-plane.\n\nIt requires the control-plane monitoring checks to be enabled using [this tutorial](https://docs.datadoghq.com/containers/kubernetes/control_plane/?tab=datadogoperator).\n\nFind more detailed monitoring for each component on their dedicated dashboards:\n\n- Kubernetes API server - [here](https://app.datadoghq.com/dash/integration/Kubernetes%20API%20Server%20-%20Overview)\n- Etcd - [here](https://app.datadoghq.com/dash/integration/Etcd%20Overview)\n- Kubernetes Scheduler - [here](https://app.datadoghq.com/dash/integration/kube_scheduler)\n- Kubernetes Controller manager - [here](https://app.datadoghq.com/dash/integration/kube_controller_manager)",
+                            "content": "## Kubernetes Control-Plane monitoring\n\nThis dashboard shows different metrics/logs from kubernetes control-plane components (kube-api server, kube-scheduler, etcd).\n\nThis dashboard helps you monitor kubernetes control-plane.\n\nIt requires the control-plane monitoring checks to be enabled using [this tutorial](https://docs.datadoghq.com/containers/kubernetes/control_plane/?tab=datadogoperator).\n\nFind more detailed monitoring for each component on their dedicated dashboards:\n\n- Kubernetes API server - [here](https://app.datadoghq.com/dash/integration/Kubernetes%20API%20Server%20-%20Overview)\n- Etcd - [here](https://app.datadoghq.com/dash/integration/Etcd%20Overview)\n- Kubernetes Scheduler - [here](https://app.datadoghq.com/dash/integration/kube_scheduler)\n- Kubernetes Controller manager - [here](https://app.datadoghq.com/dash/integration/kube_controller_manager)",
                             "background_color": "white",
                             "font_size": "16",
                             "text_align": "left",
@@ -529,7 +529,7 @@
         {
             "id": 3478691643697987,
             "definition": {
-                "title": "Kuberbetes API server",
+                "title": "Kubernetes API server",
                 "show_title": true,
                 "type": "group",
                 "layout_type": "ordered",
@@ -1213,7 +1213,7 @@
                     {
                         "id": 1639655680757989,
                         "definition": {
-                            "title": "Agent check success ration",
+                            "title": "Agent check success ratio",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -1482,7 +1482,7 @@
                     {
                         "id": 7769591245715321,
                         "definition": {
-                            "title": "Etcd total number of keys.",
+                            "title": "Etcd total number of keys",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",
@@ -2655,7 +2655,7 @@
                     {
                         "id": 7350980922272526,
                         "definition": {
-                            "title": "Nodes unealthy",
+                            "title": "Nodes unhealthy",
                             "title_size": "16",
                             "title_align": "left",
                             "type": "query_value",

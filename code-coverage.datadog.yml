@@ -277,6 +277,9 @@ services:
 - id: falco
   paths:
   - falco/datadog_checks/falco/
+- id: flink
+  paths:
+  - flink/datadog_checks/flink/
 - id: fluentd
   paths:
   - fluentd/datadog_checks/fluentd/
@@ -421,6 +424,9 @@ services:
 - id: kubevirt_handler
   paths:
   - kubevirt_handler/datadog_checks/kubevirt_handler/
+- id: kueue
+  paths:
+  - kueue/datadog_checks/kueue/
 - id: kuma
   paths:
   - kuma/datadog_checks/kuma/

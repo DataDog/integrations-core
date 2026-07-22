@@ -6,7 +6,8 @@ import pytest
 from clickhouse_connect.driver.exceptions import Error, OperationalError
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries
+from datadog_checks.clickhouse import ClickhouseCheck, advanced_queries, queries
+from datadog_checks.clickhouse.utils import cluster_aware_query
 
 from .utils import ensure_csv_safe, parse_described_metrics, raise_error
 
@@ -361,10 +362,96 @@ def test_reported_hostname_loopback_substitutes_agent_hostname(loopback):
         assert check.reported_hostname == 'my-agent-host'
 
 
-def test_reported_hostname_non_loopback():
+@pytest.mark.parametrize(
+    'reported_hostname, expected_reported_hostname',
+    [
+        pytest.param(None, 'resolved-host', id='no-override'),
+        pytest.param('custom-host', 'custom-host', id='with-override'),
+    ],
+)
+def test_database_hostname_ignores_reported_hostname_override(reported_hostname, expected_reported_hostname):
+    instance = {**BASE_INSTANCE}
+    if reported_hostname:
+        instance['reported_hostname'] = reported_hostname
     with mock.patch(
-        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value=BASE_INSTANCE['server']
+        'datadog_checks.clickhouse.clickhouse.resolve_db_host', return_value='resolved-host'
     ) as mock_resolve:
-        check = ClickhouseCheck('clickhouse', {}, [BASE_INSTANCE])
-        assert check.reported_hostname == BASE_INSTANCE['server']
-        mock_resolve.assert_called_once_with(BASE_INSTANCE['server'])
+        check = ClickhouseCheck('clickhouse', {}, [instance])
+        # database_hostname always resolves the real host, regardless of the override
+        assert check.database_hostname == 'resolved-host'
+        # reported_hostname honors the override when configured, otherwise the resolved host
+        assert check.reported_hostname == expected_reported_hostname
+        mock_resolve.assert_called_with(BASE_INSTANCE['server'])
+
+
+def test_cluster_aware_query_bulk_match_query():
+    """The cluster-aware variant reads all replicas and tags system.events per node."""
+    variant = cluster_aware_query(advanced_queries.SystemEvents)
+
+    assert variant['query'] == (
+        "SELECT value, event, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.events)"
+    )
+    assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+    # The base query dict must not be mutated by building the variant.
+    assert advanced_queries.SystemEvents['query'] == 'SELECT value, event FROM system.events'
+    assert all(column['name'] != 'clickhouse_node' for column in advanced_queries.SystemEvents['columns'])
+
+
+def test_cluster_aware_query_preserves_where_clause():
+    """system.errors carries a WHERE clause that must survive in the cluster-aware variant."""
+    variant = cluster_aware_query(advanced_queries.SystemErrors)
+
+    assert variant['query'] == (
+        "SELECT value, name, code, remote, hostName() AS clickhouse_node "
+        "FROM clusterAllReplicas('default', system.errors) WHERE value > 0"
+    )
+    assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+
+
+def test_cluster_aware_query_legacy_query():
+    """The helper builds a cluster-aware variant for a legacy query too."""
+    variant = cluster_aware_query(queries.SystemMetrics)
+
+    assert variant['query'] == (
+        "SELECT value, metric, hostName() AS clickhouse_node FROM clusterAllReplicas('default', system.metrics)"
+    )
+    assert variant['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+    assert queries.SystemMetrics['query'] == 'SELECT value, metric FROM system.metrics'
+
+
+@pytest.mark.parametrize('use_advanced_queries', [True, False])
+def test_get_queries_tags_system_tables_per_node_in_single_endpoint_mode(instance, use_advanced_queries):
+    instance = {
+        **instance,
+        'single_endpoint_mode': True,
+        'use_advanced_queries': use_advanced_queries,
+        'use_legacy_queries': not use_advanced_queries,
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+
+    cluster_aware = [q for q in check.get_queries() if 'clusterAllReplicas' in q['query']]
+
+    # system.events, system.metrics, system.asynchronous_metrics (+ system.errors / events-to-deprecate)
+    assert cluster_aware
+    for query in cluster_aware:
+        assert 'hostName() AS clickhouse_node' in query['query']
+        assert query['columns'][-1] == {'name': 'clickhouse_node', 'type': 'tag'}
+
+    # system.parts/replicas/dictionaries use GROUP BY and are intentionally left untouched here.
+    if not use_advanced_queries:
+        assert any(q is queries.SystemParts for q in check.get_queries())
+
+
+@pytest.mark.parametrize('use_advanced_queries', [True, False])
+def test_get_queries_uses_base_queries_for_direct_connection(instance, use_advanced_queries):
+    instance = {
+        **instance,
+        'single_endpoint_mode': False,
+        'use_advanced_queries': use_advanced_queries,
+        'use_legacy_queries': not use_advanced_queries,
+    }
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check._server_version = '24.8'
+
+    assert all('clusterAllReplicas' not in q['query'] for q in check.get_queries())

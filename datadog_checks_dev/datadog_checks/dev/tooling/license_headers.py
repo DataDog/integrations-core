@@ -2,17 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import functools
 import pathlib
 import re
 from collections import namedtuple
-from typing import Callable, Iterable, List, Optional
+from typing import Callable, Iterable
 
 from pathspec.gitignore import GitIgnoreSpec
 
 from datadog_checks.dev.errors import SubprocessError
 
 from .constants import get_root
-from .git import git_show_file
+from .git import get_base_ref, git_show_file
 from .utils import get_license_header as get_default_license_header
 
 _COPYRIGHT_PATTERN = re.compile(
@@ -27,24 +28,39 @@ _COPYRIGHT_PATTERN = re.compile(
 LicenseHeaderError = namedtuple("LicenseHeaderError", ["message", "path", "fixed"])
 
 
-def _get_previous(path):
-    """Returns contents of previous (origin/master) version of file at `path` if it exists, and `None` otherwise."""
+def _get_previous(path: pathlib.Path, base_ref: str) -> str | None:
+    """Returns contents of the `base_ref` version of file at `path` if it exists, and `None` otherwise."""
     # git_show_file relies on global context to compute the final path from a relative one,
     # so we need to pass it the relative path it expects
     relpath = path.relative_to(get_root())
     try:
-        return git_show_file(str(relpath), "origin/master")
+        return git_show_file(str(relpath), base_ref)
     except SubprocessError:
         return None
 
 
+def build_get_previous() -> Callable[[pathlib.Path], str | None]:
+    """Build a previous-version lookup that resolves the base ref at most once, lazily on first use.
+
+    The returned callable caches the base ref, whose local resolution shells out to several git
+    commands, so reusing a single instance across many files resolves it only once. Callers that
+    validate several checks should share one instance to amortize the lookup across all of them.
+    """
+    resolve_base_ref = functools.lru_cache(maxsize=1)(get_base_ref)
+
+    def get_previous(path: pathlib.Path) -> str | None:
+        return _get_previous(path, resolve_base_ref())
+
+    return get_previous
+
+
 def validate_license_headers(
     check_path: pathlib.Path,
-    ignore: Optional[Iterable[pathlib.Path]] = None,
+    ignore: Iterable[pathlib.Path] | None = None,
     *,
-    repo_root: Optional[pathlib.Path] = None,
-    get_previous: Callable[[pathlib.Path], Optional[str]] = _get_previous,
-) -> List[LicenseHeaderError]:
+    repo_root: pathlib.Path | None = None,
+    get_previous: Callable[[pathlib.Path], str | None] | None = None,
+) -> list[LicenseHeaderError]:
     """
     Validate license headers under `check_path` and return a list of validation errors.
 
@@ -54,6 +70,9 @@ def validate_license_headers(
     - Only python (*.py) files need a license header
     - Code under hidden folders (starting with `.`) are ignored
     """
+    if get_previous is None:
+        get_previous = build_get_previous()
+
     ignoreset = set(ignore or [])
 
     def walk_recursively(path, gitignore_matcher):

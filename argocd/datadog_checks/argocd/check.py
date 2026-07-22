@@ -15,6 +15,7 @@ from .metrics import (
     NOTIFICATIONS_CONTROLLER_METRICS,
     REPO_SERVER_METRICS,
 )
+from .resources import ArgocdResourceCollector
 
 (
     API_SERVER_NAMESPACE,
@@ -40,8 +41,31 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super(ArgocdCheck, self).__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_additional_transformers)
+        self._resource_collector: ArgocdResourceCollector | None = None
+
+    def check(self, instance):
+        if self.config.collect_genresources:
+            if self._resource_collector is None:
+                self._resource_collector = ArgocdResourceCollector(self)
+            try:
+                self._resource_collector.collect()
+            except Exception:
+                self.log.exception("genresources: collection cycle failed")
+        if self.config.collect_openmetrics:
+            super().check(instance)
+
+    def cancel(self):
+        if self._resource_collector is not None:
+            self._resource_collector.stop()
+        super().cancel()
 
     def parse_config(self):
+        self.scraper_configs = []
+        if not self.instance.get("collect_openmetrics", True):
+            if not self.instance.get("collect_genresources", False):
+                raise ConfigurationError("Enable at least one of `collect_openmetrics` or `collect_genresources`.")
+            return
+
         endpoint_configs = [
             ("app_controller_endpoint", APP_CONTROLLER_NAMESPACE, APPLICATION_CONTROLLER_METRICS),
             ("appset_controller_endpoint", APPSET_CONTROLLER_NAMESPACE, APPSET_CONTROLLER_METRICS),
@@ -50,8 +74,6 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             ("notifications_controller_endpoint", NOTIFICATIONS_CONTROLLER_NAMESPACE, NOTIFICATIONS_CONTROLLER_METRICS),
             ("commit_server_endpoint", COMMIT_SERVER_NAMESPACE, COMMIT_SERVER_METRICS),
         ]
-
-        self.scraper_configs = []
         for endpoint_key, namespace, metrics in endpoint_configs:
             if endpoint := self.instance.get(endpoint_key):
                 config = self.generate_config(endpoint, namespace, metrics)
@@ -97,7 +119,7 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         return argocd_cluster_connection_status_transformer
 
     def configure_additional_transformers(self):
-        endpoints = [key for key in self.instance.keys() if "_endpoint" in key]
+        endpoints = [key for key in self.instance.keys() if "_endpoint" in key and self.instance[key] in self.scrapers]
         for endpoint in endpoints:
             if endpoint == "app_controller_endpoint":
                 self.scrapers[self.instance[endpoint]].metric_transformer.add_custom_transformer(

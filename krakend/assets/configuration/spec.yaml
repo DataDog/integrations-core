@@ -2,6 +2,12 @@ name: KrakenD
 fleet_configurable: true
 files:
 - name: krakend.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        - 9090
   options:
   - template: init_config
     options:
@@ -67,3 +73,16 @@ files:
     - type: docker
       source: krakend
       service: <SERVICE>
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - krakend
+  - template: auto_conf/cel_selector
+    overrides:
+      cel_selector.example:
+        processes:
+          - "process.name == 'krakend'"
+  - template: auto_conf/discovery

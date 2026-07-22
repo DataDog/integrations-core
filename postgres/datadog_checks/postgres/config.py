@@ -190,6 +190,10 @@ def build_config(check: PostgreSql) -> Tuple[InstanceConfig, ValidationResult]:
                 **dict_defaults.instance_locks_idle_in_transaction().model_dump(),
                 **(instance.get('locks_idle_in_transaction', {})),
             },
+            "automatic_diagnostics": {
+                **dict_defaults.instance_automatic_diagnostics().model_dump(),
+                **(instance.get('automatic_diagnostics') or {}),
+            },
             "propagate_agent_tags": should_propagate_agent_tags(instance=instance, init_config=init_config),
             "service": instance.get('service', init_config.get('service', None)),
             # Metric filtering by pattern is implemented downstream, theoretically
@@ -317,6 +321,13 @@ def apply_validated_defaults(args: dict, instance: dict, validation_result: Vali
         args['query_activity']['collection_interval'] = default_value
         validation_result.add_warning(
             f"query_activity.collection_interval must be greater than 0, defaulting to {default_value} seconds."
+        )
+
+    if safefloat(args['automatic_diagnostics']['interval']) <= 0:
+        default_value = dict_defaults.instance_automatic_diagnostics().interval
+        args['automatic_diagnostics']['interval'] = default_value
+        validation_result.add_warning(
+            f"automatic_diagnostics.interval must be greater than 0, defaulting to {default_value} seconds."
         )
 
     if args.get('collect_default_database'):

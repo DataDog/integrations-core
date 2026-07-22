@@ -42,6 +42,7 @@ def ci(app: Application, sync: bool):
 
     is_core = app.repo.name == 'core'
     is_marketplace = app.repo.name == 'marketplace'
+    is_extras = app.repo.name == 'extras'
 
     # For non-core repos, extract the workflow reference from existing workflow files
     # This allows using either @master or @<commit-sha>
@@ -229,7 +230,7 @@ def ci(app: Application, sync: bool):
     if repo_choice not in valid_repos:
         app.abort(f'Unknown repository `{repo_choice}`')
 
-    if is_marketplace:
+    if is_marketplace or is_extras:
         validation_tracker.success()
         validation_tracker.display()
         return

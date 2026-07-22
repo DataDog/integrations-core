@@ -50,6 +50,8 @@ jobs:
     permissions:
       # needed for compute-matrix in test-target.yml
       contents: read
+      # needed for dd-sts in test-target.yml
+      id-token: write
 
   publish-test-results:
     needs:
@@ -76,9 +78,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      # needed for dd-sts
+      id-token: write
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Get Datadog credentials
+        id: dd-sts
+        # Coverage upload is optional; keep non-blocking so fork PRs and OIDC outages don't fail the job
+        continue-on-error: true
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-coverage-api-key
 
       - name: Download all coverage artifacts
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
@@ -92,6 +104,6 @@ jobs:
         continue-on-error: true
         uses: DataDog/coverage-upload-github-action@6c4bd935248daa6f0ef94e3e6ba71ad5ad079998 # v1.0.3
         with:
-          api_key: ${{ secrets.DD_API_KEY }}
+          api_key: ${{ steps.dd-sts.outputs.api_key }}
           files: coverage-reports
           format: cobertura

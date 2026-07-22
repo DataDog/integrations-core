@@ -208,6 +208,63 @@ class TestObfuscationLookup:
         _, misses = lk.lookup({(2, 2, 2)})
         assert (2, 2, 2) in misses
 
+    # --- negative cache (ignored keys) ---
+
+    def test_mark_ignored_excludes_from_hits_and_misses(self):
+        """A negatively-cached key is neither a hit nor a miss on lookup."""
+        lk = self._make_lookup()
+        lk.mark_ignored({(1, 1, 1)})
+        hits, misses = lk.lookup({(1, 1, 1), (2, 1, 1)})
+        assert (1, 1, 1) not in hits
+        assert (1, 1, 1) not in misses
+        assert misses == {(2, 1, 1)}
+        assert lk.ignored_map_size == 1
+
+    def test_ignored_keys_do_not_increment_miss_counter(self):
+        lk = self._make_lookup()
+        lk.mark_ignored({(1, 1, 1)})
+        lk.reset_stats()
+        lk.lookup({(1, 1, 1)})
+        assert lk.misses == 0
+        assert lk.hits == 0
+
+    def test_evict_forgets_ignored_key(self):
+        """Evicting a vanished key clears its negative-cache entry so it can be re-evaluated."""
+        lk = self._make_lookup()
+        lk.mark_ignored({(1, 1, 1)})
+        lk.evict({(1, 1, 1)})
+        assert lk.ignored_map_size == 0
+        _, misses = lk.lookup({(1, 1, 1)})
+        assert (1, 1, 1) in misses
+
+    def test_ignored_keys_lru_trimmed_to_maxsize(self):
+        lk = self._make_lookup(maxsize=2)
+        lk.mark_ignored({(1, 1, 1), (2, 2, 2), (3, 3, 3)})
+        assert lk.ignored_map_size == 2
+
+    def test_mark_ignored_drops_stale_positive_mapping(self):
+        """An ignored key must not resurface as a hit via a stale tier-1 mapping.
+
+        Reproduces the case where a key keeps its tier-1 mapping after its tier-2
+        signature was evicted: marking it ignored must drop the tier-1 entry so that,
+        even after the negative entry is trimmed and the signature is repopulated by
+        another key, the ignored key never produces a positive hit.
+        """
+        lk = self._make_lookup()
+        # Two keys share the same normalized SQL (one signature).
+        lk.populate({(1, 1, 1): 'SELECT 1', (2, 1, 1): 'SELECT 1'})
+        assert lk.queryid_map_size == 2
+
+        # Key (1, 1, 1) turns out to be ignorable; its tier-1 mapping must be dropped.
+        lk.mark_ignored({(1, 1, 1)})
+        assert (1, 1, 1) not in lk._key_to_sig
+
+        # The shared signature is still cached (via the other key), but the ignored key
+        # must not hit it.
+        hits, misses = lk.lookup({(1, 1, 1)})
+        assert (1, 1, 1) not in hits
+        assert (1, 1, 1) not in misses
+
 
 # ---------------------------------------------------------------------------
 # PostgresStatementMetricsV2 — unit tests (no live database)
@@ -299,6 +356,42 @@ class TestPostgresStatementMetricsV2:
             result = v2._resolve_obfuscations({bad_key, good_key}, set())
         assert bad_key not in result
         assert good_key in result
+
+    def test_resolve_obfuscations_skips_known_ddignore_keys_on_later_cycles(self):
+        """A DDIGNORE key is fetched once, negative-cached, then skipped (no fetch) on later cycles."""
+        v2 = self._make()
+        ddignore_key = (1, 1, 1)
+
+        with mock.patch.object(
+            v2, '_fetch_query_texts', return_value={ddignore_key: '/* DDIGNORE */ SELECT 1'}
+        ) as fetch:
+            v2._resolve_obfuscations({ddignore_key}, set())
+            assert fetch.call_count == 1
+            assert ddignore_key in v2._obfuscation_lookup._ignored_keys
+
+            # Second cycle: same key changes again but is now skipped before the fetch.
+            result = v2._resolve_obfuscations({ddignore_key}, set())
+            assert result == {}
+            assert fetch.call_count == 1
+
+    def test_resolve_obfuscations_does_not_fetch_when_all_keys_ignored(self):
+        """When every changed key is already negative-cached, no text fetch is issued."""
+        v2 = self._make()
+        ddignore_key = (1, 1, 1)
+        v2._obfuscation_lookup.mark_ignored({ddignore_key})
+        with mock.patch.object(v2, '_fetch_query_texts') as fetch:
+            result = v2._resolve_obfuscations({ddignore_key}, set())
+        assert result == {}
+        fetch.assert_not_called()
+
+    def test_resolve_obfuscations_forgets_ignored_key_when_vanished(self):
+        """An ignored key that vanishes from pgss is dropped from the negative cache via evict."""
+        v2 = self._make()
+        ddignore_key = (1, 1, 1)
+        v2._obfuscation_lookup.mark_ignored({ddignore_key})
+        with mock.patch.object(v2, '_fetch_query_texts', return_value={}):
+            v2._resolve_obfuscations(set(), {ddignore_key})
+        assert ddignore_key not in v2._obfuscation_lookup._ignored_keys
 
     # --- execute query cancel event ---
 

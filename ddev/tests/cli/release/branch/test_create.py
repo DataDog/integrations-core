@@ -6,10 +6,13 @@ from __future__ import annotations
 import json
 from unittest.mock import call
 
+import httpx
 import pytest
 
-from ddev.cli.release.branch.create import compute_next_milestone, ensure_build_agent_yaml_updated, update_release_json
+from ddev.cli.release.branch.build_agent import ensure_build_agent_yaml_updated
+from ddev.cli.release.branch.create import compute_next_milestone, update_release_json
 from ddev.utils.fs import Path
+from ddev.utils.github_errors import GitHubAuthenticationError
 
 
 @pytest.mark.parametrize(
@@ -70,6 +73,9 @@ def test_create_branch(ddev, mocker, yaml_updated):
     # Milestone bump workflow
     run_mock.assert_any_call('fetch', 'origin', 'master')
     run_mock.assert_any_call('checkout', '-B', 'release/bump-milestone-5.6.0', 'origin/master')
+    # Defensive restore prevents the build_agent.yaml change on the release branch
+    # from leaking into the milestone-bump commit (see PR #23977 leak).
+    run_mock.assert_any_call('checkout', 'origin/master', '--', '.gitlab/build_agent.yaml')
     run_mock.assert_any_call('add', 'release.json')
     run_mock.assert_any_call('commit', '-m', 'Update current_milestone to 5.6.0')
     run_mock.assert_any_call('push', 'origin', 'release/bump-milestone-5.6.0')
@@ -84,6 +90,7 @@ def test_ensure_build_agent_yaml_updated(mocker, tmp_path):
     build_agent_path.write_text('.build-agent-tpl:\n  trigger:\n    branch: main\n')
 
     app_mock = mocker.MagicMock()
+    mocker.patch('ddev.cli.release.branch.build_agent.agent_branch_exists', return_value=True)
 
     with Path(tmp_path).as_cwd():
         result = ensure_build_agent_yaml_updated(app_mock, '7.99.x')
@@ -100,6 +107,7 @@ def test_ensure_build_agent_yaml_updated_ignores_unrelated_main_branch(mocker, t
     build_agent_path.write_text(content)
 
     app_mock = mocker.MagicMock()
+    mocker.patch('ddev.cli.release.branch.build_agent.agent_branch_exists', return_value=True)
 
     with Path(tmp_path).as_cwd():
         result = ensure_build_agent_yaml_updated(app_mock, '7.99.x')
@@ -109,6 +117,27 @@ def test_ensure_build_agent_yaml_updated_ignores_unrelated_main_branch(mocker, t
         '.build-agent-tpl:\n  trigger:\n    branch: 7.99.x\nunrelated-job:\n  trigger:\n    branch: main\n'
     )
     app_mock.abort.assert_not_called()
+
+
+def test_ensure_build_agent_yaml_updated_skips_when_agent_branch_missing(mocker, tmp_path):
+    """Leave `main` in place when the matching DataDog/datadog-agent branch does not exist yet."""
+    build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
+    build_agent_path.parent.ensure_dir_exists()
+    original_content = '.build-agent-tpl:\n  trigger:\n    branch: main\n'
+    build_agent_path.write_text(original_content)
+
+    app_mock = mocker.MagicMock()
+    mocker.patch('ddev.cli.release.branch.build_agent.agent_branch_exists', return_value=False)
+
+    with Path(tmp_path).as_cwd():
+        result = ensure_build_agent_yaml_updated(app_mock, '7.99.x')
+
+    assert result is False
+    assert build_agent_path.read_text() == original_content
+    app_mock.display_warning.assert_called_once()
+    warning_message = app_mock.display_warning.call_args[0][0]
+    assert '7.99.x' in warning_message
+    assert 'datadog-agent' in warning_message
 
 
 def test_ensure_build_agent_yaml_updated_aborts_on_multiple_template_main_branches(mocker, tmp_path):
@@ -341,3 +370,26 @@ def test_create_branch_pr_creation_failure(ddev, mocker):
     assert result.exit_code == 0, result.output
     assert 'Failed to create the pull request' in result.output
     assert 'All done' in result.output
+
+
+def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mocker):
+    request = httpx.Request('POST', 'https://api.github.com/repos/DataDog/integrations-core/pulls')
+    response = httpx.Response(403, request=request)
+    error = httpx.HTTPStatusError('forbidden', request=request, response=response)
+
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request',
+        side_effect=GitHubAuthenticationError.from_http_status_error(error),
+    )
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 1, result.output
+    assert 'ddev config set github.token' in result.output
+    assert 'Please create one manually from `release/bump-milestone-7.80.0` to `master`' in result.output

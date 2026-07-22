@@ -6,7 +6,6 @@
 
 import hashlib
 import json
-import random
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -16,7 +15,11 @@ from urllib.parse import quote
 from confluent_kafka import IsolationLevel, TopicPartition
 from confluent_kafka.admin import ConfigResource, OffsetSpec, ResourceType
 
+from datadog_checks.kafka_consumer.cache import CacheHelper
+from datadog_checks.kafka_consumer.connectors import _build_http_kwargs
 from datadog_checks.kafka_consumer.constants import KAFKA_INTERNAL_TOPICS
+
+CONSUMER_GROUP_REBALANCING_STATES = frozenset({'PREPARING_REBALANCING', 'COMPLETING_REBALANCING'})
 
 
 class SchemaDefinition(TypedDict):
@@ -50,12 +53,7 @@ class ClusterMetadataCollector:
         self.log = log
         self.http = check.http
 
-        self.EVENT_CACHE_TTL = 3600  # 1 hour in seconds
-
-        # Broker/topic config refresh interval (configurable, default 3 min)
-        configs_refresh = self.config._kafka_configs_refresh_interval
-        self.CONFIGS_REFRESH_INTERVAL = configs_refresh
-        self.CONFIGS_REFRESH_JITTER = max(15, configs_refresh // 10)  # 10% jitter, min 15s
+        self.cache = CacheHelper(check, log, config._kafka_configs_refresh_interval)
         self.BROKER_CONFIG_BATCH_SIZE = 5  # Max brokers to describe_configs per run (one per call, Kafka limitation)
         self.TOPIC_CONFIG_BATCH_SIZE = 100  # Max topics to describe_configs per check run
 
@@ -70,11 +68,18 @@ class ClusterMetadataCollector:
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE = 20_000
         self.SCHEMA_ID_CACHE_MAX_SIZE = 20_000
 
+        self.EARLIEST_OFFSETS_DEFAULT_TTL = 300  # 5 minutes, matches Kafka's own broker default
+        self.EARLIEST_OFFSETS_MIN_TTL = 60
+        self.EARLIEST_OFFSETS_MAX_TTL = 1800
+        self._log_retention_check_interval_s: float | None = None
+
         self.BROKER_CONFIG_CACHE_KEY = 'kafka_broker_config_cache'
         self.BROKER_CONFIG_FETCH_CACHE_KEY = 'kafka_broker_config_fetch_cache'
+        self.EARLIEST_OFFSETS_CACHE_KEY = 'kafka_earliest_offsets_cache'
         self.TOPIC_CONFIG_CACHE_KEY = 'kafka_topic_config_cache'
         self.TOPIC_CONFIG_FETCH_CACHE_KEY = 'kafka_topic_config_fetch_cache'
         self.TOPIC_HWM_SUM_CACHE_KEY = 'kafka_topic_hwm_sum_cache'
+        self.CONSUMER_GROUP_MEMBERS_CACHE_KEY = 'kafka_consumer_group_members_cache'
         self.SCHEMA_CACHE_KEY = 'kafka_schema_cache'
         self.SCHEMA_VERSION_CHECK_CACHE_KEY = 'kafka_schema_version_check_cache'
         self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY = 'kafka_schema_compatibility_fetch_cache'
@@ -82,63 +87,49 @@ class ClusterMetadataCollector:
         self.SCHEMA_ID_CACHE_KEY = 'kafka_schema_id_cache'
         self.GLOBAL_COMPATIBILITY_CACHE_KEY = 'kafka_schema_global_compatibility_cache'
 
-        self._schema_registry_oauth_token = None
-        self._schema_registry_oauth_token_expiry = 0
+        self._schema_registry_oauth_token: str | None = None
+        self._schema_registry_oauth_token_expiry: float = 0.0
+        self._schema_registry_http_kwargs: dict[str, Any] = {}
 
         if self.config._collect_schema_registry:
-            self._configure_schema_registry_http_client()
+            self._build_schema_registry_http_kwargs()
 
-    def _configure_schema_registry_http_client(self):
-        """Configure the HTTP client with authentication and TLS settings for Schema Registry."""
-        if self.config._schema_registry_username and self.config._schema_registry_password:
-            self.log.debug("Configuring Schema Registry with Basic Authentication")
-            self.http.options['auth'] = (
-                self.config._schema_registry_username,
-                self.config._schema_registry_password,
-            )
+    def _build_schema_registry_http_kwargs(self) -> None:
+        """Build per-request HTTP kwargs for Schema Registry auth and TLS."""
+        self._schema_registry_http_kwargs = _build_http_kwargs(
+            self.config._schema_registry_username,
+            self.config._schema_registry_password,
+            self.config._schema_registry_tls_verify,
+            self.config._schema_registry_tls_ca_cert,
+            self.config._schema_registry_tls_cert,
+            self.config._schema_registry_tls_key,
+        )
 
-        if not self.config._schema_registry_tls_verify:
-            self.log.debug("Schema Registry TLS verification is disabled")
-            self.http.options['verify'] = False
-        elif self.config._schema_registry_tls_ca_cert:
-            self.log.debug("Using custom CA certificate for Schema Registry")
-            self.http.options['verify'] = self.config._schema_registry_tls_ca_cert
-        else:
-            self.http.options['verify'] = True
+    def _get_schema_registry_request_kwargs(self) -> dict[str, Any]:
+        """Return per-request kwargs including the current OAuth bearer token if set."""
+        kwargs: dict[str, Any] = dict(self._schema_registry_http_kwargs)
+        if self._schema_registry_oauth_token:
+            extra_headers: dict[str, str] = {'Authorization': f'Bearer {self._schema_registry_oauth_token}'}
+            oauth_config = self.config._schema_registry_oauth_token_provider
+            if oauth_config:
+                custom_headers = oauth_config.get('custom_headers')
+                if custom_headers:
+                    extra_headers.update(custom_headers)
+            kwargs['extra_headers'] = extra_headers
+        return kwargs
 
-        if self.config._schema_registry_tls_cert and self.config._schema_registry_tls_key:
-            self.log.debug("Configuring Schema Registry with client certificate authentication")
-            self.http.options['cert'] = (
-                self.config._schema_registry_tls_cert,
-                self.config._schema_registry_tls_key,
-            )
-        elif self.config._schema_registry_tls_cert:
-            self.http.options['cert'] = self.config._schema_registry_tls_cert
-
-    def _refresh_schema_registry_oauth_token(self):
+    def _refresh_schema_registry_oauth_token(self) -> None:
         """Fetch or refresh the OAuth token for Schema Registry if configured and expired."""
         oauth_config = self.config._schema_registry_oauth_token_provider
         if not oauth_config:
             return
 
-        # Check if token is still valid (with 30s buffer)
         if self._schema_registry_oauth_token and time.time() < (self._schema_registry_oauth_token_expiry - 30):
             return
 
         token, expires_at = self._fetch_oidc_token(oauth_config)
-
         self._schema_registry_oauth_token = token
         self._schema_registry_oauth_token_expiry = expires_at
-        headers = {
-            **self.http.options.get('headers', {}),
-            'Authorization': f'Bearer {token}',
-        }
-
-        custom_headers = oauth_config.get("custom_headers")
-        if custom_headers:
-            headers.update(custom_headers)
-
-        self.http.options['headers'] = headers
         self.log.debug("Schema Registry OAuth token refreshed, expires at %s", expires_at)
 
     def _fetch_oidc_token(self, oauth_config: dict) -> tuple[str, float]:
@@ -172,9 +163,10 @@ class ClusterMetadataCollector:
 
         return access_token, expires_at
 
-    def _schema_registry_get(self, path: str, **kwargs: Any) -> Any:
+    def _schema_registry_get(self, path: str, **extra_kwargs: Any) -> Any:
         """GET a Schema Registry path and return the parsed JSON body."""
         url = f"{self.config._collect_schema_registry}{path}"
+        kwargs = {**self._get_schema_registry_request_kwargs(), **extra_kwargs}
         response = self.http.get(url, **kwargs)
         response.raise_for_status()
         return response.json()
@@ -218,7 +210,7 @@ class ClusterMetadataCollector:
                     self.log.warning("Error fetching %s for %s: %s", error_label, subject, e)
         return results
 
-    def collect_all_metadata(self, highwater_offsets):
+    def collect_all_metadata(self, highwater_offsets, low_watermark_offsets, topic_partitions):
         try:
             shared_metadata = self.client.kafka_client.list_topics(timeout=self.config._request_timeout)
         except Exception as e:
@@ -231,7 +223,7 @@ class ClusterMetadataCollector:
             self.log.error("Error collecting broker metadata: %s", e)
 
         try:
-            self._collect_topic_metadata(shared_metadata, highwater_offsets)
+            self._collect_topic_metadata(shared_metadata, highwater_offsets, low_watermark_offsets, topic_partitions)
         except Exception as e:
             self.log.error("Error collecting topic metadata: %s", e)
 
@@ -244,137 +236,6 @@ class ClusterMetadataCollector:
             self._collect_schema_registry_info(shared_metadata)
         except Exception as e:
             self.log.error("Error collecting schema registry info: %s", e)
-
-    def _get_items_to_fetch(self, cache_key_prefix: str, item_keys: list[str]) -> list[str]:
-        """
-        Check which items need fetching based on cache expiration.
-
-        Returns items sorted oldest-first (earliest expiry first) so that
-        when combined with batch limits, the least recently fetched items
-        are prioritized.
-
-        Args:
-            cache_key_prefix: Cache key to load
-            item_keys: List of item keys to check
-
-        Returns:
-            List of item keys that need fetching (not cached or expired),
-            sorted by expiry time ascending (oldest first)
-        """
-        current_time = time.time()
-        items_to_fetch = []
-
-        try:
-            cached_str = self.check.read_persistent_cache(cache_key_prefix)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self.log.debug("Could not read cache %s: %s", cache_key_prefix, e)
-            cache_dict = {}
-
-        for item_key in item_keys:
-            expire_at = cache_dict.get(item_key, 0)
-
-            if current_time >= expire_at:
-                items_to_fetch.append((expire_at, item_key))
-
-        # Sort by expiry time ascending — items that expired longest ago are fetched first.
-        items_to_fetch.sort()
-        return [item_key for _, item_key in items_to_fetch]
-
-    def _mark_items_fetched(
-        self,
-        cache_key_prefix: str,
-        item_keys: list[str],
-        ttl_base: float | None = None,
-        ttl_jitter: float | None = None,
-        max_cache_size: int | None = None,
-    ):
-        """
-        Mark items as fetched in cache with jittered TTL.
-
-        Args:
-            cache_key_prefix: Cache key to update
-            item_keys: List of item keys that were fetched
-            ttl_base: Base TTL in seconds (defaults to CONFIGS_REFRESH_INTERVAL)
-            ttl_jitter: Jitter range in seconds (defaults to CONFIGS_REFRESH_JITTER)
-            max_cache_size: Maximum number of entries to keep. Oldest entries are evicted first.
-        """
-        if ttl_base is None:
-            ttl_base = self.CONFIGS_REFRESH_INTERVAL
-        if ttl_jitter is None:
-            ttl_jitter = self.CONFIGS_REFRESH_JITTER
-
-        current_time = time.time()
-
-        try:
-            cached_str = self.check.read_persistent_cache(cache_key_prefix)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self.log.debug("Could not read cache %s for update: %s", cache_key_prefix, e)
-            cache_dict = {}
-
-        for item_key in item_keys:
-            ttl = ttl_base + random.uniform(0, ttl_jitter)
-            cache_dict[item_key] = current_time + ttl
-
-        if max_cache_size and len(cache_dict) > max_cache_size:
-            sorted_keys = sorted(cache_dict, key=lambda k: cache_dict[k])
-            for key in sorted_keys[: len(cache_dict) - max_cache_size]:
-                del cache_dict[key]
-
-        try:
-            self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
-        except Exception as e:
-            self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
-
-    def _get_events_to_send(self, cache_key_prefix: str, items: dict[str, str]) -> list[str]:
-        """
-        Determine which items should emit events based on content changes or expiration.
-
-        Args:
-            cache_key_prefix: Cache key to load/update
-            items: Dict mapping item_key -> event_content
-
-        Returns:
-            List of item keys that should emit events
-        """
-        if not items:
-            return []
-
-        event_cache_ttl = self.EVENT_CACHE_TTL
-        current_time = time.time()
-        events_to_send = []
-
-        try:
-            cached_str = self.check.read_persistent_cache(cache_key_prefix)
-            cache_dict = json.loads(cached_str) if cached_str else {}
-        except Exception as e:
-            self.log.debug("Could not read cache %s: %s", cache_key_prefix, e)
-            cache_dict = {}
-
-        for item_key, event_content in items.items():
-            current_hash = hashlib.sha256(event_content.encode('utf-8')).hexdigest()
-
-            cached_entry = cache_dict.get(item_key)
-
-            if (
-                not cached_entry
-                or cached_entry.get('hash', '') != current_hash
-                or current_time >= cached_entry.get('expire_at', 0)
-            ):
-                events_to_send.append(item_key)
-                cache_dict[item_key] = {
-                    'hash': current_hash,
-                    'expire_at': current_time + event_cache_ttl,
-                }
-
-        if events_to_send:
-            try:
-                self.check.write_persistent_cache(cache_key_prefix, json.dumps(cache_dict))
-            except Exception as e:
-                self.log.debug("Could not write cache %s: %s", cache_key_prefix, e)
-
-        return events_to_send
 
     def _collect_broker_metadata(self, metadata=None):
         self.log.debug("Collecting broker metadata")
@@ -392,7 +253,7 @@ class ClusterMetadataCollector:
         )
 
         self.log.debug("Found %s brokers in cluster %s", len(brokers), cluster_id)
-        broker_tags = self._get_tags(cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
+        broker_tags = self.config._get_tags(cluster_id) + [f'bootstrap_servers:{self.config._kafka_connect_str}']
         self.check.gauge('broker.count', len(brokers), tags=broker_tags)
 
         try:
@@ -400,7 +261,7 @@ class ClusterMetadataCollector:
             cluster_info = cluster_future.result(timeout=self.config._request_timeout)
 
             if cluster_info.controller:
-                controller_tags = self._get_tags(cluster_id) + [
+                controller_tags = self.config._get_tags(cluster_id) + [
                     f'controller_id:{cluster_info.controller.id}',
                     f'controller_host:{cluster_info.controller.host}',
                     f'controller_port:{cluster_info.controller.port}',
@@ -425,7 +286,7 @@ class ClusterMetadataCollector:
 
         # Emit per-broker metrics (fast, in-memory only)
         for broker_id, broker_metadata in brokers.items():
-            tags = self._get_tags(cluster_id) + [
+            tags = self.config._get_tags(cluster_id) + [
                 f'broker_id:{broker_id}',
                 f'broker_host:{broker_metadata.host}',
                 f'broker_port:{broker_metadata.port}',
@@ -433,7 +294,7 @@ class ClusterMetadataCollector:
             self.check.gauge('broker.leader_count', broker_leader_count.get(broker_id, 0), tags=tags)
             self.check.gauge('broker.partition_count', broker_partition_count.get(broker_id, 0), tags=tags)
 
-        broker_ids_to_fetch = self._get_items_to_fetch(
+        broker_ids_to_fetch = self.cache.get_items_to_fetch(
             self.BROKER_CONFIG_FETCH_CACHE_KEY, [str(bid) for bid in brokers.keys()]
         )
         fetched_broker_configs = {}
@@ -452,7 +313,7 @@ class ClusterMetadataCollector:
                 if not broker_meta:
                     continue
 
-                metric_tags = self._get_tags(cluster_id) + [
+                metric_tags = self.config._get_tags(cluster_id) + [
                     f'broker_id:{broker_id_str}',
                     f'broker_host:{broker_meta.host}',
                     f'broker_port:{broker_meta.port}',
@@ -493,6 +354,21 @@ class ClusterMetadataCollector:
                                 config_data[config_name],
                             )
 
+                retention_check_interval_ms = config_data.get('log.retention.check.interval.ms')
+                if retention_check_interval_ms:
+                    try:
+                        interval_s = float(retention_check_interval_ms) / 1000
+                        if interval_s > 0:
+                            self._log_retention_check_interval_s = min(
+                                interval_s, self._log_retention_check_interval_s or interval_s
+                            )
+                    except (ValueError, TypeError):
+                        self.log.debug(
+                            "Could not convert broker %s config log.retention.check.interval.ms value %r to float",
+                            broker_id_str,
+                            retention_check_interval_ms,
+                        )
+
                 truncated_config = self._truncate_config_for_event(config_data, max_configs=50)
                 event_text = json.dumps(truncated_config, indent=2, sort_keys=True)
 
@@ -502,16 +378,16 @@ class ClusterMetadataCollector:
                     'broker_port': broker_meta.port,
                 }
 
-        self._mark_items_fetched(
+        self.cache.mark_items_fetched(
             self.BROKER_CONFIG_FETCH_CACHE_KEY,
             broker_ids_batch,
-            ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-            ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+            ttl_base=self.cache.refresh_interval,
+            ttl_jitter=self.cache.refresh_jitter,
             max_cache_size=self.BROKER_CONFIG_CACHE_MAX_SIZE,
         )
 
         broker_contents = {bid: info['event_text'] for bid, info in fetched_broker_configs.items()}
-        brokers_to_emit = self._get_events_to_send(self.BROKER_CONFIG_CACHE_KEY, broker_contents)
+        brokers_to_emit = self.cache.get_events_to_send(self.BROKER_CONFIG_CACHE_KEY, broker_contents)
 
         for broker_id in brokers_to_emit:
             info = fetched_broker_configs[broker_id]
@@ -520,7 +396,7 @@ class ClusterMetadataCollector:
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
-                        **self._original_cluster_id_field(),
+                        **self.config._original_cluster_id_field(),
                         'broker_id': str(broker_id),
                         'broker_host': info['broker_host'],
                         'broker_port': info['broker_port'],
@@ -531,7 +407,66 @@ class ClusterMetadataCollector:
                 "data-streams-message",
             )
 
-    def _fetch_earliest_offsets(self, topic_partitions):
+    def _topic_partition_pairs(self, topic_partitions):
+        return {
+            (topic, partition)
+            for topic, partitions in topic_partitions.items()
+            if topic not in KAFKA_INTERNAL_TOPICS
+            for partition in partitions
+        }
+
+    def _earliest_offsets_ttl(self) -> float:
+        """TTL for the earliest-offsets cache, derived from the broker's log-cleaner cycle."""
+        ttl = self._log_retention_check_interval_s or self.EARLIEST_OFFSETS_DEFAULT_TTL
+        return max(self.EARLIEST_OFFSETS_MIN_TTL, min(self.EARLIEST_OFFSETS_MAX_TTL, ttl))
+
+    def _load_earliest_offsets_cache(self) -> dict[str, Any] | None:
+        try:
+            cached_str = self.check.read_persistent_cache(self.EARLIEST_OFFSETS_CACHE_KEY)
+            if not cached_str:
+                return None
+            data = json.loads(cached_str)
+            return {
+                'expire_at': data['expire_at'],
+                'offsets': {(topic, partition): offset for topic, partition, offset in data['offsets']},
+            }
+        except Exception as e:
+            self.log.debug("Could not read earliest offsets cache: %s", e)
+            return None
+
+    def _save_earliest_offsets_cache(self, offsets: dict[tuple[str, int], int], expire_at: float | None = None) -> None:
+        try:
+            payload = {
+                'expire_at': expire_at if expire_at is not None else time.time() + self._earliest_offsets_ttl(),
+                'offsets': [[topic, partition, offset] for (topic, partition), offset in offsets.items()],
+            }
+            self.check.write_persistent_cache(self.EARLIEST_OFFSETS_CACHE_KEY, json.dumps(payload))
+        except Exception as e:
+            self.log.debug("Could not write earliest offsets cache: %s", e)
+
+    def fetch_earliest_offsets(self, topic_partitions):
+        """Return cached log-start offsets, refetching from the broker only once the TTL expires."""
+        requested = self._topic_partition_pairs(topic_partitions)
+        if not requested:
+            return {}
+
+        cached = self._load_earliest_offsets_cache()
+        if cached is not None and time.time() < cached['expire_at']:
+            cached_offsets = {tp: offset for tp, offset in cached['offsets'].items() if tp in requested}
+            if cached_offsets.keys() == requested:
+                return cached_offsets
+
+            result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+            if result:
+                self._save_earliest_offsets_cache(result, expire_at=cached['expire_at'])
+            return result
+
+        result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+        if result:
+            self._save_earliest_offsets_cache(result)
+        return result
+
+    def _fetch_earliest_offsets_from_broker(self, topic_partitions):
         """Batch-fetch log-start offsets via AdminClient.list_offsets(earliest).
 
         Uses ListOffsets with the EARLIEST_TIMESTAMP sentinel, which the broker
@@ -542,9 +477,7 @@ class ClusterMetadataCollector:
         """
         requests = {
             TopicPartition(topic, partition): OffsetSpec.earliest()
-            for topic, partitions in topic_partitions.items()
-            if topic not in KAFKA_INTERNAL_TOPICS
-            for partition in partitions
+            for topic, partition in self._topic_partition_pairs(topic_partitions)
         }
         if not requests:
             return {}
@@ -586,10 +519,8 @@ class ClusterMetadataCollector:
             )
         return result
 
-    def _collect_topic_metadata(self, metadata, highwater_offsets):
+    def _collect_topic_metadata(self, metadata, highwater_offsets, low_watermark_offsets, topic_partitions):
         self.log.debug("Collecting topic metadata")
-
-        topic_partitions = self.client.get_topic_partitions()
 
         cluster_id = self.config._kafka_cluster_id_override or (
             metadata.cluster_id if hasattr(metadata, 'cluster_id') else 'unknown'
@@ -598,9 +529,7 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %s topics", len(topic_partitions))
 
-        self.check.gauge('topic.count', len(topic_partitions), tags=self._get_tags(cluster_id))
-
-        earliest_offsets = self._fetch_earliest_offsets(topic_partitions)
+        self.check.gauge('topic.count', len(topic_partitions), tags=self.config._get_tags(cluster_id))
 
         now_ts = time.time()
         prev_ts = None
@@ -620,7 +549,7 @@ class ClusterMetadataCollector:
             if topic_name in KAFKA_INTERNAL_TOPICS:
                 continue
 
-            topic_tags = self._get_tags(cluster_id) + [f'topic:{topic_name}']
+            topic_tags = self.config._get_tags(cluster_id) + [f'topic:{topic_name}']
 
             if not partitions:
                 self.log.warning("No partitions found for topic %s", topic_name)
@@ -641,7 +570,7 @@ class ClusterMetadataCollector:
 
                 partition_metadata = topic_metadata.partitions.get(partition_id)
                 latest = highwater_offsets.get((topic_name, partition_id), 0)
-                earliest = earliest_offsets.get((topic_name, partition_id))
+                earliest = low_watermark_offsets.get((topic_name, partition_id))
 
                 if earliest is None:
                     have_all_earliest = False
@@ -734,7 +663,7 @@ class ClusterMetadataCollector:
 
         # --- Topic config fetching (batched describe_configs) ---
         all_topic_names = [name for name in topic_partitions.keys() if name not in KAFKA_INTERNAL_TOPICS]
-        topic_names_to_fetch = self._get_items_to_fetch(self.TOPIC_CONFIG_FETCH_CACHE_KEY, all_topic_names)
+        topic_names_to_fetch = self.cache.get_items_to_fetch(self.TOPIC_CONFIG_FETCH_CACHE_KEY, all_topic_names)
 
         # Batch: cap the number of topic configs fetched per check run.
         topic_names_to_fetch = topic_names_to_fetch[: self.TOPIC_CONFIG_BATCH_SIZE]
@@ -750,7 +679,7 @@ class ClusterMetadataCollector:
 
             for resource, future in futures.items():
                 topic_name = resource.name
-                topic_tags = self._get_tags(cluster_id) + [f'topic:{topic_name}']
+                topic_tags = self.config._get_tags(cluster_id) + [f'topic:{topic_name}']
 
                 try:
                     config_result = future.result(timeout=self.config._request_timeout)
@@ -787,16 +716,16 @@ class ClusterMetadataCollector:
                     'event_text': event_text,
                 }
 
-        self._mark_items_fetched(
+        self.cache.mark_items_fetched(
             self.TOPIC_CONFIG_FETCH_CACHE_KEY,
             topic_names_to_fetch,
-            ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-            ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+            ttl_base=self.cache.refresh_interval,
+            ttl_jitter=self.cache.refresh_jitter,
             max_cache_size=self.TOPIC_CONFIG_CACHE_MAX_SIZE,
         )
 
         topic_contents = {name: info['event_text'] for name, info in fetched_topic_configs.items()}
-        topics_to_emit = self._get_events_to_send(self.TOPIC_CONFIG_CACHE_KEY, topic_contents)
+        topics_to_emit = self.cache.get_events_to_send(self.TOPIC_CONFIG_CACHE_KEY, topic_contents)
 
         for topic_name in topics_to_emit:
             info = fetched_topic_configs[topic_name]
@@ -805,7 +734,7 @@ class ClusterMetadataCollector:
                     {
                         'collection_timestamp': int(time.time() * 1000),
                         'kafka_cluster_id': cluster_id,
-                        **self._original_cluster_id_field(),
+                        **self.config._original_cluster_id_field(),
                         'topic': topic_name,
                         'config_type': 'topic',
                         'config': json.loads(info['event_text']),
@@ -834,7 +763,7 @@ class ClusterMetadataCollector:
         consumer_groups = consumer_groups_result.valid
 
         self.log.debug("Found %s consumer groups", len(consumer_groups))
-        self.check.gauge('consumer_group.count', len(consumer_groups), tags=self._get_tags(cluster_id))
+        self.check.gauge('consumer_group.count', len(consumer_groups), tags=self.config._get_tags(cluster_id))
 
         group_ids = [group.group_id for group in consumer_groups]
         if not group_ids:
@@ -848,8 +777,11 @@ class ClusterMetadataCollector:
             except Exception as e:
                 self.log.warning("Error getting consumer group details for %s: %s", group_id, e)
 
+        prev_member_hashes = self._load_member_hashes_cache()
+        current_member_hashes = {}
+
         for group_id, group_info in group_id_to_info.items():
-            group_tags = self._get_tags(cluster_id) + [f'consumer_group:{group_id}']
+            group_tags = self.config._get_tags(cluster_id) + [f'consumer_group:{group_id}']
             state = group_info.state
             members = group_info.members
             coordinator = group_info.coordinator
@@ -858,29 +790,101 @@ class ClusterMetadataCollector:
             if coordinator:
                 state_tags.append(f'coordinator:{coordinator.id}')
 
-            self.check.gauge('consumer_group.members', len(members), tags=state_tags)
+            # All group-level gauges share the same tag set so they can be correlated in dashboards.
+            group_meta_tags = self._build_group_meta_tags(state_tags, group_info)
 
-            member_info = []
-            topics_for_group = set()
+            self.check.gauge('consumer_group.members', len(members), tags=group_meta_tags)
+            self.check.gauge(
+                'consumer_group.rebalancing',
+                1 if self._is_group_rebalancing(state_name, members) else 0,
+                tags=group_meta_tags,
+            )
+
+            member_ids = sorted(getattr(m, 'member_id', '') or '' for m in members)
+            member_hash = hashlib.sha256(json.dumps(member_ids, separators=(',', ':')).encode()).hexdigest()
+            current_member_hashes[group_id] = member_hash
+
+            if prev_member_hashes is not None:
+                prev_hash = prev_member_hashes.get(group_id)
+                if prev_hash is not None and prev_hash != member_hash:
+                    self.check.count('consumer_group.membership_changes', 1, tags=group_meta_tags)
 
             for member in members:
-                member_id = member.member_id
                 client_id = member.client_id
                 host = member.host
-
-                member_info.append({'member_id': member_id, 'client_id': client_id, 'host': host})
 
                 if hasattr(member, 'assignment') and member.assignment:
                     partition_count = len(member.assignment.topic_partitions)
 
+                    # Member-level gauges deliberately use state_tags, not group_meta_tags: the
+                    # group-level dimensional tags are omitted here to keep per-member cardinality bounded.
                     member_tags = state_tags + [
                         f'client_id:{client_id}',
                         f'member_host:{host}',
                     ]
+                    group_instance_id = getattr(member, 'group_instance_id', None)
+                    if group_instance_id is not None:
+                        member_tags.append(f'group_instance_id:{group_instance_id}')
                     self.check.gauge('consumer_group.member.partitions', partition_count, tags=member_tags)
 
-                    for tp in member.assignment.topic_partitions:
-                        topics_for_group.add(tp.topic)
+        self._save_member_hashes_cache(current_member_hashes)
+
+    def _load_member_hashes_cache(self) -> dict[str, str] | None:
+        """Return the previous member-hash map, or None if unreadable."""
+        try:
+            cached = self.check.read_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY)
+            if not cached:
+                return None
+            result = json.loads(cached)
+            if not isinstance(result, dict):
+                self.log.debug("Consumer group members cache has unexpected shape; discarding")
+                return None
+            return result
+        except Exception as e:
+            self.log.debug("Could not read consumer group members cache: %s", e)
+            return None
+
+    def _save_member_hashes_cache(self, hashes: dict[str, str]) -> None:
+        """Persist the current member-hash map."""
+        try:
+            self.check.write_persistent_cache(self.CONSUMER_GROUP_MEMBERS_CACHE_KEY, json.dumps(hashes))
+        except Exception as e:
+            self.log.debug("Could not write consumer group members cache: %s", e)
+
+    def _build_group_meta_tags(self, state_tags: list[str], group_info) -> list[str]:
+        """Build the group-level tag list, appending dimensional metadata when the broker provides it."""
+        tags = list(state_tags)
+        assignor = getattr(group_info, 'partition_assignor', None)
+        # KIP-848 and EMPTY-state groups report an empty assignor; skip it to avoid a blank-value tag.
+        if assignor:
+            tags.append(f'partition_assignor:{assignor}')
+        group_type = getattr(group_info, 'type', None)
+        if group_type is not None:
+            type_name = group_type.name if hasattr(group_type, 'name') else str(group_type)
+            tags.append(f'consumer_group_type:{type_name}')
+        is_simple = getattr(group_info, 'is_simple_consumer_group', None)
+        if is_simple is not None:
+            tags.append(f'is_simple_consumer_group:{str(bool(is_simple)).lower()}')
+        return tags
+
+    def _is_group_rebalancing(self, state_name: str, members) -> bool:
+        """Detect an in-progress rebalance via group state (classic) or assignment drift (KIP-848)."""
+        if state_name in CONSUMER_GROUP_REBALANCING_STATES:
+            return True
+        for member in members:
+            target = getattr(member, 'target_assignment', None)
+            if target is None:
+                # Classic-protocol member: no KIP-848 target, skip.
+                continue
+            assignment = getattr(member, 'assignment', None)
+            if assignment is None:
+                # Member has a target but no current assignment — unambiguous drift.
+                return True
+            current_tps = {(tp.topic, tp.partition) for tp in assignment.topic_partitions}
+            target_tps = {(tp.topic, tp.partition) for tp in target.topic_partitions}
+            if current_tps != target_tps:
+                return True
+        return False
 
     def _load_schema_id_cache(self) -> dict[str, SchemaDefinition]:
         """Load the permanent schema ID cache from persistent storage.
@@ -968,7 +972,7 @@ class ClusterMetadataCollector:
 
         self.log.debug("Found %d subjects in schema registry", len(subjects))
 
-        self.check.gauge('schema_registry.subjects', len(subjects), tags=self._get_tags(cluster_id))
+        self.check.gauge('schema_registry.subjects', len(subjects), tags=self.config._get_tags(cluster_id))
 
         try:
             global_compatibility = self._get_schema_registry_global_compatibility()
@@ -985,7 +989,7 @@ class ClusterMetadataCollector:
         # --- Tier 1: Lightweight version checks ---
         # GET /subjects/{subject}/versions returns just [1, 2, 3] — very cheap.
         # We use this to detect if a subject has a new version without fetching schema content.
-        subjects_to_check = self._get_items_to_fetch(self.SCHEMA_VERSION_CHECK_CACHE_KEY, subjects)
+        subjects_to_check = self.cache.get_items_to_fetch(self.SCHEMA_VERSION_CHECK_CACHE_KEY, subjects)
 
         subjects_to_check = subjects_to_check[: self.SCHEMA_VERSION_CHECK_BATCH_SIZE]
 
@@ -998,7 +1002,7 @@ class ClusterMetadataCollector:
         version_responses = self._parallel_fetch(self._get_schema_registry_versions, subjects_to_check, "version list")
 
         # Mark all checked subjects as fetched (even if they errored)
-        self._mark_items_fetched(
+        self.cache.mark_items_fetched(
             self.SCHEMA_VERSION_CHECK_CACHE_KEY,
             subjects_to_check,
             max_cache_size=self.SCHEMA_VERSION_CHECK_CACHE_MAX_SIZE,
@@ -1130,7 +1134,7 @@ class ClusterMetadataCollector:
             )
 
         # Determine which subjects need event emission (changed or TTL expired)
-        schemas_to_emit = self._get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
+        schemas_to_emit = self.cache.get_events_to_send(self.SCHEMA_CACHE_KEY, all_schema_cache_contents)
 
         self._emit_schema_registry_events(
             schemas_to_emit,
@@ -1150,7 +1154,7 @@ class ClusterMetadataCollector:
 
         Compatibility is refreshed on its own cadence so a flip without a version bump is still picked
         up; a per-subject flip therefore surfaces only on the next compat-fetch cadence (up to
-        CONFIGS_REFRESH_INTERVAL + jitter later), while a global flip re-emits immediately via
+        cache.refresh_interval + jitter later), while a global flip re-emits immediately via
         global_compatibility.
 
         The SCHEMA_COMPATIBILITY_BATCH_SIZE clamp bounds only the cadence-driven `compat_due` list;
@@ -1159,7 +1163,7 @@ class ClusterMetadataCollector:
         subjects_needing_full_fetch), not SCHEMA_COMPATIBILITY_BATCH_SIZE. They are equal today, so
         there is no over-fetch.
         """
-        compat_due = self._get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
+        compat_due = self.cache.get_items_to_fetch(self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY, subjects)
         remaining_slots = max(0, self.SCHEMA_COMPATIBILITY_BATCH_SIZE - len(subjects_needing_full_fetch))
         compat_due = compat_due[:remaining_slots]
         compat_subjects_to_fetch = list(set(subjects_needing_full_fetch) | set(compat_due))
@@ -1171,11 +1175,11 @@ class ClusterMetadataCollector:
             # Mark all attempted subjects as fetched (even if they errored), mirroring the version
             # tier: a subject that fails this run isn't retried until the next configs cadence rather
             # than hammered every check, at the cost of holding stale compatibility until then.
-            self._mark_items_fetched(
+            self.cache.mark_items_fetched(
                 self.SCHEMA_COMPATIBILITY_FETCH_CACHE_KEY,
                 compat_subjects_to_fetch,
-                ttl_base=self.CONFIGS_REFRESH_INTERVAL,
-                ttl_jitter=self.CONFIGS_REFRESH_JITTER,
+                ttl_base=self.cache.refresh_interval,
+                ttl_jitter=self.cache.refresh_jitter,
                 max_cache_size=self.SCHEMA_COMPATIBILITY_FETCH_CACHE_MAX_SIZE,
             )
 
@@ -1231,7 +1235,7 @@ class ClusterMetadataCollector:
             ds_payload = {
                 'collection_timestamp': int(time.time() * 1000),
                 'kafka_cluster_id': cluster_id,
-                **self._original_cluster_id_field(),
+                **self.config._original_cluster_id_field(),
                 'subject': subject,
                 'topic': info['topic_name'],
                 'schema_for': info['schema_for'],
@@ -1333,16 +1337,3 @@ class ClusterMetadataCollector:
             selected_configs.append((key, remaining[key]))
 
         return dict(selected_configs)
-
-    def _get_tags(self, cluster_id: str | None = None) -> list[str]:
-        tags = list(self.config._custom_tags)
-        if cluster_id:
-            tags.append(f'kafka_cluster_id:{cluster_id}')
-            if self.config._kafka_cluster_id_override:
-                tags.append(f'original_kafka_cluster_id:{self.config._auto_detected_cluster_id}')
-        return tags
-
-    def _original_cluster_id_field(self) -> dict[str, str]:
-        if self.config._kafka_cluster_id_override:
-            return {'original_kafka_cluster_id': self.config._auto_detected_cluster_id}
-        return {}

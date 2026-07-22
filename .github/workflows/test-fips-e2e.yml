@@ -128,7 +128,7 @@ jobs:
         continue-on-error: true
         uses: DataDog/coverage-upload-github-action@6c4bd935248daa6f0ef94e3e6ba71ad5ad079998 # v1.0.3
         with:
-          api_key: ${{ secrets.DD_API_KEY }}
+          api_key: ${{ steps.dd-sts.outputs.api_key }}
           files: "${{ inputs.target || 'tls' }}/coverage.xml"
           format: cobertura
           flags: "${{ inputs.target || 'tls' }}"

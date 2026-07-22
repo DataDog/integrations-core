@@ -1,0 +1,1 @@
+Add an async job registry to `DatabaseCheck` so DBM integrations can register `DBMAsyncJob`s additively and run, cancel, or shut them all down through a single entry point (`register_async_job`, `run_async_jobs`, `cancel_async_jobs`, `shutdown_async_jobs`), along with a `DBMAsyncJob.shutdown()` hook for releasing lifetime-scoped resources on unschedule.

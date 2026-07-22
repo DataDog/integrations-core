@@ -18,7 +18,7 @@ def test_check(aggregator, instance, dd_run_check):
     server_tag = 'server:{}'.format(instance['server'])
     port_tag = 'port:{}'.format(instance['port'])
     metrics = common.get_metrics(CLICKHOUSE_VERSION)
-    db_hostname_tag = 'database_hostname:{}'.format(check.reported_hostname)
+    db_hostname_tag = 'database_hostname:{}'.format(check.database_hostname)
     db_instance_tag = 'database_instance:{}:{}:default'.format(instance['server'], instance['port'])
 
     for metric in metrics:
@@ -55,7 +55,7 @@ def test_custom_queries(aggregator, instance, dd_run_check):
             'db:default',
             'foo:bar',
             'test:clickhouse',
-            'database_hostname:{}'.format(check.reported_hostname),
+            'database_hostname:{}'.format(check.database_hostname),
             'database_instance:{}:{}:default'.format(instance['server'], instance['port']),
         ],
     )
@@ -99,8 +99,12 @@ def test_version_metadata(instance, datadog_agent, dd_run_check):
     )
 
 
-def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_check):
+@pytest.mark.parametrize('reported_hostname', [None, 'forced-clickhouse-host'])
+def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_check, reported_hostname):
     """Test that database_instance metadata is sent correctly."""
+    if reported_hostname:
+        instance['reported_hostname'] = reported_hostname
+
     check = ClickhouseCheck('clickhouse', {}, [instance])
     check.check_id = 'test:456'
     dd_run_check(check)
@@ -115,6 +119,13 @@ def test_database_instance_metadata(aggregator, instance, datadog_agent, dd_run_
     assert event['dbms'] == 'clickhouse'
     assert event['kind'] == 'database_instance'
     assert event['database_instance'] == check.database_identifier
+    # database_hostname always reports the resolved host, independent of the reported_hostname override
+    assert event['database_hostname'] == check.database_hostname
+    # host follows the reported_hostname override when one is configured
+    assert event['host'] == check.reported_hostname
+    if reported_hostname:
+        assert event['host'] == reported_hostname
+        assert event['database_hostname'] != reported_hostname
     assert event['collection_interval'] == 300
     assert 'metadata' in event
     assert 'dbm' in event['metadata']

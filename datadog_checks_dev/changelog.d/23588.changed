@@ -1,0 +1,1 @@
+Stop declaring `black` as a direct dependency. The `apply_black` calls used to format auto-generated config-model files now go through `ruff format`, using the repo's centralized `[tool.ruff]` configuration.

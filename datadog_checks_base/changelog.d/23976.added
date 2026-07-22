@@ -1,1 +1,0 @@
-Add ``include_internal`` and ``include_db`` options to ``TagManager.get_tags`` so DBM checks can exclude internal resource tags (``dd.internal.*``) and the per-database ``db`` tag from tag views that should not carry them.

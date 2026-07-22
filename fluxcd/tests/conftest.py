@@ -102,3 +102,21 @@ def mock_metrics_v2():
         ),
     ):
         yield
+
+
+@pytest.fixture()
+def mock_metrics_ksm():
+    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-ksm.txt")
+
+    with open(fixture_file, "r") as f:
+        content = f.read()
+
+    with mock.patch(
+        "requests.Session.get",
+        return_value=mock.MagicMock(
+            status_code=200,
+            iter_lines=lambda **kwargs: content.split("\n"),
+            headers={"Content-Type": "text/plain"},
+        ),
+    ):
+        yield

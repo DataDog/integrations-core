@@ -12,16 +12,15 @@ import click
 from httpx import HTTPError, HTTPStatusError
 from packaging.version import Version
 
+from ddev.utils.github_errors import GitHubAuthenticationError
+
+from .build_agent import BUILD_AGENT_YAML_PATH, ensure_build_agent_yaml_updated
+
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
-BUILD_AGENT_YAML_PATH = '.gitlab/build_agent.yaml'
-BUILD_AGENT_TEMPLATE_PATTERN = r'^\.build-agent-tpl:\n(?:[^\S\n].*(?:\n|$))*'
-BUILD_AGENT_MAIN_BRANCH_PATTERN = r'^(\s+branch:\s+)main([^\S\n]*)$'
-BUILD_AGENT_TEMPLATE_REGEX = re.compile(BUILD_AGENT_TEMPLATE_PATTERN, re.MULTILINE)
-BUILD_AGENT_MAIN_BRANCH_REGEX = re.compile(BUILD_AGENT_MAIN_BRANCH_PATTERN, re.MULTILINE)
 GITHUB_LABEL_COLOR = '5319e7'
 
 
@@ -108,6 +107,9 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         app.display_waiting(f"Updating release.json with new milestone `{next_milestone}`...")
         app.repo.git.run('fetch', 'origin', 'master')
         app.repo.git.run('checkout', '-B', bump_branch, 'origin/master')
+        # Force-restore build_agent.yaml from origin/master so any prior in-process edit on the release
+        # branch cannot leak into the milestone-bump commit (root cause of the leak on PR #23977).
+        app.repo.git.run('checkout', 'origin/master', '--', BUILD_AGENT_YAML_PATH)
         update_release_json(app.repo.path / 'release.json', next_milestone)
         app.repo.git.run('add', 'release.json')
         app.repo.git.run('commit', '-m', f'Update current_milestone to {next_milestone}')
@@ -137,6 +139,11 @@ def bump_milestone(app: Application, branch_name: str) -> None:
             f'after cutting the `{branch_name}` release branch.',
         )
         app.display_success(f'Pull request created: {pr_url}')
+    except GitHubAuthenticationError:
+        app.display_warning(
+            f'Failed to create the pull request. Please create one manually from `{bump_branch}` to `master`.'
+        )
+        raise
     except HTTPError as e:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
@@ -179,62 +186,3 @@ def suggest_next_branch(app: Application) -> str:
             return suggestion
 
     return f'{major}.{minors[-1] + 1}.x'
-
-
-def ensure_build_agent_yaml_updated(app: Application, branch_name: str) -> bool:
-    """Update build_agent.yaml to point to the release branch when it still targets main."""
-    from ddev.utils.fs import Path
-
-    build_agent_yaml = Path(BUILD_AGENT_YAML_PATH)
-
-    if not build_agent_yaml.exists():
-        app.display_warning(f'Warning: {build_agent_yaml} not found')
-        return False
-
-    with open(build_agent_yaml, 'r') as f:
-        content = f.read()
-
-    matches = find_build_agent_template_main_branch_matches(content)
-    if not matches:
-        return False
-    if len(matches) > 1:
-        app.abort(
-            f'Expected exactly one `.build-agent-tpl` branch pointing to `main` in `{BUILD_AGENT_YAML_PATH}`; '
-            f'found {len(matches)}.'
-        )
-        return False
-
-    updated_content, replacement_count = replace_build_agent_template_main_branch(content, branch_name)
-    assert replacement_count == 1
-
-    with open(build_agent_yaml, 'w') as f:
-        f.write(updated_content)
-
-    app.display_success(f'Updated build_agent.yaml file to use Agent branch: {branch_name}')
-    return True
-
-
-def find_build_agent_template_main_branch_matches(content: str) -> list[re.Match[str]]:
-    template_match = BUILD_AGENT_TEMPLATE_REGEX.search(content)
-    if template_match is None:
-        return []
-
-    return list(BUILD_AGENT_MAIN_BRANCH_REGEX.finditer(template_match.group(0)))
-
-
-def replace_build_agent_template_main_branch(content: str, branch_name: str) -> tuple[str, int]:
-    template_match = BUILD_AGENT_TEMPLATE_REGEX.search(content)
-    if template_match is None:
-        return content, 0
-
-    def replacement(match: re.Match[str]) -> str:
-        return f'{match.group(1)}{branch_name}{match.group(2)}'
-
-    updated_template, replacement_count = BUILD_AGENT_MAIN_BRANCH_REGEX.subn(
-        replacement, template_match.group(0), count=1
-    )
-    if replacement_count == 0:
-        return content, 0
-
-    updated_content = content[: template_match.start()] + updated_template + content[template_match.end() :]
-    return updated_content, replacement_count

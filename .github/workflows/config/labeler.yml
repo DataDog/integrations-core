@@ -97,6 +97,10 @@ integration/ambari:
 - changed-files:
   - any-glob-to-any-file:
     - ambari/**/*
+integration/anomali_threatstream:
+- changed-files:
+  - any-glob-to-any-file:
+    - anomali_threatstream/**/*
 integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
@@ -409,10 +413,10 @@ integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
-integration/cyberark_endpoint_privilege_manager:
+integration/idira_endpoint_privilege_manager:
 - changed-files:
   - any-glob-to-any-file:
-    - cyberark_endpoint_privilege_manager/**/*
+    - idira_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
@@ -889,6 +893,10 @@ integration/kubevirt_handler:
 - changed-files:
   - any-glob-to-any-file:
     - kubevirt_handler/**/*
+integration/kueue:
+- changed-files:
+  - any-glob-to-any-file:
+    - kueue/**/*
 integration/kuma:
 - changed-files:
   - any-glob-to-any-file:
@@ -1129,6 +1137,10 @@ integration/palo_alto_cortex_xdr:
 - changed-files:
   - any-glob-to-any-file:
     - palo_alto_cortex_xdr/**/*
+integration/palo_alto_networks_cortex_xsoar:
+- changed-files:
+  - any-glob-to-any-file:
+    - palo_alto_networks_cortex_xsoar/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:

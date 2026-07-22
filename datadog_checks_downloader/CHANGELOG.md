@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.2 / 2026-06-22 / Agent 7.81.0
+
+***Fixed***:
+
+* Use ``https://agent-integration-wheels.datadoghq.com`` (CloudFront) as the default v2 repository URL, replacing the direct S3 URL. The ``--repository`` flag still accepts any HTTPS base URL. ([#24084](https://github.com/DataDog/integrations-core/pull/24084))
+
+## 9.2.1 / 2026-06-15
+
+***Fixed***:
+
+* Use the versioned ``wheelsmith/v1`` v2 target namespace and tighten pointer validation. ([#23937](https://github.com/DataDog/integrations-core/pull/23937))
+
 ## 9.2.0 / 2026-06-09
 
 ***Added***:

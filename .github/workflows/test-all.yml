@@ -61,6 +61,12 @@ on:
         default: "standard"
         type: string
 
+permissions:
+  # needed for compute-matrix in test-target.yml
+  contents: read
+  # needed for dd-sts in test-target.yml
+  id-token: write
+
 jobs:
   jd316aba:
     uses: ./.github/workflows/test-target.yml
@@ -1278,6 +1284,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j7f02532:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: flink
+      target: flink
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j4f2c848:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2323,6 +2349,26 @@ jobs:
     with:
       job-name: KubeVirt Handler
       target: kubevirt_handler
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j3c620e6:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kueue
+      target: kueue
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"

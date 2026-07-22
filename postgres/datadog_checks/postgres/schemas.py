@@ -235,7 +235,7 @@ class PostgresSchemaCollector(SchemaCollector):
                     query, params = self.get_rows_query()
                     cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
                     cursor.execute(query, params)
-                    yield cursor
+                yield cursor
 
     def _get_schemas_query(self):
         query = SCHEMA_QUERY

@@ -154,17 +154,17 @@ tests:
           ip: "::1"
       params:
        -
-        value: "git-upload-pack"
         key: "action"
+        value: "git-upload-pack"
        -
-        value: "_any"
         key: "changes"
+        value: "_any"
        -
-        value: "secret"
         key: "key_id"
+        value: "secret"
        -
-        value: "[FILTERED]"
         key: "secret_token"
+        value: "[FILTERED]"
       queue_duration: 1.0031E8
       route: "/api/:version/projects"
       severity: "INFO"
@@ -413,8 +413,8 @@ tests:
           ip: "18.245.0.1"
       params:
        -
-        value: "param_value"
         key: "param_key"
+        value: "param_value"
       queue_duration: 1.1247E8
       time: "2017-08-08T20:15:54.821Z"
       user_id: 1

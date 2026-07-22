@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 7.0.0 / 2026-06-09
+## 7.1.0 / 2026-07-08
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Fix the `database_hostname` tag and metadata to always report the resolved database host instead of the `reported_hostname` override. ([#24247](https://github.com/DataDog/integrations-core/pull/24247))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24268](https://github.com/DataDog/integrations-core/pull/24268))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24272](https://github.com/DataDog/integrations-core/pull/24272))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24276](https://github.com/DataDog/integrations-core/pull/24276))
+
+## 7.0.0 / 2026-06-09 / Agent 7.81.0
 
 ***Changed***:
 
@@ -20,7 +33,7 @@
 * Store advanced-queries metric definitions as JSON loaded on first check run. ([#23829](https://github.com/DataDog/integrations-core/pull/23829))
 * Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
 
-## 6.7.0 / 2026-05-14
+## 6.7.0 / 2026-05-14 / Agent 7.80.0
 
 ***Added***:
 
