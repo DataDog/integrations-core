@@ -642,12 +642,12 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
-    ## @param traefik_proxy_api_endpoint - string - optional - default: http://<PROXY_ENDPOINT>:<API_PORT>
+    ## @param traefik_proxy_api_endpoint - string - optional - default: HTTP://<PROXY_ENDPOINT>:<API_PORT>
     ## URL of the Traefik Mesh proxy to query.
     #
-    # traefik_proxy_api_endpoint: http://<PROXY_ENDPOINT>:<API_PORT>
+    # traefik_proxy_api_endpoint: HTTP://<PROXY_ENDPOINT>:<API_PORT>
 
-    ## @param traefik_controller_api_endpoint - string - optional - default: http://<CONTROLLER_ENDPOINT>:<API_PORT>
+    ## @param traefik_controller_api_endpoint - string - optional - default: HTTP://<CONTROLLER_ENDPOINT>:<API_PORT>
     ## URL of the Traefik Mesh controller to query.
     #
-    # traefik_controller_api_endpoint: http://<CONTROLLER_ENDPOINT>:<API_PORT>
+    # traefik_controller_api_endpoint: HTTP://<CONTROLLER_ENDPOINT>:<API_PORT>

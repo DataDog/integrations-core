@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
+from datadog_checks.dev.kube_discovery import setup_discovery_agent
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
@@ -48,6 +49,8 @@ def setup_traefik_mesh():
 @pytest.fixture(scope='session')
 def dd_environment(dd_save_state):
     with kind_run(conditions=[setup_traefik_mesh]) as kubeconfig:
+        setup_discovery_agent(kubeconfig)
+
         with ExitStack() as stack:
             traefik_controller_api_url, traefik_controller_api_port = stack.enter_context(
                 port_forward(kubeconfig, 'traefik-mesh', 9000, 'service', 'traefik-mesh-controller')

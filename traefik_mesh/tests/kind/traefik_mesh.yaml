@@ -480,7 +480,7 @@ spec:
             - "--entryPoints.udp-15022.address=:15022/udp"
             - "--entryPoints.udp-15023.address=:15023/udp"
             - "--entryPoints.udp-15024.address=:15024/udp"
-            - "--providers.http.endpoint=http://traefik-mesh-controller.default.svc.cluster.local:9000/api/configuration/current"
+            - "--providers.http.endpoint=http://traefik-mesh-controller.traefik-mesh.svc.cluster.local:9000/api/configuration/current"
             - "--api.dashboard=false"
             - "--api.insecure"
             - "--ping"

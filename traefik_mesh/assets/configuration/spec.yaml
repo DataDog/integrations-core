@@ -2,6 +2,15 @@ name: Traefik Mesh
 fleet_configurable: true
 files:
   - name: traefik_mesh.yaml
+    discovery:
+      strategies:
+      - strategy: local:from_traefik_mesh_kube_daemon_set
+        provides:
+        - endpoints
+        inputs: {}
+        candidates:
+        - openmetrics_endpoint: "{endpoints.openmetrics_endpoint}"
+          traefik_proxy_api_endpoint: "{endpoints.traefik_proxy_api_endpoint}"
     options:
     - template: init_config
       options:
@@ -21,7 +30,7 @@ files:
         required: false
         description: URL of the Traefik Mesh proxy to query.
         value:
-          example: http://<PROXY_ENDPOINT>:<API_PORT>
+          example: HTTP://<PROXY_ENDPOINT>:<API_PORT>
           pattern: \w+
           type: string
       - name: traefik_controller_api_endpoint
@@ -30,6 +39,13 @@ files:
         required: false
         description: URL of the Traefik Mesh controller to query.
         value:
-          example: http://<CONTROLLER_ENDPOINT>:<API_PORT>
+          example: HTTP://<CONTROLLER_ENDPOINT>:<API_PORT>
           pattern: \w+
           type: string
+  - name: auto_conf.yaml
+    options:
+    - template: ad_identifiers
+      overrides:
+        value.example:
+        - traefik
+    - template: auto_conf/discovery
