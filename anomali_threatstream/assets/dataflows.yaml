@@ -1,5 +1,5 @@
 provides:
-  - id: anomali-threatstream-threat-intelligence
+  - id: anomali-threatstream-threat-intel-feed
     always_on: false
     granular: true
     data_type: threat_intel_feed
