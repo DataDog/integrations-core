@@ -6,8 +6,8 @@
             "id": 5444821146279612,
             "definition": {
                 "type": "image",
-                "url": "https://cdn.prod.website-files.com/6453db2ad32b573c40a15c49/6627ff6e7f8cb72de4b695f6_Anomali-OpenGraph-2024.webp",
-                "url_dark_theme": "https://cdn.prod.website-files.com/68228a4fdbfec3b02c9c5186/68228a4fdbfec3b02c9c565b_Anomali-Logo-White-2024-1200.webp",
+                "url": "https://static.datadoghq.com/static/images/logos/anomali-threatstream_small.svg",
+                "url_dark_theme": "https://static.datadoghq.com/static/images/logos/anomali-threatstream_reversed_small.svg",
                 "sizing": "contain",
                 "margin": "sm",
                 "has_background": false,
