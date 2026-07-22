@@ -1,0 +1,1 @@
+Declare the ``DBMS`` platform identifier on the check class, route the DBM ``dbms`` values through the ``dbms`` property, and bump the minimum ``datadog-checks-base`` to 37.42.0.
