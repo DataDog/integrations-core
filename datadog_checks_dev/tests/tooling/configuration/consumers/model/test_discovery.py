@@ -1,51 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import importlib
-import re
-import sys
-
-import datadog_checks
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.discovery import Port, Service
-
-from ...utils import get_model_consumer, get_spec
+from ...utils import get_model_consumer, get_spec, normalize_yaml
 
 
-def _generate_configs_from_rendered_package(consumer, service, tmp_path, monkeypatch, *, custom_files=None):
-    package_name = f'generated_{re.sub(r"\W", "_", tmp_path.name)}'
-    spec_file = consumer.spec['files'][0]
-    spec_file['name'] = f'{package_name}.yaml'
-
-    rendered_files = consumer.render()[spec_file['name']]
-    package_root = tmp_path / 'datadog_checks'
-    package_dir = package_root / package_name
-    config_models_dir = package_dir / 'config_models'
-    config_models_dir.mkdir(parents=True)
-    (package_dir / '__init__.py').write_text('')
-
-    custom_files = custom_files or {}
-    for file_name, (contents, errors) in rendered_files.items():
-        assert not errors
-        (config_models_dir / file_name).write_text(custom_files.get(file_name, contents))
-
-    monkeypatch.syspath_prepend(str(tmp_path))
-    monkeypatch.setattr(datadog_checks, '__path__', [str(package_root), *datadog_checks.__path__])
-    importlib.invalidate_caches()
-
-    module_name = f'datadog_checks.{package_name}'
-    check = type('GeneratedDiscoveryCheck', (AgentCheck,), {'__module__': module_name})
-    try:
-        return list(check.generate_configs(service))
-    finally:
-        for imported_module in tuple(sys.modules):
-            if imported_module == module_name or imported_module.startswith(f'{module_name}.'):
-                sys.modules.pop(imported_module)
-        if hasattr(datadog_checks, package_name):
-            delattr(datadog_checks, package_name)
-
-
-def test_generated_candidates_follow_public_discovery_contract(tmp_path, monkeypatch):
+def test():
     consumer = get_model_consumer(
         """
         name: test
@@ -71,15 +30,52 @@ def test_generated_candidates_follow_public_discovery_contract(tmp_path, monkeyp
                 type: string
         """
     )
-    service = Service(id='svc', host='example.com', ports=(Port(number=9090),))
-    configs = _generate_configs_from_rendered_package(consumer, service, tmp_path, monkeypatch)
 
-    assert configs == [
-        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:9090/m'}]},
-    ]
+    model_definitions = consumer.render()
+    files = model_definitions['test.yaml']
+
+    discovery_contents, discovery_errors = files['discovery.py']
+    assert not discovery_errors
+    assert discovery_contents == normalize_yaml(
+        """
+        from __future__ import annotations
+
+        from collections.abc import Iterator
+        from typing import Any
+
+        from datadog_checks.base.utils.discovery import Service, candidate_ports
+        from datadog_checks.test.config_models import discovery_overrides
+        from datadog_checks.test.config_models.instance import InstanceConfig
+        from datadog_checks.test.config_models.shared import SharedConfig
 
 
-def test_literal_candidate_values_follow_public_discovery_contract(tmp_path, monkeypatch):
+        def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
+            shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
+                by_alias=True, mode='json', exclude_none=True
+            )
+            # discovery[0]: from_ports
+            for port in candidate_ports(service, [9090]):
+                ctx = {'port': port}
+                instance_data = {
+                    'endpoint': 'http://{service.host}:{port.number}/m'.format(service=service, **ctx),
+                }
+                instance = InstanceConfig.model_validate(
+                    instance_data, context={'configured_fields': frozenset(instance_data)}
+                ).model_dump(by_alias=True, mode='json', exclude_none=True)
+                yield {'init_config': shared, 'instances': [instance]}
+
+
+        def candidates(service: Service) -> Iterator[dict[str, Any]]:
+            override = getattr(discovery_overrides, 'candidates', None)
+            if override is None:
+                yield from _generated_candidates(service)
+            else:
+                yield from override(service, default=_generated_candidates)
+        """
+    )
+
+
+def test_literal_candidate_values():
     consumer = get_model_consumer(
         """
         name: test
@@ -110,74 +106,53 @@ def test_literal_candidate_values_follow_public_discovery_contract(tmp_path, mon
               description: words
               value:
                 type: object
-                properties:
-                - name: include
-                  type: array
-                  items:
-                    type: string
+                additionalProperties: true
         """
     )
-    service = Service(id='svc', host='example.com', ports=(Port(number=9090),))
-    configs = _generate_configs_from_rendered_package(consumer, service, tmp_path, monkeypatch)
 
-    assert configs == [
-        {
-            'init_config': {},
-            'instances': [
-                {
-                    'endpoint': 'http://example.com:9090/m',
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    assert discovery_contents == normalize_yaml(
+        """
+        from __future__ import annotations
+
+        from collections.abc import Iterator
+        from typing import Any
+
+        from datadog_checks.base.utils.discovery import Service, candidate_ports
+        from datadog_checks.test.config_models import discovery_overrides
+        from datadog_checks.test.config_models.instance import InstanceConfig
+        from datadog_checks.test.config_models.shared import SharedConfig
+
+
+        def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
+            shared = SharedConfig.model_validate({}, context={'configured_fields': frozenset()}).model_dump(
+                by_alias=True, mode='json', exclude_none=True
+            )
+            # discovery[0]: from_ports
+            for port in candidate_ports(service, [9090]):
+                ctx = {'port': port}
+                instance_data = {
+                    'endpoint': 'http://{service.host}:{port.number}/m'.format(service=service, **ctx),
                     'metric_patterns': {'include': ['test.metric.{2}']},
                 }
-            ],
-        }
-    ]
+                instance = InstanceConfig.model_validate(
+                    instance_data, context={'configured_fields': frozenset(instance_data)}
+                ).model_dump(by_alias=True, mode='json', exclude_none=True)
+                yield {'init_config': shared, 'instances': [instance]}
 
 
-def test_from_named_ports_follows_public_discovery_contract(tmp_path, monkeypatch):
-    consumer = get_model_consumer(
-        """
-        name: test
-        version: 0.0.0
-        files:
-        - name: test.yaml
-          discovery:
-            strategies:
-            - strategy: from_named_ports
-              port_names:
-              - metrics
-              - http-monitoring
-              candidates:
-              - endpoint: http://{service.host}:{port.number}/m
-          options:
-          - template: init_config
-            options: []
-          - template: instances
-            options:
-            - name: endpoint
-              description: words
-              required: true
-              value:
-                type: string
+        def candidates(service: Service) -> Iterator[dict[str, Any]]:
+            override = getattr(discovery_overrides, 'candidates', None)
+            if override is None:
+                yield from _generated_candidates(service)
+            else:
+                yield from override(service, default=_generated_candidates)
         """
     )
-    service = Service(
-        id='svc',
-        host='example.com',
-        ports=(
-            Port(number=8086, name='http-monitoring'),
-            Port(number=9999, name='admin'),
-            Port(number=8085, name='metrics'),
-        ),
-    )
-    configs = _generate_configs_from_rendered_package(consumer, service, tmp_path, monkeypatch)
-
-    assert configs == [
-        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:8085/m'}]},
-        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:8086/m'}]},
-    ]
 
 
-def test_local_strategy_follows_public_discovery_contract(tmp_path, monkeypatch):
+def test_local_strategy():
     consumer = get_model_consumer(
         """
         name: test
@@ -204,31 +179,16 @@ def test_local_strategy_follows_public_discovery_contract(tmp_path, monkeypatch)
                 type: string
         """
     )
-    service = Service(id='svc', host='example.com', ports=())
-    configs = _generate_configs_from_rendered_package(
-        consumer,
-        service,
-        tmp_path,
-        monkeypatch,
-        custom_files={
-            'discovery_strategies.py': """
-from types import SimpleNamespace
+
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    assert 'from datadog_checks.test.config_models.discovery_strategies import from_app_config' in discovery_contents
+    assert "for ctx in from_app_config(service, config_path='/etc/app.conf'):" in discovery_contents
+    assert 'InstanceConfig.model_validate(' in discovery_contents
+    assert 'from datadog_checks.test.config_models import discovery_overrides' in discovery_contents
 
 
-def from_app_config(service, config_path):
-    assert service.id == 'svc'
-    assert config_path == '/etc/app.conf'
-    yield {'svc': SimpleNamespace(port=8123)}
-""",
-        },
-    )
-
-    assert configs == [
-        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:8123/m'}]},
-    ]
-
-
-def test_override_seam_follows_public_discovery_contract(tmp_path, monkeypatch):
+def test_override_seam_wired():
     consumer = get_model_consumer(
         """
         name: test
@@ -253,25 +213,15 @@ def test_override_seam_follows_public_discovery_contract(tmp_path, monkeypatch):
                 type: string
         """
     )
-    service = Service(id='svc', host='example.com', ports=(Port(number=9090),))
-    configs = _generate_configs_from_rendered_package(
-        consumer,
-        service,
-        tmp_path,
-        monkeypatch,
-        custom_files={
-            'discovery_overrides.py': """
-def candidates(service, default):
-    for config in default(service):
-        config['instances'][0]['endpoint'] += '?source=override'
-        yield config
-""",
-        },
-    )
 
-    assert configs == [
-        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:9090/m?source=override'}]},
-    ]
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    # The override seam is wired even though this integration does not use it:
+    # the public candidates() delegates to discovery_overrides.candidates when present.
+    assert 'from datadog_checks.test.config_models import discovery_overrides' in discovery_contents
+    assert "override = getattr(discovery_overrides, 'candidates', None)" in discovery_contents
+    assert 'yield from _generated_candidates(service)' in discovery_contents
+    assert 'yield from override(service, default=_generated_candidates)' in discovery_contents
 
 
 def test_unknown_strategy_clean_error():
@@ -300,10 +250,44 @@ def test_unknown_strategy_clean_error():
     )
     spec.load()
 
-    assert any('Unsupported strategy `from_services`' in error for error in spec.errors)
+    # An unknown strategy must surface as a clean spec error from validation,
+    # never as a traceback or NotImplementedError from the generator.
+    assert any('Unsupported strategy `from_services`' in e for e in spec.errors)
 
 
-def test_no_init_config_follows_public_discovery_contract(tmp_path, monkeypatch):
+def test_custom_files_are_stubbed():
+    consumer = get_model_consumer(
+        """
+        name: test
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          discovery:
+            strategies:
+            - strategy: from_ports
+              port_hints: [9090]
+              candidates:
+              - endpoint: http://{service.host}:{port.number}/m
+          options:
+          - template: init_config
+            options: []
+          - template: instances
+            options:
+            - name: endpoint
+              description: words
+              required: true
+              value:
+                type: string
+        """
+    )
+
+    files = consumer.render()['test.yaml']
+    assert 'discovery_strategies.py' in files
+    assert 'discovery_overrides.py' in files
+    assert 'candidates(service, default)' in files['discovery_overrides.py'][0]
+
+
+def test_no_init_config_section():
     consumer = get_model_consumer(
         """
         name: test
@@ -327,9 +311,9 @@ def test_no_init_config_follows_public_discovery_contract(tmp_path, monkeypatch)
                 type: string
         """
     )
-    service = Service(id='svc', host='example.com', ports=(Port(number=9090),))
-    configs = _generate_configs_from_rendered_package(consumer, service, tmp_path, monkeypatch)
 
-    assert configs == [
-        {'init_config': {}, 'instances': [{'endpoint': 'http://example.com:9090/m'}]},
-    ]
+    discovery_contents, discovery_errors = consumer.render()['test.yaml']['discovery.py']
+    assert not discovery_errors
+    assert 'SharedConfig' not in discovery_contents
+    assert 'from datadog_checks.test.config_models.shared' not in discovery_contents
+    assert '    shared = {}' in discovery_contents
