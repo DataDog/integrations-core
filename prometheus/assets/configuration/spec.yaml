@@ -132,6 +132,7 @@ files:
         value:
           example: <CERT_PATH>
           type: string
+          require_trusted_provider: true
       - name: ssl_private_key
         description: |
           Needed if the certificate does not include the private key.
@@ -140,6 +141,7 @@ files:
         value:
           example: <KEY_PATH>
           type: string
+          require_trusted_provider: true
       - name: ssl_ca_cert
         description: |
           The path to the trusted CA used for generating custom certificates. Set this to false to disable SSL
@@ -148,6 +150,7 @@ files:
         value:
           example: <CA_CERT_PATH>
           type: string
+          require_trusted_provider: true
       - name: prometheus_timeout
         description: Set a timeout in seconds for the Prometheus query.
         value:
