@@ -114,13 +114,23 @@ def assert_all_discovery_candidates_stable(
 def _get_compose_container_id(
     compose_file: str | os.PathLike[str] | None, compose_service: str, *, project_name: str | None = None
 ) -> str:
-    compose_file = compose_file or _get_default_compose_file()
     project_name = project_name or _get_default_compose_project_name()
 
-    command = ['docker', 'compose']
     if project_name:
-        command.extend(['-p', project_name])
-    command.extend(['-f', os.fspath(compose_file), 'ps', '-q', compose_service])
+        command = [
+            'docker',
+            'ps',
+            '--quiet',
+            '--filter',
+            f'label=com.docker.compose.project={project_name}',
+            '--filter',
+            f'label=com.docker.compose.service={compose_service}',
+            '--filter',
+            'label=com.docker.compose.oneoff=False',
+        ]
+    else:
+        compose_file = compose_file or _get_default_compose_file()
+        command = ['docker', 'compose', '-f', os.fspath(compose_file), 'ps', '-q', compose_service]
 
     container_id = run_command(command, capture='out', check=True).stdout.strip()
     if not container_id:
