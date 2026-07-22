@@ -11,6 +11,7 @@ from xml.etree import ElementTree
 import pytest
 from textual import events
 from textual.containers import Horizontal
+from textual.screen import Screen
 from textual.widgets import Button, Input, Static, Switch
 
 from ddev.ai.config.models import FlowInput, InputType
@@ -29,6 +30,12 @@ def object_flow_input(**overrides: object) -> FlowInput:
     }
     data.update(overrides)
     return FlowInput.model_validate(data)
+
+
+def button_labeled(screen: Screen, label: str) -> Button:
+    button = next((button for button in screen.query(Button) if str(button.label) == label), None)
+    assert button is not None, f"Button labeled {label!r} was not visible"
+    return button
 
 
 # ---------------------------------------------------------------------------
@@ -364,6 +371,200 @@ async def test_object_submission_dismisses_with_canonical_nested_payload(make_la
             },
             "prd": "Required product behavior.\n",
         }
+
+
+async def test_multi_scalar_entries_can_be_added_removed_and_submitted_in_order(
+    make_launch_modal_app,
+) -> None:
+    flow_input = FlowInput(name="tags", label="Tags", input_type=InputType.STRING, multi=True, required=False)
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=(160, 100)) as pilot:
+        await pilot.pause()
+        add_button = button_labeled(app.screen, "+ Add Tag")
+        add_button.focus()
+        await pilot.press("enter")
+        await pilot.pause()
+        assert isinstance(app.focused, Input)
+        await pilot.press(*"first")
+        await pilot.press("tab")
+        assert isinstance(app.focused, Button)
+        assert str(app.focused.label) == "Remove"
+        await pilot.press("tab")
+        assert app.focused is add_button
+        await pilot.press("enter")
+        await pilot.pause()
+        assert isinstance(app.focused, Input)
+        await pilot.press(*"second")
+
+        first_remove = button_labeled(app.screen, "Remove")
+        first_remove.focus()
+        await pilot.press("enter")
+        await pilot.pause()
+        button_labeled(app.screen, "Launch ▶").focus()
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert app.dismiss_result == {"tags": ["second"], "prd": "Required product behavior.\n"}
+
+
+async def test_singular_collection_label_adds_and_submits_value(make_launch_modal_app) -> None:
+    flow_input = FlowInput(
+        name="series",
+        label="Series",
+        input_type=InputType.STRING,
+        multi=True,
+        required=False,
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=(160, 100)) as pilot:
+        await pilot.pause()
+        add_button = button_labeled(app.screen, "+ Add Series")
+        add_button.focus()
+        await pilot.press("enter")
+        await pilot.press(*"requests")
+        button_labeled(app.screen, "Launch ▶").focus()
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert app.dismiss_result == {"series": ["requests"], "prd": "Required product behavior.\n"}
+
+
+async def test_required_multi_object_starts_with_a_usable_entry(make_launch_modal_app) -> None:
+    flow_input = object_flow_input(
+        name="endpoints",
+        label="Endpoints",
+        multi=True,
+        fields=[
+            {"name": "name", "label": "Name", "type": "string"},
+            {"name": "url", "label": "URL", "type": "string"},
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=(160, 100)) as pilot:
+        await pilot.pause()
+        button_labeled(app.screen, "Remove").focus()
+        await pilot.press("tab")
+        await pilot.press(*"primary")
+        await pilot.press("tab")
+        await pilot.press(*"https://primary.test")
+        button_labeled(app.screen, "Launch ▶").focus()
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert app.dismiss_result == {
+            "endpoints": [{"name": "primary", "url": "https://primary.test"}],
+            "prd": "Required product behavior.\n",
+        }
+
+
+async def test_multi_object_entries_can_be_added_removed_and_submitted_in_order(
+    make_launch_modal_app,
+) -> None:
+    flow_input = object_flow_input(
+        name="endpoints",
+        label="Endpoints",
+        multi=True,
+        required=False,
+        fields=[
+            {"name": "name", "label": "Name", "type": "string"},
+            {"name": "url", "label": "URL", "type": "string"},
+        ],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=(160, 100)) as pilot:
+        await pilot.pause()
+        add_button = button_labeled(app.screen, "+ Add Endpoint")
+        add_button.focus()
+        await pilot.press("enter")
+        await pilot.pause()
+        assert isinstance(app.focused, Input)
+        await pilot.press(*"first")
+        await pilot.press("tab")
+        assert isinstance(app.focused, Input)
+        await pilot.press(*"https://first.test")
+
+        add_button.focus()
+        await pilot.press("enter")
+        await pilot.pause()
+        assert isinstance(app.focused, Input)
+        await pilot.press(*"second")
+        await pilot.press("tab")
+        assert isinstance(app.focused, Input)
+        await pilot.press(*"https://second.test")
+
+        first_remove = button_labeled(app.screen, "Remove")
+        first_remove.focus()
+        await pilot.press("enter")
+        await pilot.pause()
+        button_labeled(app.screen, "Launch ▶").focus()
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert app.dismiss_result == {
+            "endpoints": [{"name": "second", "url": "https://second.test"}],
+            "prd": "Required product behavior.\n",
+        }
+
+
+async def test_multi_defaults_launch_as_ordered_runtime_values(make_launch_modal_app, large_terminal) -> None:
+    flow_input = FlowInput(
+        name="ports",
+        label="Ports",
+        input_type=InputType.NUMBER,
+        multi=True,
+        required=False,
+        default=[9090, 8080],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == {"ports": ["9090", "8080"], "prd": "Required product behavior.\n"}
+
+
+async def test_multi_defaults_are_restored_after_all_entries_are_removed(make_launch_modal_app, large_terminal) -> None:
+    flow_input = FlowInput(
+        name="ports",
+        label="Ports",
+        input_type=InputType.NUMBER,
+        multi=True,
+        required=False,
+        default=[9090, 8080],
+    )
+    app = make_launch_modal_app([flow_input])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        for _ in range(2):
+            button_labeled(app.screen, "Remove").focus()
+            await pilot.press("enter")
+            await pilot.pause()
+        button_labeled(app.screen, "Launch ▶").focus()
+        await pilot.press("enter")
+        await pilot.pause()
+
+        assert app.dismiss_result == {"ports": ["9090", "8080"], "prd": "Required product behavior.\n"}
+
+
+async def test_required_multi_input_blocks_launch_while_initial_entry_is_empty(
+    make_launch_modal_app, large_terminal
+) -> None:
+    app = make_launch_modal_app([FlowInput(name="tags", label="Tags", input_type=InputType.STRING, multi=True)])
+
+    async with app.run_test(size=large_terminal) as pilot:
+        await pilot.pause()
+        await pilot.click("#btn-launch")
+        await pilot.pause()
+
+        assert app.dismiss_result == "NOT_SET"
+        assert "cannot be empty" in str(app.screen.query_one("#launch-error", Static).render())
 
 
 async def test_missing_required_object_field_stays_inline(make_launch_modal_app, large_terminal) -> None:

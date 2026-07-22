@@ -112,9 +112,8 @@ def message_queue():
     return asyncio.Queue()
 
 
-def _inspect_input_var(*pairs: tuple[str, str]) -> dict[str, str]:
-    payload = {"endpoints": [{"name": n, "url": u} for n, u in pairs]}
-    return {"inspect_input": json.dumps(payload)}
+def _endpoint_variables(*pairs: tuple[str, str]) -> dict[str, list[dict[str, str]]]:
+    return {"endpoints": [{"name": name, "url": url} for name, url in pairs]}
 
 
 def _make_phase(
@@ -122,12 +121,12 @@ def _make_phase(
     message_queue,
     *,
     phase_id: str = PHASE_ID,
-    runtime_variables: dict[str, str] | None = None,
+    runtime_variables: dict[str, object] | None = None,
 ) -> tuple[InspectEndpointPhase, CheckpointManager]:
     checkpoint_mgr = CheckpointManager(flow_dir / "checkpoints.yaml")
     context = FlowContext(
         runtime_variables=(
-            runtime_variables if runtime_variables is not None else _inspect_input_var((ENDPOINT_NAME, ENDPOINT_URL))
+            runtime_variables if runtime_variables is not None else _endpoint_variables((ENDPOINT_NAME, ENDPOINT_URL))
         ),
         flow_variables={},
     )
@@ -339,14 +338,14 @@ async def test_failure_request_error(flow_dir, message_queue, monkeypatch):
     await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="request failed")
 
 
-async def test_failure_missing_inspect_input(flow_dir, message_queue):
+async def test_failure_missing_endpoints(flow_dir, message_queue):
     phase, checkpoint_mgr = _make_phase(flow_dir, message_queue, runtime_variables={})
 
     trigger = PhaseTrigger(id="start", phase_id=None)
-    with pytest.raises(ConfigError, match="inspect_input"):
+    with pytest.raises(ConfigError, match="endpoints"):
         await phase.process_message(trigger)
 
-    wrapped = MessageProcessingError(phase._phase_id, trigger, ConfigError("inspect_input required"))
+    wrapped = MessageProcessingError(phase._phase_id, trigger, ConfigError("endpoints required"))
     await phase.on_error(wrapped)
 
     checkpoint = checkpoint_mgr.read()[PHASE_ID]
@@ -792,7 +791,7 @@ def two_endpoint_run(flow_dir, message_queue, monkeypatch):
     phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
-        runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
+        runtime_variables=_endpoint_variables(("agent", url_a), ("operator", url_b)),
     )
     return phase, checkpoint_mgr, url_a, url_b
 
@@ -897,7 +896,7 @@ async def test_all_or_nothing_one_endpoint_fails_aborts_phase(flow_dir, message_
     phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
-        runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
+        runtime_variables=_endpoint_variables(("agent", url_a), ("operator", url_b)),
     )
 
     raised = await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="[operator]")
@@ -932,7 +931,7 @@ async def test_all_or_nothing_cleans_up_partial_write_of_failing_endpoint(flow_d
     phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
-        runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
+        runtime_variables=_endpoint_variables(("agent", url_a), ("operator", url_b)),
     )
 
     await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="endpoint(s) failed to inspect")
@@ -957,7 +956,7 @@ async def test_multiple_failures_are_all_reported(flow_dir, message_queue, monke
     phase, checkpoint_mgr = _make_phase(
         flow_dir,
         message_queue,
-        runtime_variables=_inspect_input_var(("agent", url_a), ("operator", url_b)),
+        runtime_variables=_endpoint_variables(("agent", url_a), ("operator", url_b)),
     )
 
     raised = await _assert_phase_fails(phase, checkpoint_mgr, message_queue, error_contains="2 endpoint(s) failed")
@@ -971,18 +970,18 @@ async def test_multiple_failures_are_all_reported(flow_dir, message_queue, monke
 @pytest.mark.parametrize(
     ("runtime_variables", "match"),
     [
-        pytest.param({}, "inspect_input", id="missing"),
-        pytest.param({"inspect_input": "not json"}, "invalid 'inspect_input'", id="malformed_json"),
-        pytest.param({"inspect_input": '{"endpoints": []}'}, "inspect_input", id="empty_endpoints"),
+        pytest.param({}, "endpoints", id="missing"),
+        pytest.param({"endpoints": "not a list"}, "invalid 'endpoints'", id="not_a_list"),
+        pytest.param({"endpoints": []}, "endpoints", id="empty_endpoints"),
         pytest.param(
-            _inspect_input_var(("App Controller", "http://h:1/m"), ("app-controller", "http://h:2/m")),
+            _endpoint_variables(("App Controller", "http://h:1/m"), ("app-controller", "http://h:2/m")),
             "duplicate endpoint names",
             id="duplicate_names",
         ),
-        pytest.param(_inspect_input_var(("main", "example.com/metrics")), "inspect_input", id="url_without_scheme"),
+        pytest.param(_endpoint_variables(("main", "example.com/metrics")), "endpoints", id="url_without_scheme"),
     ],
 )
-async def test_invalid_inspect_input_raises_config_error(flow_dir, message_queue, runtime_variables, match):
+async def test_invalid_endpoints_raise_config_error(flow_dir, message_queue, runtime_variables, match):
     phase, _checkpoint_mgr = _make_phase(flow_dir, message_queue, runtime_variables=runtime_variables)
     with pytest.raises(ConfigError, match=match):
         await phase.process_message(PhaseTrigger(id="start", phase_id=None))
@@ -992,7 +991,7 @@ async def test_endpoint_name_normalized_to_snake_case(flow_dir, message_queue, m
     url = "http://host:9962/metrics"
     _install_mock_transport(monkeypatch, _ok_handler(200, PROMETHEUS_BODY, "text/plain"))
     phase, checkpoint_mgr = _make_phase(
-        flow_dir, message_queue, runtime_variables=_inspect_input_var(("App Controller", url))
+        flow_dir, message_queue, runtime_variables=_endpoint_variables(("App Controller", url))
     )
 
     await phase.process_message(PhaseTrigger(id="start", phase_id=None))

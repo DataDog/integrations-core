@@ -10,7 +10,7 @@ from decimal import Decimal, InvalidOperation
 from enum import StrEnum, auto
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Annotated, Any, Literal, Mapping, assert_never
+from typing import TYPE_CHECKING, Annotated, Any, Literal, Mapping, assert_never, cast
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
 
@@ -56,7 +56,7 @@ type ScalarInputType = Literal[
 ]
 type ScalarInputValue = str
 type ObjectInputValue = dict[str, str]
-type RuntimeInputValue = ScalarInputValue | ObjectInputValue
+type RuntimeInputValue = ScalarInputValue | ObjectInputValue | list[ScalarInputValue] | list[ObjectInputValue]
 type RuntimeVariables = dict[str, RuntimeInputValue]
 
 
@@ -100,36 +100,84 @@ class FlowInput(FlowInputBase):
 
     input_type: InputType = Field(alias="type")
     fields: list[FlowInputField] = Field(default_factory=list)
+    multi: bool = False
 
     @model_validator(mode="after")
     def validate_input_options(self) -> FlowInput:
+        defaults: list[object] = []
+        if self.default is not None:
+            if self.multi:
+                if not isinstance(self.default, list):
+                    raise ValueError(f"Default for multi input {self.name!r} must be a list")
+                if not self.default:
+                    raise ValueError(f"Default for multi input {self.name!r} must contain at least one item")
+                defaults.extend(self.default)
+            else:
+                defaults.append(self.default)
+
         if self.input_type is InputType.OBJECT:
             _validate_object_options(
                 self.name,
                 self.fields,
-                default=self.default,
+                defaults=defaults,
                 placeholder=self.placeholder,
                 as_content=self.as_content,
+                multi=self.multi,
             )
         else:
             if self.fields:
                 raise ValueError("'fields' may only be used with object inputs")
-            _validate_scalar_options(
-                self.input_type,
-                self.name,
-                default=self.default,
-                placeholder=self.placeholder,
-                as_content=self.as_content,
-            )
+            if defaults:
+                for index, default in enumerate(defaults):
+                    name = f"{self.name}[{index}]" if self.multi else self.name
+                    _validate_scalar_options(
+                        self.input_type,
+                        name,
+                        default=default,
+                        placeholder=self.placeholder,
+                        as_content=self.as_content,
+                    )
+            else:
+                _validate_scalar_options(
+                    self.input_type,
+                    self.name,
+                    default=None,
+                    placeholder=self.placeholder,
+                    as_content=self.as_content,
+                )
         return self
 
     def convert_runtime_value(self, value: object) -> RuntimeInputValue:
+        """Convert runtime values according to this input's type and cardinality."""
+        if self.multi:
+            if not isinstance(value, list):
+                raise ValueError(f"Input {self.name!r} must be a list")
+            if not value and self.required:
+                raise ValueError(f"Required input {self.name!r} must contain at least one item")
+            if self.input_type is InputType.OBJECT:
+                return [
+                    cast(ObjectInputValue, self.convert_single_runtime_value(item, error_path=f"{self.name}[{index}]"))
+                    for index, item in enumerate(value)
+                ]
+            return [
+                cast(ScalarInputValue, self.convert_single_runtime_value(item, error_path=f"{self.name}[{index}]"))
+                for index, item in enumerate(value)
+            ]
+        return self.convert_single_runtime_value(value)
+
+    def convert_single_runtime_value(
+        self,
+        value: object,
+        *,
+        error_path: str | None = None,
+    ) -> ScalarInputValue | ObjectInputValue:
         """Convert one runtime value according to this input's declared type."""
+        input_error_path = error_path or self.name
         if self.input_type is not InputType.OBJECT:
-            return _convert_scalar_runtime_value(self.input_type, self.name, value, as_content=self.as_content)
+            return _convert_scalar_runtime_value(self.input_type, input_error_path, value, as_content=self.as_content)
         return {
             child.name: child.convert_runtime_value(child_value, error_path=qualified_name)
-            for child, child_value, qualified_name in _resolve_object_field_values(self.name, self.fields, value)
+            for child, child_value, qualified_name in _resolve_object_field_values(input_error_path, self.fields, value)
         }
 
 
@@ -137,9 +185,10 @@ def _validate_object_options(
     error_path: str,
     fields: list[FlowInputField],
     *,
-    default: object | None,
+    defaults: list[object],
     placeholder: str | None,
     as_content: bool,
+    multi: bool,
 ) -> None:
     if not fields:
         raise ValueError("Object inputs must declare at least one field")
@@ -150,8 +199,9 @@ def _validate_object_options(
         raise ValueError("'as_content' may only be used with path inputs")
     if placeholder is not None:
         raise ValueError("'placeholder' may not be set on object inputs; set it on individual object fields instead")
-    if default is not None:
-        for child, child_value, qualified_name in _resolve_object_field_values(error_path, fields, default):
+    for index, default in enumerate(defaults):
+        object_error_path = f"{error_path}[{index}]" if multi else error_path
+        for child, child_value, qualified_name in _resolve_object_field_values(object_error_path, fields, default):
             _validate_scalar_runtime_value(child.input_type, qualified_name, child_value)
 
 
@@ -418,6 +468,10 @@ class ResolvedFlow:
                     continue
                 value = flow_input.default
 
+            if flow_input.multi and isinstance(value, list) and not value and not flow_input.required:
+                if flow_input.default is None:
+                    continue
+                value = flow_input.default
             converted[flow_input.name] = flow_input.convert_runtime_value(value)
         return converted
 

@@ -93,6 +93,12 @@ def test_render_inline_supports_one_level_braced_object_field_access():
     assert result == "URL: https://example.test"
 
 
+@pytest.mark.parametrize("prompt", ["Tags: ${tags}", "Name: ${endpoints.name}"])
+def test_render_inline_rejects_multi_value_interpolation(prompt):
+    with pytest.raises(ValueError, match="List variable .* cannot be rendered"):
+        render_inline(prompt, {"tags": ["api", "worker"], "endpoints": [{"name": "api"}]})
+
+
 @pytest.mark.parametrize(
     ("prompt", "context", "message"),
     [

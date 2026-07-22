@@ -649,6 +649,47 @@ ModalScreen {
     height: auto;
 }
 
+.multi-items {
+    height: auto;
+}
+
+.multi-entry {
+    height: auto;
+    margin-bottom: 1;
+}
+
+.multi-entry.object-entry {
+    border: round $border;
+    background: $surface;
+    padding: 0 1;
+}
+
+.multi-entry-header,
+.multi-scalar-row {
+    height: auto;
+    layout: horizontal;
+    align-vertical: middle;
+}
+
+.multi-entry-title,
+.multi-scalar-row > .launch-value-editor {
+    width: 1fr;
+}
+
+.multi-entry-title {
+    color: $text-muted;
+    text-style: bold;
+}
+
+.remove-multi-item,
+.add-multi-item {
+    min-width: 10;
+}
+
+.add-multi-item {
+    margin-bottom: 1;
+}
+
 .object-field {
     height: auto;
     margin-bottom: 1;

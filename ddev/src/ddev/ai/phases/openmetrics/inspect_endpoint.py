@@ -303,7 +303,7 @@ async def _inspect_one(
 class InspectEndpointPhase(Phase):
     """Deterministic Phase 0 for the OpenMetrics pipeline.
 
-    Fetches every named endpoint in ``inspect_input`` concurrently and, per endpoint:
+    Fetches every named endpoint in ``endpoints`` concurrently and, per endpoint:
 
     1. Confirms the endpoint is reachable (HTTP 200).
     2. Confirms the body is valid Prometheus or OpenMetrics exposition.
@@ -329,13 +329,13 @@ class InspectEndpointPhase(Phase):
             raise ConfigError(f"Phase {phase_id!r} (InspectEndpointPhase) must not declare 'checkpoint'")
 
     async def execute(self, context: dict[str, Any]) -> PhaseOutcome:
-        raw = context.get("inspect_input")
-        if not raw:
-            raise ConfigError("'inspect_input' runtime variable is required")
+        raw = context.get("endpoints")
+        if raw is None:
+            raise ConfigError("'endpoints' runtime variable is required")
         try:
-            endpoints = InspectInput.model_validate_json(raw).endpoints
+            endpoints = InspectInput.model_validate({"endpoints": raw}).endpoints
         except ValidationError as e:
-            raise ConfigError(f"invalid 'inspect_input': {e}") from e
+            raise ConfigError(f"invalid 'endpoints': {e}") from e
 
         memory_dir = self._checkpoint_manager.memory_dir
         memory_dir.mkdir(parents=True, exist_ok=True)

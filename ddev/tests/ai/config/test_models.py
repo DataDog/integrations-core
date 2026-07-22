@@ -285,6 +285,26 @@ def test_flow_input_rejects_placeholder_for_boolean():
         models.FlowInput(name="enabled", label="Enabled", input_type="boolean", placeholder="Enabled")
 
 
+def test_flow_config_rejects_empty_optional_multi_default():
+    with pytest.raises(ValidationError, match="Default for multi input 'tags' must contain at least one item"):
+        FlowConfig.model_validate(
+            {
+                "name": "demo",
+                "inputs": [
+                    {
+                        "name": "tags",
+                        "label": "Tags",
+                        "type": "string",
+                        "multi": True,
+                        "required": False,
+                        "default": [],
+                    }
+                ],
+                "flow": [],
+            }
+        )
+
+
 def object_input(**overrides: object) -> models.FlowInput:
     data = {
         "name": "endpoint",
@@ -439,6 +459,87 @@ def test_resolved_flow_converts_object_fields_to_strings():
             "enabled": "false",
         }
     }
+
+
+def test_resolved_flow_converts_multi_values_in_declared_order():
+    resolved = resolved_with_inputs(
+        models.FlowInput(name="ports", label="Ports", input_type="number", multi=True),
+        object_input(name="endpoints", label="Endpoints", multi=True),
+    )
+
+    assert resolved.convert_inputs(
+        {
+            "ports": [9090, "8080"],
+            "endpoints": [
+                {"url": "https://first.test", "retries": 1, "enabled": True},
+                {"url": "https://second.test", "retries": 2, "enabled": False},
+            ],
+        }
+    ) == {
+        "ports": ["9090", "8080"],
+        "endpoints": [
+            {"url": "https://first.test", "retries": "1", "enabled": "true"},
+            {"url": "https://second.test", "retries": "2", "enabled": "false"},
+        ],
+    }
+
+
+def test_resolved_flow_reports_multi_item_conversion_path():
+    resolved = resolved_with_inputs(
+        object_input(name="endpoints", label="Endpoints", multi=True),
+    )
+
+    with pytest.raises(ValueError, match=r"Input 'endpoints\[1\]\.retries' must be a number"):
+        resolved.convert_inputs(
+            {
+                "endpoints": [
+                    {"url": "https://first.test", "enabled": True},
+                    {"url": "https://second.test", "retries": "many", "enabled": False},
+                ]
+            }
+        )
+
+
+def test_resolved_flow_rejects_empty_required_multi_input():
+    resolved = resolved_with_inputs(
+        models.FlowInput(name="tags", label="Tags", input_type="string", multi=True),
+    )
+
+    with pytest.raises(ValueError, match="Required input 'tags' must contain at least one item"):
+        resolved.convert_inputs({"tags": []})
+
+
+def test_resolved_flow_omits_empty_optional_multi_input():
+    resolved = resolved_with_inputs(
+        models.FlowInput(name="tags", label="Tags", input_type="string", multi=True, required=False),
+    )
+
+    assert resolved.convert_inputs({"tags": []}) == {}
+
+
+@pytest.mark.parametrize("value", ["", False, {}], ids=["empty-string", "false", "empty-object"])
+def test_resolved_flow_rejects_falsy_non_list_optional_multi_values(value):
+    resolved = resolved_with_inputs(
+        models.FlowInput(name="tags", label="Tags", input_type="string", multi=True, required=False),
+    )
+
+    with pytest.raises(ValueError, match="Input 'tags' must be a list"):
+        resolved.convert_inputs({"tags": value})
+
+
+def test_resolved_flow_converts_optional_multi_default_when_launched():
+    resolved = resolved_with_inputs(
+        models.FlowInput(
+            name="enabled",
+            label="Enabled states",
+            input_type="boolean",
+            multi=True,
+            required=False,
+            default=[True, "false"],
+        ),
+    )
+
+    assert resolved.convert_inputs({}) == {"enabled": ["true", "false"]}
 
 
 def test_resolved_flow_uses_optional_object_field_defaults():

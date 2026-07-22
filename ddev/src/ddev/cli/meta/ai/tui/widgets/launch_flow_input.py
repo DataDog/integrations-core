@@ -13,13 +13,13 @@ from typing import assert_never
 
 from textual import events
 from textual.app import ComposeResult
-from textual.containers import Vertical
+from textual.containers import Horizontal, Vertical
 from textual.content import Content
 from textual.css.query import NoMatches
 from textual.geometry import Size
 from textual.validation import Number
 from textual.widget import Widget
-from textual.widgets import Input, Static, Switch
+from textual.widgets import Button, Input, Static, Switch
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
 from ddev.ai.config.models import FlowInput, FlowInputField, InputType
@@ -53,16 +53,35 @@ def spec_for_input(flow_input: FlowInput) -> EditorSpec:
 
 def spec_for_field(flow_input: FlowInput, field: FlowInputField) -> EditorSpec:
     """Adapt an object field to its UI editor specification."""
-    object_default = flow_input.default if isinstance(flow_input.default, Mapping) else {}
+    return _spec_for_object_field(spec_for_input(flow_input), field)
+
+
+def _spec_for_object_field(object_spec: EditorSpec, field: FlowInputField) -> EditorSpec:
+    object_default = object_spec.default if isinstance(object_spec.default, Mapping) else {}
     parent_default = object_default.get(field.name)
     return EditorSpec(
-        widget_id=f"input-{flow_input.name}-{field.name}",
+        widget_id=f"{object_spec.widget_id}-{field.name}",
         value_name=field.name,
         input_type=field.input_type,
         label=field.label,
         required=field.required,
         default=field.default if parent_default is None else parent_default,
         placeholder=field.placeholder,
+    )
+
+
+def spec_for_item(flow_input: FlowInput, index: int) -> EditorSpec:
+    """Adapt one multi input item to its UI editor specification."""
+    defaults = flow_input.default if isinstance(flow_input.default, list) else []
+    default = defaults[index] if index < len(defaults) else None
+    return EditorSpec(
+        widget_id=f"input-{flow_input.name}-item-{index}",
+        value_name=flow_input.name,
+        input_type=flow_input.input_type,
+        label=flow_input.label,
+        required=flow_input.required,
+        default=default,
+        placeholder=flow_input.placeholder,
     )
 
 
@@ -283,8 +302,17 @@ class LaunchFlowInput[T](Widget, ABC, metaclass=WidgetABCMeta):
     def get(
         cls,
         flow_input: FlowInput,
-    ) -> LaunchFlowInput[str] | LaunchFlowInput[bool] | LaunchFlowInput[dict[str, str | bool]]:
+    ) -> (
+        LaunchFlowInput[str]
+        | LaunchFlowInput[bool]
+        | LaunchFlowInput[dict[str, str | bool]]
+        | LaunchFlowInput[list[str]]
+        | LaunchFlowInput[list[bool]]
+        | LaunchFlowInput[list[dict[str, str | bool]]]
+    ):
         """Create the launch widget declared by a flow input."""
+        if flow_input.multi:
+            return MultiLaunchFlowInput(flow_input)
         return SingleLaunchFlowInput(flow_input, get_value_editor(flow_input))
 
     @abstractmethod
@@ -307,3 +335,114 @@ class SingleLaunchFlowInput[T](LaunchFlowInput[T]):
         if value is None and self.flow_input.required:
             raise ValueError(f"{self.flow_input.label}: required field cannot be empty.")
         return value
+
+
+type LaunchEditor = LaunchValueEditor[str] | LaunchValueEditor[bool] | LaunchValueEditor[dict[str, str | bool]]
+
+
+class MultiValueEntry(Widget):
+    """Display one removable value in a repeated launch input."""
+
+    def __init__(self, editor: LaunchEditor, *, object_entry: bool, item_label: str, ordinal: int) -> None:
+        classes = "multi-entry object-entry" if object_entry else "multi-entry scalar-entry"
+        super().__init__(classes=classes)
+        self.editor = editor
+        self.object_entry = object_entry
+        self.item_label = item_label
+        self.ordinal = ordinal
+
+    def compose(self) -> ComposeResult:
+        if self.object_entry:
+            with Horizontal(classes="multi-entry-header"):
+                yield Static(f"{self.item_label} {self.ordinal}", classes="multi-entry-title")
+                yield Button("Remove", classes="remove-multi-item", variant="warning")
+            yield self.editor
+        else:
+            with Horizontal(classes="multi-scalar-row"):
+                yield self.editor
+                yield Button("Remove", classes="remove-multi-item", variant="warning")
+
+    def set_ordinal(self, ordinal: int) -> None:
+        self.ordinal = ordinal
+        if self.object_entry and self.is_mounted:
+            self.query_one(".multi-entry-title", Static).update(f"{self.item_label} {ordinal}")
+
+
+class MultiLaunchFlowInput(LaunchFlowInput[list[object]]):
+    """Collect an ordered list using repeated single-value editors."""
+
+    def __init__(self, flow_input: FlowInput) -> None:
+        super().__init__(flow_input)
+        self.border_title = f"{flow_input.label.upper()} (multi · {flow_input.input_type.value})"
+        self.next_entry_id = 0
+        defaults = flow_input.default if isinstance(flow_input.default, list) else []
+        self.entries: list[MultiValueEntry] = []
+        initial_entry_count = len(defaults) if defaults else int(flow_input.required)
+        for _ in range(initial_entry_count):
+            self.entries.append(self._create_entry())
+
+    def compose(self) -> ComposeResult:
+        with Vertical(classes="multi-items"):
+            yield from self.entries
+        yield Button(f"+ Add {self._item_label()}", classes="add-multi-item")
+
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.has_class("add-multi-item"):
+            entry = self._create_entry()
+            self.entries.append(entry)
+            await self.query_one(".multi-items", Vertical).mount(entry)
+            self._renumber_entries()
+            controls = entry.query("Input, Switch")
+            if controls:
+                controls.first().focus()
+            event.stop()
+        elif event.button.has_class("remove-multi-item"):
+            entry = next(
+                ancestor for ancestor in event.button.ancestors_with_self if isinstance(ancestor, MultiValueEntry)
+            )
+            self.entries.remove(entry)
+            await entry.remove()
+            self._renumber_entries()
+            event.stop()
+
+    def get_value(self) -> list[object]:
+        values: list[object] = []
+        for index, entry in enumerate(self.entries, start=1):
+            value = entry.editor.get_value()
+            if value is None:
+                raise ValueError(f"{self.flow_input.label} item {index}: cannot be empty.")
+            values.append(value)
+        if not values and self.flow_input.required:
+            raise ValueError(f"{self.flow_input.label}: must contain at least one item.")
+        return values
+
+    def _create_entry(self) -> MultiValueEntry:
+        entry_id = self.next_entry_id
+        self.next_entry_id += 1
+        item_spec = spec_for_item(self.flow_input, entry_id)
+        if self.flow_input.input_type is InputType.OBJECT:
+            field_specs = tuple(_spec_for_object_field(item_spec, field) for field in self.flow_input.fields)
+            editor: LaunchEditor = ObjectValueEditor(item_spec, field_specs)
+        else:
+            editor = get_scalar_value_editor(item_spec)
+        return MultiValueEntry(
+            editor,
+            object_entry=self.flow_input.input_type is InputType.OBJECT,
+            item_label=self._item_label(),
+            ordinal=len(self.entries) + 1,
+        )
+
+    def _renumber_entries(self) -> None:
+        for ordinal, entry in enumerate(self.entries, start=1):
+            entry.set_ordinal(ordinal)
+
+    def _item_label(self) -> str:
+        label = self.flow_input.label
+        lowercase_label = label.lower()
+        if lowercase_label.endswith(("ss", "us", "is", "series")):
+            return label
+        if lowercase_label.endswith("ies"):
+            return f"{label[:-3]}y"
+        if lowercase_label.endswith("s"):
+            return label[:-1]
+        return label
