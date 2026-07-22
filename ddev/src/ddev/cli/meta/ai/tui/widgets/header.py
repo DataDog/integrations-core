@@ -39,14 +39,13 @@ EXECUTION_STATUS_TEXT = {
 class ExecutionStatusBadge(Static):
     """Render the current app-wide execution status."""
 
-    execution_status: reactive[ExecutionStatus] = reactive(ExecutionStatus.IDLE)
+    execution_status: reactive[ExecutionStatus] = reactive(ExecutionStatus.IDLE, init=False)
 
     def on_mount(self) -> None:
         self.watch(cast("TogoApp", self.app), "execution_status", self._sync_execution_status)
 
     def watch_execution_status(self, old_status: ExecutionStatus, new_status: ExecutionStatus) -> None:
-        self.remove_class(f"status-{old_status.value}")
-        self.add_class(f"status-{new_status.value}")
+        self.toggle_class(f"status-{old_status.value}", f"status-{new_status.value}")
         self.update(EXECUTION_STATUS_TEXT[new_status])
 
         if new_status is ExecutionStatus.RUNNING:
