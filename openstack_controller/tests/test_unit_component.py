@@ -32,14 +32,14 @@ def component():
 # Exceptions the decorator must treat as expected HTTP failures: swallowed, logged at DEBUG,
 # and (when the method reports a service check) surfaced as a CRITICAL service check.
 CAUGHT_HTTP_EXCEPTIONS = [
-    pytest.param(openstack.exceptions.HttpException(), id='sdk HttpException'),
     pytest.param(HTTPRequestError('boom'), id='agnostic HTTPRequestError'),
     pytest.param(HTTPStatusError('boom'), id='agnostic HTTPStatusError'),
 ]
 
-# Exceptions the decorator must let fall through to the generic handler: logged at ERROR,
-# with no service check reported. A non-HTTP SDKException is the case the catch narrowing hinges on.
+# Exceptions the decorator must let fall through to the generic handler: logged at ERROR, with
+# no service check reported. SDK exceptions should be translated before they reach components.
 FELL_THROUGH_EXCEPTIONS = [
+    pytest.param(openstack.exceptions.HttpException(), id='raw sdk HttpException'),
     pytest.param(openstack.exceptions.SDKException(), id='non-http SDKException'),
     pytest.param(ValueError('boom'), id='unrelated exception'),
 ]
