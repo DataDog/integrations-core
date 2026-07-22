@@ -6,72 +6,9 @@
 import pytest
 
 from datadog_checks.base.checks.openmetrics.parser_optimizations import (
-    _next_unquoted_char,
     _parse_labels,
     _parse_sample,
 )
-
-
-@pytest.mark.parametrize(
-    'text, chs, startidx, expected',
-    [
-        pytest.param('foo{bar="baz"} 1', '{', 0, 3, id='open_brace'),
-        pytest.param('bar="baz"} 1', '}', 0, 9, id='close_brace'),
-        pytest.param('label="value"', '=', 0, 5, id='equals'),
-        pytest.param('a="1",b="2"', ',', 0, 5, id='comma'),
-        pytest.param('metric{l="v"} 42', ' ', 0, 13, id='space'),
-        pytest.param('label=value,next', '=,}', 0, 5, id='multi_target_equals_first'),
-        pytest.param('value,next=foo', '=,}', 0, 5, id='multi_target_comma_first'),
-        pytest.param('value}', '=,}', 0, 5, id='multi_target_brace'),
-        pytest.param('no_special_chars', '{', 0, -1, id='not_found'),
-        pytest.param('', '{', 0, -1, id='empty_string'),
-        pytest.param('a{b{c', '{', 2, 3, id='startidx'),
-        pytest.param('a{b', '{', 1, 1, id='startidx_at_target'),
-        pytest.param('abc', '{', 10, -1, id='startidx_past_end'),
-        pytest.param('foo bar', None, 0, 3, id='whitespace_default'),
-        pytest.param('foo\tbar', None, 0, 3, id='whitespace_tab'),
-        pytest.param('{foo}', '{', 0, 0, id='first_char'),
-        pytest.param('foo}', '}', 0, 3, id='last_char'),
-        pytest.param('a{b{c', '{', 0, 1, id='multiple_returns_first'),
-    ],
-)
-def test_next_unquoted_char(text, chs, startidx, expected):
-    assert _next_unquoted_char(text, chs, startidx) == expected
-
-
-@pytest.mark.parametrize(
-    'line, find_char, startidx, expected',
-    [
-        pytest.param('envoy_server_live 1', '{', 0, -1, id='simple_gauge_no_brace'),
-        pytest.param('envoy_server_live 1', ' ', 0, 17, id='simple_gauge_space'),
-        pytest.param(
-            'envoy_cluster_upstream_cx_active{envoy_cluster_name="service1"} 0',
-            '{', 0, 32, id='labeled_open_brace',
-        ),
-        pytest.param(
-            'envoy_cluster_upstream_cx_active{envoy_cluster_name="service1"} 0',
-            '}', 33, 62, id='labeled_close_brace',
-        ),
-        pytest.param(
-            'http_request_duration_seconds_bucket{le="0.5"} 24054',
-            '{', 0, 36, id='histogram_open_brace',
-        ),
-        pytest.param(
-            'http_request_duration_seconds_bucket{le="0.5"} 24054',
-            '}', 37, 45, id='histogram_close_brace',
-        ),
-        pytest.param(
-            '# HELP http_requests_total The total number of HTTP requests.',
-            None, 0, 1, id='help_line',
-        ),
-        pytest.param(
-            '# TYPE http_requests_total counter',
-            None, 0, 1, id='type_line',
-        ),
-    ],
-)
-def test_next_unquoted_char_real_metrics(line, find_char, startidx, expected):
-    assert _next_unquoted_char(line, find_char, startidx) == expected
 
 
 @pytest.mark.parametrize(

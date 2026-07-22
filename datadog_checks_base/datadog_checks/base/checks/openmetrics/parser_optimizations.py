@@ -10,30 +10,14 @@ scanning function (_next_unquoted_char). This caused a ~3-5x performance regress
 
 This module restores the pre-v0.22.0 parsing approach by replacing _parse_sample
 and _parse_labels with their v0.21.1 implementations that use C-level str.index()
-and str.rindex() for fast delimiter lookup. _next_unquoted_char is also replaced
-with a simple str.find() wrapper for any remaining callers.
+and str.rindex() for fast delimiter lookup.
 
 The original v0.21.1 source:
 https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parser.py
 """
 
-import string
-
 import prometheus_client.parser as _prom_parser
 from prometheus_client.samples import Sample
-
-
-def _next_unquoted_char(text, chs, startidx=0):
-    """Find the next occurrence of any character in chs using str.find()."""
-    if chs is None:
-        chs = string.whitespace
-
-    best = -1
-    for ch in chs:
-        p = text.find(ch, startidx)
-        if p != -1 and (best == -1 or p < best):
-            best = p
-    return best
 
 
 # Copied from prometheus_client v0.21.1:
@@ -121,15 +105,7 @@ def apply():
         return
 
     _prom_parser._parse_sample = _parse_sample
-    _prom_parser._next_unquoted_char = _next_unquoted_char
     _prom_parser._dd_optimized = True
-
-    try:
-        import prometheus_client.openmetrics.parser as _om_parser
-
-        _om_parser._next_unquoted_char = _next_unquoted_char
-    except (ImportError, AttributeError):
-        pass
 
 
 apply()
