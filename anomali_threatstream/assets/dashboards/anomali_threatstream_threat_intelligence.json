@@ -88,7 +88,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -159,7 +159,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -223,7 +223,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream -@threat_intel.results.type:domain $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream -@threat_intel.results.type:domain $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -278,7 +278,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -339,7 +339,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -409,7 +409,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -479,7 +479,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -547,7 +547,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -616,7 +616,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -687,7 +687,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream @threat_intel.results.additional_data.meta.severity:very-high $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream @threat_intel.results.additional_data.meta.severity:very-high $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -749,7 +749,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream @threat_intel.results.additional_data.meta.severity:high $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream @threat_intel.results.additional_data.meta.severity:high $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -811,7 +811,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream @threat_intel.results.additional_data.meta.severity:medium $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream @threat_intel.results.additional_data.meta.severity:medium $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -874,7 +874,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream @threat_intel.results.additional_data.meta.severity:low $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream @threat_intel.results.additional_data.meta.severity:low $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -935,7 +935,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1005,7 +1005,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream -@threat_intel.results.additional_data.org:\"\" $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream -@threat_intel.results.additional_data.org:\"\" $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1075,7 +1075,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1145,7 +1145,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1216,7 +1216,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1281,7 +1281,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1345,7 +1345,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1414,7 +1414,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1484,7 +1484,7 @@
                                             "name": "query1",
                                             "data_source": "logs",
                                             "search": {
-                                                "query": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type"
+                                                "query": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type"
                                             },
                                             "indexes": [
                                                 "*"
@@ -1550,7 +1550,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "@threat_intel.results.source.name:AnomaliThreatStream $category $intention $indicator $ioc_type $severity $threat_type",
+                                        "query_string": "@threat_intel.results.source.name:anomali_threatstream $category $intention $indicator $ioc_type $severity $threat_type",
                                         "indexes": [],
                                         "storage": "hot"
                                     },
