@@ -355,8 +355,30 @@ async def test_phase_config_screen_renders_phase_info_and_agent_details() -> Non
         task_prompt = screen.query(".task-prompt").first()
         assert "do something" in task_prompt.source
         assert "agent_a" in str(screen.query_one("#phase-agent-name").render())
-        assert "provider · anthropic" in str(screen.query_one("#phase-agent-provider").render())
+        assert "anthropic" in str(screen.query_one("#phase-agent-model").render())
         assert "_No system prompt configured._" in screen.query_one("#phase-agent-prompt").source
+
+
+async def test_phase_config_long_description_scrolls_without_displacing_config() -> None:
+    """Long phase descriptions use a bounded scroll region above the configuration cards."""
+    from textual.containers import VerticalScroll
+
+    from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+
+    flow = _make_flow()
+    phase = flow.phases[flow.flow[0].phase]
+    phase.description = "\n\n".join(["Explain this phase clearly."] * 20)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(PhaseConfigScreen(flow, phase.name))
+        await pilot.pause()
+
+        description = pilot.app.screen.query_one("#phase-description", VerticalScroll)
+        config_grid = pilot.app.screen.query_one("#phase-config-grid")
+        assert description.region.height <= 4
+        assert description.max_scroll_y > 0
+        assert config_grid.region.height > description.region.height
 
 
 async def test_phase_config_screen_renders_resolved_task_prompt() -> None:
@@ -520,13 +542,16 @@ async def test_phase_config_agent_panel_renders_tools_and_prompt() -> None:
         variables={},
     )
     app = _app()
-    async with app.run_test() as pilot:
+    async with app.run_test(size=(120, 50)) as pilot:
         await pilot.pause()
         await pilot.app.push_screen(PhaseConfigScreen(flow, "analyse"))
         await pilot.pause()
 
         assert "analyst" in str(pilot.app.screen.query_one("#phase-agent-name").render())
-        assert "claude-3-sonnet" in str(pilot.app.screen.query_one("#phase-agent-model").render())
+        model = pilot.app.screen.query_one("#phase-agent-model")
+        assert "claude-3-sonnet" in str(model.render())
+        assert "anthropic" in str(model.render())
+        assert model.region.right <= pilot.app.screen.query_one("#phase-agent-card").content_region.right
         rendered_tools = str(pilot.app.screen.query_one("#phase-agent-tools").render())
         assert rendered_tools == "read_file · create_file · ddev_test"
         assert "inline analyst" in pilot.app.screen.query_one("#phase-agent-prompt").source

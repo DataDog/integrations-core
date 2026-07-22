@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 from ddev.ai.config.errors import ErrorKind, FlowError
@@ -236,6 +237,22 @@ async def test_flow_card_uses_available_width_before_truncating(make_flow, make_
         assert card.render().plain.splitlines()[0] == name
 
 
+async def test_flow_card_limits_description_without_hiding_phase_count(make_flow, make_togo_app) -> None:
+    flow = replace(
+        make_flow("Long Description", n_phases=2),
+        description=" ".join(["A detailed flow description that should wrap across the card."] * 10),
+    )
+    app = make_togo_app([flow])
+
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        rendered_lines = app.screen.query_one("FlowCard").render().plain.splitlines()
+
+        assert len(rendered_lines) == 5
+        assert rendered_lines[2].endswith("…")
+        assert rendered_lines[-1] == "● 2 phases"
+
+
 async def test_flow_card_click_does_not_navigate_when_text_is_selected(monkeypatch, make_togo_app):
     """Releasing a drag selection over a card does not activate the card."""
     from ddev.cli.meta.ai.tui.screens.main import MainScreen
@@ -302,7 +319,10 @@ async def test_resume_discovery_uses_repository_root_when_cwd_differs(tmp_path, 
     other_cwd = tmp_path / "elsewhere"
     repo_path.mkdir()
     other_cwd.mkdir()
-    flow = make_flow("Repo Flow", n_phases=2)
+    flow = replace(
+        make_flow("Repo Flow", n_phases=2),
+        description=" ".join(["A resumable flow with a deliberately long description."] * 10),
+    )
     run_dir = repo_path / ".ddev" / "ai-runs" / flow_slug(flow)
     run_dir.mkdir(parents=True)
     (run_dir / "checkpoints.yaml").write_text(
@@ -324,6 +344,10 @@ async def test_resume_discovery_uses_repository_root_when_cwd_differs(tmp_path, 
         await pilot.pause()
         card = app.screen.query_one(FlowCard)
         assert card.resumable
+        rendered_lines = card.render().plain.splitlines()
+        assert len(rendered_lines) == 6
+        assert rendered_lines[-2] == "● 2 phases"
+        assert rendered_lines[-1] == "↻ resumable run available"
         card.action_select()
         await pilot.pause()
         assert isinstance(app.screen, FlowScreen)

@@ -14,6 +14,8 @@ from ddev.ai.config.models import ConfigStatus, FlowResult
 from ddev.cli.meta.ai.palette import ERROR, SUCCESS
 from ddev.cli.meta.ai.tui.widgets.pipeline_graph import COLOR_RUNNING
 
+FLOW_DESCRIPTION_MAX_LINES = 2
+
 
 class FlowCard(Static):
     """Focusable card for one validated or broken flow result."""
@@ -51,7 +53,7 @@ class FlowCard(Static):
         content = Text(name, style="bold", no_wrap=True, overflow="ellipsis")
         if desc:
             content.append("\n")
-            content.append(desc, style="dim")
+            content.append_text(self._render_description(desc))
         content.append("\n\n")
         if self.result.status is ConfigStatus.BROKEN:
             count = len(self.result.errors)
@@ -67,6 +69,19 @@ class FlowCard(Static):
             if self.resumable:
                 content.append("\n↻ resumable run available", style=COLOR_RUNNING)
         return content
+
+    def _render_description(self, description: str) -> Text:
+        width = self.content_size.width
+        if width <= 0:
+            return Text(description, style="dim")
+
+        lines = Text(description, style="dim").wrap(self.app.console, width)
+        visible_lines = lines[:FLOW_DESCRIPTION_MAX_LINES]
+        if len(lines) > FLOW_DESCRIPTION_MAX_LINES:
+            last_line = visible_lines[-1]
+            last_line.truncate(max(width - 1, 0))
+            last_line.append("…", style="dim")
+        return Text("\n").join(visible_lines)
 
     def action_select(self) -> None:
         self.post_message(self.Selected(self.result))

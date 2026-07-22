@@ -1,6 +1,8 @@
 - type: phase
   config:
     name: inspect_endpoint
+    description: >-
+      Fetch and validate every OpenMetrics endpoint, then save metric catalogs and exposition snapshots for downstream phases.
     class: InspectEndpointPhase
     variables:
       - name: inspect_input
@@ -8,6 +10,8 @@
 - type: phase
   config:
     name: rename_metrics
+    description: >-
+      Scaffold the integration, map every discovered metric to a Datadog name, and generate the combined metric metadata.
     class: AgenticPhase
     agent: metrics_renamer
     variables:
@@ -29,6 +33,8 @@
 - type: phase
   config:
     name: build_integration
+    description: >-
+      Copy the test environment and captured fixtures, then implement the OpenMetrics check and its configuration specification.
     class: AgenticPhase
     agent: integration_coder
     variables:
@@ -50,6 +56,8 @@
 - type: phase
   config:
     name: write_tests
+    description: >-
+      Build and run the unit, integration, and end-to-end test suite for the completed integration.
     class: AgenticPhase
     agent: integration_tester
     variables:
@@ -67,6 +75,8 @@
 - type: phase
   config:
     name: write_readme
+    description: >-
+      Turn the scaffolded README into accurate customer-facing documentation for the completed integration.
     class: AgenticPhase
     agent: readme_writer
     variables:

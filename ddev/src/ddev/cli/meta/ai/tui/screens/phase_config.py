@@ -39,6 +39,9 @@ class PhaseConfigScreen(TogoScreen):
                 with Vertical(id="phase-heading"):
                     yield Static(f"Phase {phase_index:02d}", id="phase-index", classes="eyebrow")
                     yield Static(self.phase_id, id="phase-title")
+                    if phase.description:
+                        with VerticalScroll(id="phase-description"):
+                            yield Markdown(phase.description, classes="desc")
                 with Vertical(id="phase-dependencies-summary"):
                     yield Static("DEPENDENCIES", classes="eyebrow")
                     yield Static(
@@ -77,10 +80,7 @@ class PhaseConfigScreen(TogoScreen):
 
     def _compose_agent(self, agent_name: str, config: AgentConfig) -> Iterator[Widget]:
         yield Static(agent_name, id="phase-agent-name")
-        with Horizontal(id="phase-agent-meta"):
-            yield Static(f"provider · {config.provider}", id="phase-agent-provider", classes="badge")
-            if config.model:
-                yield Static(f"model · {config.model}", id="phase-agent-model", classes="badge")
+        yield Static(f"model · {config.model} ({config.provider})", id="phase-agent-model", classes="badge")
         yield Static("TOOLS", classes="eyebrow")
         if config.tools:
             yield Static(" · ".join(config.tools), id="phase-agent-tools", classes="tools-box")
