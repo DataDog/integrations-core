@@ -6,21 +6,23 @@
 from __future__ import annotations
 
 from abc import ABC, ABCMeta, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import assert_never
 
 from textual import events
 from textual.app import ComposeResult
+from textual.containers import Vertical
 from textual.content import Content
 from textual.css.query import NoMatches
 from textual.geometry import Size
 from textual.validation import Number
 from textual.widget import Widget
-from textual.widgets import Input, Switch
+from textual.widgets import Input, Static, Switch
 from textual_autocomplete import DropdownItem, PathAutoComplete, TargetState
 
-from ddev.ai.config.models import FlowInput, InputType
+from ddev.ai.config.models import FlowInput, FlowInputField, InputType
 
 
 @dataclass(frozen=True)
@@ -46,6 +48,21 @@ def spec_for_input(flow_input: FlowInput) -> EditorSpec:
         required=flow_input.required,
         default=flow_input.default,
         placeholder=flow_input.placeholder,
+    )
+
+
+def spec_for_field(flow_input: FlowInput, field: FlowInputField) -> EditorSpec:
+    """Adapt an object field to its UI editor specification."""
+    object_default = flow_input.default if isinstance(flow_input.default, Mapping) else {}
+    parent_default = object_default.get(field.name)
+    return EditorSpec(
+        widget_id=f"input-{flow_input.name}-{field.name}",
+        value_name=field.name,
+        input_type=field.input_type,
+        label=field.label,
+        required=field.required,
+        default=field.default if parent_default is None else parent_default,
+        placeholder=field.placeholder,
     )
 
 
@@ -195,7 +212,7 @@ class PathLaunchValueEditor(TextLaunchValueEditor):
         return self._get_text()
 
 
-def get_value_editor(spec: EditorSpec) -> LaunchValueEditor[str] | LaunchValueEditor[bool]:
+def get_scalar_value_editor(spec: EditorSpec) -> LaunchValueEditor[str] | LaunchValueEditor[bool]:
     """Create the scalar editor declared by an editor specification."""
     match spec.input_type:
         case InputType.STRING:
@@ -210,6 +227,50 @@ def get_value_editor(spec: EditorSpec) -> LaunchValueEditor[str] | LaunchValueEd
             assert_never(unexpected)
 
 
+class ObjectValueEditor(LaunchValueEditor[dict[str, str | bool]]):
+    """Edit the scalar fields declared by an object input."""
+
+    def __init__(self, spec: EditorSpec, field_specs: tuple[EditorSpec, ...]) -> None:
+        super().__init__(spec)
+        self.field_specs = field_specs
+        self.editors = {field.value_name: get_scalar_value_editor(field) for field in field_specs}
+
+    def compose(self) -> ComposeResult:
+        for field in self.field_specs:
+            with Vertical(classes="object-field"):
+                yield Static(f"{field.label} ({field.input_type.value})", classes="object-field-label")
+                yield self.editors[field.value_name]
+
+    def get_value(self) -> dict[str, str | bool] | None:
+        field_values = {field.value_name: self.editors[field.value_name].get_value() for field in self.field_specs}
+        if (
+            not self.spec.required
+            and self.spec.default is None
+            and all(value is None for value in field_values.values())
+        ):
+            return None
+
+        values: dict[str, str | bool] = {}
+        for field in self.field_specs:
+            value = field_values[field.value_name]
+            if value is None:
+                if field.required:
+                    raise ValueError(f"{field.label}: required field cannot be empty.")
+                continue
+            values[field.value_name] = value
+        return values
+
+
+def get_value_editor(
+    flow_input: FlowInput,
+) -> LaunchValueEditor[str] | LaunchValueEditor[bool] | LaunchValueEditor[dict[str, str | bool]]:
+    """Create the editor declared by a flow input."""
+    spec = spec_for_input(flow_input)
+    if flow_input.input_type is InputType.OBJECT:
+        return ObjectValueEditor(spec, tuple(spec_for_field(flow_input, field) for field in flow_input.fields))
+    return get_scalar_value_editor(spec)
+
+
 class LaunchFlowInput[T](Widget, ABC, metaclass=WidgetABCMeta):
     """Common framed interface for one declared launch input."""
 
@@ -219,9 +280,12 @@ class LaunchFlowInput[T](Widget, ABC, metaclass=WidgetABCMeta):
         self.border_title = f"{flow_input.label.upper()} ({flow_input.input_type.value})"
 
     @classmethod
-    def get(cls, flow_input: FlowInput) -> LaunchFlowInput[str] | LaunchFlowInput[bool]:
+    def get(
+        cls,
+        flow_input: FlowInput,
+    ) -> LaunchFlowInput[str] | LaunchFlowInput[bool] | LaunchFlowInput[dict[str, str | bool]]:
         """Create the launch widget declared by a flow input."""
-        return SingleLaunchFlowInput(flow_input, get_value_editor(spec_for_input(flow_input)))
+        return SingleLaunchFlowInput(flow_input, get_value_editor(flow_input))
 
     @abstractmethod
     def get_value(self) -> T | None:

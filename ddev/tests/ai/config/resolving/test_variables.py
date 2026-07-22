@@ -103,6 +103,33 @@ def test_required_runtime_input_satisfies_required_variable_without_static_value
     assert diagnostics.resolved.variables == {}
 
 
+def test_object_fields_do_not_satisfy_separate_variable_declarations():
+    entries = [
+        phase_entry(
+            "p",
+            variables=[VariableDeclaration(name="endpoint"), VariableDeclaration(name="url")],
+        ),
+        flow_entry(
+            "demo",
+            [FlowEntry(phase="p")],
+            inputs=[
+                FlowInput.model_validate(
+                    {
+                        "name": "endpoint",
+                        "label": "Endpoint",
+                        "type": "object",
+                        "fields": [{"name": "url", "label": "URL", "type": "string"}],
+                    }
+                )
+            ],
+        ),
+    ]
+    diagnostics = FlowResolver(ResourceRegistry(entries), StubReg()).resolve("demo")
+
+    assert diagnostics.status == ConfigStatus.BROKEN
+    assert any(error.subject == "url" and "Required variable" in error.message for error in diagnostics.errors)
+
+
 def test_built_in_prd_input_satisfies_required_variable():
     entries = [
         phase_entry("p", variables=[VariableDeclaration(name="prd")]),

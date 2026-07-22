@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.models import PhaseConfig
+from ddev.ai.config.models import PhaseConfig, RuntimeVariables
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.runtime.checkpoints import (
     CheckpointManager,
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 class FlowContext:
     """Ambient, flow-scoped execution context shared by every phase."""
 
-    runtime_variables: dict[str, str]
+    runtime_variables: RuntimeVariables
     flow_variables: dict[str, str]
     callbacks: Callbacks = field(default_factory=Callbacks)
     logger: logging.Logger = field(default_factory=lambda: logging.getLogger(__name__))

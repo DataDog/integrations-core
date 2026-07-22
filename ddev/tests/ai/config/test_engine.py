@@ -189,6 +189,32 @@ def test_unparseable_yaml_recorded_as_file_error(tmp_path):
     assert any(p.name == "bad.yaml" for p in eng.file_errors)
 
 
+def test_object_placeholder_diagnostic_explains_field_placement(tmp_path):
+    path = tmp_path / "flow.yaml"
+    write(
+        path,
+        "- type: flow\n"
+        "  config:\n"
+        "    name: demo\n"
+        "    inputs:\n"
+        "      - name: endpoint\n"
+        "        label: Endpoint\n"
+        "        type: object\n"
+        "        placeholder: Configure endpoint\n"
+        "        fields:\n"
+        "          - name: url\n"
+        "            label: URL\n"
+        "            type: string\n"
+        "    flow: []\n",
+    )
+
+    engine = ConfigurationEngine(core_dir=tmp_path, user_dirs=[], phase_registry=StubReg())
+    diagnostic = engine.flows["demo"]
+
+    assert diagnostic.status is ConfigStatus.BROKEN
+    assert any("set it on individual object fields instead" in error.message for error in diagnostic.errors)
+
+
 def test_non_utf8_file_recorded_as_file_error(tmp_path):
     path = tmp_path / "bad.yaml"
     path.write_bytes(b"\xff")

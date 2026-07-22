@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.models import ResolvedFlow
+from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.phases.base import FlowContext
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
 from ddev.ai.phases.registry import PhaseRegistry
@@ -27,7 +27,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
         resolved_flow: ResolvedFlow,
         phase_registry: PhaseRegistry,
         checkpoint_path: Path,
-        runtime_variables: dict[str, str],
+        runtime_variables: RuntimeVariables,
         provider_registry: AgentProviderRegistry,
         file_access_policy: FileAccessPolicy,
         callbacks: Callbacks | None = None,

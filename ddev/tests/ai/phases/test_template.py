@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import pytest
+
 from ddev.ai.phases.template import _SafeMapping, render_inline
 
 from .conftest import resolve_key
@@ -62,3 +64,57 @@ def test_render_inline_uses_resolver():
 def test_render_inline_escaped_dollar():
     result = render_inline("Price: $$5", {})
     assert result == "Price: $5"
+
+
+def test_render_inline_renders_objects_as_compact_json():
+    result = render_inline(
+        "Endpoint: ${endpoint}",
+        {"endpoint": {"url": "https://example.test", "enabled": "true"}},
+    )
+
+    assert result == 'Endpoint: {"url":"https://example.test","enabled":"true"}'
+
+
+def test_render_inline_preserves_unicode_and_escapes_object_json():
+    result = render_inline(
+        "Endpoint: ${endpoint}",
+        {"endpoint": {"label": 'café "primary"\nline'}},
+    )
+
+    assert result == 'Endpoint: {"label":"café \\"primary\\"\\nline"}'
+
+
+def test_render_inline_supports_one_level_braced_object_field_access():
+    result = render_inline(
+        "URL: ${endpoint.url}",
+        {"endpoint": {"url": "https://example.test"}},
+    )
+
+    assert result == "URL: https://example.test"
+
+
+@pytest.mark.parametrize(
+    ("prompt", "context", "message"),
+    [
+        ("${endpoint.url}", {}, "Object variable 'endpoint' is missing"),
+        ("${endpoint.url}", {"endpoint": "scalar"}, "Variable 'endpoint' is not an object"),
+        ("${endpoint.url}", {"endpoint": {}}, "Object field 'endpoint.url' is missing"),
+        (
+            "${endpoint.url.scheme}",
+            {"endpoint": {"url": "https://example.test"}},
+            "Invalid placeholder",
+        ),
+    ],
+)
+def test_render_inline_rejects_invalid_object_field_access(prompt, context, message):
+    with pytest.raises(ValueError, match=message):
+        render_inline(prompt, context)
+
+
+def test_render_inline_does_not_treat_unbraced_dots_as_object_access():
+    result = render_inline(
+        "$endpoint.url",
+        {"endpoint": {"url": "https://example.test"}},
+    )
+
+    assert result == '{"url":"https://example.test"}.url'

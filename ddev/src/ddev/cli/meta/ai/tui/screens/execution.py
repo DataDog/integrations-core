@@ -17,7 +17,7 @@ from textual.widgets import Static
 from textual.worker import Worker
 
 from ddev.ai.callbacks.callbacks import Callbacks
-from ddev.ai.config.models import ResolvedFlow
+from ddev.ai.config.models import ResolvedFlow, RuntimeVariables
 from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
 from ddev.cli.meta.ai.rendering import (
     render_agent_error_line,
@@ -82,7 +82,7 @@ class ExecutionScreen(TogoScreen):
     def __init__(
         self,
         flow: ResolvedFlow,
-        runtime_variables: dict[str, str] | None = None,
+        runtime_variables: RuntimeVariables | None = None,
         resume: bool = False,
         runs_dir: Path | None = None,
         orchestrator_builder: OrchestratorBuilder | None = None,

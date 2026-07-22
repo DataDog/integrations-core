@@ -285,6 +285,101 @@ def test_flow_input_rejects_placeholder_for_boolean():
         models.FlowInput(name="enabled", label="Enabled", input_type="boolean", placeholder="Enabled")
 
 
+def object_input(**overrides: object) -> models.FlowInput:
+    data = {
+        "name": "endpoint",
+        "label": "Endpoint",
+        "type": "object",
+        "fields": [
+            {"name": "url", "label": "URL", "type": "string"},
+            {"name": "retries", "label": "Retries", "type": "number", "required": False, "default": 3},
+            {"name": "enabled", "label": "Enabled", "type": "boolean"},
+        ],
+    }
+    data.update(overrides)
+    return models.FlowInput.model_validate(data)
+
+
+def test_flow_input_rejects_empty_object_fields():
+    with pytest.raises(ValidationError, match="Object inputs must declare at least one field"):
+        object_input(fields=[])
+
+
+def test_flow_input_rejects_duplicate_object_field_names():
+    with pytest.raises(ValidationError, match="Object field names must be unique"):
+        object_input(
+            fields=[
+                {"name": "url", "label": "URL", "type": "string"},
+                {"name": "url", "label": "Other URL", "type": "path"},
+            ]
+        )
+
+
+def test_flow_input_rejects_fields_on_scalar_inputs():
+    with pytest.raises(ValidationError, match="'fields' may only be used with object inputs"):
+        models.FlowInput.model_validate(
+            {
+                "name": "subject",
+                "label": "Subject",
+                "type": "string",
+                "fields": [{"name": "value", "label": "Value", "type": "string"}],
+            }
+        )
+
+
+def test_flow_input_rejects_nested_object_fields():
+    with pytest.raises(ValidationError):
+        object_input(fields=[{"name": "nested", "label": "Nested", "type": "object", "fields": []}])
+
+
+def test_flow_input_rejects_invalid_object_field_options():
+    with pytest.raises(ValidationError, match="'placeholder' may not be used with boolean inputs"):
+        object_input(fields=[{"name": "enabled", "label": "Enabled", "type": "boolean", "placeholder": "yes"}])
+
+
+def test_object_path_default_reads_launch_time_content(tmp_path):
+    source = tmp_path / "endpoint.txt"
+    source.write_text("configuration-time content", encoding="utf-8")
+    flow_input = object_input(
+        required=False,
+        default={"source": source},
+        fields=[
+            {
+                "name": "source",
+                "label": "Source",
+                "type": "path",
+                "as_content": True,
+            }
+        ],
+    )
+
+    source.write_text("launch-time content", encoding="utf-8")
+    resolved = resolved_with_inputs(flow_input)
+
+    assert resolved.convert_inputs({}) == {"endpoint": {"source": "launch-time content"}}
+
+
+@pytest.mark.parametrize(
+    ("default", "message"),
+    [
+        ("https://example.test", "Input 'endpoint' must be an object"),
+        ({"url": "https://example.test"}, "Required input 'endpoint.enabled' is missing"),
+        (
+            {"url": "https://example.test", "enabled": True, "timeout": 10},
+            "Unknown fields for input 'endpoint'",
+        ),
+        (
+            {"url": "https://example.test", "retries": "many", "enabled": True},
+            "Input 'endpoint.retries' must be a number",
+        ),
+    ],
+    ids=["not-mapping", "missing-required-field", "unknown-field", "invalid-field"],
+)
+def test_flow_input_rejects_invalid_object_default_at_configuration_load(default, message):
+    with pytest.raises(ValidationError, match=message):
+        object_input(required=False, default=default)
+
+
 def resolved_with_inputs(*inputs: models.FlowInput) -> models.ResolvedFlow:
     return models.ResolvedFlow(
         name="demo",
@@ -332,6 +427,75 @@ def test_resolved_flow_rejects_invalid_boolean():
 
     with pytest.raises(ValueError, match="Input 'enabled' must be a boolean"):
         resolved.convert_inputs({"enabled": "sometimes"})
+
+
+def test_resolved_flow_converts_object_fields_to_strings():
+    resolved = resolved_with_inputs(object_input())
+
+    assert resolved.convert_inputs({"endpoint": {"url": "https://example.test", "retries": 2.5, "enabled": False}}) == {
+        "endpoint": {
+            "url": "https://example.test",
+            "retries": "2.5",
+            "enabled": "false",
+        }
+    }
+
+
+def test_resolved_flow_uses_optional_object_field_defaults():
+    resolved = resolved_with_inputs(object_input())
+
+    assert resolved.convert_inputs({"endpoint": {"url": "https://example.test", "enabled": True}}) == {
+        "endpoint": {
+            "url": "https://example.test",
+            "retries": "3",
+            "enabled": "true",
+        }
+    }
+
+
+def test_resolved_flow_uses_canonical_optional_object_default():
+    resolved = resolved_with_inputs(
+        object_input(
+            required=False,
+            default={"url": "https://example.test", "enabled": False},
+        )
+    )
+
+    assert resolved.convert_inputs({}) == {
+        "endpoint": {
+            "url": "https://example.test",
+            "retries": "3",
+            "enabled": "false",
+        }
+    }
+
+
+def test_resolved_flow_rejects_missing_required_object_field():
+    resolved = resolved_with_inputs(object_input())
+
+    with pytest.raises(ValueError, match="Required input 'endpoint.enabled' is missing"):
+        resolved.convert_inputs({"endpoint": {"url": "https://example.test"}})
+
+
+def test_resolved_flow_rejects_unknown_object_fields():
+    resolved = resolved_with_inputs(object_input())
+
+    with pytest.raises(ValueError, match="Unknown fields for input 'endpoint': \\['timeout'\\]"):
+        resolved.convert_inputs({"endpoint": {"url": "https://example.test", "enabled": True, "timeout": "10"}})
+
+
+def test_resolved_flow_rejects_non_mapping_object_value():
+    resolved = resolved_with_inputs(object_input())
+
+    with pytest.raises(ValueError, match="Input 'endpoint' must be an object"):
+        resolved.convert_inputs({"endpoint": "https://example.test"})
+
+
+def test_resolved_flow_reports_object_child_conversion_path():
+    resolved = resolved_with_inputs(object_input())
+
+    with pytest.raises(ValueError, match="Input 'endpoint.retries' must be a number"):
+        resolved.convert_inputs({"endpoint": {"url": "https://example.test", "retries": "many", "enabled": True}})
 
 
 def test_resolved_flow_requires_required_input_even_with_default():

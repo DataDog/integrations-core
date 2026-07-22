@@ -41,58 +41,205 @@ class VariableDeclaration(BaseModel):
 
 
 class InputType(StrEnum):
-    STRING = "string"
-    NUMBER = "number"
-    BOOLEAN = "boolean"
-    PATH = "path"
+    STRING = auto()
+    NUMBER = auto()
+    BOOLEAN = auto()
+    PATH = auto()
+    OBJECT = auto()
 
 
-class FlowInput(BaseModel):
-    """Describe a typed value supplied when launching a flow."""
+type ScalarInputType = Literal[
+    InputType.STRING,
+    InputType.NUMBER,
+    InputType.BOOLEAN,
+    InputType.PATH,
+]
+type ScalarInputValue = str
+type ObjectInputValue = dict[str, str]
+type RuntimeInputValue = ScalarInputValue | ObjectInputValue
+type RuntimeVariables = dict[str, RuntimeInputValue]
+
+
+class FlowInputBase(BaseModel):
+    """Describe fields shared by flow inputs."""
 
     model_config = ConfigDict(extra="forbid", populate_by_name=True)
     name: str = Field(pattern=VARIABLE_NAME_PATTERN)
     label: str
-    input_type: InputType = Field(alias="type")
     default: Any | None = None
     placeholder: str | None = None
     required: bool = True
     as_content: bool = False
 
+
+class FlowInputField(FlowInputBase):
+    """Describe one scalar field within an object input."""
+
+    input_type: ScalarInputType = Field(alias="type")
+
     @model_validator(mode="after")
-    def validate_input_options(self) -> FlowInput:
-        if self.as_content and self.input_type is not InputType.PATH:
-            raise ValueError("'as_content' may only be used with path inputs")
-        if self.placeholder is not None and self.input_type is InputType.BOOLEAN:
-            raise ValueError("'placeholder' may not be used with boolean inputs")
-        if self.default is not None:
-            match self.input_type:
-                case InputType.STRING | InputType.PATH:
-                    pass
-                case InputType.NUMBER:
-                    _validate_number(self.name, self.default, prefix="Default for number input")
-                case InputType.BOOLEAN:
-                    _convert_boolean(self.name, self.default, prefix="Default for boolean input")
-                case unexpected:
-                    assert_never(unexpected)
+    def validate_input_options(self) -> FlowInputField:
+        _validate_scalar_options(
+            self.input_type,
+            self.name,
+            default=self.default,
+            placeholder=self.placeholder,
+            as_content=self.as_content,
+        )
         return self
 
-    def convert_runtime_value(self, value: object) -> str:
+    def convert_runtime_value(self, value: object, *, error_path: str | None = None) -> str:
         """Convert one runtime value according to this input's declared type."""
-        match self.input_type:
-            case InputType.STRING:
-                return str(value)
-            case InputType.NUMBER:
-                _validate_number(self.name, value)
-                return str(value)
-            case InputType.BOOLEAN:
-                return _convert_boolean(self.name, value)
-            case InputType.PATH:
-                if self.as_content:
-                    return _read_path_content(self.name, value)
-                return str(value)
-            case unexpected:
-                assert_never(unexpected)
+        return _convert_scalar_runtime_value(
+            self.input_type, error_path or self.name, value, as_content=self.as_content
+        )
+
+
+class FlowInput(FlowInputBase):
+    """Describe a typed value supplied when launching a flow."""
+
+    input_type: InputType = Field(alias="type")
+    fields: list[FlowInputField] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_input_options(self) -> FlowInput:
+        if self.input_type is InputType.OBJECT:
+            _validate_object_options(
+                self.name,
+                self.fields,
+                default=self.default,
+                placeholder=self.placeholder,
+                as_content=self.as_content,
+            )
+        else:
+            if self.fields:
+                raise ValueError("'fields' may only be used with object inputs")
+            _validate_scalar_options(
+                self.input_type,
+                self.name,
+                default=self.default,
+                placeholder=self.placeholder,
+                as_content=self.as_content,
+            )
+        return self
+
+    def convert_runtime_value(self, value: object) -> RuntimeInputValue:
+        """Convert one runtime value according to this input's declared type."""
+        if self.input_type is not InputType.OBJECT:
+            return _convert_scalar_runtime_value(self.input_type, self.name, value, as_content=self.as_content)
+        return {
+            child.name: child.convert_runtime_value(child_value, error_path=qualified_name)
+            for child, child_value, qualified_name in _resolve_object_field_values(self.name, self.fields, value)
+        }
+
+
+def _validate_object_options(
+    error_path: str,
+    fields: list[FlowInputField],
+    *,
+    default: object | None,
+    placeholder: str | None,
+    as_content: bool,
+) -> None:
+    if not fields:
+        raise ValueError("Object inputs must declare at least one field")
+    field_names = [field.name for field in fields]
+    if len(field_names) != len(set(field_names)):
+        raise ValueError("Object field names must be unique")
+    if as_content:
+        raise ValueError("'as_content' may only be used with path inputs")
+    if placeholder is not None:
+        raise ValueError("'placeholder' may not be set on object inputs; set it on individual object fields instead")
+    if default is not None:
+        for child, child_value, qualified_name in _resolve_object_field_values(error_path, fields, default):
+            _validate_scalar_runtime_value(child.input_type, qualified_name, child_value)
+
+
+def _resolve_object_field_values(
+    error_path: str,
+    fields: list[FlowInputField],
+    value: object,
+) -> list[tuple[FlowInputField, object, str]]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"Input {error_path!r} must be an object")
+
+    field_names = {field.name for field in fields}
+    unknown_fields = sorted(set(value) - field_names)
+    if unknown_fields:
+        raise ValueError(f"Unknown fields for input {error_path!r}: {unknown_fields}")
+
+    values: list[tuple[FlowInputField, object, str]] = []
+    for child in fields:
+        child_value = value.get(child.name)
+        qualified_name = f"{error_path}.{child.name}"
+        if child_value is None:
+            if child.required:
+                raise ValueError(f"Required input {qualified_name!r} is missing")
+            if child.default is None:
+                continue
+            child_value = child.default
+        values.append((child, child_value, qualified_name))
+    return values
+
+
+def _validate_scalar_options(
+    input_type: ScalarInputType,
+    error_path: str,
+    *,
+    default: object | None,
+    placeholder: str | None,
+    as_content: bool,
+) -> None:
+    if as_content and input_type is not InputType.PATH:
+        raise ValueError("'as_content' may only be used with path inputs")
+    if placeholder is not None and input_type is InputType.BOOLEAN:
+        raise ValueError("'placeholder' may not be used with boolean inputs")
+    if default is None:
+        return
+    match input_type:
+        case InputType.STRING | InputType.PATH:
+            pass
+        case InputType.NUMBER:
+            _validate_number(error_path, default, prefix="Default for number input")
+        case InputType.BOOLEAN:
+            _convert_boolean(error_path, default, prefix="Default for boolean input")
+        case unexpected:
+            assert_never(unexpected)
+
+
+def _convert_scalar_runtime_value(
+    input_type: ScalarInputType,
+    error_path: str,
+    value: object,
+    *,
+    as_content: bool,
+) -> str:
+    match input_type:
+        case InputType.STRING:
+            return str(value)
+        case InputType.NUMBER:
+            _validate_number(error_path, value)
+            return str(value)
+        case InputType.BOOLEAN:
+            return _convert_boolean(error_path, value)
+        case InputType.PATH:
+            if as_content:
+                return _read_path_content(error_path, value)
+            return str(value)
+        case unexpected:
+            assert_never(unexpected)
+
+
+def _validate_scalar_runtime_value(input_type: ScalarInputType, error_path: str, value: object) -> None:
+    match input_type:
+        case InputType.STRING | InputType.PATH:
+            pass
+        case InputType.NUMBER:
+            _validate_number(error_path, value)
+        case InputType.BOOLEAN:
+            _convert_boolean(error_path, value)
+        case unexpected:
+            assert_never(unexpected)
 
 
 BUILT_IN_FLOW_INPUTS = (
@@ -259,9 +406,9 @@ class ResolvedFlow:
     description: str | None = None
     inputs: list[FlowInput] = field(default_factory=list)
 
-    def convert_inputs(self, values: Mapping[str, object]) -> dict[str, str]:
-        """Convert declared launch inputs to runtime variable strings."""
-        converted: dict[str, str] = {}
+    def convert_inputs(self, values: Mapping[str, object]) -> RuntimeVariables:
+        """Convert declared launch inputs to canonical runtime values."""
+        converted: RuntimeVariables = {}
         for flow_input in self.inputs:
             value = values.get(flow_input.name)
             if value is None:
@@ -275,38 +422,38 @@ class ResolvedFlow:
         return converted
 
 
-def _convert_boolean(name: str, value: object, *, prefix: str = "Input") -> str:
+def _convert_boolean(error_path: str, value: object, *, prefix: str = "Input") -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
     if isinstance(value, str) and (lower := value.lower()) in {"true", "false"}:
         return lower
-    raise ValueError(f"{prefix} {name!r} must be a boolean")
+    raise ValueError(f"{prefix} {error_path!r} must be a boolean")
 
 
-def _validate_number(name: str, value: object, *, prefix: str = "Input") -> None:
+def _validate_number(error_path: str, value: object, *, prefix: str = "Input") -> None:
     if isinstance(value, bool):
-        raise ValueError(f"{prefix} {name!r} must be a number")
+        raise ValueError(f"{prefix} {error_path!r} must be a number")
     try:
         number = Decimal(str(value))
     except (InvalidOperation, ValueError):
-        raise ValueError(f"{prefix} {name!r} must be a number") from None
+        raise ValueError(f"{prefix} {error_path!r} must be a number") from None
     if not number.is_finite():
-        raise ValueError(f"{prefix} {name!r} must be a number")
+        raise ValueError(f"{prefix} {error_path!r} must be a number")
 
 
-def _read_path_content(name: str, value: object) -> str:
+def _read_path_content(error_path: str, value: object) -> str:
     """Read an existing regular UTF-8 file supplied as a path input."""
     if not isinstance(value, (str, PathLike)) or not str(value):
-        raise ValueError(f"Input {name!r} must be a valid path")
+        raise ValueError(f"Input {error_path!r} must be a valid path")
     path = Path(value)
     if not path.exists():
-        raise ValueError(f"Input {name!r} path does not exist: {path}")
+        raise ValueError(f"Input {error_path!r} path does not exist: {path}")
     if not path.is_file():
-        raise ValueError(f"Input {name!r} path is not a file: {path}")
+        raise ValueError(f"Input {error_path!r} path is not a file: {path}")
     try:
         return path.read_text(encoding="utf-8")
     except OSError as error:
-        raise ValueError(f"Input {name!r} path could not be read: {path}: {error}") from error
+        raise ValueError(f"Input {error_path!r} path could not be read: {path}: {error}") from error
 
 
 class ConfigStatus(StrEnum):
