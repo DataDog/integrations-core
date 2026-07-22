@@ -243,20 +243,21 @@ class MessageDeserializer:
     ) -> tuple[str | None, int | None]:
         """Deserialize message, handling Schema Registry format if present."""
         if uses_schema_registry:
-            if len(message) < 5 or message[0] != SCHEMA_REGISTRY_MAGIC_BYTE:
-                msg_hex = message[:5].hex() if len(message) >= 5 else message.hex()
-                raise ValueError(
-                    f"Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
-                    f"but message is too short or has wrong magic byte: {msg_hex}"
+            if len(message) >= 5 and message[0] == SCHEMA_REGISTRY_MAGIC_BYTE:
+                schema_id = int.from_bytes(message[1:5], 'big')
+                message = message[5:]  # Skip the magic byte and schema ID bytes
+
+                actual_format = message_format
+                if self.schema_registry is not None:
+                    schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
+
+                return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
+            else:
+                self.log.debug(
+                    "Expected schema registry format (magic byte 0x00 + 4-byte schema ID), "
+                    "but message is too short or has wrong magic byte, falling back to string",
                 )
-            schema_id = int.from_bytes(message[1:5], 'big')
-            message = message[5:]  # Skip the magic byte and schema ID bytes
-
-            actual_format = message_format
-            if self.schema_registry is not None:
-                schema, actual_format = self._fetch_and_build_schema(schema_id, message_format)
-
-            return self._deserialize_bytes(message, actual_format, schema, uses_schema_registry=True), schema_id
+                return self._deserialize_bytes(message, 'string', None, uses_schema_registry=False), None
         else:
             # Fallback behavior: try without schema registry format first, then with it
             try:

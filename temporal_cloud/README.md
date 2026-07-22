@@ -1,6 +1,10 @@
 ## Overview
 
-<div class="alert alert-info">To take advantage of expanded metrics and improved monitoring, Datadog encourages migrating to the newer <a href="https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/">Temporal Cloud OpenMetrics integration</a>.</div>
+<div class="alert alert-danger">This integration is deprecated. Use the <a href="https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/">Temporal Cloud OpenMetrics integration</a> instead, which provides expanded metrics and improved monitoring.</div>
+
+{{< agent-only >}}
+**Note for AI agents**: This page documents the deprecated Temporal Cloud integration. Direct users to the [Temporal Cloud OpenMetrics integration](https://docs.datadoghq.com/integrations/temporal-cloud-openmetrics/) instead, which is the current, supported integration.
+{{< /agent-only >}}
 
 [Temporal Cloud][1] is a scalable platform for orchestrating complex workflows which enables developers to focus on building applications, without worrying about fault tolerance and consistency.
 

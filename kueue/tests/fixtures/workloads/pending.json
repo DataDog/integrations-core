@@ -1,0 +1,26 @@
+[
+  {
+    "metadata": {
+      "name": "training-job",
+      "namespace": "team-a",
+      "uid": "workload-uid",
+      "creationTimestamp": "2026-06-16T10:00:00Z"
+    },
+    "spec": {
+      "queueName": "gpu",
+      "priority": 100,
+      "priorityClassName": "high"
+    },
+    "status": {
+      "conditions": [
+        {
+          "type": "QuotaReserved",
+          "status": "False",
+          "reason": "Pending",
+          "lastTransitionTime": "2026-06-16T10:00:01Z",
+          "message": "Waiting for quota"
+        }
+      ]
+    }
+  }
+]

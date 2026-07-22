@@ -2,6 +2,13 @@ name: CockroachDB
 fleet_configurable: true
 files:
 - name: cockroachdb.yaml
+  discovery:
+    strategies:
+      - strategy: from_ports
+        port_hints:
+          - 8080
+        candidates:
+          - openmetrics_endpoint: "http://{service.host}:{port.number}/_status/vars"
   options:
   - template: init_config
     options:
@@ -31,3 +38,11 @@ files:
       - type: multi_line
         name: new_log_start_with_status_and_date
         pattern: \[A-Z]\d{6}\s\d+\:\d+\:\d+\.\d+
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - cockroach
+  - template: auto_conf/discovery

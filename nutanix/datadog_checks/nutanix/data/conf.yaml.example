@@ -136,6 +136,15 @@ instances:
     #
     # prefix_category_tags: false
 
+    ## @param collect_resource_ids_as_tags - boolean - optional - default: false
+    ## Whether to collect Nutanix resource extId values as tags on infrastructure metrics.
+    ## When true, cluster metrics get 'ntnx_cluster_id', host metrics get 'ntnx_host_id',
+    ## and VM metrics get 'ntnx_vm_id', 'ntnx_host_id', and 'ntnx_cluster_id'.
+    ## These tags are high cardinality (one unique value per resource).
+    ## Default is false.
+    #
+    # collect_resource_ids_as_tags: false
+
     ## @param collect_events - boolean - optional - default: true
     ## Whether to collect events from Prism Central.
     ## Default is true.
@@ -185,6 +194,15 @@ instances:
     ## Default is true.
     #
     # batch_vm_collection: true
+
+    ## @param hostname_transform - string - optional
+    ## Should be either 'upper' or 'lower' or 'default'.
+    ## If 'upper', the check will convert the Nutanix hostname to uppercase.
+    ## If 'lower', the check will convert the Nutanix hostname to lowercase.
+    ## If 'default', the check will not transform the Nutanix hostname (the default option).
+    ## Use this if you install the agent in VMs so that the hosts are not duplicated in the web application UI.
+    #
+    # hostname_transform: <HOSTNAME_TRANSFORM>
 
     ## @param proxy - mapping - optional
     ## This overrides the `proxy` setting in `init_config`.

@@ -306,6 +306,13 @@ def mock_get_coord_nodes_benchmark(num_nodes):
     return nodes
 
 
+def mock_get_health_check_with_warning(_):
+    checks = mock_get_health_check(_)
+    checks[0]["Status"] = "warning"
+    checks[0]["Output"] = "disk usage high"
+    return checks
+
+
 def mock_get_health_check(_):
     return [
         {

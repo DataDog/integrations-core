@@ -37,6 +37,7 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    client_name: Optional[str] = None
     collect_client_metrics: Optional[bool] = None
     command_stats: Optional[bool] = None
     db: Optional[int] = None

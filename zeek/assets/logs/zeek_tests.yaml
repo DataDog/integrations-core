@@ -18,7 +18,7 @@ tests:
     message: "<134>Dec 26 01:35:11 machine-name {\"_path\":\"capture_loss\",\"_write_ts\":\"2023-12-12T05:52:50.756358Z\",\"ts\":\"2023-12-12T05:52:32.763303Z\",\"ts_delta\":15.235642194747925,\"peer\":\"zeek\",\"gaps\":3,\"acks\":316,\"percent_lost\":0.9493670886075949}"
     service: "capture_loss"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1702360352763
  -
   sample: |-
@@ -52,8 +52,15 @@ tests:
       _write_ts: "2023-12-12T05:52:50.756358Z"
       conn_state: "OTH"
       connection_state: "No SYN seen - just midstream traffic"
+      duration: 3.0111899375915527
+      id:
+        orig_h: 185.64.148.0
+        orig_p: 3
+        resp_h: 185.64.148.0
+        resp_p: 10
       local_orig: true
       local_resp: true
+      missed_bytes: 0
       network:
         bytes_read: 234
         bytes_written: 0
@@ -63,8 +70,52 @@ tests:
         destination:
           ip: "185.64.148.0"
           port: 10
+      ocsf:
+        activity_id: 6
+        activity_name: Traffic
+        category_name: Network Activity
+        category_uid: 4
+        class_name: Network Activity
+        class_uid: 4001
+        connection_info:
+          boundary: Localhost
+          boundary_id: 1
+          direction: Lateral
+          direction_id: 3
+          protocol_name: icmp
+          uid: CcdWSj20NUmxZowq93
+        dst_endpoint:
+          ip: 185.64.148.0
+          port: 10
+        duration: 3011
+        metadata:
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CcdWSj20NUmxZowq93
+          version: 1.5.0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 185.64.148.0
+          port: 3
+        status: Success
+        status_detail: OTH
+        status_id: 1
+        time: 1702360352763
+        traffic:
+          bytes: 234
+          bytes_in: 0
+          bytes_missed: 0
+          bytes_out: 234
+          packets: 3
+          packets_in: 0
+          packets_out: 3
+      orig_bytes: 234
       orig_ip_bytes: 318
       orig_pkts: 3
+      proto: icmp
+      resp_bytes: 0
       resp_ip_bytes: 0
       resp_pkts: 0
       ts: "2023-12-12T05:52:32.763303Z"
@@ -100,7 +151,7 @@ tests:
       }
     service: "conn"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1702360352763
  -
   sample: |-
@@ -134,6 +185,7 @@ tests:
     custom:
       _path: "http"
       _write_ts: "2023-12-12T05:52:50.756358Z"
+      host: host.com
       http:
         method: "POST"
         status_code: 200
@@ -143,6 +195,12 @@ tests:
         useragent: "LIBCURL"
         version: "1.1"
       http_url: "http://host.com/rootr3"
+      id:
+        orig_h: 185.64.148.0
+        orig_p: 47210
+        resp_h: 185.64.148.0
+        resp_p: 80
+      method: POST
       network:
         bytes_read: 83
         bytes_written: 1434
@@ -152,18 +210,68 @@ tests:
         destination:
           ip: "185.64.148.0"
           port: 80
+      ocsf:
+        activity_id: 6
+        activity_name: Post
+        category_name: Network Activity
+        category_uid: 4
+        class_name: HTTP Activity
+        class_uid: 4002
+        connection_info:
+          direction: Unknown
+          direction_id: 0
+          uid: CBQBvs1hob384mp2lb
+        dst_endpoint:
+          ip: 185.64.148.0
+          port: 80
+        http_request:
+          body_length: 83
+          http_method: POST
+          uid: CBQBvs1hob384mp2lb
+          url:
+            hostname: host.com
+            path: /rootr3
+            port: 80
+            url_string: http://host.com/rootr3
+          user_agent: LIBCURL
+          version: '1.1'
+        http_response:
+          body_length: 1434
+          code: 200
+          message: OK
+        metadata:
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CBQBvs1hob384mp2lb
+          version: 1.5.0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 185.64.148.0
+          port: 47210
+        status: Success
+        status_detail: OK
+        status_id: 1
+        time: 1702360352763
       orig_fuids:
-       - "FKhxp22QnZua8NWY2"
+        - "FKhxp22QnZua8NWY2"
       orig_mime_types:
-       - "application/ocsp-request"
+        - "application/ocsp-request"
+      request_body_len: 83
       resp_fuids:
-       - "F9Zqr71YzMZPVZ4dbe"
+        - "F9Zqr71YzMZPVZ4dbe"
       resp_mime_types:
-       - "application/ocsp-response"
+        - "application/ocsp-response"
+      response_body_len: 1434
+      status_code: 200
       status_msg: "OK"
       trans_depth: 1
       ts: "2023-12-12T05:52:32.763303Z"
       uid: "CBQBvs1hob384mp2lb"
+      uri: /rootr3
+      user_agent: LIBCURL
+      version: '1.1'
     message: |-
       {
         "status_code" : 200,
@@ -193,7 +301,7 @@ tests:
       }
     service: "http"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1702360352763
  -
   sample: |-
@@ -203,7 +311,7 @@ tests:
       "rejected" : false,
       "query" : "win2k16-1-159",
       "_write_ts" : "2023-12-12T05:52:50.756358Z",
-      "answers" : [ "185.64.148.0" ],
+      "answers" : [ "185.64.148.0", "8.8.8.8" ],
       "trans_id" : 38706,
       "rcode" : 0,
       "_path" : "dns",
@@ -229,19 +337,28 @@ tests:
       RD: false
       TC: false
       TTLs:
-       - 30.0
+        - 30
       Z: 0
       _path: "dns"
       _write_ts: "2023-12-12T05:52:50.756358Z"
+      answers:
+        - 185.64.148.0
+        - 8.8.8.8
       dns:
         answer:
           name:
-           - "185.64.148.0"
+            - 185.64.148.0
+            - 8.8.8.8
         flags:
           rcode: "NOERROR"
         id: 38706
         question:
           name: "win2k16-1-159"
+      id:
+        orig_h: 185.64.148.0
+        orig_p: 58013
+        resp_h: 185.64.148.0
+        resp_p: 5355
       network:
         client:
           geoip:
@@ -266,8 +383,49 @@ tests:
         destination:
           ip: "185.64.148.0"
           port: 5355
+      ocsf:
+        activity_id: 2
+        activity_name: Response
+        answers:
+          - rdata: 185.64.148.0
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Unknown
+          direction_id: 0
+          protocol_name: udp
+          uid: CsOSdHqRMu62rNs31
+        dst_endpoint:
+          ip: 185.64.148.0
+          port: 5355
+        message: win2k16-1-159
+        metadata:
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CsOSdHqRMu62rNs31
+          version: 1.5.0
+        query:
+          hostname: win2k16-1-159
+        rcode: NoError
+        rcode_id: 0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 185.64.148.0
+          port: 58013
+        status: Success
+        status_detail: NOERROR
+        status_id: 1
+        time: 1702360352763
+      proto: udp
+      query: win2k16-1-159
       rcode: 0
+      rcode_name: NOERROR
       rejected: false
+      trans_id: 38706
       ts: "2023-12-12T05:52:32.763303Z"
       uid: "CsOSdHqRMu62rNs31"
       zeek:
@@ -279,7 +437,7 @@ tests:
         "rejected" : false,
         "query" : "win2k16-1-159",
         "_write_ts" : "2023-12-12T05:52:50.756358Z",
-        "answers" : [ "185.64.148.0" ],
+        "answers" : [ "185.64.148.0", "8.8.8.8" ],
         "trans_id" : 38706,
         "rcode" : 0,
         "_path" : "dns",
@@ -300,7 +458,7 @@ tests:
       }
     service: "dns"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1702360352763
  -
   sample: |-
@@ -324,7 +482,7 @@ tests:
     service: "reporter"
     status: "info"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1702360352763
  -
   sample: "<134>Jan 12 18:13:46 machine-name {\"_path\":\"datared\",\"_write_ts\":\"2024-01-13T00:13:42.817478Z\",\"ts\":\"2024-01-13T00:13:42.817478Z\",\"conn_red\":1310,\"conn_total\":18460,\"dns_red\":1141,\"dns_total\":1604,\"files_red\":313,\"files_total\":796,\"http_red\":140,\"http_total\":140,\"ssl_red\":215,\"ssl_total\":227,\"weird_red\":20,\"weird_total\":20}"
@@ -350,52 +508,8 @@ tests:
     message: "<134>Jan 12 18:13:46 machine-name {\"_path\":\"datared\",\"_write_ts\":\"2024-01-13T00:13:42.817478Z\",\"ts\":\"2024-01-13T00:13:42.817478Z\",\"conn_red\":1310,\"conn_total\":18460,\"dns_red\":1141,\"dns_total\":1604,\"files_red\":313,\"files_total\":796,\"http_red\":140,\"http_total\":140,\"ssl_red\":215,\"ssl_total\":227,\"weird_red\":20,\"weird_total\":20}"
     service: "datared"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1705104822817
- -
-  sample: "<134>Mar  6 20:22:19 machine-name {\"_path\":\"files_red\",\"_write_ts\":\"2024-03-07T02:22:18.145479Z\",\"ts\":[\"2024-03-07T02:12:12.099810Z\"],\"fuid\":\"FJcjJV2mrRbxT0TWi\",\"tx_hosts\":[\"10.10.10.10\"],\"rx_hosts\":[\"20.20.20.20\"],\"conn_uids\":[\"CALvyD1AyopngTm5Xh\"],\"source\":\"HTTP\",\"depth\":0,\"analyzers\":[\"SHA1\",\"MD5\",\"DATA_EVENT\",\"SHA256\"],\"local_orig\":true,\"is_orig\":false,\"seen_bytes\":163,\"total_bytes\":163,\"missing_bytes\":0,\"overflow_bytes\":0,\"timedout\":false,\"extracted\":[],\"md5\":\"e335c05220a3858e858d2026071e3se2\",\"sha1\":\"8514de756fa993adb449c282affe84c752bab495\",\"sha256\":\"2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456\",\"num\":1}"
-  service: "corelight"
-  result:
-    custom:
-      _path: "files_red"
-      _write_ts: "2024-03-07T02:22:18.145479Z"
-      analyzers:
-       - "SHA1"
-       - "MD5"
-       - "DATA_EVENT"
-       - "SHA256"
-      conn_uids:
-       - "CALvyD1AyopngTm5Xh"
-      depth: 0
-      dest_host:
-       - "10.10.10.10"
-      fuid: "FJcjJV2mrRbxT0TWi"
-      is_orig: false
-      local_orig: true
-      md5: "e335c05220a3858e858d2026071e3se2"
-      num: 1
-      orig_host:
-       - "20.20.20.20"
-      rx_hosts:
-       - "20.20.20.20"
-      sha1: "8514de756fa993adb449c282affe84c752bab495"
-      sha256: "2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456"
-      source: "HTTP"
-      timedout: false
-      ts:
-       - "2024-03-07T02:12:12.099810Z"
-      tx_hosts:
-       - "10.10.10.10"
-      zeek:
-        missing_bytes: 0
-        overflow_bytes: 0
-        seen_bytes: 163
-        total_bytes: 163
-    message: "<134>Mar  6 20:22:19 machine-name {\"_path\":\"files_red\",\"_write_ts\":\"2024-03-07T02:22:18.145479Z\",\"ts\":[\"2024-03-07T02:12:12.099810Z\"],\"fuid\":\"FJcjJV2mrRbxT0TWi\",\"tx_hosts\":[\"10.10.10.10\"],\"rx_hosts\":[\"20.20.20.20\"],\"conn_uids\":[\"CALvyD1AyopngTm5Xh\"],\"source\":\"HTTP\",\"depth\":0,\"analyzers\":[\"SHA1\",\"MD5\",\"DATA_EVENT\",\"SHA256\"],\"local_orig\":true,\"is_orig\":false,\"seen_bytes\":163,\"total_bytes\":163,\"missing_bytes\":0,\"overflow_bytes\":0,\"timedout\":false,\"extracted\":[],\"md5\":\"e335c05220a3858e858d2026071e3se2\",\"sha1\":\"8514de756fa993adb449c282affe84c752bab495\",\"sha256\":\"2733c2e83762f8a9542ebacf40642505fee0247295161ced264b44d2ad6f9456\",\"num\":1}"
-    service: "files_red"
-    tags:
-     - "source:LOGS_SOURCE"
-    timestamp: 1709778138145
  -
   sample: "<134>Mar  6 22:39:30 machine-name {\"_path\":\"dns_red\",\"_write_ts\":\"2024-03-07T04:39:28.580374Z\",\"ts\":\"2024-03-07T04:38:40.085451Z\",\"uid\":\"CyArTY2KEgcygwMLi1\",\"id.orig_h\":\"10.10.10.10\",\"id.orig_p\":123,\"id.resp_h\":\"20.20.20.20\",\"id.resp_p\":321,\"query\":\"time.missouri.edu\",\"qtype_name\":\"A\",\"num\":4}"
   service: "corelight"
@@ -407,6 +521,11 @@ tests:
         question:
           name: "time.missouri.edu"
           type: "A"
+      id:
+        orig_h: 10.10.10.10
+        orig_p: 123
+        resp_h: 20.20.20.20
+        resp_p: 321
       network:
         client:
           geoip: {}
@@ -416,12 +535,46 @@ tests:
           ip: "20.20.20.20"
           port: 321
       num: 4
+      ocsf:
+        activity_id: 1
+        activity_name: Query
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Unknown
+          direction_id: 0
+          uid: CyArTY2KEgcygwMLi1
+        dst_endpoint:
+          ip: 20.20.20.20
+          port: 321
+        message: time.missouri.edu
+        metadata:
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CyArTY2KEgcygwMLi1
+          version: 1.5.0
+        query:
+          hostname: time.missouri.edu
+          type: A
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 10.10.10.10
+          port: 123
+        status: Unknown
+        status_id: 0
+        time: 1709786320085
+      qtype_name: A
+      query: time.missouri.edu
       ts: "2024-03-07T04:38:40.085451Z"
       uid: "CyArTY2KEgcygwMLi1"
     message: "<134>Mar  6 22:39:30 machine-name {\"_path\":\"dns_red\",\"_write_ts\":\"2024-03-07T04:39:28.580374Z\",\"ts\":\"2024-03-07T04:38:40.085451Z\",\"uid\":\"CyArTY2KEgcygwMLi1\",\"id.orig_h\":\"10.10.10.10\",\"id.orig_p\":123,\"id.resp_h\":\"20.20.20.20\",\"id.resp_p\":321,\"query\":\"time.missouri.edu\",\"qtype_name\":\"A\",\"num\":4}"
     service: "dns_red"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1709786320085
  -
   sample: "<134>Nov 19 22:36:37 machine-name {\"_path\":\"etc_viz\",\"_system_name\":\"machine-name\",\"_write_ts\":\"2024-03-28T00:01:04.742415Z\",\"c2s_viz.clr_frac\":0.0,\"c2s_viz.enc_dev\":0.30151134457776363,\"c2s_viz.enc_frac\":1.0,\"c2s_viz.pdu1_enc\":true,\"c2s_viz.size\":198,\"err\":null,\"s2c_viz.clr_frac\":0.0,\"s2c_viz.enc_dev\":0.6957566520492713,\"s2c_viz.enc_frac\":1.0,\"s2c_viz.pdu1_enc\":true,\"s2c_viz.size\":818,\"server_a\":\"10.10.10.10\",\"server_p\":443,\"service\":[],\"ts\":\"2024-03-28T00:00:52.656388Z\",\"uid\":\"CV79JD7onkfdf7WDa\",\"viz_stat\":\"Ee!!\"}"
@@ -432,9 +585,9 @@ tests:
       _system_name: "machine-name"
       _write_ts: "2024-03-28T00:01:04.742415Z"
       c2s_viz:
-        clr_frac: 0.0
+        clr_frac: 0
         enc_dev: 0.30151134457776363
-        enc_frac: 1.0
+        enc_frac: 1
         pdu1_enc: true
         size: 198
       network:
@@ -442,16 +595,1008 @@ tests:
           ip: "10.10.10.10"
           port: 443
       s2c_viz:
-        clr_frac: 0.0
+        clr_frac: 0
         enc_dev: 0.6957566520492713
-        enc_frac: 1.0
+        enc_frac: 1
         pdu1_enc: true
         size: 818
+      server_p: 443
       ts: "2024-03-28T00:00:52.656388Z"
       uid: "CV79JD7onkfdf7WDa"
       viz_stat: "Ee!!"
     message: "<134>Nov 19 22:36:37 machine-name {\"_path\":\"etc_viz\",\"_system_name\":\"machine-name\",\"_write_ts\":\"2024-03-28T00:01:04.742415Z\",\"c2s_viz.clr_frac\":0.0,\"c2s_viz.enc_dev\":0.30151134457776363,\"c2s_viz.enc_frac\":1.0,\"c2s_viz.pdu1_enc\":true,\"c2s_viz.size\":198,\"err\":null,\"s2c_viz.clr_frac\":0.0,\"s2c_viz.enc_dev\":0.6957566520492713,\"s2c_viz.enc_frac\":1.0,\"s2c_viz.pdu1_enc\":true,\"s2c_viz.size\":818,\"server_a\":\"10.10.10.10\",\"server_p\":443,\"service\":[],\"ts\":\"2024-03-28T00:00:52.656388Z\",\"uid\":\"CV79JD7onkfdf7WDa\",\"viz_stat\":\"Ee!!\"}"
     service: "etc_viz"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1711584052656
+ -
+  sample: "<134>May 11 18:47:07 test-system {\"_path\":\"conn\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T18:47:07.850764Z\",\"ts\":\"2026-05-11T18:47:02.848960Z\",\"uid\":\"12345678901234567890\",\"id.orig_h\":\"10.10.50.1\",\"id.orig_p\":60704,\"id.resp_h\":\"10.10.60.6\",\"id.resp_p\":88,\"proto\":\"tcp\",\"service\":\"krb_tcp\",\"orig_bytes\":227,\"resp_bytes\":195,\"conn_state\":\"RSTR\",\"local_orig\":true,\"local_resp\":true,\"missed_bytes\":0,\"history\":\"ShADTdFar\",\"orig_pkts\":5,\"resp_pkts\":7,\"orig_ip_bytes\":666,\"resp_ip_bytes\":499,\"community_id\":\"1:abc123\",\"tunnel_parents\":[\"test\",\"test2\"],\"orig_l2_addr\":\"00:50:56:a1:b2:c3\",\"resp_l2_addr\":\"00:50:56:d4:e5:f6\"}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "conn"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T18:47:07.850764Z"
+      community_id: "1:abc123"
+      conn_state: "RSTR"
+      connection_state: "Responder sent a RST"
+      history: "ShADTdFar"
+      id:
+        orig_h: "10.10.50.1"
+        orig_p: 60704
+        resp_h: "10.10.60.6"
+        resp_p: 88
+      local_orig: true
+      local_resp: true
+      missed_bytes: 0
+      network:
+        bytes_read: 227
+        bytes_written: 195
+        client:
+          ip: "10.10.50.1"
+          port: 60704
+        destination:
+          ip: "10.10.60.6"
+          port: 88
+      ocsf:
+        activity_id: 2
+        activity_name: "Close"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          boundary: "Localhost"
+          boundary_id: 1
+          community_uid: "1:abc123"
+          direction: "Lateral"
+          direction_id: 3
+          flag_history: "ShADTdFar"
+          protocol_name: "tcp"
+          uid: "12345678901234567890"
+        dst_endpoint:
+          ip: "10.10.60.6"
+          mac: "00:50:56:d4:e5:f6"
+          port: 88
+        metadata:
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "12345678901234567890"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.50.1"
+          mac: "00:50:56:a1:b2:c3"
+          port: 60704
+        status: "Failure"
+        status_detail: "RSTR"
+        status_id: 2
+        time: 1778525222848
+        traffic:
+          bytes: 422
+          bytes_in: 195
+          bytes_missed: 0
+          bytes_out: 227
+          packets: 12
+          packets_in: 7
+          packets_out: 5
+      orig_bytes: 227
+      orig_ip_bytes: 666
+      orig_l2_addr: "00:50:56:a1:b2:c3"
+      orig_pkts: 5
+      proto: "tcp"
+      resp_bytes: 195
+      resp_ip_bytes: 499
+      resp_l2_addr: "00:50:56:d4:e5:f6"
+      resp_pkts: 7
+      service: "krb_tcp"
+      ts: "2026-05-11T18:47:02.848960Z"
+      tunnel_parents:
+       - "test"
+       - "test2"
+      uid: "12345678901234567890"
+      zeek:
+        missed_bytes: 0
+        proto: "tcp"
+    message: '<134>May 11 18:47:07 test-system {"_path":"conn","_system_name":"test-system","_write_ts":"2026-05-11T18:47:07.850764Z","ts":"2026-05-11T18:47:02.848960Z","uid":"12345678901234567890","id.orig_h":"10.10.50.1","id.orig_p":60704,"id.resp_h":"10.10.60.6","id.resp_p":88,"proto":"tcp","service":"krb_tcp","orig_bytes":227,"resp_bytes":195,"conn_state":"RSTR","local_orig":true,"local_resp":true,"missed_bytes":0,"history":"ShADTdFar","orig_pkts":5,"resp_pkts":7,"orig_ip_bytes":666,"resp_ip_bytes":499,"community_id":"1:abc123","tunnel_parents":["test","test2"],"orig_l2_addr":"00:50:56:a1:b2:c3","resp_l2_addr":"00:50:56:d4:e5:f6"}'
+    service: "conn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1778525222848
+ -
+  sample: "<134>May 11 18:47:07 test-system {\"_path\":\"conn\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T18:47:07.850764Z\",\"ts\":\"2026-05-11T18:47:02.848960Z\",\"uid\":\"C1234567890abcdef1\",\"id.orig_h\":\"10.250.7.2\",\"id.orig_h_name\":{\"src\":\"DNS_PTR\",\"vals\":[\"workstation-1.corp.example.com\"]},\"id.orig_p\":60099,\"id.resp_h\":\"10.252.75.69\",\"id.resp_h_name\":{\"src\":\"DNS_PTR\",\"vals\":[\"server-1.corp.example.com\"]},\"id.resp_p\":8651,\"id.vlan\":1039,\"proto\":\"tcp\",\"service\":\"http\",\"orig_bytes\":1024,\"resp_bytes\":4096,\"conn_state\":\"SF\",\"local_orig\":true,\"local_resp\":true,\"missed_bytes\":0,\"history\":\"ShADadtT\",\"orig_pkts\":8,\"resp_pkts\":12,\"orig_ip_bytes\":1320,\"resp_ip_bytes\":4488,\"community_id\":\"1:xyz789\",\"orig_l2_addr\":\"aa:bb:cc:11:22:33\",\"resp_l2_addr\":\"aa:bb:cc:44:55:66\"}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "conn"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T18:47:07.850764Z"
+      community_id: "1:xyz789"
+      conn_state: "SF"
+      connection_state: "Normal establishment and termination"
+      history: "ShADadtT"
+      id:
+        orig_h: "10.250.7.2"
+        orig_h_name:
+          src: "DNS_PTR"
+          vals:
+           - "workstation-1.corp.example.com"
+        orig_p: 60099
+        resp_h: "10.252.75.69"
+        resp_h_name:
+          src: "DNS_PTR"
+          vals:
+           - "server-1.corp.example.com"
+        resp_p: 8651
+        vlan: 1039
+      local_orig: true
+      local_resp: true
+      missed_bytes: 0
+      network:
+        bytes_read: 1024
+        bytes_written: 4096
+        client:
+          ip: "10.250.7.2"
+          port: 60099
+        destination:
+          ip: "10.252.75.69"
+          port: 8651
+      ocsf:
+        activity_id: 2
+        activity_name: "Close"
+        category_name: "Network Activity"
+        category_uid: 4
+        class_name: "Network Activity"
+        class_uid: 4001
+        connection_info:
+          boundary: "Localhost"
+          boundary_id: 1
+          community_uid: "1:xyz789"
+          direction: "Lateral"
+          direction_id: 3
+          flag_history: "ShADadtT"
+          protocol_name: "tcp"
+          uid: "C1234567890abcdef1"
+        dst_endpoint:
+          hostname: "server-1.corp.example.com"
+          ip: "10.252.75.69"
+          mac: "aa:bb:cc:44:55:66"
+          port: 8651
+        metadata:
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "C1234567890abcdef1"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          hostname: "workstation-1.corp.example.com"
+          ip: "10.250.7.2"
+          mac: "aa:bb:cc:11:22:33"
+          port: 60099
+        status: "Success"
+        status_detail: "SF"
+        status_id: 1
+        time: 1778525222848
+        traffic:
+          bytes: 5120
+          bytes_in: 4096
+          bytes_missed: 0
+          bytes_out: 1024
+          packets: 20
+          packets_in: 12
+          packets_out: 8
+      orig_bytes: 1024
+      orig_ip_bytes: 1320
+      orig_l2_addr: "aa:bb:cc:11:22:33"
+      orig_pkts: 8
+      proto: "tcp"
+      resp_bytes: 4096
+      resp_ip_bytes: 4488
+      resp_l2_addr: "aa:bb:cc:44:55:66"
+      resp_pkts: 12
+      service: "http"
+      ts: "2026-05-11T18:47:02.848960Z"
+      uid: "C1234567890abcdef1"
+      zeek:
+        missed_bytes: 0
+        proto: "tcp"
+    message: '<134>May 11 18:47:07 test-system {"_path":"conn","_system_name":"test-system","_write_ts":"2026-05-11T18:47:07.850764Z","ts":"2026-05-11T18:47:02.848960Z","uid":"C1234567890abcdef1","id.orig_h":"10.250.7.2","id.orig_h_name":{"src":"DNS_PTR","vals":["workstation-1.corp.example.com"]},"id.orig_p":60099,"id.resp_h":"10.252.75.69","id.resp_h_name":{"src":"DNS_PTR","vals":["server-1.corp.example.com"]},"id.resp_p":8651,"id.vlan":1039,"proto":"tcp","service":"http","orig_bytes":1024,"resp_bytes":4096,"conn_state":"SF","local_orig":true,"local_resp":true,"missed_bytes":0,"history":"ShADadtT","orig_pkts":8,"resp_pkts":12,"orig_ip_bytes":1320,"resp_ip_bytes":4488,"community_id":"1:xyz789","orig_l2_addr":"aa:bb:cc:11:22:33","resp_l2_addr":"aa:bb:cc:44:55:66"}'
+    service: "conn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1778525222848
+ -
+  sample: "<134>May 11 18:46:03 ndr-pvg3-1 {\"_path\":\"conn_long\",\"_system_name\":\"ndr-pvg3-1\",\"_write_ts\":\"2026-05-11T18:46:03.887017Z\",\"ts\":\"2026-05-11T18:36:03.886935Z\",\"uid\":\"12345678901234568\",\"id.orig_h\":\"10.250.5.75\",\"id.orig_p\":63231,\"id.resp_h\":\"172.64.5.1\",\"id.resp_p\":443,\"id.vlan\":1000,\"proto\":\"tcp\",\"service\":\"ssl\",\"duration\":600.0000820159912,\"orig_bytes\":7071,\"resp_bytes\":18980,\"conn_state\":\"S1\",\"local_orig\":true,\"local_resp\":false,\"missed_bytes\":0,\"history\":\"ShADadtT\",\"orig_pkts\":32,\"resp_pkts\":37,\"orig_ip_bytes\":8380,\"resp_ip_bytes\":20532,\"community_id\":\"1:def456\",\"corelight_shunted\":false}"
+  service: "corelight"
+  result:
+    custom:
+      _path: conn_long
+      _system_name: ndr-pvg3-1
+      _write_ts: '2026-05-11T18:46:03.887017Z'
+      community_id: 1:def456
+      conn_state: S1
+      connection_state: Connection established - not terminated
+      corelight_shunted: false
+      duration: 600.0000820159912
+      history: ShADadtT
+      id:
+        orig_h: 10.250.5.75
+        orig_p: 63231
+        resp_h: 172.64.5.1
+        resp_p: 443
+        vlan: 1000
+      local_orig: true
+      local_resp: false
+      missed_bytes: 0
+      network:
+        bytes_read: 7071
+        bytes_written: 18980
+        client:
+          ip: 10.250.5.75
+          port: 63231
+        destination:
+          ip: 172.64.5.1
+          port: 443
+      ocsf:
+        activity_id: 6
+        activity_name: Traffic
+        category_name: Network Activity
+        category_uid: 4
+        class_name: Network Activity
+        class_uid: 4001
+        connection_info:
+          boundary: External
+          boundary_id: 3
+          community_uid: 1:def456
+          direction: Outbound
+          direction_id: 2
+          flag_history: ShADadtT
+          protocol_name: tcp
+          uid: '12345678901234568'
+        dst_endpoint:
+          ip: 172.64.5.1
+          port: 443
+        duration: 600000
+        metadata:
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: '12345678901234568'
+          version: 1.5.0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 10.250.5.75
+          port: 63231
+        status: Success
+        status_detail: S1
+        status_id: 1
+        time: 1778524563886
+        traffic:
+          bytes: 26051
+          bytes_in: 18980
+          bytes_missed: 0
+          bytes_out: 7071
+          packets: 69
+          packets_in: 37
+          packets_out: 32
+      orig_bytes: 7071
+      orig_ip_bytes: 8380
+      orig_pkts: 32
+      proto: tcp
+      resp_bytes: 18980
+      resp_ip_bytes: 20532
+      resp_pkts: 37
+      service: ssl
+      ts: '2026-05-11T18:36:03.886935Z'
+      uid: '12345678901234568'
+      zeek:
+        duration_sec: 600.0000820159912
+        missed_bytes: 0
+        proto: tcp
+    message: <134>May 11 18:46:03 ndr-pvg3-1 {"_path":"conn_long","_system_name":"ndr-pvg3-1","_write_ts":"2026-05-11T18:46:03.887017Z","ts":"2026-05-11T18:36:03.886935Z","uid":"12345678901234568","id.orig_h":"10.250.5.75","id.orig_p":63231,"id.resp_h":"172.64.5.1","id.resp_p":443,"id.vlan":1000,"proto":"tcp","service":"ssl","duration":600.0000820159912,"orig_bytes":7071,"resp_bytes":18980,"conn_state":"S1","local_orig":true,"local_resp":false,"missed_bytes":0,"history":"ShADadtT","orig_pkts":32,"resp_pkts":37,"orig_ip_bytes":8380,"resp_ip_bytes":20532,"community_id":"1:def456","corelight_shunted":false}
+    service: conn_long
+    tags:
+      - source:LOGS_SOURCE
+    timestamp: 1778524563886
+ -
+  sample: "<134>Dec 12 05:52:50 machine-name {\"_path\":\"http\",\"_write_ts\":\"2023-12-12T05:52:50.756358Z\",\"ts\":\"2023-12-12T05:52:32.763303Z\",\"uid\":\"CBQBvs1hob384mp2lb\",\"id.orig_h\":\"185.64.148.0\",\"id.orig_p\":47210,\"id.resp_h\":\"185.64.148.0\",\"id.resp_p\":80,\"method\":\"POST\",\"host\":\"host.com\",\"uri\":\"/rootr3\",\"version\":\"1.1\",\"user_agent\":\"LIBCURL\",\"request_body_len\":83,\"response_body_len\":1434,\"status_code\":200,\"status_msg\":\"OK\",\"trans_depth\":1,\"orig_mime_types\":[\"application/ocsp-request\"],\"resp_mime_types\":[\"application/ocsp-response\"],\"orig_fuids\":[\"FKhxp22QnZua8NWY2\"],\"resp_fuids\":[\"F9Zqr71YzMZPVZ4dbe\"]}"
+  service: "corelight"
+  result:
+    custom:
+      _path: http
+      _write_ts: '2023-12-12T05:52:50.756358Z'
+      host: host.com
+      http:
+        method: POST
+        status_code: 200
+        url_details:
+          host: host.com
+          path: /rootr3
+        useragent: LIBCURL
+        version: '1.1'
+      http_url: http://host.com/rootr3
+      id:
+        orig_h: 185.64.148.0
+        orig_p: 47210
+        resp_h: 185.64.148.0
+        resp_p: 80
+      method: POST
+      network:
+        bytes_read: 83
+        bytes_written: 1434
+        client:
+          ip: 185.64.148.0
+          port: 47210
+        destination:
+          ip: 185.64.148.0
+          port: 80
+      ocsf:
+        activity_id: 6
+        activity_name: Post
+        category_name: Network Activity
+        category_uid: 4
+        class_name: HTTP Activity
+        class_uid: 4002
+        connection_info:
+          direction: Unknown
+          direction_id: 0
+          uid: CBQBvs1hob384mp2lb
+        dst_endpoint:
+          ip: 185.64.148.0
+          port: 80
+        http_request:
+          body_length: 83
+          http_method: POST
+          uid: CBQBvs1hob384mp2lb
+          url:
+            hostname: host.com
+            path: /rootr3
+            port: 80
+            url_string: http://host.com/rootr3
+          user_agent: LIBCURL
+          version: '1.1'
+        http_response:
+          body_length: 1434
+          code: 200
+          message: OK
+        metadata:
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CBQBvs1hob384mp2lb
+          version: 1.5.0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 185.64.148.0
+          port: 47210
+        status: Success
+        status_detail: OK
+        status_id: 1
+        time: 1702360352763
+      orig_fuids:
+        - FKhxp22QnZua8NWY2
+      orig_mime_types:
+        - application/ocsp-request
+      request_body_len: 83
+      resp_fuids:
+        - F9Zqr71YzMZPVZ4dbe
+      resp_mime_types:
+        - application/ocsp-response
+      response_body_len: 1434
+      status_code: 200
+      status_msg: OK
+      trans_depth: 1
+      ts: '2023-12-12T05:52:32.763303Z'
+      uid: CBQBvs1hob384mp2lb
+      uri: /rootr3
+      user_agent: LIBCURL
+      version: '1.1'
+    message: <134>Dec 12 05:52:50 machine-name {"_path":"http","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CBQBvs1hob384mp2lb","id.orig_h":"185.64.148.0","id.orig_p":47210,"id.resp_h":"185.64.148.0","id.resp_p":80,"method":"POST","host":"host.com","uri":"/rootr3","version":"1.1","user_agent":"LIBCURL","request_body_len":83,"response_body_len":1434,"status_code":200,"status_msg":"OK","trans_depth":1,"orig_mime_types":["application/ocsp-request"],"resp_mime_types":["application/ocsp-response"],"orig_fuids":["FKhxp22QnZua8NWY2"],"resp_fuids":["F9Zqr71YzMZPVZ4dbe"]}
+    service: http
+    tags:
+      - source:LOGS_SOURCE
+    timestamp: 1702360352763
+ -
+  sample: "<134>Dec 12 05:52:50 machine-name {\"_path\":\"dns\",\"_write_ts\":\"2023-12-12T05:52:50.756358Z\",\"ts\":\"2023-12-12T05:52:32.763303Z\",\"uid\":\"CsOSdHqRMu62rNs31\",\"id.orig_h\":\"185.64.148.0\",\"id.orig_p\":58013,\"id.resp_h\":\"185.64.148.0\",\"id.resp_p\":5355,\"proto\":\"udp\",\"trans_id\":38706,\"rcode\":0,\"rcode_name\":\"NOERROR\",\"query\":\"win2k16-1-159\",\"answers\":[\"185.64.148.0\"],\"TTLs\":[30.0],\"AA\":false,\"TC\":false,\"RD\":false,\"RA\":false,\"Z\":0,\"rejected\":false}"
+  service: "corelight"
+  result:
+    custom:
+      AA: false
+      RA: false
+      RD: false
+      TC: false
+      TTLs:
+        - 30
+      Z: 0
+      _path: dns
+      _write_ts: '2023-12-12T05:52:50.756358Z'
+      answers:
+        - 185.64.148.0
+      dns:
+        answer:
+          name:
+            - 185.64.148.0
+        flags:
+          rcode: NOERROR
+        id: 38706
+        question:
+          name: win2k16-1-159
+      id:
+        orig_h: 185.64.148.0
+        orig_p: 58013
+        resp_h: 185.64.148.0
+        resp_p: 5355
+      network:
+        client:
+          geoip:
+            city:
+              name: Paris
+            continent:
+              code: EU
+              name: Europe
+            country:
+              iso_code: FR
+              name: France
+            ipAddress: 185.64.148.0
+            location:
+              latitude: 48.90654
+              longitude: 2.33339
+            subdivision:
+              iso_code: FR-IDF
+              name: Île-de-France
+            timezone: Europe/Paris
+          ip: 185.64.148.0
+          port: 58013
+        destination:
+          ip: 185.64.148.0
+          port: 5355
+      ocsf:
+        activity_id: 2
+        activity_name: Response
+        answers:
+          - rdata: 185.64.148.0
+        category_name: Network Activity
+        category_uid: 4
+        class_name: DNS Activity
+        class_uid: 4003
+        connection_info:
+          direction: Unknown
+          direction_id: 0
+          protocol_name: udp
+          uid: CsOSdHqRMu62rNs31
+        dst_endpoint:
+          ip: 185.64.148.0
+          port: 5355
+        message: win2k16-1-159
+        metadata:
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CsOSdHqRMu62rNs31
+          version: 1.5.0
+        query:
+          hostname: win2k16-1-159
+        rcode: NoError
+        rcode_id: 0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 185.64.148.0
+          port: 58013
+        status: Success
+        status_detail: NOERROR
+        status_id: 1
+        time: 1702360352763
+      proto: udp
+      query: win2k16-1-159
+      rcode: 0
+      rcode_name: NOERROR
+      rejected: false
+      trans_id: 38706
+      ts: '2023-12-12T05:52:32.763303Z'
+      uid: CsOSdHqRMu62rNs31
+      zeek:
+        proto: udp
+    message: <134>Dec 12 05:52:50 machine-name {"_path":"dns","_write_ts":"2023-12-12T05:52:50.756358Z","ts":"2023-12-12T05:52:32.763303Z","uid":"CsOSdHqRMu62rNs31","id.orig_h":"185.64.148.0","id.orig_p":58013,"id.resp_h":"185.64.148.0","id.resp_p":5355,"proto":"udp","trans_id":38706,"rcode":0,"rcode_name":"NOERROR","query":"win2k16-1-159","answers":["185.64.148.0"],"TTLs":[30.0],"AA":false,"TC":false,"RD":false,"RA":false,"Z":0,"rejected":false}
+    service: dns
+    tags:
+      - source:LOGS_SOURCE
+    timestamp: 1702360352763
+ -
+  sample: "<134>May 11 17:22:02 test-system {\"_path\":\"ssl\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T17:22:02.759122Z\",\"ts\":\"2026-05-11T17:22:02.754532Z\",\"uid\":\"Cxu3mb4NZI2tAscrhb\",\"id.orig_h\":\"10.205.140.1\",\"id.orig_p\":43108,\"id.resp_h\":\"10.205.180.10\",\"id.resp_p\":443,\"version\":\"TLSv12\",\"cipher\":\"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256\",\"curve\":\"secp256r1\",\"server_name\":null,\"resumed\":false,\"established\":true,\"ssl_history\":\"CsxknGIti\",\"ja3\":\"c34a54599a1fbaf1786bb6d633545a60\",\"ja3s\":\"03788d8896c247631984a250db971b74\",\"subject\":\"CN=*.org.test.io,O=Test Org,L=Los Angeles,ST=California,C=US\",\"issuer\":\"CN=Test Issuer,OU=Test OU,O=Test Org,C=US\",\"validation_status\":\"ok\",\"cert_chain_fps\":[\"3f5332c4631559ebf68bacbdf27d408g5d904bf5fa8e4f455c5274aae330ca96\",\"8bb2f6883fed289a521ba27c478482950874e167caccec6fc025990c0c46813f\"],\"port\":23367}"
+  service: "corelight"
+  result:
+    custom:
+      _path: ssl
+      _system_name: test-system
+      _write_ts: '2026-05-11T17:22:02.759122Z'
+      cert_chain_fps:
+        - 3f5332c4631559ebf68bacbdf27d408g5d904bf5fa8e4f455c5274aae330ca96
+        - 8bb2f6883fed289a521ba27c478482950874e167caccec6fc025990c0c46813f
+      cipher: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+      curve: secp256r1
+      established: true
+      id:
+        orig_h: 10.205.140.1
+        orig_p: 43108
+        resp_h: 10.205.180.10
+        resp_p: 443
+      issuer: CN=Test Issuer,OU=Test OU,O=Test Org,C=US
+      ja3: c34a54599a1fbaf1786bb6d633545a60
+      ja3s: 03788d8896c247631984a250db971b74
+      network:
+        client:
+          ip: 10.205.140.1
+          port: 43108
+        destination:
+          ip: 10.205.180.10
+          port: 443
+      ocsf:
+        activity_id: 1
+        activity_name: Open
+        category_name: Network Activity
+        category_uid: 4
+        class_name: Network Activity
+        class_uid: 4001
+        dst_endpoint:
+          ip: 10.205.180.10
+          port: 443
+        metadata:
+          original_time: '2026-05-11T17:22:02.754532Z'
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: Cxu3mb4NZI2tAscrhb
+          version: 1.5.0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 10.205.140.1
+          port: 43108
+        status: Success
+        status_id: 1
+        time: 1778520122754
+        tls:
+          cipher: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+          ja3_hash:
+            algorithm: MD5
+            algorithm_id: 1
+            value: c34a54599a1fbaf1786bb6d633545a60
+          ja3s_hash:
+            algorithm: MD5
+            algorithm_id: 1
+            value: 03788d8896c247631984a250db971b74
+          version: TLSv12
+      port: 23367
+      resumed: false
+      ssl_history: CsxknGIti
+      subject: CN=*.org.test.io,O=Test Org,L=Los Angeles,ST=California,C=US
+      ts: '2026-05-11T17:22:02.754532Z'
+      uid: Cxu3mb4NZI2tAscrhb
+      validation_status: ok
+      version: TLSv12
+    message: <134>May 11 17:22:02 test-system {"_path":"ssl","_system_name":"test-system","_write_ts":"2026-05-11T17:22:02.759122Z","ts":"2026-05-11T17:22:02.754532Z","uid":"Cxu3mb4NZI2tAscrhb","id.orig_h":"10.205.140.1","id.orig_p":43108,"id.resp_h":"10.205.180.10","id.resp_p":443,"version":"TLSv12","cipher":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256","curve":"secp256r1","server_name":null,"resumed":false,"established":true,"ssl_history":"CsxknGIti","ja3":"c34a54599a1fbaf1786bb6d633545a60","ja3s":"03788d8896c247631984a250db971b74","subject":"CN=*.org.test.io,O=Test Org,L=Los Angeles,ST=California,C=US","issuer":"CN=Test Issuer,OU=Test OU,O=Test Org,C=US","validation_status":"ok","cert_chain_fps":["3f5332c4631559ebf68bacbdf27d408g5d904bf5fa8e4f455c5274aae330ca96","8bb2f6883fed289a521ba27c478482950874e167caccec6fc025990c0c46813f"],"port":23367}
+    service: ssl
+    tags:
+      - source:LOGS_SOURCE
+    timestamp: 1778520122754
+ -
+  sample: "<134>May 11 17:22:02 test-system {\"_path\":\"ssl_red\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T17:22:02.032606Z\",\"ts\":\"2026-05-11T17:22:02.023967Z\",\"uid\":\"CfSalo2IDfDMZeOJ02\",\"id.orig_h\":\"192.168.1.1\",\"id.orig_p\":54745,\"id.resp_h\":\"18.164.5.1\",\"id.resp_p\":443,\"id.vlan\":1000,\"version\":\"TLSv13\",\"cipher\":\"TLS_AES_128_GCM_SHA256\",\"curve\":\"x25519\",\"server_name\":\"public.test.app\",\"resumed\":false,\"established\":true,\"ssl_history\":\"CsiI\",\"ja3\":\"f4febc55ea12b31ae17cfb7e614afea4\",\"ja3s\":\"f4febc55ea12b31ae17cfb7e614afea4\",\"port\":64884}"
+  service: "corelight"
+  result:
+    custom:
+      _path: ssl_red
+      _system_name: test-system
+      _write_ts: '2026-05-11T17:22:02.032606Z'
+      cipher: TLS_AES_128_GCM_SHA256
+      curve: x25519
+      established: true
+      id:
+        orig_h: 192.168.1.1
+        orig_p: 54745
+        resp_h: 18.164.5.1
+        resp_p: 443
+        vlan: 1000
+      ja3: f4febc55ea12b31ae17cfb7e614afea4
+      ja3s: f4febc55ea12b31ae17cfb7e614afea4
+      network:
+        client:
+          ip: 192.168.1.1
+          port: 54745
+        destination:
+          ip: 18.164.5.1
+          port: 443
+      ocsf:
+        activity_id: 1
+        activity_name: Open
+        category_name: Network Activity
+        category_uid: 4
+        class_name: Network Activity
+        class_uid: 4001
+        dst_endpoint:
+          hostname: public.test.app
+          ip: 18.164.5.1
+          port: 443
+        metadata:
+          original_time: '2026-05-11T17:22:02.023967Z'
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CfSalo2IDfDMZeOJ02
+          version: 1.5.0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 192.168.1.1
+          port: 54745
+        status: Success
+        status_id: 1
+        time: 1778520122023
+        tls:
+          cipher: TLS_AES_128_GCM_SHA256
+          ja3_hash:
+            algorithm: MD5
+            algorithm_id: 1
+            value: f4febc55ea12b31ae17cfb7e614afea4
+          ja3s_hash:
+            algorithm: MD5
+            algorithm_id: 1
+            value: f4febc55ea12b31ae17cfb7e614afea4
+          sni: public.test.app
+          version: TLSv13
+      port: 64884
+      resumed: false
+      server_name: public.test.app
+      ssl_history: CsiI
+      ts: '2026-05-11T17:22:02.023967Z'
+      uid: CfSalo2IDfDMZeOJ02
+      version: TLSv13
+    message: <134>May 11 17:22:02 test-system {"_path":"ssl_red","_system_name":"test-system","_write_ts":"2026-05-11T17:22:02.032606Z","ts":"2026-05-11T17:22:02.023967Z","uid":"CfSalo2IDfDMZeOJ02","id.orig_h":"192.168.1.1","id.orig_p":54745,"id.resp_h":"18.164.5.1","id.resp_p":443,"id.vlan":1000,"version":"TLSv13","cipher":"TLS_AES_128_GCM_SHA256","curve":"x25519","server_name":"public.test.app","resumed":false,"established":true,"ssl_history":"CsiI","ja3":"f4febc55ea12b31ae17cfb7e614afea4","ja3s":"f4febc55ea12b31ae17cfb7e614afea4","port":64884}
+    service: ssl_red
+    tags:
+      - source:LOGS_SOURCE
+    timestamp: 1778520122023
+ -
+  sample: "<134>May 11 16:11:53 test-system {\"_path\":\"weird_red\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T16:11:53.944496Z\",\"ts\":\"2026-05-11T16:11:53.944496Z\",\"uid\":\"CYThCC2DZNVcGgpiI2\",\"id.orig_h\":\"10.250.182.4\",\"id.orig_p\":58438,\"id.resp_h\":\"180.153.200.12\",\"id.resp_p\":53,\"id.vlan\":1600,\"name\":\"DNS_truncated_quest_too_short\",\"source\":\"DNS\",\"notice\":false,\"peer\":\"worker-04\"}"
+  service: "corelight"
+  result:
+    custom:
+      _path: weird_red
+      _system_name: test-system
+      _write_ts: '2026-05-11T16:11:53.944496Z'
+      id:
+        orig_h: 10.250.182.4
+        orig_p: 58438
+        resp_h: 180.153.200.12
+        resp_p: 53
+        vlan: 1600
+      name: DNS_truncated_quest_too_short
+      network:
+        client:
+          ip: 10.250.182.4
+          port: 58438
+        destination:
+          ip: 180.153.200.12
+          port: 53
+      notice: false
+      ocsf:
+        activity_id: 6
+        activity_name: Traffic
+        category_name: Network Activity
+        category_uid: 4
+        class_name: Network Activity
+        class_uid: 4001
+        connection_info:
+          direction: Unknown
+          direction_id: 0
+          protocol_name: DNS
+          uid: CYThCC2DZNVcGgpiI2
+        dst_endpoint:
+          ip: 180.153.200.12
+          port: 53
+        message: DNS_truncated_quest_too_short
+        metadata:
+          event_code: DNS_truncated_quest_too_short
+          product:
+            name: Zeek
+            vendor_name: Corelight
+          uid: CYThCC2DZNVcGgpiI2
+          version: 1.5.0
+        severity: Informational
+        severity_id: 1
+        src_endpoint:
+          ip: 10.250.182.4
+          port: 58438
+        status_detail: DNS_truncated_quest_too_short
+        time: 1778515913944
+      peer: worker-04
+      source: DNS
+      ts: '2026-05-11T16:11:53.944496Z'
+      uid: CYThCC2DZNVcGgpiI2
+    message: <134>May 11 16:11:53 test-system {"_path":"weird_red","_system_name":"test-system","_write_ts":"2026-05-11T16:11:53.944496Z","ts":"2026-05-11T16:11:53.944496Z","uid":"CYThCC2DZNVcGgpiI2","id.orig_h":"10.250.182.4","id.orig_p":58438,"id.resp_h":"180.153.200.12","id.resp_p":53,"id.vlan":1600,"name":"DNS_truncated_quest_too_short","source":"DNS","notice":false,"peer":"worker-04"}
+    service: weird_red
+    tags:
+      - source:LOGS_SOURCE
+    timestamp: 1778515913944
+ -
+  sample: "<134>May 11 19:11:03 test-system {\"_path\":\"notice\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T19:11:03.521194Z\",\"ts\":\"2026-05-11T19:11:03.521194Z\",\"note\":\"ATTACK::Discovery\",\"msg\":\"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins\",\"id.orig_h\":\"10.10.10.15\",\"id.orig_p\":54321,\"id.resp_h\":\"192.168.1.1\",\"id.resp_p\":80,\"proto\":\"tcp\",\"peer_descr\":\"manager\",\"actions\":[\"Notice::ACTION_LOG\"],\"suppress_for\":3600, \"uid\":\"12345678901234567890\", \"severity\":{\"name\":\"error\",\"level\":3}}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "notice"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T19:11:03.521194Z"
+      actions:
+        - "Notice::ACTION_LOG"
+      id:
+        orig_h: "10.10.10.15"
+        orig_p: 54321
+        resp_h: "192.168.1.1"
+        resp_p: 80
+      msg: "Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins"
+      network:
+        client:
+          ip: "10.10.10.15"
+          port: 54321
+        destination:
+          ip: "192.168.1.1"
+          port: 80
+      note: "ATTACK::Discovery"
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        evidences:
+          - connection_info:
+              direction_id: 0
+              protocol_name: "tcp"
+            dst_endpoint:
+              ip: "192.168.1.1"
+              port: 80
+            src_endpoint:
+              ip: "10.10.10.15"
+              port: 54321
+        finding_info:
+          title: "ATTACK::Discovery"
+          uid: "12345678901234567890"
+        is_alert: true
+        metadata:
+          event_code: "ATTACK::Discovery"
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "12345678901234567890"
+          version: "1.5.0"
+        severity: "Medium"
+        severity_id: 3
+        status: "New"
+        status_id: 1
+        time: 1778526663521
+      peer_descr: "manager"
+      proto: "tcp"
+      severity:
+        level: 3
+        name: "error"
+      suppress_for: 3600
+      ts: "2026-05-11T19:11:03.521194Z"
+      uid: "12345678901234567890"
+      zeek:
+        note: "ATTACK::Discovery"
+        proto: "tcp"
+    message: '<134>May 11 19:11:03 test-system {"_path":"notice","_system_name":"test-system","_write_ts":"2026-05-11T19:11:03.521194Z","ts":"2026-05-11T19:11:03.521194Z","note":"ATTACK::Discovery","msg":"Detected activity from host 10.10.10.15, total attempts 9 within timeframe 5.0 mins","id.orig_h":"10.10.10.15","id.orig_p":54321,"id.resp_h":"192.168.1.1","id.resp_p":80,"proto":"tcp","peer_descr":"manager","actions":["Notice::ACTION_LOG"],"suppress_for":3600, "uid":"12345678901234567890", "severity":{"name":"error","level":3}}'
+    service: "notice"
+    status: "info"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1778526663521
+ -
+  sample: "<134>May 11 17:59:59 test-system {\"_path\":\"suricata_corelight\",\"_system_name\":\"test-system\",\"_write_ts\":\"2026-05-11T17:59:59.359532Z\",\"ts\":\"2026-05-11T17:59:59.358114Z\",\"uid\":\"CN4bklsrGiWMsQhg3\",\"id.orig_h\":\"10.215.3.8\",\"id.orig_p\":65196,\"id.resp_h\":\"10.69.5.8\",\"id.resp_p\":80,\"id.vlan\":1123,\"proto\":\"tcp\",\"service\":\"http\",\"suri_id\":\"SOHaIDWJ5dBe\",\"flow_id\":2093130069465879,\"tx_id\":0,\"community_id\":\"1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=\",\"severity\":1,\"alert\":{\"action\":\"allowed\",\"gid\":1,\"signature_id\":2006380,\"rev\":17,\"signature\":\"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted\",\"category\":\"Potential Corporate Privacy Violation\",\"severity\":1,\"metadata\":[\"attack_target:Client_Endpoint\",\"confidence:High\",\"created_at:2026_04_01\",\"deployment:Internal\",\"deployment:Perimeter\",\"mitre_tactic_id:TA0011\",\"mitre_tactic_name:Command_And_Control\",\"mitre_technique_id:T1071\",\"mitre_technique_name:Application_Layer_Protocol\",\"performance_impact:Low\",\"signature_severity:Major\",\"updated_at:2026_04_09\"]}}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "suricata_corelight"
+      _system_name: "test-system"
+      _write_ts: "2026-05-11T17:59:59.359532Z"
+      alert:
+        action: "allowed"
+        category: "Potential Corporate Privacy Violation"
+        gid: 1
+        metadata:
+         - "attack_target:Client_Endpoint"
+         - "confidence:High"
+         - "created_at:2026_04_01"
+         - "deployment:Internal"
+         - "deployment:Perimeter"
+         - "mitre_tactic_id:TA0011"
+         - "mitre_tactic_name:Command_And_Control"
+         - "mitre_technique_id:T1071"
+         - "mitre_technique_name:Application_Layer_Protocol"
+         - "performance_impact:Low"
+         - "signature_severity:Major"
+         - "updated_at:2026_04_09"
+        rev: 17
+        severity: 1
+        signature: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
+        signature_id: 2006380
+      alert_severity: "High"
+      community_id: "1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY="
+      flow_id: 2093130069465879
+      id:
+        orig_h: "10.215.3.8"
+        orig_p: 65196
+        resp_h: "10.69.5.8"
+        resp_p: 80
+        vlan: 1123
+      network:
+        client:
+          ip: "10.215.3.8"
+          port: 65196
+        destination:
+          ip: "10.69.5.8"
+          port: 80
+      ocsf:
+        activity_id: 1
+        activity_name: "Create"
+        category_name: "Findings"
+        category_uid: 2
+        class_name: "Detection Finding"
+        class_uid: 2004
+        confidence: "High"
+        confidence_id: 3
+        evidences:
+          - connection_info:
+              direction_id: 0
+              protocol_name: "http"
+            dst_endpoint:
+              ip: "10.69.5.8"
+              port: 80
+            src_endpoint:
+              ip: "10.215.3.8"
+              port: 65196
+        finding_info:
+          analytic:
+            name: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
+            type: "Rule"
+            type_id: 1
+            uid: "2006380"
+          attacks:
+            - tactic:
+                name: "Command_And_Control"
+                uid: "TA0011"
+              technique:
+                name: "Application_Layer_Protocol"
+                uid: "T1071"
+          title: "ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted"
+          types:
+           - "Potential Corporate Privacy Violation"
+          uid: "CN4bklsrGiWMsQhg3"
+          uid_alt: "SOHaIDWJ5dBe"
+        is_alert: true
+        metadata:
+          event_code: "2006380"
+          log_provider: "Corelight"
+          product:
+            name: "Suricata"
+            vendor_name: "Corelight"
+          uid: "CN4bklsrGiWMsQhg3"
+          version: "1.5.0"
+        risk_level: "High"
+        risk_level_id: 3
+        severity: "High"
+        severity_id: 4
+        status_detail: "allowed"
+        time: 1778522399358
+      proto: "tcp"
+      service: "http"
+      severity: 1
+      suri_id: "SOHaIDWJ5dBe"
+      ts: "2026-05-11T17:59:59.358114Z"
+      tx_id: 0
+      uid: "CN4bklsrGiWMsQhg3"
+    message: '<134>May 11 17:59:59 test-system {"_path":"suricata_corelight","_system_name":"test-system","_write_ts":"2026-05-11T17:59:59.359532Z","ts":"2026-05-11T17:59:59.358114Z","uid":"CN4bklsrGiWMsQhg3","id.orig_h":"10.215.3.8","id.orig_p":65196,"id.resp_h":"10.69.5.8","id.resp_p":80,"id.vlan":1123,"proto":"tcp","service":"http","suri_id":"SOHaIDWJ5dBe","flow_id":2093130069465879,"tx_id":0,"community_id":"1:Y4yC2kKf1Cm0QUkA/aBLSDxepcY=","severity":1,"alert":{"action":"allowed","gid":1,"signature_id":2006380,"rev":17,"signature":"ET POLICY Outgoing Basic Auth Base64 HTTP Password detected unencrypted","category":"Potential Corporate Privacy Violation","severity":1,"metadata":["attack_target:Client_Endpoint","confidence:High","created_at:2026_04_01","deployment:Internal","deployment:Perimeter","mitre_tactic_id:TA0011","mitre_tactic_name:Command_And_Control","mitre_technique_id:T1071","mitre_technique_name:Application_Layer_Protocol","performance_impact:Low","signature_severity:Major","updated_at:2026_04_09"]}}'
+    service: "suricata_corelight"
+    status: "alert"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1778522399358
+ -
+  sample: "<134>May 11 19:26:26 ndr-dub-stryker-DC-1 {\"_path\":\"files\",\"_system_name\":\"ndr-dub-stryker-DC-1\",\"_write_ts\":\"2026-05-11T19:26:26.082433Z\",\"ts\":\"2026-05-11T19:26:25.875206Z\",\"uid\":\"CjTuQU17IDvaVa8Nq2\",\"fuid\":\"FOPDsn3PdkiZsljcj2\",\"tx_hosts\":[\"10.104.10.60\"],\"rx_hosts\":[\"10.104.10.65\"],\"conn_uids\":[\"CjTuQU17IDvaGb8Nq2\"],\"source\":\"HTTP\",\"depth\":0,\"analyzers\":[\"SHA1\",\"MD5\",\"SHA256\",\"DATA_EVENT\"],\"local_orig\":true,\"is_orig\":false,\"seen_bytes\":253109,\"total_bytes\":253109,\"missing_bytes\":0,\"overflow_bytes\":0,\"timedout\":false,\"duration\":0.2072269916534424,\"mime_type\":\"text/json\",\"md5\":\"6e6ae0ed19f595687684faafae5499e13\",\"sha1\":\"f6578daa6d398c91398888b91a96d4c0e099c79c\",\"sha256\":\"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f\",\"id.vlan\":1010}"
+  service: "corelight"
+  result:
+    custom:
+      _path: "files"
+      _system_name: "ndr-dub-stryker-DC-1"
+      _write_ts: "2026-05-11T19:26:26.082433Z"
+      analyzers:
+       - "SHA1"
+       - "MD5"
+       - "SHA256"
+       - "DATA_EVENT"
+      conn_uids:
+       - "CjTuQU17IDvaGb8Nq2"
+      depth: 0
+      dest_host:
+       - "10.104.10.60"
+      duration: 0.2072269916534424
+      fuid: "FOPDsn3PdkiZsljcj2"
+      id:
+        vlan: 1010
+      is_orig: false
+      local_orig: true
+      md5: "6e6ae0ed19f595687684faafae5499e13"
+      mime_type: "text/json"
+      missing_bytes: 0
+      ocsf:
+        activity_id: 2
+        activity_name: "Download"
+        actor:
+          session:
+            uid: "CjTuQU17IDvaVa8Nq2"
+        category_name: "Application Activity"
+        category_uid: 6
+        class_name: "File Hosting Activity"
+        class_uid: 6006
+        dst_endpoint:
+          ip: "10.104.10.65"
+        file:
+          hashes:
+            - algorithm: "MD5"
+              algorithm_id: 1
+              value: "6e6ae0ed19f595687684faafae5499e13"
+            - algorithm: "SHA-1"
+              algorithm_id: 2
+              value: "f6578daa6d398c91398888b91a96d4c0e099c79c"
+            - algorithm: "SHA-256"
+              algorithm_id: 3
+              value: "a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f"
+          mime_type: "text/json"
+          name: "FOPDsn3PdkiZsljcj2"
+          size: 253109
+          type_id: 1
+          uid: "FOPDsn3PdkiZsljcj2"
+        metadata:
+          product:
+            name: "Zeek"
+            vendor_name: "Corelight"
+          uid: "CjTuQU17IDvaVa8Nq2"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.104.10.60"
+        status: "Success"
+        status_id: 1
+        time: 1778527585875
+      orig_host:
+       - "10.104.10.65"
+      rx_hosts:
+       - "10.104.10.65"
+      seen_bytes: 253109
+      sha1: "f6578daa6d398c91398888b91a96d4c0e099c79c"
+      sha256: "a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f"
+      source: "HTTP"
+      timedout: false
+      total_bytes: 253109
+      ts: "2026-05-11T19:26:25.875206Z"
+      tx_hosts:
+       - "10.104.10.60"
+      uid: "CjTuQU17IDvaVa8Nq2"
+      zeek:
+        missing_bytes: 0
+        overflow_bytes: 0
+        seen_bytes: 253109
+        total_bytes: 253109
+    message: '<134>May 11 19:26:26 ndr-dub-stryker-DC-1 {"_path":"files","_system_name":"ndr-dub-stryker-DC-1","_write_ts":"2026-05-11T19:26:26.082433Z","ts":"2026-05-11T19:26:25.875206Z","uid":"CjTuQU17IDvaVa8Nq2","fuid":"FOPDsn3PdkiZsljcj2","tx_hosts":["10.104.10.60"],"rx_hosts":["10.104.10.65"],"conn_uids":["CjTuQU17IDvaGb8Nq2"],"source":"HTTP","depth":0,"analyzers":["SHA1","MD5","SHA256","DATA_EVENT"],"local_orig":true,"is_orig":false,"seen_bytes":253109,"total_bytes":253109,"missing_bytes":0,"overflow_bytes":0,"timedout":false,"duration":0.2072269916534424,"mime_type":"text/json","md5":"6e6ae0ed19f595687684faafae5499e13","sha1":"f6578daa6d398c91398888b91a96d4c0e099c79c","sha256":"a7d5f44561e9707b3faf6ca1cdec4823e6625dd1c3aba2b7395697d65b47dc8f","id.vlan":1010}'
+    service: "files"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1778527585875

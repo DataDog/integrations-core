@@ -21,6 +21,7 @@ files:
           type: string
         - name: dbname
           type: string
+      fleet_configurable: false
     - name: username
       required: true
       description: |
@@ -28,45 +29,53 @@ files:
       value:
         example: "datadog"
         type: string
+      fleet_configurable: false
     - name: password
       secret: true
       description: |
         The database password for authentication.
       value:
         type: string
+      fleet_configurable: false
     - name: port
       description: |
         The database port to connect to.
         If not specified, defaults to 5432.
       value:
         type: integer
+      fleet_configurable: false
     - name: ssl
       description: |
         SSL mode for PostgreSQL connections.
         Valid values: disable, allow, prefer, require, verify-ca, verify-full.
       value:
         type: string
+      fleet_configurable: false
     - name: ssl_cert
       description: |
         Path to the client SSL certificate.
       value:
         type: string
+      fleet_configurable: false
     - name: ssl_root_cert
       description: |
         Path to the SSL root certificate authority.
       value:
         type: string
+      fleet_configurable: false
     - name: ssl_key
       description: |
         Path to the client SSL private key.
       value:
         type: string
+      fleet_configurable: false
     - name: ssl_password
       secret: true
       description: |
         Password for the client SSL private key.
       value:
         type: string
+      fleet_configurable: false
     - name: aws
       description: |
         AWS configuration for RDS IAM authentication.
@@ -82,6 +91,7 @@ files:
             type: boolean
           - name: role_arn
             type: string
+      fleet_configurable: false
     - name: managed_authentication
       description: |
         Azure Managed Identity configuration.
@@ -94,11 +104,13 @@ files:
           type: string
         - name: identity_scope
           type: string
+      fleet_configurable: false
     - name: config_id
       description: |
         An identifier for tracking this query configuration via Remote Config.
       value:
         type: string
+      fleet_configurable: false
     - name: db_type
       required: true
       description: |
@@ -106,6 +118,7 @@ files:
       value:
         example: "postgres"
         type: string
+      fleet_configurable: false
     - name: queries
       required: true
       description: |
@@ -158,4 +171,5 @@ files:
               type: integer
             - name: entity_id
               type: string
+      fleet_configurable: false
     - template: instances/default

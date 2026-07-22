@@ -26,9 +26,10 @@ jobs:
       run: pip install --disable-pip-version-check --upgrade pip setuptools wheel
 
     - name: Install ddev
-      run: |
-        pip install -e ./datadog_checks_dev[cli]
-        pip install -e ./ddev
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev-base
 
     - name: Configure ddev
       run: |

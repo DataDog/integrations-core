@@ -136,6 +136,8 @@ def test_create_batched_payload_query_details(check_with_dbm):
             'result_rows': 100,
             'result_bytes': 10240,
             'memory_usage': 5242880,
+            'cpu_us': 1872000,
+            'cpu_wait_us': 35000,
             'event_time_microseconds': 1746205423150500,
             'query_start_time_microseconds': 1746205423000000,
             'initial_query_id': 'test-query-id-123',
@@ -165,6 +167,8 @@ def test_create_batched_payload_query_details(check_with_dbm):
     assert query_details['query_id'] == 'test-query-id-123'
     assert query_details['read_rows'] == 1000
     assert query_details['memory_usage'] == 5242880
+    assert query_details['cpu_us'] == 1872000
+    assert query_details['cpu_wait_us'] == 35000
 
     # Verify metadata is included
     assert query_details['metadata']['tables'] == ['users']
@@ -210,6 +214,28 @@ def test_create_batched_payload_structure(check_with_dbm):
     assert payload['clickhouse_query_completions'][1]['query_details']['statement'] == 'INSERT INTO events VALUES (?)'
 
 
+@pytest.mark.parametrize('service', [None, 'test-clickhouse-service'])
+def test_create_batched_payload_service_field(check_with_dbm, service):
+    """The completions payload carries the configured service, or None when unset."""
+    check_with_dbm._config = check_with_dbm._config.model_copy(update={'service': service})
+
+    rows = [
+        {
+            'statement': 'SELECT * FROM users',
+            'query_signature': 'abc123',
+            'query_duration_ms': 100.0,
+            'databases': 'default',
+            'user': 'default',
+        },
+    ]
+
+    with mock.patch('datadog_checks.clickhouse.query_completions.datadog_agent') as mock_agent:
+        mock_agent.get_version.return_value = '7.64.0'
+        payload = check_with_dbm.query_completions._create_batched_payload(rows)
+
+    assert payload['service'] == service
+
+
 def test_rate_limiting(check_with_dbm):
     """Test that query sample rate limiting works correctly"""
     query_completions = check_with_dbm.query_completions
@@ -252,6 +278,10 @@ def test_completed_queries_query_format():
     assert 'memory_usage' in COMPLETED_QUERIES_QUERY
     assert 'event_time_microseconds' in COMPLETED_QUERIES_QUERY
     assert 'query_start_time_microseconds' in COMPLETED_QUERIES_QUERY
+
+    # CPU fields read from the ProfileEvents map
+    assert "ProfileEvents['OSCPUVirtualTimeMicroseconds']" in COMPLETED_QUERIES_QUERY
+    assert "ProfileEvents['OSCPUWaitMicroseconds']" in COMPLETED_QUERIES_QUERY
 
 
 def test_normalize_query_with_obfuscation(check_with_dbm):

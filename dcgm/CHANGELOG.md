@@ -2,7 +2,17 @@
 
 <!-- towncrier release notes start -->
 
-## 4.4.1 / 2026-04-15
+## 5.0.0 / 2026-07-08
+
+***Changed***:
+
+* Filter autodiscovery ``kube_namespace``, ``pod_name``, and ``kube_container_name`` tags from the exporter pod so only the GPU workload tags are submitted. ([#24171](https://github.com/DataDog/integrations-core/pull/24171))
+
+***Added***:
+
+* Bump minimum version of datadog-checks-base to 37.35.0. ([#24171](https://github.com/DataDog/integrations-core/pull/24171))
+
+## 4.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

@@ -58,7 +58,10 @@ def changelog(app: Application, since: str, to: str, write: bool, force: bool):
 
     app.repo.git.fetch_tags()
 
-    changes_per_agent = get_changes_per_agent(app.repo, since, to)
+    try:
+        changes_per_agent = get_changes_per_agent(app.repo, since, to)
+    except ValueError as exc:
+        app.abort(str(exc))
 
     # store the changelog in memory
     changelog_contents = StringIO()

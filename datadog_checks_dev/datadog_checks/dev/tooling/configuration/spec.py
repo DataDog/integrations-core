@@ -1,8 +1,13 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from string import Formatter
+from typing import Any
 
 from .constants import ALLOWED_FORMATS, OPENAPI_DATA_TYPES
+
+DISCOVERY_FIELDS = {'strategies'}
+DISCOVERY_TEMPLATE_CONTROL_FIELDS = {'template', 'overrides', 'enabled'}
 
 
 def spec_validator(spec: dict, loader) -> None:
@@ -108,87 +113,362 @@ def files_validator(files, loader) -> None:
 
         options_validator(options, loader, file_name)
 
+        if 'discovery' in config_file:
+            handle_discovery(config_file, loader, file_name)
+
+
+def expand_template_items(
+    items: list, loader, file_name: str, section: str, propagate_hidden: bool = False
+) -> set[int]:
+    """Expand every template: item in items in-place.
+
+    Overrides are shared across the whole list: ``apply_overrides`` pops each
+    override as it is applied, so an override that cannot resolve against the
+    current item is retried against later items, including nested templates that
+    are spliced into the list as they expand (e.g. ``extra_metrics.value.*``).
+
+    When ``propagate_hidden`` is set, a template wrapper's ``hidden`` value is
+    carried forward (via ``setdefault``, so an item's own value wins) to every
+    following item until the next template wrapper. Plain items do not start or
+    reset propagation. This is the historical option-template behaviour that
+    specs such as the Windows perf-counter checks and haproxy rely on to hide a
+    block of legacy options; it is left off for discovery strategies, which have
+    no ``hidden`` concept.
+
+    Returns the set of 0-based indices that failed to resolve.
+    """
+    overrides: dict = {}
+    override_errors: list = []
+    failed: set[int] = set()
+    pending_hidden = False
+    i = 0
+    while i < len(items):
+        item = items[i]
+        if not isinstance(item, dict) or 'template' not in item:
+            if propagate_hidden and isinstance(item, dict):
+                item.setdefault('hidden', pending_hidden)
+            i += 1
+            continue
+
+        resolved = False
+
+        while 'template' in item:
+            if propagate_hidden:
+                pending_hidden = item.get('hidden', False)
+            overrides.update(item.pop('overrides', {}))
+            try:
+                tmpl = loader.templates.load(item.pop('template'))
+            except Exception as e:
+                loader.errors.append(f'{loader.source}, {file_name}, {section} #{i + 1}: {e}')
+                break
+            else:
+                if 'name' in item:
+                    tmpl['name'] = item['name']
+
+            errors = loader.templates.apply_overrides(tmpl, overrides)
+            if errors:
+                override_errors.append((i, errors))
+
+            if isinstance(tmpl, dict):
+                tmpl.update(item)
+                item = tmpl
+                items[i] = tmpl
+            elif isinstance(tmpl, list):
+                if tmpl:
+                    for k, tmpl_item in enumerate(tmpl):
+                        items.insert(i + 1 + k, tmpl_item)
+                    items.pop(i)
+                    item = tmpl[0]
+                    if not isinstance(item, dict):
+                        loader.errors.append(
+                            f'{loader.source}, {file_name}, {section} #{i + 1}: Template item must be a mapping object'
+                        )
+                        break
+                else:
+                    loader.errors.append(
+                        f'{loader.source}, {file_name}, {section} #{i + 1}: Template refers to an empty array'
+                    )
+                    break
+            else:
+                loader.errors.append(
+                    f'{loader.source}, {file_name}, {section} #{i + 1}: '
+                    'Template does not refer to a mapping object nor array'
+                )
+                break
+        else:
+            resolved = True
+
+        if resolved and propagate_hidden and isinstance(item, dict):
+            item.setdefault('hidden', pending_hidden)
+
+        if not resolved:
+            failed.add(i)
+
+        i += 1
+
+    # Only overrides still present were never applied to any item; report those.
+    if overrides and override_errors:
+        for idx, errors in override_errors:
+            error_message = '\n'.join(errors)
+            loader.errors.append(f'{loader.source}, {file_name}, {section} #{idx + 1}: {error_message}')
+
+    return failed
+
+
+def _get_instance_option_names(options: list) -> frozenset[str]:
+    """Return all option names from the instances section of a resolved options list."""
+    for section in options:
+        if isinstance(section, dict) and section.get('name') == 'instances':
+            section_opts = section.get('options', [])
+            if isinstance(section_opts, list):
+                return frozenset(opt['name'] for opt in section_opts if isinstance(opt, dict) and 'name' in opt)
+    return frozenset()
+
+
+def _validate_strategy_input(stanza: dict, name: str, input_def: Any, loader: Any, location: str) -> None:
+    """Validate a single declared strategy input against the resolved stanza."""
+    if name not in stanza:
+        if input_def.required:
+            loader.errors.append(f'{location}: Attribute `{name}` is required')
+        return
+
+    value = stanza[name]
+    if input_def.type == 'array[int]':
+        if not isinstance(value, list) or not all(isinstance(v, int) and not isinstance(v, bool) for v in value):
+            loader.errors.append(f'{location}: Attribute `{name}` must be an array of integers')
+    elif input_def.type == 'integer':
+        if not isinstance(value, int) or isinstance(value, bool):
+            loader.errors.append(f'{location}: Attribute `{name}` must be an integer')
+    elif input_def.type == 'string':
+        if not isinstance(value, str):
+            loader.errors.append(f'{location}: Attribute `{name}` must be a string')
+    elif input_def.type == 'boolean':
+        if not isinstance(value, bool):
+            loader.errors.append(f'{location}: Attribute `{name}` must be true or false')
+
+
+def discovery_validator(discovery: Any, options: list, loader: Any, file_name: str) -> None:
+    import datadog_checks.dev.tooling.configuration.discovery.core_strategies  # noqa: F401
+    from datadog_checks.dev.tooling.configuration.discovery.registry import (
+        PORT_FIELDS,
+        REGISTRY,
+        SERVICE_FIELDS,
+        Input,
+    )
+
+    location = f'{loader.source}, {file_name}, discovery'
+    if not isinstance(discovery, dict):
+        loader.errors.append(f'{location}: Attribute `discovery` must be a mapping object')
+        return
+
+    invalid_fields = set(discovery) - DISCOVERY_FIELDS
+    if invalid_fields:
+        fields = ', '.join(sorted(invalid_fields))
+        loader.errors.append(f'{location}: Unknown field(s): {fields}')
+
+    strategies = discovery.get('strategies')
+    if not isinstance(strategies, list) or not strategies:
+        loader.errors.append(f'{location}: Attribute `strategies` must be a non-empty array')
+        return
+
+    instance_option_names = _get_instance_option_names(options)
+
+    for strategy_index, stanza in enumerate(strategies, 1):
+        strategy_location = f'{location}, strategy #{strategy_index}'
+        if not isinstance(stanza, dict):
+            loader.errors.append(f'{strategy_location}: Strategy must be a mapping object')
+            continue
+
+        strategy_name = stanza.get('strategy')
+        is_local = isinstance(strategy_name, str) and strategy_name.startswith('local:')
+
+        if not is_local and strategy_name not in REGISTRY:
+            loader.errors.append(f'{strategy_location}: Unsupported strategy `{strategy_name}`')
+            continue
+
+        reg = REGISTRY.get(strategy_name) if not is_local else None
+
+        # Placeholders allowed in candidate templates: `service.*` is always
+        # available, and each context key the strategy `provides` exposes a Port.
+        placeholders: dict[str, frozenset[str]] = {'service': SERVICE_FIELDS}
+
+        if reg is not None:
+            allowed_fields = {'strategy', 'candidates', *reg.inputs}
+            unknown = set(stanza) - allowed_fields
+            if unknown:
+                loader.errors.append(f'{strategy_location}: Unknown field(s): {", ".join(sorted(unknown))}')
+
+            for input_name, input_def in reg.inputs.items():
+                _validate_strategy_input(stanza, input_name, input_def, loader, strategy_location)
+
+            for provided in reg.provides:
+                placeholders[provided] = PORT_FIELDS
+        else:
+            # A local: strategy must declare its contract since dev cannot import it.
+            local_provides = stanza.get('provides')
+            if not isinstance(local_provides, list) or not all(isinstance(p, str) for p in local_provides):
+                loader.errors.append(f'{strategy_location}: Attribute `provides` must be an array of strings')
+            else:
+                # Dev cannot know the field set of a local-provided context, so any
+                # attribute is accepted on its placeholders.
+                for provided in local_provides:
+                    placeholders[provided] = None  # type: ignore[assignment]
+
+            local_inputs = stanza.get('inputs')
+            if not isinstance(local_inputs, dict):
+                loader.errors.append(f'{strategy_location}: Attribute `inputs` must be a mapping object')
+                local_inputs = {}
+            elif not all(isinstance(k, str) and isinstance(v, str) for k, v in local_inputs.items()):
+                loader.errors.append(f'{strategy_location}: Attribute `inputs` must map input names to type strings')
+                local_inputs = {}
+
+            allowed_fields = {'strategy', 'candidates', 'provides', 'inputs', *local_inputs}
+            unknown = set(stanza) - allowed_fields
+            if unknown:
+                loader.errors.append(f'{strategy_location}: Unknown field(s): {", ".join(sorted(unknown))}')
+
+            for input_name, input_type in local_inputs.items():
+                _validate_strategy_input(stanza, input_name, Input(input_type), loader, strategy_location)
+
+        candidates = stanza.get('candidates')
+        if not isinstance(candidates, list) or not candidates:
+            loader.errors.append(f'{strategy_location}: Attribute `candidates` must be a non-empty array')
+            continue
+
+        for candidate_index, candidate in enumerate(candidates, 1):
+            candidate_location = f'{strategy_location}, candidate #{candidate_index}'
+            if not isinstance(candidate, dict) or not candidate:
+                loader.errors.append(f'{candidate_location}: Candidate must be a non-empty mapping object')
+                continue
+
+            for field_name, template in candidate.items():
+                if not isinstance(field_name, str):
+                    loader.errors.append(f'{candidate_location}: Candidate field names must be strings')
+                    continue
+                if instance_option_names and field_name not in instance_option_names:
+                    loader.errors.append(f'{candidate_location}, {field_name}: Not a recognized instance option')
+
+                validate_discovery_candidate_value(template, loader, candidate_location, field_name, placeholders)
+
+
+def validate_discovery_candidate_value(
+    value: Any, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str] | None]
+) -> None:
+    if isinstance(value, str):
+        _validate_discovery_template(value, loader, location, field_name, placeholders)
+    elif isinstance(value, dict):
+        validate_discovery_candidate_mapping_keys(value, loader, location, field_name)
+
+
+def validate_discovery_candidate_mapping_keys(
+    value: dict[str, Any], loader: Any, location: str, field_name: str
+) -> None:
+    for key, item in value.items():
+        if not isinstance(key, str):
+            loader.errors.append(f'{location}, {field_name}: Candidate mapping keys must be strings')
+            continue
+
+        if isinstance(item, dict):
+            validate_discovery_candidate_mapping_keys(item, loader, location, f'{field_name}.{key}')
+        elif isinstance(item, list):
+            for index, nested_item in enumerate(item, 1):
+                if isinstance(nested_item, dict):
+                    validate_discovery_candidate_mapping_keys(
+                        nested_item, loader, location, f'{field_name}.{key}[{index}]'
+                    )
+
+
+def _validate_discovery_template(
+    template: str, loader: Any, location: str, field_name: str, placeholders: dict[str, frozenset[str] | None]
+) -> None:
+    try:
+        parsed_template = Formatter().parse(template)
+    except ValueError as e:
+        loader.errors.append(f'{location}, {field_name}: Invalid candidate template: {e}')
+        return
+
+    for _, placeholder, _, _ in parsed_template:
+        if placeholder is None:
+            continue
+
+        root, separator, attr = placeholder.partition('.')
+        if not separator or root not in placeholders:
+            loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
+            continue
+
+        # A `None` field-set means the root's attributes are unknown to dev (a
+        # local: strategy's provided context), so any attribute is accepted.
+        allowed_attrs = placeholders[root]
+        if allowed_attrs is not None and attr not in allowed_attrs:
+            loader.errors.append(f'{location}, {field_name}: Unknown placeholder `{placeholder}`')
+
+
+def handle_discovery(config_file: dict, loader, file_name: str) -> None:
+    """Resolve discovery templates, honour `enabled`, then validate.
+
+    Runs after option-template resolution so the validator sees fully resolved
+    data (D4). All discovery handling lives here, in one place at the tail of
+    per-file processing.
+    """
+    discovery = config_file['discovery']
+    if not isinstance(discovery, dict):
+        loader.errors.append(f'{loader.source}, {file_name}, discovery: Attribute `discovery` must be a mapping object')
+        return
+
+    location = f'{loader.source}, {file_name}, discovery'
+
+    # 1. Resolve a discovery-level template (if any), then expand strategy-item templates.
+    if 'template' in discovery:
+        overrides = discovery.pop('overrides', {})
+        try:
+            template = loader.templates.load(discovery.pop('template'))
+        except Exception as e:
+            loader.errors.append(f'{location}: {e}')
+            return
+        errors = loader.templates.apply_overrides(template, overrides)
+        if errors:
+            error_message = '\n'.join(errors)
+            loader.errors.append(f'{location}: {error_message}')
+        if not isinstance(template, dict):
+            loader.errors.append(f'{location}: Template does not refer to a mapping object')
+            return
+        template.update(discovery)
+        discovery = template
+        config_file['discovery'] = discovery
+
+    strategies = discovery.get('strategies')
+    if isinstance(strategies, list):
+        expand_template_items(strategies, loader, file_name, 'discovery, strategy')
+
+    # 2. Honour `enabled: false` as a kill switch: drop the stanza so no
+    #    discovery.py is generated.
+    enabled = discovery.pop('enabled', True)
+    if not enabled:
+        del config_file['discovery']
+        return
+
+    # 3. Validate on the fully resolved stanza and resolved options.
+    discovery_validator(discovery, config_file.get('options', []), loader, file_name)
+
 
 def options_validator(options, loader, file_name, *sections):
     sections_display = ', '.join(sections)
     if sections_display:
         sections_display += ', '
 
-    overrides = {}
-    override_errors = []
+    failed = expand_template_items(options, loader, file_name, f'{sections_display}option', propagate_hidden=True)
 
     option_names_origin = {}
-    hide_template = False
     for option_index, option in enumerate(options, 1):
+        if option_index - 1 in failed:
+            continue
+
         if not isinstance(option, dict):
             loader.errors.append(
                 '{}, {}, {}option #{}: Option attribute must be a mapping object'.format(
                     loader.source, file_name, sections_display, option_index
                 )
             )
-            continue
-
-        templates_resolved = False
-        while 'template' in option:
-            hide_template = option.get('hidden', False)
-
-            overrides.update(option.pop('overrides', {}))
-            try:
-                template = loader.templates.load(option.pop('template'))
-            except Exception as e:
-                loader.errors.append(f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {e}')
-                break
-
-            else:
-                # Handle the case where a template name is overriden
-                if 'name' in option:
-                    template['name'] = option['name']
-
-            errors = loader.templates.apply_overrides(template, overrides)
-            if errors:
-                override_errors.append((option_index, errors))
-
-            if isinstance(template, dict):
-                template.update(option)
-                option = template
-                options[option_index - 1] = template
-            elif isinstance(template, list):
-                if template:
-                    option = template[0]
-                    for item_index, template_item in enumerate(template):
-                        options.insert(option_index + item_index, template_item)
-
-                    # Delete what's at the current index
-                    options.pop(option_index - 1)
-
-                    # Perform this check once again
-                    if not isinstance(option, dict):
-                        loader.errors.append(
-                            '{}, {}, {}option #{}: Template option must be a mapping object'.format(
-                                loader.source, file_name, sections_display, option_index
-                            )
-                        )
-                        break
-                else:
-                    loader.errors.append(
-                        '{}, {}, {}option #{}: Template refers to an empty array'.format(
-                            loader.source, file_name, sections_display, option_index
-                        )
-                    )
-                    break
-            else:
-                loader.errors.append(
-                    '{}, {}, {}option #{}: Template does not refer to a mapping object nor array'.format(
-                        loader.source, file_name, sections_display, option_index
-                    )
-                )
-                break
-
-        # Only set upon success or if there were no templates
-        else:
-            templates_resolved = True
-
-        if not templates_resolved:
             continue
 
         if 'name' not in option:
@@ -207,7 +487,7 @@ def options_validator(options, loader, file_name, *sections):
                 )
             )
 
-        option.setdefault('hidden', hide_template)
+        # `hidden` is already set on every option by expand_template_items (propagate_hidden).
         if not isinstance(option['hidden'], bool):
             loader.errors.append(
                 '{}, {}, {}{}: Attribute `hidden` must be true or false'.format(
@@ -353,14 +633,6 @@ def options_validator(options, loader, file_name, *sections):
             previous_sections = list(sections)
             previous_sections.append(option_name)
             options_validator(nested_options, loader, file_name, *previous_sections)
-
-    # If there are unused overrides, add the associated error messages
-    if overrides:
-        for option_index, errors in override_errors:
-            error_message = '\n'.join(errors)
-            loader.errors.append(
-                f'{loader.source}, {file_name}, {sections_display}option #{option_index}: {error_message}'
-            )
 
 
 def formats_validator(formats, loader, file_name, sections_display, option_name, property_name=None):

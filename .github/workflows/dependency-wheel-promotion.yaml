@@ -27,6 +27,25 @@ jobs:
     - name: Checkout trusted code
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+    - name: Find existing lifecycle comment
+      id: find_comment
+      uses: peter-evans/find-comment@b30e6a3c0ed37e7c023ccd3f1db5c6c0b0c23aad # v4.0.0
+      with:
+        issue-number: ${{ inputs.pr_number }}
+        body-includes: "<!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->"
+
+    - name: Post lifecycle comment (started)
+      id: started_comment
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      with:
+        issue-number: ${{ inputs.pr_number }}
+        comment-id: ${{ steps.find_comment.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          <!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->
+          Wheel promotion started for commit `${{ inputs.head_sha }}` by @${{ github.actor }}.
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
     - name: Checkout PR lockfiles only
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
@@ -62,41 +81,57 @@ jobs:
 
     - name: Set dependency-wheel-promotion status to success
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        HEAD_SHA: ${{ inputs.head_sha }}
       with:
         script: |
           await github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ inputs.head_sha }}',
+            sha: process.env.HEAD_SHA,
             state: 'success',
             context: 'dependency-wheel-promotion',
             description: 'Wheels promoted to stable storage.',
             target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
           });
 
-    - name: Post success comment
-      uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+    - name: Update lifecycle comment (success)
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
       with:
-        script: |
-          const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-          await github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: ${{ inputs.pr_number }},
-            body: `Wheels promoted to stable storage for commit ${{ inputs.head_sha }} by @${context.actor}. [Workflow run](${runUrl}).`,
-          });
+        issue-number: ${{ inputs.pr_number }}
+        comment-id: ${{ steps.started_comment.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          <!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->
+          Wheels promoted to stable storage for commit `${{ inputs.head_sha }}` by @${{ github.actor }}.
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
     - name: Set dependency-wheel-promotion status to error
       if: failure()
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+      env:
+        HEAD_SHA: ${{ inputs.head_sha }}
       with:
         script: |
           await github.rest.repos.createCommitStatus({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            sha: '${{ inputs.head_sha }}',
+            sha: process.env.HEAD_SHA,
             state: 'error',
             context: 'dependency-wheel-promotion',
             description: 'Wheel promotion failed. Check the Actions tab for details.',
             target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
           });
+
+    - name: Update lifecycle comment (failure)
+      if: failure()
+      uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+      with:
+        issue-number: ${{ inputs.pr_number }}
+        comment-id: ${{ steps.started_comment.outputs.comment-id }}
+        edit-mode: replace
+        body: |
+          <!-- dependency-wheel-promotion pr=${{ inputs.pr_number }} sha=${{ inputs.head_sha }} -->
+          Wheel promotion failed for commit `${{ inputs.head_sha }}` by @${{ github.actor }}.
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          Check the workflow logs before retrying.

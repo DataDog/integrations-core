@@ -2,7 +2,50 @@
 
 <!-- towncrier release notes start -->
 
-## 15.16.1 / 2026-04-28
+## 15.18.0 / 2026-07-08
+
+***Added***:
+
+* Bump the minimum supported version of `datadog-checks-base` to 37.41.0. ([#24267](https://github.com/DataDog/integrations-core/pull/24267))
+
+***Fixed***:
+
+* Fix `mysql.index.reads`, `mysql.index.updates`, and `mysql.index.deletes` metrics by submitting them as monotonic counts instead of gauges, so they correctly reflect per-interval operations rather than cumulative `performance_schema` lifetime totals. ([#24125](https://github.com/DataDog/integrations-core/pull/24125))
+* Fix MariaDB multi-channel replication reporting 0 channels by using `SHOW ALL REPLICAS STATUS` when no specific channel is configured. ([#24178](https://github.com/DataDog/integrations-core/pull/24178))
+* Remove duplicated `agent_hostname` logic now provided by the `DatabaseCheck` base class. ([#24269](https://github.com/DataDog/integrations-core/pull/24269))
+* Remove duplicated tags logic now provided by the `DatabaseCheck` base class. ([#24273](https://github.com/DataDog/integrations-core/pull/24273))
+* Remove duplicated `database_identifier` logic now provided by the `DatabaseCheck` base class. ([#24277](https://github.com/DataDog/integrations-core/pull/24277))
+* Change display priority of Postgres and MySQL to keep only the most important fields on top. ([#24287](https://github.com/DataDog/integrations-core/pull/24287))
+
+## 15.17.2 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 15.17.1 / 2026-06-09
+
+***Fixed***:
+
+* Bump `datadog-checks-base` to `>=37.39.1`. ([#23950](https://github.com/DataDog/integrations-core/pull/23950))
+
+## 15.17.0 / 2026-05-14 / Agent 7.80.0
+
+***Added***:
+
+* Collect additional statement metrics for sort operations, temporary table usage, and join strategies from events_statements_summary_by_digest. ([#23365](https://github.com/DataDog/integrations-core/pull/23365))
+* Add metadata lock blocking detection to activity query for MySQL 8.0+. ([#23505](https://github.com/DataDog/integrations-core/pull/23505))
+* Add collection of global wait event metrics from performance_schema for DBM-enabled instances. ([#23562](https://github.com/DataDog/integrations-core/pull/23562))
+
+***Fixed***:
+
+* Re-order configuration fields based on real-world usage data. ([#23272](https://github.com/DataDog/integrations-core/pull/23272))
+* Use parameterized queries for table names in schema collection. ([#23366](https://github.com/DataDog/integrations-core/pull/23366))
+* Use parameterized queries for replication channel configuration to safely handle special characters in channel names. ([#23581](https://github.com/DataDog/integrations-core/pull/23581))
+* Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled. ([#23593](https://github.com/DataDog/integrations-core/pull/23593))
+* Log a warning when a 1045 access denied error occurs with no SSL configuration, hinting that SSL may be required by the MySQL instance. ([#23607](https://github.com/DataDog/integrations-core/pull/23607))
+
+## 15.16.1 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

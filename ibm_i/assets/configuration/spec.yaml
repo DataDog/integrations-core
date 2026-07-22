@@ -122,4 +122,5 @@ files:
             type: array
             items:
               type: string
+      fleet_configurable: false
     - template: instances/default

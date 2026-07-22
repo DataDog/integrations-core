@@ -6,12 +6,46 @@ import logging
 
 import pymqi
 import pytest
+from dateutil import tz
 from mock import Mock, patch
 
 from datadog_checks.ibm_mq.collectors import QueueMetricCollector
 from datadog_checks.ibm_mq.config import IBMMQConfig
+from datadog_checks.ibm_mq.stats.queue_stats import QueueStats
+
+from . import common
 
 pytestmark = pytest.mark.unit
+
+
+def test_filtered_queues_none_without_queue_patterns_or_regex(instance, get_check):
+    check = get_check(instance)
+    collector = check.queue_metric_collector
+    collector.discover_queues(Mock())
+    assert collector.filtered_queues is None
+
+
+def test_filtered_queues_tracks_monitored_queues_queue_patterns(instance):
+    instance['queue_patterns'] = ['pattern']
+    instance['auto_discover_queues'] = False
+    config = IBMMQConfig(instance, {})
+    collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+    collector._discover_queues = Mock(return_value=['pattern_queue'])
+    queue_manager = Mock()
+    collector.discover_queues(queue_manager)
+    assert collector.filtered_queues == {'pattern_queue', common.QUEUE}
+
+
+def test_filtered_queues_tracks_monitored_queues_queue_regex(instance):
+    instance['queue_regex'] = [r'^pat.*$']
+    instance['auto_discover_queues'] = False
+    instance['queues'] = []
+    config = IBMMQConfig(instance, {})
+    collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+    collector._discover_queues = Mock(return_value=['pattern_queue', 'other_queue'])
+    queue_manager = Mock()
+    collector.discover_queues(queue_manager)
+    assert collector.filtered_queues == {'pattern_queue'}
 
 
 def test_pattern_preceedes_autodiscovery(instance):
@@ -307,3 +341,36 @@ def test_queue_description_tags(
         else:
             desc_tags = [t for t in enriched_tags if t.startswith('queue_desc:')]
             assert len(desc_tags) == 0
+
+
+def _raw_queue_statistics_message(queue_names):
+    blocks = []
+    for name in queue_names:
+        blocks.append(
+            {
+                pymqi.CMQC.MQCA_Q_NAME: name.encode('utf-8'),
+                pymqi.CMQC.MQIA_Q_TYPE: pymqi.CMQC.MQQT_LOCAL,
+                pymqi.CMQC.MQIA_DEFINITION_TYPE: pymqi.CMQC.MQQDT_PREDEFINED,
+            }
+        )
+    return {
+        pymqi.CMQCFC.MQCAMO_START_DATE: b'2020-01-01',
+        pymqi.CMQCFC.MQCAMO_START_TIME: b'12.00.00',
+        pymqi.CMQCFC.MQGACF_Q_STATISTICS_DATA: blocks,
+    }
+
+
+@pytest.mark.parametrize(
+    'filter_on, filtered_names, expected_queue_names',
+    [
+        (True, {'QUEUE.A'}, ['QUEUE.A']),
+        (True, {'QUEUE.B'}, ['QUEUE.B']),
+        (True, set(), []),
+        (False, {'QUEUE.A'}, ['QUEUE.A', 'QUEUE.B']),
+        (True, None, ['QUEUE.A', 'QUEUE.B']),
+    ],
+)
+def test_queue_stats_respects_filter_flag_and_names(filter_on, filtered_names, expected_queue_names):
+    raw = _raw_queue_statistics_message(['QUEUE.A', 'QUEUE.B'])
+    stats = QueueStats(raw, filtered_names, timezone=tz.UTC, filter_queue_statistics_metrics=filter_on)
+    assert [q.name for q in stats.queues] == expected_queue_names

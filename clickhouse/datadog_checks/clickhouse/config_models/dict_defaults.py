@@ -57,6 +57,29 @@ def instance_query_errors():
     )
 
 
+def instance_schema_metrics():
+    return instance.SchemaMetrics(
+        enabled=False,
+        collection_interval=60,
+        run_sync=False,
+    )
+
+
+def instance_collect_schemas():
+    return instance.CollectSchemas(
+        enabled=False,
+        collection_interval=600,
+        max_tables=300,
+        max_columns=1000,
+        max_query_duration=60,
+        include_databases=(),
+        exclude_databases=(),
+        include_tables=(),
+        exclude_tables=(),
+        run_sync=False,
+    )
+
+
 def instance_parts_and_merges():
     return instance.PartsAndMerges(
         enabled=True,

@@ -22,7 +22,7 @@ def test_disks_endpoint_failure_falls_back_to_unknown(dd_run_check, aggregator, 
     aggregator.assert_metric(
         "nutanix.host.storage_capacity",
         at_least=1,
-        tags=HOST_TAGS + ['ntnx_disk_status:unknown'],
+        tags=HOST_TAGS + ['ntnx_disk_status:$unknown'],
         hostname=HOST_NAME,
     )
 

@@ -22,6 +22,7 @@ validations = [
     "readmes",
     "saved-views",
     "version",
+    "qa-label"
 ]
 
 [overrides.display-name]
@@ -40,18 +41,24 @@ teamcity = "TeamCity"
 win32_event_log = "Windows Event Log"
 krakend = "KrakenD"
 lustre = "Lustre"
+kueue = "Kueue"
 prefect = "Prefect"
 n8n = "n8n"
+hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
+dell_powerflex = "Dell Powerflex"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
 lustre = "lustre."
+kueue = "kueue."
 prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
 nifi = "nifi."
+dell_powerflex = "dell_powerflex."
+hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -86,9 +93,6 @@ runners = { windows = ["windows-2022"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
-
-[overrides.ci.tokumx]
-exclude = true
 
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
@@ -201,7 +205,6 @@ kube_scheduler = "kube_scheduler"
 nifi = "nifi"
 nginx_ingress_controller = "nginx-ingress-controller"
 
-
 [overrides.dep.updates]
 exclude = [
     'pyasn1',          # https://github.com/pyasn1/pyasn1/issues/52
@@ -213,6 +216,7 @@ exclude = [
     'psutil',
     'pyvmomi',      # 9+ has breaking changes
     'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'pymysql',      # Pinned to below 1.2.0 as requested by DBM while they work on supporting 1.2+
     'foundationdb', # 7+ has a breaking changes
     'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
 
@@ -239,6 +243,24 @@ trace-captures = false
 ## Just in case __pycache__ is present in the root of the repo
 __pycache__ = false
 
+# Integrations that were pinned in requirements-agent-release.txt but were not shipped
+# in the listed Agent releases. Agent release generation uses these entries to skip
+# false positives when building AGENT_INTEGRATIONS.md and Agent changelog data.
+# Use by-integration for one-off skips:
+#   integration_name = ["7.78.0", "7.79.0"]
+# Use by-agent-version-range for inclusive Agent version ranges:
+#   "7.74.0..7.78.0" = ["datadog-first-integration", "datadog-second-integration"]
+[overrides.release.agent.unreleased-integrations.by-integration]
+
+[overrides.release.agent.unreleased-integrations.by-agent-version-range]
+"7.74.0..7.78.0" = [
+  "datadog-control-m",
+  "datadog-krakend",
+  "datadog-lustre",
+  "datadog-n8n",
+  "datadog-prefect",
+]
+
 # Explicitely add the platforms supported by an integration for those where the manifest has been
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
@@ -248,7 +270,11 @@ __pycache__ = false
 [overrides.manifest.platforms]
 krakend = ["linux", "windows", "mac_os"]
 lustre = ["linux", "windows", "mac_os"]
+kueue = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
 nifi = ["linux", "windows", "mac_os"]
+dell_powerflex = ["linux", "windows", "mac_os"]
+hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
+

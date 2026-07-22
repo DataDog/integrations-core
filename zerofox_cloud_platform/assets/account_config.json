@@ -1,0 +1,27 @@
+{
+  "supported_auth_methods": [],
+  "additional_config_fields": [
+    {
+      "text": {},
+      "key": "username",
+      "label": "Username",
+      "help": "ZeroFox Username.",
+      "editable": true,
+      "required": true
+    },
+    {
+      "password": {},
+      "key": "password",
+      "label": "password",
+      "help": "ZeroFox Password.",
+      "editable": true,
+      "required": true
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "zerofox-cloud-platform-logs",
+      "additional_config_fields": []
+    }
+  ]
+}

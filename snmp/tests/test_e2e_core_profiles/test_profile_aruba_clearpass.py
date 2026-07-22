@@ -5,6 +5,7 @@
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
+from datadog_checks.snmp.utils import get_profile_definition
 
 from .. import common
 from ..test_e2e_core_metadata import assert_device_metadata
@@ -19,9 +20,30 @@ from .utils import (
 
 pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
 
+CPPM_CAPACITY_METRIC_TYPES = {
+    'cppmSystemMemoryFree': 'gauge',
+    'cppmSystemMemoryTotal': 'gauge',
+    'cppmSystemDiskSpaceFree': 'gauge',
+    'cppmSystemDiskSpaceTotal': 'gauge',
+}
+
+
+def assert_cppm_capacity_metrics_are_forced_to_gauge(profile):
+    profile_definition = get_profile_definition({'definition_file': '{}.yaml'.format(profile)})
+    metric_types = {}
+    for metric in profile_definition['metrics']:
+        for symbol in metric.get('symbols', []):
+            name = symbol['name']
+            if name in CPPM_CAPACITY_METRIC_TYPES:
+                metric_types[name] = symbol.get('metric_type')
+
+    assert metric_types == CPPM_CAPACITY_METRIC_TYPES
+
 
 def test_e2e_profile_aruba_clearpass(dd_agent_check):
     profile = 'aruba-clearpass'
+    assert_cppm_capacity_metrics_are_forced_to_gauge(profile)
+
     config = create_e2e_core_test_config(profile)
     aggregator = common.dd_agent_check_wrapper(dd_agent_check, config, rate=True)
 

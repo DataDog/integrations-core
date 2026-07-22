@@ -17,6 +17,7 @@
       "Category::OS & System",
       "Category::Log Collection",
       "Category::Windows",
+      "Category::SIEM",
       "Offering::Integration"
     ],
     "resources": [

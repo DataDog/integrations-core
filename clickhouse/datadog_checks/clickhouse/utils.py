@@ -25,3 +25,29 @@ class ErrorSanitizer(object):
 
 def compact_query(query):
     return re.sub(r'\n\s+', ' ', query.strip())
+
+
+# Tag added to per-node metrics when collecting from all replicas in single endpoint mode.
+CLUSTER_NODE_TAG = 'clickhouse_node'
+
+
+def cluster_aware_query(base: dict) -> dict:
+    """Build a cluster-aware variant that reads all replicas and tags each row per node.
+
+    Derives the SELECT list and table from the base query, whose shape is always
+    ``SELECT <cols> FROM system.<table>[ <trailing clause>]``.
+    """
+    select, _, tail = base['query'].partition(' FROM system.')
+    table, sep, trailing = tail.partition(' ')
+    return {
+        'name': base['name'],
+        'query': (
+            f"{select}, hostName() AS {CLUSTER_NODE_TAG} "
+            f"FROM clusterAllReplicas('default', system.{table}){sep}{trailing}"
+        ),
+        'columns': [*base['columns'], {'name': CLUSTER_NODE_TAG, 'type': 'tag'}],
+    }
+
+
+def parse_version(version: str) -> list[int]:
+    return [int(v) for v in version.split('.')]

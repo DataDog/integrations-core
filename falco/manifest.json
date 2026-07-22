@@ -26,6 +26,7 @@
     "classifier_tags": [
       "Category::Log Collection",
       "Category::Security",
+      "Category::SIEM",
       "Submitted Data Type::Logs",
       "Supported OS::Linux",
       "Supported OS::Windows",

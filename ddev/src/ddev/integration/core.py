@@ -69,7 +69,11 @@ class Integration:
                     yield Path(root, f)
 
     def requires_changelog_entry(self, path: Path) -> bool:
-        return self.package_directory in path.parents or (self.is_package and path == (self.path / 'pyproject.toml'))
+        return (
+            self.package_directory in path.parents
+            or (self.is_package and path == (self.path / 'pyproject.toml'))
+            or path == self.example_config
+        )
 
     @property
     def release_tag_pattern(self) -> str:
@@ -142,6 +146,10 @@ class Integration:
     def config_spec(self) -> Path:
         relative_path = self.manifest.get('/assets/integration/configuration/spec', 'assets/configuration/spec.yaml')
         return self.path / relative_path
+
+    @cached_property
+    def example_config(self) -> Path:
+        return self.package_directory / 'data' / 'conf.yaml.example'
 
     @cached_property
     def minimum_base_package_version(self) -> str | None:
@@ -222,8 +230,12 @@ class Integration:
         return contents.count('import ') > 1
 
     @cached_property
+    def jmx_metrics_file(self) -> Path:
+        return self.path / 'datadog_checks' / self.package_directory_name / 'data' / 'metrics.yaml'
+
+    @cached_property
     def is_jmx_check(self) -> bool:
-        return (self.path / 'datadog_checks' / self.package_directory_name / 'data' / 'metrics.yaml').is_file()
+        return self.jmx_metrics_file.is_file()
 
     def __eq__(self, other):
         return other.path == self.path

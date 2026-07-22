@@ -13,6 +13,7 @@ infiniband.multicast_rcv_packets,gauge,,packet,,"Number of multicast packets,inc
 infiniband.multicast_rcv_packets.count,count,,packet,,Number of new multicast packets received since the last metric submission (legacy),0,infiniband,,,
 infiniband.multicast_xmit_packets,gauge,,packet,,Number of multicast packets transmitted on all Virtual Lanes from the port (legacy),0,infiniband,,,
 infiniband.multicast_xmit_packets.count,count,,packet,,Number of new multicast packets transmitted since the last metric submission (legacy),0,infiniband,,,
+infiniband.port.rate,gauge,,bit,second,Negotiated port data rate in bits per second,0,infiniband,port rate,,
 infiniband.port_multicast_rcv_packets,gauge,,packet,,Number of multicast packets received,0,infiniband,,,
 infiniband.port_multicast_rcv_packets.count,count,,packet,,Number of new multicast packets received since the last metric submission,0,infiniband,,,
 infiniband.port_multicast_xmit_packets,gauge,,packet,,Number of multicast packets transmitted on all Virtual Lanes from the port,0,infiniband,,,
