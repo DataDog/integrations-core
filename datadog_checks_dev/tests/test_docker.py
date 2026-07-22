@@ -266,19 +266,13 @@ def test_assert_all_discovery_candidates_stable_uses_docker_run_metadata():
     assert DiscoveryCheck.service.id == 'service'
 
 
-def test_get_compose_container_id_falls_back_to_compose_file_without_project_metadata():
+def test_get_compose_container_id_requires_project_metadata():
     with mock.patch('datadog_checks.dev.docker.get_state', return_value={}):
-        with mock.patch(
-            'datadog_checks.dev.docker.run_command', return_value=_docker_result(stdout='container-id\n')
-        ) as run:
-            container_id = _get_compose_container_id('/tmp/docker-compose.yml', 'service')
+        with mock.patch('datadog_checks.dev.docker.run_command') as run:
+            with pytest.raises(AssertionError, match='Could not determine the Compose project name'):
+                _get_compose_container_id('/tmp/docker-compose.yml', 'service')
 
-    assert container_id == 'container-id'
-    run.assert_called_once_with(
-        ['docker', 'compose', '-f', '/tmp/docker-compose.yml', 'ps', '-q', 'service'],
-        capture='out',
-        check=True,
-    )
+    run.assert_not_called()
 
 
 def test_docker_run_saves_compose_metadata(monkeypatch):
