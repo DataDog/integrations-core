@@ -5,17 +5,17 @@
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import StrEnum, auto
 
 
 class ExecutionStatus(StrEnum):
     """Whole-flow execution lifecycle states."""
 
-    IDLE = "idle"
-    RUNNING = "running"
-    FINISHING = "finishing"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    IDLE = auto()
+    RUNNING = auto()
+    FINISHING = auto()
+    COMPLETED = auto()
+    FAILED = auto()
 
     @property
     def is_active(self) -> bool:
@@ -26,10 +26,10 @@ class ExecutionStatus(StrEnum):
 class RunStatus(StrEnum):
     """Finite phase/task execution states shown in the TUI."""
 
-    PENDING = "pending"
-    RUNNING = "running"
-    DONE = "done"
-    FAILED = "failed"
+    PENDING = auto()
+    RUNNING = auto()
+    DONE = auto()
+    FAILED = auto()
 
     @property
     def has_started(self) -> bool:
