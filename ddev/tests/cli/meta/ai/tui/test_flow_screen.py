@@ -355,7 +355,7 @@ async def test_phase_config_screen_renders_phase_info_and_agent_details() -> Non
         task_prompt = screen.query(".task-prompt").first()
         assert "do something" in task_prompt.source
         assert "agent_a" in str(screen.query_one("#phase-agent-name").render())
-        assert "provider · anthropic" in str(screen.query_one("#phase-agent-provider").render())
+        assert "anthropic" in str(screen.query_one("#phase-agent-model").render())
         assert "_No system prompt configured._" in screen.query_one("#phase-agent-prompt").source
 
 
@@ -549,7 +549,8 @@ async def test_phase_config_agent_panel_renders_tools_and_prompt() -> None:
 
         assert "analyst" in str(pilot.app.screen.query_one("#phase-agent-name").render())
         model = pilot.app.screen.query_one("#phase-agent-model")
-        assert "model claude-3-sonnet (anthropic)" in str(model.render())
+        assert "claude-3-sonnet" in str(model.render())
+        assert "anthropic" in str(model.render())
         assert model.region.right <= pilot.app.screen.query_one("#phase-agent-card").content_region.right
         rendered_tools = str(pilot.app.screen.query_one("#phase-agent-tools").render())
         assert rendered_tools == "read_file · create_file · ddev_test"

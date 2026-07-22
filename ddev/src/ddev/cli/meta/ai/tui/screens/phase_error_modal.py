@@ -18,6 +18,7 @@ from ddev.cli.meta.ai.palette import ERROR
 class PhaseErrorModal(ModalScreen[None]):
     """Show the complete error for a failed phase over the execution view."""
 
+    AUTO_FOCUS = "#btn-close"
     BINDINGS = [Binding("escape", "dismiss_modal", "Close")]
 
     def __init__(self, phase_id: str, error: BaseException) -> None:
