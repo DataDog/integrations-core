@@ -10,10 +10,12 @@ from openstack.config import loader
 
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
+from datadog_checks.openstack_controller.api.errors import translate_openstack_sdk_methods
 from datadog_checks.openstack_controller.components.component import Component
 from datadog_checks.openstack_controller.defaults import DEFAULT_DOMAIN_ID
 
 
+@translate_openstack_sdk_methods
 class ApiSdk(Api):
     def __init__(self, config, logger, http):
         super(ApiSdk, self).__init__()

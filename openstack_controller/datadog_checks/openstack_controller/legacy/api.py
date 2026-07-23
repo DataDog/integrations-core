@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 from openstack import connection
 
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError, HTTPTimeoutError
+from datadog_checks.openstack_controller.api.errors import http_status_code, translate_openstack_sdk_methods
 
 from .exceptions import (
     AuthenticationNeeded,
@@ -91,6 +92,7 @@ class AbstractApi(object):
         raise NotImplementedError()
 
 
+@translate_openstack_sdk_methods
 class OpenstackSDKApi(AbstractApi):
     def __init__(self, logger):
         super(OpenstackSDKApi, self).__init__(logger)
@@ -286,15 +288,17 @@ class SimpleApi(AbstractApi):
         """
         self.logger.debug("Request URL, Headers and Params: %s, %s, %s", url, self.http.options['headers'], params)
 
+        resp = None
         try:
             resp = self.http.get(url, params=params)
             resp.raise_for_status()
         except HTTPStatusError as e:
             self.logger.debug("Error contacting openstack endpoint: %s", e)
-            if resp.status_code == 401:
+            status_code = http_status_code(e, response=resp)
+            if status_code == 401:
                 self.logger.info('Need to reauthenticate before next check')
                 raise AuthenticationNeeded()
-            elif resp.status_code == 409:
+            elif status_code == 409:
                 raise InstancePowerOffFailure()
             else:
                 raise e

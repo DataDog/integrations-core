@@ -6,8 +6,6 @@ import inspect
 from enum import Enum, unique
 from functools import wraps
 
-from openstack.exceptions import HttpException
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPRequestError, HTTPStatusError
 from datadog_checks.openstack_controller.api.catalog import CatalogEndPointFailure
@@ -77,7 +75,7 @@ class Component:
                         tags = argument_value('tags', func, *args, **kwargs)
                         self.check.service_check(self.SERVICE_CHECK, AgentCheck.OK, tags=tags)
                     return result if result is not None else True
-                except (HttpException, HTTPRequestError, HTTPStatusError) as e:
+                except (HTTPRequestError, HTTPStatusError) as e:
                     self.check.log.debug(
                         "Encountered an HTTP error in '%s:%s' [%s]: %s",
                         self.__class__.__name__,

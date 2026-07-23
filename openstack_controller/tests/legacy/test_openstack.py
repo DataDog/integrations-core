@@ -14,6 +14,7 @@ from mock import ANY
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPConnectionError, HTTPStatusError
+from datadog_checks.openstack_controller.api.errors import translate_openstack_error
 from datadog_checks.openstack_controller.legacy.api import AbstractApi, Authenticator, SimpleApi
 from datadog_checks.openstack_controller.legacy.exceptions import IncompleteConfig, KeystoneUnreachable
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
@@ -29,11 +30,26 @@ pytestmark = [
 ]
 
 
-def sdk_http_exception(status_code: int | None = None) -> openstack.exceptions.HttpException:
+def translated_sdk_http_error(status_code: int | None = None) -> HTTPStatusError:
     if status_code is None:
-        return openstack.exceptions.HttpException()
+        error = openstack.exceptions.HttpException()
+    else:
+        response = mock.Mock(
+            content=b'',
+            cookies={},
+            encoding=None,
+            headers={},
+            history=[],
+            links={},
+            reason='',
+            request=None,
+            status_code=status_code,
+            text='',
+            url='',
+        )
+        error = openstack.exceptions.HttpException(response=response)
 
-    return openstack.exceptions.HttpException(response=mock.Mock(status_code=status_code, headers={}, request=None))
+    return translate_openstack_error(error)
 
 
 def test_parse_uptime_string(aggregator):
@@ -149,11 +165,11 @@ def test_check_with_config_file(mock_api, aggregator):
     mock_api.assert_called_with(ANY, common.CONFIG_FILE_INSTANCE, ANY)
 
 
-def test_send_api_service_checks_handles_sdk_http_exception(aggregator):
+def test_send_api_service_checks_handles_translated_sdk_http_error(aggregator):
     check = OpenStackControllerLegacyCheck("test", {'ssl_verify': False}, [common.CONFIG_FILE_INSTANCE])
 
-    with mock.patch.object(check, 'get_nova_endpoint', side_effect=sdk_http_exception(500)):
-        with mock.patch.object(check, 'get_neutron_endpoint', side_effect=sdk_http_exception(500)):
+    with mock.patch.object(check, 'get_nova_endpoint', side_effect=translated_sdk_http_error(500)):
+        with mock.patch.object(check, 'get_neutron_endpoint', side_effect=translated_sdk_http_error(500)):
             check._send_api_service_checks('http://10.0.2.15:5000', ['tag'])
 
     tags = ['keystone_server: http://10.0.2.15:5000', 'tag']
@@ -395,7 +411,7 @@ def test_collect_server_metrics_pre_2_48(server_diagnostics, os_aggregates, aggr
     'error',
     [
         pytest.param(HTTPStatusError('not found', response=mock.Mock(status_code=404)), id='agnostic_status_error'),
-        pytest.param(sdk_http_exception(404), id='sdk_http_exception'),
+        pytest.param(translated_sdk_http_error(404), id='translated_sdk_http_error'),
     ],
 )
 def test_collect_server_diagnostic_metrics_404_is_debug_logged(os_aggregates, error, aggregator, caplog):
@@ -421,8 +437,8 @@ def test_collect_server_diagnostic_metrics_404_is_debug_logged(os_aggregates, er
     [
         pytest.param(HTTPStatusError('boom', response=mock.Mock(status_code=500)), id='agnostic_status_500'),
         pytest.param(HTTPStatusError('boom'), id='agnostic_missing_response'),
-        pytest.param(sdk_http_exception(500), id='sdk_status_500'),
-        pytest.param(sdk_http_exception(), id='sdk_missing_response'),
+        pytest.param(translated_sdk_http_error(500), id='translated_sdk_status_500'),
+        pytest.param(translated_sdk_http_error(), id='translated_sdk_missing_response'),
     ],
 )
 def test_collect_server_diagnostic_metrics_non_404_warns(os_aggregates, error, aggregator):
@@ -447,18 +463,18 @@ def test_collect_server_diagnostic_metrics_non_404_warns(os_aggregates, error, a
         (HTTPStatusError('server error', response=mock.Mock(status_code=500)), True),
         (HTTPStatusError('no response'), True),
         (HTTPConnectionError('connection refused'), True),
-        (sdk_http_exception(400), False),
-        (sdk_http_exception(500), True),
-        (sdk_http_exception(), True),
+        (translated_sdk_http_error(400), False),
+        (translated_sdk_http_error(500), True),
+        (translated_sdk_http_error(), True),
     ],
     ids=[
         'status_lt_500_warns',
         'status_ge_500_backs_off',
         'missing_response_backs_off',
         'connection_error_backs_off',
-        'sdk_status_lt_500_warns',
-        'sdk_status_ge_500_backs_off',
-        'sdk_missing_response_backs_off',
+        'translated_sdk_status_lt_500_warns',
+        'translated_sdk_status_ge_500_backs_off',
+        'translated_sdk_missing_response_backs_off',
     ],
 )
 def test_check_nova_api_error_backoff(mock_api, error, expect_backoff):
