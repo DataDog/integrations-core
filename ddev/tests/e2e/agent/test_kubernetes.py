@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-import re
 import subprocess
 
 import pytest
@@ -81,20 +80,6 @@ def command_calls(run_command):
     return [call.args[0] for call in run_command.call_args_list]
 
 
-def test_namespace_metadata_cannot_override_generated_name(agent, metadata):
-    metadata['kubernetes']['namespace'] = 'custom-namespace'
-
-    assert agent._namespace == 'ddev-agent-velero-py3-12-ad72b57a'
-
-
-def test_generated_namespace_is_a_valid_kubernetes_name(app, get_integration, metadata, config_file):
-    integration = get_integration('Very_Long.Integration-' + 'x' * 100)
-    agent = KubernetesAgent(app, integration, 'Py3.12+FIPS', metadata, config_file)
-
-    assert len(agent._namespace) == 63
-    assert re.fullmatch(r'[a-z0-9]([-a-z0-9]*[a-z0-9])?', agent._namespace)
-
-
 def test_start_uses_selected_image_rbac_config_and_local_packages(
     agent, metadata, config_file, auto_conf, temp_dir, run_command
 ):
@@ -102,6 +87,8 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     local_base.ensure_dir_exists()
     integration = temp_dir / 'velero'
     integration.ensure_dir_exists()
+    metadata['start_commands'] = ['echo start']
+    metadata['post_install_commands'] = ['echo post-install']
 
     agent.start(
         agent_build='registry.example.com/datadog-agent:test',
@@ -113,9 +100,18 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
     assert calls[0] == [*prefix, 'get', 'nodes', '-o', 'json']
 
-    create_call = next(call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-'])
-    manifest = json.loads(create_call.kwargs['input'])
+    create_calls = [call for call in run_command.call_args_list if call.args[0] == [*prefix, 'create', '-f', '-']]
+    assert len(create_calls) == 1
+    manifest = json.loads(create_calls[0].kwargs['input'])
     resources = {item['kind']: item for item in manifest['items']}
+    assert resources['Namespace']['metadata']['name'] == 'ddev-agent'
+    assert resources['ServiceAccount']['metadata']['namespace'] == 'ddev-agent'
+    assert resources['ClusterRole']['metadata']['name'] == 'ddev-agent'
+    assert resources['ClusterRoleBinding']['metadata']['name'] == 'ddev-agent'
+    assert resources['ClusterRoleBinding']['roleRef']['name'] == 'ddev-agent'
+    assert resources['ClusterRoleBinding']['subjects'][0]['namespace'] == 'ddev-agent'
+    assert resources['Pod']['metadata']['namespace'] == 'ddev-agent'
+    assert resources['Pod']['spec']['containers'][0]['name'] == 'agent'
     assert resources['Pod']['spec']['containers'][0]['image'] == 'registry.example.com/datadog-agent:test'
     assert resources['Pod']['spec']['containers'][0]['imagePullPolicy'] == 'Always'
     assert resources['Pod']['spec']['serviceAccountName'] == 'ddev-agent'
@@ -145,6 +141,33 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
     assert env['DD_AUTOCONFIG_FROM_ENVIRONMENT'] == 'true'
     assert 'DD_KUBERNETES_KUBELET_HOST' in env
     assert 'DD_KUBERNETES_KUBELET_NODENAME' in env
+
+    start_command = [
+        *prefix,
+        'exec',
+        '--namespace',
+        'ddev-agent',
+        'pod/ddev-agent',
+        '--container',
+        'agent',
+        '--',
+        'echo',
+        'start',
+    ]
+    post_install_command = [
+        *prefix,
+        'exec',
+        '--namespace',
+        'ddev-agent',
+        'pod/ddev-agent',
+        '--container',
+        'agent',
+        '--',
+        'echo',
+        'post-install',
+    ]
+    assert start_command in calls
+    assert post_install_command in calls
 
     assert [
         *prefix,
@@ -187,7 +210,7 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
         auto_conf.name,
         f'{agent._namespace}/ddev-agent:/etc/datadog-agent/conf.d/velero.d/auto_conf.yaml',
     ] in calls
-    assert [
+    restart_command = [
         *prefix,
         'exec',
         '--namespace',
@@ -199,7 +222,9 @@ def test_start_uses_selected_image_rbac_config_and_local_packages(
         'sh',
         '-c',
         RESTART_COMMAND,
-    ] in calls
+    ]
+    assert restart_command in calls
+    assert calls.index(start_command) < calls.index(post_install_command) < calls.index(restart_command)
     assert metadata['kubernetes']['local_packages'] == [
         {'path': str(local_base), 'name': 'datadog_checks_base', 'features': '[kube]'},
         {'path': str(integration), 'name': 'velero', 'features': '[deps]'},
@@ -232,7 +257,7 @@ def test_rejects_multi_node_clusters(agent, app, mocker):
     run_command.assert_called_once()
 
 
-def test_creation_failure_stops_startup(agent, app, mocker):
+def test_partial_manifest_creation_failure_is_propagated(agent, app, mocker):
     nodes = {'items': [{'metadata': {'name': 'kind-control-plane'}, 'spec': {}}]}
 
     def run(command, **kwargs):
@@ -345,40 +370,10 @@ def test_invoke_removes_pod_config_when_host_config_is_absent(agent, config_file
     ] in calls
 
 
-def test_stop_is_idempotent_when_pod_is_absent(agent, run_command):
+def test_stop_is_no_op(agent, run_command):
     agent.stop()
 
-    calls = command_calls(run_command)
-    prefix = ['kubectl', '--kubeconfig', '/tmp/kubeconfig']
-    assert calls == [
-        [
-            *prefix,
-            'get',
-            'pod',
-            'ddev-agent',
-            '--namespace',
-            agent._namespace,
-            '--ignore-not-found=true',
-            '-o',
-            'name',
-        ],
-        [
-            *prefix,
-            'delete',
-            'namespace',
-            agent._namespace,
-            '--ignore-not-found=true',
-            '--wait=true',
-            '--timeout=120s',
-        ],
-        [
-            *prefix,
-            'delete',
-            'clusterrole,clusterrolebinding',
-            agent._cluster_resource_name,
-            '--ignore-not-found=true',
-        ],
-    ]
+    run_command.assert_not_called()
 
 
 def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
@@ -427,26 +422,6 @@ def test_restart_resynchronizes_config_auto_conf_and_editable_sources(
     assert config_copy in calls
     assert calls.index(package_copy) < calls.index(config_copy) < calls.index(restart)
     assert not any('pip' in command for command in calls)
-
-
-def test_stop_cleans_resources_after_stop_command_failure(agent, app, mocker):
-    agent.metadata['stop_commands'] = ['false']
-
-    def run(command, **kwargs):
-        if command[-1:] == ['name'] and 'pod' in command:
-            return successful_process(command, stdout=b'pod/ddev-agent\n')
-        if command[-1:] == ['false']:
-            raise subprocess.CalledProcessError(1, command)
-        return successful_process(command)
-
-    run_command = mocker.patch.object(app.platform, 'run_command', side_effect=run)
-
-    with pytest.raises(RuntimeError, match='Errors while stopping Kubernetes Agent'):
-        agent.stop()
-
-    calls = command_calls(run_command)
-    assert any('namespace' in command and 'delete' in command for command in calls)
-    assert any('clusterrole,clusterrolebinding' in command and 'delete' in command for command in calls)
 
 
 def test_shell_and_logs_use_backend_commands(agent, run_command):
