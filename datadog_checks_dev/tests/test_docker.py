@@ -14,6 +14,7 @@ from datadog_checks.dev._env import get_state, serialize_data
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.docker import (
     ComposeFileUp,
+    _get_compose_container_id,
     assert_all_discovery_candidates_stable,
     compose_file_active,
     docker_run,
@@ -196,7 +197,7 @@ def test_assert_all_discovery_candidates_stable_generates_and_runs_candidates():
     )
 
     def fake_run_command(command, **kwargs):
-        if command[:2] == ['docker', 'compose']:
+        if command[:2] == ['docker', 'ps']:
             return _docker_result(stdout='container-id\n')
         if command[:2] == ['docker', 'inspect']:
             return _docker_result(stdout=json.dumps([inspect_data]))
@@ -237,7 +238,7 @@ def test_assert_all_discovery_candidates_stable_uses_docker_run_metadata():
 
     def fake_run_command(command, **kwargs):
         commands.append(command)
-        if command[:2] == ['docker', 'compose']:
+        if command[:2] == ['docker', 'ps']:
             return _docker_result(stdout='container-id\n')
         if command[:2] == ['docker', 'inspect']:
             return _docker_result(stdout=json.dumps([_container_inspect(ports=('8080/tcp',))]))
@@ -251,8 +252,19 @@ def test_assert_all_discovery_candidates_stable_uses_docker_run_metadata():
         with mock.patch('datadog_checks.dev.docker.run_command', side_effect=fake_run_command):
             assert_all_discovery_candidates_stable(mock.Mock(), DiscoveryCheck)
 
-    assert commands[0] == ['docker', 'compose', '-p', 'project', '-f', '/tmp/docker-compose.yml', 'ps', '-q', 'service']
+    assert commands[0][:2] == ['docker', 'ps']
+    assert 'label=com.docker.compose.project=project' in commands[0]
+    assert 'label=com.docker.compose.service=service' in commands[0]
     assert DiscoveryCheck.service.id == 'service'
+
+
+def test_get_compose_container_id_requires_project_metadata():
+    with mock.patch('datadog_checks.dev.docker.get_state', return_value={}):
+        with mock.patch('datadog_checks.dev.docker.run_command') as run:
+            with pytest.raises(AssertionError, match='Could not determine the Compose project name'):
+                _get_compose_container_id('/tmp/docker-compose.yml', 'service')
+
+    run.assert_not_called()
 
 
 def test_docker_run_saves_compose_metadata(monkeypatch):
@@ -353,7 +365,7 @@ def test_assert_all_discovery_candidates_stable_reports_incremental_logs(caplog)
     )
 
     def fake_run_command(command, **kwargs):
-        if command[:2] == ['docker', 'compose']:
+        if command[:2] == ['docker', 'ps']:
             return _docker_result(stdout='container-id\n')
         if command[:2] == ['docker', 'inspect']:
             return _docker_result(stdout=json.dumps([_container_inspect()]))
@@ -368,6 +380,7 @@ def test_assert_all_discovery_candidates_stable_reports_incremental_logs(caplog)
                 DiscoveryCheck,
                 '/tmp/docker-compose.yml',
                 'service',
+                project_name='project',
             )
 
     assert [record.message for record in caplog.records if record.message.startswith('New log line:')] == [
@@ -390,7 +403,7 @@ def test_assert_all_discovery_candidates_stable_detects_restarts():
     )
 
     def fake_run_command(command, **kwargs):
-        if command[:2] == ['docker', 'compose']:
+        if command[:2] == ['docker', 'ps']:
             return _docker_result(stdout='container-id\n')
         if command[:2] == ['docker', 'inspect']:
             return _docker_result(stdout=json.dumps([next(inspect_results)]))
@@ -405,6 +418,7 @@ def test_assert_all_discovery_candidates_stable_detects_restarts():
                 DiscoveryCheck,
                 '/tmp/docker-compose.yml',
                 'service',
+                project_name='project',
             )
 
 
@@ -422,7 +436,7 @@ def test_assert_all_discovery_candidates_stable_detects_new_crash_logs():
     )
 
     def fake_run_command(command, **kwargs):
-        if command[:2] == ['docker', 'compose']:
+        if command[:2] == ['docker', 'ps']:
             return _docker_result(stdout='container-id\n')
         if command[:2] == ['docker', 'inspect']:
             return _docker_result(stdout=json.dumps([_container_inspect()]))
@@ -437,6 +451,7 @@ def test_assert_all_discovery_candidates_stable_detects_new_crash_logs():
                 DiscoveryCheck,
                 '/tmp/docker-compose.yml',
                 'service',
+                project_name='project',
             )
 
 
@@ -455,7 +470,7 @@ def test_assert_all_discovery_candidates_stable_ignores_old_stderr_when_new_stdo
     )
 
     def fake_run_command(command, **kwargs):
-        if command[:2] == ['docker', 'compose']:
+        if command[:2] == ['docker', 'ps']:
             return _docker_result(stdout='container-id\n')
         if command[:2] == ['docker', 'inspect']:
             return _docker_result(stdout=json.dumps([_container_inspect()]))
@@ -469,4 +484,5 @@ def test_assert_all_discovery_candidates_stable_ignores_old_stderr_when_new_stdo
             DiscoveryCheck,
             '/tmp/docker-compose.yml',
             'service',
+            project_name='project',
         )
