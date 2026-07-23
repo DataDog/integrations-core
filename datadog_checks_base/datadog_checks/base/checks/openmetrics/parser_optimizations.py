@@ -9,19 +9,22 @@ scanning function (_next_unquoted_char). This caused a ~3-5x performance regress
 (see https://github.com/prometheus/client_python/issues/1114).
 
 This module restores the pre-v0.22.0 parsing approach by replacing _parse_sample
-and _parse_labels with their v0.21.1 implementations that use C-level str.index()
-and str.rindex() for fast delimiter lookup. For the OpenMetrics parser (which has
-no v0.21.1 equivalent), _next_unquoted_char is replaced with a str.find()-based
-version that avoids character-by-character iteration.
+in both the Prometheus text format and OpenMetrics parsers with their v0.21.1
+implementations that use C-level str.index()/str.rindex() for fast delimiter lookup.
 
-The original v0.21.1 source:
+The original v0.21.1 sources:
 https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/parser.py
+https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/openmetrics/parser.py
 """
-
-import string
 
 import prometheus_client.parser as _prom_parser
 from prometheus_client.samples import Sample
+from prometheus_client.validation import METRIC_LABEL_NAME_RE
+
+try:
+    import prometheus_client.openmetrics.parser as _om_parser
+except ImportError:
+    _om_parser = None
 
 
 # Copied from prometheus_client v0.21.1:
@@ -103,19 +106,175 @@ def _parse_sample(text):
         return Sample(name, {}, value, timestamp)
 
 
-def _next_unquoted_char(text, chs, startidx=0):
-    """str.find()-based replacement for the character-by-character _next_unquoted_char.
+# Copied from prometheus_client v0.21.1:
+# https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/openmetrics/parser.py#L116-L181
+def _om_parse_labels_with_state_machine(text):
+    # The { has already been parsed.
+    state = 'startoflabelname'
+    labelname = []
+    labelvalue = []
+    labels = {}
+    labels_len = 0
 
-    Used for the OpenMetrics parser path which has no v0.21.1 equivalent to copy.
-    """
-    if chs is None:
-        chs = string.whitespace
-    best = -1
-    for ch in chs:
-        p = text.find(ch, startidx)
-        if p != -1 and (best == -1 or p < best):
-            best = p
-    return best
+    for char in text:
+        if state == 'startoflabelname':
+            if char == '}':
+                state = 'endoflabels'
+            else:
+                state = 'labelname'
+                labelname.append(char)
+        elif state == 'labelname':
+            if char == '=':
+                state = 'labelvaluequote'
+            else:
+                labelname.append(char)
+        elif state == 'labelvaluequote':
+            if char == '"':
+                state = 'labelvalue'
+            else:
+                raise ValueError("Invalid line: " + text)
+        elif state == 'labelvalue':
+            if char == '\\':
+                state = 'labelvalueslash'
+            elif char == '"':
+                ln = ''.join(labelname)
+                if not METRIC_LABEL_NAME_RE.match(ln):
+                    raise ValueError("Invalid line, bad label name: " + text)
+                if ln in labels:
+                    raise ValueError("Invalid line, duplicate label name: " + text)
+                labels[ln] = ''.join(labelvalue)
+                labelname = []
+                labelvalue = []
+                state = 'endoflabelvalue'
+            else:
+                labelvalue.append(char)
+        elif state == 'endoflabelvalue':
+            if char == ',':
+                state = 'labelname'
+            elif char == '}':
+                state = 'endoflabels'
+            else:
+                raise ValueError("Invalid line: " + text)
+        elif state == 'labelvalueslash':
+            state = 'labelvalue'
+            if char == '\\':
+                labelvalue.append('\\')
+            elif char == 'n':
+                labelvalue.append('\n')
+            elif char == '"':
+                labelvalue.append('"')
+            else:
+                labelvalue.append('\\' + char)
+        elif state == 'endoflabels':
+            if char == ' ':
+                break
+            else:
+                raise ValueError("Invalid line: " + text)
+        labels_len += 1
+    return labels, labels_len
+
+
+# Copied from prometheus_client v0.21.1:
+# https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/openmetrics/parser.py#L182-L248
+def _om_parse_labels(text):
+    labels = {}
+
+    # Raise error if we don't have valid labels
+    if text and "=" not in text:
+        raise ValueError
+
+    # Copy original labels
+    sub_labels = text
+    try:
+        # Process one label at a time
+        while sub_labels:
+            # The label name is before the equal
+            value_start = sub_labels.index("=")
+            label_name = sub_labels[:value_start]
+            sub_labels = sub_labels[value_start + 1 :]
+
+            # Check for missing quotes
+            if not sub_labels or sub_labels[0] != '"':
+                raise ValueError
+
+            # The first quote is guaranteed to be after the equal
+            value_substr = sub_labels[1:]
+
+            # Check for extra commas
+            if not label_name or label_name[0] == ',':
+                raise ValueError
+            if not value_substr or value_substr[-1] == ',':
+                raise ValueError
+
+            # Find the last unescaped quote
+            i = 0
+            while i < len(value_substr):
+                i = value_substr.index('"', i)
+                if not _om_parser._is_character_escaped(value_substr[:i], i):
+                    break
+                i += 1
+
+            # The label value is between the first and last quote
+            quote_end = i + 1
+            label_value = sub_labels[1:quote_end]
+            # Replace escaping if needed
+            if "\\" in label_value:
+                label_value = _om_parser._replace_escaping(label_value)
+            if not METRIC_LABEL_NAME_RE.match(label_name):
+                raise ValueError("invalid line, bad label name: " + text)
+            if label_name in labels:
+                raise ValueError("invalid line, duplicate label name: " + text)
+            labels[label_name] = label_value
+
+            # Remove the processed label from the sub-slice for next iteration
+            sub_labels = sub_labels[quote_end + 1 :]
+            if sub_labels.startswith(","):
+                next_comma = 1
+            else:
+                next_comma = 0
+            sub_labels = sub_labels[next_comma:]
+
+            # Check for missing commas
+            if sub_labels and next_comma == 0:
+                raise ValueError
+
+        return labels
+
+    except ValueError:
+        raise ValueError("Invalid labels: " + text)
+
+
+# Copied from prometheus_client v0.21.1:
+# https://github.com/prometheus/client_python/blob/v0.21.1/prometheus_client/openmetrics/parser.py#L250-L279
+def _om_parse_sample(text):
+    separator = " # "
+    # Detect the labels in the text
+    label_start = text.find("{")
+    if label_start == -1 or separator in text[:label_start]:
+        # We don't have labels, but there could be an exemplar.
+        name_end = text.index(" ")
+        name = text[:name_end]
+        # Parse the remaining text after the name
+        remaining_text = text[name_end + 1 :]
+        value, timestamp, exemplar = _om_parser._parse_remaining_text(remaining_text)
+        return Sample(name, {}, value, timestamp, exemplar)
+    # The name is before the labels
+    name = text[:label_start]
+    if separator not in text:
+        # Line doesn't contain an exemplar
+        # We can use `rindex` to find `label_end`
+        label_end = text.rindex("}")
+        label = text[label_start + 1 : label_end]
+        labels = _om_parse_labels(label)
+    else:
+        # Line potentially contains an exemplar
+        # Fallback to parsing labels with a state machine
+        labels, labels_len = _om_parse_labels_with_state_machine(text[label_start + 1 :])
+        label_end = labels_len + len(name)
+    # Parsing labels succeeded, continue parsing the remaining text
+    remaining_text = text[label_end + 2 :]
+    value, timestamp, exemplar = _om_parser._parse_remaining_text(remaining_text)
+    return Sample(name, labels, value, timestamp, exemplar)
 
 
 def apply():
@@ -127,17 +286,9 @@ def apply():
     _prom_parser._parse_sample = _parse_sample
     _prom_parser._dd_optimized = True
 
-    # OpenMetrics format: replace _next_unquoted_char with str.find() version.
-    # The OpenMetrics parser imports _next_unquoted_char, parse_labels, and
-    # _split_quoted from prometheus_client.parser via `from ..parser import`,
-    # so we must patch both modules' bindings.
-    _prom_parser._next_unquoted_char = _next_unquoted_char
-    try:
-        import prometheus_client.openmetrics.parser as _om_parser
-
-        _om_parser._next_unquoted_char = _next_unquoted_char
-    except (ImportError, AttributeError):
-        pass
+    # OpenMetrics format: replace _parse_sample with v0.21.1 implementation
+    if _om_parser is not None:
+        _om_parser._parse_sample = _om_parse_sample
 
 
 apply()

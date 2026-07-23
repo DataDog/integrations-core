@@ -6,7 +6,7 @@
 import pytest
 
 from datadog_checks.base.checks.openmetrics.parser_optimizations import (
-    _next_unquoted_char,
+    _om_parse_sample,
     _parse_labels,
     _parse_sample,
 )
@@ -170,16 +170,31 @@ def test_parse_full_newline_in_label_value():
 
 
 @pytest.mark.parametrize(
-    'text, chs, startidx, expected',
+    'text, expected_name, expected_labels, expected_value',
     [
-        pytest.param('metric{label="value"} 1', ['{'], 0, 6, id='open_brace'),
-        pytest.param('metric{label="value"} 1', ['}'], 6, 20, id='close_brace'),
-        pytest.param('a="b" c', [' '], 0, 5, id='space_unquoted'),
-        pytest.param('nope', ['{'], 0, -1, id='not_found'),
+        pytest.param('test_gauge 42', 'test_gauge', {}, 42, id='simple'),
+        pytest.param(
+            'http_requests_total{method="GET",code="200"} 1027',
+            'http_requests_total',
+            {'method': 'GET', 'code': '200'},
+            1027,
+            id='labeled',
+        ),
     ],
 )
-def test_next_unquoted_char(text, chs, startidx, expected):
-    assert _next_unquoted_char(text, chs, startidx) == expected
+def test_om_parse_sample(text, expected_name, expected_labels, expected_value):
+    sample = _om_parse_sample(text)
+    assert sample.name == expected_name
+    assert sample.labels == expected_labels
+    assert sample.value == expected_value
+
+
+def test_om_parse_sample_with_exemplar():
+    sample = _om_parse_sample('http_requests_total{method="GET"} 100 # {trace_id="abc"} 1')
+    assert sample.name == 'http_requests_total'
+    assert sample.labels == {'method': 'GET'}
+    assert sample.value == 100
+    assert sample.exemplar is not None
 
 
 def test_parse_full_closing_brace_in_label_value():
