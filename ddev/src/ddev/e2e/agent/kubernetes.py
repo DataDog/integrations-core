@@ -29,9 +29,9 @@ _OWNER_LABEL = 'ddev.datadoghq.com/environment'
 class KubernetesAgent(AgentInterface):
     """Run the E2E Agent inside a Kubernetes test cluster.
 
-    The initial implementation intentionally supports one schedulable node and
-    one Agent pod. Cluster creation and image loading belong to the environment
-    provisioner (for example, ``kind_run``), not this backend.
+    Exactly one schedulable node is required, and the backend runs one Agent pod.
+    Cluster creation and image loading are the responsibility of the environment
+    provisioner (for example, ``kind_run``).
     """
 
     build_config_keys = ('kubernetes', 'docker')
