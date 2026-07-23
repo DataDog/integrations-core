@@ -59,14 +59,6 @@ class KubernetesAgent(AgentInterface):
 
     @property
     def _namespace(self) -> str:
-        namespace = self._kubernetes_metadata.get('namespace')
-        if namespace is not None:
-            if not isinstance(namespace, str) or not re.fullmatch(r'[a-z0-9]([-a-z0-9]*[a-z0-9])?', namespace):
-                raise ValueError(f'Invalid Kubernetes Agent namespace: {namespace!r}')
-            if len(namespace) > 63:
-                raise ValueError('Kubernetes Agent namespace must contain at most 63 characters')
-            return namespace
-
         raw_id = super().get_id().lower()
         normalized_id = re.sub(r'[^a-z0-9]+', '-', raw_id).strip('-')
         digest = hashlib.sha256(raw_id.encode()).hexdigest()[:8]
@@ -438,7 +430,7 @@ class KubernetesAgent(AgentInterface):
         errors: list[Exception] = []
 
         # Do not execute commands in a namespace that merely happens to have
-        # the configured name. Startup may have failed because it was already
+        # the generated name. Startup may have failed because it was already
         # owned by the cluster's caller.
         try:
             namespace_owned = self._resource_is_owned('namespace', self._namespace)
